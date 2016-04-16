@@ -1,0 +1,3 @@
+# RUN: %mutang_lab | FileCheck %s
+# CHECK: some lab name
+
