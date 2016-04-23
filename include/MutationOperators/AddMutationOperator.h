@@ -4,7 +4,7 @@
 
 namespace Mutang {
 
-  class AddMutationOperator : MutationOperator {
+  class AddMutationOperator : public MutationOperator {
   public:
     virtual bool canBeApplied(llvm::Value &V);
   };

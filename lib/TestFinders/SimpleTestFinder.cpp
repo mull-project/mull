@@ -1,5 +1,8 @@
 #include "TestFinders/SimpleTestFinder.h"
+
 #include "Context.h"
+#include "MutationOperators/MutationOperator.h"
+
 
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/Instructions.h"
@@ -51,4 +54,24 @@ ArrayRef<Function *> SimpleTestFinder::findTestees(llvm::Function &F) {
   }
 
   return testees;
+}
+
+llvm::ArrayRef<std::unique_ptr<MutationPoint>> SimpleTestFinder::findMutationPoints(
+                          llvm::ArrayRef<MutationOperator *> &MutationOperators,
+                          llvm::Function &F) {
+  std::vector<std::unique_ptr<MutationPoint>> MutPoints;
+
+  /// FIXME: Iterate over BasicBlocks as well
+  for (inst_iterator I = inst_begin(F), E = inst_end(F); I != E; ++I) {
+    Instruction &Instr = *I;
+
+    for (auto &MutOp : MutationOperators) {
+      if (MutOp->canBeApplied(Instr)) {
+        std::unique_ptr<MutationPoint> MP(new MutationPoint(MutOp, &Instr));
+        MutPoints.push_back(std::move(MP));
+      }
+    }
+  }
+
+  return MutPoints;
 }
