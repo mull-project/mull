@@ -56,7 +56,7 @@ ArrayRef<Function *> SimpleTestFinder::findTestees(llvm::Function &F) {
   return testees;
 }
 
-llvm::ArrayRef<std::unique_ptr<MutationPoint>> SimpleTestFinder::findMutationPoints(
+std::vector<std::unique_ptr<MutationPoint>> SimpleTestFinder::findMutationPoints(
                           llvm::ArrayRef<MutationOperator *> &MutationOperators,
                           llvm::Function &F) {
   std::vector<std::unique_ptr<MutationPoint>> MutPoints;
@@ -67,8 +67,7 @@ llvm::ArrayRef<std::unique_ptr<MutationPoint>> SimpleTestFinder::findMutationPoi
 
     for (auto &MutOp : MutationOperators) {
       if (MutOp->canBeApplied(Instr)) {
-        std::unique_ptr<MutationPoint> MP(new MutationPoint(MutOp, &Instr));
-        MutPoints.push_back(std::move(MP));
+        MutPoints.emplace_back(make_unique<MutationPoint>(MutOp, &Instr));
       }
     }
   }

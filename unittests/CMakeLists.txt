@@ -7,6 +7,7 @@ endfunction()
 
 add_subdirectory(Context)
 add_subdirectory(Laboratory)
+add_subdirectory(MutationEngine)
 add_subdirectory(MutationOperators)
 add_subdirectory(TestFinders)
 

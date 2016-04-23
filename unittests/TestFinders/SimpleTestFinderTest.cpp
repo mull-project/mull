@@ -4,6 +4,8 @@
 #include "MutationOperators/AddMutationOperator.h"
 
 #include "llvm/AsmParser/Parser.h"
+#include "llvm/IR/InstrTypes.h"
+#include "llvm/IR/InstIterator.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Support/SourceMgr.h"
@@ -137,6 +139,10 @@ TEST(SimpleTestFinder, FindMutationPoints) {
   AddMutationOperator MutOp;
   ArrayRef<MutationOperator *> MutOps(&MutOp);
 
-  ArrayRef<std::unique_ptr<MutationPoint>> MutationPoints = Finder.findMutationPoints(MutOps, *Testee);
+  std::vector<std::unique_ptr<MutationPoint>> MutationPoints = Finder.findMutationPoints(MutOps, *Testee);
   EXPECT_EQ(1, MutationPoints.size());
+
+  MutationPoint *MP = (*(MutationPoints.begin())).get();
+  EXPECT_EQ(&MutOp, MP->getOperator());
+  EXPECT_EQ(true, isa<BinaryOperator>(MP->getValue()));
 }
