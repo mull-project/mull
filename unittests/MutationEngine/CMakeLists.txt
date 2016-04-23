@@ -7,5 +7,6 @@ target_link_libraries(MutationEngineTests
   LLVMCore
   LLVMAsmParser
   LLVMSupport
+  LLVMTransformUtils
 )
 

@@ -4,9 +4,12 @@
 #include "MutationOperators/AddMutationOperator.h"
 
 #include "llvm/AsmParser/Parser.h"
+#include "llvm/IR/InstrTypes.h"
+#include "llvm/IR/InstIterator.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Support/SourceMgr.h"
+#include "llvm/Transforms/Utils/Cloning.h"
 
 #include "gtest/gtest.h"
 
@@ -18,6 +21,17 @@ static LLVMContext Ctx;
 std::unique_ptr<Module> parseIR(const char *IR) {
   SMDiagnostic Err;
   return parseAssemblyString(IR, Err, Ctx);
+}
+
+Instruction *getFirstNamedInstruction(Function &F, const StringRef &Name) {
+  for (inst_iterator I = inst_begin(F), E = inst_end(F); I != E; ++I) {
+    Instruction *Inst = &*I;
+    if (Name.equals(Inst->getName())) {
+      return Inst;
+    }
+  }
+
+  return nullptr;
 }
 
 TEST(MutationEngine, applyMutation) {
@@ -67,13 +81,21 @@ TEST(MutationEngine, applyMutation) {
   AddMutationOperator MutOp;
   ArrayRef<MutationOperator *> MutOps(&MutOp);
 
-  ArrayRef<std::unique_ptr<MutationPoint>> MutationPoints = Finder.findMutationPoints(MutOps, *Testee);
+  std::vector<std::unique_ptr<MutationPoint>> MutationPoints = Finder.findMutationPoints(MutOps, *Testee);
   EXPECT_EQ(1, MutationPoints.size());
 
-  /////
+  MutationPoint *MP = (*(MutationPoints.begin())).get();
+  EXPECT_EQ(&MutOp, MP->getOperator());
+  EXPECT_EQ(true, isa<BinaryOperator>(MP->getValue()));
 
-  MutationPoint *MP = MutationPoints.begin()->get();
+  MutationEngine Engine;
 
-  MutationEngine ME;
+  auto MutationModule = CloneModule(ModuleWithTestees.get());
+  Engine.applyMutation(MutationModule.get(), *MP);
 
+  Function *MutatedFunction = MutationModule->getFunction(Testee->getName());
+  Instruction *ReplacedInstruction = getFirstNamedInstruction(*MutatedFunction, MP->getValue()->getName());
+
+  EXPECT_EQ(true, isa<BinaryOperator>(ReplacedInstruction));
+  EXPECT_EQ(Instruction::Sub, ReplacedInstruction->getOpcode());
 }

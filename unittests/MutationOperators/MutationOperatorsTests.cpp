@@ -28,4 +28,7 @@ TEST(MutationOperators, AddMutationOperator) {
 
   std::unique_ptr<BinaryOperator> FAdd(BinaryOperator::CreateFAdd(FA, FB));
   EXPECT_EQ(true, mutationOperator.canBeApplied(*FAdd));
+
+  std::unique_ptr<BinaryOperator> FSub(BinaryOperator::CreateFSub(FA, FB));
+  EXPECT_EQ(false, mutationOperator.canBeApplied(*FSub));
 }

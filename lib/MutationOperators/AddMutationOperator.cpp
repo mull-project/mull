@@ -8,7 +8,8 @@ using namespace Mutang;
 bool AddMutationOperator::canBeApplied(Value &V) {
 
   if (BinaryOperator *BinOp = dyn_cast<BinaryOperator>(&V)) {
-    return BinOp->isBinaryOp(Instruction::Add);
+    BinaryOperator::BinaryOps Opcode = BinOp->getOpcode();
+    return Opcode == Instruction::Add || Opcode == Instruction::FAdd;
   }
 
   return false;
