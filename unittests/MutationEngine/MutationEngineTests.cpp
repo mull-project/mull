@@ -25,9 +25,10 @@ std::unique_ptr<Module> parseIR(const char *IR) {
 
 Instruction *getFirstNamedInstruction(Function &F, const StringRef &Name) {
   for (inst_iterator I = inst_begin(F), E = inst_end(F); I != E; ++I) {
-    Instruction *Inst = &*I;
-    if (Name.equals(Inst->getName())) {
-      return Inst;
+    Instruction &Instr = *I;
+
+    if (Instr.getName().equals(Name)) {
+      return &*I;
     }
   }
 
@@ -76,7 +77,7 @@ TEST(MutationEngine, applyMutation) {
   EXPECT_EQ(1, Testees.size());
 
   Function *Testee = *(Testees.begin());
-  EXPECT_EQ(false, Testee->empty());
+  EXPECT_FALSE(Testee->empty());
 
   AddMutationOperator MutOp;
   ArrayRef<MutationOperator *> MutOps(&MutOp);
@@ -86,16 +87,22 @@ TEST(MutationEngine, applyMutation) {
 
   MutationPoint *MP = (*(MutationPoints.begin())).get();
   EXPECT_EQ(&MutOp, MP->getOperator());
-  EXPECT_EQ(true, isa<BinaryOperator>(MP->getValue()));
+  EXPECT_TRUE(isa<BinaryOperator>(MP->getValue()));
+
+  std::string ReplacedInstructionName = MP->getValue()->getName().str();
 
   MutationEngine Engine;
 
-  auto MutationModule = CloneModule(ModuleWithTestees.get());
-  Engine.applyMutation(MutationModule.get(), *MP);
+  Engine.applyMutation(*MP);
 
-  Function *MutatedFunction = MutationModule->getFunction(Testee->getName());
-  Instruction *ReplacedInstruction = getFirstNamedInstruction(*MutatedFunction, MP->getValue()->getName());
+  // After mutation applied on instruction it should be erased
+  Instruction *OldInstruction = cast<BinaryOperator>(MP->getValue());
+  EXPECT_EQ(nullptr, OldInstruction->getParent());
 
-  EXPECT_EQ(true, isa<BinaryOperator>(ReplacedInstruction));
-  EXPECT_EQ(Instruction::Sub, ReplacedInstruction->getOpcode());
+  Function *MutatedFunction = ModuleWithTestees->getFunction(Testee->getName());
+
+  // After mutation we should have new instruction with the same name as an original instruction
+  Instruction *NewInstruction = getFirstNamedInstruction(*MutatedFunction, ReplacedInstructionName);
+  EXPECT_TRUE(isa<BinaryOperator>(NewInstruction));
+  EXPECT_EQ(Instruction::Sub, NewInstruction->getOpcode());
 }

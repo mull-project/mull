@@ -10,7 +10,7 @@ class MutationPoint;
 
 class MutationEngine {
 public:
-  void applyMutation(llvm::Module *M, MutationPoint &MP);
+  void applyMutation(MutationPoint &MP);
 };
 
 }
