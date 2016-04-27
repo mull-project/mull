@@ -15,6 +15,19 @@ llvm_add_library(mutang
   ${MUTANG_MAIN_INCLUDE_DIR}/Context
 
   LINK_LIBS
+  LLVMAsmPrinter
+  LLVMCodeGen
   LLVMCore
+  LLVMExecutionEngine
+  LLVMMCJIT
+  LLVMOrcJIT
   LLVMSupport
+  LLVMTarget
+  # FIXME: Should not be arch specific
+  LLVMX86AsmParser
+  LLVMX86AsmPrinter
+  LLVMX86CodeGen
+  LLVMX86Desc
+  LLVMX86Info
 )
+
