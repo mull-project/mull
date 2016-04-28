@@ -8,7 +8,7 @@
 using namespace Mutang;
 using namespace llvm;
 
-SimpleTestRunner::SimpleTestRunner(ArrayRef<Module *> ModulesRef)
+SimpleTestRunner::SimpleTestRunner(std::vector<Module *> ModulesRef)
   : Modules(ModulesRef) {
 
     assert(ModulesRef.size() != 0);
@@ -53,8 +53,6 @@ TestResult SimpleTestRunner::runTest(Function *Test,
   GenericValue GV = EE->runFunction(Test, ArrayRef<GenericValue>());
 
   EE->removeModule(TesteeModule);
-
-  delete EE;
 
   const uint64_t *x = GV.IntVal.getRawData();
 

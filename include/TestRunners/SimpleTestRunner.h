@@ -19,10 +19,10 @@ enum TestResult {
 };
 
 class SimpleTestRunner {
-  llvm::ArrayRef<llvm::Module *> Modules;
+  std::vector<llvm::Module *> Modules;
   llvm::ExecutionEngine *EE;
 public:
-  SimpleTestRunner(llvm::ArrayRef<llvm::Module *> ModulesRef);
+  SimpleTestRunner(std::vector<llvm::Module *> ModulesRef);
   TestResult runTest(llvm::Function *Test, llvm::Module *TesteeModule);
 };
 

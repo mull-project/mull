@@ -17,11 +17,11 @@
 using namespace Mutang;
 using namespace llvm;
 
-static LLVMContext Ctx;
+static LLVMContext GlobalCtx;
 
 std::unique_ptr<Module> parseIR(const char *IR) {
   SMDiagnostic Err;
-  return parseAssemblyString(IR, Err, Ctx);
+  return parseAssemblyString(IR, Err, GlobalCtx);
 }
 
 TEST(SimpleTestRunner, runTest) {
@@ -59,20 +59,27 @@ TEST(SimpleTestRunner, runTest) {
   SimpleTestFinder Finder(Ctx);
   ArrayRef<Function *> Tests = Finder.findTests();
 
+  ASSERT_NE(0, Tests.size());
+
   Function *Test = *(Tests.begin());
 
-  SmallVector<Module *, 1> Modules;
+  std::vector<Module *> Modules;
   Modules.push_back(ModuleWithTests.get());
+
+  ModuleWithTests->dump();
+  ModuleWithTestees->dump();
 
   SimpleTestRunner Runner(Modules);
 
   /// Here we run test with original testee function
-  EXPECT_EQ(Passed, Runner.runTest(Test, ModuleWithTestees.get()));
+  ASSERT_EQ(Passed, Runner.runTest(Test, ModuleWithTestees.get()));
 
   /// afterwards we apply single mutation and run test again
   /// expecting it to fail
 
   ArrayRef<Function *> Testees = Finder.findTestees(*Test);
+  ASSERT_NE(0, Testees.size());
+  dbgs() << Testees.size() << "\n";
   Function *Testee = *(Testees.begin());
 
   AddMutationOperator MutOp;
@@ -84,5 +91,5 @@ TEST(SimpleTestRunner, runTest) {
   MutationEngine Engine;
   Engine.applyMutation(*MP);
 
-  EXPECT_EQ(Failed, Runner.runTest(Test, ModuleWithTestees.get()));
+  ASSERT_EQ(Failed, Runner.runTest(Test, ModuleWithTestees.get()));
 }
