@@ -18,7 +18,7 @@ using namespace llvm;
 
 static LLVMContext Ctx;
 
-std::unique_ptr<Module> parseIR(const char *IR) {
+static std::unique_ptr<Module> parseIR(const char *IR) {
   SMDiagnostic Err;
   return parseAssemblyString(IR, Err, Ctx);
 }
@@ -74,20 +74,20 @@ TEST(MutationEngine, applyMutation) {
 
   ArrayRef<Function *> Testees = Finder.findTestees(*Test);
 
-  EXPECT_EQ(1, Testees.size());
+  ASSERT_EQ(1U, Testees.size());
 
   Function *Testee = *(Testees.begin());
-  EXPECT_FALSE(Testee->empty());
+  ASSERT_FALSE(Testee->empty());
 
   AddMutationOperator MutOp;
   ArrayRef<MutationOperator *> MutOps(&MutOp);
 
   std::vector<std::unique_ptr<MutationPoint>> MutationPoints = Finder.findMutationPoints(MutOps, *Testee);
-  EXPECT_EQ(1, MutationPoints.size());
+  ASSERT_EQ(1U, MutationPoints.size());
 
   MutationPoint *MP = (*(MutationPoints.begin())).get();
-  EXPECT_EQ(&MutOp, MP->getOperator());
-  EXPECT_TRUE(isa<BinaryOperator>(MP->getValue()));
+  ASSERT_EQ(&MutOp, MP->getOperator());
+  ASSERT_TRUE(isa<BinaryOperator>(MP->getValue()));
 
   std::string ReplacedInstructionName = MP->getValue()->getName().str();
 
@@ -97,12 +97,12 @@ TEST(MutationEngine, applyMutation) {
 
   // After mutation applied on instruction it should be erased
   Instruction *OldInstruction = cast<BinaryOperator>(MP->getValue());
-  EXPECT_EQ(nullptr, OldInstruction->getParent());
+  ASSERT_EQ(nullptr, OldInstruction->getParent());
 
   Function *MutatedFunction = ModuleWithTestees->getFunction(Testee->getName());
 
   // After mutation we should have new instruction with the same name as an original instruction
   Instruction *NewInstruction = getFirstNamedInstruction(*MutatedFunction, ReplacedInstructionName);
-  EXPECT_TRUE(isa<BinaryOperator>(NewInstruction));
-  EXPECT_EQ(Instruction::Sub, NewInstruction->getOpcode());
+  ASSERT_TRUE(isa<BinaryOperator>(NewInstruction));
+  ASSERT_EQ(Instruction::Sub, NewInstruction->getOpcode());
 }

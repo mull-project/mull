@@ -19,7 +19,7 @@ using namespace llvm;
 
 static LLVMContext GlobalCtx;
 
-std::unique_ptr<Module> parseIR(const char *IR) {
+static std::unique_ptr<Module> parseIR(const char *IR) {
   SMDiagnostic Err;
   return parseAssemblyString(IR, Err, GlobalCtx);
 }
@@ -59,15 +59,12 @@ TEST(SimpleTestRunner, runTest) {
   SimpleTestFinder Finder(Ctx);
   ArrayRef<Function *> Tests = Finder.findTests();
 
-  ASSERT_NE(0, Tests.size());
+  ASSERT_NE(0U, Tests.size());
 
   Function *Test = *(Tests.begin());
 
   std::vector<Module *> Modules;
   Modules.push_back(ModuleWithTests.get());
-
-  ModuleWithTests->dump();
-  ModuleWithTestees->dump();
 
   SimpleTestRunner Runner(Modules);
 
@@ -78,8 +75,7 @@ TEST(SimpleTestRunner, runTest) {
   /// expecting it to fail
 
   ArrayRef<Function *> Testees = Finder.findTestees(*Test);
-  ASSERT_NE(0, Testees.size());
-  dbgs() << Testees.size() << "\n";
+  ASSERT_NE(0U, Testees.size());
   Function *Testee = *(Testees.begin());
 
   AddMutationOperator MutOp;

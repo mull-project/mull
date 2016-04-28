@@ -16,7 +16,7 @@ using namespace llvm;
 
 static LLVMContext Ctx;
 
-std::unique_ptr<Module> parseIR(const char *IR) {
+static std::unique_ptr<Module> parseIR(const char *IR) {
   SMDiagnostic Err;
   return parseAssemblyString(IR, Err, Ctx);
 }
@@ -43,7 +43,7 @@ TEST(SimpleTestFinder, FindTest) {
 
   ArrayRef<Function *> tests = finder.findTests();
 
-  EXPECT_EQ(tests.size(), 1);
+  ASSERT_EQ(1U, tests.size());
 }
 
 TEST(SimpleTestFinder, FindTestee) {
@@ -85,10 +85,10 @@ TEST(SimpleTestFinder, FindTestee) {
 
   ArrayRef<Function *> Testees = Finder.findTestees(*Test);
 
-  EXPECT_EQ(Testees.size(), 1);
+  ASSERT_EQ(1U, Testees.size());
 
   Function *Testee = *(Testees.begin());
-  EXPECT_EQ(Testee->empty(), false);
+  ASSERT_FALSE(Testee->empty());
 }
 
 TEST(SimpleTestFinder, FindMutationPoints) {
@@ -130,18 +130,18 @@ TEST(SimpleTestFinder, FindMutationPoints) {
 
   ArrayRef<Function *> Testees = Finder.findTestees(*Test);
 
-  EXPECT_EQ(1, Testees.size());
+  ASSERT_EQ(1U, Testees.size());
 
   Function *Testee = *(Testees.begin());
-  EXPECT_EQ(false, Testee->empty());
+  ASSERT_FALSE(Testee->empty());
 
   AddMutationOperator MutOp;
   ArrayRef<MutationOperator *> MutOps(&MutOp);
 
   std::vector<std::unique_ptr<MutationPoint>> MutationPoints = Finder.findMutationPoints(MutOps, *Testee);
-  EXPECT_EQ(1, MutationPoints.size());
+  ASSERT_EQ(1U, MutationPoints.size());
 
   MutationPoint *MP = (*(MutationPoints.begin())).get();
-  EXPECT_EQ(&MutOp, MP->getOperator());
-  EXPECT_EQ(true, isa<BinaryOperator>(MP->getValue()));
+  ASSERT_EQ(&MutOp, MP->getOperator());
+  ASSERT_TRUE(isa<BinaryOperator>(MP->getValue()));
 }

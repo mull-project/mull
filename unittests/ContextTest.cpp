@@ -10,7 +10,7 @@
 using namespace Mutang;
 using namespace llvm;
 
-std::unique_ptr<Module> parseIR(const char *IR) {
+static std::unique_ptr<Module> parseIR(const char *IR) {
   LLVMContext &C = getGlobalContext();
   SMDiagnostic Err;
   return parseAssemblyString(IR, Err, C);
@@ -35,5 +35,5 @@ TEST(Context, AddModule) {
   Context Ctx;
   Ctx.addModule(ModuleWithTests.get());
 
-  EXPECT_EQ(Ctx.getModules().size(), 1);
+  ASSERT_EQ(1U, Ctx.getModules().size());
 }
