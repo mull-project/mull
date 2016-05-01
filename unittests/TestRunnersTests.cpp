@@ -9,6 +9,7 @@
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
+#include "llvm/Support/DynamicLibrary.h"
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Transforms/Utils/Cloning.h"
 
@@ -182,4 +183,51 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   Engine.applyMutation(*MP);
 
   ASSERT_EQ(Failed, Runner.runTest(Test, ModuleWithTestees.get()));
+}
+
+TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
+  /// No mutations applied here, since the only point of interest
+  /// is an external libraries, in this case it is 'sqlite3'
+  auto ModuleWithTests = parseIR("define i32 @test_in_memory_db() #0 {\n"
+                                 "entry:\n"
+                                 "  %call = call i32 (...) @in_memory_db()\n"
+                                 "  %cmp = icmp eq i32 %call, 0\n"
+                                 "  %conv = zext i1 %cmp to i32\n"
+                                 "  ret i32 %conv\n"
+                                 "}\n"
+                                 ""
+                                 "declare i32 @in_memory_db(...)\n");
+
+  auto ModuleWithTestees = parseIR("%struct.sqlite3 = type opaque\n"
+                                   ""
+                                   "@.str = private unnamed_addr constant [9 x i8] c\":memory:\\00\", align 1\n"
+                                   ""
+                                   "define i32 @in_memory_db() #0 {\n"
+                                   "entry:\n"
+                                   "  %db = alloca %struct.sqlite3*, align 8\n"
+                                   "  %call = call i32 @sqlite3_open(i8* getelementptr inbounds ([9 x i8], [9 x i8]* @.str, i32 0, i32 0), %struct.sqlite3** %db)\n"
+                                   "  ret i32 %call\n"
+                                   "}\n"
+                                   ""
+                                   "declare i32 @sqlite3_open(i8*, %struct.sqlite3**) #1\n");
+
+  Context Ctx;
+  Ctx.addModule(ModuleWithTests.get());
+  Ctx.addModule(ModuleWithTestees.get());
+
+  SimpleTestFinder Finder(Ctx);
+  ArrayRef<Function *> Tests = Finder.findTests();
+
+  ASSERT_NE(0U, Tests.size());
+
+  Function *Test = *(Tests.begin());
+
+  std::vector<Module *> Modules;
+  Modules.push_back(ModuleWithTests.get());
+
+  SimpleTestRunner Runner(Modules);
+
+  llvm::sys::DynamicLibrary::LoadLibraryPermanently("/usr/lib/libsqlite3.dylib");
+
+  ASSERT_EQ(Passed, Runner.runTest(Test, ModuleWithTestees.get()));
 }

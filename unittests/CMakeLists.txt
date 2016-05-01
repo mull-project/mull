@@ -14,8 +14,8 @@ add_mutang_unittest(MutangUnitTests
 
 target_link_libraries(MutangUnitTests
   mutang
-  LLVMCore
   LLVMAsmParser
+  LLVMCore
   LLVMSupport
 )
 

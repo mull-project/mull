@@ -4,9 +4,9 @@
 
 namespace llvm {
 
-class Module;
-class Function;
 class ExecutionEngine;
+class Function;
+class Module;
 
 }
 
