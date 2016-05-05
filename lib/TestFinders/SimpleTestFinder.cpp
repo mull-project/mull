@@ -3,7 +3,6 @@
 #include "Context.h"
 #include "MutationOperators/MutationOperator.h"
 
-
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/LLVMContext.h"

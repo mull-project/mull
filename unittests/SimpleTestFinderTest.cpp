@@ -143,5 +143,5 @@ TEST(SimpleTestFinder, FindMutationPoints) {
 
   MutationPoint *MP = (*(MutationPoints.begin())).get();
   ASSERT_EQ(&MutOp, MP->getOperator());
-  ASSERT_TRUE(isa<BinaryOperator>(MP->getValue()));
+  ASSERT_TRUE(isa<BinaryOperator>(MP->getOriginalValue()));
 }

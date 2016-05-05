@@ -11,6 +11,7 @@ class MutationPoint;
 class MutationEngine {
 public:
   void applyMutation(MutationPoint &MP);
+  void revertMutation(MutationPoint &MP);
 };
 
 }

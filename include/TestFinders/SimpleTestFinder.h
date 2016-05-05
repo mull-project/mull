@@ -1,29 +1,18 @@
 #pragma once 
 
+#include "MutationPoint.h"
+
 #include "llvm/ADT/ArrayRef.h"
 
 namespace llvm {
   class Function;
-  class Module;
-  class Value;
 }
 
 namespace Mutang {
 
 class Context;
 class MutationOperator;
-
-class MutationPoint {
-  MutationOperator *MutOp;
-  llvm::Value *Val;
-public:
-  MutationPoint(MutationOperator *MO, llvm::Value *V) : MutOp(MO), Val(V) {}
-
-  ~MutationPoint() {}
-
-  MutationOperator *getOperator() { return MutOp; }
-  llvm::Value *getValue() { return Val; }
-};
+class MutationPoint;
 
 // Finds all methods that start with "test_"
 class SimpleTestFinder {

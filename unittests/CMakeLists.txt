@@ -8,6 +8,7 @@ add_mutang_unittest(MutangUnitTests
   ContextTest.cpp
   MutationEngineTests.cpp
   MutationOperatorsTests.cpp
+  MutationPointTests.cpp
   SimpleTestFinderTest.cpp
   TestRunnersTests.cpp
 )
