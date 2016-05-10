@@ -5,6 +5,7 @@ function(add_mutang_unittest test_dirname)
 endfunction()
 
 add_mutang_unittest(MutangUnitTests
+  ConfigParserTests.cpp
   ContextTest.cpp
   MutationEngineTests.cpp
   MutationOperatorsTests.cpp

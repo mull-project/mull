@@ -1,10 +1,12 @@
 llvm_add_library(mutang 
   Laboratory.cpp
-  TestFinders/SimpleTestFinder.cpp
+
+  ConfigParser.cpp
+  Context.cpp
   MutationOperators/AddMutationOperator.cpp
   MutationEngine.cpp
   MutationPoint.cpp
-  Context.cpp
+  TestFinders/SimpleTestFinder.cpp
   TestRunners/SimpleTestRunner.cpp
 
   ADDITIONAL_HEADER_DIRS
