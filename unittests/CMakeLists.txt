@@ -7,6 +7,7 @@ endfunction()
 add_mutang_unittest(MutangUnitTests
   ConfigParserTests.cpp
   ContextTest.cpp
+  DriverTests.cpp
   MutationEngineTests.cpp
   MutationOperatorsTests.cpp
   MutationPointTests.cpp
