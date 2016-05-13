@@ -64,8 +64,8 @@ TEST(MutationEngine, applyMutation) {
                                    "}");
 
   Context Ctx;
-  Ctx.addModule(ModuleWithTests.get());
-  Ctx.addModule(ModuleWithTestees.get());
+  Ctx.addModule(std::move(ModuleWithTests));
+  Ctx.addModule(std::move(ModuleWithTestees));
 
   SimpleTestFinder Finder(Ctx);
   ArrayRef<Function *> Tests = Finder.findTests();
@@ -80,7 +80,7 @@ TEST(MutationEngine, applyMutation) {
   ASSERT_FALSE(Testee->empty());
 
   AddMutationOperator MutOp;
-  ArrayRef<MutationOperator *> MutOps(&MutOp);
+  std::vector<MutationOperator *> MutOps({&MutOp});
 
   std::vector<std::unique_ptr<MutationPoint>> MutationPoints = Finder.findMutationPoints(MutOps, *Testee);
   ASSERT_EQ(1U, MutationPoints.size());
@@ -138,8 +138,8 @@ TEST(MutationEngine, applyAndRevertMutation) {
                                    "}");
 
   Context Ctx;
-  Ctx.addModule(ModuleWithTests.get());
-  Ctx.addModule(ModuleWithTestees.get());
+  Ctx.addModule(std::move(ModuleWithTests));
+  Ctx.addModule(std::move(ModuleWithTestees));
 
   SimpleTestFinder Finder(Ctx);
   ArrayRef<Function *> Tests = Finder.findTests();
@@ -154,7 +154,7 @@ TEST(MutationEngine, applyAndRevertMutation) {
   ASSERT_FALSE(Testee->empty());
 
   AddMutationOperator MutOp;
-  ArrayRef<MutationOperator *> MutOps(&MutOp);
+  std::vector<MutationOperator *> MutOps({&MutOp});
 
   std::vector<std::unique_ptr<MutationPoint>> MutationPoints = Finder.findMutationPoints(MutOps, *Testee);
   ASSERT_EQ(1U, MutationPoints.size());

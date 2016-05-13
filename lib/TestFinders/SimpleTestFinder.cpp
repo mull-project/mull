@@ -14,11 +14,13 @@
 using namespace Mutang;
 using namespace llvm;
 
-ArrayRef<Function *> SimpleTestFinder::findTests() {
+std::vector<Function *> SimpleTestFinder::findTests() {
   std::vector<Function *> tests;
 
   for (auto &M : Ctx.getModules()) {
+    printf("%s\n", M->getName().str().c_str());
     for (auto &Fn : M->getFunctionList()) {
+      printf("%s\n", Fn.getName().str().c_str());
       if (Fn.getName().startswith("test_")) {
         tests.push_back(&Fn);
       }
@@ -28,7 +30,7 @@ ArrayRef<Function *> SimpleTestFinder::findTests() {
   return tests;
 }
 
-ArrayRef<Function *> SimpleTestFinder::findTestees(llvm::Function &F) {
+std::vector<Function *> SimpleTestFinder::findTestees(llvm::Function &F) {
   std::vector<Function *> testees;
 
   for (inst_iterator I = inst_begin(F), E = inst_end(F); I != E; ++I) {
@@ -56,7 +58,7 @@ ArrayRef<Function *> SimpleTestFinder::findTestees(llvm::Function &F) {
 }
 
 std::vector<std::unique_ptr<MutationPoint>> SimpleTestFinder::findMutationPoints(
-                          llvm::ArrayRef<MutationOperator *> &MutationOperators,
+                          std::vector<MutationOperator *> &MutationOperators,
                           llvm::Function &F) {
   std::vector<std::unique_ptr<MutationPoint>> MutPoints;
 

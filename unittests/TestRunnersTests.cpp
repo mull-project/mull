@@ -60,8 +60,8 @@ TEST(SimpleTestRunner, runTest) {
                                    "}");
 
   Context Ctx;
-  Ctx.addModule(ModuleWithTests.get());
-  Ctx.addModule(ModuleWithTestees.get());
+  Ctx.addModule(std::move(ModuleWithTests));
+  Ctx.addModule(std::move(ModuleWithTestees));
 
   SimpleTestFinder Finder(Ctx);
   ArrayRef<Function *> Tests = Finder.findTests();
@@ -86,7 +86,7 @@ TEST(SimpleTestRunner, runTest) {
   Function *Testee = *(Testees.begin());
 
   AddMutationOperator MutOp;
-  ArrayRef<MutationOperator *> MutOps(&MutOp);
+  std::vector<MutationOperator *> MutOps({&MutOp});
 
   std::vector<std::unique_ptr<MutationPoint>> MutationPoints = Finder.findMutationPoints(MutOps, *Testee);
 
@@ -148,8 +148,8 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
                                    "declare i8* @strchr(i8*, i32)");
 
   Context Ctx;
-  Ctx.addModule(ModuleWithTests.get());
-  Ctx.addModule(ModuleWithTestees.get());
+  Ctx.addModule(std::move(ModuleWithTests));
+  Ctx.addModule(std::move(ModuleWithTestees));
 
   SimpleTestFinder Finder(Ctx);
   ArrayRef<Function *> Tests = Finder.findTests();
@@ -174,7 +174,7 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   Function *Testee = *(Testees.begin());
 
   AddMutationOperator MutOp;
-  ArrayRef<MutationOperator *> MutOps(&MutOp);
+  std::vector<MutationOperator *> MutOps({&MutOp});
 
   std::vector<std::unique_ptr<MutationPoint>> MutationPoints = Finder.findMutationPoints(MutOps, *Testee);
 
@@ -212,8 +212,8 @@ TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
                                    "declare i32 @sqlite3_open(i8*, %struct.sqlite3**) #1\n");
 
   Context Ctx;
-  Ctx.addModule(ModuleWithTests.get());
-  Ctx.addModule(ModuleWithTestees.get());
+  Ctx.addModule(std::move(ModuleWithTests));
+  Ctx.addModule(std::move(ModuleWithTestees));
 
   SimpleTestFinder Finder(Ctx);
   ArrayRef<Function *> Tests = Finder.findTests();

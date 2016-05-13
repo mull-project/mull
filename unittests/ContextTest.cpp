@@ -33,7 +33,7 @@ TEST(Context, AddModule) {
                                  "}\n");
 
   Context Ctx;
-  Ctx.addModule(ModuleWithTests.get());
+  Ctx.addModule(std::move(ModuleWithTests));
 
   ASSERT_EQ(1U, Ctx.getModules().size());
 }

@@ -5,6 +5,6 @@
 using namespace Mutang;
 using namespace llvm;
 
-void Context::addModule(Module *M) {
-  Modules.push_back(M);
+void Context::addModule(std::unique_ptr<Module> M) {
+  Modules.push_back(M.get());
 }

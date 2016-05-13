@@ -21,10 +21,10 @@ class SimpleTestFinder {
 public:
   explicit SimpleTestFinder(Context &C) : Ctx(C) {}
 
-  llvm::ArrayRef<llvm::Function *> findTests();
-  llvm::ArrayRef<llvm::Function *> findTestees(llvm::Function &F);
+  std::vector<llvm::Function *> findTests();
+  std::vector<llvm::Function *> findTestees(llvm::Function &F);
   std::vector<std::unique_ptr<MutationPoint>> findMutationPoints(
-                          llvm::ArrayRef<MutationOperator *> &MutationOperators,
+                          std::vector<MutationOperator *> &MutationOperators,
                           llvm::Function &F);
 };
 
