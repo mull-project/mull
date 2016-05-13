@@ -9,6 +9,9 @@
 /// FIXME: Should be abstract
 #include "TestFinders/SimpleTestFinder.h"
 
+/// FIXME: Should be abstract
+#include "MutationOperators/AddMutationOperator.h"
+
 //using namespace llvm;
 using namespace Mutang;
 
@@ -33,16 +36,14 @@ void Driver::Run() {
   }
 
   SimpleTestFinder TestFinder(Ctx);
-  auto tests = TestFinder.findTests();
-  int x = tests.size();
-  for (auto Test : tests) {
-    printf("%s -> ", Test->getName().str().c_str());
+  for (auto Test : TestFinder.findTests()) {
     for (auto Testee : TestFinder.findTestees(*Test)) {
       /// FIXME: Should come from the outside
+      AddMutationOperator MutOp;
       std::vector<MutationOperator *> MutationOperators;
-      printf("%s -> ", Testee->getName().str().c_str());
+      MutationOperators.push_back(&MutOp);
       for (auto &Testee : TestFinder.findMutationPoints(MutationOperators, *Testee)) {
-        printf("%s\n", Testee->getOriginalValue()->getName().str().c_str());
+        Testee->getOriginalValue()->dump();
       }
     }
   }

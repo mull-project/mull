@@ -8,7 +8,7 @@ namespace Mutang {
 
 class Context {
 public:
-  typedef std::vector<llvm::Module *> ModuleArrayType;
+  typedef std::vector<std::unique_ptr<llvm::Module>> ModuleArrayType;
   typedef ModuleArrayType::iterator iterator;
 
 private:
@@ -17,7 +17,7 @@ private:
 public:
   void addModule(std::unique_ptr<llvm::Module> M);
 
-  ModuleArrayType getModules() { return Modules; }
+  ModuleArrayType &getModules() { return Modules; }
   iterator begin()  { return Modules.begin(); }
   iterator end()    { return Modules.end();   }
 };

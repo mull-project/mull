@@ -18,9 +18,8 @@ std::vector<Function *> SimpleTestFinder::findTests() {
   std::vector<Function *> tests;
 
   for (auto &M : Ctx.getModules()) {
-    printf("%s\n", M->getName().str().c_str());
-    for (auto &Fn : M->getFunctionList()) {
-      printf("%s\n", Fn.getName().str().c_str());
+    auto &x = M->getFunctionList();
+    for (auto &Fn : x) {
       if (Fn.getName().startswith("test_")) {
         tests.push_back(&Fn);
       }
