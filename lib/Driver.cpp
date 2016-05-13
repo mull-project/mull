@@ -27,6 +27,11 @@ using namespace Mutang;
 /// This method should return (somehow) results of the tests/mutants execution
 /// So that we could easily plug in some TestReporter
 
+/// UPD: The method returns set of results
+/// Number of results equals to a number of tests
+/// Each result contains result of execution of an original test and
+/// all the results of each mutant within corresponding MutationPoint
+
 void Driver::Run() {
   Context Ctx;
   for (auto ModulePath : Cfg.GetBitcodePaths()) {
