@@ -99,10 +99,10 @@ TEST(MutationEngine, applyMutation) {
   Instruction *OldInstruction = cast<BinaryOperator>(MP->getOriginalValue());
   ASSERT_EQ(nullptr, OldInstruction->getParent());
 
-  Function *MutatedFunction = ModuleWithTestees->getFunction(Testee->getName());
+//  Function *MutatedFunction = Testee;//ModuleWithTestees->getFunction(Testee->getName());
 
   // After mutation we should have new instruction with the same name as an original instruction
-  Instruction *NewInstruction = getFirstNamedInstruction(*MutatedFunction, ReplacedInstructionName);
+  Instruction *NewInstruction = getFirstNamedInstruction(*Testee, ReplacedInstructionName);
   ASSERT_TRUE(isa<BinaryOperator>(NewInstruction));
   ASSERT_EQ(Instruction::Sub, NewInstruction->getOpcode());
 
@@ -173,10 +173,10 @@ TEST(MutationEngine, applyAndRevertMutation) {
   Instruction *OldInstruction = cast<BinaryOperator>(MP->getOriginalValue());
   ASSERT_EQ(nullptr, OldInstruction->getParent());
 
-  Function *MutatedFunction = ModuleWithTestees->getFunction(Testee->getName());
+//  Function *MutatedFunction = ModuleWithTestees->getFunction(Testee->getName());
 
   // After mutation we should have new instruction with the same name as an original instruction
-  Instruction *NewInstruction = getFirstNamedInstruction(*MutatedFunction, ReplacedInstructionName);
+  Instruction *NewInstruction = getFirstNamedInstruction(*Testee, ReplacedInstructionName);
   ASSERT_TRUE(isa<BinaryOperator>(NewInstruction));
   ASSERT_EQ(Instruction::Sub, NewInstruction->getOpcode());
 
@@ -188,7 +188,7 @@ TEST(MutationEngine, applyAndRevertMutation) {
   ASSERT_NE(nullptr, OldInstruction->getParent());
 
   // After mutation we should have new instruction with the same name as an original instruction
-  Instruction *RolledBackInstruction = getFirstNamedInstruction(*MutatedFunction, ReplacedInstructionName);
+  Instruction *RolledBackInstruction = getFirstNamedInstruction(*Testee, ReplacedInstructionName);
   ASSERT_TRUE(isa<BinaryOperator>(RolledBackInstruction));
   ASSERT_EQ(Instruction::Add, RolledBackInstruction->getOpcode());
 
