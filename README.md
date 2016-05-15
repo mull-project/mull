@@ -9,7 +9,7 @@ cd ~/Projects/LLVM
 git clone http://llvm.org/git/llvm.git
 git clone http://llvm.org/git/compiler-rt.git llvm/projects/compiler-rt
 
-git clone git@bitbucket.org:AlexDenisov/mutang.git llvm/projects/mutang-project
+git clone git@github.com:AlexDenisov/mutang.git llvm/projects/mutang-project
 
 mkdir Build
 
