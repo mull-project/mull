@@ -2,8 +2,8 @@
 
 #include "Context.h"
 #include "MutationOperators/AddMutationOperator.h"
+#include "TestModuleFactory.h"
 
-#include "llvm/AsmParser/Parser.h"
 #include "llvm/IR/InstrTypes.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
@@ -14,28 +14,11 @@
 using namespace Mutang;
 using namespace llvm;
 
-static LLVMContext Ctx;
-
-static std::unique_ptr<Module> parseIR(const char *IR) {
-  SMDiagnostic Err;
-  return parseAssemblyString(IR, Err, Ctx);
-}
+static TestModuleFactory TestModuleFactory;
 
 TEST(SimpleTestFinder, FindTest) {
-  auto ModuleWithTests = parseIR("declare i32 @sum(i32, i32)"
-                                 "define i32 @test_main() {\n"
-                                 "entry:\n"
-                                 "  %result = alloca i32, align 4\n"
-                                 "  %result_matches = alloca i32, align 4\n"
-                                 "  %call = call i32 @sum(i32 3, i32 5)\n"
-                                 "  store i32 %call, i32* %result, align 4\n"
-                                 "  %0 = load i32, i32* %result, align 4\n"
-                                 "  %cmp = icmp eq i32 %0, 8\n"
-                                 "  %conv = zext i1 %cmp to i32\n"
-                                 "  store i32 %conv, i32* %result_matches, align 4\n"
-                                 "  %1 = load i32, i32* %result_matches, align 4\n"
-                                 "  ret i32 %1\n"
-                                 "}\n");
+  auto ModuleWithTests = TestModuleFactory.createTesterModule();
+
   Context Ctx;
   Ctx.addModule(std::move(ModuleWithTests));
 
@@ -47,32 +30,8 @@ TEST(SimpleTestFinder, FindTest) {
 }
 
 TEST(SimpleTestFinder, FindTestee) {
-  auto ModuleWithTests = parseIR("declare i32 @sum(i32, i32)"
-                                 "define i32 @test_main() {\n"
-                                 "entry:\n"
-                                 "  %result = alloca i32, align 4\n"
-                                 "  %result_matches = alloca i32, align 4\n"
-                                 "  %call = call i32 @sum(i32 3, i32 5)\n"
-                                 "  store i32 %call, i32* %result, align 4\n"
-                                 "  %0 = load i32, i32* %result, align 4\n"
-                                 "  %cmp = icmp eq i32 %0, 8\n"
-                                 "  %conv = zext i1 %cmp to i32\n"
-                                 "  store i32 %conv, i32* %result_matches, align 4\n"
-                                 "  %1 = load i32, i32* %result_matches, align 4\n"
-                                 "  ret i32 %1\n"
-                                 "}\n");
-
-  auto ModuleWithTestees = parseIR("define i32 @sum(i32 %a, i32 %b) {\n"
-                                   "entry:\n"
-                                   "  %a.addr = alloca i32, align 4\n"
-                                   "  %b.addr = alloca i32, align 4\n"
-                                   "  store i32 %a, i32* %a.addr, align 4\n"
-                                   "  store i32 %b, i32* %b.addr, align 4\n"
-                                   "  %0 = load i32, i32* %a.addr, align 4\n"
-                                   "  %1 = load i32, i32* %b.addr, align 4\n"
-                                   "  %add = add nsw i32 %0, %1\n"
-                                   "  ret i32 %add\n"
-                                   "}");
+  auto ModuleWithTests   = TestModuleFactory.createTesterModule();
+  auto ModuleWithTestees = TestModuleFactory.createTesteeModule();
 
   Context Ctx;
   Ctx.addModule(std::move(ModuleWithTests));
@@ -92,32 +51,8 @@ TEST(SimpleTestFinder, FindTestee) {
 }
 
 TEST(SimpleTestFinder, FindMutationPoints) {
-  auto ModuleWithTests = parseIR("declare i32 @sum(i32, i32)"
-                                 "define i32 @test_main() {\n"
-                                 "entry:\n"
-                                 "  %result = alloca i32, align 4\n"
-                                 "  %result_matches = alloca i32, align 4\n"
-                                 "  %call = call i32 @sum(i32 3, i32 5)\n"
-                                 "  store i32 %call, i32* %result, align 4\n"
-                                 "  %0 = load i32, i32* %result, align 4\n"
-                                 "  %cmp = icmp eq i32 %0, 8\n"
-                                 "  %conv = zext i1 %cmp to i32\n"
-                                 "  store i32 %conv, i32* %result_matches, align 4\n"
-                                 "  %1 = load i32, i32* %result_matches, align 4\n"
-                                 "  ret i32 %1\n"
-                                 "}\n");
-
-  auto ModuleWithTestees = parseIR("define i32 @sum(i32 %a, i32 %b) {\n"
-                                   "entry:\n"
-                                   "  %a.addr = alloca i32, align 4\n"
-                                   "  %b.addr = alloca i32, align 4\n"
-                                   "  store i32 %a, i32* %a.addr, align 4\n"
-                                   "  store i32 %b, i32* %b.addr, align 4\n"
-                                   "  %0 = load i32, i32* %a.addr, align 4\n"
-                                   "  %1 = load i32, i32* %b.addr, align 4\n"
-                                   "  %add = add nsw i32 %0, %1\n"
-                                   "  ret i32 %add\n"
-                                   "}");
+  auto ModuleWithTests   = TestModuleFactory.createTesterModule();
+  auto ModuleWithTestees = TestModuleFactory.createTesteeModule();
 
   Context Ctx;
   Ctx.addModule(std::move(ModuleWithTests));

@@ -13,6 +13,9 @@ add_mutang_unittest(MutangUnitTests
   MutationPointTests.cpp
   SimpleTestFinderTest.cpp
   TestRunnersTests.cpp
+
+  TestModuleFactory.cpp
+  TestModuleFactory.h
 )
 
 target_link_libraries(MutangUnitTests
