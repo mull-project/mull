@@ -40,15 +40,16 @@ void Driver::Run() {
     Ctx.addModule(std::move(Module));
   }
 
+  /// FIXME: Should come from the outside
+  AddMutationOperator MutOp;
+  std::vector<MutationOperator *> MutationOperators;
+  MutationOperators.push_back(&MutOp);
+
   SimpleTestFinder TestFinder(Ctx);
   for (auto Test : TestFinder.findTests()) {
     for (auto Testee : TestFinder.findTestees(*Test)) {
-      /// FIXME: Should come from the outside
-      AddMutationOperator MutOp;
-      std::vector<MutationOperator *> MutationOperators;
-      MutationOperators.push_back(&MutOp);
-      for (auto &Testee : TestFinder.findMutationPoints(MutationOperators, *Testee)) {
-        Testee->getOriginalValue()->dump();
+      for (auto &MutationPoint : TestFinder.findMutationPoints(MutationOperators, *Testee)) {
+        MutationPoint->getOriginalValue()->dump();
       }
     }
   }
