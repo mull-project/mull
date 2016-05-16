@@ -24,3 +24,9 @@ When opening Xcode first time do not autocreate schemes but choose option to cre
 
 Currently the work is being done against MutangUnitTests scheme so that's the only scheme that should be created and used.
 
+## Notes
+
+Update to LLVM's trunk should be a recurrent task, but first we need to get experience of living in a downstream world.
+
+Current code is being developed against LLVM commit: [20ebcfc5d130082e30ee4b095ecaf1dcf9f57239](https://github.com/llvm-mirror/llvm/commit/20ebcfc5d130082e30ee4b095ecaf1dcf9f57239).
+
