@@ -3,7 +3,7 @@
 ## Getting started
 
 ```bash
-mkdir ~/Projects/LLVM
+mkdir -p ~/Projects/LLVM
 cd ~/Projects/LLVM
 
 git clone http://llvm.org/git/llvm.git
