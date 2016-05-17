@@ -1,4 +1,5 @@
 #include "Driver.h"
+#include "Compiler.h"
 #include "Config.h"
 #include "Context.h"
 #include "ModuleLoader.h"
@@ -8,6 +9,9 @@
 
 /// FIXME: Should be abstract
 #include "TestFinders/SimpleTestFinder.h"
+
+/// FIXME: Should be abstract
+#include "TestRunners/SimpleTestRunner.h"
 
 /// FIXME: Should be abstract
 #include "MutationOperators/AddMutationOperator.h"
@@ -45,11 +49,29 @@ void Driver::Run() {
   std::vector<MutationOperator *> MutationOperators;
   MutationOperators.push_back(&MutOp);
 
+  Compiler Compiler;
+
   SimpleTestFinder TestFinder(Ctx);
   for (auto Test : TestFinder.findTests()) {
     for (auto Testee : TestFinder.findTestees(*Test)) {
       for (auto &MutationPoint : TestFinder.findMutationPoints(MutationOperators, *Testee)) {
-        MutationPoint->getOriginalValue()->dump();
+        SimpleTestRunner Runner;
+        SimpleTestRunner::ObjectFiles ObjectFiles;
+
+        MutationPoint->applyMutation();
+
+        /// Recompile all the modules all the time
+        /// I assume it is incredibly slow
+        /// If so, then this is a perfect place
+        /// to start playing with optimizations
+        for (auto &M : Ctx.getModules()) {
+          ObjectFiles.push_back(Compiler.CompilerModule(M.get()));
+        }
+
+        /// Rollback mutation once we have compiled the module
+        MutationPoint->revertMutation();
+
+        Runner.runTest(Test, ObjectFiles);
       }
     }
   }
