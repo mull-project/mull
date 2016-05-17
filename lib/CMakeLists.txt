@@ -1,6 +1,7 @@
 llvm_add_library(mutang 
   Laboratory.cpp
 
+  Compiler.cpp
   ConfigParser.cpp
   Context.cpp
   Driver.cpp
@@ -25,7 +26,9 @@ llvm_add_library(mutang
   LLVMCore
   LLVMExecutionEngine
   LLVMMCJIT
+  LLVMObject
   LLVMOrcJIT
+  LLVMRuntimeDyld
   LLVMSupport
   LLVMTarget
   # FIXME: Should not be arch specific

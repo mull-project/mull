@@ -5,6 +5,7 @@ function(add_mutang_unittest test_dirname)
 endfunction()
 
 add_mutang_unittest(MutangUnitTests
+  CompilerTests.cpp
   ConfigParserTests.cpp
   ContextTest.cpp
   DriverTests.cpp
