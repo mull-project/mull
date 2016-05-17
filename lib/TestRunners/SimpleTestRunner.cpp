@@ -2,63 +2,54 @@
 
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/ExecutionEngine/OrcMCJITReplacement.h"
+#include "llvm/ExecutionEngine/Orc/CompileUtils.h"
 #include "llvm/ExecutionEngine/GenericValue.h"
+#include "llvm/ExecutionEngine/RTDyldMemoryManager.h"
+#include "llvm/ExecutionEngine/SectionMemoryManager.h"
 #include "llvm/Support/TargetSelect.h"
 
 using namespace Mutang;
 using namespace llvm;
 
-SimpleTestRunner::SimpleTestRunner(std::vector<Module *> ModulesRef)
-  : Modules(ModulesRef) {
+SimpleTestRunner::SimpleTestRunner() {
+//
+//    assert(ModulesRef.size() != 0);
+//
+//    InitializeNativeTarget();
+//    InitializeNativeTargetAsmPrinter();
+//    InitializeNativeTargetAsmParser();
 
-    assert(ModulesRef.size() != 0);
-
-    InitializeNativeTarget();
-    InitializeNativeTargetAsmPrinter();
-    InitializeNativeTargetAsmParser();
-
-    LLVMLinkInMCJIT();
+    LLVMLinkInOrcMCJITReplacement();
 }
 
-TestResult SimpleTestRunner::runTest(Function *Test,
-                                     Module *TesteeModule) {
+TestResult SimpleTestRunner::runTest(llvm::Function *Test,
+                                     ObjectFiles &ObjectFiles) {
+  /// Execution Engine requires a Module
+  /// Let's give him something
+  LLVMContext Ctx;
+  Module M("dummy", Ctx);
 
-  /// FIXME: Do not create JIT engine every time
-  /// If we create the engine once and use
-  /// the same module for evaluating a test against original testee
-  /// and against mutated testee, then the testee from mutated is not picked up
-  /// probably due to some cache
-  /// The problem requires investigation
-
-  Module *M = *Modules.begin();
-
-  EngineBuilder builder((std::unique_ptr<Module>(M)));
+  EngineBuilder builder((std::unique_ptr<Module>(&M)));
   builder.setEngineKind(EngineKind::JIT);
+  builder.setUseOrcMCJITReplacement(true);
+  builder.setMCJITMemoryManager(
+                                std::unique_ptr<RTDyldMemoryManager>(new SectionMemoryManager()));
 
-  std::string Err;
-  builder.setErrorStr(&Err);
-
-  EE = builder.create();
+  ExecutionEngine *EE = builder.create();
 
   assert(EE && "Can't create ExecutionEngine");
 
-  for (unsigned long Index = 1; Index < Modules.size(); Index++) {
-    Module *M = *(Modules.begin() + Index);
-    EE->addModule(std::unique_ptr<Module>(M));
+  for (auto &Obj : ObjectFiles) {
+    EE->addObjectFile(std::move(Obj));
   }
 
-  EE->addModule(std::unique_ptr<Module>(TesteeModule));
-  EE->finalizeObject();
-
   GenericValue GV = EE->runFunction(Test, ArrayRef<GenericValue>());
-
-  EE->removeModule(TesteeModule);
 
   const uint64_t *x = GV.IntVal.getRawData();
 
   if (*x == 1) {
     return Passed;
   }
-
+  
   return Failed;
 }

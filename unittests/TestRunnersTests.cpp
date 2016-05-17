@@ -1,4 +1,6 @@
 #include "MutationEngine.h"
+
+#include "Compiler.h"
 #include "Context.h"
 #include "MutationOperators/AddMutationOperator.h"
 #include "TestModuleFactory.h"
@@ -21,13 +23,17 @@ using namespace llvm;
 static TestModuleFactory TestModuleFactory;
 
 TEST(SimpleTestRunner, runTest) {
+  Compiler Compiler;
+  Context Ctx;
+  SimpleTestRunner Runner;
+  SimpleTestRunner::ObjectFiles ObjectFiles;
+
   auto OwnedModuleWithTests   = TestModuleFactory.createTesterModule();
   auto OwnedModuleWithTestees = TestModuleFactory.createTesteeModule();
 
   Module *ModuleWithTests   = OwnedModuleWithTests.get();
   Module *ModuleWithTestees = OwnedModuleWithTestees.get();
 
-  Context Ctx;
   Ctx.addModule(std::move(OwnedModuleWithTests));
   Ctx.addModule(std::move(OwnedModuleWithTestees));
 
@@ -38,13 +44,13 @@ TEST(SimpleTestRunner, runTest) {
 
   Function *Test = *(Tests.begin());
 
-  std::vector<Module *> Modules;
-  Modules.push_back(ModuleWithTests);
-
-  SimpleTestRunner Runner(Modules);
+  ObjectFiles.push_back(Compiler.CompilerModule(ModuleWithTests));
+  ObjectFiles.push_back(Compiler.CompilerModule(ModuleWithTestees));
 
   /// Here we run test with original testee function
-  ASSERT_EQ(Passed, Runner.runTest(Test, ModuleWithTestees));
+  ASSERT_EQ(Passed, Runner.runTest(Test, ObjectFiles));
+
+  ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
 
   /// afterwards we apply single mutation and run test again
   /// expecting it to fail
@@ -62,17 +68,26 @@ TEST(SimpleTestRunner, runTest) {
   MutationEngine Engine;
   Engine.applyMutation(*MP);
 
-  ASSERT_EQ(Failed, Runner.runTest(Test, ModuleWithTestees));
+  ObjectFiles.push_back(Compiler.CompilerModule(ModuleWithTests));
+  ObjectFiles.push_back(Compiler.CompilerModule(ModuleWithTestees));
+
+  ASSERT_EQ(Failed, Runner.runTest(Test, ObjectFiles));
+
+  ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
 }
 
 TEST(SimpleTestRunner, runTestUsingLibC) {
+  Compiler Compiler;
+  Context Ctx;
+  SimpleTestRunner Runner;
+  SimpleTestRunner::ObjectFiles ObjectFiles;
+
   auto OwnedModuleWithTests   = TestModuleFactory.createLibCTesterModule();
   auto OwnedModuleWithTestees = TestModuleFactory.createLibCTesteeModule();
 
   Module *ModuleWithTests   = OwnedModuleWithTests.get();
   Module *ModuleWithTestees = OwnedModuleWithTestees.get();
 
-  Context Ctx;
   Ctx.addModule(std::move(OwnedModuleWithTests));
   Ctx.addModule(std::move(OwnedModuleWithTestees));
 
@@ -83,13 +98,13 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
 
   Function *Test = *(Tests.begin());
 
-  std::vector<Module *> Modules;
-  Modules.push_back(ModuleWithTests);
-
-  SimpleTestRunner Runner(Modules);
+  ObjectFiles.push_back(Compiler.CompilerModule(ModuleWithTests));
+  ObjectFiles.push_back(Compiler.CompilerModule(ModuleWithTestees));
 
   /// Here we run test with original testee function
-  ASSERT_EQ(Passed, Runner.runTest(Test, ModuleWithTestees));
+  ASSERT_EQ(Passed, Runner.runTest(Test, ObjectFiles));
+
+  ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
 
   /// afterwards we apply single mutation and run test again
   /// expecting it to fail
@@ -107,10 +122,19 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   MutationEngine Engine;
   Engine.applyMutation(*MP);
 
-  ASSERT_EQ(Failed, Runner.runTest(Test, ModuleWithTestees));
+  ObjectFiles.push_back(Compiler.CompilerModule(ModuleWithTests));
+  ObjectFiles.push_back(Compiler.CompilerModule(ModuleWithTestees));
+
+  ASSERT_EQ(Failed, Runner.runTest(Test, ObjectFiles));
+  ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
 }
 
 TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
+  Compiler Compiler;
+  Context Ctx;
+  SimpleTestRunner Runner;
+  SimpleTestRunner::ObjectFiles ObjectFiles;
+
   /// No mutations applied here, since the only point of interest
   /// is an external libraries, in this case it is 'sqlite3'
   auto OwnedModuleWithTests   = TestModuleFactory.createExternalLibTesterModule();
@@ -119,7 +143,6 @@ TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
   Module *ModuleWithTests   = OwnedModuleWithTests.get();
   Module *ModuleWithTestees = OwnedModuleWithTestees.get();
 
-  Context Ctx;
   Ctx.addModule(std::move(OwnedModuleWithTests));
   Ctx.addModule(std::move(OwnedModuleWithTestees));
 
@@ -129,13 +152,11 @@ TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
   ASSERT_NE(0U, Tests.size());
   
   Function *Test = *(Tests.begin());
-  
-  std::vector<Module *> Modules;
-  Modules.push_back(ModuleWithTests);
-  
-  SimpleTestRunner Runner(Modules);
-  
+
   llvm::sys::DynamicLibrary::LoadLibraryPermanently("/usr/lib/libsqlite3.dylib");
-  
-  ASSERT_EQ(Passed, Runner.runTest(Test, ModuleWithTestees));
+
+  ObjectFiles.push_back(Compiler.CompilerModule(ModuleWithTests));
+  ObjectFiles.push_back(Compiler.CompilerModule(ModuleWithTestees));
+
+  ASSERT_EQ(Passed, Runner.runTest(Test, ObjectFiles));
 }

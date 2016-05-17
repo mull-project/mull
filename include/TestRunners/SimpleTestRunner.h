@@ -1,6 +1,7 @@
 #pragma once
 
-#include "llvm/ADT/ArrayRef.h"
+#include "llvm/Object/Binary.h"
+#include "llvm/Object/ObjectFile.h"
 
 namespace llvm {
 
@@ -19,11 +20,11 @@ enum TestResult {
 };
 
 class SimpleTestRunner {
-  std::vector<llvm::Module *> Modules;
-  llvm::ExecutionEngine *EE;
 public:
-  SimpleTestRunner(std::vector<llvm::Module *> ModulesRef);
-  TestResult runTest(llvm::Function *Test, llvm::Module *TesteeModule);
+  typedef std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> ObjectFiles;
+
+  SimpleTestRunner();
+  TestResult runTest(llvm::Function *Test, ObjectFiles &ObjectFiles);
 };
 
 }
