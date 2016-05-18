@@ -38,10 +38,20 @@ using namespace Mutang;
 
 void Driver::Run() {
   Context Ctx;
+  Compiler Compiler;
+
+  /// Assumption: all modules will be used during the execution
+  /// Therefore we load them into memory and compile immediately
+  /// Later on modules used only for generating of mutants
   for (auto ModulePath : Cfg.GetBitcodePaths()) {
-    auto Module = Loader.loadModuleAtPath(ModulePath);
-    assert(Module && "Can't load module");
-    Ctx.addModule(std::move(Module));
+    auto OwnedModule = Loader.loadModuleAtPath(ModulePath);
+    assert(OwnedModule && "Can't load module");
+
+    auto Module = OwnedModule.get();
+    auto ObjectFile = Compiler.CompilerModule(Module);
+    InnerCache.insert(std::make_pair(Module, std::move(ObjectFile)));
+
+    Ctx.addModule(std::move(OwnedModule));
   }
 
   /// FIXME: Should come from the outside
@@ -49,25 +59,17 @@ void Driver::Run() {
   std::vector<MutationOperator *> MutationOperators;
   MutationOperators.push_back(&MutOp);
 
-  Compiler Compiler;
+  SimpleTestRunner Runner;
 
   SimpleTestFinder TestFinder(Ctx);
   for (auto Test : TestFinder.findTests()) {
     for (auto Testee : TestFinder.findTestees(*Test)) {
+      auto ObjectFiles = AllButOne(Testee->getParent());
       for (auto &MutationPoint : TestFinder.findMutationPoints(MutationOperators, *Testee)) {
-        SimpleTestRunner Runner;
-        SimpleTestRunner::ObjectFiles ObjectFiles;
-
         MutationPoint->applyMutation();
 
-        /// Recompile all the modules all the time
-        /// I assume it is incredibly slow
-        /// If so, then this is a perfect place
-        /// to start playing with optimizations
-        for (auto &M : Ctx.getModules()) {
-          ObjectFiles.push_back(Compiler.CompilerModule(M.get()));
-        }
-
+        auto Mutant = Compiler.CompilerModule(Testee->getParent());
+        ObjectFiles.push_back(Mutant.getBinary());
         /// Rollback mutation once we have compiled the module
         MutationPoint->revertMutation();
 
@@ -75,4 +77,16 @@ void Driver::Run() {
       }
     }
   }
+}
+
+std::vector<llvm::object::ObjectFile *> Driver::AllButOne(llvm::Module *One) {
+  std::vector<llvm::object::ObjectFile *> Objects;
+
+  for (auto &CachedEntry : InnerCache) {
+    if (One != CachedEntry.first) {
+      Objects.push_back(CachedEntry.second.getBinary());
+    }
+  }
+
+  return Objects;
 }

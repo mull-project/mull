@@ -27,6 +27,7 @@ TEST(SimpleTestRunner, runTest) {
   Context Ctx;
   SimpleTestRunner Runner;
   SimpleTestRunner::ObjectFiles ObjectFiles;
+  SimpleTestRunner::OwnedObjectFiles OwnedObjectFiles;
 
   auto OwnedModuleWithTests   = TestModuleFactory.createTesterModule();
   auto OwnedModuleWithTestees = TestModuleFactory.createTesteeModule();
@@ -44,8 +45,17 @@ TEST(SimpleTestRunner, runTest) {
 
   Function *Test = *(Tests.begin());
 
-  ObjectFiles.push_back(Compiler.CompilerModule(ModuleWithTests));
-  ObjectFiles.push_back(Compiler.CompilerModule(ModuleWithTestees));
+  {
+    auto Obj = Compiler.CompilerModule(ModuleWithTests);
+    ObjectFiles.push_back(Obj.getBinary());
+    OwnedObjectFiles.push_back(std::move(Obj));
+  }
+
+  {
+    auto Obj = Compiler.CompilerModule(ModuleWithTestees);
+    ObjectFiles.push_back(Obj.getBinary());
+    OwnedObjectFiles.push_back(std::move(Obj));
+  }
 
   /// Here we run test with original testee function
   ASSERT_EQ(Passed, Runner.runTest(Test, ObjectFiles));
@@ -68,8 +78,17 @@ TEST(SimpleTestRunner, runTest) {
   MutationEngine Engine;
   Engine.applyMutation(*MP);
 
-  ObjectFiles.push_back(Compiler.CompilerModule(ModuleWithTests));
-  ObjectFiles.push_back(Compiler.CompilerModule(ModuleWithTestees));
+  {
+    auto Obj = Compiler.CompilerModule(ModuleWithTests);
+    ObjectFiles.push_back(Obj.getBinary());
+    OwnedObjectFiles.push_back(std::move(Obj));
+  }
+
+  {
+    auto Obj = Compiler.CompilerModule(ModuleWithTestees);
+    ObjectFiles.push_back(Obj.getBinary());
+    OwnedObjectFiles.push_back(std::move(Obj));
+  }
 
   ASSERT_EQ(Failed, Runner.runTest(Test, ObjectFiles));
 
@@ -81,6 +100,7 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   Context Ctx;
   SimpleTestRunner Runner;
   SimpleTestRunner::ObjectFiles ObjectFiles;
+  SimpleTestRunner::OwnedObjectFiles OwnedObjectFiles;
 
   auto OwnedModuleWithTests   = TestModuleFactory.createLibCTesterModule();
   auto OwnedModuleWithTestees = TestModuleFactory.createLibCTesteeModule();
@@ -98,8 +118,14 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
 
   Function *Test = *(Tests.begin());
 
-  ObjectFiles.push_back(Compiler.CompilerModule(ModuleWithTests));
-  ObjectFiles.push_back(Compiler.CompilerModule(ModuleWithTestees));
+
+  auto Obj = Compiler.CompilerModule(ModuleWithTests);
+  ObjectFiles.push_back(Obj.getBinary());
+  OwnedObjectFiles.push_back(std::move(Obj));
+
+  Obj = Compiler.CompilerModule(ModuleWithTestees);
+  ObjectFiles.push_back(Obj.getBinary());
+  OwnedObjectFiles.push_back(std::move(Obj));
 
   /// Here we run test with original testee function
   ASSERT_EQ(Passed, Runner.runTest(Test, ObjectFiles));
@@ -122,8 +148,13 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   MutationEngine Engine;
   Engine.applyMutation(*MP);
 
-  ObjectFiles.push_back(Compiler.CompilerModule(ModuleWithTests));
-  ObjectFiles.push_back(Compiler.CompilerModule(ModuleWithTestees));
+  Obj = Compiler.CompilerModule(ModuleWithTests);
+  ObjectFiles.push_back(Obj.getBinary());
+  OwnedObjectFiles.push_back(std::move(Obj));
+
+  Obj = Compiler.CompilerModule(ModuleWithTestees);
+  ObjectFiles.push_back(Obj.getBinary());
+  OwnedObjectFiles.push_back(std::move(Obj));
 
   ASSERT_EQ(Failed, Runner.runTest(Test, ObjectFiles));
   ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
@@ -134,6 +165,7 @@ TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
   Context Ctx;
   SimpleTestRunner Runner;
   SimpleTestRunner::ObjectFiles ObjectFiles;
+  SimpleTestRunner::OwnedObjectFiles OwnedObjectFiles;
 
   /// No mutations applied here, since the only point of interest
   /// is an external libraries, in this case it is 'sqlite3'
@@ -155,8 +187,13 @@ TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
 
   llvm::sys::DynamicLibrary::LoadLibraryPermanently("/usr/lib/libsqlite3.dylib");
 
-  ObjectFiles.push_back(Compiler.CompilerModule(ModuleWithTests));
-  ObjectFiles.push_back(Compiler.CompilerModule(ModuleWithTestees));
+  auto Obj = Compiler.CompilerModule(ModuleWithTestees);
+  ObjectFiles.push_back(Obj.getBinary());
+  OwnedObjectFiles.push_back(std::move(Obj));
+
+  Obj = Compiler.CompilerModule(ModuleWithTests);
+  ObjectFiles.push_back(Obj.getBinary());
+  OwnedObjectFiles.push_back(std::move(Obj));
 
   ASSERT_EQ(Passed, Runner.runTest(Test, ObjectFiles));
 }
