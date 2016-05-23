@@ -17,7 +17,9 @@
 /// FIXME: Should be abstract
 #include "MutationOperators/AddMutationOperator.h"
 
-//using namespace llvm;
+#include <algorithm>
+
+using namespace llvm;
 using namespace Mutang;
 
 /// Populate Mutang::Context with modules using
@@ -37,9 +39,11 @@ using namespace Mutang;
 /// Each result contains result of execution of an original test and
 /// all the results of each mutant within corresponding MutationPoint
 
-void Driver::Run() {
+std::vector<std::unique_ptr<TestResult>> Driver::Run() {
   Context Ctx;
   Compiler Compiler;
+
+  std::vector<std::unique_ptr<TestResult>> Results;
 
   /// Assumption: all modules will be used during the execution
   /// Therefore we load them into memory and compile immediately
@@ -64,6 +68,10 @@ void Driver::Run() {
 
   SimpleTestFinder TestFinder(Ctx);
   for (auto Test : TestFinder.findTests()) {
+    auto ObjectFiles = AllObjectFiles();
+    ExecutionResult ExecResult = Runner.runTest(Test, ObjectFiles);
+    auto Result = make_unique<TestResult>(ExecResult, Test);
+
     for (auto Testee : TestFinder.findTestees(*Test)) {
       auto ObjectFiles = AllButOne(Testee->getParent());
       for (auto &MutationPoint : TestFinder.findMutationPoints(MutationOperators, *Testee)) {
@@ -76,9 +84,17 @@ void Driver::Run() {
 
         ExecutionResult R = Runner.runTest(Test, ObjectFiles);
         assert(R != ExecutionResult::Invalid && "Expect to see valid TestResult");
+
+        /// FIXME: Check if it's legal or not
+        auto MutResult = make_unique<MutationResult>(R, std::move(MutationPoint));
+        Result->addMutantResult(std::move(MutResult));
       }
     }
+
+    Results.push_back(std::move(Result));
   }
+
+  return Results;
 }
 
 std::vector<llvm::object::ObjectFile *> Driver::AllButOne(llvm::Module *One) {
@@ -88,6 +104,16 @@ std::vector<llvm::object::ObjectFile *> Driver::AllButOne(llvm::Module *One) {
     if (One != CachedEntry.first) {
       Objects.push_back(CachedEntry.second.getBinary());
     }
+  }
+
+  return Objects;
+}
+
+std::vector<llvm::object::ObjectFile *> Driver::AllObjectFiles() {
+  std::vector<llvm::object::ObjectFile *> Objects;
+
+  for (auto &CachedEntry : InnerCache) {
+    Objects.push_back(CachedEntry.second.getBinary());
   }
 
   return Objects;

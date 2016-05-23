@@ -4,6 +4,7 @@
 #include "ModuleLoader.h"
 #include "TestFinders/SimpleTestFinder.h"
 #include "TestModuleFactory.h"
+#include "TestResult.h"
 
 #include "llvm/ADT/SmallString.h"
 #include "llvm/ADT/Twine.h"
@@ -53,5 +54,23 @@ TEST(Driver, SimpleTest) {
   FakeModuleLoader Loader;
 
   Driver Driver(Cfg, Loader);
-  Driver.Run();
+
+  /// Given the modules we use here we expect:
+  ///
+  /// 1 original test, which has Passed state
+  /// 1 mutant test, which has Failed state
+  auto Results = Driver.Run();
+  ASSERT_EQ(1u, Results.size());
+
+  auto FirstResult = Results.begin()->get();
+  ASSERT_EQ(ExecutionResult::Passed, FirstResult->getOriginalTestResult());
+  ASSERT_NE(nullptr, FirstResult->getTestFunction());
+
+  auto &Mutants = FirstResult->getMutationResults();
+  ASSERT_EQ(1u, Mutants.size());
+
+  auto FirstMutant = Mutants.begin()->get();
+  ASSERT_EQ(ExecutionResult::Failed, FirstMutant->getExecutionResult());
+
+  ASSERT_NE(nullptr, FirstMutant->getMutationPoint());
 }
