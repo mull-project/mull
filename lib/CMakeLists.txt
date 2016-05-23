@@ -9,6 +9,7 @@ llvm_add_library(mutang
   MutationOperators/AddMutationOperator.cpp
   MutationEngine.cpp
   MutationPoint.cpp
+  TestResult.cpp
   TestFinders/SimpleTestFinder.cpp
   TestRunners/SimpleTestRunner.cpp
 

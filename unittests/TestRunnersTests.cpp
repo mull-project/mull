@@ -3,8 +3,8 @@
 #include "Compiler.h"
 #include "Context.h"
 #include "MutationOperators/AddMutationOperator.h"
-#include "TestModuleFactory.h"
 #include "TestFinders/SimpleTestFinder.h"
+#include "TestModuleFactory.h"
 #include "TestRunners/SimpleTestRunner.h"
 
 #include "llvm/IR/InstrTypes.h"
@@ -58,7 +58,7 @@ TEST(SimpleTestRunner, runTest) {
   }
 
   /// Here we run test with original testee function
-  ASSERT_EQ(Passed, Runner.runTest(Test, ObjectFiles));
+  ASSERT_EQ(ExecutionResult::Passed, Runner.runTest(Test, ObjectFiles));
 
   ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
 
@@ -90,7 +90,7 @@ TEST(SimpleTestRunner, runTest) {
     OwnedObjectFiles.push_back(std::move(Obj));
   }
 
-  ASSERT_EQ(Failed, Runner.runTest(Test, ObjectFiles));
+  ASSERT_EQ(ExecutionResult::Failed, Runner.runTest(Test, ObjectFiles));
 
   ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
 }
@@ -128,7 +128,7 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   OwnedObjectFiles.push_back(std::move(Obj));
 
   /// Here we run test with original testee function
-  ASSERT_EQ(Passed, Runner.runTest(Test, ObjectFiles));
+  ASSERT_EQ(ExecutionResult::Passed, Runner.runTest(Test, ObjectFiles));
 
   ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
 
@@ -156,7 +156,7 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
-  ASSERT_EQ(Failed, Runner.runTest(Test, ObjectFiles));
+  ASSERT_EQ(ExecutionResult::Failed, Runner.runTest(Test, ObjectFiles));
   ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
 }
 
@@ -195,5 +195,5 @@ TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
-  ASSERT_EQ(Passed, Runner.runTest(Test, ObjectFiles));
+  ASSERT_EQ(ExecutionResult::Passed, Runner.runTest(Test, ObjectFiles));
 }

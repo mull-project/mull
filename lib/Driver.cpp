@@ -3,6 +3,7 @@
 #include "Config.h"
 #include "Context.h"
 #include "ModuleLoader.h"
+#include "TestResult.h"
 
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Value.h"
@@ -73,7 +74,8 @@ void Driver::Run() {
         /// Rollback mutation once we have compiled the module
         MutationPoint->revertMutation();
 
-        Runner.runTest(Test, ObjectFiles);
+        ExecutionResult R = Runner.runTest(Test, ObjectFiles);
+        assert(R != ExecutionResult::Invalid && "Expect to see valid TestResult");
       }
     }
   }

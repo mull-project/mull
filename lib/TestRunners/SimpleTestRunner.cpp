@@ -48,8 +48,8 @@ void *SimpleTestRunner::TestFunctionPointer(const llvm::Function &Function) {
   return FPointer;
 }
 
-TestResult SimpleTestRunner::runTest(llvm::Function *Test,
-                                     ObjectFiles &ObjectFiles) {
+ExecutionResult SimpleTestRunner::runTest(llvm::Function *Test,
+                                             ObjectFiles &ObjectFiles) {
   auto Handle = ObjectLayer.addObjectSet(ObjectFiles,
                                          make_unique<SectionMemoryManager>(),
                                          make_unique<MutangResolver>());
@@ -59,8 +59,8 @@ TestResult SimpleTestRunner::runTest(llvm::Function *Test,
   ObjectLayer.removeObjectSet(Handle);
 
   if (result == 1) {
-    return Passed;
+    return ExecutionResult::Passed;
   }
 
-  return Failed;
+  return ExecutionResult::Failed;
 }
