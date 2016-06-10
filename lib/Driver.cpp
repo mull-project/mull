@@ -40,7 +40,6 @@ using namespace Mutang;
 /// all the results of each mutant within corresponding MutationPoint
 
 std::vector<std::unique_ptr<TestResult>> Driver::Run() {
-  Context Ctx;
   Compiler Compiler;
 
   std::vector<std::unique_ptr<TestResult>> Results;

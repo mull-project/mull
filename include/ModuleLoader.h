@@ -16,5 +16,5 @@ public:
   virtual std::unique_ptr<llvm::Module> loadModuleAtPath(const std::string &path);
   virtual ~ModuleLoader() {}
 };
-  
+
 }

@@ -1,0 +1,19 @@
+RUN: cd %S; make clean; make PWD=%S; %mutang_driver %S/config.yaml | FileCheck %s
+
+CHECK:      Result for 'test_addition1'
+CHECK-NEXT:	  Original test 'Passed'
+CHECK-NEXT:	  Mutants:
+CHECK-NEXT:		  Mutant 'Failed'
+CHECK-NEXT: Result for 'test_addition2'
+CHECK-NEXT:	  Original test 'Passed'
+CHECK-NEXT:	  Mutants:
+CHECK-NEXT:		  Mutant 'Failed'
+CHECK-NEXT: Result for 'test_addition3'
+CHECK-NEXT:	  Original test 'Passed'
+CHECK-NEXT:	  Mutants:
+CHECK-NEXT:		  Mutant 'Failed'
+CHECK-NEXT: Result for 'test_addition4'
+CHECK-NEXT:	  Original test 'Failed'
+CHECK-NEXT:	  Mutants:
+CHECK-NEXT:		  Mutant 'Failed'
+

@@ -1,6 +1,4 @@
-llvm_add_library(mutang 
-  Laboratory.cpp
-
+llvm_add_library(mutang
   Compiler.cpp
   ConfigParser.cpp
   Context.cpp
@@ -23,6 +21,8 @@ llvm_add_library(mutang
 
   LINK_LIBS
   LLVMAsmPrinter
+  LLVMAsmParser
+  LLVMBitReader
   LLVMCodeGen
   LLVMCore
   LLVMExecutionEngine

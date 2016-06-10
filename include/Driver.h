@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TestResult.h"
+#include "Context.h"
 #include "llvm/Object/ObjectFile.h"
 
 #include <map>
@@ -16,6 +17,7 @@ class ModuleLoader;
 
 class Driver {
   Config &Cfg;
+  Context Ctx;
   ModuleLoader &Loader;
   std::map<llvm::Module *, llvm::object::OwningBinary<llvm::object::ObjectFile>> InnerCache;
 public:

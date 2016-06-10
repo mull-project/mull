@@ -5,13 +5,13 @@ configure_lit_site_cfg(
 
 set(MUTANG_TEST_DEPENDS
         FileCheck
-        mutang-lab
+        mutang-driver
         )
 
 add_custom_target(mutang-test-depends DEPENDS ${MUTANG_TEST_DEPENDS})
 
 add_lit_testsuite(check-mutang "Running the Mutang Integration Tests"
-  ${CMAKE_CURRENT_BINARY_DIR} 
+  ${CMAKE_CURRENT_BINARY_DIR}
   PARAMS  llvm_site_config=${CMAKE_CURRENT_BINARY_DIR}/lit.site.cfg
   DEPENDS ${MUTANG_TEST_DEPENDS}
 )
