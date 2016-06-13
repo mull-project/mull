@@ -111,7 +111,10 @@ TEST(MutationEngine, applyAndRevertMutation) {
   ASSERT_EQ(&MutOp, MP->getOperator());
   ASSERT_TRUE(isa<BinaryOperator>(MP->getOriginalValue()));
 
-  std::string ReplacedInstructionName = MP->getOriginalValue()->getName().str();
+  Instruction *ReplacedInstruction = cast<BinaryOperator>(MP->getOriginalValue());
+  BasicBlock *ReplacedInstructionParent = ReplacedInstruction->getParent();
+
+  std::string ReplacedInstructionName = ReplacedInstruction->getName().str();
 
   MutationEngine Engine;
 
@@ -132,13 +135,15 @@ TEST(MutationEngine, applyAndRevertMutation) {
 
   Engine.revertMutation(*MP);
 
-  // After mutation rolled back instruction should have parent again
-  ASSERT_NE(nullptr, OldInstruction->getParent());
-
-  // After mutation we should have new instruction with the same name as an original instruction
+  // After mutation is reverted back we should have
+  // a new instruction with the same name as an original instruction
   Instruction *RolledBackInstruction = getFirstNamedInstruction(*Testee, ReplacedInstructionName);
   ASSERT_TRUE(isa<BinaryOperator>(RolledBackInstruction));
   ASSERT_EQ(Instruction::Add, RolledBackInstruction->getOpcode());
+
+  // After mutation is reverted back instruction should have the same parent again
+  ASSERT_NE(nullptr, RolledBackInstruction->getParent());
+  ASSERT_EQ(ReplacedInstructionParent, RolledBackInstruction->getParent());
 
   ASSERT_EQ(MP->getOriginalValue(), RolledBackInstruction);
 }
