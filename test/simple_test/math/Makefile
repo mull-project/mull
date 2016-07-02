@@ -5,7 +5,6 @@ CC=clang
 all: main.ll main.bc config.yaml
 
 config.yaml:
-	env
 	echo "bitcode_files:" > config.yaml
 	echo "  - $(PWD)/main.bc" >> config.yaml
 

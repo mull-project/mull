@@ -29,21 +29,8 @@ static const char *ExecutionResultToString(ExecutionResult Result) {
 int main(int argc, char *argv[]) {
   assert(argc == 2);
 
-  SourceMgr SM;
-
-  auto BufOrErr = MemoryBuffer::getFile(argv[1]);
-
-  if (!BufOrErr) {
-    printf("can't read config file '%s'\n", argv[1]);
-    return 1;
-  }
-
-  auto Buffer = BufOrErr->get();
-
-  yaml::Stream YAMLBuf(Buffer->getMemBufferRef(), SM);
-
   ConfigParser Parser;
-  auto Cfg = Parser.loadConfig(YAMLBuf);
+  auto Cfg = Parser.loadConfig(argv[1]);
 
   LLVMContext Ctx;
   ModuleLoader Loader(Ctx);
@@ -52,12 +39,15 @@ int main(int argc, char *argv[]) {
 
   auto Results = D.Run();
   for (auto &R : Results) {
+
     printf("Result for '%s'\n", R->getTestFunction()->getName().str().c_str());
     printf("\tOriginal test '%s'\n", ExecutionResultToString(R->getOriginalTestResult()));
     printf("\tMutants:\n");
+
     for (auto &MR : R->getMutationResults()) {
       printf("\t\tMutant '%s'\n", ExecutionResultToString(MR->getExecutionResult()));
     }
+
   }
 
   return 0;

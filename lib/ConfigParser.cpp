@@ -10,6 +10,22 @@
 using namespace llvm;
 using namespace Mutang;
 
+std::unique_ptr<Config> ConfigParser::loadConfig(const char *filename) {
+  SourceMgr SM;
+
+  auto BufOrErr = MemoryBuffer::getFile(filename);
+
+  if (!BufOrErr) {
+    printf("can't read config file '%s'\n", filename);
+    exit(1);
+  }
+
+  auto Buffer = BufOrErr->get();
+
+  yaml::Stream YAMLBuf(Buffer->getMemBufferRef(), SM);
+  return loadConfig(YAMLBuf);
+}
+
 std::unique_ptr<Config> ConfigParser::loadConfig(yaml::Stream &S) {
     auto Paths = std::vector<std::string>();
 

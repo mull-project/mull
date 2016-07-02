@@ -1,4 +1,4 @@
-#include <stdio.h>
+extern int printf(const char *fmt, ...);
 
 typedef enum ST_Result {
   ST_Success = 1,
