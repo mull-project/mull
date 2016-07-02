@@ -2,7 +2,7 @@
 
 using namespace Mutang;
 
-MutationResult::MutationResult(enum ExecutionResult R,
+MutationResult::MutationResult(ExecutionResult R,
                                std::unique_ptr<MutationPoint> MP) :
   Result(R), MutPoint(std::move(MP)) {
 

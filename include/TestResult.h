@@ -12,10 +12,15 @@ class Function;
 
 namespace Mutang {
 
-enum ExecutionResult {
+enum ExecutionStatus {
   Invalid = 0,
   Failed,
   Passed
+};
+
+struct ExecutionResult {
+  ExecutionStatus Status;
+  long long RunningTime;
 };
 
 class MutationResult {

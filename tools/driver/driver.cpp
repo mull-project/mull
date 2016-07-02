@@ -12,8 +12,8 @@
 using namespace Mutang;
 using namespace llvm;
 
-static const char *ExecutionResultToString(ExecutionResult Result) {
-  switch (Result) {
+static const char *ExecutionResultToString(ExecutionStatus Status) {
+  switch (Status) {
     case Failed:
       return "Failed";
     case Passed:
@@ -41,11 +41,13 @@ int main(int argc, char *argv[]) {
   for (auto &R : Results) {
 
     printf("Result for '%s'\n", R->getTestFunction()->getName().str().c_str());
-    printf("\tOriginal test '%s'\n", ExecutionResultToString(R->getOriginalTestResult()));
+    auto TestResult = R->getOriginalTestResult();
+    printf("\tOriginal test '%s' in %lld nanoseconds\n", ExecutionResultToString(TestResult.Status), TestResult.RunningTime);
     printf("\tMutants:\n");
 
     for (auto &MR : R->getMutationResults()) {
-      printf("\t\tMutant '%s'\n", ExecutionResultToString(MR->getExecutionResult()));
+      auto MutationResult = MR->getExecutionResult();
+      printf("\t\tMutant '%s' in %lld nanoseconds\n", ExecutionResultToString(MutationResult.Status), MutationResult.RunningTime);
     }
 
   }

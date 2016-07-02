@@ -8,8 +8,11 @@
 #include "llvm/Support/DynamicLibrary.h"
 #include "llvm/Support/TargetSelect.h"
 
+#include <chrono>
+
 using namespace Mutang;
 using namespace llvm;
+using namespace std::chrono;
 
 class MutangResolver : public RuntimeDyld::SymbolResolver {
 public:
@@ -49,18 +52,26 @@ void *SimpleTestRunner::TestFunctionPointer(const llvm::Function &Function) {
 }
 
 ExecutionResult SimpleTestRunner::runTest(llvm::Function *Test,
-                                             ObjectFiles &ObjectFiles) {
+                                          ObjectFiles &ObjectFiles) {
   auto Handle = ObjectLayer.addObjectSet(ObjectFiles,
                                          make_unique<SectionMemoryManager>(),
                                          make_unique<MutangResolver>());
   void *FunctionPointer = TestFunctionPointer(*Test);
 
+  auto start = high_resolution_clock::now();
   uint64_t result = ((int (*)())(intptr_t)FunctionPointer)();
+  auto elapsed = high_resolution_clock::now() - start;
+
+  ExecutionResult Result;
+  Result.RunningTime = duration_cast<std::chrono::nanoseconds>(elapsed).count();
+
   ObjectLayer.removeObjectSet(Handle);
 
   if (result == 1) {
-    return ExecutionResult::Passed;
+    Result.Status = ExecutionStatus::Passed;
+  } else {
+    Result.Status = ExecutionStatus::Failed;
   }
 
-  return ExecutionResult::Failed;
+  return Result;
 }

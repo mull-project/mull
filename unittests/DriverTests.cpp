@@ -63,14 +63,14 @@ TEST(Driver, SimpleTest) {
   ASSERT_EQ(1u, Results.size());
 
   auto FirstResult = Results.begin()->get();
-  ASSERT_EQ(ExecutionResult::Passed, FirstResult->getOriginalTestResult());
+  ASSERT_EQ(ExecutionStatus::Passed, FirstResult->getOriginalTestResult().Status);
   ASSERT_NE(nullptr, FirstResult->getTestFunction());
 
   auto &Mutants = FirstResult->getMutationResults();
   ASSERT_EQ(1u, Mutants.size());
 
   auto FirstMutant = Mutants.begin()->get();
-  ASSERT_EQ(ExecutionResult::Failed, FirstMutant->getExecutionResult());
+  ASSERT_EQ(ExecutionStatus::Failed, FirstMutant->getExecutionResult().Status);
 
   ASSERT_NE(nullptr, FirstMutant->getMutationPoint());
 }

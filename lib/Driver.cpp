@@ -82,7 +82,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
         MutationPoint->revertMutation();
 
         ExecutionResult R = Runner.runTest(Test, ObjectFiles);
-        assert(R != ExecutionResult::Invalid && "Expect to see valid TestResult");
+        assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
 
         /// FIXME: Check if it's legal or not
         auto MutResult = make_unique<MutationResult>(R, std::move(MutationPoint));
