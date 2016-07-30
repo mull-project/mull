@@ -1,6 +1,8 @@
 #include "TestFinders/SimpleTestFinder.h"
 
 #include "Context.h"
+#include "MutationPoint.h"
+
 #include "MutationOperators/MutationOperator.h"
 
 #include "llvm/IR/InstIterator.h"
@@ -9,6 +11,7 @@
 #include "llvm/IR/Module.h"
 #include "llvm/Support/Debug.h"
 
+#include <algorithm>
 #include <vector>
 
 using namespace Mutang;
@@ -61,16 +64,44 @@ std::vector<std::unique_ptr<MutationPoint>> SimpleTestFinder::findMutationPoints
                           llvm::Function &F) {
   std::vector<std::unique_ptr<MutationPoint>> MutPoints;
 
-  /// FIXME: Iterate over BasicBlocks as well
-  for (inst_iterator I = inst_begin(F), E = inst_end(F); I != E; ++I) {
-    Instruction &Instr = *I;
 
-    for (auto &MutOp : MutationOperators) {
-      if (MutOp->canBeApplied(Instr)) {
-        MutPoints.emplace_back(make_unique<MutationPoint>(MutOp, &Instr));
+  Module *PM = F.getParent();
+
+  auto FII = std::find_if(PM->begin(), PM->end(),
+                          [&F] (llvm::Function &f) {
+                            return &f == &F;
+                          });
+
+  assert(FII != PM->end() && "Expected function to be found in module");
+  int FIndex = std::distance(PM->begin(), FII);
+
+  for (Function::iterator B = F.begin(), E = F.end(); B != E; ++B) {
+    BasicBlock &BB = *B;
+
+    for (BasicBlock::iterator I = BB.begin(), E = BB.end(); I != E; ++I) {
+      Instruction &Instr = *I;
+
+      for (auto &MutOp : MutationOperators) {
+        if (MutOp->canBeApplied(Instr)) {
+          BasicBlock *BB = Instr.getParent();
+
+          auto BII = std::find_if(F.begin(), F.end(),
+                                  [&BB] (llvm::BasicBlock &bb) {
+                                    return &bb == BB;
+                                  });
+          assert(BII != F.end() && "Expected block to be found in function");
+
+          int BBIndex = std::distance(F.begin(), BII);
+
+          int IIndex = std::distance(B->begin(), I);
+
+          MutationPointAddress Address(FIndex, BBIndex, IIndex);
+          MutPoints.emplace_back(make_unique<MutationPoint>(MutOp, Address, &Instr));
+        }
       }
     }
   }
+
 
   return MutPoints;
 }

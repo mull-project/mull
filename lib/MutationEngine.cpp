@@ -10,8 +10,8 @@
 using namespace llvm;
 using namespace Mutang;
 
-void MutationEngine::applyMutation(MutationPoint &MP) {
-  MP.applyMutation();
+void MutationEngine::applyMutation(llvm::Module *M, MutationPoint &MP) {
+  MP.applyMutation(M);
 }
 
 void MutationEngine::revertMutation(MutationPoint &MP) {

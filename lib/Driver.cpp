@@ -74,10 +74,14 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
     for (auto Testee : TestFinder.findTestees(*Test)) {
       auto ObjectFiles = AllButOne(Testee->getParent());
       for (auto &MutationPoint : TestFinder.findMutationPoints(MutationOperators, *Testee)) {
-        MutationPoint->applyMutation();
+
+        /// TODO: here the clone of Testee->getParent() will be used very soon instead.
+        /// For now we are applying mutation to the module same as of mutation point.
+        MutationPoint->applyMutation(Testee->getParent());
 
         auto Mutant = Compiler.CompilerModule(Testee->getParent());
         ObjectFiles.push_back(Mutant.getBinary());
+
         /// Rollback mutation once we have compiled the module
         MutationPoint->revertMutation();
 
