@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
 
   Driver D(*Cfg.get(), Loader);
 
-  auto Results = D.Run();
+  auto Results = D.RunGTest();
   for (auto &R : Results) {
 
     printf("Result for '%s'\n", R->getTestFunction()->getName().str().c_str());

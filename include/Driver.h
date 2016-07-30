@@ -8,6 +8,8 @@
 
 namespace llvm {
   class Module;
+  class Function;
+  class JITEventListener;
 }
 
 namespace Mutang {
@@ -20,9 +22,11 @@ class Driver {
   Context Ctx;
   ModuleLoader &Loader;
   std::map<llvm::Module *, llvm::object::OwningBinary<llvm::object::ObjectFile>> InnerCache;
+  llvm::JITEventListener *EventListener;
 public:
   Driver(Config &C, ModuleLoader &ML) : Cfg(C), Loader(ML) {}
   std::vector<std::unique_ptr<TestResult>> Run();
+  std::vector<std::unique_ptr<TestResult>> RunGTest();
 
 private:
   /// Returns cached object files for all modules excerpt one provided
@@ -30,6 +34,8 @@ private:
 
   /// Returns cached object files for all modules
   std::vector<llvm::object::ObjectFile *> AllObjectFiles();
+
+  std::vector<llvm::Function *> getStaticCtors();
 };
 
 }

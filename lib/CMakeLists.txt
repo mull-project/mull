@@ -9,7 +9,9 @@ llvm_add_library(mutang
   MutationPoint.cpp
   TestResult.cpp
   TestFinders/SimpleTestFinder.cpp
+  TestFinders/GoogleTestFinder.cpp
   TestRunners/SimpleTestRunner.cpp
+  TestRunners/GoogleTestRunner.cpp
 
   ADDITIONAL_HEADER_DIRS
   ${MUTANG_INCLUDE_DIR}
