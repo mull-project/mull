@@ -76,7 +76,7 @@ TEST(SimpleTestRunner, runTest) {
 
   MutationPoint *MP = (*(MutationPoints.begin())).get();
   MutationEngine Engine;
-  Engine.applyMutation(*MP);
+  Engine.applyMutation(Testee->getParent(), *MP);
 
   {
     auto Obj = Compiler.CompilerModule(ModuleWithTests);
@@ -146,7 +146,7 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
 
   MutationPoint *MP = (*(MutationPoints.begin())).get();
   MutationEngine Engine;
-  Engine.applyMutation(*MP);
+  Engine.applyMutation(Testee->getParent(), *MP);
 
   Obj = Compiler.CompilerModule(ModuleWithTests);
   ObjectFiles.push_back(Obj.getBinary());

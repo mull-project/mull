@@ -11,7 +11,7 @@ class MutationPoint;
 /// FIXME: This class seems to be redundant
 class MutationEngine {
 public:
-  void applyMutation(MutationPoint &MP);
+  void applyMutation(llvm::Module *M, MutationPoint &MP);
   void revertMutation(MutationPoint &MP);
 };
 

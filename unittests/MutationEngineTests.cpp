@@ -65,7 +65,7 @@ TEST(MutationEngine, applyMutation) {
 
   MutationEngine Engine;
 
-  Engine.applyMutation(*MP);
+  Engine.applyMutation(Testee->getParent(), *MP);
 
   // After mutation applied on instruction it should be erased
   Instruction *OldInstruction = cast<BinaryOperator>(MP->getOriginalValue());
@@ -118,7 +118,7 @@ TEST(MutationEngine, applyAndRevertMutation) {
 
   MutationEngine Engine;
 
-  Engine.applyMutation(*MP);
+  Engine.applyMutation(Testee->getParent(), *MP);
 
   // After mutation applied on instruction it should be erased
   Instruction *OldInstruction = cast<BinaryOperator>(MP->getOriginalValue());

@@ -79,4 +79,9 @@ TEST(SimpleTestFinder, FindMutationPoints) {
   MutationPoint *MP = (*(MutationPoints.begin())).get();
   ASSERT_EQ(&MutOp, MP->getOperator());
   ASSERT_TRUE(isa<BinaryOperator>(MP->getOriginalValue()));
+
+  MutationPointAddress MPA = MP->getAddress();
+  ASSERT_TRUE(MPA.getFnIndex() == 0);
+  ASSERT_TRUE(MPA.getBBIndex() == 2);
+  ASSERT_TRUE(MPA.getIIndex() == 1);
 }
