@@ -3,6 +3,7 @@
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/ExecutionEngine/OrcMCJITReplacement.h"
 #include "llvm/ExecutionEngine/GenericValue.h"
+#include "llvm/ExecutionEngine/JITSymbol.h"
 #include "llvm/ExecutionEngine/RTDyldMemoryManager.h"
 #include "llvm/ExecutionEngine/SectionMemoryManager.h"
 #include "llvm/Support/DynamicLibrary.h"
@@ -14,17 +15,17 @@ using namespace Mutang;
 using namespace llvm;
 using namespace std::chrono;
 
-class MutangResolver : public RuntimeDyld::SymbolResolver {
+class MutangResolver : public JITSymbolResolver {
 public:
 
-  RuntimeDyld::SymbolInfo findSymbol(const std::string &Name) {
+  JITSymbol findSymbol(const std::string &Name) {
     if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(Name))
-      return RuntimeDyld::SymbolInfo(SymAddr, JITSymbolFlags::Exported);
-    return RuntimeDyld::SymbolInfo(nullptr);
+      return JITSymbol(SymAddr, JITSymbolFlags::Exported);
+    return JITSymbol(nullptr);
   }
 
-  RuntimeDyld::SymbolInfo findSymbolInLogicalDylib(const std::string &Name) {
-    return RuntimeDyld::SymbolInfo(nullptr);
+  JITSymbol findSymbolInLogicalDylib(const std::string &Name) {
+    return JITSymbol(nullptr);
   }
 };
 
@@ -45,7 +46,7 @@ std::string SimpleTestRunner::MangleName(const llvm::StringRef &Name) {
 }
 
 void *SimpleTestRunner::TestFunctionPointer(const llvm::Function &Function) {
-  orc::JITSymbol Symbol = ObjectLayer.findSymbol(MangleName(Function.getName()), true);
+  JITSymbol Symbol = ObjectLayer.findSymbol(MangleName(Function.getName()), true);
   void *FPointer = reinterpret_cast<void *>(static_cast<uintptr_t>(Symbol.getAddress()));
   assert(FPointer && "Can't find pointer to function");
   return FPointer;
