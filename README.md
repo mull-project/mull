@@ -28,5 +28,5 @@ Currently the work is being done against MutangUnitTests scheme so that's the on
 
 Update to LLVM's trunk should be a recurrent task, but first we need to get experience of living in a downstream world.
 
-Current code is being developed against LLVM commit: [20ebcfc5d130082e30ee4b095ecaf1dcf9f57239](https://github.com/llvm-mirror/llvm/commit/20ebcfc5d130082e30ee4b095ecaf1dcf9f57239).
+Current code is being developed against LLVM commit: [1223b84c3018ba3b1148da49a85cf8f181812f2b](https://github.com/llvm-mirror/llvm/commit/1223b84c3018ba3b1148da49a85cf8f181812f2b).
 
