@@ -1,6 +1,7 @@
 #pragma once 
 
 #include "MutationPoint.h"
+#include "Test.h"
 
 #include "llvm/ADT/ArrayRef.h"
 
@@ -21,8 +22,8 @@ class SimpleTestFinder {
 public:
   explicit SimpleTestFinder(Context &C) : Ctx(C) {}
 
-  std::vector<llvm::Function *> findTests();
-  std::vector<llvm::Function *> findTestees(llvm::Function &F);
+  std::vector<std::unique_ptr<Test>> findTests();
+  std::vector<llvm::Function *> findTestees(Test *Test);
   std::vector<std::unique_ptr<MutationPoint>> findMutationPoints(
                           std::vector<MutationOperator *> &MutationOperators,
                           llvm::Function &F);

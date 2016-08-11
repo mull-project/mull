@@ -13,6 +13,8 @@ llvm_add_library(mutang
   TestRunners/SimpleTestRunner.cpp
   TestRunners/GoogleTestRunner.cpp
 
+  SimpleTest/SimpleTest_Test.cpp
+
   ADDITIONAL_HEADER_DIRS
   ${MUTANG_INCLUDE_DIR}
   ${MUTANG_INCLUDE_DIR}/TestFinders

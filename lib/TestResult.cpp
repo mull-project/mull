@@ -1,4 +1,5 @@
 #include "TestResult.h"
+#include "Test.h"
 
 using namespace Mutang;
 
@@ -10,8 +11,14 @@ MutationResult::MutationResult(ExecutionResult R,
 
 
 TestResult::TestResult(ExecutionResult OriginalResult,
-                       llvm::Function *TestFunction) :
-  OriginalTestResult(OriginalResult), Test(TestFunction) {
+                       llvm::Function *TF) :
+  OriginalTestResult(OriginalResult), TestFunction(TF) {
+
+}
+
+TestResult::TestResult(ExecutionResult OriginalResult,
+                       class Test *T) :
+  OriginalTestResult(OriginalResult), Test(T) {
 
 }
 
@@ -20,7 +27,7 @@ void TestResult::addMutantResult(std::unique_ptr<MutationResult> Res) {
 }
 
 llvm::Function *TestResult::getTestFunction() {
-  return Test;
+  return TestFunction;
 }
 
 std::vector<std::unique_ptr<MutationResult>> &TestResult::getMutationResults() {

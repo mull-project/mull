@@ -12,6 +12,8 @@ class Function;
 
 namespace Mutang {
 
+class Test;
+
 enum ExecutionStatus {
   Invalid = 0,
   Failed,
@@ -35,10 +37,12 @@ public:
 class TestResult {
   /// Result of execution of a test without any mutations applied
   ExecutionResult OriginalTestResult;
-  llvm::Function *Test;
+  llvm::Function *TestFunction;
+  Test *Test;
   std::vector<std::unique_ptr<MutationResult>> MutationResults;
 public:
   TestResult(ExecutionResult OriginalResult, llvm::Function *TestFunction);
+  TestResult(ExecutionResult OriginalResult, class Test *T);
 
   void addMutantResult(std::unique_ptr<MutationResult> Res);
 

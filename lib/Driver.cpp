@@ -69,12 +69,12 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
   SimpleTestRunner Runner;
 
   SimpleTestFinder TestFinder(Ctx);
-  for (auto Test : TestFinder.findTests()) {
+  for (auto &Test : TestFinder.findTests()) {
     auto ObjectFiles = AllObjectFiles();
-    ExecutionResult ExecResult = Runner.runTest(Test, ObjectFiles);
-    auto Result = make_unique<TestResult>(ExecResult, Test);
+    ExecutionResult ExecResult = Runner.runTest(Test.get(), ObjectFiles);
+    auto Result = make_unique<TestResult>(ExecResult, Test.get());
 
-    for (auto Testee : TestFinder.findTestees(*Test)) {
+    for (auto Testee : TestFinder.findTestees(Test.get())) {
       auto ObjectFiles = AllButOne(Testee->getParent());
       for (auto &MutationPoint : TestFinder.findMutationPoints(MutationOperators, *Testee)) {
 
@@ -88,7 +88,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
         /// Rollback mutation once we have compiled the module
         MutationPoint->revertMutation();
 
-        ExecutionResult R = Runner.runTest(Test, ObjectFiles);
+        ExecutionResult R = Runner.runTest(Test.get(), ObjectFiles);
         assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
 
         /// FIXME: Check if it's legal or not

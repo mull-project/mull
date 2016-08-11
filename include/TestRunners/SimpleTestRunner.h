@@ -17,6 +17,8 @@ class Module;
 
 namespace Mutang {
 
+class Test;
+
 class SimpleTestRunner {
   llvm::orc::ObjectLinkingLayer<> ObjectLayer;
   std::unique_ptr<llvm::TargetMachine> TM;
@@ -28,7 +30,7 @@ public:
   typedef std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> OwnedObjectFiles;
 
   SimpleTestRunner();
-  ExecutionResult runTest(llvm::Function *Test, ObjectFiles &ObjectFiles);
+  ExecutionResult runTest(Test *Test, ObjectFiles &ObjectFiles);
 
 private:
   std::string MangleName(const llvm::StringRef &Name);

@@ -11,20 +11,22 @@
 #include "llvm/IR/Module.h"
 #include "llvm/Support/Debug.h"
 
+#include "SimpleTest/SimpleTest_Test.h"
+
 #include <algorithm>
 #include <vector>
 
 using namespace Mutang;
 using namespace llvm;
 
-std::vector<Function *> SimpleTestFinder::findTests() {
-  std::vector<Function *> tests;
+std::vector<std::unique_ptr<Test>> SimpleTestFinder::findTests() {
+  std::vector<std::unique_ptr<Test>> tests;
 
   for (auto &M : Ctx.getModules()) {
     auto &x = M->getFunctionList();
     for (auto &Fn : x) {
       if (Fn.getName().startswith("test_")) {
-        tests.push_back(&Fn);
+        tests.emplace_back(make_unique<SimpleTest_Test>(&Fn));
       }
     }
   }
@@ -32,7 +34,11 @@ std::vector<Function *> SimpleTestFinder::findTests() {
   return tests;
 }
 
-std::vector<Function *> SimpleTestFinder::findTestees(llvm::Function &F) {
+std::vector<Function *> SimpleTestFinder::findTestees(Test *Test) {
+  SimpleTest_Test *SimpleTest = dyn_cast<SimpleTest_Test>(Test);
+
+  Function &F = *(SimpleTest->GetTestFunction());
+
   std::vector<Function *> testees;
 
   for (inst_iterator I = inst_begin(F), E = inst_end(F); I != E; ++I) {
