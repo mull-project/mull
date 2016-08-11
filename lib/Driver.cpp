@@ -156,14 +156,11 @@ std::vector<std::unique_ptr<TestResult>> Driver::RunGTest() {
 
   auto ObjectFiles = AllObjectFiles();
 
-  std::vector<llvm::Function *> Ctors = getStaticCtors();
-  for (auto *Ctor: Ctors) {
-    Runner.runStaticCtor(Ctor, ObjectFiles);
-  }
+  auto Ctors = getStaticCtors();
 
   GoogleTestFinder TestFinder(Ctx);
   for (auto Test : TestFinder.findTests()) {
-    ExecutionResult ExecResult = Runner.runTest(Test, ObjectFiles);
+    ExecutionResult ExecResult = Runner.runTest(Ctors, Test, ObjectFiles);
     auto Result = make_unique<TestResult>(ExecResult, Test);
 
     for (auto Testee : TestFinder.findTestees(*Test)) {
@@ -176,7 +173,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::RunGTest() {
         /// Rollback mutation once we have compiled the module
         MutationPoint->revertMutation();
 
-        ExecutionResult R = Runner.runTest(Test, ObjectFiles);
+        ExecutionResult R = Runner.runTest(Ctors, Test, ObjectFiles);
         assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
 
         /// FIXME: Check if it's legal or not
