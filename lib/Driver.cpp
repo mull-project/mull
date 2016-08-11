@@ -9,8 +9,6 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Value.h"
 
-#include "llvm/ExecutionEngine/JITEventListener.h"
-
 /// FIXME: Should be abstract
 #include "TestFinders/SimpleTestFinder.h"
 #include "TestFinders/GoogleTestFinder.h"
@@ -26,20 +24,6 @@
 
 using namespace llvm;
 using namespace Mutang;
-
-class GTestMutangResolver : public RuntimeDyld::SymbolResolver {
-public:
-
-  RuntimeDyld::SymbolInfo findSymbol(const std::string &Name) {
-    if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(Name))
-      return RuntimeDyld::SymbolInfo(SymAddr, JITSymbolFlags::Exported);
-    return RuntimeDyld::SymbolInfo(nullptr);
-  }
-
-  RuntimeDyld::SymbolInfo findSymbolInLogicalDylib(const std::string &Name) {
-    return RuntimeDyld::SymbolInfo(nullptr);
-  }
-};
 
 /// Populate Mutang::Context with modules using
 /// ModulePaths from Mutang::Config.
@@ -120,12 +104,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 }
 
 std::vector<std::unique_ptr<TestResult>> Driver::RunGTest() {
-  EventListener = JITEventListener::createGDBRegistrationListener();
-
   Compiler Compiler;
-  SectionMemoryManager MemoryManager;
-  GTestMutangResolver Resolver;
-  RuntimeDyld Dyld(MemoryManager, Resolver);
 
   std::vector<std::unique_ptr<TestResult>> Results;
 
@@ -138,10 +117,6 @@ std::vector<std::unique_ptr<TestResult>> Driver::RunGTest() {
 
     auto Module = OwnedModule.get();
     auto ObjectFile = Compiler.CompilerModule(Module);
-    auto &RawObjectFile = *ObjectFile.getBinary();
-    auto ObjectInfo = Dyld.loadObject(RawObjectFile);
-
-    EventListener->NotifyObjectEmitted(RawObjectFile, *ObjectInfo );
     InnerCache.insert(std::make_pair(Module, std::move(ObjectFile)));
 
     Ctx.addModule(std::move(OwnedModule));

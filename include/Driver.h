@@ -9,7 +9,6 @@
 namespace llvm {
   class Module;
   class Function;
-  class JITEventListener;
 }
 
 namespace Mutang {
@@ -22,7 +21,6 @@ class Driver {
   Context Ctx;
   ModuleLoader &Loader;
   std::map<llvm::Module *, llvm::object::OwningBinary<llvm::object::ObjectFile>> InnerCache;
-  llvm::JITEventListener *EventListener;
 public:
   Driver(Config &C, ModuleLoader &ML) : Cfg(C), Loader(ML) {}
   std::vector<std::unique_ptr<TestResult>> Run();
