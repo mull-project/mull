@@ -37,10 +37,10 @@ int main(int argc, char *argv[]) {
 
   Driver D(*Cfg.get(), Loader);
 
-  auto Results = D.RunGTest();
+  auto Results = D.Run();
   for (auto &R : Results) {
 
-    printf("Result for '%s'\n", R->getTestFunction()->getName().str().c_str());
+    printf("Result for '%s'\n", R->getTestName().c_str());
     auto TestResult = R->getOriginalTestResult();
     printf("\tOriginal test '%s' in %lld nanoseconds\n", ExecutionResultToString(TestResult.Status), TestResult.RunningTime);
     printf("\tMutants:\n");

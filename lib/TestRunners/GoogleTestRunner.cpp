@@ -40,7 +40,6 @@ extern "C" int mutang__cxa_atexit(mutang_destructor_t destructor, void *arg, voi
   free(strs);
 #endif
 
-  /// Comment the 'for' and die
   for (int i = 0; i < current_dtor; i++) {
     if (arg == dtors[i].arg) {
 //      printf("dtor already registered: %d: %p\n", i, arg);
@@ -89,10 +88,6 @@ public:
 
     if (Name == "_printf") {
       return findSymbol("mutang_printf");
-    }
-
-    if (Name == "_ZN7testing8internal13") {
-      return findSymbol("mutang_ColoredPrintf");
     }
 
     if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(Name))

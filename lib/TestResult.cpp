@@ -9,16 +9,9 @@ MutationResult::MutationResult(ExecutionResult R,
 
 }
 
-
 TestResult::TestResult(ExecutionResult OriginalResult,
-                       llvm::Function *TF) :
-  OriginalTestResult(OriginalResult), TestFunction(TF) {
-
-}
-
-TestResult::TestResult(ExecutionResult OriginalResult,
-                       class Test *T) :
-  OriginalTestResult(OriginalResult), Test(T) {
+                       std::unique_ptr<Test> T) :
+  OriginalTestResult(OriginalResult), TestPtr(std::move(T)) {
 
 }
 
@@ -26,8 +19,8 @@ void TestResult::addMutantResult(std::unique_ptr<MutationResult> Res) {
   MutationResults.push_back(std::move(Res));
 }
 
-llvm::Function *TestResult::getTestFunction() {
-  return TestFunction;
+std::string TestResult::getTestName() {
+  return TestPtr->getTestName();
 }
 
 std::vector<std::unique_ptr<MutationResult>> &TestResult::getMutationResults() {

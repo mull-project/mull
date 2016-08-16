@@ -24,7 +24,7 @@ class Driver {
 public:
   Driver(Config &C, ModuleLoader &ML) : Cfg(C), Loader(ML) {}
   std::vector<std::unique_ptr<TestResult>> Run();
-  std::vector<std::unique_ptr<TestResult>> RunGTest();
+//  std::vector<std::unique_ptr<TestResult>> RunGTest();
 
 private:
   /// Returns cached object files for all modules excerpt one provided

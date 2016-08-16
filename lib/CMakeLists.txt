@@ -8,16 +8,16 @@ llvm_add_library(mutang
   MutationEngine.cpp
   MutationPoint.cpp
   TestResult.cpp
-  TestFinders/SimpleTestFinder.cpp
-  TestFinders/GoogleTestFinder.cpp
   TestRunners/SimpleTestRunner.cpp
   TestRunners/GoogleTestRunner.cpp
 
   SimpleTest/SimpleTest_Test.cpp
+  SimpleTest/SimpleTestFinder.cpp
+
+  GoogleTest/GoogleTestFinder.cpp
 
   ADDITIONAL_HEADER_DIRS
   ${MUTANG_INCLUDE_DIR}
-  ${MUTANG_INCLUDE_DIR}/TestFinders
   ${MUTANG_INCLUDE_DIR}/TestRunners
   ${MUTANG_INCLUDE_DIR}/MutationOperators
   ${MUTANG_INCLUDE_DIR}/MutationEngine

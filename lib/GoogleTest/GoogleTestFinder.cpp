@@ -1,4 +1,4 @@
-#include "TestFinders/GoogleTestFinder.h"
+#include "GoogleTest/GoogleTestFinder.h"
 
 #include "Context.h"
 #include "MutationOperators/MutationOperator.h"

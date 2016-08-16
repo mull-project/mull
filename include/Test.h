@@ -1,9 +1,14 @@
 #pragma once
 
+#include <string>
+
 namespace Mutang {
 
 class Test {
 public:
+  virtual std::string getTestName() = 0;
+  virtual ~Test() {}
+
   enum TestKind {
     TK_SimpleTest
   };

@@ -10,8 +10,8 @@
 #include "llvm/IR/Value.h"
 
 /// FIXME: Should be abstract
-#include "TestFinders/SimpleTestFinder.h"
-#include "TestFinders/GoogleTestFinder.h"
+#include "SimpleTest/SimpleTestFinder.h"
+#include "GoogleTest/GoogleTestFinder.h"
 
 /// FIXME: Should be abstract
 #include "TestRunners/SimpleTestRunner.h"
@@ -72,9 +72,10 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
   for (auto &Test : TestFinder.findTests()) {
     auto ObjectFiles = AllObjectFiles();
     ExecutionResult ExecResult = Runner.runTest(Test.get(), ObjectFiles);
-    auto Result = make_unique<TestResult>(ExecResult, Test.get());
+    auto BorrowedTest = Test.get();
+    auto Result = make_unique<TestResult>(ExecResult, std::move(Test));
 
-    for (auto Testee : TestFinder.findTestees(Test.get())) {
+    for (auto Testee : TestFinder.findTestees(BorrowedTest)) {
       auto ObjectFiles = AllButOne(Testee->getParent());
       for (auto &MutationPoint : TestFinder.findMutationPoints(MutationOperators, *Testee)) {
 
@@ -88,7 +89,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
         /// Rollback mutation once we have compiled the module
         MutationPoint->revertMutation();
 
-        ExecutionResult R = Runner.runTest(Test.get(), ObjectFiles);
+        ExecutionResult R = Runner.runTest(BorrowedTest, ObjectFiles);
         assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
 
         /// FIXME: Check if it's legal or not
@@ -103,68 +104,68 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
   return Results;
 }
 
-std::vector<std::unique_ptr<TestResult>> Driver::RunGTest() {
-  Compiler Compiler;
-
-  std::vector<std::unique_ptr<TestResult>> Results;
-
-  /// Assumption: all modules will be used during the execution
-  /// Therefore we load them into memory and compile immediately
-  /// Later on modules used only for generating of mutants
-  for (auto ModulePath : Cfg.GetBitcodePaths()) {
-    auto OwnedModule = Loader.loadModuleAtPath(ModulePath);
-    assert(OwnedModule && "Can't load module");
-
-    auto Module = OwnedModule.get();
-    auto ObjectFile = Compiler.CompilerModule(Module);
-    InnerCache.insert(std::make_pair(Module, std::move(ObjectFile)));
-
-    Ctx.addModule(std::move(OwnedModule));
-  }
-
-//  /// FIXME: Should come from the outside
-//  AddMutationOperator MutOp;
-  std::vector<MutationOperator *> MutationOperators;
-//  MutationOperators.push_back(&MutOp);
-
-  GoogleTestRunner Runner;
-
-  auto ObjectFiles = AllObjectFiles();
-
-  auto Ctors = getStaticCtors();
-
-  GoogleTestFinder TestFinder(Ctx);
-  for (auto Test : TestFinder.findTests()) {
-    ExecutionResult ExecResult = Runner.runTest(Ctors, Test, ObjectFiles);
-    auto Result = make_unique<TestResult>(ExecResult, Test);
-
-    for (auto Testee : TestFinder.findTestees(*Test)) {
-      auto ObjectFiles = AllButOne(Testee->getParent());
-      for (auto &MutationPoint : TestFinder.findMutationPoints(MutationOperators, *Testee)) {
-        MutationPoint->applyMutation();
-
-        auto Mutant = Compiler.CompilerModule(Testee->getParent());
-        ObjectFiles.push_back(Mutant.getBinary());
-        /// Rollback mutation once we have compiled the module
-        MutationPoint->revertMutation();
-
-        ExecutionResult R = Runner.runTest(Ctors, Test, ObjectFiles);
-        assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
-
-        /// FIXME: Check if it's legal or not
-        auto MutResult = make_unique<MutationResult>(R, std::move(MutationPoint));
-        Result->addMutantResult(std::move(MutResult));
-      }
-    }
-
-    Results.push_back(std::move(Result));
-  }
-
-  fflush(stdout);
-  fflush(stderr);
-
-  return Results;
-}
+//std::vector<std::unique_ptr<TestResult>> Driver::RunGTest() {
+//  Compiler Compiler;
+//
+//  std::vector<std::unique_ptr<TestResult>> Results;
+//
+//  /// Assumption: all modules will be used during the execution
+//  /// Therefore we load them into memory and compile immediately
+//  /// Later on modules used only for generating of mutants
+//  for (auto ModulePath : Cfg.GetBitcodePaths()) {
+//    auto OwnedModule = Loader.loadModuleAtPath(ModulePath);
+//    assert(OwnedModule && "Can't load module");
+//
+//    auto Module = OwnedModule.get();
+//    auto ObjectFile = Compiler.CompilerModule(Module);
+//    InnerCache.insert(std::make_pair(Module, std::move(ObjectFile)));
+//
+//    Ctx.addModule(std::move(OwnedModule));
+//  }
+//
+////  /// FIXME: Should come from the outside
+////  AddMutationOperator MutOp;
+//  std::vector<MutationOperator *> MutationOperators;
+////  MutationOperators.push_back(&MutOp);
+//
+//  GoogleTestRunner Runner;
+//
+//  auto ObjectFiles = AllObjectFiles();
+//
+//  auto Ctors = getStaticCtors();
+//
+//  GoogleTestFinder TestFinder(Ctx);
+//  for (auto Test : TestFinder.findTests()) {
+//    ExecutionResult ExecResult = Runner.runTest(Ctors, Test, ObjectFiles);
+//    auto Result = make_unique<TestResult>(ExecResult, Test);
+//
+//    for (auto Testee : TestFinder.findTestees(*Test)) {
+//      auto ObjectFiles = AllButOne(Testee->getParent());
+//      for (auto &MutationPoint : TestFinder.findMutationPoints(MutationOperators, *Testee)) {
+//        MutationPoint->applyMutation();
+//
+//        auto Mutant = Compiler.CompilerModule(Testee->getParent());
+//        ObjectFiles.push_back(Mutant.getBinary());
+//        /// Rollback mutation once we have compiled the module
+//        MutationPoint->revertMutation();
+//
+//        ExecutionResult R = Runner.runTest(Ctors, Test, ObjectFiles);
+//        assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
+//
+//        /// FIXME: Check if it's legal or not
+//        auto MutResult = make_unique<MutationResult>(R, std::move(MutationPoint));
+//        Result->addMutantResult(std::move(MutResult));
+//      }
+//    }
+//
+//    Results.push_back(std::move(Result));
+//  }
+//
+//  fflush(stdout);
+//  fflush(stderr);
+//
+//  return Results;
+//}
 
 std::vector<llvm::object::ObjectFile *> Driver::AllButOne(llvm::Module *One) {
   std::vector<llvm::object::ObjectFile *> Objects;

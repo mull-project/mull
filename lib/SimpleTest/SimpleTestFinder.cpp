@@ -1,4 +1,4 @@
-#include "TestFinders/SimpleTestFinder.h"
+#include "SimpleTest/SimpleTestFinder.h"
 
 #include "Context.h"
 #include "MutationPoint.h"

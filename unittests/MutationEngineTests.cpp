@@ -1,6 +1,6 @@
 
 #include "Context.h"
-#include "TestFinders/SimpleTestFinder.h"
+#include "SimpleTest/SimpleTestFinder.h"
 #include "MutationEngine.h"
 #include "MutationOperators/AddMutationOperator.h"
 #include "TestModuleFactory.h"

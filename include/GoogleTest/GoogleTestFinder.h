@@ -2,8 +2,6 @@
 
 #include "MutationPoint.h"
 
-#include "llvm/ADT/ArrayRef.h"
-
 namespace llvm {
   class Function;
 }
