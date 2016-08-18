@@ -1,4 +1,4 @@
-#include "TestRunners/SimpleTestRunner.h"
+#include "SimpleTest/SimpleTestRunner.h"
 
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/ExecutionEngine/OrcMCJITReplacement.h"

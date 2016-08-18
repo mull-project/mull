@@ -5,7 +5,7 @@
 #include "MutationOperators/AddMutationOperator.h"
 #include "SimpleTest/SimpleTestFinder.h"
 #include "TestModuleFactory.h"
-#include "TestRunners/SimpleTestRunner.h"
+#include "SimpleTest/SimpleTestRunner.h"
 
 #include "llvm/IR/InstrTypes.h"
 #include "llvm/IR/InstIterator.h"

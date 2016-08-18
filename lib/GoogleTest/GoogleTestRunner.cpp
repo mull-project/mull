@@ -1,4 +1,4 @@
-#include "TestRunners/GoogleTestRunner.h"
+#include "GoogleTest/GoogleTestRunner.h"
 
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/ExecutionEngine/OrcMCJITReplacement.h"

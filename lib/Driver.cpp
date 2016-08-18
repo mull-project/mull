@@ -12,8 +12,8 @@
 #include "TestFinder.h"
 
 /// FIXME: Should be abstract
-#include "TestRunners/SimpleTestRunner.h"
-#include "TestRunners/GoogleTestRunner.h"
+#include "SimpleTest/SimpleTestRunner.h"
+#include "GoogleTest/GoogleTestRunner.h"
 
 /// FIXME: Should be abstract
 #include "MutationOperators/AddMutationOperator.h"

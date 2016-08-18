@@ -8,20 +8,18 @@ llvm_add_library(mutang
   MutationEngine.cpp
   MutationPoint.cpp
   TestResult.cpp
-  TestRunners/SimpleTestRunner.cpp
-  TestRunners/GoogleTestRunner.cpp
 
   SimpleTest/SimpleTest_Test.cpp
   SimpleTest/SimpleTestFinder.cpp
+  SimpleTest/SimpleTestRunner.cpp
 
   GoogleTest/GoogleTest_Test.cpp
   GoogleTest/GoogleTestFinder.cpp
+  GoogleTest/GoogleTestRunner.cpp
 
   ADDITIONAL_HEADER_DIRS
   ${MUTANG_INCLUDE_DIR}
-  ${MUTANG_INCLUDE_DIR}/TestRunners
   ${MUTANG_INCLUDE_DIR}/MutationOperators
-  ${MUTANG_INCLUDE_DIR}/MutationEngine
   ${MUTANG_INCLUDE_DIR}/Context
 
   LINK_LIBS
@@ -44,4 +42,3 @@ llvm_add_library(mutang
   LLVMX86Desc
   LLVMX86Info
 )
-
