@@ -78,10 +78,10 @@ extern "C" int mutang_printf(const char *fmt, ...) {
   return 0;
 }
 
-class MutangResolver : public RuntimeDyld::SymbolResolver {
+class MutangResolver : public JITSymbolResolver {
 public:
 
-  RuntimeDyld::SymbolInfo findSymbol(const std::string &Name) {
+  JITSymbol findSymbol(const std::string &Name) {
     if (Name == "___cxa_atexit") {
       return findSymbol("mutang__cxa_atexit");
     }
@@ -91,12 +91,12 @@ public:
     }
 
     if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(Name))
-      return RuntimeDyld::SymbolInfo(SymAddr, JITSymbolFlags::Exported);
-    return RuntimeDyld::SymbolInfo(nullptr);
+      return JITSymbol(SymAddr, JITSymbolFlags::Exported);
+    return JITSymbol(nullptr);
   }
 
-  RuntimeDyld::SymbolInfo findSymbolInLogicalDylib(const std::string &Name) {
-    return RuntimeDyld::SymbolInfo(nullptr);
+  JITSymbol findSymbolInLogicalDylib(const std::string &Name) {
+    return JITSymbol(nullptr);
   }
 };
 
@@ -117,7 +117,7 @@ std::string GoogleTestRunner::MangleName(const llvm::StringRef &Name) {
 }
 
 void *GoogleTestRunner::TestFunctionPointer(const llvm::Function &Function) {
-  orc::JITSymbol Symbol = ObjectLayer.findSymbol(MangleName(Function.getName()), false);
+  JITSymbol Symbol = ObjectLayer.findSymbol(MangleName(Function.getName()), false);
   void *FPointer = reinterpret_cast<void *>(static_cast<uintptr_t>(Symbol.getAddress()));
   assert(FPointer && "Can't find pointer to function");
   return FPointer;
@@ -163,6 +163,6 @@ ExecutionResult GoogleTestRunner::runTest(std::vector<llvm::Function *> Ctors,
   } else {
     Result.Status = ExecutionStatus::Failed;
   }
-  
+
   return Result;
 }

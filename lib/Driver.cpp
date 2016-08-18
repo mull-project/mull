@@ -69,7 +69,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 
     for (auto Testee : Finder.findTestees(BorrowedTest, Ctx)) {
       auto ObjectFiles = AllButOne(Testee->getParent());
-      for (auto &MutationPoint : TestFinder.findMutationPoints(MutationOperators, *Testee)) {
+      for (auto &MutationPoint : Finder.findMutationPoints(MutationOperators, *Testee)) {
 
         /// TODO: here the clone of Testee->getParent() will be used very soon instead.
         /// For now we are applying mutation to the module same as of mutation point.
