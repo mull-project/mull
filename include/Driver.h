@@ -18,16 +18,18 @@ namespace Mutang {
 class Config;
 class ModuleLoader;
 class TestFinder;
+class TestRunner;
 
 class Driver {
   Config &Cfg;
   ModuleLoader &Loader;
   TestFinder &Finder;
+  TestRunner &Runner;
   Context Ctx;
   std::map<llvm::Module *, llvm::object::OwningBinary<llvm::object::ObjectFile>> InnerCache;
 public:
-  Driver(Config &C, ModuleLoader &ML, TestFinder &TF)
-    : Cfg(C), Loader(ML), Finder(TF) {}
+  Driver(Config &C, ModuleLoader &ML, TestFinder &TF, TestRunner &TR)
+    : Cfg(C), Loader(ML), Finder(TF), Runner(TR) {}
   std::vector<std::unique_ptr<TestResult>> Run();
 
 private:

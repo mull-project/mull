@@ -4,12 +4,14 @@
 #include "ModuleLoader.h"
 
 #include "SimpleTest/SimpleTestFinder.h"
+#include "SimpleTest/SimpleTestRunner.h"
 
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Function.h"
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/YAMLParser.h"
+#include "llvm/Support/TargetSelect.h"
 
 using namespace Mutang;
 using namespace llvm;
@@ -34,12 +36,17 @@ int main(int argc, char *argv[]) {
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(argv[1]);
 
+  InitializeNativeTarget();
+  InitializeNativeTargetAsmPrinter();
+  InitializeNativeTargetAsmParser();
+
   LLVMContext Ctx;
   ModuleLoader Loader(Ctx);
 
   SimpleTestFinder TestFinder;
+  SimpleTestRunner Runner;
 
-  Driver D(*Cfg.get(), Loader, TestFinder);
+  Driver D(*Cfg.get(), Loader, TestFinder, Runner);
 
   auto Results = D.Run();
   for (auto &R : Results) {

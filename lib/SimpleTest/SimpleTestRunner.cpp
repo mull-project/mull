@@ -31,13 +31,6 @@ public:
   }
 };
 
-SimpleTestRunner::SimpleTestRunner() : TM(EngineBuilder().selectTarget(
-                                            Triple(), "", "",
-                                            SmallVector<std::string, 1>())) {
-  sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
-  LLVMLinkInOrcMCJITReplacement();
-}
-
 std::string SimpleTestRunner::MangleName(const llvm::StringRef &Name) {
   std::string MangledName;
   {

@@ -10,10 +10,7 @@
 #include "llvm/IR/Value.h"
 
 #include "TestFinder.h"
-
-/// FIXME: Should be abstract
-#include "SimpleTest/SimpleTestRunner.h"
-#include "GoogleTest/GoogleTestRunner.h"
+#include "TestRunner.h"
 
 /// FIXME: Should be abstract
 #include "MutationOperators/AddMutationOperator.h"
@@ -63,8 +60,6 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
   AddMutationOperator MutOp;
   std::vector<MutationOperator *> MutationOperators;
   MutationOperators.push_back(&MutOp);
-
-  SimpleTestRunner Runner;
 
   for (auto &Test : Finder.findTests(Ctx)) {
     auto ObjectFiles = AllObjectFiles();

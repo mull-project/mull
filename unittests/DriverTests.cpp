@@ -3,6 +3,7 @@
 #include "Context.h"
 #include "ModuleLoader.h"
 #include "SimpleTest/SimpleTestFinder.h"
+#include "SimpleTest/SimpleTestRunner.h"
 #include "TestModuleFactory.h"
 #include "TestResult.h"
 
@@ -53,8 +54,9 @@ TEST(Driver, SimpleTest) {
 
   FakeModuleLoader Loader;
   SimpleTestFinder TestFinder;
+  SimpleTestRunner Runner;
 
-  Driver Driver(Cfg, Loader, TestFinder);
+  Driver Driver(Cfg, Loader, TestFinder, Runner);
 
   /// Given the modules we use here we expect:
   ///

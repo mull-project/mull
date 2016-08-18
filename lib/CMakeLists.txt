@@ -8,6 +8,7 @@ llvm_add_library(mutang
   MutationEngine.cpp
   MutationPoint.cpp
   TestResult.cpp
+  TestRunner.cpp
 
   SimpleTest/SimpleTest_Test.cpp
   SimpleTest/SimpleTestFinder.cpp

@@ -22,7 +22,7 @@ public:
                             std::vector<MutationOperator *> &MutationOperators,
                             llvm::Function &F) = 0;
 
-  virtual ~TestFinder(){}
+  virtual ~TestFinder() {}
 };
 
 }
