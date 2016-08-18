@@ -14,6 +14,7 @@ llvm_add_library(mutang
   SimpleTest/SimpleTest_Test.cpp
   SimpleTest/SimpleTestFinder.cpp
 
+  GoogleTest/GoogleTest_Test.cpp
   GoogleTest/GoogleTestFinder.cpp
 
   ADDITIONAL_HEADER_DIRS

@@ -1,27 +1,29 @@
 #pragma once
 
 #include "MutationPoint.h"
+#include "TestFinder.h"
 
 namespace llvm {
-  class Function;
+
+class Function;
+
 }
 
 namespace Mutang {
 
-  class Context;
-  class MutationOperator;
-  class MutationPoint;
+class Context;
+class MutationOperator;
+class MutationPoint;
 
-  class GoogleTestFinder {
-    Context &Ctx;
-  public:
-    explicit GoogleTestFinder(Context &C) : Ctx(C) {}
+class GoogleTestFinder : public TestFinder {
+public:
+  explicit GoogleTestFinder() {}
 
-    std::vector<llvm::Function *> findTests();
-    std::vector<llvm::Function *> findTestees(llvm::Function &F);
-    std::vector<std::unique_ptr<MutationPoint>> findMutationPoints(
-                                                                   std::vector<MutationOperator *> &MutationOperators,
-                                                                   llvm::Function &F);
-  };
-  
+  std::vector<std::unique_ptr<Test>> findTests(Context &Ctx) override;
+  std::vector<llvm::Function *> findTestees(Test *Test, Context &Ctx) override;
+  std::vector<std::unique_ptr<MutationPoint>> findMutationPoints(
+                          std::vector<MutationOperator *> &MutationOperators,
+                          llvm::Function &F) override;
+};
+
 }

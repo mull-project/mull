@@ -9,19 +9,21 @@
 #include "llvm/IR/Module.h"
 #include "llvm/Support/Debug.h"
 
+#include "GoogleTest/GoogleTest_Test.h"
+
 #include <vector>
 
 using namespace Mutang;
 using namespace llvm;
 
-std::vector<Function *> GoogleTestFinder::findTests() {
-  std::vector<Function *> tests;
+std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
+  std::vector<std::unique_ptr<Test>> tests;
 
   for (auto &M : Ctx.getModules()) {
     auto &x = M->getFunctionList();
     for (auto &Fn : x) {
       if (Fn.getName().startswith("main")) {
-        tests.push_back(&Fn);
+        tests.emplace_back(make_unique<GoogleTest_Test>(&Fn));
       }
     }
   }
@@ -29,7 +31,7 @@ std::vector<Function *> GoogleTestFinder::findTests() {
   return tests;
 }
 
-std::vector<Function *> GoogleTestFinder::findTestees(llvm::Function &F) {
+std::vector<llvm::Function *> GoogleTestFinder::findTestees(Test *Test, Context &Ctx) {
   return std::vector<Function *>();
 }
 

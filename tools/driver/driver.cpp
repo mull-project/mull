@@ -3,6 +3,8 @@
 #include "Config.h"
 #include "ModuleLoader.h"
 
+#include "SimpleTest/SimpleTestFinder.h"
+
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Function.h"
 #include "llvm/Support/MemoryBuffer.h"
@@ -35,7 +37,9 @@ int main(int argc, char *argv[]) {
   LLVMContext Ctx;
   ModuleLoader Loader(Ctx);
 
-  Driver D(*Cfg.get(), Loader);
+  SimpleTestFinder TestFinder;
+
+  Driver D(*Cfg.get(), Loader, TestFinder);
 
   auto Results = D.Run();
   for (auto &R : Results) {
@@ -54,4 +58,3 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
-

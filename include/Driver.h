@@ -7,24 +7,28 @@
 #include <map>
 
 namespace llvm {
-  class Module;
-  class Function;
+
+class Module;
+class Function;
+
 }
 
 namespace Mutang {
 
 class Config;
 class ModuleLoader;
+class TestFinder;
 
 class Driver {
   Config &Cfg;
-  Context Ctx;
   ModuleLoader &Loader;
+  TestFinder &Finder;
+  Context Ctx;
   std::map<llvm::Module *, llvm::object::OwningBinary<llvm::object::ObjectFile>> InnerCache;
 public:
-  Driver(Config &C, ModuleLoader &ML) : Cfg(C), Loader(ML) {}
+  Driver(Config &C, ModuleLoader &ML, TestFinder &TF)
+    : Cfg(C), Loader(ML), Finder(TF) {}
   std::vector<std::unique_ptr<TestResult>> Run();
-//  std::vector<std::unique_ptr<TestResult>> RunGTest();
 
 private:
   /// Returns cached object files for all modules excerpt one provided

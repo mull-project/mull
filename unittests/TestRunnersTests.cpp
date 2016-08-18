@@ -38,8 +38,8 @@ TEST(SimpleTestRunner, runTest) {
   Ctx.addModule(std::move(OwnedModuleWithTests));
   Ctx.addModule(std::move(OwnedModuleWithTestees));
 
-  SimpleTestFinder Finder(Ctx);
-  auto Tests = Finder.findTests();
+  SimpleTestFinder Finder;
+  auto Tests = Finder.findTests(Ctx);
 
   ASSERT_NE(0U, Tests.size());
 
@@ -65,7 +65,7 @@ TEST(SimpleTestRunner, runTest) {
   /// afterwards we apply single mutation and run test again
   /// expecting it to fail
 
-  ArrayRef<Function *> Testees = Finder.findTestees(Test.get());
+  ArrayRef<Function *> Testees = Finder.findTestees(Test.get(), Ctx);
   ASSERT_NE(0U, Testees.size());
   Function *Testee = *(Testees.begin());
 
@@ -111,8 +111,8 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   Ctx.addModule(std::move(OwnedModuleWithTests));
   Ctx.addModule(std::move(OwnedModuleWithTestees));
 
-  SimpleTestFinder Finder(Ctx);
-  auto Tests = Finder.findTests();
+  SimpleTestFinder Finder;
+  auto Tests = Finder.findTests(Ctx);
 
   ASSERT_NE(0U, Tests.size());
 
@@ -135,7 +135,7 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   /// afterwards we apply single mutation and run test again
   /// expecting it to fail
 
-  ArrayRef<Function *> Testees = Finder.findTestees(Test.get());
+  ArrayRef<Function *> Testees = Finder.findTestees(Test.get(), Ctx);
   ASSERT_NE(0U, Testees.size());
   Function *Testee = *(Testees.begin());
 
@@ -178,11 +178,11 @@ TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
   Ctx.addModule(std::move(OwnedModuleWithTests));
   Ctx.addModule(std::move(OwnedModuleWithTestees));
 
-  SimpleTestFinder Finder(Ctx);
-  auto Tests = Finder.findTests();
-  
+  SimpleTestFinder Finder;
+  auto Tests = Finder.findTests(Ctx);
+
   ASSERT_NE(0U, Tests.size());
-  
+
   auto &Test = *(Tests.begin());
 
   llvm::sys::DynamicLibrary::LoadLibraryPermanently("/usr/lib/libsqlite3.dylib");

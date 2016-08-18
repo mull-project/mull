@@ -39,12 +39,12 @@ TEST(MutationEngine, applyMutation) {
   Ctx.addModule(std::move(ModuleWithTests));
   Ctx.addModule(std::move(ModuleWithTestees));
 
-  SimpleTestFinder Finder(Ctx);
-  auto Tests = Finder.findTests();
+  SimpleTestFinder Finder;
+  auto Tests = Finder.findTests(Ctx);
 
   auto &Test = *(Tests.begin());
 
-  ArrayRef<Function *> Testees = Finder.findTestees(Test.get());
+  ArrayRef<Function *> Testees = Finder.findTestees(Test.get(), Ctx);
 
   ASSERT_EQ(1U, Testees.size());
 
@@ -89,12 +89,12 @@ TEST(MutationEngine, applyAndRevertMutation) {
   Ctx.addModule(std::move(ModuleWithTests));
   Ctx.addModule(std::move(ModuleWithTestees));
 
-  SimpleTestFinder Finder(Ctx);
-  auto Tests = Finder.findTests();
+  SimpleTestFinder Finder;
+  auto Tests = Finder.findTests(Ctx);
 
   auto &Test = *(Tests.begin());
 
-  ArrayRef<Function *> Testees = Finder.findTestees(Test.get());
+  ArrayRef<Function *> Testees = Finder.findTestees(Test.get(), Ctx);
 
   ASSERT_EQ(1U, Testees.size());
 

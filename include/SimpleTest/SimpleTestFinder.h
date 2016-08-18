@@ -1,10 +1,12 @@
-#pragma once 
+#pragma once
 
 #include "TestFinder.h"
 #include "Test.h"
 
 namespace llvm {
-  class Function;
+
+class Function;
+
 }
 
 namespace Mutang {
@@ -13,14 +15,13 @@ class Context;
 class MutationOperator;
 class MutationPoint;
 
-// Finds all methods that start with "test_"
 class SimpleTestFinder : public TestFinder {
-  Context &Ctx;
 public:
-  explicit SimpleTestFinder(Context &C) : Ctx(C) {}
+  explicit SimpleTestFinder() {}
 
-  std::vector<std::unique_ptr<Test>> findTests() override;
-  std::vector<llvm::Function *> findTestees(Test *Test) override;
+  // Finds all methods that start with "test_"
+  std::vector<std::unique_ptr<Test>> findTests(Context &Ctx) override;
+  std::vector<llvm::Function *> findTestees(Test *Test, Context &Ctx) override;
   std::vector<std::unique_ptr<MutationPoint>> findMutationPoints(
                           std::vector<MutationOperator *> &MutationOperators,
                           llvm::Function &F) override;

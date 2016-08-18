@@ -9,9 +9,7 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Value.h"
 
-/// FIXME: Should be abstract
-#include "SimpleTest/SimpleTestFinder.h"
-#include "GoogleTest/GoogleTestFinder.h"
+#include "TestFinder.h"
 
 /// FIXME: Should be abstract
 #include "TestRunners/SimpleTestRunner.h"
@@ -68,14 +66,13 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 
   SimpleTestRunner Runner;
 
-  SimpleTestFinder TestFinder(Ctx);
-  for (auto &Test : TestFinder.findTests()) {
+  for (auto &Test : Finder.findTests(Ctx)) {
     auto ObjectFiles = AllObjectFiles();
     ExecutionResult ExecResult = Runner.runTest(Test.get(), ObjectFiles);
     auto BorrowedTest = Test.get();
     auto Result = make_unique<TestResult>(ExecResult, std::move(Test));
 
-    for (auto Testee : TestFinder.findTestees(BorrowedTest)) {
+    for (auto Testee : Finder.findTestees(BorrowedTest, Ctx)) {
       auto ObjectFiles = AllButOne(Testee->getParent());
       for (auto &MutationPoint : TestFinder.findMutationPoints(MutationOperators, *Testee)) {
 

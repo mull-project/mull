@@ -19,7 +19,7 @@
 using namespace Mutang;
 using namespace llvm;
 
-std::vector<std::unique_ptr<Test>> SimpleTestFinder::findTests() {
+std::vector<std::unique_ptr<Test>> SimpleTestFinder::findTests(Context &Ctx) {
   std::vector<std::unique_ptr<Test>> tests;
 
   for (auto &M : Ctx.getModules()) {
@@ -34,7 +34,7 @@ std::vector<std::unique_ptr<Test>> SimpleTestFinder::findTests() {
   return tests;
 }
 
-std::vector<Function *> SimpleTestFinder::findTestees(Test *Test) {
+std::vector<Function *> SimpleTestFinder::findTestees(Test *Test, Context &Ctx) {
   SimpleTest_Test *SimpleTest = dyn_cast<SimpleTest_Test>(Test);
 
   Function &F = *(SimpleTest->GetTestFunction());

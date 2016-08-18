@@ -23,9 +23,9 @@ TEST(SimpleTestFinder, FindTest) {
   Context Ctx;
   Ctx.addModule(std::move(ModuleWithTests));
 
-  SimpleTestFinder finder(Ctx);
+  SimpleTestFinder finder;
 
-  auto tests = finder.findTests();
+  auto tests = finder.findTests(Ctx);
 
   ASSERT_EQ(1U, tests.size());
 }
@@ -38,12 +38,12 @@ TEST(SimpleTestFinder, FindTestee) {
   Ctx.addModule(std::move(ModuleWithTests));
   Ctx.addModule(std::move(ModuleWithTestees));
 
-  SimpleTestFinder Finder(Ctx);
-  auto Tests = Finder.findTests();
+  SimpleTestFinder Finder;
+  auto Tests = Finder.findTests(Ctx);
 
   auto &Test = *(Tests.begin());
 
-  ArrayRef<Function *> Testees = Finder.findTestees(Test.get());
+  ArrayRef<Function *> Testees = Finder.findTestees(Test.get(), Ctx);
 
   ASSERT_EQ(1U, Testees.size());
 
@@ -59,12 +59,12 @@ TEST(SimpleTestFinder, FindMutationPoints) {
   Ctx.addModule(std::move(ModuleWithTests));
   Ctx.addModule(std::move(ModuleWithTestees));
 
-  SimpleTestFinder Finder(Ctx);
-  auto Tests = Finder.findTests();
+  SimpleTestFinder Finder;
+  auto Tests = Finder.findTests(Ctx);
 
   auto &Test = *Tests.begin();
 
-  ArrayRef<Function *> Testees = Finder.findTestees(Test.get());
+  ArrayRef<Function *> Testees = Finder.findTestees(Test.get(), Ctx);
 
   ASSERT_EQ(1U, Testees.size());
 

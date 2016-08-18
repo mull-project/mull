@@ -52,8 +52,9 @@ TEST(Driver, SimpleTest) {
   Config Cfg(ModulePaths);
 
   FakeModuleLoader Loader;
+  SimpleTestFinder TestFinder;
 
-  Driver Driver(Cfg, Loader);
+  Driver Driver(Cfg, Loader, TestFinder);
 
   /// Given the modules we use here we expect:
   ///

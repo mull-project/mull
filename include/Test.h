@@ -10,7 +10,8 @@ public:
   virtual ~Test() {}
 
   enum TestKind {
-    TK_SimpleTest
+    TK_SimpleTest,
+    TK_GoogleTest
   };
   TestKind getKind() const { return Kind; }
   Test(TestKind K) : Kind(K) {}
