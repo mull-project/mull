@@ -143,3 +143,24 @@ std::unique_ptr<Module> TestModuleFactory::createExternalLibTesteeModule() {
 
     return module;
 }
+
+std::unique_ptr<Module> TestModuleFactory::createGoogleTestTesterModule() {
+  auto module = parseIR("%\"class.(anonymous namespace)::APFloatTest_operatorOverloads_Test\" = type opaque"
+                        "\n\n"
+
+                        "%struct.anon.73 = type opaque"
+                        "\n\n"
+
+                        "define internal void "
+                        "@_ZN12_GLOBAL__N_134APFloatTest_operatorOverloads_Test8TestBodyEv(%\"class.(anonymous namespace)::APFloatTest_operatorOverloads_Test\"*) {"
+                        "ret void"
+                        "}"
+                        "\n\n"
+
+                        "define internal void "
+                        "@_ZN12_GLOBAL__N_134APFloatTest_operatorOverloads_Test8TestBodyEvEN3$_3D2Ev(%struct.anon.73*) {"
+                        "ret void"
+                        "}");
+
+  return module;
+}
