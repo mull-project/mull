@@ -7,21 +7,29 @@
 #include <map>
 
 namespace llvm {
-  class Module;
+
+class Module;
+class Function;
+
 }
 
 namespace Mutang {
 
 class Config;
 class ModuleLoader;
+class TestFinder;
+class TestRunner;
 
 class Driver {
   Config &Cfg;
-  Context Ctx;
   ModuleLoader &Loader;
+  TestFinder &Finder;
+  TestRunner &Runner;
+  Context Ctx;
   std::map<llvm::Module *, llvm::object::OwningBinary<llvm::object::ObjectFile>> InnerCache;
 public:
-  Driver(Config &C, ModuleLoader &ML) : Cfg(C), Loader(ML) {}
+  Driver(Config &C, ModuleLoader &ML, TestFinder &TF, TestRunner &TR)
+    : Cfg(C), Loader(ML), Finder(TF), Runner(TR) {}
   std::vector<std::unique_ptr<TestResult>> Run();
 
 private:
@@ -30,6 +38,8 @@ private:
 
   /// Returns cached object files for all modules
   std::vector<llvm::object::ObjectFile *> AllObjectFiles();
+
+  std::vector<llvm::Function *> getStaticCtors();
 };
 
 }

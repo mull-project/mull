@@ -17,7 +17,7 @@ class Module;
 
 namespace Mutang {
 
-class SimpleTestRunner {
+class GoogleTestRunner {
   llvm::orc::ObjectLinkingLayer<> ObjectLayer;
   std::unique_ptr<llvm::TargetMachine> TM;
   llvm::Mangler Mangler;
@@ -27,12 +27,14 @@ public:
   typedef std::vector<llvm::object::ObjectFile *> ObjectFiles;
   typedef std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> OwnedObjectFiles;
 
-  SimpleTestRunner();
-  ExecutionResult runTest(llvm::Function *Test, ObjectFiles &ObjectFiles);
+  GoogleTestRunner();
+  ExecutionResult runTest(std::vector<llvm::Function *> Ctors, llvm::Function *Test, ObjectFiles &ObjectFiles);
 
 private:
   std::string MangleName(const llvm::StringRef &Name);
   void *TestFunctionPointer(const llvm::Function &Function);
+
+  void runStaticCtor(llvm::Function *Ctor);
 };
 
 }

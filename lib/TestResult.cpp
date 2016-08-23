@@ -1,4 +1,5 @@
 #include "TestResult.h"
+#include "Test.h"
 
 using namespace Mutang;
 
@@ -8,10 +9,9 @@ MutationResult::MutationResult(ExecutionResult R,
 
 }
 
-
 TestResult::TestResult(ExecutionResult OriginalResult,
-                       llvm::Function *TestFunction) :
-  OriginalTestResult(OriginalResult), Test(TestFunction) {
+                       std::unique_ptr<Test> T) :
+  OriginalTestResult(OriginalResult), TestPtr(std::move(T)) {
 
 }
 
@@ -19,8 +19,8 @@ void TestResult::addMutantResult(std::unique_ptr<MutationResult> Res) {
   MutationResults.push_back(std::move(Res));
 }
 
-llvm::Function *TestResult::getTestFunction() {
-  return Test;
+std::string TestResult::getTestName() {
+  return TestPtr->getTestName();
 }
 
 std::vector<std::unique_ptr<MutationResult>> &TestResult::getMutationResults() {

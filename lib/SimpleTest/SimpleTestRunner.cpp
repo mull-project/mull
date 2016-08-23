@@ -1,4 +1,4 @@
-#include "TestRunners/SimpleTestRunner.h"
+#include "SimpleTest/SimpleTestRunner.h"
 
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/ExecutionEngine/OrcMCJITReplacement.h"
@@ -8,6 +8,8 @@
 #include "llvm/ExecutionEngine/SectionMemoryManager.h"
 #include "llvm/Support/DynamicLibrary.h"
 #include "llvm/Support/TargetSelect.h"
+
+#include "SimpleTest/SimpleTest_Test.h"
 
 #include <chrono>
 
@@ -29,13 +31,6 @@ public:
   }
 };
 
-SimpleTestRunner::SimpleTestRunner() : TM(EngineBuilder().selectTarget(
-                                            Triple(), "", "",
-                                            SmallVector<std::string, 1>())) {
-  sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
-  LLVMLinkInOrcMCJITReplacement();
-}
-
 std::string SimpleTestRunner::MangleName(const llvm::StringRef &Name) {
   std::string MangledName;
   {
@@ -52,12 +47,15 @@ void *SimpleTestRunner::TestFunctionPointer(const llvm::Function &Function) {
   return FPointer;
 }
 
-ExecutionResult SimpleTestRunner::runTest(llvm::Function *Test,
-                                          ObjectFiles &ObjectFiles) {
+ExecutionResult SimpleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) {
+  assert(isa<SimpleTest_Test>(Test) && "Supposed to work only with");
+
+  SimpleTest_Test *SimpleTest = dyn_cast<SimpleTest_Test>(Test);
+
   auto Handle = ObjectLayer.addObjectSet(ObjectFiles,
                                          make_unique<SectionMemoryManager>(),
                                          make_unique<MutangResolver>());
-  void *FunctionPointer = TestFunctionPointer(*Test);
+  void *FunctionPointer = TestFunctionPointer(*SimpleTest->GetTestFunction());
 
   auto start = high_resolution_clock::now();
   uint64_t result = ((int (*)())(intptr_t)FunctionPointer)();

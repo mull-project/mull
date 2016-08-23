@@ -2,7 +2,8 @@
 #include "Config.h"
 #include "Context.h"
 #include "ModuleLoader.h"
-#include "TestFinders/SimpleTestFinder.h"
+#include "SimpleTest/SimpleTestFinder.h"
+#include "SimpleTest/SimpleTestRunner.h"
 #include "TestModuleFactory.h"
 #include "TestResult.h"
 
@@ -52,8 +53,10 @@ TEST(Driver, SimpleTest) {
   Config Cfg(ModulePaths);
 
   FakeModuleLoader Loader;
+  SimpleTestFinder TestFinder;
+  SimpleTestRunner Runner;
 
-  Driver Driver(Cfg, Loader);
+  Driver Driver(Cfg, Loader, TestFinder, Runner);
 
   /// Given the modules we use here we expect:
   ///
@@ -64,7 +67,7 @@ TEST(Driver, SimpleTest) {
 
   auto FirstResult = Results.begin()->get();
   ASSERT_EQ(ExecutionStatus::Passed, FirstResult->getOriginalTestResult().Status);
-  ASSERT_NE(nullptr, FirstResult->getTestFunction());
+  ASSERT_EQ("test_count_letters", FirstResult->getTestName());
 
   auto &Mutants = FirstResult->getMutationResults();
   ASSERT_EQ(1u, Mutants.size());

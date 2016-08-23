@@ -3,9 +3,9 @@
 #include "Compiler.h"
 #include "Context.h"
 #include "MutationOperators/AddMutationOperator.h"
-#include "TestFinders/SimpleTestFinder.h"
+#include "SimpleTest/SimpleTestFinder.h"
 #include "TestModuleFactory.h"
-#include "TestRunners/SimpleTestRunner.h"
+#include "SimpleTest/SimpleTestRunner.h"
 
 #include "llvm/IR/InstrTypes.h"
 #include "llvm/IR/InstIterator.h"
@@ -38,12 +38,12 @@ TEST(SimpleTestRunner, runTest) {
   Ctx.addModule(std::move(OwnedModuleWithTests));
   Ctx.addModule(std::move(OwnedModuleWithTestees));
 
-  SimpleTestFinder Finder(Ctx);
-  ArrayRef<Function *> Tests = Finder.findTests();
+  SimpleTestFinder Finder;
+  auto Tests = Finder.findTests(Ctx);
 
   ASSERT_NE(0U, Tests.size());
 
-  Function *Test = *(Tests.begin());
+  auto &Test = *(Tests.begin());
 
   {
     auto Obj = Compiler.CompilerModule(ModuleWithTests);
@@ -58,14 +58,14 @@ TEST(SimpleTestRunner, runTest) {
   }
 
   /// Here we run test with original testee function
-  ASSERT_EQ(ExecutionStatus::Passed, Runner.runTest(Test, ObjectFiles).Status);
+  ASSERT_EQ(ExecutionStatus::Passed, Runner.runTest(Test.get(), ObjectFiles).Status);
 
   ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
 
   /// afterwards we apply single mutation and run test again
   /// expecting it to fail
 
-  ArrayRef<Function *> Testees = Finder.findTestees(*Test);
+  ArrayRef<Function *> Testees = Finder.findTestees(Test.get(), Ctx);
   ASSERT_NE(0U, Testees.size());
   Function *Testee = *(Testees.begin());
 
@@ -90,7 +90,7 @@ TEST(SimpleTestRunner, runTest) {
     OwnedObjectFiles.push_back(std::move(Obj));
   }
 
-  ASSERT_EQ(ExecutionStatus::Failed, Runner.runTest(Test, ObjectFiles).Status);
+  ASSERT_EQ(ExecutionStatus::Failed, Runner.runTest(Test.get(), ObjectFiles).Status);
 
   ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
 }
@@ -111,12 +111,12 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   Ctx.addModule(std::move(OwnedModuleWithTests));
   Ctx.addModule(std::move(OwnedModuleWithTestees));
 
-  SimpleTestFinder Finder(Ctx);
-  ArrayRef<Function *> Tests = Finder.findTests();
+  SimpleTestFinder Finder;
+  auto Tests = Finder.findTests(Ctx);
 
   ASSERT_NE(0U, Tests.size());
 
-  Function *Test = *(Tests.begin());
+  auto &Test = *(Tests.begin());
 
 
   auto Obj = Compiler.CompilerModule(ModuleWithTests);
@@ -128,14 +128,14 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   OwnedObjectFiles.push_back(std::move(Obj));
 
   /// Here we run test with original testee function
-  ASSERT_EQ(ExecutionStatus::Passed, Runner.runTest(Test, ObjectFiles).Status);
+  ASSERT_EQ(ExecutionStatus::Passed, Runner.runTest(Test.get(), ObjectFiles).Status);
 
   ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
 
   /// afterwards we apply single mutation and run test again
   /// expecting it to fail
 
-  ArrayRef<Function *> Testees = Finder.findTestees(*Test);
+  ArrayRef<Function *> Testees = Finder.findTestees(Test.get(), Ctx);
   ASSERT_NE(0U, Testees.size());
   Function *Testee = *(Testees.begin());
 
@@ -156,7 +156,7 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
-  ASSERT_EQ(ExecutionStatus::Failed, Runner.runTest(Test, ObjectFiles).Status);
+  ASSERT_EQ(ExecutionStatus::Failed, Runner.runTest(Test.get(), ObjectFiles).Status);
   ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
 }
 
@@ -178,12 +178,12 @@ TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
   Ctx.addModule(std::move(OwnedModuleWithTests));
   Ctx.addModule(std::move(OwnedModuleWithTestees));
 
-  SimpleTestFinder Finder(Ctx);
-  ArrayRef<Function *> Tests = Finder.findTests();
-  
+  SimpleTestFinder Finder;
+  auto Tests = Finder.findTests(Ctx);
+
   ASSERT_NE(0U, Tests.size());
-  
-  Function *Test = *(Tests.begin());
+
+  auto &Test = *(Tests.begin());
 
   llvm::sys::DynamicLibrary::LoadLibraryPermanently("/usr/lib/libsqlite3.dylib");
 
@@ -195,5 +195,5 @@ TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
-  ASSERT_EQ(ExecutionStatus::Passed, Runner.runTest(Test, ObjectFiles).Status);
+  ASSERT_EQ(ExecutionStatus::Passed, Runner.runTest(Test.get(), ObjectFiles).Status);
 }

@@ -1,7 +1,6 @@
 #include "MutationEngine.h"
 
 #include "MutationPoint.h"
-#include "TestFinders/SimpleTestFinder.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Instruction.h"
 #include "llvm/IR/InstrTypes.h"

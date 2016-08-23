@@ -1,6 +1,6 @@
 
 #include "Context.h"
-#include "TestFinders/SimpleTestFinder.h"
+#include "SimpleTest/SimpleTestFinder.h"
 #include "MutationEngine.h"
 #include "MutationOperators/AddMutationOperator.h"
 #include "TestModuleFactory.h"
@@ -39,12 +39,12 @@ TEST(MutationEngine, applyMutation) {
   Ctx.addModule(std::move(ModuleWithTests));
   Ctx.addModule(std::move(ModuleWithTestees));
 
-  SimpleTestFinder Finder(Ctx);
-  ArrayRef<Function *> Tests = Finder.findTests();
+  SimpleTestFinder Finder;
+  auto Tests = Finder.findTests(Ctx);
 
-  Function *Test = *(Tests.begin());
+  auto &Test = *(Tests.begin());
 
-  ArrayRef<Function *> Testees = Finder.findTestees(*Test);
+  ArrayRef<Function *> Testees = Finder.findTestees(Test.get(), Ctx);
 
   ASSERT_EQ(1U, Testees.size());
 
@@ -89,12 +89,12 @@ TEST(MutationEngine, applyAndRevertMutation) {
   Ctx.addModule(std::move(ModuleWithTests));
   Ctx.addModule(std::move(ModuleWithTestees));
 
-  SimpleTestFinder Finder(Ctx);
-  ArrayRef<Function *> Tests = Finder.findTests();
+  SimpleTestFinder Finder;
+  auto Tests = Finder.findTests(Ctx);
 
-  Function *Test = *(Tests.begin());
+  auto &Test = *(Tests.begin());
 
-  ArrayRef<Function *> Testees = Finder.findTestees(*Test);
+  ArrayRef<Function *> Testees = Finder.findTestees(Test.get(), Ctx);
 
   ASSERT_EQ(1U, Testees.size());
 

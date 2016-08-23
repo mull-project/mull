@@ -1,8 +1,9 @@
-#include "TestFinders/SimpleTestFinder.h"
+#include "SimpleTest/SimpleTestFinder.h"
 
 #include "Context.h"
 #include "MutationOperators/AddMutationOperator.h"
 #include "TestModuleFactory.h"
+#include "Test.h"
 
 #include "llvm/IR/InstrTypes.h"
 #include "llvm/IR/LLVMContext.h"
@@ -22,9 +23,9 @@ TEST(SimpleTestFinder, FindTest) {
   Context Ctx;
   Ctx.addModule(std::move(ModuleWithTests));
 
-  SimpleTestFinder finder(Ctx);
+  SimpleTestFinder finder;
 
-  ArrayRef<Function *> tests = finder.findTests();
+  auto tests = finder.findTests(Ctx);
 
   ASSERT_EQ(1U, tests.size());
 }
@@ -37,12 +38,12 @@ TEST(SimpleTestFinder, FindTestee) {
   Ctx.addModule(std::move(ModuleWithTests));
   Ctx.addModule(std::move(ModuleWithTestees));
 
-  SimpleTestFinder Finder(Ctx);
-  ArrayRef<Function *> Tests = Finder.findTests();
+  SimpleTestFinder Finder;
+  auto Tests = Finder.findTests(Ctx);
 
-  Function *Test = *(Tests.begin());
+  auto &Test = *(Tests.begin());
 
-  ArrayRef<Function *> Testees = Finder.findTestees(*Test);
+  ArrayRef<Function *> Testees = Finder.findTestees(Test.get(), Ctx);
 
   ASSERT_EQ(1U, Testees.size());
 
@@ -58,12 +59,12 @@ TEST(SimpleTestFinder, FindMutationPoints) {
   Ctx.addModule(std::move(ModuleWithTests));
   Ctx.addModule(std::move(ModuleWithTestees));
 
-  SimpleTestFinder Finder(Ctx);
-  ArrayRef<Function *> Tests = Finder.findTests();
+  SimpleTestFinder Finder;
+  auto Tests = Finder.findTests(Ctx);
 
-  Function *Test = *(Tests.begin());
+  auto &Test = *Tests.begin();
 
-  ArrayRef<Function *> Testees = Finder.findTestees(*Test);
+  ArrayRef<Function *> Testees = Finder.findTestees(Test.get(), Ctx);
 
   ASSERT_EQ(1U, Testees.size());
 
