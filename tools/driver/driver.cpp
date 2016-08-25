@@ -6,6 +6,9 @@
 #include "SimpleTest/SimpleTestFinder.h"
 #include "SimpleTest/SimpleTestRunner.h"
 
+#include "GoogleTest/GoogleTestFinder.h"
+#include "GoogleTest/GoogleTestRunner.h"
+
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Function.h"
 #include "llvm/Support/MemoryBuffer.h"
@@ -43,8 +46,8 @@ int main(int argc, char *argv[]) {
   LLVMContext Ctx;
   ModuleLoader Loader(Ctx);
 
-  SimpleTestFinder TestFinder;
-  SimpleTestRunner Runner;
+  GoogleTestFinder TestFinder;
+  GoogleTestRunner Runner;
 
   Driver D(*Cfg.get(), Loader, TestFinder, Runner);
 

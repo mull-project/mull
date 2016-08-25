@@ -23,7 +23,7 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
     auto &x = M->getFunctionList();
     for (auto &Fn : x) {
       if (Fn.getName().endswith("_Test8TestBodyEv")) {
-        tests.emplace_back(make_unique<GoogleTest_Test>(&Fn));
+        tests.emplace_back(make_unique<GoogleTest_Test>(&Fn, Ctx.getStaticConstructors()));
       }
     }
   }

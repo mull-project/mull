@@ -9,8 +9,34 @@
 using namespace Mutang;
 using namespace std;
 
-GoogleTest_Test::GoogleTest_Test(llvm::Function *Function) :
-  Test(TK_GoogleTest), TestFunction(Function) { DetermineSuiteAndTestNames(); }
+static std::string demangle(const char* name) {
+  int status = -1;
+  std::unique_ptr<char, void(*)(void*)> res { abi::__cxa_demangle(name, NULL, NULL, &status), std::free };
+
+  assert( (status == 0) && "Can't demangle Test Function name");
+
+  return res.get();
+}
+
+static vector<string> split_non_empty(string input, char delimiter) {
+  stringstream ss(input);
+  string item;
+  vector<string> elems;
+  while (getline(ss, item, delimiter)) {
+    if (item.size()) {
+      elems.push_back(item);
+    }
+  }
+
+  return elems;
+}
+
+GoogleTest_Test::GoogleTest_Test(llvm::Function *Function,
+                                 std::vector<llvm::Function *> Ctors) :
+  Test(TK_GoogleTest), TestFunction(Function), GlobalCtors(Ctors)
+{
+  DetermineSuiteAndTestNames();
+}
 
 llvm::Function *GoogleTest_Test::GetTestFunction() {
   return TestFunction;
@@ -24,26 +50,8 @@ std::string GoogleTest_Test::getTestSuiteName() {
   return TestSuiteName;
 }
 
-static std::string demangle(const char* name) {
-  int status = -1;
-  std::unique_ptr<char, void(*)(void*)> res { abi::__cxa_demangle(name, NULL, NULL, &status), std::free };
-
-  assert( (status == 0) && "Can't demangle Test Function name");
-
-  return res.get();
-}
-
-vector<string> split_non_empty(string input, char delimiter) {
-  stringstream ss(input);
-  string item;
-  vector<string> elems;
-  while (getline(ss, item, delimiter)) {
-    if (item.size()) {
-      elems.push_back(item);
-    }
-  }
-
-  return elems;
+std::vector<llvm::Function *> &GoogleTest_Test::GetGlobalCtors() {
+  return GlobalCtors;
 }
 
 void GoogleTest_Test::DetermineSuiteAndTestNames() {
