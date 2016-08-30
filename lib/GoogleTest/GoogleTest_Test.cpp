@@ -81,7 +81,7 @@ void GoogleTest_Test::DetermineSuiteAndTestNames() {
 
   auto suiteAndTestNames = split_non_empty(*(testMethodChunks.end() - 2), '_');
 
-  assert((suiteAndTestNames.size() == 3) && "Assumption about names is wrong");
+//  assert((suiteAndTestNames.size() == 3) && "Assumption about names is wrong");
 
   TestSuiteName = *(suiteAndTestNames.begin());
   TestName = *(suiteAndTestNames.begin() + 1);

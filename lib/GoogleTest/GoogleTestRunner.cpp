@@ -80,6 +80,8 @@ extern "C" int mutang_printf(const char *fmt, ...) {
   return 0;
 }
 
+extern "C" void *mutang__dso_handle = nullptr;
+
 class MutangResolver : public JITSymbolResolver {
 public:
 
@@ -92,9 +94,13 @@ public:
       return findSymbol("mutang_printf");
     }
 
-//    if (Name == "_vprintf") {
-//      return findSymbol("mutang_vprintf");
-//    }
+    if (Name == "___dso_handle") {
+      return findSymbol("mutang__dso_handle");
+    }
+
+    if (Name == "_vprintf") {
+      return findSymbol("mutang_vprintf");
+    }
 
     if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(Name))
       return JITSymbol(SymAddr, JITSymbolFlags::Exported);
@@ -134,7 +140,7 @@ void *GoogleTestRunner::FunctionPointer(const char *FunctionName) {
 }
 
 void GoogleTestRunner::runStaticCtor(llvm::Function *Ctor) {
-  printf("Init: %s\n", Ctor->getName().str().c_str());
+//  printf("Init: %s\n", Ctor->getName().str().c_str());
 
   void *CtorPointer = GetCtorPointer(*Ctor);
 
@@ -158,20 +164,11 @@ ExecutionResult GoogleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) 
   void *MainPtr = FunctionPointer("_main");
   auto Main = ((int (*)(int, const char**))(intptr_t)MainPtr);
 
-//  void *GetUnitTestInstancePtr = FunctionPointer("_ZN7testing8UnitTest11GetInstanceEv");
-//  auto GetUnitTestInstance = ((void* (*)())(intptr_t)GetUnitTestInstancePtr);
-//
-//  void *RunUnitTestPtr = FunctionPointer("_ZN7testing8UnitTest3RunEv");
-//  auto RunUnitTest = ((int (*)(void *))(intptr_t)RunUnitTestPtr);
-
   std::string testName = GTest->getTestSuiteName() + "." + GTest->getTestName();
   std::string filter = "--gtest_filter=" + testName;
 
   const char *argv[] = { "mutang", filter.c_str(), NULL };
-//
-//  InitGoogleTest(1, argv);
 
-//  auto UnitTestInstance = GetUnitTestInstance();
   uint64_t result = Main(2, argv);
   auto elapsed = high_resolution_clock::now() - start;
 

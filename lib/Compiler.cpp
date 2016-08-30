@@ -21,11 +21,8 @@ object::OwningBinary<object::ObjectFile> Compiler::CompilerModule(Module *M) {
 
   /// FIXME: Initialize everything once
   std::unique_ptr<TargetMachine> TM(
-                              EngineBuilder().selectTarget(Triple("x86_64-apple-macosx10.11.0"), "", "",
+                              EngineBuilder().selectTarget(Triple(), "", "",
                               SmallVector<std::string, 1>()));
-
-  printf("%s\n", Triple("x86_64-apple-macosx10.11.0").str().c_str());
-  printf("%s\n", TM->createDataLayout().getStringRepresentation().c_str());
 
   assert(TM && "Can't create TargetMachine");
 
