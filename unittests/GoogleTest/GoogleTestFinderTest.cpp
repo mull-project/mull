@@ -29,15 +29,9 @@ TEST(GoogleTestFinder, FindTest) {
 
   ASSERT_EQ(1U, tests.size());
 
-  /// The GoogleTestTesterModule contains one test.
-  ///   @_ZN12_GLOBAL__N_134APFloatTest_operatorOverloads_Test8TestBodyEv
-  /// From the mangled name we need extract test suite and the test name
-  /// So that we can run the test later
-
   GoogleTest_Test *Test = dyn_cast<GoogleTest_Test>(tests.begin()->get());
 
-  ASSERT_EQ("operatorOverloads", Test->getTestName());
-  ASSERT_EQ("APFloatTest", Test->getTestSuiteName());
+  ASSERT_EQ("Hello.world", Test->getTestName());
 }
 
 TEST(GoogleTestFinder, DISABLED_FindTestee) {

@@ -164,8 +164,7 @@ ExecutionResult GoogleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) 
   void *MainPtr = FunctionPointer("_main");
   auto Main = ((int (*)(int, const char**))(intptr_t)MainPtr);
 
-  std::string testName = GTest->getTestSuiteName() + "." + GTest->getTestName();
-  std::string filter = "--gtest_filter=" + testName;
+  std::string filter = "--gtest_filter=" + GTest->getTestName();
 
   const char *argv[] = { "mutang", filter.c_str(), NULL };
 

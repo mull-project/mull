@@ -46,8 +46,13 @@ int main(int argc, char *argv[]) {
   LLVMContext Ctx;
   ModuleLoader Loader(Ctx);
 
+#if 0
   GoogleTestFinder TestFinder;
   GoogleTestRunner Runner;
+#else
+  SimpleTestFinder TestFinder;
+  SimpleTestRunner Runner;
+#endif
 
   Driver D(*Cfg.get(), Loader, TestFinder, Runner);
 
