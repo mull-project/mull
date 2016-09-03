@@ -5,6 +5,8 @@
 #include "llvm/IR/Module.h"
 #include "llvm/Support/TargetSelect.h"
 
+#include "llvm/IR/DataLayout.h"
+
 using namespace llvm;
 using namespace Mutang;
 
@@ -19,7 +21,7 @@ object::OwningBinary<object::ObjectFile> Compiler::CompilerModule(Module *M) {
 
   /// FIXME: Initialize everything once
   std::unique_ptr<TargetMachine> TM(
-                              EngineBuilder().selectTarget(Triple(""), "", "",
+                              EngineBuilder().selectTarget(Triple(), "", "",
                               SmallVector<std::string, 1>()));
 
   assert(TM && "Can't create TargetMachine");

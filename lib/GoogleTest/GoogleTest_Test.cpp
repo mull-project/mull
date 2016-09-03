@@ -1,16 +1,18 @@
 #include "GoogleTest/GoogleTest_Test.h"
 
-#include "llvm/IR/Function.h"
-
 using namespace Mutang;
+using namespace std;
 
-GoogleTest_Test::GoogleTest_Test(llvm::Function *Function) :
-  Test(TK_SimpleTest), TestFunction(Function) {}
-
-llvm::Function *GoogleTest_Test::GetTestFunction() {
-  return TestFunction;
+GoogleTest_Test::GoogleTest_Test(std::string Name,
+                                 std::vector<llvm::Function *> Ctors) :
+  Test(TK_GoogleTest), TestName(Name), GlobalCtors(Ctors)
+{
 }
 
 std::string GoogleTest_Test::getTestName() {
-  return TestFunction->getName().str();
+  return TestName;
+}
+
+std::vector<llvm::Function *> &GoogleTest_Test::GetGlobalCtors() {
+  return GlobalCtors;
 }

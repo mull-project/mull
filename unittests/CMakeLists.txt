@@ -12,8 +12,11 @@ add_mutang_unittest(MutangUnitTests
   MutationEngineTests.cpp
   MutationOperatorsTests.cpp
   MutationPointTests.cpp
-  SimpleTestFinderTest.cpp
   TestRunnersTests.cpp
+
+  SimpleTest/SimpleTestFinderTest.cpp
+
+  GoogleTest/GoogleTestFinderTest.cpp
 
   TestModuleFactory.cpp
   TestModuleFactory.h
@@ -25,4 +28,3 @@ target_link_libraries(MutangUnitTests
   LLVMCore
   LLVMSupport
 )
-

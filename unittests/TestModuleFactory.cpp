@@ -8,17 +8,17 @@
 static LLVMContext GlobalCtx;
 
 static std::unique_ptr<Module> parseIR(const char *IR) {
-    SMDiagnostic Err;
-    auto M = parseAssemblyString(IR, Err, GlobalCtx);
+  SMDiagnostic Err;
+  auto M = parseAssemblyString(IR, Err, GlobalCtx);
 
-    assert(M && "Expected module to be parsed correctly");
+  /// FIXME: is there another way to check for errors?
+  if (Err.getMessage().empty() == false) {
+    Err.print("test", dbgs());
+  }
 
-    /// FIXME: is there another way to check for errors?
-    if (Err.getMessage().empty() == false) {
-        Err.print("test", dbgs());
-    }
+  assert(M && "Expected module to be parsed correctly");
 
-    return M;
+  return M;
 }
 
 std::unique_ptr<Module> TestModuleFactory::createTesterModule() {
@@ -142,4 +142,39 @@ std::unique_ptr<Module> TestModuleFactory::createExternalLibTesteeModule() {
                           "declare i32 @sqlite3_open(i8*, %struct.sqlite3**) #1\n");
 
     return module;
+}
+
+std::unique_ptr<Module> TestModuleFactory::createGoogleTestTesterModule() {
+  auto module = parseIR("@.str = private unnamed_addr constant [6 x i8] c\"Hello\\00\", align 1 \n"
+                        "@.str.1 = private unnamed_addr constant [6 x i8] c\"world\\00\", align 1 \n"
+
+                        "%\"class.testing::internal::TestFactoryImpl\" = type opaque \n"
+                        "%\"class.testing::internal::TestFactoryBase\" = type opaque \n"
+
+                        "%\"class.testing::TestInfo\" = type opaque \n"
+
+                        "@_ZN14Hello_world_Test10test_info_E = global %\"class.testing::TestInfo\"* null, align 8 \n"
+
+                        "define void @__cxx_global_var_init() { \n"
+                        "entry: \n"
+                        "  %call = call i8* @_ZN7testing8internal13GetTestTypeIdEv() \n"
+                        "  %call1 = call i8* @_Znwm(i64 8) \n"
+                        "  %0 = bitcast i8* %call1 to %\"class.testing::internal::TestFactoryImpl\"* \n"
+                        "  call void @_ZN7testing8internal15TestFactoryImplI14Hello_sup_TestEC1Ev(%\"class.testing::internal::TestFactoryImpl\"* %0) \n"
+                        "  %1 = bitcast %\"class.testing::internal::TestFactoryImpl\"* %0 to %\"class.testing::internal::TestFactoryBase\"*  \n"
+                        "  %call2 = call %\"class.testing::TestInfo\"* @_ZN7testing8internal23MakeAndRegisterTestInfoEPKcS2_S2_S2_PKvPFvvES6_PNS0_15TestFactoryBaseE(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @.str, i32 0, i32 0), i8* getelementptr inbounds ([6 x i8], [6 x i8]* @.str.1, i32 0, i32 0), i8* null, i8* null, i8* %call, void ()* @_ZN7testing4Test13SetUpTestCaseEv, void ()* @_ZN7testing4Test16TearDownTestCaseEv, %\"class.testing::internal::TestFactoryBase\"* %1) \n"
+                        "  store %\"class.testing::TestInfo\"* %call2, %\"class.testing::TestInfo\"** @_ZN14Hello_world_Test10test_info_E, align 8 \n"
+                        "  ret void \n"
+                        "}\n"
+
+                        "declare void @_ZN7testing4Test13SetUpTestCaseEv() \n"
+                        "declare void @_ZN7testing4Test16TearDownTestCaseEv() \n"
+                        "declare i8* @_ZN7testing8internal13GetTestTypeIdEv() \n"
+                        "declare void @_ZN7testing8internal15TestFactoryImplI14Hello_sup_TestEC1Ev(%\"class.testing::internal::TestFactoryImpl\"* %this) \n"
+                        "declare %\"class.testing::TestInfo\"* @_ZN7testing8internal23MakeAndRegisterTestInfoEPKcS2_S2_S2_PKvPFvvES6_PNS0_15TestFactoryBaseE(i8*, i8*, i8*, i8*, i8*, void ()*, void ()*, %\"class.testing::internal::TestFactoryBase\"*) \n"
+                        "declare i8* @_Znwm(i64) \n"
+
+                        "");
+
+  return module;
 }

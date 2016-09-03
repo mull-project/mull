@@ -1,5 +1,7 @@
 #include "GoogleTest/GoogleTestRunner.h"
 
+#include "GoogleTest/GoogleTest_Test.h"
+
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/ExecutionEngine/OrcMCJITReplacement.h"
 #include "llvm/ExecutionEngine/GenericValue.h"
@@ -69,14 +71,16 @@ void runDestructors() {
 
 /// Hijacking output functions to prevent extra logging
 
-extern "C" void mutang_ColoredPrintf(int color, const char* fmt, ...) {
-  /// ignoring
+extern "C" int mutang_vprintf(const char *restrict, va_list) {
+  return 0;
 }
 
 extern "C" int mutang_printf(const char *fmt, ...) {
   /// ignoring
   return 0;
 }
+
+extern "C" void *mutang__dso_handle = nullptr;
 
 class MutangResolver : public JITSymbolResolver {
 public:
@@ -88,6 +92,14 @@ public:
 
     if (Name == "_printf") {
       return findSymbol("mutang_printf");
+    }
+
+    if (Name == "___dso_handle") {
+      return findSymbol("mutang__dso_handle");
+    }
+
+    if (Name == "_vprintf") {
+      return findSymbol("mutang_vprintf");
     }
 
     if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(Name))
@@ -116,39 +128,47 @@ std::string GoogleTestRunner::MangleName(const llvm::StringRef &Name) {
   return MangledName;
 }
 
-void *GoogleTestRunner::TestFunctionPointer(const llvm::Function &Function) {
-  JITSymbol Symbol = ObjectLayer.findSymbol(MangleName(Function.getName()), false);
+void *GoogleTestRunner::GetCtorPointer(const llvm::Function &Function) {
+  return FunctionPointer(MangleName(Function.getName()).c_str());
+}
+
+void *GoogleTestRunner::FunctionPointer(const char *FunctionName) {
+  JITSymbol Symbol = ObjectLayer.findSymbol(FunctionName, false);
   void *FPointer = reinterpret_cast<void *>(static_cast<uintptr_t>(Symbol.getAddress()));
   assert(FPointer && "Can't find pointer to function");
   return FPointer;
 }
 
 void GoogleTestRunner::runStaticCtor(llvm::Function *Ctor) {
-  printf("Init: %s\n", Ctor->getName().str().c_str());
+//  printf("Init: %s\n", Ctor->getName().str().c_str());
 
-  void *FunctionPointer = TestFunctionPointer(*Ctor);
+  void *CtorPointer = GetCtorPointer(*Ctor);
 
-  auto ctor = ((int (*)())(intptr_t)FunctionPointer);
+  auto ctor = ((int (*)())(intptr_t)CtorPointer);
   ctor();
 }
 
-ExecutionResult GoogleTestRunner::runTest(std::vector<llvm::Function *> Ctors,
-                                          llvm::Function *Test,
-                                          ObjectFiles &ObjectFiles) {
+ExecutionResult GoogleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) {
+  GoogleTest_Test *GTest = dyn_cast<GoogleTest_Test>(Test);
+
   auto Handle = ObjectLayer.addObjectSet(ObjectFiles,
                                          make_unique<SectionMemoryManager>(),
                                          make_unique<MutangResolver>());
 
-  for (auto &Ctor: Ctors) {
+  for (auto &Ctor: GTest->GetGlobalCtors()) {
     runStaticCtor(Ctor);
   }
 
-  void *FunctionPointer = TestFunctionPointer(*Test);
-
   auto start = high_resolution_clock::now();
-  auto func = ((int (*)(int, const char**))(intptr_t)FunctionPointer);
-  const char *argv[] = { "mutang", NULL };
-  uint64_t result = func(1, argv);
+
+  void *MainPtr = FunctionPointer("_main");
+  auto Main = ((int (*)(int, const char**))(intptr_t)MainPtr);
+
+  std::string filter = "--gtest_filter=" + GTest->getTestName();
+
+  const char *argv[] = { "mutang", filter.c_str(), NULL };
+
+  uint64_t result = Main(2, argv);
   auto elapsed = high_resolution_clock::now() - start;
 
   runDestructors();

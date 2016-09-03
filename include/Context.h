@@ -17,6 +17,8 @@ private:
 public:
   void addModule(std::unique_ptr<llvm::Module> M);
 
+  std::vector<llvm::Function *> getStaticConstructors();
+
   ModuleArrayType &getModules() { return Modules; }
   iterator begin()  { return Modules.begin(); }
   iterator end()    { return Modules.end();   }

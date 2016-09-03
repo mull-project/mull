@@ -84,7 +84,6 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
         ExecutionResult R = Runner.runTest(BorrowedTest, ObjectFiles);
         assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
 
-        /// FIXME: Check if it's legal or not
         auto MutResult = make_unique<MutationResult>(R, std::move(MutationPoint));
         Result->addMutantResult(std::move(MutResult));
       }
@@ -95,69 +94,6 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 
   return Results;
 }
-
-//std::vector<std::unique_ptr<TestResult>> Driver::RunGTest() {
-//  Compiler Compiler;
-//
-//  std::vector<std::unique_ptr<TestResult>> Results;
-//
-//  /// Assumption: all modules will be used during the execution
-//  /// Therefore we load them into memory and compile immediately
-//  /// Later on modules used only for generating of mutants
-//  for (auto ModulePath : Cfg.GetBitcodePaths()) {
-//    auto OwnedModule = Loader.loadModuleAtPath(ModulePath);
-//    assert(OwnedModule && "Can't load module");
-//
-//    auto Module = OwnedModule.get();
-//    auto ObjectFile = Compiler.CompilerModule(Module);
-//    InnerCache.insert(std::make_pair(Module, std::move(ObjectFile)));
-//
-//    Ctx.addModule(std::move(OwnedModule));
-//  }
-//
-////  /// FIXME: Should come from the outside
-////  AddMutationOperator MutOp;
-//  std::vector<MutationOperator *> MutationOperators;
-////  MutationOperators.push_back(&MutOp);
-//
-//  GoogleTestRunner Runner;
-//
-//  auto ObjectFiles = AllObjectFiles();
-//
-//  auto Ctors = getStaticCtors();
-//
-//  GoogleTestFinder TestFinder(Ctx);
-//  for (auto Test : TestFinder.findTests()) {
-//    ExecutionResult ExecResult = Runner.runTest(Ctors, Test, ObjectFiles);
-//    auto Result = make_unique<TestResult>(ExecResult, Test);
-//
-//    for (auto Testee : TestFinder.findTestees(*Test)) {
-//      auto ObjectFiles = AllButOne(Testee->getParent());
-//      for (auto &MutationPoint : TestFinder.findMutationPoints(MutationOperators, *Testee)) {
-//        MutationPoint->applyMutation();
-//
-//        auto Mutant = Compiler.CompilerModule(Testee->getParent());
-//        ObjectFiles.push_back(Mutant.getBinary());
-//        /// Rollback mutation once we have compiled the module
-//        MutationPoint->revertMutation();
-//
-//        ExecutionResult R = Runner.runTest(Ctors, Test, ObjectFiles);
-//        assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
-//
-//        /// FIXME: Check if it's legal or not
-//        auto MutResult = make_unique<MutationResult>(R, std::move(MutationPoint));
-//        Result->addMutantResult(std::move(MutResult));
-//      }
-//    }
-//
-//    Results.push_back(std::move(Result));
-//  }
-//
-//  fflush(stdout);
-//  fflush(stderr);
-//
-//  return Results;
-//}
 
 std::vector<llvm::object::ObjectFile *> Driver::AllButOne(llvm::Module *One) {
   std::vector<llvm::object::ObjectFile *> Objects;
@@ -179,51 +115,4 @@ std::vector<llvm::object::ObjectFile *> Driver::AllObjectFiles() {
   }
 
   return Objects;
-}
-
-std::vector<llvm::Function *> Driver::getStaticCtors() {
-  std::vector<llvm::Function *> Ctors;
-
-  for (auto &CachedEntry : InnerCache) {
-    Module *M = CachedEntry.first;
-
-    /// Just Copied the whole logic from ExecutionEngine
-
-    GlobalVariable *GV = M->getNamedGlobal("llvm.global_ctors");
-
-    // If this global has internal linkage, or if it has a use, then it must be
-    // an old-style (llvmgcc3) static ctor with __main linked in and in use.  If
-    // this is the case, don't execute any of the global ctors, __main will do
-    // it.
-    if (!GV || GV->isDeclaration() || GV->hasLocalLinkage()) continue;
-
-    // Should be an array of '{ i32, void ()* }' structs.  The first value is
-    // the init priority, which we ignore.
-    ConstantArray *InitList = dyn_cast<ConstantArray>(GV->getInitializer());
-    if (!InitList)
-      continue;
-    for (unsigned i = 0, e = InitList->getNumOperands(); i != e; ++i) {
-      ConstantStruct *CS = dyn_cast<ConstantStruct>(InitList->getOperand(i));
-      if (!CS) continue;
-
-      Constant *FP = CS->getOperand(1);
-      if (FP->isNullValue())
-        continue;  // Found a sentinal value, ignore.
-
-      // Strip off constant expression casts.
-      if (ConstantExpr *CE = dyn_cast<ConstantExpr>(FP))
-        if (CE->isCast())
-          FP = CE->getOperand(0);
-
-      // Execute the ctor/dtor function!
-      if (Function *F = dyn_cast<Function>(FP))
-        Ctors.push_back(F);
-
-      // FIXME: It is marginally lame that we just do nothing here if we see an
-      // entry we don't recognize. It might not be unreasonable for the verifier
-      // to not even allow this and just assert here.
-    }
-  }
-
-  return Ctors;
 }
