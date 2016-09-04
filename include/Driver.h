@@ -1,7 +1,9 @@
 #pragma once
 
 #include "TestResult.h"
+#include "ForkProcessSandbox.h"
 #include "Context.h"
+
 #include "llvm/Object/ObjectFile.h"
 
 #include <map>
@@ -26,6 +28,8 @@ class Driver {
   TestFinder &Finder;
   TestRunner &Runner;
   Context Ctx;
+  ForkProcessSandbox Sandbox;
+
   std::map<llvm::Module *, llvm::object::OwningBinary<llvm::object::ObjectFile>> InnerCache;
 public:
   Driver(Config &C, ModuleLoader &ML, TestFinder &TF, TestRunner &TR)

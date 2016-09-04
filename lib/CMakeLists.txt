@@ -3,6 +3,7 @@ llvm_add_library(mutang
   ConfigParser.cpp
   Context.cpp
   Driver.cpp
+  ForkProcessSandbox.cpp
   ModuleLoader.cpp
   MutationOperators/AddMutationOperator.cpp
   MutationEngine.cpp
