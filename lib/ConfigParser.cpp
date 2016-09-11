@@ -23,28 +23,44 @@ std::unique_ptr<Config> ConfigParser::loadConfig(const char *filename) {
   auto Buffer = BufOrErr->get();
 
   yaml::Stream YAMLBuf(Buffer->getMemBufferRef(), SM);
+
   return loadConfig(YAMLBuf);
 }
 
 std::unique_ptr<Config> ConfigParser::loadConfig(yaml::Stream &S) {
-    auto Paths = std::vector<std::string>();
+  /// Fork is enabled by default
+  bool fork = true;
 
-    auto Cfg = dyn_cast<yaml::MappingNode>(S.begin()->getRoot());
-    assert(Cfg && "Expected to see an object as a root");
+  auto Paths = std::vector<std::string>();
 
-    for (auto KeyValue : *Cfg) {
-        auto Key = dyn_cast<yaml::ScalarNode>(KeyValue.getKey());
-        assert(Key && "keys should be strings (scalars)");
-        if (Key->getRawValue().equals(StringRef("bitcode_files"))) {
-            auto Values = dyn_cast<yaml::SequenceNode>(KeyValue.getValue());
+  yaml::Node *RootNode = S.begin()->getRoot();
+  assert(RootNode && "Expected config file to be a valid yaml document");
 
-            for (auto &V : *Values) {
-                auto BitcodePath = dyn_cast<yaml::ScalarNode>(&V);
-                assert(BitcodePath && "bitcode_files should contain strings (scalars)");
-                Paths.push_back(BitcodePath->getRawValue().str());
-            }
-        }
+  auto MappingNode = dyn_cast<yaml::MappingNode>(RootNode);
+
+  for (auto &KeyValue : *MappingNode) {
+    auto Key = dyn_cast<yaml::ScalarNode>(KeyValue.getKey());
+
+    if (Key->getRawValue().equals(StringRef("bitcode_files"))) {
+      auto Values = dyn_cast<yaml::SequenceNode>(KeyValue.getValue());
+
+      for (auto &V : *Values) {
+        auto BitcodePath = dyn_cast<yaml::ScalarNode>(&V);
+        assert(BitcodePath && "bitcode_files should contain strings (scalars)");
+        Paths.push_back(BitcodePath->getRawValue().str());
+      }
     }
 
-    return make_unique<Config>(Paths);
+    else if (Key->getRawValue().equals(StringRef("fork"))) {
+      auto Value = dyn_cast<yaml::ScalarNode>(KeyValue.getValue());
+
+      if (Value->getRawValue().equals(StringRef("true"))) {
+        fork = true;
+      } else {
+        fork = false;
+      }
+    }
+  }
+
+  return make_unique<Config>(Paths, fork);
 }

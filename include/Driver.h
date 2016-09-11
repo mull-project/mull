@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Config.h"
 #include "TestResult.h"
 #include "ForkProcessSandbox.h"
 #include "Context.h"
@@ -28,12 +29,23 @@ class Driver {
   TestFinder &Finder;
   TestRunner &Runner;
   Context Ctx;
-  ForkProcessSandbox Sandbox;
+  ProcessSandbox *Sandbox;
 
   std::map<llvm::Module *, llvm::object::OwningBinary<llvm::object::ObjectFile>> InnerCache;
 public:
   Driver(Config &C, ModuleLoader &ML, TestFinder &TF, TestRunner &TR)
-    : Cfg(C), Loader(ML), Finder(TF), Runner(TR) {}
+    : Cfg(C), Loader(ML), Finder(TF), Runner(TR) {
+      if (C.getFork()) {
+        this->Sandbox = new ForkProcessSandbox();
+      } else {
+        this->Sandbox = new NullProcessSandbox();
+      }
+    }
+
+  ~Driver() {
+    delete this->Sandbox;
+  }
+
   std::vector<std::unique_ptr<TestResult>> Run();
 
 private:

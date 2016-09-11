@@ -46,3 +46,17 @@ Mutang::ExecutionResult Mutang::ForkProcessSandbox::run(std::function<void (Exec
 
   return Result;
 }
+
+Mutang::ExecutionResult Mutang::NullProcessSandbox::run(std::function<void (ExecutionResult *)> Func) {
+  void *SharedMemory = malloc(sizeof(ExecutionResult));
+
+  ExecutionResult *SharedResult = new (SharedMemory) ExecutionResult();
+
+  Func(SharedResult);
+
+  ExecutionResult Result = *SharedResult;
+
+  free(SharedMemory);
+
+  return Result;
+}

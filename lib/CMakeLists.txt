@@ -37,6 +37,8 @@ llvm_add_library(mutang
   LLVMRuntimeDyld
   LLVMSupport
   LLVMTarget
+  LLVMTransformUtils
+
   # FIXME: Should not be arch specific
   LLVMX86AsmParser
   LLVMX86AsmPrinter

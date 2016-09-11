@@ -15,28 +15,28 @@ int addition(int a, int b);
 
 /// Tests
 
-ST_Result test_addition1() {
+ST_Result test_addition_5_plus_6_should_be_greater_than_zero() {
   int a = 5;
   int b = 6;
 
   return st_assert(addition(a, b) > 0);
 }
 
-ST_Result test_addition2() {
+ST_Result test_addition_minus_16_plus_minus_2_should_be_minus_18() {
   int a = -16;
   int b = -2;
 
   return st_assert(addition(a, b) == -18);
 }
 
-ST_Result test_addition3() {
+ST_Result test_addition_minus_8_plus_6_should_be_minus_2() {
   int a = -8;
   int b = 6;
 
   return st_assert(addition(a, b) == -2);
 }
 
-ST_Result test_addition4() {
+ST_Result test_addition_minus_8_plus_6_should_be_2() {
   int a = -8;
   int b = 6;
 
@@ -52,7 +52,12 @@ int addition(int a, int b) {
 /// Driver
 
 int main() {
-  st_test_ptr tests[] = { test_addition1, test_addition2, test_addition3, test_addition4 };
+  st_test_ptr tests[] = { 
+    test_addition_5_plus_6_should_be_greater_than_zero,
+    test_addition_minus_16_plus_minus_2_should_be_minus_18,
+    test_addition_minus_8_plus_6_should_be_minus_2,
+    test_addition_minus_8_plus_6_should_be_2
+  };
   int tests_count = sizeof(tests) / sizeof(st_test_ptr);
 
   int tests_failed = 0;

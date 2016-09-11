@@ -8,6 +8,7 @@
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Value.h"
+#include "llvm/Transforms/Utils/Cloning.h"
 
 #include "TestFinder.h"
 #include "TestRunner.h"
@@ -64,7 +65,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
   for (auto &Test : Finder.findTests(Ctx)) {
     auto ObjectFiles = AllObjectFiles();
 
-    ExecutionResult ExecResult = Sandbox.run([&](ExecutionResult *SharedResult){
+    ExecutionResult ExecResult = Sandbox->run([&](ExecutionResult *SharedResult){
       *SharedResult = Runner.runTest(Test.get(), ObjectFiles);
     });
 
@@ -74,17 +75,14 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
     for (auto Testee : Finder.findTestees(BorrowedTest, Ctx)) {
       auto ObjectFiles = AllButOne(Testee->getParent());
       for (auto &MutationPoint : Finder.findMutationPoints(MutationOperators, *Testee)) {
-        ExecutionResult R = Sandbox.run([&](ExecutionResult *SharedResult){
-          /// TODO: here the clone of Testee->getParent() will be used very soon instead.
-          /// For now we are applying mutation to the module same as of mutation point.
-          MutationPoint->applyMutation(Testee->getParent());
 
-          auto Mutant = Compiler.CompilerModule(Testee->getParent());
+        Module *TesteeModuleCopy = CloneModule(Testee->getParent()).release();
+
+        ExecutionResult R = Sandbox->run([&](ExecutionResult *SharedResult){
+          MutationPoint->applyMutation(TesteeModuleCopy);
+
+          auto Mutant = Compiler.CompilerModule(TesteeModuleCopy);
           ObjectFiles.push_back(Mutant.getBinary());
-
-          /// No longer need to revert mutations since forked child dies:
-          /// ~~Rollback mutation once we have compiled the module~~
-          /// MutationPoint->revertMutation();
 
           *SharedResult = Runner.runTest(BorrowedTest, ObjectFiles);
 
