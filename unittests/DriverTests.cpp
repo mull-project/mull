@@ -50,7 +50,8 @@ TEST(Driver, SimpleTest) {
   /// Then Run all the tests using driver
 
   std::vector<std::string> ModulePaths({ "foo", "bar" });
-  Config Cfg(ModulePaths);
+  bool doFork = false;
+  Config Cfg(ModulePaths, doFork);
 
   FakeModuleLoader Loader;
   SimpleTestFinder TestFinder;

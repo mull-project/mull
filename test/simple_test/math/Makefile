@@ -5,7 +5,8 @@ CC=clang
 all: main.ll main.bc config.yaml
 
 config.yaml:
-	echo "bitcode_files:" > config.yaml
+	echo "fork: true" > config.yaml
+	echo "bitcode_files:" >> config.yaml
 	echo "  - $(PWD)/main.bc" >> config.yaml
 
 main.ll:

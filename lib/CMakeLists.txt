@@ -3,6 +3,7 @@ llvm_add_library(mutang
   ConfigParser.cpp
   Context.cpp
   Driver.cpp
+  ForkProcessSandbox.cpp
   ModuleLoader.cpp
   MutationOperators/AddMutationOperator.cpp
   MutationEngine.cpp
@@ -36,6 +37,8 @@ llvm_add_library(mutang
   LLVMRuntimeDyld
   LLVMSupport
   LLVMTarget
+  LLVMTransformUtils
+
   # FIXME: Should not be arch specific
   LLVMX86AsmParser
   LLVMX86AsmPrinter

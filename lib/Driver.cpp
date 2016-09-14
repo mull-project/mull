@@ -8,6 +8,7 @@
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Value.h"
+#include "llvm/Transforms/Utils/Cloning.h"
 
 #include "TestFinder.h"
 #include "TestRunner.h"
@@ -63,7 +64,11 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 
   for (auto &Test : Finder.findTests(Ctx)) {
     auto ObjectFiles = AllObjectFiles();
-    ExecutionResult ExecResult = Runner.runTest(Test.get(), ObjectFiles);
+
+    ExecutionResult ExecResult = Sandbox->run([&](ExecutionResult *SharedResult){
+      *SharedResult = Runner.runTest(Test.get(), ObjectFiles);
+    });
+
     auto BorrowedTest = Test.get();
     auto Result = make_unique<TestResult>(ExecResult, std::move(Test));
 
@@ -71,17 +76,19 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
       auto ObjectFiles = AllButOne(Testee->getParent());
       for (auto &MutationPoint : Finder.findMutationPoints(MutationOperators, *Testee)) {
 
-        /// TODO: here the clone of Testee->getParent() will be used very soon instead.
-        /// For now we are applying mutation to the module same as of mutation point.
-        MutationPoint->applyMutation(Testee->getParent());
+        Module *TesteeModuleCopy = CloneModule(Testee->getParent()).release();
 
-        auto Mutant = Compiler.CompilerModule(Testee->getParent());
-        ObjectFiles.push_back(Mutant.getBinary());
+        ExecutionResult R = Sandbox->run([&](ExecutionResult *SharedResult){
+          MutationPoint->applyMutation(TesteeModuleCopy);
 
-        /// Rollback mutation once we have compiled the module
-        MutationPoint->revertMutation();
+          auto Mutant = Compiler.CompilerModule(TesteeModuleCopy);
+          ObjectFiles.push_back(Mutant.getBinary());
 
-        ExecutionResult R = Runner.runTest(BorrowedTest, ObjectFiles);
+          *SharedResult = Runner.runTest(BorrowedTest, ObjectFiles);
+
+          assert(SharedResult->Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
+        });
+
         assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
 
         auto MutResult = make_unique<MutationResult>(R, std::move(MutationPoint));

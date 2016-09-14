@@ -102,6 +102,7 @@ std::vector<std::unique_ptr<MutationPoint>> SimpleTestFinder::findMutationPoints
           int IIndex = std::distance(B->begin(), I);
 
           MutationPointAddress Address(FIndex, BBIndex, IIndex);
+
           MutPoints.emplace_back(make_unique<MutationPoint>(MutOp, Address, &Instr));
         }
       }
