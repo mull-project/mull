@@ -7,7 +7,21 @@ using namespace Mutang;
 using namespace llvm;
 
 void Context::addModule(std::unique_ptr<Module> M) {
+  for (auto &F : M->getFunctionList()) {
+    if (!F.isDeclaration()) {
+      FunctionsRegistry.insert(std::make_pair(F.getName(), &F));
+    }
+  }
+
   Modules.emplace_back(std::move(M));
+}
+
+llvm::Function *Context::lookupDefinedFunction(llvm::StringRef FunctionName) {
+  auto it = FunctionsRegistry.find(FunctionName.str());
+  if (it == FunctionsRegistry.end()) {
+    return nullptr;
+  }
+  return it->second;
 }
 
 std::vector<llvm::Function *> Context::getStaticConstructors() {

@@ -32,6 +32,9 @@ public:
     : Cfg(C), Loader(ML), Finder(TF), Runner(TR) {}
   std::vector<std::unique_ptr<TestResult>> Run();
 
+  void debug_PrintTestNames();
+  void debug_PrintTesteeNames();
+
 private:
   /// Returns cached object files for all modules excerpt one provided
   std::vector<llvm::object::ObjectFile *> AllButOne(llvm::Module *One);

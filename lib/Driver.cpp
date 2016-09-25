@@ -9,6 +9,9 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Value.h"
 
+#include "llvm/IR/LLVMContext.h"
+#include "llvm/IR/DebugInfoMetadata.h"
+
 #include "TestFinder.h"
 #include "TestRunner.h"
 
@@ -115,4 +118,38 @@ std::vector<llvm::object::ObjectFile *> Driver::AllObjectFiles() {
   }
 
   return Objects;
+}
+
+#pragma mark - Debug
+
+void Driver::debug_PrintTestNames() {
+  for (auto ModulePath : Cfg.GetBitcodePaths()) {
+    auto OwnedModule = Loader.loadModuleAtPath(ModulePath);
+    assert(OwnedModule && "Can't load module");
+    Ctx.addModule(std::move(OwnedModule));
+  }
+
+  for (auto &Test : Finder.findTests(Ctx)) {
+    printf("%s\n", Test->getTestName().c_str());
+  }
+}
+
+void Driver::debug_PrintTesteeNames() {
+  for (auto ModulePath : Cfg.GetBitcodePaths()) {
+    auto OwnedModule = Loader.loadModuleAtPath(ModulePath);
+    assert(OwnedModule && "Can't load module");
+    Ctx.addModule(std::move(OwnedModule));
+  }
+
+  for (auto &Test : Finder.findTests(Ctx)) {
+    printf("%s\n", Test->getTestName().c_str());
+    for (auto &Testee : Finder.findTestees(Test.get(), Ctx)) {
+//      auto MD = Testee->getMetadata(LLVMContext::MD_dbg);
+//      auto Dbg = dyn_cast<DISubprogram>(MD);
+//      if (Dbg) {
+//        printf("\t%s\n", Dbg->getFilename().str().c_str());
+//      }
+      printf("\t%s\n", Testee->getName().str().c_str());
+    }
+  }
 }

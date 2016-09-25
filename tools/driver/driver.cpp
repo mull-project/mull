@@ -33,8 +33,31 @@ static const char *ExecutionResultToString(ExecutionStatus Status) {
   llvm_unreachable("Must not reach here");
 }
 
+int debug_main(int argc, char *argv[]) {
+  ConfigParser Parser;
+  auto Cfg = Parser.loadConfig(argv[argc - 1]);
+
+  LLVMContext Ctx;
+  ModuleLoader Loader(Ctx);
+
+  GoogleTestFinder TestFinder;
+  GoogleTestRunner Runner;
+
+  Driver D(*Cfg.get(), Loader, TestFinder, Runner);
+
+  if (strcmp(argv[2], "-print-test-names") == 0) {
+    D.debug_PrintTestNames();
+  } else if (strcmp(argv[2], "-print-testee-names") == 0) {
+    D.debug_PrintTesteeNames();
+  }
+
+  return 0;
+}
+
 int main(int argc, char *argv[]) {
-  assert(argc == 2);
+  if (strcmp(argv[1], "-debug") == 0) {
+    return debug_main(argc, argv);
+  }
 
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(argv[1]);
@@ -46,7 +69,7 @@ int main(int argc, char *argv[]) {
   LLVMContext Ctx;
   ModuleLoader Loader(Ctx);
 
-#if 0
+#if 1
   GoogleTestFinder TestFinder;
   GoogleTestRunner Runner;
 #else
