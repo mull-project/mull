@@ -137,7 +137,7 @@ void Driver::debug_PrintTestNames() {
   }
 
   for (auto &Test : Finder.findTests(Ctx)) {
-    printf("%s\n", Test->getTestName().c_str());
+    outs() << Test->getTestName() << "\n";
   }
 }
 
@@ -149,14 +149,31 @@ void Driver::debug_PrintTesteeNames() {
   }
 
   for (auto &Test : Finder.findTests(Ctx)) {
-    printf("%s\n", Test->getTestName().c_str());
+    outs() << Test->getTestName() << "\n";
     for (auto &Testee : Finder.findTestees(Test.get(), Ctx)) {
-//      auto MD = Testee->getMetadata(LLVMContext::MD_dbg);
-//      auto Dbg = dyn_cast<DISubprogram>(MD);
-//      if (Dbg) {
-//        printf("\t%s\n", Dbg->getFilename().str().c_str());
-//      }
-      printf("\t%s\n", Testee->getName().str().c_str());
+      outs() << "\t" << Testee->getName() << "\n";
     }
+  }
+}
+
+void Driver::debug_PrintMutationPoints() {
+  for (auto ModulePath : Cfg.GetBitcodePaths()) {
+    auto OwnedModule = Loader.loadModuleAtPath(ModulePath);
+    assert(OwnedModule && "Can't load module");
+    Ctx.addModule(std::move(OwnedModule));
+  }
+
+  for (auto &Test : Finder.findTests(Ctx)) {
+    outs() << Test->getTestName() << "\n";
+    for (auto &Testee : Finder.findTestees(Test.get(), Ctx)) {
+      outs() << "\t" << Testee->getName() << "\n";
+      for (auto &MPoint : Finder.findMutationPoints(*Testee)) {
+        outs() << "\t\t";
+        MPoint->getOriginalValue()->print(outs());
+        outs() << "\n";
+      }
+      outs() << "\n";
+    }
+    outs() << "\n";
   }
 }

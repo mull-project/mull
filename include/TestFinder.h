@@ -21,6 +21,9 @@ public:
   virtual std::vector<std::unique_ptr<MutationPoint>> findMutationPoints(
                             std::vector<MutationOperator *> &MutationOperators,
                             llvm::Function &F) = 0;
+  virtual std::vector<MutationPoint *> findMutationPoints(llvm::Function &F) {
+    return std::vector<MutationPoint *>();
+  }
 
   virtual ~TestFinder() {}
 };

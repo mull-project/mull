@@ -12,6 +12,8 @@
 
 #include "GoogleTest/GoogleTest_Test.h"
 
+#include "MutationOperators/AddMutationOperator.h"
+
 #include <queue>
 #include <set>
 #include <vector>
@@ -210,9 +212,43 @@ std::string demangle(const char* name) {
   return (status==0) ? res.get() : name ;
 }
 
+static bool shouldSkipDefinedFunction(llvm::Function *DefinedFunction) {
+  if (DefinedFunction->getName().find(StringRef("testing8internal")) != StringRef::npos) {
+    return true;
+  }
+
+  if (DefinedFunction->getName().find(StringRef("testing15AssertionResult")) != StringRef::npos) {
+    return true;
+  }
+
+  if (DefinedFunction->getName().find(StringRef("testing7Message")) != StringRef::npos) {
+    return true;
+  }
+
+  return false;
+}
+
+static int GetFunctionIndex(llvm::Function *Function) {
+  auto PM = Function->getParent();
+
+  auto FII = std::find_if(PM->begin(), PM->end(),
+                          [Function] (llvm::Function *f) {
+                            return f == Function;
+                          });
+
+  assert(FII != PM->end() && "Expected function to be found in module");
+  int FIndex = std::distance(PM->begin(), FII);
+
+  return FIndex;
+}
 
 std::vector<llvm::Function *> GoogleTestFinder::findTestees(Test *Test, Context &Ctx) {
   GoogleTest_Test *GTest = dyn_cast<GoogleTest_Test>(Test);
+
+  /// FIXME: Should come from the outside
+  AddMutationOperator MutOp;
+  std::vector<MutationOperator *> MutationOperators;
+  MutationOperators.push_back(&MutOp);
 
   std::vector<Function *> Testees;
   std::queue<Function *> Traversees;
@@ -221,40 +257,59 @@ std::vector<llvm::Function *> GoogleTestFinder::findTestees(Test *Test, Context 
   Traversees.push(GTest->GetTestBodyFunction());
 
   while (true) {
-    Function *F = Traversees.front();
-    if (F != GTest->GetTestBodyFunction()) {
-      Testees.push_back(F);
+    Function *Traversee = Traversees.front();
+    if (Traversee != GTest->GetTestBodyFunction()) {
+      Testees.push_back(Traversee);
     }
 
-    for (inst_iterator I = inst_begin(F), E = inst_end(F); I != E; ++I) {
-      if (CallInst *CI = dyn_cast<CallInst>(&*I)) {
-        Value *V = CI->getOperand(CI->getNumOperands() - 1);
-        Function *CIF = dyn_cast<Function>(V);
+    int FunctionIndex = GetFunctionIndex(Traversee);
+    int BasicBlockIndex = 0;
+    int InstructionIndex = 0;
 
-        if (CIF) {
-          Function *DefinedFunction = Ctx.lookupDefinedFunction(CIF->getName());
-          if (DefinedFunction) {
+    std::vector<MutationPoint *> MutPoints;
+
+    for (auto &BB : Traversee->getBasicBlockList()) {
+
+      for (auto &Instr : BB.getInstList()) {
+        for (auto &MutOp : MutationOperators) {
+          if (MutOp->canBeApplied(Instr)) {
+            MutationPointAddress Address(FunctionIndex, BasicBlockIndex, InstructionIndex);
+            auto MP = new MutationPoint(MutOp, Address, &Instr);
+            MutPoints.push_back(MP);
+            MutationPoints.emplace_back(std::unique_ptr<MutationPoint>(MP));
+          }
+        }
+
+        InstructionIndex++;
+
+        if (CallInst *CI = dyn_cast<CallInst>(&Instr)) {
+          Value *V = CI->getOperand(CI->getNumOperands() - 1);
+          Function *CIF = dyn_cast<Function>(V);
+
+          if (!CIF) {
+            continue;
+          }
+
+          if (Function *DefinedFunction = Ctx.lookupDefinedFunction(CIF->getName())) {
             auto FunctionWasNotProcessed = CheckedFunctions.find(DefinedFunction) == CheckedFunctions.end();
             CheckedFunctions.insert(DefinedFunction);
+
             if (FunctionWasNotProcessed) {
               /// Filtering
-              if (DefinedFunction->getName().find(StringRef("testing8internal")) != StringRef::npos) {
-                continue;
-              }
-
-              if (DefinedFunction->getName().find(StringRef("testing15AssertionResult")) != StringRef::npos) {
-                continue;
-              }
-
-              if (DefinedFunction->getName().find(StringRef("testing7Message")) != StringRef::npos) {
+              if (shouldSkipDefinedFunction(DefinedFunction)) {
                 continue;
               }
               Traversees.push(DefinedFunction);
             }
           }
-        }
-      }
-    }
+
+        } /// if (CallInst *CI = dyn_cast<CallInst>(&Instr))
+
+      } /// for (auto &Instr : BB.getInstList())
+      BasicBlockIndex++;
+    } /// for (auto &BB : Traversee->getBasicBlockList())
+
+    MutationPointsRegistry.insert(std::make_pair(Traversee, MutPoints));
 
     Traversees.pop();
     if (Traversees.size() == 0) {
@@ -263,6 +318,12 @@ std::vector<llvm::Function *> GoogleTestFinder::findTestees(Test *Test, Context 
   }
 
   return Testees;
+}
+
+std::vector<MutationPoint *> GoogleTestFinder::findMutationPoints(
+                                                          llvm::Function &F) {
+  auto &Bucket = MutationPointsRegistry.at(&F);
+  return Bucket;
 }
 
 std::vector<std::unique_ptr<MutationPoint>> GoogleTestFinder::findMutationPoints(
