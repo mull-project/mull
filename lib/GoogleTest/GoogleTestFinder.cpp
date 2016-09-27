@@ -228,12 +228,12 @@ static bool shouldSkipDefinedFunction(llvm::Function *DefinedFunction) {
   return false;
 }
 
-static int GetFunctionIndex(llvm::Function *Function) {
-  auto PM = Function->getParent();
+static int GetFunctionIndex(llvm::Function &Function) {
+  auto PM = Function.getParent();
 
   auto FII = std::find_if(PM->begin(), PM->end(),
-                          [Function] (llvm::Function *f) {
-                            return f == Function;
+                          [&Function] (llvm::Function &f) {
+                            return &f == &Function;
                           });
 
   assert(FII != PM->end() && "Expected function to be found in module");
@@ -256,13 +256,15 @@ std::vector<llvm::Function *> GoogleTestFinder::findTestees(Test *Test, Context 
 
   Traversees.push(GTest->GetTestBodyFunction());
 
+  printf("findTestees::begin\n");
+
   while (true) {
     Function *Traversee = Traversees.front();
     if (Traversee != GTest->GetTestBodyFunction()) {
       Testees.push_back(Traversee);
     }
 
-    int FunctionIndex = GetFunctionIndex(Traversee);
+    int FunctionIndex = GetFunctionIndex(*Traversee);
     int BasicBlockIndex = 0;
     int InstructionIndex = 0;
 
@@ -316,6 +318,8 @@ std::vector<llvm::Function *> GoogleTestFinder::findTestees(Test *Test, Context 
       break;
     }
   }
+
+  printf("findTestees::end\n");
 
   return Testees;
 }

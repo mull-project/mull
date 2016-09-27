@@ -28,11 +28,11 @@ struct ExecutionResult {
 
 class MutationResult {
   ExecutionResult Result;
-  std::unique_ptr<MutationPoint> MutPoint;
+  MutationPoint *MutPoint;
 public:
-  MutationResult(ExecutionResult R, std::unique_ptr<Mutang::MutationPoint> MP);
+  MutationResult(ExecutionResult R, Mutang::MutationPoint *MP);
   ExecutionResult getExecutionResult()  { return Result; }
-  MutationPoint* getMutationPoint()     { return MutPoint.get(); }
+  MutationPoint* getMutationPoint()     { return MutPoint; }
 };
 
 class TestResult {
