@@ -256,8 +256,6 @@ std::vector<llvm::Function *> GoogleTestFinder::findTestees(Test *Test, Context 
 
   Traversees.push(GTest->GetTestBodyFunction());
 
-  printf("findTestees::begin\n");
-
   while (true) {
     Function *Traversee = Traversees.front();
     if (Traversee != GTest->GetTestBodyFunction()) {
@@ -318,8 +316,6 @@ std::vector<llvm::Function *> GoogleTestFinder::findTestees(Test *Test, Context 
       break;
     }
   }
-
-  printf("findTestees::end\n");
 
   return Testees;
 }
