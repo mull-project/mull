@@ -12,7 +12,11 @@
 
 #include "GoogleTest/GoogleTest_Test.h"
 
+#include <queue>
+#include <set>
 #include <vector>
+
+#include <cxxabi.h>
 
 using namespace Mutang;
 using namespace llvm;
@@ -128,44 +132,64 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
       /// Once we have the CallInstruction we can extract Test Suite Name and Test Case Name
       /// To extract them we need climb to the top, i.e.:
       ///
-      ///   1. i8* getelementptr inbounds ([6 x i8], [6 x i8]* @.str, i32 0, i32 0)
-      ///   2. @.str = private unnamed_addr constant [6 x i8] c"Hello\00", align 1
-      ///   3. [6 x i8] c"Hello\00"
-      ///   4. "Hello"
+      ///   i8* getelementptr inbounds ([6 x i8], [6 x i8]* @.str, i32 0, i32 0)
+      ///   i8* getelementptr inbounds ([6 x i8], [6 x i8]* @.str1, i32 0, i32 0)
 
-      /// 1
       auto TestSuiteNameConstRef = dyn_cast<ConstantExpr>(CallInstruction->getArgOperand(0));
       assert(TestSuiteNameConstRef);
 
-      /// 2
-      auto TestSuiteNameConst = dyn_cast<GlobalValue>(TestSuiteNameConstRef->getOperand(0));
-      assert(TestSuiteNameConst);
-
-      /// 3
-      auto TestSuiteNameConstArray = dyn_cast<ConstantDataArray>(TestSuiteNameConst->getOperand(0));
-      assert(TestSuiteNameConstArray);
-
-      /// 4
-      auto TestSuiteName = TestSuiteNameConstArray->getRawDataValues();
-
-      /// 1
       auto TestCaseNameConstRef = dyn_cast<ConstantExpr>(CallInstruction->getArgOperand(1));
       assert(TestCaseNameConstRef);
 
-      /// 2
+      ///   @.str = private unnamed_addr constant [6 x i8] c"Hello\00", align 1
+      ///   @.str = private unnamed_addr constant [6 x i8] c"world\00", align 1
+
+      auto TestSuiteNameConst = dyn_cast<GlobalValue>(TestSuiteNameConstRef->getOperand(0));
+      assert(TestSuiteNameConst);
+
       auto TestCaseNameConst = dyn_cast<GlobalValue>(TestCaseNameConstRef->getOperand(0));
       assert(TestCaseNameConst);
 
-      /// 3
+      ///   [6 x i8] c"Hello\00"
+      ///   [6 x i8] c"world\00"
+
+      auto TestSuiteNameConstArray = dyn_cast<ConstantDataArray>(TestSuiteNameConst->getOperand(0));
+      assert(TestSuiteNameConstArray);
+
       auto TestCaseNameConstArray = dyn_cast<ConstantDataArray>(TestCaseNameConst->getOperand(0));
       assert(TestCaseNameConstArray);
 
-      /// 4
-      auto TestCaseName = TestCaseNameConstArray->getRawDataValues();
+      ///   "Hello"
+      ///   "world"
 
-      auto TestName = TestSuiteName.rtrim('\0') + "." + TestCaseName.rtrim('\0');
+      auto TestSuiteName = TestSuiteNameConstArray->getRawDataValues().rtrim('\0');
+      auto TestCaseName = TestCaseNameConstArray->getRawDataValues().rtrim('\0');
 
-      tests.emplace_back(make_unique<GoogleTest_Test>(TestName.str(), Ctx.getStaticConstructors()));
+      /// Once we've got the Name of a Test Suite and the name of a Test Case
+      /// We can construct the name of a Test
+      auto TestName = TestSuiteName + "." + TestCaseName;
+
+      /// And the part of Test Body function name
+
+      auto TestBodyFunctionName = TestSuiteName + "_" + TestCaseName + "_Test8TestBodyEv";
+
+      /// Using the TestBodyFunctionName we could find the function
+      /// and finish creating the GoogleTest_Test object
+
+      Function *TestBodyFunction = nullptr;
+      for (auto &Func : M->getFunctionList()) {
+        auto foundPosition = Func.getName().rfind(StringRef(TestBodyFunctionName.str()));
+        if (foundPosition != StringRef::npos) {
+          TestBodyFunction = &Func;
+          break;
+        }
+      }
+
+      assert(TestBodyFunction && "Cannot find the TestBody function for the Test");
+
+      tests.emplace_back(make_unique<GoogleTest_Test>(TestName.str(),
+                                                      TestBodyFunction,
+                                                      Ctx.getStaticConstructors()));
     }
 
   }
@@ -173,8 +197,72 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
   return tests;
 }
 
+std::string demangle(const char* name) {
+
+  int status = -4; // some arbitrary value to eliminate the compiler warning
+
+  // enable c++11 by passing the flag -std=c++11 to g++
+  std::unique_ptr<char, void(*)(void*)> res {
+    abi::__cxa_demangle(name, NULL, NULL, &status),
+    std::free
+  };
+
+  return (status==0) ? res.get() : name ;
+}
+
+
 std::vector<llvm::Function *> GoogleTestFinder::findTestees(Test *Test, Context &Ctx) {
-  return std::vector<Function *>();
+  GoogleTest_Test *GTest = dyn_cast<GoogleTest_Test>(Test);
+
+  std::vector<Function *> Testees;
+  std::queue<Function *> Traversees;
+  std::set<Function *> CheckedFunctions;
+
+  Traversees.push(GTest->GetTestBodyFunction());
+
+  while (true) {
+    Function *F = Traversees.front();
+    if (F != GTest->GetTestBodyFunction()) {
+      Testees.push_back(F);
+    }
+
+    for (inst_iterator I = inst_begin(F), E = inst_end(F); I != E; ++I) {
+      if (CallInst *CI = dyn_cast<CallInst>(&*I)) {
+        Value *V = CI->getOperand(CI->getNumOperands() - 1);
+        Function *CIF = dyn_cast<Function>(V);
+
+        if (CIF) {
+          Function *DefinedFunction = Ctx.lookupDefinedFunction(CIF->getName());
+          if (DefinedFunction) {
+            auto FunctionWasNotProcessed = CheckedFunctions.find(DefinedFunction) == CheckedFunctions.end();
+            CheckedFunctions.insert(DefinedFunction);
+            if (FunctionWasNotProcessed) {
+              /// Filtering
+              if (DefinedFunction->getName().find(StringRef("testing8internal")) != StringRef::npos) {
+                continue;
+              }
+
+              if (DefinedFunction->getName().find(StringRef("testing15AssertionResult")) != StringRef::npos) {
+                continue;
+              }
+
+              if (DefinedFunction->getName().find(StringRef("testing7Message")) != StringRef::npos) {
+                continue;
+              }
+              Traversees.push(DefinedFunction);
+            }
+          }
+        }
+      }
+    }
+
+    Traversees.pop();
+    if (Traversees.size() == 0) {
+      break;
+    }
+  }
+
+  return Testees;
 }
 
 std::vector<std::unique_ptr<MutationPoint>> GoogleTestFinder::findMutationPoints(

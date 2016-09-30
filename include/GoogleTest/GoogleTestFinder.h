@@ -3,6 +3,8 @@
 #include "MutationPoint.h"
 #include "TestFinder.h"
 
+#include "llvm/ADT/StringMap.h"
+
 namespace llvm {
 
 class Function;
@@ -16,6 +18,7 @@ class MutationOperator;
 class MutationPoint;
 
 class GoogleTestFinder : public TestFinder {
+  llvm::StringMap<llvm::Function *> FunctionRegistry;
 public:
   explicit GoogleTestFinder() {}
 

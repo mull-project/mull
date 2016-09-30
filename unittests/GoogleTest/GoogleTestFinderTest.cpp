@@ -5,6 +5,7 @@
 #include "TestModuleFactory.h"
 #include "GoogleTest/GoogleTest_Test.h"
 
+#include "llvm/IR/CallSite.h"
 #include "llvm/IR/InstrTypes.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
@@ -34,9 +35,9 @@ TEST(GoogleTestFinder, FindTest) {
   ASSERT_EQ("Hello.world", Test->getTestName());
 }
 
-TEST(GoogleTestFinder, DISABLED_FindTestee) {
-  auto ModuleWithTests   = TestModuleFactory.createTesterModule();
-  auto ModuleWithTestees = TestModuleFactory.createTesteeModule();
+TEST(GoogleTestFinder, FindTestee) {
+  auto ModuleWithTests   = TestModuleFactory.createGoogleTestTesterModule();
+  auto ModuleWithTestees = TestModuleFactory.createGoogleTestTesteeModule();
 
   Context Ctx;
   Ctx.addModule(std::move(ModuleWithTests));
