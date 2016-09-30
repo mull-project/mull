@@ -60,13 +60,12 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
     Ctx.addModule(std::move(OwnedModule));
   }
 
-  /// FIXME: Should come from the outside
-  AddMutationOperator MutOp;
-  std::vector<MutationOperator *> MutationOperators;
-  MutationOperators.push_back(&MutOp);
+  outs() << "Driver::Run::begin\n";
 
   for (auto &Test : Finder.findTests(Ctx)) {
     auto ObjectFiles = AllObjectFiles();
+
+    outs() << "\tDriver::Run::run test: " << Test->getTestName() << "\n";
 
     ExecutionResult ExecResult = Sandbox->run([&](ExecutionResult *SharedResult){
       *SharedResult = Runner.runTest(Test.get(), ObjectFiles);
@@ -76,8 +75,13 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
     auto Result = make_unique<TestResult>(ExecResult, std::move(Test));
 
     for (auto Testee : Finder.findTestees(BorrowedTest, Ctx)) {
+      outs() << "\t\tDriver::Run::process testee: " << Testee->getName() << "\n";
+
       auto ObjectFiles = AllButOne(Testee->getParent());
-      for (auto &MutationPoint : Finder.findMutationPoints(MutationOperators, *Testee)) {
+      for (auto &MutationPoint : Finder.findMutationPoints(*Testee)) {
+        outs() << "\t\t\tDriver::Run::run mutant:" << "\t";
+        MutationPoint->getOriginalValue()->print(outs());
+        outs() << "\n";
 
         Module *TesteeModuleCopy = CloneModule(Testee->getParent()).release();
 
@@ -94,13 +98,15 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 
         assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
 
-        auto MutResult = make_unique<MutationResult>(R, std::move(MutationPoint));
+        auto MutResult = make_unique<MutationResult>(R, MutationPoint);
         Result->addMutantResult(std::move(MutResult));
       }
     }
 
     Results.push_back(std::move(Result));
   }
+
+  outs() << "Driver::Run::end\n";
 
   return Results;
 }
@@ -137,7 +143,7 @@ void Driver::debug_PrintTestNames() {
   }
 
   for (auto &Test : Finder.findTests(Ctx)) {
-    printf("%s\n", Test->getTestName().c_str());
+    outs() << Test->getTestName() << "\n";
   }
 }
 
@@ -149,14 +155,31 @@ void Driver::debug_PrintTesteeNames() {
   }
 
   for (auto &Test : Finder.findTests(Ctx)) {
-    printf("%s\n", Test->getTestName().c_str());
+    outs() << Test->getTestName() << "\n";
     for (auto &Testee : Finder.findTestees(Test.get(), Ctx)) {
-//      auto MD = Testee->getMetadata(LLVMContext::MD_dbg);
-//      auto Dbg = dyn_cast<DISubprogram>(MD);
-//      if (Dbg) {
-//        printf("\t%s\n", Dbg->getFilename().str().c_str());
-//      }
-      printf("\t%s\n", Testee->getName().str().c_str());
+      outs() << "\t" << Testee->getName() << "\n";
     }
+  }
+}
+
+void Driver::debug_PrintMutationPoints() {
+  for (auto ModulePath : Cfg.GetBitcodePaths()) {
+    auto OwnedModule = Loader.loadModuleAtPath(ModulePath);
+    assert(OwnedModule && "Can't load module");
+    Ctx.addModule(std::move(OwnedModule));
+  }
+
+  for (auto &Test : Finder.findTests(Ctx)) {
+    outs() << Test->getTestName() << "\n";
+    for (auto &Testee : Finder.findTestees(Test.get(), Ctx)) {
+      outs() << "\t" << Testee->getName() << "\n";
+      for (auto &MPoint : Finder.findMutationPoints(*Testee)) {
+        outs() << "\t\t";
+        MPoint->getOriginalValue()->print(outs());
+        outs() << "\n";
+      }
+      outs() << "\n";
+    }
+    outs() << "\n";
   }
 }

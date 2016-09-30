@@ -49,6 +49,8 @@ int debug_main(int argc, char *argv[]) {
     D.debug_PrintTestNames();
   } else if (strcmp(argv[2], "-print-testee-names") == 0) {
     D.debug_PrintTesteeNames();
+  } else if (strcmp(argv[2], "-print-mutation-points") == 0) {
+    D.debug_PrintMutationPoints();
   }
 
   return 0;

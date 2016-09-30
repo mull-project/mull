@@ -50,6 +50,7 @@ public:
 
   void debug_PrintTestNames();
   void debug_PrintTesteeNames();
+  void debug_PrintMutationPoints();
 
 private:
   /// Returns cached object files for all modules excerpt one provided
