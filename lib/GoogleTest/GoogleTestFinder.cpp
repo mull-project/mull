@@ -9,6 +9,7 @@
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Support/Debug.h"
+#include "llvm/Support/raw_ostream.h"
 
 #include "GoogleTest/GoogleTest_Test.h"
 
@@ -22,6 +23,11 @@
 
 using namespace Mutang;
 using namespace llvm;
+
+GoogleTestFinder::GoogleTestFinder() : TestFinder() {
+  /// FIXME: should come from outside
+  mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+}
 
 /// The algorithm is the following:
 ///
@@ -245,11 +251,6 @@ static int GetFunctionIndex(llvm::Function &Function) {
 std::vector<llvm::Function *> GoogleTestFinder::findTestees(Test *Test, Context &Ctx) {
   GoogleTest_Test *GTest = dyn_cast<GoogleTest_Test>(Test);
 
-  /// FIXME: Should come from the outside
-  AddMutationOperator MutOp;
-  std::vector<MutationOperator *> MutationOperators;
-  MutationOperators.push_back(&MutOp);
-
   std::vector<Function *> Testees;
   std::queue<Function *> Traversees;
   std::set<Function *> CheckedFunctions;
@@ -258,25 +259,35 @@ std::vector<llvm::Function *> GoogleTestFinder::findTestees(Test *Test, Context 
 
   while (true) {
     Function *Traversee = Traversees.front();
+
+    /// When we come to this function very first time we must ignore Traversee
+    /// since it's our starting point: Test Body Function
     if (Traversee != GTest->GetTestBodyFunction()) {
       Testees.push_back(Traversee);
     }
 
     int FunctionIndex = GetFunctionIndex(*Traversee);
     int BasicBlockIndex = 0;
-    int InstructionIndex = 0;
 
     std::vector<MutationPoint *> MutPoints;
 
     for (auto &BB : Traversee->getBasicBlockList()) {
 
+      int InstructionIndex = 0;
+
       for (auto &Instr : BB.getInstList()) {
-        for (auto &MutOp : MutationOperators) {
-          if (MutOp->canBeApplied(Instr)) {
-            MutationPointAddress Address(FunctionIndex, BasicBlockIndex, InstructionIndex);
-            auto MP = new MutationPoint(MutOp, Address, &Instr);
-            MutPoints.push_back(MP);
-            MutationPoints.emplace_back(std::unique_ptr<MutationPoint>(MP));
+
+        if ( Traversee->getParent() != GTest->GetTestBodyFunction()->getParent() ) {
+          /// If the function we are processing is in  the same translation unit
+          /// as the test itself, then we are not looking for mutation points
+          /// in this function assuming it to be a helper function or so
+          for (auto &MutOp : mutationOperators) {
+            if (MutOp->canBeApplied(Instr)) {
+              MutationPointAddress Address(FunctionIndex, BasicBlockIndex, InstructionIndex);
+              auto MP = new MutationPoint(MutOp.get(), Address, &Instr);
+              MutPoints.push_back(MP);
+              MutationPoints.emplace_back(std::unique_ptr<MutationPoint>(MP));
+            }
           }
         }
 

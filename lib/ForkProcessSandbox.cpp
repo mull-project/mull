@@ -17,8 +17,14 @@ Mutang::ExecutionResult Mutang::ForkProcessSandbox::run(std::function<void (Exec
 
   ExecutionResult *SharedResult = new (SharedMemory) ExecutionResult();
 
+  static unsigned long long kaunt = 0;
+
   int ChildPid = fork();
+  kaunt++;
   if (ChildPid == -1) {
+    printf("child pid -1\n");
+    printf("after %llu forks\n", kaunt);
+    printf("reason: %s\n", strerror(errno));
     exit(1);
   }
 
@@ -32,7 +38,8 @@ Mutang::ExecutionResult Mutang::ForkProcessSandbox::run(std::function<void (Exec
     /// 1) Child process crashes
     /// 2) Child process exits 1
     /// 3) Child process hangs
-    waitpid(ChildPid, NULL, 0);
+    int stat_loc = 0;
+    waitpid(ChildPid, &stat_loc, 0);
   }
 
   ExecutionResult Result = *SharedResult;

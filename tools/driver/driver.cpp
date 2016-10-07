@@ -106,5 +106,7 @@ int main(int argc, char *argv[]) {
   printf("Passed: %lu\n", Results.size() - FailedCount);
   printf("Failed: %d\n", FailedCount);
 
+  llvm_shutdown();
+
   return 0;
 }

@@ -6,7 +6,7 @@ using namespace llvm;
 using namespace Mutang;
 
 MutationPoint::MutationPoint(MutationOperator *MO, MutationPointAddress Address, llvm::Value *Val) :
-  MutOp(MO), Address(Address), OriginalValue(Val), MutatedValue(nullptr) {}
+  MutOp(MO), Address(Address), OriginalValue(Val) {}
 
 MutationPoint::~MutationPoint() {}
 
@@ -22,18 +22,18 @@ Value *MutationPoint::getOriginalValue() {
   return OriginalValue;
 }
 
-Value *MutationPoint::getMutatedValue() {
-  return MutatedValue;
-}
+//Value *MutationPoint::getMutatedValue() {
+//  return MutatedValue;
+//}
 
 void MutationPoint::applyMutation(llvm::Module *M) {
-  assert(!MutatedValue && "Mutation already applied");
-
-  MutatedValue = MutOp->applyMutation(M, Address, *OriginalValue);
+  //assert(!MutatedValue && "Mutation already applied");
+  //MutatedValue =
+  MutOp->applyMutation(M, Address, *OriginalValue);
 }
 
-void MutationPoint::revertMutation() {
-  assert(MutatedValue && "Mutation was not applied yet");
-
-  OriginalValue = MutOp->revertMutation(*MutatedValue);
-}
+//void MutationPoint::revertMutation() {
+//  assert(MutatedValue && "Mutation was not applied yet");
+//
+//  OriginalValue = MutOp->revertMutation(*MutatedValue);
+//}

@@ -25,8 +25,10 @@ class GoogleTestFinder : public TestFinder {
   llvm::StringMap<llvm::Function *> FunctionRegistry;
   std::vector<std::unique_ptr<MutationPoint>> MutationPoints;
   std::map<llvm::Function *, std::vector<MutationPoint *>> MutationPointsRegistry;
+
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
 public:
-  explicit GoogleTestFinder() {}
+  explicit GoogleTestFinder();
 
   std::vector<std::unique_ptr<Test>> findTests(Context &Ctx) override;
   std::vector<llvm::Function *> findTestees(Test *Test, Context &Ctx) override;

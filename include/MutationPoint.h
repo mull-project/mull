@@ -32,7 +32,7 @@ class MutationPoint {
   MutationOperator *MutOp;
   MutationPointAddress Address;
   llvm::Value *OriginalValue;
-  llvm::Value *MutatedValue;
+  //llvm::Value *MutatedValue;
 public:
   MutationPoint(MutationOperator *MO, MutationPointAddress Address, llvm::Value *Val);
   ~MutationPoint();
@@ -41,10 +41,10 @@ public:
 
   MutationPointAddress getAddress();
   llvm::Value *getOriginalValue();
-  llvm::Value *getMutatedValue();
+  //llvm::Value *getMutatedValue();
 
   void applyMutation(llvm::Module *M);
-  void revertMutation();
+  //void revertMutation();
 };
 
 }

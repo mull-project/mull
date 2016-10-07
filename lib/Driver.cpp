@@ -8,6 +8,7 @@
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Value.h"
+#include "llvm/IR/Verifier.h"
 #include "llvm/Transforms/Utils/Cloning.h"
 
 #include "llvm/IR/LLVMContext.h"
@@ -20,6 +21,7 @@
 #include "MutationOperators/AddMutationOperator.h"
 
 #include <algorithm>
+#include <fstream>
 
 using namespace llvm;
 using namespace Mutang;
@@ -62,43 +64,53 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 
   outs() << "Driver::Run::begin\n";
 
-  for (auto &Test : Finder.findTests(Ctx)) {
+  for (auto &test : Finder.findTests(Ctx)) {
     auto ObjectFiles = AllObjectFiles();
 
-    outs() << "\tDriver::Run::run test: " << Test->getTestName() << "\n";
+    outs() << "\tDriver::Run::run test: " << test->getTestName() << "\n";
 
     ExecutionResult ExecResult = Sandbox->run([&](ExecutionResult *SharedResult){
-      *SharedResult = Runner.runTest(Test.get(), ObjectFiles);
+      *SharedResult = Runner.runTest(test.get(), ObjectFiles);
     });
 
-    auto BorrowedTest = Test.get();
-    auto Result = make_unique<TestResult>(ExecResult, std::move(Test));
+    auto BorrowedTest = test.get();
+    auto Result = make_unique<TestResult>(ExecResult, std::move(test));
 
     for (auto Testee : Finder.findTestees(BorrowedTest, Ctx)) {
+      auto MPoints = Finder.findMutationPoints(*Testee);
+      if (MPoints.size() == 0) {
+        continue;
+      }
+
       outs() << "\t\tDriver::Run::process testee: " << Testee->getName() << "\n";
 
-      auto ObjectFiles = AllButOne(Testee->getParent());
-      for (auto &MutationPoint : Finder.findMutationPoints(*Testee)) {
+      for (auto mutationPoint : MPoints) {
+        auto ObjectFiles = AllButOne(Testee->getParent());
         outs() << "\t\t\tDriver::Run::run mutant:" << "\t";
-        MutationPoint->getOriginalValue()->print(outs());
+        mutationPoint->getOriginalValue()->print(outs());
         outs() << "\n";
 
-        Module *TesteeModuleCopy = CloneModule(Testee->getParent()).release();
+        auto OwnedCopy = CloneModule(Testee->getParent());
+        auto BorrowedCopy = OwnedCopy.get();
 
-        ExecutionResult R = Sandbox->run([&](ExecutionResult *SharedResult){
-          MutationPoint->applyMutation(TesteeModuleCopy);
+        verifyModule(*BorrowedCopy, &errs());
+        ExecutionResult R = Sandbox->run([&](ExecutionResult *SharedResult) {
+          mutationPoint->applyMutation(BorrowedCopy);
 
-          auto Mutant = Compiler.CompilerModule(TesteeModuleCopy);
+          auto Mutant = Compiler.CompilerModule(BorrowedCopy);
           ObjectFiles.push_back(Mutant.getBinary());
 
-          *SharedResult = Runner.runTest(BorrowedTest, ObjectFiles);
+          ExecutionResult R = Runner.runTest(BorrowedTest, ObjectFiles);
 
-          assert(SharedResult->Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
+          assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
+
+          *SharedResult = R;
         });
 
-        assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
+        /// It's happening now when a child crashes
+        // assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
 
-        auto MutResult = make_unique<MutationResult>(R, MutationPoint);
+        auto MutResult = make_unique<MutationResult>(R, mutationPoint);
         Result->addMutantResult(std::move(MutResult));
       }
     }
@@ -172,14 +184,46 @@ void Driver::debug_PrintMutationPoints() {
   for (auto &Test : Finder.findTests(Ctx)) {
     outs() << Test->getTestName() << "\n";
     for (auto &Testee : Finder.findTestees(Test.get(), Ctx)) {
-      outs() << "\t" << Testee->getName() << "\n";
-      for (auto &MPoint : Finder.findMutationPoints(*Testee)) {
+      auto MPoints = Finder.findMutationPoints(*Testee);
+      if (MPoints.size()) {
+        outs() << "\t" << Testee->getName() << "\n";
+      }
+      for (auto &MPoint : MPoints) {
         outs() << "\t\t";
         MPoint->getOriginalValue()->print(outs());
         outs() << "\n";
+
+        if (Instruction *I = dyn_cast<Instruction>(MPoint->getOriginalValue())) {
+          auto DL = I->getDebugLoc();
+          auto Filename = DL->getFilename();
+          auto LineNo = DL->getLine();
+
+          std::string line;
+          std::ifstream SourceFile(Filename);
+          unsigned int curLine = 1;
+          if (SourceFile.is_open()) {
+            while (!SourceFile.eof()) {
+              getline(SourceFile, line);
+              if (curLine == LineNo) {
+                outs() << "\t\t";
+                outs() << Filename << ":" << LineNo;
+                outs() << "\n";
+
+                outs() << "\t\t";
+                outs() << line;
+                outs() << "\n";
+                break;
+              }
+              curLine++;
+            }
+            SourceFile.close();
+          } else {
+            errs() << "Unable to open file";
+          }
+        }
       }
-      outs() << "\n";
+//      outs() << "\n";
     }
-    outs() << "\n";
+//    outs() << "\n";
   }
 }
