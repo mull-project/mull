@@ -56,7 +56,6 @@ Mutang::ExecutionResult Mutang::ForkProcessSandbox::run(std::function<void (Exec
       ExecutionResult result;
       result.Status = Timedout;
       *sharedResult = result;
-      printf("Timedout");
     } else {
       kill(timerPID, SIGKILL);
       /// Worker Process finished first
@@ -65,7 +64,6 @@ Mutang::ExecutionResult Mutang::ForkProcessSandbox::run(std::function<void (Exec
         ExecutionResult result;
         result.Status = Crashed;
         *sharedResult = result;
-        printf("Crashed");
       }
     }
 

@@ -1,14 +1,19 @@
 #pragma once
 
 #include "llvm/ADT/ArrayRef.h"
+#include "llvm/Object/Binary.h"
+#include "llvm/Object/ObjectFile.h"
 
 namespace llvm {
-  class Value;
-  class Module;
+
+class Value;
+class Module;
+
 }
 
 namespace Mutang {
 
+class Compiler;
 class MutationOperator;
 
 /// \brief Container class that stores information needed to find MutationPoints.
@@ -32,7 +37,7 @@ class MutationPoint {
   MutationOperator *MutOp;
   MutationPointAddress Address;
   llvm::Value *OriginalValue;
-  //llvm::Value *MutatedValue;
+  llvm::object::OwningBinary<llvm::object::ObjectFile> mutatedBinary;
 public:
   MutationPoint(MutationOperator *MO, MutationPointAddress Address, llvm::Value *Val);
   ~MutationPoint();
@@ -44,7 +49,8 @@ public:
   //llvm::Value *getMutatedValue();
 
   void applyMutation(llvm::Module *M);
-  //void revertMutation();
+  llvm::object::ObjectFile *applyMutation(llvm::Module *module,
+                                          Compiler &compiler);
 };
 
 }

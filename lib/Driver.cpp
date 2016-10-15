@@ -64,12 +64,12 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 
   auto foundTests = Finder.findTests(Ctx);
 
-  outs() << "Driver::Run::begin with " << foundTests.size() << " tests\n";
+//  outs() << "Driver::Run::begin with " << foundTests.size() << " tests\n";
 
   for (auto &test : foundTests) {
     auto ObjectFiles = AllObjectFiles();
 
-    outs() << "\tDriver::Run::run test: " << test->getTestName() << "\n";
+//    outs() << "\tDriver::Run::run test: " << test->getTestName() << "\n";
 
     ExecutionResult ExecResult = Sandbox->run([&](ExecutionResult *SharedResult){
       *SharedResult = Runner.runTest(test.get(), ObjectFiles);
@@ -80,7 +80,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 
     auto testees = Finder.findTestees(BorrowedTest, Ctx);
 
-    outs() << "\tagainst " << testees.size() << " testees\n";
+//    outs() << "\tagainst " << testees.size() << " testees\n";
 
     for (auto Testee : testees) {
       auto MPoints = Finder.findMutationPoints(*Testee);
@@ -88,26 +88,28 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
         continue;
       }
 
-      outs() << "\t\tDriver::Run::process testee: " << Testee->getName() << "\n";
-      outs() << "\t\tagainst " << MPoints.size() << " mutation points\n";
+//      outs() << "\t\tDriver::Run::process testee: " << Testee->getName() << "\n";
+//      outs() << "\t\tagainst " << MPoints.size() << " mutation points\n";
 
+      auto ObjectFiles = AllButOne(Testee->getParent());
       for (auto mutationPoint : MPoints) {
-        auto ObjectFiles = AllButOne(Testee->getParent());
-        outs() << "\t\t\tDriver::Run::run mutant:" << "\t";
-        mutationPoint->getOriginalValue()->print(outs());
-        outs() << "\n";
+//        outs() << "\t\t\tDriver::Run::run mutant:" << "\t";
+//        mutationPoint->getOriginalValue()->print(outs());
+//        outs() << "\n";
 
-        auto OwnedCopy = CloneModule(Testee->getParent());
-        auto BorrowedCopy = OwnedCopy.get();
+//        auto OwnedCopy = CloneModule(Testee->getParent());
+//        auto BorrowedCopy = OwnedCopy.get();
 
-        verifyModule(*BorrowedCopy, &errs());
+//        verifyModule(*BorrowedCopy, &errs());
         ExecutionResult R = Sandbox->run([&](ExecutionResult *SharedResult) {
-          mutationPoint->applyMutation(BorrowedCopy);
+//          mutationPoint->applyMutation(BorrowedCopy);
 
-          auto Mutant = Compiler.CompilerModule(BorrowedCopy);
-          ObjectFiles.push_back(Mutant.getBinary());
-
+//          auto Mutant = Compiler.CompilerModule(BorrowedCopy);
+          auto mutatedBinary = mutationPoint->applyMutation(Testee->getParent(),
+                                                            Compiler);
+          ObjectFiles.push_back(mutatedBinary);
           ExecutionResult R = Runner.runTest(BorrowedTest, ObjectFiles);
+          ObjectFiles.pop_back();
 
           assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
 
@@ -125,7 +127,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
     Results.push_back(std::move(Result));
   }
 
-  outs() << "Driver::Run::end\n";
+//  outs() << "Driver::Run::end\n";
 
   return Results;
 }
