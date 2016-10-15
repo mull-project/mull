@@ -8,17 +8,17 @@ struct ExecutionResult;
 class ProcessSandbox {
 public:
   virtual ~ProcessSandbox() {}
-  virtual ExecutionResult run(std::function<void (ExecutionResult *)> Func) = 0;
+  virtual ExecutionResult run(std::function<void (ExecutionResult *)> function) = 0;
 };
 
 class ForkProcessSandbox : public ProcessSandbox {
 public:
-  ExecutionResult run(std::function<void (ExecutionResult *)> Func);
+  ExecutionResult run(std::function<void (ExecutionResult *)> function);
 };
 
 class NullProcessSandbox : public ProcessSandbox {
 public:
-  ExecutionResult run(std::function<void (ExecutionResult *)> Func);
+  ExecutionResult run(std::function<void (ExecutionResult *)> function);
 };
 
 }

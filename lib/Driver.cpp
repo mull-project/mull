@@ -62,9 +62,11 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
     Ctx.addModule(std::move(OwnedModule));
   }
 
-  outs() << "Driver::Run::begin\n";
+  auto foundTests = Finder.findTests(Ctx);
 
-  for (auto &test : Finder.findTests(Ctx)) {
+  outs() << "Driver::Run::begin with " << foundTests.size() << " tests\n";
+
+  for (auto &test : foundTests) {
     auto ObjectFiles = AllObjectFiles();
 
     outs() << "\tDriver::Run::run test: " << test->getTestName() << "\n";
@@ -76,13 +78,18 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
     auto BorrowedTest = test.get();
     auto Result = make_unique<TestResult>(ExecResult, std::move(test));
 
-    for (auto Testee : Finder.findTestees(BorrowedTest, Ctx)) {
+    auto testees = Finder.findTestees(BorrowedTest, Ctx);
+
+    outs() << "\tagainst " << testees.size() << " testees\n";
+
+    for (auto Testee : testees) {
       auto MPoints = Finder.findMutationPoints(*Testee);
       if (MPoints.size() == 0) {
         continue;
       }
 
       outs() << "\t\tDriver::Run::process testee: " << Testee->getName() << "\n";
+      outs() << "\t\tagainst " << MPoints.size() << " mutation points\n";
 
       for (auto mutationPoint : MPoints) {
         auto ObjectFiles = AllButOne(Testee->getParent());

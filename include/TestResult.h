@@ -18,7 +18,9 @@ class Test;
 enum ExecutionStatus {
   Invalid = 0,
   Failed,
-  Passed
+  Passed,
+  Timedout,
+  Crashed
 };
 
 struct ExecutionResult {

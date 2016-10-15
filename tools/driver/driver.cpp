@@ -25,6 +25,10 @@ static const char *ExecutionResultToString(ExecutionStatus Status) {
       return "Failed";
     case Passed:
       return "Passed";
+    case Timedout:
+      return "Timedout";
+    case Crashed:
+      return "Crashed";
     case Invalid:
       llvm_unreachable("Must not reach here");
       break;
