@@ -114,7 +114,7 @@ void sqlite_exec(sqlite3 *database, const char *sql) {
 void createTables(sqlite3 *database) {
   const char *executionResult = "CREATE TABLE execution_result (status INT, duration INT);";
   const char *test = "CREATE TABLE test (test_name TEXT, execution_result_id INT);";
-  const char *mutationPoint = "CREATE TABLE mutation_point (mutation_operator TEXT, module_name TEXT, function_index INT, basic_block_index INT, instruction_index INT, filename TEXT, line_number INT);";
+  const char *mutationPoint = "CREATE TABLE mutation_point (mutation_operator TEXT, module_name TEXT, function_index INT, basic_block_index INT, instruction_index INT, filename TEXT, line_number INT, column_number INT);";
   const char *mutationResult = "CREATE TABLE mutation_result (execution_result_id INT, test_id INT, mutation_point_id INT);";
 
   sqlite_exec(database, executionResult);
@@ -156,7 +156,9 @@ void reportResults(const std::vector<std::unique_ptr<TestResult>> &results) {
         + "'" + std::to_string(mutationPoint->getAddress().getBBIndex()) + "',"
         + "'" + std::to_string(mutationPoint->getAddress().getIIndex()) + "',"
         + "'" + instruction->getDebugLoc()->getFilename().str() + "',"
-        + "'" + std::to_string(instruction->getDebugLoc()->getLine()) + "');";
+        + "'" + std::to_string(instruction->getDebugLoc()->getLine()) + "',"
+        + "'" + std::to_string(instruction->getDebugLoc()->getColumn()) + "'"
+        + ");";
 
       sqlite_exec(database, insertMutationPointSQL.c_str());
       int mutationPointID = sqlite3_last_insert_rowid(database);
