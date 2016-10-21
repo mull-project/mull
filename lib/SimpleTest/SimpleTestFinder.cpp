@@ -34,12 +34,12 @@ std::vector<std::unique_ptr<Test>> SimpleTestFinder::findTests(Context &Ctx) {
   return tests;
 }
 
-std::vector<Function *> SimpleTestFinder::findTestees(Test *Test, Context &Ctx) {
+std::vector<Testee> SimpleTestFinder::findTestees(Test *Test, Context &Ctx) {
   SimpleTest_Test *SimpleTest = dyn_cast<SimpleTest_Test>(Test);
 
   Function &F = *(SimpleTest->GetTestFunction());
 
-  std::vector<Function *> testees;
+  std::vector<Testee> testees;
 
   for (inst_iterator I = inst_begin(F), E = inst_end(F); I != E; ++I) {
     Instruction *Inst = &*I;
@@ -53,7 +53,7 @@ std::vector<Function *> SimpleTestFinder::findTestees(Test *Test, Context &Ctx) 
         for (auto &Fn : M->getFunctionList()) {
           if (Fn.getName() == F->getName()) {
             if (!Fn.empty()) {
-              testees.push_back(&Fn);
+              testees.push_back(std::make_pair(&Fn, 0));
             }
           }
         }

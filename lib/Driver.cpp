@@ -82,8 +82,8 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 
 //    outs() << "\tagainst " << testees.size() << " testees\n";
 
-    for (auto Testee : testees) {
-      auto MPoints = Finder.findMutationPoints(*Testee);
+    for (auto testee : testees) {
+      auto MPoints = Finder.findMutationPoints(*(testee.first));
       if (MPoints.size() == 0) {
         continue;
       }
@@ -91,7 +91,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 //      outs() << "\t\tDriver::Run::process testee: " << Testee->getName() << "\n";
 //      outs() << "\t\tagainst " << MPoints.size() << " mutation points\n";
 
-      auto ObjectFiles = AllButOne(Testee->getParent());
+      auto ObjectFiles = AllButOne(testee.first->getParent());
       for (auto mutationPoint : MPoints) {
 //        outs() << "\t\t\tDriver::Run::run mutant:" << "\t";
 //        mutationPoint->getOriginalValue()->print(outs());
@@ -105,7 +105,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 //          mutationPoint->applyMutation(BorrowedCopy);
 
 //          auto Mutant = Compiler.CompilerModule(BorrowedCopy);
-          auto mutatedBinary = mutationPoint->applyMutation(Testee->getParent(),
+          auto mutatedBinary = mutationPoint->applyMutation(testee.first->getParent(),
                                                             Compiler);
           ObjectFiles.push_back(mutatedBinary);
           ExecutionResult R = Runner.runTest(BorrowedTest, ObjectFiles);
@@ -119,7 +119,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
         /// It's happening now when a child crashes
         // assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
 
-        auto MutResult = make_unique<MutationResult>(R, mutationPoint);
+        auto MutResult = make_unique<MutationResult>(R, mutationPoint, testee.second);
         Result->addMutantResult(std::move(MutResult));
       }
     }
@@ -177,8 +177,8 @@ void Driver::debug_PrintTesteeNames() {
 
   for (auto &Test : Finder.findTests(Ctx)) {
     outs() << Test->getTestName() << "\n";
-    for (auto &Testee : Finder.findTestees(Test.get(), Ctx)) {
-      outs() << "\t" << Testee->getName() << "\n";
+    for (auto &testee : Finder.findTestees(Test.get(), Ctx)) {
+      outs() << "\t" << testee.first->getName() << "\n";
     }
   }
 }
@@ -192,10 +192,10 @@ void Driver::debug_PrintMutationPoints() {
 
   for (auto &Test : Finder.findTests(Ctx)) {
     outs() << Test->getTestName() << "\n";
-    for (auto &Testee : Finder.findTestees(Test.get(), Ctx)) {
-      auto MPoints = Finder.findMutationPoints(*Testee);
+    for (auto testee : Finder.findTestees(Test.get(), Ctx)) {
+      auto MPoints = Finder.findMutationPoints(*(testee.first));
       if (MPoints.size()) {
-        outs() << "\t" << Testee->getName() << "\n";
+        outs() << "\t" << testee.first->getName() << "\n";
       }
       for (auto &MPoint : MPoints) {
         outs() << "\t\t";

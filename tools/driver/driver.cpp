@@ -79,7 +79,8 @@ int main(int argc, char *argv[]) {
   Driver driver(*Cfg.get(), Loader, TestFinder, Runner);
   auto results = driver.Run();
   reportResults(results);
-  llvm_shutdown();
+  /// It does crash at the very moment
+  /// llvm_shutdown();
   return 0;
 }
 
@@ -115,7 +116,7 @@ void createTables(sqlite3 *database) {
   const char *executionResult = "CREATE TABLE execution_result (status INT, duration INT);";
   const char *test = "CREATE TABLE test (test_name TEXT, execution_result_id INT);";
   const char *mutationPoint = "CREATE TABLE mutation_point (mutation_operator TEXT, module_name TEXT, function_index INT, basic_block_index INT, instruction_index INT, filename TEXT, line_number INT, column_number INT);";
-  const char *mutationResult = "CREATE TABLE mutation_result (execution_result_id INT, test_id INT, mutation_point_id INT);";
+  const char *mutationResult = "CREATE TABLE mutation_result (execution_result_id INT, test_id INT, mutation_point_id INT, mutation_distance INT);";
 
   sqlite_exec(database, executionResult);
   sqlite_exec(database, test);
@@ -174,7 +175,8 @@ void reportResults(const std::vector<std::unique_ptr<TestResult>> &results) {
       std::string insertMutationResultSQL = std::string("INSERT INTO mutation_result VALUES (")
         + "'" + std::to_string(mutationExecutionResultID) + "',"
         + "'" + std::to_string(testID) + "',"
-        + "'" + std::to_string(mutationPointID) + "');";
+        + "'" + std::to_string(mutationPointID) + "',"
+        + "'" + std::to_string(mutation->getMutationDistance()) + "');";
 
       sqlite_exec(database, insertMutationResultSQL.c_str());
     }

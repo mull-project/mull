@@ -173,6 +173,8 @@ ExecutionResult GoogleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) 
 
   runDestructors();
 
+  //printf("%llu %s\n", result, GTest->getTestName().c_str());
+
   ExecutionResult Result;
   Result.RunningTime = duration_cast<std::chrono::nanoseconds>(elapsed).count();
 

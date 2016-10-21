@@ -31,10 +31,12 @@ struct ExecutionResult {
 class MutationResult {
   ExecutionResult Result;
   MutationPoint *MutPoint;
+  int mutationDistance;
 public:
-  MutationResult(ExecutionResult R, Mutang::MutationPoint *MP);
+  MutationResult(ExecutionResult R, Mutang::MutationPoint *MP, int distance);
   ExecutionResult getExecutionResult()  { return Result; }
   MutationPoint* getMutationPoint()     { return MutPoint; }
+  int getMutationDistance()             { return mutationDistance; }
 };
 
 class TestResult {
