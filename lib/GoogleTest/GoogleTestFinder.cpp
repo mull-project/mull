@@ -9,6 +9,7 @@
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Support/Debug.h"
+#include "llvm/Support/raw_ostream.h"
 
 #include "GoogleTest/GoogleTest_Test.h"
 
@@ -22,6 +23,11 @@
 
 using namespace Mutang;
 using namespace llvm;
+
+GoogleTestFinder::GoogleTestFinder() : TestFinder() {
+  /// FIXME: should come from outside
+  mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+}
 
 /// The algorithm is the following:
 ///
@@ -242,41 +248,51 @@ static int GetFunctionIndex(llvm::Function &Function) {
   return FIndex;
 }
 
-std::vector<llvm::Function *> GoogleTestFinder::findTestees(Test *Test, Context &Ctx) {
+std::vector<Testee> GoogleTestFinder::findTestees(Test *Test, Context &Ctx) {
   GoogleTest_Test *GTest = dyn_cast<GoogleTest_Test>(Test);
 
-  /// FIXME: Should come from the outside
-  AddMutationOperator MutOp;
-  std::vector<MutationOperator *> MutationOperators;
-  MutationOperators.push_back(&MutOp);
-
-  std::vector<Function *> Testees;
-  std::queue<Function *> Traversees;
+  std::vector<Testee> Testees;
+  std::queue<Testee> Traversees;
   std::set<Function *> CheckedFunctions;
 
-  Traversees.push(GTest->GetTestBodyFunction());
+  Traversees.push(std::make_pair(GTest->GetTestBodyFunction(), 0));
 
   while (true) {
-    Function *Traversee = Traversees.front();
-    if (Traversee != GTest->GetTestBodyFunction()) {
-      Testees.push_back(Traversee);
+    const Testee traversee = Traversees.front();
+    Function *traverseeFunction = traversee.first;
+    const int mutationDistance = traversee.second;
+
+    /// When we come to this function very first time we must ignore Traversee
+    /// since it's our starting point: Test Body Function
+    if (traverseeFunction != GTest->GetTestBodyFunction()) {
+      Testees.push_back(traversee);
     }
 
-    int FunctionIndex = GetFunctionIndex(*Traversee);
+    /// If the function we are processing is in  the same translation unit
+    /// as the test itself, then we are not looking for mutation points
+    /// in this function assuming it to be a helper function or so
+    const bool shouldLookForMutations = traverseeFunction->getParent() !=
+        GTest->GetTestBodyFunction()->getParent();
+
+    int FunctionIndex = GetFunctionIndex(*traverseeFunction);
     int BasicBlockIndex = 0;
-    int InstructionIndex = 0;
 
     std::vector<MutationPoint *> MutPoints;
 
-    for (auto &BB : Traversee->getBasicBlockList()) {
+    for (auto &BB : traverseeFunction->getBasicBlockList()) {
+
+      int InstructionIndex = 0;
 
       for (auto &Instr : BB.getInstList()) {
-        for (auto &MutOp : MutationOperators) {
-          if (MutOp->canBeApplied(Instr)) {
-            MutationPointAddress Address(FunctionIndex, BasicBlockIndex, InstructionIndex);
-            auto MP = new MutationPoint(MutOp, Address, &Instr);
-            MutPoints.push_back(MP);
-            MutationPoints.emplace_back(std::unique_ptr<MutationPoint>(MP));
+
+        if (shouldLookForMutations) {
+          for (auto &MutOp : mutationOperators) {
+            if (MutOp->canBeApplied(Instr)) {
+              MutationPointAddress Address(FunctionIndex, BasicBlockIndex, InstructionIndex);
+              auto MP = new MutationPoint(MutOp.get(), Address, &Instr);
+              MutPoints.push_back(MP);
+              MutationPoints.emplace_back(std::unique_ptr<MutationPoint>(MP));
+            }
           }
         }
 
@@ -299,7 +315,15 @@ std::vector<llvm::Function *> GoogleTestFinder::findTestees(Test *Test, Context 
               if (shouldSkipDefinedFunction(DefinedFunction)) {
                 continue;
               }
-              Traversees.push(DefinedFunction);
+              /// The code below is not actually correct
+              /// For each C++ constructor compiler can generate up to three
+              /// functions*. Which means that the distance might be incorrect
+              /// We need to find a clever way to fix this problem
+              ///
+              /// * Here is a good overview of what's going on:
+              /// http://stackoverflow.com/a/6921467/829116
+              ///
+              Traversees.push(std::make_pair(DefinedFunction, mutationDistance + 1));
             }
           }
 
@@ -309,7 +333,7 @@ std::vector<llvm::Function *> GoogleTestFinder::findTestees(Test *Test, Context 
       BasicBlockIndex++;
     } /// for (auto &BB : Traversee->getBasicBlockList())
 
-    MutationPointsRegistry.insert(std::make_pair(Traversee, MutPoints));
+    MutationPointsRegistry.insert(std::make_pair(traverseeFunction, MutPoints));
 
     Traversees.pop();
     if (Traversees.size() == 0) {

@@ -8,6 +8,7 @@
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/Value.h"
+#include "llvm/IR/Verifier.h"
 #include "llvm/Transforms/Utils/Cloning.h"
 
 #include "llvm/IR/LLVMContext.h"
@@ -20,9 +21,12 @@
 #include "MutationOperators/AddMutationOperator.h"
 
 #include <algorithm>
+#include <chrono>
+#include <fstream>
 
 using namespace llvm;
 using namespace Mutang;
+using namespace std::chrono;
 
 /// Populate Mutang::Context with modules using
 /// ModulePaths from Mutang::Config.
@@ -60,45 +64,60 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
     Ctx.addModule(std::move(OwnedModule));
   }
 
-  outs() << "Driver::Run::begin\n";
+  auto foundTests = Finder.findTests(Ctx);
 
-  for (auto &Test : Finder.findTests(Ctx)) {
+//  outs() << "Driver::Run::begin with " << foundTests.size() << " tests\n";
+
+  for (auto &test : foundTests) {
     auto ObjectFiles = AllObjectFiles();
 
-    outs() << "\tDriver::Run::run test: " << Test->getTestName() << "\n";
+//    outs() << "\tDriver::Run::run test: " << test->getTestName() << "\n";
 
     ExecutionResult ExecResult = Sandbox->run([&](ExecutionResult *SharedResult){
-      *SharedResult = Runner.runTest(Test.get(), ObjectFiles);
+      *SharedResult = Runner.runTest(test.get(), ObjectFiles);
     });
 
-    auto BorrowedTest = Test.get();
-    auto Result = make_unique<TestResult>(ExecResult, std::move(Test));
+    auto BorrowedTest = test.get();
+    auto Result = make_unique<TestResult>(ExecResult, std::move(test));
 
-    for (auto Testee : Finder.findTestees(BorrowedTest, Ctx)) {
-      outs() << "\t\tDriver::Run::process testee: " << Testee->getName() << "\n";
+    auto testees = Finder.findTestees(BorrowedTest, Ctx);
 
-      auto ObjectFiles = AllButOne(Testee->getParent());
-      for (auto &MutationPoint : Finder.findMutationPoints(*Testee)) {
-        outs() << "\t\t\tDriver::Run::run mutant:" << "\t";
-        MutationPoint->getOriginalValue()->print(outs());
-        outs() << "\n";
+//    outs() << "\tagainst " << testees.size() << " testees\n";
 
-        Module *TesteeModuleCopy = CloneModule(Testee->getParent()).release();
+    for (auto testee : testees) {
+      auto MPoints = Finder.findMutationPoints(*(testee.first));
+      if (MPoints.size() == 0) {
+        continue;
+      }
 
-        ExecutionResult R = Sandbox->run([&](ExecutionResult *SharedResult){
-          MutationPoint->applyMutation(TesteeModuleCopy);
+//      outs() << "\t\tDriver::Run::process testee: " << Testee->getName() << "\n";
+//      outs() << "\t\tagainst " << MPoints.size() << " mutation points\n";
 
-          auto Mutant = Compiler.CompilerModule(TesteeModuleCopy);
-          ObjectFiles.push_back(Mutant.getBinary());
+      auto ObjectFiles = AllButOne(testee.first->getParent());
+      for (auto mutationPoint : MPoints) {
+//        outs() << "\t\t\tDriver::Run::run mutant:" << "\t";
+//        mutationPoint->getOriginalValue()->print(outs());
+//        outs() << "\n";
 
-          *SharedResult = Runner.runTest(BorrowedTest, ObjectFiles);
+//        auto OwnedCopy = CloneModule(Testee->getParent());
+//        auto BorrowedCopy = OwnedCopy.get();
 
-          assert(SharedResult->Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
-        });
+//        verifyModule(*BorrowedCopy, &errs());
+        auto mutatedBinary = mutationPoint->applyMutation(testee.first->getParent(),
+                                                          Compiler);
+        ObjectFiles.push_back(mutatedBinary);
+        ExecutionResult R = Sandbox->run([&](ExecutionResult *SharedResult) {
+          ExecutionResult R = Runner.runTest(BorrowedTest, ObjectFiles);
+          ObjectFiles.pop_back();
+
+          assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
+
+          *SharedResult = R;
+        }, ExecResult.RunningTime * 10);
 
         assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
 
-        auto MutResult = make_unique<MutationResult>(R, MutationPoint);
+        auto MutResult = make_unique<MutationResult>(R, mutationPoint, testee.second);
         Result->addMutantResult(std::move(MutResult));
       }
     }
@@ -106,7 +125,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
     Results.push_back(std::move(Result));
   }
 
-  outs() << "Driver::Run::end\n";
+//  outs() << "Driver::Run::end\n";
 
   return Results;
 }
@@ -156,8 +175,8 @@ void Driver::debug_PrintTesteeNames() {
 
   for (auto &Test : Finder.findTests(Ctx)) {
     outs() << Test->getTestName() << "\n";
-    for (auto &Testee : Finder.findTestees(Test.get(), Ctx)) {
-      outs() << "\t" << Testee->getName() << "\n";
+    for (auto &testee : Finder.findTestees(Test.get(), Ctx)) {
+      outs() << "\t" << testee.first->getName() << "\n";
     }
   }
 }
@@ -171,15 +190,47 @@ void Driver::debug_PrintMutationPoints() {
 
   for (auto &Test : Finder.findTests(Ctx)) {
     outs() << Test->getTestName() << "\n";
-    for (auto &Testee : Finder.findTestees(Test.get(), Ctx)) {
-      outs() << "\t" << Testee->getName() << "\n";
-      for (auto &MPoint : Finder.findMutationPoints(*Testee)) {
+    for (auto testee : Finder.findTestees(Test.get(), Ctx)) {
+      auto MPoints = Finder.findMutationPoints(*(testee.first));
+      if (MPoints.size()) {
+        outs() << "\t" << testee.first->getName() << "\n";
+      }
+      for (auto &MPoint : MPoints) {
         outs() << "\t\t";
         MPoint->getOriginalValue()->print(outs());
         outs() << "\n";
+
+        if (Instruction *I = dyn_cast<Instruction>(MPoint->getOriginalValue())) {
+          auto DL = I->getDebugLoc();
+          auto Filename = DL->getFilename();
+          auto LineNo = DL->getLine();
+
+          std::string line;
+          std::ifstream SourceFile(Filename);
+          unsigned int curLine = 1;
+          if (SourceFile.is_open()) {
+            while (!SourceFile.eof()) {
+              getline(SourceFile, line);
+              if (curLine == LineNo) {
+                outs() << "\t\t";
+                outs() << Filename << ":" << LineNo;
+                outs() << "\n";
+
+                outs() << "\t\t";
+                outs() << line;
+                outs() << "\n";
+                break;
+              }
+              curLine++;
+            }
+            SourceFile.close();
+          } else {
+            errs() << "Unable to open file";
+          }
+        }
       }
-      outs() << "\n";
+//      outs() << "\n";
     }
-    outs() << "\n";
+//    outs() << "\n";
   }
 }

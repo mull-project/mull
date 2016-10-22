@@ -14,5 +14,5 @@ void MutationEngine::applyMutation(llvm::Module *M, MutationPoint &MP) {
 }
 
 void MutationEngine::revertMutation(MutationPoint &MP) {
-  MP.revertMutation();
+  //MP.revertMutation();
 }

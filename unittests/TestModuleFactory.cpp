@@ -216,7 +216,7 @@ std::unique_ptr<Module> TestModuleFactory::createGoogleTestTesteeModule() {
                         "declare i8* @_Znwm(i64) \n"
 
                         "declare void @_ZN16Hello_world_Test8TestBodyEv(%class.Hello_world_Test* %this) \n"
-                        
+
                         "");
 
   return module;

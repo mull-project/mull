@@ -3,8 +3,8 @@
 
 using namespace Mutang;
 
-MutationResult::MutationResult(ExecutionResult R, MutationPoint *MP) :
-  Result(R), MutPoint(MP) {
+MutationResult::MutationResult(ExecutionResult R, MutationPoint *MP, int distance) :
+  Result(R), MutPoint(MP), mutationDistance(distance) {
 
 }
 

@@ -1,12 +1,14 @@
 #include "MutationPoint.h"
+#include "Compiler.h"
 
 #include "MutationOperators/MutationOperator.h"
+#include "llvm/Transforms/Utils/Cloning.h"
 
 using namespace llvm;
 using namespace Mutang;
 
 MutationPoint::MutationPoint(MutationOperator *MO, MutationPointAddress Address, llvm::Value *Val) :
-  MutOp(MO), Address(Address), OriginalValue(Val), MutatedValue(nullptr) {}
+  MutOp(MO), Address(Address), OriginalValue(Val) {}
 
 MutationPoint::~MutationPoint() {}
 
@@ -22,18 +24,19 @@ Value *MutationPoint::getOriginalValue() {
   return OriginalValue;
 }
 
-Value *MutationPoint::getMutatedValue() {
-  return MutatedValue;
-}
-
 void MutationPoint::applyMutation(llvm::Module *M) {
-  assert(!MutatedValue && "Mutation already applied");
-
-  MutatedValue = MutOp->applyMutation(M, Address, *OriginalValue);
+  MutOp->applyMutation(M, Address, *OriginalValue);
 }
 
-void MutationPoint::revertMutation() {
-  assert(MutatedValue && "Mutation was not applied yet");
+object::ObjectFile *MutationPoint::applyMutation(Module *module,
+                                                 Compiler &compiler) {
+  if (mutatedBinary.getBinary() != nullptr) {
+    return mutatedBinary.getBinary();
+  }
 
-  OriginalValue = MutOp->revertMutation(*MutatedValue);
+  auto copyForMutation = CloneModule(module);
+  MutOp->applyMutation(copyForMutation.get(), Address, *OriginalValue);
+  mutatedBinary = compiler.CompilerModule(copyForMutation.get());
+
+  return mutatedBinary.getBinary();
 }

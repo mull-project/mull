@@ -5,7 +5,10 @@
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/Module.h"
+#include "llvm/IR/DebugLoc.h"
+#include "llvm/IR/DebugInfoMetadata.h"
 
+#include <fstream>
 #include <iterator>
 
 using namespace llvm;
@@ -15,14 +18,38 @@ bool AddMutationOperator::canBeApplied(Value &V) {
 
   if (BinaryOperator *BinOp = dyn_cast<BinaryOperator>(&V)) {
     BinaryOperator::BinaryOps Opcode = BinOp->getOpcode();
-    return Opcode == Instruction::Add || Opcode == Instruction::FAdd;
+
+    if (Opcode == Instruction::Add || Opcode == Instruction::FAdd) {
+      auto DL = BinOp->getDebugLoc().get();
+      if (DL) {
+        auto Filename = DL->getFilename();
+        auto LineNo = DL->getLine();
+
+        std::string line;
+        std::ifstream SourceFile(Filename);
+        assert(SourceFile.is_open());
+        unsigned int curLine = 1;
+
+        while (!SourceFile.eof()) {
+          getline(SourceFile, line);
+          if (curLine == LineNo) {
+            if (line.find("for (") == std::string::npos) {
+              return true;
+            }
+          }
+          curLine++;
+        }
+        SourceFile.close();
+      }
+      return true;
+    }
+
   }
 
   return false;
 }
 
-llvm::Value *AddMutationOperator::applyMutation(Module *M, MutationPointAddress address, Value &V) {
-
+llvm::Value *AddMutationOperator::applyMutation(Module *M, MutationPointAddress address, Value &_V) {
   /// In the following V argument is not used. Eventually it will be removed from
   /// this method's signature because it will be not relevant
   /// when mutations will be applied on copies of original module
@@ -33,29 +60,36 @@ llvm::Value *AddMutationOperator::applyMutation(Module *M, MutationPointAddress 
 
   /// TODO: Cover FAdd
   /// TODO: Take care of NUW/NSW
-  BinaryOperator *BinOp = cast<BinaryOperator>(&I);
+  BinaryOperator *binaryOperator = cast<BinaryOperator>(&I);
 
-  assert(BinOp->getOpcode() == Instruction::Add);
+  assert(binaryOperator->getOpcode() == Instruction::Add);
 
   /// NOTE: Create a new BinaryOperator with the same name as existing one
-  Instruction *Replacement = BinaryOperator::Create(Instruction::Sub,
-                                                    BinOp->getOperand(0),
-                                                    BinOp->getOperand(1),
-                                                    BinOp->getName());
 
-  assert(Replacement);
+  Instruction *replacement = BinaryOperator::Create(Instruction::Sub,
+                                                    binaryOperator->getOperand(0),
+                                                    binaryOperator->getOperand(1),
+                                                    binaryOperator->getName());
+  assert(replacement);
+  if (binaryOperator->hasNoUnsignedWrap()) {
+    replacement->setHasNoUnsignedWrap();
+  }
+
+  if (binaryOperator->hasNoSignedWrap()) {
+    replacement->setHasNoSignedWrap();
+  }
 
   /// NOTE: If I add a named instruction, and the name already exist
   /// in a basic block, then LLVM will make another unique name of it
   /// To prevent this name change we need to 'drop' the existing old name
   /// TODO: Check behaviour of 'unnamed' instructions (e.g.: %0, %2, etc.)
-  BinOp->setName("");
+  binaryOperator->setName("");
 
-  Replacement->insertAfter(BinOp);
-  BinOp->replaceAllUsesWith(Replacement);
-  BinOp->eraseFromParent();
+  replacement->insertAfter(binaryOperator);
+  binaryOperator->replaceAllUsesWith(replacement);
+  binaryOperator->eraseFromParent();
 
-  return Replacement;
+  return replacement;
 }
 
 Value *AddMutationOperator::revertMutation(Value &V)  {

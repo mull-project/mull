@@ -35,7 +35,7 @@ TEST(GoogleTestFinder, FindTest) {
   ASSERT_EQ("Hello.world", Test->getTestName());
 }
 
-TEST(GoogleTestFinder, FindTestee) {
+TEST(GoogleTestFinder, DISABLED_FindTestee) {
   auto ModuleWithTests   = TestModuleFactory.createGoogleTestTesterModule();
   auto ModuleWithTestees = TestModuleFactory.createGoogleTestTesteeModule();
 
