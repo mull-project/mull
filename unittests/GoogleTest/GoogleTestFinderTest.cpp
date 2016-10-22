@@ -50,11 +50,11 @@ TEST(GoogleTestFinder, DISABLED_FindTestee) {
 
   auto &Test = *(Tests.begin());
 
-  ArrayRef<Function *> Testees = Finder.findTestees(Test.get(), Ctx);
+  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx);
 
   ASSERT_EQ(1U, Testees.size());
 
-  Function *Testee = *(Testees.begin());
+  Function *Testee = Testees.begin()->first;
   ASSERT_FALSE(Testee->empty());
 }
 
@@ -73,11 +73,11 @@ TEST(GoogleTestFinder, DISABLED_FindMutationPoints) {
 
   auto &Test = *Tests.begin();
 
-  ArrayRef<Function *> Testees = Finder.findTestees(Test.get(), Ctx);
+  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx);
 
   ASSERT_EQ(1U, Testees.size());
 
-  Function *Testee = *(Testees.begin());
+  Function *Testee = Testees.begin()->first;
   ASSERT_FALSE(Testee->empty());
 
   AddMutationOperator MutOp;

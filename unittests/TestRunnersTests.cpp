@@ -65,9 +65,9 @@ TEST(SimpleTestRunner, runTest) {
   /// afterwards we apply single mutation and run test again
   /// expecting it to fail
 
-  ArrayRef<Function *> Testees = Finder.findTestees(Test.get(), Ctx);
+  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx);
   ASSERT_NE(0U, Testees.size());
-  Function *Testee = *(Testees.begin());
+  Function *Testee = Testees.begin()->first;
 
   AddMutationOperator MutOp;
   std::vector<MutationOperator *> MutOps({&MutOp});
@@ -135,9 +135,9 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   /// afterwards we apply single mutation and run test again
   /// expecting it to fail
 
-  ArrayRef<Function *> Testees = Finder.findTestees(Test.get(), Ctx);
+  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx);
   ASSERT_NE(0U, Testees.size());
-  Function *Testee = *(Testees.begin());
+  Function *Testee = Testees.begin()->first;
 
   AddMutationOperator MutOp;
   std::vector<MutationOperator *> MutOps({&MutOp});
