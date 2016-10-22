@@ -5,7 +5,39 @@
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/SourceMgr.h"
 
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <unistd.h>
+
 static LLVMContext GlobalCtx;
+
+static inline bool fileExists(const std::string& name) {
+  std::ifstream f(name.c_str());
+  return f.good();
+}
+
+static std::string createFixture(const char *fixtureName) {
+  char cFixtureFullPath[256];
+
+  getcwd(cFixtureFullPath, 255);
+  strcat(cFixtureFullPath, "/fixtures/");
+  strcat(cFixtureFullPath, fixtureName);
+
+  std::string fixtureFullPath(cFixtureFullPath);
+
+  assert(fileExists(fixtureFullPath));
+
+  std::ifstream file(fixtureFullPath);
+  std::string str;
+  std::string file_contents;
+  while (std::getline(file, str)) {
+    file_contents += str;
+    file_contents.push_back('\n');
+  }
+
+  return file_contents;
+}
 
 static std::unique_ptr<Module> parseIR(const char *IR) {
   SMDiagnostic Err;
@@ -22,18 +54,11 @@ static std::unique_ptr<Module> parseIR(const char *IR) {
 }
 
 std::unique_ptr<Module> TestModuleFactory::createTesterModule() {
-    auto module = parseIR("@.str = private unnamed_addr constant [6 x i8] c\"ababa\\00\", align 1 \n"
-                          "define i32 @test_count_letters() { \n"
-                          "entry: \n"
-                          "  %call = call i32 @count_letters(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @.str, i32 0, i32 0), i8 signext 97) \n"
-                          "  %cmp = icmp eq i32 %call, 3 \n"
-                          "  %conv = zext i1 %cmp to i32 \n"
-                          "  ret i32 %conv \n"
-                          "} \n"
-                          ""
-                          "declare i32 @count_letters(i8*, i8 signext) \n");
+  std::string contents = createFixture("fixture_simple_test_tester_module.ll");
 
-    return module;
+  auto module = parseIR(contents.c_str());
+
+  return module;
 }
 
 std::unique_ptr<Module> TestModuleFactory::createTesteeModule() {
@@ -177,7 +202,6 @@ std::unique_ptr<Module> TestModuleFactory::createGoogleTestTesterModule() {
                         "declare i8* @_Znwm(i64) \n"
 
                         "declare void @_ZN16Hello_world_Test8TestBodyEv(%class.Hello_world_Test* %this) \n"
-
                         "");
 
   return module;
