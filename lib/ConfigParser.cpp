@@ -30,6 +30,7 @@ std::unique_ptr<Config> ConfigParser::loadConfig(const char *filename) {
 std::unique_ptr<Config> ConfigParser::loadConfig(yaml::Stream &S) {
   /// Fork is enabled by default
   bool fork = true;
+  float timeout = 3;
 
   auto Paths = std::vector<std::string>();
 
@@ -60,7 +61,21 @@ std::unique_ptr<Config> ConfigParser::loadConfig(yaml::Stream &S) {
         fork = false;
       }
     }
+
+    else if (Key->getRawValue().equals(StringRef("timeout"))) {
+      auto Value = dyn_cast<yaml::ScalarNode>(KeyValue.getValue());
+
+      std::string timeoutStringValue = Value->getRawValue().str();
+
+      double timeoutValue = ::atof(timeoutStringValue.c_str());
+
+      assert(timeoutValue > 0 &&
+             timeoutValue < 10 &&
+             "ConfigParser error: timeout value was provided but we could not resolve it to a meaningful value.");
+
+      timeout = timeoutValue;
+    }
   }
 
-  return make_unique<Config>(Paths, fork);
+  return make_unique<Config>(Paths, fork, timeout);
 }

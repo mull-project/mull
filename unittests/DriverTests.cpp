@@ -51,7 +51,7 @@ TEST(Driver, SimpleTest) {
 
   std::vector<std::string> ModulePaths({ "foo", "bar" });
   bool doFork = false;
-  Config Cfg(ModulePaths, doFork);
+  Config Cfg(ModulePaths, doFork, MutangDefaultTimeout);
 
   FakeModuleLoader Loader;
   SimpleTestFinder TestFinder;
