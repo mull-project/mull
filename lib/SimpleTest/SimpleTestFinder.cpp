@@ -3,7 +3,7 @@
 #include "Context.h"
 #include "MutationPoint.h"
 
-#include "MutationOperators/MutationOperator.h"
+#include "MutationOperators/AddMutationOperator.h"
 
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/Instructions.h"
@@ -18,6 +18,11 @@
 
 using namespace Mutang;
 using namespace llvm;
+
+SimpleTestFinder::SimpleTestFinder() : TestFinder() {
+  /// FIXME: should come from outside
+  mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+}
 
 std::vector<std::unique_ptr<Test>> SimpleTestFinder::findTests(Context &Ctx) {
   std::vector<std::unique_ptr<Test>> tests;
@@ -63,6 +68,58 @@ std::vector<Testee> SimpleTestFinder::findTestees(Test *Test, Context &Ctx) {
   }
 
   return testees;
+}
+
+std::vector<MutationPoint *> SimpleTestFinder::findMutationPoints(llvm::Function &F) {
+  std::vector<MutationPoint *> MutPoints;
+
+  //std::vector<std::unique_ptr<MutationPoint>> MutPoints;
+
+
+  Module *PM = F.getParent();
+
+  auto FII = std::find_if(PM->begin(), PM->end(),
+                          [&F] (llvm::Function &f) {
+                            return &f == &F;
+                          });
+
+  assert(FII != PM->end() && "Expected function to be found in module");
+  int FIndex = std::distance(PM->begin(), FII);
+
+  for (Function::iterator B = F.begin(), E = F.end(); B != E; ++B) {
+    BasicBlock &BB = *B;
+
+    for (BasicBlock::iterator I = BB.begin(), E = BB.end(); I != E; ++I) {
+      Instruction &Instr = *I;
+
+      for (auto &MutOp : mutationOperators) {
+        if (MutOp->canBeApplied(Instr)) {
+          BasicBlock *BB = Instr.getParent();
+
+          auto BII = std::find_if(F.begin(), F.end(),
+                                  [&BB] (llvm::BasicBlock &bb) {
+                                    return &bb == BB;
+                                  });
+          assert(BII != F.end() && "Expected block to be found in function");
+
+          int BBIndex = std::distance(F.begin(), BII);
+
+          int IIndex = std::distance(B->begin(), I);
+
+          MutationPointAddress Address(FIndex, BBIndex, IIndex);
+
+          MutationPoint *MP = new MutationPoint(MutOp.get(), Address, &Instr);
+
+          MutPoints.push_back(MP);
+          MutationPoints.emplace_back(std::unique_ptr<MutationPoint>(MP));
+        }
+      }
+    }
+  }
+
+  MutationPointsRegistry.insert(std::make_pair(&F, MutPoints));
+
+  return MutPoints;
 }
 
 std::vector<std::unique_ptr<MutationPoint>> SimpleTestFinder::findMutationPoints(
