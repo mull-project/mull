@@ -44,11 +44,11 @@ TEST(MutationEngine, applyMutation) {
 
   auto &Test = *(Tests.begin());
 
-  ArrayRef<Function *> Testees = Finder.findTestees(Test.get(), Ctx);
+  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx);
 
   ASSERT_EQ(1U, Testees.size());
 
-  Function *Testee = *(Testees.begin());
+  Function *Testee = Testees.begin()->first;
   ASSERT_FALSE(Testee->empty());
 
   AddMutationOperator MutOp;
@@ -77,8 +77,6 @@ TEST(MutationEngine, applyMutation) {
   Instruction *NewInstruction = getFirstNamedInstruction(*Testee, ReplacedInstructionName);
   ASSERT_TRUE(isa<BinaryOperator>(NewInstruction));
   ASSERT_EQ(Instruction::Sub, NewInstruction->getOpcode());
-
-  ASSERT_EQ(MP->getMutatedValue(), NewInstruction);
 }
 
 TEST(MutationEngine, applyAndRevertMutation) {
@@ -94,11 +92,11 @@ TEST(MutationEngine, applyAndRevertMutation) {
 
   auto &Test = *(Tests.begin());
 
-  ArrayRef<Function *> Testees = Finder.findTestees(Test.get(), Ctx);
+  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx);
 
   ASSERT_EQ(1U, Testees.size());
 
-  Function *Testee = *(Testees.begin());
+  Function *Testee = Testees.begin()->first;
   ASSERT_FALSE(Testee->empty());
 
   AddMutationOperator MutOp;
@@ -112,7 +110,6 @@ TEST(MutationEngine, applyAndRevertMutation) {
   ASSERT_TRUE(isa<BinaryOperator>(MP->getOriginalValue()));
 
   Instruction *ReplacedInstruction = cast<BinaryOperator>(MP->getOriginalValue());
-  BasicBlock *ReplacedInstructionParent = ReplacedInstruction->getParent();
 
   std::string ReplacedInstructionName = ReplacedInstruction->getName().str();
 
@@ -124,26 +121,8 @@ TEST(MutationEngine, applyAndRevertMutation) {
   Instruction *OldInstruction = cast<BinaryOperator>(MP->getOriginalValue());
   ASSERT_EQ(nullptr, OldInstruction->getParent());
 
-//  Function *MutatedFunction = ModuleWithTestees->getFunction(Testee->getName());
-
   // After mutation we should have new instruction with the same name as an original instruction
   Instruction *NewInstruction = getFirstNamedInstruction(*Testee, ReplacedInstructionName);
   ASSERT_TRUE(isa<BinaryOperator>(NewInstruction));
   ASSERT_EQ(Instruction::Sub, NewInstruction->getOpcode());
-
-  ASSERT_EQ(MP->getMutatedValue(), NewInstruction);
-
-  Engine.revertMutation(*MP);
-
-  // After mutation is reverted back we should have
-  // a new instruction with the same name as an original instruction
-  Instruction *RolledBackInstruction = getFirstNamedInstruction(*Testee, ReplacedInstructionName);
-  ASSERT_TRUE(isa<BinaryOperator>(RolledBackInstruction));
-  ASSERT_EQ(Instruction::Add, RolledBackInstruction->getOpcode());
-
-  // After mutation is reverted back instruction should have the same parent again
-  ASSERT_NE(nullptr, RolledBackInstruction->getParent());
-  ASSERT_EQ(ReplacedInstructionParent, RolledBackInstruction->getParent());
-
-  ASSERT_EQ(MP->getOriginalValue(), RolledBackInstruction);
 }

@@ -109,6 +109,5 @@ std::vector<std::unique_ptr<MutationPoint>> SimpleTestFinder::findMutationPoints
     }
   }
 
-
   return MutPoints;
 }
