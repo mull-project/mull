@@ -21,10 +21,12 @@
 #include "MutationOperators/AddMutationOperator.h"
 
 #include <algorithm>
+#include <chrono>
 #include <fstream>
 
 using namespace llvm;
 using namespace Mutang;
+using namespace std::chrono;
 
 /// Populate Mutang::Context with modules using
 /// ModulePaths from Mutang::Config.
@@ -101,23 +103,19 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 //        auto BorrowedCopy = OwnedCopy.get();
 
 //        verifyModule(*BorrowedCopy, &errs());
+        auto mutatedBinary = mutationPoint->applyMutation(testee.first->getParent(),
+                                                          Compiler);
+        ObjectFiles.push_back(mutatedBinary);
         ExecutionResult R = Sandbox->run([&](ExecutionResult *SharedResult) {
-//          mutationPoint->applyMutation(BorrowedCopy);
-
-//          auto Mutant = Compiler.CompilerModule(BorrowedCopy);
-          auto mutatedBinary = mutationPoint->applyMutation(testee.first->getParent(),
-                                                            Compiler);
-          ObjectFiles.push_back(mutatedBinary);
           ExecutionResult R = Runner.runTest(BorrowedTest, ObjectFiles);
           ObjectFiles.pop_back();
 
           assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
 
           *SharedResult = R;
-        });
+        }, ExecResult.RunningTime * 10);
 
-        /// It's happening now when a child crashes
-        // assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
+        assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
 
         auto MutResult = make_unique<MutationResult>(R, mutationPoint, testee.second);
         Result->addMutantResult(std::move(MutResult));

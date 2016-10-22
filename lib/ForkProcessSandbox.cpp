@@ -3,10 +3,14 @@
 
 #include "TestResult.h"
 
+#include <chrono>
 #include <signal.h>
 #include <sys/mman.h>
 #include <sys/types.h>
+#include <thread>
 #include <unistd.h>
+
+using namespace std::chrono;
 
 pid_t mutangFork(const char *processName) {
   static int childrenCount = 0;
@@ -22,7 +26,8 @@ pid_t mutangFork(const char *processName) {
   return pid;
 }
 
-Mutang::ExecutionResult Mutang::ForkProcessSandbox::run(std::function<void (ExecutionResult *)> function) {
+Mutang::ExecutionResult Mutang::ForkProcessSandbox::run(std::function<void (ExecutionResult *)> function,
+                                                        long long timeoutMilliseconds) {
 
   void *SharedMemory = mmap(NULL,
                             sizeof(ExecutionResult),
@@ -38,11 +43,14 @@ Mutang::ExecutionResult Mutang::ForkProcessSandbox::run(std::function<void (Exec
 
     const pid_t timerPID = mutangFork("timer");
     if (timerPID == 0) {
-      sleep(3);
+      std::this_thread::sleep_for(std::chrono::milliseconds(timeoutMilliseconds));
       exit(0);
     }
 
     const pid_t workerPID = mutangFork("worker");
+
+    auto start = high_resolution_clock::now();
+
     if (workerPID == 0) {
       function(sharedResult);
       exit(0);
@@ -53,15 +61,20 @@ Mutang::ExecutionResult Mutang::ForkProcessSandbox::run(std::function<void (Exec
     if (exitedPID == timerPID) {
       /// Timer Process finished first, meaning that the worker timed out
       kill(workerPID, SIGKILL);
+      auto elapsed = high_resolution_clock::now() - start;
+
       ExecutionResult result;
       result.Status = Timedout;
+      result.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
       *sharedResult = result;
     } else {
       kill(timerPID, SIGKILL);
       /// Worker Process finished first
       /// Need to check whether it has signaled (crashed) or finished normally
       if (WIFSIGNALED(status)) {
+        auto elapsed = high_resolution_clock::now() - start;
         ExecutionResult result;
+        result.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
         result.Status = Crashed;
         *sharedResult = result;
       }
@@ -87,7 +100,8 @@ Mutang::ExecutionResult Mutang::ForkProcessSandbox::run(std::function<void (Exec
   return result;
 }
 
-Mutang::ExecutionResult Mutang::NullProcessSandbox::run(std::function<void (ExecutionResult *)> function) {
+Mutang::ExecutionResult Mutang::NullProcessSandbox::run(std::function<void (ExecutionResult *)> function,
+                                                        long long timeoutMilliseconds) {
   void *SharedMemory = malloc(sizeof(ExecutionResult));
 
   ExecutionResult *SharedResult = new (SharedMemory) ExecutionResult();

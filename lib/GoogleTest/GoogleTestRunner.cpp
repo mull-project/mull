@@ -155,11 +155,11 @@ ExecutionResult GoogleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) 
                                          make_unique<SectionMemoryManager>(),
                                          make_unique<MutangResolver>());
 
+  auto start = high_resolution_clock::now();
+
   for (auto &Ctor: GTest->GetGlobalCtors()) {
     runStaticCtor(Ctor);
   }
-
-  auto start = high_resolution_clock::now();
 
   void *MainPtr = FunctionPointer("_main");
   auto Main = ((int (*)(int, const char**))(intptr_t)MainPtr);
@@ -169,14 +169,14 @@ ExecutionResult GoogleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) 
   const char *argv[] = { "mutang", filter.c_str(), NULL };
 
   uint64_t result = Main(2, argv);
-  auto elapsed = high_resolution_clock::now() - start;
 
   runDestructors();
+  auto elapsed = high_resolution_clock::now() - start;
 
   //printf("%llu %s\n", result, GTest->getTestName().c_str());
 
   ExecutionResult Result;
-  Result.RunningTime = duration_cast<std::chrono::nanoseconds>(elapsed).count();
+  Result.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
 
   ObjectLayer.removeObjectSet(Handle);
 
