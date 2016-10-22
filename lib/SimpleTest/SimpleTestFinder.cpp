@@ -4,6 +4,7 @@
 #include "MutationPoint.h"
 
 #include "MutationOperators/AddMutationOperator.h"
+#include "MutationOperators/NegateConditionMutationOperator.h"
 
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/Instructions.h"
@@ -19,9 +20,8 @@
 using namespace Mutang;
 using namespace llvm;
 
-SimpleTestFinder::SimpleTestFinder() : TestFinder() {
-  /// FIXME: should come from outside
-  mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+SimpleTestFinder::SimpleTestFinder(std::vector<std::unique_ptr<MutationOperator>> mutationOperators) : TestFinder(), mutationOperators(std::move(mutationOperators)) {
+
 }
 
 std::vector<std::unique_ptr<Test>> SimpleTestFinder::findTests(Context &Ctx) {
@@ -31,6 +31,9 @@ std::vector<std::unique_ptr<Test>> SimpleTestFinder::findTests(Context &Ctx) {
     auto &x = M->getFunctionList();
     for (auto &Fn : x) {
       if (Fn.getName().startswith("test_")) {
+
+        printf("SimpleTestFinder::findTests - found function %s\n", Fn.getName().str().c_str());
+
         tests.emplace_back(make_unique<SimpleTest_Test>(&Fn));
       }
     }
@@ -57,7 +60,11 @@ std::vector<Testee> SimpleTestFinder::findTestees(Test *Test, Context &Ctx) {
       for (auto &M : Ctx.getModules()) {
         for (auto &Fn : M->getFunctionList()) {
           if (Fn.getName() == F->getName()) {
+
+            // Ignore export declarations.
             if (!Fn.empty()) {
+              printf("SimpleTestFinder::findTestees - found function %s\n", Fn.getName().str().c_str());
+
               testees.push_back(std::make_pair(&Fn, 0));
             }
           }
@@ -108,6 +115,8 @@ std::vector<MutationPoint *> SimpleTestFinder::findMutationPoints(llvm::Function
 
           MutationPointAddress Address(FIndex, BBIndex, IIndex);
 
+          printf("Found Mutation point at address: %d %d %d\n", FIndex, BBIndex, IIndex);
+
           MutationPoint *MP = new MutationPoint(MutOp.get(), Address, &Instr);
 
           MutPoints.push_back(MP);
@@ -125,8 +134,11 @@ std::vector<MutationPoint *> SimpleTestFinder::findMutationPoints(llvm::Function
 std::vector<std::unique_ptr<MutationPoint>> SimpleTestFinder::findMutationPoints(
                           std::vector<MutationOperator *> &MutationOperators,
                           llvm::Function &F) {
+
+  assert(false && "should not reach here");
   std::vector<std::unique_ptr<MutationPoint>> MutPoints;
 
+  /*
 
   Module *PM = F.getParent();
 
@@ -165,6 +177,7 @@ std::vector<std::unique_ptr<MutationPoint>> SimpleTestFinder::findMutationPoints
       }
     }
   }
+  */
 
   return MutPoints;
 }

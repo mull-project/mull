@@ -27,7 +27,7 @@ class SimpleTestFinder : public TestFinder {
   std::map<llvm::Function *, std::vector<MutationPoint *>> MutationPointsRegistry;
 
 public:
-  SimpleTestFinder();
+  SimpleTestFinder(std::vector<std::unique_ptr<MutationOperator>> mutationOperators);
 
   // Finds all methods that start with "test_"
   std::vector<std::unique_ptr<Test>> findTests(Context &Ctx) override;

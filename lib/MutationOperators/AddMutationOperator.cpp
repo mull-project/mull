@@ -111,6 +111,9 @@ llvm::Value *AddMutationOperator::applyMutation(Module *M, MutationPointAddress 
 }
 
 Value *AddMutationOperator::revertMutation(Value &V)  {
+  LLVM_BUILTIN_UNREACHABLE;
+
+  /*
   /// TODO: Cover FSub
   /// TODO: Take care of NUW/NSW
   BinaryOperator *BinOp = cast<BinaryOperator>(&V);
@@ -136,4 +139,5 @@ Value *AddMutationOperator::revertMutation(Value &V)  {
   BinOp->eraseFromParent();
 
   return Replacement;
+   */
 }

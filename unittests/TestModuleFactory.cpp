@@ -2,6 +2,7 @@
 #include "TestModuleFactory.h"
 
 #include "llvm/AsmParser/Parser.h"
+#include "llvm/IR/Verifier.h"
 #include "llvm/Support/Debug.h"
 #include "llvm/Support/SourceMgr.h"
 
@@ -50,7 +51,25 @@ static std::unique_ptr<Module> parseIR(const char *IR) {
 
   assert(M && "Expected module to be parsed correctly");
 
+  assert(!llvm::verifyModule(*M, &dbgs()));
+
   return M;
+}
+
+std::unique_ptr<Module> TestModuleFactory::create_SimpleTest_NegateCondition_Tester_Module() {
+  std::string contents = createFixture("fixture_simple_test_negate_condition_operator_tester.ll");
+
+  auto module = parseIR(contents.c_str());
+
+  return module;
+}
+
+std::unique_ptr<Module> TestModuleFactory::create_SimpleTest_NegateCondition_Testee_Module() {
+  std::string contents = createFixture("fixture_simple_test_negate_condition_operator_testee.ll");
+
+  auto module = parseIR(contents.c_str());
+
+  return module;
 }
 
 std::unique_ptr<Module> TestModuleFactory::createTesterModule() {

@@ -66,12 +66,12 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 
   auto foundTests = Finder.findTests(Ctx);
 
-//  outs() << "Driver::Run::begin with " << foundTests.size() << " tests\n";
+  //outs() << "Driver::Run::begin with " << foundTests.size() << " tests\n";
 
   for (auto &test : foundTests) {
     auto ObjectFiles = AllObjectFiles();
 
-//    outs() << "\tDriver::Run::run test: " << test->getTestName() << "\n";
+    //outs() << "\tDriver::Run::run test: " << test->getTestName() << "\n";
 
     ExecutionResult ExecResult = Sandbox->run([&](ExecutionResult *SharedResult){
       *SharedResult = Runner.runTest(test.get(), ObjectFiles);
@@ -82,7 +82,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 
     auto testees = Finder.findTestees(BorrowedTest, Ctx);
 
-//    outs() << "\tagainst " << testees.size() << " testees\n";
+    //outs() << "\tagainst " << testees.size() << " testees\n";
 
     for (auto testee : testees) {
       auto MPoints = Finder.findMutationPoints(*(testee.first));
@@ -90,8 +90,8 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
         continue;
       }
 
-//      outs() << "\t\tDriver::Run::process testee: " << Testee->getName() << "\n";
-//      outs() << "\t\tagainst " << MPoints.size() << " mutation points\n";
+      //outs() << "\t\tDriver::Run::process testee: " << testee.first->getName() << "\n";
+      //outs() << "\t\tagainst " << MPoints.size() << " mutation points\n";
 
       auto ObjectFiles = AllButOne(testee.first->getParent());
       for (auto mutationPoint : MPoints) {

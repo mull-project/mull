@@ -38,8 +38,12 @@ TEST(SimpleTestRunner, runTest) {
   Ctx.addModule(std::move(OwnedModuleWithTests));
   Ctx.addModule(std::move(OwnedModuleWithTestees));
 
-  SimpleTestFinder Finder;
-  auto Tests = Finder.findTests(Ctx);
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+
+  SimpleTestFinder testFinder(std::move(mutationOperators));
+
+  auto Tests = testFinder.findTests(Ctx);
 
   ASSERT_NE(0U, Tests.size());
 
@@ -65,16 +69,16 @@ TEST(SimpleTestRunner, runTest) {
   /// afterwards we apply single mutation and run test again
   /// expecting it to fail
 
-  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx);
+  ArrayRef<Testee> Testees = testFinder.findTestees(Test.get(), Ctx);
   ASSERT_NE(0U, Testees.size());
   Function *Testee = Testees.begin()->first;
 
   AddMutationOperator MutOp;
   std::vector<MutationOperator *> MutOps({&MutOp});
 
-  std::vector<std::unique_ptr<MutationPoint>> MutationPoints = Finder.findMutationPoints(MutOps, *Testee);
+  std::vector<MutationPoint *> MutationPoints = testFinder.findMutationPoints(*Testee);
 
-  MutationPoint *MP = (*(MutationPoints.begin())).get();
+  MutationPoint *MP = (*(MutationPoints.begin()));
   MutationEngine Engine;
   Engine.applyMutation(Testee->getParent(), *MP);
 
@@ -111,13 +115,16 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   Ctx.addModule(std::move(OwnedModuleWithTests));
   Ctx.addModule(std::move(OwnedModuleWithTestees));
 
-  SimpleTestFinder Finder;
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+
+  SimpleTestFinder Finder(std::move(mutationOperators));
+
   auto Tests = Finder.findTests(Ctx);
 
   ASSERT_NE(0U, Tests.size());
 
   auto &Test = *(Tests.begin());
-
 
   auto Obj = Compiler.compileModule(ModuleWithTests);
   ObjectFiles.push_back(Obj.getBinary());
@@ -142,9 +149,9 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   AddMutationOperator MutOp;
   std::vector<MutationOperator *> MutOps({&MutOp});
 
-  std::vector<std::unique_ptr<MutationPoint>> MutationPoints = Finder.findMutationPoints(MutOps, *Testee);
+  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(*Testee);
 
-  MutationPoint *MP = (*(MutationPoints.begin())).get();
+  MutationPoint *MP = (*(MutationPoints.begin()));
   MutationEngine Engine;
   Engine.applyMutation(Testee->getParent(), *MP);
 
@@ -178,8 +185,12 @@ TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
   Ctx.addModule(std::move(OwnedModuleWithTests));
   Ctx.addModule(std::move(OwnedModuleWithTestees));
 
-  SimpleTestFinder Finder;
-  auto Tests = Finder.findTests(Ctx);
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+
+  SimpleTestFinder testFinder(std::move(mutationOperators));
+
+  auto Tests = testFinder.findTests(Ctx);
 
   ASSERT_NE(0U, Tests.size());
 
