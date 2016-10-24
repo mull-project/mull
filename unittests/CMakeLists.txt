@@ -28,3 +28,9 @@ target_link_libraries(MutangUnitTests
   LLVMCore
   LLVMSupport
 )
+
+add_custom_command(TARGET MutangUnitTests POST_BUILD
+                   COMMAND ${CMAKE_COMMAND} -E create_symlink
+                   ${CMAKE_CURRENT_LIST_DIR}/fixtures $<TARGET_FILE_DIR:MutangUnitTests>/fixtures)
+
+
