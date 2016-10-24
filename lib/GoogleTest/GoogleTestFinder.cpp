@@ -234,26 +234,14 @@ static bool shouldSkipDefinedFunction(llvm::Function *DefinedFunction) {
   return false;
 }
 
-static int GetFunctionIndex(llvm::Function &Function) {
-  auto PM = Function.getParent();
-
-  auto FII = std::find_if(PM->begin(), PM->end(),
-                          [&Function] (llvm::Function &f) {
-                            return &f == &Function;
-                          });
-
-  assert(FII != PM->end() && "Expected function to be found in module");
-  int FIndex = std::distance(PM->begin(), FII);
-
-  return FIndex;
-}
-
 std::vector<Testee> GoogleTestFinder::findTestees(Test *Test, Context &Ctx) {
   GoogleTest_Test *GTest = dyn_cast<GoogleTest_Test>(Test);
 
   std::vector<Testee> Testees;
   std::queue<Testee> Traversees;
   std::set<Function *> CheckedFunctions;
+
+  Module *testBodyModule = GTest->GetTestBodyFunction()->getParent();
 
   Traversees.push(std::make_pair(GTest->GetTestBodyFunction(), 0));
 
@@ -262,78 +250,53 @@ std::vector<Testee> GoogleTestFinder::findTestees(Test *Test, Context &Ctx) {
     Function *traverseeFunction = traversee.first;
     const int mutationDistance = traversee.second;
 
-    /// When we come to this function very first time we must ignore Traversee
-    /// since it's our starting point: Test Body Function
-    if (traverseeFunction != GTest->GetTestBodyFunction()) {
+    /// If the function we are processing is in the same translation unit
+    /// as the test itself, then we are not looking for mutation points
+    /// in this function assuming it to be a helper function, or the test itself
+    if (traverseeFunction->getParent() != testBodyModule) {
       Testees.push_back(traversee);
     }
 
-    /// If the function we are processing is in  the same translation unit
-    /// as the test itself, then we are not looking for mutation points
-    /// in this function assuming it to be a helper function or so
-    const bool shouldLookForMutations = traverseeFunction->getParent() !=
-        GTest->GetTestBodyFunction()->getParent();
+    for (inst_iterator I = inst_begin(traverseeFunction),
+         E = inst_end(traverseeFunction); I != E; ++I) {
 
-    int FunctionIndex = GetFunctionIndex(*traverseeFunction);
-    int BasicBlockIndex = 0;
+      auto instruction = &*I;
 
-    std::vector<MutationPoint *> MutPoints;
+      CallInst *callInstruction = dyn_cast<CallInst>(instruction);
+      if (callInstruction == nullptr) {
+        continue;
+      }
 
-    for (auto &BB : traverseeFunction->getBasicBlockList()) {
+      int callOperandIndex = callInstruction->getNumOperands() - 1;
+      Value *callOperand = callInstruction->getOperand(callOperandIndex);
+      Function *functionOperand = dyn_cast<Function>(callOperand);
 
-      int InstructionIndex = 0;
+      if (!functionOperand) {
+        continue;
+      }
 
-      for (auto &Instr : BB.getInstList()) {
+      if (Function *DefinedFunction = Ctx.lookupDefinedFunction(functionOperand->getName())) {
+        auto FunctionWasNotProcessed = CheckedFunctions.find(DefinedFunction) == CheckedFunctions.end();
+        CheckedFunctions.insert(DefinedFunction);
 
-        if (shouldLookForMutations) {
-          for (auto &MutOp : mutationOperators) {
-            if (MutOp->canBeApplied(Instr)) {
-              MutationPointAddress Address(FunctionIndex, BasicBlockIndex, InstructionIndex);
-              auto MP = new MutationPoint(MutOp.get(), Address, &Instr);
-              MutPoints.push_back(MP);
-              MutationPoints.emplace_back(std::unique_ptr<MutationPoint>(MP));
-            }
-          }
-        }
-
-        InstructionIndex++;
-
-        if (CallInst *CI = dyn_cast<CallInst>(&Instr)) {
-          Value *V = CI->getOperand(CI->getNumOperands() - 1);
-          Function *CIF = dyn_cast<Function>(V);
-
-          if (!CIF) {
+        if (FunctionWasNotProcessed) {
+          /// Filtering
+          if (shouldSkipDefinedFunction(DefinedFunction)) {
             continue;
           }
+          /// The code below is not actually correct
+          /// For each C++ constructor compiler can generate up to three
+          /// functions*. Which means that the distance might be incorrect
+          /// We need to find a clever way to fix this problem
+          ///
+          /// * Here is a good overview of what's going on:
+          /// http://stackoverflow.com/a/6921467/829116
+          ///
+          Traversees.push(std::make_pair(DefinedFunction, mutationDistance + 1));
+        }
+      }
 
-          if (Function *DefinedFunction = Ctx.lookupDefinedFunction(CIF->getName())) {
-            auto FunctionWasNotProcessed = CheckedFunctions.find(DefinedFunction) == CheckedFunctions.end();
-            CheckedFunctions.insert(DefinedFunction);
-
-            if (FunctionWasNotProcessed) {
-              /// Filtering
-              if (shouldSkipDefinedFunction(DefinedFunction)) {
-                continue;
-              }
-              /// The code below is not actually correct
-              /// For each C++ constructor compiler can generate up to three
-              /// functions*. Which means that the distance might be incorrect
-              /// We need to find a clever way to fix this problem
-              ///
-              /// * Here is a good overview of what's going on:
-              /// http://stackoverflow.com/a/6921467/829116
-              ///
-              Traversees.push(std::make_pair(DefinedFunction, mutationDistance + 1));
-            }
-          }
-
-        } /// if (CallInst *CI = dyn_cast<CallInst>(&Instr))
-
-      } /// for (auto &Instr : BB.getInstList())
-      BasicBlockIndex++;
-    } /// for (auto &BB : Traversee->getBasicBlockList())
-
-    MutationPointsRegistry.insert(std::make_pair(traverseeFunction, MutPoints));
+    }
 
     Traversees.pop();
     if (Traversees.size() == 0) {
@@ -345,9 +308,23 @@ std::vector<Testee> GoogleTestFinder::findTestees(Test *Test, Context &Ctx) {
 }
 
 std::vector<MutationPoint *> GoogleTestFinder::findMutationPoints(
-                                                          llvm::Function &F) {
-  auto &Bucket = MutationPointsRegistry.at(&F);
-  return Bucket;
+                                                      llvm::Function &testee) {
+
+  if (MutationPointsRegistry.count(&testee) != 0) {
+    return MutationPointsRegistry.at(&testee);
+  }
+
+  std::vector<MutationPoint *> points;
+
+  for (auto &mutationOperator : mutationOperators) {
+    for (auto point : mutationOperator->getMutationPoints(&testee)) {
+      points.push_back(point);
+      MutationPoints.emplace_back(std::unique_ptr<MutationPoint>(point));
+    }
+  }
+
+  MutationPointsRegistry.insert(std::make_pair(&testee, points));
+  return points;
 }
 
 std::vector<std::unique_ptr<MutationPoint>> GoogleTestFinder::findMutationPoints(

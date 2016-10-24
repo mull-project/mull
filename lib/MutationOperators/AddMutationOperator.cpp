@@ -14,33 +14,51 @@
 using namespace llvm;
 using namespace Mutang;
 
+static int GetFunctionIndex(llvm::Function *function) {
+  auto PM = function->getParent();
+
+  auto FII = std::find_if(PM->begin(), PM->end(),
+                          [function] (llvm::Function &f) {
+                            return &f == function;
+                          });
+
+  assert(FII != PM->end() && "Expected function to be found in module");
+  int FIndex = std::distance(PM->begin(), FII);
+
+  return FIndex;
+}
+
+std::vector<MutationPoint *> AddMutationOperator::getMutationPoints(
+                                                    llvm::Function *function) {
+  int functionIndex = GetFunctionIndex(function);
+  int basicBlockIndex = 0;
+
+  std::vector<MutationPoint *> mutationPoints;
+
+  for (auto &basicBlock : function->getBasicBlockList()) {
+
+    int instructionIndex = 0;
+
+    for (auto &instruction : basicBlock.getInstList()) {
+      if (canBeApplied(instruction)) {
+        MutationPointAddress address(functionIndex, basicBlockIndex, instructionIndex);
+        auto mutationPoint = new MutationPoint(this, address, &instruction);
+        mutationPoints.push_back(mutationPoint);
+      }
+      instructionIndex++;
+    }
+    basicBlockIndex++;
+  }
+
+  return mutationPoints;
+}
+
 bool AddMutationOperator::canBeApplied(Value &V) {
 
   if (BinaryOperator *BinOp = dyn_cast<BinaryOperator>(&V)) {
     BinaryOperator::BinaryOps Opcode = BinOp->getOpcode();
 
     if (Opcode == Instruction::Add || Opcode == Instruction::FAdd) {
-      auto DL = BinOp->getDebugLoc().get();
-      if (DL) {
-        auto Filename = DL->getFilename();
-        auto LineNo = DL->getLine();
-
-        std::string line;
-        std::ifstream SourceFile(Filename);
-        assert(SourceFile.is_open());
-        unsigned int curLine = 1;
-
-        while (!SourceFile.eof()) {
-          getline(SourceFile, line);
-          if (curLine == LineNo) {
-            if (line.find("for (") == std::string::npos) {
-              return true;
-            }
-          }
-          curLine++;
-        }
-        SourceFile.close();
-      }
       return true;
     }
 
