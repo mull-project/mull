@@ -234,20 +234,6 @@ static bool shouldSkipDefinedFunction(llvm::Function *DefinedFunction) {
   return false;
 }
 
-static int GetFunctionIndex(llvm::Function &Function) {
-  auto PM = Function.getParent();
-
-  auto FII = std::find_if(PM->begin(), PM->end(),
-                          [&Function] (llvm::Function &f) {
-                            return &f == &Function;
-                          });
-
-  assert(FII != PM->end() && "Expected function to be found in module");
-  int FIndex = std::distance(PM->begin(), FII);
-
-  return FIndex;
-}
-
 std::vector<Testee> GoogleTestFinder::findTestees(Test *Test, Context &Ctx) {
   GoogleTest_Test *GTest = dyn_cast<GoogleTest_Test>(Test);
 
@@ -328,33 +314,17 @@ std::vector<MutationPoint *> GoogleTestFinder::findMutationPoints(
     return MutationPointsRegistry.at(&testee);
   }
 
-  int functionIndex = GetFunctionIndex(testee);
-  int basicBlockIndex = 0;
+  std::vector<MutationPoint *> points;
 
-  std::vector<MutationPoint *> mutationPoints;
-
-  for (auto &basicBlock : testee.getBasicBlockList()) {
-
-    int instructionIndex = 0;
-
-    for (auto &instruction : basicBlock.getInstList()) {
-      for (auto &mutationOperator : mutationOperators) {
-        if (mutationOperator->canBeApplied(instruction)) {
-          MutationPointAddress address(functionIndex, basicBlockIndex, instructionIndex);
-          auto mutationPoint = new MutationPoint(mutationOperator.get(), address, &instruction);
-          mutationPoints.push_back(mutationPoint);
-          MutationPoints.emplace_back(std::unique_ptr<MutationPoint>(mutationPoint));
-        }
-      }
-
-      instructionIndex++;
-
+  for (auto &mutationOperator : mutationOperators) {
+    for (auto point : mutationOperator->getMutationPoints(&testee)) {
+      points.push_back(point);
+      MutationPoints.emplace_back(std::unique_ptr<MutationPoint>(point));
     }
-    basicBlockIndex++;
   }
 
-  MutationPointsRegistry.insert(std::make_pair(&testee, mutationPoints));
-  return mutationPoints;
+  MutationPointsRegistry.insert(std::make_pair(&testee, points));
+  return points;
 }
 
 std::vector<std::unique_ptr<MutationPoint>> GoogleTestFinder::findMutationPoints(
