@@ -8,6 +8,7 @@
 #include "llvm/IR/DataLayout.h"
 
 using namespace llvm;
+using namespace llvm::object;
 using namespace Mutang;
 
 Compiler::Compiler() {
@@ -16,21 +17,21 @@ Compiler::Compiler() {
   InitializeNativeTargetAsmParser();
 }
 
-object::OwningBinary<object::ObjectFile> Compiler::CompilerModule(Module *M) {
-  assert(M);
+OwningBinary<ObjectFile> Compiler::compileModule(Module *module) {
+  assert(module);
 
   /// FIXME: Initialize everything once
-  std::unique_ptr<TargetMachine> TM(
+  std::unique_ptr<TargetMachine> targetMachine(
                               EngineBuilder().selectTarget(Triple(), "", "",
                               SmallVector<std::string, 1>()));
 
-  assert(TM && "Can't create TargetMachine");
+  assert(targetMachine && "Can't create TargetMachine");
 
-  if (M->getDataLayout().isDefault()) {
-    M->setDataLayout(TM->createDataLayout());
+  if (module->getDataLayout().isDefault()) {
+    module->setDataLayout(targetMachine->createDataLayout());
   }
 
-  orc::SimpleCompiler Compiler(*TM);
+  orc::SimpleCompiler compiler(*targetMachine);
 
-  return Compiler(*M);
+  return compiler(*module);
 }

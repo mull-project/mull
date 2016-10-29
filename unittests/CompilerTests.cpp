@@ -17,7 +17,7 @@ TEST(Compiler, CompileModule) {
   Compiler Compiler;
 
   auto SomeModule = TestModuleFactory.createTesterModule();
-  auto Binary = Compiler.CompilerModule(SomeModule.get());
+  auto Binary = Compiler.compileModule(SomeModule.get());
 
   ASSERT_NE(nullptr, Binary.getBinary());
 }

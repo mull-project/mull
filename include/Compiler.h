@@ -10,10 +10,13 @@ class Module;
 };
 
 namespace Mutang {
+
+using namespace llvm;
+using namespace llvm::object;
+
 class Compiler {
 public:
   Compiler();
-  /// FIXME: Fix typo
-  llvm::object::OwningBinary<llvm::object::ObjectFile> CompilerModule(llvm::Module *M);
+  OwningBinary<ObjectFile> compileModule(Module *module);
 };
 }

@@ -46,13 +46,13 @@ TEST(SimpleTestRunner, runTest) {
   auto &Test = *(Tests.begin());
 
   {
-    auto Obj = Compiler.CompilerModule(ModuleWithTests);
+    auto Obj = Compiler.compileModule(ModuleWithTests);
     ObjectFiles.push_back(Obj.getBinary());
     OwnedObjectFiles.push_back(std::move(Obj));
   }
 
   {
-    auto Obj = Compiler.CompilerModule(ModuleWithTestees);
+    auto Obj = Compiler.compileModule(ModuleWithTestees);
     ObjectFiles.push_back(Obj.getBinary());
     OwnedObjectFiles.push_back(std::move(Obj));
   }
@@ -79,13 +79,13 @@ TEST(SimpleTestRunner, runTest) {
   Engine.applyMutation(Testee->getParent(), *MP);
 
   {
-    auto Obj = Compiler.CompilerModule(ModuleWithTests);
+    auto Obj = Compiler.compileModule(ModuleWithTests);
     ObjectFiles.push_back(Obj.getBinary());
     OwnedObjectFiles.push_back(std::move(Obj));
   }
 
   {
-    auto Obj = Compiler.CompilerModule(ModuleWithTestees);
+    auto Obj = Compiler.compileModule(ModuleWithTestees);
     ObjectFiles.push_back(Obj.getBinary());
     OwnedObjectFiles.push_back(std::move(Obj));
   }
@@ -119,11 +119,11 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   auto &Test = *(Tests.begin());
 
 
-  auto Obj = Compiler.CompilerModule(ModuleWithTests);
+  auto Obj = Compiler.compileModule(ModuleWithTests);
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
-  Obj = Compiler.CompilerModule(ModuleWithTestees);
+  Obj = Compiler.compileModule(ModuleWithTestees);
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
@@ -148,11 +148,11 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   MutationEngine Engine;
   Engine.applyMutation(Testee->getParent(), *MP);
 
-  Obj = Compiler.CompilerModule(ModuleWithTests);
+  Obj = Compiler.compileModule(ModuleWithTests);
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
-  Obj = Compiler.CompilerModule(ModuleWithTestees);
+  Obj = Compiler.compileModule(ModuleWithTestees);
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
@@ -187,11 +187,11 @@ TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
 
   llvm::sys::DynamicLibrary::LoadLibraryPermanently("/usr/lib/libsqlite3.dylib");
 
-  auto Obj = Compiler.CompilerModule(ModuleWithTestees);
+  auto Obj = Compiler.compileModule(ModuleWithTestees);
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
-  Obj = Compiler.CompilerModule(ModuleWithTests);
+  Obj = Compiler.compileModule(ModuleWithTests);
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 

@@ -46,7 +46,6 @@ public:
 
   MutationPointAddress getAddress();
   llvm::Value *getOriginalValue();
-  //llvm::Value *getMutatedValue();
 
   void applyMutation(llvm::Module *M);
   llvm::object::ObjectFile *applyMutation(llvm::Module *module,

@@ -58,7 +58,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
     assert(OwnedModule && "Can't load module");
 
     auto Module = OwnedModule.get();
-    auto ObjectFile = Compiler.CompilerModule(Module);
+    auto ObjectFile = Compiler.compileModule(Module);
     InnerCache.insert(std::make_pair(Module, std::move(ObjectFile)));
 
     Ctx.addModule(std::move(OwnedModule));

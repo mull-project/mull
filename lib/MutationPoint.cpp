@@ -36,7 +36,7 @@ object::ObjectFile *MutationPoint::applyMutation(Module *module,
 
   auto copyForMutation = CloneModule(module);
   MutOp->applyMutation(copyForMutation.get(), Address, *OriginalValue);
-  mutatedBinary = compiler.CompilerModule(copyForMutation.get());
+  mutatedBinary = compiler.compileModule(copyForMutation.get());
 
   return mutatedBinary.getBinary();
 }
