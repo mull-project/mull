@@ -3,21 +3,21 @@
 #include <string>
 #include <vector>
 
-static float MutangDefaultTimeout = 3;
+static int MutangDefaultTimeout = 3000;
 
 namespace Mutang {
 
 class Config {
-  std::vector<std::string> BitcodePaths;
+  std::vector<std::string> bitcodePaths;
   bool fork;
-  float timeout;
+  int timeout;
 
 public:
-  Config(const std::vector<std::string> &Paths, bool fork, float timeout) :
-    BitcodePaths(Paths), fork(fork), timeout(timeout) {}
+  Config(const std::vector<std::string> &paths, bool fork, int timeout) :
+    bitcodePaths(paths), fork(fork), timeout(timeout) {}
 
-  const std::vector<std::string> &GetBitcodePaths() const {
-      return BitcodePaths;
+  const std::vector<std::string> &getBitcodePaths() const {
+      return bitcodePaths;
   }
 
   bool getFork() const {

@@ -11,71 +11,69 @@ using namespace llvm;
 using namespace Mutang;
 
 std::unique_ptr<Config> ConfigParser::loadConfig(const char *filename) {
-  SourceMgr SM;
+  SourceMgr sourceManager;
 
-  auto BufOrErr = MemoryBuffer::getFile(filename);
+  auto bufferOrError = MemoryBuffer::getFile(filename);
 
-  if (!BufOrErr) {
+  if (!bufferOrError) {
     printf("can't read config file '%s'\n", filename);
     exit(1);
   }
 
-  auto Buffer = BufOrErr->get();
+  auto buffer = bufferOrError->get();
 
-  yaml::Stream YAMLBuf(Buffer->getMemBufferRef(), SM);
+  yaml::Stream yamlBuffer(buffer->getMemBufferRef(), sourceManager);
 
-  return loadConfig(YAMLBuf);
+  return loadConfig(yamlBuffer);
 }
 
-std::unique_ptr<Config> ConfigParser::loadConfig(yaml::Stream &S) {
+std::unique_ptr<Config> ConfigParser::loadConfig(yaml::Stream &stream) {
   /// Fork is enabled by default
   bool fork = true;
-  float timeout = 3;
+  float timeout = MutangDefaultTimeout;
+  auto paths = std::vector<std::string>();
 
-  auto Paths = std::vector<std::string>();
+  yaml::Node *rootNode = stream.begin()->getRoot();
+  assert(rootNode && "Expected config file to be a valid yaml document");
 
-  yaml::Node *RootNode = S.begin()->getRoot();
-  assert(RootNode && "Expected config file to be a valid yaml document");
+  auto mappingNode = dyn_cast<yaml::MappingNode>(rootNode);
 
-  auto MappingNode = dyn_cast<yaml::MappingNode>(RootNode);
+  for (auto &keyValue : *mappingNode) {
+    auto key = dyn_cast<yaml::ScalarNode>(keyValue.getKey());
 
-  for (auto &KeyValue : *MappingNode) {
-    auto Key = dyn_cast<yaml::ScalarNode>(KeyValue.getKey());
+    if (key->getRawValue().equals(StringRef("bitcode_files"))) {
+      auto values = dyn_cast<yaml::SequenceNode>(keyValue.getValue());
 
-    if (Key->getRawValue().equals(StringRef("bitcode_files"))) {
-      auto Values = dyn_cast<yaml::SequenceNode>(KeyValue.getValue());
-
-      for (auto &V : *Values) {
-        auto BitcodePath = dyn_cast<yaml::ScalarNode>(&V);
-        assert(BitcodePath && "bitcode_files should contain strings (scalars)");
-        Paths.push_back(BitcodePath->getRawValue().str());
+      for (auto &value : *values) {
+        auto bitcodePath = dyn_cast<yaml::ScalarNode>(&value);
+        assert(bitcodePath && "bitcode_files should contain strings (scalars)");
+        paths.push_back(bitcodePath->getRawValue().str());
       }
     }
 
-    else if (Key->getRawValue().equals(StringRef("fork"))) {
-      auto Value = dyn_cast<yaml::ScalarNode>(KeyValue.getValue());
+    else if (key->getRawValue().equals(StringRef("fork"))) {
+      auto value = dyn_cast<yaml::ScalarNode>(keyValue.getValue());
 
-      if (Value->getRawValue().equals(StringRef("true"))) {
+      if (value->getRawValue().equals(StringRef("true"))) {
         fork = true;
       } else {
         fork = false;
       }
     }
 
-    else if (Key->getRawValue().equals(StringRef("timeout"))) {
-      auto Value = dyn_cast<yaml::ScalarNode>(KeyValue.getValue());
+    else if (key->getRawValue().equals(StringRef("timeout"))) {
+      auto value = dyn_cast<yaml::ScalarNode>(keyValue.getValue());
 
-      std::string timeoutStringValue = Value->getRawValue().str();
+      std::string timeoutStringValue = value->getRawValue().str();
 
       double timeoutValue = ::atof(timeoutStringValue.c_str());
 
       assert(timeoutValue > 0 &&
-             timeoutValue < 10 &&
              "ConfigParser error: timeout value was provided but we could not resolve it to a meaningful value.");
 
       timeout = timeoutValue;
     }
   }
 
-  return make_unique<Config>(Paths, fork, timeout);
+  return make_unique<Config>(paths, fork, timeout);
 }

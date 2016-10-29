@@ -16,7 +16,7 @@ namespace Mutang {
 
 class ConfigParser {
 public:
-  std::unique_ptr<Config> loadConfig(llvm::yaml::Stream &S);
+  std::unique_ptr<Config> loadConfig(llvm::yaml::Stream &stream);
   std::unique_ptr<Config> loadConfig(const char *filename);
 };
 

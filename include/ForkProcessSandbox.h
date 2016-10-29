@@ -5,25 +5,23 @@ namespace Mutang {
 
 struct ExecutionResult;
 
-const long long kDefaultTimeoutInMilliseconds = 3000;
-
 class ProcessSandbox {
 public:
   virtual ~ProcessSandbox() {}
   virtual ExecutionResult run(std::function<void (ExecutionResult *)> function,
-                              long long timeoutMilliseconds = kDefaultTimeoutInMilliseconds) = 0;
+                              long long timeoutMilliseconds) = 0;
 };
 
 class ForkProcessSandbox : public ProcessSandbox {
 public:
   ExecutionResult run(std::function<void (ExecutionResult *)> function,
-                      long long timeoutMilliseconds = kDefaultTimeoutInMilliseconds);
+                      long long timeoutMilliseconds);
 };
 
 class NullProcessSandbox : public ProcessSandbox {
 public:
   ExecutionResult run(std::function<void (ExecutionResult *)> function,
-                      long long timeoutMilliseconds = kDefaultTimeoutInMilliseconds);
+                      long long timeoutMilliseconds);
 };
 
 }

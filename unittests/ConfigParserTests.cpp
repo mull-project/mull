@@ -19,10 +19,10 @@ TEST(ConfigParser, loadConfig_BitcodeFiles) {
     ConfigParser Parser;
     auto Cfg = Parser.loadConfig(Stream);
 
-    ASSERT_EQ(2U, Cfg->GetBitcodePaths().size());
-    ASSERT_EQ("foo.bc", *(Cfg->GetBitcodePaths().begin()));
-    ASSERT_EQ("bar.bc", *(Cfg->GetBitcodePaths().end() - 1));
-    ASSERT_EQ("bar.bc", *(Cfg->GetBitcodePaths().end() - 1));
+    ASSERT_EQ(2U, Cfg->getBitcodePaths().size());
+    ASSERT_EQ("foo.bc", *(Cfg->getBitcodePaths().begin()));
+    ASSERT_EQ("bar.bc", *(Cfg->getBitcodePaths().end() - 1));
+    ASSERT_EQ("bar.bc", *(Cfg->getBitcodePaths().end() - 1));
 }
 
 TEST(ConfigParser, loadConfig_Fork_True) {
@@ -78,10 +78,10 @@ TEST(ConfigParser, loadConfig_Timeout_Unspecified) {
 
 TEST(ConfigParser, loadConfig_Timeout_SpecificValue) {
   SourceMgr SM;
-  yaml::Stream Stream("timeout: 1.5\n", SM);
+  yaml::Stream Stream("timeout: 15\n", SM);
 
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(Stream);
 
-  ASSERT_EQ(1.5, Cfg->getTimeout());
+  ASSERT_EQ(15, Cfg->getTimeout());
 }

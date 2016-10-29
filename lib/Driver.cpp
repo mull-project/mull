@@ -46,19 +46,19 @@ using namespace std::chrono;
 /// all the results of each mutant within corresponding MutationPoint
 
 std::vector<std::unique_ptr<TestResult>> Driver::Run() {
-  Compiler Compiler;
+  Compiler compiler;
 
   std::vector<std::unique_ptr<TestResult>> Results;
 
   /// Assumption: all modules will be used during the execution
   /// Therefore we load them into memory and compile immediately
   /// Later on modules used only for generating of mutants
-  for (auto ModulePath : Cfg.GetBitcodePaths()) {
+  for (auto ModulePath : Cfg.getBitcodePaths()) {
     auto OwnedModule = Loader.loadModuleAtPath(ModulePath);
     assert(OwnedModule && "Can't load module");
 
     auto Module = OwnedModule.get();
-    auto ObjectFile = Compiler.compileModule(Module);
+    auto ObjectFile = compiler.compileModule(Module);
     InnerCache.insert(std::make_pair(Module, std::move(ObjectFile)));
 
     Ctx.addModule(std::move(OwnedModule));
@@ -75,7 +75,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 
     ExecutionResult ExecResult = Sandbox->run([&](ExecutionResult *SharedResult){
       *SharedResult = Runner.runTest(test.get(), ObjectFiles);
-    });
+    }, Cfg.getTimeout());
 
     auto BorrowedTest = test.get();
     auto Result = make_unique<TestResult>(ExecResult, std::move(test));
@@ -104,7 +104,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 
 //        verifyModule(*BorrowedCopy, &errs());
         auto mutatedBinary = mutationPoint->applyMutation(testee.first->getParent(),
-                                                          Compiler);
+                                                          compiler);
         ObjectFiles.push_back(mutatedBinary);
         ExecutionResult R = Sandbox->run([&](ExecutionResult *SharedResult) {
           ExecutionResult R = Runner.runTest(BorrowedTest, ObjectFiles);
@@ -155,7 +155,7 @@ std::vector<llvm::object::ObjectFile *> Driver::AllObjectFiles() {
 #pragma mark - Debug
 
 void Driver::debug_PrintTestNames() {
-  for (auto ModulePath : Cfg.GetBitcodePaths()) {
+  for (auto ModulePath : Cfg.getBitcodePaths()) {
     auto OwnedModule = Loader.loadModuleAtPath(ModulePath);
     assert(OwnedModule && "Can't load module");
     Ctx.addModule(std::move(OwnedModule));
@@ -167,7 +167,7 @@ void Driver::debug_PrintTestNames() {
 }
 
 void Driver::debug_PrintTesteeNames() {
-  for (auto ModulePath : Cfg.GetBitcodePaths()) {
+  for (auto ModulePath : Cfg.getBitcodePaths()) {
     auto OwnedModule = Loader.loadModuleAtPath(ModulePath);
     assert(OwnedModule && "Can't load module");
     Ctx.addModule(std::move(OwnedModule));
@@ -182,7 +182,7 @@ void Driver::debug_PrintTesteeNames() {
 }
 
 void Driver::debug_PrintMutationPoints() {
-  for (auto ModulePath : Cfg.GetBitcodePaths()) {
+  for (auto ModulePath : Cfg.getBitcodePaths()) {
     auto OwnedModule = Loader.loadModuleAtPath(ModulePath);
     assert(OwnedModule && "Can't load module");
     Ctx.addModule(std::move(OwnedModule));
