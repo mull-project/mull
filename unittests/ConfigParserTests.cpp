@@ -19,10 +19,10 @@ TEST(ConfigParser, loadConfig_BitcodeFiles) {
     ConfigParser Parser;
     auto Cfg = Parser.loadConfig(Stream);
 
-    ASSERT_EQ(2U, Cfg->GetBitcodePaths().size());
-    ASSERT_EQ("foo.bc", *(Cfg->GetBitcodePaths().begin()));
-    ASSERT_EQ("bar.bc", *(Cfg->GetBitcodePaths().end() - 1));
-    ASSERT_EQ("bar.bc", *(Cfg->GetBitcodePaths().end() - 1));
+    ASSERT_EQ(2U, Cfg->getBitcodePaths().size());
+    ASSERT_EQ("foo.bc", *(Cfg->getBitcodePaths().begin()));
+    ASSERT_EQ("bar.bc", *(Cfg->getBitcodePaths().end() - 1));
+    ASSERT_EQ("bar.bc", *(Cfg->getBitcodePaths().end() - 1));
 }
 
 TEST(ConfigParser, loadConfig_Fork_True) {
@@ -59,4 +59,29 @@ TEST(ConfigParser, loadConfig_Fork_Unspecified) {
   auto Cfg = Parser.loadConfig(Stream);
 
   ASSERT_EQ(true, Cfg->getFork());
+}
+
+TEST(ConfigParser, loadConfig_Timeout_Unspecified) {
+  SourceMgr SM;
+
+  /// Surprisingly enough, yaml library crashes on empty string so
+  /// providing 'bitcode_files:' with content just to overcome the assert.
+  yaml::Stream Stream("bitcode_files:\n"
+                      "  - foo.bc\n"
+                      "  - bar.bc\n", SM);
+
+  ConfigParser Parser;
+  auto Cfg = Parser.loadConfig(Stream);
+
+  ASSERT_EQ(MutangDefaultTimeout, Cfg->getTimeout());
+}
+
+TEST(ConfigParser, loadConfig_Timeout_SpecificValue) {
+  SourceMgr SM;
+  yaml::Stream Stream("timeout: 15\n", SM);
+
+  ConfigParser Parser;
+  auto Cfg = Parser.loadConfig(Stream);
+
+  ASSERT_EQ(15, Cfg->getTimeout());
 }
