@@ -23,7 +23,7 @@ using namespace llvm;
 static TestModuleFactory TestModuleFactory;
 
 TEST(SimpleTestRunner, runTest) {
-  Compiler Compiler;
+  Compiler Compiler(false);
   Context Ctx;
   SimpleTestRunner Runner;
   SimpleTestRunner::ObjectFiles ObjectFiles;
@@ -35,8 +35,11 @@ TEST(SimpleTestRunner, runTest) {
   Module *ModuleWithTests   = OwnedModuleWithTests.get();
   Module *ModuleWithTestees = OwnedModuleWithTestees.get();
 
-  Ctx.addModule(std::move(OwnedModuleWithTests));
-  Ctx.addModule(std::move(OwnedModuleWithTestees));
+  auto mutangOwnedModuleWithTests   = make_unique<MutangModule>(std::move(OwnedModuleWithTests), "");
+  auto mutangOwnedModuleWithTestees = make_unique<MutangModule>(std::move(OwnedModuleWithTestees), "");
+
+  Ctx.addModule(std::move(mutangOwnedModuleWithTests));
+  Ctx.addModule(std::move(mutangOwnedModuleWithTestees));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
@@ -100,7 +103,7 @@ TEST(SimpleTestRunner, runTest) {
 }
 
 TEST(SimpleTestRunner, runTestUsingLibC) {
-  Compiler Compiler;
+  Compiler Compiler(false);
   Context Ctx;
   SimpleTestRunner Runner;
   SimpleTestRunner::ObjectFiles ObjectFiles;
@@ -112,8 +115,11 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   Module *ModuleWithTests   = OwnedModuleWithTests.get();
   Module *ModuleWithTestees = OwnedModuleWithTestees.get();
 
-  Ctx.addModule(std::move(OwnedModuleWithTests));
-  Ctx.addModule(std::move(OwnedModuleWithTestees));
+  auto mutangOwnedModuleWithTests   = make_unique<MutangModule>(std::move(OwnedModuleWithTests), "");
+  auto mutangOwnedModuleWithTestees = make_unique<MutangModule>(std::move(OwnedModuleWithTestees), "");
+
+  Ctx.addModule(std::move(mutangOwnedModuleWithTests));
+  Ctx.addModule(std::move(mutangOwnedModuleWithTestees));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
@@ -168,7 +174,7 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
 }
 
 TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
-  Compiler Compiler;
+  Compiler Compiler(false);
   Context Ctx;
   SimpleTestRunner Runner;
   SimpleTestRunner::ObjectFiles ObjectFiles;
@@ -182,8 +188,11 @@ TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
   Module *ModuleWithTests   = OwnedModuleWithTests.get();
   Module *ModuleWithTestees = OwnedModuleWithTestees.get();
 
-  Ctx.addModule(std::move(OwnedModuleWithTests));
-  Ctx.addModule(std::move(OwnedModuleWithTestees));
+  auto mutangOwnedModuleWithTests   = make_unique<MutangModule>(std::move(OwnedModuleWithTests), "");
+  auto mutangOwnedModuleWithTestees = make_unique<MutangModule>(std::move(OwnedModuleWithTestees), "");
+
+  Ctx.addModule(std::move(mutangOwnedModuleWithTests));
+  Ctx.addModule(std::move(mutangOwnedModuleWithTestees));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());

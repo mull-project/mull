@@ -15,9 +15,10 @@ static TestModuleFactory TestModuleFactory;
 
 TEST(Context, AddModule) {
   auto ModuleWithTests = TestModuleFactory.createTesterModule();
+  auto mutangModuleWithTests = make_unique<MutangModule>(std::move(ModuleWithTests), "");
 
   Context Ctx;
-  Ctx.addModule(std::move(ModuleWithTests));
+  Ctx.addModule(std::move(mutangModuleWithTests));
 
   ASSERT_EQ(1U, Ctx.getModules().size());
 }

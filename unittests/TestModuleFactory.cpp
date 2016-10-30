@@ -18,7 +18,7 @@ static inline bool fileExists(const std::string& name) {
   return f.good();
 }
 
-static std::string createFixture(const char *fixtureName) {
+static std::string fixturePath(const char *fixtureName) {
   char cFixtureFullPath[256];
 
   getcwd(cFixtureFullPath, 255);
@@ -26,6 +26,12 @@ static std::string createFixture(const char *fixtureName) {
   strcat(cFixtureFullPath, fixtureName);
 
   std::string fixtureFullPath(cFixtureFullPath);
+
+  return fixtureFullPath;
+}
+
+static std::string createFixture(const char *fixtureName) {
+  std::string fixtureFullPath = fixturePath(fixtureName);
 
   assert(fileExists(fixtureFullPath));
 
@@ -72,7 +78,16 @@ std::unique_ptr<Module> TestModuleFactory::create_SimpleTest_NegateCondition_Tes
   return module;
 }
 
+std::string TestModuleFactory::testerModulePath_IR() {
+  return fixturePath("fixture_simple_test_tester_module.ll");
+}
+
+std::string TestModuleFactory::testerModulePath_Bitcode() {
+  return fixturePath("fixture_simple_test_tester_module.bc");
+}
+
 std::unique_ptr<Module> TestModuleFactory::createTesterModule() {
+  /// FIXME: Use testerModulePath() after merge with Stan's code
   std::string contents = createFixture("fixture_simple_test_tester_module.ll");
 
   auto module = parseIR(contents.c_str());

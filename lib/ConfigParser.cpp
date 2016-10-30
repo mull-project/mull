@@ -31,6 +31,7 @@ std::unique_ptr<Config> ConfigParser::loadConfig(yaml::Stream &stream) {
   /// Fork is enabled by default
   bool fork = true;
   bool dryRun = false;
+  bool useCache = true;
   int timeout = MutangDefaultTimeout;
   int maxDistance = 128;
   auto paths = std::vector<std::string>();
@@ -73,6 +74,16 @@ std::unique_ptr<Config> ConfigParser::loadConfig(yaml::Stream &stream) {
       }
     }
 
+    else if (key->getRawValue().equals(StringRef("use_cache"))) {
+      auto value = dyn_cast<yaml::ScalarNode>(keyValue.getValue());
+
+      if (value->getRawValue().equals(StringRef("true"))) {
+        useCache = true;
+      } else {
+        useCache = false;
+      }
+    }
+
     else if (key->getRawValue().equals(StringRef("timeout"))) {
       auto value = dyn_cast<yaml::ScalarNode>(keyValue.getValue());
 
@@ -100,5 +111,5 @@ std::unique_ptr<Config> ConfigParser::loadConfig(yaml::Stream &stream) {
     }
   }
 
-  return make_unique<Config>(paths, fork, dryRun, timeout, maxDistance);
+  return make_unique<Config>(paths, fork, dryRun, useCache, timeout, maxDistance);
 }

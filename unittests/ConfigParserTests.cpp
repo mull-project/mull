@@ -102,13 +102,24 @@ TEST(ConfigParser, loadConfig_DryRun_Unspecified) {
 }
 
 TEST(ConfigParser, loadConfig_DryRun_SpecificValue) {
+  ConfigParser Parser;
+  auto Cfg = Parser.loadConfig(Stream);
   SourceMgr SM;
   yaml::Stream Stream("dryRun: true\n", SM);
+  ASSERT_TRUE(Cfg->isDryRun());
+}
+
+TEST(ConfigParser, loadConfig_UseCache_Unspecified) {
+  ASSERT_TRUE(Cfg->getUseCache());
+}
+
+TEST(ConfigParser, loadConfig_UseCache_SpecificValue) {
+  SourceMgr SM;
+  yaml::Stream Stream("use_cache: false\n", SM);
 
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(Stream);
-
-  ASSERT_TRUE(Cfg->isDryRun());
+  ASSERT_FALSE(Cfg->getUseCache());
 }
 
 TEST(ConfigParser, loadConfig_MaxDistance_Unspecified) {

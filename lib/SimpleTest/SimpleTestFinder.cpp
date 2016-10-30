@@ -27,8 +27,8 @@ SimpleTestFinder::SimpleTestFinder(std::vector<std::unique_ptr<MutationOperator>
 std::vector<std::unique_ptr<Test>> SimpleTestFinder::findTests(Context &Ctx) {
   std::vector<std::unique_ptr<Test>> tests;
 
-  for (auto &M : Ctx.getModules()) {
-    auto &x = M->getFunctionList();
+  for (auto &module : Ctx.getModules()) {
+    auto &x = module->getModule()->getFunctionList();
     for (auto &Fn : x) {
       if (Fn.getName().startswith("test_")) {
 
@@ -60,7 +60,7 @@ std::vector<Testee> SimpleTestFinder::findTestees(Test *Test,
       /// FIXME: Export all declared functions to external registry
       /// while looking for tests
       for (auto &M : Ctx.getModules()) {
-        for (auto &Fn : M->getFunctionList()) {
+        for (auto &Fn : M->getModule()->getFunctionList()) {
           if (Fn.getName() == F->getName()) {
 
             // Ignore export declarations.

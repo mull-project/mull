@@ -13,6 +13,7 @@ add_mutang_unittest(MutangUnitTests
   MutationEngineTests.cpp
   MutationPointTests.cpp
   TestRunnersTests.cpp
+  UniqueIDProvierTests.cpp
 
   MutationOperators/MutationOperatorsTests.cpp
   MutationOperators/NegateConditionMutationOperatorTest.cpp
@@ -38,5 +39,4 @@ target_link_libraries(MutangUnitTests
 add_custom_command(TARGET MutangUnitTests POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E create_symlink
                    ${CMAKE_CURRENT_LIST_DIR}/fixtures $<TARGET_FILE_DIR:MutangUnitTests>/fixtures)
-
 

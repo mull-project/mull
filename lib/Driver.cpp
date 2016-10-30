@@ -4,6 +4,7 @@
 #include "Context.h"
 #include "ModuleLoader.h"
 #include "TestResult.h"
+#include "UniqueIDProvider.h"
 
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Module.h"
@@ -46,22 +47,24 @@ using namespace std::chrono;
 /// all the results of each mutant within corresponding MutationPoint
 
 std::vector<std::unique_ptr<TestResult>> Driver::Run() {
-  Compiler compiler;
+  Compiler compiler(Cfg.getUseCache());
 
   std::vector<std::unique_ptr<TestResult>> Results;
 
   /// Assumption: all modules will be used during the execution
   /// Therefore we load them into memory and compile immediately
   /// Later on modules used only for generating of mutants
+  UniqueIDProvider uniqueIDProvider;
   for (auto ModulePath : Cfg.getBitcodePaths()) {
-    auto OwnedModule = Loader.loadModuleAtPath(ModulePath);
-    assert(OwnedModule && "Can't load module");
+    auto ownedModule = Loader.loadModuleAtPath(ModulePath);
+    auto module = ownedModule->getModule();
+    assert(ownedModule && "Can't load module");
 
-    auto Module = OwnedModule.get();
-    auto ObjectFile = compiler.compileModule(Module);
-    InnerCache.insert(std::make_pair(Module, std::move(ObjectFile)));
+    std::string uniqueID = uniqueIDProvider.uniqueIDForModule(*ownedModule.get());
+    auto objectFile = compiler.compileModule(ownedModule.get(), uniqueID);
+    InnerCache.insert(std::make_pair(module, std::move(objectFile)));
 
-    Ctx.addModule(std::move(OwnedModule));
+    Ctx.addModule(std::move(ownedModule));
   }
 
   auto foundTests = Finder.findTests(Ctx);
@@ -103,6 +106,16 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 //        auto BorrowedCopy = OwnedCopy.get();
 
 //        verifyModule(*BorrowedCopy, &errs());
+<<<<<<< 06a4962a07422bf0d6a13eea600025a0d8cfd80e
+=======
+        std::string identifier = testee.first->getParent()->getModuleIdentifier();
+        auto mutatedBinary = mutationPoint->applyMutation(*Ctx.moduleWithIdentifier(identifier),
+                                                          compiler);
+        ObjectFiles.push_back(mutatedBinary);
+        ExecutionResult R = Sandbox->run([&](ExecutionResult *SharedResult) {
+          ExecutionResult R = Runner.runTest(BorrowedTest, ObjectFiles);
+          ObjectFiles.pop_back();
+>>>>>>> First take on cache
 
         ExecutionResult result;
         bool dryRun = Cfg.isDryRun();
@@ -165,8 +178,8 @@ std::vector<llvm::object::ObjectFile *> Driver::AllObjectFiles() {
 void Driver::debug_PrintTestNames() {
   for (auto ModulePath : Cfg.getBitcodePaths()) {
     auto OwnedModule = Loader.loadModuleAtPath(ModulePath);
-    assert(OwnedModule && "Can't load module");
-    Ctx.addModule(std::move(OwnedModule));
+//    assert(OwnedModule && "Can't load module");
+//    Ctx.addModule(std::move(OwnedModule));
   }
 
   for (auto &Test : Finder.findTests(Ctx)) {
@@ -177,8 +190,8 @@ void Driver::debug_PrintTestNames() {
 void Driver::debug_PrintTesteeNames() {
   for (auto ModulePath : Cfg.getBitcodePaths()) {
     auto OwnedModule = Loader.loadModuleAtPath(ModulePath);
-    assert(OwnedModule && "Can't load module");
-    Ctx.addModule(std::move(OwnedModule));
+//    assert(OwnedModule && "Can't load module");
+//    Ctx.addModule(std::move(OwnedModule));
   }
 
   for (auto &Test : Finder.findTests(Ctx)) {
@@ -192,8 +205,8 @@ void Driver::debug_PrintTesteeNames() {
 void Driver::debug_PrintMutationPoints() {
   for (auto ModulePath : Cfg.getBitcodePaths()) {
     auto OwnedModule = Loader.loadModuleAtPath(ModulePath);
-    assert(OwnedModule && "Can't load module");
-    Ctx.addModule(std::move(OwnedModule));
+//    assert(OwnedModule && "Can't load module");
+//    Ctx.addModule(std::move(OwnedModule));
   }
 
   for (auto &Test : Finder.findTests(Ctx)) {

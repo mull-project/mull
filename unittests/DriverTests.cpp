@@ -32,25 +32,30 @@ class FakeModuleLoader : public ModuleLoader {
 public:
   FakeModuleLoader() : ModuleLoader(GlobalCtx) {}
 
-  std::unique_ptr<llvm::Module> loadModuleAtPath(const std::string &path) override {
+  std::unique_ptr<MutangModule> loadModuleAtPath(const std::string &path) override {
     if (path == "foo") {
-      return TestModuleFactory.createTesterModule();
+      auto module = TestModuleFactory.createTesterModule();
+      return make_unique<MutangModule>(std::move(module), "");
     }
 
     else if (path == "bar") {
-      return TestModuleFactory.createTesteeModule();
+      auto module = TestModuleFactory.createTesteeModule();
+      return make_unique<MutangModule>(std::move(module), "");
     }
 
     else if (path == "simple_test/negate_condition/tester") {
-      return TestModuleFactory.create_SimpleTest_NegateCondition_Tester_Module();
+      auto module = TestModuleFactory.create_SimpleTest_NegateCondition_Tester_Module();
+      return make_unique<MutangModule>(std::move(module), "");
     }
 
     else if (path == "simple_test/negate_condition/testee") {
-      return TestModuleFactory.create_SimpleTest_NegateCondition_Testee_Module();
+      auto module = TestModuleFactory.create_SimpleTest_NegateCondition_Testee_Module();
+      return make_unique<MutangModule>(std::move(module), "");
     }
 
-    return nullptr;
+    return make_unique<MutangModule>(nullptr, "");
   }
+
 };
 
 TEST(Driver, SimpleTest_AddMutationOperator) {
@@ -63,6 +68,7 @@ TEST(Driver, SimpleTest_AddMutationOperator) {
 
   std::vector<std::string> ModulePaths({ "foo", "bar" });
   bool doFork = false;
+<<<<<<< 06a4962a07422bf0d6a13eea600025a0d8cfd80e
   bool dryRun = false;
   int distance = 10;
   Config config(ModulePaths, doFork, dryRun, MutangDefaultTimeout, distance);
@@ -73,6 +79,10 @@ TEST(Driver, SimpleTest_AddMutationOperator) {
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
 
   SimpleTestFinder testFinder(std::move(mutationOperators));
+=======
+  bool useCache = false;
+  Config Cfg(ModulePaths, doFork, useCache, MutangDefaultTimeout);
+>>>>>>> First take on cache
 
   SimpleTestRunner runner;
 

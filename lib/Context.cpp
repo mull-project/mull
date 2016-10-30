@@ -6,14 +6,16 @@
 using namespace Mutang;
 using namespace llvm;
 
-void Context::addModule(std::unique_ptr<Module> M) {
-  for (auto &F : M->getFunctionList()) {
-    if (!F.isDeclaration()) {
-      FunctionsRegistry.insert(std::make_pair(F.getName(), &F));
+void Context::addModule(std::unique_ptr<MutangModule> module) {
+  for (auto &function : module->getModule()->getFunctionList()) {
+    if (!function.isDeclaration()) {
+      FunctionsRegistry.insert(std::make_pair(function.getName(), &function));
     }
   }
 
-  Modules.emplace_back(std::move(M));
+  moduleRegistry.insert(std::make_pair(module->getModule()->getModuleIdentifier(),
+                                       module.get()));
+  Modules.emplace_back(std::move(module));
 }
 
 llvm::Function *Context::lookupDefinedFunction(llvm::StringRef FunctionName) {
@@ -24,13 +26,21 @@ llvm::Function *Context::lookupDefinedFunction(llvm::StringRef FunctionName) {
   return it->second;
 }
 
+MutangModule *Context::moduleWithIdentifier(const std::string &identifier) {
+  auto it = moduleRegistry.find(identifier);
+  if (it == moduleRegistry.end()) {
+    return nullptr;
+  }
+  return it->second;
+}
+
 std::vector<llvm::Function *> Context::getStaticConstructors() {
   /// NOTE: Just Copied the whole logic from ExecutionEngine
   std::vector<llvm::Function *> Ctors;
 
-  for (auto &Module : Modules) {
+  for (auto &module : Modules) {
 
-    GlobalVariable *GV = Module->getNamedGlobal("llvm.global_ctors");
+    GlobalVariable *GV = module->getModule()->getNamedGlobal("llvm.global_ctors");
 
     // If this global has internal linkage, or if it has a use, then it must be
     // an old-style (llvmgcc3) static ctor with __main linked in and in use.  If

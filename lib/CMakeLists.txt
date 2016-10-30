@@ -13,6 +13,7 @@ llvm_add_library(mutang
   MutationPoint.cpp
   TestResult.cpp
   TestRunner.cpp
+  UniqueIDProvider.cpp
 
   SimpleTest/SimpleTest_Test.cpp
   SimpleTest/SimpleTestFinder.cpp

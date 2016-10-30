@@ -15,6 +15,7 @@ namespace Mutang {
 
 class Compiler;
 class MutationOperator;
+class MutangModule;
 
 /// \brief Container class that stores information needed to find MutationPoints.
 /// We need the indexes of function, basic block and instruction to find the mutation point
@@ -43,12 +44,15 @@ public:
   ~MutationPoint();
 
   MutationOperator *getOperator();
-
   MutationPointAddress getAddress();
   llvm::Value *getOriginalValue();
 
+  MutationOperator *getOperator() const;
+  MutationPointAddress getAddress() const;
+  llvm::Value *getOriginalValue() const;
+
   void applyMutation(llvm::Module *M);
-  llvm::object::ObjectFile *applyMutation(llvm::Module *module,
+  llvm::object::ObjectFile *applyMutation(MutangModule &module,
                                           Compiler &compiler);
 };
 

@@ -1,10 +1,12 @@
 #pragma once
 
-#include <map>
-#include <vector>
+#include "ModuleLoader.h"
 
-//#include "llvm/ADT/StringMap.h"
 #include "llvm/IR/Module.h"
+
+#include <map>
+#include <string>
+#include <vector>
 
 namespace llvm {
 
@@ -16,19 +18,20 @@ namespace Mutang {
 
 class Context {
 public:
-  typedef std::vector<std::unique_ptr<llvm::Module>> ModuleArrayType;
+  typedef std::vector<std::unique_ptr<MutangModule>> ModuleArrayType;
   typedef ModuleArrayType::iterator iterator;
 
 private:
   ModuleArrayType Modules;
-//  llvm::StringMap<llvm::Function *> FunctionsRegistry;
   std::map<std::string, llvm::Function *> FunctionsRegistry;
+  std::map<std::string, MutangModule *> moduleRegistry;
 
 public:
-  void addModule(std::unique_ptr<llvm::Module> M);
+  void addModule(std::unique_ptr<MutangModule> module);
 
   std::vector<llvm::Function *> getStaticConstructors();
 
+  MutangModule *moduleWithIdentifier(const std::string &identifier);
   ModuleArrayType &getModules() { return Modules; }
   llvm::Function *lookupDefinedFunction(llvm::StringRef FunctionName);
   iterator begin()  { return Modules.begin(); }

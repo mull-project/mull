@@ -21,9 +21,10 @@ static TestModuleFactory TestModuleFactory;
 
 TEST(SimpleTestFinder, FindTest) {
   auto ModuleWithTests = TestModuleFactory.createTesterModule();
+  auto mutangModuleWithTests = make_unique<MutangModule>(std::move(ModuleWithTests), "");
 
   Context Ctx;
-  Ctx.addModule(std::move(ModuleWithTests));
+  Ctx.addModule(std::move(mutangModuleWithTests));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
@@ -36,12 +37,15 @@ TEST(SimpleTestFinder, FindTest) {
 }
 
 TEST(SimpleTestFinder, FindTestee) {
-  auto ModuleWithTests   = TestModuleFactory.createTesterModule();
+  auto ModuleWithTests = TestModuleFactory.createTesterModule();
   auto ModuleWithTestees = TestModuleFactory.createTesteeModule();
 
+  auto mutangModuleWithTests = make_unique<MutangModule>(std::move(ModuleWithTests), "");
+  auto mutangModuleWithTestees = make_unique<MutangModule>(std::move(ModuleWithTestees), "");
+
   Context Ctx;
-  Ctx.addModule(std::move(ModuleWithTests));
-  Ctx.addModule(std::move(ModuleWithTestees));
+  Ctx.addModule(std::move(mutangModuleWithTests));
+  Ctx.addModule(std::move(mutangModuleWithTestees));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
@@ -64,9 +68,12 @@ TEST(SimpleTestFinder, FindMutationPoints_AddMutationOperator) {
   auto ModuleWithTests   = TestModuleFactory.createTesterModule();
   auto ModuleWithTestees = TestModuleFactory.createTesteeModule();
 
+  auto mutangModuleWithTests   = make_unique<MutangModule>(std::move(ModuleWithTests), "");
+  auto mutangModuleWithTestees = make_unique<MutangModule>(std::move(ModuleWithTestees), "");
+
   Context Ctx;
-  Ctx.addModule(std::move(ModuleWithTests));
-  Ctx.addModule(std::move(ModuleWithTestees));
+  Ctx.addModule(std::move(mutangModuleWithTests));
+  Ctx.addModule(std::move(mutangModuleWithTestees));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   std::unique_ptr<AddMutationOperator> addMutationOperator = make_unique<AddMutationOperator>();

@@ -14,7 +14,7 @@ using namespace Mutang;
 static TestModuleFactory TestModuleFactory;
 
 TEST(Compiler, CompileModule) {
-  Compiler Compiler;
+  Compiler Compiler(false);
 
   auto SomeModule = TestModuleFactory.createTesterModule();
   auto Binary = Compiler.compileModule(SomeModule.get());
