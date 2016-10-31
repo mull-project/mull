@@ -31,77 +31,131 @@ llvm::CmpInst::Predicate
 NegateConditionMutationOperator::negatedCmpInstPredicate(llvm::CmpInst::Predicate predicate) {
 
   switch (predicate) {
-    /// FCMP_FALSE =  0,  ///< 0 0 0 0    Always false (always folded)
-    case CmpInst::FCMP_FALSE: {
-      return CmpInst::FCMP_TRUE;
+
+    /// Ordered comparisons
+
+    /// == -> !=
+    case CmpInst::FCMP_OEQ: {
+      return CmpInst::FCMP_ONE;
     }
 
-      /* TO IMPLEMENT:
-      FCMP_OEQ =  1,  ///< 0 0 0 1    True if ordered and equal
-      FCMP_OGT   =  2,  ///< 0 0 1 0    True if ordered and greater than
-      FCMP_OGE   =  3,  ///< 0 0 1 1    True if ordered and greater than or equal
-      FCMP_OLT   =  4,  ///< 0 1 0 0    True if ordered and less than
-      FCMP_OLE   =  5,  ///< 0 1 0 1    True if ordered and less than or equal
-      FCMP_ONE   =  6,  ///< 0 1 1 0    True if ordered and operands are unequal
-      FCMP_ORD   =  7,  ///< 0 1 1 1    True if ordered (no nans)
-      FCMP_UNO   =  8,  ///< 1 0 0 0    True if unordered: isnan(X) | isnan(Y)
-      FCMP_UEQ   =  9,  ///< 1 0 0 1    True if unordered or equal
-      FCMP_UGT   = 10,  ///< 1 0 1 0    True if unordered or greater than
-      FCMP_UGE   = 11,  ///< 1 0 1 1    True if unordered, greater than, or equal
-      FCMP_ULT   = 12,  ///< 1 1 0 0    True if unordered or less than
-      FCMP_ULE   = 13,  ///< 1 1 0 1    True if unordered, less than, or equal
-      FCMP_UNE   = 14,  ///< 1 1 1 0    True if unordered or not equal
-      FCMP_TRUE  = 15,  ///< 1 1 1 1    Always true (always folded)
-      FIRST_FCMP_PREDICATE = FCMP_FALSE,
-      LAST_FCMP_PREDICATE = FCMP_TRUE,
-      BAD_FCMP_PREDICATE = FCMP_TRUE + 1,
-       */
+    /// != -> ==
+    case CmpInst::FCMP_ONE: {
+      return CmpInst::FCMP_OEQ;
+    }
 
+    /// > -> <=
+    case CmpInst::FCMP_OGT: {
+      return CmpInst::FCMP_OLE;
+    }
+
+    /// <= -> >
+    case CmpInst::FCMP_OLE: {
+      return CmpInst::FCMP_OGT;
+    }
+
+    /// >= -> <
+    case CmpInst::FCMP_OGE: {
+      return CmpInst::FCMP_OLT;
+    }
+
+    /// < -> >=
+    case CmpInst::FCMP_OLT: {
+      return CmpInst::FCMP_OGE;
+    }
+
+    /// Unordered comparisons
+
+    /// == -> !=
+    case CmpInst::FCMP_UEQ: {
+      return CmpInst::FCMP_UNE;
+    }
+
+    /// != -> ==
+    case CmpInst::FCMP_UNE: {
+      return CmpInst::FCMP_UEQ;
+    }
+
+    /// >= -> <
+    case CmpInst::FCMP_UGE: {
+      return CmpInst::FCMP_ULT;
+    }
+
+    /// < -> >=
+    case CmpInst::FCMP_ULT: {
+      return CmpInst::FCMP_UGE;
+    }
+
+    /// > -> <=
+    case CmpInst::FCMP_UGT: {
+      return CmpInst::FCMP_ULE;
+    }
+
+    /// < -> >=
+    case CmpInst::FCMP_ULE: {
+      return CmpInst::FCMP_UGT;
+    }
+
+    /// Normal comparisons
+
+    /// == -> !=
     case CmpInst::ICMP_EQ: {
       return CmpInst::ICMP_NE;
     }
 
+    /// != -> ==
     case CmpInst::ICMP_NE: {
       return CmpInst::ICMP_EQ;
     }
 
+    /// Unsigned: > -> <=
     case CmpInst::ICMP_UGT: {
       return CmpInst::ICMP_ULE;
     }
 
-    case CmpInst::ICMP_UGE: {
-      return CmpInst::ICMP_ULT;
-    }
-
-    case CmpInst::ICMP_ULT: {
-      return CmpInst::ICMP_UGE;
-    }
-
+    /// Unsigned: <= -> >
     case CmpInst::ICMP_ULE: {
       return CmpInst::ICMP_UGT;
     }
 
+    /// Unsigned: >= -> <
+    case CmpInst::ICMP_UGE: {
+      return CmpInst::ICMP_ULT;
+    }
+
+    /// Unsigned: < -> >=
+    case CmpInst::ICMP_ULT: {
+      return CmpInst::ICMP_UGE;
+    }
+
+    /// Signed: > -> <=
     case CmpInst::ICMP_SGT: {
       return CmpInst::ICMP_SLE;
     }
 
-    case CmpInst::ICMP_SGE: {
-      return CmpInst::ICMP_SLT;
-    }
-
-    case CmpInst::ICMP_SLT: {
-      return CmpInst::ICMP_SGE;
-    }
-
+    /// Signed: <= -> >
     case CmpInst::ICMP_SLE: {
       return CmpInst::ICMP_SGT;
     }
 
-    /* TO IMPLEMENT:
-     FIRST_ICMP_PREDICATE = ICMP_EQ,
-     LAST_ICMP_PREDICATE = ICMP_SLE,
-     BAD_ICMP_PREDICATE = ICMP_SLE + 1
-     */
+    /// Signed: >= -> <
+    case CmpInst::ICMP_SGE: {
+      return CmpInst::ICMP_SLT;
+    }
+
+    /// Signed: < -> >=
+    case CmpInst::ICMP_SLT: {
+      return CmpInst::ICMP_SGE;
+    }
+
+    // Etc
+    case CmpInst::FCMP_FALSE: {
+      return CmpInst::FCMP_TRUE;
+    }
+
+    case CmpInst::FCMP_TRUE: {
+      return CmpInst::FCMP_FALSE;
+    }
 
     default: {
       printf("Unsupported predicate: %d\n", predicate);
