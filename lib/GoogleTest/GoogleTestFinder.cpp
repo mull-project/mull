@@ -28,7 +28,7 @@ using namespace llvm;
 GoogleTestFinder::GoogleTestFinder() : TestFinder() {
   /// FIXME: should come from outside
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
-  mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
+//  mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
 }
 
 /// The algorithm is the following:

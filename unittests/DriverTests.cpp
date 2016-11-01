@@ -63,7 +63,8 @@ TEST(Driver, SimpleTest_AddMutationOperator) {
 
   std::vector<std::string> ModulePaths({ "foo", "bar" });
   bool doFork = false;
-  Config config(ModulePaths, doFork, MutangDefaultTimeout);
+  bool dryRun = false;
+  Config config(ModulePaths, doFork, dryRun, MutangDefaultTimeout);
 
   FakeModuleLoader loader;
 
@@ -110,7 +111,8 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
   });
 
   bool doFork = false;
-  Config config(ModulePaths, doFork, MutangDefaultTimeout);
+  bool dryRun = false;
+  Config config(ModulePaths, doFork, dryRun, MutangDefaultTimeout);
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());

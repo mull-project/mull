@@ -10,11 +10,12 @@ namespace Mutang {
 class Config {
   std::vector<std::string> bitcodePaths;
   bool fork;
+  bool dryRun;
   int timeout;
 
 public:
-  Config(const std::vector<std::string> &paths, bool fork, int timeout) :
-    bitcodePaths(paths), fork(fork), timeout(timeout) {}
+  Config(const std::vector<std::string> &paths, bool fork, bool dryrun, int timeout) :
+    bitcodePaths(paths), fork(fork), dryRun(dryrun), timeout(timeout) {}
 
   const std::vector<std::string> &getBitcodePaths() const {
       return bitcodePaths;
@@ -24,9 +25,14 @@ public:
     return fork;
   }
 
-  float getTimeout() const {
+  int getTimeout() const {
     return timeout;
   }
+
+  bool isDryRun() const {
+    return dryRun;
+  }
+
 };
 
 }
