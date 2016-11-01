@@ -3,6 +3,7 @@
 #include "SimpleTest/SimpleTestFinder.h"
 #include "MutationEngine.h"
 #include "MutationOperators/AddMutationOperator.h"
+#include "MutationOperators/NegateConditionMutationOperator.h"
 #include "TestModuleFactory.h"
 
 #include "llvm/IR/InstrTypes.h"
@@ -19,9 +20,23 @@ using namespace llvm;
 
 static TestModuleFactory TestModuleFactory;
 
+static llvm::Instruction &FunctionInstructionByAddress(Function &F, MutationPointAddress address) {
+  printf("ModuleInstructionByAddress: %d %d %d\n",
+         address.getFnIndex(),
+         address.getBBIndex(),
+         address.getIIndex());
+
+  llvm::BasicBlock &B = *(std::next(F.begin(), address.getBBIndex()));
+  llvm::Instruction &NewInstruction = *(std::next(B.begin(), address.getIIndex()));
+
+  return NewInstruction;
+}
+
 Instruction *getFirstNamedInstruction(Function &F, const StringRef &Name) {
   for (inst_iterator I = inst_begin(F), E = inst_end(F); I != E; ++I) {
     Instruction &Instr = *I;
+
+    //printf("Found instruction: %s\n", Instr.getName().str().c_str());
 
     if (Instr.getName().equals(Name)) {
       return &*I;
@@ -31,7 +46,7 @@ Instruction *getFirstNamedInstruction(Function &F, const StringRef &Name) {
   return nullptr;
 }
 
-TEST(MutationEngine, applyMutation) {
+TEST(MutationEngine, SimpleTest_AddOperator_applyMutation) {
   auto ModuleWithTests   = TestModuleFactory.createTesterModule();
   auto ModuleWithTestees = TestModuleFactory.createTesteeModule();
 
@@ -39,7 +54,11 @@ TEST(MutationEngine, applyMutation) {
   Ctx.addModule(std::move(ModuleWithTests));
   Ctx.addModule(std::move(ModuleWithTestees));
 
-  SimpleTestFinder Finder;
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+
+  SimpleTestFinder Finder(std::move(mutationOperators));
+
   auto Tests = Finder.findTests(Ctx);
 
   auto &Test = *(Tests.begin());
@@ -51,14 +70,10 @@ TEST(MutationEngine, applyMutation) {
   Function *Testee = Testees.begin()->first;
   ASSERT_FALSE(Testee->empty());
 
-  AddMutationOperator MutOp;
-  std::vector<MutationOperator *> MutOps({&MutOp});
-
-  std::vector<std::unique_ptr<MutationPoint>> MutationPoints = Finder.findMutationPoints(MutOps, *Testee);
+  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(*Testee);
   ASSERT_EQ(1U, MutationPoints.size());
 
-  MutationPoint *MP = (*(MutationPoints.begin())).get();
-  ASSERT_EQ(&MutOp, MP->getOperator());
+  MutationPoint *MP = (*(MutationPoints.begin()));
   ASSERT_TRUE(isa<BinaryOperator>(MP->getOriginalValue()));
 
   std::string ReplacedInstructionName = MP->getOriginalValue()->getName().str();
@@ -79,15 +94,18 @@ TEST(MutationEngine, applyMutation) {
   ASSERT_EQ(Instruction::Sub, NewInstruction->getOpcode());
 }
 
-TEST(MutationEngine, applyAndRevertMutation) {
-  auto ModuleWithTests   = TestModuleFactory.createTesterModule();
-  auto ModuleWithTestees = TestModuleFactory.createTesteeModule();
+TEST(MutationEngine, SimpleTest_NegateConditionOperator_applyMutation) {
+  auto ModuleWithTests   = TestModuleFactory.create_SimpleTest_NegateCondition_Tester_Module();
+  auto ModuleWithTestees = TestModuleFactory.create_SimpleTest_NegateCondition_Testee_Module();
 
   Context Ctx;
   Ctx.addModule(std::move(ModuleWithTests));
   Ctx.addModule(std::move(ModuleWithTestees));
 
-  SimpleTestFinder Finder;
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
+
+  SimpleTestFinder Finder(std::move(mutationOperators));
   auto Tests = Finder.findTests(Ctx);
 
   auto &Test = *(Tests.begin());
@@ -99,30 +117,24 @@ TEST(MutationEngine, applyAndRevertMutation) {
   Function *Testee = Testees.begin()->first;
   ASSERT_FALSE(Testee->empty());
 
-  AddMutationOperator MutOp;
-  std::vector<MutationOperator *> MutOps({&MutOp});
-
-  std::vector<std::unique_ptr<MutationPoint>> MutationPoints = Finder.findMutationPoints(MutOps, *Testee);
+  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(*Testee);
   ASSERT_EQ(1U, MutationPoints.size());
 
-  MutationPoint *MP = (*(MutationPoints.begin())).get();
-  ASSERT_EQ(&MutOp, MP->getOperator());
-  ASSERT_TRUE(isa<BinaryOperator>(MP->getOriginalValue()));
+  MutationPoint *MP = (*(MutationPoints.begin()));
+  ASSERT_TRUE(isa<CmpInst>(MP->getOriginalValue()));
 
-  Instruction *ReplacedInstruction = cast<BinaryOperator>(MP->getOriginalValue());
-
-  std::string ReplacedInstructionName = ReplacedInstruction->getName().str();
+  MutationPointAddress address = MP->getAddress();
 
   MutationEngine Engine;
 
+  ASSERT_EQ(&FunctionInstructionByAddress(*Testee, address), MP->getOriginalValue());
   Engine.applyMutation(Testee->getParent(), *MP);
 
   // After mutation applied on instruction it should be erased
-  Instruction *OldInstruction = cast<BinaryOperator>(MP->getOriginalValue());
+  Instruction *OldInstruction = cast<CmpInst>(MP->getOriginalValue());
   ASSERT_EQ(nullptr, OldInstruction->getParent());
 
-  // After mutation we should have new instruction with the same name as an original instruction
-  Instruction *NewInstruction = getFirstNamedInstruction(*Testee, ReplacedInstructionName);
-  ASSERT_TRUE(isa<BinaryOperator>(NewInstruction));
-  ASSERT_EQ(Instruction::Sub, NewInstruction->getOpcode());
+  llvm::Instruction &NewInstruction = FunctionInstructionByAddress(*Testee, address);
+  ASSERT_TRUE(isa<ICmpInst>(NewInstruction));
+  ASSERT_EQ(ICmpInst::ICMP_SGE, (cast<CmpInst>(NewInstruction)).getPredicate());
 }

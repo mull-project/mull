@@ -2,6 +2,8 @@
 
 #include "Context.h"
 #include "MutationOperators/AddMutationOperator.h"
+#include "MutationOperators/NegateConditionMutationOperator.h"
+
 #include "TestModuleFactory.h"
 #include "Test.h"
 
@@ -23,7 +25,10 @@ TEST(SimpleTestFinder, FindTest) {
   Context Ctx;
   Ctx.addModule(std::move(ModuleWithTests));
 
-  SimpleTestFinder finder;
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+
+  SimpleTestFinder finder(std::move(mutationOperators));
 
   auto tests = finder.findTests(Ctx);
 
@@ -38,7 +43,11 @@ TEST(SimpleTestFinder, FindTestee) {
   Ctx.addModule(std::move(ModuleWithTests));
   Ctx.addModule(std::move(ModuleWithTestees));
 
-  SimpleTestFinder Finder;
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+
+  SimpleTestFinder Finder(std::move(mutationOperators));
+
   auto Tests = Finder.findTests(Ctx);
 
   auto &Test = *(Tests.begin());
@@ -51,7 +60,7 @@ TEST(SimpleTestFinder, FindTestee) {
   ASSERT_FALSE(Testee->empty());
 }
 
-TEST(SimpleTestFinder, FindMutationPoints) {
+TEST(SimpleTestFinder, FindMutationPoints_AddMutationOperator) {
   auto ModuleWithTests   = TestModuleFactory.createTesterModule();
   auto ModuleWithTestees = TestModuleFactory.createTesteeModule();
 
@@ -59,7 +68,11 @@ TEST(SimpleTestFinder, FindMutationPoints) {
   Ctx.addModule(std::move(ModuleWithTests));
   Ctx.addModule(std::move(ModuleWithTestees));
 
-  SimpleTestFinder Finder;
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::unique_ptr<AddMutationOperator> addMutationOperator = make_unique<AddMutationOperator>();
+  mutationOperators.emplace_back(std::move(addMutationOperator));
+
+  SimpleTestFinder Finder(std::move(mutationOperators));
   auto Tests = Finder.findTests(Ctx);
 
   auto &Test = *Tests.begin();
@@ -71,18 +84,58 @@ TEST(SimpleTestFinder, FindMutationPoints) {
   Function *Testee = (Testees.begin())->first;
   ASSERT_FALSE(Testee->empty());
 
-  AddMutationOperator MutOp;
-  std::vector<MutationOperator *> MutOps({&MutOp});
 
-  std::vector<std::unique_ptr<MutationPoint>> MutationPoints = Finder.findMutationPoints(MutOps, *Testee);
+  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(*Testee);
   ASSERT_EQ(1U, MutationPoints.size());
 
-  MutationPoint *MP = (*(MutationPoints.begin())).get();
-  ASSERT_EQ(&MutOp, MP->getOperator());
+  MutationPoint *MP = (*(MutationPoints.begin()));
+
+  /// TODO: Don't know how to compare unique pointer addMutationOperator with
+  /// MutationOperator *.
+  //ASSERT_EQ(addMutationOperator.get(), MP->getOperator());
   ASSERT_TRUE(isa<BinaryOperator>(MP->getOriginalValue()));
 
   MutationPointAddress MPA = MP->getAddress();
   ASSERT_TRUE(MPA.getFnIndex() == 0);
   ASSERT_TRUE(MPA.getBBIndex() == 2);
   ASSERT_TRUE(MPA.getIIndex() == 1);
+}
+
+TEST(SimpleTestFinder, FindMutationPoints_NegateConditionMutationOperator) {
+  auto ModuleWithTests   = TestModuleFactory.create_SimpleTest_NegateCondition_Tester_Module();
+  auto ModuleWithTestees = TestModuleFactory.create_SimpleTest_NegateCondition_Testee_Module();
+
+  Context Ctx;
+  Ctx.addModule(std::move(ModuleWithTests));
+  Ctx.addModule(std::move(ModuleWithTestees));
+
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
+
+  SimpleTestFinder Finder(std::move(mutationOperators));
+  auto Tests = Finder.findTests(Ctx);
+
+  auto &Test = *Tests.begin();
+
+  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx);
+
+  ASSERT_EQ(1U, Testees.size());
+
+  Function *Testee = (Testees.begin())->first;
+  ASSERT_FALSE(Testee->empty());
+
+  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(*Testee);
+  ASSERT_EQ(1U, MutationPoints.size());
+
+  MutationPoint *MP = (*(MutationPoints.begin()));
+
+  /// TODO: Don't know how to compare unique pointer addMutationOperator with
+  /// MutationOperator *.
+  //ASSERT_EQ(addMutationOperator.get(), MP->getOperator());
+  ASSERT_TRUE(isa<CmpInst>(MP->getOriginalValue()));
+
+  MutationPointAddress MPA = MP->getAddress();
+  ASSERT_TRUE(MPA.getFnIndex() == 0);
+  ASSERT_TRUE(MPA.getBBIndex() == 0);
+  ASSERT_TRUE(MPA.getIIndex() == 7);
 }

@@ -10,9 +10,11 @@ add_mutang_unittest(MutangUnitTests
   ContextTest.cpp
   DriverTests.cpp
   MutationEngineTests.cpp
-  MutationOperatorsTests.cpp
   MutationPointTests.cpp
   TestRunnersTests.cpp
+
+  MutationOperators/MutationOperatorsTests.cpp
+  MutationOperators/NegateConditionMutationOperatorTest.cpp
 
   SimpleTest/SimpleTestFinderTest.cpp
 

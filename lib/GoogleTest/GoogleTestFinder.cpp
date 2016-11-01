@@ -14,6 +14,7 @@
 #include "GoogleTest/GoogleTest_Test.h"
 
 #include "MutationOperators/AddMutationOperator.h"
+#include "MutationOperators/NegateConditionMutationOperator.h"
 
 #include <queue>
 #include <set>
@@ -27,6 +28,7 @@ using namespace llvm;
 GoogleTestFinder::GoogleTestFinder() : TestFinder() {
   /// FIXME: should come from outside
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+//  mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
 }
 
 /// The algorithm is the following:

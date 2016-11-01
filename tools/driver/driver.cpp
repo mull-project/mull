@@ -151,7 +151,7 @@ void reportResults(const std::vector<std::unique_ptr<TestResult>> &results) {
       auto mutationPoint = mutation->getMutationPoint();
       Instruction *instruction = dyn_cast<Instruction>(mutationPoint->getOriginalValue());
       std::string insertMutationPointSQL = std::string("INSERT INTO mutation_point VALUES (")
-        + "'add_mutation_operator',"
+        + "'" + mutationPoint->getOperator()->uniqueID() + "',"
         + "'" + instruction->getParent()->getParent()->getParent()->getModuleIdentifier() + "',"
         + "'" + std::to_string(mutationPoint->getAddress().getFnIndex()) + "',"
         + "'" + std::to_string(mutationPoint->getAddress().getBBIndex()) + "',"

@@ -5,7 +5,10 @@ llvm_add_library(mutang
   Driver.cpp
   ForkProcessSandbox.cpp
   ModuleLoader.cpp
+
   MutationOperators/AddMutationOperator.cpp
+  MutationOperators/NegateConditionMutationOperator.cpp
+ 
   MutationEngine.cpp
   MutationPoint.cpp
   TestResult.cpp

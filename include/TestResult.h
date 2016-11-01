@@ -20,7 +20,8 @@ enum ExecutionStatus {
   Failed,
   Passed,
   Timedout,
-  Crashed
+  Crashed,
+  DryRun
 };
 
 struct ExecutionResult {

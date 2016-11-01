@@ -82,7 +82,7 @@ extern "C" int mutang_printf(const char *fmt, ...) {
 
 extern "C" void *mutang__dso_handle = nullptr;
 
-class MutangResolver : public JITSymbolResolver {
+class Mutang_GoogleTest_Resolver : public JITSymbolResolver {
 public:
 
   JITSymbol findSymbol(const std::string &Name) {
@@ -153,7 +153,7 @@ ExecutionResult GoogleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) 
 
   auto Handle = ObjectLayer.addObjectSet(ObjectFiles,
                                          make_unique<SectionMemoryManager>(),
-                                         make_unique<MutangResolver>());
+                                         make_unique<Mutang_GoogleTest_Resolver>());
 
   auto start = high_resolution_clock::now();
 
