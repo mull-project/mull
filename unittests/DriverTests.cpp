@@ -110,8 +110,7 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
     "simple_test/negate_condition/testee"
   });
 
-#warning WIP
-  bool doFork = true;
+  bool doFork = false;
   bool dryRun = false;
   Config config(ModulePaths, doFork, dryRun, MutangDefaultTimeout);
 

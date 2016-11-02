@@ -22,6 +22,8 @@ llvm_add_library(mutang
   GoogleTest/GoogleTestFinder.cpp
   GoogleTest/GoogleTestRunner.cpp
 
+  SQLiteReporter.cpp
+
   ADDITIONAL_HEADER_DIRS
   ${MUTANG_INCLUDE_DIR}
   ${MUTANG_INCLUDE_DIR}/MutationOperators
@@ -41,6 +43,7 @@ llvm_add_library(mutang
   LLVMSupport
   LLVMTarget
   LLVMTransformUtils
+  sqlite3
 
   # FIXME: Should not be arch specific
   LLVMX86AsmParser
