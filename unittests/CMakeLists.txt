@@ -9,6 +9,7 @@ add_mutang_unittest(MutangUnitTests
   ConfigParserTests.cpp
   ContextTest.cpp
   DriverTests.cpp
+  ForkProcessSandboxTest.cpp
   MutationEngineTests.cpp
   MutationPointTests.cpp
   TestRunnersTests.cpp
