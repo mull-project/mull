@@ -80,7 +80,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
     auto BorrowedTest = test.get();
     auto Result = make_unique<TestResult>(ExecResult, std::move(test));
 
-    auto testees = Finder.findTestees(BorrowedTest, Ctx);
+    auto testees = Finder.findTestees(BorrowedTest, Ctx, Cfg.getMaxDistance());
 
     //outs() << "\tagainst " << testees.size() << " testees\n";
 
@@ -183,7 +183,7 @@ void Driver::debug_PrintTesteeNames() {
 
   for (auto &Test : Finder.findTests(Ctx)) {
     outs() << Test->getTestName() << "\n";
-    for (auto &testee : Finder.findTestees(Test.get(), Ctx)) {
+    for (auto &testee : Finder.findTestees(Test.get(), Ctx, Cfg.getMaxDistance())) {
       outs() << "\t" << testee.first->getName() << "\n";
     }
   }
@@ -198,7 +198,7 @@ void Driver::debug_PrintMutationPoints() {
 
   for (auto &Test : Finder.findTests(Ctx)) {
     outs() << Test->getTestName() << "\n";
-    for (auto testee : Finder.findTestees(Test.get(), Ctx)) {
+    for (auto testee : Finder.findTestees(Test.get(), Ctx, Cfg.getMaxDistance())) {
       auto MPoints = Finder.findMutationPoints(*(testee.first));
       if (MPoints.size()) {
         outs() << "\t" << testee.first->getName() << "\n";
