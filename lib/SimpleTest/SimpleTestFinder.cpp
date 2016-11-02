@@ -42,7 +42,9 @@ std::vector<std::unique_ptr<Test>> SimpleTestFinder::findTests(Context &Ctx) {
   return tests;
 }
 
-std::vector<Testee> SimpleTestFinder::findTestees(Test *Test, Context &Ctx) {
+std::vector<Testee> SimpleTestFinder::findTestees(Test *Test,
+                                                  Context &Ctx,
+                                                  int maxDistance) {
   SimpleTest_Test *SimpleTest = dyn_cast<SimpleTest_Test>(Test);
 
   Function &F = *(SimpleTest->GetTestFunction());

@@ -111,3 +111,27 @@ TEST(ConfigParser, loadConfig_DryRun_SpecificValue) {
   ASSERT_TRUE(Cfg->isDryRun());
 }
 
+TEST(ConfigParser, loadConfig_MaxDistance_Unspecified) {
+  SourceMgr SM;
+
+  /// Surprisingly enough, yaml library crashes on empty string so
+  /// providing 'bitcode_files:' with content just to overcome the assert.
+  yaml::Stream Stream("bitcode_files:\n"
+                      "  - foo.bc\n"
+                      "  - bar.bc\n", SM);
+
+  ConfigParser Parser;
+  auto Cfg = Parser.loadConfig(Stream);
+
+  ASSERT_EQ(128, Cfg->getMaxDistance());
+}
+
+TEST(ConfigParser, loadConfig_MaxDistance_SpecificValue) {
+  SourceMgr SM;
+  yaml::Stream Stream("maxDistance: 3\n", SM);
+
+  ConfigParser Parser;
+  auto Cfg = Parser.loadConfig(Stream);
+
+  ASSERT_EQ(3, Cfg->getMaxDistance());
+}

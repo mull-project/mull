@@ -28,7 +28,7 @@ using namespace llvm;
 GoogleTestFinder::GoogleTestFinder() : TestFinder() {
   /// FIXME: should come from outside
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
-//  mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
+  mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
 }
 
 /// The algorithm is the following:
@@ -236,19 +236,21 @@ static bool shouldSkipDefinedFunction(llvm::Function *DefinedFunction) {
   return false;
 }
 
-std::vector<Testee> GoogleTestFinder::findTestees(Test *Test, Context &Ctx) {
-  GoogleTest_Test *GTest = dyn_cast<GoogleTest_Test>(Test);
+std::vector<Testee> GoogleTestFinder::findTestees(Test *Test,
+                                                  Context &Ctx,
+                                                  int maxDistance) {
+  GoogleTest_Test *googleTest = dyn_cast<GoogleTest_Test>(Test);
 
-  std::vector<Testee> Testees;
-  std::queue<Testee> Traversees;
-  std::set<Function *> CheckedFunctions;
+  std::vector<Testee> testees;
+  std::queue<Testee> traversees;
+  std::set<Function *> checkedFunctions;
 
-  Module *testBodyModule = GTest->GetTestBodyFunction()->getParent();
+  Module *testBodyModule = googleTest->GetTestBodyFunction()->getParent();
 
-  Traversees.push(std::make_pair(GTest->GetTestBodyFunction(), 0));
+  traversees.push(std::make_pair(googleTest->GetTestBodyFunction(), 0));
 
   while (true) {
-    const Testee traversee = Traversees.front();
+    const Testee traversee = traversees.front();
     Function *traverseeFunction = traversee.first;
     const int mutationDistance = traversee.second;
 
@@ -256,7 +258,18 @@ std::vector<Testee> GoogleTestFinder::findTestees(Test *Test, Context &Ctx) {
     /// as the test itself, then we are not looking for mutation points
     /// in this function assuming it to be a helper function, or the test itself
     if (traverseeFunction->getParent() != testBodyModule) {
-      Testees.push_back(traversee);
+      testees.push_back(traversee);
+    }
+
+    /// The function reached the max allowed distance
+    /// Hence we don't go deeper
+    if ( mutationDistance == maxDistance) {
+      traversees.pop();
+      if (traversees.size() == 0) {
+        break;
+      } else {
+        continue;
+      }
     }
 
     for (inst_iterator I = inst_begin(traverseeFunction),
@@ -277,15 +290,16 @@ std::vector<Testee> GoogleTestFinder::findTestees(Test *Test, Context &Ctx) {
         continue;
       }
 
-      if (Function *DefinedFunction = Ctx.lookupDefinedFunction(functionOperand->getName())) {
-        auto FunctionWasNotProcessed = CheckedFunctions.find(DefinedFunction) == CheckedFunctions.end();
-        CheckedFunctions.insert(DefinedFunction);
+      if (Function *definedFunction = Ctx.lookupDefinedFunction(functionOperand->getName())) {
+        auto functionWasNotProcessed = checkedFunctions.find(definedFunction) == checkedFunctions.end();
+        checkedFunctions.insert(definedFunction);
 
-        if (FunctionWasNotProcessed) {
+        if (functionWasNotProcessed) {
           /// Filtering
-          if (shouldSkipDefinedFunction(DefinedFunction)) {
+          if (shouldSkipDefinedFunction(definedFunction)) {
             continue;
           }
+
           /// The code below is not actually correct
           /// For each C++ constructor compiler can generate up to three
           /// functions*. Which means that the distance might be incorrect
@@ -294,19 +308,19 @@ std::vector<Testee> GoogleTestFinder::findTestees(Test *Test, Context &Ctx) {
           /// * Here is a good overview of what's going on:
           /// http://stackoverflow.com/a/6921467/829116
           ///
-          Traversees.push(std::make_pair(DefinedFunction, mutationDistance + 1));
+          traversees.push(std::make_pair(definedFunction, mutationDistance + 1));
         }
       }
 
     }
 
-    Traversees.pop();
-    if (Traversees.size() == 0) {
+    traversees.pop();
+    if (traversees.size() == 0) {
       break;
     }
   }
 
-  return Testees;
+  return testees;
 }
 
 std::vector<MutationPoint *> GoogleTestFinder::findMutationPoints(

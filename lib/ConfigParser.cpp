@@ -31,7 +31,8 @@ std::unique_ptr<Config> ConfigParser::loadConfig(yaml::Stream &stream) {
   /// Fork is enabled by default
   bool fork = true;
   bool dryRun = false;
-  float timeout = MutangDefaultTimeout;
+  int timeout = MutangDefaultTimeout;
+  int maxDistance = 128;
   auto paths = std::vector<std::string>();
 
   yaml::Node *rootNode = stream.begin()->getRoot();
@@ -77,14 +78,27 @@ std::unique_ptr<Config> ConfigParser::loadConfig(yaml::Stream &stream) {
 
       std::string timeoutStringValue = value->getRawValue().str();
 
-      double timeoutValue = ::atof(timeoutStringValue.c_str());
+      int timeoutValue = ::atoi(timeoutStringValue.c_str());
 
       assert(timeoutValue > 0 &&
              "ConfigParser error: timeout value was provided but we could not resolve it to a meaningful value.");
 
       timeout = timeoutValue;
     }
+
+    else if (key->getRawValue().equals(StringRef("maxDistance"))) {
+      auto value = dyn_cast<yaml::ScalarNode>(keyValue.getValue());
+
+      std::string timeoutStringValue = value->getRawValue().str();
+
+      int distance = ::atoi(timeoutStringValue.c_str());
+
+      assert(distance > 0 &&
+             "ConfigParser error: distance should be more than zero.");
+
+      maxDistance = distance;
+    }
   }
 
-  return make_unique<Config>(paths, fork, dryRun, timeout);
+  return make_unique<Config>(paths, fork, dryRun, timeout, maxDistance);
 }

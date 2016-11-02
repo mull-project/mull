@@ -31,7 +31,7 @@ public:
   explicit GoogleTestFinder();
 
   std::vector<std::unique_ptr<Test>> findTests(Context &Ctx) override;
-  std::vector<Testee> findTestees(Test *Test, Context &Ctx) override;
+  std::vector<Testee> findTestees(Test *Test, Context &Ctx, int maxDistance) override;
   std::vector<std::unique_ptr<MutationPoint>> findMutationPoints(
                           std::vector<MutationOperator *> &MutationOperators,
                           llvm::Function &F) override;
