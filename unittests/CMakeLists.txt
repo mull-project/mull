@@ -9,6 +9,7 @@ add_mutang_unittest(MutangUnitTests
   ConfigParserTests.cpp
   ContextTest.cpp
   DriverTests.cpp
+  ForkProcessSandboxTest.cpp
   MutationEngineTests.cpp
   MutationPointTests.cpp
   TestRunnersTests.cpp
@@ -20,12 +21,15 @@ add_mutang_unittest(MutangUnitTests
 
   GoogleTest/GoogleTestFinderTest.cpp
 
+  SQLiteReporterTest.cpp
+
   TestModuleFactory.cpp
   TestModuleFactory.h
 )
 
 target_link_libraries(MutangUnitTests
   mutang
+  sqlite3
   LLVMAsmParser
   LLVMCore
   LLVMSupport

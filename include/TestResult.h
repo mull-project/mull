@@ -27,6 +27,8 @@ enum ExecutionStatus {
 struct ExecutionResult {
   ExecutionStatus Status;
   long long RunningTime;
+  std::string stdoutOutput;
+  std::string stderrOutput;
 };
 
 class MutationResult {

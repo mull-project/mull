@@ -12,6 +12,11 @@
 
 using namespace std::chrono;
 
+enum {
+  FPSPipeWrite = 1,
+  FPSPipeRead = 0
+};
+
 pid_t mutangFork(const char *processName) {
   static int childrenCount = 0;
   childrenCount++;
@@ -26,9 +31,24 @@ pid_t mutangFork(const char *processName) {
   return pid;
 }
 
-Mutang::ExecutionResult Mutang::ForkProcessSandbox::run(std::function<void (ExecutionResult *)> function,
-                                                        long long timeoutMilliseconds) {
+Mutang::ExecutionResult
+Mutang::ForkProcessSandbox::run(std::function<void (ExecutionResult *)> function,
+                                long long timeoutMilliseconds) {
 
+  /// Preparing pipes for child process to write to and parent process to read from.
+  int stdout_file_descriptor[2];
+  int stderr_file_descriptor[2];
+  if (pipe(stdout_file_descriptor) == -1) {
+    perror("stdout pipe");
+    exit(1);
+  }
+
+  if (pipe(stderr_file_descriptor) == -1) {
+    perror("stderr_pipe");
+    exit(1);
+  }
+
+  /// Creating a memory to be shared between child and parent.
   void *SharedMemory = mmap(NULL,
                             sizeof(ExecutionResult),
                             PROT_READ | PROT_WRITE,
@@ -52,7 +72,18 @@ Mutang::ExecutionResult Mutang::ForkProcessSandbox::run(std::function<void (Exec
     auto start = high_resolution_clock::now();
 
     if (workerPID == 0) {
+      while ((dup2(stdout_file_descriptor[FPSPipeWrite], STDOUT_FILENO) == -1) && (errno == EINTR)) { }
+      while ((dup2(stderr_file_descriptor[FPSPipeWrite], STDERR_FILENO) == -1) && (errno == EINTR)) { }
+
+      close(stdout_file_descriptor[FPSPipeWrite]);
+      close(stdout_file_descriptor[FPSPipeRead]);
+      close(stderr_file_descriptor[FPSPipeWrite]);
+      close(stderr_file_descriptor[FPSPipeRead]);
+
+      //      execl("/bin/pwd", "pwd", (char*)0);
+
       function(sharedResult);
+
       exit(0);
     }
 
@@ -67,7 +98,7 @@ Mutang::ExecutionResult Mutang::ForkProcessSandbox::run(std::function<void (Exec
       result.Status = Timedout;
       result.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
       *sharedResult = result;
-    } else {
+    } else if (exitedPID == workerPID) {
       kill(timerPID, SIGKILL);
       /// Worker Process finished first
       /// Need to check whether it has signaled (crashed) or finished normally
@@ -78,6 +109,8 @@ Mutang::ExecutionResult Mutang::ForkProcessSandbox::run(std::function<void (Exec
         result.Status = Crashed;
         *sharedResult = result;
       }
+    } else {
+      llvm_unreachable("Should not reach!");
     }
 
     wait(nullptr);
@@ -87,7 +120,55 @@ Mutang::ExecutionResult Mutang::ForkProcessSandbox::run(std::function<void (Exec
     while ( (pid = waitpid(watchdogPID, 0, 0)) == -1 ) {}
   }
 
+  close(stdout_file_descriptor[FPSPipeWrite]);
+  close(stderr_file_descriptor[FPSPipeWrite]);
+
+  char child_stdout_buffer[4096];
+  char child_stderr_buffer[4096];
+
+  std::string stdoutOutput;
+  std::string stderrOutput;
+
+  while (1) {
+    ssize_t count = read(stdout_file_descriptor[0], child_stdout_buffer, sizeof(child_stdout_buffer));
+    if (count == -1) {
+      if (errno == EINTR) {
+        continue;
+      } else {
+        perror("read");
+        exit(1);
+      }
+    } else if (count == 0) {
+      break;
+    } else {
+      stdoutOutput.append(child_stdout_buffer, 0, count);
+    }
+  }
+
+  while (1) {
+    ssize_t count = read(stderr_file_descriptor[0], child_stderr_buffer, sizeof(child_stderr_buffer));
+    if (count == -1) {
+      if (errno == EINTR) {
+        continue;
+      } else {
+        perror("read");
+        exit(1);
+      }
+    } else if (count == 0) {
+      break;
+    } else {
+      stderrOutput.append(child_stderr_buffer, 0, count);
+    }
+  }
+
+  close(stdout_file_descriptor[FPSPipeRead]);
+  close(stderr_file_descriptor[FPSPipeRead]);
+
+  wait(0);
+
   ExecutionResult result = *sharedResult;
+  result.stdoutOutput = stdoutOutput;
+  result.stderrOutput = stderrOutput;
 
   int munmapResult = munmap(SharedMemory, sizeof(ExecutionResult));
   (void)munmapResult;

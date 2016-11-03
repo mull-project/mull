@@ -1,9 +1,9 @@
 find_library(PTHREAD_LIBRARY_PATH sqlite3)
 
-add_llvm_executable(mutang-driver driver.cpp)
+add_llvm_executable(mutang-driver driver.cpp
+)
 
 target_link_libraries(mutang-driver
-  sqlite3
   mutang
   LLVMCore
   LLVMSupport

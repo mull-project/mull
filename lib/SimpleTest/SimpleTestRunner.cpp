@@ -33,9 +33,9 @@ class Mutang_SimpleTest_Resolver : public JITSymbolResolver {
 public:
 
   JITSymbol findSymbol(const std::string &Name) {
-    if (Name == "_printf") {
-      return findSymbol("mutang_simple_test_printf");
-    }
+    //if (Name == "_printf") {
+    //  return findSymbol("mutang_simple_test_printf");
+    //}
 
     if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(Name)) {
       return JITSymbol(SymAddr, JITSymbolFlags::Exported);
