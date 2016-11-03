@@ -90,16 +90,8 @@ public:
       return findSymbol("mutang__cxa_atexit");
     }
 
-    if (Name == "_printf") {
-      return findSymbol("mutang_printf");
-    }
-
     if (Name == "___dso_handle") {
       return findSymbol("mutang__dso_handle");
-    }
-
-    if (Name == "_vprintf") {
-      return findSymbol("mutang_vprintf");
     }
 
     if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(Name))
