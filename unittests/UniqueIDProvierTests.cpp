@@ -41,7 +41,7 @@ TEST(UniqueIDProvider, uniqueIDForModuleWithMutationPoint) {
   string moduleName = "fixture_simple_test_tester_module";
   string moduleMD5  = "de5070f8606cc2a8ee794b2ab56b31f2";
   string addressString = "2_3_5";
-  string operatorName = "add";
+  string operatorName = "add_mutation_operator";
 
   string uniqueID = moduleName + "_"
       + moduleMD5 + "_"

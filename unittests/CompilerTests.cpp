@@ -1,5 +1,5 @@
 #include "Compiler.h"
-
+#include "ModuleLoader.h"
 #include "TestModuleFactory.h"
 
 #include "llvm/IR/LLVMContext.h"
@@ -17,7 +17,8 @@ TEST(Compiler, CompileModule) {
   Compiler Compiler(false);
 
   auto SomeModule = TestModuleFactory.createTesterModule();
-  auto Binary = Compiler.compileModule(SomeModule.get());
+  MutangModule mutangModule(std::move(SomeModule), "");
+  auto Binary = Compiler.compileModule(&mutangModule, "");
 
   ASSERT_NE(nullptr, Binary.getBinary());
 }

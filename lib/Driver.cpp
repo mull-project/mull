@@ -106,16 +106,13 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 //        auto BorrowedCopy = OwnedCopy.get();
 
 //        verifyModule(*BorrowedCopy, &errs());
-<<<<<<< 06a4962a07422bf0d6a13eea600025a0d8cfd80e
-=======
-        std::string identifier = testee.first->getParent()->getModuleIdentifier();
-        auto mutatedBinary = mutationPoint->applyMutation(*Ctx.moduleWithIdentifier(identifier),
-                                                          compiler);
-        ObjectFiles.push_back(mutatedBinary);
-        ExecutionResult R = Sandbox->run([&](ExecutionResult *SharedResult) {
-          ExecutionResult R = Runner.runTest(BorrowedTest, ObjectFiles);
-          ObjectFiles.pop_back();
->>>>>>> First take on cache
+
+//        std::string identifier = testee.first->getParent()->getModuleIdentifier();
+//        ObjectFiles.push_back(mutatedBinary);
+//        ExecutionResult R = Sandbox->run([&](ExecutionResult *SharedResult) {
+//          ExecutionResult R = Runner.runTest(BorrowedTest, ObjectFiles);
+//          ObjectFiles.pop_back();
+//        });
 
         ExecutionResult result;
         bool dryRun = Cfg.isDryRun();
@@ -123,17 +120,18 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
           result.Status = DryRun;
           result.RunningTime = ExecResult.RunningTime * 10;
         } else {
-          auto mutatedBinary = mutationPoint->applyMutation(testee.first->getParent(),
+          std::string identifier = testee.first->getParent()->getModuleIdentifier();
+          auto mutatedBinary = mutationPoint->applyMutation(*Ctx.moduleWithIdentifier(identifier),
                                                             compiler);
           ObjectFiles.push_back(mutatedBinary);
           result = Sandbox->run([&](ExecutionResult *SharedResult) {
             ExecutionResult R = Runner.runTest(BorrowedTest, ObjectFiles);
-            ObjectFiles.pop_back();
 
             assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
 
             *SharedResult = R;
           }, ExecResult.RunningTime * 10);
+          ObjectFiles.pop_back();
 
           assert(result.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
         }

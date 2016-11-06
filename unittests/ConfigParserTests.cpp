@@ -103,13 +103,23 @@ TEST(ConfigParser, loadConfig_DryRun_Unspecified) {
 
 TEST(ConfigParser, loadConfig_DryRun_SpecificValue) {
   ConfigParser Parser;
-  auto Cfg = Parser.loadConfig(Stream);
   SourceMgr SM;
   yaml::Stream Stream("dryRun: true\n", SM);
+  auto Cfg = Parser.loadConfig(Stream);
   ASSERT_TRUE(Cfg->isDryRun());
 }
 
 TEST(ConfigParser, loadConfig_UseCache_Unspecified) {
+  SourceMgr SM;
+
+  /// Surprisingly enough, yaml library crashes on empty string so
+  /// providing 'bitcode_files:' with content just to overcome the assert.
+  yaml::Stream Stream("bitcode_files:\n"
+                      "  - foo.bc\n"
+                      "  - bar.bc\n", SM);
+
+  ConfigParser Parser;
+  auto Cfg = Parser.loadConfig(Stream);
   ASSERT_TRUE(Cfg->getUseCache());
 }
 

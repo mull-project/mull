@@ -36,7 +36,7 @@ static string stringFromMutationPoint(const MutationPoint &point) {
     + to_string(address.getBBIndex()) + "_"
     + to_string(address.getIIndex());
 
-  string operatorID = point.getOperator()->uniqueIdentifier();
+  string operatorID = point.getOperator()->uniqueID();
 
   string pointID = addressID + "_" + operatorID;
 

@@ -68,10 +68,10 @@ TEST(Driver, SimpleTest_AddMutationOperator) {
 
   std::vector<std::string> ModulePaths({ "foo", "bar" });
   bool doFork = false;
-<<<<<<< 06a4962a07422bf0d6a13eea600025a0d8cfd80e
   bool dryRun = false;
+  bool useCache = false;
   int distance = 10;
-  Config config(ModulePaths, doFork, dryRun, MutangDefaultTimeout, distance);
+  Config config(ModulePaths, doFork, dryRun, useCache, MutangDefaultTimeout, distance);
 
   FakeModuleLoader loader;
 
@@ -79,10 +79,6 @@ TEST(Driver, SimpleTest_AddMutationOperator) {
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
 
   SimpleTestFinder testFinder(std::move(mutationOperators));
-=======
-  bool useCache = false;
-  Config Cfg(ModulePaths, doFork, useCache, MutangDefaultTimeout);
->>>>>>> First take on cache
 
   SimpleTestRunner runner;
 
@@ -123,8 +119,9 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
 
   bool doFork = false;
   bool dryRun = false;
+  bool useCache = false;
   int distance = 10;
-  Config config(ModulePaths, doFork, dryRun, MutangDefaultTimeout, distance);
+  Config config(ModulePaths, doFork, dryRun, useCache, MutangDefaultTimeout, distance);
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());

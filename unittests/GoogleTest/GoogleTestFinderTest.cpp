@@ -55,7 +55,7 @@ TEST(GoogleTestFinder, DISABLED_FindTestee) {
 
   auto &Test = *(Tests.begin());
 
-  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx);
+  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx, 4);
 
   ASSERT_EQ(1U, Testees.size());
 
@@ -81,7 +81,7 @@ TEST(GoogleTestFinder, DISABLED_FindMutationPoints) {
 
   auto &Test = *Tests.begin();
 
-  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx);
+  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx, 4);
 
   ASSERT_EQ(1U, Testees.size());
 

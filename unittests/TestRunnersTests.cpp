@@ -53,13 +53,13 @@ TEST(SimpleTestRunner, runTest) {
   auto &Test = *(Tests.begin());
 
   {
-    auto Obj = Compiler.compileModule(ModuleWithTests);
+    auto Obj = Compiler.compileModule(ModuleWithTests, "");
     ObjectFiles.push_back(Obj.getBinary());
     OwnedObjectFiles.push_back(std::move(Obj));
   }
 
   {
-    auto Obj = Compiler.compileModule(ModuleWithTestees);
+    auto Obj = Compiler.compileModule(ModuleWithTestees, "");
     ObjectFiles.push_back(Obj.getBinary());
     OwnedObjectFiles.push_back(std::move(Obj));
   }
@@ -72,7 +72,7 @@ TEST(SimpleTestRunner, runTest) {
   /// afterwards we apply single mutation and run test again
   /// expecting it to fail
 
-  ArrayRef<Testee> Testees = testFinder.findTestees(Test.get(), Ctx);
+  ArrayRef<Testee> Testees = testFinder.findTestees(Test.get(), Ctx, 4);
   ASSERT_NE(0U, Testees.size());
   Function *Testee = Testees.begin()->first;
 
@@ -86,13 +86,13 @@ TEST(SimpleTestRunner, runTest) {
   Engine.applyMutation(Testee->getParent(), *MP);
 
   {
-    auto Obj = Compiler.compileModule(ModuleWithTests);
+    auto Obj = Compiler.compileModule(ModuleWithTests, "");
     ObjectFiles.push_back(Obj.getBinary());
     OwnedObjectFiles.push_back(std::move(Obj));
   }
 
   {
-    auto Obj = Compiler.compileModule(ModuleWithTestees);
+    auto Obj = Compiler.compileModule(ModuleWithTestees, "");
     ObjectFiles.push_back(Obj.getBinary());
     OwnedObjectFiles.push_back(std::move(Obj));
   }
@@ -132,11 +132,11 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
 
   auto &Test = *(Tests.begin());
 
-  auto Obj = Compiler.compileModule(ModuleWithTests);
+  auto Obj = Compiler.compileModule(ModuleWithTests, "");
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
-  Obj = Compiler.compileModule(ModuleWithTestees);
+  Obj = Compiler.compileModule(ModuleWithTestees, "");
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
@@ -148,7 +148,7 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   /// afterwards we apply single mutation and run test again
   /// expecting it to fail
 
-  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx);
+  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx, 4);
   ASSERT_NE(0U, Testees.size());
   Function *Testee = Testees.begin()->first;
 
@@ -161,11 +161,11 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   MutationEngine Engine;
   Engine.applyMutation(Testee->getParent(), *MP);
 
-  Obj = Compiler.compileModule(ModuleWithTests);
+  Obj = Compiler.compileModule(ModuleWithTests, "");
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
-  Obj = Compiler.compileModule(ModuleWithTestees);
+  Obj = Compiler.compileModule(ModuleWithTestees, "");
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
@@ -207,11 +207,11 @@ TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
 
   llvm::sys::DynamicLibrary::LoadLibraryPermanently("/usr/lib/libsqlite3.dylib");
 
-  auto Obj = Compiler.compileModule(ModuleWithTestees);
+  auto Obj = Compiler.compileModule(ModuleWithTestees, "");
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
-  Obj = Compiler.compileModule(ModuleWithTests);
+  Obj = Compiler.compileModule(ModuleWithTests, "");
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
