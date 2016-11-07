@@ -13,7 +13,7 @@ add_mutang_unittest(MutangUnitTests
   MutationEngineTests.cpp
   MutationPointTests.cpp
   TestRunnersTests.cpp
-  UniqueIDProvierTests.cpp
+  UniqueIdentifierTests.cpp
 
   MutationOperators/MutationOperatorsTests.cpp
   MutationOperators/NegateConditionMutationOperatorTest.cpp

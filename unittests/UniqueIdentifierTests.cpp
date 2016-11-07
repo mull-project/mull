@@ -1,5 +1,3 @@
-#include "UniqueIDProvider.h"
-
 #include "MutationOperators/AddMutationOperator.h"
 #include "ModuleLoader.h"
 #include "MutationPoint.h"
@@ -15,7 +13,7 @@ using namespace std;
 
 static TestModuleFactory testModuleFactory;
 
-TEST(UniqueIDProvider, uniqueIDForModule) {
+TEST(MutangModule, uniqueIdentifier) {
   LLVMContext context;
   ModuleLoader loader(context);
   auto module = loader.loadModuleAtPath(testModuleFactory.testerModulePath_Bitcode());
@@ -24,11 +22,10 @@ TEST(UniqueIDProvider, uniqueIDForModule) {
   string moduleMD5  = "de5070f8606cc2a8ee794b2ab56b31f2";
   string uniqueID   = moduleName + "_" + moduleMD5;
 
-  UniqueIDProvider provider;
-  ASSERT_EQ(provider.uniqueIDForModule(*module.get()), uniqueID);
+  ASSERT_EQ(module->getUniqueIdentifier(), uniqueID);
 }
 
-TEST(UniqueIDProvider, uniqueIDForModuleWithMutationPoint) {
+TEST(MutationPoint, uniqueIdentifier) {
   LLVMContext context;
   ModuleLoader loader(context);
   auto module = loader.loadModuleAtPath(testModuleFactory.testerModulePath_Bitcode());
@@ -36,7 +33,7 @@ TEST(UniqueIDProvider, uniqueIDForModuleWithMutationPoint) {
   MutationPointAddress address(2, 3, 5);
   AddMutationOperator mutationOperator;
 
-  MutationPoint point(&mutationOperator, address, nullptr);
+  MutationPoint point(&mutationOperator, address, nullptr, module.get());
 
   string moduleName = "fixture_simple_test_tester_module";
   string moduleMD5  = "de5070f8606cc2a8ee794b2ab56b31f2";
@@ -48,6 +45,5 @@ TEST(UniqueIDProvider, uniqueIDForModuleWithMutationPoint) {
       + addressString + "_"
       + operatorName;
 
-  UniqueIDProvider provider;
-  ASSERT_EQ(provider.uniqueIDForModuleWithMutationPoint(*module.get(), point), uniqueID);
+  ASSERT_EQ(point.getUniqueIdentifier(), uniqueID);
 }

@@ -34,6 +34,14 @@ MutangModule *Context::moduleWithIdentifier(const std::string &identifier) {
   return it->second;
 }
 
+MutangModule *Context::moduleWithIdentifier(const std::string &identifier) const {
+  auto it = moduleRegistry.find(identifier);
+  if (it == moduleRegistry.end()) {
+    return nullptr;
+  }
+  return it->second;
+}
+
 std::vector<llvm::Function *> Context::getStaticConstructors() {
   /// NOTE: Just Copied the whole logic from ExecutionEngine
   std::vector<llvm::Function *> Ctors;

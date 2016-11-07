@@ -79,7 +79,7 @@ TEST(SimpleTestRunner, runTest) {
   AddMutationOperator MutOp;
   std::vector<MutationOperator *> MutOps({&MutOp});
 
-  std::vector<MutationPoint *> MutationPoints = testFinder.findMutationPoints(*Testee);
+  std::vector<MutationPoint *> MutationPoints = testFinder.findMutationPoints(Ctx, *Testee);
 
   MutationPoint *MP = (*(MutationPoints.begin()));
   MutationEngine Engine;
@@ -155,7 +155,7 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   AddMutationOperator MutOp;
   std::vector<MutationOperator *> MutOps({&MutOp});
 
-  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(*Testee);
+  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
 
   MutationPoint *MP = (*(MutationPoints.begin()));
   MutationEngine Engine;

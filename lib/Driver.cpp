@@ -4,7 +4,6 @@
 #include "Context.h"
 #include "ModuleLoader.h"
 #include "TestResult.h"
-#include "UniqueIDProvider.h"
 
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Module.h"
@@ -54,14 +53,12 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
   /// Assumption: all modules will be used during the execution
   /// Therefore we load them into memory and compile immediately
   /// Later on modules used only for generating of mutants
-  UniqueIDProvider uniqueIDProvider;
   for (auto ModulePath : Cfg.getBitcodePaths()) {
     auto ownedModule = Loader.loadModuleAtPath(ModulePath);
     auto module = ownedModule->getModule();
     assert(ownedModule && "Can't load module");
 
-    std::string uniqueID = uniqueIDProvider.uniqueIDForModule(*ownedModule.get());
-    auto objectFile = compiler.compileModule(ownedModule.get(), uniqueID);
+    auto objectFile = compiler.compileModule(ownedModule.get(), ownedModule->getUniqueIdentifier());
     InnerCache.insert(std::make_pair(module, std::move(objectFile)));
 
     Ctx.addModule(std::move(ownedModule));
@@ -88,7 +85,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
     //outs() << "\tagainst " << testees.size() << " testees\n";
 
     for (auto testee : testees) {
-      auto MPoints = Finder.findMutationPoints(*(testee.first));
+      auto MPoints = Finder.findMutationPoints(Ctx, *(testee.first));
       if (MPoints.size() == 0) {
         continue;
       }
@@ -102,27 +99,13 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 //        mutationPoint->getOriginalValue()->print(outs());
 //        outs() << "\n";
 
-//        auto OwnedCopy = CloneModule(Testee->getParent());
-//        auto BorrowedCopy = OwnedCopy.get();
-
-//        verifyModule(*BorrowedCopy, &errs());
-
-//        std::string identifier = testee.first->getParent()->getModuleIdentifier();
-//        ObjectFiles.push_back(mutatedBinary);
-//        ExecutionResult R = Sandbox->run([&](ExecutionResult *SharedResult) {
-//          ExecutionResult R = Runner.runTest(BorrowedTest, ObjectFiles);
-//          ObjectFiles.pop_back();
-//        });
-
         ExecutionResult result;
         bool dryRun = Cfg.isDryRun();
         if (dryRun) {
           result.Status = DryRun;
           result.RunningTime = ExecResult.RunningTime * 10;
         } else {
-          std::string identifier = testee.first->getParent()->getModuleIdentifier();
-          auto mutatedBinary = mutationPoint->applyMutation(*Ctx.moduleWithIdentifier(identifier),
-                                                            compiler);
+          auto mutatedBinary = mutationPoint->applyMutation(compiler);
           ObjectFiles.push_back(mutatedBinary);
           result = Sandbox->run([&](ExecutionResult *SharedResult) {
             ExecutionResult R = Runner.runTest(BorrowedTest, ObjectFiles);
@@ -210,7 +193,7 @@ void Driver::debug_PrintMutationPoints() {
   for (auto &Test : Finder.findTests(Ctx)) {
     outs() << Test->getTestName() << "\n";
     for (auto testee : Finder.findTestees(Test.get(), Ctx, Cfg.getMaxDistance())) {
-      auto MPoints = Finder.findMutationPoints(*(testee.first));
+      auto MPoints = Finder.findMutationPoints(Ctx, *(testee.first));
       if (MPoints.size()) {
         outs() << "\t" << testee.first->getName() << "\n";
       }

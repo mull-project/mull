@@ -32,6 +32,8 @@ public:
   std::vector<llvm::Function *> getStaticConstructors();
 
   MutangModule *moduleWithIdentifier(const std::string &identifier);
+  MutangModule *moduleWithIdentifier(const std::string &identifier) const;
+
   ModuleArrayType &getModules() { return Modules; }
   llvm::Function *lookupDefinedFunction(llvm::StringRef FunctionName);
   iterator begin()  { return Modules.begin(); }

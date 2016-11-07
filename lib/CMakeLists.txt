@@ -8,12 +8,12 @@ llvm_add_library(mutang
 
   MutationOperators/AddMutationOperator.cpp
   MutationOperators/NegateConditionMutationOperator.cpp
- 
+
+  MutangModule.cpp
   MutationEngine.cpp
   MutationPoint.cpp
   TestResult.cpp
   TestRunner.cpp
-  UniqueIDProvider.cpp
 
   SimpleTest/SimpleTest_Test.cpp
   SimpleTest/SimpleTestFinder.cpp

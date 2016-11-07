@@ -25,22 +25,40 @@ class MutationPointAddress {
   int BBIndex;
   int IIndex;
 
+  std::string identifier;
 public:
   MutationPointAddress(int FnIndex, int BBIndex, int IIndex) :
-  FnIndex(FnIndex), BBIndex(BBIndex), IIndex(IIndex) {}
+  FnIndex(FnIndex), BBIndex(BBIndex), IIndex(IIndex) {
+    identifier = std::to_string(FnIndex) + "_" +
+      std::to_string(BBIndex) + "_" +
+      std::to_string(IIndex);
+  }
 
   int getFnIndex() { return FnIndex; }
   int getBBIndex() { return BBIndex; }
   int getIIndex() { return IIndex; }
+
+  std::string getIdentifier() {
+    return identifier;
+  }
+
+  std::string getIdentifier() const {
+    return identifier;
+  }
 };
 
 class MutationPoint {
-  MutationOperator *MutOp;
+  MutationOperator *mutationOperator;
   MutationPointAddress Address;
   llvm::Value *OriginalValue;
+  MutangModule *module;
+  std::string uniqueIdentifier;
   llvm::object::OwningBinary<llvm::object::ObjectFile> mutatedBinary;
 public:
-  MutationPoint(MutationOperator *MO, MutationPointAddress Address, llvm::Value *Val);
+  MutationPoint(MutationOperator *op,
+                MutationPointAddress Address,
+                llvm::Value *Val,
+                MutangModule *m);
   ~MutationPoint();
 
   MutationOperator *getOperator();
@@ -51,9 +69,11 @@ public:
   MutationPointAddress getAddress() const;
   llvm::Value *getOriginalValue() const;
 
-  void applyMutation(llvm::Module *M);
-  llvm::object::ObjectFile *applyMutation(MutangModule &module,
-                                          Compiler &compiler);
+  void applyMutation(llvm::Module *M) __attribute__((deprecated));
+  llvm::object::ObjectFile *applyMutation(Compiler &compiler);
+
+  std::string getUniqueIdentifier();
+  std::string getUniqueIdentifier() const;
 };
 
 }

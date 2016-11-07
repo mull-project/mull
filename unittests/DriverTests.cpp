@@ -35,22 +35,22 @@ public:
   std::unique_ptr<MutangModule> loadModuleAtPath(const std::string &path) override {
     if (path == "foo") {
       auto module = TestModuleFactory.createTesterModule();
-      return make_unique<MutangModule>(std::move(module), "");
+      return make_unique<MutangModule>(std::move(module), "1234");
     }
 
     else if (path == "bar") {
       auto module = TestModuleFactory.createTesteeModule();
-      return make_unique<MutangModule>(std::move(module), "");
+      return make_unique<MutangModule>(std::move(module), "3456");
     }
 
     else if (path == "simple_test/negate_condition/tester") {
       auto module = TestModuleFactory.create_SimpleTest_NegateCondition_Tester_Module();
-      return make_unique<MutangModule>(std::move(module), "");
+      return make_unique<MutangModule>(std::move(module), "5678");
     }
 
     else if (path == "simple_test/negate_condition/testee") {
       auto module = TestModuleFactory.create_SimpleTest_NegateCondition_Testee_Module();
-      return make_unique<MutangModule>(std::move(module), "");
+      return make_unique<MutangModule>(std::move(module), "7890");
     }
 
     return make_unique<MutangModule>(nullptr, "");

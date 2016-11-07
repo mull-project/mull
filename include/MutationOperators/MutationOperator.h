@@ -11,13 +11,16 @@ namespace llvm {
 
 namespace Mutang {
 
+class Context;
 class MutationPoint;
 class MutationPointAddress;
 
 class MutationOperator {
 public:
-  virtual std::vector<MutationPoint *> getMutationPoints(llvm::Function *function) = 0;
+  virtual std::vector<MutationPoint *> getMutationPoints(const Context &context,
+                                                         llvm::Function *function) = 0;
 
+  /// FIXME: Renmae to 'getUniqueIdentifier'
   virtual std::string uniqueID() = 0;
   virtual std::string uniqueID() const = 0;
 

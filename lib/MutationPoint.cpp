@@ -1,21 +1,31 @@
 #include "MutationPoint.h"
 #include "Compiler.h"
 #include "ModuleLoader.h"
-#include "UniqueIDProvider.h"
 
 #include "MutationOperators/MutationOperator.h"
 #include "llvm/Transforms/Utils/Cloning.h"
 
 using namespace llvm;
 using namespace Mutang;
+using namespace std;
 
-MutationPoint::MutationPoint(MutationOperator *MO, MutationPointAddress Address, llvm::Value *Val) :
-  MutOp(MO), Address(Address), OriginalValue(Val) {}
+MutationPoint::MutationPoint(MutationOperator *op,
+                             MutationPointAddress Address,
+                             Value *Val,
+                             MutangModule *m) :
+  mutationOperator(op), Address(Address), OriginalValue(Val), module(m)
+{
+  string moduleID = module->getUniqueIdentifier();
+  string addressID = Address.getIdentifier();
+  string operatorID = mutationOperator->uniqueID();
+
+  uniqueIdentifier = moduleID + "_" + addressID + "_" + operatorID;
+}
 
 MutationPoint::~MutationPoint() {}
 
 MutationOperator *MutationPoint::getOperator() {
-  return MutOp;
+  return mutationOperator;
 }
 
 MutationPointAddress MutationPoint::getAddress() {
@@ -27,7 +37,7 @@ Value *MutationPoint::getOriginalValue() {
 }
 
 MutationOperator *MutationPoint::getOperator() const {
-  return MutOp;
+  return mutationOperator;
 }
 
 MutationPointAddress MutationPoint::getAddress() const {
@@ -39,22 +49,26 @@ Value *MutationPoint::getOriginalValue() const {
 }
 
 void MutationPoint::applyMutation(llvm::Module *M) {
-  MutOp->applyMutation(M, Address, *OriginalValue);
+  mutationOperator->applyMutation(M, Address, *OriginalValue);
 }
 
-object::ObjectFile *MutationPoint::applyMutation(MutangModule &module,
-                                                 Compiler &compiler) {
+object::ObjectFile *MutationPoint::applyMutation(Compiler &compiler) {
   if (mutatedBinary.getBinary() != nullptr) {
     return mutatedBinary.getBinary();
   }
 
-  UniqueIDProvider uniqueIDProvier;
-  std::string uniqueID = uniqueIDProvier.uniqueIDForModuleWithMutationPoint(module,
-                                                                            *this);
-
-  auto copyForMutation = CloneModule(module.getModule());
-  MutOp->applyMutation(copyForMutation.get(), Address, *OriginalValue);
-  mutatedBinary = compiler.compileModule(copyForMutation.get(), uniqueID);
+  /// FIXME: Should look into cache first
+  auto copyForMutation = CloneModule(module->getModule());
+  mutationOperator->applyMutation(copyForMutation.get(), Address, *OriginalValue);
+  mutatedBinary = compiler.compileModule(copyForMutation.get(), getUniqueIdentifier());
 
   return mutatedBinary.getBinary();
+}
+
+std::string MutationPoint::getUniqueIdentifier() {
+  return uniqueIdentifier;
+}
+
+std::string MutationPoint::getUniqueIdentifier() const {
+  return uniqueIdentifier;
 }

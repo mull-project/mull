@@ -79,11 +79,10 @@ std::vector<Testee> SimpleTestFinder::findTestees(Test *Test,
   return testees;
 }
 
-std::vector<MutationPoint *> SimpleTestFinder::findMutationPoints(llvm::Function &F) {
+std::vector<MutationPoint *>
+SimpleTestFinder::findMutationPoints(const Context &context,
+                                     llvm::Function &F) {
   std::vector<MutationPoint *> MutPoints;
-
-  //std::vector<std::unique_ptr<MutationPoint>> MutPoints;
-
 
   Module *PM = F.getParent();
 
@@ -119,7 +118,8 @@ std::vector<MutationPoint *> SimpleTestFinder::findMutationPoints(llvm::Function
 
           printf("Found Mutation point at address: %d %d %d\n", FIndex, BBIndex, IIndex);
 
-          MutationPoint *MP = new MutationPoint(MutOp.get(), Address, &Instr);
+          auto module = context.moduleWithIdentifier(Instr.getModule()->getModuleIdentifier());
+          MutationPoint *MP = new MutationPoint(MutOp.get(), Address, &Instr, module);
 
           MutPoints.push_back(MP);
           MutationPoints.emplace_back(std::unique_ptr<MutationPoint>(MP));
