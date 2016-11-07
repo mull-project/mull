@@ -9,6 +9,9 @@ llvm_add_library(mutang
   MutationOperators/AddMutationOperator.cpp
   MutationOperators/NegateConditionMutationOperator.cpp
 
+  Toolchain/ObjectCache.cpp
+  Toolchain/Toolchain.cpp
+
   MutangModule.cpp
   MutationEngine.cpp
   MutationPoint.cpp
@@ -29,6 +32,9 @@ llvm_add_library(mutang
   ${MUTANG_INCLUDE_DIR}
   ${MUTANG_INCLUDE_DIR}/MutationOperators
   ${MUTANG_INCLUDE_DIR}/Context
+  ${MUTANG_INCLUDE_DIR}/GoogleTest
+  ${MUTANG_INCLUDE_DIR}/SimpleTest
+  ${MUTANG_INCLUDE_DIR}/Toolchain
 
   LINK_LIBS
   LLVMAsmPrinter

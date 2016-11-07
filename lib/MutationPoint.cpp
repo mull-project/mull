@@ -52,17 +52,15 @@ void MutationPoint::applyMutation(llvm::Module *M) {
   mutationOperator->applyMutation(M, Address, *OriginalValue);
 }
 
-object::ObjectFile *MutationPoint::applyMutation(Compiler &compiler) {
-  if (mutatedBinary.getBinary() != nullptr) {
-    return mutatedBinary.getBinary();
-  }
+llvm::object::OwningBinary<llvm::object::ObjectFile> MutationPoint::applyMutation(Compiler &compiler) {
+//  if (mutatedBinary.getBinary() != nullptr) {
+//    return mutatedBinary.getBinary();
+//  }
 
   /// FIXME: Should look into cache first
   auto copyForMutation = CloneModule(module->getModule());
   mutationOperator->applyMutation(copyForMutation.get(), Address, *OriginalValue);
-  mutatedBinary = compiler.compileModule(copyForMutation.get(), getUniqueIdentifier());
-
-  return mutatedBinary.getBinary();
+  return compiler.compileModule(copyForMutation.get(), getUniqueIdentifier());
 }
 
 std::string MutationPoint::getUniqueIdentifier() {

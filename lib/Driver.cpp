@@ -26,6 +26,7 @@
 
 using namespace llvm;
 using namespace Mutang;
+using namespace std;
 using namespace std::chrono;
 
 /// Populate Mutang::Context with modules using
@@ -46,7 +47,7 @@ using namespace std::chrono;
 /// all the results of each mutant within corresponding MutationPoint
 
 std::vector<std::unique_ptr<TestResult>> Driver::Run() {
-  Compiler compiler(Cfg.getUseCache());
+  Compiler compiler(false);
 
   std::vector<std::unique_ptr<TestResult>> Results;
 
@@ -54,13 +55,17 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
   /// Therefore we load them into memory and compile immediately
   /// Later on modules used only for generating of mutants
   for (auto ModulePath : Cfg.getBitcodePaths()) {
-    auto ownedModule = Loader.loadModuleAtPath(ModulePath);
-    auto module = ownedModule->getModule();
+    unique_ptr<MutangModule> ownedModule = Loader.loadModuleAtPath(ModulePath);
+    MutangModule &module = *ownedModule.get();
     assert(ownedModule && "Can't load module");
 
-    auto objectFile = compiler.compileModule(ownedModule.get(), ownedModule->getUniqueIdentifier());
-    InnerCache.insert(std::make_pair(module, std::move(objectFile)));
+    OwningBinary<ObjectFile> objectFile = toolchain.cache().getObject(module);
+    if (objectFile.getBinary() == nullptr) {
+      objectFile = compiler.compileModule(module);
+      toolchain.cache().putObject(objectFile, *ownedModule.get());
+    }
 
+    InnerCache.insert(std::make_pair(module.getModule(), std::move(objectFile)));
     Ctx.addModule(std::move(ownedModule));
   }
 
@@ -73,7 +78,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 
     //outs() << "\tDriver::Run::run test: " << test->getTestName() << "\n";
 
-    ExecutionResult ExecResult = Sandbox->run([&](ExecutionResult *SharedResult){
+    ExecutionResult ExecResult = Sandbox->run([&](ExecutionResult *SharedResult) {
       *SharedResult = Runner.runTest(test.get(), ObjectFiles);
     }, Cfg.getTimeout());
 
@@ -105,8 +110,13 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
           result.Status = DryRun;
           result.RunningTime = ExecResult.RunningTime * 10;
         } else {
-          auto mutatedBinary = mutationPoint->applyMutation(compiler);
-          ObjectFiles.push_back(mutatedBinary);
+          OwningBinary<ObjectFile> mutant = toolchain.cache().getObject(*mutationPoint);
+          if (mutant.getBinary() == nullptr) {
+            mutant = mutationPoint->applyMutation(compiler);
+            toolchain.cache().putObject(mutant, *mutationPoint);
+          }
+          ObjectFiles.push_back(mutant.getBinary());
+
           result = Sandbox->run([&](ExecutionResult *SharedResult) {
             ExecutionResult R = Runner.runTest(BorrowedTest, ObjectFiles);
 

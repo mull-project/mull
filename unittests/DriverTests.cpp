@@ -9,6 +9,8 @@
 #include "TestModuleFactory.h"
 #include "TestResult.h"
 
+#include "Toolchain/Toolchain.h"
+
 #include "llvm/ADT/SmallString.h"
 #include "llvm/ADT/Twine.h"
 #include "llvm/IR/LLVMContext.h"
@@ -81,8 +83,9 @@ TEST(Driver, SimpleTest_AddMutationOperator) {
   SimpleTestFinder testFinder(std::move(mutationOperators));
 
   SimpleTestRunner runner;
+  Toolchain toolchain;
 
-  Driver Driver(config, loader, testFinder, runner);
+  Driver Driver(config, loader, testFinder, runner, toolchain);
 
   /// Given the modules we use here we expect:
   ///
@@ -130,8 +133,9 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
 
   FakeModuleLoader loader;
   SimpleTestRunner runner;
+  Toolchain toolchain;
 
-  Driver Driver(config, loader, testFinder, runner);
+  Driver Driver(config, loader, testFinder, runner, toolchain);
 
   /// Given the modules we use here we expect:
   ///

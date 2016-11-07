@@ -22,6 +22,7 @@ class Compiler {
   bool useCache;
 public:
   Compiler(bool cache);
+  OwningBinary<ObjectFile> compileModule(const MutangModule &module);
   OwningBinary<ObjectFile> compileModule(MutangModule *module,
                                          const std::string &uniqueID);
   OwningBinary<ObjectFile> compileModule(Module *module,

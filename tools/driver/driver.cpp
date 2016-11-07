@@ -5,6 +5,8 @@
 #include "MutationPoint.h"
 #include "SQLiteReporter.h"
 
+#include "Toolchain/Toolchain.h"
+
 #include "SimpleTest/SimpleTestFinder.h"
 #include "SimpleTest/SimpleTestRunner.h"
 
@@ -33,7 +35,8 @@ int debug_main(int argc, char *argv[]) {
   GoogleTestFinder TestFinder;
   GoogleTestRunner Runner;
 
-  Driver D(*Cfg.get(), Loader, TestFinder, Runner);
+  Toolchain toolchain;
+  Driver D(*Cfg.get(), Loader, TestFinder, Runner, toolchain);
 
   if (strcmp(argv[2], "-print-test-names") == 0) {
     D.debug_PrintTestNames();
@@ -69,7 +72,8 @@ int main(int argc, char *argv[]) {
   SimpleTestRunner Runner;
 #endif
 
-  Driver driver(*Cfg.get(), Loader, TestFinder, Runner);
+  Toolchain toolchain;
+  Driver driver(*Cfg.get(), Loader, TestFinder, Runner, toolchain);
   auto results = driver.Run();
 
   SQLiteReporter reporter;

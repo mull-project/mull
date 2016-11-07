@@ -49,6 +49,26 @@ Compiler::Compiler(bool cache) : useCache(cache) {
   InitializeNativeTargetAsmParser();
 }
 
+OwningBinary<ObjectFile> Compiler::compileModule(const MutangModule &module) {
+  /// FIXME: Initialize everything once
+  std::unique_ptr<TargetMachine> targetMachine(
+                                 EngineBuilder().selectTarget(Triple(), "", "",
+                                              SmallVector<std::string, 1>()));
+  assert(targetMachine && "Can't create TargetMachine");
+
+  Module *llvmModule = module.getModule();
+
+  if (llvmModule->getDataLayout().isDefault()) {
+    llvmModule->setDataLayout(targetMachine->createDataLayout());
+  }
+
+  orc::SimpleCompiler compiler(*targetMachine);
+
+  OwningBinary<ObjectFile> objectFile = compiler(*llvmModule);
+  
+  return objectFile;
+}
+
 OwningBinary<ObjectFile> Compiler::compileModule(MutangModule *module,
                                                  const std::string &uniqueID) {
   return compileModule(module->getModule(), uniqueID);
