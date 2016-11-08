@@ -59,8 +59,9 @@ llvm::object::OwningBinary<llvm::object::ObjectFile> MutationPoint::applyMutatio
 
   /// FIXME: Should look into cache first
   auto copyForMutation = CloneModule(module->getModule());
+  printf("Compiling mutant '%s'\n", getUniqueIdentifier().c_str());
   mutationOperator->applyMutation(copyForMutation.get(), Address, *OriginalValue);
-  return compiler.compileModule(copyForMutation.get(), getUniqueIdentifier());
+  return compiler.compileModule(copyForMutation.get());
 }
 
 std::string MutationPoint::getUniqueIdentifier() {

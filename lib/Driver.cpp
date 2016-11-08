@@ -25,6 +25,7 @@
 #include <fstream>
 
 using namespace llvm;
+using namespace llvm::object;
 using namespace Mutang;
 using namespace std;
 using namespace std::chrono;
@@ -47,7 +48,7 @@ using namespace std::chrono;
 /// all the results of each mutant within corresponding MutationPoint
 
 std::vector<std::unique_ptr<TestResult>> Driver::Run() {
-  Compiler compiler(false);
+  Compiler compiler;
 
   std::vector<std::unique_ptr<TestResult>> Results;
 
