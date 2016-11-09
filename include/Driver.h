@@ -34,7 +34,7 @@ class Driver {
   Context Ctx;
   ProcessSandbox *Sandbox;
 
-  std::map<llvm::Module *, llvm::object::OwningBinary<llvm::object::ObjectFile>> InnerCache;
+  std::map<llvm::Module *, llvm::object::ObjectFile *> InnerCache;
 public:
   Driver(Config &C, ModuleLoader &ML, TestFinder &TF, TestRunner &TR, Toolchain &t)
     : Cfg(C), Loader(ML), Finder(TF), Runner(TR), toolchain(t) {

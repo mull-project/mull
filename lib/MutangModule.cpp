@@ -1,5 +1,7 @@
 #include "MutangModule.h"
 
+#include "llvm/Transforms/Utils/Cloning.h"
+
 using namespace Mutang;
 using namespace llvm;
 using namespace std;
@@ -22,8 +24,21 @@ static string fileNameFromPath(const string &path) {
   return filename;
 }
 
+MutangModule::MutangModule(std::unique_ptr<llvm::Module> llvmModule)
+  : module(std::move(llvmModule)),
+    uniqueIdentifier("")
+{
+}
+
 MutangModule::MutangModule(std::unique_ptr<llvm::Module> llvmModule,
                            const std::string &md5) : module(std::move(llvmModule))
 {
   uniqueIdentifier = fileNameFromPath(module->getModuleIdentifier()) + "_" + md5;
+}
+
+std::unique_ptr<MutangModule> MutangModule::clone() {
+  auto llvmModule = CloneModule(module.get());
+  auto clone = new MutangModule(std::move(llvmModule));
+  clone->uniqueIdentifier = uniqueIdentifier;
+  return std::unique_ptr<MutangModule>(clone);
 }

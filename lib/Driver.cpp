@@ -60,13 +60,15 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
     MutangModule &module = *ownedModule.get();
     assert(ownedModule && "Can't load module");
 
-    OwningBinary<ObjectFile> objectFile = toolchain.cache().getObject(module);
-    if (objectFile.getBinary() == nullptr) {
-      objectFile = compiler.compileModule(module);
-      toolchain.cache().putObject(objectFile, *ownedModule.get());
+    ObjectFile *objectFile = toolchain.cache().getObject(module);
+
+    if (objectFile == nullptr) {
+      auto owningObjectFile = compiler.compileModule(*module.clone().get());
+      objectFile = owningObjectFile.getBinary();
+      toolchain.cache().putObject(std::move(owningObjectFile), *ownedModule.get());
     }
 
-    InnerCache.insert(std::make_pair(module.getModule(), std::move(objectFile)));
+    InnerCache.insert(std::make_pair(module.getModule(), objectFile));
     Ctx.addModule(std::move(ownedModule));
   }
 
@@ -111,12 +113,13 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
           result.Status = DryRun;
           result.RunningTime = ExecResult.RunningTime * 10;
         } else {
-          OwningBinary<ObjectFile> mutant = toolchain.cache().getObject(*mutationPoint);
-          if (mutant.getBinary() == nullptr) {
-            mutant = mutationPoint->applyMutation(compiler);
-            toolchain.cache().putObject(mutant, *mutationPoint);
+          ObjectFile *mutant = toolchain.cache().getObject(*mutationPoint);
+          if (mutant == nullptr) {
+            auto owningObject = mutationPoint->applyMutation(compiler);
+            mutant = owningObject.getBinary();
+            toolchain.cache().putObject(std::move(owningObject), *mutationPoint);
           }
-          ObjectFiles.push_back(mutant.getBinary());
+          ObjectFiles.push_back(mutant);
 
           result = Sandbox->run([&](ExecutionResult *SharedResult) {
             ExecutionResult R = Runner.runTest(BorrowedTest, ObjectFiles);
@@ -148,7 +151,7 @@ std::vector<llvm::object::ObjectFile *> Driver::AllButOne(llvm::Module *One) {
 
   for (auto &CachedEntry : InnerCache) {
     if (One != CachedEntry.first) {
-      Objects.push_back(CachedEntry.second.getBinary());
+      Objects.push_back(CachedEntry.second);
     }
   }
 
@@ -159,7 +162,7 @@ std::vector<llvm::object::ObjectFile *> Driver::AllObjectFiles() {
   std::vector<llvm::object::ObjectFile *> Objects;
 
   for (auto &CachedEntry : InnerCache) {
-    Objects.push_back(CachedEntry.second.getBinary());
+    Objects.push_back(CachedEntry.second);
   }
 
   return Objects;

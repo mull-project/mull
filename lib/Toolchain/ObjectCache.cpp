@@ -6,6 +6,11 @@ using namespace Mutang;
 using namespace llvm;
 using namespace llvm::object;
 
+static bool cacheDirectoryExists(const std::string &cacheDirectory) {
+
+  return true;
+}
+
 static void putFileIntoCache(ObjectFile *object, std::string uniqueID) {
   std::string cacheName("/tmp/mutang_cache/" + uniqueID + ".o");
   std::error_code EC;
@@ -19,41 +24,68 @@ static OwningBinary<ObjectFile> loadFileFromCache(std::string uniqueID) {
   std::string cacheName("/tmp/mutang_cache/" + uniqueID + ".o");
 
   ErrorOr<std::unique_ptr<MemoryBuffer>> buffer =
-  MemoryBuffer::getFile(cacheName.c_str());
+    MemoryBuffer::getFile(cacheName.c_str());
 
   if (!buffer) {
     return OwningBinary<ObjectFile>();
   }
 
-  Expected<std::unique_ptr<ObjectFile>> object =
-  ObjectFile::createObjectFile(buffer.get()->getMemBufferRef());
+  Expected<std::unique_ptr<ObjectFile>> objectOrError =
+    ObjectFile::createObjectFile(buffer.get()->getMemBufferRef());
 
-  if (!object) {
+  if (!objectOrError) {
     return OwningBinary<ObjectFile>();
   }
 
-  printf("Cache hit for '%s'\n", uniqueID.c_str());
+  std::unique_ptr<ObjectFile> objectFile(std::move(objectOrError.get()));
 
-  return OwningBinary<ObjectFile>(std::move(*object),
+  return OwningBinary<ObjectFile>(std::move(objectFile),
                                   std::move(buffer.get()));
 }
 
 ObjectCache::ObjectCache() {}
 
-OwningBinary<ObjectFile> ObjectCache::getObject(const MutangModule &module) {
-  return loadFileFromCache(module.getUniqueIdentifier());
+ObjectFile *ObjectCache::getObject(const std::string &identifier) {
+  ObjectFile *objectFile = nullptr;
+
+  if (inMemoryCache.count(identifier) != 0) {
+    auto &owningObject = inMemoryCache.at(identifier);
+    objectFile = owningObject.getBinary();
+  } else {
+    auto owningObject = loadFileFromCache(identifier);
+    objectFile = owningObject.getBinary();
+    if (objectFile != nullptr) {
+      inMemoryCache.insert(std::make_pair(identifier, std::move(owningObject)));
+    }
+  }
+
+  if (objectFile) {
+    printf("Cache hit for '%s'\n", identifier.c_str());
+  }
+
+  return objectFile;
 }
 
-OwningBinary<ObjectFile> ObjectCache::getObject(const MutationPoint &mutationPoint) {
-  return loadFileFromCache(mutationPoint.getUniqueIdentifier());
+void ObjectCache::putObject(OwningBinary<ObjectFile> object,
+                            const std::string &identifier) {
+  putFileIntoCache(object.getBinary(), identifier);
+  inMemoryCache.insert(std::make_pair(identifier, std::move(object)));
 }
 
-void ObjectCache::putObject(OwningBinary<ObjectFile> &object,
+ObjectFile *ObjectCache::getObject(const MutangModule &module) {
+  return getObject(module.getUniqueIdentifier());
+}
+
+ObjectFile *ObjectCache::getObject(const MutationPoint &mutationPoint) {
+  return getObject(mutationPoint.getUniqueIdentifier());
+}
+
+void ObjectCache::putObject(OwningBinary<ObjectFile> object,
                             const MutangModule &module) {
-  putFileIntoCache(object.getBinary(), module.getUniqueIdentifier());
+  putObject(std::move(object), module.getUniqueIdentifier());
 }
 
-void ObjectCache::putObject(OwningBinary<ObjectFile> &object,
+void ObjectCache::putObject(OwningBinary<ObjectFile> object,
                             const MutationPoint &mutationPoint) {
-  putFileIntoCache(object.getBinary(), mutationPoint.getUniqueIdentifier());
+  putObject(std::move(object), mutationPoint.getUniqueIdentifier());
 }
