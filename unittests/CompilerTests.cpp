@@ -14,11 +14,11 @@ using namespace Mutang;
 static TestModuleFactory TestModuleFactory;
 
 TEST(Compiler, CompileModule) {
-  Compiler Compiler(false);
+  Compiler Compiler;
 
   auto SomeModule = TestModuleFactory.createTesterModule();
   MutangModule mutangModule(std::move(SomeModule), "");
-  auto Binary = Compiler.compileModule(&mutangModule, "");
+  auto Binary = Compiler.compileModule(mutangModule);
 
   ASSERT_NE(nullptr, Binary.getBinary());
 }

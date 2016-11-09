@@ -3,10 +3,12 @@
 #include "Toolchain/ObjectCache.h"
 
 namespace Mutang {
+  class Config;
+
   class Toolchain {
     ObjectCache objectCache;
   public:
-    Toolchain();
+    Toolchain(Config &config);
 
     ObjectCache &cache();
   };

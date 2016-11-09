@@ -23,7 +23,7 @@ using namespace llvm;
 static TestModuleFactory TestModuleFactory;
 
 TEST(SimpleTestRunner, runTest) {
-  Compiler Compiler(false);
+  Compiler Compiler;
   Context Ctx;
   SimpleTestRunner Runner;
   SimpleTestRunner::ObjectFiles ObjectFiles;
@@ -53,13 +53,13 @@ TEST(SimpleTestRunner, runTest) {
   auto &Test = *(Tests.begin());
 
   {
-    auto Obj = Compiler.compileModule(ModuleWithTests, "");
+    auto Obj = Compiler.compileModule(ModuleWithTests);
     ObjectFiles.push_back(Obj.getBinary());
     OwnedObjectFiles.push_back(std::move(Obj));
   }
 
   {
-    auto Obj = Compiler.compileModule(ModuleWithTestees, "");
+    auto Obj = Compiler.compileModule(ModuleWithTestees);
     ObjectFiles.push_back(Obj.getBinary());
     OwnedObjectFiles.push_back(std::move(Obj));
   }
@@ -86,13 +86,13 @@ TEST(SimpleTestRunner, runTest) {
   Engine.applyMutation(Testee->getParent(), *MP);
 
   {
-    auto Obj = Compiler.compileModule(ModuleWithTests, "");
+    auto Obj = Compiler.compileModule(ModuleWithTests);
     ObjectFiles.push_back(Obj.getBinary());
     OwnedObjectFiles.push_back(std::move(Obj));
   }
 
   {
-    auto Obj = Compiler.compileModule(ModuleWithTestees, "");
+    auto Obj = Compiler.compileModule(ModuleWithTestees);
     ObjectFiles.push_back(Obj.getBinary());
     OwnedObjectFiles.push_back(std::move(Obj));
   }
@@ -103,7 +103,7 @@ TEST(SimpleTestRunner, runTest) {
 }
 
 TEST(SimpleTestRunner, runTestUsingLibC) {
-  Compiler Compiler(false);
+  Compiler Compiler;
   Context Ctx;
   SimpleTestRunner Runner;
   SimpleTestRunner::ObjectFiles ObjectFiles;
@@ -132,11 +132,11 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
 
   auto &Test = *(Tests.begin());
 
-  auto Obj = Compiler.compileModule(ModuleWithTests, "");
+  auto Obj = Compiler.compileModule(ModuleWithTests);
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
-  Obj = Compiler.compileModule(ModuleWithTestees, "");
+  Obj = Compiler.compileModule(ModuleWithTestees);
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
@@ -161,11 +161,11 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   MutationEngine Engine;
   Engine.applyMutation(Testee->getParent(), *MP);
 
-  Obj = Compiler.compileModule(ModuleWithTests, "");
+  Obj = Compiler.compileModule(ModuleWithTests);
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
-  Obj = Compiler.compileModule(ModuleWithTestees, "");
+  Obj = Compiler.compileModule(ModuleWithTestees);
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
@@ -174,7 +174,7 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
 }
 
 TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
-  Compiler Compiler(false);
+  Compiler Compiler;
   Context Ctx;
   SimpleTestRunner Runner;
   SimpleTestRunner::ObjectFiles ObjectFiles;
@@ -207,11 +207,11 @@ TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
 
   llvm::sys::DynamicLibrary::LoadLibraryPermanently("/usr/lib/libsqlite3.dylib");
 
-  auto Obj = Compiler.compileModule(ModuleWithTestees, "");
+  auto Obj = Compiler.compileModule(ModuleWithTestees);
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
-  Obj = Compiler.compileModule(ModuleWithTests, "");
+  Obj = Compiler.compileModule(ModuleWithTests);
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 

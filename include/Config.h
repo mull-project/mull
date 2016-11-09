@@ -14,6 +14,7 @@ class Config {
   bool useCache;
   int timeout;
   int maxDistance;
+  std::string cacheDirectory;
 
 public:
   Config(const std::vector<std::string> &paths,
@@ -21,13 +22,17 @@ public:
          bool dryrun,
          bool cache,
          int timeout,
-         int distance) :
+         int distance,
+         const std::string &cacheDir) :
     bitcodePaths(paths),
     fork(fork),
     dryRun(dryrun),
     useCache(cache),
     timeout(timeout),
-    maxDistance(distance) {}
+    maxDistance(distance),
+    cacheDirectory(cacheDir)
+  {
+  }
 
   const std::vector<std::string> &getBitcodePaths() const {
       return bitcodePaths;
@@ -51,6 +56,10 @@ public:
 
   int getMaxDistance() const {
     return maxDistance;
+  }
+
+  std::string getCacheDirectory() const {
+    return cacheDirectory;
   }
 
 };

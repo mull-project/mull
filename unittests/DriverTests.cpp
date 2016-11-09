@@ -73,7 +73,9 @@ TEST(Driver, SimpleTest_AddMutationOperator) {
   bool dryRun = false;
   bool useCache = false;
   int distance = 10;
-  Config config(ModulePaths, doFork, dryRun, useCache, MutangDefaultTimeout, distance);
+  std::string cacheDirectory = "/tmp/mutang_cache";
+  Config config(ModulePaths, doFork, dryRun, useCache, MutangDefaultTimeout,
+                distance, cacheDirectory);
 
   FakeModuleLoader loader;
 
@@ -83,7 +85,7 @@ TEST(Driver, SimpleTest_AddMutationOperator) {
   SimpleTestFinder testFinder(std::move(mutationOperators));
 
   SimpleTestRunner runner;
-  Toolchain toolchain;
+  Toolchain toolchain(config);
 
   Driver Driver(config, loader, testFinder, runner, toolchain);
 
@@ -124,7 +126,9 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
   bool dryRun = false;
   bool useCache = false;
   int distance = 10;
-  Config config(ModulePaths, doFork, dryRun, useCache, MutangDefaultTimeout, distance);
+  std::string cacheDirectory = "/tmp/mutang_cache";
+  Config config(ModulePaths, doFork, dryRun, useCache, MutangDefaultTimeout,
+                distance, cacheDirectory);
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
@@ -133,7 +137,7 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
 
   FakeModuleLoader loader;
   SimpleTestRunner runner;
-  Toolchain toolchain;
+  Toolchain toolchain(config);
 
   Driver Driver(config, loader, testFinder, runner, toolchain);
 

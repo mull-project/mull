@@ -34,6 +34,7 @@ std::unique_ptr<Config> ConfigParser::loadConfig(yaml::Stream &stream) {
   bool useCache = true;
   int timeout = MutangDefaultTimeout;
   int maxDistance = 128;
+  std::string cacheDirectory = "/tmp/mutang_cache";
   auto paths = std::vector<std::string>();
 
   yaml::Node *rootNode = stream.begin()->getRoot();
@@ -109,7 +110,14 @@ std::unique_ptr<Config> ConfigParser::loadConfig(yaml::Stream &stream) {
 
       maxDistance = distance;
     }
+
+    else if (key->getRawValue().equals(StringRef("cache_directory"))) {
+      auto value = dyn_cast<yaml::ScalarNode>(keyValue.getValue());
+
+      cacheDirectory = value->getRawValue().str();
+    }
   }
 
-  return make_unique<Config>(paths, fork, dryRun, useCache, timeout, maxDistance);
+  return make_unique<Config>(paths, fork, dryRun, useCache, timeout,
+                             maxDistance, cacheDirectory);
 }

@@ -27,7 +27,7 @@ using namespace llvm;
 
 int debug_main(int argc, char *argv[]) {
   ConfigParser Parser;
-  auto Cfg = Parser.loadConfig(argv[argc - 1]);
+  auto config = Parser.loadConfig(argv[argc - 1]);
 
   LLVMContext Ctx;
   ModuleLoader Loader(Ctx);
@@ -35,8 +35,8 @@ int debug_main(int argc, char *argv[]) {
   GoogleTestFinder TestFinder;
   GoogleTestRunner Runner;
 
-  Toolchain toolchain;
-  Driver D(*Cfg.get(), Loader, TestFinder, Runner, toolchain);
+  Toolchain toolchain(*config.get());
+  Driver D(*config.get(), Loader, TestFinder, Runner, toolchain);
 
   if (strcmp(argv[2], "-print-test-names") == 0) {
     D.debug_PrintTestNames();
@@ -55,7 +55,7 @@ int main(int argc, char *argv[]) {
   }
 
   ConfigParser Parser;
-  auto Cfg = Parser.loadConfig(argv[1]);
+  auto config = Parser.loadConfig(argv[1]);
 
   InitializeNativeTarget();
   InitializeNativeTargetAsmPrinter();
@@ -72,8 +72,8 @@ int main(int argc, char *argv[]) {
   SimpleTestRunner Runner;
 #endif
 
-  Toolchain toolchain;
-  Driver driver(*Cfg.get(), Loader, TestFinder, Runner, toolchain);
+  Toolchain toolchain(*config.get());
+  Driver driver(*config.get(), Loader, TestFinder, Runner, toolchain);
   auto results = driver.Run();
 
   SQLiteReporter reporter;

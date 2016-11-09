@@ -156,3 +156,28 @@ TEST(ConfigParser, loadConfig_MaxDistance_SpecificValue) {
 
   ASSERT_EQ(3, Cfg->getMaxDistance());
 }
+
+TEST(ConfigParser, loadConfig_CacheDirectory_Unspecified) {
+  SourceMgr SM;
+
+  /// Surprisingly enough, yaml library crashes on empty string so
+  /// providing 'bitcode_files:' with content just to overcome the assert.
+  yaml::Stream Stream("bitcode_files:\n"
+                      "  - foo.bc\n"
+                      "  - bar.bc\n", SM);
+
+  ConfigParser Parser;
+  auto Cfg = Parser.loadConfig(Stream);
+
+  ASSERT_EQ("/tmp/mutang_cache", Cfg->getCacheDirectory());
+}
+
+TEST(ConfigParser, loadConfig_CacheDirectory_SpecificValue) {
+  SourceMgr SM;
+  yaml::Stream Stream("cache_directory: /var/tmp\n", SM);
+
+  ConfigParser Parser;
+  auto Cfg = Parser.loadConfig(Stream);
+
+  ASSERT_EQ("/var/tmp", Cfg->getCacheDirectory());
+}

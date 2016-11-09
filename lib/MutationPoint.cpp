@@ -53,13 +53,7 @@ void MutationPoint::applyMutation(llvm::Module *M) {
 }
 
 llvm::object::OwningBinary<llvm::object::ObjectFile> MutationPoint::applyMutation(Compiler &compiler) {
-//  if (mutatedBinary.getBinary() != nullptr) {
-//    return mutatedBinary.getBinary();
-//  }
-
-  /// FIXME: Should look into cache first
   auto copyForMutation = CloneModule(module->getModule());
-  printf("Compiling mutant '%s'\n", getUniqueIdentifier().c_str());
   mutationOperator->applyMutation(copyForMutation.get(), Address, *OriginalValue);
   return compiler.compileModule(copyForMutation.get());
 }
