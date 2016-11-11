@@ -21,9 +21,10 @@ static TestModuleFactory TestModuleFactory;
 
 TEST(SimpleTestFinder, FindTest) {
   auto ModuleWithTests = TestModuleFactory.createTesterModule();
+  auto mutangModuleWithTests = make_unique<MutangModule>(std::move(ModuleWithTests), "");
 
   Context Ctx;
-  Ctx.addModule(std::move(ModuleWithTests));
+  Ctx.addModule(std::move(mutangModuleWithTests));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
@@ -36,12 +37,15 @@ TEST(SimpleTestFinder, FindTest) {
 }
 
 TEST(SimpleTestFinder, FindTestee) {
-  auto ModuleWithTests   = TestModuleFactory.createTesterModule();
+  auto ModuleWithTests = TestModuleFactory.createTesterModule();
   auto ModuleWithTestees = TestModuleFactory.createTesteeModule();
 
+  auto mutangModuleWithTests = make_unique<MutangModule>(std::move(ModuleWithTests), "");
+  auto mutangModuleWithTestees = make_unique<MutangModule>(std::move(ModuleWithTestees), "");
+
   Context Ctx;
-  Ctx.addModule(std::move(ModuleWithTests));
-  Ctx.addModule(std::move(ModuleWithTestees));
+  Ctx.addModule(std::move(mutangModuleWithTests));
+  Ctx.addModule(std::move(mutangModuleWithTestees));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
@@ -52,7 +56,7 @@ TEST(SimpleTestFinder, FindTestee) {
 
   auto &Test = *(Tests.begin());
 
-  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx);
+  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx, 4);
 
   ASSERT_EQ(1U, Testees.size());
 
@@ -64,9 +68,12 @@ TEST(SimpleTestFinder, FindMutationPoints_AddMutationOperator) {
   auto ModuleWithTests   = TestModuleFactory.createTesterModule();
   auto ModuleWithTestees = TestModuleFactory.createTesteeModule();
 
+  auto mutangModuleWithTests   = make_unique<MutangModule>(std::move(ModuleWithTests), "");
+  auto mutangModuleWithTestees = make_unique<MutangModule>(std::move(ModuleWithTestees), "");
+
   Context Ctx;
-  Ctx.addModule(std::move(ModuleWithTests));
-  Ctx.addModule(std::move(ModuleWithTestees));
+  Ctx.addModule(std::move(mutangModuleWithTests));
+  Ctx.addModule(std::move(mutangModuleWithTestees));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   std::unique_ptr<AddMutationOperator> addMutationOperator = make_unique<AddMutationOperator>();
@@ -77,7 +84,7 @@ TEST(SimpleTestFinder, FindMutationPoints_AddMutationOperator) {
 
   auto &Test = *Tests.begin();
 
-  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx);
+  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx, 4);
 
   ASSERT_EQ(1U, Testees.size());
 
@@ -85,7 +92,7 @@ TEST(SimpleTestFinder, FindMutationPoints_AddMutationOperator) {
   ASSERT_FALSE(Testee->empty());
 
 
-  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(*Testee);
+  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
   ASSERT_EQ(1U, MutationPoints.size());
 
   MutationPoint *MP = (*(MutationPoints.begin()));
@@ -105,9 +112,12 @@ TEST(SimpleTestFinder, FindMutationPoints_NegateConditionMutationOperator) {
   auto ModuleWithTests   = TestModuleFactory.create_SimpleTest_NegateCondition_Tester_Module();
   auto ModuleWithTestees = TestModuleFactory.create_SimpleTest_NegateCondition_Testee_Module();
 
+  auto mutangModuleWithTests   = make_unique<MutangModule>(std::move(ModuleWithTests), "");
+  auto mutangModuleWithTestees = make_unique<MutangModule>(std::move(ModuleWithTestees), "");
+
   Context Ctx;
-  Ctx.addModule(std::move(ModuleWithTests));
-  Ctx.addModule(std::move(ModuleWithTestees));
+  Ctx.addModule(std::move(mutangModuleWithTests));
+  Ctx.addModule(std::move(mutangModuleWithTestees));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
@@ -117,14 +127,14 @@ TEST(SimpleTestFinder, FindMutationPoints_NegateConditionMutationOperator) {
 
   auto &Test = *Tests.begin();
 
-  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx);
+  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx, 4);
 
   ASSERT_EQ(1U, Testees.size());
 
   Function *Testee = (Testees.begin())->first;
   ASSERT_FALSE(Testee->empty());
 
-  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(*Testee);
+  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
   ASSERT_EQ(1U, MutationPoints.size());
 
   MutationPoint *MP = (*(MutationPoints.begin()));

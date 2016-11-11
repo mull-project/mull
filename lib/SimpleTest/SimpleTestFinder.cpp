@@ -27,8 +27,8 @@ SimpleTestFinder::SimpleTestFinder(std::vector<std::unique_ptr<MutationOperator>
 std::vector<std::unique_ptr<Test>> SimpleTestFinder::findTests(Context &Ctx) {
   std::vector<std::unique_ptr<Test>> tests;
 
-  for (auto &M : Ctx.getModules()) {
-    auto &x = M->getFunctionList();
+  for (auto &module : Ctx.getModules()) {
+    auto &x = module->getModule()->getFunctionList();
     for (auto &Fn : x) {
       if (Fn.getName().startswith("test_")) {
 
@@ -60,7 +60,7 @@ std::vector<Testee> SimpleTestFinder::findTestees(Test *Test,
       /// FIXME: Export all declared functions to external registry
       /// while looking for tests
       for (auto &M : Ctx.getModules()) {
-        for (auto &Fn : M->getFunctionList()) {
+        for (auto &Fn : M->getModule()->getFunctionList()) {
           if (Fn.getName() == F->getName()) {
 
             // Ignore export declarations.
@@ -79,11 +79,10 @@ std::vector<Testee> SimpleTestFinder::findTestees(Test *Test,
   return testees;
 }
 
-std::vector<MutationPoint *> SimpleTestFinder::findMutationPoints(llvm::Function &F) {
+std::vector<MutationPoint *>
+SimpleTestFinder::findMutationPoints(const Context &context,
+                                     llvm::Function &F) {
   std::vector<MutationPoint *> MutPoints;
-
-  //std::vector<std::unique_ptr<MutationPoint>> MutPoints;
-
 
   Module *PM = F.getParent();
 
@@ -119,7 +118,8 @@ std::vector<MutationPoint *> SimpleTestFinder::findMutationPoints(llvm::Function
 
           printf("Found Mutation point at address: %d %d %d\n", FIndex, BBIndex, IIndex);
 
-          MutationPoint *MP = new MutationPoint(MutOp.get(), Address, &Instr);
+          auto module = context.moduleWithIdentifier(Instr.getModule()->getModuleIdentifier());
+          MutationPoint *MP = new MutationPoint(MutOp.get(), Address, &Instr, module);
 
           MutPoints.push_back(MP);
           MutationPoints.emplace_back(std::unique_ptr<MutationPoint>(MP));

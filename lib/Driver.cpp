@@ -25,7 +25,9 @@
 #include <fstream>
 
 using namespace llvm;
+using namespace llvm::object;
 using namespace Mutang;
+using namespace std;
 using namespace std::chrono;
 
 /// Populate Mutang::Context with modules using
@@ -54,14 +56,20 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
   /// Therefore we load them into memory and compile immediately
   /// Later on modules used only for generating of mutants
   for (auto ModulePath : Cfg.getBitcodePaths()) {
-    auto OwnedModule = Loader.loadModuleAtPath(ModulePath);
-    assert(OwnedModule && "Can't load module");
+    unique_ptr<MutangModule> ownedModule = Loader.loadModuleAtPath(ModulePath);
+    MutangModule &module = *ownedModule.get();
+    assert(ownedModule && "Can't load module");
 
-    auto Module = OwnedModule.get();
-    auto ObjectFile = compiler.compileModule(Module);
-    InnerCache.insert(std::make_pair(Module, std::move(ObjectFile)));
+    ObjectFile *objectFile = toolchain.cache().getObject(module);
 
-    Ctx.addModule(std::move(OwnedModule));
+    if (objectFile == nullptr) {
+      auto owningObjectFile = compiler.compileModule(*module.clone().get());
+      objectFile = owningObjectFile.getBinary();
+      toolchain.cache().putObject(std::move(owningObjectFile), *ownedModule.get());
+    }
+
+    InnerCache.insert(std::make_pair(module.getModule(), objectFile));
+    Ctx.addModule(std::move(ownedModule));
   }
 
   auto foundTests = Finder.findTests(Ctx);
@@ -73,7 +81,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 
     //outs() << "\tDriver::Run::run test: " << test->getTestName() << "\n";
 
-    ExecutionResult ExecResult = Sandbox->run([&](ExecutionResult *SharedResult){
+    ExecutionResult ExecResult = Sandbox->run([&](ExecutionResult *SharedResult) {
       *SharedResult = Runner.runTest(test.get(), ObjectFiles);
     }, Cfg.getTimeout());
 
@@ -85,7 +93,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
     //outs() << "\tagainst " << testees.size() << " testees\n";
 
     for (auto testee : testees) {
-      auto MPoints = Finder.findMutationPoints(*(testee.first));
+      auto MPoints = Finder.findMutationPoints(Ctx, *(testee.first));
       if (MPoints.size() == 0) {
         continue;
       }
@@ -99,28 +107,28 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 //        mutationPoint->getOriginalValue()->print(outs());
 //        outs() << "\n";
 
-//        auto OwnedCopy = CloneModule(Testee->getParent());
-//        auto BorrowedCopy = OwnedCopy.get();
-
-//        verifyModule(*BorrowedCopy, &errs());
-
         ExecutionResult result;
         bool dryRun = Cfg.isDryRun();
         if (dryRun) {
           result.Status = DryRun;
           result.RunningTime = ExecResult.RunningTime * 10;
         } else {
-          auto mutatedBinary = mutationPoint->applyMutation(testee.first->getParent(),
-                                                            compiler);
-          ObjectFiles.push_back(mutatedBinary);
+          ObjectFile *mutant = toolchain.cache().getObject(*mutationPoint);
+          if (mutant == nullptr) {
+            auto owningObject = mutationPoint->applyMutation(compiler);
+            mutant = owningObject.getBinary();
+            toolchain.cache().putObject(std::move(owningObject), *mutationPoint);
+          }
+          ObjectFiles.push_back(mutant);
+
           result = Sandbox->run([&](ExecutionResult *SharedResult) {
             ExecutionResult R = Runner.runTest(BorrowedTest, ObjectFiles);
-            ObjectFiles.pop_back();
 
             assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
 
             *SharedResult = R;
           }, ExecResult.RunningTime * 10);
+          ObjectFiles.pop_back();
 
           assert(result.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
         }
@@ -143,7 +151,7 @@ std::vector<llvm::object::ObjectFile *> Driver::AllButOne(llvm::Module *One) {
 
   for (auto &CachedEntry : InnerCache) {
     if (One != CachedEntry.first) {
-      Objects.push_back(CachedEntry.second.getBinary());
+      Objects.push_back(CachedEntry.second);
     }
   }
 
@@ -154,7 +162,7 @@ std::vector<llvm::object::ObjectFile *> Driver::AllObjectFiles() {
   std::vector<llvm::object::ObjectFile *> Objects;
 
   for (auto &CachedEntry : InnerCache) {
-    Objects.push_back(CachedEntry.second.getBinary());
+    Objects.push_back(CachedEntry.second);
   }
 
   return Objects;
@@ -165,8 +173,8 @@ std::vector<llvm::object::ObjectFile *> Driver::AllObjectFiles() {
 void Driver::debug_PrintTestNames() {
   for (auto ModulePath : Cfg.getBitcodePaths()) {
     auto OwnedModule = Loader.loadModuleAtPath(ModulePath);
-    assert(OwnedModule && "Can't load module");
-    Ctx.addModule(std::move(OwnedModule));
+//    assert(OwnedModule && "Can't load module");
+//    Ctx.addModule(std::move(OwnedModule));
   }
 
   for (auto &Test : Finder.findTests(Ctx)) {
@@ -177,8 +185,8 @@ void Driver::debug_PrintTestNames() {
 void Driver::debug_PrintTesteeNames() {
   for (auto ModulePath : Cfg.getBitcodePaths()) {
     auto OwnedModule = Loader.loadModuleAtPath(ModulePath);
-    assert(OwnedModule && "Can't load module");
-    Ctx.addModule(std::move(OwnedModule));
+//    assert(OwnedModule && "Can't load module");
+//    Ctx.addModule(std::move(OwnedModule));
   }
 
   for (auto &Test : Finder.findTests(Ctx)) {
@@ -192,14 +200,14 @@ void Driver::debug_PrintTesteeNames() {
 void Driver::debug_PrintMutationPoints() {
   for (auto ModulePath : Cfg.getBitcodePaths()) {
     auto OwnedModule = Loader.loadModuleAtPath(ModulePath);
-    assert(OwnedModule && "Can't load module");
-    Ctx.addModule(std::move(OwnedModule));
+//    assert(OwnedModule && "Can't load module");
+//    Ctx.addModule(std::move(OwnedModule));
   }
 
   for (auto &Test : Finder.findTests(Ctx)) {
     outs() << Test->getTestName() << "\n";
     for (auto testee : Finder.findTestees(Test.get(), Ctx, Cfg.getMaxDistance())) {
-      auto MPoints = Finder.findMutationPoints(*(testee.first));
+      auto MPoints = Finder.findMutationPoints(Ctx, *(testee.first));
       if (MPoints.size()) {
         outs() << "\t" << testee.first->getName() << "\n";
       }

@@ -35,8 +35,11 @@ TEST(SimpleTestRunner, runTest) {
   Module *ModuleWithTests   = OwnedModuleWithTests.get();
   Module *ModuleWithTestees = OwnedModuleWithTestees.get();
 
-  Ctx.addModule(std::move(OwnedModuleWithTests));
-  Ctx.addModule(std::move(OwnedModuleWithTestees));
+  auto mutangOwnedModuleWithTests   = make_unique<MutangModule>(std::move(OwnedModuleWithTests), "");
+  auto mutangOwnedModuleWithTestees = make_unique<MutangModule>(std::move(OwnedModuleWithTestees), "");
+
+  Ctx.addModule(std::move(mutangOwnedModuleWithTests));
+  Ctx.addModule(std::move(mutangOwnedModuleWithTestees));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
@@ -69,14 +72,14 @@ TEST(SimpleTestRunner, runTest) {
   /// afterwards we apply single mutation and run test again
   /// expecting it to fail
 
-  ArrayRef<Testee> Testees = testFinder.findTestees(Test.get(), Ctx);
+  ArrayRef<Testee> Testees = testFinder.findTestees(Test.get(), Ctx, 4);
   ASSERT_NE(0U, Testees.size());
   Function *Testee = Testees.begin()->first;
 
   AddMutationOperator MutOp;
   std::vector<MutationOperator *> MutOps({&MutOp});
 
-  std::vector<MutationPoint *> MutationPoints = testFinder.findMutationPoints(*Testee);
+  std::vector<MutationPoint *> MutationPoints = testFinder.findMutationPoints(Ctx, *Testee);
 
   MutationPoint *MP = (*(MutationPoints.begin()));
   MutationEngine Engine;
@@ -112,8 +115,11 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   Module *ModuleWithTests   = OwnedModuleWithTests.get();
   Module *ModuleWithTestees = OwnedModuleWithTestees.get();
 
-  Ctx.addModule(std::move(OwnedModuleWithTests));
-  Ctx.addModule(std::move(OwnedModuleWithTestees));
+  auto mutangOwnedModuleWithTests   = make_unique<MutangModule>(std::move(OwnedModuleWithTests), "");
+  auto mutangOwnedModuleWithTestees = make_unique<MutangModule>(std::move(OwnedModuleWithTestees), "");
+
+  Ctx.addModule(std::move(mutangOwnedModuleWithTests));
+  Ctx.addModule(std::move(mutangOwnedModuleWithTestees));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
@@ -142,14 +148,14 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   /// afterwards we apply single mutation and run test again
   /// expecting it to fail
 
-  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx);
+  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx, 4);
   ASSERT_NE(0U, Testees.size());
   Function *Testee = Testees.begin()->first;
 
   AddMutationOperator MutOp;
   std::vector<MutationOperator *> MutOps({&MutOp});
 
-  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(*Testee);
+  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
 
   MutationPoint *MP = (*(MutationPoints.begin()));
   MutationEngine Engine;
@@ -182,8 +188,11 @@ TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
   Module *ModuleWithTests   = OwnedModuleWithTests.get();
   Module *ModuleWithTestees = OwnedModuleWithTestees.get();
 
-  Ctx.addModule(std::move(OwnedModuleWithTests));
-  Ctx.addModule(std::move(OwnedModuleWithTestees));
+  auto mutangOwnedModuleWithTests   = make_unique<MutangModule>(std::move(OwnedModuleWithTests), "");
+  auto mutangOwnedModuleWithTestees = make_unique<MutangModule>(std::move(OwnedModuleWithTestees), "");
+
+  Ctx.addModule(std::move(mutangOwnedModuleWithTests));
+  Ctx.addModule(std::move(mutangOwnedModuleWithTestees));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());

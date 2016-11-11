@@ -19,10 +19,11 @@ using namespace llvm;
 static TestModuleFactory TestModuleFactory;
 
 TEST(GoogleTestFinder, FindTest) {
-  auto ModuleWithTests = TestModuleFactory.createGoogleTestTesterModule();
+  auto ModuleWithTests       = TestModuleFactory.createGoogleTestTesterModule();
+  auto mutangModuleWithTests = make_unique<MutangModule>(std::move(ModuleWithTests), "");
 
   Context Ctx;
-  Ctx.addModule(std::move(ModuleWithTests));
+  Ctx.addModule(std::move(mutangModuleWithTests));
 
   GoogleTestFinder finder;
 
@@ -37,11 +38,15 @@ TEST(GoogleTestFinder, FindTest) {
 
 TEST(GoogleTestFinder, DISABLED_FindTestee) {
   auto ModuleWithTests   = TestModuleFactory.createGoogleTestTesterModule();
+
   auto ModuleWithTestees = TestModuleFactory.createGoogleTestTesteeModule();
 
+  auto mutangModuleWithTests   = make_unique<MutangModule>(std::move(ModuleWithTests), "");
+  auto mutangModuleWithTestees = make_unique<MutangModule>(std::move(ModuleWithTestees), "");
+
   Context Ctx;
-  Ctx.addModule(std::move(ModuleWithTests));
-  Ctx.addModule(std::move(ModuleWithTestees));
+  Ctx.addModule(std::move(mutangModuleWithTests));
+  Ctx.addModule(std::move(mutangModuleWithTestees));
 
   GoogleTestFinder Finder;
   auto Tests = Finder.findTests(Ctx);
@@ -50,7 +55,7 @@ TEST(GoogleTestFinder, DISABLED_FindTestee) {
 
   auto &Test = *(Tests.begin());
 
-  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx);
+  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx, 4);
 
   ASSERT_EQ(1U, Testees.size());
 
@@ -62,9 +67,12 @@ TEST(GoogleTestFinder, DISABLED_FindMutationPoints) {
   auto ModuleWithTests   = TestModuleFactory.createTesterModule();
   auto ModuleWithTestees = TestModuleFactory.createTesteeModule();
 
+  auto mutangModuleWithTests   = make_unique<MutangModule>(std::move(ModuleWithTests), "");
+  auto mutangModuleWithTestees = make_unique<MutangModule>(std::move(ModuleWithTestees), "");
+
   Context Ctx;
-  Ctx.addModule(std::move(ModuleWithTests));
-  Ctx.addModule(std::move(ModuleWithTestees));
+  Ctx.addModule(std::move(mutangModuleWithTests));
+  Ctx.addModule(std::move(mutangModuleWithTestees));
 
   GoogleTestFinder Finder;
   auto Tests = Finder.findTests(Ctx);
@@ -73,7 +81,7 @@ TEST(GoogleTestFinder, DISABLED_FindMutationPoints) {
 
   auto &Test = *Tests.begin();
 
-  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx);
+  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx, 4);
 
   ASSERT_EQ(1U, Testees.size());
 

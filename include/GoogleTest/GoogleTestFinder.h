@@ -36,7 +36,8 @@ public:
                           std::vector<MutationOperator *> &MutationOperators,
                           llvm::Function &F) override;
 
-  std::vector<MutationPoint *> findMutationPoints(llvm::Function &F) override;
+  std::vector<MutationPoint *> findMutationPoints(const Context &context,
+                                                  llvm::Function &F) override;
 };
 
 }

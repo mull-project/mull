@@ -11,12 +11,12 @@ class Module;
 
 namespace Mutang {
 
-using namespace llvm;
-using namespace llvm::object;
+class MutangModule;
 
 class Compiler {
 public:
   Compiler();
-  OwningBinary<ObjectFile> compileModule(Module *module);
+  llvm::object::OwningBinary<llvm::object::ObjectFile> compileModule(const MutangModule &module);
+  llvm::object::OwningBinary<llvm::object::ObjectFile> compileModule(llvm::Module *module);
 };
 }

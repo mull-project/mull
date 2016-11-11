@@ -9,6 +9,8 @@
 #include "TestModuleFactory.h"
 #include "TestResult.h"
 
+#include "Toolchain/Toolchain.h"
+
 #include "llvm/ADT/SmallString.h"
 #include "llvm/ADT/Twine.h"
 #include "llvm/IR/LLVMContext.h"
@@ -32,25 +34,30 @@ class FakeModuleLoader : public ModuleLoader {
 public:
   FakeModuleLoader() : ModuleLoader(GlobalCtx) {}
 
-  std::unique_ptr<llvm::Module> loadModuleAtPath(const std::string &path) override {
+  std::unique_ptr<MutangModule> loadModuleAtPath(const std::string &path) override {
     if (path == "foo") {
-      return TestModuleFactory.createTesterModule();
+      auto module = TestModuleFactory.createTesterModule();
+      return make_unique<MutangModule>(std::move(module), "1234");
     }
 
     else if (path == "bar") {
-      return TestModuleFactory.createTesteeModule();
+      auto module = TestModuleFactory.createTesteeModule();
+      return make_unique<MutangModule>(std::move(module), "3456");
     }
 
     else if (path == "simple_test/negate_condition/tester") {
-      return TestModuleFactory.create_SimpleTest_NegateCondition_Tester_Module();
+      auto module = TestModuleFactory.create_SimpleTest_NegateCondition_Tester_Module();
+      return make_unique<MutangModule>(std::move(module), "5678");
     }
 
     else if (path == "simple_test/negate_condition/testee") {
-      return TestModuleFactory.create_SimpleTest_NegateCondition_Testee_Module();
+      auto module = TestModuleFactory.create_SimpleTest_NegateCondition_Testee_Module();
+      return make_unique<MutangModule>(std::move(module), "7890");
     }
 
-    return nullptr;
+    return make_unique<MutangModule>(nullptr, "");
   }
+
 };
 
 TEST(Driver, SimpleTest_AddMutationOperator) {
@@ -64,8 +71,11 @@ TEST(Driver, SimpleTest_AddMutationOperator) {
   std::vector<std::string> ModulePaths({ "foo", "bar" });
   bool doFork = false;
   bool dryRun = false;
+  bool useCache = false;
   int distance = 10;
-  Config config(ModulePaths, doFork, dryRun, MutangDefaultTimeout, distance);
+  std::string cacheDirectory = "/tmp/mutang_cache";
+  Config config(ModulePaths, doFork, dryRun, useCache, MutangDefaultTimeout,
+                distance, cacheDirectory);
 
   FakeModuleLoader loader;
 
@@ -75,8 +85,9 @@ TEST(Driver, SimpleTest_AddMutationOperator) {
   SimpleTestFinder testFinder(std::move(mutationOperators));
 
   SimpleTestRunner runner;
+  Toolchain toolchain(config);
 
-  Driver Driver(config, loader, testFinder, runner);
+  Driver Driver(config, loader, testFinder, runner, toolchain);
 
   /// Given the modules we use here we expect:
   ///
@@ -113,8 +124,11 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
 
   bool doFork = false;
   bool dryRun = false;
+  bool useCache = false;
   int distance = 10;
-  Config config(ModulePaths, doFork, dryRun, MutangDefaultTimeout, distance);
+  std::string cacheDirectory = "/tmp/mutang_cache";
+  Config config(ModulePaths, doFork, dryRun, useCache, MutangDefaultTimeout,
+                distance, cacheDirectory);
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
@@ -123,8 +137,9 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
 
   FakeModuleLoader loader;
   SimpleTestRunner runner;
+  Toolchain toolchain(config);
 
-  Driver Driver(config, loader, testFinder, runner);
+  Driver Driver(config, loader, testFinder, runner, toolchain);
 
   /// Given the modules we use here we expect:
   ///

@@ -1,8 +1,10 @@
 #include "Compiler.h"
+#include "ModuleLoader.h"
 
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/ExecutionEngine/Orc/CompileUtils.h"
 #include "llvm/IR/Module.h"
+#include "llvm/Support/raw_ostream.h"
 #include "llvm/Support/TargetSelect.h"
 
 #include "llvm/IR/DataLayout.h"
@@ -15,6 +17,10 @@ Compiler::Compiler() {
   InitializeNativeTarget();
   InitializeNativeTargetAsmPrinter();
   InitializeNativeTargetAsmParser();
+}
+
+OwningBinary<ObjectFile> Compiler::compileModule(const MutangModule &module) {
+  return compileModule(module.getModule());
 }
 
 OwningBinary<ObjectFile> Compiler::compileModule(Module *module) {
@@ -33,5 +39,7 @@ OwningBinary<ObjectFile> Compiler::compileModule(Module *module) {
 
   orc::SimpleCompiler compiler(*targetMachine);
 
-  return compiler(*module);
+  OwningBinary<ObjectFile> objectFile = compiler(*module);
+
+  return objectFile;
 }

@@ -102,13 +102,34 @@ TEST(ConfigParser, loadConfig_DryRun_Unspecified) {
 }
 
 TEST(ConfigParser, loadConfig_DryRun_SpecificValue) {
+  ConfigParser Parser;
   SourceMgr SM;
   yaml::Stream Stream("dryRun: true\n", SM);
+  auto Cfg = Parser.loadConfig(Stream);
+  ASSERT_TRUE(Cfg->isDryRun());
+}
+
+TEST(ConfigParser, loadConfig_UseCache_Unspecified) {
+  SourceMgr SM;
+
+  /// Surprisingly enough, yaml library crashes on empty string so
+  /// providing 'bitcode_files:' with content just to overcome the assert.
+  yaml::Stream Stream("bitcode_files:\n"
+                      "  - foo.bc\n"
+                      "  - bar.bc\n", SM);
 
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(Stream);
+  ASSERT_TRUE(Cfg->getUseCache());
+}
 
-  ASSERT_TRUE(Cfg->isDryRun());
+TEST(ConfigParser, loadConfig_UseCache_SpecificValue) {
+  SourceMgr SM;
+  yaml::Stream Stream("use_cache: false\n", SM);
+
+  ConfigParser Parser;
+  auto Cfg = Parser.loadConfig(Stream);
+  ASSERT_FALSE(Cfg->getUseCache());
 }
 
 TEST(ConfigParser, loadConfig_MaxDistance_Unspecified) {
@@ -134,4 +155,29 @@ TEST(ConfigParser, loadConfig_MaxDistance_SpecificValue) {
   auto Cfg = Parser.loadConfig(Stream);
 
   ASSERT_EQ(3, Cfg->getMaxDistance());
+}
+
+TEST(ConfigParser, loadConfig_CacheDirectory_Unspecified) {
+  SourceMgr SM;
+
+  /// Surprisingly enough, yaml library crashes on empty string so
+  /// providing 'bitcode_files:' with content just to overcome the assert.
+  yaml::Stream Stream("bitcode_files:\n"
+                      "  - foo.bc\n"
+                      "  - bar.bc\n", SM);
+
+  ConfigParser Parser;
+  auto Cfg = Parser.loadConfig(Stream);
+
+  ASSERT_EQ("/tmp/mutang_cache", Cfg->getCacheDirectory());
+}
+
+TEST(ConfigParser, loadConfig_CacheDirectory_SpecificValue) {
+  SourceMgr SM;
+  yaml::Stream Stream("cache_directory: /var/tmp\n", SM);
+
+  ConfigParser Parser;
+  auto Cfg = Parser.loadConfig(Stream);
+
+  ASSERT_EQ("/var/tmp", Cfg->getCacheDirectory());
 }

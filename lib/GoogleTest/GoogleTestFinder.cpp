@@ -68,7 +68,7 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
   std::vector<std::unique_ptr<Test>> tests;
 
   for (auto &M : Ctx.getModules()) {
-    for (auto &Global : M->getGlobalList()) {
+    for (auto &Global : M->getModule()->getGlobalList()) {
       Type *Ty = Global.getValueType();
       if (Ty->getTypeID() != Type::PointerTyID) {
         continue;
@@ -187,7 +187,7 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
       /// and finish creating the GoogleTest_Test object
 
       Function *TestBodyFunction = nullptr;
-      for (auto &Func : M->getFunctionList()) {
+      for (auto &Func : M->getModule()->getFunctionList()) {
         auto foundPosition = Func.getName().rfind(StringRef(TestBodyFunctionName.str()));
         if (foundPosition != StringRef::npos) {
           TestBodyFunction = &Func;
@@ -323,8 +323,9 @@ std::vector<Testee> GoogleTestFinder::findTestees(Test *Test,
   return testees;
 }
 
-std::vector<MutationPoint *> GoogleTestFinder::findMutationPoints(
-                                                      llvm::Function &testee) {
+std::vector<MutationPoint *>
+GoogleTestFinder::findMutationPoints(const Context &context,
+                                     llvm::Function &testee) {
 
   if (MutationPointsRegistry.count(&testee) != 0) {
     return MutationPointsRegistry.at(&testee);
@@ -333,7 +334,7 @@ std::vector<MutationPoint *> GoogleTestFinder::findMutationPoints(
   std::vector<MutationPoint *> points;
 
   for (auto &mutationOperator : mutationOperators) {
-    for (auto point : mutationOperator->getMutationPoints(&testee)) {
+    for (auto point : mutationOperator->getMutationPoints(context, &testee)) {
       points.push_back(point);
       MutationPoints.emplace_back(std::unique_ptr<MutationPoint>(point));
     }

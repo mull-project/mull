@@ -16,6 +16,14 @@
 using namespace Mutang;
 using namespace llvm;
 
+static void assume(bool condition, const char *assumption) {
+  if (condition) {
+    return;
+  }
+
+  printf("Assumption failed: %s\n", assumption);
+}
+
 void sqlite_exec(sqlite3 *database, const char *sql) {
   char *errorMessage;
   int result = sqlite3_exec(database,
@@ -37,14 +45,18 @@ void createTables(sqlite3 *database) {
   const char *test =
     "CREATE TABLE test (test_name TEXT, execution_result_id INT);";
   const char *mutationPoint =
-    "CREATE TABLE mutation_point (mutation_operator TEXT, module_name TEXT, function_index INT, basic_block_index INT, instruction_index INT, filename TEXT, line_number INT, column_number INT);";
+    "CREATE TABLE mutation_point (mutation_operator TEXT, module_name TEXT, function_index INT, basic_block_index INT, instruction_index INT, filename TEXT, line_number INT, column_number INT, unique_id TEXT);";
   const char *mutationResult =
     "CREATE TABLE mutation_result (execution_result_id INT, test_id INT, mutation_point_id INT, mutation_distance INT);";
+
+  const char *mutationPointDebug =
+    "CREATE TABLE mutation_point_debug (function TEXT, basic_block TEXT, instruction INT, unique_id TEXT UNIQUE);";
 
   sqlite_exec(database, executionResult);
   sqlite_exec(database, test);
   sqlite_exec(database, mutationPoint);
   sqlite_exec(database, mutationResult);
+  sqlite_exec(database, mutationPointDebug);
 }
 
 
@@ -103,7 +115,8 @@ void Mutang::SQLiteReporter::reportResults(const std::vector<std::unique_ptr<Tes
       + "'" + std::to_string(mutationPoint->getAddress().getIIndex()) + "',"
       + "'" + instruction->getDebugLoc()->getFilename().str() + "',"
       + "'" + std::to_string(instruction->getDebugLoc()->getLine()) + "',"
-      + "'" + std::to_string(instruction->getDebugLoc()->getColumn()) + "'"
+      + "'" + std::to_string(instruction->getDebugLoc()->getColumn()) + "',"
+      + "'" + mutationPoint->getUniqueIdentifier() + "'"+
       + ");";
 
       sqlite_exec(database, insertMutationPointSQL.c_str());
@@ -117,6 +130,43 @@ void Mutang::SQLiteReporter::reportResults(const std::vector<std::unique_ptr<Tes
       + "'" + mutationExecutionResult.stdoutOutput + "',"
       + "'" + mutationExecutionResult.stderrOutput + "');";
 
+      {
+        std::string function;
+        llvm::raw_string_ostream f_ostream(function);
+        instruction->getFunction()->print(f_ostream);
+
+        std::string basicBlock;
+        llvm::raw_string_ostream bb_ostream(basicBlock);
+        instruction->getParent()->print(bb_ostream);
+
+        std::string instr;
+        llvm::raw_string_ostream i_ostream(instr);
+        instruction->print(i_ostream);
+
+        std::string insertMutationPointDebugSQL = std::string("INSERT OR IGNORE INTO mutation_point_debug VALUES (")
+        + "'" + f_ostream.str() + "',"
+        + "'" + bb_ostream.str() + "',"
+        + "'" + i_ostream.str() + "',"
+        + "'" + mutationPoint->getUniqueIdentifier() + "'"+
+        + ");";
+
+        sqlite3_stmt *statement = NULL;
+        int statement_prepare_result =
+        sqlite3_prepare_v2(database,
+                           insertMutationPointDebugSQL.c_str(),
+                           insertMutationPointDebugSQL.size(),
+                           &statement,
+                           NULL);
+
+        assume(statement_prepare_result == SQLITE_OK, "SQLite error: Expected finalize of debug mutation point statement to succeed.");
+
+        int insertion_result = sqlite3_step(statement);
+        assume(insertion_result == SQLITE_DONE, "SQLite error: Expected insertion of debug mutation point to succeed.");
+
+        int finalize_result = sqlite3_finalize(statement);
+        assume(finalize_result == SQLITE_OK, "SQLite error: Expected finalize of debug mutation point statement to succeed.");
+      }
+
       sqlite3_stmt *execution_result_statement = NULL;
       int execution_result_statement_prepare_result =
         sqlite3_prepare_v2(database,
@@ -125,16 +175,16 @@ void Mutang::SQLiteReporter::reportResults(const std::vector<std::unique_ptr<Tes
                            &execution_result_statement,
                            NULL);
 
-      assert(execution_result_statement_prepare_result == SQLITE_OK &&
+      assume(execution_result_statement_prepare_result == SQLITE_OK,
              "SQLite error: Expected finalize of execution result statement to succeed.");
 
       int execution_result_insertion_result = sqlite3_step(execution_result_statement);
-      assert(execution_result_insertion_result == SQLITE_DONE &&
+      assume(execution_result_insertion_result == SQLITE_DONE,
              "SQLite error: Expected insertion of execution result to succeed.");
 
       int execution_result_statement_finalize_result
         = sqlite3_finalize(execution_result_statement);
-      assert(execution_result_statement_finalize_result == SQLITE_OK &&
+      assume(execution_result_statement_finalize_result == SQLITE_OK,
              "SQLite error: Expected finalize of execution result statement to succeed.");
 
       int mutationExecutionResultID = sqlite3_last_insert_rowid(database);

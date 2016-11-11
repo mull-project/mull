@@ -1,6 +1,7 @@
 #include "MutationOperators/NegateConditionMutationOperator.h"
 
 #include "MutationPoint.h"
+#include "Context.h"
 
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/Module.h"
@@ -164,8 +165,9 @@ NegateConditionMutationOperator::negatedCmpInstPredicate(llvm::CmpInst::Predicat
   }
 }
 
-std::vector<MutationPoint *> NegateConditionMutationOperator::getMutationPoints(
-                                                                    llvm::Function *function) {
+std::vector<MutationPoint *>
+NegateConditionMutationOperator::getMutationPoints(const Context &context,
+                                                   llvm::Function *function) {
   int functionIndex = GetFunctionIndex(function);
   int basicBlockIndex = 0;
 
@@ -177,8 +179,11 @@ std::vector<MutationPoint *> NegateConditionMutationOperator::getMutationPoints(
 
     for (auto &instruction : basicBlock.getInstList()) {
       if (canBeApplied(instruction)) {
+        auto moduleID = instruction.getModule()->getModuleIdentifier();
+        MutangModule *module = context.moduleWithIdentifier(moduleID);
+
         MutationPointAddress address(functionIndex, basicBlockIndex, instructionIndex);
-        auto mutationPoint = new MutationPoint(this, address, &instruction);
+        auto mutationPoint = new MutationPoint(this, address, &instruction, module);
         mutationPoints.push_back(mutationPoint);
       }
       instructionIndex++;

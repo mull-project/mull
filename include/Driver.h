@@ -5,6 +5,8 @@
 #include "ForkProcessSandbox.h"
 #include "Context.h"
 
+#include "Toolchain/Toolchain.h"
+
 #include "llvm/Object/ObjectFile.h"
 
 #include <map>
@@ -28,13 +30,14 @@ class Driver {
   ModuleLoader &Loader;
   TestFinder &Finder;
   TestRunner &Runner;
+  Toolchain &toolchain;
   Context Ctx;
   ProcessSandbox *Sandbox;
 
-  std::map<llvm::Module *, llvm::object::OwningBinary<llvm::object::ObjectFile>> InnerCache;
+  std::map<llvm::Module *, llvm::object::ObjectFile *> InnerCache;
 public:
-  Driver(Config &C, ModuleLoader &ML, TestFinder &TF, TestRunner &TR)
-    : Cfg(C), Loader(ML), Finder(TF), Runner(TR) {
+  Driver(Config &C, ModuleLoader &ML, TestFinder &TF, TestRunner &TR, Toolchain &t)
+    : Cfg(C), Loader(ML), Finder(TF), Runner(TR), toolchain(t) {
       if (C.getFork()) {
         this->Sandbox = new ForkProcessSandbox();
       } else {

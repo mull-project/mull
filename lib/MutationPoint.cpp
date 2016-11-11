@@ -1,19 +1,31 @@
 #include "MutationPoint.h"
 #include "Compiler.h"
+#include "ModuleLoader.h"
 
 #include "MutationOperators/MutationOperator.h"
 #include "llvm/Transforms/Utils/Cloning.h"
 
 using namespace llvm;
 using namespace Mutang;
+using namespace std;
 
-MutationPoint::MutationPoint(MutationOperator *MO, MutationPointAddress Address, llvm::Value *Val) :
-  MutOp(MO), Address(Address), OriginalValue(Val) {}
+MutationPoint::MutationPoint(MutationOperator *op,
+                             MutationPointAddress Address,
+                             Value *Val,
+                             MutangModule *m) :
+  mutationOperator(op), Address(Address), OriginalValue(Val), module(m)
+{
+  string moduleID = module->getUniqueIdentifier();
+  string addressID = Address.getIdentifier();
+  string operatorID = mutationOperator->uniqueID();
+
+  uniqueIdentifier = moduleID + "_" + addressID + "_" + operatorID;
+}
 
 MutationPoint::~MutationPoint() {}
 
 MutationOperator *MutationPoint::getOperator() {
-  return MutOp;
+  return mutationOperator;
 }
 
 MutationPointAddress MutationPoint::getAddress() {
@@ -24,19 +36,32 @@ Value *MutationPoint::getOriginalValue() {
   return OriginalValue;
 }
 
-void MutationPoint::applyMutation(llvm::Module *M) {
-  MutOp->applyMutation(M, Address, *OriginalValue);
+MutationOperator *MutationPoint::getOperator() const {
+  return mutationOperator;
 }
 
-object::ObjectFile *MutationPoint::applyMutation(Module *module,
-                                                 Compiler &compiler) {
-  if (mutatedBinary.getBinary() != nullptr) {
-    return mutatedBinary.getBinary();
-  }
+MutationPointAddress MutationPoint::getAddress() const {
+  return Address;
+}
 
-  auto copyForMutation = CloneModule(module);
-  MutOp->applyMutation(copyForMutation.get(), Address, *OriginalValue);
-  mutatedBinary = compiler.compileModule(copyForMutation.get());
+Value *MutationPoint::getOriginalValue() const {
+  return OriginalValue;
+}
 
-  return mutatedBinary.getBinary();
+void MutationPoint::applyMutation(llvm::Module *M) {
+  mutationOperator->applyMutation(M, Address, *OriginalValue);
+}
+
+llvm::object::OwningBinary<llvm::object::ObjectFile> MutationPoint::applyMutation(Compiler &compiler) {
+  auto copyForMutation = CloneModule(module->getModule());
+  mutationOperator->applyMutation(copyForMutation.get(), Address, *OriginalValue);
+  return compiler.compileModule(copyForMutation.get());
+}
+
+std::string MutationPoint::getUniqueIdentifier() {
+  return uniqueIdentifier;
+}
+
+std::string MutationPoint::getUniqueIdentifier() const {
+  return uniqueIdentifier;
 }
