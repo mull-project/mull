@@ -50,7 +50,7 @@ void createTables(sqlite3 *database) {
     "CREATE TABLE mutation_result (execution_result_id INT, test_id INT, mutation_point_id INT, mutation_distance INT);";
 
   const char *mutationPointDebug =
-    "CREATE TABLE mutation_point_debug (function TEXT, basic_block TEXT, instruction INT, unique_id TEXT UNIQUE);";
+    "CREATE TABLE mutation_point_debug (filename TEXT, line_number INT, column_number INT, function TEXT, basic_block TEXT, instruction INT, unique_id TEXT UNIQUE);";
 
   sqlite_exec(database, executionResult);
   sqlite_exec(database, test);
@@ -144,6 +144,9 @@ void Mutang::SQLiteReporter::reportResults(const std::vector<std::unique_ptr<Tes
         instruction->print(i_ostream);
 
         std::string insertMutationPointDebugSQL = std::string("INSERT OR IGNORE INTO mutation_point_debug VALUES (")
+        + "'" + instruction->getDebugLoc()->getFilename().str() + "',"
+        + "'" + std::to_string(instruction->getDebugLoc()->getLine()) + "',"
+        + "'" + std::to_string(instruction->getDebugLoc()->getColumn()) + "',"
         + "'" + f_ostream.str() + "',"
         + "'" + bb_ostream.str() + "',"
         + "'" + i_ostream.str() + "',"
