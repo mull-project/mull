@@ -1,5 +1,4 @@
 llvm_add_library(mutang
-  Compiler.cpp
   ConfigParser.cpp
   Context.cpp
   Driver.cpp
@@ -9,6 +8,7 @@ llvm_add_library(mutang
   MutationOperators/AddMutationOperator.cpp
   MutationOperators/NegateConditionMutationOperator.cpp
 
+  Toolchain/Compiler.cpp
   Toolchain/ObjectCache.cpp
   Toolchain/Toolchain.cpp
 

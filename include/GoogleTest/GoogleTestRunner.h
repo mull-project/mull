@@ -17,13 +17,12 @@ class Module;
 
 namespace Mutang {
 
-  class GoogleTestRunner : public  TestRunner {
+  class GoogleTestRunner : public TestRunner {
   llvm::orc::ObjectLinkingLayer<> ObjectLayer;
-  std::unique_ptr<llvm::TargetMachine> TM;
   llvm::Mangler Mangler;
 public:
 
-  GoogleTestRunner();
+  GoogleTestRunner(llvm::TargetMachine &machine);
   ExecutionResult runTest(Test *Test, ObjectFiles &ObjectFiles) override;
 
 private:

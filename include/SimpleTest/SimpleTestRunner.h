@@ -8,6 +8,7 @@
 namespace llvm {
 
 class Function;
+class TargetMachine;
 
 }
 
@@ -19,6 +20,7 @@ class SimpleTestRunner : public TestRunner {
   llvm::orc::ObjectLinkingLayer<> ObjectLayer;
   llvm::Mangler Mangler;
 public:
+  SimpleTestRunner(llvm::TargetMachine &targetMachine);
   ExecutionResult runTest(Test *Test, TestRunner::ObjectFiles &ObjectFiles) override;
 
 private:

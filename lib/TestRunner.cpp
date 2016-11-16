@@ -12,8 +12,8 @@
 using namespace Mutang;
 using namespace llvm;
 
-TestRunner::TestRunner()
-  : TM(EngineBuilder().selectTarget(Triple(), "", "", SmallVector<std::string, 1>()))
+TestRunner::TestRunner(llvm::TargetMachine &targetMachine)
+  : machine(targetMachine)
 {
   sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
   LLVMLinkInOrcMCJITReplacement();

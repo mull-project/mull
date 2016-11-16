@@ -33,7 +33,15 @@ target_link_libraries(MutangUnitTests
   sqlite3
   LLVMAsmParser
   LLVMCore
+  LLVMExecutionEngine
   LLVMSupport
+
+  # FIXME: Should not be arch specific
+  LLVMX86AsmParser
+  LLVMX86AsmPrinter
+  LLVMX86CodeGen
+  LLVMX86Desc
+  LLVMX86Info
 )
 
 add_custom_command(TARGET MutangUnitTests POST_BUILD

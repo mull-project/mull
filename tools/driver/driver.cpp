@@ -33,9 +33,9 @@ int debug_main(int argc, char *argv[]) {
   ModuleLoader Loader(Ctx);
 
   GoogleTestFinder TestFinder;
-  GoogleTestRunner Runner;
-
   Toolchain toolchain(*config.get());
+  GoogleTestRunner Runner(toolchain.targetMachine());
+
   Driver D(*config.get(), Loader, TestFinder, Runner, toolchain);
 
   if (strcmp(argv[2], "-print-test-names") == 0) {
@@ -63,16 +63,16 @@ int main(int argc, char *argv[]) {
 
   LLVMContext Ctx;
   ModuleLoader Loader(Ctx);
+  Toolchain toolchain(*config.get());
 
 #if 1
   GoogleTestFinder TestFinder;
-  GoogleTestRunner Runner;
+  GoogleTestRunner Runner(toolchain.targetMachine());
 #else
   SimpleTestFinder TestFinder;
-  SimpleTestRunner Runner;
+  SimpleTestRunner Runner(toolchain.targetMachine());
 #endif
 
-  Toolchain toolchain(*config.get());
   Driver driver(*config.get(), Loader, TestFinder, Runner, toolchain);
   auto results = driver.Run();
 

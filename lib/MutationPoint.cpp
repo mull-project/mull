@@ -1,5 +1,5 @@
 #include "MutationPoint.h"
-#include "Compiler.h"
+#include "Toolchain/Compiler.h"
 #include "ModuleLoader.h"
 
 #include "MutationOperators/MutationOperator.h"

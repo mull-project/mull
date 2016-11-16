@@ -104,18 +104,14 @@ public:
   }
 };
 
-GoogleTestRunner::GoogleTestRunner() : TM(EngineBuilder().selectTarget(
-                                              Triple(), "", "",
-                                              SmallVector<std::string, 1>())) {
-  sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
-  LLVMLinkInOrcMCJITReplacement();
-}
+GoogleTestRunner::GoogleTestRunner(llvm::TargetMachine &machine)
+  : TestRunner(machine) {}
 
 std::string GoogleTestRunner::MangleName(const llvm::StringRef &Name) {
   std::string MangledName;
   {
     raw_string_ostream Stream(MangledName);
-    Mangler.getNameWithPrefix(Stream, Name, TM->createDataLayout());
+    Mangler.getNameWithPrefix(Stream, Name, machine.createDataLayout());
   }
   return MangledName;
 }
