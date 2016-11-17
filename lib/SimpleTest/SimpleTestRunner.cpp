@@ -7,7 +7,6 @@
 #include "llvm/ExecutionEngine/RTDyldMemoryManager.h"
 #include "llvm/ExecutionEngine/SectionMemoryManager.h"
 #include "llvm/Support/DynamicLibrary.h"
-#include "llvm/Support/TargetSelect.h"
 
 #include "SimpleTest/SimpleTest_Test.h"
 
@@ -49,11 +48,14 @@ public:
   }
 };
 
+SimpleTestRunner::SimpleTestRunner(TargetMachine &machine)
+  : TestRunner(machine) {}
+
 std::string SimpleTestRunner::MangleName(const llvm::StringRef &Name) {
   std::string MangledName;
   {
     raw_string_ostream Stream(MangledName);
-    Mangler.getNameWithPrefix(Stream, Name, TM->createDataLayout());
+    Mangler.getNameWithPrefix(Stream, Name, machine.createDataLayout());
   }
   return MangledName;
 }

@@ -1,18 +1,20 @@
 #include "MutationEngine.h"
 
-#include "Compiler.h"
 #include "Context.h"
 #include "MutationOperators/AddMutationOperator.h"
 #include "SimpleTest/SimpleTestFinder.h"
 #include "TestModuleFactory.h"
+#include "Toolchain/Compiler.h"
 #include "SimpleTest/SimpleTestRunner.h"
 
+#include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/IR/InstrTypes.h"
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Support/DynamicLibrary.h"
 #include "llvm/Support/SourceMgr.h"
+#include "llvm/Support/TargetSelect.h"
 #include "llvm/Transforms/Utils/Cloning.h"
 
 #include "gtest/gtest.h"
@@ -23,9 +25,17 @@ using namespace llvm;
 static TestModuleFactory TestModuleFactory;
 
 TEST(SimpleTestRunner, runTest) {
-  Compiler Compiler;
+  InitializeNativeTarget();
+  InitializeNativeTargetAsmPrinter();
+  InitializeNativeTargetAsmParser();
+
+  std::unique_ptr<TargetMachine> targetMachine(
+                                EngineBuilder().selectTarget(Triple(), "", "",
+                                SmallVector<std::string, 1>()));
+
+  Compiler compiler(*targetMachine.get());
   Context Ctx;
-  SimpleTestRunner Runner;
+  SimpleTestRunner Runner(*targetMachine.get());
   SimpleTestRunner::ObjectFiles ObjectFiles;
   SimpleTestRunner::OwnedObjectFiles OwnedObjectFiles;
 
@@ -53,13 +63,13 @@ TEST(SimpleTestRunner, runTest) {
   auto &Test = *(Tests.begin());
 
   {
-    auto Obj = Compiler.compileModule(ModuleWithTests);
+    auto Obj = compiler.compileModule(ModuleWithTests);
     ObjectFiles.push_back(Obj.getBinary());
     OwnedObjectFiles.push_back(std::move(Obj));
   }
 
   {
-    auto Obj = Compiler.compileModule(ModuleWithTestees);
+    auto Obj = compiler.compileModule(ModuleWithTestees);
     ObjectFiles.push_back(Obj.getBinary());
     OwnedObjectFiles.push_back(std::move(Obj));
   }
@@ -86,13 +96,13 @@ TEST(SimpleTestRunner, runTest) {
   Engine.applyMutation(Testee->getParent(), *MP);
 
   {
-    auto Obj = Compiler.compileModule(ModuleWithTests);
+    auto Obj = compiler.compileModule(ModuleWithTests);
     ObjectFiles.push_back(Obj.getBinary());
     OwnedObjectFiles.push_back(std::move(Obj));
   }
 
   {
-    auto Obj = Compiler.compileModule(ModuleWithTestees);
+    auto Obj = compiler.compileModule(ModuleWithTestees);
     ObjectFiles.push_back(Obj.getBinary());
     OwnedObjectFiles.push_back(std::move(Obj));
   }
@@ -103,9 +113,17 @@ TEST(SimpleTestRunner, runTest) {
 }
 
 TEST(SimpleTestRunner, runTestUsingLibC) {
-  Compiler Compiler;
+  InitializeNativeTarget();
+  InitializeNativeTargetAsmPrinter();
+  InitializeNativeTargetAsmParser();
+
+  std::unique_ptr<TargetMachine> targetMachine(
+                                EngineBuilder().selectTarget(Triple(), "", "",
+                                SmallVector<std::string, 1>()));
+
+  Compiler compiler(*targetMachine.get());
   Context Ctx;
-  SimpleTestRunner Runner;
+  SimpleTestRunner Runner(*targetMachine.get());
   SimpleTestRunner::ObjectFiles ObjectFiles;
   SimpleTestRunner::OwnedObjectFiles OwnedObjectFiles;
 
@@ -132,11 +150,11 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
 
   auto &Test = *(Tests.begin());
 
-  auto Obj = Compiler.compileModule(ModuleWithTests);
+  auto Obj = compiler.compileModule(ModuleWithTests);
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
-  Obj = Compiler.compileModule(ModuleWithTestees);
+  Obj = compiler.compileModule(ModuleWithTestees);
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
@@ -161,11 +179,11 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   MutationEngine Engine;
   Engine.applyMutation(Testee->getParent(), *MP);
 
-  Obj = Compiler.compileModule(ModuleWithTests);
+  Obj = compiler.compileModule(ModuleWithTests);
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
-  Obj = Compiler.compileModule(ModuleWithTestees);
+  Obj = compiler.compileModule(ModuleWithTestees);
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
@@ -174,9 +192,17 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
 }
 
 TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
-  Compiler Compiler;
+  InitializeNativeTarget();
+  InitializeNativeTargetAsmPrinter();
+  InitializeNativeTargetAsmParser();
+
+  std::unique_ptr<TargetMachine> targetMachine(
+                                EngineBuilder().selectTarget(Triple(), "", "",
+                                SmallVector<std::string, 1>()));
+
+  Compiler compiler(*targetMachine.get());
   Context Ctx;
-  SimpleTestRunner Runner;
+  SimpleTestRunner Runner(*targetMachine.get());
   SimpleTestRunner::ObjectFiles ObjectFiles;
   SimpleTestRunner::OwnedObjectFiles OwnedObjectFiles;
 
@@ -207,11 +233,11 @@ TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
 
   llvm::sys::DynamicLibrary::LoadLibraryPermanently("/usr/lib/libsqlite3.dylib");
 
-  auto Obj = Compiler.compileModule(ModuleWithTestees);
+  auto Obj = compiler.compileModule(ModuleWithTestees);
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
-  Obj = Compiler.compileModule(ModuleWithTests);
+  Obj = compiler.compileModule(ModuleWithTests);
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 

@@ -1,5 +1,4 @@
 #include "Driver.h"
-#include "Compiler.h"
 #include "Config.h"
 #include "Context.h"
 #include "ModuleLoader.h"
@@ -48,8 +47,6 @@ using namespace std::chrono;
 /// all the results of each mutant within corresponding MutationPoint
 
 std::vector<std::unique_ptr<TestResult>> Driver::Run() {
-  Compiler compiler;
-
   std::vector<std::unique_ptr<TestResult>> Results;
 
   /// Assumption: all modules will be used during the execution
@@ -63,7 +60,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
     ObjectFile *objectFile = toolchain.cache().getObject(module);
 
     if (objectFile == nullptr) {
-      auto owningObjectFile = compiler.compileModule(*module.clone().get());
+      auto owningObjectFile = toolchain.compiler().compileModule(*module.clone().get());
       objectFile = owningObjectFile.getBinary();
       toolchain.cache().putObject(std::move(owningObjectFile), *ownedModule.get());
     }
@@ -115,7 +112,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
         } else {
           ObjectFile *mutant = toolchain.cache().getObject(*mutationPoint);
           if (mutant == nullptr) {
-            auto owningObject = mutationPoint->applyMutation(compiler);
+            auto owningObject = mutationPoint->applyMutation(toolchain.compiler());
             mutant = owningObject.getBinary();
             toolchain.cache().putObject(std::move(owningObject), *mutationPoint);
           }

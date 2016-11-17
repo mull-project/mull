@@ -84,8 +84,9 @@ TEST(Driver, SimpleTest_AddMutationOperator) {
 
   SimpleTestFinder testFinder(std::move(mutationOperators));
 
-  SimpleTestRunner runner;
   Toolchain toolchain(config);
+  llvm::TargetMachine &machine = toolchain.targetMachine();
+  SimpleTestRunner runner(machine);
 
   Driver Driver(config, loader, testFinder, runner, toolchain);
 
@@ -136,8 +137,8 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
   SimpleTestFinder testFinder(std::move(mutationOperators));
 
   FakeModuleLoader loader;
-  SimpleTestRunner runner;
   Toolchain toolchain(config);
+  SimpleTestRunner runner(toolchain.targetMachine());
 
   Driver Driver(config, loader, testFinder, runner, toolchain);
 

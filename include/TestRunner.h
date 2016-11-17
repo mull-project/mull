@@ -12,11 +12,11 @@ class Test;
 
 class TestRunner {
 protected:
-  std::unique_ptr<llvm::TargetMachine> TM;
+  llvm::TargetMachine &machine;
 public:
   typedef std::vector<llvm::object::ObjectFile *> ObjectFiles;
   typedef std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> OwnedObjectFiles;
-  TestRunner();
+  TestRunner(llvm::TargetMachine &targetMachine);
 
   virtual ExecutionResult runTest(Test *Test, ObjectFiles &ObjectFiles) = 0;
 
