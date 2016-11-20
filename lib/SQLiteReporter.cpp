@@ -46,9 +46,9 @@ void createTables(sqlite3 *database) {
   const char *test =
     "CREATE TABLE test (test_name TEXT, execution_result_id INT);";
   const char *mutationPoint =
-    "CREATE TABLE mutation_point (mutation_operator TEXT, module_name TEXT, function_index INT, basic_block_index INT, instruction_index INT, filename TEXT, line_number INT, column_number INT, unique_id TEXT);";
+    "CREATE TABLE mutation_point (mutation_operator TEXT, module_name TEXT, function_index INT, basic_block_index INT, instruction_index INT, filename TEXT, line_number INT, column_number INT, unique_id TEXT UNIQUE);";
   const char *mutationResult =
-    "CREATE TABLE mutation_result (execution_result_id INT, test_id INT, mutation_point_id INT, mutation_distance INT);";
+    "CREATE TABLE mutation_result (execution_result_id INT, test_id TEXT, mutation_point_id TEXT, mutation_distance INT);";
 
   const char *mutationPointDebug =
     "CREATE TABLE mutation_point_debug (filename TEXT, line_number INT, column_number INT, function TEXT, basic_block TEXT, instruction INT, unique_id TEXT UNIQUE);";
@@ -89,6 +89,8 @@ void Mutang::SQLiteReporter::reportResults(const std::vector<std::unique_ptr<Tes
   createTables(database);
 
   for (auto &result : results) {
+    std::string testID = result->getTestName();
+
     ExecutionResult testResult = result->getOriginalTestResult();
     std::string insertResultSQL = std::string("INSERT INTO execution_result VALUES (")
     + "'" + std::to_string(testResult.Status) + "',"
@@ -99,16 +101,15 @@ void Mutang::SQLiteReporter::reportResults(const std::vector<std::unique_ptr<Tes
     int testResultID = sqlite3_last_insert_rowid(database);
 
     std::string insertTestSQL = std::string("INSERT INTO test VALUES (")
-    + "'" + result->getTestName() + "',"
+    + "'" + testID + "',"
     + "'" + std::to_string(testResultID) + "');";
     sqlite_exec(database, insertTestSQL.c_str());
-    int testID = sqlite3_last_insert_rowid(database);
 
     for (auto &mutation : result->getMutationResults()) {
       /// Mutation Point
       auto mutationPoint = mutation->getMutationPoint();
       Instruction *instruction = dyn_cast<Instruction>(mutationPoint->getOriginalValue());
-      std::string insertMutationPointSQL = std::string("INSERT INTO mutation_point VALUES (")
+      std::string insertMutationPointSQL = std::string("INSERT OR IGNORE INTO mutation_point VALUES (")
       + "'" + mutationPoint->getOperator()->uniqueID() + "',"
       + "'" + instruction->getParent()->getParent()->getParent()->getModuleIdentifier() + "',"
       + "'" + std::to_string(mutationPoint->getAddress().getFnIndex()) + "',"
@@ -121,15 +122,7 @@ void Mutang::SQLiteReporter::reportResults(const std::vector<std::unique_ptr<Tes
       + ");";
 
       sqlite_exec(database, insertMutationPointSQL.c_str());
-      int mutationPointID = sqlite3_last_insert_rowid(database);
-
-      /// Execution result
-      ExecutionResult mutationExecutionResult = mutation->getExecutionResult();
-      std::string insertMutationExecutionResultSQL = std::string("INSERT INTO execution_result VALUES (")
-      + "'" + std::to_string(mutationExecutionResult.Status) + "',"
-      + "'" + std::to_string(mutationExecutionResult.RunningTime) + "',"
-      + "'" + mutationExecutionResult.stdoutOutput + "',"
-      + "'" + mutationExecutionResult.stderrOutput + "');";
+      std::string mutationPointID = mutationPoint->getUniqueIdentifier();
 
       {
         std::string function;
@@ -171,6 +164,14 @@ void Mutang::SQLiteReporter::reportResults(const std::vector<std::unique_ptr<Tes
         assume(finalize_result == SQLITE_OK, "SQLite error: Expected finalize of debug mutation point statement to succeed.");
       }
 
+      /// Execution result
+      ExecutionResult mutationExecutionResult = mutation->getExecutionResult();
+      std::string insertMutationExecutionResultSQL = std::string("INSERT INTO execution_result VALUES (")
+      + "'" + std::to_string(mutationExecutionResult.Status) + "',"
+      + "'" + std::to_string(mutationExecutionResult.RunningTime) + "',"
+      + "" + "?" + ","
+      + "" + "?" + ");";
+
       sqlite3_stmt *execution_result_statement = NULL;
       int execution_result_statement_prepare_result =
         sqlite3_prepare_v2(database,
@@ -180,7 +181,15 @@ void Mutang::SQLiteReporter::reportResults(const std::vector<std::unique_ptr<Tes
                            NULL);
 
       assume(execution_result_statement_prepare_result == SQLITE_OK,
-             "SQLite error: Expected finalize of execution result statement to succeed.");
+             "SQLite error: Expected preparation of execution result statement to succeed.");
+
+      if (execution_result_statement_prepare_result != SQLITE_OK) {
+        llvm::outs() << insertMutationExecutionResultSQL << "\n";
+        printf("%s\n", sqlite3_errmsg(database));
+      }
+
+      sqlite3_bind_text(execution_result_statement, 1, mutationExecutionResult.stdoutOutput.c_str(), -1, SQLITE_TRANSIENT);
+      sqlite3_bind_text(execution_result_statement, 2, mutationExecutionResult.stderrOutput.c_str(), -1, SQLITE_TRANSIENT);
 
       int execution_result_insertion_result = sqlite3_step(execution_result_statement);
       assume(execution_result_insertion_result == SQLITE_DONE,
@@ -194,8 +203,8 @@ void Mutang::SQLiteReporter::reportResults(const std::vector<std::unique_ptr<Tes
       int mutationExecutionResultID = sqlite3_last_insert_rowid(database);
       std::string insertMutationResultSQL = std::string("INSERT INTO mutation_result VALUES (")
           + "'" + std::to_string(mutationExecutionResultID) + "',"
-          + "'" + std::to_string(testID) + "',"
-          + "'" + std::to_string(mutationPointID) + "',"
+          + "'" + testID + "',"
+          + "'" + mutationPointID + "',"
           + "'" + std::to_string(mutation->getMutationDistance()) + "');";
 
       sqlite_exec(database, insertMutationResultSQL.c_str());

@@ -23,6 +23,8 @@ public:
 
   std::string getTestName() override;
 
+  std::string getUniqueIdentifier() override { return getTestName(); };
+
   std::vector<llvm::Function *> &GetGlobalCtors();
   llvm::Function *GetTestBodyFunction();
 
