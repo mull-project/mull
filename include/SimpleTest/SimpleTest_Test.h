@@ -18,6 +18,8 @@ public:
 
   std::string getTestName() override;
 
+  std::string getUniqueIdentifier() override { return getTestName(); };
+
   static bool classof(const Test *T) {
     return T->getKind() == TK_SimpleTest;
   }
