@@ -14,6 +14,27 @@
 using namespace llvm;
 using namespace Mutang;
 
+///
+/// Comparison instructions emitted for explicit and implicit comparisons
+/// We should only apply mutations on explicit comparisons.
+/// e.g.:
+///
+///   int a, b;
+///   if (a < b)   // Explicit comparison. Applying mutation
+///
+///   void *ptr = nullptr;
+///   if (ptr)     // Implicit comparison. Not applying mutation
+///
+///   void *ptr = nullptr;
+///   delete ptr;  // Emits comparison instruction. Also not applying.
+///
+/// Based on observation we know that all implicit comparison instructions
+/// are named `toboolX`, where `X` is an empty string or a number.
+/// Number used when there is more than one instruction pre basic block.
+/// `delete` instructions named `isnullX`, where `X` follows the same
+/// pattern as `tobool`'s `X`.
+///
+
 static int GetFunctionIndex(llvm::Function *function) {
   auto PM = function->getParent();
 
@@ -196,7 +217,15 @@ NegateConditionMutationOperator::getMutationPoints(const Context &context,
 
 bool NegateConditionMutationOperator::canBeApplied(Value &V) {
 
-  if (__unused CmpInst *cmpOp = dyn_cast<CmpInst>(&V)) {
+  if (CmpInst *cmpOp = dyn_cast<CmpInst>(&V)) {
+    if (cmpOp->getName().startswith("tobool")) {
+      return false;
+    }
+
+    if (cmpOp->getName().startswith("isnull")) {
+      return false;
+    }
+
     return true;
   }
 

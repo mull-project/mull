@@ -300,3 +300,32 @@ std::unique_ptr<Module> TestModuleFactory::createGoogleTestTesteeModule() {
   return module;
 }
 
+std::unique_ptr<Module> TestModuleFactory::APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutation_operatorModule() {
+  std::string contents = createFixture("APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutation_operator.ll");
+
+  auto module = parseIR(contents.c_str());
+
+  module->setModuleIdentifier("APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutation_operator.ll");
+
+  return module;
+}
+
+std::unique_ptr<Module> TestModuleFactory::APFloat_019fc57b8bd190d33389137abbe7145e_214_2_7_negate_mutation_operatorModule() {
+  std::string contents = createFixture("APFloat_019fc57b8bd190d33389137abbe7145e_214_2_7_negate_mutation_operator.ll");
+
+  auto module = parseIR(contents.c_str());
+
+  module->setModuleIdentifier("APFloat_019fc57b8bd190d33389137abbe7145e_214_2_7_negate_mutation_operator.ll");
+
+  return module;
+}
+
+std::unique_ptr<Module> TestModuleFactory::APFloat_019fc57b8bd190d33389137abbe7145e_5_1_3_negate_mutation_operatorModule() {
+  std::string contents = createFixture("APFloat_019fc57b8bd190d33389137abbe7145e_5_1_3_negate_mutation_operator.ll");
+
+  auto module = parseIR(contents.c_str());
+
+  module->setModuleIdentifier("APFloat_019fc57b8bd190d33389137abbe7145e_5_1_3_negate_mutation_operator.ll");
+
+  return module;
+}
