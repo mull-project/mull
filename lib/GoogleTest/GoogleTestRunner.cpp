@@ -17,6 +17,10 @@ using namespace Mutang;
 using namespace llvm;
 using namespace std::chrono;
 
+namespace {
+  class UnitTest;
+}
+
 typedef void (*mutang_destructor_t)(void *);
 
 struct atexit_entry {
@@ -149,14 +153,37 @@ ExecutionResult GoogleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) 
     runStaticCtor(Ctor);
   }
 
-  void *MainPtr = FunctionPointer("_main");
-  auto Main = ((int (*)(int, const char**))(intptr_t)MainPtr);
-
   std::string filter = "--gtest_filter=" + GTest->getTestName();
-
   const char *argv[] = { "mutang", filter.c_str(), NULL };
+  int argc = 2;
 
-  uint64_t result = Main(2, argv);
+  /// Normally Google Test Driver looks like this:
+  ///
+  ///   int main(int argc, char **argv) {
+  ///     InitGoogleTest(&argc, argv);
+  ///     return UnitTest.GetInstance()->Run();
+  ///   }
+  ///
+  /// Technically we can just call `main` function, but there is a problem:
+  /// Among all the files that are being processed may be more than one
+  /// `main` function, therefore can call wrong driver.
+  ///
+  /// To avoid this from happening we implement the driver function on our own.
+  /// We must keep in mind that each project can have its own, extended
+  /// version of the driver (LLVM itself has one).
+  ///
+
+  void *initGTestPtr = FunctionPointer("__ZN7testing14InitGoogleTestEPiPPc");
+  auto initGTest = ((void (*)(int *, const char**))(intptr_t)initGTestPtr);
+  initGTest(&argc, argv);
+
+  void *getInstancePtr = FunctionPointer("__ZN7testing8UnitTest11GetInstanceEv");
+  auto getInstance = ((UnitTest *(*)())(intptr_t)getInstancePtr);
+  UnitTest *test = getInstance();
+
+  void *runAllTestsPtr = FunctionPointer("__ZN7testing8UnitTest3RunEv");
+  auto runAllTests = ((int (*)(UnitTest *))(intptr_t)runAllTestsPtr);
+  uint64_t result = runAllTests(test);
 
   runDestructors();
   auto elapsed = high_resolution_clock::now() - start;
