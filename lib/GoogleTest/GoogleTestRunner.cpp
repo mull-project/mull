@@ -166,7 +166,7 @@ ExecutionResult GoogleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) 
   ///
   /// Technically we can just call `main` function, but there is a problem:
   /// Among all the files that are being processed may be more than one
-  /// `main` function, therefore can call wrong driver.
+  /// `main` function, therefore we can call wrong driver.
   ///
   /// To avoid this from happening we implement the driver function on our own.
   /// We must keep in mind that each project can have its own, extended

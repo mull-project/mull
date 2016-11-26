@@ -290,7 +290,42 @@ std::vector<Testee> GoogleTestFinder::findTestees(Test *Test,
         continue;
       }
 
-      if (Function *definedFunction = Ctx.lookupDefinedFunction(functionOperand->getName())) {
+      /// Two modules may have static function with the same name, e.g.:
+      ///
+      ///   // ModuleA
+      ///   define range() {
+      ///     // ...
+      ///   }
+      ///
+      ///   define test_A() {
+      ///     call range()
+      ///   }
+      ///
+      ///   // ModuleB
+      ///   define range() {
+      ///     // ...
+      ///   }
+      ///
+      ///   define test_B() {
+      ///     call range()
+      ///   }
+      ///
+      /// Depending on the order of processing either `range` from `A` or `B`
+      /// will be added to the `context`, hence we may find function `range`
+      /// from module `B` while processing body of the `test_A`.
+      /// To avoid this problem we first look for function inside of a current
+      /// module.
+      ///
+      /// FIXME: Context should report if a function being added already exist
+      /// FIXME: What other problems such behaviour may bring?
+
+      Function *definedFunction = testBodyModule->getFunction(functionOperand->getName());
+
+      if (!definedFunction || definedFunction->isDeclaration()) {
+        definedFunction = Ctx.lookupDefinedFunction(functionOperand->getName());
+      }
+
+      if (definedFunction) {
         auto functionWasNotProcessed = checkedFunctions.find(definedFunction) == checkedFunctions.end();
         checkedFunctions.insert(definedFunction);
 
