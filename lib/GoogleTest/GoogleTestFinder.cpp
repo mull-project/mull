@@ -4,6 +4,7 @@
 #include "MutationOperators/MutationOperator.h"
 
 #include "llvm/IR/Constants.h"
+#include "llvm/IR/DebugInfoMetadata.h"
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/LLVMContext.h"
@@ -220,17 +221,28 @@ std::string demangle(const char* name) {
   return (status==0) ? res.get() : name ;
 }
 
-static bool shouldSkipDefinedFunction(llvm::Function *DefinedFunction) {
-  if (DefinedFunction->getName().find(StringRef("testing8internal")) != StringRef::npos) {
+static bool shouldSkipDefinedFunction(llvm::Function *definedFunction) {
+  if (definedFunction->getName().find(StringRef("testing8internal")) != StringRef::npos) {
     return true;
   }
 
-  if (DefinedFunction->getName().find(StringRef("testing15AssertionResult")) != StringRef::npos) {
+  if (definedFunction->getName().find(StringRef("testing15AssertionResult")) != StringRef::npos) {
     return true;
   }
 
-  if (DefinedFunction->getName().find(StringRef("testing7Message")) != StringRef::npos) {
+  if (definedFunction->getName().find(StringRef("testing7Message")) != StringRef::npos) {
     return true;
+  }
+
+  if (definedFunction->hasMetadata()) {
+    int debugInfoKindID = 0;
+    MDNode *debug = definedFunction->getMetadata(debugInfoKindID);
+    DISubprogram *subprogram = dyn_cast<DISubprogram>(debug);
+    if (subprogram) {
+      if (subprogram->getFilename().contains("include/c++/v1")) {
+        return true;
+      }
+    }
   }
 
   return false;
