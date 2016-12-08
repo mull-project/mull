@@ -10,13 +10,15 @@ namespace Mutang {
 
   class MutationPoint;
   class MutationPointAddress;
+  class MutationOperatorFilter;
 
   class NegateConditionMutationOperator : public MutationOperator {
 
   public:
     static llvm::CmpInst::Predicate negatedCmpInstPredicate(llvm::CmpInst::Predicate predicate);
     std::vector<MutationPoint *> getMutationPoints(const Context &context,
-                                                   llvm::Function *function) override;
+                                                   llvm::Function *function,
+                                                   MutationOperatorFilter &filter) override;
 
     std::string uniqueID() override {
       return "negate_mutation_operator";

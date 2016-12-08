@@ -1,4 +1,5 @@
 #include "MutationOperators/AddMutationOperator.h"
+#include "MutationOperators/MutationOperatorFilter.h"
 
 #include "MutationPoint.h"
 #include "Context.h"
@@ -31,7 +32,8 @@ static int GetFunctionIndex(llvm::Function *function) {
 
 std::vector<MutationPoint *>
 AddMutationOperator::getMutationPoints(const Context &context,
-                                       llvm::Function *function) {
+                                       llvm::Function *function,
+                                       MutationOperatorFilter &filter) {
   int functionIndex = GetFunctionIndex(function);
   int basicBlockIndex = 0;
 
@@ -42,7 +44,7 @@ AddMutationOperator::getMutationPoints(const Context &context,
     int instructionIndex = 0;
 
     for (auto &instruction : basicBlock.getInstList()) {
-      if (canBeApplied(instruction)) {
+      if (canBeApplied(instruction) && !filter.shouldSkipInstruction(&instruction)) {
         auto moduleID = instruction.getModule()->getModuleIdentifier();
         MutangModule *module = context.moduleWithIdentifier(moduleID);
 

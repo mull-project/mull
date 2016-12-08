@@ -2,8 +2,10 @@
 
 #include "Context.h"
 #include "MutationOperators/MutationOperator.h"
+#include "MutationOperators/MutationOperatorFilter.h"
 
 #include "llvm/IR/Constants.h"
+#include "llvm/IR/DebugInfoMetadata.h"
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/LLVMContext.h"
@@ -24,6 +26,25 @@
 
 using namespace Mutang;
 using namespace llvm;
+
+class GoogleTestMutationOperatorFilter : public MutationOperatorFilter {
+public:
+  bool shouldSkipInstruction(llvm::Instruction *instruction) {
+    if (instruction->hasMetadata()) {
+      int debugInfoKindID = 0;
+      MDNode *debug = instruction->getMetadata(debugInfoKindID);
+
+      DILocation *location = dyn_cast<DILocation>(debug);
+      if (location) {
+        if (location->getFilename().contains("include/c++/v1")) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  };
+};
 
 GoogleTestFinder::GoogleTestFinder() : TestFinder() {
   /// FIXME: should come from outside
@@ -220,17 +241,28 @@ std::string demangle(const char* name) {
   return (status==0) ? res.get() : name ;
 }
 
-static bool shouldSkipDefinedFunction(llvm::Function *DefinedFunction) {
-  if (DefinedFunction->getName().find(StringRef("testing8internal")) != StringRef::npos) {
+static bool shouldSkipDefinedFunction(llvm::Function *definedFunction) {
+  if (definedFunction->getName().find(StringRef("testing8internal")) != StringRef::npos) {
     return true;
   }
 
-  if (DefinedFunction->getName().find(StringRef("testing15AssertionResult")) != StringRef::npos) {
+  if (definedFunction->getName().find(StringRef("testing15AssertionResult")) != StringRef::npos) {
     return true;
   }
 
-  if (DefinedFunction->getName().find(StringRef("testing7Message")) != StringRef::npos) {
+  if (definedFunction->getName().find(StringRef("testing7Message")) != StringRef::npos) {
     return true;
+  }
+
+  if (definedFunction->hasMetadata()) {
+    int debugInfoKindID = 0;
+    MDNode *debug = definedFunction->getMetadata(debugInfoKindID);
+    DISubprogram *subprogram = dyn_cast<DISubprogram>(debug);
+    if (subprogram) {
+      if (subprogram->getFilename().contains("include/c++/v1")) {
+        return true;
+      }
+    }
   }
 
   return false;
@@ -290,7 +322,42 @@ std::vector<Testee> GoogleTestFinder::findTestees(Test *Test,
         continue;
       }
 
-      if (Function *definedFunction = Ctx.lookupDefinedFunction(functionOperand->getName())) {
+      /// Two modules may have static function with the same name, e.g.:
+      ///
+      ///   // ModuleA
+      ///   define range() {
+      ///     // ...
+      ///   }
+      ///
+      ///   define test_A() {
+      ///     call range()
+      ///   }
+      ///
+      ///   // ModuleB
+      ///   define range() {
+      ///     // ...
+      ///   }
+      ///
+      ///   define test_B() {
+      ///     call range()
+      ///   }
+      ///
+      /// Depending on the order of processing either `range` from `A` or `B`
+      /// will be added to the `context`, hence we may find function `range`
+      /// from module `B` while processing body of the `test_A`.
+      /// To avoid this problem we first look for function inside of a current
+      /// module.
+      ///
+      /// FIXME: Context should report if a function being added already exist
+      /// FIXME: What other problems such behaviour may bring?
+
+      Function *definedFunction = testBodyModule->getFunction(functionOperand->getName());
+
+      if (!definedFunction || definedFunction->isDeclaration()) {
+        definedFunction = Ctx.lookupDefinedFunction(functionOperand->getName());
+      }
+
+      if (definedFunction) {
         auto functionWasNotProcessed = checkedFunctions.find(definedFunction) == checkedFunctions.end();
         checkedFunctions.insert(definedFunction);
 
@@ -333,8 +400,10 @@ GoogleTestFinder::findMutationPoints(const Context &context,
 
   std::vector<MutationPoint *> points;
 
+  GoogleTestMutationOperatorFilter filter;
+
   for (auto &mutationOperator : mutationOperators) {
-    for (auto point : mutationOperator->getMutationPoints(context, &testee)) {
+    for (auto point : mutationOperator->getMutationPoints(context, &testee, filter)) {
       points.push_back(point);
       MutationPoints.emplace_back(std::unique_ptr<MutationPoint>(point));
     }
