@@ -2,6 +2,7 @@
 
 #include "Context.h"
 #include "MutationOperators/MutationOperator.h"
+#include "MutationOperators/MutationOperatorFilter.h"
 
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/DebugInfoMetadata.h"
@@ -25,6 +26,25 @@
 
 using namespace Mutang;
 using namespace llvm;
+
+class GoogleTestMutationOperatorFilter : public MutationOperatorFilter {
+public:
+  bool shouldSkipInstruction(llvm::Instruction *instruction) {
+    if (instruction->hasMetadata()) {
+      int debugInfoKindID = 0;
+      MDNode *debug = instruction->getMetadata(debugInfoKindID);
+
+      DILocation *location = dyn_cast<DILocation>(debug);
+      if (location) {
+        if (location->getFilename().contains("include/c++/v1")) {
+          return true;
+        }
+      }
+    }
+
+    return false;
+  };
+};
 
 GoogleTestFinder::GoogleTestFinder() : TestFinder() {
   /// FIXME: should come from outside
@@ -380,8 +400,10 @@ GoogleTestFinder::findMutationPoints(const Context &context,
 
   std::vector<MutationPoint *> points;
 
+  GoogleTestMutationOperatorFilter filter;
+
   for (auto &mutationOperator : mutationOperators) {
-    for (auto point : mutationOperator->getMutationPoints(context, &testee)) {
+    for (auto point : mutationOperator->getMutationPoints(context, &testee, filter)) {
       points.push_back(point);
       MutationPoints.emplace_back(std::unique_ptr<MutationPoint>(point));
     }

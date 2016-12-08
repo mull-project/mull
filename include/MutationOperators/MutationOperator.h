@@ -1,5 +1,7 @@
 #pragma once
 
+#include "MutationOperators/MutationOperatorFilter.h"
+
 #include <string>
 #include <vector>
 
@@ -14,11 +16,13 @@ namespace Mutang {
 class Context;
 class MutationPoint;
 class MutationPointAddress;
+class MutationOperatorFilter;
 
 class MutationOperator {
 public:
   virtual std::vector<MutationPoint *> getMutationPoints(const Context &context,
-                                                         llvm::Function *function) = 0;
+                                                         llvm::Function *function,
+                                                         MutationOperatorFilter &filter) = 0;
 
   /// FIXME: Renmae to 'getUniqueIdentifier'
   virtual std::string uniqueID() = 0;

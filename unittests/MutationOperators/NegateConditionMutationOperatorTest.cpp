@@ -1,5 +1,6 @@
 
 #include "MutationOperators/MutationOperator.h"
+#include "MutationOperators/MutationOperatorFilter.h"
 #include "MutationOperators/NegateConditionMutationOperator.h"
 #include "Context.h"
 
@@ -84,8 +85,9 @@ TEST(NegateConditionMutationOperator, getMutationPoints_no_filter) {
   context.addModule(std::move(module));
 
   NegateConditionMutationOperator mutationOperator;
+  NullMutationOperatorFilter filter;
 
-  auto mutationPoints = mutationOperator.getMutationPoints(context, function);
+  auto mutationPoints = mutationOperator.getMutationPoints(context, function, filter);
   EXPECT_EQ(1U, mutationPoints.size());
 }
 
@@ -102,8 +104,9 @@ TEST(NegateConditionMutationOperator, getMutationPoints_filter_to_bool_converion
   context.addModule(std::move(module));
 
   NegateConditionMutationOperator mutationOperator;
+  NullMutationOperatorFilter filter;
 
-  auto mutationPoints = mutationOperator.getMutationPoints(context, function);
+  auto mutationPoints = mutationOperator.getMutationPoints(context, function, filter);
   EXPECT_EQ(0U, mutationPoints.size());
 }
 
@@ -120,7 +123,8 @@ TEST(NegateConditionMutationOperator, getMutationPoints_filter_is_null) {
   context.addModule(std::move(module));
 
   NegateConditionMutationOperator mutationOperator;
+  NullMutationOperatorFilter filter;
 
-  auto mutationPoints = mutationOperator.getMutationPoints(context, function);
+  auto mutationPoints = mutationOperator.getMutationPoints(context, function, filter);
   EXPECT_EQ(0U, mutationPoints.size());
 }
