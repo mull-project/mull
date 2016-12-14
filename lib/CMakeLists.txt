@@ -7,6 +7,7 @@ llvm_add_library(mutang
 
   MutationOperators/AddMutationOperator.cpp
   MutationOperators/NegateConditionMutationOperator.cpp
+  MutationOperators/RemoveVoidFunctionMutationOperator.cpp
 
   Toolchain/Compiler.cpp
   Toolchain/ObjectCache.cpp
@@ -43,7 +44,6 @@ llvm_add_library(mutang
   LLVMCodeGen
   LLVMCore
   LLVMExecutionEngine
-  LLVMMCJIT
   LLVMObject
   LLVMOrcJIT
   LLVMRuntimeDyld

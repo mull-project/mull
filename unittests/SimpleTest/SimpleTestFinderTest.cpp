@@ -3,6 +3,7 @@
 #include "Context.h"
 #include "MutationOperators/AddMutationOperator.h"
 #include "MutationOperators/NegateConditionMutationOperator.h"
+#include "MutationOperators/RemoveVoidFunctionMutationOperator.h"
 
 #include "TestModuleFactory.h"
 #include "Test.h"
@@ -148,4 +149,46 @@ TEST(SimpleTestFinder, FindMutationPoints_NegateConditionMutationOperator) {
   ASSERT_TRUE(MPA.getFnIndex() == 0);
   ASSERT_TRUE(MPA.getBBIndex() == 0);
   ASSERT_TRUE(MPA.getIIndex() == 7);
+}
+
+TEST(SimpleTestFinder, FindMutationPoints_RemoteVoidFunctionMutationOperator) {
+  auto ModuleWithTests   = TestModuleFactory.create_SimpleTest_RemoveVoidFunction_Tester_Module();
+  auto ModuleWithTestees = TestModuleFactory.create_SimpleTest_RemoveVoidFunction_Testee_Module();
+
+  auto mutangModuleWithTests   = make_unique<MutangModule>(std::move(ModuleWithTests), "");
+  auto mutangModuleWithTestees = make_unique<MutangModule>(std::move(ModuleWithTestees), "");
+
+  Context Ctx;
+  Ctx.addModule(std::move(mutangModuleWithTests));
+  Ctx.addModule(std::move(mutangModuleWithTestees));
+
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
+
+  SimpleTestFinder Finder(std::move(mutationOperators));
+  auto Tests = Finder.findTests(Ctx);
+
+  auto &Test = *Tests.begin();
+
+  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx, 4);
+
+  ASSERT_EQ(1U, Testees.size());
+
+  Function *Testee = (Testees.begin())->first;
+  ASSERT_FALSE(Testee->empty());
+
+  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
+  ASSERT_EQ(1U, MutationPoints.size());
+
+  MutationPoint *MP = (*(MutationPoints.begin()));
+
+  /// TODO: Don't know how to compare unique pointer addMutationOperator with
+  /// MutationOperator *.
+  //ASSERT_EQ(addMutationOperator.get(), MP->getOperator());
+  ASSERT_TRUE(isa<CallInst>(MP->getOriginalValue()));
+
+  MutationPointAddress MPA = MP->getAddress();
+  ASSERT_TRUE(MPA.getFnIndex() == 2);
+  ASSERT_TRUE(MPA.getBBIndex() == 0);
+  ASSERT_TRUE(MPA.getIIndex() == 2);
 }
