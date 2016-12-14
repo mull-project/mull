@@ -17,6 +17,7 @@ add_mutang_unittest(MutangUnitTests
 
   MutationOperators/MutationOperatorsTests.cpp
   MutationOperators/NegateConditionMutationOperatorTest.cpp
+  MutationOperators/RemoveVoidFunctionMutationOperatorTest.cpp
 
   SimpleTest/SimpleTestFinderTest.cpp
 
