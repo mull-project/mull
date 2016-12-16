@@ -10,174 +10,153 @@ using namespace Mutang;
 using namespace llvm;
 
 TEST(ConfigParser, loadConfig_BitcodeFiles) {
-    SourceMgr SM;
-    yaml::Stream Stream(
+    yaml::Input Input(
                         "bitcode_files:\n"
                         "  - foo.bc\n"
-                        "  - bar.bc\n", SM);
+                        "  - bar.bc\n");
 
     ConfigParser Parser;
-    auto Cfg = Parser.loadConfig(Stream);
+    auto Cfg = Parser.loadConfig(Input);
 
-    ASSERT_EQ(2U, Cfg->getBitcodePaths().size());
-    ASSERT_EQ("foo.bc", *(Cfg->getBitcodePaths().begin()));
-    ASSERT_EQ("bar.bc", *(Cfg->getBitcodePaths().end() - 1));
-    ASSERT_EQ("bar.bc", *(Cfg->getBitcodePaths().end() - 1));
+    ASSERT_EQ(2U, Cfg.getBitcodePaths().size());
+    ASSERT_EQ("foo.bc", *(Cfg.getBitcodePaths().begin()));
+    ASSERT_EQ("bar.bc", *(Cfg.getBitcodePaths().end() - 1));
+    ASSERT_EQ("bar.bc", *(Cfg.getBitcodePaths().end() - 1));
 }
 
 TEST(ConfigParser, loadConfig_Fork_True) {
-  SourceMgr SM;
-  yaml::Stream Stream(
-                      "fork: true\n", SM);
-
+  yaml::Input Input(
+                      "fork: true\n");
   ConfigParser Parser;
-  auto Cfg = Parser.loadConfig(Stream);
+  auto Cfg = Parser.loadConfig(Input);
 
-  ASSERT_EQ(true, Cfg->getFork());
+  ASSERT_EQ(true, Cfg.getFork());
 }
 
 TEST(ConfigParser, loadConfig_Fork_False) {
-  SourceMgr SM;
-  yaml::Stream Stream("fork: false\n", SM);
+  yaml::Input Input("fork: false\n");
 
   ConfigParser Parser;
-  auto Cfg = Parser.loadConfig(Stream);
+  auto Cfg = Parser.loadConfig(Input);
 
-  ASSERT_EQ(false, Cfg->getFork());
+  ASSERT_EQ(false, Cfg.getFork());
 }
 
 TEST(ConfigParser, loadConfig_Fork_Unspecified) {
-  SourceMgr SM;
-
   /// Surprisingly enough, yaml library crashes on empty string so
   /// providing 'bitcode_files:' with content just to overcome the assert.
-  yaml::Stream Stream("bitcode_files:\n"
+  yaml::Input Input("bitcode_files:\n"
                       "  - foo.bc\n"
-                      "  - bar.bc\n", SM);
+                      "  - bar.bc\n");
 
   ConfigParser Parser;
-  auto Cfg = Parser.loadConfig(Stream);
+  auto Cfg = Parser.loadConfig(Input);
 
-  ASSERT_EQ(true, Cfg->getFork());
+  ASSERT_EQ(true, Cfg.getFork());
 }
 
 TEST(ConfigParser, loadConfig_Timeout_Unspecified) {
-  SourceMgr SM;
-
   /// Surprisingly enough, yaml library crashes on empty string so
   /// providing 'bitcode_files:' with content just to overcome the assert.
-  yaml::Stream Stream("bitcode_files:\n"
+  yaml::Input Input("bitcode_files:\n"
                       "  - foo.bc\n"
-                      "  - bar.bc\n", SM);
+                      "  - bar.bc\n");
 
   ConfigParser Parser;
-  auto Cfg = Parser.loadConfig(Stream);
+  auto Cfg = Parser.loadConfig(Input);
 
-  ASSERT_EQ(MutangDefaultTimeout, Cfg->getTimeout());
+  ASSERT_EQ(MutangDefaultTimeout, Cfg.getTimeout());
 }
 
 TEST(ConfigParser, loadConfig_Timeout_SpecificValue) {
-  SourceMgr SM;
-  yaml::Stream Stream("timeout: 15\n", SM);
+  yaml::Input Input("timeout: 15\n");
 
   ConfigParser Parser;
-  auto Cfg = Parser.loadConfig(Stream);
+  auto Cfg = Parser.loadConfig(Input);
 
-  ASSERT_EQ(15, Cfg->getTimeout());
+  ASSERT_EQ(15, Cfg.getTimeout());
 }
 
 TEST(ConfigParser, loadConfig_DryRun_Unspecified) {
-  SourceMgr SM;
-
   /// Surprisingly enough, yaml library crashes on empty string so
   /// providing 'bitcode_files:' with content just to overcome the assert.
-  yaml::Stream Stream("bitcode_files:\n"
+  yaml::Input Input("bitcode_files:\n"
                       "  - foo.bc\n"
-                      "  - bar.bc\n", SM);
+                      "  - bar.bc\n");
 
   ConfigParser Parser;
-  auto Cfg = Parser.loadConfig(Stream);
+  auto Cfg = Parser.loadConfig(Input);
 
-  ASSERT_FALSE(Cfg->isDryRun());
+  ASSERT_FALSE(Cfg.isDryRun());
 }
 
 TEST(ConfigParser, loadConfig_DryRun_SpecificValue) {
   ConfigParser Parser;
-  SourceMgr SM;
-  yaml::Stream Stream("dryRun: true\n", SM);
-  auto Cfg = Parser.loadConfig(Stream);
-  ASSERT_TRUE(Cfg->isDryRun());
+  yaml::Input Input("dry_run: true\n");
+  auto Cfg = Parser.loadConfig(Input);
+  ASSERT_TRUE(Cfg.isDryRun());
 }
 
 TEST(ConfigParser, loadConfig_UseCache_Unspecified) {
-  SourceMgr SM;
-
   /// Surprisingly enough, yaml library crashes on empty string so
   /// providing 'bitcode_files:' with content just to overcome the assert.
-  yaml::Stream Stream("bitcode_files:\n"
+  yaml::Input Input("bitcode_files:\n"
                       "  - foo.bc\n"
-                      "  - bar.bc\n", SM);
+                      "  - bar.bc\n");
 
   ConfigParser Parser;
-  auto Cfg = Parser.loadConfig(Stream);
-  ASSERT_TRUE(Cfg->getUseCache());
+  auto Cfg = Parser.loadConfig(Input);
+  ASSERT_TRUE(Cfg.getUseCache());
 }
 
 TEST(ConfigParser, loadConfig_UseCache_SpecificValue) {
-  SourceMgr SM;
-  yaml::Stream Stream("use_cache: false\n", SM);
+  yaml::Input Input("use_cache: false\n");
 
   ConfigParser Parser;
-  auto Cfg = Parser.loadConfig(Stream);
-  ASSERT_FALSE(Cfg->getUseCache());
+  auto Cfg = Parser.loadConfig(Input);
+  ASSERT_FALSE(Cfg.getUseCache());
 }
 
 TEST(ConfigParser, loadConfig_MaxDistance_Unspecified) {
-  SourceMgr SM;
-
   /// Surprisingly enough, yaml library crashes on empty string so
   /// providing 'bitcode_files:' with content just to overcome the assert.
-  yaml::Stream Stream("bitcode_files:\n"
+  yaml::Input Input("bitcode_files:\n"
                       "  - foo.bc\n"
-                      "  - bar.bc\n", SM);
+                      "  - bar.bc\n");
 
   ConfigParser Parser;
-  auto Cfg = Parser.loadConfig(Stream);
+  auto Cfg = Parser.loadConfig(Input);
 
-  ASSERT_EQ(128, Cfg->getMaxDistance());
+  ASSERT_EQ(128, Cfg.getMaxDistance());
 }
 
 TEST(ConfigParser, loadConfig_MaxDistance_SpecificValue) {
-  SourceMgr SM;
-  yaml::Stream Stream("maxDistance: 3\n", SM);
+  yaml::Input Input("max_distance: 3\n");
 
   ConfigParser Parser;
-  auto Cfg = Parser.loadConfig(Stream);
+  auto Cfg = Parser.loadConfig(Input);
 
-  ASSERT_EQ(3, Cfg->getMaxDistance());
+  ASSERT_EQ(3, Cfg.getMaxDistance());
 }
 
 TEST(ConfigParser, loadConfig_CacheDirectory_Unspecified) {
-  SourceMgr SM;
-
   /// Surprisingly enough, yaml library crashes on empty string so
   /// providing 'bitcode_files:' with content just to overcome the assert.
-  yaml::Stream Stream("bitcode_files:\n"
+  yaml::Input Input("bitcode_files:\n"
                       "  - foo.bc\n"
-                      "  - bar.bc\n", SM);
+                      "  - bar.bc\n");
 
   ConfigParser Parser;
-  auto Cfg = Parser.loadConfig(Stream);
+  auto Cfg = Parser.loadConfig(Input);
 
-  ASSERT_EQ("/tmp/mutang_cache", Cfg->getCacheDirectory());
+  ASSERT_EQ("/tmp/mutang_cache", Cfg.getCacheDirectory());
 }
 
 TEST(ConfigParser, loadConfig_CacheDirectory_SpecificValue) {
-  SourceMgr SM;
-  yaml::Stream Stream("cache_directory: /var/tmp\n", SM);
+  yaml::Input Input("cache_directory: /var/tmp\n");
 
   ConfigParser Parser;
-  auto Cfg = Parser.loadConfig(Stream);
+  auto Cfg = Parser.loadConfig(Input);
 
-  ASSERT_EQ("/var/tmp", Cfg->getCacheDirectory());
+  ASSERT_EQ("/var/tmp", Cfg.getCacheDirectory());
 }

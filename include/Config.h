@@ -1,10 +1,23 @@
 #pragma once
 
+#include "llvm/Support/YAMLTraits.h"
+
 #include <string>
 #include <vector>
 
 static int MutangDefaultTimeout = 3000;
 
+// We need these forward declarations to make our config friends with the
+// mapping traits.
+namespace Mutang {
+class Config;
+}
+namespace llvm {
+namespace yaml {
+template<typename T>
+struct MappingTraits;
+}
+}
 namespace Mutang {
 
 class Config {
@@ -16,7 +29,21 @@ class Config {
   int maxDistance;
   std::string cacheDirectory;
 
+  friend llvm::yaml::MappingTraits<Mutang::Config>;
 public:
+  // Constructor initializes defaults.
+  // TODO: Refactoring into constants.
+  Config() :
+    bitcodePaths(),
+    fork(true),
+    dryRun(false),
+    useCache(true),
+    timeout(MutangDefaultTimeout),
+    maxDistance(128),
+    cacheDirectory("/tmp/mutang_cache")
+  {
+  }
+
   Config(const std::vector<std::string> &paths,
          bool fork,
          bool dryrun,
@@ -63,5 +90,5 @@ public:
   }
 
 };
-
 }
+

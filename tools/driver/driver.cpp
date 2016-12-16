@@ -1,6 +1,6 @@
-#include "Driver.h"
-#include "ConfigParser.h"
 #include "Config.h"
+#include "ConfigParser.h"
+#include "Driver.h"
 #include "ModuleLoader.h"
 #include "MutationPoint.h"
 #include "SQLiteReporter.h"
@@ -16,8 +16,8 @@
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/SourceMgr.h"
-#include "llvm/Support/YAMLParser.h"
 #include "llvm/Support/TargetSelect.h"
+#include "llvm/Support/YAMLParser.h"
 
 #include <ctime>
 #include <string>
@@ -33,10 +33,10 @@ int debug_main(int argc, char *argv[]) {
   ModuleLoader Loader(Ctx);
 
   GoogleTestFinder TestFinder;
-  Toolchain toolchain(*config.get());
+  Toolchain toolchain(config);
   GoogleTestRunner Runner(toolchain.targetMachine());
 
-  Driver D(*config.get(), Loader, TestFinder, Runner, toolchain);
+  Driver D(config, Loader, TestFinder, Runner, toolchain);
 
   if (strcmp(argv[2], "-print-test-names") == 0) {
     D.debug_PrintTestNames();
@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
 
   LLVMContext Ctx;
   ModuleLoader Loader(Ctx);
-  Toolchain toolchain(*config.get());
+  Toolchain toolchain(config);
 
 #if 1
   GoogleTestFinder TestFinder;
@@ -73,12 +73,12 @@ int main(int argc, char *argv[]) {
   SimpleTestRunner Runner(toolchain.targetMachine());
 #endif
 
-  Driver driver(*config.get(), Loader, TestFinder, Runner, toolchain);
+  Driver driver(config, Loader, TestFinder, Runner, toolchain);
   auto results = driver.Run();
 
   SQLiteReporter reporter;
   reporter.reportResults(results);
   /// It does crash at the very moment
   /// llvm_shutdown();
-  return 0;
+  return EXIT_SUCCESS;
 }

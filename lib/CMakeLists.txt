@@ -37,14 +37,15 @@ llvm_add_library(mutang
   ${MUTANG_INCLUDE_DIR}/Toolchain
 
   LINK_LIBS
-  LLVMAsmPrinter
   LLVMAsmParser
+  LLVMAsmPrinter
   LLVMBitReader
   LLVMCodeGen
   LLVMCore
   LLVMExecutionEngine
   LLVMMCJIT
   LLVMObject
+  LLVMObjectYAML
   LLVMOrcJIT
   LLVMRuntimeDyld
   LLVMSupport
