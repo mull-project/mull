@@ -62,11 +62,22 @@ RemoveVoidFunctionMutationOperator::getMutationPoints(const Context &context,
 bool RemoveVoidFunctionMutationOperator::canBeApplied(Value &V) {
 
   if (CallInst *callInst = dyn_cast<CallInst>(&V)) {
-    Function *calledFunction = callInst->getCalledFunction();
+    if (Function *calledFunction = callInst->getCalledFunction()) {
+      if (calledFunction->getName().startswith("llvm.dbg.declare")) {
+        return false;
+      }
 
-    if (calledFunction->getReturnType()->getTypeID() == Type::VoidTyID) {
-      return true;
+      if (calledFunction->getName().endswith("D1Ev") || calledFunction->getName().endswith("D2Ev") ||
+          calledFunction->getName().contains("C1E") || calledFunction->getName().contains("C2E")) {
+        return false;
+      }
+
+      if (calledFunction->getReturnType()->getTypeID() == Type::VoidTyID) {
+        return true;
+      }
     }
+
+
   }
 
   return false;
