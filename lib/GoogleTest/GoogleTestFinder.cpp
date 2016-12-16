@@ -281,12 +281,12 @@ std::vector<Testee> GoogleTestFinder::findTestees(Test *Test,
 
   Module *testBodyModule = googleTest->GetTestBodyFunction()->getParent();
 
-  traversees.push(std::make_pair(googleTest->GetTestBodyFunction(), 0));
+  traversees.push(Testee(googleTest->GetTestBodyFunction(), nullptr, 0));
 
   while (true) {
     const Testee traversee = traversees.front();
-    Function *traverseeFunction = traversee.first;
-    const int mutationDistance = traversee.second;
+    Function *traverseeFunction = traversee.getFunction();
+    const int mutationDistance = traversee.getDistance();
 
     /// If the function we are processing is in the same translation unit
     /// as the test itself, then we are not looking for mutation points
@@ -377,7 +377,7 @@ std::vector<Testee> GoogleTestFinder::findTestees(Test *Test,
           /// * Here is a good overview of what's going on:
           /// http://stackoverflow.com/a/6921467/829116
           ///
-          traversees.push(std::make_pair(definedFunction, mutationDistance + 1));
+          traversees.push(Testee(definedFunction, nullptr, mutationDistance + 1));
         }
       }
 

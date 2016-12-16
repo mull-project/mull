@@ -70,7 +70,7 @@ TEST(MutationEngine, SimpleTest_AddOperator_applyMutation) {
 
   ASSERT_EQ(1U, Testees.size());
 
-  Function *Testee = Testees.begin()->first;
+  Function *Testee = Testees.begin()->getFunction();
   ASSERT_FALSE(Testee->empty());
 
   std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
@@ -120,7 +120,7 @@ TEST(MutationEngine, SimpleTest_NegateConditionOperator_applyMutation) {
 
   ASSERT_EQ(1U, Testees.size());
 
-  Function *Testee = Testees.begin()->first;
+  Function *Testee = Testees.begin()->getFunction();
   ASSERT_FALSE(Testee->empty());
 
   std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);

@@ -61,7 +61,7 @@ TEST(SimpleTestFinder, FindTestee) {
 
   ASSERT_EQ(1U, Testees.size());
 
-  Function *Testee = (Testees.begin())->first;
+  Function *Testee = (Testees.begin())->getFunction();
   ASSERT_FALSE(Testee->empty());
 }
 
@@ -89,7 +89,7 @@ TEST(SimpleTestFinder, FindMutationPoints_AddMutationOperator) {
 
   ASSERT_EQ(1U, Testees.size());
 
-  Function *Testee = (Testees.begin())->first;
+  Function *Testee = (Testees.begin())->getFunction();
   ASSERT_FALSE(Testee->empty());
 
 
@@ -132,7 +132,7 @@ TEST(SimpleTestFinder, FindMutationPoints_NegateConditionMutationOperator) {
 
   ASSERT_EQ(1U, Testees.size());
 
-  Function *Testee = (Testees.begin())->first;
+  Function *Testee = (Testees.begin())->getFunction();
   ASSERT_FALSE(Testee->empty());
 
   std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
@@ -174,7 +174,7 @@ TEST(SimpleTestFinder, FindMutationPoints_RemoteVoidFunctionMutationOperator) {
 
   ASSERT_EQ(1U, Testees.size());
 
-  Function *Testee = (Testees.begin())->first;
+  Function *Testee = (Testees.begin())->getFunction();
   ASSERT_FALSE(Testee->empty());
 
   std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);

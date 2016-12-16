@@ -71,7 +71,7 @@ std::vector<Testee> SimpleTestFinder::findTestees(Test *Test,
                   << "SimpleTestFinder::findTestees - found function "
                   << Fn.getName() << '\n';
 
-              testees.push_back(std::make_pair(&Fn, 0));
+              testees.push_back(Testee(&Fn, nullptr, 0));
             }
           }
         }

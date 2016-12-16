@@ -2,6 +2,7 @@
 
 #include "MutationPoint.h"
 #include "Test.h"
+#include "Testee.h"
 
 namespace llvm {
 
@@ -13,8 +14,6 @@ namespace Mutang {
 
 class Context;
 class MutationOperator;
-
-typedef std::pair<llvm::Function *, int> Testee;
 
 class TestFinder {
 public:
