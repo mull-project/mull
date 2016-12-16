@@ -68,6 +68,7 @@ bool RemoveVoidFunctionMutationOperator::canBeApplied(Value &V) {
         return false;
       }
 
+      /// TODO: This might also filter out important code. Review this later.
       if (calledFunction->getName().endswith("D1Ev") || calledFunction->getName().endswith("D2Ev") ||
           calledFunction->getName().contains("C1E") || calledFunction->getName().contains("C2E")) {
         return false;
