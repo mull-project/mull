@@ -63,7 +63,7 @@ TEST(GoogleTestFinder, DISABLED_FindTestee) {
 
   ASSERT_EQ(1U, Testees.size());
 
-  Function *Testee = Testees.begin()->getFunction();
+  Function *Testee = Testees.begin()->getTesteeFunction();
   ASSERT_FALSE(Testee->empty());
 }
 
@@ -89,7 +89,7 @@ TEST(GoogleTestFinder, DISABLED_FindMutationPoints) {
 
   ASSERT_EQ(1U, Testees.size());
 
-  Function *Testee = Testees.begin()->getFunction();
+  Function *Testee = Testees.begin()->getTesteeFunction();
   ASSERT_FALSE(Testee->empty());
 
   AddMutationOperator MutOp;

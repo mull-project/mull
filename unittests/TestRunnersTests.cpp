@@ -84,7 +84,7 @@ TEST(SimpleTestRunner, runTest) {
 
   ArrayRef<Testee> Testees = testFinder.findTestees(Test.get(), Ctx, 4);
   ASSERT_NE(0U, Testees.size());
-  Function *Testee = Testees.begin()->getFunction();
+  Function *Testee = Testees.begin()->getTesteeFunction();
 
   AddMutationOperator MutOp;
   std::vector<MutationOperator *> MutOps({&MutOp});
@@ -168,7 +168,7 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
 
   ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx, 4);
   ASSERT_NE(0U, Testees.size());
-  Function *Testee = Testees.begin()->getFunction();
+  Function *Testee = Testees.begin()->getTesteeFunction();
 
   AddMutationOperator MutOp;
   std::vector<MutationOperator *> MutOps({&MutOp});

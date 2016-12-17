@@ -285,7 +285,7 @@ std::vector<Testee> GoogleTestFinder::findTestees(Test *Test,
 
   while (true) {
     const Testee traversee = traversees.front();
-    Function *traverseeFunction = traversee.getFunction();
+    Function *traverseeFunction = traversee.getTesteeFunction();
     const int mutationDistance = traversee.getDistance();
 
     /// If the function we are processing is in the same translation unit
@@ -377,7 +377,9 @@ std::vector<Testee> GoogleTestFinder::findTestees(Test *Test,
           /// * Here is a good overview of what's going on:
           /// http://stackoverflow.com/a/6921467/829116
           ///
-          traversees.push(Testee(definedFunction, nullptr, mutationDistance + 1));
+          traversees.push(Testee(definedFunction,
+                                 traverseeFunction,
+                                 mutationDistance + 1));
         }
       }
 

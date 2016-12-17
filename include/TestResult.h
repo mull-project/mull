@@ -2,6 +2,7 @@
 
 #include "MutationPoint.h"
 #include "Test.h"
+#include "Testee.h"
 
 #include <vector>
 
@@ -34,12 +35,14 @@ struct ExecutionResult {
 class MutationResult {
   ExecutionResult Result;
   MutationPoint *MutPoint;
-  int mutationDistance;
+  Testee testee;
+
 public:
-  MutationResult(ExecutionResult R, Mutang::MutationPoint *MP, int distance);
+  MutationResult(ExecutionResult R, Mutang::MutationPoint *MP, Testee testee);
+
   ExecutionResult getExecutionResult()  { return Result; }
   MutationPoint* getMutationPoint()     { return MutPoint; }
-  int getMutationDistance()             { return mutationDistance; }
+  int getMutationDistance()             { return testee.getDistance(); }
 };
 
 class TestResult {

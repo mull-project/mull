@@ -3,16 +3,14 @@
 
 using namespace Mutang;
 
-MutationResult::MutationResult(ExecutionResult R, MutationPoint *MP, int distance) :
-  Result(R), MutPoint(MP), mutationDistance(distance) {
-
-}
+MutationResult::MutationResult(ExecutionResult R,
+                               MutationPoint *MP,
+                               Testee testee) :
+  Result(R), MutPoint(MP), testee(testee) {}
 
 TestResult::TestResult(ExecutionResult OriginalResult,
                        std::unique_ptr<Test> T) :
-  OriginalTestResult(OriginalResult), TestPtr(std::move(T)) {
-
-}
+  OriginalTestResult(OriginalResult), TestPtr(std::move(T)) {}
 
 void TestResult::addMutantResult(std::unique_ptr<MutationResult> Res) {
   MutationResults.push_back(std::move(Res));

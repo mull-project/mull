@@ -1,29 +1,32 @@
+#pragma once
+
 #include "llvm/IR/Function.h"
 
 namespace Mutang {
 
-  class Testee {
-    llvm::Function *function;
-    llvm::Function *parentFunction;
-    int distance;
+class Testee {
+  llvm::Function *testeeFunction;
+  llvm::Function *callerFunction;
+  int distance;
 
-  public:
-    Testee(llvm::Function *function,
-           llvm::Function *parentFunction,
-           int distance) : function(function),
-                           parentFunction(parentFunction),
-                           distance(distance) {}
+public:
+  Testee(llvm::Function *testeeFunction,
+         llvm::Function *callerFunction,
+         int distance) : testeeFunction(testeeFunction),
+                         callerFunction(callerFunction),
+                         distance(distance) {}
 
-    llvm::Function *getFunction() const {
-      return function;
-    }
+  llvm::Function *getTesteeFunction() const {
+    return testeeFunction;
+  }
 
-    llvm::Function *getParentFunction() const {
-      return parentFunction;
-    }
+  llvm::Function *getCallerFunction() const {
+    return callerFunction;
+  }
 
-    int getDistance() const {
-      return distance;
-    }
-  };
+  int getDistance() const {
+    return distance;
+  }
+};
+
 }

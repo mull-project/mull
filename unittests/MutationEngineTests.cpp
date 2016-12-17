@@ -70,7 +70,7 @@ TEST(MutationEngine, SimpleTest_AddOperator_applyMutation) {
 
   ASSERT_EQ(1U, Testees.size());
 
-  Function *Testee = Testees.begin()->getFunction();
+  Function *Testee = Testees.begin()->getTesteeFunction();
   ASSERT_FALSE(Testee->empty());
 
   std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
@@ -89,7 +89,7 @@ TEST(MutationEngine, SimpleTest_AddOperator_applyMutation) {
   Instruction *OldInstruction = cast<BinaryOperator>(MP->getOriginalValue());
   ASSERT_EQ(nullptr, OldInstruction->getParent());
 
-//  Function *MutatedFunction = Testee;//ModuleWithTestees->getFunction(Testee->getName());
+//  Function *MutatedFunction = Testee;//ModuleWithTestees->getTesteeFunction(Testee->getName());
 
   // After mutation we should have new instruction with the same name as an original instruction
   Instruction *NewInstruction = getFirstNamedInstruction(*Testee, ReplacedInstructionName);
@@ -120,7 +120,7 @@ TEST(MutationEngine, SimpleTest_NegateConditionOperator_applyMutation) {
 
   ASSERT_EQ(1U, Testees.size());
 
-  Function *Testee = Testees.begin()->getFunction();
+  Function *Testee = Testees.begin()->getTesteeFunction();
   ASSERT_FALSE(Testee->empty());
 
   std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
