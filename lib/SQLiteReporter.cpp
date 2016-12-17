@@ -18,6 +18,8 @@
 using namespace Mutang;
 using namespace llvm;
 
+static void createTables(sqlite3 *database);
+
 static void assume(bool condition, const char *assumption) {
   if (condition) {
     return;
@@ -40,27 +42,6 @@ void sqlite_exec(sqlite3 *database, const char *sql) {
     exit(18);
   }
 }
-
-void createTables(sqlite3 *database) {
-  const char *executionResult =
-    "CREATE TABLE execution_result (status INT, duration INT, stdout TEXT, stderr TEXT);";
-  const char *test =
-    "CREATE TABLE test (test_name TEXT, execution_result_id INT);";
-  const char *mutationPoint =
-    "CREATE TABLE mutation_point (mutation_operator TEXT, module_name TEXT, function_name TEXT, function_index INT, basic_block_index INT, instruction_index INT, filename TEXT, line_number INT, column_number INT, unique_id TEXT UNIQUE);";
-  const char *mutationResult =
-    "CREATE TABLE mutation_result (execution_result_id INT, test_id TEXT, mutation_point_id TEXT, mutation_distance INT);";
-
-  const char *mutationPointDebug =
-    "CREATE TABLE mutation_point_debug (filename TEXT, line_number INT, column_number INT, function TEXT, basic_block TEXT, instruction INT, unique_id TEXT UNIQUE);";
-
-  sqlite_exec(database, executionResult);
-  sqlite_exec(database, test);
-  sqlite_exec(database, mutationPoint);
-  sqlite_exec(database, mutationResult);
-  sqlite_exec(database, mutationPointDebug);
-}
-
 
 SQLiteReporter::SQLiteReporter() {
   char wd[MAXPATHLEN] = { 0 };
@@ -216,3 +197,51 @@ void Mutang::SQLiteReporter::reportResults(const std::vector<std::unique_ptr<Tes
   sqlite3_close(database);
 }
 
+#pragma mark - Database Schema
+
+static const char *CreateTables = R"CreateTables(
+CREATE TABLE execution_result (
+  status INT,
+  duration INT,
+  stdout TEXT,
+  stderr TEXT
+);
+
+CREATE TABLE test (
+  test_name TEXT,
+  execution_result_id INT
+);
+
+CREATE TABLE mutation_point (
+  mutation_operator TEXT,
+  module_name TEXT,
+  function_name TEXT,
+  function_index INT,
+  basic_block_index INT,
+  instruction_index INT,
+  filename TEXT,
+  line_number INT,
+  column_number INT,
+  unique_id TEXT UNIQUE
+);
+
+CREATE TABLE mutation_result (
+  execution_result_id INT,
+  test_id TEXT,
+  mutation_point_id TEXT,
+  mutation_distance INT
+);
+
+CREATE TABLE mutation_point_debug (
+  filename TEXT,
+  line_number INT,
+  column_number INT,
+  function TEXT,
+  basic_block TEXT,
+  instruction INT,
+  unique_id TEXT UNIQUE);
+)CreateTables";
+
+static void createTables(sqlite3 *database) {
+  sqlite_exec(database, CreateTables);
+}
