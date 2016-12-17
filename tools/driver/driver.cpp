@@ -17,6 +17,7 @@
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/TargetSelect.h"
+#include "llvm/Support/CommandLine.h"
 #include "llvm/Support/YAMLParser.h"
 
 #include <ctime>
@@ -25,9 +26,45 @@
 using namespace Mutang;
 using namespace llvm;
 
-int debug_main(int argc, char *argv[]) {
+cl::OptionCategory MullOptionCategory("Mull");
+
+// Cannot use "debug" as it's already used by LLVM itself.
+static cl::opt<bool> Debug(
+    "mull-debug",
+    llvm::cl::desc("Run in debug mode."),
+    llvm::cl::init(false),
+    llvm::cl::cat(MullOptionCategory)
+);
+
+static cl::opt<bool> PrintTestNames(
+    "print-test-names",
+    llvm::cl::desc("Print test names."),
+    llvm::cl::init(false),
+    llvm::cl::cat(MullOptionCategory)
+);
+
+static cl::opt<bool> PrintTesteeNames(
+    "print-testee-names",
+    llvm::cl::desc("Print testee names."),
+    llvm::cl::init(false),
+    llvm::cl::cat(MullOptionCategory)
+);
+
+static cl::opt<bool> PrintMutationPoints(
+    "print-mutation-points",
+    llvm::cl::desc("Print mutation points."),
+    llvm::cl::init(false),
+    llvm::cl::cat(MullOptionCategory)
+);
+
+static cl::opt<std::string> ConfigFile(
+    llvm::cl::desc("<config file>"),
+    llvm::cl::Positional
+);
+
+int debug_main() {
   ConfigParser Parser;
-  auto config = Parser.loadConfig(argv[argc - 1]);
+  auto config = Parser.loadConfig(ConfigFile.c_str());
 
   LLVMContext Ctx;
   ModuleLoader Loader(Ctx);
@@ -38,11 +75,11 @@ int debug_main(int argc, char *argv[]) {
 
   Driver D(config, Loader, TestFinder, Runner, toolchain);
 
-  if (strcmp(argv[2], "-print-test-names") == 0) {
+  if (PrintTestNames) {
     D.debug_PrintTestNames();
-  } else if (strcmp(argv[2], "-print-testee-names") == 0) {
+  } else if (PrintTesteeNames) {
     D.debug_PrintTesteeNames();
-  } else if (strcmp(argv[2], "-print-mutation-points") == 0) {
+  } else if (PrintMutationPoints) {
     D.debug_PrintMutationPoints();
   }
 
@@ -50,12 +87,16 @@ int debug_main(int argc, char *argv[]) {
 }
 
 int main(int argc, char *argv[]) {
-  if (strcmp(argv[1], "-debug") == 0) {
-    return debug_main(argc, argv);
+  // Parse command line options
+  cl::HideUnrelatedOptions(MullOptionCategory);
+  cl::ParseCommandLineOptions(argc, argv, "Mull");
+
+  if (Debug) {
+    return debug_main();
   }
 
   ConfigParser Parser;
-  auto config = Parser.loadConfig(argv[1]);
+  auto config = Parser.loadConfig(ConfigFile.c_str());
 
   InitializeNativeTarget();
   InitializeNativeTargetAsmPrinter();
