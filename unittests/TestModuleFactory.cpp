@@ -62,6 +62,10 @@ static std::unique_ptr<Module> parseIR(const char *IR) {
   return M;
 }
 
+#pragma mark - Mutation Operators
+
+#pragma mark - Negate Condition
+
 std::unique_ptr<Module> TestModuleFactory::create_SimpleTest_NegateCondition_Tester_Module() {
   std::string contents = createFixture("fixture_simple_test_negate_condition_operator_tester.ll");
 
@@ -81,6 +85,30 @@ std::unique_ptr<Module> TestModuleFactory::create_SimpleTest_NegateCondition_Tes
 
   return module;
 }
+
+#pragma mark - Remove Void Function
+
+std::unique_ptr<Module> TestModuleFactory::create_SimpleTest_RemoveVoidFunction_Tester_Module() {
+  std::string contents = createFixture("fixture_simple_test_remove_void_function_operator_tester.ll");
+
+  auto module = parseIR(contents.c_str());
+
+  module->setModuleIdentifier("fixture_simple_test_remove_void_function_operator_tester.ll");
+
+  return module;
+}
+
+std::unique_ptr<Module> TestModuleFactory::create_SimpleTest_RemoveVoidFunction_Testee_Module() {
+  std::string contents = createFixture("fixture_simple_test_remove_void_function_operator_testee.ll");
+
+  auto module = parseIR(contents.c_str());
+
+  module->setModuleIdentifier("fixture_simple_test_negate_condition_operator_testee.ll");
+
+  return module;
+}
+
+#pragma mark -
 
 std::string TestModuleFactory::testerModulePath_IR() {
   return fixturePath("fixture_simple_test_tester_module.ll");

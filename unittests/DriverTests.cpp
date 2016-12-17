@@ -4,6 +4,7 @@
 #include "ModuleLoader.h"
 #include "MutationOperators/AddMutationOperator.h"
 #include "MutationOperators/NegateConditionMutationOperator.h"
+#include "MutationOperators/RemoveVoidFunctionMutationOperator.h"
 #include "SimpleTest/SimpleTestFinder.h"
 #include "SimpleTest/SimpleTestRunner.h"
 #include "TestModuleFactory.h"
@@ -53,6 +54,16 @@ public:
     else if (path == "simple_test/negate_condition/testee") {
       auto module = TestModuleFactory.create_SimpleTest_NegateCondition_Testee_Module();
       return make_unique<MutangModule>(std::move(module), "7890");
+    }
+
+    else if (path == "simple_test/remove_void_function/tester") {
+      auto module = TestModuleFactory.create_SimpleTest_RemoveVoidFunction_Tester_Module();
+      return make_unique<MutangModule>(std::move(module), "abcd");
+    }
+
+    else if (path == "simple_test/remove_void_function/testee") {
+      auto module = TestModuleFactory.create_SimpleTest_RemoveVoidFunction_Testee_Module();
+      return make_unique<MutangModule>(std::move(module), "efgh");
     }
 
     return make_unique<MutangModule>(nullptr, "");
@@ -152,6 +163,51 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
   auto FirstResult = Results.begin()->get();
   ASSERT_EQ(ExecutionStatus::Passed, FirstResult->getOriginalTestResult().Status);
   ASSERT_EQ("test_max", FirstResult->getTestName());
+
+  auto &Mutants = FirstResult->getMutationResults();
+  ASSERT_EQ(1u, Mutants.size());
+
+  auto FirstMutant = Mutants.begin()->get();
+  ASSERT_EQ(ExecutionStatus::Failed, FirstMutant->getExecutionResult().Status);
+
+  ASSERT_NE(nullptr, FirstMutant->getMutationPoint());
+}
+
+TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
+  std::vector<std::string> ModulePaths({
+    "simple_test/remove_void_function/tester",
+    "simple_test/remove_void_function/testee"
+  });
+
+  bool doFork = false;
+  bool dryRun = false;
+  bool useCache = false;
+  int distance = 10;
+  std::string cacheDirectory = "/tmp/mutang_cache";
+  Config config(ModulePaths, doFork, dryRun, useCache, MutangDefaultTimeout,
+                distance, cacheDirectory);
+
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
+
+  SimpleTestFinder testFinder(std::move(mutationOperators));
+
+  FakeModuleLoader loader;
+  Toolchain toolchain(config);
+  SimpleTestRunner runner(toolchain.targetMachine());
+
+  Driver Driver(config, loader, testFinder, runner, toolchain);
+
+  /// Given the modules we use here we expect:
+  ///
+  /// 1 original test, which has Passed state
+  /// 1 mutant test, which has Failed state
+  auto Results = Driver.Run();
+  ASSERT_EQ(1u, Results.size());
+
+  auto FirstResult = Results.begin()->get();
+  ASSERT_EQ(ExecutionStatus::Passed, FirstResult->getOriginalTestResult().Status);
+  ASSERT_EQ("test_func_with_a_void_function_inside", FirstResult->getTestName());
 
   auto &Mutants = FirstResult->getMutationResults();
   ASSERT_EQ(1u, Mutants.size());
