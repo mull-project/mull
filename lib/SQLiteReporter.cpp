@@ -88,6 +88,8 @@ void Mutang::SQLiteReporter::reportResults(const std::vector<std::unique_ptr<Tes
     sqlite_exec(database, insertTestSQL.c_str());
 
     for (auto &mutation : result->getMutationResults()) {
+      //Function *testee = mutation->getTestee().g
+
       /// Mutation Point
       auto mutationPoint = mutation->getMutationPoint();
       Instruction *instruction = dyn_cast<Instruction>(mutationPoint->getOriginalValue());

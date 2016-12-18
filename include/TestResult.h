@@ -43,6 +43,7 @@ public:
   ExecutionResult getExecutionResult()  { return Result; }
   MutationPoint* getMutationPoint()     { return MutPoint; }
   int getMutationDistance()             { return testee.getDistance(); }
+  Testee getTestee()                    { return testee; }
 };
 
 class TestResult {

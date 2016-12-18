@@ -4,6 +4,7 @@
 #include "Context.h"
 #include "Logger.h"
 #include "ModuleLoader.h"
+#include "Result.h"
 #include "TestResult.h"
 
 #include "llvm/IR/Constants.h"
@@ -48,7 +49,7 @@ using namespace std::chrono;
 /// Each result contains result of execution of an original test and
 /// all the results of each mutant within corresponding MutationPoint
 
-std::vector<std::unique_ptr<TestResult>> Driver::Run() {
+std::unique_ptr<Result> Driver::Run() {
   std::vector<std::unique_ptr<TestResult>> Results;
 
   /// Assumption: all modules will be used during the execution
@@ -146,7 +147,9 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 
   //  Logger::info() << "Driver::Run::end\n";
 
-  return Results;
+  std::unique_ptr<Result> result = make_unique<Result>(std::move(Results));
+
+  return result;
 }
 
 std::vector<llvm::object::ObjectFile *> Driver::AllButOne(llvm::Module *One) {

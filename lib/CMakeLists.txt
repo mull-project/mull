@@ -17,6 +17,7 @@ llvm_add_library(mutang
   MutangModule.cpp
   MutationEngine.cpp
   MutationPoint.cpp
+  Result.cpp
   TestResult.cpp
   TestRunner.cpp
   Testee.cpp

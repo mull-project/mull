@@ -381,7 +381,7 @@ GoogleTestFinder::findTestees(Test *Test,
           /// http://stackoverflow.com/a/6921467/829116
           ///
           traversees.push(new Testee(definedFunction,
-                                     traverseeFunction,
+                                     traversee,
                                      mutationDistance + 1));
         }
       }

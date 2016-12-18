@@ -5,6 +5,7 @@
 #include "MutationOperators/AddMutationOperator.h"
 #include "MutationOperators/NegateConditionMutationOperator.h"
 #include "MutationOperators/RemoveVoidFunctionMutationOperator.h"
+#include "Result.h"
 #include "SimpleTest/SimpleTestFinder.h"
 #include "SimpleTest/SimpleTestRunner.h"
 #include "TestModuleFactory.h"
@@ -105,10 +106,10 @@ TEST(Driver, SimpleTest_AddMutationOperator) {
   ///
   /// 1 original test, which has Passed state
   /// 1 mutant test, which has Failed state
-  auto Results = Driver.Run();
-  ASSERT_EQ(1u, Results.size());
+  auto result = Driver.Run();
+  ASSERT_EQ(1u, result->getTestResults().size());
 
-  auto FirstResult = Results.begin()->get();
+  auto FirstResult = result->getTestResults().begin()->get();
   ASSERT_EQ(ExecutionStatus::Passed, FirstResult->getOriginalTestResult().Status);
   ASSERT_EQ("test_count_letters", FirstResult->getTestName());
 
@@ -157,10 +158,10 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
   ///
   /// 1 original test, which has Passed state
   /// 1 mutant test, which has Failed state
-  auto Results = Driver.Run();
-  ASSERT_EQ(1u, Results.size());
+  auto result = Driver.Run();
+  ASSERT_EQ(1u, result->getTestResults().size());
 
-  auto FirstResult = Results.begin()->get();
+  auto FirstResult = result->getTestResults().begin()->get();
   ASSERT_EQ(ExecutionStatus::Passed, FirstResult->getOriginalTestResult().Status);
   ASSERT_EQ("test_max", FirstResult->getTestName());
 
@@ -202,10 +203,10 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
   ///
   /// 1 original test, which has Passed state
   /// 1 mutant test, which has Failed state
-  auto Results = Driver.Run();
-  ASSERT_EQ(1u, Results.size());
+  auto result = Driver.Run();
+  ASSERT_EQ(1u, result->getTestResults().size());
 
-  auto FirstResult = Results.begin()->get();
+  auto FirstResult = result->getTestResults().begin()->get();
   ASSERT_EQ(ExecutionStatus::Passed, FirstResult->getOriginalTestResult().Status);
   ASSERT_EQ("test_func_with_a_void_function_inside", FirstResult->getTestName());
 
