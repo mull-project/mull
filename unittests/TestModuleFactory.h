@@ -19,6 +19,9 @@ public:
   std::unique_ptr<Module> create_SimpleTest_RemoveVoidFunction_Tester_Module();
   std::unique_ptr<Module> create_SimpleTest_RemoveVoidFunction_Testee_Module();
 
+  std::unique_ptr<Module> create_SimpleTest_testeePathCalculation_testee();
+  std::unique_ptr<Module> create_SimpleTest_testeePathCalculation_tester();
+
   std::unique_ptr<Module> createLibCTesterModule();
   std::unique_ptr<Module> createLibCTesteeModule();
 

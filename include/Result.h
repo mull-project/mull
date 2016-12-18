@@ -1,3 +1,4 @@
+#pragma once
 
 #include "Testee.h"
 #include "TestResult.h"
