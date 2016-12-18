@@ -19,10 +19,6 @@ using namespace llvm;
 static TestModuleFactory TestModuleFactory;
 
 TEST(GoogleTestFinder, FindTest) {
-
-#warning WIP
-  return;
-
   auto ModuleWithTests       = TestModuleFactory.createGoogleTestTesterModule();
   auto mutangModuleWithTests = make_unique<MutangModule>(std::move(ModuleWithTests), "");
 

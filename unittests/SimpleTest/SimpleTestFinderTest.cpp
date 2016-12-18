@@ -172,12 +172,15 @@ TEST(SimpleTestFinder, FindMutationPoints_RemoteVoidFunctionMutationOperator) {
 
   std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
 
-  ASSERT_EQ(1U, Testees.size());
+  ASSERT_EQ(2U, Testees.size());
 
-  Function *Testee = Testees[0]->getTesteeFunction();
-  ASSERT_FALSE(Testee->empty());
+  Function *Testee1 = Testees[0]->getTesteeFunction(); // testee()
+  Function *Testee2 = Testees[1]->getTesteeFunction(); // void_function()
 
-  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
+  ASSERT_FALSE(Testee1->empty());
+  ASSERT_FALSE(Testee2->empty());
+
+  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee1);
   ASSERT_EQ(1U, MutationPoints.size());
 
   MutationPoint *MP = (*(MutationPoints.begin()));
