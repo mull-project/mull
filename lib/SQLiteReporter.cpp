@@ -1,6 +1,7 @@
 #include "SQLiteReporter.h"
 
 #include "Logger.h"
+#include "Result.h"
 #include "TestResult.h"
 
 #include "MutationOperators/MutationOperator.h"
@@ -61,7 +62,7 @@ std::string Mutang::SQLiteReporter::getDatabasePath() {
   return databasePath;
 }
 
-void Mutang::SQLiteReporter::reportResults(const std::vector<std::unique_ptr<TestResult>> &results) {
+void Mutang::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result) {
   std::string databasePath = getDatabasePath();
   outs() << "Results can be found at '" << databasePath << "'\n";
 
@@ -70,7 +71,7 @@ void Mutang::SQLiteReporter::reportResults(const std::vector<std::unique_ptr<Tes
 
   createTables(database);
 
-  for (auto &result : results) {
+  for (auto &result : result->getTestResults()) {
     std::string testID = result->getTestName();
 
     ExecutionResult testResult = result->getOriginalTestResult();
