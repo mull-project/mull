@@ -25,6 +25,7 @@
 #include <algorithm>
 #include <chrono>
 #include <fstream>
+#include <vector>
 
 using namespace llvm;
 using namespace llvm::object;
@@ -51,6 +52,8 @@ using namespace std::chrono;
 
 std::unique_ptr<Result> Driver::Run() {
   std::vector<std::unique_ptr<TestResult>> Results;
+  std::vector<std::unique_ptr<Testee>> allTestees;
+  allTestees.reserve(100000);
 
   /// Assumption: all modules will be used during the execution
   /// Therefore we load them into memory and compile immediately
@@ -142,12 +145,16 @@ std::unique_ptr<Result> Driver::Run() {
       }
     }
 
+    allTestees.insert(allTestees.end(),std::make_move_iterator(testees.begin()),
+                      std::make_move_iterator(testees.end()));
+
     Results.push_back(std::move(Result));
   }
 
   //  Logger::info() << "Driver::Run::end\n";
 
-  std::unique_ptr<Result> result = make_unique<Result>(std::move(Results));
+  std::unique_ptr<Result> result = make_unique<Result>(std::move(Results),
+                                                       std::move(allTestees));
 
   return result;
 }

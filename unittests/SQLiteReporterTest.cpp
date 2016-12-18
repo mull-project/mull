@@ -42,7 +42,11 @@ TEST(SQLiteReporter, integrationTest) {
   std::vector<std::unique_ptr<TestResult>> results;
   results.push_back(std::move(testResult));
 
-  std::unique_ptr<Result> result = make_unique<Result>(std::move(results));
+  /// In this test we are not interested in testees.
+  std::vector<std::unique_ptr<Testee>> testees;
+
+  std::unique_ptr<Result> result = make_unique<Result>(std::move(results),
+                                                       std::move(testees));
   reporter.reportResults(result);
 
   std::string databasePath = reporter.getDatabasePath();

@@ -1,14 +1,18 @@
 
+#include "Testee.h"
 #include "TestResult.h"
 #include <vector>
 
 namespace Mutang {
-
   class Result {
     std::vector<std::unique_ptr<TestResult>> testResults;
+    std::vector<std::unique_ptr<Testee>> allTestees;
 
   public:
-    Result(std::vector<std::unique_ptr<TestResult>> testResults) : testResults(std::move(testResults)) {}
+    Result(std::vector<std::unique_ptr<TestResult>> testResults,
+           std::vector<std::unique_ptr<Testee>> allTestees) :
+      testResults(std::move(testResults)),
+      allTestees(std::move(allTestees)) {}
 
     std::vector<std::unique_ptr<TestResult>> const& getTestResults() {
       return testResults;
