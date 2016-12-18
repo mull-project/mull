@@ -31,7 +31,9 @@ public:
 
   // Finds all methods that start with "test_"
   std::vector<std::unique_ptr<Test>> findTests(Context &Ctx) override;
-  std::vector<Testee> findTestees(Test *Test, Context &Ctx, int distance) override;
+  std::vector<std::unique_ptr<Testee>> findTestees(Test *Test,
+                                                   Context &Ctx,
+                                                   int distance) override;
 
   std::vector<MutationPoint *> findMutationPoints(const Context &context,
                                                   llvm::Function &F) override;

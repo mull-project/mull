@@ -59,11 +59,11 @@ TEST(GoogleTestFinder, DISABLED_FindTestee) {
 
   auto &Test = *(Tests.begin());
 
-  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx, 4);
+  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
 
   ASSERT_EQ(1U, Testees.size());
 
-  Function *Testee = Testees.begin()->getTesteeFunction();
+  Function *Testee = Testees[0]->getTesteeFunction();
   ASSERT_FALSE(Testee->empty());
 }
 
@@ -85,11 +85,11 @@ TEST(GoogleTestFinder, DISABLED_FindMutationPoints) {
 
   auto &Test = *Tests.begin();
 
-  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx, 4);
+  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
 
   ASSERT_EQ(1U, Testees.size());
 
-  Function *Testee = Testees.begin()->getTesteeFunction();
+  Function *Testee = Testees[0]->getTesteeFunction();
   ASSERT_FALSE(Testee->empty());
 
   AddMutationOperator MutOp;

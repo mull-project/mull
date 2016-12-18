@@ -93,8 +93,8 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 
     // Logger::info() << "\tagainst " << testees.size() << " testees\n";
 
-    for (Testee testee : testees) {
-      auto MPoints = Finder.findMutationPoints(Ctx, *(testee.getTesteeFunction()));
+    for (auto &&testee : testees) {
+      auto MPoints = Finder.findMutationPoints(Ctx, *(testee->getTesteeFunction()));
       if (MPoints.size() == 0) {
         continue;
       }
@@ -104,7 +104,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
       // Logger::info() << "\t\tagainst " << MPoints.size() << " mutation
       // points\n";
 
-      auto ObjectFiles = AllButOne(testee.getTesteeFunction()->getParent());
+      auto ObjectFiles = AllButOne(testee->getTesteeFunction()->getParent());
       for (auto mutationPoint : MPoints) {
         //        Logger::info() << "\t\t\tDriver::Run::run mutant:" << "\t";
         //        mutationPoint->getOriginalValue()->print(Logger::info());
@@ -136,7 +136,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
           assert(result.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
         }
 
-        auto MutResult = make_unique<MutationResult>(result, mutationPoint, testee);
+        auto MutResult = make_unique<MutationResult>(result, mutationPoint, *testee);
         Result->addMutantResult(std::move(MutResult));
       }
     }

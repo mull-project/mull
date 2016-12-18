@@ -57,11 +57,11 @@ TEST(SimpleTestFinder, FindTestee) {
 
   auto &Test = *(Tests.begin());
 
-  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx, 4);
+  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
 
   ASSERT_EQ(1U, Testees.size());
 
-  Function *Testee = (Testees.begin())->getTesteeFunction();
+  Function *Testee = Testees[0]->getTesteeFunction();
   ASSERT_FALSE(Testee->empty());
 }
 
@@ -85,11 +85,11 @@ TEST(SimpleTestFinder, FindMutationPoints_AddMutationOperator) {
 
   auto &Test = *Tests.begin();
 
-  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx, 4);
+  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
 
   ASSERT_EQ(1U, Testees.size());
 
-  Function *Testee = (Testees.begin())->getTesteeFunction();
+  Function *Testee = Testees[0]->getTesteeFunction();
   ASSERT_FALSE(Testee->empty());
 
 
@@ -128,11 +128,11 @@ TEST(SimpleTestFinder, FindMutationPoints_NegateConditionMutationOperator) {
 
   auto &Test = *Tests.begin();
 
-  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx, 4);
+  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
 
   ASSERT_EQ(1U, Testees.size());
 
-  Function *Testee = (Testees.begin())->getTesteeFunction();
+  Function *Testee = Testees[0]->getTesteeFunction();
   ASSERT_FALSE(Testee->empty());
 
   std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
@@ -170,11 +170,11 @@ TEST(SimpleTestFinder, FindMutationPoints_RemoteVoidFunctionMutationOperator) {
 
   auto &Test = *Tests.begin();
 
-  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx, 4);
+  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
 
   ASSERT_EQ(1U, Testees.size());
 
-  Function *Testee = (Testees.begin())->getTesteeFunction();
+  Function *Testee = Testees[0]->getTesteeFunction();
   ASSERT_FALSE(Testee->empty());
 
   std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);

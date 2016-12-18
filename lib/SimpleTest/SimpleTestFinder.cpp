@@ -44,14 +44,15 @@ std::vector<std::unique_ptr<Test>> SimpleTestFinder::findTests(Context &Ctx) {
   return tests;
 }
 
-std::vector<Testee> SimpleTestFinder::findTestees(Test *Test,
-                                                  Context &Ctx,
-                                                  int maxDistance) {
+std::vector<std::unique_ptr<Testee>>
+SimpleTestFinder::findTestees(Test *Test,
+                              Context &Ctx,
+                              int maxDistance) {
   SimpleTest_Test *SimpleTest = dyn_cast<SimpleTest_Test>(Test);
 
   Function &F = *(SimpleTest->GetTestFunction());
 
-  std::vector<Testee> testees;
+  std::vector<std::unique_ptr<Testee>> testees;
 
   for (inst_iterator I = inst_begin(F), E = inst_end(F); I != E; ++I) {
     Instruction *Inst = &*I;
@@ -71,7 +72,7 @@ std::vector<Testee> SimpleTestFinder::findTestees(Test *Test,
                   << "SimpleTestFinder::findTestees - found function "
                   << Fn.getName() << '\n';
 
-              testees.push_back(Testee(&Fn, nullptr, 0));
+              testees.push_back(make_unique<Testee>(&Fn, nullptr, 0));
             }
           }
         }
