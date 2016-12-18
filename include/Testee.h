@@ -6,22 +6,22 @@ namespace Mutang {
 
 class Testee {
   llvm::Function *testeeFunction;
-  Testee *parentTestee;
+  Testee *callerTestee;
   int distance;
 
 public:
   Testee(llvm::Function *testeeFunction,
-         Testee *parentTestee,
+         Testee *callerTestee,
          int distance) : testeeFunction(testeeFunction),
-                         parentTestee(parentTestee),
+                         callerTestee(callerTestee),
                          distance(distance) {}
 
   llvm::Function *getTesteeFunction() const {
     return testeeFunction;
   }
 
-  Testee *getParentTestee() const {
-    return parentTestee;
+  Testee *getCallerTestee() const {
+    return callerTestee;
   }
 
   int getDistance() const {

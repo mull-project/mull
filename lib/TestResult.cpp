@@ -5,7 +5,7 @@ using namespace Mutang;
 
 MutationResult::MutationResult(ExecutionResult R,
                                MutationPoint *MP,
-                               Testee testee) :
+                               Testee *testee) :
   Result(R), MutPoint(MP), testee(testee) {}
 
 TestResult::TestResult(ExecutionResult OriginalResult,

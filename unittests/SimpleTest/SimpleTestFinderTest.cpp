@@ -7,6 +7,7 @@
 
 #include "TestModuleFactory.h"
 #include "Test.h"
+#include "SimpleTest/SimpleTest_Test.h"
 
 #include "llvm/IR/InstrTypes.h"
 #include "llvm/IR/LLVMContext.h"
@@ -195,3 +196,57 @@ TEST(SimpleTestFinder, FindMutationPoints_RemoteVoidFunctionMutationOperator) {
   ASSERT_TRUE(MPA.getBBIndex() == 0);
   ASSERT_TRUE(MPA.getIIndex() == 2);
 }
+
+TEST(SimpleTestFinder, FindTestees_TesteePathMemorization) {
+  auto ModuleWithTests   = TestModuleFactory.create_SimpleTest_testeePathCalculation_tester();
+  auto ModuleWithTestees = TestModuleFactory.create_SimpleTest_testeePathCalculation_testee();
+
+  auto mutangModuleWithTests   = make_unique<MutangModule>(std::move(ModuleWithTests), "");
+  auto mutangModuleWithTestees = make_unique<MutangModule>(std::move(ModuleWithTestees), "");
+
+  Context Ctx;
+  Ctx.addModule(std::move(mutangModuleWithTests));
+  Ctx.addModule(std::move(mutangModuleWithTestees));
+
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+
+  SimpleTestFinder Finder(std::move(mutationOperators));
+  auto Tests = Finder.findTests(Ctx);
+
+  SimpleTest_Test *test = dyn_cast<SimpleTest_Test>((*Tests.begin()).get());
+
+  std::vector<std::unique_ptr<Testee>> testees = Finder.findTestees(test, Ctx, 4);
+
+  ASSERT_EQ(4U, testees.size());
+
+  Testee *testee1 = testees[0].get();
+  Testee *testee2 = testees[1].get();
+  Testee *testee3 = testees[2].get();
+  Testee *testee4 = testees[3].get();
+
+  Function *testeeFunction1 = testee1->getTesteeFunction();
+  Function *testeeFunction2 = testee2->getTesteeFunction();
+  Function *testeeFunction3 = testee3->getTesteeFunction();
+  Function *testeeFunction4 = testee4->getTesteeFunction();
+
+  ASSERT_FALSE(testeeFunction1->empty());
+  ASSERT_FALSE(testeeFunction2->empty());
+  ASSERT_FALSE(testeeFunction3->empty());
+  ASSERT_FALSE(testeeFunction4->empty());
+
+  ASSERT_EQ(testeeFunction1->getName(), "testee1");
+  ASSERT_EQ(testeeFunction2->getName(), "testee2");
+  ASSERT_EQ(testeeFunction3->getName(), "testee3");
+  ASSERT_EQ(testeeFunction4->getName(), "testee4");
+
+  ASSERT_FALSE(testeeFunction1->empty());
+  ASSERT_FALSE(testeeFunction2->empty());
+  ASSERT_FALSE(testeeFunction3->empty());
+  ASSERT_FALSE(testeeFunction4->empty());
+
+  ASSERT_EQ(testee1->getCallerTestee(), nullptr);
+  ASSERT_EQ(testee2->getCallerTestee(), testee1);
+  ASSERT_EQ(testee3->getCallerTestee(), testee2);
+  ASSERT_EQ(testee4->getCallerTestee(), testee3);
+}
+

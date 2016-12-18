@@ -67,6 +67,16 @@ public:
       return make_unique<MutangModule>(std::move(module), "efgh");
     }
 
+    else if (path == "simple_test/testee_path_calculation/tester") {
+      auto module = TestModuleFactory.create_SimpleTest_testeePathCalculation_tester();
+      return make_unique<MutangModule>(std::move(module), "simple_test/testee_path_calculation/tester");
+    }
+
+    else if (path == "simple_test/testee_path_calculation/testee") {
+      auto module = TestModuleFactory.create_SimpleTest_testeePathCalculation_testee();
+      return make_unique<MutangModule>(std::move(module), "simple_test/testee_path_calculation/testee");
+    }
+
     return make_unique<MutangModule>(nullptr, "");
   }
 
@@ -217,4 +227,83 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
   ASSERT_EQ(ExecutionStatus::Failed, FirstMutant->getExecutionResult().Status);
 
   ASSERT_NE(nullptr, FirstMutant->getMutationPoint());
+}
+
+TEST(Driver, SimpleTest_TesteePathCalculation) {
+  std::vector<std::string> ModulePaths({
+    "simple_test/testee_path_calculation/tester",
+    "simple_test/testee_path_calculation/testee"
+  });
+
+  bool doFork = false;
+  bool dryRun = false;
+  bool useCache = false;
+  int distance = 10;
+  std::string cacheDirectory = "/tmp/mutang_cache";
+  Config config(ModulePaths, doFork, dryRun, useCache, MutangDefaultTimeout,
+                distance, cacheDirectory);
+
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+
+  SimpleTestFinder testFinder(std::move(mutationOperators));
+
+  FakeModuleLoader loader;
+  Toolchain toolchain(config);
+  SimpleTestRunner runner(toolchain.targetMachine());
+
+  Driver Driver(config, loader, testFinder, runner, toolchain);
+
+  /// Given the modules we use here we expect:
+  ///
+  /// 1 original test, which has Passed state
+  /// 1 mutant test, which has Passed state
+  ///
+  /// In this test we are only interested at reconstruction of testee path of a
+  /// particular mutant.
+  auto result = Driver.Run();
+  ASSERT_EQ(1u, result->getTestResults().size());
+
+  auto firstResult = result->getTestResults().begin()->get();
+  ASSERT_EQ(ExecutionStatus::Passed, firstResult->getOriginalTestResult().Status);
+  ASSERT_EQ("test_testee_path_calculation", firstResult->getTestName());
+
+  auto &mutants = firstResult->getMutationResults();
+  ASSERT_EQ(1u, mutants.size());
+
+  auto firstMutant = mutants.begin()->get();
+
+  ASSERT_EQ(ExecutionStatus::Passed, firstMutant->getExecutionResult().Status);
+  ASSERT_NE(nullptr, firstMutant->getMutationPoint());
+
+  auto &allTestees = result->getAllTestees();
+  ASSERT_EQ(4U, allTestees.size());
+
+  Testee *testee1 = allTestees[0].get();
+  Testee *testee2 = allTestees[1].get();
+  Testee *testee3 = allTestees[2].get();
+  Testee *testee4 = allTestees[3].get();
+
+  ASSERT_EQ(firstMutant->getTestee(), testee4);
+  ASSERT_EQ(firstMutant->
+            getTestee()->
+            getCallerTestee(), testee3);
+
+  ASSERT_EQ(firstMutant->
+            getTestee()->
+            getCallerTestee()->
+            getCallerTestee(), testee2);
+
+  ASSERT_EQ(firstMutant->
+            getTestee()->
+            getCallerTestee()->
+            getCallerTestee()->
+            getCallerTestee(), testee1);
+
+  ASSERT_EQ(firstMutant->
+            getTestee()->
+            getCallerTestee()->
+            getCallerTestee()->
+            getCallerTestee()->
+            getCallerTestee(), nullptr);
 }

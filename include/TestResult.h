@@ -35,15 +35,15 @@ struct ExecutionResult {
 class MutationResult {
   ExecutionResult Result;
   MutationPoint *MutPoint;
-  Testee testee;
+  Testee *testee;
 
 public:
-  MutationResult(ExecutionResult R, Mutang::MutationPoint *MP, Testee testee);
+  MutationResult(ExecutionResult R, Mutang::MutationPoint *MP, Testee *testee);
 
   ExecutionResult getExecutionResult()  { return Result; }
   MutationPoint* getMutationPoint()     { return MutPoint; }
-  int getMutationDistance()             { return testee.getDistance(); }
-  Testee getTestee()                    { return testee; }
+  int getMutationDistance()             { return testee->getDistance(); }
+  Testee *getTestee()                    { return testee; }
 };
 
 class TestResult {

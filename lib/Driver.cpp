@@ -140,7 +140,7 @@ std::unique_ptr<Result> Driver::Run() {
           assert(result.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
         }
 
-        auto MutResult = make_unique<MutationResult>(result, mutationPoint, *testee);
+        auto MutResult = make_unique<MutationResult>(result, mutationPoint, testee.get());
         Result->addMutantResult(std::move(MutResult));
       }
     }

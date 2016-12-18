@@ -18,5 +18,9 @@ namespace Mutang {
     std::vector<std::unique_ptr<TestResult>> const& getTestResults() {
       return testResults;
     }
+
+    std::vector<std::unique_ptr<Testee>> const& getAllTestees() {
+      return allTestees;
+    }
   };
 }
