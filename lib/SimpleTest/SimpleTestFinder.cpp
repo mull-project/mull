@@ -76,6 +76,10 @@ SimpleTestFinder::findTestees(Test *Test,
   Module *testBodyModule = F->getParent();
 
   Testee *topLevelTestee = new Testee(F, nullptr, 0);
+
+  std::unique_ptr<Testee> uniqueTopLevelTestee(topLevelTestee);
+  testees.push_back(std::move(uniqueTopLevelTestee));
+
   traversees.push(topLevelTestee);
 
   while (true) {
@@ -83,18 +87,13 @@ SimpleTestFinder::findTestees(Test *Test,
     Function *traverseeFunction = traversee->getTesteeFunction();
     const int mutationDistance = traversee->getDistance();
 
-    Testee *callerTestee = nullptr;
-
     /// If the function we are processing is in the same translation unit
     /// as the test itself, then we are not looking for mutation points
     /// in this function assuming it to be a helper function, or the test itself
     if (traverseeFunction->getParent() != testBodyModule) {
-      printf("found testee: %s\n", traversee->getTesteeFunction()->getName().str().c_str());
       std::unique_ptr<Testee> uniqueTestee(traversee);
 
       testees.push_back(std::move(uniqueTestee));
-
-      callerTestee = traversee;
     }
 
     /// The function reached the max allowed distance
@@ -180,7 +179,7 @@ SimpleTestFinder::findTestees(Test *Test,
           /// http://stackoverflow.com/a/6921467/829116
           ///
           traversees.push(new Testee(definedFunction,
-                                     callerTestee,
+                                     traversee,
                                      mutationDistance + 1));
         }
       }

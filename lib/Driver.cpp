@@ -97,7 +97,12 @@ std::unique_ptr<Result> Driver::Run() {
 
     // Logger::info() << "\tagainst " << testees.size() << " testees\n";
 
-    for (auto &&testee : testees) {
+    for (auto testee_it = std::next(testees.begin()), ee = testees.end();
+         testee_it != ee;
+         ++testee_it) {
+
+      auto &&testee = *testee_it;
+
       auto MPoints = Finder.findMutationPoints(Ctx, *(testee->getTesteeFunction()));
       if (MPoints.size() == 0) {
         continue;

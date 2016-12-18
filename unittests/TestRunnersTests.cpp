@@ -83,8 +83,9 @@ TEST(SimpleTestRunner, runTest) {
   /// expecting it to fail
 
   std::vector<std::unique_ptr<Testee>> Testees = testFinder.findTestees(Test.get(), Ctx, 4);
+
   ASSERT_NE(0U, Testees.size());
-  Function *Testee = Testees[0]->getTesteeFunction();
+  Function *Testee = Testees[1]->getTesteeFunction();
 
   AddMutationOperator MutOp;
   std::vector<MutationOperator *> MutOps({&MutOp});
@@ -168,7 +169,7 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
 
   std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
   ASSERT_NE(0U, Testees.size());
-  Function *Testee = Testees[0]->getTesteeFunction();
+  Function *Testee = Testees[1]->getTesteeFunction();
 
   AddMutationOperator MutOp;
   std::vector<MutationOperator *> MutOps({&MutOp});

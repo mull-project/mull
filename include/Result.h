@@ -22,5 +22,7 @@ namespace Mutang {
     std::vector<std::unique_ptr<Testee>> const& getAllTestees() {
       return allTestees;
     }
+
+    void printPath(Testee *testee);
   };
 }

@@ -79,7 +79,6 @@ public:
 
     return make_unique<MutangModule>(nullptr, "");
   }
-
 };
 
 TEST(Driver, SimpleTest_AddMutationOperator) {
@@ -277,25 +276,34 @@ TEST(Driver, SimpleTest_TesteePathCalculation) {
   ASSERT_NE(nullptr, firstMutant->getMutationPoint());
 
   auto &allTestees = result->getAllTestees();
-  ASSERT_EQ(4U, allTestees.size());
+  ASSERT_EQ(5U, allTestees.size());
 
   Testee *testee1 = allTestees[0].get();
   Testee *testee2 = allTestees[1].get();
   Testee *testee3 = allTestees[2].get();
   Testee *testee4 = allTestees[3].get();
+  Testee *testee5 = allTestees[4].get();
 
-  ASSERT_EQ(firstMutant->getTestee(), testee4);
+  ASSERT_EQ(firstMutant->getTestee(), testee5);
+
   ASSERT_EQ(firstMutant->
             getTestee()->
+            getCallerTestee(), testee4);
+
+  ASSERT_EQ(firstMutant->
+            getTestee()->
+            getCallerTestee()->
             getCallerTestee(), testee3);
 
   ASSERT_EQ(firstMutant->
             getTestee()->
             getCallerTestee()->
+            getCallerTestee()->
             getCallerTestee(), testee2);
 
   ASSERT_EQ(firstMutant->
             getTestee()->
+            getCallerTestee()->
             getCallerTestee()->
             getCallerTestee()->
             getCallerTestee(), testee1);
@@ -305,5 +313,8 @@ TEST(Driver, SimpleTest_TesteePathCalculation) {
             getCallerTestee()->
             getCallerTestee()->
             getCallerTestee()->
+            getCallerTestee()->
             getCallerTestee(), nullptr);
+
+  result.get()->printPath(firstMutant->getTestee());
 }

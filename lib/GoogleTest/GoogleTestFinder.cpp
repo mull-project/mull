@@ -282,7 +282,12 @@ GoogleTestFinder::findTestees(Test *Test,
 
   Module *testBodyModule = googleTest->GetTestBodyFunction()->getParent();
 
-  traversees.push(new Testee(googleTest->GetTestBodyFunction(), nullptr, 0));
+  Testee *topLevelTestee = new Testee(googleTest->GetTestBodyFunction(), nullptr, 0);
+
+  std::unique_ptr<Testee> uniqueTopLevelTestee(topLevelTestee);
+  testees.push_back(std::move(uniqueTopLevelTestee));
+
+  traversees.push(topLevelTestee);
 
   while (true) {
     Testee *traversee = traversees.front();
