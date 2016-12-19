@@ -5,35 +5,62 @@
 #include "llvm/IR/DebugInfoMetadata.h"
 #include "llvm/IR/Function.h"
 
+#include <string>
+
 using namespace Mutang;
 using namespace llvm;
 
-void Result::printPath(Testee *testee) {
+std::string Result::printPath(MutationResult *mutationResult) {
   printf("Result::printPath\n");
-//
-//  + "'" + instruction->getDebugLoc()->getFilename().str() + "',"
-//  + "'" + std::to_string(instruction->getDebugLoc()->getLine()) + "',"
-//  + "'" + std::to_string(instruction->getDebugLoc()->getColumn()) + "',"
 
-  Testee *testeeIter = testee;
+  Testee *currentTestee = mutationResult->getTestee();
 
-  while (testeeIter != nullptr) {
-    Function *testeeFunction = testeeIter->getTesteeFunction();
+  char formatBuffer[256];
 
-    int debugInfoKindID = 0;
-    MDNode *debug = testeeFunction->getMetadata(debugInfoKindID);
+  std::vector<std::string> strings;
 
-    DISubprogram *sp = getDISubprogram(debug);
+  /// Last path component: mutation point itself.
+  auto mutationPoint = mutationResult->getMutationPoint();
+  Instruction *instruction = dyn_cast<Instruction>(mutationPoint->getOriginalValue());
+  std::string fileName = instruction->getDebugLoc()->getFilename();
+  std::string line = std::to_string(instruction->getDebugLoc()->getLine());
+  Function *function = instruction->getFunction();
+  assert(function && "Expected function");
 
-    StringRef functionName = testeeFunction->getName();
-    StringRef filename = sp->getFilename();
-    unsigned line = sp->getLine();
+  std::string functionName = function->getName().str();
 
-    printf("%s:%u %s\n", filename.str().c_str(), line, functionName.str().c_str());
+  snprintf(formatBuffer, sizeof(formatBuffer), "-- %s:%s, %s\n", fileName.c_str(), line.c_str(), functionName.c_str());
+  std::string testeeLine(formatBuffer);
+  strings.push_back(testeeLine);
 
-    testeeIter = testeeIter->getCallerTestee();
+  // The following loop stops on test as it does not have a caller.
+  do {
+    Instruction *instruction = currentTestee->getCallerInstruction();
+
+    std::string fileName = instruction->getDebugLoc()->getFilename();
+    std::string line = std::to_string(instruction->getDebugLoc()->getLine());
+
+    Function *function = nullptr;
+    if ((function = instruction->getFunction())) {
+      std::string functionName = function->getName().str();
+
+      snprintf(formatBuffer, sizeof(formatBuffer), "-- %s:%s, %s\n", fileName.c_str(), line.c_str(), functionName.c_str());
+
+      std::string testeeLine(formatBuffer);
+      strings.push_back(testeeLine);
+    }
+
+    currentTestee = currentTestee->getCallerTestee();
+  } while (currentTestee->getCallerTestee() != nullptr);
+
+  std::string result;
+
+  for (int i = strings.size() - 1, counter = 0; i >= 0 ; --i, counter++) {
+    result.insert(result.size(), counter * 2, ' ');
+    result.append(strings[i]);
   }
 
-#warning WIP
-  exit(1);
+  printf("caller path:\n%s", result.c_str());
+
+  return result;
 }

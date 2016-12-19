@@ -316,5 +316,5 @@ TEST(Driver, SimpleTest_TesteePathCalculation) {
             getCallerTestee()->
             getCallerTestee(), nullptr);
 
-  result.get()->printPath(firstMutant->getTestee());
+  result.get()->printPath(firstMutant);
 }

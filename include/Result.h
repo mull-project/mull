@@ -23,6 +23,6 @@ namespace Mutang {
       return allTestees;
     }
 
-    void printPath(Testee *testee);
+    std::string printPath(MutationResult *mutationResult);
   };
 }

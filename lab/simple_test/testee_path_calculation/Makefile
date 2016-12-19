@@ -3,7 +3,7 @@ CLANG=/usr/local/opt/llvm/bin/clang
 default: main
 	./main
 
-%.o: %.c
+%.o: %.c %.h
 	$(CLANG) -g -S -emit-llvm $*.c
 	$(CLANG) -g -c $*.c
 
