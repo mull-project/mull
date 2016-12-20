@@ -6,6 +6,7 @@
 #include "ModuleLoader.h"
 #include "MutationPoint.h"
 #include "SQLiteReporter.h"
+#include "Result.h"
 
 #include "Toolchain/Toolchain.h"
 
@@ -119,10 +120,10 @@ int main(int argc, char *argv[]) {
 #endif
 
   Driver driver(config, Loader, TestFinder, Runner, toolchain);
-  auto results = driver.Run();
+  auto result = driver.Run();
 
   SQLiteReporter reporter;
-  reporter.reportResults(results);
+  reporter.reportResults(result);
   /// It does crash at the very moment
   /// llvm_shutdown();
   return EXIT_SUCCESS;
