@@ -310,7 +310,7 @@ GoogleTestFinder::findTestees(Test *Test,
     /// Hence we don't go deeper
     if ( mutationDistance == maxDistance) {
       traversees.pop();
-      if (traversees.size() == 0) {
+      if (traversees.empty()) {
         break;
       } else {
         continue;
@@ -398,7 +398,7 @@ GoogleTestFinder::findTestees(Test *Test,
     }
 
     traversees.pop();
-    if (traversees.size() == 0) {
+    if (traversees.empty()) {
       break;
     }
   }

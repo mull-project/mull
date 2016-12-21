@@ -103,7 +103,7 @@ std::unique_ptr<Result> Driver::Run() {
       auto &&testee = *testee_it;
 
       auto MPoints = Finder.findMutationPoints(Ctx, *(testee->getTesteeFunction()));
-      if (MPoints.size() == 0) {
+      if (MPoints.empty()) {
         continue;
       }
 
