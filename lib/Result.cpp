@@ -5,17 +5,16 @@
 #include "llvm/IR/DebugInfoMetadata.h"
 #include "llvm/IR/Function.h"
 
+#include <sstream>
 #include <string>
 
 using namespace Mutang;
 using namespace llvm;
 
-std::string Result::calculateCallerPath(MutationResult *mutationResult) {
+std::vector<std::string> Result::calculateCallerPath(MutationResult *mutationResult) {
   Testee *currentTestee = mutationResult->getTestee();
 
-  char formatBuffer[512];
-
-  std::vector<std::string> strings;
+  std::vector<std::string> callerPath;
 
   /// Currently we don't print functions, only "file:line". Later we will and
   /// for that we will have to demangle them.
@@ -30,9 +29,13 @@ std::string Result::calculateCallerPath(MutationResult *mutationResult) {
   ///assert(function && "Expected function");
   ///std::string functionName = function->getName().str();
 
-  snprintf(formatBuffer, sizeof(formatBuffer), "-- %s:%s\n", fileName.c_str(), line.c_str());
-  std::string testeeLine(formatBuffer);
-  strings.push_back(testeeLine);
+  std::stringstream mpComponentAsStream;
+  mpComponentAsStream << fileName.c_str();
+  mpComponentAsStream << ":";
+  mpComponentAsStream << line.c_str();
+  std::string mpComponent = mpComponentAsStream.str();
+
+  callerPath.push_back(mpComponent);
 
   // The following loop stops on test as it does not have a caller.
   do {
@@ -41,27 +44,18 @@ std::string Result::calculateCallerPath(MutationResult *mutationResult) {
     std::string fileName = instruction->getDebugLoc()->getFilename();
     std::string line = std::to_string(instruction->getDebugLoc()->getLine());
 
-    Function *function = nullptr;
-    if ((function = instruction->getFunction())) {
-      ///std::string functionName = function->getName().str();
+    std::stringstream callerComponentAsStream;
+    callerComponentAsStream << fileName.c_str();
+    callerComponentAsStream << ":";
+    callerComponentAsStream << line.c_str();
+    std::string callerComponent = callerComponentAsStream.str();
 
-      snprintf(formatBuffer, sizeof(formatBuffer), "-- %s:%s\n", fileName.c_str(), line.c_str());
-
-      std::string testeeLine(formatBuffer);
-      strings.push_back(testeeLine);
-    }
+    callerPath.push_back(callerComponent);
 
     currentTestee = currentTestee->getCallerTestee();
   } while (currentTestee->getCallerTestee() != nullptr);
 
-  std::string result;
+  std::reverse(std::begin(callerPath), std::end(callerPath));
 
-  /// Reversing the result to be from test to mutation point.
-  for (int i = strings.size() - 1, counter = 0; i >= 0 ; --i, counter++) {
-    result.insert(result.size(), counter * 2, ' ');
-    result.append(strings[i]);
-  }
-
-  ///printf("Result::calculateCallerPath, final result: %s\n", result.c_str());
-  return result;
+  return callerPath;
 }

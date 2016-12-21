@@ -13,6 +13,8 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include <sqlite3.h>
+#include <sstream>
+#include <string>
 #include <sys/param.h>
 #include <unistd.h>
 
@@ -88,7 +90,18 @@ void Mutang::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result
     sqlite_exec(database, insertTestSQL.c_str());
 
     for (auto &mutation : testResult->getMutationResults()) {
-      std::string callerPath = result.get()->calculateCallerPath(mutation.get());
+      std::vector<std::string> callerPath = result.get()->calculateCallerPath(mutation.get());
+
+      std::stringstream callerPathAsStream;
+      for (size_t i = 0; i < callerPath.size(); ++i) {
+        if (i != 0) {
+          callerPathAsStream << '\n';
+        }
+
+        callerPathAsStream << callerPath[i];
+      }
+
+      std::string callerPathAsString = callerPathAsStream.str();
 
       /// Mutation Point
       auto mutationPoint = mutation->getMutationPoint();
@@ -103,7 +116,7 @@ void Mutang::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result
       + "'" + instruction->getDebugLoc()->getFilename().str() + "',"
       + "'" + std::to_string(instruction->getDebugLoc()->getLine()) + "',"
       + "'" + std::to_string(instruction->getDebugLoc()->getColumn()) + "',"
-      + "'" + callerPath + "',"
+      + "'" + callerPathAsString + "',"
       + "'" + mutationPoint->getUniqueIdentifier() + "'"+
       + ");";
 

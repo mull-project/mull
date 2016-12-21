@@ -316,7 +316,12 @@ TEST(Driver, SimpleTest_TesteePathCalculation) {
             getCallerTestee()->
             getCallerTestee(), nullptr);
 
-  std::string callerPath = result.get()->calculateCallerPath(firstMutant);
+  std::vector<std::string> callerPath = result.get()->calculateCallerPath(firstMutant);
 
-  ASSERT_EQ(callerPath, "-- tester.c:6\n  -- testee.c:23\n    -- testee.c:19\n      -- testee.c:15\n        -- testee.c:8\n");
+  ASSERT_EQ(callerPath.size(), 5U);
+  ASSERT_EQ(callerPath[0], "tester.c:6");
+  ASSERT_EQ(callerPath[1], "testee.c:23");
+  ASSERT_EQ(callerPath[2], "testee.c:19");
+  ASSERT_EQ(callerPath[3], "testee.c:15");
+  ASSERT_EQ(callerPath[4], "testee.c:8");
 }

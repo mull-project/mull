@@ -23,6 +23,6 @@ namespace Mutang {
       return allTestees;
     }
 
-    std::string calculateCallerPath(MutationResult *mutationResult);
+    std::vector<std::string> calculateCallerPath(MutationResult *mutationResult);
   };
 }
