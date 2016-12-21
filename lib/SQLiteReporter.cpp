@@ -208,7 +208,7 @@ void Mutang::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result
 
 #pragma mark -
 
-std::string SQLiteReporter::getCallerPathAsString(std::vector<std::string> callerPath) {
+std::string SQLiteReporter::getCallerPathAsString(std::vector<std::string> &callerPath) {
   std::string callerPathAsString;
 
   unsigned int indentation = 0;
