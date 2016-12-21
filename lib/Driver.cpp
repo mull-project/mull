@@ -209,7 +209,7 @@ void Driver::debug_PrintTesteeNames() {
   for (auto &Test : Finder.findTests(Ctx)) {
     Logger::info() << Test->getTestName() << "\n";
     for (auto &testee : Finder.findTestees(Test.get(), Ctx, Cfg.getMaxDistance())) {
-      Logger::info().indent(2) << testee.first->getName() << "\n";
+      Logger::info().indent(2) << testee.get()->getTesteeFunction()->getName() << "\n";
     }
   }
 }
@@ -223,10 +223,10 @@ void Driver::debug_PrintMutationPoints() {
 
   for (auto &Test : Finder.findTests(Ctx)) {
     Logger::info() << Test->getTestName() << "\n";
-    for (auto testee : Finder.findTestees(Test.get(), Ctx, Cfg.getMaxDistance())) {
-      auto MPoints = Finder.findMutationPoints(Ctx, *(testee.getTesteeFunction()));
+    for (auto &testee: Finder.findTestees(Test.get(), Ctx, Cfg.getMaxDistance())) {
+      auto MPoints = Finder.findMutationPoints(Ctx, *(testee.get()->getTesteeFunction()));
       if (MPoints.size()) {
-        Logger::info().indent(2) << testee.first->getName() << "\n";
+        Logger::info().indent(2) << testee.get()->getTesteeFunction()->getName() << "\n";
       }
       for (auto &MPoint : MPoints) {
         Logger::info().indent(4);
