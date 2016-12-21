@@ -92,16 +92,7 @@ void Mutang::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result
     for (auto &mutation : testResult->getMutationResults()) {
       std::vector<std::string> callerPath = result.get()->calculateCallerPath(mutation.get());
 
-      std::stringstream callerPathAsStream;
-      for (size_t i = 0; i < callerPath.size(); ++i) {
-        if (i != 0) {
-          callerPathAsStream << '\n';
-        }
-
-        callerPathAsStream << callerPath[i];
-      }
-
-      std::string callerPathAsString = callerPathAsStream.str();
+      std::string callerPathAsString = getCallerPathAsString(callerPath);
 
       /// Mutation Point
       auto mutationPoint = mutation->getMutationPoint();
@@ -213,6 +204,24 @@ void Mutang::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result
   sqlite3_close(database);
 
   outs() << "Results can be found at '" << databasePath << "'\n";
+}
+
+#pragma mark -
+
+std::string SQLiteReporter::getCallerPathAsString(std::vector<std::string> callerPath) {
+  std::string callerPathAsString;
+
+  unsigned int indentation = 0;
+  for (size_t i = 0; i < callerPath.size(); ++i) {
+    if (i != 0) {
+      callerPathAsString.append("\n");
+    }
+
+    callerPathAsString.append(std::string(2 * indentation++, ' '));
+    callerPathAsString.append(callerPath[i]);
+  }
+
+  return callerPathAsString;
 }
 
 #pragma mark - Database Schema

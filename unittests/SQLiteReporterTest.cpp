@@ -98,3 +98,17 @@ TEST(SQLiteReporter, integrationTest) {
   sqlite3_finalize(selectStmt);
   sqlite3_close(database);
 }
+
+TEST(SQLiteReporter, callerPathToString) {
+  std::vector<std::string> callerPath;
+
+  callerPath.push_back("func1:12");
+  callerPath.push_back("func2:14");
+  callerPath.push_back("func3:16");
+
+  SQLiteReporter reporter;
+
+  std::string expectedCallerPathString = "func1:12\n  func2:14\n    func3:16";
+  ASSERT_EQ(reporter.getCallerPathAsString(callerPath),
+            expectedCallerPathString);
+}

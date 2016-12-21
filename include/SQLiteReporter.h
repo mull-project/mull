@@ -16,6 +16,9 @@ public:
   
   void reportResults(const std::unique_ptr<Result> &result);
   std::string getDatabasePath();
+
+  // Exposed for testing.
+  std::string getCallerPathAsString(std::vector<std::string> callerPath);
 };
 
 }
