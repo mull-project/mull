@@ -53,7 +53,6 @@ using namespace std::chrono;
 std::unique_ptr<Result> Driver::Run() {
   std::vector<std::unique_ptr<TestResult>> Results;
   std::vector<std::unique_ptr<Testee>> allTestees;
-  allTestees.reserve(100000);
 
   /// Assumption: all modules will be used during the execution
   /// Therefore we load them into memory and compile immediately
