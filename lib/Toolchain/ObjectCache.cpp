@@ -1,4 +1,6 @@
 #include "Toolchain/ObjectCache.h"
+
+#include "Logger.h"
 #include "MutangModule.h"
 #include "MutationPoint.h"
 
@@ -31,8 +33,9 @@ ObjectCache::ObjectCache(bool useCache, const std::string &cacheDir)
     cacheDirectory(cacheDir)
 {
   if (useOnDiskCache && !cacheDirectoryExists(cacheDirectory)) {
-    printf("Cache directory '%s' is not accessible\n", cacheDirectory.c_str());
-    printf("falling back to in-memory cache\n");
+    Logger::info() << "Cache directory '" << cacheDirectory
+                   << "' is not accessible\n";
+    Logger::info() << "falling back to in-memory cache\n";
     useOnDiskCache = false;
   }
 }

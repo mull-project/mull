@@ -1,6 +1,6 @@
-
 #include "ForkProcessSandbox.h"
 
+#include "Logger.h"
 #include "TestResult.h"
 
 #include <chrono>
@@ -22,10 +22,10 @@ pid_t mutangFork(const char *processName) {
   childrenCount++;
   const pid_t pid = fork();
   if (pid == -1) {
-    printf("Failed to create %s after creating %d child processes\n",
-           processName, childrenCount);
-    printf("%s\n", strerror(errno));
-    printf("Shutting down\n");
+    Mutang::Logger::error() << "Failed to create " << processName
+                            << " after creating " << childrenCount
+                            << " child processes\n";
+    Mutang::Logger::error() << "Shutting down\n";
     exit(1);
   }
   return pid;

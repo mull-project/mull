@@ -1,5 +1,7 @@
 #include "ModuleLoader.h"
 
+#include "Logger.h"
+
 #include "llvm/AsmParser/Parser.h"
 //#include "llvm/Bitcode/BitcodeReader.h"
 #include "llvm/Bitcode/ReaderWriter.h"
@@ -25,7 +27,7 @@ static std::string MD5HashFromBuffer(StringRef buffer) {
 std::unique_ptr<MutangModule> ModuleLoader::loadModuleAtPath(const std::string &path) {
   auto BufferOrError = MemoryBuffer::getFile(path);
   if (!BufferOrError) {
-    printf("can't load module '%s'\n", path.c_str());
+    Logger::error() << "Can't load module " << path << '\n';
     return nullptr;
   }
 
@@ -33,7 +35,7 @@ std::unique_ptr<MutangModule> ModuleLoader::loadModuleAtPath(const std::string &
 
   auto llvmModule = parseBitcodeFile(BufferOrError->get()->getMemBufferRef(), Ctx);
   if (!llvmModule) {
-    printf("can't load module '%s'\n", path.c_str());
+    Logger::error() << "Can't load module " << path << '\n';
     return nullptr;
   }
 

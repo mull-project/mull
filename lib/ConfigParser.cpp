@@ -1,5 +1,7 @@
-#include "Config.h"
 #include "ConfigParser.h"
+
+#include "Config.h"
+#include "Logger.h"
 
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/Support/SourceMgr.h"
@@ -14,7 +16,7 @@ Config ConfigParser::loadConfig(const char *filename) {
   auto bufferOrError = MemoryBuffer::getFile(filename);
 
   if (!bufferOrError) {
-    printf("Can't read config file '%s'\n", filename);
+    Logger::error() << "Can't read config file: " << filename << '\n';
   }
 
   auto buffer = bufferOrError->get();
@@ -24,7 +26,7 @@ Config ConfigParser::loadConfig(const char *filename) {
   yin >> config;
 
   if (yin.error()) {
-    printf("Failed to parse YAML file: '%s'", filename);
+    Logger::error() << "Failed to parse YAML file: " << filename << '\n';
   }
 
   return config;

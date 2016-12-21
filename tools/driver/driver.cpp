@@ -1,6 +1,8 @@
+#include "Driver.h"
+
 #include "Config.h"
 #include "ConfigParser.h"
-#include "Driver.h"
+#include "Logger.h"
 #include "ModuleLoader.h"
 #include "MutationPoint.h"
 #include "SQLiteReporter.h"
@@ -65,6 +67,8 @@ static cl::opt<std::string> ConfigFile(
 int debug_main() {
   ConfigParser Parser;
   auto config = Parser.loadConfig(ConfigFile.c_str());
+
+  Logger::setLevel(Logger::Level::debug);
 
   LLVMContext Ctx;
   ModuleLoader Loader(Ctx);
