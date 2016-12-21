@@ -18,7 +18,7 @@ public:
   std::string getDatabasePath();
 
   // Exposed for testing.
-  std::string getCallerPathAsString(std::vector<std::string> &callerPath);
+  std::string getCallerPathAsString(const std::vector<std::string> &callerPath);
 };
 
 }
