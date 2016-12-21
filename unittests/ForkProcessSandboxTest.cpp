@@ -11,7 +11,9 @@ TEST(ForkProcessSandbox, CaptureOutputFromChildProcess) {
   static const char StdoutMessage[] = "Printing to stdout from a sandboxed child\n";
   static const char StderrMessage[] = "Printing to stderr from a sandboxed child\n";
 
-  static const long long IrrelevantValue = 2;
+  /// The timeout should be long enough to overlive the unit test suite running
+  /// on a cold start (fresh start without a "warmup").
+  static const long long Timeout = 10;
 
   ForkProcessSandbox sandbox;
 
@@ -24,7 +26,7 @@ TEST(ForkProcessSandbox, CaptureOutputFromChildProcess) {
     fprintf(stderr, "%s", StderrMessage);
 
     *SharedResult = R;
-  }, IrrelevantValue);
+  }, Timeout);
 
   ASSERT_EQ(result.Status, Passed);
   ASSERT_EQ(result.RunningTime, 1);
