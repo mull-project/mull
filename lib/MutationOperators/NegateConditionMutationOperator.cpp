@@ -1,8 +1,9 @@
 #include "MutationOperators/NegateConditionMutationOperator.h"
 #include "MutationOperators/MutationOperatorFilter.h"
 
-#include "MutationPoint.h"
 #include "Context.h"
+#include "Logger.h"
+#include "MutationPoint.h"
 
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/Module.h"
@@ -181,7 +182,7 @@ NegateConditionMutationOperator::negatedCmpInstPredicate(llvm::CmpInst::Predicat
     }
 
     default: {
-      printf("Unsupported predicate: %d\n", predicate);
+      Logger::error() << "Unsupported predicate: " << predicate << '\n';
       llvm_unreachable("Unsupported predicate!");
     }
   }

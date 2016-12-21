@@ -1,6 +1,7 @@
 #include "SimpleTest/SimpleTestFinder.h"
 
 #include "Context.h"
+#include "Logger.h"
 #include "MutationPoint.h"
 
 #include "MutationOperators/AddMutationOperator.h"
@@ -32,7 +33,8 @@ std::vector<std::unique_ptr<Test>> SimpleTestFinder::findTests(Context &Ctx) {
     for (auto &Fn : x) {
       if (Fn.getName().startswith("test_")) {
 
-        printf("SimpleTestFinder::findTests - found function %s\n", Fn.getName().str().c_str());
+        Logger::info() << "SimpleTestFinder::findTests - found function "
+                       << Fn.getName() << '\n';
 
         tests.emplace_back(make_unique<SimpleTest_Test>(&Fn));
       }
@@ -65,7 +67,9 @@ std::vector<Testee> SimpleTestFinder::findTestees(Test *Test,
 
             // Ignore export declarations.
             if (!Fn.empty()) {
-              printf("SimpleTestFinder::findTestees - found function %s\n", Fn.getName().str().c_str());
+              Logger::info()
+                  << "SimpleTestFinder::findTestees - found function "
+                  << Fn.getName() << '\n';
 
               testees.push_back(std::make_pair(&Fn, 0));
             }
@@ -116,7 +120,8 @@ SimpleTestFinder::findMutationPoints(const Context &context,
 
           MutationPointAddress Address(FIndex, BBIndex, IIndex);
 
-          printf("Found Mutation point at address: %d %d %d\n", FIndex, BBIndex, IIndex);
+          Logger::info() << "Found Mutation point at address: " << FIndex << ' '
+                         << BBIndex << ' ' << IIndex << '\n';
 
           auto module = context.moduleWithIdentifier(Instr.getModule()->getModuleIdentifier());
           MutationPoint *MP = new MutationPoint(MutOp.get(), Address, &Instr, module);

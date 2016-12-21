@@ -1,6 +1,8 @@
 #include "Driver.h"
+
 #include "Config.h"
 #include "Context.h"
+#include "Logger.h"
 #include "ModuleLoader.h"
 #include "TestResult.h"
 
@@ -71,12 +73,14 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 
   auto foundTests = Finder.findTests(Ctx);
 
-  //outs() << "Driver::Run::begin with " << foundTests.size() << " tests\n";
+  // Logger::info() << "Driver::Run::begin with " << foundTests.size() << "
+  // tests\n";
 
   for (auto &test : foundTests) {
     auto ObjectFiles = AllObjectFiles();
 
-    //outs() << "\tDriver::Run::run test: " << test->getTestName() << "\n";
+    // Logger::info() << "\tDriver::Run::run test: " << test->getTestName() <<
+    // "\n";
 
     ExecutionResult ExecResult = Sandbox->run([&](ExecutionResult *SharedResult) {
       *SharedResult = Runner.runTest(test.get(), ObjectFiles);
@@ -87,7 +91,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 
     auto testees = Finder.findTestees(BorrowedTest, Ctx, Cfg.getMaxDistance());
 
-    //outs() << "\tagainst " << testees.size() << " testees\n";
+    // Logger::info() << "\tagainst " << testees.size() << " testees\n";
 
     for (auto testee : testees) {
       auto MPoints = Finder.findMutationPoints(Ctx, *(testee.first));
@@ -95,14 +99,16 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
         continue;
       }
 
-      //outs() << "\t\tDriver::Run::process testee: " << testee.first->getName() << "\n";
-      //outs() << "\t\tagainst " << MPoints.size() << " mutation points\n";
+      // Logger::info() << "\t\tDriver::Run::process testee: " <<
+      // testee.first->getName() << "\n";
+      // Logger::info() << "\t\tagainst " << MPoints.size() << " mutation
+      // points\n";
 
       auto ObjectFiles = AllButOne(testee.first->getParent());
       for (auto mutationPoint : MPoints) {
-//        outs() << "\t\t\tDriver::Run::run mutant:" << "\t";
-//        mutationPoint->getOriginalValue()->print(outs());
-//        outs() << "\n";
+        //        Logger::info() << "\t\t\tDriver::Run::run mutant:" << "\t";
+        //        mutationPoint->getOriginalValue()->print(Logger::info());
+        //        Logger::info() << "\n";
 
         ExecutionResult result;
         bool dryRun = Cfg.isDryRun();
@@ -138,7 +144,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
     Results.push_back(std::move(Result));
   }
 
-//  outs() << "Driver::Run::end\n";
+  //  Logger::info() << "Driver::Run::end\n";
 
   return Results;
 }
@@ -175,7 +181,7 @@ void Driver::debug_PrintTestNames() {
   }
 
   for (auto &Test : Finder.findTests(Ctx)) {
-    outs() << Test->getTestName() << "\n";
+    Logger::info() << Test->getTestName() << "\n";
   }
 }
 
@@ -187,9 +193,9 @@ void Driver::debug_PrintTesteeNames() {
   }
 
   for (auto &Test : Finder.findTests(Ctx)) {
-    outs() << Test->getTestName() << "\n";
+    Logger::info() << Test->getTestName() << "\n";
     for (auto &testee : Finder.findTestees(Test.get(), Ctx, Cfg.getMaxDistance())) {
-      outs() << "\t" << testee.first->getName() << "\n";
+      Logger::info().indent(2) << testee.first->getName() << "\n";
     }
   }
 }
@@ -202,16 +208,16 @@ void Driver::debug_PrintMutationPoints() {
   }
 
   for (auto &Test : Finder.findTests(Ctx)) {
-    outs() << Test->getTestName() << "\n";
+    Logger::info() << Test->getTestName() << "\n";
     for (auto testee : Finder.findTestees(Test.get(), Ctx, Cfg.getMaxDistance())) {
       auto MPoints = Finder.findMutationPoints(Ctx, *(testee.first));
       if (MPoints.size()) {
-        outs() << "\t" << testee.first->getName() << "\n";
+        Logger::info().indent(2) << testee.first->getName() << "\n";
       }
       for (auto &MPoint : MPoints) {
-        outs() << "\t\t";
-        MPoint->getOriginalValue()->print(outs());
-        outs() << "\n";
+        Logger::info().indent(4);
+        MPoint->getOriginalValue()->print(Logger::info());
+        Logger::info() << "\n";
 
         if (Instruction *I = dyn_cast<Instruction>(MPoint->getOriginalValue())) {
           auto DL = I->getDebugLoc();
@@ -225,25 +231,18 @@ void Driver::debug_PrintMutationPoints() {
             while (!SourceFile.eof()) {
               getline(SourceFile, line);
               if (curLine == LineNo) {
-                outs() << "\t\t";
-                outs() << Filename << ":" << LineNo;
-                outs() << "\n";
-
-                outs() << "\t\t";
-                outs() << line;
-                outs() << "\n";
+                Logger::info().indent(4) << Filename << ":" << LineNo << '\n';
+                Logger::info().indent(4) << line << ":" << LineNo << '\n';
                 break;
               }
               curLine++;
             }
             SourceFile.close();
           } else {
-            errs() << "Unable to open file";
+            Logger::error() << "Unable to open file";
           }
         }
       }
-//      outs() << "\n";
     }
-//    outs() << "\n";
   }
 }

@@ -1,5 +1,6 @@
-
 #include "SQLiteReporter.h"
+
+#include "Logger.h"
 #include "TestResult.h"
 
 #include "MutationOperators/MutationOperator.h"
@@ -22,7 +23,7 @@ static void assume(bool condition, const char *assumption) {
     return;
   }
 
-  printf("Assumption failed: %s\n", assumption);
+  Logger::warn() << "Assumption failed: " << assumption << '\n';
 }
 
 void sqlite_exec(sqlite3 *database, const char *sql) {
@@ -33,9 +34,9 @@ void sqlite_exec(sqlite3 *database, const char *sql) {
                             nullptr,
                             &errorMessage);
   if (result != SQLITE_OK) {
-    printf("Cannot execute '%s'\n", sql);
-    printf("Reason: '%s'\n", errorMessage);
-    printf("Shutting down\n");
+    Logger::error() << "Cannot execute " << sql << '\n';
+    Logger::error() << "Reason: '" << errorMessage << "'\n";
+    Logger::error() << "Shutting down\n";
     exit(18);
   }
 }
@@ -185,8 +186,8 @@ void Mutang::SQLiteReporter::reportResults(const std::vector<std::unique_ptr<Tes
              "SQLite error: Expected preparation of execution result statement to succeed.");
 
       if (execution_result_statement_prepare_result != SQLITE_OK) {
-        llvm::outs() << insertMutationExecutionResultSQL << "\n";
-        printf("%s\n", sqlite3_errmsg(database));
+        Logger::error() << insertMutationExecutionResultSQL << '\n';
+        Logger::error() << sqlite3_errmsg(database) << '\n';
       }
 
       sqlite3_bind_text(execution_result_statement, 1, mutationExecutionResult.stdoutOutput.c_str(), -1, SQLITE_TRANSIENT);
