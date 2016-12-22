@@ -22,35 +22,31 @@ std::vector<std::string> Result::calculateCallerPath(MutationResult *mutationRes
   /// Last path component: mutation point itself.
   auto mutationPoint = mutationResult->getMutationPoint();
   Instruction *instruction = dyn_cast<Instruction>(mutationPoint->getOriginalValue());
-  std::string fileName = instruction->getDebugLoc()->getFilename();
-  std::string line = std::to_string(instruction->getDebugLoc()->getLine());
+  const std::string fileName = instruction->getDebugLoc()->getFilename();
+  const std::string line = std::to_string(instruction->getDebugLoc()->getLine());
 
   ///Function *function = instruction->getFunction();
   ///assert(function && "Expected function");
   ///std::string functionName = function->getName().str();
 
   std::stringstream mpComponentAsStream;
-  mpComponentAsStream << fileName.c_str();
+  mpComponentAsStream << fileName;
   mpComponentAsStream << ":";
-  mpComponentAsStream << line.c_str();
-  std::string mpComponent = mpComponentAsStream.str();
-
-  callerPath.push_back(mpComponent);
+  mpComponentAsStream << line;
+  callerPath.push_back(mpComponentAsStream.str());
 
   // The following loop stops on test as it does not have a caller.
   do {
     Instruction *instruction = currentTestee->getCallerInstruction();
 
-    std::string fileName = instruction->getDebugLoc()->getFilename();
-    std::string line = std::to_string(instruction->getDebugLoc()->getLine());
+    const std::string fileName = instruction->getDebugLoc()->getFilename();
+    const std::string line = std::to_string(instruction->getDebugLoc()->getLine());
 
     std::stringstream callerComponentAsStream;
-    callerComponentAsStream << fileName.c_str();
+    callerComponentAsStream << fileName;
     callerComponentAsStream << ":";
-    callerComponentAsStream << line.c_str();
-    std::string callerComponent = callerComponentAsStream.str();
-
-    callerPath.push_back(callerComponent);
+    callerComponentAsStream << line;
+    callerPath.push_back(callerComponentAsStream.str());
 
     currentTestee = currentTestee->getCallerTestee();
   } while (currentTestee->getCallerTestee() != nullptr);
