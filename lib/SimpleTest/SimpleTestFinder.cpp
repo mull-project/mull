@@ -67,19 +67,20 @@ std::vector<std::unique_ptr<Testee>>
 SimpleTestFinder::findTestees(Test *Test, Context &Ctx, int maxDistance) {
   SimpleTest_Test *SimpleTest = dyn_cast<SimpleTest_Test>(Test);
 
-  Function *F = SimpleTest->GetTestFunction();
+  Function *testFunction = SimpleTest->GetTestFunction();
 
   std::vector<std::unique_ptr<Testee>> testees;
-  std::queue<Testee *> traversees;
+  std::queue<std::unique_ptr<Testee>> traversees;
   std::set<Function *> checkedFunctions;
 
-  Module *testBodyModule = F->getParent();
+  Module *testBodyModule = testFunction->getParent();
 
-  testees.push_back(make_unique<Testee>(F, nullptr, nullptr, 0));
-  traversees.push(testees.back().get());
+  traversees.push(make_unique<Testee>(testFunction, nullptr, nullptr, 0));
 
   while (!traversees.empty()) {
-    Testee *traversee = traversees.front();
+    std::unique_ptr<Testee> traversee = std::move(traversees.front());
+    Testee *traverseePointer = traversee.get();
+
     traversees.pop();
 
     Function *traverseeFunction = traversee->getTesteeFunction();
@@ -87,9 +88,12 @@ SimpleTestFinder::findTestees(Test *Test, Context &Ctx, int maxDistance) {
 
     /// If the function we are processing is in the same translation unit
     /// as the test itself, then we are not looking for mutation points
-    /// in this function assuming it to be a helper function, or the test itself
-    if (traverseeFunction->getParent() != testBodyModule) {
-      testees.push_back(std::unique_ptr<Testee>(traversee));
+    /// in this function assuming it to be a helper function.
+    /// The only exception is the test function itself that is especially
+    /// important for path calculations that are done later in SQLiteReporter.
+    if (traverseeFunction->getParent() != testBodyModule ||
+        traverseeFunction == testFunction) {
+      testees.push_back(std::move(traversee));
     }
 
     /// The function reached the max allowed distance
@@ -171,8 +175,10 @@ SimpleTestFinder::findTestees(Test *Test, Context &Ctx, int maxDistance) {
             /// * Here is a good overview of what's going on:
             /// http://stackoverflow.com/a/6921467/829116
             ///
-            traversees.push(new Testee(definedFunction, callInstruction,
-                                       traversee, mutationDistance + 1));
+            traversees.push(make_unique<Testee>(definedFunction,
+                                                callInstruction,
+                                                traverseePointer,
+                                                mutationDistance + 1));
           }
         }
       }
