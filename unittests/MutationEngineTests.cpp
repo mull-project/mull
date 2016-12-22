@@ -66,11 +66,11 @@ TEST(MutationEngine, SimpleTest_AddOperator_applyMutation) {
 
   auto &Test = *(Tests.begin());
 
-  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx, 4);
+  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
 
-  ASSERT_EQ(1U, Testees.size());
+  ASSERT_EQ(2U, Testees.size());
 
-  Function *Testee = Testees.begin()->first;
+  Function *Testee = Testees[1]->getTesteeFunction();
   ASSERT_FALSE(Testee->empty());
 
   std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
@@ -89,7 +89,7 @@ TEST(MutationEngine, SimpleTest_AddOperator_applyMutation) {
   Instruction *OldInstruction = cast<BinaryOperator>(MP->getOriginalValue());
   ASSERT_EQ(nullptr, OldInstruction->getParent());
 
-//  Function *MutatedFunction = Testee;//ModuleWithTestees->getFunction(Testee->getName());
+//  Function *MutatedFunction = Testee;//ModuleWithTestees->getTesteeFunction(Testee->getName());
 
   // After mutation we should have new instruction with the same name as an original instruction
   Instruction *NewInstruction = getFirstNamedInstruction(*Testee, ReplacedInstructionName);
@@ -116,11 +116,11 @@ TEST(MutationEngine, SimpleTest_NegateConditionOperator_applyMutation) {
 
   auto &Test = *(Tests.begin());
 
-  ArrayRef<Testee> Testees = Finder.findTestees(Test.get(), Ctx, 4);
+  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
 
-  ASSERT_EQ(1U, Testees.size());
+  ASSERT_EQ(2U, Testees.size());
 
-  Function *Testee = Testees.begin()->first;
+  Function *Testee = Testees[1]->getTesteeFunction();
   ASSERT_FALSE(Testee->empty());
 
   std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);

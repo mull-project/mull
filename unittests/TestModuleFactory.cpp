@@ -110,6 +110,26 @@ std::unique_ptr<Module> TestModuleFactory::create_SimpleTest_RemoveVoidFunction_
 
 #pragma mark -
 
+std::unique_ptr<Module> TestModuleFactory::create_SimpleTest_testeePathCalculation_testee() {
+  std::string contents = createFixture("fixture_simple_test_testee_path_calculation_testee.ll");
+
+  auto module = parseIR(contents.c_str());
+
+  module->setModuleIdentifier("fixture_simple_test_testee_path_calculation_testee.ll");
+
+  return module;
+}
+
+std::unique_ptr<Module> TestModuleFactory::create_SimpleTest_testeePathCalculation_tester() {
+  std::string contents = createFixture("fixture_simple_test_testee_path_calculation_tester.ll");
+
+  auto module = parseIR(contents.c_str());
+
+  module->setModuleIdentifier("fixture_simple_test_testee_path_calculation_tester.ll");
+
+  return module;
+}
+
 std::string TestModuleFactory::testerModulePath_IR() {
   return fixturePath("fixture_simple_test_tester_module.ll");
 }

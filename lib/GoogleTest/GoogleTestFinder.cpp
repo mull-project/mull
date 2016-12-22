@@ -270,36 +270,47 @@ static bool shouldSkipDefinedFunction(llvm::Function *definedFunction) {
   return false;
 }
 
-std::vector<Testee> GoogleTestFinder::findTestees(Test *Test,
-                                                  Context &Ctx,
-                                                  int maxDistance) {
+std::vector<std::unique_ptr<Testee>>
+GoogleTestFinder::findTestees(Test *Test,
+                              Context &Ctx,
+                              int maxDistance) {
   GoogleTest_Test *googleTest = dyn_cast<GoogleTest_Test>(Test);
 
-  std::vector<Testee> testees;
-  std::queue<Testee> traversees;
+  std::vector<std::unique_ptr<Testee>> testees;
+  std::queue<Testee *> traversees;
   std::set<Function *> checkedFunctions;
 
   Module *testBodyModule = googleTest->GetTestBodyFunction()->getParent();
 
-  traversees.push(std::make_pair(googleTest->GetTestBodyFunction(), 0));
+  Testee *topLevelTestee = new Testee(googleTest->GetTestBodyFunction(),
+                                      nullptr,
+                                      nullptr,
+                                      0);
+
+  std::unique_ptr<Testee> uniqueTopLevelTestee(topLevelTestee);
+  testees.push_back(std::move(uniqueTopLevelTestee));
+
+  traversees.push(topLevelTestee);
 
   while (true) {
-    const Testee traversee = traversees.front();
-    Function *traverseeFunction = traversee.first;
-    const int mutationDistance = traversee.second;
+    Testee *traversee = traversees.front();
+    Function *traverseeFunction = traversee->getTesteeFunction();
+    const int mutationDistance = traversee->getDistance();
 
     /// If the function we are processing is in the same translation unit
     /// as the test itself, then we are not looking for mutation points
     /// in this function assuming it to be a helper function, or the test itself
     if (traverseeFunction->getParent() != testBodyModule) {
-      testees.push_back(traversee);
+      std::unique_ptr<Testee> uniqueTestee(traversee);
+
+      testees.push_back(std::move(uniqueTestee));
     }
 
     /// The function reached the max allowed distance
     /// Hence we don't go deeper
     if ( mutationDistance == maxDistance) {
       traversees.pop();
-      if (traversees.size() == 0) {
+      if (traversees.empty()) {
         break;
       } else {
         continue;
@@ -377,14 +388,17 @@ std::vector<Testee> GoogleTestFinder::findTestees(Test *Test,
           /// * Here is a good overview of what's going on:
           /// http://stackoverflow.com/a/6921467/829116
           ///
-          traversees.push(std::make_pair(definedFunction, mutationDistance + 1));
+          traversees.push(new Testee(definedFunction,
+                                     callInstruction,
+                                     traversee,
+                                     mutationDistance + 1));
         }
       }
 
     }
 
     traversees.pop();
-    if (traversees.size() == 0) {
+    if (traversees.empty()) {
       break;
     }
   }

@@ -4,7 +4,7 @@
 
 namespace Mutang {
 
-class TestResult;
+class Result;
 
 class SQLiteReporter {
 
@@ -14,8 +14,11 @@ private:
 public:
   SQLiteReporter();
   
-  void reportResults(const std::vector<std::unique_ptr<TestResult>> &results);
+  void reportResults(const std::unique_ptr<Result> &result);
   std::string getDatabasePath();
+
+  // Exposed for testing.
+  std::string getCallerPathAsString(const std::vector<std::string> &callerPath);
 };
 
 }

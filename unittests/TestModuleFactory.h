@@ -19,6 +19,9 @@ public:
   std::unique_ptr<Module> create_SimpleTest_RemoveVoidFunction_Tester_Module();
   std::unique_ptr<Module> create_SimpleTest_RemoveVoidFunction_Testee_Module();
 
+  std::unique_ptr<Module> create_SimpleTest_testeePathCalculation_testee();
+  std::unique_ptr<Module> create_SimpleTest_testeePathCalculation_tester();
+
   std::unique_ptr<Module> createLibCTesterModule();
   std::unique_ptr<Module> createLibCTesteeModule();
 
@@ -31,5 +34,4 @@ public:
   std::unique_ptr<Module> APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutation_operatorModule();
   std::unique_ptr<Module> APFloat_019fc57b8bd190d33389137abbe7145e_214_2_7_negate_mutation_operatorModule();
   std::unique_ptr<Module> APFloat_019fc57b8bd190d33389137abbe7145e_5_1_3_negate_mutation_operatorModule();
-
 };

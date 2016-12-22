@@ -1,5 +1,5 @@
 #include "SQLiteReporter.h"
-#include "TestResult.h"
+#include "Result.h"
 #include "SimpleTest/SimpleTest_Test.h"
 
 #include "gtest/gtest.h"
@@ -18,11 +18,11 @@ TEST(SQLiteReporter, integrationTest) {
 
   const long long RunningTime = 1;
 
-  ExecutionResult result;
-  result.Status = Passed;
-  result.RunningTime = RunningTime;
-  result.stdoutOutput = "STDOUT";
-  result.stderrOutput = "STDERR";
+  ExecutionResult testExecutionResult;
+  testExecutionResult.Status = Passed;
+  testExecutionResult.RunningTime = RunningTime;
+  testExecutionResult.stdoutOutput = "STDOUT";
+  testExecutionResult.stderrOutput = "STDERR";
 
   LLVMContext Context;
 
@@ -36,11 +36,18 @@ TEST(SQLiteReporter, integrationTest) {
 
   std::unique_ptr<SimpleTest_Test> test = make_unique<SimpleTest_Test>(function);
 
-  std::unique_ptr<TestResult> testResult = make_unique<TestResult>(result, std::move(test));
+  std::unique_ptr<TestResult> testResult =
+    make_unique<TestResult>(testExecutionResult, std::move(test));
+
   std::vector<std::unique_ptr<TestResult>> results;
   results.push_back(std::move(testResult));
 
-  reporter.reportResults(results);
+  /// In this test we are not interested in testees.
+  std::vector<std::unique_ptr<Testee>> testees;
+
+  std::unique_ptr<Result> result = make_unique<Result>(std::move(results),
+                                                       std::move(testees));
+  reporter.reportResults(result);
 
   std::string databasePath = reporter.getDatabasePath();
 
@@ -71,9 +78,9 @@ TEST(SQLiteReporter, integrationTest) {
       ASSERT_EQ(column2_duration, RunningTime);
 
       ASSERT_EQ(strcmp((const char *)column3_stdout,
-                       result.stdoutOutput.c_str()), 0);
+                       testExecutionResult.stdoutOutput.c_str()), 0);
       ASSERT_EQ(strcmp((const char *)column4_stderr,
-                       result.stderrOutput.c_str()), 0);
+                       testExecutionResult.stderrOutput.c_str()), 0);
 
       numberOfRows++;
     }
@@ -90,4 +97,18 @@ TEST(SQLiteReporter, integrationTest) {
 
   sqlite3_finalize(selectStmt);
   sqlite3_close(database);
+}
+
+TEST(SQLiteReporter, callerPathToString) {
+  std::vector<std::string> callerPath;
+
+  callerPath.push_back("func1:12");
+  callerPath.push_back("func2:14");
+  callerPath.push_back("func3:16");
+
+  SQLiteReporter reporter;
+
+  std::string expectedCallerPathString = "func1:12\n  func2:14\n    func3:16";
+  ASSERT_EQ(reporter.getCallerPathAsString(callerPath),
+            expectedCallerPathString);
 }

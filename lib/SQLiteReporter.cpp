@@ -1,6 +1,7 @@
 #include "SQLiteReporter.h"
 
 #include "Logger.h"
+#include "Result.h"
 #include "TestResult.h"
 
 #include "MutationOperators/MutationOperator.h"
@@ -12,11 +13,15 @@
 #include "llvm/Support/raw_ostream.h"
 
 #include <sqlite3.h>
+#include <sstream>
+#include <string>
 #include <sys/param.h>
 #include <unistd.h>
 
 using namespace Mutang;
 using namespace llvm;
+
+static void createTables(sqlite3 *database);
 
 static void assume(bool condition, const char *assumption) {
   if (condition) {
@@ -41,27 +46,6 @@ void sqlite_exec(sqlite3 *database, const char *sql) {
   }
 }
 
-void createTables(sqlite3 *database) {
-  const char *executionResult =
-    "CREATE TABLE execution_result (status INT, duration INT, stdout TEXT, stderr TEXT);";
-  const char *test =
-    "CREATE TABLE test (test_name TEXT, execution_result_id INT);";
-  const char *mutationPoint =
-    "CREATE TABLE mutation_point (mutation_operator TEXT, module_name TEXT, function_name TEXT, function_index INT, basic_block_index INT, instruction_index INT, filename TEXT, line_number INT, column_number INT, unique_id TEXT UNIQUE);";
-  const char *mutationResult =
-    "CREATE TABLE mutation_result (execution_result_id INT, test_id TEXT, mutation_point_id TEXT, mutation_distance INT);";
-
-  const char *mutationPointDebug =
-    "CREATE TABLE mutation_point_debug (filename TEXT, line_number INT, column_number INT, function TEXT, basic_block TEXT, instruction INT, unique_id TEXT UNIQUE);";
-
-  sqlite_exec(database, executionResult);
-  sqlite_exec(database, test);
-  sqlite_exec(database, mutationPoint);
-  sqlite_exec(database, mutationResult);
-  sqlite_exec(database, mutationPointDebug);
-}
-
-
 SQLiteReporter::SQLiteReporter() {
   char wd[MAXPATHLEN] = { 0 };
   getwd(wd);
@@ -80,24 +64,23 @@ std::string Mutang::SQLiteReporter::getDatabasePath() {
   return databasePath;
 }
 
-void Mutang::SQLiteReporter::reportResults(const std::vector<std::unique_ptr<TestResult>> &results) {
+void Mutang::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result) {
   std::string databasePath = getDatabasePath();
-  outs() << "Results can be found at '" << databasePath << "'\n";
 
   sqlite3 *database;
   sqlite3_open(databasePath.c_str(), &database);
 
   createTables(database);
 
-  for (auto &result : results) {
-    std::string testID = result->getTestName();
+  for (auto &testResult : result->getTestResults()) {
+    std::string testID = testResult->getTestName();
 
-    ExecutionResult testResult = result->getOriginalTestResult();
+    ExecutionResult testExecutionResult = testResult->getOriginalTestResult();
     std::string insertResultSQL = std::string("INSERT INTO execution_result VALUES (")
-    + "'" + std::to_string(testResult.Status) + "',"
-    + "'" + std::to_string(testResult.RunningTime) + "',"
-    + "'" + testResult.stdoutOutput + "',"
-    + "'" + testResult.stderrOutput + "');";
+    + "'" + std::to_string(testExecutionResult.Status) + "',"
+    + "'" + std::to_string(testExecutionResult.RunningTime) + "',"
+    + "'" + testExecutionResult.stdoutOutput + "',"
+    + "'" + testExecutionResult.stderrOutput + "');";
     sqlite_exec(database, insertResultSQL.c_str());
     int testResultID = sqlite3_last_insert_rowid(database);
 
@@ -106,7 +89,11 @@ void Mutang::SQLiteReporter::reportResults(const std::vector<std::unique_ptr<Tes
     + "'" + std::to_string(testResultID) + "');";
     sqlite_exec(database, insertTestSQL.c_str());
 
-    for (auto &mutation : result->getMutationResults()) {
+    for (auto &mutation : testResult->getMutationResults()) {
+      std::vector<std::string> callerPath = result.get()->calculateCallerPath(mutation.get());
+
+      std::string callerPathAsString = getCallerPathAsString(callerPath);
+
       /// Mutation Point
       auto mutationPoint = mutation->getMutationPoint();
       Instruction *instruction = dyn_cast<Instruction>(mutationPoint->getOriginalValue());
@@ -120,6 +107,7 @@ void Mutang::SQLiteReporter::reportResults(const std::vector<std::unique_ptr<Tes
       + "'" + instruction->getDebugLoc()->getFilename().str() + "',"
       + "'" + std::to_string(instruction->getDebugLoc()->getLine()) + "',"
       + "'" + std::to_string(instruction->getDebugLoc()->getColumn()) + "',"
+      + "'" + callerPathAsString + "',"
       + "'" + mutationPoint->getUniqueIdentifier() + "'"+
       + ");";
 
@@ -214,5 +202,74 @@ void Mutang::SQLiteReporter::reportResults(const std::vector<std::unique_ptr<Tes
   }
 
   sqlite3_close(database);
+
+  outs() << "Results can be found at '" << databasePath << "'\n";
 }
 
+#pragma mark -
+
+std::string SQLiteReporter::getCallerPathAsString(const std::vector<std::string> &callerPath) {
+  std::string callerPathAsString;
+
+  unsigned int indentation = 0;
+  for (size_t i = 0; i < callerPath.size(); ++i) {
+    if (i != 0) {
+      callerPathAsString.append("\n");
+    }
+
+    callerPathAsString.append(std::string(2 * indentation++, ' '));
+    callerPathAsString.append(callerPath[i]);
+  }
+
+  return callerPathAsString;
+}
+
+#pragma mark - Database Schema
+
+static const char *CreateTables = R"CreateTables(
+CREATE TABLE execution_result (
+  status INT,
+  duration INT,
+  stdout TEXT,
+  stderr TEXT
+);
+
+CREATE TABLE test (
+  test_name TEXT,
+  execution_result_id INT
+);
+
+CREATE TABLE mutation_point (
+  mutation_operator TEXT,
+  module_name TEXT,
+  function_name TEXT,
+  function_index INT,
+  basic_block_index INT,
+  instruction_index INT,
+  filename TEXT,
+  line_number INT,
+  column_number INT,
+  __tmp_caller_path TEXT,
+  unique_id TEXT UNIQUE
+);
+
+CREATE TABLE mutation_result (
+  execution_result_id INT,
+  test_id TEXT,
+  mutation_point_id TEXT,
+  mutation_distance INT
+);
+
+CREATE TABLE mutation_point_debug (
+  filename TEXT,
+  line_number INT,
+  column_number INT,
+  function TEXT,
+  basic_block TEXT,
+  instruction INT,
+  unique_id TEXT UNIQUE);
+)CreateTables";
+
+static void createTables(sqlite3 *database) {
+  sqlite_exec(database, CreateTables);
+}

@@ -2,6 +2,7 @@
 
 #include "MutationPoint.h"
 #include "Test.h"
+#include "Testee.h"
 
 namespace llvm {
 
@@ -14,12 +15,13 @@ namespace Mutang {
 class Context;
 class MutationOperator;
 
-typedef std::pair<llvm::Function *, int> Testee;
-
 class TestFinder {
 public:
   virtual std::vector<std::unique_ptr<Test>> findTests(Context &Ctx) = 0;
-  virtual std::vector<Testee> findTestees(Test *Test, Context &Ctx, int maxDistance) = 0;
+  virtual std::vector<std::unique_ptr<Testee>> findTestees(Test *Test,
+                                                           Context &Ctx,
+                                                           int maxDistance) = 0;
+
   virtual std::vector<std::unique_ptr<MutationPoint>> findMutationPoints(
                             std::vector<MutationOperator *> &MutationOperators,
                             llvm::Function &F) = 0;

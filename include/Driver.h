@@ -22,6 +22,7 @@ namespace Mutang {
 
 class Config;
 class ModuleLoader;
+class Result;
 class TestFinder;
 class TestRunner;
 
@@ -49,7 +50,7 @@ public:
     delete this->Sandbox;
   }
 
-  std::vector<std::unique_ptr<TestResult>> Run();
+  std::unique_ptr<Result> Run();
 
   void debug_PrintTestNames();
   void debug_PrintTesteeNames();

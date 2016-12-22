@@ -4,6 +4,7 @@
 #include "Context.h"
 #include "Logger.h"
 #include "ModuleLoader.h"
+#include "Result.h"
 #include "TestResult.h"
 
 #include "llvm/IR/Constants.h"
@@ -24,6 +25,7 @@
 #include <algorithm>
 #include <chrono>
 #include <fstream>
+#include <vector>
 
 using namespace llvm;
 using namespace llvm::object;
@@ -48,8 +50,9 @@ using namespace std::chrono;
 /// Each result contains result of execution of an original test and
 /// all the results of each mutant within corresponding MutationPoint
 
-std::vector<std::unique_ptr<TestResult>> Driver::Run() {
+std::unique_ptr<Result> Driver::Run() {
   std::vector<std::unique_ptr<TestResult>> Results;
+  std::vector<std::unique_ptr<Testee>> allTestees;
 
   /// Assumption: all modules will be used during the execution
   /// Therefore we load them into memory and compile immediately
@@ -93,9 +96,14 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
 
     // Logger::info() << "\tagainst " << testees.size() << " testees\n";
 
-    for (auto testee : testees) {
-      auto MPoints = Finder.findMutationPoints(Ctx, *(testee.first));
-      if (MPoints.size() == 0) {
+    for (auto testee_it = std::next(testees.begin()), ee = testees.end();
+         testee_it != ee;
+         ++testee_it) {
+
+      auto &&testee = *testee_it;
+
+      auto MPoints = Finder.findMutationPoints(Ctx, *(testee->getTesteeFunction()));
+      if (MPoints.empty()) {
         continue;
       }
 
@@ -104,7 +112,7 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
       // Logger::info() << "\t\tagainst " << MPoints.size() << " mutation
       // points\n";
 
-      auto ObjectFiles = AllButOne(testee.first->getParent());
+      auto ObjectFiles = AllButOne(testee->getTesteeFunction()->getParent());
       for (auto mutationPoint : MPoints) {
         //        Logger::info() << "\t\t\tDriver::Run::run mutant:" << "\t";
         //        mutationPoint->getOriginalValue()->print(Logger::info());
@@ -136,17 +144,23 @@ std::vector<std::unique_ptr<TestResult>> Driver::Run() {
           assert(result.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
         }
 
-        auto MutResult = make_unique<MutationResult>(result, mutationPoint, testee.second);
+        auto MutResult = make_unique<MutationResult>(result, mutationPoint, testee.get());
         Result->addMutantResult(std::move(MutResult));
       }
     }
+
+    allTestees.insert(allTestees.end(),std::make_move_iterator(testees.begin()),
+                      std::make_move_iterator(testees.end()));
 
     Results.push_back(std::move(Result));
   }
 
   //  Logger::info() << "Driver::Run::end\n";
 
-  return Results;
+  std::unique_ptr<Result> result = make_unique<Result>(std::move(Results),
+                                                       std::move(allTestees));
+
+  return result;
 }
 
 std::vector<llvm::object::ObjectFile *> Driver::AllButOne(llvm::Module *One) {
@@ -195,7 +209,7 @@ void Driver::debug_PrintTesteeNames() {
   for (auto &Test : Finder.findTests(Ctx)) {
     Logger::info() << Test->getTestName() << "\n";
     for (auto &testee : Finder.findTestees(Test.get(), Ctx, Cfg.getMaxDistance())) {
-      Logger::info().indent(2) << testee.first->getName() << "\n";
+      Logger::info().indent(2) << testee.get()->getTesteeFunction()->getName() << "\n";
     }
   }
 }
@@ -209,10 +223,10 @@ void Driver::debug_PrintMutationPoints() {
 
   for (auto &Test : Finder.findTests(Ctx)) {
     Logger::info() << Test->getTestName() << "\n";
-    for (auto testee : Finder.findTestees(Test.get(), Ctx, Cfg.getMaxDistance())) {
-      auto MPoints = Finder.findMutationPoints(Ctx, *(testee.first));
+    for (auto &testee: Finder.findTestees(Test.get(), Ctx, Cfg.getMaxDistance())) {
+      auto MPoints = Finder.findMutationPoints(Ctx, *(testee.get()->getTesteeFunction()));
       if (MPoints.size()) {
-        Logger::info().indent(2) << testee.first->getName() << "\n";
+        Logger::info().indent(2) << testee.get()->getTesteeFunction()->getName() << "\n";
       }
       for (auto &MPoint : MPoints) {
         Logger::info().indent(4);
