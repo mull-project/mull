@@ -1,4 +1,4 @@
-llvm_add_library(mutang
+llvm_add_library(mull
   ConfigParser.cpp
   Context.cpp
   Driver.cpp
@@ -66,7 +66,7 @@ llvm_add_library(mutang
 
 # The following is needed to make CMake to generate a folder structure in Xcode
 # that corresponds to a physical folder structure.
-get_target_property(HERE_TARGET_SOURCES mutang SOURCES)
+get_target_property(HERE_TARGET_SOURCES mull SOURCES)
 foreach(source_file ${HERE_TARGET_SOURCES})
   if (source_file MATCHES "(.*)\.h$")
     file(RELATIVE_PATH relative_source_file ${MUTANG_INCLUDE_DIR} ${source_file})

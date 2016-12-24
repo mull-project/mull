@@ -1,10 +1,10 @@
-function(add_mutang_unittest test_dirname)
+function(add_mull_unittest test_dirname)
   add_custom_target(MutangTestSuite)
   set_target_properties(MutangTestSuite PROPERTIES FOLDER "Tests")
   add_unittest(MutangTestSuite ${test_dirname} ${ARGN})
 endfunction()
 
-add_mutang_unittest(MutangUnitTests
+add_mull_unittest(MutangUnitTests
   CompilerTests.cpp
   ConfigParserTests.cpp
   ContextTest.cpp
@@ -30,7 +30,7 @@ add_mutang_unittest(MutangUnitTests
 )
 
 target_link_libraries(MutangUnitTests
-  mutang
+  mull
   sqlite3
   LLVMAsmParser
   LLVMCore

@@ -1,10 +1,10 @@
 find_library(PTHREAD_LIBRARY_PATH sqlite3)
 
-add_llvm_executable(mutang-driver driver.cpp
+add_llvm_executable(mull-driver driver.cpp
 )
 
-target_link_libraries(mutang-driver
-  mutang
+target_link_libraries(mull-driver
+  mull
   LLVMCore
   LLVMSupport
   LLVMAsmParser

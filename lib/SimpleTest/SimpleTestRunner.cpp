@@ -16,7 +16,7 @@ using namespace Mutang;
 using namespace llvm;
 using namespace std::chrono;
 
-extern "C" int mutang_simple_test_printf(const char *fmt, ...) {
+extern "C" int mull_simple_test_printf(const char *fmt, ...) {
   va_list arglist;
 
   printf("Printf called from JIT: \n");
@@ -33,7 +33,7 @@ public:
 
   JITSymbol findSymbol(const std::string &Name) {
     //if (Name == "_printf") {
-    //  return findSymbol("mutang_simple_test_printf");
+    //  return findSymbol("mull_simple_test_printf");
     //}
 
     if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(Name)) {

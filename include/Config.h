@@ -40,7 +40,7 @@ public:
     useCache(true),
     timeout(MutangDefaultTimeout),
     maxDistance(128),
-    cacheDirectory("/tmp/mutang_cache")
+    cacheDirectory("/tmp/mull_cache")
   {
   }
 

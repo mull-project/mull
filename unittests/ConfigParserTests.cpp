@@ -149,7 +149,7 @@ TEST(ConfigParser, loadConfig_CacheDirectory_Unspecified) {
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(Input);
 
-  ASSERT_EQ("/tmp/mutang_cache", Cfg.getCacheDirectory());
+  ASSERT_EQ("/tmp/mull_cache", Cfg.getCacheDirectory());
 }
 
 TEST(ConfigParser, loadConfig_CacheDirectory_SpecificValue) {

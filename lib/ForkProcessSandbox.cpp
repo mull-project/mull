@@ -17,7 +17,7 @@ enum {
   FPSPipeRead = 0
 };
 
-pid_t mutangFork(const char *processName) {
+pid_t mullFork(const char *processName) {
   static int childrenCount = 0;
   childrenCount++;
   const pid_t pid = fork();
@@ -58,16 +58,16 @@ Mutang::ForkProcessSandbox::run(std::function<void (ExecutionResult *)> function
 
   ExecutionResult *sharedResult = new (SharedMemory) ExecutionResult();
 
-  const pid_t watchdogPID = mutangFork("watchdog");
+  const pid_t watchdogPID = mullFork("watchdog");
   if (watchdogPID == 0) {
 
-    const pid_t timerPID = mutangFork("timer");
+    const pid_t timerPID = mullFork("timer");
     if (timerPID == 0) {
       std::this_thread::sleep_for(std::chrono::milliseconds(timeoutMilliseconds));
       exit(0);
     }
 
-    const pid_t workerPID = mutangFork("worker");
+    const pid_t workerPID = mullFork("worker");
 
     auto start = high_resolution_clock::now();
 

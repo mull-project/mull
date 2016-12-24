@@ -23,10 +23,10 @@ static TestModuleFactory TestModuleFactory;
 
 TEST(SimpleTestFinder, FindTest) {
   auto ModuleWithTests = TestModuleFactory.createTesterModule();
-  auto mutangModuleWithTests = make_unique<MutangModule>(std::move(ModuleWithTests), "");
+  auto mullModuleWithTests = make_unique<MutangModule>(std::move(ModuleWithTests), "");
 
   Context Ctx;
-  Ctx.addModule(std::move(mutangModuleWithTests));
+  Ctx.addModule(std::move(mullModuleWithTests));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
@@ -42,12 +42,12 @@ TEST(SimpleTestFinder, FindTestee) {
   auto ModuleWithTests = TestModuleFactory.createTesterModule();
   auto ModuleWithTestees = TestModuleFactory.createTesteeModule();
 
-  auto mutangModuleWithTests = make_unique<MutangModule>(std::move(ModuleWithTests), "");
-  auto mutangModuleWithTestees = make_unique<MutangModule>(std::move(ModuleWithTestees), "");
+  auto mullModuleWithTests = make_unique<MutangModule>(std::move(ModuleWithTests), "");
+  auto mullModuleWithTestees = make_unique<MutangModule>(std::move(ModuleWithTestees), "");
 
   Context Ctx;
-  Ctx.addModule(std::move(mutangModuleWithTests));
-  Ctx.addModule(std::move(mutangModuleWithTestees));
+  Ctx.addModule(std::move(mullModuleWithTests));
+  Ctx.addModule(std::move(mullModuleWithTestees));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
@@ -70,12 +70,12 @@ TEST(SimpleTestFinder, FindMutationPoints_AddMutationOperator) {
   auto ModuleWithTests   = TestModuleFactory.createTesterModule();
   auto ModuleWithTestees = TestModuleFactory.createTesteeModule();
 
-  auto mutangModuleWithTests   = make_unique<MutangModule>(std::move(ModuleWithTests), "");
-  auto mutangModuleWithTestees = make_unique<MutangModule>(std::move(ModuleWithTestees), "");
+  auto mullModuleWithTests   = make_unique<MutangModule>(std::move(ModuleWithTests), "");
+  auto mullModuleWithTestees = make_unique<MutangModule>(std::move(ModuleWithTestees), "");
 
   Context Ctx;
-  Ctx.addModule(std::move(mutangModuleWithTests));
-  Ctx.addModule(std::move(mutangModuleWithTestees));
+  Ctx.addModule(std::move(mullModuleWithTests));
+  Ctx.addModule(std::move(mullModuleWithTestees));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   std::unique_ptr<AddMutationOperator> addMutationOperator = make_unique<AddMutationOperator>();
@@ -113,12 +113,12 @@ TEST(SimpleTestFinder, FindMutationPoints_NegateConditionMutationOperator) {
   auto ModuleWithTests   = TestModuleFactory.create_SimpleTest_NegateCondition_Tester_Module();
   auto ModuleWithTestees = TestModuleFactory.create_SimpleTest_NegateCondition_Testee_Module();
 
-  auto mutangModuleWithTests   = make_unique<MutangModule>(std::move(ModuleWithTests), "");
-  auto mutangModuleWithTestees = make_unique<MutangModule>(std::move(ModuleWithTestees), "");
+  auto mullModuleWithTests   = make_unique<MutangModule>(std::move(ModuleWithTests), "");
+  auto mullModuleWithTestees = make_unique<MutangModule>(std::move(ModuleWithTestees), "");
 
   Context Ctx;
-  Ctx.addModule(std::move(mutangModuleWithTests));
-  Ctx.addModule(std::move(mutangModuleWithTestees));
+  Ctx.addModule(std::move(mullModuleWithTests));
+  Ctx.addModule(std::move(mullModuleWithTestees));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
@@ -155,12 +155,12 @@ TEST(SimpleTestFinder, FindMutationPoints_RemoteVoidFunctionMutationOperator) {
   auto ModuleWithTests   = TestModuleFactory.create_SimpleTest_RemoveVoidFunction_Tester_Module();
   auto ModuleWithTestees = TestModuleFactory.create_SimpleTest_RemoveVoidFunction_Testee_Module();
 
-  auto mutangModuleWithTests   = make_unique<MutangModule>(std::move(ModuleWithTests), "");
-  auto mutangModuleWithTestees = make_unique<MutangModule>(std::move(ModuleWithTestees), "");
+  auto mullModuleWithTests   = make_unique<MutangModule>(std::move(ModuleWithTests), "");
+  auto mullModuleWithTestees = make_unique<MutangModule>(std::move(ModuleWithTestees), "");
 
   Context Ctx;
-  Ctx.addModule(std::move(mutangModuleWithTests));
-  Ctx.addModule(std::move(mutangModuleWithTestees));
+  Ctx.addModule(std::move(mullModuleWithTests));
+  Ctx.addModule(std::move(mullModuleWithTestees));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
@@ -200,12 +200,12 @@ TEST(SimpleTestFinder, FindTestees_TesteePathMemorization) {
   auto ModuleWithTests   = TestModuleFactory.create_SimpleTest_testeePathCalculation_tester();
   auto ModuleWithTestees = TestModuleFactory.create_SimpleTest_testeePathCalculation_testee();
 
-  auto mutangModuleWithTests   = make_unique<MutangModule>(std::move(ModuleWithTests), "");
-  auto mutangModuleWithTestees = make_unique<MutangModule>(std::move(ModuleWithTestees), "");
+  auto mullModuleWithTests   = make_unique<MutangModule>(std::move(ModuleWithTests), "");
+  auto mullModuleWithTestees = make_unique<MutangModule>(std::move(ModuleWithTestees), "");
 
   Context Ctx;
-  Ctx.addModule(std::move(mutangModuleWithTests));
-  Ctx.addModule(std::move(mutangModuleWithTestees));
+  Ctx.addModule(std::move(mullModuleWithTests));
+  Ctx.addModule(std::move(mullModuleWithTestees));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
 

@@ -94,7 +94,7 @@ TEST(Driver, SimpleTest_AddMutationOperator) {
   bool dryRun = false;
   bool useCache = false;
   int distance = 10;
-  std::string cacheDirectory = "/tmp/mutang_cache";
+  std::string cacheDirectory = "/tmp/mull_cache";
   Config config(ModulePaths, doFork, dryRun, useCache, MutangDefaultTimeout,
                 distance, cacheDirectory);
 
@@ -148,7 +148,7 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
   bool dryRun = false;
   bool useCache = false;
   int distance = 10;
-  std::string cacheDirectory = "/tmp/mutang_cache";
+  std::string cacheDirectory = "/tmp/mull_cache";
   Config config(ModulePaths, doFork, dryRun, useCache, MutangDefaultTimeout,
                 distance, cacheDirectory);
 
@@ -193,7 +193,7 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
   bool dryRun = false;
   bool useCache = false;
   int distance = 10;
-  std::string cacheDirectory = "/tmp/mutang_cache";
+  std::string cacheDirectory = "/tmp/mull_cache";
   Config config(ModulePaths, doFork, dryRun, useCache, MutangDefaultTimeout,
                 distance, cacheDirectory);
 
@@ -238,7 +238,7 @@ TEST(Driver, SimpleTest_TesteePathCalculation) {
   bool dryRun = false;
   bool useCache = false;
   int distance = 10;
-  std::string cacheDirectory = "/tmp/mutang_cache";
+  std::string cacheDirectory = "/tmp/mull_cache";
   Config config(ModulePaths, doFork, dryRun, useCache, MutangDefaultTimeout,
                 distance, cacheDirectory);
 

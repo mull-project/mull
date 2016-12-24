@@ -20,10 +20,10 @@ static TestModuleFactory TestModuleFactory;
 
 TEST(GoogleTestFinder, FindTest) {
   auto ModuleWithTests       = TestModuleFactory.createGoogleTestTesterModule();
-  auto mutangModuleWithTests = make_unique<MutangModule>(std::move(ModuleWithTests), "");
+  auto mullModuleWithTests = make_unique<MutangModule>(std::move(ModuleWithTests), "");
 
   Context Ctx;
-  Ctx.addModule(std::move(mutangModuleWithTests));
+  Ctx.addModule(std::move(mullModuleWithTests));
 
   GoogleTestFinder finder;
 
@@ -41,12 +41,12 @@ TEST(GoogleTestFinder, DISABLED_FindTestee) {
 
   auto ModuleWithTestees = TestModuleFactory.createGoogleTestTesteeModule();
 
-  auto mutangModuleWithTests   = make_unique<MutangModule>(std::move(ModuleWithTests), "");
-  auto mutangModuleWithTestees = make_unique<MutangModule>(std::move(ModuleWithTestees), "");
+  auto mullModuleWithTests   = make_unique<MutangModule>(std::move(ModuleWithTests), "");
+  auto mullModuleWithTestees = make_unique<MutangModule>(std::move(ModuleWithTestees), "");
 
   Context Ctx;
-  Ctx.addModule(std::move(mutangModuleWithTests));
-  Ctx.addModule(std::move(mutangModuleWithTestees));
+  Ctx.addModule(std::move(mullModuleWithTests));
+  Ctx.addModule(std::move(mullModuleWithTestees));
 
   GoogleTestFinder Finder;
   auto Tests = Finder.findTests(Ctx);
@@ -67,12 +67,12 @@ TEST(GoogleTestFinder, DISABLED_FindMutationPoints) {
   auto ModuleWithTests   = TestModuleFactory.createTesterModule();
   auto ModuleWithTestees = TestModuleFactory.createTesteeModule();
 
-  auto mutangModuleWithTests   = make_unique<MutangModule>(std::move(ModuleWithTests), "");
-  auto mutangModuleWithTestees = make_unique<MutangModule>(std::move(ModuleWithTestees), "");
+  auto mullModuleWithTests   = make_unique<MutangModule>(std::move(ModuleWithTests), "");
+  auto mullModuleWithTestees = make_unique<MutangModule>(std::move(ModuleWithTestees), "");
 
   Context Ctx;
-  Ctx.addModule(std::move(mutangModuleWithTests));
-  Ctx.addModule(std::move(mutangModuleWithTestees));
+  Ctx.addModule(std::move(mullModuleWithTests));
+  Ctx.addModule(std::move(mullModuleWithTestees));
 
   GoogleTestFinder Finder;
   auto Tests = Finder.findTests(Ctx);
