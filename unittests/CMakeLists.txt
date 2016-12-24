@@ -10,7 +10,6 @@ add_mull_unittest(MullUnitTests
   ContextTest.cpp
   DriverTests.cpp
   ForkProcessSandboxTest.cpp
-  MutationEngineTests.cpp
   MutationPointTests.cpp
   TestRunnersTests.cpp
   UniqueIdentifierTests.cpp
