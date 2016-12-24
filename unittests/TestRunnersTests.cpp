@@ -1,4 +1,3 @@
-#include "MutationEngine.h"
 
 #include "Context.h"
 #include "MutationOperators/AddMutationOperator.h"
@@ -93,8 +92,7 @@ TEST(SimpleTestRunner, runTest) {
   std::vector<MutationPoint *> MutationPoints = testFinder.findMutationPoints(Ctx, *Testee);
 
   MutationPoint *MP = (*(MutationPoints.begin()));
-  MutationEngine Engine;
-  Engine.applyMutation(Testee->getParent(), *MP);
+  MP->applyMutation(Testee->getParent());
 
   {
     auto Obj = compiler.compileModule(ModuleWithTests);
@@ -177,8 +175,7 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
 
   MutationPoint *MP = (*(MutationPoints.begin()));
-  MutationEngine Engine;
-  Engine.applyMutation(Testee->getParent(), *MP);
+  MP->applyMutation(Testee->getParent());
 
   Obj = compiler.compileModule(ModuleWithTests);
   ObjectFiles.push_back(Obj.getBinary());

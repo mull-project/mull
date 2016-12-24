@@ -15,7 +15,6 @@ llvm_add_library(mull
   Toolchain/Toolchain.cpp
 
   MullModule.cpp
-  MutationEngine.cpp
   MutationPoint.cpp
   Result.cpp
   TestResult.cpp
