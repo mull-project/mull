@@ -8,17 +8,17 @@
 
 #include "gtest/gtest.h"
 
-using namespace Mutang;
+using namespace mull;
 using namespace llvm;
 
 static TestModuleFactory TestModuleFactory;
 
 TEST(Context, AddModule) {
   auto ModuleWithTests = TestModuleFactory.createTesterModule();
-  auto mutangModuleWithTests = make_unique<MutangModule>(std::move(ModuleWithTests), "");
+  auto mullModuleWithTests = make_unique<MullModule>(std::move(ModuleWithTests), "");
 
   Context Ctx;
-  Ctx.addModule(std::move(mutangModuleWithTests));
+  Ctx.addModule(std::move(mullModuleWithTests));
 
   ASSERT_EQ(1U, Ctx.getModules().size());
 }

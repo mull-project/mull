@@ -20,7 +20,7 @@
 
 #include "gtest/gtest.h"
 
-using namespace Mutang;
+using namespace mull;
 using namespace llvm;
 
 static LLVMContext Ctx;
@@ -80,7 +80,7 @@ TEST(NegateConditionMutationOperator, getMutationPoints_no_filter) {
   Function *function = llvmModule->getFunction("_ZN4llvm5APInt12tcExtractBitEPKyj");
   assert(function);
 
-  auto module = make_unique<MutangModule>(std::move(llvmModule), "APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutation_operator");
+  auto module = make_unique<MullModule>(std::move(llvmModule), "APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutation_operator");
   Context context;
   context.addModule(std::move(module));
 
@@ -99,7 +99,7 @@ TEST(NegateConditionMutationOperator, getMutationPoints_filter_to_bool_converion
   Function *function = llvmModule->getFunction("_ZNK4llvm7APFloat11isSignalingEv");
   assert(function);
 
-  auto module = make_unique<MutangModule>(std::move(llvmModule), "APFloat_019fc57b8bd190d33389137abbe7145e_214_2_7_negate_mutation_operator");
+  auto module = make_unique<MullModule>(std::move(llvmModule), "APFloat_019fc57b8bd190d33389137abbe7145e_214_2_7_negate_mutation_operator");
   Context context;
   context.addModule(std::move(module));
 
@@ -118,7 +118,7 @@ TEST(NegateConditionMutationOperator, getMutationPoints_filter_is_null) {
   Function *function = llvmModule->getFunction("_ZN4llvm7APFloat15freeSignificandEv");
   assert(function);
 
-  auto module = make_unique<MutangModule>(std::move(llvmModule), "APFloat_019fc57b8bd190d33389137abbe7145e_5_1_3_negate_mutation_operator");
+  auto module = make_unique<MullModule>(std::move(llvmModule), "APFloat_019fc57b8bd190d33389137abbe7145e_5_1_3_negate_mutation_operator");
   Context context;
   context.addModule(std::move(module));
 

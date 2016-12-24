@@ -28,7 +28,7 @@ When opening Xcode first time do not autocreate schemes but choose option to
 create them manually otherwise you'll have a lot of LLVM-related schemes which
 you don't need.
 
-Currently the work is being done against MutangUnitTests scheme so that's the
+Currently the work is being done against MullUnitTests scheme so that's the
 only scheme that should be created and used.
 
 ## Notes

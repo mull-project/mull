@@ -6,7 +6,7 @@
 
 #include "gtest/gtest.h"
 
-using namespace Mutang;
+using namespace mull;
 using namespace llvm;
 
 TEST(ConfigParser, loadConfig_BitcodeFiles) {
@@ -65,7 +65,7 @@ TEST(ConfigParser, loadConfig_Timeout_Unspecified) {
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(Input);
 
-  ASSERT_EQ(MutangDefaultTimeout, Cfg.getTimeout());
+  ASSERT_EQ(MullDefaultTimeout, Cfg.getTimeout());
 }
 
 TEST(ConfigParser, loadConfig_Timeout_SpecificValue) {
@@ -149,7 +149,7 @@ TEST(ConfigParser, loadConfig_CacheDirectory_Unspecified) {
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(Input);
 
-  ASSERT_EQ("/tmp/mutang_cache", Cfg.getCacheDirectory());
+  ASSERT_EQ("/tmp/mull_cache", Cfg.getCacheDirectory());
 }
 
 TEST(ConfigParser, loadConfig_CacheDirectory_SpecificValue) {

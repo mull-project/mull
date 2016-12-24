@@ -13,9 +13,9 @@ namespace llvm {
 namespace yaml {
 class Input;
 template <>
-struct MappingTraits<Mutang::Config>
+struct MappingTraits<mull::Config>
 {
-  static void mapping(IO& io, Mutang::Config& config)
+  static void mapping(IO& io, mull::Config& config)
   {
     io.mapOptional("bitcode_files", config.bitcodePaths);
     io.mapOptional("fork", config.fork);
@@ -29,7 +29,7 @@ struct MappingTraits<Mutang::Config>
 }
 }
 
-namespace Mutang {
+namespace mull {
 
 class ConfigParser {
 public:

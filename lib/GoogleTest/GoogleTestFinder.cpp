@@ -25,7 +25,7 @@
 
 #include <cxxabi.h>
 
-using namespace Mutang;
+using namespace mull;
 using namespace llvm;
 
 class GoogleTestMutationOperatorFilter : public MutationOperatorFilter {

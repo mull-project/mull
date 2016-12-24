@@ -11,7 +11,7 @@ namespace llvm {
   class Module;
 }
 
-namespace Mutang {
+namespace mull {
 
 class Context;
 class MutationPoint;

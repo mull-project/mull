@@ -25,7 +25,7 @@
 
 #include "gtest/gtest.h"
 
-using namespace Mutang;
+using namespace mull;
 using namespace llvm;
 
 static LLVMContext GlobalCtx;
@@ -36,48 +36,48 @@ class FakeModuleLoader : public ModuleLoader {
 public:
   FakeModuleLoader() : ModuleLoader(GlobalCtx) {}
 
-  std::unique_ptr<MutangModule> loadModuleAtPath(const std::string &path) override {
+  std::unique_ptr<MullModule> loadModuleAtPath(const std::string &path) override {
     if (path == "foo") {
       auto module = TestModuleFactory.createTesterModule();
-      return make_unique<MutangModule>(std::move(module), "1234");
+      return make_unique<MullModule>(std::move(module), "1234");
     }
 
     else if (path == "bar") {
       auto module = TestModuleFactory.createTesteeModule();
-      return make_unique<MutangModule>(std::move(module), "3456");
+      return make_unique<MullModule>(std::move(module), "3456");
     }
 
     else if (path == "simple_test/negate_condition/tester") {
       auto module = TestModuleFactory.create_SimpleTest_NegateCondition_Tester_Module();
-      return make_unique<MutangModule>(std::move(module), "5678");
+      return make_unique<MullModule>(std::move(module), "5678");
     }
 
     else if (path == "simple_test/negate_condition/testee") {
       auto module = TestModuleFactory.create_SimpleTest_NegateCondition_Testee_Module();
-      return make_unique<MutangModule>(std::move(module), "7890");
+      return make_unique<MullModule>(std::move(module), "7890");
     }
 
     else if (path == "simple_test/remove_void_function/tester") {
       auto module = TestModuleFactory.create_SimpleTest_RemoveVoidFunction_Tester_Module();
-      return make_unique<MutangModule>(std::move(module), "abcd");
+      return make_unique<MullModule>(std::move(module), "abcd");
     }
 
     else if (path == "simple_test/remove_void_function/testee") {
       auto module = TestModuleFactory.create_SimpleTest_RemoveVoidFunction_Testee_Module();
-      return make_unique<MutangModule>(std::move(module), "efgh");
+      return make_unique<MullModule>(std::move(module), "efgh");
     }
 
     else if (path == "simple_test/testee_path_calculation/tester") {
       auto module = TestModuleFactory.create_SimpleTest_testeePathCalculation_tester();
-      return make_unique<MutangModule>(std::move(module), "simple_test/testee_path_calculation/tester");
+      return make_unique<MullModule>(std::move(module), "simple_test/testee_path_calculation/tester");
     }
 
     else if (path == "simple_test/testee_path_calculation/testee") {
       auto module = TestModuleFactory.create_SimpleTest_testeePathCalculation_testee();
-      return make_unique<MutangModule>(std::move(module), "simple_test/testee_path_calculation/testee");
+      return make_unique<MullModule>(std::move(module), "simple_test/testee_path_calculation/testee");
     }
 
-    return make_unique<MutangModule>(nullptr, "");
+    return make_unique<MullModule>(nullptr, "");
   }
 };
 
@@ -94,8 +94,8 @@ TEST(Driver, SimpleTest_AddMutationOperator) {
   bool dryRun = false;
   bool useCache = false;
   int distance = 10;
-  std::string cacheDirectory = "/tmp/mutang_cache";
-  Config config(ModulePaths, doFork, dryRun, useCache, MutangDefaultTimeout,
+  std::string cacheDirectory = "/tmp/mull_cache";
+  Config config(ModulePaths, doFork, dryRun, useCache, MullDefaultTimeout,
                 distance, cacheDirectory);
 
   FakeModuleLoader loader;
@@ -148,8 +148,8 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
   bool dryRun = false;
   bool useCache = false;
   int distance = 10;
-  std::string cacheDirectory = "/tmp/mutang_cache";
-  Config config(ModulePaths, doFork, dryRun, useCache, MutangDefaultTimeout,
+  std::string cacheDirectory = "/tmp/mull_cache";
+  Config config(ModulePaths, doFork, dryRun, useCache, MullDefaultTimeout,
                 distance, cacheDirectory);
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
@@ -193,8 +193,8 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
   bool dryRun = false;
   bool useCache = false;
   int distance = 10;
-  std::string cacheDirectory = "/tmp/mutang_cache";
-  Config config(ModulePaths, doFork, dryRun, useCache, MutangDefaultTimeout,
+  std::string cacheDirectory = "/tmp/mull_cache";
+  Config config(ModulePaths, doFork, dryRun, useCache, MullDefaultTimeout,
                 distance, cacheDirectory);
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
@@ -238,8 +238,8 @@ TEST(Driver, SimpleTest_TesteePathCalculation) {
   bool dryRun = false;
   bool useCache = false;
   int distance = 10;
-  std::string cacheDirectory = "/tmp/mutang_cache";
-  Config config(ModulePaths, doFork, dryRun, useCache, MutangDefaultTimeout,
+  std::string cacheDirectory = "/tmp/mull_cache";
+  Config config(ModulePaths, doFork, dryRun, useCache, MullDefaultTimeout,
                 distance, cacheDirectory);
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;

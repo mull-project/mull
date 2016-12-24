@@ -5,7 +5,7 @@
 
 #include "llvm/Target/TargetMachine.h" 
 
-namespace Mutang {
+namespace mull {
   class Config;
 
   class Toolchain {

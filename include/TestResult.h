@@ -12,7 +12,7 @@ class Function;
 
 }
 
-namespace Mutang {
+namespace mull {
 
 class Test;
 
@@ -38,7 +38,7 @@ class MutationResult {
   Testee *testee;
 
 public:
-  MutationResult(ExecutionResult R, Mutang::MutationPoint *MP, Testee *testee);
+  MutationResult(ExecutionResult R, mull::MutationPoint *MP, Testee *testee);
 
   ExecutionResult getExecutionResult()  { return Result; }
   MutationPoint* getMutationPoint()     { return MutPoint; }

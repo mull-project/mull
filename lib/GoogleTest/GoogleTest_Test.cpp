@@ -1,6 +1,6 @@
 #include "GoogleTest/GoogleTest_Test.h"
 
-using namespace Mutang;
+using namespace mull;
 using namespace std;
 
 GoogleTest_Test::GoogleTest_Test(std::string Name,

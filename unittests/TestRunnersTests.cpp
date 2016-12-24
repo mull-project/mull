@@ -19,7 +19,7 @@
 
 #include "gtest/gtest.h"
 
-using namespace Mutang;
+using namespace mull;
 using namespace llvm;
 
 static TestModuleFactory TestModuleFactory;
@@ -45,11 +45,11 @@ TEST(SimpleTestRunner, runTest) {
   Module *ModuleWithTests   = OwnedModuleWithTests.get();
   Module *ModuleWithTestees = OwnedModuleWithTestees.get();
 
-  auto mutangOwnedModuleWithTests   = make_unique<MutangModule>(std::move(OwnedModuleWithTests), "");
-  auto mutangOwnedModuleWithTestees = make_unique<MutangModule>(std::move(OwnedModuleWithTestees), "");
+  auto mullOwnedModuleWithTests   = make_unique<MullModule>(std::move(OwnedModuleWithTests), "");
+  auto mullOwnedModuleWithTestees = make_unique<MullModule>(std::move(OwnedModuleWithTestees), "");
 
-  Ctx.addModule(std::move(mutangOwnedModuleWithTests));
-  Ctx.addModule(std::move(mutangOwnedModuleWithTestees));
+  Ctx.addModule(std::move(mullOwnedModuleWithTests));
+  Ctx.addModule(std::move(mullOwnedModuleWithTestees));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
@@ -134,11 +134,11 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   Module *ModuleWithTests   = OwnedModuleWithTests.get();
   Module *ModuleWithTestees = OwnedModuleWithTestees.get();
 
-  auto mutangOwnedModuleWithTests   = make_unique<MutangModule>(std::move(OwnedModuleWithTests), "");
-  auto mutangOwnedModuleWithTestees = make_unique<MutangModule>(std::move(OwnedModuleWithTestees), "");
+  auto mullOwnedModuleWithTests   = make_unique<MullModule>(std::move(OwnedModuleWithTests), "");
+  auto mullOwnedModuleWithTestees = make_unique<MullModule>(std::move(OwnedModuleWithTestees), "");
 
-  Ctx.addModule(std::move(mutangOwnedModuleWithTests));
-  Ctx.addModule(std::move(mutangOwnedModuleWithTestees));
+  Ctx.addModule(std::move(mullOwnedModuleWithTests));
+  Ctx.addModule(std::move(mullOwnedModuleWithTestees));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
@@ -215,11 +215,11 @@ TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
   Module *ModuleWithTests   = OwnedModuleWithTests.get();
   Module *ModuleWithTestees = OwnedModuleWithTestees.get();
 
-  auto mutangOwnedModuleWithTests   = make_unique<MutangModule>(std::move(OwnedModuleWithTests), "");
-  auto mutangOwnedModuleWithTestees = make_unique<MutangModule>(std::move(OwnedModuleWithTestees), "");
+  auto mullOwnedModuleWithTests   = make_unique<MullModule>(std::move(OwnedModuleWithTests), "");
+  auto mullOwnedModuleWithTestees = make_unique<MullModule>(std::move(OwnedModuleWithTestees), "");
 
-  Ctx.addModule(std::move(mutangOwnedModuleWithTests));
-  Ctx.addModule(std::move(mutangOwnedModuleWithTestees));
+  Ctx.addModule(std::move(mullOwnedModuleWithTests));
+  Ctx.addModule(std::move(mullOwnedModuleWithTestees));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());

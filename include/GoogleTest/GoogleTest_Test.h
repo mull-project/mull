@@ -10,7 +10,7 @@ class Function;
 
 }
 
-namespace Mutang {
+namespace mull {
 
 class GoogleTest_Test : public Test {
   std::string TestName;

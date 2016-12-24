@@ -1,20 +1,20 @@
 #include "Toolchain/Compiler.h"
 
-#include "MutangModule.h"
+#include "MullModule.h"
 
 #include "llvm/ExecutionEngine/Orc/CompileUtils.h"
 #include "llvm/IR/Module.h"
 
 using namespace llvm;
 using namespace llvm::object;
-using namespace Mutang;
+using namespace mull;
 
 Compiler::Compiler(TargetMachine &machine) :
   targetMachine(machine)
 {
 }
 
-OwningBinary<ObjectFile> Compiler::compileModule(const MutangModule &module) {
+OwningBinary<ObjectFile> Compiler::compileModule(const MullModule &module) {
   return compileModule(module.getModule());
 }
 

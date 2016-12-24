@@ -12,11 +12,11 @@
 
 #include <chrono>
 
-using namespace Mutang;
+using namespace mull;
 using namespace llvm;
 using namespace std::chrono;
 
-extern "C" int mutang_simple_test_printf(const char *fmt, ...) {
+extern "C" int mull_simple_test_printf(const char *fmt, ...) {
   va_list arglist;
 
   printf("Printf called from JIT: \n");
@@ -28,12 +28,12 @@ extern "C" int mutang_simple_test_printf(const char *fmt, ...) {
   return 0;
 }
 
-class Mutang_SimpleTest_Resolver : public JITSymbolResolver {
+class Mull_SimpleTest_Resolver : public JITSymbolResolver {
 public:
 
   JITSymbol findSymbol(const std::string &Name) {
     //if (Name == "_printf") {
-    //  return findSymbol("mutang_simple_test_printf");
+    //  return findSymbol("mull_simple_test_printf");
     //}
 
     if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(Name)) {
@@ -74,7 +74,7 @@ ExecutionResult SimpleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) 
 
   auto Handle = ObjectLayer.addObjectSet(ObjectFiles,
                                          make_unique<SectionMemoryManager>(),
-                                         make_unique<Mutang_SimpleTest_Resolver>());
+                                         make_unique<Mull_SimpleTest_Resolver>());
   void *FunctionPointer = TestFunctionPointer(*SimpleTest->GetTestFunction());
 
   auto start = high_resolution_clock::now();

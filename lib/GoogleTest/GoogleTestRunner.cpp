@@ -13,7 +13,7 @@
 #include <chrono>
 #include <execinfo.h>
 
-using namespace Mutang;
+using namespace mull;
 using namespace llvm;
 using namespace std::chrono;
 
@@ -21,10 +21,10 @@ namespace {
   class UnitTest;
 }
 
-typedef void (*mutang_destructor_t)(void *);
+typedef void (*mull_destructor_t)(void *);
 
 struct atexit_entry {
-  mutang_destructor_t destructor;
+  mull_destructor_t destructor;
   void *arg;
   void *dso_handle;
 };
@@ -33,7 +33,7 @@ const static int dtors_count = 64;
 static int current_dtor = 0;
 static atexit_entry dtors[dtors_count];
 
-extern "C" int mutang__cxa_atexit(mutang_destructor_t destructor, void *arg, void *__dso_handle) {
+extern "C" int mull__cxa_atexit(mull_destructor_t destructor, void *arg, void *__dso_handle) {
   assert(current_dtor < dtors_count);
 
 #if 0
@@ -75,27 +75,27 @@ void runDestructors() {
 
 /// Hijacking output functions to prevent extra logging
 
-extern "C" int mutang_vprintf(const char *restrict, va_list) {
+extern "C" int mull_vprintf(const char *restrict, va_list) {
   return 0;
 }
 
-extern "C" int mutang_printf(const char *fmt, ...) {
+extern "C" int mull_printf(const char *fmt, ...) {
   /// ignoring
   return 0;
 }
 
-extern "C" void *mutang__dso_handle = nullptr;
+extern "C" void *mull__dso_handle = nullptr;
 
-class Mutang_GoogleTest_Resolver : public JITSymbolResolver {
+class Mull_GoogleTest_Resolver : public JITSymbolResolver {
 public:
 
   JITSymbol findSymbol(const std::string &Name) {
     if (Name == "___cxa_atexit") {
-      return findSymbol("mutang__cxa_atexit");
+      return findSymbol("mull__cxa_atexit");
     }
 
     if (Name == "___dso_handle") {
-      return findSymbol("mutang__dso_handle");
+      return findSymbol("mull__dso_handle");
     }
 
     if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(Name))
@@ -145,7 +145,7 @@ ExecutionResult GoogleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) 
 
   auto Handle = ObjectLayer.addObjectSet(ObjectFiles,
                                          make_unique<SectionMemoryManager>(),
-                                         make_unique<Mutang_GoogleTest_Resolver>());
+                                         make_unique<Mull_GoogleTest_Resolver>());
 
   auto start = high_resolution_clock::now();
 
@@ -154,7 +154,7 @@ ExecutionResult GoogleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) 
   }
 
   std::string filter = "--gtest_filter=" + GTest->getTestName();
-  const char *argv[] = { "mutang", filter.c_str(), NULL };
+  const char *argv[] = { "mull", filter.c_str(), NULL };
   int argc = 2;
 
   /// Normally Google Test Driver looks like this:

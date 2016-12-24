@@ -1,6 +1,6 @@
 #include "Logger.h"
 
-namespace Mutang {
+namespace mull {
 
 void Logger::setLevel(Logger::Level level) { logLevel = level; }
 

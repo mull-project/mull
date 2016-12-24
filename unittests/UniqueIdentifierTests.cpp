@@ -7,13 +7,13 @@
 
 #include "gtest/gtest.h"
 
-using namespace Mutang;
+using namespace mull;
 using namespace llvm;
 using namespace std;
 
 static TestModuleFactory testModuleFactory;
 
-TEST(MutangModule, uniqueIdentifier) {
+TEST(MullModule, uniqueIdentifier) {
   LLVMContext context;
   ModuleLoader loader(context);
   auto module = loader.loadModuleAtPath(testModuleFactory.testerModulePath_Bitcode());

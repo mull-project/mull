@@ -21,7 +21,7 @@
 #include <set>
 #include <vector>
 
-using namespace Mutang;
+using namespace mull;
 using namespace llvm;
 
 static bool shouldSkipDefinedFunction(llvm::Function *definedFunction) {

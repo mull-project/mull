@@ -18,7 +18,7 @@ class Function;
 
 }
 
-namespace Mutang {
+namespace mull {
 
 class Config;
 class ModuleLoader;

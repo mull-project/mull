@@ -1,4 +1,4 @@
-llvm_add_library(mutang
+llvm_add_library(mull
   ConfigParser.cpp
   Context.cpp
   Driver.cpp
@@ -14,7 +14,7 @@ llvm_add_library(mutang
   Toolchain/ObjectCache.cpp
   Toolchain/Toolchain.cpp
 
-  MutangModule.cpp
+  MullModule.cpp
   MutationEngine.cpp
   MutationPoint.cpp
   Result.cpp
@@ -33,12 +33,12 @@ llvm_add_library(mutang
   SQLiteReporter.cpp
 
   ADDITIONAL_HEADER_DIRS
-  ${MUTANG_INCLUDE_DIR}
-  ${MUTANG_INCLUDE_DIR}/MutationOperators
-  ${MUTANG_INCLUDE_DIR}/Context
-  ${MUTANG_INCLUDE_DIR}/GoogleTest
-  ${MUTANG_INCLUDE_DIR}/SimpleTest
-  ${MUTANG_INCLUDE_DIR}/Toolchain
+  ${MULL_INCLUDE_DIR}
+  ${MULL_INCLUDE_DIR}/MutationOperators
+  ${MULL_INCLUDE_DIR}/Context
+  ${MULL_INCLUDE_DIR}/GoogleTest
+  ${MULL_INCLUDE_DIR}/SimpleTest
+  ${MULL_INCLUDE_DIR}/Toolchain
 
   LINK_LIBS
   LLVMAsmParser
@@ -66,10 +66,10 @@ llvm_add_library(mutang
 
 # The following is needed to make CMake to generate a folder structure in Xcode
 # that corresponds to a physical folder structure.
-get_target_property(HERE_TARGET_SOURCES mutang SOURCES)
+get_target_property(HERE_TARGET_SOURCES mull SOURCES)
 foreach(source_file ${HERE_TARGET_SOURCES})
   if (source_file MATCHES "(.*)\.h$")
-    file(RELATIVE_PATH relative_source_file ${MUTANG_INCLUDE_DIR} ${source_file})
+    file(RELATIVE_PATH relative_source_file ${MULL_INCLUDE_DIR} ${source_file})
     get_filename_component(relative_path ${relative_source_file} DIRECTORY)
     source_group("Header Files\\${relative_path}" FILES ${source_file})
   else()

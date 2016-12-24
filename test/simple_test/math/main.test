@@ -1,4 +1,4 @@
-RUN: cd %S; make clean; make PWD=%S; %mutang_driver %S/config.yaml | FileCheck %s
+RUN: cd %S; make clean; make PWD=%S; %mull_driver %S/config.yaml | FileCheck %s
 
 CHECK:      Result for 'test_addition_5_plus_6_should_be_greater_than_zero'
 CHECK-NEXT:	  Original test 'Passed'

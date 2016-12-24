@@ -15,7 +15,7 @@ class Module;
 
 }
 
-namespace Mutang {
+namespace mull {
 
   class GoogleTestRunner : public TestRunner {
   llvm::orc::ObjectLinkingLayer<> ObjectLayer;

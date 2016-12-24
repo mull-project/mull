@@ -1,7 +1,7 @@
 
 #include <functional>
 
-namespace Mutang {
+namespace mull {
 
 struct ExecutionResult;
 

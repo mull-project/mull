@@ -12,7 +12,7 @@ class TargetMachine;
 
 }
 
-namespace Mutang {
+namespace mull {
 
 class Test;
 

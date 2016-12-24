@@ -2,7 +2,7 @@
 
 #include <llvm/Support/raw_ostream.h>
 
-namespace Mutang {
+namespace mull {
 
 class Logger {
 public:

@@ -11,7 +11,7 @@
 #include "gtest/gtest.h"
 
 using namespace llvm;
-using namespace Mutang;
+using namespace mull;
 
 static TestModuleFactory TestModuleFactory;
 
@@ -27,8 +27,8 @@ TEST(Compiler, CompileModule) {
   Compiler compiler(*targetMachine.get());
 
   auto someModule = TestModuleFactory.createTesterModule();
-  MutangModule mutangModule(std::move(someModule), "");
-  auto Binary = compiler.compileModule(mutangModule);
+  MullModule mullModule(std::move(someModule), "");
+  auto Binary = compiler.compileModule(mullModule);
 
   ASSERT_NE(nullptr, Binary.getBinary());
 }

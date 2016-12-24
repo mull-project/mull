@@ -8,7 +8,7 @@ class Function;
 
 }
 
-namespace Mutang {
+namespace mull {
 
 class SimpleTest_Test : public Test {
   llvm::Function *TestFunction;

@@ -3,10 +3,10 @@
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Module.h"
 
-using namespace Mutang;
+using namespace mull;
 using namespace llvm;
 
-void Context::addModule(std::unique_ptr<MutangModule> module) {
+void Context::addModule(std::unique_ptr<MullModule> module) {
   for (auto &function : module->getModule()->getFunctionList()) {
     if (!function.isDeclaration()) {
       FunctionsRegistry.insert(std::make_pair(function.getName(), &function));
@@ -26,7 +26,7 @@ llvm::Function *Context::lookupDefinedFunction(llvm::StringRef FunctionName) {
   return it->second;
 }
 
-MutangModule *Context::moduleWithIdentifier(const std::string &identifier) {
+MullModule *Context::moduleWithIdentifier(const std::string &identifier) {
   auto it = moduleRegistry.find(identifier);
   if (it == moduleRegistry.end()) {
     return nullptr;
@@ -34,7 +34,7 @@ MutangModule *Context::moduleWithIdentifier(const std::string &identifier) {
   return it->second;
 }
 
-MutangModule *Context::moduleWithIdentifier(const std::string &identifier) const {
+MullModule *Context::moduleWithIdentifier(const std::string &identifier) const {
   auto it = moduleRegistry.find(identifier);
   if (it == moduleRegistry.end()) {
     return nullptr;

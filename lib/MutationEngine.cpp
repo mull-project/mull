@@ -7,7 +7,7 @@
 #include "llvm/IR/Module.h"
 
 using namespace llvm;
-using namespace Mutang;
+using namespace mull;
 
 void MutationEngine::applyMutation(llvm::Module *M, MutationPoint &MP) {
   MP.applyMutation(M);

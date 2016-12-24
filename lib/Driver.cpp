@@ -29,16 +29,16 @@
 
 using namespace llvm;
 using namespace llvm::object;
-using namespace Mutang;
+using namespace mull;
 using namespace std;
 using namespace std::chrono;
 
-/// Populate Mutang::Context with modules using
-/// ModulePaths from Mutang::Config.
-/// Mutang::Context should be populated using ModuleLoader
+/// Populate mull::Context with modules using
+/// ModulePaths from mull::Config.
+/// mull::Context should be populated using ModuleLoader
 /// so that we could inject modules from string for testing purposes
 
-/// Having Mutang::Context in place we could instantiate TestFinder and find all tests
+/// Having mull::Context in place we could instantiate TestFinder and find all tests
 /// Using same TestFinder we could find mutation points, apply them sequentially and
 /// run tests/mutants using newly created TestRunner
 
@@ -58,8 +58,8 @@ std::unique_ptr<Result> Driver::Run() {
   /// Therefore we load them into memory and compile immediately
   /// Later on modules used only for generating of mutants
   for (auto ModulePath : Cfg.getBitcodePaths()) {
-    unique_ptr<MutangModule> ownedModule = Loader.loadModuleAtPath(ModulePath);
-    MutangModule &module = *ownedModule.get();
+    unique_ptr<MullModule> ownedModule = Loader.loadModuleAtPath(ModulePath);
+    MullModule &module = *ownedModule.get();
     assert(ownedModule && "Can't load module");
 
     ObjectFile *objectFile = toolchain.cache().getObject(module);

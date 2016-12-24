@@ -10,7 +10,7 @@ class Function;
 
 }
 
-namespace Mutang {
+namespace mull {
 
 class Context;
 class MutationOperator;
