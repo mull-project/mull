@@ -18,7 +18,7 @@
 #include <sys/param.h>
 #include <unistd.h>
 
-using namespace Mutang;
+using namespace mull;
 using namespace llvm;
 
 static void createTables(sqlite3 *database);
@@ -60,11 +60,11 @@ SQLiteReporter::SQLiteReporter() {
   this->databasePath = databasePath;
 }
 
-std::string Mutang::SQLiteReporter::getDatabasePath() {
+std::string mull::SQLiteReporter::getDatabasePath() {
   return databasePath;
 }
 
-void Mutang::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result) {
+void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result) {
   std::string databasePath = getDatabasePath();
 
   sqlite3 *database;

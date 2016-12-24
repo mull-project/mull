@@ -6,7 +6,7 @@
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/Support/TargetSelect.h"
 
-using namespace Mutang;
+using namespace mull;
 
 /// To make sure that initialization is getting called
 /// before we create TargetMachine

@@ -10,7 +10,7 @@
 #include "llvm/IR/Type.h"
 #include <sqlite3.h>
 
-using namespace Mutang;
+using namespace mull;
 using namespace llvm;
 
 TEST(SQLiteReporter, integrationTest) {

@@ -26,7 +26,7 @@
 #include <ctime>
 #include <string>
 
-using namespace Mutang;
+using namespace mull;
 using namespace llvm;
 
 cl::OptionCategory MullOptionCategory("Mull");

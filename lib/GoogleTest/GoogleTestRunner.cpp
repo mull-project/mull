@@ -13,7 +13,7 @@
 #include <chrono>
 #include <execinfo.h>
 
-using namespace Mutang;
+using namespace mull;
 using namespace llvm;
 using namespace std::chrono;
 

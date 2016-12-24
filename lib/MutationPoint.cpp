@@ -6,7 +6,7 @@
 #include "llvm/Transforms/Utils/Cloning.h"
 
 using namespace llvm;
-using namespace Mutang;
+using namespace mull;
 using namespace std;
 
 MutationPoint::MutationPoint(MutationOperator *op,

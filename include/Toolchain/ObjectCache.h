@@ -5,7 +5,7 @@
 #include <string>
 #include <map>
 
-namespace Mutang {
+namespace mull {
   class MutangModule;
   class MutationPoint;
 

@@ -9,7 +9,7 @@ namespace llvm {
   class Module;
 }
 
-namespace Mutang {
+namespace mull {
 
 class ModuleLoader {
   llvm::LLVMContext &Ctx;

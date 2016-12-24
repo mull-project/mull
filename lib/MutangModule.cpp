@@ -2,7 +2,7 @@
 
 #include "llvm/Transforms/Utils/Cloning.h"
 
-using namespace Mutang;
+using namespace mull;
 using namespace llvm;
 using namespace std;
 

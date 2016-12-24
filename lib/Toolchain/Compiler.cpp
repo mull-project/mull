@@ -7,7 +7,7 @@
 
 using namespace llvm;
 using namespace llvm::object;
-using namespace Mutang;
+using namespace mull;
 
 Compiler::Compiler(TargetMachine &machine) :
   targetMachine(machine)

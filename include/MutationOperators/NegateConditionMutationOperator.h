@@ -6,7 +6,7 @@
 
 #include <vector>
 
-namespace Mutang {
+namespace mull {
 
   class MutationPoint;
   class MutationPointAddress;

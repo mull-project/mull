@@ -9,7 +9,7 @@ static int MutangDefaultTimeout = 3000;
 
 // We need these forward declarations to make our config friends with the
 // mapping traits.
-namespace Mutang {
+namespace mull {
 class Config;
 }
 namespace llvm {
@@ -18,7 +18,7 @@ template<typename T>
 struct MappingTraits;
 }
 }
-namespace Mutang {
+namespace mull {
 
 class Config {
   std::vector<std::string> bitcodePaths;
@@ -29,7 +29,7 @@ class Config {
   int maxDistance;
   std::string cacheDirectory;
 
-  friend llvm::yaml::MappingTraits<Mutang::Config>;
+  friend llvm::yaml::MappingTraits<mull::Config>;
 public:
   // Constructor initializes defaults.
   // TODO: Refactoring into constants.

@@ -11,7 +11,7 @@
 #include "gtest/gtest.h"
 
 using namespace llvm;
-using namespace Mutang;
+using namespace mull;
 
 static TestModuleFactory TestModuleFactory;
 

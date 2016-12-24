@@ -7,7 +7,7 @@
 #include <dirent.h>
 #include <sys/stat.h>
 
-using namespace Mutang;
+using namespace mull;
 using namespace llvm;
 using namespace llvm::object;
 

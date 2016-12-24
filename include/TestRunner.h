@@ -6,7 +6,7 @@
 #include "llvm/Object/ObjectFile.h"
 #include "llvm/Target/TargetMachine.h"
 
-namespace Mutang {
+namespace mull {
 
 class Test;
 

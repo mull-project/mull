@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 
-namespace Mutang {
+namespace mull {
 
 class Result;
 

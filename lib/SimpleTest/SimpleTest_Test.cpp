@@ -2,7 +2,7 @@
 
 #include "llvm/IR/Function.h"
 
-using namespace Mutang;
+using namespace mull;
 
 SimpleTest_Test::SimpleTest_Test(llvm::Function *Function) :
   Test(TK_SimpleTest), TestFunction(Function) {}

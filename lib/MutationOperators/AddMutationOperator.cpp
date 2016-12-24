@@ -14,7 +14,7 @@
 #include <iterator>
 
 using namespace llvm;
-using namespace Mutang;
+using namespace mull;
 
 static int GetFunctionIndex(llvm::Function *function) {
   auto PM = function->getParent();

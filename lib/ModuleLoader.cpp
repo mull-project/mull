@@ -12,7 +12,7 @@
 #include "llvm/Support/SourceMgr.h"
 
 using namespace llvm;
-using namespace Mutang;
+using namespace mull;
 
 static std::string MD5HashFromBuffer(StringRef buffer) {
   MD5 Hasher;

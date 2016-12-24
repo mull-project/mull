@@ -8,7 +8,7 @@
 #include <sstream>
 #include <string>
 
-using namespace Mutang;
+using namespace mull;
 using namespace llvm;
 
 std::vector<std::string> Result::calculateCallerPath(MutationResult *mutationResult) {

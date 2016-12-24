@@ -4,7 +4,7 @@
 
 #include "llvm/IR/Module.h"
 
-namespace Mutang {
+namespace mull {
 
   class MutangModule {
     std::unique_ptr<llvm::Module> module;

@@ -2,7 +2,7 @@
 
 #include <string>
 
-namespace Mutang {
+namespace mull {
 
 class Test {
 public:

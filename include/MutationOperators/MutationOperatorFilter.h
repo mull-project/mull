@@ -4,7 +4,7 @@ namespace llvm {
   class Instruction;
 }
 
-namespace Mutang {
+namespace mull {
 
   class MutationOperatorFilter {
   public:

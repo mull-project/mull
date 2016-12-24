@@ -10,7 +10,7 @@
 #include <memory>
 
 using namespace llvm;
-using namespace Mutang;
+using namespace mull;
 
 Config ConfigParser::loadConfig(const char *filename) {
   auto bufferOrError = MemoryBuffer::getFile(filename);

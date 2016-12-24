@@ -14,7 +14,7 @@
 #include <iterator>
 
 using namespace llvm;
-using namespace Mutang;
+using namespace mull;
 
 ///
 /// Comparison instructions emitted for explicit and implicit comparisons

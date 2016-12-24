@@ -3,7 +3,7 @@
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Module.h"
 
-using namespace Mutang;
+using namespace mull;
 using namespace llvm;
 
 void Context::addModule(std::unique_ptr<MutangModule> module) {

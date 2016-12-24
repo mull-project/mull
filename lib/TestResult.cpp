@@ -1,7 +1,7 @@
 #include "TestResult.h"
 #include "Test.h"
 
-using namespace Mutang;
+using namespace mull;
 
 MutationResult::MutationResult(ExecutionResult R,
                                MutationPoint *MP,

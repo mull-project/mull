@@ -2,7 +2,7 @@
 
 #include "llvm/IR/Function.h"
 
-namespace Mutang {
+namespace mull {
 
 class Testee {
   llvm::Function *testeeFunction;

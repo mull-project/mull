@@ -9,7 +9,7 @@
 #include "llvm/Support/DynamicLibrary.h"
 #include "llvm/Support/TargetSelect.h"
 
-using namespace Mutang;
+using namespace mull;
 using namespace llvm;
 
 TestRunner::TestRunner(llvm::TargetMachine &targetMachine)

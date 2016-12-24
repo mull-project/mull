@@ -4,7 +4,7 @@
 #include "TestResult.h"
 #include <vector>
 
-namespace Mutang {
+namespace mull {
   class Result {
     std::vector<std::unique_ptr<TestResult>> testResults;
     std::vector<std::unique_ptr<Testee>> allTestees;

@@ -11,7 +11,7 @@ class Module;
 
 }
 
-namespace Mutang {
+namespace mull {
 
 class Compiler;
 class MutationOperator;
