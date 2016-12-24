@@ -304,6 +304,8 @@ GoogleTestFinder::findTestees(Test *Test,
     if (traverseeFunction->getParent() != testBodyModule ||
         traverseeFunction == testFunction) {
       testees.push_back(std::move(traversee));
+    } else {
+      continue;
     }
 
     /// The function reached the max allowed distance
