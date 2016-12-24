@@ -1,11 +1,11 @@
 
 BUILD_NINJA ?= $(realpath ../../../BuildNinja)
-MULL=$(BUILD_NINJA)/projects/mutang-project/unittests/MutangUnitTests 
+MULL=$(BUILD_NINJA)/projects/mull-project/unittests/MullUnitTests 
 
 test: test_unit test_integration
 
 test_unit:
-	cd $(BUILD_NINJA) && ninja MutangUnitTests
+	cd $(BUILD_NINJA) && ninja MullUnitTests
 
 	# TODO: A common but dirty solution, people should learn about rpath 
 	# http://stackoverflow.com/a/12399085/598057
@@ -13,5 +13,5 @@ test_unit:
 
 test_integration:
 	# TODO: also run unit tests using ninja
-	cd $(BUILD_NINJA) && ninja check-mutang
+	cd $(BUILD_NINJA) && ninja check-mull
 
