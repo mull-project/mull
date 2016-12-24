@@ -2,9 +2,9 @@
 
 import sys
 
-config.mutang_obj_root  = "@MUTANG_BINARY_DIR@"
-config.mutang_tools_dir = "@MUTANG_TOOLS_DIR@"
+config.mutang_obj_root  = "@MULL_BINARY_DIR@"
+config.mutang_tools_dir = "@MULL_TOOLS_DIR@"
 
 # Let the main config do the real work.
-lit_config.load_config(config, "@MUTANG_SOURCE_DIR@/test/lit.cfg")
+lit_config.load_config(config, "@MULL_SOURCE_DIR@/test/lit.cfg")
 

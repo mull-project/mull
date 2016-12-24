@@ -1,10 +1,10 @@
 function(add_mull_unittest test_dirname)
-  add_custom_target(MutangTestSuite)
-  set_target_properties(MutangTestSuite PROPERTIES FOLDER "Tests")
-  add_unittest(MutangTestSuite ${test_dirname} ${ARGN})
+  add_custom_target(MullTestSuite)
+  set_target_properties(MullTestSuite PROPERTIES FOLDER "Tests")
+  add_unittest(MullTestSuite ${test_dirname} ${ARGN})
 endfunction()
 
-add_mull_unittest(MutangUnitTests
+add_mull_unittest(MullUnitTests
   CompilerTests.cpp
   ConfigParserTests.cpp
   ContextTest.cpp
@@ -29,7 +29,7 @@ add_mull_unittest(MutangUnitTests
   TestModuleFactory.h
 )
 
-target_link_libraries(MutangUnitTests
+target_link_libraries(MullUnitTests
   mull
   sqlite3
   LLVMAsmParser
@@ -45,7 +45,7 @@ target_link_libraries(MutangUnitTests
   LLVMX86Info
 )
 
-add_custom_command(TARGET MutangUnitTests POST_BUILD
+add_custom_command(TARGET MullUnitTests POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E create_symlink
-                   ${CMAKE_CURRENT_LIST_DIR}/fixtures $<TARGET_FILE_DIR:MutangUnitTests>/fixtures)
+                   ${CMAKE_CURRENT_LIST_DIR}/fixtures $<TARGET_FILE_DIR:MullUnitTests>/fixtures)
 
