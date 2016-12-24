@@ -27,7 +27,7 @@ TEST(Compiler, CompileModule) {
   Compiler compiler(*targetMachine.get());
 
   auto someModule = TestModuleFactory.createTesterModule();
-  MutangModule mullModule(std::move(someModule), "");
+  MullModule mullModule(std::move(someModule), "");
   auto Binary = compiler.compileModule(mullModule);
 
   ASSERT_NE(nullptr, Binary.getBinary());

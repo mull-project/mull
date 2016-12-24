@@ -14,7 +14,7 @@ llvm_add_library(mull
   Toolchain/ObjectCache.cpp
   Toolchain/Toolchain.cpp
 
-  MutangModule.cpp
+  MullModule.cpp
   MutationEngine.cpp
   MutationPoint.cpp
   Result.cpp

@@ -20,7 +20,7 @@ static TestModuleFactory TestModuleFactory;
 
 TEST(GoogleTestFinder, FindTest) {
   auto ModuleWithTests       = TestModuleFactory.createGoogleTestTesterModule();
-  auto mullModuleWithTests = make_unique<MutangModule>(std::move(ModuleWithTests), "");
+  auto mullModuleWithTests = make_unique<MullModule>(std::move(ModuleWithTests), "");
 
   Context Ctx;
   Ctx.addModule(std::move(mullModuleWithTests));
@@ -41,8 +41,8 @@ TEST(GoogleTestFinder, DISABLED_FindTestee) {
 
   auto ModuleWithTestees = TestModuleFactory.createGoogleTestTesteeModule();
 
-  auto mullModuleWithTests   = make_unique<MutangModule>(std::move(ModuleWithTests), "");
-  auto mullModuleWithTestees = make_unique<MutangModule>(std::move(ModuleWithTestees), "");
+  auto mullModuleWithTests   = make_unique<MullModule>(std::move(ModuleWithTests), "");
+  auto mullModuleWithTestees = make_unique<MullModule>(std::move(ModuleWithTestees), "");
 
   Context Ctx;
   Ctx.addModule(std::move(mullModuleWithTests));
@@ -67,8 +67,8 @@ TEST(GoogleTestFinder, DISABLED_FindMutationPoints) {
   auto ModuleWithTests   = TestModuleFactory.createTesterModule();
   auto ModuleWithTestees = TestModuleFactory.createTesteeModule();
 
-  auto mullModuleWithTests   = make_unique<MutangModule>(std::move(ModuleWithTests), "");
-  auto mullModuleWithTestees = make_unique<MutangModule>(std::move(ModuleWithTestees), "");
+  auto mullModuleWithTests   = make_unique<MullModule>(std::move(ModuleWithTests), "");
+  auto mullModuleWithTestees = make_unique<MullModule>(std::move(ModuleWithTestees), "");
 
   Context Ctx;
   Ctx.addModule(std::move(mullModuleWithTests));

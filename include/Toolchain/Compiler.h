@@ -12,13 +12,13 @@ class TargetMachine;
 
 namespace mull {
 
-class MutangModule;
+class MullModule;
 
 class Compiler {
   llvm::TargetMachine &targetMachine;
 public:
   Compiler(llvm::TargetMachine &machine);
-  llvm::object::OwningBinary<llvm::object::ObjectFile> compileModule(const MutangModule &module);
+  llvm::object::OwningBinary<llvm::object::ObjectFile> compileModule(const MullModule &module);
   llvm::object::OwningBinary<llvm::object::ObjectFile> compileModule(llvm::Module *module);
 };
 }

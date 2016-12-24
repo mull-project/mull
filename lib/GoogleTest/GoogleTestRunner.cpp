@@ -86,7 +86,7 @@ extern "C" int mull_printf(const char *fmt, ...) {
 
 extern "C" void *mull__dso_handle = nullptr;
 
-class Mutang_GoogleTest_Resolver : public JITSymbolResolver {
+class Mull_GoogleTest_Resolver : public JITSymbolResolver {
 public:
 
   JITSymbol findSymbol(const std::string &Name) {
@@ -145,7 +145,7 @@ ExecutionResult GoogleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) 
 
   auto Handle = ObjectLayer.addObjectSet(ObjectFiles,
                                          make_unique<SectionMemoryManager>(),
-                                         make_unique<Mutang_GoogleTest_Resolver>());
+                                         make_unique<Mull_GoogleTest_Resolver>());
 
   auto start = high_resolution_clock::now();
 

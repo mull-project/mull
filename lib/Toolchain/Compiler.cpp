@@ -1,6 +1,6 @@
 #include "Toolchain/Compiler.h"
 
-#include "MutangModule.h"
+#include "MullModule.h"
 
 #include "llvm/ExecutionEngine/Orc/CompileUtils.h"
 #include "llvm/IR/Module.h"
@@ -14,7 +14,7 @@ Compiler::Compiler(TargetMachine &machine) :
 {
 }
 
-OwningBinary<ObjectFile> Compiler::compileModule(const MutangModule &module) {
+OwningBinary<ObjectFile> Compiler::compileModule(const MullModule &module) {
   return compileModule(module.getModule());
 }
 

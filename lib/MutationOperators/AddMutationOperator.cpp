@@ -46,7 +46,7 @@ AddMutationOperator::getMutationPoints(const Context &context,
     for (auto &instruction : basicBlock.getInstList()) {
       if (canBeApplied(instruction) && !filter.shouldSkipInstruction(&instruction)) {
         auto moduleID = instruction.getModule()->getModuleIdentifier();
-        MutangModule *module = context.moduleWithIdentifier(moduleID);
+        MullModule *module = context.moduleWithIdentifier(moduleID);
 
         MutationPointAddress address(functionIndex, basicBlockIndex, instructionIndex);
         auto mutationPoint = new MutationPoint(this, address, &instruction, module);

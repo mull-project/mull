@@ -2,7 +2,7 @@
 
 #include <string>
 
-#include "MutangModule.h"
+#include "MullModule.h"
 
 namespace llvm {
   class LLVMContext;
@@ -15,7 +15,7 @@ class ModuleLoader {
   llvm::LLVMContext &Ctx;
 public:
   ModuleLoader(llvm::LLVMContext &C) : Ctx(C) {}
-  virtual std::unique_ptr<MutangModule> loadModuleAtPath(const std::string &path);
+  virtual std::unique_ptr<MullModule> loadModuleAtPath(const std::string &path);
   virtual ~ModuleLoader() {}
 };
 

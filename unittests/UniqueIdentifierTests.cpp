@@ -13,7 +13,7 @@ using namespace std;
 
 static TestModuleFactory testModuleFactory;
 
-TEST(MutangModule, uniqueIdentifier) {
+TEST(MullModule, uniqueIdentifier) {
   LLVMContext context;
   ModuleLoader loader(context);
   auto module = loader.loadModuleAtPath(testModuleFactory.testerModulePath_Bitcode());

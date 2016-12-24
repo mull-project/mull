@@ -18,21 +18,21 @@ namespace mull {
 
 class Context {
 public:
-  typedef std::vector<std::unique_ptr<MutangModule>> ModuleArrayType;
+  typedef std::vector<std::unique_ptr<MullModule>> ModuleArrayType;
   typedef ModuleArrayType::iterator iterator;
 
 private:
   ModuleArrayType Modules;
   std::map<std::string, llvm::Function *> FunctionsRegistry;
-  std::map<std::string, MutangModule *> moduleRegistry;
+  std::map<std::string, MullModule *> moduleRegistry;
 
 public:
-  void addModule(std::unique_ptr<MutangModule> module);
+  void addModule(std::unique_ptr<MullModule> module);
 
   std::vector<llvm::Function *> getStaticConstructors();
 
-  MutangModule *moduleWithIdentifier(const std::string &identifier);
-  MutangModule *moduleWithIdentifier(const std::string &identifier) const;
+  MullModule *moduleWithIdentifier(const std::string &identifier);
+  MullModule *moduleWithIdentifier(const std::string &identifier) const;
 
   ModuleArrayType &getModules() { return Modules; }
   llvm::Function *lookupDefinedFunction(llvm::StringRef FunctionName);

@@ -1,7 +1,7 @@
 #include "Toolchain/ObjectCache.h"
 
 #include "Logger.h"
-#include "MutangModule.h"
+#include "MullModule.h"
 #include "MutationPoint.h"
 
 #include <dirent.h>
@@ -90,7 +90,7 @@ ObjectFile *ObjectCache::getObject(const std::string &identifier) {
   return objectFile;
 }
 
-ObjectFile *ObjectCache::getObject(const MutangModule &module) {
+ObjectFile *ObjectCache::getObject(const MullModule &module) {
   return getObject(module.getUniqueIdentifier());
 }
 
@@ -126,7 +126,7 @@ void ObjectCache::putObject(OwningBinary<ObjectFile> object,
 }
 
 void ObjectCache::putObject(OwningBinary<ObjectFile> object,
-                            const MutangModule &module) {
+                            const MullModule &module) {
   putObject(std::move(object), module.getUniqueIdentifier());
 }
 

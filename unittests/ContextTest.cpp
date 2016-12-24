@@ -15,7 +15,7 @@ static TestModuleFactory TestModuleFactory;
 
 TEST(Context, AddModule) {
   auto ModuleWithTests = TestModuleFactory.createTesterModule();
-  auto mullModuleWithTests = make_unique<MutangModule>(std::move(ModuleWithTests), "");
+  auto mullModuleWithTests = make_unique<MullModule>(std::move(ModuleWithTests), "");
 
   Context Ctx;
   Ctx.addModule(std::move(mullModuleWithTests));

@@ -24,7 +24,7 @@ static std::string MD5HashFromBuffer(StringRef buffer) {
   return Result.str();
 }
 
-std::unique_ptr<MutangModule> ModuleLoader::loadModuleAtPath(const std::string &path) {
+std::unique_ptr<MullModule> ModuleLoader::loadModuleAtPath(const std::string &path) {
   auto BufferOrError = MemoryBuffer::getFile(path);
   if (!BufferOrError) {
     Logger::error() << "Can't load module " << path << '\n';
@@ -39,6 +39,6 @@ std::unique_ptr<MutangModule> ModuleLoader::loadModuleAtPath(const std::string &
     return nullptr;
   }
 
-  auto module = make_unique<MutangModule>(std::move(llvmModule.get()), hash);
+  auto module = make_unique<MullModule>(std::move(llvmModule.get()), hash);
   return module;
 }

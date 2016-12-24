@@ -6,7 +6,7 @@
 #include <map>
 
 namespace mull {
-  class MutangModule;
+  class MullModule;
   class MutationPoint;
 
   class ObjectCache {
@@ -17,11 +17,11 @@ namespace mull {
   public:
     ObjectCache(bool useCache, const std::string &cacheDir);
 
-    llvm::object::ObjectFile *getObject(const MutangModule &module);
+    llvm::object::ObjectFile *getObject(const MullModule &module);
     llvm::object::ObjectFile *getObject(const MutationPoint &mutationPoint);
 
     void putObject(llvm::object::OwningBinary<llvm::object::ObjectFile> object,
-                   const MutangModule &module);
+                   const MullModule &module);
 
     void putObject(llvm::object::OwningBinary<llvm::object::ObjectFile> object,
                    const MutationPoint &mutationPoint);

@@ -58,8 +58,8 @@ std::unique_ptr<Result> Driver::Run() {
   /// Therefore we load them into memory and compile immediately
   /// Later on modules used only for generating of mutants
   for (auto ModulePath : Cfg.getBitcodePaths()) {
-    unique_ptr<MutangModule> ownedModule = Loader.loadModuleAtPath(ModulePath);
-    MutangModule &module = *ownedModule.get();
+    unique_ptr<MullModule> ownedModule = Loader.loadModuleAtPath(ModulePath);
+    MullModule &module = *ownedModule.get();
     assert(ownedModule && "Can't load module");
 
     ObjectFile *objectFile = toolchain.cache().getObject(module);

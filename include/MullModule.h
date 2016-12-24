@@ -6,15 +6,15 @@
 
 namespace mull {
 
-  class MutangModule {
+  class MullModule {
     std::unique_ptr<llvm::Module> module;
     std::string uniqueIdentifier;
-    MutangModule(std::unique_ptr<llvm::Module> llvmModule);
+    MullModule(std::unique_ptr<llvm::Module> llvmModule);
   public:
-    MutangModule(std::unique_ptr<llvm::Module> llvmModule,
+    MullModule(std::unique_ptr<llvm::Module> llvmModule,
                  const std::string &md5);
 
-    std::unique_ptr<MutangModule> clone();
+    std::unique_ptr<MullModule> clone();
 
     llvm::Module *getModule() {
       assert(module.get());

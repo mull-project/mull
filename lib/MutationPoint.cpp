@@ -12,7 +12,7 @@ using namespace std;
 MutationPoint::MutationPoint(MutationOperator *op,
                              MutationPointAddress Address,
                              Value *Val,
-                             MutangModule *m) :
+                             MullModule *m) :
   mutationOperator(op), Address(Address), OriginalValue(Val), module(m)
 {
   string moduleID = module->getUniqueIdentifier();

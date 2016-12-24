@@ -45,8 +45,8 @@ TEST(SimpleTestRunner, runTest) {
   Module *ModuleWithTests   = OwnedModuleWithTests.get();
   Module *ModuleWithTestees = OwnedModuleWithTestees.get();
 
-  auto mullOwnedModuleWithTests   = make_unique<MutangModule>(std::move(OwnedModuleWithTests), "");
-  auto mullOwnedModuleWithTestees = make_unique<MutangModule>(std::move(OwnedModuleWithTestees), "");
+  auto mullOwnedModuleWithTests   = make_unique<MullModule>(std::move(OwnedModuleWithTests), "");
+  auto mullOwnedModuleWithTestees = make_unique<MullModule>(std::move(OwnedModuleWithTestees), "");
 
   Ctx.addModule(std::move(mullOwnedModuleWithTests));
   Ctx.addModule(std::move(mullOwnedModuleWithTestees));
@@ -134,8 +134,8 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   Module *ModuleWithTests   = OwnedModuleWithTests.get();
   Module *ModuleWithTestees = OwnedModuleWithTestees.get();
 
-  auto mullOwnedModuleWithTests   = make_unique<MutangModule>(std::move(OwnedModuleWithTests), "");
-  auto mullOwnedModuleWithTestees = make_unique<MutangModule>(std::move(OwnedModuleWithTestees), "");
+  auto mullOwnedModuleWithTests   = make_unique<MullModule>(std::move(OwnedModuleWithTests), "");
+  auto mullOwnedModuleWithTestees = make_unique<MullModule>(std::move(OwnedModuleWithTestees), "");
 
   Ctx.addModule(std::move(mullOwnedModuleWithTests));
   Ctx.addModule(std::move(mullOwnedModuleWithTestees));
@@ -215,8 +215,8 @@ TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
   Module *ModuleWithTests   = OwnedModuleWithTests.get();
   Module *ModuleWithTestees = OwnedModuleWithTestees.get();
 
-  auto mullOwnedModuleWithTests   = make_unique<MutangModule>(std::move(OwnedModuleWithTests), "");
-  auto mullOwnedModuleWithTestees = make_unique<MutangModule>(std::move(OwnedModuleWithTestees), "");
+  auto mullOwnedModuleWithTests   = make_unique<MullModule>(std::move(OwnedModuleWithTests), "");
+  auto mullOwnedModuleWithTestees = make_unique<MullModule>(std::move(OwnedModuleWithTestees), "");
 
   Ctx.addModule(std::move(mullOwnedModuleWithTests));
   Ctx.addModule(std::move(mullOwnedModuleWithTestees));

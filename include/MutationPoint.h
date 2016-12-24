@@ -15,7 +15,7 @@ namespace mull {
 
 class Compiler;
 class MutationOperator;
-class MutangModule;
+class MullModule;
 
 /// \brief Container class that stores information needed to find MutationPoints.
 /// We need the indexes of function, basic block and instruction to find the mutation point
@@ -51,14 +51,14 @@ class MutationPoint {
   MutationOperator *mutationOperator;
   MutationPointAddress Address;
   llvm::Value *OriginalValue;
-  MutangModule *module;
+  MullModule *module;
   std::string uniqueIdentifier;
 //  llvm::object::OwningBinary<llvm::object::ObjectFile> mutatedBinary;
 public:
   MutationPoint(MutationOperator *op,
                 MutationPointAddress Address,
                 llvm::Value *Val,
-                MutangModule *m);
+                MullModule *m);
   ~MutationPoint();
 
   MutationOperator *getOperator();
