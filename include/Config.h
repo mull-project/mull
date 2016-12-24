@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-static int MutangDefaultTimeout = 3000;
+static int MullDefaultTimeout = 3000;
 
 // We need these forward declarations to make our config friends with the
 // mapping traits.
@@ -38,7 +38,7 @@ public:
     fork(true),
     dryRun(false),
     useCache(true),
-    timeout(MutangDefaultTimeout),
+    timeout(MullDefaultTimeout),
     maxDistance(128),
     cacheDirectory("/tmp/mull_cache")
   {

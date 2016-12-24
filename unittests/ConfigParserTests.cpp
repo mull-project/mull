@@ -65,7 +65,7 @@ TEST(ConfigParser, loadConfig_Timeout_Unspecified) {
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(Input);
 
-  ASSERT_EQ(MutangDefaultTimeout, Cfg.getTimeout());
+  ASSERT_EQ(MullDefaultTimeout, Cfg.getTimeout());
 }
 
 TEST(ConfigParser, loadConfig_Timeout_SpecificValue) {
