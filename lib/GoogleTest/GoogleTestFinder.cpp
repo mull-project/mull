@@ -276,133 +276,127 @@ GoogleTestFinder::findTestees(Test *Test,
                               int maxDistance) {
   GoogleTest_Test *googleTest = dyn_cast<GoogleTest_Test>(Test);
 
+  Function *testFunction = googleTest->GetTestBodyFunction();
+
   std::vector<std::unique_ptr<Testee>> testees;
-  std::queue<Testee *> traversees;
+
+  std::queue<std::unique_ptr<Testee>> traversees;
   std::set<Function *> checkedFunctions;
 
-  Module *testBodyModule = googleTest->GetTestBodyFunction()->getParent();
+  Module *testBodyModule = testFunction->getParent();
 
-  Testee *topLevelTestee = new Testee(googleTest->GetTestBodyFunction(),
-                                      nullptr,
-                                      nullptr,
-                                      0);
+  traversees.push(make_unique<Testee>(testFunction, nullptr, nullptr, 0));
 
-  std::unique_ptr<Testee> uniqueTopLevelTestee(topLevelTestee);
-  testees.push_back(std::move(uniqueTopLevelTestee));
+  while (!traversees.empty()) {
+    std::unique_ptr<Testee> traversee = std::move(traversees.front());
+    Testee *traverseePointer = traversee.get();
 
-  traversees.push(topLevelTestee);
+    traversees.pop();
 
-  while (true) {
-    Testee *traversee = traversees.front();
     Function *traverseeFunction = traversee->getTesteeFunction();
     const int mutationDistance = traversee->getDistance();
 
     /// If the function we are processing is in the same translation unit
     /// as the test itself, then we are not looking for mutation points
-    /// in this function assuming it to be a helper function, or the test itself
-    if (traverseeFunction->getParent() != testBodyModule) {
-      std::unique_ptr<Testee> uniqueTestee(traversee);
-
-      testees.push_back(std::move(uniqueTestee));
+    /// in this function assuming it to be a helper function.
+    /// The only exception is the test function itself that is especially
+    /// important for path calculations that are done later in SQLiteReporter.
+    if (traverseeFunction->getParent() != testBodyModule ||
+        traverseeFunction == testFunction) {
+      testees.push_back(std::move(traversee));
+    } else {
+      continue;
     }
 
     /// The function reached the max allowed distance
     /// Hence we don't go deeper
-    if ( mutationDistance == maxDistance) {
-      traversees.pop();
-      if (traversees.empty()) {
-        break;
-      } else {
-        continue;
-      }
+    if (mutationDistance == maxDistance) {
+      continue;
     }
 
-    for (inst_iterator I = inst_begin(traverseeFunction),
-         E = inst_end(traverseeFunction); I != E; ++I) {
+    for (auto &BB : *traverseeFunction) {
+      for (auto &I : BB) {
+        auto *instruction = &I;
 
-      auto instruction = &*I;
+        CallInst *callInstruction = dyn_cast<CallInst>(instruction);
+        if (callInstruction == nullptr) {
+          continue;
+        }
 
-      CallInst *callInstruction = dyn_cast<CallInst>(instruction);
-      if (callInstruction == nullptr) {
-        continue;
-      }
+        int callOperandIndex = callInstruction->getNumOperands() - 1;
+        Value *callOperand = callInstruction->getOperand(callOperandIndex);
+        Function *functionOperand = dyn_cast<Function>(callOperand);
 
-      int callOperandIndex = callInstruction->getNumOperands() - 1;
-      Value *callOperand = callInstruction->getOperand(callOperandIndex);
-      Function *functionOperand = dyn_cast<Function>(callOperand);
+        if (!functionOperand) {
+          continue;
+        }
 
-      if (!functionOperand) {
-        continue;
-      }
+        /// Two modules may have static function with the same name, e.g.:
+        ///
+        ///   // ModuleA
+        ///   define range() {
+        ///     // ...
+        ///   }
+        ///
+        ///   define test_A() {
+        ///     call range()
+        ///   }
+        ///
+        ///   // ModuleB
+        ///   define range() {
+        ///     // ...
+        ///   }
+        ///
+        ///   define test_B() {
+        ///     call range()
+        ///   }
+        ///
+        /// Depending on the order of processing either `range` from `A` or `B`
+        /// will be added to the `context`, hence we may find function `range`
+        /// from module `B` while processing body of the `test_A`.
+        /// To avoid this problem we first look for function inside of a current
+        /// module.
+        ///
+        /// FIXME: Context should report if a function being added already exist
+        /// FIXME: What other problems such behaviour may bring?
 
-      /// Two modules may have static function with the same name, e.g.:
-      ///
-      ///   // ModuleA
-      ///   define range() {
-      ///     // ...
-      ///   }
-      ///
-      ///   define test_A() {
-      ///     call range()
-      ///   }
-      ///
-      ///   // ModuleB
-      ///   define range() {
-      ///     // ...
-      ///   }
-      ///
-      ///   define test_B() {
-      ///     call range()
-      ///   }
-      ///
-      /// Depending on the order of processing either `range` from `A` or `B`
-      /// will be added to the `context`, hence we may find function `range`
-      /// from module `B` while processing body of the `test_A`.
-      /// To avoid this problem we first look for function inside of a current
-      /// module.
-      ///
-      /// FIXME: Context should report if a function being added already exist
-      /// FIXME: What other problems such behaviour may bring?
+        Function *definedFunction =
+        testBodyModule->getFunction(functionOperand->getName());
 
-      Function *definedFunction = testBodyModule->getFunction(functionOperand->getName());
+        if (!definedFunction || definedFunction->isDeclaration()) {
+          definedFunction =
+          Ctx.lookupDefinedFunction(functionOperand->getName());
+        }
 
-      if (!definedFunction || definedFunction->isDeclaration()) {
-        definedFunction = Ctx.lookupDefinedFunction(functionOperand->getName());
-      }
+        if (definedFunction) {
+          auto functionWasNotProcessed =
+          checkedFunctions.find(definedFunction) == checkedFunctions.end();
+          checkedFunctions.insert(definedFunction);
 
-      if (definedFunction) {
-        auto functionWasNotProcessed = checkedFunctions.find(definedFunction) == checkedFunctions.end();
-        checkedFunctions.insert(definedFunction);
+          if (functionWasNotProcessed) {
+            /// Filtering
+            if (shouldSkipDefinedFunction(definedFunction)) {
+              continue;
+            }
 
-        if (functionWasNotProcessed) {
-          /// Filtering
-          if (shouldSkipDefinedFunction(definedFunction)) {
-            continue;
+            /// The code below is not actually correct
+            /// For each C++ constructor compiler can generate up to three
+            /// functions*. Which means that the distance might be incorrect
+            /// We need to find a clever way to fix this problem
+            ///
+            /// * Here is a good overview of what's going on:
+            /// http://stackoverflow.com/a/6921467/829116
+            ///
+            traversees.push(make_unique<Testee>(definedFunction,
+                                                callInstruction,
+                                                traverseePointer,
+                                                mutationDistance + 1));
           }
-
-          /// The code below is not actually correct
-          /// For each C++ constructor compiler can generate up to three
-          /// functions*. Which means that the distance might be incorrect
-          /// We need to find a clever way to fix this problem
-          ///
-          /// * Here is a good overview of what's going on:
-          /// http://stackoverflow.com/a/6921467/829116
-          ///
-          traversees.push(new Testee(definedFunction,
-                                     callInstruction,
-                                     traversee,
-                                     mutationDistance + 1));
         }
       }
-
-    }
-
-    traversees.pop();
-    if (traversees.empty()) {
-      break;
     }
   }
-
+  
   return testees;
 }
 
