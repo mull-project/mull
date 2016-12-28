@@ -1,6 +1,7 @@
 #include "GoogleTest/GoogleTestFinder.h"
 
 #include "Context.h"
+#include "Logger.h"
 #include "MutationOperators/MutationOperator.h"
 #include "MutationOperators/MutationOperatorFilter.h"
 
@@ -366,6 +367,10 @@ GoogleTestFinder::findTestees(Test *Test,
         if (!definedFunction || definedFunction->isDeclaration()) {
           definedFunction =
           Ctx.lookupDefinedFunction(functionOperand->getName());
+        } else {
+          Logger::debug() << "GoogleTestFinder> did not find a function: "
+                          << definedFunction->getName() << '\n';
+
         }
 
         if (definedFunction) {
