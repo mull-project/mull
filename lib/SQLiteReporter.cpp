@@ -77,39 +77,35 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result) 
 
     ExecutionResult testExecutionResult = testResult->getOriginalTestResult();
     std::string insertResultSQL = std::string("INSERT INTO execution_result VALUES (")
-    + "'" + std::to_string(testExecutionResult.Status) + "',"
-    + "'" + std::to_string(testExecutionResult.RunningTime) + "',"
-    + "'" + testExecutionResult.stdoutOutput + "',"
-    + "'" + testExecutionResult.stderrOutput + "');";
+      + "'" + std::to_string(testExecutionResult.Status) + "',"
+      + "'" + std::to_string(testExecutionResult.RunningTime) + "',"
+      + "'" + testExecutionResult.stdoutOutput + "',"
+      + "'" + testExecutionResult.stderrOutput + "');";
     sqlite_exec(database, insertResultSQL.c_str());
     int testResultID = sqlite3_last_insert_rowid(database);
 
     std::string insertTestSQL = std::string("INSERT INTO test VALUES (")
-    + "'" + testID + "',"
-    + "'" + std::to_string(testResultID) + "');";
+      + "'" + testID + "',"
+      + "'" + std::to_string(testResultID) + "');";
     sqlite_exec(database, insertTestSQL.c_str());
 
     for (auto &mutation : testResult->getMutationResults()) {
-      std::vector<std::string> callerPath = result.get()->calculateCallerPath(mutation.get());
-
-      std::string callerPathAsString = getCallerPathAsString(callerPath);
 
       /// Mutation Point
       auto mutationPoint = mutation->getMutationPoint();
       Instruction *instruction = dyn_cast<Instruction>(mutationPoint->getOriginalValue());
       std::string insertMutationPointSQL = std::string("INSERT OR IGNORE INTO mutation_point VALUES (")
-      + "'" + mutationPoint->getOperator()->uniqueID() + "',"
-      + "'" + instruction->getParent()->getParent()->getParent()->getModuleIdentifier() + "',"
-      + "'" + instruction->getParent()->getParent()->getName().str() + "',"
-      + "'" + std::to_string(mutationPoint->getAddress().getFnIndex()) + "',"
-      + "'" + std::to_string(mutationPoint->getAddress().getBBIndex()) + "',"
-      + "'" + std::to_string(mutationPoint->getAddress().getIIndex()) + "',"
-      + "'" + instruction->getDebugLoc()->getFilename().str() + "',"
-      + "'" + std::to_string(instruction->getDebugLoc()->getLine()) + "',"
-      + "'" + std::to_string(instruction->getDebugLoc()->getColumn()) + "',"
-      + "'" + callerPathAsString + "',"
-      + "'" + mutationPoint->getUniqueIdentifier() + "'"+
-      + ");";
+        + "'" + mutationPoint->getOperator()->uniqueID() + "',"
+        + "'" + instruction->getParent()->getParent()->getParent()->getModuleIdentifier() + "',"
+        + "'" + instruction->getParent()->getParent()->getName().str() + "',"
+        + "'" + std::to_string(mutationPoint->getAddress().getFnIndex()) + "',"
+        + "'" + std::to_string(mutationPoint->getAddress().getBBIndex()) + "',"
+        + "'" + std::to_string(mutationPoint->getAddress().getIIndex()) + "',"
+        + "'" + instruction->getDebugLoc()->getFilename().str() + "',"
+        + "'" + std::to_string(instruction->getDebugLoc()->getLine()) + "',"
+        + "'" + std::to_string(instruction->getDebugLoc()->getColumn()) + "',"
+        + "'" + mutationPoint->getUniqueIdentifier() + "'"+
+        + ");";
 
       sqlite_exec(database, insertMutationPointSQL.c_str());
       std::string mutationPointID = mutationPoint->getUniqueIdentifier();
@@ -157,10 +153,10 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result) 
       /// Execution result
       ExecutionResult mutationExecutionResult = mutation->getExecutionResult();
       std::string insertMutationExecutionResultSQL = std::string("INSERT INTO execution_result VALUES (")
-      + "'" + std::to_string(mutationExecutionResult.Status) + "',"
-      + "'" + std::to_string(mutationExecutionResult.RunningTime) + "',"
-      + "" + "?" + ","
-      + "" + "?" + ");";
+        + "'" + std::to_string(mutationExecutionResult.Status) + "',"
+        + "'" + std::to_string(mutationExecutionResult.RunningTime) + "',"
+        + "" + "?" + ","
+        + "" + "?" + ");";
 
       sqlite3_stmt *execution_result_statement = NULL;
       int execution_result_statement_prepare_result =
@@ -190,12 +186,18 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result) 
       assume(execution_result_statement_finalize_result == SQLITE_OK,
              "SQLite error: Expected finalize of execution result statement to succeed.");
 
+      std::vector<std::string> callerPath = result.get()->calculateCallerPath(mutation.get());
+
+      std::string callerPathAsString = getCallerPathAsString(callerPath);
+
       int mutationExecutionResultID = sqlite3_last_insert_rowid(database);
       std::string insertMutationResultSQL = std::string("INSERT INTO mutation_result VALUES (")
           + "'" + std::to_string(mutationExecutionResultID) + "',"
           + "'" + testID + "',"
           + "'" + mutationPointID + "',"
-          + "'" + std::to_string(mutation->getMutationDistance()) + "');";
+          + "'" + std::to_string(mutation->getMutationDistance()) + "',"
+          + "'" + callerPathAsString + "'"
+          ");";
 
       sqlite_exec(database, insertMutationResultSQL.c_str());
     }
@@ -249,7 +251,6 @@ CREATE TABLE mutation_point (
   filename TEXT,
   line_number INT,
   column_number INT,
-  __tmp_caller_path TEXT,
   unique_id TEXT UNIQUE
 );
 
@@ -257,7 +258,8 @@ CREATE TABLE mutation_result (
   execution_result_id INT,
   test_id TEXT,
   mutation_point_id TEXT,
-  mutation_distance INT
+  mutation_distance INT,
+  __tmp_caller_path TEXT
 );
 
 CREATE TABLE mutation_point_debug (
