@@ -51,6 +51,11 @@ using namespace std::chrono;
 /// all the results of each mutant within corresponding MutationPoint
 
 std::unique_ptr<Result> Driver::Run() {
+  Logger::debug() << "Driver::Run> starting with config:\n"
+                  << "\tdistance: " << Cfg.getMaxDistance() << '\n'
+                  << "\tdry_run: " << Cfg.isDryRun() << '\n'
+                  << "\tfork: " << Cfg.getFork() << '\n';
+
   std::vector<std::unique_ptr<TestResult>> Results;
   std::vector<std::unique_ptr<Testee>> allTestees;
 
@@ -76,14 +81,16 @@ std::unique_ptr<Result> Driver::Run() {
 
   auto foundTests = Finder.findTests(Ctx);
 
-  // Logger::info() << "Driver::Run::begin with " << foundTests.size() << "
-  // tests\n";
+  Logger::debug() << "Driver::Run> found "
+                  << foundTests.size()
+                  << " tests\n";
 
   for (auto &test : foundTests) {
     auto ObjectFiles = AllObjectFiles();
 
-    // Logger::info() << "\tDriver::Run::run test: " << test->getTestName() <<
-    // "\n";
+    Logger::debug() << "\tDriver::Run> current test: "
+                    << test->getTestName()
+                    << "\n";
 
     ExecutionResult ExecResult = Sandbox->run([&](ExecutionResult *SharedResult) {
       *SharedResult = Runner.runTest(test.get(), ObjectFiles);
@@ -94,7 +101,8 @@ std::unique_ptr<Result> Driver::Run() {
 
     auto testees = Finder.findTestees(BorrowedTest, Ctx, Cfg.getMaxDistance());
 
-    // Logger::info() << "\tagainst " << testees.size() << " testees\n";
+    Logger::debug() << "\tDriver::Run> found "
+                    << testees.size() << " testees\n";
 
     for (auto testee_it = std::next(testees.begin()), ee = testees.end();
          testee_it != ee;
@@ -102,15 +110,17 @@ std::unique_ptr<Result> Driver::Run() {
 
       auto &&testee = *testee_it;
 
+      Logger::debug() << "\t\tDriver::Run::process testee: "
+                      << testee->getTesteeFunction()->getName() << "\n";
+
       auto MPoints = Finder.findMutationPoints(Ctx, *(testee->getTesteeFunction()));
       if (MPoints.empty()) {
+        Logger::debug() << "\t\no mutation points, skipping.\n";
+
         continue;
       }
 
-      // Logger::info() << "\t\tDriver::Run::process testee: " <<
-      // testee.first->getName() << "\n";
-      // Logger::info() << "\t\tagainst " << MPoints.size() << " mutation
-      // points\n";
+      Logger::debug() << "\t\tagainst " << MPoints.size() << " mutation points\n";
 
       auto ObjectFiles = AllButOne(testee->getTesteeFunction()->getParent());
       for (auto mutationPoint : MPoints) {
