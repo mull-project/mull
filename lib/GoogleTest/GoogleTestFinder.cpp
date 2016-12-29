@@ -368,9 +368,8 @@ GoogleTestFinder::findTestees(Test *Test,
           definedFunction =
           Ctx.lookupDefinedFunction(functionOperand->getName());
         } else {
-          Logger::debug() << "GoogleTestFinder> did not find a function: "
-                          << definedFunction->getName() << '\n';
-
+//          Logger::debug() << "GoogleTestFinder> did not find a function: "
+//                          << definedFunction->getName() << '\n';
         }
 
         if (definedFunction) {

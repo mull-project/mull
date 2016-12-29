@@ -115,7 +115,7 @@ std::unique_ptr<Result> Driver::Run() {
 
       auto MPoints = Finder.findMutationPoints(Ctx, *(testee->getTesteeFunction()));
       if (MPoints.empty()) {
-        Logger::debug() << "\t\no mutation points, skipping.\n";
+        Logger::debug() << "\t\tno mutation points, skipping.\n";
 
         continue;
       }

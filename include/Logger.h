@@ -12,7 +12,7 @@ public:
     error,
     warn,
     info,
-    debug,
+    debug
   };
 
   static void setLevel(Logger::Level level);
