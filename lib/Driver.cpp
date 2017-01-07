@@ -80,17 +80,21 @@ std::unique_ptr<Result> Driver::Run() {
   }
 
   auto foundTests = Finder.findTests(Ctx);
+  const int testsCount = foundTests.size();
 
   Logger::debug() << "Driver::Run> found "
-                  << foundTests.size()
+                  << testsCount
                   << " tests\n";
 
+  int testIndex = 1;
   for (auto &test : foundTests) {
     auto ObjectFiles = AllObjectFiles();
 
-    Logger::debug() << "\tDriver::Run> current test: "
-                    << test->getTestName()
-                    << "\n";
+    Logger::debug().indent(4)
+      << "Driver::Run> current test "
+      << "[" << testIndex++ << "/" << testsCount << "]: "
+      << test->getTestName()
+      << "\n";
 
     ExecutionResult ExecResult = Sandbox->run([&](ExecutionResult *SharedResult) {
       *SharedResult = Runner.runTest(test.get(), ObjectFiles);
@@ -101,32 +105,43 @@ std::unique_ptr<Result> Driver::Run() {
 
     auto testees = Finder.findTestees(BorrowedTest, Ctx, Cfg.getMaxDistance());
 
-    Logger::debug() << "\tDriver::Run> found "
-                    << testees.size() << " testees\n";
+    /// -1 since we are skipping the first testee
+    const int testeesCount = testees.size() - 1;
 
+    Logger::debug().indent(4)
+      << "Driver::Run> found "
+      << testeesCount << " testees\n";
+
+    int testeeIndex = 1;
     for (auto testee_it = std::next(testees.begin()), ee = testees.end();
          testee_it != ee;
          ++testee_it) {
 
       auto &&testee = *testee_it;
 
-      Logger::debug() << "\t\tDriver::Run::process testee: "
-                      << testee->getTesteeFunction()->getName() << "\n";
+      Logger::debug().indent(8)
+        << "Driver::Run::process testee "
+        << "[" << testeeIndex++ << "/" << testeesCount << "]: "
+        << testee->getTesteeFunction()->getName()
+        << ", ";
 
       auto MPoints = Finder.findMutationPoints(Ctx, *(testee->getTesteeFunction()));
       if (MPoints.empty()) {
-        Logger::debug() << "\t\tno mutation points, skipping.\n";
+        Logger::debug() << "no mutation points, skipping.\n";
 
         continue;
       }
 
-      Logger::debug() << "\t\tagainst " << MPoints.size() << " mutation points\n";
+      Logger::debug() << "against " << MPoints.size() << " mutation points\n";
+      Logger::debug().indent(8) << "";
 
       auto ObjectFiles = AllButOne(testee->getTesteeFunction()->getParent());
       for (auto mutationPoint : MPoints) {
         //        Logger::info() << "\t\t\tDriver::Run::run mutant:" << "\t";
         //        mutationPoint->getOriginalValue()->print(Logger::info());
         //        Logger::info() << "\n";
+
+        Logger::debug() << ".";
 
         ExecutionResult result;
         bool dryRun = Cfg.isDryRun();
@@ -157,6 +172,8 @@ std::unique_ptr<Result> Driver::Run() {
         auto MutResult = make_unique<MutationResult>(result, mutationPoint, testee.get());
         Result->addMutantResult(std::move(MutResult));
       }
+
+      Logger::debug() << "\n";
     }
 
     allTestees.insert(allTestees.end(),std::make_move_iterator(testees.begin()),
