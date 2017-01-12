@@ -46,6 +46,16 @@ void sqlite_exec(sqlite3 *database, const char *sql) {
   }
 }
 
+void sqlite_step(sqlite3 *database, sqlite3_stmt *stmt) {
+  int result = sqlite3_step(stmt);
+  if (result != SQLITE_DONE) {
+    Logger::error() << "Error inserting data: \n" << "\n";
+    Logger::error() << "Reason: '" << sqlite3_errmsg(database) << "'\n";
+    Logger::error() << "Shutting down\n";
+    exit(18);
+  }
+}
+
 SQLiteReporter::SQLiteReporter() {
   char wd[MAXPATHLEN] = { 0 };
   getwd(wd);
@@ -79,9 +89,15 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result) 
     std::string insertResultSQL = std::string("INSERT INTO execution_result VALUES (")
       + "'" + std::to_string(testExecutionResult.Status) + "',"
       + "'" + std::to_string(testExecutionResult.RunningTime) + "',"
-      + "'" + testExecutionResult.stdoutOutput + "',"
-      + "'" + testExecutionResult.stderrOutput + "');";
-    sqlite_exec(database, insertResultSQL.c_str());
+      + "" + "?1" + ","
+      + "" + "?2" + ");";
+    sqlite3_stmt *stmt;
+    sqlite3_prepare(database, insertResultSQL.c_str(), -1, &stmt, NULL);
+    sqlite3_bind_text(stmt, 1, testExecutionResult.stdoutOutput.c_str(), -1, SQLITE_STATIC);
+    sqlite3_bind_text(stmt, 2, testExecutionResult.stderrOutput.c_str(), -1, SQLITE_STATIC);
+    
+    sqlite_step(database, stmt);
+    
     int testResultID = sqlite3_last_insert_rowid(database);
 
     std::string insertTestSQL = std::string("INSERT INTO test VALUES (")
