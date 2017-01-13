@@ -28,6 +28,6 @@ namespace mull {
 
     bool canBeApplied(llvm::Value &V) override;
     llvm::Value *applyMutation(llvm::Module *M, MutationPointAddress address, llvm::Value &OriginalValue) override;
-    llvm::Value *revertMutation(llvm::Value &Value) override __unavailable;
+    llvm::Value *revertMutation(llvm::Value &Value) override;
   };
 }

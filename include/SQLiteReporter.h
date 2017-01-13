@@ -1,6 +1,6 @@
-
 #include <string>
 #include <vector>
+#include <memory>
 
 namespace mull {
 
@@ -13,7 +13,7 @@ private:
 
 public:
   SQLiteReporter();
-  
+
   void reportResults(const std::unique_ptr<Result> &result);
   std::string getDatabasePath();
 
