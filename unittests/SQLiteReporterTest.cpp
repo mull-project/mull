@@ -23,6 +23,14 @@ TEST(SQLiteReporter, integrationTest) {
   testExecutionResult.RunningTime = RunningTime;
   testExecutionResult.stdoutOutput = "STDOUT";
   testExecutionResult.stderrOutput = "STDERR";
+  
+  ExecutionResult llvmErrorTestExecutionResult;
+  llvmErrorTestExecutionResult.Status = Failed;
+  llvmErrorTestExecutionResult.RunningTime = RunningTime;
+  llvmErrorTestExecutionResult.stdoutOutput = "STDOUT";
+  llvmErrorTestExecutionResult.stderrOutput = "LLVM ERROR: Program used external function '__ZTIN4llvm20SectionMemoryManagerE' which could not be resolved!";
+  
+  std::vector<ExecutionResult> executionResults { testExecutionResult, llvmErrorTestExecutionResult };
 
   LLVMContext Context;
 
@@ -35,12 +43,16 @@ TEST(SQLiteReporter, integrationTest) {
                                           nullptr));
 
   std::unique_ptr<SimpleTest_Test> test = make_unique<SimpleTest_Test>(function);
+  std::unique_ptr<SimpleTest_Test> llvmErrorTest = make_unique<SimpleTest_Test>(function);
 
   std::unique_ptr<TestResult> testResult =
     make_unique<TestResult>(testExecutionResult, std::move(test));
+  std::unique_ptr<TestResult> llvmErrorTestResult =
+    make_unique<TestResult>(llvmErrorTestExecutionResult, std::move(llvmErrorTest));
 
   std::vector<std::unique_ptr<TestResult>> results;
   results.push_back(std::move(testResult));
+  results.push_back(std::move(llvmErrorTestResult));
 
   /// In this test we are not interested in testees.
   std::vector<std::unique_ptr<Testee>> testees;
@@ -74,13 +86,13 @@ TEST(SQLiteReporter, integrationTest) {
       column3_stdout  = sqlite3_column_text (selectStmt, 2);
       column4_stderr  = sqlite3_column_text (selectStmt, 3);
 
-      ASSERT_EQ(column1_status, Passed);
-      ASSERT_EQ(column2_duration, RunningTime);
+      ASSERT_EQ(column1_status, executionResults[numberOfRows].Status);
+      ASSERT_EQ(column2_duration, executionResults[numberOfRows].RunningTime);
 
       ASSERT_EQ(strcmp((const char *)column3_stdout,
-                       testExecutionResult.stdoutOutput.c_str()), 0);
+                       executionResults[numberOfRows].stdoutOutput.c_str()), 0);
       ASSERT_EQ(strcmp((const char *)column4_stderr,
-                       testExecutionResult.stderrOutput.c_str()), 0);
+                       executionResults[numberOfRows].stderrOutput.c_str()), 0);
 
       numberOfRows++;
     }
@@ -93,7 +105,7 @@ TEST(SQLiteReporter, integrationTest) {
     }
   }
 
-  ASSERT_EQ(numberOfRows, 1);
+  ASSERT_EQ(numberOfRows, 2);
 
   sqlite3_finalize(selectStmt);
   sqlite3_close(database);
