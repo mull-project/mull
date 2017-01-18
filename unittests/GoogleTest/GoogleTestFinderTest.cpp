@@ -2,6 +2,8 @@
 
 #include "Context.h"
 #include "MutationOperators/AddMutationOperator.h"
+#include "MutationOperators/NegateConditionMutationOperator.h"
+#include "MutationOperators/RemoveVoidFunctionMutationOperator.h"
 #include "TestModuleFactory.h"
 #include "GoogleTest/GoogleTest_Test.h"
 
@@ -24,10 +26,14 @@ TEST(GoogleTestFinder, FindTest) {
 
   Context Ctx;
   Ctx.addModule(std::move(mullModuleWithTests));
+  
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+  mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
+  mutationOperators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
+  GoogleTestFinder Finder(std::move(mutationOperators));
 
-  GoogleTestFinder finder;
-
-  auto tests = finder.findTests(Ctx);
+  auto tests = Finder.findTests(Ctx);
 
   ASSERT_EQ(1U, tests.size());
 
@@ -47,8 +53,13 @@ TEST(GoogleTestFinder, DISABLED_FindTestee) {
   Context Ctx;
   Ctx.addModule(std::move(mullModuleWithTests));
   Ctx.addModule(std::move(mullModuleWithTestees));
-
-  GoogleTestFinder Finder;
+  
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+  mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
+  mutationOperators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
+  GoogleTestFinder Finder(std::move(mutationOperators));
+  
   auto Tests = Finder.findTests(Ctx);
 
   ASSERT_NE(0u, Tests.size());
@@ -74,7 +85,12 @@ TEST(GoogleTestFinder, DISABLED_FindMutationPoints) {
   Ctx.addModule(std::move(mullModuleWithTests));
   Ctx.addModule(std::move(mullModuleWithTestees));
 
-  GoogleTestFinder Finder;
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+  mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
+  mutationOperators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
+  GoogleTestFinder Finder(std::move(mutationOperators));
+  
   auto Tests = Finder.findTests(Ctx);
 
   ASSERT_NE(0u, Tests.size());

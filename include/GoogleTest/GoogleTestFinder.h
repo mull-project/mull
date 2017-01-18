@@ -28,7 +28,7 @@ class GoogleTestFinder : public TestFinder {
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
 public:
-  explicit GoogleTestFinder();
+  GoogleTestFinder(std::vector<std::unique_ptr<MutationOperator>> mutationOperators);
 
   std::vector<std::unique_ptr<Test>> findTests(Context &Ctx) override;
   std::vector<std::unique_ptr<Testee>> findTestees(Test *Test,
