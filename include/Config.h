@@ -1,5 +1,9 @@
 #pragma once
 
+#include "MutationOperators/AddMutationOperator.h"
+#include "MutationOperators/NegateConditionMutationOperator.h"
+#include "MutationOperators/RemoveVoidFunctionMutationOperator.h"
+
 #include "llvm/Support/YAMLTraits.h"
 
 #include <string>
@@ -28,6 +32,7 @@ class Config {
   int timeout;
   int maxDistance;
   std::string cacheDirectory;
+  std::vector<std::string> mutationOperators;
 
   friend llvm::yaml::MappingTraits<mull::Config>;
 public:
@@ -40,7 +45,12 @@ public:
     useCache(true),
     timeout(MullDefaultTimeout),
     maxDistance(128),
-    cacheDirectory("/tmp/mull_cache")
+    cacheDirectory("/tmp/mull_cache"),
+    mutationOperators({
+      AddMutationOperator::ID,
+      NegateConditionMutationOperator::ID,
+      RemoveVoidFunctionMutationOperator::ID
+    })
   {
   }
 
@@ -50,14 +60,16 @@ public:
          bool cache,
          int timeout,
          int distance,
-         const std::string &cacheDir) :
+         const std::string &cacheDir,
+         std::vector<std::string> mutationOperators) :
     bitcodePaths(paths),
     fork(fork),
     dryRun(dryrun),
     useCache(cache),
     timeout(timeout),
     maxDistance(distance),
-    cacheDirectory(cacheDir)
+    cacheDirectory(cacheDir),
+    mutationOperators(mutationOperators)
   {
   }
 
@@ -89,6 +101,9 @@ public:
     return cacheDirectory;
   }
 
+  const std::vector<std::string> &getMutationOperators() const {
+    return mutationOperators;
+  }
 };
 }
 

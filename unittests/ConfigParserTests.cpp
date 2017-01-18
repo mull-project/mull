@@ -25,8 +25,8 @@ TEST(ConfigParser, loadConfig_BitcodeFiles) {
 }
 
 TEST(ConfigParser, loadConfig_Fork_True) {
-  yaml::Input Input(
-                      "fork: true\n");
+  yaml::Input Input("fork: true\n");
+
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(Input);
 
@@ -43,11 +43,7 @@ TEST(ConfigParser, loadConfig_Fork_False) {
 }
 
 TEST(ConfigParser, loadConfig_Fork_Unspecified) {
-  /// Surprisingly enough, yaml library crashes on empty string so
-  /// providing 'bitcode_files:' with content just to overcome the assert.
-  yaml::Input Input("bitcode_files:\n"
-                      "  - foo.bc\n"
-                      "  - bar.bc\n");
+  yaml::Input Input("");
 
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(Input);
@@ -56,11 +52,7 @@ TEST(ConfigParser, loadConfig_Fork_Unspecified) {
 }
 
 TEST(ConfigParser, loadConfig_Timeout_Unspecified) {
-  /// Surprisingly enough, yaml library crashes on empty string so
-  /// providing 'bitcode_files:' with content just to overcome the assert.
-  yaml::Input Input("bitcode_files:\n"
-                      "  - foo.bc\n"
-                      "  - bar.bc\n");
+  yaml::Input Input("");
 
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(Input);
@@ -78,11 +70,7 @@ TEST(ConfigParser, loadConfig_Timeout_SpecificValue) {
 }
 
 TEST(ConfigParser, loadConfig_DryRun_Unspecified) {
-  /// Surprisingly enough, yaml library crashes on empty string so
-  /// providing 'bitcode_files:' with content just to overcome the assert.
-  yaml::Input Input("bitcode_files:\n"
-                      "  - foo.bc\n"
-                      "  - bar.bc\n");
+  yaml::Input Input("");
 
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(Input);
@@ -98,11 +86,7 @@ TEST(ConfigParser, loadConfig_DryRun_SpecificValue) {
 }
 
 TEST(ConfigParser, loadConfig_UseCache_Unspecified) {
-  /// Surprisingly enough, yaml library crashes on empty string so
-  /// providing 'bitcode_files:' with content just to overcome the assert.
-  yaml::Input Input("bitcode_files:\n"
-                      "  - foo.bc\n"
-                      "  - bar.bc\n");
+  yaml::Input Input("");
 
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(Input);
@@ -118,11 +102,7 @@ TEST(ConfigParser, loadConfig_UseCache_SpecificValue) {
 }
 
 TEST(ConfigParser, loadConfig_MaxDistance_Unspecified) {
-  /// Surprisingly enough, yaml library crashes on empty string so
-  /// providing 'bitcode_files:' with content just to overcome the assert.
-  yaml::Input Input("bitcode_files:\n"
-                      "  - foo.bc\n"
-                      "  - bar.bc\n");
+  yaml::Input Input("");
 
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(Input);
@@ -140,11 +120,7 @@ TEST(ConfigParser, loadConfig_MaxDistance_SpecificValue) {
 }
 
 TEST(ConfigParser, loadConfig_CacheDirectory_Unspecified) {
-  /// Surprisingly enough, yaml library crashes on empty string so
-  /// providing 'bitcode_files:' with content just to overcome the assert.
-  yaml::Input Input("bitcode_files:\n"
-                      "  - foo.bc\n"
-                      "  - bar.bc\n");
+  yaml::Input Input("");
 
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(Input);
@@ -159,4 +135,39 @@ TEST(ConfigParser, loadConfig_CacheDirectory_SpecificValue) {
   auto Cfg = Parser.loadConfig(Input);
 
   ASSERT_EQ("/var/tmp", Cfg.getCacheDirectory());
+}
+
+TEST(ConfigParser, loadConfig_MutationOperators_SpecificValue) {
+  const char *configYAML = R"YAML(
+mutation_operators:
+- add_mutation_operator
+- negate_mutation_operator
+- remove_void_function_mutation_operator
+)YAML";
+
+  yaml::Input Input(configYAML);
+
+  ConfigParser Parser;
+  auto Cfg = Parser.loadConfig(Input);
+
+  auto mutationOperators = Cfg.getMutationOperators();
+  ASSERT_EQ(3U, mutationOperators.size());
+  ASSERT_EQ(AddMutationOperator::ID, mutationOperators[0]);
+  ASSERT_EQ(NegateConditionMutationOperator::ID, mutationOperators[1]);
+  ASSERT_EQ(RemoveVoidFunctionMutationOperator::ID, mutationOperators[2]);
+}
+
+TEST(ConfigParser, loadConfig_MutationOperators_Unspecified) {
+  const char *configYAML = "";
+
+  yaml::Input Input(configYAML);
+
+  ConfigParser Parser;
+  auto Cfg = Parser.loadConfig(Input);
+
+  auto mutationOperators = Cfg.getMutationOperators();
+  ASSERT_EQ(3U, mutationOperators.size());
+  ASSERT_EQ(AddMutationOperator::ID, mutationOperators[0]);
+  ASSERT_EQ(NegateConditionMutationOperator::ID, mutationOperators[1]);
+  ASSERT_EQ(RemoveVoidFunctionMutationOperator::ID, mutationOperators[2]);
 }

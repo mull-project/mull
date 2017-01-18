@@ -1,6 +1,9 @@
 #include "GoogleTest/GoogleTestFinder.h"
 
+#include "Driver.h"
 #include "Context.h"
+#include "Config.h"
+#include "ConfigParser.h"
 #include "MutationOperators/AddMutationOperator.h"
 #include "TestModuleFactory.h"
 #include "GoogleTest/GoogleTest_Test.h"
@@ -10,6 +13,7 @@
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Support/SourceMgr.h"
+#include "llvm/Support/YAMLTraits.h"
 
 #include "gtest/gtest.h"
 
@@ -25,9 +29,22 @@ TEST(GoogleTestFinder, FindTest) {
   Context Ctx;
   Ctx.addModule(std::move(mullModuleWithTests));
 
-  GoogleTestFinder finder;
+  const char *configYAML = R"YAML(
+mutation_operators:
+- add_mutation_operator
+- negate_mutation_operator
+- remove_void_function_mutation_operator
+)YAML";
+  
+  yaml::Input Input(configYAML);
+  
+  ConfigParser Parser;
+  auto Cfg = Parser.loadConfig(Input);
 
-  auto tests = finder.findTests(Ctx);
+  auto mutationOperators = Driver::mutationOperators(Cfg.getMutationOperators());
+  GoogleTestFinder Finder(std::move(mutationOperators));
+
+  auto tests = Finder.findTests(Ctx);
 
   ASSERT_EQ(1U, tests.size());
 
@@ -38,7 +55,6 @@ TEST(GoogleTestFinder, FindTest) {
 
 TEST(GoogleTestFinder, DISABLED_FindTestee) {
   auto ModuleWithTests   = TestModuleFactory.createGoogleTestTesterModule();
-
   auto ModuleWithTestees = TestModuleFactory.createGoogleTestTesteeModule();
 
   auto mullModuleWithTests   = make_unique<MullModule>(std::move(ModuleWithTests), "");
@@ -47,8 +63,22 @@ TEST(GoogleTestFinder, DISABLED_FindTestee) {
   Context Ctx;
   Ctx.addModule(std::move(mullModuleWithTests));
   Ctx.addModule(std::move(mullModuleWithTestees));
+  
+  const char *configYAML = R"YAML(
+mutation_operators:
+  - add_mutation_operator
+  - negate_mutation_operator
+  - remove_void_function_mutation_operator
+  )YAML";
+  
+  yaml::Input Input(configYAML);
+  
+  ConfigParser Parser;
+  auto Cfg = Parser.loadConfig(Input);
 
-  GoogleTestFinder Finder;
+  auto mutationOperators = Driver::mutationOperators(Cfg.getMutationOperators());
+  GoogleTestFinder Finder(std::move(mutationOperators));
+  
   auto Tests = Finder.findTests(Ctx);
 
   ASSERT_NE(0u, Tests.size());
@@ -74,7 +104,21 @@ TEST(GoogleTestFinder, DISABLED_FindMutationPoints) {
   Ctx.addModule(std::move(mullModuleWithTests));
   Ctx.addModule(std::move(mullModuleWithTestees));
 
-  GoogleTestFinder Finder;
+  const char *configYAML = R"YAML(
+mutation_operators:
+  - add_mutation_operator
+  - negate_mutation_operator
+  - remove_void_function_mutation_operator
+  )YAML";
+  
+  yaml::Input Input(configYAML);
+  
+  ConfigParser Parser;
+  auto Cfg = Parser.loadConfig(Input);
+  
+  auto mutationOperators = Driver::mutationOperators(Cfg.getMutationOperators());
+  GoogleTestFinder Finder(std::move(mutationOperators));
+  
   auto Tests = Finder.findTests(Ctx);
 
   ASSERT_NE(0u, Tests.size());

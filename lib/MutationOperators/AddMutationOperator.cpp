@@ -16,6 +16,8 @@
 using namespace llvm;
 using namespace mull;
 
+const std::string AddMutationOperator::ID = "add_mutation_operator";
+
 static int GetFunctionIndex(llvm::Function *function) {
   auto PM = function->getParent();
 

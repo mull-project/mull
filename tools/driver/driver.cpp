@@ -73,8 +73,10 @@ int debug_main() {
 
   LLVMContext Ctx;
   ModuleLoader Loader(Ctx);
-
-  GoogleTestFinder TestFinder;
+  
+  auto mutationOperators = Driver::mutationOperators(config.getMutationOperators());
+  
+  GoogleTestFinder TestFinder(std::move(mutationOperators));
   Toolchain toolchain(config);
   GoogleTestRunner Runner(toolchain.targetMachine());
 
@@ -112,7 +114,8 @@ int main(int argc, char *argv[]) {
   Toolchain toolchain(config);
 
 #if 1
-  GoogleTestFinder TestFinder;
+  auto mutationOperators = Driver::mutationOperators(config.getMutationOperators());
+  GoogleTestFinder TestFinder(std::move(mutationOperators));
   GoogleTestRunner Runner(toolchain.targetMachine());
 #else
   SimpleTestFinder TestFinder;

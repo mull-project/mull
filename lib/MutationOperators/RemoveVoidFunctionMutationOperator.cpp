@@ -15,6 +15,9 @@
 using namespace llvm;
 using namespace mull;
 
+const std::string RemoveVoidFunctionMutationOperator::ID =
+  "remove_void_function_mutation_operator";
+
 static int GetFunctionIndex(llvm::Function *function) {
   auto PM = function->getParent();
 

@@ -24,6 +24,7 @@ struct MappingTraits<mull::Config>
     io.mapOptional("timeout", config.timeout);
     io.mapOptional("max_distance", config.maxDistance);
     io.mapOptional("cache_directory", config.cacheDirectory);
+    io.mapOptional("mutation_operators", config.mutationOperators);
   }
 };
 }

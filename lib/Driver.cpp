@@ -190,6 +190,26 @@ std::unique_ptr<Result> Driver::Run() {
   return result;
 }
 
+std::vector<std::unique_ptr<MutationOperator>> Driver::mutationOperators
+  (std::vector<std::string> mutationOperatorStrings) {
+    std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+    for (auto mutation : mutationOperatorStrings) {
+      if (mutation == AddMutationOperator::ID) {
+        mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+      }
+      else if (mutation == NegateConditionMutationOperator::ID) {
+        mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
+      }
+      else if (mutation == RemoveVoidFunctionMutationOperator::ID) {
+        mutationOperators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
+      }
+      else {
+        Logger::error() << "Unknown Mutation Operator: " << mutation << "\n";
+      }
+    }
+    return mutationOperators;
+}
+
 std::vector<llvm::object::ObjectFile *> Driver::AllButOne(llvm::Module *One) {
   std::vector<llvm::object::ObjectFile *> Objects;
 
