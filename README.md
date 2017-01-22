@@ -11,7 +11,7 @@ cd ~/Projects/LLVM
 
 git clone http://llvm.org/git/llvm.git
 cd llvm
-git checkout 106bb1fe2db88fe77458ec594c461c8428588dab
+git checkout dc30ded6fb9526aba31a86b97e8f69fc9baece00
 
 git clone https://github.com/mull-project/mull.git projects/mull
 
@@ -37,5 +37,5 @@ Update to LLVM's trunk should be a recurrent task, but first we need to get
 experience of living in a downstream world.
 
 Current code is being developed against LLVM commit:
-[106bb1fe2db88fe77458ec594c461c8428588dab](https://github.com/llvm-mirror/llvm/commit/106bb1fe2db88fe77458ec594c461c8428588dab).
+[dc30ded6fb9526aba31a86b97e8f69fc9baece00](https://github.com/llvm-mirror/llvm/commit/dc30ded6fb9526aba31a86b97e8f69fc9baece00).
 
