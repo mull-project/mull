@@ -95,8 +95,14 @@ TEST(Driver, SimpleTest_AddMutationOperator) {
   bool useCache = false;
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
-  Config config(ModulePaths, doFork, dryRun, useCache, MullDefaultTimeout,
-                distance, cacheDirectory, {});
+  Config config(ModulePaths,
+                doFork,
+                dryRun,
+                useCache,
+                MullDefaultTimeoutMilliseconds,
+                distance,
+                cacheDirectory,
+                {});
 
   FakeModuleLoader loader;
 
@@ -149,7 +155,7 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
   bool useCache = false;
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
-  Config config(ModulePaths, doFork, dryRun, useCache, MullDefaultTimeout,
+  Config config(ModulePaths, doFork, dryRun, useCache, MullDefaultTimeoutMilliseconds,
                 distance, cacheDirectory, {});
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
@@ -194,7 +200,7 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
   bool useCache = false;
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
-  Config config(ModulePaths, doFork, dryRun, useCache, MullDefaultTimeout,
+  Config config(ModulePaths, doFork, dryRun, useCache, MullDefaultTimeoutMilliseconds,
                 distance, cacheDirectory, {});
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
@@ -239,7 +245,7 @@ TEST(Driver, SimpleTest_TesteePathCalculation) {
   bool useCache = false;
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
-  Config config(ModulePaths, doFork, dryRun, useCache, MullDefaultTimeout,
+  Config config(ModulePaths, doFork, dryRun, useCache, MullDefaultTimeoutMilliseconds,
                 distance, cacheDirectory, {});
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;

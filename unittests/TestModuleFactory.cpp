@@ -167,3 +167,15 @@ std::unique_ptr<Module> TestModuleFactory::APFloat_019fc57b8bd190d33389137abbe71
   const char *fixture = "APFloat_019fc57b8bd190d33389137abbe7145e_5_1_3_negate_mutation_operator.ll";
   return createModule(fixture, fixture);
 }
+
+#pragma mark - Rust
+
+std::unique_ptr<Module> TestModuleFactory::rustModule() {
+  std::string contents = createFixture("fixture_rust.ll");
+
+  auto module = parseIR(contents.c_str());
+
+  module->setModuleIdentifier("rust");
+
+  return module;
+}

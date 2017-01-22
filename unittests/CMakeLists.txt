@@ -1,16 +1,4 @@
-# The "add_mull_unittest" function uses the pattern for LLVM unit test targets
-# based on "add_unittest" LLVM helper. Example of its usage can be found in
-# ${LLVM_SOURCE_DIR}/unittests/CMakeLists.txt.
-# Since Mull's unit tests do not live inside LLVM tree's "unittests" folder,
-# we have to follow the pattern and create a custom unit test suite which is
-# "MullTestSuite" to be able to add actual "MullUnitTests" target to it.
-function(add_mull_unittest test_dirname)
-  add_custom_target(MullTestSuite)
-  set_target_properties(MullTestSuite PROPERTIES FOLDER "Tests")
-  add_unittest(MullTestSuite ${test_dirname} ${ARGN})
-endfunction()
-
-add_mull_unittest(MullUnitTests
+set(mull_unittests_sources
   CompilerTests.cpp
   ConfigParserTests.cpp
   ContextTest.cpp
@@ -32,6 +20,34 @@ add_mull_unittest(MullUnitTests
 
   TestModuleFactory.cpp
   TestModuleFactory.h
+)
+
+if(MULL_SUPPORT_RUST)
+
+set(mull_unittests_sources
+  ${mull_unittests_sources}
+
+  Rust/RustTestFinderTest.cpp
+  Rust/RustTestRunnerTest.cpp
+  Rust/Driver_Rust_Test.cpp
+)
+
+endif()
+
+# The "add_mull_unittest" function uses the pattern for LLVM unit test targets
+# based on "add_unittest" LLVM helper. Example of its usage can be found in
+# ${LLVM_SOURCE_DIR}/unittests/CMakeLists.txt.
+# Since Mull's unit tests do not live inside LLVM tree's "unittests" folder,
+# we have to follow the pattern and create a custom unit test suite which is
+# "MullTestSuite" to be able to add actual "MullUnitTests" target to it.
+function(add_mull_unittest test_dirname)
+  add_custom_target(MullTestSuite)
+  set_target_properties(MullTestSuite PROPERTIES FOLDER "Tests")
+  add_unittest(MullTestSuite ${test_dirname} ${ARGN})
+endfunction()
+
+add_mull_unittest(MullUnitTests
+  ${mull_unittests_sources}
 )
 
 target_link_libraries(MullUnitTests

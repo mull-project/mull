@@ -1,0 +1,6 @@
+*.o
+*.bc
+*.ll
+jitrust
+target/**/*
+
