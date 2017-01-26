@@ -51,11 +51,6 @@ using namespace std::chrono;
 /// all the results of each mutant within corresponding MutationPoint
 
 std::unique_ptr<Result> Driver::Run() {
-  Logger::debug() << "Driver::Run> starting with config:\n"
-                  << "\tdistance: " << Cfg.getMaxDistance() << '\n'
-                  << "\tdry_run: " << Cfg.isDryRun() << '\n'
-                  << "\tfork: " << Cfg.getFork() << '\n';
-
   std::vector<std::unique_ptr<TestResult>> Results;
   std::vector<std::unique_ptr<Testee>> allTestees;
 
@@ -192,6 +187,20 @@ std::unique_ptr<Result> Driver::Run() {
 
 std::vector<std::unique_ptr<MutationOperator>> Driver::mutationOperators
   (std::vector<std::string> mutationOperatorStrings) {
+    if (mutationOperatorStrings.size() == 0) {
+      Logger::info()
+        << "Driver> No mutation operators specified in a config file. "
+        << "Defaulting to default operators:" << "\n";
+
+      auto mutationOperators = defaultMutationOperators();
+
+      for (auto &mutationOperator: mutationOperators) {
+        Logger::info() << "\t" << mutationOperator.get()->uniqueID() << "\n";
+      }
+
+      return mutationOperators;
+    }
+
     std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
     for (auto mutation : mutationOperatorStrings) {
       if (mutation == AddMutationOperator::ID) {
@@ -204,10 +213,27 @@ std::vector<std::unique_ptr<MutationOperator>> Driver::mutationOperators
         mutationOperators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
       }
       else {
-        Logger::error() << "Unknown Mutation Operator: " << mutation << "\n";
+        Logger::info() << "Driver> Unknown Mutation Operator: " << mutation << "\n";
       }
     }
+
+    if (mutationOperators.size() == 0) {
+      Logger::info()
+        << "Driver> No valid mutation operators found in a config file.\n";
+    }
+
     return mutationOperators;
+}
+
+std::vector<std::unique_ptr<MutationOperator>>
+Driver::defaultMutationOperators() {
+  std::vector<std::unique_ptr<MutationOperator>> operators;
+
+  operators.emplace_back(make_unique<AddMutationOperator>());
+  operators.emplace_back(make_unique<NegateConditionMutationOperator>());
+  operators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
+
+  return operators;
 }
 
 std::vector<llvm::object::ObjectFile *> Driver::AllButOne(llvm::Module *One) {

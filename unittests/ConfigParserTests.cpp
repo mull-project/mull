@@ -142,7 +142,6 @@ TEST(ConfigParser, loadConfig_MutationOperators_SpecificValue) {
 mutation_operators:
 - add_mutation_operator
 - negate_mutation_operator
-- remove_void_function_mutation_operator
 )YAML";
 
   yaml::Input Input(configYAML);
@@ -151,10 +150,9 @@ mutation_operators:
   auto Cfg = Parser.loadConfig(Input);
 
   auto mutationOperators = Cfg.getMutationOperators();
-  ASSERT_EQ(3U, mutationOperators.size());
+  ASSERT_EQ(2U, mutationOperators.size());
   ASSERT_EQ(AddMutationOperator::ID, mutationOperators[0]);
   ASSERT_EQ(NegateConditionMutationOperator::ID, mutationOperators[1]);
-  ASSERT_EQ(RemoveVoidFunctionMutationOperator::ID, mutationOperators[2]);
 }
 
 TEST(ConfigParser, loadConfig_MutationOperators_Unspecified) {
@@ -166,8 +164,5 @@ TEST(ConfigParser, loadConfig_MutationOperators_Unspecified) {
   auto Cfg = Parser.loadConfig(Input);
 
   auto mutationOperators = Cfg.getMutationOperators();
-  ASSERT_EQ(3U, mutationOperators.size());
-  ASSERT_EQ(AddMutationOperator::ID, mutationOperators[0]);
-  ASSERT_EQ(NegateConditionMutationOperator::ID, mutationOperators[1]);
-  ASSERT_EQ(RemoveVoidFunctionMutationOperator::ID, mutationOperators[2]);
+  ASSERT_EQ(0U, mutationOperators.size());
 }

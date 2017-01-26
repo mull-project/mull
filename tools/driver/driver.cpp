@@ -105,6 +105,8 @@ int main(int argc, char *argv[]) {
   ConfigParser Parser;
   auto config = Parser.loadConfig(ConfigFile.c_str());
 
+  config.dump();
+
   InitializeNativeTarget();
   InitializeNativeTargetAsmPrinter();
   InitializeNativeTargetAsmParser();

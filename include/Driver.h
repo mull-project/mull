@@ -57,8 +57,11 @@ public:
   void debug_PrintTesteeNames();
   void debug_PrintMutationPoints();
   
-  static std::vector<std::unique_ptr<MutationOperator>> mutationOperators
-    (std::vector<std::string> mutationOperatorStrings);
+  static std::vector<std::unique_ptr<MutationOperator>>
+    mutationOperators(std::vector<std::string> mutationOperatorStrings);
+
+  static std::vector<std::unique_ptr<MutationOperator>>
+    defaultMutationOperators();
 
 private:
   /// Returns cached object files for all modules excerpt one provided

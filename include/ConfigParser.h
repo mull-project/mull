@@ -18,13 +18,13 @@ struct MappingTraits<mull::Config>
   static void mapping(IO& io, mull::Config& config)
   {
     io.mapOptional("bitcode_files", config.bitcodePaths);
+    io.mapOptional("mutation_operators", config.mutationOperators);
     io.mapOptional("fork", config.fork);
     io.mapOptional("dry_run", config.dryRun);
     io.mapOptional("use_cache", config.useCache);
     io.mapOptional("timeout", config.timeout);
     io.mapOptional("max_distance", config.maxDistance);
     io.mapOptional("cache_directory", config.cacheDirectory);
-    io.mapOptional("mutation_operators", config.mutationOperators);
   }
 };
 }
