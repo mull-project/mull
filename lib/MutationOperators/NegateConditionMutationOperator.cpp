@@ -16,6 +16,9 @@
 using namespace llvm;
 using namespace mull;
 
+const std::string NegateConditionMutationOperator::ID =
+  "negate_mutation_operator";
+
 ///
 /// Comparison instructions emitted for explicit and implicit comparisons
 /// We should only apply mutations on explicit comparisons.

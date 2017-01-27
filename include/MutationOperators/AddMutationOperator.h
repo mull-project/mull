@@ -1,4 +1,4 @@
-#pragma mark
+#pragma once
 
 #include "MutationOperators/MutationOperator.h"
 
@@ -11,16 +11,19 @@ class MutationPointAddress;
 class MutationOperatorFilter;
 
 class AddMutationOperator : public MutationOperator {
+
 public:
+  static const std::string ID;
+
   std::vector<MutationPoint *> getMutationPoints(const Context &context,
                                                  llvm::Function *function,
                                                  MutationOperatorFilter &filter) override;
 
   std::string uniqueID() override {
-    return "add_mutation_operator";
+    return ID;
   }
   std::string uniqueID() const override {
-    return "add_mutation_operator";
+    return ID;
   }
 
   bool canBeApplied(llvm::Value &V) override;
@@ -29,3 +32,4 @@ public:
 };
 
 }
+

@@ -1,4 +1,4 @@
-#pragma mark
+#pragma once
 
 #include "MutationOperators/MutationOperator.h"
 
@@ -15,15 +15,17 @@ namespace mull {
   class RemoveVoidFunctionMutationOperator : public MutationOperator {
 
   public:
+    static const std::string ID;
+
     std::vector<MutationPoint *> getMutationPoints(const Context &context,
                                                    llvm::Function *function,
                                                    MutationOperatorFilter &filter) override;
 
     std::string uniqueID() override {
-      return "remove_void_function_mutation_operator";
+      return ID;
     }
     std::string uniqueID() const override {
-      return "remove_void_function_mutation_operator";
+      return ID;
     }
 
     bool canBeApplied(llvm::Value &V) override;
