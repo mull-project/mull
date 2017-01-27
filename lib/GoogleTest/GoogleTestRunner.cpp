@@ -16,6 +16,7 @@
 using namespace mull;
 using namespace llvm;
 using namespace std::chrono;
+using namespace llvm::orc;
 
 namespace {
   class UnitTest;
@@ -86,10 +87,10 @@ extern "C" int mull_printf(const char *fmt, ...) {
 
 extern "C" void *mull__dso_handle = nullptr;
 
-class Mull_GoogleTest_Resolver : public JITSymbolResolver {
+class Mull_GoogleTest_Resolver : public RuntimeDyld::SymbolResolver {
 public:
 
-  JITSymbol findSymbol(const std::string &Name) {
+  RuntimeDyld::SymbolInfo findSymbol(const std::string &Name) {
     if (Name == "___cxa_atexit") {
       return findSymbol("mull__cxa_atexit");
     }
@@ -99,13 +100,13 @@ public:
     }
 
     if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(Name))
-      return JITSymbol(SymAddr, JITSymbolFlags::Exported);
-    return JITSymbol(nullptr);
+      return RuntimeDyld::SymbolInfo(SymAddr, JITSymbolFlags::Exported);
+
+    return RuntimeDyld::SymbolInfo(nullptr);
   }
 
-  JITSymbol findSymbolInLogicalDylib(const std::string &Name) {
-    return JITSymbol(nullptr);
-  }
+  RuntimeDyld::SymbolInfo findSymbolInLogicalDylib(const std::string &Name) {
+    return RuntimeDyld::SymbolInfo(nullptr);   }
 };
 
 GoogleTestRunner::GoogleTestRunner(llvm::TargetMachine &machine)

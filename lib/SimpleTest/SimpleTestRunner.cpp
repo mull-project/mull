@@ -3,7 +3,9 @@
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/ExecutionEngine/OrcMCJITReplacement.h"
 #include "llvm/ExecutionEngine/GenericValue.h"
-#include "llvm/ExecutionEngine/JITSymbol.h"
+
+/// TODO: enable back for LLVM 4.0
+//#include "llvm/ExecutionEngine/JITSymbol.h"
 #include "llvm/ExecutionEngine/RTDyldMemoryManager.h"
 #include "llvm/ExecutionEngine/SectionMemoryManager.h"
 #include "llvm/Support/DynamicLibrary.h"
@@ -29,23 +31,23 @@ extern "C" int mull_simple_test_printf(const char *fmt, ...) {
   return 0;
 }
 
-class Mull_SimpleTest_Resolver : public JITSymbolResolver {
+class Mull_SimpleTest_Resolver : public RuntimeDyld::SymbolResolver {
 public:
 
-  JITSymbol findSymbol(const std::string &Name) {
+  RuntimeDyld::SymbolInfo findSymbol(const std::string &Name) {
     //if (Name == "_printf") {
     //  return findSymbol("mull_simple_test_printf");
     //}
 
     if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(Name)) {
-      return JITSymbol(SymAddr, JITSymbolFlags::Exported);
+      return RuntimeDyld::SymbolInfo(SymAddr, JITSymbolFlags::Exported);
     }
 
-    return JITSymbol(nullptr);
+    return RuntimeDyld::SymbolInfo(nullptr);
   }
 
-  JITSymbol findSymbolInLogicalDylib(const std::string &Name) {
-    return JITSymbol(nullptr);
+  RuntimeDyld::SymbolInfo findSymbolInLogicalDylib(const std::string &Name) {
+    return RuntimeDyld::SymbolInfo(nullptr);
   }
 };
 
@@ -62,7 +64,7 @@ std::string SimpleTestRunner::MangleName(const llvm::StringRef &Name) {
 }
 
 void *SimpleTestRunner::TestFunctionPointer(const llvm::Function &Function) {
-  JITSymbol Symbol = ObjectLayer.findSymbol(MangleName(Function.getName()), true);
+  orc::JITSymbol Symbol = ObjectLayer.findSymbol(MangleName(Function.getName()), true);
   void *FPointer = reinterpret_cast<void *>(static_cast<uintptr_t>(Symbol.getAddress()));
   assert(FPointer && "Can't find pointer to function");
   return FPointer;
