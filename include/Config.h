@@ -1,5 +1,10 @@
 #pragma once
 
+#include "Logger.h"
+#include "MutationOperators/AddMutationOperator.h"
+#include "MutationOperators/NegateConditionMutationOperator.h"
+#include "MutationOperators/RemoveVoidFunctionMutationOperator.h"
+
 #include "llvm/Support/YAMLTraits.h"
 
 #include <string>
@@ -22,6 +27,7 @@ namespace mull {
 
 class Config {
   std::vector<std::string> bitcodePaths;
+  std::vector<std::string> mutationOperators;
   bool fork;
   bool dryRun;
   bool useCache;
@@ -35,6 +41,16 @@ public:
   // TODO: Refactoring into constants.
   Config() :
     bitcodePaths(),
+    mutationOperators(
+      // Yaml::Traits stops reading mutation_operators from config.yaml
+      // if these 3 default operators are set here (BUG?).
+      // So leaving out the empty ()
+      // {
+      //   AddMutationOperator::ID,
+      //   NegateConditionMutationOperator::ID,
+      //   RemoveVoidFunctionMutationOperator::ID
+      // }
+    ),
     fork(true),
     dryRun(false),
     useCache(true),
@@ -50,14 +66,16 @@ public:
          bool cache,
          int timeout,
          int distance,
-         const std::string &cacheDir) :
+         const std::string &cacheDir,
+         std::vector<std::string> mutationOperators) :
     bitcodePaths(paths),
     fork(fork),
     dryRun(dryrun),
     useCache(cache),
     timeout(timeout),
     maxDistance(distance),
-    cacheDirectory(cacheDir)
+    cacheDirectory(cacheDir),
+    mutationOperators(mutationOperators)
   {
   }
 
@@ -89,6 +107,23 @@ public:
     return cacheDirectory;
   }
 
+  const std::vector<std::string> &getMutationOperators() const {
+    return mutationOperators;
+  }
+
+  void dump() const {
+    Logger::debug() << "Config>\n"
+    << "\tdistance: " << getMaxDistance() << '\n'
+    << "\tdry_run: " << isDryRun() << '\n'
+    << "\tfork: " << getFork() << '\n';
+
+    if (getMutationOperators().size() > 0) {
+      Logger::debug() << "\tmutation_operators: " << '\n';
+      for (auto mutationOperator : getMutationOperators()) {
+        Logger::debug() << "\t- " << mutationOperator << '\n';
+      }
+    }
+  }
 };
 }
 

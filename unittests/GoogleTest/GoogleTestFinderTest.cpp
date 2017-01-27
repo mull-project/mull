@@ -1,9 +1,10 @@
 #include "GoogleTest/GoogleTestFinder.h"
 
+#include "Driver.h"
 #include "Context.h"
+#include "Config.h"
+#include "ConfigParser.h"
 #include "MutationOperators/AddMutationOperator.h"
-#include "MutationOperators/NegateConditionMutationOperator.h"
-#include "MutationOperators/RemoveVoidFunctionMutationOperator.h"
 #include "TestModuleFactory.h"
 #include "GoogleTest/GoogleTest_Test.h"
 
@@ -12,6 +13,7 @@
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Support/SourceMgr.h"
+#include "llvm/Support/YAMLTraits.h"
 
 #include "gtest/gtest.h"
 
@@ -26,11 +28,20 @@ TEST(GoogleTestFinder, FindTest) {
 
   Context Ctx;
   Ctx.addModule(std::move(mullModuleWithTests));
+
+  const char *configYAML = R"YAML(
+mutation_operators:
+- add_mutation_operator
+- negate_mutation_operator
+- remove_void_function_mutation_operator
+)YAML";
   
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
-  mutationOperators.emplace_back(make_unique<AddMutationOperator>());
-  mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
-  mutationOperators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
+  yaml::Input Input(configYAML);
+  
+  ConfigParser Parser;
+  auto Cfg = Parser.loadConfig(Input);
+
+  auto mutationOperators = Driver::mutationOperators(Cfg.getMutationOperators());
   GoogleTestFinder Finder(std::move(mutationOperators));
 
   auto tests = Finder.findTests(Ctx);
@@ -44,7 +55,6 @@ TEST(GoogleTestFinder, FindTest) {
 
 TEST(GoogleTestFinder, DISABLED_FindTestee) {
   auto ModuleWithTests   = TestModuleFactory.createGoogleTestTesterModule();
-
   auto ModuleWithTestees = TestModuleFactory.createGoogleTestTesteeModule();
 
   auto mullModuleWithTests   = make_unique<MullModule>(std::move(ModuleWithTests), "");
@@ -54,10 +64,19 @@ TEST(GoogleTestFinder, DISABLED_FindTestee) {
   Ctx.addModule(std::move(mullModuleWithTests));
   Ctx.addModule(std::move(mullModuleWithTestees));
   
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
-  mutationOperators.emplace_back(make_unique<AddMutationOperator>());
-  mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
-  mutationOperators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
+  const char *configYAML = R"YAML(
+mutation_operators:
+  - add_mutation_operator
+  - negate_mutation_operator
+  - remove_void_function_mutation_operator
+  )YAML";
+  
+  yaml::Input Input(configYAML);
+  
+  ConfigParser Parser;
+  auto Cfg = Parser.loadConfig(Input);
+
+  auto mutationOperators = Driver::mutationOperators(Cfg.getMutationOperators());
   GoogleTestFinder Finder(std::move(mutationOperators));
   
   auto Tests = Finder.findTests(Ctx);
@@ -85,10 +104,19 @@ TEST(GoogleTestFinder, DISABLED_FindMutationPoints) {
   Ctx.addModule(std::move(mullModuleWithTests));
   Ctx.addModule(std::move(mullModuleWithTestees));
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
-  mutationOperators.emplace_back(make_unique<AddMutationOperator>());
-  mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
-  mutationOperators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
+  const char *configYAML = R"YAML(
+mutation_operators:
+  - add_mutation_operator
+  - negate_mutation_operator
+  - remove_void_function_mutation_operator
+  )YAML";
+  
+  yaml::Input Input(configYAML);
+  
+  ConfigParser Parser;
+  auto Cfg = Parser.loadConfig(Input);
+  
+  auto mutationOperators = Driver::mutationOperators(Cfg.getMutationOperators());
   GoogleTestFinder Finder(std::move(mutationOperators));
   
   auto Tests = Finder.findTests(Ctx);

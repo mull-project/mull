@@ -95,12 +95,12 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
         continue;
       }
 
-      Type *SeqTy = Ty->getSequentialElementType();
-      if (!SeqTy) {
+      Type *globalType = Ty->getPointerElementType();
+      if (!globalType) {
         continue;
       }
 
-      StructType *STy = dyn_cast<StructType>(SeqTy);
+      StructType *STy = dyn_cast<StructType>(globalType);
       if (!STy) {
         continue;
       }

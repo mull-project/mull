@@ -4,6 +4,7 @@
 #include "TestResult.h"
 #include "ForkProcessSandbox.h"
 #include "Context.h"
+#include "MutationOperators/MutationOperator.h"
 
 #include "Toolchain/Toolchain.h"
 
@@ -55,6 +56,12 @@ public:
   void debug_PrintTestNames();
   void debug_PrintTesteeNames();
   void debug_PrintMutationPoints();
+  
+  static std::vector<std::unique_ptr<MutationOperator>>
+    mutationOperators(std::vector<std::string> mutationOperatorStrings);
+
+  static std::vector<std::unique_ptr<MutationOperator>>
+    defaultMutationOperators();
 
 private:
   /// Returns cached object files for all modules excerpt one provided

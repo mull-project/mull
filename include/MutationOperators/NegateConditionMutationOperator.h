@@ -1,4 +1,4 @@
-#pragma mark
+#pragma once
 
 #include "MutationOperators/MutationOperator.h"
 
@@ -15,16 +15,18 @@ namespace mull {
   class NegateConditionMutationOperator : public MutationOperator {
 
   public:
+    static const std::string ID;
+
     static llvm::CmpInst::Predicate negatedCmpInstPredicate(llvm::CmpInst::Predicate predicate);
     std::vector<MutationPoint *> getMutationPoints(const Context &context,
                                                    llvm::Function *function,
                                                    MutationOperatorFilter &filter) override;
 
     std::string uniqueID() override {
-      return "negate_mutation_operator";
+      return ID;
     }
     std::string uniqueID() const override {
-      return "negate_mutation_operator";
+      return ID;
     }
 
     bool canBeApplied(llvm::Value &V) override;
