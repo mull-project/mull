@@ -9,8 +9,10 @@ class TestModuleFactory {
 public:
   std::string testerModulePath_IR();
   std::string testerModulePath_Bitcode();
+  
+  std::unique_ptr<Module> createModule(const char *fixtureName, const char *moduleIdentifier);
+  
   std::unique_ptr<Module> createTesterModule();
-
   std::unique_ptr<Module> createTesteeModule();
 
   std::unique_ptr<Module> create_SimpleTest_NegateCondition_Tester_Module();
