@@ -69,13 +69,13 @@ public:
          const std::string &cacheDir,
          std::vector<std::string> mutationOperators) :
     bitcodePaths(paths),
+    mutationOperators(mutationOperators),
     fork(fork),
     dryRun(dryrun),
     useCache(cache),
     timeout(timeout),
     maxDistance(distance),
-    cacheDirectory(cacheDir),
-    mutationOperators(mutationOperators)
+    cacheDirectory(cacheDir)
   {
   }
 

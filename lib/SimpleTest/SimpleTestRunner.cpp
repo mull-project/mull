@@ -11,6 +11,7 @@
 #include "SimpleTest/SimpleTest_Test.h"
 
 #include <chrono>
+#include <cstdarg>
 
 using namespace mull;
 using namespace llvm;
