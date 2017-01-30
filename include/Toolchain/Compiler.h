@@ -8,7 +8,7 @@ namespace llvm {
 class Module;
 class TargetMachine;
 
-};
+}
 
 namespace mull {
 
