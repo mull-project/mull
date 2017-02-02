@@ -1,4 +1,4 @@
-llvm_add_library(mull
+set(mull_sources
   ConfigParser.cpp
   Context.cpp
   Driver.cpp
@@ -30,16 +30,18 @@ llvm_add_library(mull
   GoogleTest/GoogleTestRunner.cpp
 
   SQLiteReporter.cpp
+)
 
-  ADDITIONAL_HEADER_DIRS
+set(mull_header_dirs
   ${MULL_INCLUDE_DIR}
   ${MULL_INCLUDE_DIR}/MutationOperators
   ${MULL_INCLUDE_DIR}/Context
   ${MULL_INCLUDE_DIR}/GoogleTest
   ${MULL_INCLUDE_DIR}/SimpleTest
   ${MULL_INCLUDE_DIR}/Toolchain
+)
 
-  LINK_LIBS
+set(mull_additional_libraries
   LLVMAsmParser
   LLVMAsmPrinter
   LLVMBitReader
@@ -63,6 +65,78 @@ llvm_add_library(mull
   LLVMX86Info
 )
 
+set(mull_link_flags "") # to be filled later
+set(mull_rpath "")      # to be filled later
+
+if(MULL_SUPPORT_RUST)
+  message(STATUS "Mull> MULL_SUPPORT_RUST detected.")
+
+  set(mull_sources
+    ${mull_sources}
+    Rust/RustTest.cpp
+    Rust/RustTestFinder.cpp
+    Rust/RustTestRunner.cpp)
+
+  set(mull_header_dirs
+    ${mull_header_dirs}
+    ${MULL_INCLUDE_DIR}/Rust)
+
+  set(rust_cmake_path "${CMAKE_CURRENT_SOURCE_DIR}/../.mull.rust.cmake")
+  IF(NOT EXISTS ${rust_cmake_path})
+    message(FATAL_ERROR "MULL_SUPPORT_RUST is enabled but .mull.rust.cmake \
+      file was not found at path: \
+      ${CMAKE_CURRENT_SOURCE_DIR}/../.mull.rust.cmake. Please, take \
+      .mull.rust.cmake.example and modify according to your system")
+  endif()
+
+  include(${rust_cmake_path})
+
+  message(STATUS "Mull.Rust> Rust lib path: ${mull_rust_libpath}")
+
+  IF(NOT EXISTS ${mull_rust_libpath})
+    message(FATAL_ERROR
+      "mull_rust_libpath variable should be set to a valid \
+      existing path in .mull.rust.cmake")
+  endif()
+
+  foreach(library ${mull_rust_additional_libraries})
+    IF(NOT EXISTS "${mull_rust_libpath}/${library}")
+      message(FATAL_ERROR "Mull.Rust> path declared in \
+        mull_rust_additional_libraries does not exist")
+    endif()
+  endforeach()
+
+  set(mull_additional_libraries
+    ${mull_additional_libraries}
+    ${mull_rust_additional_libraries})
+
+  set(mull_rpath ${mull_rpath} ${mull_rust_libpath})
+  set(mull_link_flags ${mull_link_flags} -L${mull_rust_libpath})
+endif()
+
+llvm_add_library(mull
+  ${mull_sources}
+
+  ADDITIONAL_HEADER_DIRS
+  ${mull_header_dirs}
+
+  LINK_LIBS
+  ${mull_additional_libraries}
+)
+
+# Once we have mull target added, we can start querying and patching it.
+# rpath
+get_target_property(default_rpath mull INSTALL_RPATH)
+set(mull_rpath ${default_rpath} ${mull_rpath})
+set_target_properties(mull PROPERTIES INSTALL_RPATH "${mull_rpath}")
+
+# Link flags
+get_target_property(default_link_flags mull LINK_FLAGS)
+if(NOT ("default_link_flags-NOTFOUND" STREQUAL ${default_link_flags}))
+  set(mull_link_flags ${default_link_flags} ${mull_link_flags})
+endif()
+set_target_properties(mull PROPERTIES LINK_FLAGS "${mull_link_flags}")
+
 # The following is needed to make CMake to generate a folder structure in Xcode
 # that corresponds to a physical folder structure.
 get_target_property(HERE_TARGET_SOURCES mull SOURCES)
@@ -76,3 +150,4 @@ foreach(source_file ${HERE_TARGET_SOURCES})
     source_group("Source Files\\${relative_path}" FILES ${source_file})
   endif()
 endforeach()
+

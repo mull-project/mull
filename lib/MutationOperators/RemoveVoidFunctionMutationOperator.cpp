@@ -72,8 +72,10 @@ bool RemoveVoidFunctionMutationOperator::canBeApplied(Value &V) {
       }
 
       /// TODO: This might also filter out important code. Review this later.
-      if (calledFunction->getName().endswith("D1Ev") || calledFunction->getName().endswith("D2Ev") ||
-          calledFunction->getName().contains("C1E") || calledFunction->getName().contains("C2E")) {
+      if (calledFunction->getName().endswith("D1Ev") ||
+          calledFunction->getName().endswith("D2Ev") ||
+          calledFunction->getName().str().find("C1E") != std::string::npos ||
+          calledFunction->getName().str().find("C2E") != std::string::npos) {
         return false;
       }
 

@@ -57,7 +57,7 @@ TEST(ConfigParser, loadConfig_Timeout_Unspecified) {
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(Input);
 
-  ASSERT_EQ(MullDefaultTimeout, Cfg.getTimeout());
+  ASSERT_EQ(MullDefaultTimeoutMilliseconds, Cfg.getTimeout());
 }
 
 TEST(ConfigParser, loadConfig_Timeout_SpecificValue) {

@@ -38,7 +38,7 @@ public:
 
       DILocation *location = dyn_cast<DILocation>(debug);
       if (location) {
-        if (location->getFilename().contains("include/c++/v1")) {
+        if (location->getFilename().str().find("include/c++/v1") != std::string::npos) {
           return true;
         }
       }
@@ -95,12 +95,19 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
         continue;
       }
 
-      Type *globalType = Ty->getPointerElementType();
-      if (!globalType) {
+      /// Downgrading from LLVM 4.0 to 3.9:
+      /// in 4.0 the pointer type is used instead of sequential type.
+      // - Type *globalType = Ty->getPointerElementType();
+      // - if (!globalType) {
+      // -   continue;
+      // - }
+      // - StructType *STy = dyn_cast<StructType>(globalType);
+      Type *SeqTy = Ty->getSequentialElementType();
+      if (!SeqTy) {
         continue;
       }
 
-      StructType *STy = dyn_cast<StructType>(globalType);
+      StructType *STy = dyn_cast<StructType>(SeqTy);
       if (!STy) {
         continue;
       }
@@ -259,7 +266,7 @@ static bool shouldSkipDefinedFunction(llvm::Function *definedFunction) {
     MDNode *debug = definedFunction->getMetadata(debugInfoKindID);
     DISubprogram *subprogram = dyn_cast<DISubprogram>(debug);
     if (subprogram) {
-      if (subprogram->getFilename().contains("include/c++/v1")) {
+      if (subprogram->getFilename().str().find("include/c++/v1") != std::string::npos) {
         return true;
       }
     }

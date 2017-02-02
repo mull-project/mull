@@ -10,7 +10,13 @@ class MutationPoint;
 class MutationPointAddress;
 class MutationOperatorFilter;
 
+/// Arithmetic with Overflow Intrinsics
+/// http://llvm.org/docs/LangRef.html#id1468
 class AddMutationOperator : public MutationOperator {
+
+  bool isAddWithOverflow(llvm::Value &V);
+  llvm::Function *replacementForAddWithOverflow(llvm::Function *addFunction,
+                                                llvm::Module &module);
 
 public:
   static const std::string ID;
