@@ -28,6 +28,7 @@ namespace mull {
 class Config {
   std::vector<std::string> bitcodePaths;
   std::vector<std::string> mutationOperators;
+  std::vector<std::string> dynamicLibraries;
   bool fork;
   bool dryRun;
   bool useCache;
@@ -51,6 +52,7 @@ public:
       //   RemoveVoidFunctionMutationOperator::ID
       // }
     ),
+    dynamicLibraries(),
     fork(true),
     dryRun(false),
     useCache(true),
@@ -61,15 +63,17 @@ public:
   }
 
   Config(const std::vector<std::string> &paths,
+         const std::vector<std::string> mutationOperators,
+         const std::vector<std::string> libraries,
          bool fork,
          bool dryrun,
          bool cache,
          int timeout,
          int distance,
-         const std::string &cacheDir,
-         std::vector<std::string> mutationOperators) :
+         const std::string &cacheDir) :
     bitcodePaths(paths),
     mutationOperators(mutationOperators),
+    dynamicLibraries(libraries),
     fork(fork),
     dryRun(dryrun),
     useCache(cache),
@@ -81,6 +85,14 @@ public:
 
   const std::vector<std::string> &getBitcodePaths() const {
       return bitcodePaths;
+  }
+  
+  const std::vector<std::string> &getMutationOperators() const {
+    return mutationOperators;
+  }
+  
+  const std::vector<std::string> &getDynamicLibraries() const {
+    return dynamicLibraries;
   }
 
   bool getFork() const {
@@ -105,10 +117,6 @@ public:
 
   std::string getCacheDirectory() const {
     return cacheDirectory;
-  }
-
-  const std::vector<std::string> &getMutationOperators() const {
-    return mutationOperators;
   }
 
   void dump() const {

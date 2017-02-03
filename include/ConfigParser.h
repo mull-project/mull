@@ -19,6 +19,7 @@ struct MappingTraits<mull::Config>
   {
     io.mapOptional("bitcode_files", config.bitcodePaths);
     io.mapOptional("mutation_operators", config.mutationOperators);
+    io.mapOptional("dynamic_libraries", config.dynamicLibraries);
     io.mapOptional("fork", config.fork);
     io.mapOptional("dry_run", config.dryRun);
     io.mapOptional("use_cache", config.useCache);
