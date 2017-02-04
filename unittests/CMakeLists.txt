@@ -20,6 +20,8 @@ set(mull_unittests_sources
 
   TestModuleFactory.cpp
   TestModuleFactory.h
+
+  ConfigParserTestFixture.h
 )
 
 if(MULL_SUPPORT_RUST)
