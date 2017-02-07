@@ -39,3 +39,11 @@ experience of living in a downstream world.
 Current code is being developed against LLVM commit:
 [dc30ded6fb9526aba31a86b97e8f69fc9baece00](https://github.com/llvm-mirror/llvm/commit/dc30ded6fb9526aba31a86b97e8f69fc9baece00).
 
+## Useful Material (papers, articles, talks, etc.)
+
+### Papers
+
+[An Analysis and Survey of the Development of
+Mutation Testing](http://www0.cs.ucl.ac.uk/staff/mharman/tse-mutation-survey.pdf)
+
+[Are Mutants a Valid Substitute for Real Faults in Software Testing?](https://homes.cs.washington.edu/~mernst/pubs/mutation-effectiveness-fse2014.pdf)
