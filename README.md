@@ -33,11 +33,8 @@ only scheme that should be created and used.
 
 ## Notes
 
-Update to LLVM's trunk should be a recurrent task, but first we need to get
-experience of living in a downstream world.
-
-Current code is being developed against LLVM commit:
-[dc30ded6fb9526aba31a86b97e8f69fc9baece00](https://github.com/llvm-mirror/llvm/commit/dc30ded6fb9526aba31a86b97e8f69fc9baece00).
+Current code is being developed against stable LLVM 3.9 branch:
+[release_39](https://github.com/llvm-mirror/llvm/tree/release_39).
 
 ## Useful Material (papers, articles, talks, etc.)
 
