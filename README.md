@@ -3,6 +3,8 @@
 See [LLVM-based Mutation Testing System. Request For
 Comments](http://lowlevelbits.org/llvm-based-mutation-testing-system/).
 
+[![Slack Status](https://mutation-testing-slack.herokuapp.com/badge.svg)](https://mutation-testing.slack.com/messages/mull)
+
 ## Getting started
 
 ```bash
