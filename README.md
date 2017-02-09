@@ -13,14 +13,14 @@ cd ~/Projects/LLVM
 
 git clone http://llvm.org/git/llvm.git
 cd llvm
-git checkout dc30ded6fb9526aba31a86b97e8f69fc9baece00
+git checkout release_39
 
 git clone https://github.com/mull-project/mull.git projects/mull
 
 cd ~/Projects/LLVM
-mkdir Build
+mkdir BuildXcode
 
-cd Build
+cd BuildXcode
 cmake -G Xcode -DBUILD_SHARED_LIBS=true -DLLVM_TARGETS_TO_BUILD="X86" ../llvm
 
 open LLVM.xcodeproj
@@ -30,7 +30,7 @@ When opening Xcode first time do not autocreate schemes but choose option to
 create them manually otherwise you'll have a lot of LLVM-related schemes which
 you don't need.
 
-Currently the work is being done against MullUnitTests scheme so that's the
+Currently the work is being done against `MullUnitTests` scheme so that's the
 only scheme that should be created and used.
 
 ## Notes
