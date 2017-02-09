@@ -1,7 +1,7 @@
 # Mull
 
 See [LLVM-based Mutation Testing System. Request For
-Comments](http://lowlevelbits.org/llvm-based-mutation-testing-system/).
+Comments](http://lowlevelbits.org/llvm-based-mutation-testing-system/) and [FOSDEM 2017: Mutation Testing, Leaving the Stone Age by Alex Denisov](https://www.youtube.com/watch?v=YEgiyiICkpQ).
 
 [![Slack Status](https://mutation-testing-slack.herokuapp.com/badge.svg)](https://mutation-testing.slack.com/messages/mull)
 
@@ -46,6 +46,9 @@ Current code is being developed against stable LLVM 3.9 branch:
 Mutation Testing](http://www0.cs.ucl.ac.uk/staff/mharman/tse-mutation-survey.pdf)
 
 [Are Mutants a Valid Substitute for Real Faults in Software Testing?](https://homes.cs.washington.edu/~mernst/pubs/mutation-effectiveness-fse2014.pdf)
+
+[LLVM-based Mutation Testing System. Request For
+Comments](http://lowlevelbits.org/llvm-based-mutation-testing-system/)
 
 ### Talks
 
