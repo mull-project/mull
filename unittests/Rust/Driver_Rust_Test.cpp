@@ -62,13 +62,14 @@ TEST(Driver_Rust, AddMutationOperator) {
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
   Config config(ModulePaths,
+                {},
+                {},
                 doFork,
                 dryRun,
                 useCache,
                 MullDefaultTimeoutMilliseconds,
                 distance,
-                cacheDirectory,
-                {});
+                cacheDirectory);
 
   FakeRustModuleLoader loader;
 
