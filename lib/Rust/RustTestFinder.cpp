@@ -46,27 +46,112 @@ RustTestFinder::RustTestFinder() : TestFinder() {
 
 /// The algorithm is the following:
 ///
-/// TODO
+/// When a Rust module with functions and tests is compiled to LLVM IR via
+/// `rustc --test`, the following functions and constants are important:
+///
+/// - `main` function which is a primary test runner
+/// - `test_main` (called by `main`)
+/// - `test_main_static` (called by `test_main`, it is the actual test runner),
+///   See https://doc.rust-lang.org/1.1.0/src/test/lib.rs.html#267
+///
+/// Rust stores the test methods to run: their names and function pointers into
+/// a global variable: literal of type `internal unnamed_addr constant` which is
+/// then given by reference to `test_main_static`.
+///
+/// Algorithm works in two steps:
+/// 1) First we find a `test_main_static` function and find that global
+/// variable.
+/// 2) We go through that literal and extract the test function pointers.
+///
+/// See prettified LLVM IR example for simple Rust module with tests:
+/// https://github.com/mull-project/mull/blob/54d0e6f4ddea458a5d77fa707b26acef9f5a6093/lab/rust/example.ll.pretty
+///
+/// See also original StackOverflow question we asked in order to get a feedback
+/// about possible approaches:
+/// http://stackoverflow.com/questions/42177712/how-do-i-find-the-function-pointers-for-tests-from-the-llvm-ir-code-of-a-rust-pr#42177712
+///
+/// TODO:
+/// `main` function calls `test_main_static` indirectly: the pointer to it
+/// is given to a `std::rt::lang_start` function. There might be some important
+/// setup going on (setup of global variables, static constructors, etc).
+/// The work on real-world Rust code bases will most likely reveal more about
+/// this.
 std::vector<std::unique_ptr<Test>> RustTestFinder::findTests(Context &Ctx) {
   std::vector<std::unique_ptr<Test>> tests;
 
+  /// If we have multiple IR modules compiled, each module will have its own
+  /// global variable with test functions.
+  std::vector<GlobalValue *> testContentsGlobalVariables;
+
   for (auto &module : Ctx.getModules()) {
-    auto &x = module->getModule()->getFunctionList();
-    for (auto &Fn : x) {
-      //Logger::info() << "RustTestFinder::findTests()> found function: "
-      //  << Fn.getName() << '\n';
+    auto &functionList = module->getModule()->getFunctionList();
+    for (auto &function : functionList) {
+      for (auto &bb : function) {
+        for (auto &instruction : bb) {
+          CallInst *callInst = dyn_cast<CallInst>(&instruction);
 
-      if (Fn.getName().str().find("rusttest_") != std::string::npos) {
-        Logger::info() << "RustTestFinder::findTests - found test: "
-          << Fn.getName() << '\n';
+          if (callInst == nullptr) {
+            continue;
+          }
 
-        tests.push_back(make_unique<RustTest>(Fn.getName(), &Fn));
+          Function *calledFunction = callInst->getCalledFunction();
+
+          if (calledFunction == nullptr) {
+            continue;
+          }
+
+          StringRef cfName = calledFunction->getName();
+
+          if (cfName.find("test_main_static") == std::string::npos) {
+            continue;
+          }
+
+          assert(callInst->getNumArgOperands() == 2);
+
+          auto operand1 = callInst->getOperand(0);
+          assert(operand1->getType()->getTypeID() == llvm::Type::PointerTyID);
+
+          auto ref = dyn_cast<ConstantExpr>(operand1);
+          assert(ref);
+
+          auto global = dyn_cast<GlobalValue>(ref->getOperand(0));
+          assert(global);
+
+          testContentsGlobalVariables.push_back(global);
+        }
       }
+    }
+  }
 
-      if (Fn.getName().str().find("main") != std::string::npos) {
-        Logger::info() << "RustTestFinder::findTests - found main: "
-          << Fn.getName() << '\n';
-      }
+  if (testContentsGlobalVariables.size() == 0) {
+    return tests;
+  }
+
+  for (auto &testContentsGV : testContentsGlobalVariables) {
+    Type *type = testContentsGV->getValueType();
+    assert(type->getTypeID() == Type::StructTyID);
+
+    StructType *structType = dyn_cast<StructType>(type);
+    assert(structType);
+
+    auto testContents = dyn_cast<Constant>(testContentsGV->getOperand(0));
+    assert(testContents->getType()->getTypeID() == Type::StructTyID);
+
+    int numberOfTestDescriptions = testContents->getNumOperands();
+
+    for (int i = 0; i < numberOfTestDescriptions; i++) {
+      auto testStruct = dyn_cast<Constant>(testContents->getOperand(i));
+      assert(testStruct->getType()->getTypeID() == Type::StructTyID);
+      assert(testStruct->getNumOperands() == 2);
+
+      auto testPointerStruct =
+        dyn_cast<ConstantStruct>(testStruct->getOperand(1));
+      assert(testPointerStruct->getNumOperands() == 3);
+
+      auto testFunction = dyn_cast<Function>(testPointerStruct->getOperand(1));
+
+      tests.push_back(make_unique<RustTest>(testFunction->getName(),
+                                            testFunction));
     }
   }
 
