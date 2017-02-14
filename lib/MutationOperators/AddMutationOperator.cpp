@@ -55,7 +55,12 @@ AddMutationOperator::replacementForAddWithOverflow(llvm::Function *addFunction,
   std::string replacementName = "";
   Type *replacementType = nullptr;
 
-  if (name == "llvm.sadd.with.overflow.i16") {
+  if (name == "llvm.sadd.with.overflow.i8") {
+    replacementName = "llvm.ssub.with.overflow.i8";
+    replacementType = Type::getInt8Ty(module.getContext());
+  }
+
+  else if (name == "llvm.sadd.with.overflow.i16") {
     replacementName = "llvm.ssub.with.overflow.i16";
     replacementType = Type::getInt16Ty(module.getContext());
   }
@@ -68,6 +73,11 @@ AddMutationOperator::replacementForAddWithOverflow(llvm::Function *addFunction,
   else if (name == "llvm.sadd.with.overflow.i64") {
     replacementName = "llvm.ssub.with.overflow.i64";
     replacementType = Type::getInt64Ty(module.getContext());
+  }
+
+  else if (name == "llvm.uadd.with.overflow.i8") {
+    replacementName = "llvm.usub.with.overflow.i8";
+    replacementType = Type::getInt8Ty(module.getContext());
   }
 
   else if (name == "llvm.uadd.with.overflow.i16") {
