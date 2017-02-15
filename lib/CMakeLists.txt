@@ -42,27 +42,40 @@ set(mull_header_dirs
 )
 
 set(mull_additional_libraries
-  LLVMAsmParser
-  LLVMAsmPrinter
-  LLVMBitReader
-  LLVMCodeGen
-  LLVMCore
-  LLVMExecutionEngine
-  LLVMObject
-  LLVMObjectYAML
-  LLVMOrcJIT
-  LLVMRuntimeDyld
-  LLVMSupport
-  LLVMTarget
-  LLVMTransformUtils
-  sqlite3
 
-  # FIXME: Should not be arch specific
-  LLVMX86AsmParser
-  LLVMX86AsmPrinter
-  LLVMX86CodeGen
-  LLVMX86Desc
-  LLVMX86Info
+  # Architecture-independent:
+  ${MULL_DEPENDENCY_LLVMAnalysis}
+  ${MULL_DEPENDENCY_LLVMAsmParser}
+  ${MULL_DEPENDENCY_LLVMAsmPrinter}
+  ${MULL_DEPENDENCY_LLVMBitReader}
+  ${MULL_DEPENDENCY_LLVMCodeGen}
+  ${MULL_DEPENDENCY_LLVMCore}
+  ${MULL_DEPENDENCY_LLVMDebugInfoCodeView}
+  ${MULL_DEPENDENCY_LLVMExecutionEngine}
+  ${MULL_DEPENDENCY_LLVMMC}
+  ${MULL_DEPENDENCY_LLVMMCDisassembler}
+  ${MULL_DEPENDENCY_LLVMMCParser}
+  ${MULL_DEPENDENCY_LLVMObject}
+  ${MULL_DEPENDENCY_LLVMOrcJIT}
+  ${MULL_DEPENDENCY_LLVMRuntimeDyld}
+  ${MULL_DEPENDENCY_LLVMScalarOpts}
+  ${MULL_DEPENDENCY_LLVMSelectionDAG}
+  ${MULL_DEPENDENCY_LLVMSupport}
+  ${MULL_DEPENDENCY_LLVMTarget}
+  ${MULL_DEPENDENCY_LLVMTransformUtils}
+
+  ${MULL_DEPENDENCY_LIBZ}
+  ${MULL_DEPENDENCY_NCURSES}
+
+  ${MULL_DEPENDENCY_SQLITE}
+
+  # Architecture-specific:
+  ${MULL_DEPENDENCY_LLVMX86AsmParser}
+  ${MULL_DEPENDENCY_LLVMX86AsmPrinter}
+  ${MULL_DEPENDENCY_LLVMX86CodeGen}
+  ${MULL_DEPENDENCY_LLVMX86Desc}
+  ${MULL_DEPENDENCY_LLVMX86Info}
+  ${MULL_DEPENDENCY_LLVMX86Utils}
 )
 
 set(mull_link_flags "") # to be filled later
@@ -100,7 +113,7 @@ if(MULL_SUPPORT_RUST)
   endif()
 
   foreach(library ${mull_rust_additional_libraries})
-    IF(NOT EXISTS "${mull_rust_libpath}/${library}")
+    IF(NOT EXISTS "${library}")
       message(FATAL_ERROR "Mull.Rust> path declared in \
         mull_rust_additional_libraries does not exist")
     endif()
@@ -114,15 +127,8 @@ if(MULL_SUPPORT_RUST)
   set(mull_link_flags ${mull_link_flags} -L${mull_rust_libpath})
 endif()
 
-llvm_add_library(mull
-  ${mull_sources}
-
-  ADDITIONAL_HEADER_DIRS
-  ${mull_header_dirs}
-
-  LINK_LIBS
-  ${mull_additional_libraries}
-)
+add_library(mull ${mull_sources})
+target_link_libraries(mull ${mull_additional_libraries})
 
 # Once we have mull target added, we can start querying and patching it.
 # rpath
@@ -150,4 +156,3 @@ foreach(source_file ${HERE_TARGET_SOURCES})
     source_group("Source Files\\${relative_path}" FILES ${source_file})
   endif()
 endforeach()
-
