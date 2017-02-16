@@ -3,6 +3,7 @@ compile_commands.json
 **/main
 .mull.rust.cmake
 BuildXcode
+BuildNinja
 googletest
 !googletest/Makefile
 

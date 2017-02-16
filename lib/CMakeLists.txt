@@ -94,43 +94,32 @@ if(MULL_SUPPORT_RUST)
     ${mull_header_dirs}
     ${MULL_INCLUDE_DIR}/Rust)
 
-  set(rust_cmake_path "${CMAKE_CURRENT_SOURCE_DIR}/../.mull.rust.cmake")
-  IF(NOT EXISTS ${rust_cmake_path})
-    message(FATAL_ERROR "MULL_SUPPORT_RUST is enabled but .mull.rust.cmake \
-      file was not found at path: \
-      ${CMAKE_CURRENT_SOURCE_DIR}/../.mull.rust.cmake. Please, take \
-      .mull.rust.cmake.example and modify according to your system")
-  endif()
-
-  include(${rust_cmake_path})
-
-  message(STATUS "Mull.Rust> Rust lib path: ${mull_rust_libpath}")
-
-  IF(NOT EXISTS ${mull_rust_libpath})
+  IF(NOT EXISTS ${MULL_RUST_LIB_PATH})
     message(FATAL_ERROR
-      "mull_rust_libpath variable should be set to a valid \
+      "MULL_RUST_LIB_PATH variable should be set to a valid \
       existing path in .mull.rust.cmake")
   endif()
 
-  foreach(library ${mull_rust_additional_libraries})
+  foreach(library ${MULL_DEPENDENCY_RUST_ADDITIONAL_LIBRARIES})
     IF(NOT EXISTS "${library}")
       message(FATAL_ERROR "Mull.Rust> path declared in \
-        mull_rust_additional_libraries does not exist")
+        MULL_DEPENDENCY_RUST_ADDITIONAL_LIBRARIES does not exist: \
+        ${library}")
     endif()
   endforeach()
 
   set(mull_additional_libraries
     ${mull_additional_libraries}
-    ${mull_rust_additional_libraries})
+    ${MULL_DEPENDENCY_RUST_ADDITIONAL_LIBRARIES})
 
-  set(mull_rpath ${mull_rpath} ${mull_rust_libpath})
-  set(mull_link_flags ${mull_link_flags} -L${mull_rust_libpath})
+  set(mull_rpath ${mull_rpath} ${MULL_RUST_LIB_PATH})
+  set(mull_link_flags ${mull_link_flags} -L${MULL_RUST_LIB_PATH})
 endif()
 
-add_library(mull ${mull_sources})
+add_library(mull SHARED ${mull_sources})
 target_link_libraries(mull ${mull_additional_libraries})
 
-# Once we have mull target added, we can start querying and patching it.
+## Once we have mull target added, we can start querying and patching it.
 # rpath
 get_target_property(default_rpath mull INSTALL_RPATH)
 set(mull_rpath ${default_rpath} ${mull_rpath})

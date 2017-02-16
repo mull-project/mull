@@ -5,15 +5,24 @@ enable_language(C CXX)
 
 add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=c++11>)
 
-set(LLVM_DIR "/usr/local/opt/llvm")
-set(LLVM_LIB_PATH "${LLVM_DIR}/lib")
+if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+message(FATAL_ERROR "This CMakeLists.txt file expects cmake to be called with a CMake toolchain file:
+cmake ... -DCMAKE_TOOLCHAIN_FILE=path_to_your_toolchain_file.
+See example: Mull.toolchain.OSX.cmake")
+endif()
+
+if (NOT DEFINED LLVM_ROOT)
+  message(FATAL "This CMakeLists.txt file expects cmake to be called with a
+    CMake toolchain file which provides LLVM_ROOT:\n \
+    -DCMAKE_TOOLCHAIN_FILE=path_to_your_toolchain")
+endif()
+
+set(LLVM_LIB_PATH "${LLVM_ROOT}/lib")
 
 set(MULL_SOURCE_DIR   ${CMAKE_CURRENT_SOURCE_DIR})
 set(MULL_INCLUDE_DIR  ${MULL_SOURCE_DIR}/include)
-set(MULL_TOOLS_DIR    ${LLVM_TOOLS_BINARY_DIR})
-set(MULL_BINARY_DIR   ${LLVM_BINARY_DIR})
 
-include_directories("${LLVM_DIR}/include")
+include_directories("${LLVM_ROOT}/include")
 include_directories("${MULL_SOURCE_DIR}/googletest")
 
 ## LLVM dependencies:
@@ -38,7 +47,11 @@ find_library(MULL_DEPENDENCY_LLVMSupport LLVMSupport HINTS "${LLVM_LIB_PATH}")
 find_library(MULL_DEPENDENCY_LLVMTarget LLVMTarget HINTS "${LLVM_LIB_PATH}")
 find_library(MULL_DEPENDENCY_LLVMTransformUtils LLVMTransformUtils HINTS "${LLVM_LIB_PATH}")
 
-find_library(MULL_DEPENDENCY_LIBZ z HINTS "/usr/local/opt/zlib/lib")
+if (NOT DEFINED MULL_TOOLCHAIN_ZLIB_PATH)
+message(SEND_ERROR "MULL_TOOLCHAIN_ZLIB_PATH variable must be provided in a toolchain file.
+Example: set(MULL_TOOLCHAIN_ZLIB_PATH \"/usr/local/opt/zlib/lib\")")
+endif()
+find_library(MULL_DEPENDENCY_LIBZ z HINTS ${MULL_TOOLCHAIN_LIBZ_PATH})
 find_library(MULL_DEPENDENCY_NCURSES ncurses)
 
 find_library(MULL_DEPENDENCY_SQLITE sqlite3 HINTS "/usr/local/opt/sqlite")
@@ -55,11 +68,27 @@ find_library(MULL_DEPENDENCY_LLVMX86Info LLVMX86Info HINTS "${LLVM_LIB_PATH}")
 find_library(MULL_DEPENDENCY_LLVMX86Utils LLVMX86Utils HINTS "${LLVM_LIB_PATH}")
 
 ## Mull's own dependencies:
-find_library(MULL_DEPENDENCY_SQLITE sqlite3 HINTS "/usr/local/opt/sqlite")
-
-# message(STATUS "MULL_DEPENDENCY_LLVMAsmPrinter - ${MULL_DEPENDENCY_LLVMAsmPrinter}")
+if (NOT DEFINED MULL_TOOLCHAIN_SQLITE_PATH)
+message(SEND_ERROR "MULL_TOOLCHAIN_SQLITE_PATH variable must be provided in a toolchain file.
+Example: set(MULL_TOOLCHAIN_SQLITE_PATH \"/usr/local/opt/sqlite\"")
+endif()
+find_library(MULL_DEPENDENCY_SQLITE sqlite3 HINTS ${MULL_TOOLCHAIN_SQLITE_PATH})
 
 include_directories(${MULL_INCLUDE_DIR})
+
+if(MULL_SUPPORT_RUST)
+  set(rust_cmake_path "${CMAKE_CURRENT_SOURCE_DIR}/.mull.rust.cmake")
+  IF(NOT EXISTS ${rust_cmake_path})
+    message(FATAL_ERROR "MULL_SUPPORT_RUST is enabled but .mull.rust.cmake \
+      file was not found at path: \
+      ${rust_cmake_path}. Please take \
+      .mull.rust.cmake.example and modify according to your system")
+  endif()
+
+  include(${rust_cmake_path})
+
+  message(STATUS "Mull.Rust> Rust lib path: ${mull_rust_libpath}")
+endif()
 
 add_subdirectory(tools)
 add_subdirectory(lib)

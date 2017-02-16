@@ -24,6 +24,8 @@ set(mull_unittests_sources
   ConfigParserTestFixture.h
 )
 
+set(mull_unittests_rpath "") # to be filled later
+
 if(MULL_SUPPORT_RUST)
   set(mull_unittests_sources
     ${mull_unittests_sources}
@@ -31,6 +33,10 @@ if(MULL_SUPPORT_RUST)
     Rust/RustTestFinderTest.cpp
     Rust/RustTestRunnerTest.cpp
     Rust/Driver_Rust_Test.cpp
+  )
+
+  set(mull_unittests_rpath
+    ${mull_unittests_rpath} ${MULL_RUST_LIB_PATH}
   )
 endif()
 
@@ -48,6 +54,15 @@ target_link_libraries(MullUnitTests
   ${MULL_DEPENDENCY_LLVMX86AsmParser}
 )
 
+# rpath
+get_target_property(default_rpath MullUnitTests INSTALL_RPATH)
+set(mull_unittests_rpath ${default_rpath} ${mull_unittests_rpath})
+set_target_properties(MullUnitTests
+  PROPERTIES INSTALL_RPATH
+  "${mull_unittests_rpath}"
+)
+
+# This copies (symlinks) fixtures/*.bc files that used by unit tests.
 add_custom_command(TARGET MullUnitTests POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E create_symlink
                    ${CMAKE_CURRENT_LIST_DIR}/fixtures $<TARGET_FILE_DIR:MullUnitTests>/fixtures)

@@ -1,6 +1,7 @@
 
 #include "TestModuleFactory.h"
 
+#include "Logger.h"
 #include "llvm/AsmParser/Parser.h"
 #include "llvm/IR/Verifier.h"
 #include "llvm/Support/Debug.h"
@@ -33,7 +34,12 @@ static std::string fixturePath(const char *fixtureName) {
 static std::string createFixture(const char *fixtureName) {
   std::string fixtureFullPath = fixturePath(fixtureName);
 
-  assert(fileExists(fixtureFullPath));
+  if (fileExists(fixtureFullPath) == false) {
+    mull::Logger::debug() << "Could not find a fixture at path: "
+                          << fixtureFullPath << '\n';
+
+    exit(1);
+  }
 
   std::ifstream file(fixtureFullPath);
   std::string str;
