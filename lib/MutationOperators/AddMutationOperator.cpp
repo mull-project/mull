@@ -37,6 +37,10 @@ bool AddMutationOperator::isAddWithOverflow(llvm::Value &V) {
   if (CallInst *callInst = dyn_cast<CallInst>(&V)) {
     Function *calledFunction = callInst->getCalledFunction();
 
+    if (calledFunction == nullptr) {
+      return false;
+    }
+
     if (calledFunction->getName().startswith("llvm.sadd") ||
         calledFunction->getName().startswith("llvm.uadd")) {
       return true;
