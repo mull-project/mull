@@ -4,6 +4,4 @@ compile_commands.json
 .mull.rust.cmake
 BuildXcode
 BuildNinja
-googletest
-!googletest/Makefile
 
