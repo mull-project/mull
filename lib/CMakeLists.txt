@@ -116,7 +116,20 @@ if(MULL_SUPPORT_RUST)
   set(mull_link_flags ${mull_link_flags} -L${MULL_RUST_LIB_PATH})
 endif()
 
-add_library(mull SHARED ${mull_sources})
+# Globbing is not recommended by CMake so maybe consider listing headers
+# explicitly in include/CMakeLists.txt file. However LLVM goes find(GLOB) under
+# the hood so probably we are also good for now.
+# "We do not recommend using GLOB to collect a list of source files from your
+# source tree. If no CMakeLists.txt file changes when a source is added or
+# removed then the generated build system cannot know when to ask
+# CMake to regenerate. https://cmake.org/cmake/help/v3.0/command/file.html
+file(GLOB_RECURSE mull_header_files ${MULL_INCLUDE_DIR}/*.h)
+
+add_library(mull SHARED ${mull_sources} ${mull_header_files})
+
+set_source_files_properties(${mull_header_dirs} PROPERTIES HEADER_FILE_ONLY ON)
+include_directories(${mull_header_dirs})
+
 target_link_libraries(mull ${mull_additional_libraries})
 
 ## Once we have mull target added, we can start querying and patching it.
