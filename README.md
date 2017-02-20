@@ -64,7 +64,14 @@ Either use binary distribution via `brew install llvm` or clone LLVM and
 build it yourself from
 [release_39](https://github.com/llvm-mirror/llvm/tree/release_39) branch.
 
-## Useful Material (papers, articles, talks, etc.)
+## Open questions
+
+There are the questions we want to answer with Mull eventually.
+
+- Can mutation testing actually detect serious errors in the real-world programs?
+- What are the most effective mutation operators?
+
+## Useful Material
 
 ### Papers
 
