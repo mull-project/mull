@@ -7,36 +7,62 @@ Comments](http://lowlevelbits.org/llvm-based-mutation-testing-system/) and [FOSD
 
 ## Getting started
 
+So far Mull is being developed against OSX. Linux support is coming.
+
+### OS X
+
+**Warning:** Recently we migrated Mull to be an out-of-source project.
+Migration went smoothly and all is working on our end (c). Please let us know
+if you notice some dependencies that we missed to specify below.
+
+#### Getting dependencies
+
 ```bash
-mkdir -p ~/Projects/LLVM
-cd ~/Projects/LLVM
+# These are needed by LLVM
+brew install zlib
+brew install ncurses
 
-git clone http://llvm.org/git/llvm.git
-cd llvm
-git checkout release_39
-
-git clone https://github.com/mull-project/mull.git projects/mull
-
-cd ~/Projects/LLVM
-mkdir BuildXcode
-
-cd BuildXcode
-cmake -G Xcode -DBUILD_SHARED_LIBS=true -DLLVM_TARGETS_TO_BUILD="X86" ../llvm
-
-open LLVM.xcodeproj
+# SQLite is needed for Mull to generate reports.
+brew install sqlite
 ```
 
-When opening Xcode first time do not autocreate schemes but choose option to
-create them manually otherwise you'll have a lot of LLVM-related schemes which
-you don't need.
+#### Getting Mull
 
-Currently the work is being done against `MullUnitTests` scheme so that's the
-only scheme that should be created and used.
+```bash
+git clone https://github.com/mull-project/mull.git
+cd mull
+```
+
+#### Getting Google Test
+
+After you clone Mull, you have to install Google Test.
+
+```bash
+cd googletest && make install
+```
+
+#### Building Mull
+
+```bash
+mkdir BuildXcode
+cd BuildXcode && cmake ../ -G Xcode \
+                 -DCMAKE_TOOLCHAIN_FILE=../Mull.toolchain.OSX.cmake
+
+open BuildXcode/Mull.xcodeproj
+```
+
+Use `make help` to see the common tasks used by developers.
+
+Use `MullUnitTests` scheme to run the tests. Use `mull-driver` scheme to
+build Mull.
 
 ## Notes
 
-Current code is being developed against stable LLVM 3.9 branch:
-[release_39](https://github.com/llvm-mirror/llvm/tree/release_39).
+Current code is being developed against stable LLVM 3.9 branch.
+
+Either use binary distribution via `brew install llvm` or clone LLVM and
+build it yourself from
+[release_39](https://github.com/llvm-mirror/llvm/tree/release_39) branch.
 
 ## Useful Material (papers, articles, talks, etc.)
 
