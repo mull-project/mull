@@ -25,24 +25,35 @@ std::vector<std::string> Result::calculateCallerPath(MutationResult *mutationRes
   /// Last path component: mutation point itself.
   auto mutationPoint = mutationResult->getMutationPoint();
   Instruction *instruction = dyn_cast<Instruction>(mutationPoint->getOriginalValue());
-  const std::string fileName = instruction->getDebugLoc()->getFilename();
-  const std::string line = std::to_string(instruction->getDebugLoc()->getLine());
+
+  std::string fileNameOrNil = "no-debug-info";
+  std::string lineOrNil = "0";
+  if (instruction->getMetadata(0)) {
+    fileNameOrNil = instruction->getDebugLoc()->getFilename();
+    lineOrNil = std::to_string(instruction->getDebugLoc()->getLine());
+  }
 
   std::stringstream mpComponentAsStream;
-  mpComponentAsStream << fileName;
+  mpComponentAsStream << fileNameOrNil;
   mpComponentAsStream << ":";
-  mpComponentAsStream << line;
+  mpComponentAsStream << lineOrNil;
   callerPath.push_back(mpComponentAsStream.str());
 
   // The following loop stops on test as it does not have a caller.
   while (currentTestee->getCallerTestee() != nullptr) {
     Instruction *instruction = currentTestee->getCallerInstruction();
-    const std::string fileName = instruction->getDebugLoc()->getFilename();
-    const std::string line = std::to_string(instruction->getDebugLoc()->getLine());
+
+    std::string fileNameOrNil = "no-debug-info";
+    std::string lineOrNil = "0";
+    if (instruction->getMetadata(0)) {
+      fileNameOrNil = instruction->getDebugLoc()->getFilename();
+      lineOrNil = std::to_string(instruction->getDebugLoc()->getLine());
+    }
+
     std::stringstream callerComponentAsStream;
-    callerComponentAsStream << fileName;
+    callerComponentAsStream << fileNameOrNil;
     callerComponentAsStream << ":";
-    callerComponentAsStream << line;
+    callerComponentAsStream << lineOrNil;
     callerPath.push_back(callerComponentAsStream.str());
 
     currentTestee = currentTestee->getCallerTestee();
