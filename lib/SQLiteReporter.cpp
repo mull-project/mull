@@ -110,6 +110,17 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result) 
       /// Mutation Point
       auto mutationPoint = mutation->getMutationPoint();
       Instruction *instruction = dyn_cast<Instruction>(mutationPoint->getOriginalValue());
+
+      std::string fileNameOrNil = "no-debug-info";
+      std::string lineOrNil = "0";
+      std::string columnOrNil = "0";
+
+      if (instruction->getMetadata(0)) {
+        fileNameOrNil = instruction->getDebugLoc()->getFilename().str();
+        lineOrNil = std::to_string(instruction->getDebugLoc()->getLine());
+        columnOrNil = std::to_string(instruction->getDebugLoc()->getColumn());
+      }
+
       std::string insertMutationPointSQL = std::string("INSERT OR IGNORE INTO mutation_point VALUES (")
         + "'" + mutationPoint->getOperator()->uniqueID() + "',"
         + "'" + instruction->getParent()->getParent()->getParent()->getModuleIdentifier() + "',"
@@ -117,9 +128,9 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result) 
         + "'" + std::to_string(mutationPoint->getAddress().getFnIndex()) + "',"
         + "'" + std::to_string(mutationPoint->getAddress().getBBIndex()) + "',"
         + "'" + std::to_string(mutationPoint->getAddress().getIIndex()) + "',"
-        + "'" + instruction->getDebugLoc()->getFilename().str() + "',"
-        + "'" + std::to_string(instruction->getDebugLoc()->getLine()) + "',"
-        + "'" + std::to_string(instruction->getDebugLoc()->getColumn()) + "',"
+        + "'" + fileNameOrNil + "',"
+        + "'" + lineOrNil + "',"
+        + "'" + columnOrNil + "',"
         + "'" + mutationPoint->getUniqueIdentifier() + "'"+
         + ");";
 
@@ -139,10 +150,20 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result) 
         llvm::raw_string_ostream i_ostream(instr);
         instruction->print(i_ostream);
 
+        std::string fileNameOrNil = "no-debug-info";
+        std::string lineOrNil = "0";
+        std::string columnOrNil = "0";
+
+        if (instruction->getMetadata(0)) {
+          fileNameOrNil = instruction->getDebugLoc()->getFilename().str();
+          lineOrNil = std::to_string(instruction->getDebugLoc()->getLine());
+          columnOrNil = std::to_string(instruction->getDebugLoc()->getColumn());
+        }
+
         std::string insertMutationPointDebugSQL = std::string("INSERT OR IGNORE INTO mutation_point_debug VALUES (")
-        + "'" + instruction->getDebugLoc()->getFilename().str() + "',"
-        + "'" + std::to_string(instruction->getDebugLoc()->getLine()) + "',"
-        + "'" + std::to_string(instruction->getDebugLoc()->getColumn()) + "',"
+        + "'" + fileNameOrNil + "',"
+        + "'" + lineOrNil + "',"
+        + "'" + columnOrNil + "',"
         + "'" + f_ostream.str() + "',"
         + "'" + bb_ostream.str() + "',"
         + "'" + i_ostream.str() + "',"
