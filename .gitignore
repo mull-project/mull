@@ -2,3 +2,6 @@ compile_commands.json
 **/*.o
 **/main
 .mull.rust.cmake
+BuildXcode
+BuildNinja
+

@@ -1,21 +1,22 @@
-find_library(PTHREAD_LIBRARY_PATH sqlite3)
 
-add_llvm_executable(mull-driver driver.cpp
-)
+add_executable(mull-driver driver.cpp)
 
 target_link_libraries(mull-driver
   mull
-  LLVMCore
-  LLVMSupport
-  LLVMAsmParser
-  LLVMBitReader
+)
 
-  # FIXME: Should not be arch specific
-  # These are probably should be part of library
-  # not of the driver
-  LLVMX86AsmParser
-  LLVMX86AsmPrinter
-  LLVMX86CodeGen
-  LLVMX86Desc
-  LLVMX86Info
+set(mulldriver_rpath "") # to be filled later.
+
+if(MULL_SUPPORT_RUST)
+  set(mulldriver_rpath
+    ${mulldriver_rpath} ${MULL_RUST_LIB_PATH}
+  )
+endif()
+
+# rpath
+get_target_property(default_rpath mull-driver INSTALL_RPATH)
+set(mulldriver_rpath ${default_rpath} ${mulldriver_rpath})
+set_target_properties(mull-driver
+  PROPERTIES INSTALL_RPATH
+  "${mulldriver_rpath}"
 )

@@ -42,27 +42,40 @@ set(mull_header_dirs
 )
 
 set(mull_additional_libraries
-  LLVMAsmParser
-  LLVMAsmPrinter
-  LLVMBitReader
-  LLVMCodeGen
-  LLVMCore
-  LLVMExecutionEngine
-  LLVMObject
-  LLVMObjectYAML
-  LLVMOrcJIT
-  LLVMRuntimeDyld
-  LLVMSupport
-  LLVMTarget
-  LLVMTransformUtils
-  sqlite3
 
-  # FIXME: Should not be arch specific
-  LLVMX86AsmParser
-  LLVMX86AsmPrinter
-  LLVMX86CodeGen
-  LLVMX86Desc
-  LLVMX86Info
+  # Architecture-independent:
+  ${MULL_DEPENDENCY_LLVMAnalysis}
+  ${MULL_DEPENDENCY_LLVMAsmParser}
+  ${MULL_DEPENDENCY_LLVMAsmPrinter}
+  ${MULL_DEPENDENCY_LLVMBitReader}
+  ${MULL_DEPENDENCY_LLVMCodeGen}
+  ${MULL_DEPENDENCY_LLVMCore}
+  ${MULL_DEPENDENCY_LLVMDebugInfoCodeView}
+  ${MULL_DEPENDENCY_LLVMExecutionEngine}
+  ${MULL_DEPENDENCY_LLVMMC}
+  ${MULL_DEPENDENCY_LLVMMCDisassembler}
+  ${MULL_DEPENDENCY_LLVMMCParser}
+  ${MULL_DEPENDENCY_LLVMObject}
+  ${MULL_DEPENDENCY_LLVMOrcJIT}
+  ${MULL_DEPENDENCY_LLVMRuntimeDyld}
+  ${MULL_DEPENDENCY_LLVMScalarOpts}
+  ${MULL_DEPENDENCY_LLVMSelectionDAG}
+  ${MULL_DEPENDENCY_LLVMSupport}
+  ${MULL_DEPENDENCY_LLVMTarget}
+  ${MULL_DEPENDENCY_LLVMTransformUtils}
+
+  ${MULL_DEPENDENCY_LIBZ}
+  ${MULL_DEPENDENCY_NCURSES}
+
+  ${MULL_DEPENDENCY_SQLITE}
+
+  # Architecture-specific:
+  ${MULL_DEPENDENCY_LLVMX86AsmParser}
+  ${MULL_DEPENDENCY_LLVMX86AsmPrinter}
+  ${MULL_DEPENDENCY_LLVMX86CodeGen}
+  ${MULL_DEPENDENCY_LLVMX86Desc}
+  ${MULL_DEPENDENCY_LLVMX86Info}
+  ${MULL_DEPENDENCY_LLVMX86Utils}
 )
 
 set(mull_link_flags "") # to be filled later
@@ -81,50 +94,45 @@ if(MULL_SUPPORT_RUST)
     ${mull_header_dirs}
     ${MULL_INCLUDE_DIR}/Rust)
 
-  set(rust_cmake_path "${CMAKE_CURRENT_SOURCE_DIR}/../.mull.rust.cmake")
-  IF(NOT EXISTS ${rust_cmake_path})
-    message(FATAL_ERROR "MULL_SUPPORT_RUST is enabled but .mull.rust.cmake \
-      file was not found at path: \
-      ${CMAKE_CURRENT_SOURCE_DIR}/../.mull.rust.cmake. Please, take \
-      .mull.rust.cmake.example and modify according to your system")
-  endif()
-
-  include(${rust_cmake_path})
-
-  message(STATUS "Mull.Rust> Rust lib path: ${mull_rust_libpath}")
-
-  IF(NOT EXISTS ${mull_rust_libpath})
+  IF(NOT EXISTS ${MULL_RUST_LIB_PATH})
     message(FATAL_ERROR
-      "mull_rust_libpath variable should be set to a valid \
+      "MULL_RUST_LIB_PATH variable should be set to a valid \
       existing path in .mull.rust.cmake")
   endif()
 
-  foreach(library ${mull_rust_additional_libraries})
-    IF(NOT EXISTS "${mull_rust_libpath}/${library}")
+  foreach(library ${MULL_DEPENDENCY_RUST_ADDITIONAL_LIBRARIES})
+    IF(NOT EXISTS "${library}")
       message(FATAL_ERROR "Mull.Rust> path declared in \
-        mull_rust_additional_libraries does not exist")
+        MULL_DEPENDENCY_RUST_ADDITIONAL_LIBRARIES does not exist: \
+        ${library}")
     endif()
   endforeach()
 
   set(mull_additional_libraries
     ${mull_additional_libraries}
-    ${mull_rust_additional_libraries})
+    ${MULL_DEPENDENCY_RUST_ADDITIONAL_LIBRARIES})
 
-  set(mull_rpath ${mull_rpath} ${mull_rust_libpath})
-  set(mull_link_flags ${mull_link_flags} -L${mull_rust_libpath})
+  set(mull_rpath ${mull_rpath} ${MULL_RUST_LIB_PATH})
+  set(mull_link_flags ${mull_link_flags} -L${MULL_RUST_LIB_PATH})
 endif()
 
-llvm_add_library(mull
-  ${mull_sources}
+# Globbing is not recommended by CMake so maybe consider listing headers
+# explicitly in include/CMakeLists.txt file. However LLVM goes find(GLOB) under
+# the hood so probably we are also good for now.
+# "We do not recommend using GLOB to collect a list of source files from your
+# source tree. If no CMakeLists.txt file changes when a source is added or
+# removed then the generated build system cannot know when to ask
+# CMake to regenerate. https://cmake.org/cmake/help/v3.0/command/file.html
+file(GLOB_RECURSE mull_header_files ${MULL_INCLUDE_DIR}/*.h)
 
-  ADDITIONAL_HEADER_DIRS
-  ${mull_header_dirs}
+add_library(mull SHARED ${mull_sources} ${mull_header_files})
 
-  LINK_LIBS
-  ${mull_additional_libraries}
-)
+set_source_files_properties(${mull_header_dirs} PROPERTIES HEADER_FILE_ONLY ON)
+include_directories(${mull_header_dirs})
 
-# Once we have mull target added, we can start querying and patching it.
+target_link_libraries(mull ${mull_additional_libraries})
+
+## Once we have mull target added, we can start querying and patching it.
 # rpath
 get_target_property(default_rpath mull INSTALL_RPATH)
 set(mull_rpath ${default_rpath} ${mull_rpath})
@@ -150,4 +158,3 @@ foreach(source_file ${HERE_TARGET_SOURCES})
     source_group("Source Files\\${relative_path}" FILES ${source_file})
   endif()
 endforeach()
-
