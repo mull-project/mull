@@ -38,17 +38,19 @@ cd mull
 After you clone Mull, you have to install Google Test.
 
 ```bash
-cd googletest && make install
+cd googletest
+make install
+cd ..
 ```
 
 #### Building Mull
 
 ```bash
 mkdir BuildXcode
-cd BuildXcode && cmake ../ -G Xcode \
-                 -DCMAKE_TOOLCHAIN_FILE=../Mull.toolchain.OSX.cmake
+cd BuildXcode
+cmake ../ -G Xcode -DCMAKE_TOOLCHAIN_FILE=../Mull.toolchain.OSX.cmake
 
-open BuildXcode/Mull.xcodeproj
+open Mull.xcodeproj
 ```
 
 Use `make help` to see the common tasks used by developers.
