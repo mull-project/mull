@@ -1,6 +1,7 @@
 #include "Rust/RustTestRunner.h"
 
 #include "Config.h"
+#include "Logger.h"
 #include "ForkProcessSandbox.h"
 #include "Rust/RustTest.h"
 
@@ -60,7 +61,6 @@ ExecutionResult RustTestRunner::runTest(Test *Test, ObjectFiles &objectFiles) {
   auto start = high_resolution_clock::now();
 
   std::string rustTestFunctionName = std::string("_") + rustTest->getTestName();
-
   void *rustTestPointer = FunctionPointer(rustTestFunctionName.c_str());
 
   // Normally Rust tests are run via `main` function which calls
@@ -72,22 +72,16 @@ ExecutionResult RustTestRunner::runTest(Test *Test, ObjectFiles &objectFiles) {
   // - Failing assertions.
   // - All other program crashes that happen because of corruption produced by
   // mutation operators.
-  ForkProcessSandbox sandbox;
-  ExecutionResult rustTestsExecutionResult =
-    sandbox.run([&](ExecutionResult *SharedResult) {
-      auto rustTestFunction = ((int (*)())(intptr_t)rustTestPointer);
-      __unused auto res = rustTestFunction();
-
-      SharedResult->Status = Passed;
-  }, MullDefaultTimeoutMilliseconds);
+    auto rustTestFunction = ((int (*)())(intptr_t)rustTestPointer);
+  __unused auto res = rustTestFunction();
 
   auto elapsed = high_resolution_clock::now() - start;
 
-  ExecutionResult finalResult;
-  finalResult.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
-  finalResult.Status = rustTestsExecutionResult.Status;
+  ExecutionResult Result;
+  Result.Status = Passed;
+  Result.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
 
   objectLayer.removeObjectSet(handle);
 
-  return finalResult;
+  return Result;
 }

@@ -56,7 +56,7 @@ TEST(Driver_Rust, AddMutationOperator) {
   /// Then Run all the tests using driver
 
   std::vector<std::string> ModulePaths({ "rust" });
-  bool doFork = false;
+  bool doFork = true;
   bool dryRun = false;
   bool useCache = false;
   int distance = 10;
@@ -101,13 +101,13 @@ TEST(Driver_Rust, AddMutationOperator) {
   ASSERT_EQ(ExecutionStatus::Passed,
             testResult_4->getOriginalTestResult().Status);
 
-  ASSERT_EQ("_ZN7example17rusttest_foo_sum117h319bd21b204fd3edE",
+  ASSERT_EQ("_ZN7example17rusttest_foo_sum117h7aa5d6b570662192E",
             testResult_1->getTestName());
-  ASSERT_EQ("_ZN7example17rusttest_foo_sum217h8c8aeea1b7695792E",
+  ASSERT_EQ("_ZN7example17rusttest_foo_sum217h389da0550735b641E",
             testResult_2->getTestName());
-  ASSERT_EQ("_ZN7example17rusttest_foo_sum317h7b25023f7e01f980E",
+  ASSERT_EQ("_ZN7example17rusttest_foo_sum317h792193082ea99887E",
             testResult_3->getTestName());
-  ASSERT_EQ("_ZN7example17rusttest_foo_sum417hba9da76c09e67d3dE",
+  ASSERT_EQ("_ZN7example17rusttest_foo_sum417h38f8b273364164edE",
             testResult_4->getTestName());
 
   auto &testResult_1_mutants = testResult_1->getMutationResults();
@@ -121,8 +121,18 @@ TEST(Driver_Rust, AddMutationOperator) {
   ASSERT_EQ(1U, testResult_4_mutants.size());
 
   auto testResult_1_mutant_1 = testResult_1_mutants.begin()->get();
+  auto testResult_2_mutant_1 = testResult_2_mutants.begin()->get();
+  auto testResult_3_mutant_1 = testResult_3_mutants.begin()->get();
+  auto testResult_4_mutant_1 = testResult_4_mutants.begin()->get();
+
   ASSERT_EQ(ExecutionStatus::Crashed,
             testResult_1_mutant_1->getExecutionResult().Status);
+  ASSERT_EQ(ExecutionStatus::Crashed,
+            testResult_2_mutant_1->getExecutionResult().Status);
+  ASSERT_EQ(ExecutionStatus::Crashed,
+            testResult_3_mutant_1->getExecutionResult().Status);
+  ASSERT_EQ(ExecutionStatus::Crashed,
+            testResult_4_mutant_1->getExecutionResult().Status);
 
   ASSERT_NE(nullptr, testResult_1_mutant_1->getMutationPoint());
 }

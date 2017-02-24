@@ -168,6 +168,7 @@ mull::ForkProcessSandbox::run(std::function<void (ExecutionResult *)> function,
   wait(0);
 
   ExecutionResult result = *sharedResult;
+
   result.stdoutOutput = stdoutOutput;
   result.stderrOutput = stderrOutput;
 

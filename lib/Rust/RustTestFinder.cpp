@@ -32,10 +32,31 @@ using namespace llvm;
 class RustTestMutationOperatorFilter : public MutationOperatorFilter {
 public:
   bool shouldSkipInstruction(llvm::Instruction *instruction) {
+    if (CallInst *callInst = dyn_cast<CallInst>(instruction)) {
+      if (Function *calledFunction = callInst->getCalledFunction()) {
+        if (calledFunction->getName().find("panic") != std::string::npos) {
+          return true;
+        }
+      }
+    }
+
+    // For now we ignore all instructions without a debug information.
+    if (instruction->hasMetadata() == false) {
+      return true;
+    }
+
+    int debugInfoKindID = 0;
+    MDNode *debug = instruction->getMetadata(debugInfoKindID);
+
+    if (DILocation *location = dyn_cast<DILocation>(debug)) {
+      if (location->getFilename().str().find("buildbot") != std::string::npos) {
+        return true;
+      }
+    }
+
     return false;
   };
 };
-
 
 RustTestFinder::RustTestFinder() : TestFinder() {
   /// FIXME: should come from outside
