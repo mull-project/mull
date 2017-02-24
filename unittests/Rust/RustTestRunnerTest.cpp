@@ -1,5 +1,7 @@
 
+#include "Config.h"
 #include "Context.h"
+#include "ForkProcessSandbox.h"
 #include "MutationOperators/AddMutationOperator.h"
 #include "Rust/RustTestFinder.h"
 #include "TestModuleFactory.h"
@@ -51,7 +53,7 @@ TEST(RustTestRunner, runTest) {
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
 
-  RustTestFinder testFinder;
+  RustTestFinder testFinder(std::move(mutationOperators));
 
   auto Tests = testFinder.findTests(context);
 
@@ -92,7 +94,14 @@ TEST(RustTestRunner, runTest) {
     OwnedObjectFiles.push_back(std::move(owningObject));
   }
 
-  ASSERT_EQ(ExecutionStatus::Crashed, Runner.runTest(Test.get(), ObjectFiles).Status);
+  ForkProcessSandbox sandbox;
+  ExecutionResult result = sandbox.run([&](ExecutionResult *SharedResult) {
+    ExecutionResult R = Runner.runTest(Test.get(), ObjectFiles);
+
+    *SharedResult = R;
+  }, MullDefaultTimeoutMilliseconds);
+
+  ASSERT_EQ(ExecutionStatus::Crashed, result.Status);
 
   ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
 }
@@ -133,7 +142,7 @@ TEST(RustTestRunner, runTest_twoModules) {
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
 
-  RustTestFinder testFinder;
+  RustTestFinder testFinder(std::move(mutationOperators));
 
   auto Tests = testFinder.findTests(context);
 
@@ -180,7 +189,14 @@ TEST(RustTestRunner, runTest_twoModules) {
     OwnedObjectFiles.push_back(std::move(owningObject));
   }
 
-  ASSERT_EQ(ExecutionStatus::Crashed, Runner.runTest(Test.get(), ObjectFiles).Status);
+  ForkProcessSandbox sandbox;
+  ExecutionResult result = sandbox.run([&](ExecutionResult *SharedResult) {
+    ExecutionResult R = Runner.runTest(Test.get(), ObjectFiles);
+
+    *SharedResult = R;
+  }, MullDefaultTimeoutMilliseconds);
+
+  ASSERT_EQ(ExecutionStatus::Crashed, result.Status);
   
   ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
 }
