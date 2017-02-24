@@ -19,6 +19,7 @@ namespace mull {
 
   class RustTestRunner : public TestRunner {
   llvm::orc::ObjectLinkingLayer<> objectLayer;
+
 public:
 
   RustTestRunner(llvm::TargetMachine &machine);

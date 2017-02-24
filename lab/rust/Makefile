@@ -5,7 +5,7 @@ default: compile run
 
 compile:
 	mkdir -p target/debug
-	rustc example.rs -Z print-link-args --verbose --crate-name example --crate-type lib -g --test --out-dir target/debug --emit=dep-info,link,llvm-ir,llvm-bc -L dependency=target/debug -L dependency=target/debug/deps
+	rustc example.rs -Z print-link-args --verbose --crate-name example --crate-type lib -g -C opt-level=0 --test --out-dir target/debug --emit=dep-info,link,llvm-ir,llvm-bc -L dependency=target/debug -L dependency=target/debug/deps
 
 run:
 	./target/debug/example

@@ -152,13 +152,16 @@ std::unique_ptr<Result> Driver::Run() {
           }
           ObjectFiles.push_back(mutant);
 
+          const auto sandboxTimeout = std::max(30LL,
+                                               ExecResult.RunningTime * 10);
+
           result = Sandbox->run([&](ExecutionResult *SharedResult) {
             ExecutionResult R = Runner.runTest(BorrowedTest, ObjectFiles);
 
             assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
 
             *SharedResult = R;
-          }, ExecResult.RunningTime * 10);
+          }, sandboxTimeout);
           ObjectFiles.pop_back();
 
           assert(result.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
