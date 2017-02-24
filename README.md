@@ -88,3 +88,5 @@ Comments](http://lowlevelbits.org/llvm-based-mutation-testing-system/)
 ### Talks
 
 [FOSDEM 2017: Mutation Testing, Leaving the Stone Age by Alex Denisov](https://www.youtube.com/watch?v=YEgiyiICkpQ)
+
+[LLVM Social Berlin #6: Mull meets Rust](https://www.youtube.com/watch?v=b9VVlIw16y4)
