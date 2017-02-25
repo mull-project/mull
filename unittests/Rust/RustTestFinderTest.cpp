@@ -32,8 +32,7 @@ TEST(RustTestFinder, FindTest) {
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
-
-  RustTestFinder finder;
+  RustTestFinder finder(std::move(mutationOperators));
 
   auto tests = finder.findTests(Ctx);
 
@@ -47,13 +46,15 @@ TEST(RustTestFinder, FindTestee) {
   Context Ctx;
   Ctx.addModule(std::move(mullRustModule));
 
-  RustTestFinder Finder;
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+  RustTestFinder finder(std::move(mutationOperators));
 
-  auto Tests = Finder.findTests(Ctx);
+  auto Tests = finder.findTests(Ctx);
 
   auto &Test = *(Tests.begin());
 
-  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
+  std::vector<std::unique_ptr<Testee>> Testees = finder.findTestees(Test.get(), Ctx, 4);
 
   ASSERT_EQ(2U, Testees.size());
 

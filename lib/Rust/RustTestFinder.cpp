@@ -58,12 +58,9 @@ public:
   };
 };
 
-RustTestFinder::RustTestFinder() : TestFinder() {
-  /// FIXME: should come from outside
-  mutationOperators.emplace_back(make_unique<AddMutationOperator>());
-//  mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
-//  mutationOperators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
-}
+RustTestFinder::RustTestFinder(
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators)
+  : TestFinder(), mutationOperators(std::move(mutationOperators)) {}
 
 /// The algorithm is the following:
 ///
