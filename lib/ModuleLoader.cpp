@@ -29,7 +29,7 @@ static std::string MD5HashFromBuffer(StringRef buffer) {
 std::unique_ptr<MullModule> ModuleLoader::loadModuleAtPath(const std::string &path) {
   auto BufferOrError = MemoryBuffer::getFile(path);
   if (!BufferOrError) {
-    Logger::error() << "Can't load module " << path << '\n';
+    Logger::error() << "ModuleLoader> Can't load module " << path << '\n';
     return nullptr;
   }
 
@@ -37,7 +37,7 @@ std::unique_ptr<MullModule> ModuleLoader::loadModuleAtPath(const std::string &pa
 
   auto llvmModule = parseBitcodeFile(BufferOrError->get()->getMemBufferRef(), Ctx);
   if (!llvmModule) {
-    Logger::error() << "Can't load module " << path << '\n';
+    Logger::error() << "ModuleLoader> Can't load module " << path << '\n';
     return nullptr;
   }
 

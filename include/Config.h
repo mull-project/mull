@@ -129,7 +129,7 @@ public:
 
   void dump() const {
     Logger::debug() << "Config>\n"
-    << "\project_name: " << getProjectName() << '\n'
+    << "\tproject_name: " << getProjectName() << '\n'
     << "\tdistance: " << getMaxDistance() << '\n'
     << "\tdry_run: " << isDryRun() << '\n'
     << "\tfork: " << getFork() << '\n';
