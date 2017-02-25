@@ -12,7 +12,7 @@ private:
   std::string databasePath;
 
 public:
-  SQLiteReporter();
+  SQLiteReporter(const std::string &projectName = std::string(""));
 
   void reportResults(const std::unique_ptr<Result> &result);
   std::string getDatabasePath();

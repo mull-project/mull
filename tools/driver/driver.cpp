@@ -127,7 +127,7 @@ int main(int argc, char *argv[]) {
   Driver driver(config, Loader, TestFinder, Runner, toolchain);
   auto result = driver.Run();
 
-  SQLiteReporter reporter;
+  SQLiteReporter reporter(config.getProjectName());
   reporter.reportResults(result);
   /// It does crash at the very moment
   /// llvm_shutdown();

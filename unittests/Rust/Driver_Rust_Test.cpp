@@ -55,13 +55,15 @@ TEST(Driver_Rust, AddMutationOperator) {
   /// TestRunner and TestFinder based on the Config
   /// Then Run all the tests using driver
 
+  std::string projectName("");
   std::vector<std::string> ModulePaths({ "rust" });
   bool doFork = true;
   bool dryRun = false;
   bool useCache = false;
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
-  Config config(ModulePaths,
+  Config config(projectName,
+                ModulePaths,
                 {},
                 {},
                 doFork,

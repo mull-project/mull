@@ -26,6 +26,7 @@ struct MappingTraits;
 namespace mull {
 
 class Config {
+  std::string projectName;
   std::vector<std::string> bitcodePaths;
   std::vector<std::string> mutationOperators;
   std::vector<std::string> dynamicLibraries;
@@ -41,6 +42,7 @@ public:
   // Constructor initializes defaults.
   // TODO: Refactoring into constants.
   Config() :
+    projectName(""),
     bitcodePaths(),
     mutationOperators(
       // Yaml::Traits stops reading mutation_operators from config.yaml
@@ -62,7 +64,8 @@ public:
   {
   }
 
-  Config(const std::vector<std::string> &paths,
+  Config(const std::string &project,
+         const std::vector<std::string> &paths,
          const std::vector<std::string> mutationOperators,
          const std::vector<std::string> libraries,
          bool fork,
@@ -71,6 +74,7 @@ public:
          int timeout,
          int distance,
          const std::string &cacheDir) :
+    projectName(project),
     bitcodePaths(paths),
     mutationOperators(mutationOperators),
     dynamicLibraries(libraries),
@@ -81,6 +85,10 @@ public:
     maxDistance(distance),
     cacheDirectory(cacheDir)
   {
+  }
+
+  const std::string &getProjectName() const {
+    return projectName;
   }
 
   const std::vector<std::string> &getBitcodePaths() const {
@@ -121,6 +129,7 @@ public:
 
   void dump() const {
     Logger::debug() << "Config>\n"
+    << "\project_name: " << getProjectName() << '\n'
     << "\tdistance: " << getMaxDistance() << '\n'
     << "\tdry_run: " << isDryRun() << '\n'
     << "\tfork: " << getFork() << '\n';

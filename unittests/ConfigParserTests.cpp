@@ -91,8 +91,13 @@ mutation_operators:
   ASSERT_EQ(NegateConditionMutationOperator::ID, mutationOperators[1]);
 }
 
-TEST_F(ConfigParserTestFixture, loadConfig_MutationOperators_Unspecified) {
+TEST_F(ConfigParserTestFixture, loadConfig_ProjectName_Specified) {
+  const char *configYAML = "project_name: FooBar";
+  configWithYamlContent(configYAML);
+  ASSERT_EQ("FooBar", config.getProjectName());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_ProjectName_Unspecified) {
   configWithYamlContent("");
-  auto mutationOperators = config.getMutationOperators();
-  ASSERT_EQ(0U, mutationOperators.size());
+  ASSERT_EQ("", config.getProjectName());
 }
