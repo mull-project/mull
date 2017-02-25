@@ -128,7 +128,7 @@ int main(int argc, char *argv[]) {
   auto result = driver.Run();
 
   SQLiteReporter reporter(config.getProjectName());
-  reporter.reportResults(result);
+  reporter.reportResults(result, config);
   llvm_shutdown();
   return EXIT_SUCCESS;
 }
