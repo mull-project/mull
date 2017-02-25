@@ -56,7 +56,7 @@ void sqlite_step(sqlite3 *database, sqlite3_stmt *stmt) {
   }
 }
 
-SQLiteReporter::SQLiteReporter() {
+SQLiteReporter::SQLiteReporter(const std::string &projectName) {
   char wd[MAXPATHLEN] = { 0 };
   getwd(wd);
   std::string currentDirectory(wd);
@@ -64,8 +64,12 @@ SQLiteReporter::SQLiteReporter() {
   time_t ct;
   time(&ct);
   std::string currentTime = std::to_string(ct);
+  std::string projectNameComponent = projectName;
+  if (!projectNameComponent.empty()) {
+    projectNameComponent += "_";
+  }
 
-  std::string databasePath = currentDirectory + "/" + currentTime + ".sqlite";
+  std::string databasePath = currentDirectory + "/" + projectNameComponent + currentTime + ".sqlite";
 
   this->databasePath = databasePath;
 }
