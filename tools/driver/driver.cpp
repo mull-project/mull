@@ -10,11 +10,15 @@
 
 #include "Toolchain/Toolchain.h"
 
+#include "GoogleTest/GoogleTestFinder.h"
+#include "GoogleTest/GoogleTestRunner.h"
 #include "SimpleTest/SimpleTestFinder.h"
 #include "SimpleTest/SimpleTestRunner.h"
 
-#include "GoogleTest/GoogleTestFinder.h"
-#include "GoogleTest/GoogleTestRunner.h"
+#if defined(MULL_SUPPORT_RUST)
+#include "Rust/RustTestFinder.h"
+#include "Rust/RustTestRunner.h"
+#endif
 
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/Support/MemoryBuffer.h"
@@ -65,42 +69,16 @@ static cl::opt<std::string> ConfigFile(
     llvm::cl::Positional
 );
 
-int debug_main() {
-  ConfigParser Parser;
-  auto config = Parser.loadConfig(ConfigFile.c_str());
-
-  Logger::setLevel(Logger::Level::debug);
-
-  LLVMContext Ctx;
-  ModuleLoader Loader(Ctx);
-  
-  auto mutationOperators = Driver::mutationOperators(config.getMutationOperators());
-  
-  GoogleTestFinder TestFinder(std::move(mutationOperators));
-  Toolchain toolchain(config);
-  GoogleTestRunner Runner(toolchain.targetMachine());
-
-  Driver D(config, Loader, TestFinder, Runner, toolchain);
-
-  if (PrintTestNames) {
-    D.debug_PrintTestNames();
-  } else if (PrintTesteeNames) {
-    D.debug_PrintTesteeNames();
-  } else if (PrintMutationPoints) {
-    D.debug_PrintMutationPoints();
+int main(int argc, char *argv[]) {
+  if (argc == 1) {
+    // TODO: print friendlier help message here.
+    Logger::error() << "Usage: mull-driver path-to-config-file.yml" << "\n";
+    exit(1);
   }
 
-  return 0;
-}
-
-int main(int argc, char *argv[]) {
   // Parse command line options
   cl::HideUnrelatedOptions(MullOptionCategory);
   cl::ParseCommandLineOptions(argc, argv, "Mull");
-
-  if (Debug) {
-    return debug_main();
-  }
 
   ConfigParser Parser;
   auto config = Parser.loadConfig(ConfigFile.c_str());
@@ -115,16 +93,53 @@ int main(int argc, char *argv[]) {
   ModuleLoader Loader(Ctx);
   Toolchain toolchain(config);
 
-#if 1
-  auto mutationOperators = Driver::mutationOperators(config.getMutationOperators());
-  GoogleTestFinder TestFinder(std::move(mutationOperators));
-  GoogleTestRunner Runner(toolchain.targetMachine());
-#else
-  SimpleTestFinder TestFinder;
-  SimpleTestRunner Runner(toolchain.targetMachine());
-#endif
+  const std::string &testFramework = config.getTestFramework();
 
-  Driver driver(config, Loader, TestFinder, Runner, toolchain);
+  std::unique_ptr<TestFinder> testFinder;
+  std::unique_ptr<TestRunner> testRunner;
+
+  auto mutationOperators = Driver::mutationOperators(config.getMutationOperators());
+
+  if (testFramework == "GoogleTest") {
+    testFinder = make_unique<GoogleTestFinder>(std::move(mutationOperators));
+    testRunner = make_unique<GoogleTestRunner>(toolchain.targetMachine());
+  }
+
+  else if (testFramework == "SimpleTest") {
+    testFinder = make_unique<SimpleTestFinder>(std::move(mutationOperators));
+    testRunner = make_unique<SimpleTestRunner>(toolchain.targetMachine());
+  }
+
+  #if defined(MULL_SUPPORT_RUST)
+  else if (testFramework == "Rust") {
+    testFinder = make_unique<RustTestFinder>(std::move(mutationOperators));
+    testRunner = make_unique<RustTestRunner>(toolchain.targetMachine());
+  }
+  #endif
+
+  else {
+    Logger::error() << "mull-driver> Unknown test framework provided: "
+                    << "`" << testFramework << "`. "
+                    << "Choose one between: GoogleTest, SimpleTest or Rust "
+                    << "(Rust support must be enabled)."
+                    << "\n";
+    exit(1);
+  }
+
+  Driver driver(config, Loader, *testFinder, *testRunner, toolchain);
+
+  if (Debug) {
+    if (PrintTestNames) {
+      driver.debug_PrintTestNames();
+    } else if (PrintTesteeNames) {
+      driver.debug_PrintTesteeNames();
+    } else if (PrintMutationPoints) {
+      driver.debug_PrintMutationPoints();
+    }
+
+    return 0;
+  }
+
   auto result = driver.Run();
 
   SQLiteReporter reporter(config.getProjectName());
