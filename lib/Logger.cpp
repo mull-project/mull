@@ -16,5 +16,5 @@ llvm::raw_ostream &Logger::getStream(Logger::Level level) {
 }
 
 // Initialize logger to info.
-Logger::Level Logger::logLevel = Logger::Level::info;
+Logger::Level Logger::logLevel = Logger::Level::error;
 }

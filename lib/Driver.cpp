@@ -59,6 +59,11 @@ std::unique_ptr<Result> Driver::Run() {
   /// Later on modules used only for generating of mutants
   for (auto ModulePath : Cfg.getBitcodePaths()) {
     unique_ptr<MullModule> ownedModule = Loader.loadModuleAtPath(ModulePath);
+
+    if (ownedModule == nullptr) {
+      continue;
+    }
+
     MullModule &module = *ownedModule.get();
     assert(ownedModule && "Can't load module");
 
