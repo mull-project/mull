@@ -14,19 +14,19 @@ using namespace mull;
 
 Config ConfigParser::loadConfig(const char *filename) {
   auto bufferOrError = MemoryBuffer::getFile(filename);
+  Config config;
 
   if (!bufferOrError) {
     Logger::error() << "Can't read config file: " << filename << '\n';
-  }
+  } else {
+    auto buffer = bufferOrError->get();
+    llvm::yaml::Input yin(buffer->getBuffer());
 
-  auto buffer = bufferOrError->get();
-  llvm::yaml::Input yin(buffer->getBuffer());
+    yin >> config;
 
-  Config config;
-  yin >> config;
-
-  if (yin.error()) {
-    Logger::error() << "Failed to parse YAML file: " << filename << '\n';
+    if (yin.error()) {
+      Logger::error() << "Failed to parse YAML file: " << filename << '\n';
+    }
   }
 
   return config;
