@@ -129,7 +129,6 @@ int main(int argc, char *argv[]) {
 
   SQLiteReporter reporter;
   reporter.reportResults(result);
-  /// It does crash at the very moment
-  /// llvm_shutdown();
+  llvm_shutdown();
   return EXIT_SUCCESS;
 }
