@@ -1,5 +1,6 @@
 #include "SQLiteReporter.h"
 
+#include "Config.h"
 #include "Logger.h"
 #include "Result.h"
 #include "TestResult.h"
@@ -29,6 +30,17 @@ static void assume(bool condition, const char *assumption) {
   }
 
   Logger::warn() << "Assumption failed: " << assumption << '\n';
+}
+
+static std::string vectorToCsv(const std::vector<std::string> &v) {
+  if (v.empty()) {
+    return std::string();
+  }
+
+  std::stringstream csv;
+  std::copy(v.begin(), v.end() - 1, std::ostream_iterator<std::string>(csv, ","));
+  csv << *(v.end() - 1);
+  return csv.str();
 }
 
 void sqlite_exec(sqlite3 *database, const char *sql) {
@@ -78,7 +90,8 @@ std::string mull::SQLiteReporter::getDatabasePath() {
   return databasePath;
 }
 
-void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result) {
+void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
+                                         const Config &config) {
   std::string databasePath = getDatabasePath();
 
   sqlite3 *database;
@@ -244,6 +257,28 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result) 
     }
   }
 
+  /// Config
+  {
+    std::string csvBitcodePaths = vectorToCsv(config.getBitcodePaths());
+    std::string csvMutationOperators = vectorToCsv(config.getMutationOperators());
+    std::string csvDynamicLibraries = vectorToCsv(config.getDynamicLibraries());
+
+    std::string insertConfigSQL = std::string("INSERT INTO config VALUES (")
+    + "'" + config.getProjectName() + "',"
+    + "'" + csvBitcodePaths + "',"
+    + "'" + csvMutationOperators + "',"
+    + "'" + csvDynamicLibraries + "',"
+    + "'" + std::to_string(config.getFork()) + "',"
+    + "'" + std::to_string(config.isDryRun()) + "',"
+    + "'" + std::to_string(config.getUseCache()) + "',"
+    + "'" + std::to_string(config.getTimeout()) + "',"
+    + "'" + std::to_string(config.getMaxDistance()) + "',"
+    + "'" + config.getCacheDirectory() + "');"
+    ;
+
+    sqlite_exec(database, insertConfigSQL.c_str());
+  }
+
   sqlite3_close(database);
 
   outs() << "Results can be found at '" << databasePath << "'\n";
@@ -310,7 +345,21 @@ CREATE TABLE mutation_point_debug (
   function TEXT,
   basic_block TEXT,
   instruction INT,
-  unique_id TEXT UNIQUE);
+  unique_id TEXT UNIQUE
+);
+
+CREATE TABLE config (
+  project_name TEXT,
+  bitcode_paths TEXT,
+  mutation_operators TEXT,
+  dynamic_libraries TEXT,
+  fork INT,
+  dry_run INT,
+  use_cache INT,
+  timeout INT,
+  max_distance INT,
+  cache_directory TEXT
+);
 )CreateTables";
 
 static void createTables(sqlite3 *database) {

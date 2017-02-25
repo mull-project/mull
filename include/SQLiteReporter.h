@@ -5,6 +5,7 @@
 namespace mull {
 
 class Result;
+class Config;
 
 class SQLiteReporter {
 
@@ -14,7 +15,7 @@ private:
 public:
   SQLiteReporter(const std::string &projectName = std::string(""));
 
-  void reportResults(const std::unique_ptr<Result> &result);
+  void reportResults(const std::unique_ptr<Result> &result, const Config &config);
   std::string getDatabasePath();
 
   // Exposed for testing.
