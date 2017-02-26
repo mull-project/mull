@@ -13,7 +13,12 @@ void Context::addModule(std::unique_ptr<MullModule> module) {
     }
   }
 
-  moduleRegistry.insert(std::make_pair(module->getModule()->getModuleIdentifier(),
+  std::string identifier = module->getModule()->getModuleIdentifier();
+
+  assert(moduleWithIdentifier(identifier) == nullptr &&
+         "Attempt to add a module which has been added already!");
+
+  moduleRegistry.insert(std::make_pair(identifier,
                                        module.get()));
   Modules.emplace_back(std::move(module));
 }

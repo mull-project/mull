@@ -202,7 +202,7 @@ llvm::Value *AddMutationOperator::applyMutation(Module *M,
   Instruction *replacement = BinaryOperator::Create(Instruction::Sub,
                                                     binaryOperator->getOperand(0),
                                                     binaryOperator->getOperand(1),
-                                                    binaryOperator->getName());
+                                                    "sub");
   assert(replacement);
   if (binaryOperator->hasNoUnsignedWrap()) {
     replacement->setHasNoUnsignedWrap();

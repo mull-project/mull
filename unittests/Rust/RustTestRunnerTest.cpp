@@ -87,7 +87,10 @@ TEST(RustTestRunner, runTest) {
   auto &mutationPoint = *(mutationPoints.begin());
 
   {
-    auto owningObject = mutationPoint->applyMutation(compiler);
+    auto ownedModule = mutationPoint->cloneModuleAndApplyMutation();
+
+    auto owningObject = compiler.compileModule(ownedModule.get());
+
     auto mutant = owningObject.getBinary();
 
     ObjectFiles.push_back(mutant);
@@ -127,6 +130,7 @@ TEST(RustTestRunner, runTest_twoModules) {
 
   auto ownedModuleWithTests1 = TestModuleFactory.rustModule();
   auto ownedModuleWithTests2 = TestModuleFactory.rustModule();
+  ownedModuleWithTests2->setModuleIdentifier("rust2");
 
   Module *moduleWithTests1 = ownedModuleWithTests1.get();
   Module *moduleWithTests2 = ownedModuleWithTests2.get();
@@ -182,7 +186,10 @@ TEST(RustTestRunner, runTest_twoModules) {
   auto &mutationPoint = *(mutationPoints.begin());
 
   {
-    auto owningObject = mutationPoint->applyMutation(compiler);
+    auto ownedModule = mutationPoint->cloneModuleAndApplyMutation();
+
+    auto owningObject = compiler.compileModule(ownedModule.get());
+
     auto mutant = owningObject.getBinary();
 
     ObjectFiles.push_back(mutant);

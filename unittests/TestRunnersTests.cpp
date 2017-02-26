@@ -92,7 +92,7 @@ TEST(SimpleTestRunner, runTest) {
   std::vector<MutationPoint *> MutationPoints = testFinder.findMutationPoints(Ctx, *Testee);
 
   MutationPoint *MP = (*(MutationPoints.begin()));
-  MP->applyMutation(Testee->getParent());
+  auto ownedMutatedTesteeModule = MP->cloneModuleAndApplyMutation();
 
   {
     auto Obj = compiler.compileModule(ModuleWithTests);
@@ -101,7 +101,7 @@ TEST(SimpleTestRunner, runTest) {
   }
 
   {
-    auto Obj = compiler.compileModule(ModuleWithTestees);
+    auto Obj = compiler.compileModule(ownedMutatedTesteeModule.get());
     ObjectFiles.push_back(Obj.getBinary());
     OwnedObjectFiles.push_back(std::move(Obj));
   }
@@ -145,7 +145,7 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
 
   auto Tests = Finder.findTests(Ctx);
 
-  ASSERT_NE(0U, Tests.size());
+  ASSERT_EQ(1U, Tests.size());
 
   auto &Test = *(Tests.begin());
 
@@ -166,22 +166,27 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   /// expecting it to fail
 
   std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
-  ASSERT_NE(0U, Testees.size());
+
+  // 2 testees: test_main, sum
+  ASSERT_EQ(2U, Testees.size());
+
   Function *Testee = Testees[1]->getTesteeFunction();
 
   AddMutationOperator MutOp;
   std::vector<MutationOperator *> MutOps({&MutOp});
 
   std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
+  ASSERT_EQ(1U, MutationPoints.size());
 
   MutationPoint *MP = (*(MutationPoints.begin()));
-  MP->applyMutation(Testee->getParent());
+
+  auto ownedMutatedTesteeModule = MP->cloneModuleAndApplyMutation();
 
   Obj = compiler.compileModule(ModuleWithTests);
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
-  Obj = compiler.compileModule(ModuleWithTestees);
+  Obj = compiler.compileModule(ownedMutatedTesteeModule.get());
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 

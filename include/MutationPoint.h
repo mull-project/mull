@@ -53,7 +53,7 @@ class MutationPoint {
   llvm::Value *OriginalValue;
   MullModule *module;
   std::string uniqueIdentifier;
-//  llvm::object::OwningBinary<llvm::object::ObjectFile> mutatedBinary;
+
 public:
   MutationPoint(MutationOperator *op,
                 MutationPointAddress Address,
@@ -69,8 +69,7 @@ public:
   MutationPointAddress getAddress() const;
   llvm::Value *getOriginalValue() const;
 
-  void applyMutation(llvm::Module *M) __attribute__((deprecated));
-  llvm::object::OwningBinary<llvm::object::ObjectFile> applyMutation(Compiler &compiler);
+  std::unique_ptr<llvm::Module> cloneModuleAndApplyMutation();
 
   std::string getUniqueIdentifier();
   std::string getUniqueIdentifier() const;

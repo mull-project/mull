@@ -134,7 +134,7 @@ std::unique_ptr<Module> TestModuleFactory::createTesteeModule() {
 }
 
 std::unique_ptr<Module> TestModuleFactory::createLibCTesterModule() {
-  return createModule("fixture_lib_c_tester_module.ll", "sum");
+  return createModule("fixture_lib_c_tester_module.ll", "test_main");
 }
 
 std::unique_ptr<Module> TestModuleFactory::createLibCTesteeModule() {
