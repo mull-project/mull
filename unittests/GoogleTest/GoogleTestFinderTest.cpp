@@ -50,10 +50,10 @@ mutation_operators:
 
   GoogleTest_Test *Test = dyn_cast<GoogleTest_Test>(tests.begin()->get());
 
-  ASSERT_EQ("Hello.world", Test->getTestName());
+  ASSERT_EQ("HelloTest.testSumOfTestee", Test->getTestName());
 }
 
-TEST(GoogleTestFinder, DISABLED_FindTestee) {
+TEST(GoogleTestFinder, FindTestee) {
   auto ModuleWithTests   = TestModuleFactory.createGoogleTestTesterModule();
   auto ModuleWithTestees = TestModuleFactory.createGoogleTestTesteeModule();
 
@@ -67,8 +67,6 @@ TEST(GoogleTestFinder, DISABLED_FindTestee) {
   const char *configYAML = R"YAML(
 mutation_operators:
   - add_mutation_operator
-  - negate_mutation_operator
-  - remove_void_function_mutation_operator
   )YAML";
   
   yaml::Input Input(configYAML);
@@ -81,21 +79,21 @@ mutation_operators:
   
   auto Tests = Finder.findTests(Ctx);
 
-  ASSERT_NE(0u, Tests.size());
+  ASSERT_EQ(1U, Tests.size());
 
   auto &Test = *(Tests.begin());
 
   std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
 
-  ASSERT_EQ(1U, Testees.size());
+  ASSERT_EQ(2U, Testees.size());
 
   Function *Testee = Testees[0]->getTesteeFunction();
   ASSERT_FALSE(Testee->empty());
 }
 
-TEST(GoogleTestFinder, DISABLED_FindMutationPoints) {
-  auto ModuleWithTests   = TestModuleFactory.createTesterModule();
-  auto ModuleWithTestees = TestModuleFactory.createTesteeModule();
+TEST(GoogleTestFinder, FindMutationPoints) {
+  auto ModuleWithTests   = TestModuleFactory.createGoogleTestTesterModule();
+  auto ModuleWithTestees = TestModuleFactory.createGoogleTestTesteeModule();
 
   auto mullModuleWithTests   = make_unique<MullModule>(std::move(ModuleWithTests), "");
   auto mullModuleWithTestees = make_unique<MullModule>(std::move(ModuleWithTestees), "");
@@ -107,43 +105,44 @@ TEST(GoogleTestFinder, DISABLED_FindMutationPoints) {
   const char *configYAML = R"YAML(
 mutation_operators:
   - add_mutation_operator
-  - negate_mutation_operator
-  - remove_void_function_mutation_operator
   )YAML";
-  
+
   yaml::Input Input(configYAML);
-  
+
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(Input);
-  
+
   auto mutationOperators = Driver::mutationOperators(Cfg.getMutationOperators());
+  ASSERT_EQ(mutationOperators.size(), 1U);
+
   GoogleTestFinder Finder(std::move(mutationOperators));
-  
+
   auto Tests = Finder.findTests(Ctx);
 
-  ASSERT_NE(0u, Tests.size());
+  ASSERT_EQ(1U, Tests.size());
 
   auto &Test = *Tests.begin();
 
   std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
 
-  ASSERT_EQ(1U, Testees.size());
+  ASSERT_EQ(2U, Testees.size());
 
-  Function *Testee = Testees[0]->getTesteeFunction();
+  Function *Testee = Testees[1]->getTesteeFunction();
+
   ASSERT_FALSE(Testee->empty());
+  ASSERT_EQ(Testee->getName().str(), "_ZN6Testee3sumEii");
 
-  AddMutationOperator MutOp;
-  std::vector<MutationOperator *> MutOps({&MutOp});
-
-  std::vector<std::unique_ptr<MutationPoint>> MutationPoints = Finder.findMutationPoints(MutOps, *Testee);
+  std::vector<MutationPoint *> MutationPoints =
+    Finder.findMutationPoints(Ctx, *Testee);
+  
   ASSERT_EQ(1U, MutationPoints.size());
 
-  MutationPoint *MP = (*(MutationPoints.begin())).get();
-  ASSERT_EQ(&MutOp, MP->getOperator());
-  ASSERT_TRUE(isa<BinaryOperator>(MP->getOriginalValue()));
+  MutationPoint *MP = MutationPoints[0];
+
+  ASSERT_TRUE(dynamic_cast<AddMutationOperator *>(MP->getOperator()));
 
   MutationPointAddress MPA = MP->getAddress();
-  ASSERT_TRUE(MPA.getFnIndex() == 0);
-  ASSERT_TRUE(MPA.getBBIndex() == 2);
-  ASSERT_TRUE(MPA.getIIndex() == 1);
+  ASSERT_EQ(MPA.getFnIndex(), 0);
+  ASSERT_EQ(MPA.getBBIndex(), 0);
+  ASSERT_EQ(MPA.getIIndex(), 14);
 }

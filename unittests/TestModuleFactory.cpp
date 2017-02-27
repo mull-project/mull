@@ -151,12 +151,12 @@ std::unique_ptr<Module> TestModuleFactory::createExternalLibTesteeModule() {
 
 std::unique_ptr<Module> TestModuleFactory::createGoogleTestTesterModule() {
   return createModule("fixture_google_test_tester_module.ll",
-                      "_ZN16Hello_world_Test8TestBodyEv");
+                      "google_test_tester");
 }
 
 std::unique_ptr<Module> TestModuleFactory::createGoogleTestTesteeModule() {
   return createModule("fixture_google_test_testee_module.ll",
-                      "_ZN16Hello_world_Test8TestBodyEv____x");
+                      "google_test_testee");
 }
 
 std::unique_ptr<Module> TestModuleFactory::APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutation_operatorModule() {
