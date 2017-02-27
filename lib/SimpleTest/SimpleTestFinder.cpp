@@ -221,7 +221,8 @@ SimpleTestFinder::findMutationPoints(const Context &context,
 
           MutationPointAddress Address(FIndex, BBIndex, IIndex);
 
-          Logger::info() << "Found Mutation point at address: " << FIndex << ' '
+          Logger::info() << "SimpleTestFinder> Found Mutation point at address: "
+                         << FIndex << ' '
                          << BBIndex << ' ' << IIndex << '\n';
 
           auto module = context.moduleWithIdentifier(

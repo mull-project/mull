@@ -48,16 +48,13 @@ Value *MutationPoint::getOriginalValue() const {
   return OriginalValue;
 }
 
-void MutationPoint::applyMutation(llvm::Module *M) {
-  mutationOperator->applyMutation(M, Address, *OriginalValue);
-}
-
-llvm::object::OwningBinary<llvm::object::ObjectFile>
-MutationPoint::applyMutation(Compiler &compiler) {
+std::unique_ptr<llvm::Module>
+MutationPoint::cloneModuleAndApplyMutation() {
   auto copyForMutation = CloneModule(module->getModule());
+
   mutationOperator->applyMutation(copyForMutation.get(), Address, *OriginalValue);
 
-  return compiler.compileModule(copyForMutation.get());
+  return copyForMutation;
 }
 
 std::string MutationPoint::getUniqueIdentifier() {

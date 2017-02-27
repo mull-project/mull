@@ -151,7 +151,10 @@ std::unique_ptr<Result> Driver::Run() {
         } else {
           ObjectFile *mutant = toolchain.cache().getObject(*mutationPoint);
           if (mutant == nullptr) {
-            auto owningObject = mutationPoint->applyMutation(toolchain.compiler());
+            auto ownedModule = mutationPoint->cloneModuleAndApplyMutation();
+
+            auto owningObject = toolchain.compiler().compileModule(ownedModule.get());
+
             mutant = owningObject.getBinary();
             toolchain.cache().putObject(std::move(owningObject), *mutationPoint);
           }

@@ -4,7 +4,9 @@
 #include "MutationOperators/AddMutationOperator.h"
 #include "MutationOperators/NegateConditionMutationOperator.h"
 #include "TestModuleFactory.h"
+#include "Toolchain/Compiler.h"
 
+#include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/IR/InstrTypes.h"
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/LLVMContext.h"
@@ -80,18 +82,22 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
 
   std::string ReplacedInstructionName = MP->getOriginalValue()->getName().str();
 
-  MP->applyMutation(Testee->getParent());
+  std::unique_ptr<TargetMachine> targetMachine(
+    EngineBuilder().selectTarget(Triple(), "", "",
+    SmallVector<std::string, 1>()));
+  
+  Compiler compiler(*targetMachine.get());
 
-  // After mutation applied on instruction it should be erased
-  Instruction *OldInstruction = cast<BinaryOperator>(MP->getOriginalValue());
-  ASSERT_EQ(nullptr, OldInstruction->getParent());
+  auto ownedMutatedModule = MP->cloneModuleAndApplyMutation();
 
-  //  Function *MutatedFunction = Testee;//ModuleWithTestees->getTesteeFunction(Testee->getName());
+  Function *mutatedTestee = ownedMutatedModule->getFunction("count_letters");
+  ASSERT_TRUE(mutatedTestee != nullptr);
 
-  // After mutation we should have new instruction with the same name as an original instruction
-  Instruction *NewInstruction = getFirstNamedInstruction(*Testee, ReplacedInstructionName);
-  ASSERT_TRUE(isa<BinaryOperator>(NewInstruction));
-  ASSERT_EQ(Instruction::Sub, NewInstruction->getOpcode());
+  Instruction *mutatedInstruction = getFirstNamedInstruction(*mutatedTestee, "add");
+  ASSERT_TRUE(mutatedInstruction != nullptr);
+
+  ASSERT_TRUE(isa<BinaryOperator>(mutatedInstruction));
+  ASSERT_EQ(Instruction::Sub, mutatedInstruction->getOpcode());
 }
 
 TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
@@ -129,13 +135,16 @@ TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
   MutationPointAddress address = MP->getAddress();
 
   ASSERT_EQ(&FunctionInstructionByAddress(*Testee, address), MP->getOriginalValue());
-  MP->applyMutation(Testee->getParent());
 
-  // After mutation applied on instruction it should be erased
-  Instruction *OldInstruction = cast<CmpInst>(MP->getOriginalValue());
-  ASSERT_EQ(nullptr, OldInstruction->getParent());
+  auto ownedMutatedTesteeModule = MP->cloneModuleAndApplyMutation();
 
-  llvm::Instruction &NewInstruction = FunctionInstructionByAddress(*Testee, address);
-  ASSERT_TRUE(isa<ICmpInst>(NewInstruction));
-  ASSERT_EQ(ICmpInst::ICMP_SGE, (cast<CmpInst>(NewInstruction)).getPredicate());
+  Function *mutatedTestee = ownedMutatedTesteeModule->getFunction("max");
+  ASSERT_TRUE(mutatedTestee != nullptr);
+
+  auto &mutatedInstruction = FunctionInstructionByAddress(*mutatedTestee,
+                                                          MP->getAddress());
+  ASSERT_TRUE(CmpInst::classof(&mutatedInstruction));
+
+  auto mutatedCmpInstruction = cast<CmpInst>(&mutatedInstruction);
+  ASSERT_EQ(mutatedCmpInstruction->getPredicate(), CmpInst::Predicate::ICMP_SGE);
 }
