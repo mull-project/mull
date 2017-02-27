@@ -93,7 +93,7 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
   Function *mutatedTestee = ownedMutatedModule->getFunction("count_letters");
   ASSERT_TRUE(mutatedTestee != nullptr);
 
-  Instruction *mutatedInstruction = getFirstNamedInstruction(*mutatedTestee, "sub");
+  Instruction *mutatedInstruction = getFirstNamedInstruction(*mutatedTestee, "add");
   ASSERT_TRUE(mutatedInstruction != nullptr);
 
   ASSERT_TRUE(isa<BinaryOperator>(mutatedInstruction));
