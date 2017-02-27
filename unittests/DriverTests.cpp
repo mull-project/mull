@@ -89,16 +89,21 @@ TEST(Driver, SimpleTest_AddMutationOperator) {
   /// TestRunner and TestFinder based on the Config
   /// Then Run all the tests using driver
 
-  std::string projectName("");
+  std::string projectName = "some_project";
+  std::string testFramework = "SimpleTest";
+
   std::vector<std::string> ModulePaths({ "foo", "bar" });
   bool doFork = false;
   bool dryRun = false;
   bool useCache = false;
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
+
   Config config(projectName,
+                testFramework,
                 ModulePaths,
-                {}, {},
+                {},
+                {},
                 doFork,
                 dryRun,
                 useCache,
@@ -147,7 +152,9 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
   /// TestRunner and TestFinder based on the Config
   /// Then Run all the tests using driver
 
-  std::string projectName("");
+  std::string projectName = "some_project";
+  std::string testFramework = "SimpleTest";
+
   std::vector<std::string> ModulePaths({
     "simple_test/negate_condition/tester",
     "simple_test/negate_condition/testee"
@@ -158,9 +165,18 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
   bool useCache = false;
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
-  Config config(projectName, ModulePaths, {}, {}, doFork, dryRun,
-                useCache, MullDefaultTimeoutMilliseconds,
-                distance, cacheDirectory);
+
+  Config config(projectName,
+                testFramework,
+                ModulePaths,
+                {},
+                {},
+                doFork,
+                dryRun,
+                useCache,
+                MullDefaultTimeoutMilliseconds,
+                distance,
+                cacheDirectory);
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
@@ -194,7 +210,9 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
 }
 
 TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
-  std::string projectName("");
+  std::string projectName = "some_project";
+  std::string testFramework = "SimpleTest";
+
   std::vector<std::string> ModulePaths({
     "simple_test/remove_void_function/tester",
     "simple_test/remove_void_function/testee"
@@ -205,9 +223,18 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
   bool useCache = false;
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
-  Config config(projectName, ModulePaths, {}, {}, doFork, dryRun,
-                useCache, MullDefaultTimeoutMilliseconds,
-                distance, cacheDirectory);
+
+  Config config(projectName,
+                testFramework,
+                ModulePaths,
+                {},
+                {},
+                doFork,
+                dryRun,
+                useCache,
+                MullDefaultTimeoutMilliseconds,
+                distance,
+                cacheDirectory);
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
@@ -241,7 +268,9 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
 }
 
 TEST(Driver, SimpleTest_TesteePathCalculation) {
-  std::string projectName("");
+  std::string projectName = "some_project";
+  std::string testFramework = "SimpleTest";
+
   std::vector<std::string> ModulePaths({
     "simple_test/testee_path_calculation/tester",
     "simple_test/testee_path_calculation/testee"
@@ -252,9 +281,18 @@ TEST(Driver, SimpleTest_TesteePathCalculation) {
   bool useCache = false;
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
-  Config config(projectName, ModulePaths, {}, {}, doFork, dryRun,
-                useCache, MullDefaultTimeoutMilliseconds,
-                distance, cacheDirectory);
+
+  Config config(projectName,
+                testFramework,
+                ModulePaths,
+                {},
+                {},
+                doFork,
+                dryRun,
+                useCache,
+                MullDefaultTimeoutMilliseconds,
+                distance,
+                cacheDirectory);
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());

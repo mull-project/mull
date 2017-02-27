@@ -114,6 +114,8 @@ TEST(SQLiteReporter, integrationTest) {
 
 TEST(SQLiteReporter, integrationTest_Config) {
   std::string projectName("Integration Test");
+  std::string testFramework = "SimpleTest";
+
   std::vector<std::string> bitcodePaths({
     "tester.bc",
     "testee.bc"
@@ -135,7 +137,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
   int timeout = 42;
   int distance = 10;
   std::string cacheDirectory = "/a/cache";
-  Config config(projectName, bitcodePaths, operators, dylibs,
+  Config config(projectName, testFramework, bitcodePaths, operators, dylibs,
                 doFork, dryRun, useCache, timeout, distance,
                 cacheDirectory);
 

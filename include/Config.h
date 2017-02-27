@@ -27,6 +27,7 @@ namespace mull {
 
 class Config {
   std::string projectName;
+  std::string testFramework;
   std::vector<std::string> bitcodePaths;
   std::vector<std::string> mutationOperators;
   std::vector<std::string> dynamicLibraries;
@@ -43,6 +44,7 @@ public:
   // TODO: Refactoring into constants.
   Config() :
     projectName(""),
+    testFramework("GoogleTest"),
     bitcodePaths(),
     mutationOperators(
       // Yaml::Traits stops reading mutation_operators from config.yaml
@@ -65,6 +67,7 @@ public:
   }
 
   Config(const std::string &project,
+         const std::string &testFramework,
          const std::vector<std::string> &paths,
          const std::vector<std::string> mutationOperators,
          const std::vector<std::string> libraries,
@@ -75,6 +78,7 @@ public:
          int distance,
          const std::string &cacheDir) :
     projectName(project),
+    testFramework(testFramework),
     bitcodePaths(paths),
     mutationOperators(mutationOperators),
     dynamicLibraries(libraries),
@@ -89,6 +93,10 @@ public:
 
   const std::string &getProjectName() const {
     return projectName;
+  }
+
+  const std::string &getTestFramework() const {
+    return testFramework;
   }
 
   const std::vector<std::string> &getBitcodePaths() const {
@@ -129,10 +137,11 @@ public:
 
   void dump() const {
     Logger::debug() << "Config>\n"
-    << "\tproject_name: " << getProjectName() << '\n'
-    << "\tdistance: " << getMaxDistance() << '\n'
-    << "\tdry_run: " << isDryRun() << '\n'
-    << "\tfork: " << getFork() << '\n';
+    << "\t" << "project_name: " << getProjectName() << '\n'
+    << "\t" << "test_framework: " << getTestFramework() << '\n'
+    << "\t" << "distance: " << getMaxDistance() << '\n'
+    << "\t" << "dry_run: " << isDryRun() << '\n'
+    << "\t" << "fork: " << getFork() << '\n';
 
     if (getMutationOperators().size() > 0) {
       Logger::debug() << "\tmutation_operators: " << '\n';

@@ -88,6 +88,7 @@ if(MULL_SUPPORT_RUST)
   include(${rust_cmake_path})
 
   message(STATUS "Mull.Rust> Rust lib path: ${mull_rust_libpath}")
+  add_definitions(-DMULL_SUPPORT_RUST=1)
 endif()
 
 add_subdirectory(tools)
