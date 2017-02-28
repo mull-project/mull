@@ -42,15 +42,48 @@ mutation_operators:
   auto Cfg = Parser.loadConfig(Input);
 
   auto mutationOperators = Driver::mutationOperators(Cfg.getMutationOperators());
-  GoogleTestFinder Finder(std::move(mutationOperators));
+  GoogleTestFinder Finder(std::move(mutationOperators), {});
+
+  auto tests = Finder.findTests(Ctx);
+
+  ASSERT_EQ(2U, tests.size());
+
+  GoogleTest_Test *Test1 = dyn_cast<GoogleTest_Test>(tests[0].get());
+  ASSERT_EQ("HelloTest.testSumOfTestee", Test1->getTestName());
+
+  GoogleTest_Test *Test2 = dyn_cast<GoogleTest_Test>(tests[1].get());
+  ASSERT_EQ("HelloTest.testSumOfTestee2", Test2->getTestName());
+}
+
+TEST(GoogleTestFinder, findTests_filter) {
+  auto ModuleWithTests       = TestModuleFactory.createGoogleTestTesterModule();
+  auto mullModuleWithTests = make_unique<MullModule>(std::move(ModuleWithTests), "");
+
+  Context Ctx;
+  Ctx.addModule(std::move(mullModuleWithTests));
+
+  const char *configYAML = R"YAML(
+mutation_operators:
+  - add_mutation_operator
+  - negate_mutation_operator
+  - remove_void_function_mutation_operator
+  )YAML";
+
+  yaml::Input Input(configYAML);
+
+  ConfigParser Parser;
+  auto Cfg = Parser.loadConfig(Input);
+
+  auto mutationOperators = Driver::mutationOperators(Cfg.getMutationOperators());
+
+  GoogleTestFinder Finder(std::move(mutationOperators),
+                          { "HelloTest.testSumOfTestee" });
 
   auto tests = Finder.findTests(Ctx);
 
   ASSERT_EQ(1U, tests.size());
-
-  GoogleTest_Test *Test = dyn_cast<GoogleTest_Test>(tests.begin()->get());
-
-  ASSERT_EQ("HelloTest.testSumOfTestee", Test->getTestName());
+  GoogleTest_Test *Test1 = dyn_cast<GoogleTest_Test>(tests[0].get());
+  ASSERT_EQ("HelloTest.testSumOfTestee", Test1->getTestName());
 }
 
 TEST(GoogleTestFinder, FindTestee) {
@@ -75,11 +108,11 @@ mutation_operators:
   auto Cfg = Parser.loadConfig(Input);
 
   auto mutationOperators = Driver::mutationOperators(Cfg.getMutationOperators());
-  GoogleTestFinder Finder(std::move(mutationOperators));
+  GoogleTestFinder Finder(std::move(mutationOperators), {});
   
   auto Tests = Finder.findTests(Ctx);
 
-  ASSERT_EQ(1U, Tests.size());
+  ASSERT_EQ(2U, Tests.size());
 
   auto &Test = *(Tests.begin());
 
@@ -115,11 +148,11 @@ mutation_operators:
   auto mutationOperators = Driver::mutationOperators(Cfg.getMutationOperators());
   ASSERT_EQ(mutationOperators.size(), 1U);
 
-  GoogleTestFinder Finder(std::move(mutationOperators));
+  GoogleTestFinder Finder(std::move(mutationOperators), {});
 
   auto Tests = Finder.findTests(Ctx);
 
-  ASSERT_EQ(1U, Tests.size());
+  ASSERT_EQ(2U, Tests.size());
 
   auto &Test = *Tests.begin();
 

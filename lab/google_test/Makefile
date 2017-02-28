@@ -31,7 +31,10 @@ BITCODE=$(BUILD_DIR)/Test.bc \
 
 all: clean llvm_ir bitcode
 
-llvm_ir: $(LLVM_IR)
+llvm_ir: $(BUILD_DIR) $(LLVM_IR)
+
+$(BUILD_DIR):
+	mkdir $(BUILD_DIR)
 
 bitcode: $(BITCODE)
 

@@ -49,8 +49,13 @@ public:
 };
 
 GoogleTestFinder::GoogleTestFinder(
-    std::vector<std::unique_ptr<MutationOperator>> mutationOperators)
-    : TestFinder(), mutationOperators(std::move(mutationOperators)) {}
+    std::vector<std::unique_ptr<MutationOperator>> mutationOperators,
+    std::vector<std::string> testsToFilter)
+    : TestFinder(),
+    mutationOperators(std::move(mutationOperators)),
+    testsToFilter(testsToFilter)
+{
+}
 
 /// The algorithm is the following:
 ///
@@ -221,6 +226,13 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
           TestBodyFunction = &Func;
           break;
         }
+      }
+
+      if (testsToFilter.empty() == false &&
+          std::find(testsToFilter.begin(),
+                    testsToFilter.end(),
+                    TestName.str()) == testsToFilter.end()) {
+            continue;
       }
 
       assert(TestBodyFunction && "Cannot find the TestBody function for the Test");
