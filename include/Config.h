@@ -28,9 +28,12 @@ namespace mull {
 class Config {
   std::string projectName;
   std::string testFramework;
+
   std::vector<std::string> bitcodePaths;
   std::vector<std::string> mutationOperators;
   std::vector<std::string> dynamicLibraries;
+  std::vector<std::string> tests;
+
   bool fork;
   bool dryRun;
   bool useCache;
@@ -57,6 +60,7 @@ public:
       // }
     ),
     dynamicLibraries(),
+    tests(),
     fork(true),
     dryRun(false),
     useCache(true),
@@ -71,6 +75,7 @@ public:
          const std::vector<std::string> &paths,
          const std::vector<std::string> mutationOperators,
          const std::vector<std::string> libraries,
+         const std::vector<std::string> tests,
          bool fork,
          bool dryrun,
          bool cache,
@@ -82,6 +87,7 @@ public:
     bitcodePaths(paths),
     mutationOperators(mutationOperators),
     dynamicLibraries(libraries),
+    tests(tests),
     fork(fork),
     dryRun(dryrun),
     useCache(cache),
@@ -109,6 +115,10 @@ public:
   
   const std::vector<std::string> &getDynamicLibraries() const {
     return dynamicLibraries;
+  }
+
+  const std::vector<std::string> &getTests() const {
+    return tests;
   }
 
   bool getFork() const {

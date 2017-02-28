@@ -262,12 +262,14 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
     std::string csvBitcodePaths = vectorToCsv(config.getBitcodePaths());
     std::string csvMutationOperators = vectorToCsv(config.getMutationOperators());
     std::string csvDynamicLibraries = vectorToCsv(config.getDynamicLibraries());
+    std::string csvTests = vectorToCsv(config.getTests());
 
     std::string insertConfigSQL = std::string("INSERT INTO config VALUES (")
     + "'" + config.getProjectName() + "',"
     + "'" + csvBitcodePaths + "',"
     + "'" + csvMutationOperators + "',"
     + "'" + csvDynamicLibraries + "',"
+    + "'" + csvTests + "',"
     + "'" + std::to_string(config.getFork()) + "',"
     + "'" + std::to_string(config.isDryRun()) + "',"
     + "'" + std::to_string(config.getUseCache()) + "',"
@@ -353,6 +355,7 @@ CREATE TABLE config (
   bitcode_paths TEXT,
   mutation_operators TEXT,
   dynamic_libraries TEXT,
+  tests TEXT,
   fork INT,
   dry_run INT,
   use_cache INT,
