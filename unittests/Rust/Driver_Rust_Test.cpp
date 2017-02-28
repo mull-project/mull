@@ -69,6 +69,7 @@ TEST(Driver_Rust, AddMutationOperator) {
                 ModulePaths,
                 {},
                 {},
+                {},
                 doFork,
                 dryRun,
                 useCache,

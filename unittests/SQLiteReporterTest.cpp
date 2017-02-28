@@ -131,13 +131,24 @@ TEST(SQLiteReporter, integrationTest_Config) {
     "libz.dylib"
   });
 
+  std::vector<std::string> tests({
+    "test_method1",
+    "test_method2"
+  });
+
+
   bool doFork = true;
   bool dryRun = true;
   bool useCache = true;
   int timeout = 42;
   int distance = 10;
   std::string cacheDirectory = "/a/cache";
-  Config config(projectName, testFramework, bitcodePaths, operators, dylibs,
+  Config config(projectName,
+                testFramework,
+                bitcodePaths,
+                operators,
+                dylibs,
+                tests,
                 doFork, dryRun, useCache, timeout, distance,
                 cacheDirectory);
 
@@ -162,12 +173,14 @@ TEST(SQLiteReporter, integrationTest_Config) {
   const unsigned char *column2_bitcodePaths = nullptr;
   const unsigned char *column3_operators = nullptr;
   const unsigned char *column4_dylibs = nullptr;
-  int column5_fork = 0;
-  int column6_dryRun = 0;
-  int column7_useCache = 0;
-  int column8_timeout = 0;
-  int column9_distance = 0;
-  const unsigned char *column10_cacheDirectory = nullptr;
+  const unsigned char *column5_tests = nullptr;
+
+  int column6_fork = 0;
+  int column7_dryRun = 0;
+  int column8_useCache = 0;
+  int column9_timeout = 0;
+  int column10_distance = 0;
+  const unsigned char *column11_cacheDirectory = nullptr;
 
   int numberOfRows = 0;
   while (1) {
@@ -178,23 +191,25 @@ TEST(SQLiteReporter, integrationTest_Config) {
       column2_bitcodePaths = sqlite3_column_text(selectStmt, 1);
       column3_operators = sqlite3_column_text(selectStmt, 2);
       column4_dylibs = sqlite3_column_text(selectStmt, 3);
-      column5_fork = sqlite3_column_int(selectStmt, 4);
-      column6_dryRun = sqlite3_column_int(selectStmt, 5);
-      column7_useCache = sqlite3_column_int(selectStmt, 6);
-      column8_timeout = sqlite3_column_int(selectStmt, 7);
-      column9_distance = sqlite3_column_int(selectStmt, 8);
-      column10_cacheDirectory = sqlite3_column_text(selectStmt, 9);
+      column5_tests = sqlite3_column_text(selectStmt, 4);
+      column6_fork = sqlite3_column_int(selectStmt, 5);
+      column7_dryRun = sqlite3_column_int(selectStmt, 6);
+      column8_useCache = sqlite3_column_int(selectStmt, 7);
+      column9_timeout = sqlite3_column_int(selectStmt, 8);
+      column10_distance = sqlite3_column_int(selectStmt, 9);
+      column11_cacheDirectory = sqlite3_column_text(selectStmt, 10);
 
       ASSERT_EQ(strcmp((const char *)column1_projectName, projectName.c_str()), 0);
       ASSERT_EQ(strcmp((const char *)column2_bitcodePaths, "tester.bc,testee.bc"), 0);
       ASSERT_EQ(strcmp((const char *)column3_operators, "add_mutation,negate_condition"), 0);
       ASSERT_EQ(strcmp((const char *)column4_dylibs, "sqlite3.dylib,libz.dylib"), 0);
-      ASSERT_EQ(column5_fork, true);
-      ASSERT_EQ(column6_dryRun, true);
-      ASSERT_EQ(column7_useCache, true);
-      ASSERT_EQ(column8_timeout, 42);
-      ASSERT_EQ(column9_distance, 10);
-      ASSERT_EQ(strcmp((const char *)column10_cacheDirectory, "/a/cache"), 0);
+      ASSERT_EQ(strcmp((const char *)column5_tests, "test_method1,test_method2"), 0);
+      ASSERT_EQ(column6_fork, true);
+      ASSERT_EQ(column7_dryRun, true);
+      ASSERT_EQ(column8_useCache, true);
+      ASSERT_EQ(column9_timeout, 42);
+      ASSERT_EQ(column10_distance, 10);
+      ASSERT_EQ(strcmp((const char *)column11_cacheDirectory, "/a/cache"), 0);
 
       numberOfRows++;
     }
