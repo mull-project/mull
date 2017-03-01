@@ -82,7 +82,8 @@ TEST(Driver_Rust, AddMutationOperator) {
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
 
-  RustTestFinder testFinder(std::move(mutationOperators));
+  RustTestFinder testFinder(std::move(mutationOperators),
+                            config.getTests());
 
   Toolchain toolchain(config);
   llvm::TargetMachine &machine = toolchain.targetMachine();

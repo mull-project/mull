@@ -154,12 +154,20 @@ public:
     << "\t" << "fork: " << getFork() << '\n';
 
     if (getMutationOperators().size() > 0) {
-      Logger::debug() << "\tmutation_operators: " << '\n';
+      Logger::debug() << "\t" << "mutation_operators: " << '\n';
+
       for (auto mutationOperator : getMutationOperators()) {
         Logger::debug() << "\t- " << mutationOperator << '\n';
+      }
+    }
+
+    if (getTests().empty() == false) {
+      Logger::debug() << "\t" << "tests: " << '\n';
+
+      for (auto test : getTests()) {
+        Logger::debug() << "\t- " << test << '\n';
       }
     }
   }
 };
 }
-

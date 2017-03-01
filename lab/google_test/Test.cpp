@@ -9,3 +9,12 @@ TEST(HelloTest, testSumOfTestee) {
 
   EXPECT_EQ(result, 5);
 }
+
+TEST(HelloTest, testSumOfTestee2) {
+  Testee testeeClass;
+
+  int result = testeeClass.sum(2, 3);
+
+  EXPECT_EQ(result, 5);
+}
+

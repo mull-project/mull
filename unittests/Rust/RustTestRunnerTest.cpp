@@ -53,7 +53,7 @@ TEST(RustTestRunner, runTest) {
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
 
-  RustTestFinder testFinder(std::move(mutationOperators));
+  RustTestFinder testFinder(std::move(mutationOperators), {});
 
   auto Tests = testFinder.findTests(context);
 
@@ -146,7 +146,7 @@ TEST(RustTestRunner, runTest_twoModules) {
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
 
-  RustTestFinder testFinder(std::move(mutationOperators));
+  RustTestFinder testFinder(std::move(mutationOperators), {});
 
   auto Tests = testFinder.findTests(context);
 

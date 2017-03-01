@@ -32,11 +32,28 @@ TEST(RustTestFinder, FindTest) {
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
-  RustTestFinder finder(std::move(mutationOperators));
+  RustTestFinder finder(std::move(mutationOperators), {});
 
   auto tests = finder.findTests(Ctx);
 
   ASSERT_EQ(4U, tests.size());
+}
+
+TEST(RustTestFinder, findTests_filter) {
+  auto rustModule = TestModuleFactory.rustModule();
+  auto mullRustModule = make_unique<MullModule>(std::move(rustModule), "");
+
+  Context Ctx;
+  Ctx.addModule(std::move(mullRustModule));
+
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+  RustTestFinder finder(std::move(mutationOperators),
+                        { "_ZN7example17rusttest_foo_sum117h7aa5d6b570662192E" });
+
+  auto tests = finder.findTests(Ctx);
+
+  ASSERT_EQ(1U, tests.size());
 }
 
 TEST(RustTestFinder, FindTestee) {
@@ -48,7 +65,7 @@ TEST(RustTestFinder, FindTestee) {
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
-  RustTestFinder finder(std::move(mutationOperators));
+  RustTestFinder finder(std::move(mutationOperators), {});
 
   auto Tests = finder.findTests(Ctx);
 

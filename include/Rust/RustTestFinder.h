@@ -27,8 +27,11 @@ class RustTestFinder : public TestFinder {
   std::map<llvm::Function *, std::vector<MutationPoint *>> MutationPointsRegistry;
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::vector<std::string> testsToFilter;
+
 public:
-  RustTestFinder(std::vector<std::unique_ptr<MutationOperator>> mutationOperators);
+  RustTestFinder(std::vector<std::unique_ptr<MutationOperator>> mutationOperators,
+                 const std::vector<std::string> testsToFilter);
 
   std::vector<std::unique_ptr<Test>> findTests(Context &Ctx) override;
   std::vector<std::unique_ptr<Testee>> findTestees(Test *Test,

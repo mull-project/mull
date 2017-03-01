@@ -59,8 +59,12 @@ public:
 };
 
 RustTestFinder::RustTestFinder(
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators)
-  : TestFinder(), mutationOperators(std::move(mutationOperators)) {}
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators,
+  const std::vector<std::string> testsToFilter) : TestFinder(),
+  mutationOperators(std::move(mutationOperators)),
+  testsToFilter(testsToFilter)
+{
+}
 
 /// The algorithm is the following:
 ///
@@ -146,11 +150,7 @@ std::vector<std::unique_ptr<Test>> RustTestFinder::findTests(Context &Ctx) {
   }
 
   for (auto &testContentsGV : testContentsGlobalVariables) {
-    Type *type = testContentsGV->getValueType();
-    assert(type->getTypeID() == Type::StructTyID);
-
-    StructType *structType = dyn_cast<StructType>(type);
-    assert(structType);
+    assert(testContentsGV->getValueType()->getTypeID() == Type::StructTyID);
 
     auto testContents = dyn_cast<Constant>(testContentsGV->getOperand(0));
     assert(testContents->getType()->getTypeID() == Type::StructTyID);
@@ -167,6 +167,13 @@ std::vector<std::unique_ptr<Test>> RustTestFinder::findTests(Context &Ctx) {
       assert(testPointerStruct->getNumOperands() == 3);
 
       auto testFunction = dyn_cast<Function>(testPointerStruct->getOperand(1));
+
+      if (testsToFilter.empty() == false &&
+          std::find(testsToFilter.begin(),
+                    testsToFilter.end(),
+                    testFunction->getName().str()) == testsToFilter.end()) {
+        continue;
+      }
 
       tests.push_back(make_unique<RustTest>(testFunction->getName(),
                                             testFunction));

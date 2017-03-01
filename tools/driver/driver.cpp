@@ -101,7 +101,9 @@ int main(int argc, char *argv[]) {
   auto mutationOperators = Driver::mutationOperators(config.getMutationOperators());
 
   if (testFramework == "GoogleTest") {
-    testFinder = make_unique<GoogleTestFinder>(std::move(mutationOperators));
+    testFinder = make_unique<GoogleTestFinder>(std::move(mutationOperators),
+                                               config.getTests());
+
     testRunner = make_unique<GoogleTestRunner>(toolchain.targetMachine());
   }
 
@@ -112,7 +114,9 @@ int main(int argc, char *argv[]) {
 
   #if defined(MULL_SUPPORT_RUST)
   else if (testFramework == "Rust") {
-    testFinder = make_unique<RustTestFinder>(std::move(mutationOperators));
+    testFinder = make_unique<RustTestFinder>(std::move(mutationOperators),
+                                             config.getTests());
+
     testRunner = make_unique<RustTestRunner>(toolchain.targetMachine());
   }
   #endif

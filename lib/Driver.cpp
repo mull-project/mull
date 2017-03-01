@@ -196,8 +196,8 @@ std::unique_ptr<Result> Driver::Run() {
   return result;
 }
 
-std::vector<std::unique_ptr<MutationOperator>> Driver::mutationOperators
-  (std::vector<std::string> mutationOperatorStrings) {
+std::vector<std::unique_ptr<MutationOperator>>
+Driver::mutationOperators(std::vector<std::string> mutationOperatorStrings) {
     if (mutationOperatorStrings.size() == 0) {
       Logger::info()
         << "Driver> No mutation operators specified in a config file. "
