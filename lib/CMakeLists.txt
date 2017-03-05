@@ -21,6 +21,10 @@ set(mull_sources
   TestRunner.cpp
   Testee.cpp
 
+  XCTest/XCTest_Test.cpp
+  XCTest/XCTestFinder.cpp
+  XCTest/XCTestRunner.cpp
+
   SimpleTest/SimpleTest_Test.cpp
   SimpleTest/SimpleTestFinder.cpp
   SimpleTest/SimpleTestRunner.cpp
@@ -39,6 +43,7 @@ set(mull_header_dirs
   ${MULL_INCLUDE_DIR}/GoogleTest
   ${MULL_INCLUDE_DIR}/SimpleTest
   ${MULL_INCLUDE_DIR}/Toolchain
+  ${MULL_INCLUDE_DIR}/XCTest
 )
 
 set(mull_additional_libraries

@@ -14,6 +14,8 @@
 #include "GoogleTest/GoogleTestRunner.h"
 #include "SimpleTest/SimpleTestFinder.h"
 #include "SimpleTest/SimpleTestRunner.h"
+#include "XCTest/XCTestFinder.h"
+#include "XCTest/XCTestRunner.h"
 
 #if defined(MULL_SUPPORT_RUST)
 #include "Rust/RustTestFinder.h"
@@ -110,6 +112,13 @@ int main(int argc, char *argv[]) {
   else if (testFramework == "SimpleTest") {
     testFinder = make_unique<SimpleTestFinder>(std::move(mutationOperators));
     testRunner = make_unique<SimpleTestRunner>(toolchain.targetMachine());
+  }
+
+  else if (testFramework == "XCTest") {
+    printf("start XCTest\n");
+    testFinder = make_unique<XCTestFinder>(std::move(mutationOperators),
+                                           config.getTests());
+    testRunner = make_unique<XCTestRunner>(toolchain.targetMachine());
   }
 
   #if defined(MULL_SUPPORT_RUST)
