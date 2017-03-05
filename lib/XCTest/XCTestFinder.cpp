@@ -61,6 +61,7 @@ XCTestFinder::findTestees(Test *test,
   Function *testFunction = concnreteTest->getFunction();
 
   std::vector<std::unique_ptr<Testee>> testees;
+  testees.push_back(make_unique<Testee>(nullptr, nullptr, nullptr, 0));
   return testees;
   ///
 

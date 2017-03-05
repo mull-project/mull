@@ -52,7 +52,7 @@ void *XCTestRunner::FunctionPointer(const char *functionName) {
 }
 
 ExecutionResult XCTestRunner::runTest(Test *Test, ObjectFiles &objectFiles) {
-  __unused XCTest_Test *concreteTest = dyn_cast<XCTest_Test>(Test);
+  XCTest_Test *concreteTest = dyn_cast<XCTest_Test>(Test);
 
   auto handle = objectLayer.addObjectSet(objectFiles,
                                          make_unique<SectionMemoryManager>(),
@@ -65,7 +65,7 @@ ExecutionResult XCTestRunner::runTest(Test *Test, ObjectFiles &objectFiles) {
   auto main = ((int (*)(int, const char **))(intptr_t)mainPointer);
   const int argc = 1;
   const char *argv[] = { "mull", NULL };
-  __unused auto res = main(argc, argv);
+  auto res = main(argc, argv);
 
   auto elapsed = high_resolution_clock::now() - start;
 
