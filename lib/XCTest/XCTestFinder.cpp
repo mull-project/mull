@@ -61,6 +61,8 @@ XCTestFinder::findTestees(Test *test,
   Function *testFunction = concnreteTest->getFunction();
 
   std::vector<std::unique_ptr<Testee>> testees;
+  return testees;
+  ///
 
   std::queue<std::unique_ptr<Testee>> traversees;
   std::set<Function *> checkedFunctions;
