@@ -38,7 +38,11 @@ public:
 };
 
 XCTestRunner::XCTestRunner(llvm::TargetMachine &machine)
-: TestRunner(machine) {}
+: TestRunner(machine) {
+sys::DynamicLibrary::LoadLibraryPermanently("/opt/swift/usr/lib/swift/linux/libswiftSwiftOnoneSupport.so");
+sys::DynamicLibrary::LoadLibraryPermanently("/opt/swift/usr/lib/swift/linux/libFoundation.so");
+sys::DynamicLibrary::LoadLibraryPermanently("/opt/swift/usr/lib/swift/linux/libXCTest.so");
+}
 
 void *XCTestRunner::FunctionPointer(const char *functionName) {
   orc::JITSymbol symbol = objectLayer.findSymbol(functionName, false);
@@ -60,7 +64,7 @@ ExecutionResult XCTestRunner::runTest(Test *Test, ObjectFiles &objectFiles) {
 
   auto start = high_resolution_clock::now();
 
-  void *mainPointer = FunctionPointer("_main");
+  void *mainPointer = FunctionPointer("main");
 
   auto main = ((int (*)(int, const char **))(intptr_t)mainPointer);
   const int argc = 1;
