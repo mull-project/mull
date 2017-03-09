@@ -100,8 +100,3 @@ llvm::Value *RemoveVoidFunctionMutationOperator::applyMutation(Module *M, Mutati
   /// TODO: remove?
   return callInst;
 }
-
-Value *RemoveVoidFunctionMutationOperator::revertMutation(Value &V)  {
-  LLVM_BUILTIN_UNREACHABLE;
-  return nullptr;
-}
