@@ -20,6 +20,10 @@ std::string TestResult::getTestName() {
   return TestPtr->getTestName();
 }
 
+std::string TestResult::getDisplayName() {
+  return TestPtr->getTestDisplayName();
+}
+
 std::vector<std::unique_ptr<MutationResult>> &TestResult::getMutationResults() {
   return MutationResults;
 }

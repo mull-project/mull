@@ -88,7 +88,8 @@ if(MULL_SUPPORT_RUST)
     ${mull_sources}
     Rust/RustTest.cpp
     Rust/RustTestFinder.cpp
-    Rust/RustTestRunner.cpp)
+    Rust/RustTestRunner.cpp
+    Rust/RustSymbolDemangling.cpp)
 
   set(mull_header_dirs
     ${mull_header_dirs}

@@ -17,6 +17,7 @@ public:
   RustTest(std::string name, llvm::Function *function);
 
   std::string getTestName() override;
+  std::string getTestDisplayName() override;
 
   std::string getUniqueIdentifier() override { return getTestName(); };
 

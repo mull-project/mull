@@ -22,6 +22,7 @@ public:
                   std::vector<llvm::Function *> Ctors);
 
   std::string getTestName() override;
+  std::string getTestDisplayName() override;
 
   std::string getUniqueIdentifier() override { return getTestName(); };
 

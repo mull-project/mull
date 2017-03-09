@@ -100,7 +100,7 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
   createTables(database);
 
   for (auto &testResult : result->getTestResults()) {
-    std::string testID = testResult->getTestName();
+    std::string testID = testResult->getDisplayName();
 
     ExecutionResult testExecutionResult = testResult->getOriginalTestResult();
     std::string insertResultSQL = std::string("INSERT INTO execution_result VALUES (")
