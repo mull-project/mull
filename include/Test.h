@@ -7,6 +7,7 @@ namespace mull {
 class Test {
 public:
   virtual std::string getTestName() = 0;
+  virtual std::string getTestDisplayName() = 0;
   virtual std::string getUniqueIdentifier() = 0;
   virtual ~Test() {}
 

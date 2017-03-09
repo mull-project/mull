@@ -14,3 +14,8 @@ llvm::Function *SimpleTest_Test::GetTestFunction() {
 std::string SimpleTest_Test::getTestName() {
   return TestFunction->getName().str();
 }
+
+std::string SimpleTest_Test::getTestDisplayName() {
+  return getTestName();
+}
+

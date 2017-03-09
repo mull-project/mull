@@ -57,6 +57,8 @@ public:
   void addMutantResult(std::unique_ptr<MutationResult> Res);
 
   std::string getTestName();
+  std::string getDisplayName();
+
   std::vector<std::unique_ptr<MutationResult>> &getMutationResults();
   ExecutionResult getOriginalTestResult();
 };

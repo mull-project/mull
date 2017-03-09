@@ -117,6 +117,15 @@ TEST(Driver_Rust, AddMutationOperator) {
   ASSERT_EQ("_ZN7example17rusttest_foo_sum417h38f8b273364164edE",
             testResult_4->getTestName());
 
+  ASSERT_EQ("example::rusttest_foo_sum1",
+            testResult_1->getDisplayName());
+  ASSERT_EQ("example::rusttest_foo_sum2",
+            testResult_2->getDisplayName());
+  ASSERT_EQ("example::rusttest_foo_sum3",
+            testResult_3->getDisplayName());
+  ASSERT_EQ("example::rusttest_foo_sum4",
+            testResult_4->getDisplayName());
+
   auto &testResult_1_mutants = testResult_1->getMutationResults();
   auto &testResult_2_mutants = testResult_2->getMutationResults();
   auto &testResult_3_mutants = testResult_3->getMutationResults();
