@@ -268,8 +268,3 @@ llvm::Value *NegateConditionMutationOperator::applyMutation(Module *M, MutationP
 
   return replacement;
 }
-
-Value *NegateConditionMutationOperator::revertMutation(Value &V)  {
-  LLVM_BUILTIN_UNREACHABLE;
-  return nullptr;
-}

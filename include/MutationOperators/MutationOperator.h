@@ -30,7 +30,6 @@ public:
 
   virtual bool canBeApplied(llvm::Value &V) = 0;
   virtual llvm::Value *applyMutation(llvm::Module *M, MutationPointAddress address, llvm::Value &OriginalValue) = 0;
-  virtual llvm::Value *revertMutation(llvm::Value &Value) = 0;
   virtual ~MutationOperator() {}
 };
 
