@@ -6,8 +6,9 @@
 
 namespace llvm {
 
-class Value;
+class LLVMContext;
 class Module;
+class Value;
 
 }
 
@@ -69,7 +70,7 @@ public:
   MutationPointAddress getAddress() const;
   llvm::Value *getOriginalValue() const;
 
-  std::unique_ptr<llvm::Module> cloneModuleAndApplyMutation();
+  std::unique_ptr<llvm::Module> cloneModuleAndApplyMutation(llvm::LLVMContext &context);
 
   std::string getUniqueIdentifier();
   std::string getUniqueIdentifier() const;
