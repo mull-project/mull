@@ -92,7 +92,8 @@ TEST(SimpleTestRunner, runTest) {
   std::vector<MutationPoint *> MutationPoints = testFinder.findMutationPoints(Ctx, *Testee);
 
   MutationPoint *MP = (*(MutationPoints.begin()));
-  auto ownedMutatedTesteeModule = MP->cloneModuleAndApplyMutation();
+  LLVMContext mutationContext;
+  auto ownedMutatedTesteeModule = MP->cloneModuleAndApplyMutation(mutationContext);
 
   {
     auto Obj = compiler.compileModule(ModuleWithTests);
@@ -180,7 +181,8 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
 
   MutationPoint *MP = (*(MutationPoints.begin()));
 
-  auto ownedMutatedTesteeModule = MP->cloneModuleAndApplyMutation();
+  LLVMContext mutationContext;
+  auto ownedMutatedTesteeModule = MP->cloneModuleAndApplyMutation(mutationContext);
 
   Obj = compiler.compileModule(ModuleWithTests);
   ObjectFiles.push_back(Obj.getBinary());

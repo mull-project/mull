@@ -87,7 +87,8 @@ TEST(RustTestRunner, runTest) {
   auto &mutationPoint = *(mutationPoints.begin());
 
   {
-    auto ownedModule = mutationPoint->cloneModuleAndApplyMutation();
+    LLVMContext mutationContext;
+    auto ownedModule = mutationPoint->cloneModuleAndApplyMutation(mutationContext);
 
     auto owningObject = compiler.compileModule(ownedModule.get());
 
@@ -186,7 +187,8 @@ TEST(RustTestRunner, runTest_twoModules) {
   auto &mutationPoint = *(mutationPoints.begin());
 
   {
-    auto ownedModule = mutationPoint->cloneModuleAndApplyMutation();
+    LLVMContext mutationContext;
+    auto ownedModule = mutationPoint->cloneModuleAndApplyMutation(mutationContext);
 
     auto owningObject = compiler.compileModule(ownedModule.get());
 

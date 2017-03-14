@@ -149,17 +149,21 @@ std::unique_ptr<Result> Driver::Run() {
           result.Status = DryRun;
           result.RunningTime = ExecResult.RunningTime * 10;
         } else {
-          ObjectFile *mutant = toolchain.cache().getObject(*mutationPoint);
-          if (mutant == nullptr) {
+          OwningBinary<ObjectFile> mutantObject =
+            toolchain.cache().getMutatedObject(*mutationPoint);
+
+          if (mutantObject.getBinary() == nullptr) {
             LLVMContext mutationContext;
             auto ownedModule = mutationPoint->cloneModuleAndApplyMutation(mutationContext);
 
-            auto owningObject = toolchain.compiler().compileModule(ownedModule.get());
+            mutantObject =
+              OwningBinary<ObjectFile>(
+                toolchain.compiler().compileModule(ownedModule.get()));
 
-            mutant = owningObject.getBinary();
-            //toolchain.cache().putObject(std::move(owningObject), *mutationPoint);
+            toolchain.cache().putMutatedObject(mutantObject, *mutationPoint);
           }
-          ObjectFiles.push_back(mutant);
+
+          ObjectFiles.push_back(mutantObject.getBinary());
 
           const auto sandboxTimeout = std::max(30LL,
                                                ExecResult.RunningTime * 10);
@@ -171,9 +175,15 @@ std::unique_ptr<Result> Driver::Run() {
 
             *SharedResult = R;
           }, sandboxTimeout);
+
           ObjectFiles.pop_back();
 
-          assert(result.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
+          if (result.Status == ExecutionStatus::Invalid) {
+            Logger::debug()
+            << "Driver::Run> ExecutionStatus::Invalid status. Error: `"
+            << result.stderrOutput << "`";
+            LLVM_BUILTIN_UNREACHABLE;
+          }
         }
 
         auto MutResult = make_unique<MutationResult>(result, mutationPoint, testee.get());

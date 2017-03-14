@@ -88,7 +88,8 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
   
   Compiler compiler(*targetMachine.get());
 
-  auto ownedMutatedModule = MP->cloneModuleAndApplyMutation();
+  LLVMContext mutationContext;
+  auto ownedMutatedModule = MP->cloneModuleAndApplyMutation(mutationContext);
 
   Function *mutatedTestee = ownedMutatedModule->getFunction("count_letters");
   ASSERT_TRUE(mutatedTestee != nullptr);
@@ -136,7 +137,8 @@ TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
 
   ASSERT_EQ(&FunctionInstructionByAddress(*Testee, address), MP->getOriginalValue());
 
-  auto ownedMutatedTesteeModule = MP->cloneModuleAndApplyMutation();
+  LLVMContext mutationContext;
+  auto ownedMutatedTesteeModule = MP->cloneModuleAndApplyMutation(mutationContext);
 
   Function *mutatedTestee = ownedMutatedTesteeModule->getFunction("max");
   ASSERT_TRUE(mutatedTestee != nullptr);

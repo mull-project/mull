@@ -94,8 +94,37 @@ ObjectFile *ObjectCache::getObject(const MullModule &module) {
   return getObject(module.getUniqueIdentifier());
 }
 
-ObjectFile *ObjectCache::getObject(const MutationPoint &mutationPoint) {
-  return getObject(mutationPoint.getUniqueIdentifier());
+llvm::object::OwningBinary<ObjectFile>
+ObjectCache::getMutatedObject(const MutationPoint &mutationPoint) {
+  std::string identifier = mutationPoint.getUniqueIdentifier();
+
+  if (!useOnDiskCache) {
+    return llvm::object::OwningBinary<ObjectFile>();
+  }
+
+  std::string cacheName(cacheDirectory + "/" + identifier + ".o");
+
+  ErrorOr<std::unique_ptr<MemoryBuffer>> buffer =
+  MemoryBuffer::getFile(cacheName.c_str());
+
+  if (!buffer) {
+    return llvm::object::OwningBinary<ObjectFile>();
+  }
+
+  Expected<std::unique_ptr<ObjectFile>> objectOrError =
+  ObjectFile::createObjectFile(buffer.get()->getMemBufferRef());
+
+  if (!objectOrError) {
+    return llvm::object::OwningBinary<ObjectFile>();
+  }
+
+  std::unique_ptr<ObjectFile> objectFile(std::move(objectOrError.get()));
+
+  auto owningObject =
+    llvm::object::OwningBinary<ObjectFile>
+      (OwningBinary<ObjectFile>(std::move(objectFile), std::move(buffer.get())));
+
+  return owningObject;
 }
 
 void ObjectCache::putObjectInMemory(
@@ -130,7 +159,7 @@ void ObjectCache::putObject(OwningBinary<ObjectFile> object,
   putObject(std::move(object), module.getUniqueIdentifier());
 }
 
-void ObjectCache::putObject(OwningBinary<ObjectFile> object,
-                            const MutationPoint &mutationPoint) {
-  putObject(std::move(object), mutationPoint.getUniqueIdentifier());
+void ObjectCache::putMutatedObject(OwningBinary<ObjectFile> &object,
+                                   const MutationPoint &mutationPoint) {
+  putObjectOnDisk(object, mutationPoint.getUniqueIdentifier());
 }
