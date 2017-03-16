@@ -27,11 +27,12 @@
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/YAMLParser.h"
 
-#include <ctime>
+#include <chrono>
 #include <string>
 
 using namespace mull;
 using namespace llvm;
+using namespace std::chrono;
 
 cl::OptionCategory MullOptionCategory("Mull");
 
@@ -144,10 +145,22 @@ int main(int argc, char *argv[]) {
     return 0;
   }
 
+  const long timeSuiteStart =
+    duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+
   auto result = driver.Run();
 
+  const long timeSuiteEnd =
+    duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
+
+  ResultTime resultTime = {
+    .start = timeSuiteStart,
+    .end = timeSuiteEnd
+  };
+
   SQLiteReporter reporter(config.getProjectName());
-  reporter.reportResults(result, config);
+  reporter.reportResults(result, config, resultTime);
+
   llvm_shutdown();
   return EXIT_SUCCESS;
 }

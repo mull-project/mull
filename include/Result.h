@@ -5,6 +5,11 @@
 #include <vector>
 
 namespace mull {
+  typedef struct {
+    const long start;
+    const long end;
+  } ResultTime;
+
   class Result {
     std::vector<std::unique_ptr<TestResult>> testResults;
     std::vector<std::unique_ptr<Testee>> allTestees;
