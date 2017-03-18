@@ -58,9 +58,14 @@ TEST(SQLiteReporter, integrationTest) {
   /// In this test we are not interested in testees.
   std::vector<std::unique_ptr<Testee>> testees;
 
+  ResultTime resultTime = {
+    .start = 1234,
+    .end = 5678
+  };
+
   std::unique_ptr<Result> result = make_unique<Result>(std::move(results),
                                                        std::move(testees));
-  reporter.reportResults(result, Config());
+  reporter.reportResults(result, Config(), resultTime);
 
   std::string databasePath = reporter.getDatabasePath();
 
@@ -156,9 +161,15 @@ TEST(SQLiteReporter, integrationTest_Config) {
 
   std::vector<std::unique_ptr<TestResult>> testResults;
   std::vector<std::unique_ptr<Testee>> allTestees;
+
+  ResultTime resultTime = {
+    .start = 1234,
+    .end = 5678
+  };
+
   std::unique_ptr<Result> result = make_unique<Result>(std::move(testResults),
                                                        std::move(allTestees));
-  reporter.reportResults(result, config);
+  reporter.reportResults(result, config, resultTime);
 
   std::string databasePath = reporter.getDatabasePath();
 
@@ -181,6 +192,8 @@ TEST(SQLiteReporter, integrationTest_Config) {
   int column9_timeout = 0;
   int column10_distance = 0;
   const unsigned char *column11_cacheDirectory = nullptr;
+  int column12_timeStart = 0;
+  int column13_timeEnd = 0;
 
   int numberOfRows = 0;
   while (1) {
@@ -198,6 +211,8 @@ TEST(SQLiteReporter, integrationTest_Config) {
       column9_timeout = sqlite3_column_int(selectStmt, 8);
       column10_distance = sqlite3_column_int(selectStmt, 9);
       column11_cacheDirectory = sqlite3_column_text(selectStmt, 10);
+      column12_timeStart = sqlite3_column_int(selectStmt, 11);
+      column13_timeEnd = sqlite3_column_int(selectStmt, 12);
 
       ASSERT_EQ(strcmp((const char *)column1_projectName, projectName.c_str()), 0);
       ASSERT_EQ(strcmp((const char *)column2_bitcodePaths, "tester.bc,testee.bc"), 0);
@@ -210,6 +225,8 @@ TEST(SQLiteReporter, integrationTest_Config) {
       ASSERT_EQ(column9_timeout, 42);
       ASSERT_EQ(column10_distance, 10);
       ASSERT_EQ(strcmp((const char *)column11_cacheDirectory, "/a/cache"), 0);
+      ASSERT_EQ(column12_timeStart, 1234);
+      ASSERT_EQ(column13_timeEnd, 5678);
 
       numberOfRows++;
     }

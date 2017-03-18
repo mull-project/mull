@@ -91,7 +91,9 @@ std::string mull::SQLiteReporter::getDatabasePath() {
 }
 
 void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
-                                         const Config &config) {
+                                         const Config &config,
+                                         const ResultTime &resultTime) {
+
   std::string databasePath = getDatabasePath();
 
   sqlite3 *database;
@@ -259,6 +261,11 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
 
   /// Config
   {
+    // Start and end times are not part of a config however we are
+    // mixing them in to make them into a final report.
+    const long startTime = resultTime.start;
+    const long endTime = resultTime.end;
+
     std::string csvBitcodePaths = vectorToCsv(config.getBitcodePaths());
     std::string csvMutationOperators = vectorToCsv(config.getMutationOperators());
     std::string csvDynamicLibraries = vectorToCsv(config.getDynamicLibraries());
@@ -275,7 +282,10 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
     + "'" + std::to_string(config.getUseCache()) + "',"
     + "'" + std::to_string(config.getTimeout()) + "',"
     + "'" + std::to_string(config.getMaxDistance()) + "',"
-    + "'" + config.getCacheDirectory() + "');"
+    + "'" + config.getCacheDirectory() + "'," +
+    + "'" + std::to_string(startTime) + "'," +
+    + "'" + std::to_string(endTime) + "'" +
+    ");"
     ;
 
     sqlite_exec(database, insertConfigSQL.c_str());
@@ -361,7 +371,9 @@ CREATE TABLE config (
   use_cache INT,
   timeout INT,
   max_distance INT,
-  cache_directory TEXT
+  cache_directory TEXT,
+  time_start INT,
+  time_end INT
 );
 )CreateTables";
 
