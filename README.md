@@ -15,6 +15,14 @@ So far Mull is being developed against OSX. Linux support is coming.
 Migration went smoothly and all is working on our end (c). Please let us know
 if you notice some dependencies that we missed to specify below.
 
+#### Notes
+
+Current code is being developed against stable LLVM 3.9 branch.
+
+Either use binary distribution via `brew install llvm` or clone LLVM and
+build it yourself from
+[release_39](https://github.com/llvm-mirror/llvm/tree/release_39) branch.
+
 #### Getting dependencies
 
 ```bash
@@ -57,14 +65,6 @@ Use `make help` to see the common tasks used by developers.
 
 Use `MullUnitTests` scheme to run the tests. Use `mull-driver` scheme to
 build Mull.
-
-## Notes
-
-Current code is being developed against stable LLVM 3.9 branch.
-
-Either use binary distribution via `brew install llvm` or clone LLVM and
-build it yourself from
-[release_39](https://github.com/llvm-mirror/llvm/tree/release_39) branch.
 
 ## Open questions
 
