@@ -27,9 +27,58 @@
 using namespace mull;
 using namespace llvm;
 
+using namespace std;
+
+struct swift_test_demangled {
+  string testModule;
+  string testSuite;
+  string testName;
+
+  string toString() {
+    return testModule + "/" + testSuite + "." + testName;
+  }
+};
+
+swift_test_demangled parseMangledTestName(const string &testName) {
+  vector<string> strings;
+  string digits;
+
+  for (auto it = testName.begin() + 4; it != testName.end(); it++) {
+    auto ch = *it;
+
+    if (isdigit(ch)) {
+      digits += ch;
+    } else if (digits.size() == 0) {
+      continue;
+    } else {
+      auto length = stoul(digits);
+      string chunk(it, it + length);
+      strings.push_back(chunk);
+      it += length - 1;
+      digits = "";
+    }
+  }
+
+  swift_test_demangled t;
+  t.testModule = strings[0];
+  t.testSuite = strings[1];
+  t.testName = strings[2];
+
+  return t;
+}
+
 class XCTestMutationOperatorFilter : public MutationOperatorFilter {
 public:
   bool shouldSkipInstruction(llvm::Instruction *instruction) {
+    auto debug = instruction->getDebugLoc().get();
+    if (!debug) {
+      return true;
+    }
+
+    if (debug->getLine() == 0) {
+      return true;
+    }
+
     return false;
   };
 };
@@ -40,10 +89,59 @@ XCTestFinder::XCTestFinder(std::vector<std::unique_ptr<MutationOperator>> mutati
   testsToFilter(testsToFilter)
   {}
 
-std::vector<std::unique_ptr<Test>> XCTestFinder::findTests(Context &Ctx) {
+std::vector<std::unique_ptr<Test>> XCTestFinder::findTests(Context &context) {
   std::vector<std::unique_ptr<Test>> tests;
 
-  tests.push_back(make_unique<XCTest_Test>("hello", nullptr));
+  for (auto &module : context.getModules()) {
+    auto &functionList = module->getModule()->getFunctionList();
+
+    std::vector<Type *> testTypes;
+    for (auto &tt : module->getModule()->getIdentifiedStructTypes()) {
+      if (tt->getNumElements() >= 6) {
+        auto secondType = tt->getElementType(1);
+        if (secondType->isStructTy() && secondType->getStructName().startswith("GSqC6XCTest9XCTestRun")) {
+          testTypes.push_back(tt);
+        }
+      }
+    }
+
+    for (auto &function : functionList) {
+      if (function.isDeclaration()) {
+        continue;
+      }
+
+      if (!function.getName().equals("_TFC16CryptoSwiftTests8AESTests15testAESEncrypt2fT_T_")) {
+        continue;
+      }
+
+      auto functionType = function.getFunctionType();
+      if (functionType->getNumParams() == 0) {
+        continue;
+      }
+      PointerType *pointer = dyn_cast<PointerType>(functionType->getParamType(0));
+      if (!pointer) {
+        continue;
+      }
+      unsigned index = 0;
+      auto firstParameter = pointer->getTypeAtIndex(index);
+      if (!firstParameter->isStructTy()) {
+        continue;
+      }
+
+      if (std::find(testTypes.begin(), testTypes.end(), firstParameter) == testTypes.end() ) {
+        continue;
+      }
+
+      if (!function.getName().endswith("fT_T_")) {
+        continue;
+      }
+
+      /* functionType->dump(); */
+      /* firstParameter->dump(); */
+      /* Logger::debug() << function.getName() << "\n"; */
+      tests.push_back(make_unique<XCTest_Test>(parseMangledTestName(function.getName().str()).toString(), &function));
+    }
+  }
 
   return tests;
 }
@@ -61,9 +159,6 @@ XCTestFinder::findTestees(Test *test,
   Function *testFunction = concnreteTest->getFunction();
 
   std::vector<std::unique_ptr<Testee>> testees;
-  testees.push_back(make_unique<Testee>(nullptr, nullptr, nullptr, 0));
-  return testees;
-  ///
 
   std::queue<std::unique_ptr<Testee>> traversees;
   std::set<Function *> checkedFunctions;
@@ -135,15 +230,20 @@ XCTestFinder::findTestees(Test *test,
         /// FIXME: Context should report if a function being added already exist
         /// FIXME: What other problems such behaviour may bring?
 
+
         Function *definedFunction =
-        testBodyModule->getFunction(functionOperand->getName());
+          testBodyModule->getFunction(functionOperand->getName());
 
         if (!definedFunction || definedFunction->isDeclaration()) {
+//                    Logger::debug() << "SwiftTestFinder> found a function: "
+  //                                  << definedFunction->getName() << '\n';
           definedFunction =
-          Ctx.lookupDefinedFunction(functionOperand->getName());
+            Ctx.lookupDefinedFunction(functionOperand->getName());
         } else {
-          //          Logger::debug() << "RustTestFinder> did not find a function: "
-          //                          << definedFunction->getName() << '\n';
+//	Logger::debug() << "asdasd\n";
+  //                  Logger::debug() << "SwiftTestFinder> did not find a function: "
+    //                                << definedFunction->getName() << '\n';
+//	Logger::debug() << "ASDASD\n";
         }
 
         if (definedFunction) {
@@ -161,6 +261,8 @@ XCTestFinder::findTestees(Test *test,
                                                 traverseePointer,
                                                 mutationDistance + 1));
           }
+        } else {
+  //         Logger::debug() << "Could not find functnio definition for: " << functionOperand->getName() << "\n";
         }
       }
     }
@@ -187,7 +289,7 @@ XCTestFinder::findMutationPoints(const Context &context,
       MutationPoints.emplace_back(std::unique_ptr<MutationPoint>(point));
     }
   }
-  
+
   MutationPointsRegistry.insert(std::make_pair(&testee, points));
   return points;
 }

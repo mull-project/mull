@@ -48,7 +48,6 @@ set(mull_header_dirs
 
 set(mull_additional_libraries
 
-  ${MULL_DEPENDENCY_LIBZ}
   ${MULL_DEPENDENCY_NCURSES}
 
   ${MULL_DEPENDENCY_SQLITE}

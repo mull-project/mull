@@ -39,16 +39,18 @@ public:
 
 XCTestRunner::XCTestRunner(llvm::TargetMachine &machine)
 : TestRunner(machine) {
-sys::DynamicLibrary::LoadLibraryPermanently("/opt/swift/usr/lib/swift/linux/libswiftSwiftOnoneSupport.so");
-sys::DynamicLibrary::LoadLibraryPermanently("/opt/swift/usr/lib/swift/linux/libFoundation.so");
-sys::DynamicLibrary::LoadLibraryPermanently("/opt/swift/usr/lib/swift/linux/libXCTest.so");
+  int core = sys::DynamicLibrary::LoadLibraryPermanently("/opt/swift/usr/lib/swift/linux/libswiftCore.so");
+  int onon = sys::DynamicLibrary::LoadLibraryPermanently("/opt/swift/usr/lib/swift/linux/libswiftSwiftOnoneSupport.so");
+  int foundation = sys::DynamicLibrary::LoadLibraryPermanently("/opt/swift/usr/lib/swift/linux/libFoundation.so");
+  int xctest = sys::DynamicLibrary::LoadLibraryPermanently("/opt/swift/usr/lib/swift/linux/libXCTest.so");
+  printf("SwiftCore: %d\nOnone: %d\nFoundation: %d\nxctest: %d\n", core, onon, foundation, xctest);
 }
 
 void *XCTestRunner::FunctionPointer(const char *functionName) {
   orc::JITSymbol symbol = objectLayer.findSymbol(functionName, false);
 
   void *FPointer =
-  reinterpret_cast<void *>(static_cast<uintptr_t>(symbol.getAddress()));
+    reinterpret_cast<void *>(static_cast<uintptr_t>(symbol.getAddress()));
 
   assert(FPointer && "Can't find pointer to function");
 
@@ -67,8 +69,12 @@ ExecutionResult XCTestRunner::runTest(Test *Test, ObjectFiles &objectFiles) {
   void *mainPointer = FunctionPointer("main");
 
   auto main = ((int (*)(int, const char **))(intptr_t)mainPointer);
-  const int argc = 1;
-  const char *argv[] = { "mull", NULL };
+  const int argc = 2;
+  auto testName = concreteTest->getTestName();
+  testName += '\0';
+  const char *testName_c = testName.c_str();
+  printf("%s:%d\n", testName_c, strlen(testName_c));
+  const char *argv[] = { "mull", testName_c, NULL };
   auto res = main(argc, argv);
 
   auto elapsed = high_resolution_clock::now() - start;
@@ -78,6 +84,6 @@ ExecutionResult XCTestRunner::runTest(Test *Test, ObjectFiles &objectFiles) {
   Result.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
 
   objectLayer.removeObjectSet(handle);
-  
+
   return Result;
 }
