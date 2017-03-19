@@ -103,13 +103,19 @@ mull::ForkProcessSandbox::run(std::function<void (ExecutionResult *)> function,
       kill(timerPID, SIGKILL);
       /// Worker Process finished first
       /// Need to check whether it has signaled (crashed) or finished normally
+      auto elapsed = high_resolution_clock::now() - start;
+      ExecutionResult result;
+      result.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
       if (WIFSIGNALED(status)) {
-        auto elapsed = high_resolution_clock::now() - start;
-        ExecutionResult result;
-        result.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
         result.Status = Crashed;
-        *sharedResult = result;
+      } else if (WIFEXITED(status)) {
+        if (WEXITSTATUS(status) == 0) {
+          result.Status = Passed;
+        } else {
+          result.Status = Failed;
+        }
       }
+      *sharedResult = result;
     } else {
       llvm_unreachable("Should not reach!");
     }
