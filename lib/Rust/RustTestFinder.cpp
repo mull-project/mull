@@ -34,7 +34,13 @@ public:
   bool shouldSkipInstruction(llvm::Instruction *instruction) {
     if (CallInst *callInst = dyn_cast<CallInst>(instruction)) {
       if (Function *calledFunction = callInst->getCalledFunction()) {
-        if (calledFunction->getName().find("panic") != std::string::npos) {
+        const std::string &cfName = calledFunction->getName();
+
+        if (cfName.find("panic") != std::string::npos) {
+          return true;
+        }
+
+        if (cfName.find("llvm.memcpy") != std::string::npos) {
           return true;
         }
       }
