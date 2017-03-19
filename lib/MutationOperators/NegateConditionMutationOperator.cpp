@@ -257,10 +257,11 @@ llvm::Value *NegateConditionMutationOperator::applyMutation(Module *M, MutationP
   CmpInst::Predicate negatedPredicate =
     NegateConditionMutationOperator::negatedCmpInstPredicate(cmpInstruction->getPredicate());
 
-  ICmpInst *replacement = new ICmpInst(negatedPredicate,
-                                       cmpInstruction->getOperand(0),
-                                       cmpInstruction->getOperand(1),
-                                       cmpInstruction->getName());
+  CmpInst *replacement = CmpInst::Create(cmpInstruction->getOpcode(),
+                                         negatedPredicate,
+                                         cmpInstruction->getOperand(0),
+                                         cmpInstruction->getOperand(1),
+                                         cmpInstruction->getName());
 
   replacement->insertAfter(cmpInstruction);
   cmpInstruction->replaceAllUsesWith(replacement);
