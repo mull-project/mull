@@ -1,4 +1,5 @@
 #include "Context.h"
+#include "Logger.h"
 
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/Module.h"
@@ -14,9 +15,13 @@ void Context::addModule(std::unique_ptr<MullModule> module) {
   }
 
   std::string identifier = module->getModule()->getModuleIdentifier();
+  Logger::debug() << "adding " << identifier << '\n';
 
-  assert(moduleWithIdentifier(identifier) == nullptr &&
-         "Attempt to add a module which has been added already!");
+  if (moduleWithIdentifier(identifier) != nullptr) {
+    Logger::debug() << "Attempt to add a module which has been added already: "
+                    << identifier << '\n';
+    exit(1);
+  }
 
   moduleRegistry.insert(std::make_pair(identifier,
                                        module.get()));

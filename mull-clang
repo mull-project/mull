@@ -1,0 +1,105 @@
+#!/usr/bin/python
+
+import os
+import re
+import subprocess
+import sys
+
+def get_tmp_dir_path(cwd):
+  tmp_dir_path = "{0}/{1}".format(cwd, 'tmp')
+  if not os.path.exists(tmp_dir_path):
+    os.makedirs(tmp_dir_path)
+  return tmp_dir_path
+
+def get_bitcode_paths_file(cwd):
+  tmp_dir_path = get_tmp_dir_path(cwd)
+  bc_file_path = "{0}/{1}".format(tmp_dir_path, 'bitcode_files.txt')
+  return bc_file_path
+
+def get_output_config_yml_file_path(cwd):
+  tmp_dir_path = get_tmp_dir_path(cwd)
+  output_config_yml_file_path = "{0}/{1}".format(tmp_dir_path, 'config.yml')
+  return output_config_yml_file_path
+
+def run_compiler(args):
+  assert(args)
+  # print(args)
+
+  output_file = args[len(args) - 1]
+  print("\toutput file: {0}".format(output_file))
+  assert(re.match('^.*\.o$', output_file))
+
+  o_flag=args[len(args) - 2]
+  assert(o_flag == '-o')
+
+  input_file=sys.argv[len(sys.argv) - 3]
+  print("\tinput file: {0}".format(input_file))
+
+  output_file_as_bitcode = re.sub('\.o$', '.bc', output_file)
+  print("\tpatched output file: {0}".format(output_file_as_bitcode))
+
+  if os.path.isfile(output_file_as_bitcode):
+    input_modification_date = os.path.getmtime(input_file)
+    output_modification_date = os.path.getmtime(output_file_as_bitcode)
+
+    if False or input_modification_date > output_modification_date:
+      print("Input file is newer than existing output .bc file, have to recompile.")
+    else:
+      print("Input file is not newer than existing output .bc file, no need to recompile.")
+      exit(0)
+
+  cwd = os.getcwd()
+  bc_file_path = get_bitcode_paths_file(cwd)
+
+  bc_list_file = open(bc_file_path, 'a')
+  bc_list_file.write("{0}\n".format(output_file_as_bitcode))
+  bc_list_file.close()
+
+  args.pop()
+  args.pop()
+
+  args.append('-emit-llvm')
+  args.append('-o')
+  args.append(output_file_as_bitcode)
+
+  args[0] = '/usr/local/opt/llvm/bin/clang++'
+
+  # print('final command:')
+  # print(' '.join(args))
+
+  process = subprocess.Popen(args, stdout=subprocess.PIPE)
+  output, error = process.communicate()
+
+def run_linker(args):
+  cwd = os.getcwd()
+
+  output_config_yml_file_path = get_output_config_yml_file_path(cwd)
+  assert(output_config_yml_file_path)
+
+  bc_file_path = get_bitcode_paths_file(cwd)
+  assert(bc_file_path)
+
+  bc_list_file = open(bc_file_path, 'r')
+  files = bc_list_file.readlines()
+  used = set()
+  files = [x for x in files if x not in used and (used.add(x) or True)]
+  bc_list_file.close()
+
+  # print(files)
+
+  output_config_yml_file = open(output_config_yml_file_path, 'w')
+  output_config_yml_file.write("bitcode_files:\n")
+  for file in files:
+    output_config_yml_file.write("- {0}".format(file))
+
+  output_config_yml_file.close()
+
+args = sys.argv
+# print(' '.join(args))
+
+if '-Xlinker' in sys.argv:
+  print('mull-clang[linker]')
+  run_linker(args)
+else:
+  print('mull-clang[compiler]')
+  run_compiler(args)

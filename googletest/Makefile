@@ -12,9 +12,11 @@ install: download compile link copy_headers
 compile: $(GT_BUILD_DIR)/gtest-all.o $(GT_BUILD_DIR)/gtest_main.o
 $(GT_BUILD_DIR)/gtest-all.o:
 	mkdir -p $(GT_BUILD_DIR)
+	clang++ -I$(GT_SOURCE_DIR)/include -I$(GT_SOURCE_DIR) -emit-llvm -c $(GT_SOURCE_DIR)/src/gtest-all.cc -o $(GT_BUILD_DIR)/gtest-all.bc
 	g++ -I$(GT_SOURCE_DIR)/include -I$(GT_SOURCE_DIR) -c $(GT_SOURCE_DIR)/src/gtest-all.cc -o $(GT_BUILD_DIR)/gtest-all.o
 $(GT_BUILD_DIR)/gtest_main.o:
 	mkdir -p $(GT_BUILD_DIR)
+	clang++ -I$(GT_SOURCE_DIR)/include -I$(GT_SOURCE_DIR) -emit-llvm -c $(GT_SOURCE_DIR)/src/gtest_main.cc -o $(GT_BUILD_DIR)/gtest_main.bc
 	g++ -I$(GT_SOURCE_DIR)/include -I$(GT_SOURCE_DIR) -c $(GT_SOURCE_DIR)/src/gtest_main.cc -o $(GT_BUILD_DIR)/gtest_main.o
 
 link: libgtest.a libgtest_main.a

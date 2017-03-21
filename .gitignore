@@ -4,4 +4,5 @@ compile_commands.json
 .mull.rust.cmake
 BuildXcode
 BuildNinja
+tmp/
 

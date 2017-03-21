@@ -160,7 +160,7 @@ std::unique_ptr<Result> Driver::Run() {
           }
           ObjectFiles.push_back(mutant);
 
-          const auto sandboxTimeout = std::max(30LL,
+          const auto sandboxTimeout = std::max(1000LL,
                                                ExecResult.RunningTime * 10);
 
           result = Sandbox->run([&](ExecutionResult *SharedResult) {
@@ -172,8 +172,8 @@ std::unique_ptr<Result> Driver::Run() {
           }, sandboxTimeout);
           ObjectFiles.pop_back();
 
-          assert(result.Status != ExecutionStatus::Invalid &&
-                 "Expect to see valid TestResult");
+//          assert(result.Status != ExecutionStatus::Invalid &&
+//                 "Expect to see valid TestResult");
         }
 
         auto MutResult = make_unique<MutationResult>(result, mutationPoint, testee.get());

@@ -167,11 +167,21 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
 
       auto Store = dyn_cast<StoreInst>(StoreInstUser);
       auto ValueOp = Store->getValueOperand();
-      assert(isa<CallInst>(ValueOp) &&
-             "Store should be using call to MakeAndRegisterTestInfo");
 
-      auto CallInstruction = dyn_cast<CallInst>(ValueOp);
+//      if (isa<CallInst>(ValueOp) == false) {
+//        Logger::debug() << "WTFFFUCK\n";
+//        continue;
+//      }
 
+//      assert((isa<CallInst>(ValueOp)) &&
+//             "Store should be using call to MakeAndRegisterTestInfo");
+
+//      assert((isa<InvokeInst>(ValueOp)) &&
+//             "Store should be using call to MakeAndRegisterTestInfo");
+
+//      auto CallInstruction = dyn_cast<CallInst>(ValueOp);
+      auto CallInstruction = dyn_cast<InvokeInst>(ValueOp);
+      assert(CallInstruction);
       /// Once we have the CallInstruction we can extract Test Suite Name and Test Case Name
       /// To extract them we need climb to the top, i.e.:
       ///
