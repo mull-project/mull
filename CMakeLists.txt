@@ -95,3 +95,7 @@ add_subdirectory(tools)
 add_subdirectory(lib)
 # add_subdirectory(test)
 add_subdirectory(unittests)
+
+include("Mull.extensions.cmake")
+
+mull_clone_target(mull mull_bitcode)
