@@ -6,7 +6,7 @@
 MESSAGE(STATUS "Using Mull.toolchain.OSX.cmake")
 
 # brew install llvm
-set(LLVM_ROOT "/usr/local/opt/llvm" CACHE PATH "Root of LLVM install.")
+set(LLVM_ROOT "/usr/local/opt/llvm@3.9" CACHE PATH "Root of LLVM install.")
 
 # A bit of a sanity check:
 if (NOT EXISTS ${LLVM_ROOT}/include/llvm)
