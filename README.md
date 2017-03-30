@@ -19,7 +19,7 @@ if you notice some dependencies that we missed to specify below.
 
 Current code is being developed against stable LLVM 3.9 branch.
 
-Either use binary distribution via `brew install llvm` or clone LLVM and
+Either use binary distribution via `brew install llvm@3.9` or clone LLVM and
 build it yourself from
 [release_39](https://github.com/llvm-mirror/llvm/tree/release_39) branch.
 
