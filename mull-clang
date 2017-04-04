@@ -35,10 +35,10 @@ def run_compiler(args):
   input_file=sys.argv[len(sys.argv) - 3]
   print("\tinput file: {0}".format(input_file))
 
-  output_file_as_bitcode = re.sub('\.o$', '.bc', output_file)
+  output_file_as_bitcode = re.sub('\.o$', '.o', output_file)
   print("\tpatched output file: {0}".format(output_file_as_bitcode))
 
-  if os.path.isfile(output_file_as_bitcode):
+  if False and os.path.isfile(output_file_as_bitcode):
     input_modification_date = os.path.getmtime(input_file)
     output_modification_date = os.path.getmtime(output_file_as_bitcode)
 
