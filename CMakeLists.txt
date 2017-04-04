@@ -98,4 +98,4 @@ add_subdirectory(unittests)
 
 include("Mull.extensions.cmake")
 
-mull_clone_target(mull mull_bitcode)
+mull_clone_target(mull mull-bitcode)
