@@ -21,6 +21,8 @@ set(LLVM_LIB_PATH "${LLVM_ROOT}/lib")
 
 set(MULL_SOURCE_DIR   ${CMAKE_CURRENT_SOURCE_DIR})
 set(MULL_INCLUDE_DIR  ${MULL_SOURCE_DIR}/include)
+set(MULL_CC  "${MULL_SOURCE_DIR}/mull-clang")
+set(MULL_CXX "${MULL_SOURCE_DIR}/mull-clang++")
 
 include_directories("${LLVM_ROOT}/include")
 include_directories("${MULL_SOURCE_DIR}/googletest")
@@ -99,3 +101,6 @@ add_subdirectory(unittests)
 include("Mull.extensions.cmake")
 
 mull_clone_target(mull mull-bitcode)
+
+set_target_properties(mull-bitcode PROPERTIES XCODE_ATTRIBUTE_CC "${MULL_CC}")
+set_target_properties(mull-bitcode PROPERTIES XCODE_ATTRIBUTE_CXX "${MULL_CXX}")
