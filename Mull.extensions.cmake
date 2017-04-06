@@ -11,6 +11,10 @@ function(mull_clone_target existing_target new_target)
   get_target_property(existing_target_link_libraries ${existing_target} LINK_LIBRARIES)
   get_target_property(existing_target_install_rpath ${existing_target} INSTALL_RPATH)
 
+  if(NOT existing_target_link_libraries)
+    set(existing_target_link_libraries "")
+  endif()
+
   set(new_target_sources "")
   foreach(existing_target_source_file ${existing_target_sources})
       if (existing_target_source_file MATCHES "^\/")

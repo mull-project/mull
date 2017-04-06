@@ -42,12 +42,12 @@ endif()
 
 add_executable(MullUnitTests ${mull_unittests_sources})
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
+include_directories("${MULL_SOURCE_DIR}/googletest/include")
 
 target_link_libraries(MullUnitTests
   mull
 
-  ${MULL_DEPENDENCY_GOOGLETEST}
-  ${MULL_DEPENDENCY_GOOGLETESTMAIN}
+  google-test
   ${MULL_DEPENDENCY_LLVMAsmParser}
 
   # FIXME: Should not be arch specific

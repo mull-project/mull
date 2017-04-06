@@ -26,7 +26,6 @@ set(MULL_CXX "${MULL_SOURCE_DIR}/mull-clang++")
 set(MULL_TMP "${MULL_SOURCE_DIR}/tmp")
 
 include_directories("${LLVM_ROOT}/include")
-include_directories("${MULL_SOURCE_DIR}/googletest")
 
 ## LLVM dependencies:
 # Architecture-independent files.
@@ -58,9 +57,6 @@ find_library(MULL_DEPENDENCY_LIBZ z HINTS ${MULL_TOOLCHAIN_LIBZ_PATH})
 find_library(MULL_DEPENDENCY_NCURSES ncurses)
 
 find_library(MULL_DEPENDENCY_SQLITE sqlite3 HINTS "/usr/local/opt/sqlite")
-
-find_library(MULL_DEPENDENCY_GOOGLETEST gtest HINTS "${MULL_SOURCE_DIR}/googletest")
-find_library(MULL_DEPENDENCY_GOOGLETESTMAIN gtest_main HINTS "${MULL_SOURCE_DIR}/googletest")
 
 # Architecture-specific files.
 find_library(MULL_DEPENDENCY_LLVMX86AsmParser LLVMX86AsmParser HINTS "${LLVM_LIB_PATH}")
@@ -94,6 +90,7 @@ if(MULL_SUPPORT_RUST)
   add_definitions(-DMULL_SUPPORT_RUST=1)
 endif()
 
+add_subdirectory(googletest)
 add_subdirectory(lib)
 add_subdirectory(tools)
 # add_subdirectory(test)
@@ -109,12 +106,14 @@ mull_clone_target(MullUnitTests mull-unittests-bitcode)
 set_target_properties(mull-unittests-bitcode PROPERTIES XCODE_ATTRIBUTE_CC "${MULL_CC}")
 set_target_properties(mull-unittests-bitcode PROPERTIES XCODE_ATTRIBUTE_CXX "${MULL_CXX}")
 
-# set(mull_library "$<TARGET_FILE:mull>")
-# set(mull_driver_executable "$<TARGET_FILE:mull-driver>")
-# set(mull_config_yml "${MULL_TMP}/config.yml")
+mull_clone_target(google-test google-test-bitcode)
+set_target_properties(google-test-bitcode PROPERTIES XCODE_ATTRIBUTE_CC "${MULL_CC}")
+set_target_properties(google-test-bitcode PROPERTIES XCODE_ATTRIBUTE_CXX "${MULL_CXX}")
+
 mull_clone_executable_target(mull-driver mull-autotest-driver)
 
 add_dependencies(mull-autotest-driver
   mull-bitcode
   mull-unittests-bitcode
+  google-test-bitcode
 )
