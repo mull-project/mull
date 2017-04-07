@@ -3,7 +3,7 @@ message(STATUS "Mull> Mull CMake Extensions file is included")
 
 function(mull_clone_target existing_target new_target)
   message(STATUS
-    "Mull.clone_target()> cloning target '${existing_target}' -> '${new_target}'...")
+    "Mull.mull_clone_target()> cloning target '${existing_target}' -> '${new_target}'...")
 
   get_target_property(existing_target_source_dir ${existing_target} SOURCE_DIR)
   get_target_property(existing_target_sources ${existing_target} SOURCES)
