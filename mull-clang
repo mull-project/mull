@@ -38,16 +38,6 @@ def run_compiler(args):
   output_file_as_bitcode = re.sub('\.o$', '.o', output_file)
   print("\tpatched output file: {0}".format(output_file_as_bitcode))
 
-  if False and os.path.isfile(output_file_as_bitcode):
-    input_modification_date = os.path.getmtime(input_file)
-    output_modification_date = os.path.getmtime(output_file_as_bitcode)
-
-    if False or input_modification_date > output_modification_date:
-      print("Input file is newer than existing output .bc file, have to recompile.")
-    else:
-      print("Input file is not newer than existing output .bc file, no need to recompile.")
-      exit(0)
-
   cwd = os.getcwd()
   bc_file_path = get_bitcode_paths_file(cwd)
 
