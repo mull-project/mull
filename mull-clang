@@ -52,7 +52,7 @@ def run_compiler(args):
   args.append('-o')
   args.append(output_file_as_bitcode)
 
-  args[0] = '/usr/local/opt/llvm/bin/clang++'
+  args[0] = '/usr/local/opt/llvm@3.9/bin/clang++'
 
   # print('final command:')
   # print(' '.join(args))
