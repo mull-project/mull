@@ -5,6 +5,7 @@
 #include "MutationOperators/MutationOperator.h"
 #include "MutationOperators/MutationOperatorFilter.h"
 
+#include "llvm/IR/CallSite.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/DebugInfoMetadata.h"
 #include "llvm/IR/InstIterator.h"
@@ -168,30 +169,22 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
       auto Store = dyn_cast<StoreInst>(StoreInstUser);
       auto ValueOp = Store->getValueOperand();
 
-//      if (isa<CallInst>(ValueOp) == false) {
-//        Logger::debug() << "WTFFFUCK\n";
-//        continue;
-//      }
+      // Bitcode compiled from older and newer versions of Google Test can have
+      // both CallInst and InvokeInst instructions.
+      CallSite callSite(ValueOp);
+      assert((callSite.isCall() || callSite.isInvoke()) &&
+             "Store should be using call to MakeAndRegisterTestInfo");
 
-//      assert((isa<CallInst>(ValueOp)) &&
-//             "Store should be using call to MakeAndRegisterTestInfo");
-
-//      assert((isa<InvokeInst>(ValueOp)) &&
-//             "Store should be using call to MakeAndRegisterTestInfo");
-
-//      auto CallInstruction = dyn_cast<CallInst>(ValueOp);
-      auto CallInstruction = dyn_cast<InvokeInst>(ValueOp);
-      assert(CallInstruction);
       /// Once we have the CallInstruction we can extract Test Suite Name and Test Case Name
       /// To extract them we need climb to the top, i.e.:
       ///
       ///   i8* getelementptr inbounds ([6 x i8], [6 x i8]* @.str, i32 0, i32 0)
       ///   i8* getelementptr inbounds ([6 x i8], [6 x i8]* @.str1, i32 0, i32 0)
 
-      auto TestSuiteNameConstRef = dyn_cast<ConstantExpr>(CallInstruction->getArgOperand(0));
+      auto TestSuiteNameConstRef = dyn_cast<ConstantExpr>(callSite.getArgOperand(0));
       assert(TestSuiteNameConstRef);
 
-      auto TestCaseNameConstRef = dyn_cast<ConstantExpr>(CallInstruction->getArgOperand(1));
+      auto TestCaseNameConstRef = dyn_cast<ConstantExpr>(callSite.getArgOperand(1));
       assert(TestCaseNameConstRef);
 
       ///   @.str = private unnamed_addr constant [6 x i8] c"Hello\00", align 1
