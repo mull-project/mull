@@ -23,7 +23,6 @@ set(MULL_SOURCE_DIR   ${CMAKE_CURRENT_SOURCE_DIR})
 set(MULL_INCLUDE_DIR  ${MULL_SOURCE_DIR}/include)
 set(MULL_CC  "${MULL_SOURCE_DIR}/mull-clang")
 set(MULL_CXX "${MULL_SOURCE_DIR}/mull-clang++")
-set(MULL_TMP "${MULL_SOURCE_DIR}/tmp")
 
 include_directories("${LLVM_ROOT}/include")
 

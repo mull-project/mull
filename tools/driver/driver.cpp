@@ -21,20 +21,11 @@
 #endif
 
 #include "llvm/IR/LLVMContext.h"
-#include <llvm/Support/DynamicLibrary.h>
-#include "llvm/ExecutionEngine/ExecutionEngine.h"
-#include "llvm/ExecutionEngine/OrcMCJITReplacement.h"
-#include "llvm/ExecutionEngine/GenericValue.h"
-#include "llvm/ExecutionEngine/RTDyldMemoryManager.h"
-#include "llvm/ExecutionEngine/SectionMemoryManager.h"
-#include "llvm/Support/DynamicLibrary.h"
-#include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/TargetSelect.h"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/YAMLParser.h"
-#include "llvm/ExecutionEngine/OrcMCJITReplacement.h"
 
 #include <chrono>
 #include <string>
@@ -95,14 +86,9 @@ int main(int argc, char *argv[]) {
 
   config.dump();
 
-  sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
-  LLVMLinkInOrcMCJITReplacement();
-
   InitializeNativeTarget();
   InitializeNativeTargetAsmPrinter();
   InitializeNativeTargetAsmParser();
-  sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
-  LLVMLinkInOrcMCJITReplacement();
 
   LLVMContext Ctx;
   ModuleLoader Loader(Ctx);

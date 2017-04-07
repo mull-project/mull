@@ -15,10 +15,10 @@ void Context::addModule(std::unique_ptr<MullModule> module) {
   }
 
   std::string identifier = module->getModule()->getModuleIdentifier();
-  Logger::debug() << "adding " << identifier << '\n';
+  //Logger::debug() << "Mull::Context::addModule()> adding " << identifier << '\n';
 
   if (moduleWithIdentifier(identifier) != nullptr) {
-    Logger::debug() << "Attempt to add a module which has been added already: "
+    Logger::debug() << "Mull::Context::addModule()> Attempt to add a module which has been added already: "
                     << identifier << '\n';
     exit(1);
   }

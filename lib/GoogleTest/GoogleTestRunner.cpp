@@ -110,8 +110,7 @@ public:
 };
 
 GoogleTestRunner::GoogleTestRunner(llvm::TargetMachine &machine)
-  : TestRunner(machine) {
-}
+  : TestRunner(machine) {}
 
 std::string GoogleTestRunner::MangleName(const llvm::StringRef &Name) {
   std::string MangledName;

@@ -20,6 +20,8 @@ add_dependencies(mull-autotest-driver
   google-test-bitcode
 )
 
+# We need to force_load LLVMAsmParser so that its API is available for execution
+# by JIT'ed Mull's unit tests.
 get_target_property(mull_autotest_driver_link_flags mull-autotest-driver LINK_FLAGS)
 if(NOT mull_autotest_driver_link_flags)
   set(mull_autotest_driver_link_flags "")
