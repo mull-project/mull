@@ -23,16 +23,11 @@ static std::string fixturePath(const char *fixtureName) {
   char cFixtureFullPath[256];
 
   getcwd(cFixtureFullPath, 255);
+
   strcat(cFixtureFullPath, "/fixtures/");
   strcat(cFixtureFullPath, fixtureName);
 
   std::string fixtureFullPath(cFixtureFullPath);
-
-  return fixtureFullPath;
-}
-
-static std::string createFixture(const char *fixtureName) {
-  std::string fixtureFullPath = fixturePath(fixtureName);
 
   if (fileExists(fixtureFullPath) == false) {
     mull::Logger::debug() << "Could not find a fixture at path: "
@@ -40,6 +35,15 @@ static std::string createFixture(const char *fixtureName) {
 
     exit(1);
   }
+
+  mull::Logger::debug() << "TestModuleFactory> found fixture at path: "
+                        << fixtureFullPath << '\n';
+
+  return fixtureFullPath;
+}
+
+static std::string createFixture(const char *fixtureName) {
+  std::string fixtureFullPath = fixturePath(fixtureName);
 
   std::ifstream file(fixtureFullPath);
   std::string str;

@@ -28,3 +28,10 @@ set_target_properties(mull-autotest-driver
   PROPERTIES
   LINK_FLAGS
   "${mull_autotest_driver_link_flags} -force_load ${MULL_DEPENDENCY_LLVMAsmParser}")
+
+# This copies (symlinks) fixtures/*.bc files that are used by unit tests.
+add_custom_command(TARGET mull-autotest-driver
+  POST_BUILD
+  COMMAND ${CMAKE_COMMAND} -E create_symlink
+    ${MULL_SOURCE_DIR}/unittests/fixtures
+    $<TARGET_FILE_DIR:mull-autotest-driver>/fixtures)
