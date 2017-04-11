@@ -87,9 +87,12 @@ def run_linker(args):
 args = sys.argv
 # print(' '.join(args))
 
-if '-Xlinker' in sys.argv:
+# -Xlinker is when clang is used as a linker.
+# -static when libtool is used as a linker for a static library target.
+if ('-Xlinker' in sys.argv) or ('-static' in sys.argv):
   print('mull-clang[linker]')
   run_linker(args)
 else:
   print('mull-clang[compiler]')
   run_compiler(args)
+
