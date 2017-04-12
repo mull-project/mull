@@ -316,17 +316,7 @@ GoogleTestFinder::findTestees(Test *Test,
     Function *traverseeFunction = traversee->getTesteeFunction();
     const int mutationDistance = traversee->getDistance();
 
-    /// If the function we are processing is in the same translation unit
-    /// as the test itself, then we are not looking for mutation points
-    /// in this function assuming it to be a helper function.
-    /// The only exception is the test function itself that is especially
-    /// important for path calculations that are done later in SQLiteReporter.
-    if (traverseeFunction->getParent() != testBodyModule ||
-        traverseeFunction == testFunction) {
-      testees.push_back(std::move(traversee));
-    } else {
-      continue;
-    }
+    testees.push_back(std::move(traversee));
 
     /// The function reached the max allowed distance
     /// Hence we don't go deeper
