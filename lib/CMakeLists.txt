@@ -21,6 +21,10 @@ set(mull_sources
   TestRunner.cpp
   Testee.cpp
 
+  XCTest/XCTest_Test.cpp
+  XCTest/XCTestFinder.cpp
+  XCTest/XCTestRunner.cpp
+
   SimpleTest/SimpleTest_Test.cpp
   SimpleTest/SimpleTestFinder.cpp
   SimpleTest/SimpleTestRunner.cpp
@@ -39,43 +43,17 @@ set(mull_header_dirs
   ${MULL_INCLUDE_DIR}/GoogleTest
   ${MULL_INCLUDE_DIR}/SimpleTest
   ${MULL_INCLUDE_DIR}/Toolchain
+  ${MULL_INCLUDE_DIR}/XCTest
 )
 
 set(mull_additional_libraries
 
-  # Architecture-independent:
-  ${MULL_DEPENDENCY_LLVMAnalysis}
-  ${MULL_DEPENDENCY_LLVMAsmParser}
-  ${MULL_DEPENDENCY_LLVMAsmPrinter}
-  ${MULL_DEPENDENCY_LLVMBitReader}
-  ${MULL_DEPENDENCY_LLVMCodeGen}
-  ${MULL_DEPENDENCY_LLVMCore}
-  ${MULL_DEPENDENCY_LLVMDebugInfoCodeView}
-  ${MULL_DEPENDENCY_LLVMExecutionEngine}
-  ${MULL_DEPENDENCY_LLVMMC}
-  ${MULL_DEPENDENCY_LLVMMCDisassembler}
-  ${MULL_DEPENDENCY_LLVMMCParser}
-  ${MULL_DEPENDENCY_LLVMObject}
-  ${MULL_DEPENDENCY_LLVMOrcJIT}
-  ${MULL_DEPENDENCY_LLVMRuntimeDyld}
-  ${MULL_DEPENDENCY_LLVMScalarOpts}
-  ${MULL_DEPENDENCY_LLVMSelectionDAG}
-  ${MULL_DEPENDENCY_LLVMSupport}
-  ${MULL_DEPENDENCY_LLVMTarget}
-  ${MULL_DEPENDENCY_LLVMTransformUtils}
-
-  ${MULL_DEPENDENCY_LIBZ}
   ${MULL_DEPENDENCY_NCURSES}
 
   ${MULL_DEPENDENCY_SQLITE}
 
-  # Architecture-specific:
-  ${MULL_DEPENDENCY_LLVMX86AsmParser}
-  ${MULL_DEPENDENCY_LLVMX86AsmPrinter}
-  ${MULL_DEPENDENCY_LLVMX86CodeGen}
-  ${MULL_DEPENDENCY_LLVMX86Desc}
-  ${MULL_DEPENDENCY_LLVMX86Info}
-  ${MULL_DEPENDENCY_LLVMX86Utils}
+  -lLLVM-3.9
+  -lz
 )
 
 set(mull_link_flags "") # to be filled later

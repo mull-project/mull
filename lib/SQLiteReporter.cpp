@@ -135,7 +135,7 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
       std::string columnOrNil = "0";
 
       if (instruction->getMetadata(0)) {
-        fileNameOrNil = instruction->getDebugLoc()->getFilename().str();
+        fileNameOrNil = instruction->getDebugLoc()->getDirectory().str() + "/" + instruction->getDebugLoc()->getFilename().str();
         lineOrNil = std::to_string(instruction->getDebugLoc()->getLine());
         columnOrNil = std::to_string(instruction->getDebugLoc()->getColumn());
       }
@@ -174,7 +174,7 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
         std::string columnOrNil = "0";
 
         if (instruction->getMetadata(0)) {
-          fileNameOrNil = instruction->getDebugLoc()->getFilename().str();
+          fileNameOrNil = instruction->getDebugLoc()->getDirectory().str() + "/" +  instruction->getDebugLoc()->getFilename().str();
           lineOrNil = std::to_string(instruction->getDebugLoc()->getLine());
           columnOrNil = std::to_string(instruction->getDebugLoc()->getColumn());
         }

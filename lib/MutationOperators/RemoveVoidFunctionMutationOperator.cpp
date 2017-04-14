@@ -71,6 +71,30 @@ bool RemoveVoidFunctionMutationOperator::canBeApplied(Value &V) {
         return false;
       }
 
+      if (calledFunction->getName().startswith("llvm.lifetime.start")) {
+        return false;
+      }
+
+      if (calledFunction->getName().startswith("llvm.trap")) {
+        return false;
+      }
+
+      if (calledFunction->getName().startswith("rt_swift_")) {
+        return false;
+      }
+
+      if (calledFunction->getName().startswith("llvm.lifetime.end")) {
+        return false;
+      }
+
+      if (calledFunction->getName().startswith("swift_willThrow")) {
+        return false;
+      }
+
+      if (calledFunction->getName().startswith("llvm.dbg.value")) {
+        return false;
+      }
+
       /// TODO: This might also filter out important code. Review this later.
       if (calledFunction->getName().endswith("D1Ev") ||
           calledFunction->getName().endswith("D2Ev") ||
