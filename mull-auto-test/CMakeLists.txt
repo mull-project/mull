@@ -12,7 +12,7 @@ mull_clone_target(google-test google-test-bitcode)
 set_target_properties(google-test-bitcode PROPERTIES XCODE_ATTRIBUTE_CC "${MULL_CC}")
 set_target_properties(google-test-bitcode PROPERTIES XCODE_ATTRIBUTE_CXX "${MULL_CXX}")
 
-mull_clone_executable_target(mull-driver mull-autotest-driver)
+mull_clone_target(mull-driver mull-autotest-driver)
 
 add_dependencies(mull-autotest-driver
   mull-bitcode
