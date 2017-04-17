@@ -121,10 +121,18 @@ TEST(SQLiteReporter, integrationTest_Config) {
   std::string projectName("Integration Test");
   std::string testFramework = "SimpleTest";
 
-  std::vector<std::string> bitcodePaths({
-    "tester.bc",
-    "testee.bc"
-  });
+  const std::string BitcodeFileList = "/tmp/bitcode_file_list.txt";
+
+  std::ofstream fs(BitcodeFileList);
+
+  if (!fs) {
+    std::cerr << "Cannot open the output file." << std::endl;
+
+    ASSERT_FALSE(true);
+  }
+
+  fs << "tester.bc" << std::endl;
+  fs << "testee.bc" << std::endl;
 
   std::vector<std::string> operators({
     "add_mutation",
@@ -148,9 +156,9 @@ TEST(SQLiteReporter, integrationTest_Config) {
   int timeout = 42;
   int distance = 10;
   std::string cacheDirectory = "/a/cache";
-  Config config(projectName,
+  Config config(BitcodeFileList,
+                projectName,
                 testFramework,
-                bitcodePaths,
                 operators,
                 dylibs,
                 tests,

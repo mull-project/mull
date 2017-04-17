@@ -13,6 +13,7 @@
 
 #include "Toolchain/Toolchain.h"
 
+#include <functional>
 #include "llvm/ADT/SmallString.h"
 #include "llvm/ADT/Twine.h"
 #include "llvm/IR/LLVMContext.h"
@@ -28,58 +29,7 @@
 using namespace mull;
 using namespace llvm;
 
-static LLVMContext GlobalCtx;
-
-static TestModuleFactory TestModuleFactory;
-
-class FakeModuleLoader : public ModuleLoader {
-public:
-  FakeModuleLoader() : ModuleLoader(GlobalCtx) {}
-
-  std::unique_ptr<MullModule> loadModuleAtPath(const std::string &path) override {
-    if (path == "foo") {
-      auto module = TestModuleFactory.createTesterModule();
-      return make_unique<MullModule>(std::move(module), "1234");
-    }
-
-    else if (path == "bar") {
-      auto module = TestModuleFactory.createTesteeModule();
-      return make_unique<MullModule>(std::move(module), "3456");
-    }
-
-    else if (path == "simple_test/negate_condition/tester") {
-      auto module = TestModuleFactory.create_SimpleTest_NegateCondition_Tester_Module();
-      return make_unique<MullModule>(std::move(module), "5678");
-    }
-
-    else if (path == "simple_test/negate_condition/testee") {
-      auto module = TestModuleFactory.create_SimpleTest_NegateCondition_Testee_Module();
-      return make_unique<MullModule>(std::move(module), "7890");
-    }
-
-    else if (path == "simple_test/remove_void_function/tester") {
-      auto module = TestModuleFactory.create_SimpleTest_RemoveVoidFunction_Tester_Module();
-      return make_unique<MullModule>(std::move(module), "abcd");
-    }
-
-    else if (path == "simple_test/remove_void_function/testee") {
-      auto module = TestModuleFactory.create_SimpleTest_RemoveVoidFunction_Testee_Module();
-      return make_unique<MullModule>(std::move(module), "efgh");
-    }
-
-    else if (path == "simple_test/testee_path_calculation/tester") {
-      auto module = TestModuleFactory.create_SimpleTest_testeePathCalculation_tester();
-      return make_unique<MullModule>(std::move(module), "simple_test/testee_path_calculation/tester");
-    }
-
-    else if (path == "simple_test/testee_path_calculation/testee") {
-      auto module = TestModuleFactory.create_SimpleTest_testeePathCalculation_testee();
-      return make_unique<MullModule>(std::move(module), "simple_test/testee_path_calculation/testee");
-    }
-
-    return make_unique<MullModule>(nullptr, "");
-  }
-};
+static TestModuleFactory SharedTestModuleFactory;
 
 TEST(Driver, SimpleTest_AddMutationOperator) {
   /// Create Config with fake BitcodePaths
@@ -92,16 +42,15 @@ TEST(Driver, SimpleTest_AddMutationOperator) {
   std::string projectName = "some_project";
   std::string testFramework = "SimpleTest";
 
-  std::vector<std::string> ModulePaths({ "foo", "bar" });
   bool doFork = false;
   bool dryRun = false;
   bool useCache = false;
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
 
-  Config config(projectName,
+  Config config("",
+                projectName,
                 testFramework,
-                ModulePaths,
                 {},
                 {},
                 {},
@@ -112,7 +61,20 @@ TEST(Driver, SimpleTest_AddMutationOperator) {
                 distance,
                 cacheDirectory);
 
-  FakeModuleLoader loader;
+  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
+    std::vector<std::unique_ptr<MullModule>> modules;
+
+    auto module1 = SharedTestModuleFactory.createTesterModule();
+    modules.push_back(make_unique<MullModule>(std::move(module1), "1234"));
+
+    auto module2 = SharedTestModuleFactory.createTesteeModule();
+    modules.push_back(make_unique<MullModule>(std::move(module2), "5678"));
+
+    return modules;
+  };
+
+  LLVMContext context;
+  FakeModuleLoader loader(context, modules);
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
@@ -156,20 +118,15 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
   std::string projectName = "some_project";
   std::string testFramework = "SimpleTest";
 
-  std::vector<std::string> ModulePaths({
-    "simple_test/negate_condition/tester",
-    "simple_test/negate_condition/testee"
-  });
-
   bool doFork = false;
   bool dryRun = false;
   bool useCache = false;
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
 
-  Config config(projectName,
+  Config config("",
+                projectName,
                 testFramework,
-                ModulePaths,
                 {},
                 {},
                 {},
@@ -185,7 +142,21 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
 
   SimpleTestFinder testFinder(std::move(mutationOperators));
 
-  FakeModuleLoader loader;
+  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
+    std::vector<std::unique_ptr<MullModule>> modules;
+
+    auto module1 = SharedTestModuleFactory.create_SimpleTest_NegateCondition_Tester_Module();
+    modules.push_back(make_unique<MullModule>(std::move(module1), "1234"));
+
+    auto module2 = SharedTestModuleFactory.create_SimpleTest_NegateCondition_Testee_Module();
+    modules.push_back(make_unique<MullModule>(std::move(module2), "5678"));
+
+    return modules;
+  };
+
+  LLVMContext context;
+  FakeModuleLoader loader(context, modules);
+
   Toolchain toolchain(config);
   SimpleTestRunner runner(toolchain.targetMachine());
 
@@ -215,20 +186,15 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
   std::string projectName = "some_project";
   std::string testFramework = "SimpleTest";
 
-  std::vector<std::string> ModulePaths({
-    "simple_test/remove_void_function/tester",
-    "simple_test/remove_void_function/testee"
-  });
-
   bool doFork = false;
   bool dryRun = false;
   bool useCache = false;
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
 
-  Config config(projectName,
+  Config config("",
+                projectName,
                 testFramework,
-                ModulePaths,
                 {},
                 {},
                 {},
@@ -244,7 +210,21 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
 
   SimpleTestFinder testFinder(std::move(mutationOperators));
 
-  FakeModuleLoader loader;
+  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
+    std::vector<std::unique_ptr<MullModule>> modules;
+
+    auto module1 = SharedTestModuleFactory.create_SimpleTest_RemoveVoidFunction_Tester_Module();
+    modules.push_back(make_unique<MullModule>(std::move(module1), "1234"));
+
+    auto module2 = SharedTestModuleFactory.create_SimpleTest_RemoveVoidFunction_Testee_Module();
+    modules.push_back(make_unique<MullModule>(std::move(module2), "5678"));
+
+    return modules;
+  };
+
+  LLVMContext context;
+  FakeModuleLoader loader(context, modules);
+
   Toolchain toolchain(config);
   SimpleTestRunner runner(toolchain.targetMachine());
 
@@ -274,20 +254,15 @@ TEST(Driver, SimpleTest_TesteePathCalculation) {
   std::string projectName = "some_project";
   std::string testFramework = "SimpleTest";
 
-  std::vector<std::string> ModulePaths({
-    "simple_test/testee_path_calculation/tester",
-    "simple_test/testee_path_calculation/testee"
-  });
-
   bool doFork = false;
   bool dryRun = false;
   bool useCache = false;
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
 
-  Config config(projectName,
+  Config config("",
+                projectName,
                 testFramework,
-                ModulePaths,
                 {},
                 {},
                 {},
@@ -303,7 +278,21 @@ TEST(Driver, SimpleTest_TesteePathCalculation) {
 
   SimpleTestFinder testFinder(std::move(mutationOperators));
 
-  FakeModuleLoader loader;
+  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
+    std::vector<std::unique_ptr<MullModule>> modules;
+
+    auto module1 = SharedTestModuleFactory.create_SimpleTest_testeePathCalculation_tester();
+    modules.push_back(make_unique<MullModule>(std::move(module1), "1234"));
+
+    auto module2 = SharedTestModuleFactory.create_SimpleTest_testeePathCalculation_testee();
+    modules.push_back(make_unique<MullModule>(std::move(module2), "5678"));
+
+    return modules;
+  };
+
+  LLVMContext context;
+  FakeModuleLoader loader(context, modules);
+
   Toolchain toolchain(config);
   SimpleTestRunner runner(toolchain.targetMachine());
 

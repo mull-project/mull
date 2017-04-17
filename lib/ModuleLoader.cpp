@@ -13,6 +13,9 @@
 #include "llvm/Support/MemoryBuffer.h"
 #include "llvm/Support/SourceMgr.h"
 
+#include <fstream>
+#include <iostream>
+
 using namespace llvm;
 using namespace mull;
 
@@ -43,4 +46,21 @@ std::unique_ptr<MullModule> ModuleLoader::loadModuleAtPath(const std::string &pa
 
   auto module = make_unique<MullModule>(std::move(llvmModule.get()), hash);
   return module;
+}
+
+std::vector<std::unique_ptr<MullModule>>
+ModuleLoader::loadModulesFromBitcodeFileList(const std::vector<std::string> &bitcodeFileList) {
+  std::vector<std::unique_ptr<MullModule>> modules;
+
+  for (const std::string &path : bitcodeFileList) {
+    std::unique_ptr<MullModule> module = loadModuleAtPath(path);
+
+    if (module == nullptr) {
+      continue;
+    }
+
+    modules.push_back(std::move(module));
+  }
+
+  return modules;
 }

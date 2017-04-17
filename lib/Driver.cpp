@@ -57,13 +57,11 @@ std::unique_ptr<Result> Driver::Run() {
   /// Assumption: all modules will be used during the execution
   /// Therefore we load them into memory and compile immediately
   /// Later on modules used only for generating of mutants
-  for (auto ModulePath : Cfg.getBitcodePaths()) {
-    unique_ptr<MullModule> ownedModule = Loader.loadModuleAtPath(ModulePath);
+  std::vector<std::string> bitcodePaths = Cfg.getBitcodePaths();
+  std::vector<unique_ptr<MullModule>> modules =
+    Loader.loadModulesFromBitcodeFileList(bitcodePaths);
 
-    if (ownedModule == nullptr) {
-      continue;
-    }
-
+  for (auto &ownedModule : modules) {
     MullModule &module = *ownedModule.get();
     assert(ownedModule && "Can't load module");
 
@@ -273,11 +271,14 @@ std::vector<llvm::object::ObjectFile *> Driver::AllObjectFiles() {
 #pragma mark - Debug
 
 void Driver::debug_PrintTestNames() {
-  for (auto ModulePath : Cfg.getBitcodePaths()) {
-    auto OwnedModule = Loader.loadModuleAtPath(ModulePath);
+  std::vector<std::string> bitcodePaths = Cfg.getBitcodePaths();
+  std::vector<unique_ptr<MullModule>> modules =
+    Loader.loadModulesFromBitcodeFileList(bitcodePaths);
+
+//  for (auto &ownedModule : modules) {
 //    assert(OwnedModule && "Can't load module");
 //    Ctx.addModule(std::move(OwnedModule));
-  }
+//  }
 
   for (auto &Test : Finder.findTests(Ctx)) {
     Logger::info() << Test->getTestName() << "\n";
@@ -285,11 +286,15 @@ void Driver::debug_PrintTestNames() {
 }
 
 void Driver::debug_PrintTesteeNames() {
-  for (auto ModulePath : Cfg.getBitcodePaths()) {
-    auto OwnedModule = Loader.loadModuleAtPath(ModulePath);
+  std::vector<std::string> bitcodePaths = Cfg.getBitcodePaths();
+
+  std::vector<unique_ptr<MullModule>> modules =
+  Loader.loadModulesFromBitcodeFileList(bitcodePaths);
+
+//  for (auto &ownedModule : modules) {
 //    assert(OwnedModule && "Can't load module");
 //    Ctx.addModule(std::move(OwnedModule));
-  }
+//  }
 
   for (auto &Test : Finder.findTests(Ctx)) {
     Logger::info() << Test->getTestName() << "\n";
@@ -300,11 +305,15 @@ void Driver::debug_PrintTesteeNames() {
 }
 
 void Driver::debug_PrintMutationPoints() {
-  for (auto ModulePath : Cfg.getBitcodePaths()) {
-    auto OwnedModule = Loader.loadModuleAtPath(ModulePath);
+  std::vector<std::string> bitcodePaths = Cfg.getBitcodePaths();
+
+  std::vector<unique_ptr<MullModule>> modules =
+  Loader.loadModulesFromBitcodeFileList(bitcodePaths);
+
+  //  for (auto &ownedModule : modules) {
 //    assert(OwnedModule && "Can't load module");
 //    Ctx.addModule(std::move(OwnedModule));
-  }
+//  }
 
   for (auto &Test : Finder.findTests(Ctx)) {
     Logger::info() << Test->getTestName() << "\n";
