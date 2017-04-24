@@ -49,7 +49,7 @@ build_ninja: ## Build Ninja project with CMake.
 	cd $(BUILD_DIR_NINJA) && cmake ../ -G Ninja \
 	  $(CMAKE_COMMAND_LINE_DEBUG_FLAGS) \
 	  -DCMAKE_TOOLCHAIN_FILE=$(MULL_CMAKE_TOOLCHAIN) \
-	  -DMULL_SUPPORT_RUST=1
+	  -DMULL_SUPPORT_RUST=0
 
 ## Xcode-specific tools.
 ## TODO: maybe extract to Makefile.Xcode?
