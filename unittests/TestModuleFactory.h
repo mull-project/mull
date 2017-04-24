@@ -1,8 +1,13 @@
+
+#include "ModuleLoader.h"
+#include "MullModule.h"
+
 #include "llvm/IR/Module.h"
 
 #include <string>
 
 using namespace llvm;
+using namespace mull;
 
 class TestModuleFactory {
 
@@ -40,4 +45,23 @@ public:
 #pragma mark - Rust
   std::unique_ptr<Module> rustModule();
 
+};
+
+class FakeModuleLoader : public mull::ModuleLoader {
+  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules;
+
+public:
+  FakeModuleLoader(LLVMContext &context, std::function<std::vector<std::unique_ptr<MullModule>> ()> modules) : ModuleLoader(context), modules(modules) {}
+
+  std::vector<std::unique_ptr<MullModule>>
+  loadModulesFromBitcodeFileList(const std::vector<std::string> &paths) override {
+    std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = this->modules;
+
+    if (modules) {
+      return modules();
+    }
+
+    return {};
+  }
+  
 };

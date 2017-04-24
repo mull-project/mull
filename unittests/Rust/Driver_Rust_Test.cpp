@@ -28,23 +28,7 @@
 using namespace mull;
 using namespace llvm;
 
-static LLVMContext GlobalCtx;
-
-static TestModuleFactory TestModuleFactory;
-
-class FakeRustModuleLoader : public ModuleLoader {
-public:
-  FakeRustModuleLoader() : ModuleLoader(GlobalCtx) {}
-
-  std::unique_ptr<MullModule> loadModuleAtPath(const std::string &path) override {
-    if (path == "rust") {
-      auto module = TestModuleFactory.rustModule();
-      return make_unique<MullModule>(std::move(module), "rust");
-    }
-
-    return make_unique<MullModule>(nullptr, "");
-  }
-};
+static TestModuleFactory SharedTestModuleFactory;
 
 TEST(Driver_Rust, AddMutationOperator) {
 
@@ -64,9 +48,9 @@ TEST(Driver_Rust, AddMutationOperator) {
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
 
-  Config config(projectName,
+  Config config("",
+                projectName,
                 testFramework,
-                ModulePaths,
                 {},
                 {},
                 {},
@@ -77,7 +61,17 @@ TEST(Driver_Rust, AddMutationOperator) {
                 distance,
                 cacheDirectory);
 
-  FakeRustModuleLoader loader;
+  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
+    std::vector<std::unique_ptr<MullModule>> modules;
+
+    auto module1 = SharedTestModuleFactory.rustModule();
+    modules.push_back(make_unique<MullModule>(std::move(module1), "1234"));
+
+    return modules;
+  };
+
+  LLVMContext context;
+  FakeModuleLoader loader(context, modules);
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());

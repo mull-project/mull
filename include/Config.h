@@ -7,6 +7,8 @@
 
 #include "llvm/Support/YAMLTraits.h"
 
+#include <fstream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -26,10 +28,11 @@ struct MappingTraits;
 namespace mull {
 
 class Config {
+  std::string bitcodeFileList;
+
   std::string projectName;
   std::string testFramework;
 
-  std::vector<std::string> bitcodePaths;
   std::vector<std::string> mutationOperators;
   std::vector<std::string> dynamicLibraries;
   std::vector<std::string> tests;
@@ -46,9 +49,9 @@ public:
   // Constructor initializes defaults.
   // TODO: Refactoring into constants.
   Config() :
+    bitcodeFileList(""),
     projectName(""),
     testFramework("GoogleTest"),
-    bitcodePaths(),
     mutationOperators(
       // Yaml::Traits stops reading mutation_operators from config.yaml
       // if these 3 default operators are set here (BUG?).
@@ -70,9 +73,9 @@ public:
   {
   }
 
-  Config(const std::string &project,
+  Config(const std::string &bitcodeFileList,
+         const std::string &project,
          const std::string &testFramework,
-         const std::vector<std::string> &paths,
          const std::vector<std::string> mutationOperators,
          const std::vector<std::string> libraries,
          const std::vector<std::string> tests,
@@ -82,9 +85,9 @@ public:
          int timeout,
          int distance,
          const std::string &cacheDir) :
+    bitcodeFileList(bitcodeFileList),
     projectName(project),
     testFramework(testFramework),
-    bitcodePaths(paths),
     mutationOperators(mutationOperators),
     dynamicLibraries(libraries),
     tests(tests),
@@ -97,16 +100,32 @@ public:
   {
   }
 
+  const std::string &getBitcodeFileList() const {
+    return bitcodeFileList;
+  }
+
+  std::vector<std::string> getBitcodePaths() const {
+    std::vector<std::string> bitcodePaths;
+
+    std::ifstream ifs(bitcodeFileList);
+
+    for (std::string path; getline(ifs, path); ) {
+      if (path.at(0) == '#') {
+        continue;
+      }
+
+      bitcodePaths.push_back(path);
+    }
+    
+    return bitcodePaths;
+  }
+
   const std::string &getProjectName() const {
     return projectName;
   }
 
   const std::string &getTestFramework() const {
     return testFramework;
-  }
-
-  const std::vector<std::string> &getBitcodePaths() const {
-      return bitcodePaths;
   }
   
   const std::vector<std::string> &getMutationOperators() const {
@@ -147,6 +166,7 @@ public:
 
   void dump() const {
     Logger::debug() << "Config>\n"
+    << "\t" << "bitcode_file_list: " << bitcodeFileList << '\n'
     << "\t" << "project_name: " << getProjectName() << '\n'
     << "\t" << "test_framework: " << getTestFramework() << '\n'
     << "\t" << "distance: " << getMaxDistance() << '\n'
@@ -169,5 +189,30 @@ public:
       }
     }
   }
+
+  std::vector<std::string> validate() {
+    std::vector<std::string> errors;
+
+    if (bitcodeFileList.size() == 0) {
+      std::string error = "bitcode_file_list parameter is not specified.";
+      errors.push_back(error);
+      return errors;
+    }
+
+    std::ifstream f(bitcodeFileList.c_str());
+
+    if (f.good() == false) {
+      std::stringstream error;
+
+      error << "bitcode_file_list parameter points to a non-existing file: "
+            << bitcodeFileList;
+
+      errors.push_back(error.str());
+      return errors;
+    }
+
+    return errors;
+  }
+
 };
 }

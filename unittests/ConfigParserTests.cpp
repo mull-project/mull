@@ -1,15 +1,46 @@
 #include "ConfigParserTestFixture.h"
 
-TEST_F(ConfigParserTestFixture, loadConfig_BitcodeFiles) {
-  const char *configYAML = "bitcode_files:\n"
-                           "  - foo.bc\n"
-                           "  - bar.bc\n";
+TEST_F(ConfigParserTestFixture, loadConfig_bitcodeFileList_unspecified) {
+  const char *configYAML = "";
+
   configWithYamlContent(configYAML);
-  
+
+  auto errors = config.validate();
+  ASSERT_EQ(errors.size(), 1U);
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_bitcodeFileList_nonExistingFile) {
+  const char *configYAML = "bitcode_file_list: /tmp/non-existing-file-12345.txt\n";
+  configWithYamlContent(configYAML);
+
+  auto errors = config.validate();
+  ASSERT_EQ(errors.size(), 1U);
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_bitcodeFileList) {
+  static std::string BitcodeFileList = "/tmp/bitcode_file_list.txt";
+
+  std::ofstream fs(BitcodeFileList);
+
+  if (!fs) {
+    std::cerr << "Cannot open the output file." << std::endl;
+
+    ASSERT_FALSE(true);
+  }
+
+  fs << "foo.bc" << std::endl;
+  fs << "bar.bc" << std::endl;
+  fs << "# baz.bc"  << std::endl;
+
+  const char *configYAML = "bitcode_file_list: /tmp/bitcode_file_list.txt\n";
+  configWithYamlContent(configYAML);
+
   ASSERT_EQ(2U, config.getBitcodePaths().size());
   ASSERT_EQ("foo.bc", *(config.getBitcodePaths().begin()));
   ASSERT_EQ("bar.bc", *(config.getBitcodePaths().end() - 1));
-  ASSERT_EQ("bar.bc", *(config.getBitcodePaths().end() - 1));
+
+  auto errors = config.validate();
+  ASSERT_EQ(errors.size(), 0U);
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_Fork_True) {

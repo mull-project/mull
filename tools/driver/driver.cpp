@@ -84,6 +84,16 @@ int main(int argc, char *argv[]) {
   ConfigParser Parser;
   auto config = Parser.loadConfig(ConfigFile.c_str());
 
+  std::vector <std::string> configErrors = config.validate();
+  if (configErrors.size() > 0) {
+    Logger::error() << "Provided config file is not valid:" << "\n";
+    for (const std::string &configError : configErrors) {
+      Logger::error() << "\t" << configError << "\n";
+    }
+
+    exit(1);
+  }
+
   config.dump();
 
   InitializeNativeTarget();

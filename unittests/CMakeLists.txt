@@ -5,6 +5,8 @@ set(mull_unittests_sources
   DriverTests.cpp
   ForkProcessSandboxTest.cpp
   MutationPointTests.cpp
+  ModuleLoaderTest.cpp
+
   TestRunnersTests.cpp
   UniqueIdentifierTests.cpp
 
