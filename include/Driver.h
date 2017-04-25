@@ -53,10 +53,6 @@ public:
   }
 
   std::unique_ptr<Result> Run();
-
-  void debug_PrintTestNames();
-  void debug_PrintTesteeNames();
-  void debug_PrintMutationPoints();
   
   static std::vector<std::unique_ptr<MutationOperator>>
     mutationOperators(std::vector<std::string> mutationOperatorStrings);

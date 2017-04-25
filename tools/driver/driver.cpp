@@ -36,35 +36,6 @@ using namespace std::chrono;
 
 cl::OptionCategory MullOptionCategory("Mull");
 
-// Cannot use "debug" as it's already used by LLVM itself.
-static cl::opt<bool> Debug(
-    "mull-debug",
-    llvm::cl::desc("Run in debug mode."),
-    llvm::cl::init(false),
-    llvm::cl::cat(MullOptionCategory)
-);
-
-static cl::opt<bool> PrintTestNames(
-    "print-test-names",
-    llvm::cl::desc("Print test names."),
-    llvm::cl::init(false),
-    llvm::cl::cat(MullOptionCategory)
-);
-
-static cl::opt<bool> PrintTesteeNames(
-    "print-testee-names",
-    llvm::cl::desc("Print testee names."),
-    llvm::cl::init(false),
-    llvm::cl::cat(MullOptionCategory)
-);
-
-static cl::opt<bool> PrintMutationPoints(
-    "print-mutation-points",
-    llvm::cl::desc("Print mutation points."),
-    llvm::cl::init(false),
-    llvm::cl::cat(MullOptionCategory)
-);
-
 static cl::opt<std::string> ConfigFile(
     llvm::cl::desc("<config file>"),
     llvm::cl::Positional
@@ -142,18 +113,6 @@ int main(int argc, char *argv[]) {
   }
 
   Driver driver(config, Loader, *testFinder, *testRunner, toolchain);
-
-  if (Debug) {
-    if (PrintTestNames) {
-      driver.debug_PrintTestNames();
-    } else if (PrintTesteeNames) {
-      driver.debug_PrintTesteeNames();
-    } else if (PrintMutationPoints) {
-      driver.debug_PrintMutationPoints();
-    }
-
-    return 0;
-  }
 
   const long timeSuiteStart =
     duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
