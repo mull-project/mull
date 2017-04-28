@@ -121,27 +121,33 @@ TEST(SQLiteReporter, integrationTest_Config) {
   std::string projectName("Integration Test");
   std::string testFramework = "SimpleTest";
 
-  const std::string BitcodeFileList = "/tmp/bitcode_file_list.txt";
+  const std::string bitcodeFileList = "/tmp/bitcode_file_list.txt";
+  const std::string dynamicLibraryFileList = "/tmp/dynamic_library_file_list.txt";
 
-  std::ofstream fs(BitcodeFileList);
+  std::ofstream bitcodeFile(bitcodeFileList);
+  std::ofstream dynamicLibraryFile(dynamicLibraryFileList);
 
-  if (!fs) {
+  if (!bitcodeFile) {
     std::cerr << "Cannot open the output file." << std::endl;
 
     ASSERT_FALSE(true);
   }
 
-  fs << "tester.bc" << std::endl;
-  fs << "testee.bc" << std::endl;
+  bitcodeFile << "tester.bc" << std::endl;
+  bitcodeFile << "testee.bc" << std::endl;
+  
+  if (!dynamicLibraryFile) {
+    std::cerr << "Cannot open the output file." << std::endl;
+    
+    ASSERT_FALSE(true);
+  }
+  
+  dynamicLibraryFile << "sqlite3.dylib" << std::endl;
+  dynamicLibraryFile << "libz.dylib" << std::endl;
 
   std::vector<std::string> operators({
     "add_mutation",
     "negate_condition"
-  });
-
-  std::vector<std::string> dylibs({
-    "sqlite3.dylib",
-    "libz.dylib"
   });
 
   std::vector<std::string> tests({
@@ -156,11 +162,11 @@ TEST(SQLiteReporter, integrationTest_Config) {
   int timeout = 42;
   int distance = 10;
   std::string cacheDirectory = "/a/cache";
-  Config config(BitcodeFileList,
+  Config config(bitcodeFileList,
                 projectName,
                 testFramework,
                 operators,
-                dylibs,
+                dynamicLibraryFileList,
                 tests,
                 doFork, dryRun, useCache, timeout, distance,
                 cacheDirectory);
