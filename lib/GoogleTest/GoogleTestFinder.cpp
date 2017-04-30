@@ -5,6 +5,7 @@
 #include "MutationOperators/MutationOperator.h"
 #include "MutationOperators/MutationOperatorFilter.h"
 
+#include "llvm/IR/CallSite.h"
 #include "llvm/IR/Constants.h"
 #include "llvm/IR/DebugInfoMetadata.h"
 #include "llvm/IR/InstIterator.h"
@@ -325,16 +326,14 @@ GoogleTestFinder::findTestees(Test *Test,
       for (auto &I : BB) {
         auto *instruction = &I;
 
-        CallInst *callInstruction = dyn_cast<CallInst>(instruction);
-        if (callInstruction == nullptr) {
+        CallSite callInstruction(instruction);
+        if (callInstruction.isCall() == false &&
+            callInstruction.isInvoke() == false) {
           continue;
         }
 
-        int callOperandIndex = callInstruction->getNumOperands() - 1;
-        Value *callOperand = callInstruction->getOperand(callOperandIndex);
-        Function *functionOperand = dyn_cast<Function>(callOperand);
-
-        if (!functionOperand) {
+        Function *calledFunction = callInstruction.getCalledFunction();
+        if (!calledFunction) {
           continue;
         }
 
@@ -368,19 +367,20 @@ GoogleTestFinder::findTestees(Test *Test,
         /// FIXME: What other problems such behaviour may bring?
 
         Function *definedFunction =
-        testBodyModule->getFunction(functionOperand->getName());
+          testBodyModule->getFunction(calledFunction->getName());
 
         if (!definedFunction || definedFunction->isDeclaration()) {
           definedFunction =
-          Ctx.lookupDefinedFunction(functionOperand->getName());
+            Ctx.lookupDefinedFunction(calledFunction->getName());
         } else {
-//          Logger::debug() << "GoogleTestFinder> did not find a function: "
-//                          << definedFunction->getName() << '\n';
+          //Logger::debug() << "GoogleTestFinder> did not find a function: "
+          //                << definedFunction->getName() << '\n';
         }
 
         if (definedFunction) {
           auto functionWasNotProcessed =
-          checkedFunctions.find(definedFunction) == checkedFunctions.end();
+            checkedFunctions.find(definedFunction) == checkedFunctions.end();
+
           checkedFunctions.insert(definedFunction);
 
           if (functionWasNotProcessed) {
@@ -398,7 +398,7 @@ GoogleTestFinder::findTestees(Test *Test,
             /// http://stackoverflow.com/a/6921467/829116
             ///
             traversees.push(make_unique<Testee>(definedFunction,
-                                                callInstruction,
+                                                instruction,
                                                 traverseePointer,
                                                 mutationDistance + 1));
           }
