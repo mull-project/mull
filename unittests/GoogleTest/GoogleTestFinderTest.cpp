@@ -124,6 +124,45 @@ mutation_operators:
   ASSERT_FALSE(Testee->empty());
 }
 
+TEST(GoogleTestFinder, findTestees_testeesAsInvokeInstr) {
+  auto module =
+    TestModuleFactory.createGoogleTestFinder_invokeInstTestee_Module();
+
+  auto mullModule = make_unique<MullModule>(std::move(module), "");
+
+  Context Ctx;
+  Ctx.addModule(std::move(mullModule));
+
+  const char *configYAML = R"YAML(
+mutation_operators:
+  - add_mutation_operator
+  )YAML";
+
+  yaml::Input Input(configYAML);
+
+  ConfigParser Parser;
+  auto Cfg = Parser.loadConfig(Input);
+
+  auto mutationOperators = Driver::mutationOperators(Cfg.getMutationOperators());
+  GoogleTestFinder Finder(std::move(mutationOperators), {});
+
+  auto Tests = Finder.findTests(Ctx);
+
+  ASSERT_EQ(1U, Tests.size());
+
+  auto &Test = *(Tests.begin());
+
+  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
+  ASSERT_EQ(2U, Testees.size());
+
+  // the first testee is always test itself, its test body.
+  Function *testee1 = Testees[0]->getTesteeFunction();
+  ASSERT_EQ(testee1->getName().str(), "_ZN44HelloTest_testTesteeCalledAsInvokeInstr_Test8TestBodyEv");
+
+  Function *testee2 = Testees[1]->getTesteeFunction();
+  ASSERT_EQ(testee2->getName().str(), "_ZL6testeev");
+}
+
 TEST(GoogleTestFinder, FindMutationPoints) {
   auto ModuleWithTests   = TestModuleFactory.createGoogleTestTesterModule();
   auto ModuleWithTestees = TestModuleFactory.createGoogleTestTesteeModule();

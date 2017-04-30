@@ -168,10 +168,10 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
 
       auto Store = dyn_cast<StoreInst>(StoreInstUser);
       auto ValueOp = Store->getValueOperand();
-      assert(isa<CallInst>(ValueOp) &&
-             "Store should be using call to MakeAndRegisterTestInfo");
 
-      auto CallInstruction = dyn_cast<CallInst>(ValueOp);
+      auto callSite = CallSite(ValueOp);
+      assert((callSite.isCall() || callSite.isInvoke()) &&
+             "Store should be using call to MakeAndRegisterTestInfo");
 
       /// Once we have the CallInstruction we can extract Test Suite Name and Test Case Name
       /// To extract them we need climb to the top, i.e.:
@@ -179,10 +179,10 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
       ///   i8* getelementptr inbounds ([6 x i8], [6 x i8]* @.str, i32 0, i32 0)
       ///   i8* getelementptr inbounds ([6 x i8], [6 x i8]* @.str1, i32 0, i32 0)
 
-      auto TestSuiteNameConstRef = dyn_cast<ConstantExpr>(CallInstruction->getArgOperand(0));
+      auto TestSuiteNameConstRef = dyn_cast<ConstantExpr>(callSite->getOperand(0));
       assert(TestSuiteNameConstRef);
 
-      auto TestCaseNameConstRef = dyn_cast<ConstantExpr>(CallInstruction->getArgOperand(1));
+      auto TestCaseNameConstRef = dyn_cast<ConstantExpr>(callSite->getOperand(1));
       assert(TestCaseNameConstRef);
 
       ///   @.str = private unnamed_addr constant [6 x i8] c"Hello\00", align 1
