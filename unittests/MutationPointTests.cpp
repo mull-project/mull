@@ -74,6 +74,8 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
   Function *Testee = Testees[1]->getTesteeFunction();
   ASSERT_FALSE(Testee->empty());
 
+  ASSERT_EQ(1, Testees[1]->getDistance());
+
   std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
   ASSERT_EQ(1U, MutationPoints.size());
 

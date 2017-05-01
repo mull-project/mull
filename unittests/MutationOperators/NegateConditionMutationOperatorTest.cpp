@@ -1,4 +1,5 @@
 
+#include "MutationPoint.h"
 #include "MutationOperators/MutationOperator.h"
 #include "MutationOperators/MutationOperatorFilter.h"
 #include "MutationOperators/NegateConditionMutationOperator.h"
@@ -89,6 +90,9 @@ TEST(NegateConditionMutationOperator, getMutationPoints_no_filter) {
 
   auto mutationPoints = mutationOperator.getMutationPoints(context, function, filter);
   EXPECT_EQ(1U, mutationPoints.size());
+  EXPECT_EQ(0, mutationPoints[0]->getAddress().getFnIndex());
+  EXPECT_EQ(0, mutationPoints[0]->getAddress().getBBIndex());
+  EXPECT_EQ(15, mutationPoints[0]->getAddress().getIIndex());
 }
 
 TEST(NegateConditionMutationOperator, getMutationPoints_filter_to_bool_converion) {
