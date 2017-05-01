@@ -86,7 +86,7 @@ mutation_operators:
   ASSERT_EQ("HelloTest.testSumOfTestee", Test1->getTestName());
 }
 
-TEST(GoogleTestFinder, FindTestee) {
+TEST(GoogleTestFinder, findTestees) {
   auto ModuleWithTests   = TestModuleFactory.createGoogleTestTesterModule();
   auto ModuleWithTestees = TestModuleFactory.createGoogleTestTesteeModule();
 
@@ -122,6 +122,9 @@ mutation_operators:
 
   Function *Testee = Testees[0]->getTesteeFunction();
   ASSERT_FALSE(Testee->empty());
+
+  ASSERT_EQ(0, Testees[0]->getDistance());
+  ASSERT_EQ(1, Testees[1]->getDistance());
 }
 
 TEST(GoogleTestFinder, findTestees_testeesAsInvokeInstr) {
