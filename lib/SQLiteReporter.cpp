@@ -30,7 +30,6 @@ static void assume(bool condition, const char *assumption) {
   }
 
   Logger::warn() << "Assumption failed: " << assumption << '\n';
-  exit(1);
 }
 
 static std::string vectorToCsv(const std::vector<std::string> &v) {
