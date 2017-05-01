@@ -34,7 +34,7 @@ class Config {
   std::string testFramework;
 
   std::vector<std::string> mutationOperators;
-  std::vector<std::string> dynamicLibraries;
+  std::string dynamicLibraryFileList;
   std::vector<std::string> tests;
 
   bool fork;
@@ -62,7 +62,7 @@ public:
       //   RemoveVoidFunctionMutationOperator::ID
       // }
     ),
-    dynamicLibraries(),
+    dynamicLibraryFileList(),
     tests(),
     fork(true),
     dryRun(false),
@@ -77,7 +77,7 @@ public:
          const std::string &project,
          const std::string &testFramework,
          const std::vector<std::string> mutationOperators,
-         const std::vector<std::string> libraries,
+         const std::string &dynamicLibraryFileList,
          const std::vector<std::string> tests,
          bool fork,
          bool dryrun,
@@ -89,7 +89,7 @@ public:
     projectName(project),
     testFramework(testFramework),
     mutationOperators(mutationOperators),
-    dynamicLibraries(libraries),
+    dynamicLibraryFileList(dynamicLibraryFileList),
     tests(tests),
     fork(fork),
     dryRun(dryrun),
@@ -128,12 +128,28 @@ public:
     return testFramework;
   }
   
-  const std::vector<std::string> &getMutationOperators() const {
-    return mutationOperators;
+  const std::string &getDynamicLibraries() const {
+    return dynamicLibraryFileList;
   }
   
-  const std::vector<std::string> &getDynamicLibraries() const {
-    return dynamicLibraries;
+  std::vector<std::string> getDynamicLibrariesPaths() const {
+    std::vector<std::string> dynamicLibrariesPaths;
+    
+    std::ifstream ifs(dynamicLibraryFileList);
+    
+    for (std::string path; getline(ifs, path); ) {
+      if (path.at(0) == '#') {
+        continue;
+      }
+      
+      dynamicLibrariesPaths.push_back(path);
+    }
+    
+    return dynamicLibrariesPaths;
+  }
+  
+  const std::vector<std::string> &getMutationOperators() const {
+    return mutationOperators;
   }
 
   const std::vector<std::string> &getTests() const {
@@ -167,16 +183,17 @@ public:
   void dump() const {
     Logger::debug() << "Config>\n"
     << "\t" << "bitcode_file_list: " << bitcodeFileList << '\n'
+    << "\t" << "dynamic_library_file_list: " << dynamicLibraryFileList << '\n'
     << "\t" << "project_name: " << getProjectName() << '\n'
     << "\t" << "test_framework: " << getTestFramework() << '\n'
     << "\t" << "distance: " << getMaxDistance() << '\n'
     << "\t" << "dry_run: " << isDryRun() << '\n'
     << "\t" << "fork: " << getFork() << '\n';
 
-    if (getMutationOperators().size() > 0) {
+    if (mutationOperators.empty() == false) {
       Logger::debug() << "\t" << "mutation_operators: " << '\n';
 
-      for (auto mutationOperator : getMutationOperators()) {
+      for (auto mutationOperator : mutationOperators) {
         Logger::debug() << "\t- " << mutationOperator << '\n';
       }
     }
@@ -199,16 +216,28 @@ public:
       return errors;
     }
 
-    std::ifstream f(bitcodeFileList.c_str());
+    std::ifstream bitcodeFile(bitcodeFileList.c_str());
 
-    if (f.good() == false) {
+    if (bitcodeFile.good() == false) {
       std::stringstream error;
 
       error << "bitcode_file_list parameter points to a non-existing file: "
             << bitcodeFileList;
 
       errors.push_back(error.str());
-      return errors;
+    }
+    
+    if (dynamicLibraryFileList.empty() == false) {
+      std::ifstream dynamicLibraryFile(dynamicLibraryFileList.c_str());
+      
+      if (dynamicLibraryFile.good() == false) {
+        std::stringstream error;
+        
+        error << "dynamic_library_file_list parameter points to a non-existing file: "
+        << dynamicLibraryFileList;
+        
+        errors.push_back(error.str());
+      }
     }
 
     return errors;

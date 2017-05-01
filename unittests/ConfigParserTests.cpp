@@ -24,7 +24,6 @@ TEST_F(ConfigParserTestFixture, loadConfig_bitcodeFileList) {
 
   if (!fs) {
     std::cerr << "Cannot open the output file." << std::endl;
-
     ASSERT_FALSE(true);
   }
 
@@ -39,6 +38,66 @@ TEST_F(ConfigParserTestFixture, loadConfig_bitcodeFileList) {
   ASSERT_EQ("foo.bc", *(config.getBitcodePaths().begin()));
   ASSERT_EQ("bar.bc", *(config.getBitcodePaths().end() - 1));
 
+  auto errors = config.validate();
+  ASSERT_EQ(errors.size(), 0U);
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_dynamicLibraryFileList_nonExistingFile) {
+  const std::string bitcodeFileList = "/tmp/bitcode_file_list.txt";
+  
+  std::ofstream bitcodeFile(bitcodeFileList);
+  
+  if (!bitcodeFile) {
+    std::cerr << "Cannot open the output file." << std::endl;
+    ASSERT_FALSE(true);
+  }
+  
+  bitcodeFile << "foo.bc" << std::endl;
+  bitcodeFile << "bar.bc" << std::endl;
+  bitcodeFile << "# baz.bc"  << std::endl;
+  
+  const char *configYAML = "bitcode_file_list: /tmp/bitcode_file_list.txt\ndynamic_library_file_list: /tmp/non-existing-file-12345.txt\n";
+  configWithYamlContent(configYAML);
+  
+  auto errors = config.validate();
+  ASSERT_EQ(errors.size(), 1U);
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_bitcodeFileList_dynamicLibraryFileList) {
+  const std::string bitcodeFileList = "/tmp/bitcode_file_list.txt";
+  const std::string dynamicLibraryFileList = "/tmp/dynamic_library_file_list.txt";
+  
+  std::ofstream bitcodeFile(bitcodeFileList);
+  std::ofstream dynamicLibraryFile(dynamicLibraryFileList);
+  
+  if (!bitcodeFile) {
+    std::cerr << "Cannot open bitcode file." << std::endl;
+    ASSERT_FALSE(true);
+  }
+  
+  if (!dynamicLibraryFile) {
+    std::cerr << "Cannot open dynamic library file." << std::endl;
+    ASSERT_FALSE(true);
+  }
+  
+  bitcodeFile << "foo.bc" << std::endl;
+  bitcodeFile << "bar.bc" << std::endl;
+  bitcodeFile << "# baz.bc"  << std::endl;
+  
+  dynamicLibraryFile << "sqlite3.dylib" << std::endl;
+  dynamicLibraryFile << "libz.dylib" << std::endl;
+  
+  const char *configYAML = "bitcode_file_list: /tmp/bitcode_file_list.txt\ndynamic_library_file_list: /tmp/dynamic_library_file_list.txt";
+  configWithYamlContent(configYAML);
+  
+  ASSERT_EQ(2U, config.getBitcodePaths().size());
+  ASSERT_EQ("foo.bc", *(config.getBitcodePaths().begin()));
+  ASSERT_EQ("bar.bc", *(config.getBitcodePaths().end() - 1));
+  
+  ASSERT_EQ(2U, config.getDynamicLibrariesPaths().size());
+  ASSERT_EQ("sqlite3.dylib", *(config.getDynamicLibrariesPaths().begin()));
+  ASSERT_EQ("libz.dylib", *(config.getDynamicLibrariesPaths().end() - 1));
+  
   auto errors = config.validate();
   ASSERT_EQ(errors.size(), 0U);
 }

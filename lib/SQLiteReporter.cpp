@@ -268,7 +268,7 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
 
     std::string csvBitcodePaths = vectorToCsv(config.getBitcodePaths());
     std::string csvMutationOperators = vectorToCsv(config.getMutationOperators());
-    std::string csvDynamicLibraries = vectorToCsv(config.getDynamicLibraries());
+    std::string csvDynamicLibraries = vectorToCsv(config.getDynamicLibrariesPaths());
     std::string csvTests = vectorToCsv(config.getTests());
 
     std::string insertConfigSQL = std::string("INSERT INTO config VALUES (")
