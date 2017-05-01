@@ -1,0 +1,103 @@
+#!/usr/bin/python
+
+import os
+import re
+import subprocess
+import sys
+
+def get_tmp_dir_path(cwd):
+  tmp_dir_path = "{0}/{1}".format(cwd, 'tmp')
+  if not os.path.exists(tmp_dir_path):
+    os.makedirs(tmp_dir_path)
+  return tmp_dir_path
+
+def get_output_config_yml_file_path(cwd):
+  tmp_dir_path = get_tmp_dir_path(cwd)
+  output_config_yml_file_path = "{0}/{1}".format(tmp_dir_path, 'mull_bitcode_files')
+
+  if not os.path.exists(output_config_yml_file_path):
+    open(output_config_yml_file_path, 'a').close()
+
+  return output_config_yml_file_path
+
+def run_compiler(args):
+  assert(args)
+
+  output_file = args[len(args) - 1]
+  print("\toutput file: {0}".format(output_file))
+  assert(re.match('^.*\.o$', output_file))
+
+  o_flag=args[len(args) - 2]
+  assert(o_flag == '-o')
+
+  input_file=sys.argv[len(sys.argv) - 3]
+  print("\tinput file: {0}".format(input_file))
+
+  # Currently we don't change extension, because incremental compilation
+  # does not work if extension if not '.o'
+  output_file_as_bitcode = re.sub('\.o$', '.o', output_file)
+  print("\tpatched output file: {0}".format(output_file_as_bitcode))
+
+  cwd = os.getcwd()
+
+  # The following replaces last two arguments: ... -o path/to/output-file.o with
+  # ... -emit-llvm -o path/to/output-file.o
+  args.pop()
+  args.pop()
+
+  args.append('-emit-llvm')
+  args.append('-o')
+  args.append(output_file_as_bitcode)
+
+  args[0] = '/usr/local/opt/llvm@3.9/bin/clang++'
+
+  process = subprocess.Popen(args, stdout=subprocess.PIPE)
+  output, error = process.communicate()
+
+def run_linker(args):
+  cwd = os.getcwd()
+
+  try:
+    arg_file_list_index = args.index('-filelist')
+  except:
+    arg_file_list_index = -1
+
+  if arg_file_list_index == -1:
+    print("mull-clang(linker)> Failed to recognize -filelist argument in linker command")
+    exit(1)
+
+  file_list_path = args[arg_file_list_index + 1]
+  assert(file_list_path)
+
+  output_config_yml_file_path = get_output_config_yml_file_path(cwd)
+  assert(output_config_yml_file_path)
+
+  file_list_file = open(file_list_path, 'r')
+  files = file_list_file.readlines()
+  file_list_file.close()
+
+  output_config_yml_file = open(output_config_yml_file_path, 'r')
+  existing_files = output_config_yml_file.readlines()
+  output_config_yml_file.close()
+
+  all_files = files + existing_files
+
+  used = set()
+  all_files = [x for x in all_files if x not in used and (used.add(x) or True)]
+
+  output_config_yml_file = open(output_config_yml_file_path, 'w')
+  for file in all_files:
+    output_config_yml_file.write(file)
+
+  output_config_yml_file.close()
+
+args = sys.argv
+
+# -Xlinker is when clang is used as a linker.
+# -static when libtool is used as a linker for a static library target.
+if ('-Xlinker' in sys.argv) or ('-static' in sys.argv):
+  print('mull-clang[linker]')
+  run_linker(args)
+else:
+  print('mull-clang[compiler]')
+  run_compiler(args)

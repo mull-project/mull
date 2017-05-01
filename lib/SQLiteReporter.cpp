@@ -293,7 +293,9 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
 
   sqlite3_close(database);
 
-  outs() << "Results can be found at '" << databasePath << "'\n";
+  outs() << "Results can be found at '" << databasePath << "'\n"
+         << "Use the following command to generate HTML report:\n"
+         << "REPORT=" << databasePath << " " << "make build\n";
 }
 
 #pragma mark -

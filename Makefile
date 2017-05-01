@@ -64,6 +64,7 @@ reopen: ## Kill Xcode and open Mull.xcodeproj in Xcode.
 	open BuildXcode/Mull.xcodeproj
 
 clean: clean_ninja clean_xcode ## Delete CMake build caches: Xcode and Ninja.
+	rm -rfv tmp/
 
 clean_xcode: ## Delete Xcode CMake build cache.
 	rm -rfv $(BUILD_DIR_XCODE)
