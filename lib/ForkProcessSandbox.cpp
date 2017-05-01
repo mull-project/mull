@@ -101,6 +101,7 @@ mull::ForkProcessSandbox::run(std::function<void (ExecutionResult *)> function,
       *sharedResult = result;
     } else if (exitedPID == workerPID) {
       kill(timerPID, SIGKILL);
+
       /// Worker Process finished first
       /// Need to check whether it has signaled (crashed) or finished normally
       if (WIFSIGNALED(status)) {
@@ -108,6 +109,13 @@ mull::ForkProcessSandbox::run(std::function<void (ExecutionResult *)> function,
         ExecutionResult result;
         result.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
         result.Status = Crashed;
+        *sharedResult = result;
+      } else if (WIFEXITED(status) &&
+                 (WEXITSTATUS(status) != 0 || sharedResult->Status == Invalid)) {
+        auto elapsed = high_resolution_clock::now() - start;
+        ExecutionResult result;
+        result.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
+        result.Status = Failed;
         *sharedResult = result;
       }
     } else {
