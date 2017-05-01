@@ -1,7 +1,11 @@
+
 #include "Config.h"
+#include "Context.h"
 #include "SQLiteReporter.h"
 #include "Result.h"
+#include "SimpleTest/SimpleTestFinder.h"
 #include "SimpleTest/SimpleTest_Test.h"
+#include "TestModuleFactory.h"
 
 #include "gtest/gtest.h"
 
@@ -15,48 +19,75 @@ using namespace mull;
 using namespace llvm;
 
 TEST(SQLiteReporter, integrationTest) {
-  SQLiteReporter reporter;
 
-  const long long RunningTime = 1;
+  /// STEP 1. Long setup of:
+  /// - 1 test with 1 testee with 1 mutation point.
+  /// - 1 test execution result which includes 1 normal test execution and 1
+  /// mutated test execution.
+
+  TestModuleFactory testModuleFactory;
+  auto ModuleWithTests   = testModuleFactory.createTesterModule();
+  auto ModuleWithTestees = testModuleFactory.createTesteeModule();
+
+  auto mullModuleWithTests   = make_unique<MullModule>(std::move(ModuleWithTests), "");
+  auto mullModuleWithTestees = make_unique<MullModule>(std::move(ModuleWithTestees), "");
+
+  Context context;
+  context.addModule(std::move(mullModuleWithTests));
+  context.addModule(std::move(mullModuleWithTestees));
+
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::unique_ptr<AddMutationOperator> addMutationOperator = make_unique<AddMutationOperator>();
+  mutationOperators.emplace_back(std::move(addMutationOperator));
+
+  SimpleTestFinder Finder(std::move(mutationOperators));
+  auto tests = Finder.findTests(context);
+
+  auto &test = *tests.begin();
+
+  std::vector<std::unique_ptr<Testee>> testees =
+  Finder.findTestees(test.get(), context, 4);
+
+  ASSERT_EQ(2U, testees.size());
+
+  Testee *testee = testees[1].get();
+  Function *testeeFunction = testee->getTesteeFunction();
+
+  ASSERT_FALSE(testeeFunction->empty());
+
+  std::vector<MutationPoint *> mutationPoints =
+  Finder.findMutationPoints(context, *testeeFunction);
+
+  ASSERT_EQ(1U, mutationPoints.size());
+
+  MutationPoint *mutationPoint = (*(mutationPoints.begin()));
+
+  const long long RunningTime_1 = 1;
+  const long long RunningTime_2 = 2;
 
   ExecutionResult testExecutionResult;
   testExecutionResult.Status = Passed;
-  testExecutionResult.RunningTime = RunningTime;
-  testExecutionResult.stdoutOutput = "STDOUT";
-  testExecutionResult.stderrOutput = "STDERR";
-  
-  ExecutionResult llvmErrorTestExecutionResult;
-  llvmErrorTestExecutionResult.Status = Failed;
-  llvmErrorTestExecutionResult.RunningTime = RunningTime;
-  llvmErrorTestExecutionResult.stdoutOutput = "STDOUT";
-  llvmErrorTestExecutionResult.stderrOutput = "LLVM ERROR: Program used external function '__ZTIN4llvm20SectionMemoryManagerE' which could not be resolved!";
-  
-  std::vector<ExecutionResult> executionResults { testExecutionResult, llvmErrorTestExecutionResult };
+  testExecutionResult.RunningTime = RunningTime_1;
+  testExecutionResult.stdoutOutput = "testExecutionResult.STDOUT";
+  testExecutionResult.stderrOutput = "testExecutionResult.STDERR";
 
-  LLVMContext Context;
-
-  std::unique_ptr<Module> moduleOwner(new Module("test", Context));
-  Module *module = moduleOwner.get();
-
-  Function *function =
-    cast<Function>(module->getOrInsertFunction("fib", Type::getInt32Ty(Context),
-                                          Type::getInt32Ty(Context),
-                                          nullptr));
-
-  std::unique_ptr<SimpleTest_Test> test = make_unique<SimpleTest_Test>(function);
-  std::unique_ptr<SimpleTest_Test> llvmErrorTest = make_unique<SimpleTest_Test>(function);
+  ExecutionResult mutatedTestExecutionResult;
+  mutatedTestExecutionResult.Status = Failed;
+  mutatedTestExecutionResult.RunningTime = RunningTime_2;
+  mutatedTestExecutionResult.stdoutOutput = "mutatedTestExecutionResult.STDOUT";
+  mutatedTestExecutionResult.stderrOutput = "mutatedTestExecutionResult.STDERR";
 
   std::unique_ptr<TestResult> testResult =
-    make_unique<TestResult>(testExecutionResult, std::move(test));
-  std::unique_ptr<TestResult> llvmErrorTestResult =
-    make_unique<TestResult>(llvmErrorTestExecutionResult, std::move(llvmErrorTest));
+  make_unique<TestResult>(testExecutionResult, std::move(test));
+
+  auto mutationResult = make_unique<MutationResult>(mutatedTestExecutionResult,
+                                                    mutationPoint,
+                                                    testee);
+
+  testResult->addMutantResult(std::move(mutationResult));
 
   std::vector<std::unique_ptr<TestResult>> results;
   results.push_back(std::move(testResult));
-  results.push_back(std::move(llvmErrorTestResult));
-
-  /// In this test we are not interested in testees.
-  std::vector<std::unique_ptr<Testee>> testees;
 
   ResultTime resultTime = {
     .start = 1234,
@@ -65,7 +96,16 @@ TEST(SQLiteReporter, integrationTest) {
 
   std::unique_ptr<Result> result = make_unique<Result>(std::move(results),
                                                        std::move(testees));
+
+  /// STEP2. Reporting results to SQLite
+  SQLiteReporter reporter;
   reporter.reportResults(result, Config(), resultTime);
+
+  /// STEP3. Making assertions.
+  std::vector<ExecutionResult> executionResults {
+    testExecutionResult,
+    mutatedTestExecutionResult
+  };
 
   std::string databasePath = reporter.getDatabasePath();
 
@@ -135,13 +175,13 @@ TEST(SQLiteReporter, integrationTest_Config) {
 
   bitcodeFile << "tester.bc" << std::endl;
   bitcodeFile << "testee.bc" << std::endl;
-  
+
   if (!dynamicLibraryFile) {
     std::cerr << "Cannot open the output file." << std::endl;
-    
+
     ASSERT_FALSE(true);
   }
-  
+
   dynamicLibraryFile << "sqlite3.dylib" << std::endl;
   dynamicLibraryFile << "libz.dylib" << std::endl;
 
