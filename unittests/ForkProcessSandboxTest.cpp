@@ -49,23 +49,22 @@ TEST(ForkProcessSandbox, statusPassedIfExitingWithZeroAndResultWasSet) {
   ASSERT_EQ(result.Status, Passed);
 }
 
-TEST(ForkProcessSandbox, statusFailedIfExitingWithNonZero) {
+TEST(ForkProcessSandbox, statusAbnormalExit_IfExitingWithNonZero) {
   ForkProcessSandbox sandbox;
 
   ExecutionResult result = sandbox.run([&](ExecutionResult *SharedResult) {
     exit(1);
   }, Timeout);
 
-  ASSERT_EQ(result.Status, Failed);
+  ASSERT_EQ(result.Status, AbnormalExit);
 }
 
-TEST(ForkProcessSandbox, statusFailedIfExitingWithZeroButResultWasNotSet) {
+TEST(ForkProcessSandbox, statusAbnormalExit_IfExitingWithZeroButResultWasNotSet) {
   ForkProcessSandbox sandbox;
 
   ExecutionResult result = sandbox.run([&](ExecutionResult *SharedResult) {
     exit(0);
   }, Timeout);
 
-  ASSERT_EQ(result.Status, Failed);
+  ASSERT_EQ(result.Status, AbnormalExit);
 }
-

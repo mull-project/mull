@@ -115,7 +115,7 @@ mull::ForkProcessSandbox::run(std::function<void (ExecutionResult *)> function,
         auto elapsed = high_resolution_clock::now() - start;
         ExecutionResult result;
         result.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
-        result.Status = Failed;
+        result.Status = AbnormalExit;
         *sharedResult = result;
       }
     } else {

@@ -22,6 +22,7 @@ enum ExecutionStatus {
   Passed,
   Timedout,
   Crashed,
+  AbnormalExit,
   DryRun
 };
 
