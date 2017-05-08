@@ -87,6 +87,10 @@ Mutation Testing](http://www0.cs.ucl.ac.uk/staff/mharman/tse-mutation-survey.pdf
 [LLVM-based Mutation Testing System. Request For
 Comments](http://lowlevelbits.org/llvm-based-mutation-testing-system/)
 
+[Mull and Klee, part 1: mutation testing analysis for Klee's Tutorial Two](http://stanislaw.github.io/2017/05/07/mull-and-klee-part1.html)
+
+[Using mutation testing score to measure a reliability of a single function](http://stanislaw.github.io/2017/05/05/unbreakable-code.html)
+
 ### Talks
 
 [FOSDEM 2017: Mutation Testing, Leaving the Stone Age by Alex Denisov](https://www.youtube.com/watch?v=YEgiyiICkpQ)
