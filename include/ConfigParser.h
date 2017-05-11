@@ -17,6 +17,8 @@ struct MappingTraits<mull::Config>
 {
   static void mapping(IO& io, mull::Config& config)
   {
+    config.mutationOperators.clear();
+    
     io.mapOptional("bitcode_file_list", config.bitcodeFileList);
     io.mapOptional("project_name", config.projectName);
     io.mapOptional("test_framework", config.testFramework);
