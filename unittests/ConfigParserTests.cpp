@@ -167,6 +167,14 @@ TEST_F(ConfigParserTestFixture, loadConfig_CacheDirectory_SpecificValue) {
   ASSERT_EQ("/var/tmp", config.getCacheDirectory());
 }
 
+TEST_F(ConfigParserTestFixture, loadConfig_MutationOperators_Unspecified) {
+  const char *configYAML = "";
+  configWithYamlContent(configYAML);
+
+  auto mutationOperators = config.getMutationOperators();
+  ASSERT_EQ(0U, mutationOperators.size());
+}
+
 TEST_F(ConfigParserTestFixture, loadConfig_MutationOperators_SpecificValue) {
   const char *configYAML = R"YAML(
 mutation_operators:
