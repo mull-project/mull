@@ -18,11 +18,7 @@ before_install:
 # Uncomment this line when support Rust
 # - if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then curl -sf https://static.rust-lang.org/rustup.sh | sudo sh; fi
 
-install:
-- cd googletest
-- make install
-- cd ..
-
 # Build steps
 script:
 - make test_unit
+
