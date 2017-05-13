@@ -85,7 +85,7 @@ mull::ForkProcessSandbox::run(std::function<void (ExecutionResult *)> function,
 
       function(sharedResult);
 
-      exit(0);
+      exit(MullExitCode);
     }
 
     int status = 0;
@@ -110,8 +110,9 @@ mull::ForkProcessSandbox::run(std::function<void (ExecutionResult *)> function,
         result.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
         result.Status = Crashed;
         *sharedResult = result;
-      } else if (WIFEXITED(status) &&
-                 (WEXITSTATUS(status) != 0 || sharedResult->Status == Invalid)) {
+      }
+
+      else if (WIFEXITED(status) && WEXITSTATUS(status) != MullExitCode) {
         auto elapsed = high_resolution_clock::now() - start;
         ExecutionResult result;
         result.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();

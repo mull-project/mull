@@ -42,8 +42,6 @@ TEST(ForkProcessSandbox, statusPassedIfExitingWithZeroAndResultWasSet) {
 
   ExecutionResult result = sandbox.run([&](ExecutionResult *SharedResult) {
     SharedResult->Status = Passed;
-
-    exit(0);
   }, Timeout);
 
   ASSERT_EQ(result.Status, Passed);

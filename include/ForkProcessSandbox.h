@@ -14,6 +14,8 @@ public:
 
 class ForkProcessSandbox : public ProcessSandbox {
 public:
+  const static int MullExitCode = 227;
+
   ExecutionResult run(std::function<void (ExecutionResult *)> function,
                       long long timeoutMilliseconds);
 };
