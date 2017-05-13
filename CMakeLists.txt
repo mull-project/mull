@@ -23,7 +23,6 @@ set(MULL_SOURCE_DIR   ${CMAKE_CURRENT_SOURCE_DIR})
 set(MULL_INCLUDE_DIR  ${MULL_SOURCE_DIR}/include)
 
 include_directories("${LLVM_ROOT}/include")
-include_directories("${MULL_SOURCE_DIR}/googletest")
 
 ## LLVM dependencies:
 # Architecture-independent files.
@@ -55,9 +54,6 @@ find_library(MULL_DEPENDENCY_LIBZ z HINTS ${MULL_TOOLCHAIN_LIBZ_PATH})
 find_library(MULL_DEPENDENCY_NCURSES ncurses)
 
 find_library(MULL_DEPENDENCY_SQLITE sqlite3 HINTS "/usr/local/opt/sqlite")
-
-find_library(MULL_DEPENDENCY_GOOGLETEST gtest HINTS "${MULL_SOURCE_DIR}/googletest")
-find_library(MULL_DEPENDENCY_GOOGLETESTMAIN gtest_main HINTS "${MULL_SOURCE_DIR}/googletest")
 
 # Architecture-specific files.
 find_library(MULL_DEPENDENCY_LLVMX86AsmParser LLVMX86AsmParser HINTS "${LLVM_LIB_PATH}")
@@ -91,7 +87,9 @@ if(MULL_SUPPORT_RUST)
   add_definitions(-DMULL_SUPPORT_RUST=1)
 endif()
 
-add_subdirectory(tools)
 add_subdirectory(lib)
+add_subdirectory(googletest)
+add_subdirectory(tools)
 # add_subdirectory(test)
 add_subdirectory(unittests)
+
