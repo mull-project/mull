@@ -92,4 +92,6 @@ add_subdirectory(googletest)
 add_subdirectory(tools)
 # add_subdirectory(test)
 add_subdirectory(unittests)
+add_subdirectory(projects)
+
 
