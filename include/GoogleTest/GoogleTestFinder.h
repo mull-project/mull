@@ -27,7 +27,7 @@ class GoogleTestFinder : public TestFinder {
   std::vector<std::unique_ptr<MutationPoint>> MutationPoints;
   std::map<llvm::Function *, std::vector<MutationPoint *>> MutationPointsRegistry;
 
-  const mull::GoogleTestMutationOperatorFilter filter;
+  GoogleTestMutationOperatorFilter filter;
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   std::vector<std::string> testsToFilter;

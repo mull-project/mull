@@ -243,33 +243,6 @@ std::string demangle(const char* name) {
   return (status==0) ? res.get() : name ;
 }
 
-static bool shouldSkipDefinedFunction(llvm::Function *definedFunction) {
-  if (definedFunction->getName().find(StringRef("testing8internal")) != StringRef::npos) {
-    return true;
-  }
-
-  if (definedFunction->getName().find(StringRef("testing15AssertionResult")) != StringRef::npos) {
-    return true;
-  }
-
-  if (definedFunction->getName().find(StringRef("testing7Message")) != StringRef::npos) {
-    return true;
-  }
-
-  if (definedFunction->hasMetadata()) {
-    int debugInfoKindID = 0;
-    MDNode *debug = definedFunction->getMetadata(debugInfoKindID);
-    DISubprogram *subprogram = dyn_cast<DISubprogram>(debug);
-    if (subprogram) {
-      if (subprogram->getFilename().str().find("include/c++/v1") != std::string::npos) {
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
-
 std::vector<std::unique_ptr<Testee>>
 GoogleTestFinder::findTestees(Test *Test,
                               Context &Ctx,
@@ -367,7 +340,7 @@ GoogleTestFinder::findTestees(Test *Test,
 
           if (functionWasNotProcessed) {
             /// Filtering
-            if (shouldSkipDefinedFunction(definedFunction)) {
+            if (filter.shouldSkipDefinedFunction(definedFunction)) {
               continue;
             }
 
