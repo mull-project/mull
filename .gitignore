@@ -6,5 +6,5 @@ BuildXcode
 BuildNinja
 projects/**
 !projects/CMakeLists.txt
-
+tmp/
 

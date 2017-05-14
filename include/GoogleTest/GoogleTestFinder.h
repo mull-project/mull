@@ -1,7 +1,7 @@
 #pragma once
 
+#include "GoogleTest/GoogleTestMutationOperatorFilter.h"
 #include "MutationPoint.h"
-#include "MutationOperators/MutationOperator.h"
 #include "TestFinder.h"
 
 #include "llvm/ADT/StringMap.h"
@@ -27,11 +27,12 @@ class GoogleTestFinder : public TestFinder {
   std::map<llvm::Function *, std::vector<MutationPoint *>> MutationPointsRegistry;
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
-  std::vector<std::string> testsToFilter;
 
+  GoogleTestMutationOperatorFilter filter;
 public:
   GoogleTestFinder(std::vector<std::unique_ptr<MutationOperator>> mutationOperators,
-                   std::vector<std::string> testsToFilter);
+                   std::vector<std::string> testsToFilter,
+                   std::vector<std::string> excludeLocations);
 
   std::vector<std::unique_ptr<Test>> findTests(Context &Ctx) override;
   std::vector<std::unique_ptr<Testee>> findTestees(Test *Test,

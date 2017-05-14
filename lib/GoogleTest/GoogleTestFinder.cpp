@@ -3,7 +3,6 @@
 #include "Context.h"
 #include "Logger.h"
 #include "MutationOperators/MutationOperator.h"
-#include "MutationOperators/MutationOperatorFilter.h"
 
 #include "llvm/IR/CallSite.h"
 #include "llvm/IR/Constants.h"
@@ -30,32 +29,15 @@
 using namespace mull;
 using namespace llvm;
 
-class GoogleTestMutationOperatorFilter : public MutationOperatorFilter {
-public:
-  bool shouldSkipInstruction(llvm::Instruction *instruction) {
-    if (instruction->hasMetadata()) {
-      int debugInfoKindID = 0;
-      MDNode *debug = instruction->getMetadata(debugInfoKindID);
-
-      DILocation *location = dyn_cast<DILocation>(debug);
-      if (location) {
-        if (location->getFilename().str().find("include/c++/v1") != std::string::npos) {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  };
-};
-
 GoogleTestFinder::GoogleTestFinder(
-    std::vector<std::unique_ptr<MutationOperator>> mutationOperators,
-    std::vector<std::string> testsToFilter)
-    : TestFinder(),
-    mutationOperators(std::move(mutationOperators)),
-    testsToFilter(testsToFilter)
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators,
+  std::vector<std::string> testsToFilter,
+  std::vector<std::string> excludeLocations)
+  : TestFinder(),
+  mutationOperators(std::move(mutationOperators)),
+  filter(GoogleTestMutationOperatorFilter(testsToFilter, excludeLocations))
 {
+
 }
 
 /// The algorithm is the following:
@@ -211,7 +193,12 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
 
       /// Once we've got the Name of a Test Suite and the name of a Test Case
       /// We can construct the name of a Test
-      auto TestName = TestSuiteName + "." + TestCaseName;
+      const auto TestName = TestSuiteName + "." + TestCaseName;
+
+      const std::string testNameStr = TestName.str();
+      if (filter.shouldSkipTest(testNameStr)) {
+        continue;
+      }
 
       /// And the part of Test Body function name
 
@@ -227,13 +214,6 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
           TestBodyFunction = &Func;
           break;
         }
-      }
-
-      if (testsToFilter.empty() == false &&
-          std::find(testsToFilter.begin(),
-                    testsToFilter.end(),
-                    TestName.str()) == testsToFilter.end()) {
-            continue;
       }
 
       assert(TestBodyFunction && "Cannot find the TestBody function for the Test");
@@ -259,33 +239,6 @@ std::string demangle(const char* name) {
   };
 
   return (status==0) ? res.get() : name ;
-}
-
-static bool shouldSkipDefinedFunction(llvm::Function *definedFunction) {
-  if (definedFunction->getName().find(StringRef("testing8internal")) != StringRef::npos) {
-    return true;
-  }
-
-  if (definedFunction->getName().find(StringRef("testing15AssertionResult")) != StringRef::npos) {
-    return true;
-  }
-
-  if (definedFunction->getName().find(StringRef("testing7Message")) != StringRef::npos) {
-    return true;
-  }
-
-  if (definedFunction->hasMetadata()) {
-    int debugInfoKindID = 0;
-    MDNode *debug = definedFunction->getMetadata(debugInfoKindID);
-    DISubprogram *subprogram = dyn_cast<DISubprogram>(debug);
-    if (subprogram) {
-      if (subprogram->getFilename().str().find("include/c++/v1") != std::string::npos) {
-        return true;
-      }
-    }
-  }
-
-  return false;
 }
 
 std::vector<std::unique_ptr<Testee>>
@@ -385,7 +338,7 @@ GoogleTestFinder::findTestees(Test *Test,
 
           if (functionWasNotProcessed) {
             /// Filtering
-            if (shouldSkipDefinedFunction(definedFunction)) {
+            if (filter.shouldSkipTesteeFunction(definedFunction)) {
               continue;
             }
 
@@ -419,8 +372,6 @@ GoogleTestFinder::findMutationPoints(const Context &context,
   }
 
   std::vector<MutationPoint *> points;
-
-  GoogleTestMutationOperatorFilter filter;
 
   for (auto &mutationOperator : mutationOperators) {
     for (auto point : mutationOperator->getMutationPoints(context, &testee, filter)) {

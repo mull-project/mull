@@ -195,7 +195,6 @@ TEST(SQLiteReporter, integrationTest_Config) {
     "test_method2"
   });
 
-
   bool doFork = true;
   bool dryRun = true;
   bool useCache = true;
@@ -208,6 +207,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
                 operators,
                 dynamicLibraryFileList,
                 tests,
+                {},
                 doFork, dryRun, useCache, timeout, distance,
                 cacheDirectory);
 
