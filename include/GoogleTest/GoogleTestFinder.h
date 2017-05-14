@@ -31,7 +31,8 @@ class GoogleTestFinder : public TestFinder {
   GoogleTestMutationOperatorFilter filter;
 public:
   GoogleTestFinder(std::vector<std::unique_ptr<MutationOperator>> mutationOperators,
-                   std::vector<std::string> testsToFilter);
+                   std::vector<std::string> testsToFilter,
+                   std::vector<std::string> excludeLocations);
 
   std::vector<std::unique_ptr<Test>> findTests(Context &Ctx) override;
   std::vector<std::unique_ptr<Testee>> findTestees(Test *Test,

@@ -84,7 +84,8 @@ int main(int argc, char *argv[]) {
 
   if (testFramework == "GoogleTest") {
     testFinder = make_unique<GoogleTestFinder>(std::move(mutationOperators),
-                                               config.getTests());
+                                               config.getTests(),
+                                               config.getExcludeLocations());
 
     testRunner = make_unique<GoogleTestRunner>(toolchain.targetMachine());
   }

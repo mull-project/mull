@@ -42,7 +42,7 @@ mutation_operators:
   auto Cfg = Parser.loadConfig(Input);
 
   auto mutationOperators = Driver::mutationOperators(Cfg.getMutationOperators());
-  GoogleTestFinder Finder(std::move(mutationOperators), {});
+  GoogleTestFinder Finder(std::move(mutationOperators), {}, {});
 
   auto tests = Finder.findTests(Ctx);
 
@@ -77,7 +77,8 @@ mutation_operators:
   auto mutationOperators = Driver::mutationOperators(Cfg.getMutationOperators());
 
   GoogleTestFinder Finder(std::move(mutationOperators),
-                          { "HelloTest.testSumOfTestee" });
+                          { "HelloTest.testSumOfTestee" },
+                          {});
 
   auto tests = Finder.findTests(Ctx);
 
@@ -108,7 +109,7 @@ mutation_operators:
   auto Cfg = Parser.loadConfig(Input);
 
   auto mutationOperators = Driver::mutationOperators(Cfg.getMutationOperators());
-  GoogleTestFinder Finder(std::move(mutationOperators), {});
+  GoogleTestFinder Finder(std::move(mutationOperators), {}, {});
   
   auto Tests = Finder.findTests(Ctx);
 
@@ -147,7 +148,7 @@ mutation_operators:
   auto Cfg = Parser.loadConfig(Input);
 
   auto mutationOperators = Driver::mutationOperators(Cfg.getMutationOperators());
-  GoogleTestFinder Finder(std::move(mutationOperators), {});
+  GoogleTestFinder Finder(std::move(mutationOperators), {}, {});
 
   auto Tests = Finder.findTests(Ctx);
 
@@ -190,7 +191,7 @@ mutation_operators:
   auto mutationOperators = Driver::mutationOperators(Cfg.getMutationOperators());
   ASSERT_EQ(mutationOperators.size(), 1U);
 
-  GoogleTestFinder Finder(std::move(mutationOperators), {});
+  GoogleTestFinder Finder(std::move(mutationOperators), {}, {});
 
   auto Tests = Finder.findTests(Ctx);
 

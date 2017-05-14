@@ -31,10 +31,11 @@ using namespace llvm;
 
 GoogleTestFinder::GoogleTestFinder(
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators,
-  std::vector<std::string> testsToFilter)
+  std::vector<std::string> testsToFilter,
+  std::vector<std::string> excludeLocations)
   : TestFinder(),
   mutationOperators(std::move(mutationOperators)),
-  filter(GoogleTestMutationOperatorFilter(testsToFilter))
+  filter(GoogleTestMutationOperatorFilter(testsToFilter, excludeLocations))
 {
 
 }

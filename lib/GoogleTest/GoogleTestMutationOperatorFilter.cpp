@@ -8,8 +8,10 @@ using namespace llvm;
 using namespace mull;
 
 GoogleTestMutationOperatorFilter::GoogleTestMutationOperatorFilter(
-  std::vector<std::string> testsToFilter) :
-  testsToFilter(testsToFilter) {}
+  std::vector<std::string> testsToFilter,
+  std::vector<std::string> excludeLocations) :
+  testsToFilter(testsToFilter),
+  excludeLocations(excludeLocations) {}
 
 bool GoogleTestMutationOperatorFilter::shouldSkipDefinedFunction(llvm::Function *definedFunction) {
   if (definedFunction->getName().find(StringRef("testing8internal")) != StringRef::npos) {

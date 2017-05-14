@@ -16,9 +16,11 @@ namespace mull {
 class GoogleTestMutationOperatorFilter : public MutationOperatorFilter {
 
 std::vector<std::string> testsToFilter;
+std::vector<std::string> excludeLocations;
 
 public:
-  GoogleTestMutationOperatorFilter(std::vector<std::string> testsToFilter);
+  GoogleTestMutationOperatorFilter(std::vector<std::string> testsToFilter,
+                                   std::vector<std::string> excludeLocations);
 
   bool shouldSkipDefinedFunction(llvm::Function *definedFunction);
   bool shouldSkipTest(const std::string &testName);
