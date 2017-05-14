@@ -30,12 +30,11 @@ using namespace mull;
 using namespace llvm;
 
 GoogleTestFinder::GoogleTestFinder(
-    std::vector<std::unique_ptr<MutationOperator>> mutationOperators,
-    std::vector<std::string> testsToFilter)
-    : TestFinder(),
-    filter(GoogleTestMutationOperatorFilter()),
-    mutationOperators(std::move(mutationOperators)),
-    testsToFilter(testsToFilter)
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators,
+  std::vector<std::string> testsToFilter)
+  : TestFinder(),
+  mutationOperators(std::move(mutationOperators)),
+  filter(GoogleTestMutationOperatorFilter(testsToFilter))
 {
 
 }
@@ -193,7 +192,12 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
 
       /// Once we've got the Name of a Test Suite and the name of a Test Case
       /// We can construct the name of a Test
-      auto TestName = TestSuiteName + "." + TestCaseName;
+      const auto TestName = TestSuiteName + "." + TestCaseName;
+
+      const std::string testNameStr = TestName.str();
+      if (filter.shouldSkipTest(testNameStr)) {
+        continue;
+      }
 
       /// And the part of Test Body function name
 
@@ -209,13 +213,6 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
           TestBodyFunction = &Func;
           break;
         }
-      }
-
-      if (testsToFilter.empty() == false &&
-          std::find(testsToFilter.begin(),
-                    testsToFilter.end(),
-                    TestName.str()) == testsToFilter.end()) {
-            continue;
       }
 
       assert(TestBodyFunction && "Cannot find the TestBody function for the Test");
@@ -374,8 +371,6 @@ GoogleTestFinder::findMutationPoints(const Context &context,
   }
 
   std::vector<MutationPoint *> points;
-
-  auto filter = getFilter();
 
   for (auto &mutationOperator : mutationOperators) {
     for (auto point : mutationOperator->getMutationPoints(context, &testee, filter)) {

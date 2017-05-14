@@ -7,6 +7,10 @@
 using namespace llvm;
 using namespace mull;
 
+GoogleTestMutationOperatorFilter::GoogleTestMutationOperatorFilter(
+  std::vector<std::string> testsToFilter) :
+  testsToFilter(testsToFilter) {}
+
 bool GoogleTestMutationOperatorFilter::shouldSkipDefinedFunction(llvm::Function *definedFunction) {
   if (definedFunction->getName().find(StringRef("testing8internal")) != StringRef::npos) {
     return true;
@@ -29,6 +33,20 @@ bool GoogleTestMutationOperatorFilter::shouldSkipDefinedFunction(llvm::Function 
         return true;
       }
     }
+  }
+
+  return false;
+}
+
+bool GoogleTestMutationOperatorFilter::shouldSkipTest(const std::string &testName) {
+  if (testsToFilter.empty()) {
+    return false;
+  }
+
+  if (std::find(testsToFilter.begin(),
+                testsToFilter.end(),
+                testName) == testsToFilter.end()) {
+    return true;
   }
 
   return false;
