@@ -36,6 +36,7 @@ class Config {
   std::vector<std::string> mutationOperators;
   std::string dynamicLibraryFileList;
   std::vector<std::string> tests;
+  std::vector<std::string> excludeLocations;
 
   bool fork;
   bool dryRun;
@@ -64,6 +65,7 @@ public:
     ),
     dynamicLibraryFileList(),
     tests(),
+    excludeLocations(),
     fork(true),
     dryRun(false),
     useCache(true),
@@ -79,6 +81,7 @@ public:
          const std::vector<std::string> mutationOperators,
          const std::string &dynamicLibraryFileList,
          const std::vector<std::string> tests,
+         const std::vector<std::string> excludeLocations,
          bool fork,
          bool dryrun,
          bool cache,
@@ -91,6 +94,7 @@ public:
     mutationOperators(mutationOperators),
     dynamicLibraryFileList(dynamicLibraryFileList),
     tests(tests),
+    excludeLocations(excludeLocations),
     fork(fork),
     dryRun(dryrun),
     useCache(cache),
@@ -154,6 +158,10 @@ public:
 
   const std::vector<std::string> &getTests() const {
     return tests;
+  }
+
+  const std::vector<std::string> &getExcludeLocations() const {
+    return excludeLocations;
   }
 
   bool getFork() const {

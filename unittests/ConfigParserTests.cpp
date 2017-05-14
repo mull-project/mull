@@ -213,3 +213,22 @@ TEST_F(ConfigParserTestFixture, loadConfig_ProjectName_Unspecified) {
   configWithYamlContent("");
   ASSERT_EQ("", config.getProjectName());
 }
+
+TEST_F(ConfigParserTestFixture, loadConfig_excludeLocations_unspecified) {
+  configWithYamlContent("");
+  ASSERT_EQ(0U, config.getExcludeLocations().size());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_excludeLocations_specified) {
+  const char *configYAML = R"YAML(
+exclude_locations:
+  - include/c++/v1
+  - llvm/include
+  )YAML";
+  configWithYamlContent(configYAML);
+
+  auto excludeLocations = config.getExcludeLocations();
+  ASSERT_EQ(2U, excludeLocations.size());
+  ASSERT_EQ("include/c++/v1", excludeLocations[0]);
+  ASSERT_EQ("llvm/include", excludeLocations[1]);
+}

@@ -54,6 +54,7 @@ TEST(Driver_Rust, AddMutationOperator) {
                 {},
                 {},
                 {},
+                {},
                 doFork,
                 dryRun,
                 useCache,

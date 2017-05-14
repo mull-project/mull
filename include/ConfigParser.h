@@ -23,6 +23,7 @@ struct MappingTraits<mull::Config>
     io.mapOptional("dynamic_library_file_list", config.dynamicLibraryFileList);
     io.mapOptional("mutation_operators", config.mutationOperators);
     io.mapOptional("tests", config.tests);
+    io.mapOptional("exclude_locations", config.excludeLocations);
     io.mapOptional("fork", config.fork);
     io.mapOptional("dry_run", config.dryRun);
     io.mapOptional("use_cache", config.useCache);
