@@ -1,5 +1,7 @@
 #include "GoogleTestMutationOperatorFilter.h"
 
+#include "Logger.h"
+
 #include "llvm/IR/DebugInfoMetadata.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/Instructions.h"
@@ -13,26 +15,32 @@ GoogleTestMutationOperatorFilter::GoogleTestMutationOperatorFilter(
   testsToFilter(testsToFilter),
   excludeLocations(excludeLocations) {}
 
-bool GoogleTestMutationOperatorFilter::shouldSkipDefinedFunction(llvm::Function *definedFunction) {
-  if (definedFunction->getName().find(StringRef("testing8internal")) != StringRef::npos) {
+bool GoogleTestMutationOperatorFilter::shouldSkipTesteeFunction(llvm::Function *testee) {
+  if (testee->getName().find(StringRef("testing8internal")) != StringRef::npos) {
     return true;
   }
 
-  if (definedFunction->getName().find(StringRef("testing15AssertionResult")) != StringRef::npos) {
+  if (testee->getName().find(StringRef("testing15AssertionResult")) != StringRef::npos) {
     return true;
   }
 
-  if (definedFunction->getName().find(StringRef("testing7Message")) != StringRef::npos) {
+  if (testee->getName().find(StringRef("testing7Message")) != StringRef::npos) {
     return true;
   }
 
-  if (definedFunction->hasMetadata()) {
+  if (testee->hasMetadata()) {
     int debugInfoKindID = 0;
-    MDNode *debug = definedFunction->getMetadata(debugInfoKindID);
+    MDNode *debug = testee->getMetadata(debugInfoKindID);
     DISubprogram *subprogram = dyn_cast<DISubprogram>(debug);
     if (subprogram) {
       if (subprogram->getFilename().str().find("include/c++/v1") != std::string::npos) {
         return true;
+      }
+
+      for (auto &excludeLocation: excludeLocations) {
+        if (subprogram->getFilename().str().find(excludeLocation) != std::string::npos) {
+          return true;
+        }
       }
     }
   }
@@ -63,6 +71,12 @@ bool GoogleTestMutationOperatorFilter::shouldSkipInstruction(llvm::Instruction *
     if (location) {
       if (location->getFilename().str().find("include/c++/v1") != std::string::npos) {
         return true;
+      }
+
+      for (auto &excludeLocation: excludeLocations) {
+        if (location->getFilename().str().find(excludeLocation) != std::string::npos) {
+          return true;
+        }
       }
     }
   }

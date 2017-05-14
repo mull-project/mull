@@ -338,7 +338,7 @@ GoogleTestFinder::findTestees(Test *Test,
 
           if (functionWasNotProcessed) {
             /// Filtering
-            if (filter.shouldSkipDefinedFunction(definedFunction)) {
+            if (filter.shouldSkipTesteeFunction(definedFunction)) {
               continue;
             }
 

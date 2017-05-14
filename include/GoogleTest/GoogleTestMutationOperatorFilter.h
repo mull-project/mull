@@ -22,7 +22,7 @@ public:
   GoogleTestMutationOperatorFilter(std::vector<std::string> testsToFilter,
                                    std::vector<std::string> excludeLocations);
 
-  bool shouldSkipDefinedFunction(llvm::Function *definedFunction);
+  bool shouldSkipTesteeFunction(llvm::Function *testee);
   bool shouldSkipTest(const std::string &testName);
   bool shouldSkipInstruction(llvm::Instruction *instruction);
 };

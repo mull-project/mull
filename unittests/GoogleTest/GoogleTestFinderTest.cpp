@@ -22,6 +22,8 @@ using namespace llvm;
 
 static TestModuleFactory TestModuleFactory;
 
+#pragma mark - Finding Tests
+
 TEST(GoogleTestFinder, FindTest) {
   auto ModuleWithTests       = TestModuleFactory.createGoogleTestTesterModule();
   auto mullModuleWithTests = make_unique<MullModule>(std::move(ModuleWithTests), "");
@@ -86,6 +88,8 @@ mutation_operators:
   GoogleTest_Test *Test1 = dyn_cast<GoogleTest_Test>(tests[0].get());
   ASSERT_EQ("HelloTest.testSumOfTestee", Test1->getTestName());
 }
+
+#pragma mark - Finding Testees
 
 TEST(GoogleTestFinder, findTestees) {
   auto ModuleWithTests   = TestModuleFactory.createGoogleTestTesterModule();
@@ -166,6 +170,41 @@ mutation_operators:
   Function *testee2 = Testees[1]->getTesteeFunction();
   ASSERT_EQ(testee2->getName().str(), "_ZL6testeev");
 }
+
+TEST(GoogleTestFinder, findTestees_with_excludeLocations) {
+  auto ModuleWithTests   = TestModuleFactory.createGoogleTestTesterModule();
+  auto ModuleWithTestees = TestModuleFactory.createGoogleTestTesteeModule();
+
+  auto mullModuleWithTests   = make_unique<MullModule>(std::move(ModuleWithTests), "");
+  auto mullModuleWithTestees = make_unique<MullModule>(std::move(ModuleWithTestees), "");
+
+  Context Ctx;
+  Ctx.addModule(std::move(mullModuleWithTests));
+  Ctx.addModule(std::move(mullModuleWithTestees));
+
+  const char *configYAML = "";
+  yaml::Input Input(configYAML);
+
+  ConfigParser Parser;
+  auto Cfg = Parser.loadConfig(Input);
+
+  auto mutationOperators = Driver::mutationOperators(Cfg.getMutationOperators());
+  GoogleTestFinder Finder(std::move(mutationOperators), {}, { "Testee.cpp" });
+
+  auto Tests = Finder.findTests(Ctx);
+
+  ASSERT_EQ(2U, Tests.size());
+
+  auto &Test = *(Tests.begin());
+
+  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
+
+  // Test itself is always the first testee - it is not filtered out.
+  // But the second testee *is* filtered out so having 1 instead of 2.
+  ASSERT_EQ(1U, Testees.size());
+}
+
+#pragma mark - Finding Mutation Points
 
 TEST(GoogleTestFinder, FindMutationPoints) {
   auto ModuleWithTests   = TestModuleFactory.createGoogleTestTesterModule();
