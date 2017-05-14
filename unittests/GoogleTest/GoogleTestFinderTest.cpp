@@ -206,7 +206,7 @@ TEST(GoogleTestFinder, findTestees_with_excludeLocations) {
 
 #pragma mark - Finding Mutation Points
 
-TEST(GoogleTestFinder, FindMutationPoints) {
+TEST(GoogleTestFinder, findMutationPoints) {
   auto ModuleWithTests   = TestModuleFactory.createGoogleTestTesterModule();
   auto ModuleWithTestees = TestModuleFactory.createGoogleTestTesteeModule();
 
@@ -260,4 +260,59 @@ mutation_operators:
   ASSERT_EQ(MPA.getFnIndex(), 0);
   ASSERT_EQ(MPA.getBBIndex(), 0);
   ASSERT_EQ(MPA.getIIndex(), 14);
+}
+
+TEST(GoogleTestFinder, findMutationPoints_excludeLocations) {
+  auto ModuleWithTests   = TestModuleFactory.createGoogleTestTesterModule();
+  auto ModuleWithTestees = TestModuleFactory.createGoogleTestTesteeModule();
+
+  auto mullModuleWithTests   = make_unique<MullModule>(std::move(ModuleWithTests), "");
+  auto mullModuleWithTestees = make_unique<MullModule>(std::move(ModuleWithTestees), "");
+
+  Context Ctx;
+  Ctx.addModule(std::move(mullModuleWithTests));
+  Ctx.addModule(std::move(mullModuleWithTestees));
+
+  const char *configYAML = R"YAML(
+mutation_operators:
+  - add_mutation_operator
+  )YAML";
+
+  yaml::Input Input(configYAML);
+
+  ConfigParser Parser;
+  auto Cfg = Parser.loadConfig(Input);
+
+  auto mutationOperators = Driver::mutationOperators(Cfg.getMutationOperators());
+  ASSERT_EQ(mutationOperators.size(), 1U);
+
+  GoogleTestFinder Finder(std::move(mutationOperators), {}, {});
+
+  auto Tests = Finder.findTests(Ctx);
+
+  ASSERT_EQ(2U, Tests.size());
+
+  auto &Test = *Tests.begin();
+
+  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
+
+  ASSERT_EQ(2U, Testees.size());
+
+  Function *Testee = Testees[1]->getTesteeFunction();
+
+  ASSERT_FALSE(Testee->empty());
+  ASSERT_EQ(Testee->getName().str(), "_ZN6Testee3sumEii");
+
+  // Now we create another find with excludeLocations set to "- Testee.cpp"
+  auto mutationOperators2 = Driver::mutationOperators(Cfg.getMutationOperators());
+  ASSERT_EQ(mutationOperators2.size(), 1U);
+
+  GoogleTestFinder finderWithExcludedLocations(std::move(mutationOperators2),
+                                               {},
+                                               { "Testee.cpp" });
+
+  std::vector<MutationPoint *> mutationPoints =
+    finderWithExcludedLocations.findMutationPoints(Ctx, *Testee);
+
+  ASSERT_EQ(0U, mutationPoints.size());
 }
