@@ -213,6 +213,14 @@ public:
         Logger::debug() << "\t- " << test << '\n';
       }
     }
+
+    if (getExcludeLocations().empty() == false) {
+      Logger::debug() << "\t" << "exclude_locations: " << '\n';
+
+      for (auto excludeLocation : getExcludeLocations()) {
+        Logger::debug() << "\t- " << excludeLocation << '\n';
+      }
+    }
   }
 
   std::vector<std::string> validate() {
