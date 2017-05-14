@@ -1,5 +1,6 @@
 #pragma once
 
+#include "GoogleTest/GoogleTestMutationOperatorFilter.h"
 #include "MutationPoint.h"
 #include "MutationOperators/MutationOperator.h"
 #include "TestFinder.h"
@@ -26,9 +27,14 @@ class GoogleTestFinder : public TestFinder {
   std::vector<std::unique_ptr<MutationPoint>> MutationPoints;
   std::map<llvm::Function *, std::vector<MutationPoint *>> MutationPointsRegistry;
 
+  const mull::GoogleTestMutationOperatorFilter filter;
+
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   std::vector<std::string> testsToFilter;
 
+  const mull::GoogleTestMutationOperatorFilter &getFilter() const {
+    return filter;
+  }
 public:
   GoogleTestFinder(std::vector<std::unique_ptr<MutationOperator>> mutationOperators,
                    std::vector<std::string> testsToFilter);

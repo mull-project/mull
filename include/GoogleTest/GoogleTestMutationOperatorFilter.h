@@ -1,4 +1,6 @@
-#include "MutationOperatorFilter.h"
+#pragma once
+
+#include "MutationOperators/MutationOperatorFilter.h"
 
 namespace mull {
 

@@ -1,11 +1,8 @@
 #include "GoogleTest/GoogleTestFinder.h"
 
-#include "GoogleTest/GoogleTestMutationOperatorFilter.h"
-
 #include "Context.h"
 #include "Logger.h"
 #include "MutationOperators/MutationOperator.h"
-#include "MutationOperators/MutationOperatorFilter.h"
 
 #include "llvm/IR/CallSite.h"
 #include "llvm/IR/Constants.h"
@@ -36,9 +33,11 @@ GoogleTestFinder::GoogleTestFinder(
     std::vector<std::unique_ptr<MutationOperator>> mutationOperators,
     std::vector<std::string> testsToFilter)
     : TestFinder(),
+    filter(GoogleTestMutationOperatorFilter()),
     mutationOperators(std::move(mutationOperators)),
     testsToFilter(testsToFilter)
 {
+
 }
 
 /// The algorithm is the following:
@@ -403,7 +402,7 @@ GoogleTestFinder::findMutationPoints(const Context &context,
 
   std::vector<MutationPoint *> points;
 
-  GoogleTestMutationOperatorFilter filter;
+  auto filter = getFilter();
 
   for (auto &mutationOperator : mutationOperators) {
     for (auto point : mutationOperator->getMutationPoints(context, &testee, filter)) {
