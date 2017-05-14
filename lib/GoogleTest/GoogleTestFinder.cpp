@@ -1,5 +1,7 @@
 #include "GoogleTest/GoogleTestFinder.h"
 
+#include "GoogleTest/GoogleTestMutationOperatorFilter.h"
+
 #include "Context.h"
 #include "Logger.h"
 #include "MutationOperators/MutationOperator.h"
@@ -29,25 +31,6 @@
 
 using namespace mull;
 using namespace llvm;
-
-class GoogleTestMutationOperatorFilter : public MutationOperatorFilter {
-public:
-  bool shouldSkipInstruction(llvm::Instruction *instruction) {
-    if (instruction->hasMetadata()) {
-      int debugInfoKindID = 0;
-      MDNode *debug = instruction->getMetadata(debugInfoKindID);
-
-      DILocation *location = dyn_cast<DILocation>(debug);
-      if (location) {
-        if (location->getFilename().str().find("include/c++/v1") != std::string::npos) {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  };
-};
 
 GoogleTestFinder::GoogleTestFinder(
     std::vector<std::unique_ptr<MutationOperator>> mutationOperators,
