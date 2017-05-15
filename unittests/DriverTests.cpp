@@ -3,6 +3,7 @@
 #include "Driver.h"
 #include "ModuleLoader.h"
 #include "MutationOperators/AddMutationOperator.h"
+#include "MutationOperators/AndOrReplacementMutationOperator.h"
 #include "MutationOperators/NegateConditionMutationOperator.h"
 #include "MutationOperators/RemoveVoidFunctionMutationOperator.h"
 #include "Result.h"
@@ -30,6 +31,8 @@ using namespace mull;
 using namespace llvm;
 
 static TestModuleFactory SharedTestModuleFactory;
+
+#pragma mark - Mutation operators
 
 TEST(Driver, SimpleTest_AddMutationOperator) {
   /// Create Config with fake BitcodePaths
@@ -252,6 +255,148 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
 
   ASSERT_NE(nullptr, FirstMutant->getMutationPoint());
 }
+
+TEST(Driver, SimpleTest_AndOrReplacementMutationOperator) {
+  std::string projectName = "some_project";
+  std::string testFramework = "SimpleTest";
+
+  bool doFork = false;
+  bool dryRun = false;
+  bool useCache = false;
+  int distance = 10;
+  std::string cacheDirectory = "/tmp/mull_cache";
+
+  Config config("",
+                projectName,
+                testFramework,
+                {},
+                {},
+                {},
+                {},
+                doFork,
+                dryRun,
+                useCache,
+                MullDefaultTimeoutMilliseconds,
+                distance,
+                cacheDirectory);
+
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<AndOrReplacementMutationOperator>());
+
+  SimpleTestFinder testFinder(std::move(mutationOperators));
+
+  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
+    std::vector<std::unique_ptr<MullModule>> modules;
+
+    auto module = SharedTestModuleFactory.create_SimpleTest_AndOrReplacement_Module();
+    modules.push_back(make_unique<MullModule>(std::move(module), "1234"));
+
+    return modules;
+  };
+
+  LLVMContext context;
+  FakeModuleLoader loader(context, modules);
+
+  Toolchain toolchain(config);
+  SimpleTestRunner runner(toolchain.targetMachine());
+
+  Driver Driver(config, loader, testFinder, runner, toolchain);
+
+  auto result = Driver.Run();
+  ASSERT_EQ(6U, result->getTestResults().size());
+
+  /// Mutation #1: AND operator with 2 branches.
+  {
+    auto result1 = result->getTestResults().begin()->get();
+    ASSERT_EQ(ExecutionStatus::Passed, result1->getOriginalTestResult().Status);
+    ASSERT_EQ("test_AND_operator_2branches", result1->getTestName());
+
+    auto &mutants1 = result1->getMutationResults();
+    ASSERT_EQ(1U, mutants1.size());
+
+    auto mutant1_1 = mutants1.begin()->get();
+    ASSERT_EQ(ExecutionStatus::Failed, mutant1_1->getExecutionResult().Status);
+  }
+
+  /// Mutation #2: AND operator with 1 branch.
+  {
+    auto result2 = result->getTestResults()[1].get();
+    ASSERT_EQ(ExecutionStatus::Passed, result2->getOriginalTestResult().Status);
+    ASSERT_EQ("test_AND_operator_1branch", result2->getTestName());
+
+    auto &mutants2 = result2->getMutationResults();
+    ASSERT_EQ(1U, mutants2.size());
+
+    auto mutant2_1 = mutants2.begin()->get();
+    ASSERT_EQ(ExecutionStatus::Failed, mutant2_1->getExecutionResult().Status);
+  }
+
+  /// Mutation #3: OR operator with 2 branches.
+  {
+    auto result3 = result->getTestResults()[2].get();
+    ASSERT_EQ(ExecutionStatus::Passed, result3->getOriginalTestResult().Status);
+    ASSERT_EQ("test_OR_operator_2branches", result3->getTestName());
+
+    auto &mutants3 = result3->getMutationResults();
+    ASSERT_EQ(1U, mutants3.size());
+
+    auto mutant3_1 = mutants3.begin()->get();
+    ASSERT_EQ(ExecutionStatus::Failed, mutant3_1->getExecutionResult().Status);
+  }
+
+  /// Mutation #4: OR operator with 1 branch.
+  {
+    auto result4 = result->getTestResults()[3].get();
+    ASSERT_EQ(ExecutionStatus::Passed, result4->getOriginalTestResult().Status);
+    ASSERT_EQ("test_OR_operator_1branch", result4->getTestName());
+
+    auto &mutants4 = result4->getMutationResults();
+    ASSERT_EQ(1U, mutants4.size());
+
+    auto mutant4_1 = mutants4.begin()->get();
+    ASSERT_EQ(ExecutionStatus::Failed, mutant4_1->getExecutionResult().Status);
+  }
+
+  /// Mutation #5: Compound AND then OR expression.
+  {
+    auto result5 = result->getTestResults()[4].get();
+    ASSERT_EQ(ExecutionStatus::Passed, result5->getOriginalTestResult().Status);
+    ASSERT_EQ("test_compound_AND_then_OR_operator", result5->getTestName());
+
+    auto &mutants5 = result5->getMutationResults();
+    ASSERT_EQ(2U, mutants5.size());
+
+    // Mutant 5.1 should pass because it is a relaxing AND -> OR replacement.
+    auto mutant5_1 = mutants5[0].get();
+    ASSERT_EQ(ExecutionStatus::Passed, mutant5_1->getExecutionResult().Status);
+
+    // Mutant 5.2 should pass because it is a stressing OR -> AND replacement.
+    auto mutant5_2 = mutants5[1].get();
+    ASSERT_EQ(ExecutionStatus::Failed, mutant5_2->getExecutionResult().Status);
+  }
+
+  /// Mutation #6: Compound OR then AND expression.
+  {
+    auto result6 = result->getTestResults()[5].get();
+    ASSERT_EQ(ExecutionStatus::Passed, result6->getOriginalTestResult().Status);
+    ASSERT_EQ("test_compound_OR_then_AND_operator", result6->getTestName());
+
+    auto &mutants6 = result6->getMutationResults();
+    ASSERT_EQ(2U, mutants6.size());
+
+    /// Mutant 6.1 should pass because it is a stressing OR -> AND replacement
+    /// in the first expression.
+    auto mutant6_1 = mutants6[0].get();
+    ASSERT_EQ(ExecutionStatus::Failed, mutant6_1->getExecutionResult().Status);
+
+    /// Mutant 6.2 should pass because it is a relaxing AND -> OR replacement
+    /// in the second expression.
+    auto mutant6_2 = mutants6[1].get();
+    ASSERT_EQ(ExecutionStatus::Passed, mutant6_2->getExecutionResult().Status);
+  }
+}
+
+#pragma mark - Testee path calculation
 
 TEST(Driver, SimpleTest_TesteePathCalculation) {
   std::string projectName = "some_project";

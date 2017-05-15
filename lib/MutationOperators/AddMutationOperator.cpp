@@ -174,7 +174,6 @@ llvm::Value *AddMutationOperator::applyMutation(Module *M,
   /// In the following V argument is not used. Eventually it will be removed from
   /// this method's signature because it will be not relevant
   /// when mutations will be applied on copies of original module
-
   llvm::Function &F = *(std::next(M->begin(), address.getFnIndex()));
   llvm::BasicBlock &B = *(std::next(F.begin(), address.getBBIndex()));
   llvm::Instruction &I = *(std::next(B.begin(), address.getIIndex()));

@@ -21,6 +21,7 @@
 
 /// FIXME: Should be abstract
 #include "MutationOperators/AddMutationOperator.h"
+#include "MutationOperators/AndOrReplacementMutationOperator.h"
 
 #include <algorithm>
 #include <chrono>
@@ -215,6 +216,9 @@ Driver::mutationOperators(std::vector<std::string> mutationOperatorStrings) {
     for (auto mutation : mutationOperatorStrings) {
       if (mutation == AddMutationOperator::ID) {
         mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+      }
+      else if (mutation == AndOrReplacementMutationOperator::ID) {
+        mutationOperators.emplace_back(make_unique<AndOrReplacementMutationOperator>());
       }
       else if (mutation == NegateConditionMutationOperator::ID) {
         mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
