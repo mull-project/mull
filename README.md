@@ -71,7 +71,7 @@ build Mull.
 - **Add Mutation**: replaces + with -.
 - **Negate Condition**: inverses conditions like `A -> !A` or `== -> !=`.
 - **Remove Void Function Call**: removes a function which doesn't have a return value.
-- **AND <-> OR**: replaces `&& -> ||` and vice versa. Not fully implemented, work in progress.
+- **AND <-> OR**: replaces `&& -> ||` and vice versa. Not fully implemented, unstable, work in progress.
 
 ## Open questions
 
