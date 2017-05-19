@@ -66,6 +66,13 @@ Use `make help` to see the common tasks used by developers.
 Use `MullUnitTests` scheme to run the tests. Use `mull-driver` scheme to
 build Mull.
 
+## Supported mutation operators
+
+- **Add Mutation**: replaces + with -.
+- **Negate Condition**: inverses conditions like `A -> !A` or `== -> !=`.
+- **Remove Void Function Call**: removes a function which doesn't have a return value.
+- **AND <-> OR**: replaces `&& -> ||` and vice versa. Not fully implemented, work in progress.
+
 ## Open questions
 
 There are the questions we want to answer with Mull eventually.
