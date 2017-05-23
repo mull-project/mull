@@ -2,6 +2,7 @@
 
 #include "Context.h"
 #include "MutationOperators/AddMutationOperator.h"
+#include "MutationOperators/AndOrReplacementMutationOperator.h"
 #include "MutationOperators/NegateConditionMutationOperator.h"
 #include "MutationOperators/RemoveVoidFunctionMutationOperator.h"
 
@@ -194,6 +195,72 @@ TEST(SimpleTestFinder, FindMutationPoints_RemoteVoidFunctionMutationOperator) {
   ASSERT_TRUE(MPA.getFnIndex() == 2);
   ASSERT_TRUE(MPA.getBBIndex() == 0);
   ASSERT_TRUE(MPA.getIIndex() == 2);
+}
+
+TEST(SimpleTestFinder, findMutationPoints_AndOrReplacementMutationOperator) {
+  auto module = TestModuleFactory.create_SimpleTest_AndOrReplacement_Module();
+
+  auto mullModule = make_unique<MullModule>(std::move(module), "");
+
+  Context ctx;
+  ctx.addModule(std::move(mullModule));
+
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<AndOrReplacementMutationOperator>());
+
+  SimpleTestFinder Finder(std::move(mutationOperators));
+
+  auto tests = Finder.findTests(ctx);
+  ASSERT_EQ(6U, tests.size());
+
+  /// Test #1
+  auto &test = *tests.begin();
+
+  std::vector<std::unique_ptr<Testee>> testees = Finder.findTestees(test.get(), ctx, 4);
+
+  ASSERT_EQ(2U, testees.size());
+
+  Function *testee_test_and_operator = testees[1]->getTesteeFunction(); // testee_and_operator()
+
+  std::vector<MutationPoint *> MutationPoints =
+    Finder.findMutationPoints(ctx, *testee_test_and_operator);
+
+  ASSERT_EQ(1U, MutationPoints.size());
+
+  MutationPoint *mutationPoint = (*(MutationPoints.begin()));
+
+  MutationPointAddress mutationPointAddress = mutationPoint->getAddress();
+  ASSERT_EQ(mutationPointAddress.getFnIndex(), 0);
+  ASSERT_EQ(mutationPointAddress.getBBIndex(), 0);
+  ASSERT_EQ(mutationPointAddress.getIIndex(), 10);
+
+  /// Test #5
+  auto &test5 = tests[4];
+
+  std::vector<std::unique_ptr<Testee>> test5_testees = Finder.findTestees(test5.get(), ctx, 4);
+
+  ASSERT_EQ(2U, test5_testees.size());
+
+  Function *testee5_function = test5_testees[1]->getTesteeFunction(); // testee_and_operator()
+
+  std::vector<MutationPoint *> testee5_mutationPoints =
+    Finder.findMutationPoints(ctx, *testee5_function);
+
+  ASSERT_EQ(2U, testee5_mutationPoints.size());
+
+  MutationPoint *testee5_mutationPoint1 = testee5_mutationPoints[0];
+
+  MutationPointAddress testee5_mutationPoint1_address = testee5_mutationPoint1->getAddress();
+  ASSERT_EQ(testee5_mutationPoint1_address.getFnIndex(), 5);
+  ASSERT_EQ(testee5_mutationPoint1_address.getBBIndex(), 0);
+  ASSERT_EQ(testee5_mutationPoint1_address.getIIndex(), 10);
+
+  MutationPoint *testee5_mutationPoint2 = testee5_mutationPoints[1];
+
+  MutationPointAddress testee5_mutationPoint2_address = testee5_mutationPoint2->getAddress();
+  ASSERT_EQ(testee5_mutationPoint2_address.getFnIndex(), 5);
+  ASSERT_EQ(testee5_mutationPoint2_address.getBBIndex(), 1);
+  ASSERT_EQ(testee5_mutationPoint2_address.getIIndex(), 3);
 }
 
 TEST(SimpleTestFinder, FindTestees_TesteePathMemorization) {

@@ -7,6 +7,7 @@ set(mull_sources
   ModuleLoader.cpp
 
   MutationOperators/AddMutationOperator.cpp
+  MutationOperators/AndOrReplacementMutationOperator.cpp
   MutationOperators/NegateConditionMutationOperator.cpp
   MutationOperators/RemoveVoidFunctionMutationOperator.cpp
 

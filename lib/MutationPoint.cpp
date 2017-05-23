@@ -51,6 +51,7 @@ Value *MutationPoint::getOriginalValue() const {
 std::unique_ptr<llvm::Module>
 MutationPoint::cloneModuleAndApplyMutation() {
   auto copyForMutation = CloneModule(module->getModule());
+  assert(copyForMutation);
 
   mutationOperator->applyMutation(copyForMutation.get(), Address, *OriginalValue);
 

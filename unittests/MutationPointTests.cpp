@@ -3,11 +3,13 @@
 #include "SimpleTest/SimpleTestFinder.h"
 #include "MutationOperators/AddMutationOperator.h"
 #include "MutationOperators/NegateConditionMutationOperator.h"
+#include "MutationOperators/AndOrReplacementMutationOperator.h"
 #include "TestModuleFactory.h"
 #include "Toolchain/Compiler.h"
 
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/IR/InstrTypes.h"
+#include "llvm/IR/Instructions.h"
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
@@ -149,4 +151,63 @@ TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
 
   auto mutatedCmpInstruction = cast<CmpInst>(&mutatedInstruction);
   ASSERT_EQ(mutatedCmpInstruction->getPredicate(), CmpInst::Predicate::ICMP_SGE);
+}
+
+TEST(MutationPoint, SimpleTest_AndOrMutationOperator_applyMutation) {
+  auto module = TestModuleFactory.create_SimpleTest_AndOrReplacement_Module();
+
+  auto mullModule = make_unique<MullModule>(std::move(module), "");
+
+  Context ctx;
+  ctx.addModule(std::move(mullModule));
+
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<AndOrReplacementMutationOperator>());
+
+  SimpleTestFinder Finder(std::move(mutationOperators));
+
+  auto tests = Finder.findTests(ctx);
+  ASSERT_EQ(6U, tests.size());
+
+  {
+    auto &test1 = tests[0];
+
+    std::vector<std::unique_ptr<Testee>> test1_testees = Finder.findTestees(test1.get(), ctx, 4);
+
+    ASSERT_EQ(2U, test1_testees.size());
+
+    // testee_AND_operator_2branches()
+    // testee #0 is always test itself.
+    Function *test1_testee1_function = test1_testees[1]->getTesteeFunction();
+
+    std::vector<MutationPoint *> test1_testee1_mutationPoints =
+      Finder.findMutationPoints(ctx, *test1_testee1_function);
+
+    ASSERT_EQ(1U, test1_testee1_mutationPoints.size());
+
+    MutationPoint *test1_testee1_mutationPoint1 = (*(test1_testee1_mutationPoints.begin()));
+
+    MutationPointAddress test1_testee1_mutationPoint1_address =
+      test1_testee1_mutationPoint1->getAddress();
+
+    ASSERT_TRUE(isa<BranchInst>(test1_testee1_mutationPoint1->getOriginalValue()));
+
+    ASSERT_EQ(&FunctionInstructionByAddress(*test1_testee1_function,
+                                            test1_testee1_mutationPoint1_address),
+                                            test1_testee1_mutationPoint1->getOriginalValue());
+
+    auto ownedMutatedTesteeModule = test1_testee1_mutationPoint1->cloneModuleAndApplyMutation();
+
+    Function *test1_mutatedTestee1_function = ownedMutatedTesteeModule->getFunction("testee_AND_operator_2branches");
+    ASSERT_TRUE(test1_mutatedTestee1_function != nullptr);
+
+    auto &test1_mutatedTestee1_mutatedInstruction =
+      FunctionInstructionByAddress(*test1_mutatedTestee1_function,
+                                   test1_testee1_mutationPoint1_address);
+
+    ASSERT_TRUE(BranchInst::classof(&test1_mutatedTestee1_mutatedInstruction));
+
+    auto test1_mutatedTestee1_mutatedBranchInstruction = cast<BranchInst>(&test1_mutatedTestee1_mutatedInstruction);
+    ASSERT_TRUE(test1_mutatedTestee1_mutatedBranchInstruction != nullptr);
+  }
 }

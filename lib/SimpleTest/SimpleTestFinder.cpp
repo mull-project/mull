@@ -91,10 +91,7 @@ SimpleTestFinder::findTestees(Test *Test, Context &Ctx, int maxDistance) {
     /// in this function assuming it to be a helper function.
     /// The only exception is the test function itself that is especially
     /// important for path calculations that are done later in SQLiteReporter.
-    if (traverseeFunction->getParent() != testBodyModule ||
-        traverseeFunction == testFunction) {
-      testees.push_back(std::move(traversee));
-    }
+    testees.push_back(std::move(traversee));
 
     /// The function reached the max allowed distance
     /// Hence we don't go deeper
