@@ -50,7 +50,10 @@ std::vector<std::unique_ptr<Test>> SimpleTestFinder::findTests(Context &Ctx) {
   for (auto &module : Ctx.getModules()) {
     auto &x = module->getModule()->getFunctionList();
     for (auto &Fn : x) {
-      if (Fn.getName().startswith("test_")) {
+
+      /// We find C functions having test_ and the same functions if they are
+      /// compiled with C++ (mangled as "_Z25test_").
+      if (Fn.getName().find("test_") != std::string::npos) {
 
         Logger::info() << "SimpleTestFinder::findTests - found function "
                        << Fn.getName() << '\n';

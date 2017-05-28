@@ -198,7 +198,7 @@ TEST(SimpleTestFinder, FindMutationPoints_RemoteVoidFunctionMutationOperator) {
 }
 
 TEST(SimpleTestFinder, findMutationPoints_AndOrReplacementMutationOperator) {
-  auto module = TestModuleFactory.create_SimpleTest_AndOrReplacement_Module();
+  auto module = TestModuleFactory.create_SimpleTest_ANDORReplacement_Module();
 
   auto mullModule = make_unique<MullModule>(std::move(module), "");
 

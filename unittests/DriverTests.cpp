@@ -262,7 +262,7 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
   ASSERT_NE(nullptr, FirstMutant->getMutationPoint());
 }
 
-TEST(Driver, SimpleTest_AndOrReplacementMutationOperator) {
+TEST(Driver, SimpleTest_ANDORReplacementMutationOperator) {
   std::string projectName = "some_project";
   std::string testFramework = "SimpleTest";
 
@@ -296,7 +296,7 @@ TEST(Driver, SimpleTest_AndOrReplacementMutationOperator) {
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
 
-    auto module = SharedTestModuleFactory.create_SimpleTest_AndOrReplacement_Module();
+    auto module = SharedTestModuleFactory.create_SimpleTest_ANDORReplacement_Module();
     modules.push_back(make_unique<MullModule>(std::move(module), "1234"));
 
     return modules;
@@ -401,6 +401,137 @@ TEST(Driver, SimpleTest_AndOrReplacementMutationOperator) {
     /// in the second expression.
     auto mutant6_2 = mutants6[1].get();
     ASSERT_EQ(ExecutionStatus::Passed, mutant6_2->getExecutionResult().Status);
+  }
+}
+
+TEST(Driver, SimpleTest_ANDORReplacementMutationOperator_CPP) {
+  std::string projectName = "some_project";
+  std::string testFramework = "SimpleTest";
+
+  bool doFork = true; // this test crashes in 2 tests, so we want a sandbox.
+  bool dryRun = false;
+  bool useCache = false;
+  bool debugInfo = false;
+
+  int distance = 10;
+  std::string cacheDirectory = "/tmp/mull_cache";
+
+  Config config("",
+                projectName,
+                testFramework,
+                {},
+                {},
+                {},
+                {},
+                doFork,
+                dryRun,
+                useCache,
+                debugInfo,
+                MullDefaultTimeoutMilliseconds,
+                distance,
+                cacheDirectory);
+
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<AndOrReplacementMutationOperator>());
+
+  SimpleTestFinder testFinder(std::move(mutationOperators));
+
+  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
+    std::vector<std::unique_ptr<MullModule>> modules;
+
+    auto module = SharedTestModuleFactory.create_SimpleTest_ANDORReplacement_CPPContent_Module();
+    modules.push_back(make_unique<MullModule>(std::move(module), "1234"));
+
+    return modules;
+  };
+
+  LLVMContext context;
+  FakeModuleLoader loader(context, modules);
+
+  Toolchain toolchain(config);
+  SimpleTestRunner runner(toolchain.targetMachine());
+
+  Driver Driver(config, loader, testFinder, runner, toolchain);
+
+  auto result = Driver.Run();
+  ASSERT_EQ(6U, result->getTestResults().size());
+
+  /// Mutation #1: OR operator
+  {
+    auto result1 = result->getTestResults().begin()->get();
+    ASSERT_EQ(ExecutionStatus::Passed, result1->getOriginalTestResult().Status);
+    ASSERT_EQ("_Z25test_OR_operator_with_CPPv", result1->getTestName());
+
+    auto &mutants1 = result1->getMutationResults();
+    ASSERT_EQ(1U, mutants1.size());
+
+    auto mutant1_1 = mutants1.begin()->get();
+    ASSERT_EQ(ExecutionStatus::Failed, mutant1_1->getExecutionResult().Status);
+  }
+
+  /// Mutation #2: OR operator (PHI case)
+  {
+    auto result2 = result->getTestResults()[1].get();
+    ASSERT_EQ(ExecutionStatus::Passed, result2->getOriginalTestResult().Status);
+    ASSERT_EQ("_Z34test_OR_operator_with_CPP_PHI_casev", result2->getTestName());
+
+    auto &mutants2 = result2->getMutationResults();
+    ASSERT_EQ(1U, mutants2.size());
+
+    auto mutant2_1 = mutants2.begin()->get();
+    ASSERT_EQ(ExecutionStatus::Failed, mutant2_1->getExecutionResult().Status);
+  }
+
+  /// Mutation #3: OR operator (Assert)
+  {
+    auto result3 = result->getTestResults()[2].get();
+    ASSERT_EQ(ExecutionStatus::Passed, result3->getOriginalTestResult().Status);
+    ASSERT_EQ("_Z36test_OR_operator_with_CPP_and_assertv", result3->getTestName());
+
+    auto &mutants3 = result3->getMutationResults();
+    ASSERT_EQ(1U, mutants3.size());
+
+    auto mutant3_1 = mutants3.begin()->get();
+    ASSERT_EQ(ExecutionStatus::Crashed, mutant3_1->getExecutionResult().Status);
+  }
+
+  /// Mutation #4: AND operator
+  {
+    auto result4 = result->getTestResults()[3].get();
+    ASSERT_EQ(ExecutionStatus::Passed, result4->getOriginalTestResult().Status);
+    ASSERT_EQ("_Z26test_AND_operator_with_CPPv", result4->getTestName());
+
+    auto &mutants4 = result4->getMutationResults();
+    ASSERT_EQ(1U, mutants4.size());
+
+    auto mutant4_1 = mutants4.begin()->get();
+    ASSERT_EQ(ExecutionStatus::Failed, mutant4_1->getExecutionResult().Status);
+  }
+
+  /// Mutation #5: AND operator (PHI case)
+  {
+    auto result5 = result->getTestResults()[4].get();
+    ASSERT_EQ(ExecutionStatus::Passed, result5->getOriginalTestResult().Status);
+    ASSERT_EQ("_Z35test_AND_operator_with_CPP_PHI_casev", result5->getTestName());
+
+    auto &mutants5 = result5->getMutationResults();
+    ASSERT_EQ(1U, mutants5.size());
+
+    auto mutant5_1 = mutants5.begin()->get();
+    ASSERT_EQ(ExecutionStatus::Failed, mutant5_1->getExecutionResult().Status);
+  }
+
+  /// Mutation #6: AND operator (Assert)
+  {
+    auto result6 = result->getTestResults()[5].get();
+    ASSERT_EQ(ExecutionStatus::Passed, result6->getOriginalTestResult().Status);
+    ASSERT_EQ("_Z37test_AND_operator_with_CPP_and_assertv", result6->getTestName());
+
+    auto &mutants6 = result6->getMutationResults();
+    ASSERT_EQ(1U, mutants6.size());
+
+    auto mutant6_1 = mutants6.begin()->get();
+    ASSERT_EQ(ExecutionStatus::Crashed, mutant6_1->getExecutionResult().Status);
   }
 }
 

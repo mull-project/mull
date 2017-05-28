@@ -106,8 +106,13 @@ std::unique_ptr<Module> TestModuleFactory::create_SimpleTest_RemoveVoidFunction_
 
 #pragma mark - AND <-> OR Replacement
 
-std::unique_ptr<Module> TestModuleFactory::create_SimpleTest_AndOrReplacement_Module() {
-  const char *fixture = "fixture_simple_test_test_and_or_operators.ll";
+std::unique_ptr<Module> TestModuleFactory::create_SimpleTest_ANDORReplacement_Module() {
+  const char *fixture = "fixture_simple_test_and_or_replacement_operator.ll";
+  return createModule(fixture, fixture);
+}
+
+std::unique_ptr<Module> TestModuleFactory::create_SimpleTest_ANDORReplacement_CPPContent_Module() {
+  const char *fixture = "fixture_simple_test_and_or_replacement_operator_cpp_content.ll";
   return createModule(fixture, fixture);
 }
 
