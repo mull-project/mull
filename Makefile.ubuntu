@@ -15,6 +15,9 @@ MULL=$(MULL_UNITTESTS_DIR)/MullUnitTests
 help: ## Show this help message.
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
+install: build_ninja
+	cd $(BUILD_DIR_NINJA) && ninja install
+
 test: test_unit
 
 test_unit: build_ninja ## Run Unit Tests (Builds Ninja cache first if it does not exist)
