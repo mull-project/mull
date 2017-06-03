@@ -1,11 +1,13 @@
+MAKEFLAGS += --warn-undefined-variables
 
 BUILD_DIR_XCODE?=$(PWD)/BuildXcode
 BUILD_DIR_NINJA?=$(PWD)/BuildNinja
 
-MULL_CMAKE_TOOLCHAIN?=$(PWD)/Mull.toolchain.OSX.cmake
+MULL_CMAKE_TOOLCHAIN?=$(PWD)/Mull.toolchain.macos.cmake
 
 MULL_UNITTESTS_DIR=$(BUILD_DIR_NINJA)/unittests
 MULL=$(MULL_UNITTESTS_DIR)/MullUnitTests
+LLVM_LIB_PATH=/usr/local/opt/llvm@3.9/lib
 
 # Self-Documented Makefile
 # http://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
@@ -13,19 +15,14 @@ MULL=$(MULL_UNITTESTS_DIR)/MullUnitTests
 help: ## Show this help message.
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
 
-test: test_unit test_integration
+test: test_unit
 
 test_unit: build_ninja ## Run Unit Tests (Builds Ninja cache first if it does not exist)
 	cd $(BUILD_DIR_NINJA) && ninja MullUnitTests
 
 	# TODO: A common but dirty solution, people should learn about rpath
 	# http://stackoverflow.com/a/12399085/598057
-	cd $(MULL_UNITTESTS_DIR) && LD_LIBRARY_PATH=$(BUILD_DIR_NINJA)/lib $(MULL)
-
-test_integration:
-	# TODO: also run unit tests using ninja
-	cd $(BUILD_DIR_NINJA) && ninja check-mull
-
+	cd $(MULL_UNITTESTS_DIR) && LD_LIBRARY_PATH="$(BUILD_DIR_NINJA)/lib:$(LLVM_LIB_PATH)" $(MULL)
 
 CMAKE_COMMAND_LINE_DEBUG_FLAGS=# --trace # --debug-output # --debug-output --trace --trace-expand # --trace # --debug-output #
 

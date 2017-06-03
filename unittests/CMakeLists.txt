@@ -50,10 +50,10 @@ target_link_libraries(MullUnitTests
   mull
 
   google-test
-  ${MULL_DEPENDENCY_LLVMAsmParser}
 
-  # FIXME: Should not be arch specific
-  ${MULL_DEPENDENCY_LLVMX86AsmParser}
+  ${MULL_DEPENDENCY_LLVM}
+
+  ${CMAKE_THREAD_LIBS_INIT}
 )
 
 # rpath
