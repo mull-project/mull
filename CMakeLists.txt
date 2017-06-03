@@ -12,6 +12,12 @@ find_package(Threads REQUIRED)
 
 add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=c++11>)
 
+# https://cmake.org/Wiki/CMake_RPATH_handling#Always_full_RPATH
+SET(CMAKE_SKIP_BUILD_RPATH FALSE)
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
 message(FATAL_ERROR "This CMakeLists.txt file expects cmake to be called with a CMake toolchain file:
 cmake ... -DCMAKE_TOOLCHAIN_FILE=path_to_your_toolchain_file.
@@ -61,4 +67,3 @@ add_subdirectory(tools)
 # add_subdirectory(test)
 add_subdirectory(unittests)
 add_subdirectory(projects)
-

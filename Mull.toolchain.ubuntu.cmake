@@ -17,7 +17,7 @@ set(MULL_TOOLCHAIN_SQLITE_PATH "/usr/lib/x86_64-linux-gnu")
 # brew install zlib
 set(MULL_TOOLCHAIN_ZLIB_PATH "/usr/lib/x86_64-linux-gnu")
 
-## Changing the compilers will not work in Xcode which always 
+## Changing the compilers will not work in Xcode which always
 ## forces Apple Clang. It will always yield something like this:
 ## -- The C compiler identification is AppleClang 8.0.0.8000042
 ## -- The CXX compiler identification is AppleClang 8.0.0.8000042
@@ -25,6 +25,3 @@ set(MULL_TOOLCHAIN_ZLIB_PATH "/usr/lib/x86_64-linux-gnu")
 set(CMAKE_C_COMPILER   ${LLVM_ROOT}/bin/clang)
 set(CMAKE_CXX_COMPILER ${LLVM_ROOT}/bin/clang++)
 set(CMAKE_ASM_COMPILER ${LLVM_ROOT}/bin/llvm-as)
-
-SET(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
-

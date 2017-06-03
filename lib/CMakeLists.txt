@@ -135,3 +135,7 @@ foreach(source_file ${HERE_TARGET_SOURCES})
     source_group("Source Files\\${relative_path}" FILES ${source_file})
   endif()
 endforeach()
+
+INSTALL(TARGETS mull
+  LIBRARY DESTINATION lib
+)

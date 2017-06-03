@@ -20,3 +20,7 @@ set_target_properties(mull-driver
   PROPERTIES INSTALL_RPATH
   "${mulldriver_rpath}"
 )
+
+INSTALL(TARGETS mull-driver
+  RUNTIME DESTINATION bin
+)
