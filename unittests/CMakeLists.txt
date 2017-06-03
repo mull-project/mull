@@ -56,12 +56,26 @@ target_link_libraries(MullUnitTests
   ${CMAKE_THREAD_LIBS_INIT}
 )
 
-# rpath
+# @rpath
 get_target_property(default_rpath MullUnitTests INSTALL_RPATH)
 set(mull_unittests_rpath ${default_rpath} ${mull_unittests_rpath})
 set_target_properties(MullUnitTests
   PROPERTIES INSTALL_RPATH
   "${mull_unittests_rpath}"
+)
+
+# This is done so that CMake sets LLVM_LIB_PATH to the MullUnitTests executable
+# because libLLVM cannot find libLTO on Mac OS.
+# This probably is a bug in the LLVM 3.9 bottle.
+get_target_property(mull_unittests_lflags MullUnitTests LINK_FLAGS)
+if (NOT DEFINED ${mull_unittests_lflags})
+  set(mull_unittests_lflags "")
+endif()
+set(mull_unittests_lflags
+  ${mull_unittests_lflags} "-Wl,-rpath ${LLVM_LIB_PATH}")
+set_target_properties(MullUnitTests
+  PROPERTIES LINK_FLAGS
+  "${mull_unittests_lflags}"
 )
 
 # This copies (symlinks) fixtures/*.bc files that used by unit tests.
