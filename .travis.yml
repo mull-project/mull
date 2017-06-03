@@ -20,5 +20,5 @@ before_install:
 
 # Build steps
 script:
-- make test_unit
+- make -f Makefile.macos test_unit
 
