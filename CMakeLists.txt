@@ -1,7 +1,14 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.5.1)
 
 project(Mull)
 enable_language(C CXX)
+
+# Setting THREADS_PREFER_PTHREAD_FLAG and finding package Threads resolves:
+# /usr/bin/ld: ../../gtest-1.7.0/libgtest.a(gtest-all.cc.o): undefined reference to symbol     'pthread_key_delete@@GLIBC_2.2.5'
+# /lib/x86_64-linux-gnu/libpthread.so.0: error adding symbols: DSO missing from command line
+# https://stackoverflow.com/questions/25617839/undefined-reference-to-symbol-pthread-key-deleteglibc-2-2-5
+set(THREADS_PREFER_PTHREAD_FLAG ON)
+find_package(Threads REQUIRED)
 
 add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=c++11>)
 
@@ -19,55 +26,22 @@ endif()
 
 set(LLVM_LIB_PATH "${LLVM_ROOT}/lib")
 
+# https://cmake.org/Wiki/CMake_RPATH_handling#Always_full_RPATH
+SET(CMAKE_SKIP_BUILD_RPATH FALSE)
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib" "${LLVM_LIB_PATH}")
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
 set(MULL_SOURCE_DIR   ${CMAKE_CURRENT_SOURCE_DIR})
 set(MULL_INCLUDE_DIR  ${MULL_SOURCE_DIR}/include)
 
 include_directories("${LLVM_ROOT}/include")
 
-## LLVM dependencies:
-# Architecture-independent files.
-find_library(MULL_DEPENDENCY_LLVMAnalysis LLVMAnalysis HINTS "${LLVM_LIB_PATH}")
-find_library(MULL_DEPENDENCY_LLVMAsmParser LLVMAsmParser HINTS "${LLVM_LIB_PATH}")
-find_library(MULL_DEPENDENCY_LLVMAsmPrinter LLVMAsmPrinter HINTS "${LLVM_LIB_PATH}")
-find_library(MULL_DEPENDENCY_LLVMBitReader LLVMBitReader HINTS "${LLVM_LIB_PATH}")
-find_library(MULL_DEPENDENCY_LLVMCodeGen LLVMCodeGen HINTS "${LLVM_LIB_PATH}")
-find_library(MULL_DEPENDENCY_LLVMCore LLVMCore HINTS "${LLVM_LIB_PATH}")
-find_library(MULL_DEPENDENCY_LLVMDebugInfoCodeView LLVMDebugInfoCodeView HINTS "${LLVM_LIB_PATH}")
-find_library(MULL_DEPENDENCY_LLVMExecutionEngine LLVMExecutionEngine HINTS "${LLVM_LIB_PATH}")
-find_library(MULL_DEPENDENCY_LLVMMC LLVMMC HINTS "${LLVM_LIB_PATH}")
-find_library(MULL_DEPENDENCY_LLVMMCDisassembler LLVMMCDisassembler HINTS "${LLVM_LIB_PATH}")
-find_library(MULL_DEPENDENCY_LLVMMCParser LLVMMCParser HINTS "${LLVM_LIB_PATH}")
-find_library(MULL_DEPENDENCY_LLVMObject LLVMObject HINTS "${LLVM_LIB_PATH}")
-find_library(MULL_DEPENDENCY_LLVMOrcJIT LLVMOrcJIT HINTS "${LLVM_LIB_PATH}")
-find_library(MULL_DEPENDENCY_LLVMRuntimeDyld LLVMRuntimeDyld HINTS "${LLVM_LIB_PATH}")
-find_library(MULL_DEPENDENCY_LLVMScalarOpts LLVMScalarOpts HINTS "${LLVM_LIB_PATH}")
-find_library(MULL_DEPENDENCY_LLVMSelectionDAG LLVMSelectionDAG HINTS "${LLVM_LIB_PATH}")
-find_library(MULL_DEPENDENCY_LLVMSupport LLVMSupport HINTS "${LLVM_LIB_PATH}")
-find_library(MULL_DEPENDENCY_LLVMTarget LLVMTarget HINTS "${LLVM_LIB_PATH}")
-find_library(MULL_DEPENDENCY_LLVMTransformUtils LLVMTransformUtils HINTS "${LLVM_LIB_PATH}")
-
-if (NOT DEFINED MULL_TOOLCHAIN_ZLIB_PATH)
-message(SEND_ERROR "MULL_TOOLCHAIN_ZLIB_PATH variable must be provided in a toolchain file.
-Example: set(MULL_TOOLCHAIN_ZLIB_PATH \"/usr/local/opt/zlib/lib\")")
-endif()
+## LLVM's dependencies.
+find_library(MULL_DEPENDENCY_LLVM LLVM HINTS "${LLVM_LIB_PATH}")
 find_library(MULL_DEPENDENCY_LIBZ z HINTS ${MULL_TOOLCHAIN_LIBZ_PATH})
 find_library(MULL_DEPENDENCY_NCURSES ncurses)
-
-find_library(MULL_DEPENDENCY_SQLITE sqlite3 HINTS "/usr/local/opt/sqlite")
-
-# Architecture-specific files.
-find_library(MULL_DEPENDENCY_LLVMX86AsmParser LLVMX86AsmParser HINTS "${LLVM_LIB_PATH}")
-find_library(MULL_DEPENDENCY_LLVMX86AsmPrinter LLVMX86AsmPrinter HINTS "${LLVM_LIB_PATH}")
-find_library(MULL_DEPENDENCY_LLVMX86CodeGen LLVMX86CodeGen HINTS "${LLVM_LIB_PATH}")
-find_library(MULL_DEPENDENCY_LLVMX86Desc LLVMX86Desc HINTS "${LLVM_LIB_PATH}")
-find_library(MULL_DEPENDENCY_LLVMX86Info LLVMX86Info HINTS "${LLVM_LIB_PATH}")
-find_library(MULL_DEPENDENCY_LLVMX86Utils LLVMX86Utils HINTS "${LLVM_LIB_PATH}")
-
 ## Mull's own dependencies:
-if (NOT DEFINED MULL_TOOLCHAIN_SQLITE_PATH)
-message(SEND_ERROR "MULL_TOOLCHAIN_SQLITE_PATH variable must be provided in a toolchain file.
-Example: set(MULL_TOOLCHAIN_SQLITE_PATH \"/usr/local/opt/sqlite\"")
-endif()
 find_library(MULL_DEPENDENCY_SQLITE sqlite3 HINTS ${MULL_TOOLCHAIN_SQLITE_PATH})
 
 include_directories(${MULL_INCLUDE_DIR})
@@ -93,5 +67,3 @@ add_subdirectory(tools)
 # add_subdirectory(test)
 add_subdirectory(unittests)
 add_subdirectory(projects)
-
-
