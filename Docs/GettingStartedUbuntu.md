@@ -4,7 +4,10 @@
 
 ```bash
 $ docker pull ubuntu:xenial
+
+# This command creates and starts a new container.
 $ docker run -ti --name=mull_linux_container ubuntu:xenial
+# This command starts existing container, use it later.
 $ docker start -ai mull_linux_container
 ```
 
@@ -15,17 +18,18 @@ Add LLVM sources for binary distributions as recommended by
 
 ```
 $ echo "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-3.9 main" >> /etc/apt/sources.list.d/llvm.list
-$ echo "deb-src http://apt.llvm.org/xenial/ llvm-toolchain-xenial-3.9 main" >> /etc/apt/sources.list.d/llvm.list
+$ apt-get -y install wget
+$ wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
 ```
 
 Then install:
 
 ```bash
 $ apt-get update
-$ apt-get install git make vim ninja-build wget \
-                  libz-dev sqlite3 libsqlite3-dev ncurses-dev \
-                  cmake \
-                  llvm-3.9 clang-3.9
+$ apt-get -y install git make vim ninja-build wget \
+                     libz-dev sqlite3 libsqlite3-dev ncurses-dev \
+                     cmake \
+                     llvm-3.9 clang-3.9
 ```
 
 ### Cloning mull
