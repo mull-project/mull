@@ -16,19 +16,40 @@ find_package(Threads REQUIRED)
 
 add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=c++11>)
 
-if (NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+if (NOT CMAKE_TOOLCHAIN_FILE)
 message(FATAL_ERROR "This CMakeLists.txt file expects cmake to be called with a CMake toolchain file:
 cmake ... -DCMAKE_TOOLCHAIN_FILE=path_to_your_toolchain_file.
 See example: Mull.toolchain.OSX.cmake")
 endif()
 
-if (NOT DEFINED LLVM_ROOT)
-  message(FATAL "This CMakeLists.txt file expects cmake to be called with a
+if (NOT LLVM_ROOT)
+  message(FATAL_ERROR "This CMakeLists.txt file expects cmake to be called with a
     CMake toolchain file which provides LLVM_ROOT:\n \
     -DCMAKE_TOOLCHAIN_FILE=path_to_your_toolchain")
 endif()
 
-set(LLVM_LIB_PATH "${LLVM_ROOT}/lib")
+include(Mull.LLVM.cmake)
+
+## LLVM CXX flags
+llvm_get_cxx_flags(LLVM_CXX_FLAGS)
+
+## LLVM lib directory
+llvm_get_lib_dir(LLVM_LIB_PATH)
+
+## LLVM linker flags.
+llvm_get_link_flags(LLVM_LINK_FLAGS)
+# Without -undefined,dynamic_lookup flags there is a problem with order in which
+# the libraries are linked and that causes missing symbols.
+# https://github.com/eliben/llvm-clang-samples/pull/11
+set(LLVM_LINK_FLAGS "${LLVM_LINK_FLAGS} -Wl,-undefined,dynamic_lookup")
+
+# LLVM libraries
+set(llvm_components
+  "asmparser"
+  "orcjit"
+  "support"
+  "x86")
+llvm_get_libs(MULL_DEPENDENCY_LLVM_LIBRARIES "${llvm_components}")
 
 # https://cmake.org/Wiki/CMake_RPATH_handling#Always_full_RPATH
 SET(CMAKE_SKIP_BUILD_RPATH FALSE)
@@ -42,7 +63,6 @@ set(MULL_INCLUDE_DIR  ${MULL_SOURCE_DIR}/include)
 include_directories("${LLVM_ROOT}/include")
 
 ## LLVM's dependencies.
-find_library(MULL_DEPENDENCY_LLVM LLVM HINTS "${LLVM_LIB_PATH}")
 find_library(MULL_DEPENDENCY_LIBZ z HINTS ${MULL_TOOLCHAIN_LIBZ_PATH})
 find_library(MULL_DEPENDENCY_NCURSES ncurses)
 ## Mull's own dependencies:

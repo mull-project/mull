@@ -6,17 +6,12 @@
 MESSAGE(STATUS "Using Mull.toolchain.OSX.cmake")
 
 # brew install llvm
-set(LLVM_ROOT "/usr/local/opt/llvm@3.9" CACHE PATH "Root of LLVM install.")
+set(LLVM_ROOT "/opt/llvm-3.9" CACHE PATH "Root of LLVM install.")
 
 # A bit of a sanity check:
 if (NOT EXISTS ${LLVM_ROOT}/include/llvm)
 message(SEND_ERROR "LLVM_ROOT (${LLVM_ROOT}) is not a valid LLVM install")
 endif()
-
-# brew install sqlite
-set(MULL_TOOLCHAIN_SQLITE_PATH "/usr/local/opt/sqlite")
-# brew install zlib
-set(MULL_TOOLCHAIN_ZLIB_PATH "/usr/local/opt/zlib/lib")
 
 ## Changing the compilers will not work in Xcode which always forces Apple Clang,
 ## It will always yield something like this:
@@ -26,5 +21,10 @@ set(MULL_TOOLCHAIN_ZLIB_PATH "/usr/local/opt/zlib/lib")
 # set(CMAKE_C_COMPILER   ${LLVM_ROOT}/bin/clang)
 # set(CMAKE_CXX_COMPILER ${LLVM_ROOT}/bin/clang++)
 # set(CMAKE_ASM_COMPILER ${LLVM_ROOT}/bin/llvm-as)
+
+# brew install sqlite
+set(MULL_TOOLCHAIN_SQLITE_PATH "/usr/local/opt/sqlite")
+# brew install zlib
+set(MULL_TOOLCHAIN_ZLIB_PATH "/usr/local/opt/zlib/lib")
 
 set(CMAKE_MACOSX_RPATH ON)

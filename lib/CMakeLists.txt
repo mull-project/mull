@@ -44,9 +44,7 @@ set(mull_header_dirs
 )
 
 set(mull_additional_libraries
-
-  # Architecture-independent:
-  ${MULL_DEPENDENCY_LLVM}
+  ${MULL_DEPENDENCY_LLVM_LIBRARIES}
 
   ${MULL_DEPENDENCY_LIBZ}
   ${MULL_DEPENDENCY_NCURSES}
@@ -115,11 +113,25 @@ get_target_property(default_rpath mull INSTALL_RPATH)
 set(mull_rpath ${default_rpath} ${mull_rpath})
 set_target_properties(mull PROPERTIES INSTALL_RPATH "${mull_rpath}")
 
+# compile flags
+get_target_property(default_compile_flags mull COMPILE_FLAGS)
+if(NOT default_compile_flags)
+  set(default_compile_flags "")
+endif()
+set(mull_compileflags ${default_compile_flags} ${LLVM_CXX_FLAGS})
+set_target_properties(mull
+  PROPERTIES COMPILE_FLAGS
+  "${mull_compileflags}"
+)
+
 # Link flags
 get_target_property(default_link_flags mull LINK_FLAGS)
-if(NOT ("default_link_flags-NOTFOUND" STREQUAL ${default_link_flags}))
-  set(mull_link_flags ${default_link_flags} ${mull_link_flags})
+if(NOT ${default_link_flags})
+set(default_link_flags "")
 endif()
+set(mull_link_flags
+  "${default_link_flags} ${LLVM_LINK_FLAGS}"
+)
 set_target_properties(mull PROPERTIES LINK_FLAGS "${mull_link_flags}")
 
 # The following is needed to make CMake to generate a folder structure in Xcode
