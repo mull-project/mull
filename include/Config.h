@@ -41,6 +41,7 @@ class Config {
   bool fork;
   bool dryRun;
   bool useCache;
+  bool emitDebugInfo;
   int timeout;
   int maxDistance;
   std::string cacheDirectory;
@@ -69,6 +70,7 @@ public:
     fork(true),
     dryRun(false),
     useCache(true),
+    emitDebugInfo(false),
     timeout(MullDefaultTimeoutMilliseconds),
     maxDistance(128),
     cacheDirectory("/tmp/mull_cache")
@@ -85,6 +87,7 @@ public:
          bool fork,
          bool dryrun,
          bool cache,
+         bool debugInfo,
          int timeout,
          int distance,
          const std::string &cacheDir) :
@@ -98,6 +101,7 @@ public:
     fork(fork),
     dryRun(dryrun),
     useCache(cache),
+    emitDebugInfo(debugInfo),
     timeout(timeout),
     maxDistance(distance),
     cacheDirectory(cacheDir)
@@ -138,17 +142,17 @@ public:
   
   std::vector<std::string> getDynamicLibrariesPaths() const {
     std::vector<std::string> dynamicLibrariesPaths;
-    
+
     std::ifstream ifs(dynamicLibraryFileList);
-    
+
     for (std::string path; getline(ifs, path); ) {
       if (path.at(0) == '#') {
         continue;
       }
-      
+
       dynamicLibrariesPaths.push_back(path);
     }
-    
+
     return dynamicLibrariesPaths;
   }
   
@@ -180,6 +184,10 @@ public:
     return dryRun;
   }
 
+  bool shouldEmitDebugInfo() const {
+    return emitDebugInfo;
+  }
+
   int getMaxDistance() const {
     return maxDistance;
   }
@@ -196,7 +204,8 @@ public:
     << "\t" << "test_framework: " << getTestFramework() << '\n'
     << "\t" << "distance: " << getMaxDistance() << '\n'
     << "\t" << "dry_run: " << isDryRun() << '\n'
-    << "\t" << "fork: " << getFork() << '\n';
+    << "\t" << "fork: " << getFork() << '\n'
+    << "\t" << "emit_debug_info: " << shouldEmitDebugInfo() << '\n';
 
     if (mutationOperators.empty() == false) {
       Logger::debug() << "\t" << "mutation_operators: " << '\n';

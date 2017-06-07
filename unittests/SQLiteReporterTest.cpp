@@ -98,7 +98,7 @@ TEST(SQLiteReporter, integrationTest) {
                                                        std::move(testees));
 
   /// STEP2. Reporting results to SQLite
-  SQLiteReporter reporter;
+  SQLiteReporter reporter("integration test");
   reporter.reportResults(result, Config(), resultTime);
 
   /// STEP3. Making assertions.
@@ -158,7 +158,7 @@ TEST(SQLiteReporter, integrationTest) {
 }
 
 TEST(SQLiteReporter, integrationTest_Config) {
-  std::string projectName("Integration Test");
+  std::string projectName("Integration Test Config");
   std::string testFramework = "SimpleTest";
 
   const std::string bitcodeFileList = "/tmp/bitcode_file_list.txt";
@@ -198,6 +198,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
   bool doFork = true;
   bool dryRun = true;
   bool useCache = true;
+  bool emitDebugInfo = false;
   int timeout = 42;
   int distance = 10;
   std::string cacheDirectory = "/a/cache";
@@ -208,7 +209,8 @@ TEST(SQLiteReporter, integrationTest_Config) {
                 dynamicLibraryFileList,
                 tests,
                 {},
-                doFork, dryRun, useCache, timeout, distance,
+                doFork, dryRun, useCache, emitDebugInfo,
+                timeout, distance,
                 cacheDirectory);
 
   SQLiteReporter reporter(config.getProjectName());
@@ -248,6 +250,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
   const unsigned char *column11_cacheDirectory = nullptr;
   int column12_timeStart = 0;
   int column13_timeEnd = 0;
+  int column14_emitDebugInfo = 0;
 
   int numberOfRows = 0;
   while (1) {
@@ -267,6 +270,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
       column11_cacheDirectory = sqlite3_column_text(selectStmt, 10);
       column12_timeStart = sqlite3_column_int(selectStmt, 11);
       column13_timeEnd = sqlite3_column_int(selectStmt, 12);
+      column14_emitDebugInfo = sqlite3_column_int(selectStmt, 14);
 
       ASSERT_EQ(strcmp((const char *)column1_projectName, projectName.c_str()), 0);
       ASSERT_EQ(strcmp((const char *)column2_bitcodePaths, "tester.bc,testee.bc"), 0);
@@ -281,6 +285,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
       ASSERT_EQ(strcmp((const char *)column11_cacheDirectory, "/a/cache"), 0);
       ASSERT_EQ(column12_timeStart, 1234);
       ASSERT_EQ(column13_timeEnd, 5678);
+      ASSERT_EQ(column14_emitDebugInfo, 0);
 
       numberOfRows++;
     }
@@ -306,9 +311,356 @@ TEST(SQLiteReporter, callerPathToString) {
   callerPath.push_back("func2:14");
   callerPath.push_back("func3:16");
 
-  SQLiteReporter reporter;
+  SQLiteReporter reporter("caller path to string");
 
   std::string expectedCallerPathString = "func1:12\n  func2:14\n    func3:16";
   ASSERT_EQ(reporter.getCallerPathAsString(callerPath),
             expectedCallerPathString);
 }
+
+TEST(SQLiteReporter, do_emitDebugInfo) {
+  TestModuleFactory testModuleFactory;
+  auto ModuleWithTests   = testModuleFactory.createTesterModule();
+  auto ModuleWithTestees = testModuleFactory.createTesteeModule();
+
+  auto mullModuleWithTests   = make_unique<MullModule>(std::move(ModuleWithTests), "");
+  auto mullModuleWithTestees = make_unique<MullModule>(std::move(ModuleWithTestees), "");
+
+  Context context;
+  context.addModule(std::move(mullModuleWithTests));
+  context.addModule(std::move(mullModuleWithTestees));
+
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::unique_ptr<AddMutationOperator> addMutationOperator = make_unique<AddMutationOperator>();
+  mutationOperators.emplace_back(std::move(addMutationOperator));
+
+  SimpleTestFinder Finder(std::move(mutationOperators));
+  auto tests = Finder.findTests(context);
+
+  auto &test = *tests.begin();
+
+  std::vector<std::unique_ptr<Testee>> testees =
+    Finder.findTestees(test.get(), context, 4);
+
+  ASSERT_EQ(2U, testees.size());
+
+  Testee *testee = testees[1].get();
+  Function *testeeFunction = testee->getTesteeFunction();
+
+  ASSERT_FALSE(testeeFunction->empty());
+
+  std::vector<MutationPoint *> mutationPoints =
+  Finder.findMutationPoints(context, *testeeFunction);
+
+  ASSERT_EQ(1U, mutationPoints.size());
+
+  MutationPoint *mutationPoint = (*(mutationPoints.begin()));
+
+  const long long RunningTime_1 = 1;
+  const long long RunningTime_2 = 2;
+
+  ExecutionResult testExecutionResult;
+  testExecutionResult.Status = Passed;
+  testExecutionResult.RunningTime = RunningTime_1;
+  testExecutionResult.stdoutOutput = "testExecutionResult.STDOUT";
+  testExecutionResult.stderrOutput = "testExecutionResult.STDERR";
+
+  ExecutionResult mutatedTestExecutionResult;
+  mutatedTestExecutionResult.Status = Failed;
+  mutatedTestExecutionResult.RunningTime = RunningTime_2;
+  mutatedTestExecutionResult.stdoutOutput = "mutatedTestExecutionResult.STDOUT";
+  mutatedTestExecutionResult.stderrOutput = "mutatedTestExecutionResult.STDERR";
+
+  std::unique_ptr<TestResult> testResult =
+    make_unique<TestResult>(testExecutionResult, std::move(test));
+
+  auto mutationResult = make_unique<MutationResult>(mutatedTestExecutionResult,
+                                                    mutationPoint,
+                                                    testee);
+
+  testResult->addMutantResult(std::move(mutationResult));
+
+  std::vector<std::unique_ptr<TestResult>> results;
+  results.push_back(std::move(testResult));
+
+  ResultTime resultTime = {
+    .start = 1234,
+    .end = 5678
+  };
+
+  std::unique_ptr<Result> result = make_unique<Result>(std::move(results),
+                                                       std::move(testees));
+
+  std::string projectName("Integration Test Do Emit Debug Info");
+  std::string testFramework = "SimpleTest";
+
+  const std::string bitcodeFileList = "/tmp/bitcode_file_list.txt";
+  const std::string dynamicLibraryFileList = "/tmp/dynamic_library_file_list.txt";
+
+  std::ofstream bitcodeFile(bitcodeFileList);
+  std::ofstream dynamicLibraryFile(dynamicLibraryFileList);
+
+  if (!bitcodeFile) {
+    std::cerr << "Cannot open the output file." << std::endl;
+
+    ASSERT_FALSE(true);
+  }
+
+  bitcodeFile << "tester.bc" << std::endl;
+  bitcodeFile << "testee.bc" << std::endl;
+
+  if (!dynamicLibraryFile) {
+    std::cerr << "Cannot open the output file." << std::endl;
+
+    ASSERT_FALSE(true);
+  }
+
+  dynamicLibraryFile << "sqlite3.dylib" << std::endl;
+  dynamicLibraryFile << "libz.dylib" << std::endl;
+
+  std::vector<std::string> operators({
+    "add_mutation",
+    "negate_condition"
+  });
+
+  std::vector<std::string> configTests({
+    "test_method1",
+    "test_method2"
+  });
+
+  bool doFork = true;
+  bool dryRun = true;
+  bool useCache = true;
+  bool emitDebugInfo = true;
+  int timeout = 42;
+  int distance = 10;
+  std::string cacheDirectory = "/a/cache";
+  Config config(bitcodeFileList,
+                projectName,
+                testFramework,
+                operators,
+                dynamicLibraryFileList,
+                configTests,
+                {},
+                doFork, dryRun, useCache, emitDebugInfo,
+                timeout, distance,
+                cacheDirectory);
+
+  SQLiteReporter reporter(projectName);
+  reporter.reportResults(result, config, resultTime);
+
+  std::vector<ExecutionResult> executionResults {
+    testExecutionResult,
+    mutatedTestExecutionResult
+  };
+
+  std::string databasePath = reporter.getDatabasePath();
+
+  sqlite3 *database;
+  sqlite3_open(databasePath.c_str(), &database);
+
+  std::string selectQuery = "SELECT count(*) FROM mutation_point_debug";
+  sqlite3_stmt *selectStmt;
+  sqlite3_prepare(database, selectQuery.c_str(), selectQuery.size(), &selectStmt, NULL);
+
+  int count;
+
+  int numberOfRows = 0;
+  while (1) {
+    int stepResult = sqlite3_step (selectStmt);
+
+    if (stepResult == SQLITE_ROW) {
+      count = sqlite3_column_int(selectStmt, 0);
+
+      ASSERT_EQ(count, 1);
+
+      numberOfRows++;
+    }
+    else if (stepResult == SQLITE_DONE) {
+      break;
+    }
+    else {
+      fprintf (stderr, "Failed.\n");
+      exit (1);
+    }
+  }
+
+  ASSERT_EQ(numberOfRows, 1);
+  
+  sqlite3_finalize(selectStmt);
+  sqlite3_close(database);
+}
+
+TEST(SQLiteReporter, do_not_emitDebugInfo) {
+  TestModuleFactory testModuleFactory;
+  auto ModuleWithTests   = testModuleFactory.createTesterModule();
+  auto ModuleWithTestees = testModuleFactory.createTesteeModule();
+
+  auto mullModuleWithTests   = make_unique<MullModule>(std::move(ModuleWithTests), "");
+  auto mullModuleWithTestees = make_unique<MullModule>(std::move(ModuleWithTestees), "");
+
+  Context context;
+  context.addModule(std::move(mullModuleWithTests));
+  context.addModule(std::move(mullModuleWithTestees));
+
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::unique_ptr<AddMutationOperator> addMutationOperator = make_unique<AddMutationOperator>();
+  mutationOperators.emplace_back(std::move(addMutationOperator));
+
+  SimpleTestFinder Finder(std::move(mutationOperators));
+  auto tests = Finder.findTests(context);
+
+  auto &test = *tests.begin();
+
+  std::vector<std::unique_ptr<Testee>> testees =
+    Finder.findTestees(test.get(), context, 4);
+
+  ASSERT_EQ(2U, testees.size());
+
+  Testee *testee = testees[1].get();
+  Function *testeeFunction = testee->getTesteeFunction();
+
+  ASSERT_FALSE(testeeFunction->empty());
+
+  std::vector<MutationPoint *> mutationPoints =
+  Finder.findMutationPoints(context, *testeeFunction);
+
+  ASSERT_EQ(1U, mutationPoints.size());
+
+  MutationPoint *mutationPoint = (*(mutationPoints.begin()));
+
+  const long long RunningTime_1 = 1;
+  const long long RunningTime_2 = 2;
+
+  ExecutionResult testExecutionResult;
+  testExecutionResult.Status = Passed;
+  testExecutionResult.RunningTime = RunningTime_1;
+  testExecutionResult.stdoutOutput = "testExecutionResult.STDOUT";
+  testExecutionResult.stderrOutput = "testExecutionResult.STDERR";
+
+  ExecutionResult mutatedTestExecutionResult;
+  mutatedTestExecutionResult.Status = Failed;
+  mutatedTestExecutionResult.RunningTime = RunningTime_2;
+  mutatedTestExecutionResult.stdoutOutput = "mutatedTestExecutionResult.STDOUT";
+  mutatedTestExecutionResult.stderrOutput = "mutatedTestExecutionResult.STDERR";
+
+  std::unique_ptr<TestResult> testResult =
+  make_unique<TestResult>(testExecutionResult, std::move(test));
+
+  auto mutationResult = make_unique<MutationResult>(mutatedTestExecutionResult,
+                                                    mutationPoint,
+                                                    testee);
+
+  testResult->addMutantResult(std::move(mutationResult));
+
+  std::vector<std::unique_ptr<TestResult>> results;
+  results.push_back(std::move(testResult));
+
+  ResultTime resultTime = {
+    .start = 1234,
+    .end = 5678
+  };
+
+  std::unique_ptr<Result> result = make_unique<Result>(std::move(results),
+                                                       std::move(testees));
+
+  std::string projectName("Integration Test Do Not Emit Debug Info");
+  std::string testFramework = "SimpleTest";
+
+  const std::string bitcodeFileList = "/tmp/bitcode_file_list.txt";
+  const std::string dynamicLibraryFileList = "/tmp/dynamic_library_file_list.txt";
+
+  std::ofstream bitcodeFile(bitcodeFileList);
+  std::ofstream dynamicLibraryFile(dynamicLibraryFileList);
+
+  if (!bitcodeFile) {
+    std::cerr << "Cannot open the output file." << std::endl;
+
+    ASSERT_FALSE(true);
+  }
+
+  bitcodeFile << "tester.bc" << std::endl;
+  bitcodeFile << "testee.bc" << std::endl;
+
+  if (!dynamicLibraryFile) {
+    std::cerr << "Cannot open the output file." << std::endl;
+
+    ASSERT_FALSE(true);
+  }
+
+  dynamicLibraryFile << "sqlite3.dylib" << std::endl;
+  dynamicLibraryFile << "libz.dylib" << std::endl;
+
+  std::vector<std::string> operators({
+    "add_mutation",
+    "negate_condition"
+  });
+
+  std::vector<std::string> configTests({
+    "test_method1",
+    "test_method2"
+  });
+
+  bool doFork = true;
+  bool dryRun = true;
+  bool useCache = true;
+  bool emitDebugInfo = false;
+  int timeout = 42;
+  int distance = 10;
+  std::string cacheDirectory = "/a/cache";
+  Config config(bitcodeFileList,
+                projectName,
+                testFramework,
+                operators,
+                dynamicLibraryFileList,
+                configTests,
+                {},
+                doFork, dryRun, useCache, emitDebugInfo,
+                timeout, distance,
+                cacheDirectory);
+
+  SQLiteReporter reporter(projectName);
+  reporter.reportResults(result, config, resultTime);
+
+  std::vector<ExecutionResult> executionResults {
+    testExecutionResult,
+    mutatedTestExecutionResult
+  };
+
+  std::string databasePath = reporter.getDatabasePath();
+
+  sqlite3 *database;
+  sqlite3_open(databasePath.c_str(), &database);
+
+  std::string selectQuery = "SELECT count(*) FROM mutation_point_debug";
+  sqlite3_stmt *selectStmt;
+  sqlite3_prepare(database, selectQuery.c_str(), selectQuery.size(), &selectStmt, NULL);
+
+  int count;
+
+  int numberOfRows = 0;
+  while (1) {
+    int stepResult = sqlite3_step (selectStmt);
+
+    if (stepResult == SQLITE_ROW) {
+      count = sqlite3_column_int(selectStmt, 0);
+
+      ASSERT_EQ(count, 0);
+
+      numberOfRows++;
+    }
+    else if (stepResult == SQLITE_DONE) {
+      break;
+    }
+    else {
+      fprintf (stderr, "Failed.\n");
+      exit (1);
+    }
+  }
+  
+  ASSERT_EQ(numberOfRows, 1);
+  
+  sqlite3_finalize(selectStmt);
+  sqlite3_close(database);
+}
+
