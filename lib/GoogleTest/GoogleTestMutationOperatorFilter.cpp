@@ -28,12 +28,24 @@ bool GoogleTestMutationOperatorFilter::shouldSkipTesteeFunction(llvm::Function *
     return true;
   }
 
+  if (testee->getName().find(StringRef("clang_call_terminate")) != StringRef::npos) {
+    return true;
+  }
+
   if (testee->hasMetadata()) {
     int debugInfoKindID = 0;
     MDNode *debug = testee->getMetadata(debugInfoKindID);
     DISubprogram *subprogram = dyn_cast<DISubprogram>(debug);
     if (subprogram) {
       if (subprogram->getFilename().str().find("include/c++/v1") != std::string::npos) {
+        return true;
+      }
+
+      if (subprogram->getFilename().str().find("gmock") != std::string::npos) {
+        return true;
+      }
+
+      if (subprogram->getFilename().str().find("gtest") != std::string::npos) {
         return true;
       }
 
