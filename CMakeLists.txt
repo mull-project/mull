@@ -3,6 +3,10 @@ cmake_minimum_required(VERSION 3.5.1)
 project(Mull)
 enable_language(C CXX)
 
+# This enables assertions for Release builds.
+# https://stackoverflow.com/questions/22140520/how-to-enable-assert-in-cmake-release-mode
+string(REPLACE "-DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
+
 # Setting THREADS_PREFER_PTHREAD_FLAG and finding package Threads resolves:
 # /usr/bin/ld: ../../gtest-1.7.0/libgtest.a(gtest-all.cc.o): undefined reference to symbol     'pthread_key_delete@@GLIBC_2.2.5'
 # /lib/x86_64-linux-gnu/libpthread.so.0: error adding symbols: DSO missing from command line
