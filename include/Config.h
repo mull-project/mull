@@ -54,16 +54,11 @@ public:
     bitcodeFileList(""),
     projectName(""),
     testFramework("GoogleTest"),
-    mutationOperators(
-      // Yaml::Traits stops reading mutation_operators from config.yaml
-      // if these 3 default operators are set here (BUG?).
-      // So leaving out the empty ()
-      // {
-      //   AddMutationOperator::ID,
-      //   NegateConditionMutationOperator::ID,
-      //   RemoveVoidFunctionMutationOperator::ID
-      // }
-    ),
+    mutationOperators({
+         AddMutationOperator::ID,
+         NegateConditionMutationOperator::ID,
+         RemoveVoidFunctionMutationOperator::ID
+    }),
     dynamicLibraryFileList(),
     tests(),
     excludeLocations(),
