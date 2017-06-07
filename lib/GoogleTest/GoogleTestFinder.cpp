@@ -76,10 +76,12 @@ GoogleTestFinder::GoogleTestFinder(
 std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
   std::vector<std::unique_ptr<Test>> tests;
 
-  for (auto &M : Ctx.getModules()) {
-    for (auto &Global : M->getModule()->getGlobalList()) {
-      Type *Ty = Global.getValueType();
-      if (Ty->getTypeID() != Type::PointerTyID) {
+  auto testInfoTypeName = StringRef("class.testing::TestInfo");
+
+  for (auto &currentModule : Ctx.getModules()) {
+    for (auto &globalValue : currentModule->getModule()->getGlobalList()) {
+      Type *globalValueType = globalValue.getValueType();
+      if (globalValueType->getTypeID() != Type::PointerTyID) {
         continue;
       }
 
@@ -90,13 +92,13 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
       // -   continue;
       // - }
       // - StructType *STy = dyn_cast<StructType>(globalType);
-      Type *SeqTy = Ty->getSequentialElementType();
-      if (!SeqTy) {
+      Type *sequentialType = globalValueType->getSequentialElementType();
+      if (!sequentialType) {
         continue;
       }
 
-      StructType *STy = dyn_cast<StructType>(SeqTy);
-      if (!STy) {
+      StructType *structType = dyn_cast<StructType>(sequentialType);
+      if (!structType) {
         continue;
       }
 
@@ -109,12 +111,14 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
       /// Hence we cannot just compare string, and rather should
       /// compare the beginning of the typename
 
-      if (!STy->getName().startswith(StringRef("class.testing::TestInfo"))) {
+      if (!structType->getName().startswith(testInfoTypeName)) {
         continue;
       }
 
-      /// At this point the Global has only one usage
-      /// The user of the Global is part of initialization function
+      /// Normally the globalValue has only one usage, ut LLVM could add
+      /// intrinsics such as @llvm.invariant.start
+      /// We need to find a user that is a store instruction, which is
+      /// a part of initialization function
       /// It looks like this:
       ///
       ///   store %"class.testing::TestInfo"* %call2, %"class.testing::TestInfo"** @_ZN16Hello_world_Test10test_info_E
@@ -141,60 +145,65 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
       /// Putting lots of assertions to check the hardway whether
       /// my assumptions are correct or not
 
-      assert(Global.getNumUses() == 1 &&
-             "The Global (TestInfo) used only once during test setup");
+      StoreInst *storeInstruction = nullptr;
+      for (auto userIterator = globalValue.user_begin();
+           userIterator != globalValue.user_end();
+           userIterator++) {
+        auto user = *userIterator;
+        if (isa<StoreInst>(user)) {
+          storeInstruction = dyn_cast<StoreInst>(user);
+          break;
+        }
+      }
 
-      auto StoreInstUser = *Global.users().begin();
-      assert(isa<StoreInst>(StoreInstUser) &&
-             "The Global should only be used within store instruction");
+      assert(storeInstruction &&
+             "The Global should be used within a store instruction");
+      auto valueOperand = storeInstruction->getValueOperand();
 
-      auto Store = dyn_cast<StoreInst>(StoreInstUser);
-      auto ValueOp = Store->getValueOperand();
-
-      auto callSite = CallSite(ValueOp);
+      auto callSite = CallSite(valueOperand);
       assert((callSite.isCall() || callSite.isInvoke()) &&
              "Store should be using call to MakeAndRegisterTestInfo");
 
-      /// Once we have the CallInstruction we can extract Test Suite Name and Test Case Name
+      /// Once we have the CallInstruction we can extract Test Suite Name
+      /// and Test Case Name
       /// To extract them we need climb to the top, i.e.:
       ///
       ///   i8* getelementptr inbounds ([6 x i8], [6 x i8]* @.str, i32 0, i32 0)
       ///   i8* getelementptr inbounds ([6 x i8], [6 x i8]* @.str1, i32 0, i32 0)
 
-      auto TestSuiteNameConstRef = dyn_cast<ConstantExpr>(callSite->getOperand(0));
-      assert(TestSuiteNameConstRef);
+      auto testSuiteNameConstRef = dyn_cast<ConstantExpr>(callSite->getOperand(0));
+      assert(testSuiteNameConstRef);
 
-      auto TestCaseNameConstRef = dyn_cast<ConstantExpr>(callSite->getOperand(1));
-      assert(TestCaseNameConstRef);
+      auto testCaseNameConstRef = dyn_cast<ConstantExpr>(callSite->getOperand(1));
+      assert(testCaseNameConstRef);
 
       ///   @.str = private unnamed_addr constant [6 x i8] c"Hello\00", align 1
       ///   @.str = private unnamed_addr constant [6 x i8] c"world\00", align 1
 
-      auto TestSuiteNameConst = dyn_cast<GlobalValue>(TestSuiteNameConstRef->getOperand(0));
-      assert(TestSuiteNameConst);
+      auto testSuiteNameConst = dyn_cast<GlobalValue>(testSuiteNameConstRef->getOperand(0));
+      assert(testSuiteNameConst);
 
-      auto TestCaseNameConst = dyn_cast<GlobalValue>(TestCaseNameConstRef->getOperand(0));
-      assert(TestCaseNameConst);
+      auto testCaseNameConst = dyn_cast<GlobalValue>(testCaseNameConstRef->getOperand(0));
+      assert(testCaseNameConst);
 
       ///   [6 x i8] c"Hello\00"
       ///   [6 x i8] c"world\00"
 
-      auto TestSuiteNameConstArray = dyn_cast<ConstantDataArray>(TestSuiteNameConst->getOperand(0));
-      assert(TestSuiteNameConstArray);
+      auto testSuiteNameConstArray = dyn_cast<ConstantDataArray>(testSuiteNameConst->getOperand(0));
+      assert(testSuiteNameConstArray);
 
-      auto TestCaseNameConstArray = dyn_cast<ConstantDataArray>(TestCaseNameConst->getOperand(0));
-      assert(TestCaseNameConstArray);
+      auto testCaseNameConstArray = dyn_cast<ConstantDataArray>(testCaseNameConst->getOperand(0));
+      assert(testCaseNameConstArray);
 
       ///   "Hello"
       ///   "world"
 
-      auto TestSuiteName = TestSuiteNameConstArray->getRawDataValues().rtrim('\0');
-      auto TestCaseName = TestCaseNameConstArray->getRawDataValues().rtrim('\0');
+      auto testSuiteName = testSuiteNameConstArray->getRawDataValues().rtrim('\0');
+      auto testCaseName = testCaseNameConstArray->getRawDataValues().rtrim('\0');
 
       /// Once we've got the Name of a Test Suite and the name of a Test Case
       /// We can construct the name of a Test
-      const auto TestName = TestSuiteName + "." + TestCaseName;
-
+      const auto TestName = testSuiteName + "." + testCaseName;
       const std::string testNameStr = TestName.str();
       if (filter.shouldSkipTest(testNameStr)) {
         continue;
@@ -202,43 +211,31 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
 
       /// And the part of Test Body function name
 
-      auto TestBodyFunctionName = TestSuiteName + "_" + TestCaseName + "_Test8TestBodyEv";
+      auto testBodyFunctionName = testSuiteName + "_" + testCaseName + "_Test8TestBodyEv";
+      auto testBodyFunctionNameRef = StringRef(testBodyFunctionName.str());
 
       /// Using the TestBodyFunctionName we could find the function
       /// and finish creating the GoogleTest_Test object
 
-      Function *TestBodyFunction = nullptr;
-      for (auto &Func : M->getModule()->getFunctionList()) {
-        auto foundPosition = Func.getName().rfind(StringRef(TestBodyFunctionName.str()));
+      Function *testBodyFunction = nullptr;
+      for (auto &func : currentModule->getModule()->getFunctionList()) {
+        auto foundPosition = func.getName().rfind(testBodyFunctionNameRef);
         if (foundPosition != StringRef::npos) {
-          TestBodyFunction = &Func;
+          testBodyFunction = &func;
           break;
         }
       }
 
-      assert(TestBodyFunction && "Cannot find the TestBody function for the Test");
+      assert(testBodyFunction && "Cannot find the TestBody function for the Test");
 
-      tests.emplace_back(make_unique<GoogleTest_Test>(TestName.str(),
-                                                      TestBodyFunction,
+      tests.emplace_back(make_unique<GoogleTest_Test>(testNameStr,
+                                                      testBodyFunction,
                                                       Ctx.getStaticConstructors()));
     }
 
   }
 
   return tests;
-}
-
-std::string demangle(const char* name) {
-
-  int status = -4; // some arbitrary value to eliminate the compiler warning
-
-  // enable c++11 by passing the flag -std=c++11 to g++
-  std::unique_ptr<char, void(*)(void*)> res {
-    abi::__cxa_demangle(name, NULL, NULL, &status),
-    std::free
-  };
-
-  return (status==0) ? res.get() : name ;
 }
 
 std::vector<std::unique_ptr<Testee>>
