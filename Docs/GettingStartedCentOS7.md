@@ -3,6 +3,7 @@
 ## Installing dependencies
 
 ```
+yum install epel-release
 yum updateinfo
 yum install -y make git wget ninja-build zlib-devel ncurses-devel libsq3-devel
 ```
