@@ -147,6 +147,16 @@ TEST_F(ConfigParserTestFixture, loadConfig_UseCache_SpecificValue) {
   ASSERT_FALSE(config.getUseCache());
 }
 
+TEST_F(ConfigParserTestFixture, loadConfig_emitDebugInfo_Unspecified) {
+  configWithYamlContent("");
+  ASSERT_FALSE(config.shouldEmitDebugInfo());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_emitDebugInfo_SpecificValue) {
+  configWithYamlContent("emit_debug_info: true\n");
+  ASSERT_TRUE(config.shouldEmitDebugInfo());
+}
+
 TEST_F(ConfigParserTestFixture, loadConfig_MaxDistance_Unspecified) {
   configWithYamlContent("fork: true\n");
   ASSERT_EQ(128, config.getMaxDistance());

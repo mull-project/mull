@@ -27,6 +27,7 @@ struct MappingTraits<mull::Config>
     io.mapOptional("fork", config.fork);
     io.mapOptional("dry_run", config.dryRun);
     io.mapOptional("use_cache", config.useCache);
+    io.mapOptional("emit_debug_info", config.emitDebugInfo);
     io.mapOptional("timeout", config.timeout);
     io.mapOptional("max_distance", config.maxDistance);
     io.mapOptional("cache_directory", config.cacheDirectory);

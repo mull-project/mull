@@ -198,6 +198,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
   bool doFork = true;
   bool dryRun = true;
   bool useCache = true;
+  bool emitDebugInfo = false;
   int timeout = 42;
   int distance = 10;
   std::string cacheDirectory = "/a/cache";
@@ -208,7 +209,8 @@ TEST(SQLiteReporter, integrationTest_Config) {
                 dynamicLibraryFileList,
                 tests,
                 {},
-                doFork, dryRun, useCache, timeout, distance,
+                doFork, dryRun, useCache, emitDebugInfo,
+                timeout, distance,
                 cacheDirectory);
 
   SQLiteReporter reporter(config.getProjectName());
@@ -248,6 +250,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
   const unsigned char *column11_cacheDirectory = nullptr;
   int column12_timeStart = 0;
   int column13_timeEnd = 0;
+  int column14_emitDebugInfo = 0;
 
   int numberOfRows = 0;
   while (1) {
@@ -267,6 +270,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
       column11_cacheDirectory = sqlite3_column_text(selectStmt, 10);
       column12_timeStart = sqlite3_column_int(selectStmt, 11);
       column13_timeEnd = sqlite3_column_int(selectStmt, 12);
+      column14_emitDebugInfo = sqlite3_column_int(selectStmt, 14);
 
       ASSERT_EQ(strcmp((const char *)column1_projectName, projectName.c_str()), 0);
       ASSERT_EQ(strcmp((const char *)column2_bitcodePaths, "tester.bc,testee.bc"), 0);
@@ -281,6 +285,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
       ASSERT_EQ(strcmp((const char *)column11_cacheDirectory, "/a/cache"), 0);
       ASSERT_EQ(column12_timeStart, 1234);
       ASSERT_EQ(column13_timeEnd, 5678);
+      ASSERT_EQ(column14_emitDebugInfo, 0);
 
       numberOfRows++;
     }
