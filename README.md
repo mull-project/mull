@@ -103,3 +103,9 @@ Comments](http://lowlevelbits.org/llvm-based-mutation-testing-system/)
 [FOSDEM 2017: Mutation Testing, Leaving the Stone Age by Alex Denisov](https://www.youtube.com/watch?v=YEgiyiICkpQ)
 
 [LLVM Social Berlin #6: Mull meets Rust](https://www.youtube.com/watch?v=VasSufnFswc)
+
+## Get in touch
+
+The authors and developers of Mull are Alex Denisov 1101.debian@gmail.com and Stanislav Pankevich s.pankevich@gmail.com.
+
+Feel free to contact us if you have any questions about Mull and mutation testing or any other topics related to software reliability and a software in general.
