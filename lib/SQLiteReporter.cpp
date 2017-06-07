@@ -156,7 +156,7 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
       sqlite_exec(database, insertMutationPointSQL.c_str());
       std::string mutationPointID = mutationPoint->getUniqueIdentifier();
 
-      {
+      if (config.shouldEmitDebugInfo()) {
         std::string function;
         llvm::raw_string_ostream f_ostream(function);
         instruction->getFunction()->print(f_ostream);
