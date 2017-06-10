@@ -18,9 +18,9 @@ function(llvm_get_cxx_flags OUT_CXX_FLAGS)
   )
   if(NOT HAD_ERROR)
     # Remove -O3 or any other -O? flags
-    string(REPLACE "-O? " "" config_output "${config_output}")
+    string(REGEX REPLACE "-O." "" config_output "${config_output}")
     # Remove DNDEBUG to not disable assertions.
-    string(REPLACE "-DNDEBUG " "" config_output "${config_output}")
+    string(REPLACE "-DNDEBUG" "" config_output "${config_output}")
     set(llvm_cxx_flags ${config_output})
   else()
     string(REPLACE ";" " " config_command_str "${config_command}")
