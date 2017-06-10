@@ -4,6 +4,8 @@ compile_commands.json
 .mull.rust.cmake
 BuildXcode
 BuildNinja
+BuildNinjaDebug
+BuildNinjaRelease
 projects/**
 !projects/CMakeLists.txt
 tmp/
