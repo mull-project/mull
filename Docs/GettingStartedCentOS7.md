@@ -61,6 +61,7 @@ ln -s /usr/bin/ninja-build /usr/bin/ninja
 ```bash
 cd /opt
 git clone https://github.com/mull-project/mull.git
+cd mull
 ```
 
 ### Running Mull's tests
