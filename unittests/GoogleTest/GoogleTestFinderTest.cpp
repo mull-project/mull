@@ -254,8 +254,6 @@ mutation_operators:
 
   MutationPoint *MP = MutationPoints[0];
 
-  ASSERT_TRUE(dynamic_cast<AddMutationOperator *>(MP->getOperator()));
-
   MutationPointAddress MPA = MP->getAddress();
   ASSERT_EQ(MPA.getFnIndex(), 0);
   ASSERT_EQ(MPA.getBBIndex(), 0);
