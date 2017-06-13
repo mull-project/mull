@@ -1,4 +1,4 @@
-# Installing Mull on Ubuntu 16.04 LTS (Xenial Xerus)
+# Getting started on Ubuntu 16.04 LTS (Xenial Xerus)
 
 ### Getting Docker image
 

@@ -7,61 +7,16 @@ Comments](http://lowlevelbits.org/llvm-based-mutation-testing-system/) and [FOSD
 
 ## Getting started
 
-So far Mull is being developed against OSX. Linux support is coming.
+Mull is being developed against OSX. Also it is known to work against
+Linux Ubuntu 16.04 and CentOS 7.
 
-### OS X
+- [Getting started on Mac OS](/Docs/GettingStartedMacOS.md)
+- [Getting started on Ubuntu](/Docs/GettingStartedUbuntu.md)
+- [Getting started on CentOS](/Docs/GettingStartedCentOS7.md)
 
-**Warning:** Recently we migrated Mull to be an out-of-source project.
-Migration went smoothly and all is working on our end (c). Please let us know
-if you notice some dependencies that we missed to specify below.
+## Notes
 
-#### Notes
-
-Current code is being developed against stable LLVM 3.9 branch.
-
-Either use binary distribution via `brew install llvm@3.9` or clone LLVM and
-build it yourself from
-[release_39](https://github.com/llvm-mirror/llvm/tree/release_39) branch.
-
-#### Getting dependencies
-
-```bash
-# These are needed by LLVM
-brew install zlib
-brew install ncurses
-
-# SQLite is needed for Mull to generate reports.
-brew install sqlite
-```
-
-#### Getting Mull
-
-```bash
-git clone https://github.com/mull-project/mull.git
-cd mull
-```
-
-#### Getting Google Test
-
-After you clone Mull, you have to install Google Test.
-
-```bash
-cd googletest
-make install
-cd ..
-```
-
-#### Building Mull
-
-```bash
-mkdir BuildXcode
-cd BuildXcode
-cmake ../ -G Xcode -DCMAKE_TOOLCHAIN_FILE=../Mull.toolchain.OSX.cmake
-
-open Mull.xcodeproj
-```
-
-Use `make help` to see the common tasks used by developers.
+Use `make -f Makefile.macos help` to see the common tasks used by developers.
 
 Use `MullUnitTests` scheme to run the tests. Use `mull-driver` scheme to
 build Mull.
