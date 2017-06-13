@@ -5,9 +5,13 @@
 #include <vector>
 
 enum AND_OR_MutationType {
-  AND_OR_MutationType_None = 0,
-  AND_OR_MutationType_AND_to_OR = 1,
-  AND_OR_MutationType_OR_to_AND = 2
+  AND_OR_MutationType_None               = 0,
+
+  AND_OR_MutationType_AND_to_OR_Pattern1 = 1,
+  AND_OR_MutationType_AND_to_OR_Pattern2 = 2,
+
+  AND_OR_MutationType_OR_to_AND_Pattern1 = 3,
+  AND_OR_MutationType_OR_to_AND_Pattern2 = 4
 };
 
 namespace llvm {
@@ -26,15 +30,23 @@ namespace mull {
   class AndOrReplacementMutationOperator : public MutationOperator {
 
     AND_OR_MutationType findPossibleMutationInBranch(BranchInst *branchInst,
-                                                     BasicBlock *leftBB,
-                                                     BasicBlock *rightBB);
+                                                     BranchInst **secondBranchInst);
 
-    llvm::Value *applyMutationANDToOR(llvm::Module *M,
-                                      MutationPointAddress address,
-                                      llvm::Value &OriginalValue);
-    llvm::Value *applyMutationORToAND(llvm::Module *M,
-                                      MutationPointAddress address,
-                                      llvm::Value &OriginalValue);
+    // AND -> OR
+    llvm::Value *applyMutationANDToOR_Pattern1(Module *M,
+                                               BranchInst *firstBranch,
+                                               BranchInst *secondBranch);
+    llvm::Value *applyMutationANDToOR_Pattern2(Module *M,
+                                               BranchInst *firstBranch,
+                                               BranchInst *secondBranch);
+
+    // OR -> AND
+    llvm::Value *applyMutationORToAND_Pattern1(Module *M,
+                                               BranchInst *firstBranch,
+                                               BranchInst *secondBranch);
+    llvm::Value *applyMutationORToAND_Pattern2(Module *M,
+                                               BranchInst *firstBranch,
+                                               BranchInst *secondBranch);
 
   public:
     static const std::string ID;

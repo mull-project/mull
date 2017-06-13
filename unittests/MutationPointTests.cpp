@@ -154,7 +154,7 @@ TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_AndOrMutationOperator_applyMutation) {
-  auto module = TestModuleFactory.create_SimpleTest_AndOrReplacement_Module();
+  auto module = TestModuleFactory.create_SimpleTest_ANDORReplacement_Module();
 
   auto mullModule = make_unique<MullModule>(std::move(module), "");
 
