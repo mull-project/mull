@@ -34,6 +34,7 @@ There are the questions we want to answer with Mull eventually.
 
 - Can mutation testing actually detect serious errors in the real-world programs?
 - What are the most effective mutation operators?
+- Is there any equivalence between mutation testing and different kinds of testing coverage especially MC/DC coverage?
 
 ## Useful Material
 
