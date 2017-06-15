@@ -3,8 +3,10 @@
 #include "Logger.h"
 #include "TestResult.h"
 
+#include <errno.h>
 #include <chrono>
 #include <signal.h>
+#include <string.h>
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -26,6 +28,7 @@ pid_t mullFork(const char *processName) {
     mull::Logger::error() << "Failed to create " << processName
                             << " after creating " << childrenCount
                             << " child processes\n";
+    mull::Logger::error() << strerror(errno) << "\n";
     mull::Logger::error() << "Shutting down\n";
     exit(1);
   }
