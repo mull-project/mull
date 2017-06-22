@@ -89,10 +89,7 @@ TEST(SQLiteReporter, integrationTest) {
   std::vector<std::unique_ptr<TestResult>> results;
   results.push_back(std::move(testResult));
 
-  ResultTime resultTime = {
-    .start = 1234,
-    .end = 5678
-  };
+  ResultTime resultTime(1234, 5678);
 
   std::unique_ptr<Result> result = make_unique<Result>(std::move(results),
                                                        std::move(testees));
@@ -218,10 +215,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
   std::vector<std::unique_ptr<TestResult>> testResults;
   std::vector<std::unique_ptr<Testee>> allTestees;
 
-  ResultTime resultTime = {
-    .start = 1234,
-    .end = 5678
-  };
+  ResultTime resultTime(1234, 5678);
 
   std::unique_ptr<Result> result = make_unique<Result>(std::move(testResults),
                                                        std::move(allTestees));
@@ -383,10 +377,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   std::vector<std::unique_ptr<TestResult>> results;
   results.push_back(std::move(testResult));
 
-  ResultTime resultTime = {
-    .start = 1234,
-    .end = 5678
-  };
+  ResultTime resultTime(1234, 5678);
 
   std::unique_ptr<Result> result = make_unique<Result>(std::move(results),
                                                        std::move(testees));
@@ -556,10 +547,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   std::vector<std::unique_ptr<TestResult>> results;
   results.push_back(std::move(testResult));
 
-  ResultTime resultTime = {
-    .start = 1234,
-    .end = 5678
-  };
+  ResultTime resultTime(1234, 5678);
 
   std::unique_ptr<Result> result = make_unique<Result>(std::move(results),
                                                        std::move(testees));

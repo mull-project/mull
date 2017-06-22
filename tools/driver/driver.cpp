@@ -123,10 +123,7 @@ int main(int argc, char *argv[]) {
   const long timeSuiteEnd =
     duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 
-  ResultTime resultTime = {
-    .start = timeSuiteStart,
-    .end = timeSuiteEnd
-  };
+  ResultTime resultTime(timeSuiteStart, timeSuiteEnd);
 
   SQLiteReporter reporter(config.getProjectName());
   reporter.reportResults(result, config, resultTime);
