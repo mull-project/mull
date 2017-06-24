@@ -52,6 +52,16 @@ int testee_compound_AND_then_OR_operator(int a, int b, int c) {
   return b;
 }
 
+int testee_compound_AND_then_AND_operator(int A, int B, int C) {
+  if ((!A && B) && C) {
+    printf("left branch\n");
+    return 1;
+  } else {
+    printf("right branch\n");
+    return 0;
+  }
+}
+
 int testee_compound_OR_then_AND_operator(int a, int b, int c) {
   if (a < b || (b < c && a < c)) {
     printf("left branch\n");
@@ -60,6 +70,16 @@ int testee_compound_OR_then_AND_operator(int a, int b, int c) {
 
   printf("right branch\n");
   return b;
+}
+
+int testee_compound_OR_then_OR_operator(int A, int B, int C) {
+  if ((!A || B) || C) {
+    printf("left branch\n");
+    return 1;
+  } else {
+    printf("right branch\n");
+    return 0;
+  }
 }
 
 int test_AND_operator_2branches() {
@@ -87,7 +107,17 @@ int test_compound_AND_then_OR_operator() {
   return result;
 }
 
+int test_compound_AND_then_AND_operator() {
+  int result = (testee_compound_AND_then_AND_operator(1, 1, 1) == 0);
+  return result;
+}
+
 int test_compound_OR_then_AND_operator() {
   int result = (testee_compound_OR_then_AND_operator(1, 3, 2) == 1);
+  return result;
+}
+
+int test_compound_OR_then_OR_operator() {
+  int result = (testee_compound_OR_then_OR_operator(0, 0, 0) == 1);
   return result;
 }

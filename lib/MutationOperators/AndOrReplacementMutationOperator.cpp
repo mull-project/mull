@@ -126,12 +126,20 @@ llvm::Value *AndOrReplacementMutationOperator::applyMutation(Module *M,
     return applyMutationANDToOR_Pattern2(M, branchInst, secondBranch);
   }
 
+  if (possibleMutationType == AND_OR_MutationType_AND_to_OR_Pattern3) {
+    return applyMutationANDToOR_Pattern3(M, branchInst, secondBranch);
+  }
+
   if (possibleMutationType == AND_OR_MutationType_OR_to_AND_Pattern1) {
     return applyMutationORToAND_Pattern1(M, branchInst, secondBranch);
   }
 
   if (possibleMutationType == AND_OR_MutationType_OR_to_AND_Pattern2) {
     return applyMutationORToAND_Pattern2(M, branchInst, secondBranch);
+  }
+
+  if (possibleMutationType == AND_OR_MutationType_OR_to_AND_Pattern3) {
+    return applyMutationORToAND_Pattern3(M, branchInst, secondBranch);
   }
 
   return nullptr;
@@ -209,6 +217,74 @@ AndOrReplacementMutationOperator::applyMutationANDToOR_Pattern1(Module *M,
 
 llvm::Value *
 AndOrReplacementMutationOperator::applyMutationANDToOR_Pattern2(Module *M,
+                                                                BranchInst *firstBranch,
+                                                                BranchInst *secondBranch) {
+
+  assert(firstBranch != nullptr);
+  assert(firstBranch->isConditional());
+
+  assert(secondBranch != nullptr);
+  assert(secondBranch->isConditional());
+
+  /// Operand #0 is a comparison instruction.
+  Instruction *sourceInst = (dyn_cast<Instruction>(firstBranch->getOperand(0)));
+  assert(sourceInst);
+
+  /// Left branch value is somehow operand #2, right is #1.
+  BasicBlock *firstBranchLeftBB  = dyn_cast<BasicBlock>(firstBranch->getOperand(2));
+  BasicBlock *firstBranchRightBB = dyn_cast<BasicBlock>(firstBranch->getOperand(1));
+  assert(firstBranchLeftBB);
+  assert(firstBranchRightBB);
+
+  BasicBlock *secondBranchLeftBB = dyn_cast<BasicBlock>(secondBranch->getOperand(2));
+
+  BranchInst *replacement = BranchInst::Create(firstBranchRightBB,
+                                               secondBranchLeftBB,
+                                               sourceInst);
+
+  /// If I add a named instruction, and the name already exist
+  /// in a basic block, then LLVM will make another unique name of it
+  /// To prevent this name change we need to 'drop' the existing old name
+  firstBranch->setName("");
+
+  replacement->insertAfter(firstBranch);
+  firstBranch->replaceAllUsesWith(replacement);
+
+  firstBranch->eraseFromParent();
+
+  /// If one of the second branch's successor basic blocks has a PHI node and
+  /// second branch's left basic block jumps to that successor block,
+  /// we need to update PHI node to also accept a jump from a replacement
+  /// branch instruction.
+  for (BasicBlock *secondBranchSuccessorBlock: secondBranch->getParent()->getTerminator()->successors()) {
+    if (secondBranchLeftBB != secondBranchSuccessorBlock) {
+      continue;
+    }
+
+    for (Instruction &inst: *secondBranchSuccessorBlock) {
+      PHINode *PN = dyn_cast<PHINode>(&inst);
+
+      if (!PN) {
+        break;
+      }
+
+      int i = PN->getBasicBlockIndex(secondBranch->getParent());
+      if (i < 0) {
+        continue;
+      }
+
+      int operandIndex = PN->getOperandNumForIncomingValue(i);
+      Value *operand = PN->getOperand(operandIndex);
+
+      PN->addIncoming(operand, replacement->getParent());
+    }
+  }
+  
+  return replacement;
+}
+
+llvm::Value *
+AndOrReplacementMutationOperator::applyMutationANDToOR_Pattern3(Module *M,
                                                                 BranchInst *firstBranch,
                                                                 BranchInst *secondBranch) {
 
@@ -335,6 +411,75 @@ AndOrReplacementMutationOperator::applyMutationORToAND_Pattern2(Module *M,
                                                                 BranchInst *firstBranch,
                                                                 BranchInst *secondBranch) {
 
+  assert(firstBranch != nullptr);
+  assert(firstBranch->isConditional());
+
+  assert(secondBranch != nullptr);
+  assert(secondBranch->isConditional());
+
+  /// Operand #0 is a comparison instruction.
+  Instruction *sourceInst = (dyn_cast<Instruction>(firstBranch->getOperand(0)));
+  assert(sourceInst);
+
+  /// Left branch value is somehow operand #2, right is #1.
+  BasicBlock *firstBranchLeftBB = dyn_cast<BasicBlock>(firstBranch->getOperand(2));
+  assert(firstBranchLeftBB);
+
+  BasicBlock *secondBranchLeftBB = dyn_cast<BasicBlock>(secondBranch->getOperand(2));
+  BasicBlock *secondBranchRightBB = dyn_cast<BasicBlock>(secondBranch->getOperand(1));
+  assert(secondBranchLeftBB);
+  assert(secondBranchRightBB);
+
+  BranchInst *replacement = BranchInst::Create(secondBranchRightBB,
+                                               firstBranchLeftBB,
+                                               sourceInst);
+
+  /// If I add a named instruction, and the name already exist
+  /// in a basic block, then LLVM will make another unique name of it
+  /// To prevent this name change we need to 'drop' the existing old name
+  firstBranch->setName("");
+
+  replacement->insertAfter(firstBranch);
+  firstBranch->replaceAllUsesWith(replacement);
+
+  firstBranch->eraseFromParent();
+
+  /// If one of the second branch's successor basic blocks has a PHI node and
+  /// second branch's right basic block jumps to that successor block,
+  /// we need to update PHI node to also accept a jump from a replacement
+  /// branch instruction.
+  for (BasicBlock *secondBranchSuccessorBlock: secondBranch->getParent()->getTerminator()->successors()) {
+    if (secondBranchRightBB != secondBranchSuccessorBlock) {
+      continue;
+    }
+
+    for (Instruction &inst: *secondBranchSuccessorBlock) {
+      PHINode *PN = dyn_cast<PHINode>(&inst);
+
+      if (!PN) {
+        break;
+      }
+
+      int i = PN->getBasicBlockIndex(secondBranch->getParent());
+      if (i < 0) {
+        continue;
+      }
+
+      int operandIndex = PN->getOperandNumForIncomingValue(i);
+      Value *operand = PN->getOperand(operandIndex);
+
+      PN->addIncoming(operand, replacement->getParent());
+    }
+  }
+  
+  return replacement;
+}
+
+llvm::Value *
+AndOrReplacementMutationOperator::applyMutationORToAND_Pattern3(Module *M,
+                                                                BranchInst *firstBranch,
+                                                                BranchInst *secondBranch) {
+
   PHINode *phiNode;
   for (auto &instruction: *secondBranch->getParent()) {
     phiNode = dyn_cast<PHINode>(&instruction);
@@ -432,6 +577,22 @@ AndOrReplacementMutationOperator::findPossibleMutationInBranch(BranchInst *branc
         return AND_OR_MutationType_OR_to_AND_Pattern1;
       }
 
+      else if (candidateBranchInst_leftBB == rightBB) {
+        if (secondBranchInst) {
+          *secondBranchInst = candidateBranchInst;
+        }
+
+        return AND_OR_MutationType_OR_to_AND_Pattern2;
+      }
+
+      else if (candidateBranchInst_rightBB == leftBB) {
+        if (secondBranchInst) {
+          *secondBranchInst = candidateBranchInst;
+        }
+
+        return AND_OR_MutationType_AND_to_OR_Pattern2;
+      }
+
       for (auto &instruction: *candidateBranchInst->getParent()) {
         PHINode *phiNode = dyn_cast<PHINode>(&instruction);
 
@@ -449,7 +610,7 @@ AndOrReplacementMutationOperator::findPossibleMutationInBranch(BranchInst *branc
               *secondBranchInst = candidateBranchInst;
             }
 
-            return AND_OR_MutationType_OR_to_AND_Pattern2;
+            return AND_OR_MutationType_OR_to_AND_Pattern3;
           }
 
           if (candidateBranchInst->getParent() == rightBB) {
@@ -457,7 +618,7 @@ AndOrReplacementMutationOperator::findPossibleMutationInBranch(BranchInst *branc
               *secondBranchInst = candidateBranchInst;
             }
 
-            return AND_OR_MutationType_AND_to_OR_Pattern2;
+            return AND_OR_MutationType_AND_to_OR_Pattern3;
           }
         }
       }

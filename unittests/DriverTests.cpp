@@ -311,7 +311,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator) {
   Driver Driver(config, loader, testFinder, runner, toolchain);
 
   auto result = Driver.Run();
-  ASSERT_EQ(6U, result->getTestResults().size());
+  ASSERT_EQ(8U, result->getTestResults().size());
 
   /// Mutation #1: AND operator with 2 branches.
   {
@@ -383,24 +383,52 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator) {
     ASSERT_EQ(ExecutionStatus::Failed, mutant5_2->getExecutionResult().Status);
   }
 
-  /// Mutation #6: Compound OR then AND expression.
+  /// Mutation #6: Compound AND then AND expression.
   {
     auto result6 = result->getTestResults()[5].get();
     ASSERT_EQ(ExecutionStatus::Passed, result6->getOriginalTestResult().Status);
-    ASSERT_EQ("test_compound_OR_then_AND_operator", result6->getTestName());
+    ASSERT_EQ("test_compound_AND_then_AND_operator", result6->getTestName());
 
     auto &mutants6 = result6->getMutationResults();
     ASSERT_EQ(2U, mutants6.size());
 
-    /// Mutant 6.1 should pass because it is a stressing OR -> AND replacement
-    /// in the first expression.
     auto mutant6_1 = mutants6[0].get();
     ASSERT_EQ(ExecutionStatus::Failed, mutant6_1->getExecutionResult().Status);
 
-    /// Mutant 6.2 should pass because it is a relaxing AND -> OR replacement
-    /// in the second expression.
     auto mutant6_2 = mutants6[1].get();
     ASSERT_EQ(ExecutionStatus::Passed, mutant6_2->getExecutionResult().Status);
+  }
+
+  /// Mutation #7: Compound OR then AND expression.
+  {
+    auto result7 = result->getTestResults()[6].get();
+    ASSERT_EQ(ExecutionStatus::Passed, result7->getOriginalTestResult().Status);
+    ASSERT_EQ("test_compound_OR_then_AND_operator", result7->getTestName());
+
+    auto &mutants6 = result7->getMutationResults();
+    ASSERT_EQ(2U, mutants6.size());
+
+    auto mutant6_1 = mutants6[0].get();
+    ASSERT_EQ(ExecutionStatus::Failed, mutant6_1->getExecutionResult().Status);
+
+    auto mutant6_2 = mutants6[1].get();
+    ASSERT_EQ(ExecutionStatus::Passed, mutant6_2->getExecutionResult().Status);
+  }
+
+  /// Mutation #8: Compound OR then OR expression.
+  {
+    auto result8 = result->getTestResults()[7].get();
+    ASSERT_EQ(ExecutionStatus::Passed, result8->getOriginalTestResult().Status);
+    ASSERT_EQ("test_compound_OR_then_OR_operator", result8->getTestName());
+
+    auto &mutants8 = result8->getMutationResults();
+    ASSERT_EQ(2U, mutants8.size());
+
+    auto mutant8_1 = mutants8[0].get();
+    ASSERT_EQ(ExecutionStatus::Failed, mutant8_1->getExecutionResult().Status);
+
+    auto mutant8_2 = mutants8[1].get();
+    ASSERT_EQ(ExecutionStatus::Passed, mutant8_2->getExecutionResult().Status);
   }
 }
 

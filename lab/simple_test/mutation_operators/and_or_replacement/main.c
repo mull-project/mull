@@ -17,6 +17,12 @@ int main() {
   printf("result of test_compound_AND_then_OR_operator() is: %d\n",
          test_compound_AND_then_OR_operator());
 
+  printf("result of test_compound_AND_then_AND_operator() is: %d\n",
+         test_compound_AND_then_AND_operator());
+
   printf("result of test_compound_OR_then_AND_operator() is: %d\n",
          test_compound_OR_then_AND_operator());
+
+  printf("result of test_compound_OR_then_OR_operator() is: %d\n",
+         test_compound_OR_then_OR_operator());
 }

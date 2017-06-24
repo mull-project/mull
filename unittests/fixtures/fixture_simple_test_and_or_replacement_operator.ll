@@ -200,6 +200,44 @@ define i32 @testee_compound_AND_then_OR_operator(i32, i32, i32) #0 {
 }
 
 ; Function Attrs: nounwind ssp uwtable
+define i32 @testee_compound_AND_then_AND_operator(i32, i32, i32) #0 {
+  %4 = alloca i32, align 4
+  %5 = alloca i32, align 4
+  %6 = alloca i32, align 4
+  %7 = alloca i32, align 4
+  store i32 %0, i32* %5, align 4
+  store i32 %1, i32* %6, align 4
+  store i32 %2, i32* %7, align 4
+  %8 = load i32, i32* %5, align 4
+  %9 = icmp ne i32 %8, 0
+  br i1 %9, label %18, label %10
+
+; <label>:10:                                     ; preds = %3
+  %11 = load i32, i32* %6, align 4
+  %12 = icmp ne i32 %11, 0
+  br i1 %12, label %13, label %18
+
+; <label>:13:                                     ; preds = %10
+  %14 = load i32, i32* %7, align 4
+  %15 = icmp ne i32 %14, 0
+  br i1 %15, label %16, label %18
+
+; <label>:16:                                     ; preds = %13
+  %17 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([13 x i8], [13 x i8]* @.str, i32 0, i32 0))
+  store i32 1, i32* %4, align 4
+  br label %20
+
+; <label>:18:                                     ; preds = %13, %10, %3
+  %19 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @.str.1, i32 0, i32 0))
+  store i32 0, i32* %4, align 4
+  br label %20
+
+; <label>:20:                                     ; preds = %18, %16
+  %21 = load i32, i32* %4, align 4
+  ret i32 %21
+}
+
+; Function Attrs: nounwind ssp uwtable
 define i32 @testee_compound_OR_then_AND_operator(i32, i32, i32) #0 {
   %4 = alloca i32, align 4
   %5 = alloca i32, align 4
@@ -240,6 +278,44 @@ define i32 @testee_compound_OR_then_AND_operator(i32, i32, i32) #0 {
 ; <label>:25:                                     ; preds = %22, %19
   %26 = load i32, i32* %4, align 4
   ret i32 %26
+}
+
+; Function Attrs: nounwind ssp uwtable
+define i32 @testee_compound_OR_then_OR_operator(i32, i32, i32) #0 {
+  %4 = alloca i32, align 4
+  %5 = alloca i32, align 4
+  %6 = alloca i32, align 4
+  %7 = alloca i32, align 4
+  store i32 %0, i32* %5, align 4
+  store i32 %1, i32* %6, align 4
+  store i32 %2, i32* %7, align 4
+  %8 = load i32, i32* %5, align 4
+  %9 = icmp ne i32 %8, 0
+  br i1 %9, label %10, label %16
+
+; <label>:10:                                     ; preds = %3
+  %11 = load i32, i32* %6, align 4
+  %12 = icmp ne i32 %11, 0
+  br i1 %12, label %16, label %13
+
+; <label>:13:                                     ; preds = %10
+  %14 = load i32, i32* %7, align 4
+  %15 = icmp ne i32 %14, 0
+  br i1 %15, label %16, label %18
+
+; <label>:16:                                     ; preds = %13, %10, %3
+  %17 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([13 x i8], [13 x i8]* @.str, i32 0, i32 0))
+  store i32 1, i32* %4, align 4
+  br label %20
+
+; <label>:18:                                     ; preds = %13
+  %19 = call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([14 x i8], [14 x i8]* @.str.1, i32 0, i32 0))
+  store i32 0, i32* %4, align 4
+  br label %20
+
+; <label>:20:                                     ; preds = %18, %16
+  %21 = load i32, i32* %4, align 4
+  ret i32 %21
 }
 
 ; Function Attrs: nounwind ssp uwtable
@@ -298,9 +374,31 @@ define i32 @test_compound_AND_then_OR_operator() #0 {
 }
 
 ; Function Attrs: nounwind ssp uwtable
+define i32 @test_compound_AND_then_AND_operator() #0 {
+  %1 = alloca i32, align 4
+  %2 = call i32 @testee_compound_AND_then_AND_operator(i32 1, i32 1, i32 1)
+  %3 = icmp eq i32 %2, 0
+  %4 = zext i1 %3 to i32
+  store i32 %4, i32* %1, align 4
+  %5 = load i32, i32* %1, align 4
+  ret i32 %5
+}
+
+; Function Attrs: nounwind ssp uwtable
 define i32 @test_compound_OR_then_AND_operator() #0 {
   %1 = alloca i32, align 4
   %2 = call i32 @testee_compound_OR_then_AND_operator(i32 1, i32 3, i32 2)
+  %3 = icmp eq i32 %2, 1
+  %4 = zext i1 %3 to i32
+  store i32 %4, i32* %1, align 4
+  %5 = load i32, i32* %1, align 4
+  ret i32 %5
+}
+
+; Function Attrs: nounwind ssp uwtable
+define i32 @test_compound_OR_then_OR_operator() #0 {
+  %1 = alloca i32, align 4
+  %2 = call i32 @testee_compound_OR_then_OR_operator(i32 0, i32 0, i32 0)
   %3 = icmp eq i32 %2, 1
   %4 = zext i1 %3 to i32
   store i32 %4, i32* %1, align 4
