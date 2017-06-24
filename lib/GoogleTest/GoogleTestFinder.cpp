@@ -198,28 +198,28 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
       ///   "Hello"
       ///   "world"
 
-      auto testSuiteName = testSuiteNameConstArray->getRawDataValues().rtrim('\0');
-      auto testCaseName = testCaseNameConstArray->getRawDataValues().rtrim('\0');
+      std::string testSuiteName(testSuiteNameConstArray->getRawDataValues().rtrim('\0'));
+      std::string testCaseName(testCaseNameConstArray->getRawDataValues().rtrim('\0'));
 
       /// Once we've got the Name of a Test Suite and the name of a Test Case
       /// We can construct the name of a Test
-      const auto TestName = testSuiteName + "." + testCaseName;
-      const std::string testNameStr = TestName.str();
-      if (filter.shouldSkipTest(testNameStr)) {
+      const auto testName = testSuiteName + "." + testCaseName;
+      if (filter.shouldSkipTest(testName)) {
         continue;
       }
 
       /// And the part of Test Body function name
 
-      auto testBodyFunctionName = testSuiteName + "_" + testCaseName + "_Test8TestBodyEv";
-      auto testBodyFunctionNameRef = StringRef(testBodyFunctionName.str());
+      std::string testBodyFunctionName(testSuiteName + "_" + testCaseName + "_Test8TestBodyEv");
 
       /// Using the TestBodyFunctionName we could find the function
       /// and finish creating the GoogleTest_Test object
 
       Function *testBodyFunction = nullptr;
       for (auto &func : currentModule->getModule()->getFunctionList()) {
-        auto foundPosition = func.getName().rfind(testBodyFunctionNameRef);
+        StringRef testBodyFunctionNameRef(testBodyFunctionName);
+        auto name = func.getName();
+        auto foundPosition = name.rfind(testBodyFunctionNameRef);
         if (foundPosition != StringRef::npos) {
           testBodyFunction = &func;
           break;
@@ -228,7 +228,7 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
 
       assert(testBodyFunction && "Cannot find the TestBody function for the Test");
 
-      tests.emplace_back(make_unique<GoogleTest_Test>(testNameStr,
+      tests.emplace_back(make_unique<GoogleTest_Test>(testName,
                                                       testBodyFunction,
                                                       Ctx.getStaticConstructors()));
     }
