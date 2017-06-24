@@ -66,6 +66,7 @@ private:
 
   /// Returns cached object files for all modules
   std::vector<llvm::object::ObjectFile *> AllObjectFiles();
+  std::vector<llvm::Module *> allModules();
 };
 
 }

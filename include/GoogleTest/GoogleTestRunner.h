@@ -1,8 +1,10 @@
 #pragma once
 
 #include "TestRunner.h"
+#include "MullJIT.h"
 
 #include "llvm/ExecutionEngine/Orc/ObjectLinkingLayer.h"
+#include "llvm/ExecutionEngine/Orc/IRCompileLayer.h"
 #include "llvm/IR/Mangler.h"
 #include "llvm/Object/Binary.h"
 #include "llvm/Object/ObjectFile.h"
@@ -17,13 +19,16 @@ class Module;
 
 namespace mull {
 
-  class GoogleTestRunner : public TestRunner {
-  llvm::orc::ObjectLinkingLayer<> ObjectLayer;
+class GoogleTestRunner : public TestRunner {
   llvm::Mangler Mangler;
+  MullJIT jit;
 public:
 
   GoogleTestRunner(llvm::TargetMachine &machine);
   ExecutionResult runTest(Test *Test, ObjectFiles &ObjectFiles) override;
+  ExecutionResult runTest(Test *Test, std::vector<llvm::Module *> &modules) override;
+
+  virtual ~GoogleTestRunner() {}
 
 private:
   std::string MangleName(const llvm::StringRef &Name);

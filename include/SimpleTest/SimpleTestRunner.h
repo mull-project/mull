@@ -22,6 +22,10 @@ class SimpleTestRunner : public TestRunner {
 public:
   SimpleTestRunner(llvm::TargetMachine &targetMachine);
   ExecutionResult runTest(Test *Test, TestRunner::ObjectFiles &ObjectFiles) override;
+  ExecutionResult runTest(Test *test, std::vector<llvm::Module *> &modules) override {
+    ExecutionResult result;
+    return result;
+  }
 
 private:
   std::string MangleName(const llvm::StringRef &Name);

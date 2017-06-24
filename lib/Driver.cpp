@@ -63,18 +63,18 @@ std::unique_ptr<Result> Driver::Run() {
     Loader.loadModulesFromBitcodeFileList(bitcodePaths);
 
   for (auto &ownedModule : modules) {
-    MullModule &module = *ownedModule.get();
-    assert(ownedModule && "Can't load module");
+//    MullModule &module = *ownedModule.get();
+//    assert(ownedModule && "Can't load module");
 
-    ObjectFile *objectFile = toolchain.cache().getObject(module);
+//    ObjectFile *objectFile = toolchain.cache().getObject(module);
+//
+//    if (objectFile == nullptr) {
+//      auto owningObjectFile = toolchain.compiler().compileModule(*module.clone().get());
+//      objectFile = owningObjectFile.getBinary();
+//      toolchain.cache().putObject(std::move(owningObjectFile), *ownedModule.get());
+//    }
 
-    if (objectFile == nullptr) {
-      auto owningObjectFile = toolchain.compiler().compileModule(*module.clone().get());
-      objectFile = owningObjectFile.getBinary();
-      toolchain.cache().putObject(std::move(owningObjectFile), *ownedModule.get());
-    }
-
-    InnerCache.insert(std::make_pair(module.getModule(), objectFile));
+//    InnerCache.insert(std::make_pair(module.getModule(), objectFile));
     Ctx.addModule(std::move(ownedModule));
   }
 
@@ -86,8 +86,9 @@ std::unique_ptr<Result> Driver::Run() {
                   << " tests\n";
 
   int testIndex = 1;
+  auto _modules = allModules();
   for (auto &test : foundTests) {
-    auto ObjectFiles = AllObjectFiles();
+//    auto ObjectFiles = AllObjectFiles();
 
     Logger::debug().indent(4)
       << "Driver::Run> current test "
@@ -96,7 +97,7 @@ std::unique_ptr<Result> Driver::Run() {
       << "\n";
 
     ExecutionResult ExecResult = Sandbox->run([&](ExecutionResult *SharedResult) {
-      *SharedResult = Runner.runTest(test.get(), ObjectFiles);
+      *SharedResult = Runner.runTest(test.get(), _modules);
     }, Cfg.getTimeout());
 
     auto BorrowedTest = test.get();
@@ -134,7 +135,6 @@ std::unique_ptr<Result> Driver::Run() {
       Logger::debug() << "against " << MPoints.size() << " mutation points\n";
       Logger::debug().indent(8) << "";
 
-      auto ObjectFiles = AllButOne(testee->getTesteeFunction()->getParent());
       for (auto mutationPoint : MPoints) {
         //        Logger::info() << "\t\t\tDriver::Run::run mutant:" << "\t";
         //        mutationPoint->getOriginalValue()->print(Logger::info());
@@ -148,6 +148,7 @@ std::unique_ptr<Result> Driver::Run() {
           result.Status = DryRun;
           result.RunningTime = ExecResult.RunningTime * 10;
         } else {
+          auto ObjectFiles = AllButOne(testee->getTesteeFunction()->getParent());
           ObjectFile *mutant = toolchain.cache().getObject(*mutationPoint);
           if (mutant == nullptr) {
             auto ownedModule = mutationPoint->cloneModuleAndApplyMutation();
@@ -270,4 +271,16 @@ std::vector<llvm::object::ObjectFile *> Driver::AllObjectFiles() {
   }
 
   return Objects;
+}
+
+std::vector<llvm::Module *> Driver::allModules() {
+  std::vector<llvm::Module *> modules;
+
+  for (auto &module : Ctx.getModules()) {
+    modules.push_back(module->getModule());
+  }
+
+  printf("%lu\n", modules.size());
+
+  return modules;
 }
