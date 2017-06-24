@@ -7,11 +7,13 @@
 enum AND_OR_MutationType {
   AND_OR_MutationType_None               = 0,
 
-  AND_OR_MutationType_AND_to_OR_Pattern1 = 1,
-  AND_OR_MutationType_AND_to_OR_Pattern2 = 2,
+  AND_OR_MutationType_AND_to_OR_Pattern1 = 11,
+  AND_OR_MutationType_AND_to_OR_Pattern2 = 12,
+  AND_OR_MutationType_AND_to_OR_Pattern3 = 13,
 
-  AND_OR_MutationType_OR_to_AND_Pattern1 = 3,
-  AND_OR_MutationType_OR_to_AND_Pattern2 = 4
+  AND_OR_MutationType_OR_to_AND_Pattern1 = 21,
+  AND_OR_MutationType_OR_to_AND_Pattern2 = 22,
+  AND_OR_MutationType_OR_to_AND_Pattern3 = 23
 };
 
 namespace llvm {
@@ -39,12 +41,18 @@ namespace mull {
     llvm::Value *applyMutationANDToOR_Pattern2(Module *M,
                                                BranchInst *firstBranch,
                                                BranchInst *secondBranch);
+    llvm::Value *applyMutationANDToOR_Pattern3(Module *M,
+                                               BranchInst *firstBranch,
+                                               BranchInst *secondBranch);
 
     // OR -> AND
     llvm::Value *applyMutationORToAND_Pattern1(Module *M,
                                                BranchInst *firstBranch,
                                                BranchInst *secondBranch);
     llvm::Value *applyMutationORToAND_Pattern2(Module *M,
+                                               BranchInst *firstBranch,
+                                               BranchInst *secondBranch);
+    llvm::Value *applyMutationORToAND_Pattern3(Module *M,
                                                BranchInst *firstBranch,
                                                BranchInst *secondBranch);
 

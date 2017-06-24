@@ -167,7 +167,7 @@ TEST(MutationPoint, SimpleTest_AndOrMutationOperator_applyMutation) {
   SimpleTestFinder Finder(std::move(mutationOperators));
 
   auto tests = Finder.findTests(ctx);
-  ASSERT_EQ(6U, tests.size());
+  ASSERT_EQ(8U, tests.size());
 
   {
     auto &test1 = tests[0];
