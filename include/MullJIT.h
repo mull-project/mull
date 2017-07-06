@@ -352,6 +352,7 @@ private:
       typename IndirectStubsMgrT::StubInitsMap StubInits;
       for (auto &F : SrcM) {
         // Skip declarations.
+
         if (F.isDeclaration())
           continue;
 
@@ -581,7 +582,8 @@ private:
   }
 
   void emitCallTreeCallbacks(Module &module) {
-    printf("%s\n", module.getModuleIdentifier().c_str());
+//    printf("%s\n", module.getModuleIdentifier().c_str());
+//    module.dump();
   }
 
   BaseLayerT &BaseLayer;
