@@ -76,6 +76,14 @@ void runDestructors() {
 
 extern "C" void *mull__dso_handle = nullptr;
 
+extern "C" void mull_enterFunction(uint64_t functionIndex) {
+  errs() << "mull_enterFunction: " << functionIndex  << "\n";
+}
+
+extern "C" void mull_leaveFunction(uint64_t functionIndex) {
+  errs() << "mull_leaveFunction: " << functionIndex  << "\n";
+}
+
 //class Mull_GoogleTest_Resolver : public RuntimeDyld::SymbolResolver {
 //public:
 //

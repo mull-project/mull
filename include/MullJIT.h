@@ -268,7 +268,7 @@ public:
   : BaseLayer(BaseLayer),
   CompileCallbackMgr(CallbackMgr),
   CreateIndirectStubsManager(std::move(CreateIndirectStubsManager)),
-  CloneStubsIntoPartitions(CloneStubsIntoPartitions) {}
+  CloneStubsIntoPartitions(CloneStubsIntoPartitions), currentFunctionIndex(0) {}
 
   /// @brief Add a module to the compile-on-demand layer.
   template <typename ModuleSetT, typename MemoryManagerPtrT,
@@ -367,8 +367,9 @@ private:
         StubInits[mangle(F.getName(), DL)] =
         std::make_pair(CCInfo.getAddress(),
                        JITSymbolBase::flagsFromGlobalValue(F));
-        CCInfo.setCompileAction([this, &LD, LMH, &F]() {
-          return this->extractAndCompile(LD, LMH, F);
+        uint64_t index = currentFunctionIndex++;
+        CCInfo.setCompileAction([this, &LD, LMH, &F, index]() {
+          return this->extractAndCompile(LD, LMH, F, index);
         });
       }
 
@@ -479,7 +480,7 @@ private:
 
   llvm::orc::TargetAddress extractAndCompile(CODLogicalDylib &LD,
                                              LogicalModuleHandle LMH,
-                                             Function &F) {
+                                             Function &F, uint64_t functionIndex) {
     auto &LMResources = LD.getLogicalModuleResources(LMH);
     Module &SrcM = LMResources.SourceModule->getResource();
 
@@ -490,7 +491,7 @@ private:
     // Grab the name of the function being called here.
     std::string CalledFnName = mangle(F.getName(), SrcM.getDataLayout());
 
-    auto PartH = emitFunction(LD, LMH, F);
+    auto PartH = emitFunction(LD, LMH, F, functionIndex);
 
     std::string FnName = mangle(F.getName(), SrcM.getDataLayout());
     auto FnBodySym = BaseLayer.findSymbolIn(PartH, FnName, false);
@@ -506,7 +507,8 @@ private:
 
   BaseLayerModuleSetHandleT emitFunction(CODLogicalDylib &LD,
                                          LogicalModuleHandle LMH,
-                                         Function &function) {
+                                         Function &function,
+                                         uint64_t functionIndex) {
     auto &LMResources = LD.getLogicalModuleResources(LMH);
     Module &SrcM = LMResources.SourceModule->getResource();
 
@@ -520,7 +522,7 @@ private:
     ValueToValueMapTy VMap;
 
     auto Materializer = createLambdaMaterializer([this, &LMResources, &M,
-                                                  &VMap](Value *V) -> Value * {
+                                                  &VMap, functionIndex](Value *V) -> Value * {
       if (auto *GV = dyn_cast<GlobalVariable>(V))
         return orc::cloneGlobalVariableDecl(*M, *GV);
 
@@ -575,15 +577,50 @@ private:
                                                 return LDResolver->findSymbol(Name);
                                               });
 
-    emitCallTreeCallbacks(*M.get());
+    insertCallTreeCallbacks(*M->getFunction(function.getName()), functionIndex);
 
     return LD.getDylibResources().ModuleAdder(BaseLayer, std::move(M),
                                               std::move(Resolver));
   }
 
-  void emitCallTreeCallbacks(Module &module) {
-//    printf("%s\n", module.getModuleIdentifier().c_str());
-//    module.dump();
+  void insertCallTreeCallbacks(Function &function, uint64_t index) {
+    if (function.isDeclaration()) {
+      return;
+    }
+
+    auto &context = function.getParent()->getContext();
+    auto parameterType = Type::getInt64Ty(context);
+    auto voidType = Type::getVoidTy(context);
+    std::vector<Type *> parameterTypes(1, parameterType);
+
+    FunctionType *callbackType = FunctionType::get(voidType, parameterTypes, false);
+
+    Value *functionIndex = ConstantInt::get(parameterType, index);
+    std::vector<Value *> parameters(1, functionIndex);
+
+    Function *enterFunction = Function::Create(callbackType,
+                                               Function::ExternalLinkage,
+                                               "mull_enterFunction",
+                                               function.getParent());
+
+    auto &entryBlock = *function.getBasicBlockList().begin();
+    CallInst *enterFunctionCall = CallInst::Create(enterFunction, parameters);
+    enterFunctionCall->insertBefore(&*entryBlock.getInstList().begin());
+
+    Function *leaveFunction = Function::Create(callbackType,
+                                               Function::ExternalLinkage,
+                                               "mull_leaveFunction",
+                                               function.getParent());
+
+    for (auto &block : function.getBasicBlockList()) {
+      ReturnInst *returnStatement = nullptr;
+      if (!(returnStatement = dyn_cast<ReturnInst>(block.getTerminator()))) {
+        continue;
+      }
+
+      CallInst *leaveFunctionCall = CallInst::Create(leaveFunction, parameters);
+      leaveFunctionCall->insertBefore(returnStatement);
+    }
   }
 
   BaseLayerT &BaseLayer;
@@ -592,6 +629,7 @@ private:
 
   LogicalDylibList LogicalDylibs;
   bool CloneStubsIntoPartitions;
+  uint64_t currentFunctionIndex;
 };
 
 class MullJIT {
