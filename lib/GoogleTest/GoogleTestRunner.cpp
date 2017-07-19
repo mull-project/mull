@@ -76,14 +76,6 @@ void runDestructors() {
 
 extern "C" void *mull__dso_handle = nullptr;
 
-extern "C" void mull_enterFunction(uint64_t functionIndex) {
-  errs() << "mull_enterFunction: " << functionIndex  << "\n";
-}
-
-extern "C" void mull_leaveFunction(uint64_t functionIndex) {
-  errs() << "mull_leaveFunction: " << functionIndex  << "\n";
-}
-
 //class Mull_GoogleTest_Resolver : public RuntimeDyld::SymbolResolver {
 //public:
 //
@@ -174,6 +166,8 @@ ExecutionResult GoogleTestRunner::runTest(Test *Test, std::vector<llvm::Module *
                                        make_unique<SectionMemoryManager>(),
                                        std::move(resolver));
 
+  jit.jit().prepareForExecution();
+
   auto start = high_resolution_clock::now();
 
   for (auto &Ctor: GTest->GetGlobalCtors()) {
@@ -219,6 +213,8 @@ ExecutionResult GoogleTestRunner::runTest(Test *Test, std::vector<llvm::Module *
 
   ExecutionResult Result;
   Result.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
+
+  jit.jit().dumpCallTree();
 
   jit.jit().removeModuleSet(handle);
 

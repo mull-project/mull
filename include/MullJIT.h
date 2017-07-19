@@ -9,14 +9,42 @@
 #include <llvm/ADT/STLExtras.h>
 #include <llvm/Support/Debug.h>
 #include <llvm/Transforms/Utils/Cloning.h>
+
+#include <stdlib.h>
+
 #include <list>
 #include <memory>
 #include <set>
+#include <stack>
 #include <utility>
 
 using namespace llvm;
 
 namespace mull {
+
+static uint64_t *_callTreeMapping = nullptr;
+static std::stack<uint64_t> _callstack;
+
+extern "C" void mull_enterFunction(uint64_t functionIndex) {
+  assert(_callTreeMapping);
+
+  if (_callstack.empty()) {
+    /// This is the first function in a chain
+    /// The root of a tree
+    _callTreeMapping[functionIndex] = functionIndex;
+  } else if (_callTreeMapping[functionIndex] == 0) {
+    /// This function has never been called
+    uint64_t parent = _callstack.top();
+    _callTreeMapping[functionIndex] = parent;
+  }
+
+  _callstack.push(functionIndex);
+}
+
+extern "C" void mull_leaveFunction(uint64_t functionIndex) {
+  assert(_callTreeMapping);
+  _callstack.pop();
+}
 
 template <typename BaseLayerT,
 typename LogicalModuleResources,
@@ -268,7 +296,7 @@ public:
   : BaseLayer(BaseLayer),
   CompileCallbackMgr(CallbackMgr),
   CreateIndirectStubsManager(std::move(CreateIndirectStubsManager)),
-  CloneStubsIntoPartitions(CloneStubsIntoPartitions), currentFunctionIndex(0) {}
+  CloneStubsIntoPartitions(CloneStubsIntoPartitions) {}
 
   /// @brief Add a module to the compile-on-demand layer.
   template <typename ModuleSetT, typename MemoryManagerPtrT,
@@ -329,6 +357,44 @@ public:
     return H->findSymbol(Name, ExportedSymbolsOnly);
   }
 
+  void prepareForExecution() {
+    if (_callTreeMapping == nullptr) {
+      _callTreeMapping = (uint64_t *)calloc(functions.size() + 1, sizeof(uint64_t));
+    } else {
+      memset(_callTreeMapping, 0, functions.size() + 1);
+    }
+  }
+
+  void dumpCallTree() {
+    for (uint16_t i = 1; i < functions.size(); i++) {
+      auto value = _callTreeMapping[i];
+      if (value == 0) {
+        continue;
+      }
+
+      if (value == i) {
+        errs() << "Root: " << value << " ";
+        errs() << functions.at(i - 1)->getName();
+        errs() << "\n";
+      }
+    }
+
+    for (uint16_t i = 1; i < functions.size(); i++) {
+      auto value = _callTreeMapping[i];
+      if (value == 0) {
+//        errs() << "x ";
+      } else if (value == i) {
+        errs() << "r ";
+        errs() << functions.at(i - 1)->getName();
+      } else {
+        errs() << value << "_ ";
+        errs() << functions.at(i - 1)->getName();
+        errs() << "\n";
+      }
+    }
+    errs() << "\n";
+  }
+
 private:
 
   template <typename ModulePtrT>
@@ -367,7 +433,10 @@ private:
         StubInits[mangle(F.getName(), DL)] =
         std::make_pair(CCInfo.getAddress(),
                        JITSymbolBase::flagsFromGlobalValue(F));
-        uint64_t index = currentFunctionIndex++;
+
+        functions.push_back(&F);
+
+        uint64_t index = functions.size();
         CCInfo.setCompileAction([this, &LD, LMH, &F, index]() {
           return this->extractAndCompile(LD, LMH, F, index);
         });
@@ -629,7 +698,7 @@ private:
 
   LogicalDylibList LogicalDylibs;
   bool CloneStubsIntoPartitions;
-  uint64_t currentFunctionIndex;
+  std::vector<llvm::Function *> functions;
 };
 
 class MullJIT {
