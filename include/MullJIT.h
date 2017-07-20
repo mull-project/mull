@@ -22,29 +22,14 @@ using namespace llvm;
 
 namespace mull {
 
-static uint64_t *_callTreeMapping = nullptr;
-static std::stack<uint64_t> _callstack;
+//#define CHECKPOINT printf("%s: %p\n", __FUNCTION__, (void *)&_callTreeMapping)
+#define CHECKPOINT 
 
-extern "C" void mull_enterFunction(uint64_t functionIndex) {
-  assert(_callTreeMapping);
+extern uint64_t *_callTreeMapping;
+extern std::stack<uint64_t> _callstack;
 
-  if (_callstack.empty()) {
-    /// This is the first function in a chain
-    /// The root of a tree
-    _callTreeMapping[functionIndex] = functionIndex;
-  } else if (_callTreeMapping[functionIndex] == 0) {
-    /// This function has never been called
-    uint64_t parent = _callstack.top();
-    _callTreeMapping[functionIndex] = parent;
-  }
-
-  _callstack.push(functionIndex);
-}
-
-extern "C" void mull_leaveFunction(uint64_t functionIndex) {
-  assert(_callTreeMapping);
-  _callstack.pop();
-}
+extern "C" void mull_enterFunction(uint64_t functionIndex);
+extern "C" void mull_leaveFunction(uint64_t functionIndex);
 
 template <typename BaseLayerT,
 typename LogicalModuleResources,
@@ -360,6 +345,7 @@ public:
   void prepareForExecution() {
     if (_callTreeMapping == nullptr) {
       _callTreeMapping = (uint64_t *)calloc(functions.size() + 1, sizeof(uint64_t));
+      CHECKPOINT;
     } else {
       memset(_callTreeMapping, 0, functions.size() + 1);
     }
@@ -386,6 +372,7 @@ public:
       } else if (value == i) {
         errs() << "r ";
         errs() << functions.at(i - 1)->getName();
+        errs() << "\n";
       } else {
         errs() << value << "_ ";
         errs() << functions.at(i - 1)->getName();
@@ -550,6 +537,8 @@ private:
   llvm::orc::TargetAddress extractAndCompile(CODLogicalDylib &LD,
                                              LogicalModuleHandle LMH,
                                              Function &F, uint64_t functionIndex) {
+
+    CHECKPOINT;
     auto &LMResources = LD.getLogicalModuleResources(LMH);
     Module &SrcM = LMResources.SourceModule->getResource();
 

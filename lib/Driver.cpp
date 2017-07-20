@@ -280,7 +280,5 @@ std::vector<llvm::Module *> Driver::allModules() {
     modules.push_back(module->getModule());
   }
 
-  printf("%lu\n", modules.size());
-
   return modules;
 }
