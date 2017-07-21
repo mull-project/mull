@@ -22,9 +22,6 @@ using namespace llvm;
 
 namespace mull {
 
-//#define CHECKPOINT printf("%s: %p\n", __FUNCTION__, (void *)&_callTreeMapping)
-#define CHECKPOINT 
-
 extern uint64_t *_callTreeMapping;
 extern std::stack<uint64_t> _callstack;
 
@@ -345,7 +342,6 @@ public:
   void prepareForExecution() {
     if (_callTreeMapping == nullptr) {
       _callTreeMapping = (uint64_t *)calloc(functions.size() + 1, sizeof(uint64_t));
-      CHECKPOINT;
     } else {
       memset(_callTreeMapping, 0, functions.size() + 1);
     }
@@ -537,8 +533,6 @@ private:
   llvm::orc::TargetAddress extractAndCompile(CODLogicalDylib &LD,
                                              LogicalModuleHandle LMH,
                                              Function &F, uint64_t functionIndex) {
-
-    CHECKPOINT;
     auto &LMResources = LD.getLogicalModuleResources(LMH);
     Module &SrcM = LMResources.SourceModule->getResource();
 

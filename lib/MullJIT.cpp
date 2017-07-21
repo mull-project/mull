@@ -2,18 +2,10 @@
 
 namespace mull {
 
-uint64_t *initttt();
-
-uint64_t *_callTreeMapping = initttt();
+uint64_t *_callTreeMapping = nullptr;
 std::stack<uint64_t> _callstack;
 
-uint64_t *initttt() {
-  CHECKPOINT;
-  return nullptr;
-}
-
 extern "C" void mull_enterFunction(uint64_t functionIndex) {
-  CHECKPOINT;
   assert(_callTreeMapping);
 
   if (_callstack.empty()) {
