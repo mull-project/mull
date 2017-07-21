@@ -28,6 +28,13 @@ extern std::stack<uint64_t> _callstack;
 extern "C" void mull_enterFunction(uint64_t functionIndex);
 extern "C" void mull_leaveFunction(uint64_t functionIndex);
 
+struct CallTree {
+  llvm::Function *function;
+  std::list<std::unique_ptr<CallTree>> children;
+
+  CallTree(llvm::Function *f) : function(f) {}
+};
+
 template <typename BaseLayerT,
 typename LogicalModuleResources,
 typename LogicalDylibResources>
@@ -345,6 +352,33 @@ public:
     } else {
       memset(_callTreeMapping, 0, functions.size() + 1);
     }
+  }
+
+  std::unique_ptr<CallTree> createCallTree() {
+    assert(_callTreeMapping);
+
+    std::unique_ptr<CallTree> root = make_unique<CallTree>(nullptr);
+
+    /// Building the Call Tree
+    ///
+    /// To build a call tree we insert callbacks into each function during JIT
+    /// execution. The callbacks are called within unique function id.
+    /// The callbacks then store information about program execution in a plain
+    /// array of function IDs (_callTreeMapping).
+    /// The very first element of the array (callTreeMapping[0]) is
+    /// zero and not used. Each subsequent element may have three states:
+    ///
+    ///   1. If a function N was never called then _callTreeMapping[N] == 0
+    ///   2. If a function N was called as a very first function
+    ///   (i.e. callstack is empty) then _callTreeMapping[N] == N.
+    ///   3. If a function N is called by some other function
+    ///   (i.e. callstack is not empty) then _callTreeMapping[N] == callstack.top()
+    ///
+    /// When the execution is done we can construct a tree of a  more classic
+    /// form.
+    ///
+
+    return std::move(root);
   }
 
   void dumpCallTree() {
