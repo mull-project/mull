@@ -30,9 +30,17 @@ extern "C" void mull_leaveFunction(uint64_t functionIndex);
 
 struct CallTree {
   llvm::Function *function;
+  int level;
   std::list<std::unique_ptr<CallTree>> children;
 
-  CallTree(llvm::Function *f) : function(f) {}
+  CallTree(llvm::Function *f) : function(f), level(0) {}
+};
+
+struct CallTreeFunction {
+  llvm::Function *function;
+  CallTree *treeRoot;
+
+  CallTreeFunction(llvm::Function *f) : function(f), treeRoot(nullptr) {}
 };
 
 template <typename BaseLayerT,
@@ -285,7 +293,10 @@ public:
   : BaseLayer(BaseLayer),
   CompileCallbackMgr(CallbackMgr),
   CreateIndirectStubsManager(std::move(CreateIndirectStubsManager)),
-  CloneStubsIntoPartitions(CloneStubsIntoPartitions) {}
+  CloneStubsIntoPartitions(CloneStubsIntoPartitions) {
+    CallTreeFunction phonyRoot(nullptr);
+    functions.push_back(phonyRoot);
+  }
 
   /// @brief Add a module to the compile-on-demand layer.
   template <typename ModuleSetT, typename MemoryManagerPtrT,
@@ -346,19 +357,42 @@ public:
     return H->findSymbol(Name, ExportedSymbolsOnly);
   }
 
+#pragma mark - Call Tree Begin
+
   void prepareForExecution() {
     if (_callTreeMapping == nullptr) {
-      _callTreeMapping = (uint64_t *)calloc(functions.size() + 1, sizeof(uint64_t));
-    } else {
-      memset(_callTreeMapping, 0, functions.size() + 1);
+      _callTreeMapping = (uint64_t *)calloc(functions.size(), sizeof(uint64_t));
     }
+  }
+
+  void fillInCallTree(std::vector<CallTreeFunction> &functions,
+                      uint64_t *callTreeMapping, uint64_t functionIndex) {
+    uint64_t parent = callTreeMapping[functionIndex];
+    if (parent == 0) {
+      return;
+    }
+
+    if (parent == functionIndex) {
+      parent = 0;
+    }
+
+    CallTreeFunction &function = functions[functionIndex];
+    std::unique_ptr<CallTree> node = make_unique<CallTree>(function.function);
+    function.treeRoot = node.get();
+
+    fillInCallTree(functions, callTreeMapping, parent);
+
+    CallTreeFunction root = functions[parent];
+    assert(root.treeRoot);
+    node->level = root.treeRoot->level + 1;
+    root.treeRoot->children.push_back(std::move(node));
+    callTreeMapping[functionIndex] = 0;
   }
 
   std::unique_ptr<CallTree> createCallTree() {
     assert(_callTreeMapping);
 
-    std::unique_ptr<CallTree> root = make_unique<CallTree>(nullptr);
-
+    ///
     /// Building the Call Tree
     ///
     /// To build a call tree we insert callbacks into each function during JIT
@@ -366,7 +400,8 @@ public:
     /// The callbacks then store information about program execution in a plain
     /// array of function IDs (_callTreeMapping).
     /// The very first element of the array (callTreeMapping[0]) is
-    /// zero and not used. Each subsequent element may have three states:
+    /// zero and not used.
+    /// Each subsequent element may have three states:
     ///
     ///   1. If a function N was never called then _callTreeMapping[N] == 0
     ///   2. If a function N was called as a very first function
@@ -378,39 +413,18 @@ public:
     /// form.
     ///
 
-    return std::move(root);
-  }
+    std::unique_ptr<CallTree> phonyRoot = make_unique<CallTree>(nullptr);
+    CallTreeFunction &rootFunction = functions[0];
+    rootFunction.treeRoot = phonyRoot.get();
 
-  void dumpCallTree() {
-    for (uint16_t i = 1; i < functions.size(); i++) {
-      auto value = _callTreeMapping[i];
-      if (value == 0) {
-        continue;
-      }
-
-      if (value == i) {
-        errs() << "Root: " << value << " ";
-        errs() << functions.at(i - 1)->getName();
-        errs() << "\n";
-      }
+    for (uint64_t index = 1; index < functions.size(); index++) {
+      fillInCallTree(functions, _callTreeMapping, index);
     }
 
-    for (uint16_t i = 1; i < functions.size(); i++) {
-      auto value = _callTreeMapping[i];
-      if (value == 0) {
-//        errs() << "x ";
-      } else if (value == i) {
-        errs() << "r ";
-        errs() << functions.at(i - 1)->getName();
-        errs() << "\n";
-      } else {
-        errs() << value << "_ ";
-        errs() << functions.at(i - 1)->getName();
-        errs() << "\n";
-      }
-    }
-    errs() << "\n";
+    return phonyRoot;
   }
+
+#pragma mark - Call Tree End
 
 private:
 
@@ -451,9 +465,9 @@ private:
         std::make_pair(CCInfo.getAddress(),
                        JITSymbolBase::flagsFromGlobalValue(F));
 
-        functions.push_back(&F);
-
+        CallTreeFunction callTreeFunction(&F);
         uint64_t index = functions.size();
+        functions.push_back(callTreeFunction);
         CCInfo.setCompileAction([this, &LD, LMH, &F, index]() {
           return this->extractAndCompile(LD, LMH, F, index);
         });
@@ -715,7 +729,7 @@ private:
 
   LogicalDylibList LogicalDylibs;
   bool CloneStubsIntoPartitions;
-  std::vector<llvm::Function *> functions;
+  std::vector<CallTreeFunction> functions;
 };
 
 class MullJIT {

@@ -12,6 +12,7 @@
 
 #include <chrono>
 #include <execinfo.h>
+#include <queue>
 
 using namespace mull;
 using namespace llvm;
@@ -214,7 +215,19 @@ ExecutionResult GoogleTestRunner::runTest(Test *Test, std::vector<llvm::Module *
   ExecutionResult Result;
   Result.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
 
-  jit.jit().dumpCallTree();
+  std::unique_ptr<CallTree> callTree(jit.jit().createCallTree());
+  std::queue<CallTree *> tree;
+  tree.push(callTree.get());
+  while (!tree.empty()) {
+    CallTree *node = tree.front();
+    assert(node);
+    tree.pop();
+    for (auto &child: node->children) {
+      assert(child->function);
+      errs() << child->level << " " << child->function->getName() << "\n";
+      tree.push(child.get());
+    }
+  }
 
   jit.jit().removeModuleSet(handle);
 
