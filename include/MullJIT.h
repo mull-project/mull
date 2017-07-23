@@ -152,12 +152,17 @@ protected:
   LogicalDylibResources DylibResources;
 };
 
+typedef llvm::orc::ObjectLinkingLayer<> LinkingLayer;
+typedef llvm::orc::IRCompileLayer<LinkingLayer> CompileLayer;
+
 /// @brief Custom Compile On Demand layer
-template <typename BaseLayerT,
-typename CompileCallbackMgrT = llvm::orc::JITCompileCallbackManager,
-typename IndirectStubsMgrT = llvm::orc::IndirectStubsManager>
+template <typename IndirectStubsMgrT = llvm::orc::IndirectStubsManager>
 class MullLayer {
 private:
+
+  llvm::orc::SimpleCompiler compiler;
+  LinkingLayer linkingLayer;
+  CompileLayer compileLayer;
 
   template <typename MaterializerFtor>
   class LambdaMaterializer final : public llvm::ValueMaterializer {
@@ -175,7 +180,7 @@ private:
     return LambdaMaterializer<MaterializerFtor>(std::move(M));
   }
 
-  typedef typename BaseLayerT::ModuleSetHandleT BaseLayerModuleSetHandleT;
+  typedef typename CompileLayer::ModuleSetHandleT BaseLayerModuleSetHandleT;
 
   // Provide type-erasure for the Modules and MemoryManagers.
   template <typename ResourceT>
@@ -240,8 +245,8 @@ private:
     typedef std::function<llvm::RuntimeDyld::SymbolInfo(const std::string&)>
     SymbolResolverFtor;
 
-    typedef std::function<typename BaseLayerT::ModuleSetHandleT(
-                                                                BaseLayerT&,
+    typedef std::function<typename CompileLayer::ModuleSetHandleT(
+                                                                CompileLayer&,
                                                                 std::unique_ptr<llvm::Module>,
                                                                 std::unique_ptr<llvm::RuntimeDyld::SymbolResolver>)>
     ModuleAdderFtor;
@@ -267,7 +272,7 @@ private:
     ModuleAdderFtor ModuleAdder;
   };
 
-  typedef MullLogicalDylib<BaseLayerT, LogicalModuleResources,
+  typedef MullLogicalDylib<CompileLayer, LogicalModuleResources,
   LogicalDylibResources> CODLogicalDylib;
 
   typedef typename CODLogicalDylib::LogicalModuleHandle LogicalModuleHandle;
@@ -286,12 +291,12 @@ public:
   IndirectStubsManagerBuilderT;
 
   /// @brief Construct a compile-on-demand layer instance.
-  MullLayer(BaseLayerT &BaseLayer,
-            CompileCallbackMgrT &CallbackMgr,
+  MullLayer(llvm::TargetMachine &machine,
             IndirectStubsManagerBuilderT CreateIndirectStubsManager,
             bool CloneStubsIntoPartitions = true)
-  : BaseLayer(BaseLayer),
-  CompileCallbackMgr(CallbackMgr),
+  : compiler(machine),
+    compileLayer(linkingLayer, compiler),
+  callbackManager(llvm::orc::createLocalCompileCallbackManager(machine.getTargetTriple(), 0)),
   CreateIndirectStubsManager(std::move(CreateIndirectStubsManager)),
   CloneStubsIntoPartitions(CloneStubsIntoPartitions) {
     CallTreeFunction phonyRoot(nullptr);
@@ -305,7 +310,7 @@ public:
                                 MemoryManagerPtrT MemMgr,
                                 SymbolResolverPtrT Resolver) {
 
-    LogicalDylibs.push_back(CODLogicalDylib(BaseLayer));
+    LogicalDylibs.push_back(CODLogicalDylib(compileLayer));
     auto &LDResources = LogicalDylibs.back().getDylibResources();
 
     LDResources.ExternalSymbolResolver = std::move(Resolver);
@@ -315,7 +320,7 @@ public:
       wrapOwnership<RuntimeDyld::MemoryManager>(std::move(MemMgr));
 
     LDResources.ModuleAdder =
-      [&MemMgrRef](BaseLayerT &B, std::unique_ptr<Module> M,
+      [&MemMgrRef](CompileLayer &B, std::unique_ptr<Module> M,
                    std::unique_ptr<RuntimeDyld::SymbolResolver> R)
     {
       std::vector<std::unique_ptr<Module>> Ms;
@@ -347,7 +352,7 @@ public:
          LDI != LDE; ++LDI)
       if (auto Symbol = findSymbolIn(LDI, Name, ExportedSymbolsOnly))
         return Symbol;
-    return BaseLayer.findSymbol(Name, ExportedSymbolsOnly);
+    return compileLayer.findSymbol(Name, ExportedSymbolsOnly);
   }
 
   /// @brief Get the address of a symbol provided by this layer, or some layer
@@ -460,7 +465,7 @@ private:
         // Create a callback, associate it with the stub for the function,
         // and set the compile action to compile the partition containing the
         // function.
-        auto CCInfo = CompileCallbackMgr.getCompileCallback();
+        auto CCInfo = callbackManager->getCompileCallback();
         StubInits[mangle(F.getName(), DL)] =
         std::make_pair(CCInfo.getAddress(),
                        JITSymbolBase::flagsFromGlobalValue(F));
@@ -564,7 +569,7 @@ private:
                                                    return LDResolver->findSymbol(Name);
                                                  });
 
-    auto GVsH = LD.getDylibResources().ModuleAdder(BaseLayer, std::move(GVsM),
+    auto GVsH = LD.getDylibResources().ModuleAdder(compileLayer, std::move(GVsM),
                                                    std::move(GVsResolver));
     LD.addToLogicalModule(LMH, GVsH);
   }
@@ -594,7 +599,7 @@ private:
     auto PartH = emitFunction(LD, LMH, F, functionIndex);
 
     std::string FnName = mangle(F.getName(), SrcM.getDataLayout());
-    auto FnBodySym = BaseLayer.findSymbolIn(PartH, FnName, false);
+    auto FnBodySym = compileLayer.findSymbolIn(PartH, FnName, false);
     assert(FnBodySym && "Couldn't find function body.");
     llvm::orc::TargetAddress FnBodyAddr = FnBodySym.getAddress();
 
@@ -679,7 +684,7 @@ private:
 
     insertCallTreeCallbacks(*M->getFunction(function.getName()), functionIndex);
 
-    return LD.getDylibResources().ModuleAdder(BaseLayer, std::move(M),
+    return LD.getDylibResources().ModuleAdder(compileLayer, std::move(M),
                                               std::move(Resolver));
   }
 
@@ -723,8 +728,7 @@ private:
     }
   }
 
-  BaseLayerT &BaseLayer;
-  CompileCallbackMgrT &CompileCallbackMgr;
+  std::unique_ptr<llvm::orc::JITCompileCallbackManager> callbackManager;
   IndirectStubsManagerBuilderT CreateIndirectStubsManager;
 
   LogicalDylibList LogicalDylibs;
@@ -733,25 +737,15 @@ private:
 };
 
 class MullJIT {
-  typedef llvm::orc::ObjectLinkingLayer<> LinkingLayer;
-  typedef llvm::orc::IRCompileLayer<LinkingLayer> CompileLayer;
-  typedef MullLayer<CompileLayer> CODLayer;
+  typedef MullLayer<> CODLayer;
 
-  std::unique_ptr<llvm::orc::JITCompileCallbackManager> callbackManager;
   std::function<std::unique_ptr<llvm::orc::IndirectStubsManager>()> stubsManager;
-
-  llvm::orc::SimpleCompiler compiler;
-  LinkingLayer linkingLayer;
-  CompileLayer compileLayer;
   CODLayer compileOnDemandLayer;
 
 public:
   MullJIT(llvm::TargetMachine &machine) :
-    callbackManager(llvm::orc::createLocalCompileCallbackManager(machine.getTargetTriple(), 0)),
     stubsManager(llvm::orc::createLocalIndirectStubsManagerBuilder(machine.getTargetTriple())),
-    compiler(machine),
-    compileLayer(linkingLayer, compiler),
-    compileOnDemandLayer(compileLayer, *(callbackManager.get()), stubsManager) {
+    compileOnDemandLayer(machine, stubsManager) {
   }
 
   CODLayer &jit() { return compileOnDemandLayer; }
