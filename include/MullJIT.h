@@ -156,7 +156,6 @@ typedef llvm::orc::ObjectLinkingLayer<> LinkingLayer;
 typedef llvm::orc::IRCompileLayer<LinkingLayer> CompileLayer;
 
 /// @brief Custom Compile On Demand layer
-template <typename IndirectStubsMgrT = llvm::orc::IndirectStubsManager>
 class MullLayer {
 private:
 
@@ -213,7 +212,7 @@ private:
   struct LogicalModuleResources {
     std::unique_ptr<ResourceOwner<llvm::Module>> SourceModule;
     std::set<const llvm::Function *> StubsToClone;
-    std::unique_ptr<IndirectStubsMgrT> StubsMgr;
+    std::unique_ptr<llvm::orc::IndirectStubsManager> StubsMgr;
 
     LogicalModuleResources() = default;
 
@@ -286,18 +285,13 @@ public:
   /// @brief Module partitioning functor.
   typedef std::function<std::set<Function*>(Function&)> PartitioningFtor;
 
-  /// @brief Builder for IndirectStubsManagers.
-  typedef std::function<std::unique_ptr<IndirectStubsMgrT>()>
-  IndirectStubsManagerBuilderT;
-
   /// @brief Construct a compile-on-demand layer instance.
   MullLayer(llvm::TargetMachine &machine,
-            IndirectStubsManagerBuilderT CreateIndirectStubsManager,
             bool CloneStubsIntoPartitions = true)
   : compiler(machine),
     compileLayer(linkingLayer, compiler),
   callbackManager(llvm::orc::createLocalCompileCallbackManager(machine.getTargetTriple(), 0)),
-  CreateIndirectStubsManager(std::move(CreateIndirectStubsManager)),
+  stubsManagerBuilder(llvm::orc::createLocalIndirectStubsManagerBuilder(machine.getTargetTriple())),
   CloneStubsIntoPartitions(CloneStubsIntoPartitions) {
     CallTreeFunction phonyRoot(nullptr);
     functions.push_back(phonyRoot);
@@ -451,7 +445,7 @@ private:
     // Create stub functions.
     const DataLayout &DL = SrcM.getDataLayout();
     {
-      typename IndirectStubsMgrT::StubInitsMap StubInits;
+      typename llvm::orc::IndirectStubsManager::StubInitsMap StubInits;
       for (auto &F : SrcM) {
         // Skip declarations.
 
@@ -478,7 +472,7 @@ private:
         });
       }
 
-      LMResources.StubsMgr = CreateIndirectStubsManager();
+      LMResources.StubsMgr = stubsManagerBuilder();
       auto EC = LMResources.StubsMgr->createStubs(StubInits);
       (void)EC;
       // FIXME: This should be propagated back to the user. Stub creation may
@@ -729,7 +723,7 @@ private:
   }
 
   std::unique_ptr<llvm::orc::JITCompileCallbackManager> callbackManager;
-  IndirectStubsManagerBuilderT CreateIndirectStubsManager;
+  std::function<std::unique_ptr<llvm::orc::IndirectStubsManager>()> stubsManagerBuilder;
 
   LogicalDylibList LogicalDylibs;
   bool CloneStubsIntoPartitions;
@@ -737,16 +731,11 @@ private:
 };
 
 class MullJIT {
-  typedef MullLayer<> CODLayer;
-
-  std::function<std::unique_ptr<llvm::orc::IndirectStubsManager>()> stubsManager;
+  typedef MullLayer CODLayer;
   CODLayer compileOnDemandLayer;
 
 public:
-  MullJIT(llvm::TargetMachine &machine) :
-    stubsManager(llvm::orc::createLocalIndirectStubsManagerBuilder(machine.getTargetTriple())),
-    compileOnDemandLayer(machine, stubsManager) {
-  }
+  MullJIT(llvm::TargetMachine &machine) : compileOnDemandLayer(machine) {}
 
   CODLayer &jit() { return compileOnDemandLayer; }
 };
