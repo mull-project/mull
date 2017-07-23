@@ -209,7 +209,7 @@ private:
   }
 
   struct LogicalModuleResources {
-    std::unique_ptr<ResourceOwner<llvm::Module>> SourceModule;
+    llvm::Module *SourceModule;
     std::set<const llvm::Function *> StubsToClone;
     std::unique_ptr<llvm::orc::IndirectStubsManager> StubsMgr;
 
@@ -289,18 +289,17 @@ public:
   : compiler(machine),
     compileLayer(linkingLayer, compiler),
   callbackManager(llvm::orc::createLocalCompileCallbackManager(machine.getTargetTriple(), 0)),
-  stubsManagerBuilder(llvm::orc::createLocalIndirectStubsManagerBuilder(machine.getTargetTriple()))
+  stubsManagerBuilder(llvm::orc::createLocalIndirectStubsManagerBuilder(machine.getTargetTriple())),
+  logicalDylib(compileLayer)
   {
     CallTreeFunction phonyRoot(nullptr);
     functions.push_back(phonyRoot);
   }
 
-  ModuleSetHandleT addModuleSet(std::vector<llvm::Module *> &modules,
-                                std::unique_ptr<SectionMemoryManager> memoryManager,
-                                std::unique_ptr<RuntimeDyld::SymbolResolver> resolver) {
-
-    LogicalDylibs.push_back(CODLogicalDylib(compileLayer));
-    auto &LDResources = LogicalDylibs.back().getDylibResources();
+  void addModuleSet(std::vector<llvm::Module *> &modules,
+                    std::unique_ptr<SectionMemoryManager> memoryManager,
+                    std::unique_ptr<RuntimeDyld::SymbolResolver> resolver) {
+    auto &LDResources = logicalDylib.getDylibResources();
 
     LDResources.ExternalSymbolResolver = std::move(resolver);
 
@@ -319,17 +318,9 @@ public:
 
     // Process each of the modules in this module set.
     for (auto &M : modules)
-      addLogicalModule(LogicalDylibs.back(), std::move(M));
+      addLogicalModule(std::move(M));
 
-    return std::prev(LogicalDylibs.end());
-  }
-
-  /// @brief Remove the module represented by the given handle.
-  ///
-  ///   This will remove all modules in the layers below that were derived from
-  /// the module represented by H.
-  void removeModuleSet(ModuleSetHandleT H) {
-    LogicalDylibs.erase(H);
+    return;
   }
 
   /// @brief Search for the given named symbol.
@@ -337,18 +328,9 @@ public:
   /// @param ExportedSymbolsOnly If true, search only for exported symbols.
   /// @return A handle for the given named symbol, if it exists.
   llvm::orc::JITSymbol findSymbol(StringRef Name, bool ExportedSymbolsOnly) {
-    for (auto LDI = LogicalDylibs.begin(), LDE = LogicalDylibs.end();
-         LDI != LDE; ++LDI)
-      if (auto Symbol = findSymbolIn(LDI, Name, ExportedSymbolsOnly))
-        return Symbol;
+    if (auto Symbol = logicalDylib.findSymbol(Name, ExportedSymbolsOnly))
+      return Symbol;
     return compileLayer.findSymbol(Name, ExportedSymbolsOnly);
-  }
-
-  /// @brief Get the address of a symbol provided by this layer, or some layer
-  ///        below this one.
-  llvm::orc::JITSymbol findSymbolIn(ModuleSetHandleT H, const std::string &Name,
-                                    bool ExportedSymbolsOnly) {
-    return H->findSymbol(Name, ExportedSymbolsOnly);
   }
 
 #pragma mark - Call Tree Begin
@@ -421,27 +403,23 @@ public:
 #pragma mark - Call Tree End
 
 private:
-
-  template <typename ModulePtrT>
-  void addLogicalModule(CODLogicalDylib &LD, ModulePtrT SrcMPtr) {
+  void addLogicalModule(llvm::Module *module) {
 
     // Bump the linkage and rename any anonymous/privote members in SrcM to
     // ensure that everything will resolve properly after we partition SrcM.
-    orc::makeAllSymbolsExternallyAccessible(*SrcMPtr);
+    orc::makeAllSymbolsExternallyAccessible(*module);
 
     // Create a logical module handle for SrcM within the logical dylib.
-    auto LMH = LD.createLogicalModule();
-    auto &LMResources =  LD.getLogicalModuleResources(LMH);
+    auto LMH = logicalDylib.createLogicalModule();
+    auto &LMResources = logicalDylib.getLogicalModuleResources(LMH);
 
-    LMResources.SourceModule = wrapOwnership<Module>(std::move(SrcMPtr));
-
-    Module &SrcM = LMResources.SourceModule->getResource();
+    LMResources.SourceModule = module;
 
     // Create stub functions.
-    const DataLayout &DL = SrcM.getDataLayout();
+    const DataLayout &DL = module->getDataLayout();
     {
       typename llvm::orc::IndirectStubsManager::StubInitsMap StubInits;
-      for (auto &F : SrcM) {
+      for (auto &F : *module) {
         // Skip declarations.
 
         if (F.isDeclaration())
@@ -460,8 +438,8 @@ private:
         CallTreeFunction callTreeFunction(&F);
         uint64_t index = functions.size();
         functions.push_back(callTreeFunction);
-        CCInfo.setCompileAction([this, &LD, LMH, &F, index]() {
-          return this->extractAndCompile(LD, LMH, F, index);
+        CCInfo.setCompileAction([this, LMH, &F, index]() {
+          return this->extractAndCompile(LMH, F, index);
         });
       }
 
@@ -476,23 +454,23 @@ private:
     // If this module doesn't contain any globals or aliases we can bail out
     // early and avoid the overhead of creating and managing an empty globals
     // module.
-    if (SrcM.global_empty() && SrcM.alias_empty())
+    if (module->global_empty() && module->alias_empty())
       return;
 
     // Create the GlobalValues module.
-    auto GVsM = llvm::make_unique<Module>((SrcM.getName() + ".globals").str(),
-                                          SrcM.getContext());
+    auto GVsM = llvm::make_unique<Module>((module->getName() + ".globals").str(),
+                                          module->getContext());
     GVsM->setDataLayout(DL);
 
     ValueToValueMapTy VMap;
 
     // Clone global variable decls.
-    for (auto &GV : SrcM.globals())
+    for (auto &GV : module->globals())
       if (!GV.isDeclaration() && !VMap.count(&GV))
         llvm::orc::cloneGlobalVariableDecl(*GVsM, GV, &VMap);
 
     // And the aliases.
-    for (auto &A : SrcM.aliases())
+    for (auto &A : module->aliases())
       if (!VMap.count(&A))
         llvm::orc::cloneGlobalAliasDecl(*GVsM, A, VMap);
 
@@ -529,12 +507,12 @@ private:
                                                  });
 
     // Clone the global variable initializers.
-    for (auto &GV : SrcM.globals())
+    for (auto &GV : module->globals())
       if (!GV.isDeclaration())
         orc::moveGlobalVariableInitializer(GV, VMap, &Materializer);
 
     // Clone the global alias initializers.
-    for (auto &A : SrcM.aliases()) {
+    for (auto &A : module->aliases()) {
       auto *NewA = cast<GlobalAlias>(VMap[&A]);
       assert(NewA && "Alias not cloned?");
       Value *Init = MapValue(A.getAliasee(), VMap, RF_None, nullptr,
@@ -544,21 +522,21 @@ private:
 
     // Build a resolver for the globals module and add it to the base layer.
     auto GVsResolver = orc::createLambdaResolver(
-                                                 [&LD, LMH](const std::string &Name) {
-                                                   auto &LMResources = LD.getLogicalModuleResources(LMH);
+                                                 [this, LMH](const std::string &Name) {
+                                                   auto &LMResources = logicalDylib.getLogicalModuleResources(LMH);
                                                    if (auto Sym = LMResources.StubsMgr->findStub(Name, false))
                                                      return Sym.toRuntimeDyldSymbol();
-                                                   auto &LDResolver = LD.getDylibResources().ExternalSymbolResolver;
+                                                   auto &LDResolver = logicalDylib.getDylibResources().ExternalSymbolResolver;
                                                    return LDResolver->findSymbolInLogicalDylib(Name);
                                                  },
-                                                 [&LD](const std::string &Name) {
-                                                   auto &LDResolver = LD.getDylibResources().ExternalSymbolResolver;
+                                                 [this](const std::string &Name) {
+                                                   auto &LDResolver = logicalDylib.getDylibResources().ExternalSymbolResolver;
                                                    return LDResolver->findSymbol(Name);
                                                  });
 
-    auto GVsH = LD.getDylibResources().ModuleAdder(compileLayer, std::move(GVsM),
+    auto GVsH = logicalDylib.getDylibResources().ModuleAdder(compileLayer, std::move(GVsM),
                                                    std::move(GVsResolver));
-    LD.addToLogicalModule(LMH, GVsH);
+    logicalDylib.addToLogicalModule(LMH, GVsH);
   }
 
   static std::string mangle(llvm::StringRef Name, const llvm::DataLayout &DL) {
@@ -570,22 +548,22 @@ private:
     return MangledName;
   }
 
-  llvm::orc::TargetAddress extractAndCompile(CODLogicalDylib &LD,
-                                             LogicalModuleHandle LMH,
-                                             Function &F, uint64_t functionIndex) {
-    auto &LMResources = LD.getLogicalModuleResources(LMH);
-    Module &SrcM = LMResources.SourceModule->getResource();
+  llvm::orc::TargetAddress extractAndCompile(LogicalModuleHandle LMH,
+                                             Function &F,
+                                             uint64_t functionIndex) {
+    auto &LMResources = logicalDylib.getLogicalModuleResources(LMH);
+    Module &module = *LMResources.SourceModule;
 
     // If F is a declaration we must already have compiled it.
     if (F.isDeclaration())
       return 0;
 
     // Grab the name of the function being called here.
-    std::string CalledFnName = mangle(F.getName(), SrcM.getDataLayout());
+    std::string CalledFnName = mangle(F.getName(), module.getDataLayout());
 
-    auto PartH = emitFunction(LD, LMH, F, functionIndex);
+    auto PartH = emitFunction(LMH, F, functionIndex);
 
-    std::string FnName = mangle(F.getName(), SrcM.getDataLayout());
+    std::string FnName = mangle(F.getName(), module.getDataLayout());
     auto FnBodySym = compileLayer.findSymbolIn(PartH, FnName, false);
     assert(FnBodySym && "Couldn't find function body.");
     llvm::orc::TargetAddress FnBodyAddr = FnBodySym.getAddress();
@@ -597,20 +575,19 @@ private:
     return FnBodyAddr;
   }
 
-  BaseLayerModuleSetHandleT emitFunction(CODLogicalDylib &LD,
-                                         LogicalModuleHandle LMH,
+  BaseLayerModuleSetHandleT emitFunction(LogicalModuleHandle LMH,
                                          Function &function,
                                          uint64_t functionIndex) {
-    auto &LMResources = LD.getLogicalModuleResources(LMH);
-    Module &SrcM = LMResources.SourceModule->getResource();
+    auto &LMResources = logicalDylib.getLogicalModuleResources(LMH);
+    Module &module = *LMResources.SourceModule;
 
     // Create the module.
-    std::string NewName = SrcM.getName();
+    std::string NewName = module.getName();
     NewName += ".";
     NewName += function.getName();
 
-    auto M = llvm::make_unique<Module>(NewName, SrcM.getContext());
-    M->setDataLayout(SrcM.getDataLayout());
+    auto M = llvm::make_unique<Module>(NewName, module.getContext());
+    M->setDataLayout(module.getDataLayout());
     ValueToValueMapTy VMap;
 
     auto Materializer = createLambdaMaterializer([this, &LMResources, &M,
@@ -658,21 +635,21 @@ private:
 
     // Create memory manager and symbol resolver.
     auto Resolver = orc::createLambdaResolver(
-                                              [this, &LD, LMH](const std::string &Name) {
-                                                if (auto Sym = LD.findSymbolInternally(LMH, Name))
+                                              [this, LMH](const std::string &Name) {
+                                                if (auto Sym = logicalDylib.findSymbolInternally(LMH, Name))
                                                   return Sym.toRuntimeDyldSymbol();
-                                                auto &LDResolver = LD.getDylibResources().ExternalSymbolResolver;
+                                                auto &LDResolver = logicalDylib.getDylibResources().ExternalSymbolResolver;
                                                 return LDResolver->findSymbolInLogicalDylib(Name);
                                               },
-                                              [this, &LD](const std::string &Name) {
-                                                auto &LDResolver = LD.getDylibResources().ExternalSymbolResolver;
+                                              [this](const std::string &Name) {
+                                                auto &LDResolver = logicalDylib.getDylibResources().ExternalSymbolResolver;
                                                 return LDResolver->findSymbol(Name);
                                               });
 
     insertCallTreeCallbacks(*M->getFunction(function.getName()), functionIndex);
 
-    return LD.getDylibResources().ModuleAdder(compileLayer, std::move(M),
-                                              std::move(Resolver));
+    return logicalDylib.getDylibResources().ModuleAdder(compileLayer, std::move(M),
+                                                        std::move(Resolver));
   }
 
   void insertCallTreeCallbacks(Function &function, uint64_t index) {
@@ -718,7 +695,7 @@ private:
   std::unique_ptr<llvm::orc::JITCompileCallbackManager> callbackManager;
   std::function<std::unique_ptr<llvm::orc::IndirectStubsManager>()> stubsManagerBuilder;
 
-  LogicalDylibList LogicalDylibs;
+  CODLogicalDylib logicalDylib;
   std::vector<CallTreeFunction> functions;
 };
 

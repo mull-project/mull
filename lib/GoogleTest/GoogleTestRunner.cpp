@@ -134,6 +134,7 @@ void GoogleTestRunner::runStaticCtor(llvm::Function *Ctor) {
 
 ExecutionResult GoogleTestRunner::runTest(Test *Test, std::vector<llvm::Module *> &modules) {
   GoogleTest_Test *GTest = dyn_cast<GoogleTest_Test>(Test);
+  errs() << GTest->GetTestBodyFunction()->getName();
 
   typedef std::function<RuntimeDyld::SymbolInfo (const std::string&)> resolver_t;
 
@@ -163,9 +164,9 @@ ExecutionResult GoogleTestRunner::runTest(Test *Test, std::vector<llvm::Module *
 
   auto resolver = createLambdaResolver(localLookup, externalLookup);
 
-  auto handle = jit.jit().addModuleSet(modules,
-                                       make_unique<SectionMemoryManager>(),
-                                       std::move(resolver));
+  jit.jit().addModuleSet(modules,
+                         make_unique<SectionMemoryManager>(),
+                         std::move(resolver));
 
   jit.jit().prepareForExecution();
 
@@ -228,8 +229,6 @@ ExecutionResult GoogleTestRunner::runTest(Test *Test, std::vector<llvm::Module *
       tree.push(child.get());
     }
   }
-
-  jit.jit().removeModuleSet(handle);
 
   if (result == 0) {
     Result.Status = ExecutionStatus::Passed;
