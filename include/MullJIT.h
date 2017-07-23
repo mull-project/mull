@@ -43,12 +43,14 @@ struct CallTreeFunction {
   CallTreeFunction(llvm::Function *f) : function(f), treeRoot(nullptr) {}
 };
 
-template <typename BaseLayerT,
-typename LogicalModuleResources,
+typedef llvm::orc::ObjectLinkingLayer<> LinkingLayer;
+typedef llvm::orc::IRCompileLayer<LinkingLayer> CompileLayer;
+
+template <typename LogicalModuleResources,
 typename LogicalDylibResources>
 class MullLogicalDylib {
 public:
-  typedef typename BaseLayerT::ModuleSetHandleT BaseLayerModuleSetHandleT;
+  typedef typename CompileLayer::ModuleSetHandleT BaseLayerModuleSetHandleT;
 private:
 
   typedef std::vector<BaseLayerModuleSetHandleT> BaseLayerHandleList;
@@ -71,7 +73,7 @@ public:
   typedef typename BaseLayerHandleList::iterator BaseLayerHandleIterator;
   typedef typename LogicalModuleList::iterator LogicalModuleHandle;
 
-  MullLogicalDylib(BaseLayerT &BaseLayer) : BaseLayer(BaseLayer) {}
+  MullLogicalDylib(CompileLayer &BaseLayer) : BaseLayer(BaseLayer) {}
 
   ~MullLogicalDylib() {
     for (auto &LM : LogicalModules)
@@ -147,13 +149,10 @@ public:
   LogicalDylibResources& getDylibResources() { return DylibResources; }
   
 protected:
-  BaseLayerT BaseLayer;
+  CompileLayer BaseLayer;
   LogicalModuleList LogicalModules;
   LogicalDylibResources DylibResources;
 };
-
-typedef llvm::orc::ObjectLinkingLayer<> LinkingLayer;
-typedef llvm::orc::IRCompileLayer<LinkingLayer> CompileLayer;
 
 /// @brief Custom Compile On Demand layer
 class MullLayer {
@@ -271,7 +270,7 @@ private:
     ModuleAdderFtor ModuleAdder;
   };
 
-  typedef MullLogicalDylib<CompileLayer, LogicalModuleResources,
+  typedef MullLogicalDylib<LogicalModuleResources,
   LogicalDylibResources> CODLogicalDylib;
 
   typedef typename CODLogicalDylib::LogicalModuleHandle LogicalModuleHandle;
@@ -286,32 +285,28 @@ public:
   typedef std::function<std::set<Function*>(Function&)> PartitioningFtor;
 
   /// @brief Construct a compile-on-demand layer instance.
-  MullLayer(llvm::TargetMachine &machine,
-            bool CloneStubsIntoPartitions = true)
+  MullLayer(llvm::TargetMachine &machine)
   : compiler(machine),
     compileLayer(linkingLayer, compiler),
   callbackManager(llvm::orc::createLocalCompileCallbackManager(machine.getTargetTriple(), 0)),
-  stubsManagerBuilder(llvm::orc::createLocalIndirectStubsManagerBuilder(machine.getTargetTriple())),
-  CloneStubsIntoPartitions(CloneStubsIntoPartitions) {
+  stubsManagerBuilder(llvm::orc::createLocalIndirectStubsManagerBuilder(machine.getTargetTriple()))
+  {
     CallTreeFunction phonyRoot(nullptr);
     functions.push_back(phonyRoot);
   }
 
-  /// @brief Add a module to the compile-on-demand layer.
-  template <typename ModuleSetT, typename MemoryManagerPtrT,
-  typename SymbolResolverPtrT>
-  ModuleSetHandleT addModuleSet(ModuleSetT Ms,
-                                MemoryManagerPtrT MemMgr,
-                                SymbolResolverPtrT Resolver) {
+  ModuleSetHandleT addModuleSet(std::vector<llvm::Module *> &modules,
+                                std::unique_ptr<SectionMemoryManager> memoryManager,
+                                std::unique_ptr<RuntimeDyld::SymbolResolver> resolver) {
 
     LogicalDylibs.push_back(CODLogicalDylib(compileLayer));
     auto &LDResources = LogicalDylibs.back().getDylibResources();
 
-    LDResources.ExternalSymbolResolver = std::move(Resolver);
+    LDResources.ExternalSymbolResolver = std::move(resolver);
 
-    auto &MemMgrRef = *MemMgr;
+    auto &MemMgrRef = *memoryManager;
     LDResources.MemMgr =
-      wrapOwnership<RuntimeDyld::MemoryManager>(std::move(MemMgr));
+      wrapOwnership<RuntimeDyld::MemoryManager>(std::move(memoryManager));
 
     LDResources.ModuleAdder =
       [&MemMgrRef](CompileLayer &B, std::unique_ptr<Module> M,
@@ -323,7 +318,7 @@ public:
     };
 
     // Process each of the modules in this module set.
-    for (auto &M : Ms)
+    for (auto &M : modules)
       addLogicalModule(LogicalDylibs.back(), std::move(M));
 
     return std::prev(LogicalDylibs.end());
@@ -452,9 +447,7 @@ private:
         if (F.isDeclaration())
           continue;
 
-        // Record all functions defined by this module.
-        if (CloneStubsIntoPartitions)
-          LMResources.StubsToClone.insert(&F);
+        LMResources.StubsToClone.insert(&F);
 
         // Create a callback, associate it with the stub for the function,
         // and set the compile action to compile the partition containing the
@@ -726,7 +719,6 @@ private:
   std::function<std::unique_ptr<llvm::orc::IndirectStubsManager>()> stubsManagerBuilder;
 
   LogicalDylibList LogicalDylibs;
-  bool CloneStubsIntoPartitions;
   std::vector<CallTreeFunction> functions;
 };
 
