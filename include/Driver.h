@@ -65,7 +65,7 @@ private:
   std::vector<llvm::object::ObjectFile *> AllButOne(llvm::Module *One);
 
   /// Returns cached object files for all modules
-  std::vector<llvm::object::ObjectFile *> AllObjectFiles();
+  // std::vector<llvm::object::ObjectFile *> AllObjectFiles();
   std::vector<llvm::Module *> allModules();
 };
 

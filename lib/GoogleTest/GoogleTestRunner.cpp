@@ -13,6 +13,7 @@
 #include <chrono>
 #include <execinfo.h>
 #include <queue>
+#include <unistd.h>
 
 using namespace mull;
 using namespace llvm;
@@ -101,7 +102,10 @@ extern "C" void *mull__dso_handle = nullptr;
 //};
 
 GoogleTestRunner::GoogleTestRunner(llvm::TargetMachine &machine)
-  : TestRunner(machine), jit(machine) {}
+  : TestRunner(machine), jit(machine)
+{
+  creatorPID = getpid();
+}
 
 std::string GoogleTestRunner::MangleName(const llvm::StringRef &Name) {
   std::string MangledName;
@@ -117,7 +121,7 @@ void *GoogleTestRunner::GetCtorPointer(const llvm::Function &Function) {
 }
 
 void *GoogleTestRunner::FunctionPointer(const char *functionName) {
-  JITSymbol Symbol = jit.jit().findSymbol(functionName, false);
+  JITSymbol Symbol = jit.findSymbol(functionName, false);
   void *FPointer = reinterpret_cast<void *>(static_cast<uintptr_t>(Symbol.getAddress()));
   assert(FPointer && "Can't find pointer to function");
   return FPointer;
@@ -132,15 +136,14 @@ void GoogleTestRunner::runStaticCtor(llvm::Function *Ctor) {
   ctor();
 }
 
-ExecutionResult GoogleTestRunner::runTest(Test *Test, std::vector<llvm::Module *> &modules) {
-  GoogleTest_Test *GTest = dyn_cast<GoogleTest_Test>(Test);
-  errs() << GTest->GetTestBodyFunction()->getName();
+void GoogleTestRunner::prepareForExecution(std::vector<llvm::Module *> &modules) {
+  assert(creatorPID == getpid() && "Must be called from the main process");
 
   typedef std::function<RuntimeDyld::SymbolInfo (const std::string&)> resolver_t;
 
   resolver_t localLookup = [&] (const std::string &Name)
   {
-    if (auto Sym = jit.jit().findSymbol(Name, false))
+    if (auto Sym = jit.findSymbol(Name, false))
       return Sym.toRuntimeDyldSymbol();
     return RuntimeDyld::SymbolInfo(nullptr);
   };
@@ -164,11 +167,49 @@ ExecutionResult GoogleTestRunner::runTest(Test *Test, std::vector<llvm::Module *
 
   auto resolver = createLambdaResolver(localLookup, externalLookup);
 
-  jit.jit().addModuleSet(modules,
-                         make_unique<SectionMemoryManager>(),
-                         std::move(resolver));
+  jit.addModuleSet(modules,
+                   make_unique<SectionMemoryManager>(),
+                   std::move(resolver));
 
-  jit.jit().prepareForExecution();
+  jit.prepareForExecution();
+}
+
+ExecutionResult GoogleTestRunner::runTest(Test *Test, std::vector<llvm::Module *> &modules) {
+  typedef std::function<RuntimeDyld::SymbolInfo (const std::string&)> resolver_t;
+
+  resolver_t localLookup = [&] (const std::string &Name)
+  {
+    if (auto Sym = jit.findSymbol(Name, false))
+      return Sym.toRuntimeDyldSymbol();
+    return RuntimeDyld::SymbolInfo(nullptr);
+  };
+
+  /// Recursive labmda! Yay!
+  resolver_t externalLookup = [&](const std::string &Name) {
+    if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(Name)) {
+      return RuntimeDyld::SymbolInfo(SymAddr, JITSymbolFlags::Exported);
+    }
+
+    if (Name == "___cxa_atexit") {
+      return externalLookup("mull__cxa_atexit");
+    }
+
+    if (Name == "___dso_handle") {
+      return externalLookup("mull__dso_handle");
+    }
+
+    return RuntimeDyld::SymbolInfo(nullptr);
+  };
+
+  auto resolver = createLambdaResolver(localLookup, externalLookup);
+
+  jit.addModuleSet(modules,
+                   make_unique<SectionMemoryManager>(),
+                   std::move(resolver));
+
+  jit.prepareForExecution();
+
+  GoogleTest_Test *GTest = dyn_cast<GoogleTest_Test>(Test);
 
   auto start = high_resolution_clock::now();
 
@@ -216,20 +257,6 @@ ExecutionResult GoogleTestRunner::runTest(Test *Test, std::vector<llvm::Module *
   ExecutionResult Result;
   Result.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
 
-  std::unique_ptr<CallTree> callTree(jit.jit().createCallTree());
-  std::queue<CallTree *> tree;
-  tree.push(callTree.get());
-  while (!tree.empty()) {
-    CallTree *node = tree.front();
-    assert(node);
-    tree.pop();
-    for (auto &child: node->children) {
-      assert(child->function);
-      errs() << child->level << " " << child->function->getName() << "\n";
-      tree.push(child.get());
-    }
-  }
-
   if (result == 0) {
     Result.Status = ExecutionStatus::Passed;
   } else {
@@ -237,6 +264,10 @@ ExecutionResult GoogleTestRunner::runTest(Test *Test, std::vector<llvm::Module *
   }
   
   return Result;
+}
+
+std::unique_ptr<CallTree> GoogleTestRunner::callTree() {
+  return jit.createCallTree();
 }
 
 ExecutionResult GoogleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) {

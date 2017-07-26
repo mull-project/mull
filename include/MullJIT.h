@@ -10,6 +10,8 @@
 #include <llvm/Support/Debug.h>
 #include <llvm/Transforms/Utils/Cloning.h>
 
+#include <llvm/ExecutionEngine/Orc/OrcABISupport.h>
+
 #include <stdlib.h>
 
 #include <list>
@@ -155,7 +157,7 @@ protected:
 };
 
 /// @brief Custom Compile On Demand layer
-class MullLayer {
+class MullJIT {
 private:
 
   llvm::orc::SimpleCompiler compiler;
@@ -285,7 +287,7 @@ public:
   typedef std::function<std::set<Function*>(Function&)> PartitioningFtor;
 
   /// @brief Construct a compile-on-demand layer instance.
-  MullLayer(llvm::TargetMachine &machine)
+  MullJIT(llvm::TargetMachine &machine)
   : compiler(machine),
     compileLayer(linkingLayer, compiler),
   callbackManager(llvm::orc::createLocalCompileCallbackManager(machine.getTargetTriple(), 0)),
@@ -336,9 +338,8 @@ public:
 #pragma mark - Call Tree Begin
 
   void prepareForExecution() {
-    if (_callTreeMapping == nullptr) {
-      _callTreeMapping = (uint64_t *)calloc(functions.size(), sizeof(uint64_t));
-    }
+    assert(_callTreeMapping == nullptr && "Called twice?");
+    _callTreeMapping = (uint64_t *)calloc(functions.size(), sizeof(uint64_t));
   }
 
   void fillInCallTree(std::vector<CallTreeFunction> &functions,
@@ -699,13 +700,4 @@ private:
   std::vector<CallTreeFunction> functions;
 };
 
-class MullJIT {
-  typedef MullLayer CODLayer;
-  CODLayer compileOnDemandLayer;
-
-public:
-  MullJIT(llvm::TargetMachine &machine) : compileOnDemandLayer(machine) {}
-
-  CODLayer &jit() { return compileOnDemandLayer; }
-};
 }

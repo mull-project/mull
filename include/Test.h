@@ -1,6 +1,12 @@
 #pragma once
 
+#include <llvm/IR/Function.h>
+
 #include <string>
+
+namespace llvm {
+class Function;
+}
 
 namespace mull {
 
@@ -9,6 +15,13 @@ public:
   virtual std::string getTestName() = 0;
   virtual std::string getTestDisplayName() = 0;
   virtual std::string getUniqueIdentifier() = 0;
+
+  /// Entry points into the test might be the test body, setup/teardown,
+  /// before each/before all functions, and so on.
+  /// TODO: entryPoints is not the best name for teardown/after each methods
+  virtual std::vector<llvm::Function *> entryPoints() {
+    return std::vector<llvm::Function *>();
+  }
   virtual ~Test() {}
 
   enum TestKind {

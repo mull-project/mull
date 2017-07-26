@@ -22,11 +22,16 @@ namespace mull {
 class GoogleTestRunner : public TestRunner {
   llvm::Mangler Mangler;
   MullJIT jit;
+  pid_t creatorPID;
 public:
 
   GoogleTestRunner(llvm::TargetMachine &machine);
   ExecutionResult runTest(Test *Test, ObjectFiles &ObjectFiles) override;
+
+  //ExecutionResult runTest(Test *Test) override;
   ExecutionResult runTest(Test *Test, std::vector<llvm::Module *> &modules) override;
+  std::unique_ptr<CallTree> callTree() override;
+  void prepareForExecution(std::vector<llvm::Module *> &modules) override;
 
   virtual ~GoogleTestRunner() {}
 

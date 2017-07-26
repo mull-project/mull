@@ -26,6 +26,7 @@
 #include <algorithm>
 #include <chrono>
 #include <fstream>
+#include <queue>
 #include <vector>
 
 using namespace llvm;
@@ -87,6 +88,7 @@ std::unique_ptr<Result> Driver::Run() {
 
   int testIndex = 1;
   auto _modules = allModules();
+  //Runner.prepareForExecution(_modules);
   for (auto &test : foundTests) {
 //    auto ObjectFiles = AllObjectFiles();
 
@@ -101,7 +103,39 @@ std::unique_ptr<Result> Driver::Run() {
     }, Cfg.getTimeout());
 
     auto BorrowedTest = test.get();
+    const std::vector<Function *> &entryPoints = test->entryPoints();
+
     auto Result = make_unique<TestResult>(ExecResult, std::move(test));
+
+    std::unique_ptr<CallTree> callTree(Runner.callTree());
+    std::vector<CallTree *> testeeRoots;
+
+    std::queue<CallTree *> nodes;
+    nodes.push(callTree.get());
+    while (!nodes.empty()) {
+      CallTree *node = nodes.front();
+      nodes.pop();
+      for (auto &n : node->children) {
+        if (std::find(entryPoints.begin(), entryPoints.end(), n->function) != entryPoints.end()) {
+          testeeRoots.push_back(n.get());
+        }
+
+        nodes.push(n.get());
+      }
+    }
+
+    for (auto &node : testeeRoots) {
+      nodes.push(node);
+      while (!nodes.empty()) {
+        CallTree *node = nodes.front();
+        nodes.pop();
+        errs() << node->level << " " << node->function->getName() << "\n";
+        for (auto &n : node->children) {
+          errs() << "\t" << n->level << " " << n->function->getName() << "\n";
+          nodes.push(n.get());
+        }
+      }
+    }
 
     auto testees = Finder.findTestees(BorrowedTest, Ctx, Cfg.getMaxDistance());
 
@@ -263,6 +297,7 @@ std::vector<llvm::object::ObjectFile *> Driver::AllButOne(llvm::Module *One) {
   return Objects;
 }
 
+/*
 std::vector<llvm::object::ObjectFile *> Driver::AllObjectFiles() {
   std::vector<llvm::object::ObjectFile *> Objects;
 
@@ -272,6 +307,7 @@ std::vector<llvm::object::ObjectFile *> Driver::AllObjectFiles() {
 
   return Objects;
 }
+*/
 
 std::vector<llvm::Module *> Driver::allModules() {
   std::vector<llvm::Module *> modules;
