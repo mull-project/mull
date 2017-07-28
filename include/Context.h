@@ -35,7 +35,7 @@ public:
   MullModule *moduleWithIdentifier(const std::string &identifier) const;
 
   ModuleArrayType &getModules() { return Modules; }
-  llvm::Function *lookupDefinedFunction(llvm::StringRef FunctionName);
+  llvm::Function *lookupDefinedFunction(llvm::StringRef FunctionName) const;
   iterator begin()  { return Modules.begin(); }
   iterator end()    { return Modules.end();   }
 };

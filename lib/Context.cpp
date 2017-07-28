@@ -29,7 +29,7 @@ void Context::addModule(std::unique_ptr<MullModule> module) {
   Modules.emplace_back(std::move(module));
 }
 
-llvm::Function *Context::lookupDefinedFunction(llvm::StringRef FunctionName) {
+llvm::Function *Context::lookupDefinedFunction(llvm::StringRef FunctionName) const {
   auto it = FunctionsRegistry.find(FunctionName.str());
   if (it == FunctionsRegistry.end()) {
     return nullptr;

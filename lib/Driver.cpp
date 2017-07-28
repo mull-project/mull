@@ -35,6 +35,64 @@ using namespace mull;
 using namespace std;
 using namespace std::chrono;
 
+std::vector<CallTree *> filterCallTree(CallTree *root, Test *test) {
+  std::vector<CallTree *> roots;
+
+  std::vector<Function *> entryPoints = test->entryPoints();
+
+  std::queue<CallTree *> nodes;
+  nodes.push(root);
+  while (!nodes.empty()) {
+    CallTree *node = nodes.front();
+    nodes.pop();
+
+    if (std::find(entryPoints.begin(), entryPoints.end(), node->function) != entryPoints.end()) {
+      roots.push_back(node);
+    }
+
+    for (auto &child : node->children) {
+      nodes.push(child.get());
+    }
+  }
+
+  return roots;
+}
+
+std::vector<std::unique_ptr<Testee>> testeesFromCallTreeForTest(CallTree *root,
+                                                                Test *test,
+                                                                int maxDistance) {
+  std::vector<std::unique_ptr<Testee>> testees;
+
+  for (CallTree *root : filterCallTree(root, test)) {
+    const int offset = root->level;
+
+    std::queue<CallTree *> nodes;
+    nodes.push(root);
+
+    Testee *parent = nullptr;
+
+    while (!nodes.empty()) {
+      CallTree *node = nodes.front();
+      nodes.pop();
+
+      int distance = node->level - offset;
+      std::unique_ptr<Testee> testee(make_unique<Testee>(node->function,
+                                                         nullptr,
+                                                         parent,
+                                                         distance));
+      parent = testee.get();
+      testees.push_back(std::move(testee));
+      if (distance < maxDistance) {
+        for (std::unique_ptr<CallTree> &child : node->children) {
+          nodes.push(child.get());
+        }
+      }
+    }
+  }
+
+  return testees;
+}
+
 /// Populate mull::Context with modules using
 /// ModulePaths from mull::Config.
 /// mull::Context should be populated using ModuleLoader
@@ -102,42 +160,17 @@ std::unique_ptr<Result> Driver::Run() {
       *SharedResult = Runner.runTest(test.get(), _modules);
     }, Cfg.getTimeout());
 
-    auto BorrowedTest = test.get();
-    const std::vector<Function *> &entryPoints = test->entryPoints();
+    Test *borrowedTest = test.get();
 
     auto Result = make_unique<TestResult>(ExecResult, std::move(test));
 
     std::unique_ptr<CallTree> callTree(Runner.callTree());
-    std::vector<CallTree *> testeeRoots;
 
-    std::queue<CallTree *> nodes;
-    nodes.push(callTree.get());
-    while (!nodes.empty()) {
-      CallTree *node = nodes.front();
-      nodes.pop();
-      for (auto &n : node->children) {
-        if (std::find(entryPoints.begin(), entryPoints.end(), n->function) != entryPoints.end()) {
-          testeeRoots.push_back(n.get());
-        }
+    auto testees = testeesFromCallTreeForTest(callTree.get(),
+                                              borrowedTest,
+                                              Cfg.getMaxDistance());
 
-        nodes.push(n.get());
-      }
-    }
-
-    for (auto &node : testeeRoots) {
-      nodes.push(node);
-      while (!nodes.empty()) {
-        CallTree *node = nodes.front();
-        nodes.pop();
-        errs() << node->level << " " << node->function->getName() << "\n";
-        for (auto &n : node->children) {
-          errs() << "\t" << n->level << " " << n->function->getName() << "\n";
-          nodes.push(n.get());
-        }
-      }
-    }
-
-    auto testees = Finder.findTestees(BorrowedTest, Ctx, Cfg.getMaxDistance());
+//    auto testees = Finder.findTestees(borrowedTest, Ctx, Cfg.getMaxDistance());
 
     /// -1 since we are skipping the first testee
     const int testeesCount = testees.size() - 1;
@@ -198,7 +231,7 @@ std::unique_ptr<Result> Driver::Run() {
                                                ExecResult.RunningTime * 10);
 
           result = Sandbox->run([&](ExecutionResult *SharedResult) {
-            ExecutionResult R = Runner.runTest(BorrowedTest, ObjectFiles);
+            ExecutionResult R = Runner.runTest(borrowedTest, ObjectFiles);
 
             assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
 
