@@ -368,13 +368,10 @@ GoogleTestFinder::findMutationPoints(const Context &context,
     return MutationPointsRegistry.at(&testee);
   }
 
-  Function *definedFunction = context.lookupDefinedFunction(testee.getName());
-  assert(definedFunction);
-
   std::vector<MutationPoint *> points;
 
   for (auto &mutationOperator : mutationOperators) {
-    for (auto point : mutationOperator->getMutationPoints(context, definedFunction, filter)) {
+    for (auto point : mutationOperator->getMutationPoints(context, &testee, filter)) {
       points.push_back(point);
       MutationPoints.emplace_back(std::unique_ptr<MutationPoint>(point));
     }

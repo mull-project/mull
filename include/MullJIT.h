@@ -45,6 +45,14 @@ struct CallTreeFunction {
   CallTreeFunction(llvm::Function *f) : function(f), treeRoot(nullptr) {}
 };
 
+
+/// ORC's implementation deletes body of original function
+/// We need to preserve it!
+/// TODO: Ask for the reason of such behaviour
+void mull_moveFunctionBody(Function &OrigF, ValueToValueMapTy &VMap,
+                           ValueMaterializer *Materializer,
+                           Function *NewF = nullptr);
+
 typedef llvm::orc::ObjectLinkingLayer<> LinkingLayer;
 typedef llvm::orc::IRCompileLayer<LinkingLayer> CompileLayer;
 
@@ -632,7 +640,7 @@ private:
     orc::cloneFunctionDecl(*M, function, &VMap);
 
     // Move the function bodies.
-    orc::moveFunctionBody(function, VMap, &Materializer);
+    mull_moveFunctionBody(function, VMap, &Materializer);
 
     // Create memory manager and symbol resolver.
     auto Resolver = orc::createLambdaResolver(
