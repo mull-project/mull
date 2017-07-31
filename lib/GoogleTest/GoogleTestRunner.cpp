@@ -78,28 +78,33 @@ void runDestructors() {
 
 extern "C" void *mull__dso_handle = nullptr;
 
-//class Mull_GoogleTest_Resolver : public RuntimeDyld::SymbolResolver {
-//public:
-//
-//  RuntimeDyld::SymbolInfo findSymbol(const std::string &Name) {
-//    if (Name == "___cxa_atexit") {
-//      return findSymbol("mull__cxa_atexit");
-//    }
-//
-//    if (Name == "___dso_handle") {
-//      return findSymbol("mull__dso_handle");
-//    }
-//
-//    if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(Name))
-//      return RuntimeDyld::SymbolInfo(SymAddr, JITSymbolFlags::Exported);
-//
-//    return RuntimeDyld::SymbolInfo(nullptr);
-//  }
-//
-//  RuntimeDyld::SymbolInfo findSymbolInLogicalDylib(const std::string &Name) {
-//    return RuntimeDyld::SymbolInfo(nullptr);
-//  }
-//};
+class Mull_GoogleTest_Resolver : public RuntimeDyld::SymbolResolver {
+  MullJIT &jit;
+public:
+  Mull_GoogleTest_Resolver(MullJIT &j) : jit(j) {}
+
+  RuntimeDyld::SymbolInfo findSymbol(const std::string &Name) {
+    if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(Name)) {
+      return RuntimeDyld::SymbolInfo(SymAddr, JITSymbolFlags::Exported);
+    }
+
+    if (Name == "___cxa_atexit") {
+      return findSymbol("mull__cxa_atexit");
+    }
+
+    if (Name == "___dso_handle") {
+      return findSymbol("mull__dso_handle");
+    }
+
+    return RuntimeDyld::SymbolInfo(nullptr);
+  }
+
+  RuntimeDyld::SymbolInfo findSymbolInLogicalDylib(const std::string &Name) {
+    if (auto Sym = jit.findSymbol(Name, false))
+      return Sym.toRuntimeDyldSymbol();
+    return RuntimeDyld::SymbolInfo(nullptr);
+  }
+};
 
 GoogleTestRunner::GoogleTestRunner(llvm::TargetMachine &machine)
   : TestRunner(machine), jit(machine)
@@ -139,76 +144,14 @@ void GoogleTestRunner::runStaticCtor(llvm::Function *Ctor) {
 void GoogleTestRunner::prepareForExecution(std::vector<llvm::Module *> &modules) {
   assert(creatorPID == getpid() && "Must be called from the main process");
 
-  typedef std::function<RuntimeDyld::SymbolInfo (const std::string&)> resolver_t;
-
-  resolver_t localLookup = [&] (const std::string &Name)
-  {
-    if (auto Sym = jit.findSymbol(Name, false))
-      return Sym.toRuntimeDyldSymbol();
-    return RuntimeDyld::SymbolInfo(nullptr);
-  };
-
-  /// Recursive labmda! Yay!
-  resolver_t externalLookup = [&](const std::string &Name) {
-    if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(Name)) {
-      return RuntimeDyld::SymbolInfo(SymAddr, JITSymbolFlags::Exported);
-    }
-
-    if (Name == "___cxa_atexit") {
-      return externalLookup("mull__cxa_atexit");
-    }
-
-    if (Name == "___dso_handle") {
-      return externalLookup("mull__dso_handle");
-    }
-
-    return RuntimeDyld::SymbolInfo(nullptr);
-  };
-
-  auto resolver = createLambdaResolver(localLookup, externalLookup);
-
   jit.addModuleSet(modules,
                    make_unique<SectionMemoryManager>(),
-                   std::move(resolver));
+                   make_unique<Mull_GoogleTest_Resolver>(jit));
 
   jit.prepareForExecution();
 }
 
-ExecutionResult GoogleTestRunner::runTest(Test *Test, std::vector<llvm::Module *> &modules) {
-  typedef std::function<RuntimeDyld::SymbolInfo (const std::string&)> resolver_t;
-
-  resolver_t localLookup = [&] (const std::string &Name)
-  {
-    if (auto Sym = jit.findSymbol(Name, false))
-      return Sym.toRuntimeDyldSymbol();
-    return RuntimeDyld::SymbolInfo(nullptr);
-  };
-
-  /// Recursive labmda! Yay!
-  resolver_t externalLookup = [&](const std::string &Name) {
-    if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(Name)) {
-      return RuntimeDyld::SymbolInfo(SymAddr, JITSymbolFlags::Exported);
-    }
-
-    if (Name == "___cxa_atexit") {
-      return externalLookup("mull__cxa_atexit");
-    }
-
-    if (Name == "___dso_handle") {
-      return externalLookup("mull__dso_handle");
-    }
-
-    return RuntimeDyld::SymbolInfo(nullptr);
-  };
-
-  auto resolver = createLambdaResolver(localLookup, externalLookup);
-
-  jit.addModuleSet(modules,
-                   make_unique<SectionMemoryManager>(),
-                   std::move(resolver));
-
-  jit.prepareForExecution();
-
+ExecutionResult GoogleTestRunner::runTest(Test *Test) {
   GoogleTest_Test *GTest = dyn_cast<GoogleTest_Test>(Test);
 
   auto start = high_resolution_clock::now();

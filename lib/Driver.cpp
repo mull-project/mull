@@ -146,7 +146,7 @@ std::unique_ptr<Result> Driver::Run() {
 
   int testIndex = 1;
   auto _modules = allModules();
-  //Runner.prepareForExecution(_modules);
+  Runner.prepareForExecution(_modules);
   for (auto &test : foundTests) {
 //    auto ObjectFiles = AllObjectFiles();
 
@@ -157,7 +157,7 @@ std::unique_ptr<Result> Driver::Run() {
       << "\n";
 
     ExecutionResult ExecResult = Sandbox->run([&](ExecutionResult *SharedResult) {
-      *SharedResult = Runner.runTest(test.get(), _modules);
+      *SharedResult = Runner.runTest(test.get());
     }, Cfg.getTimeout());
 
     Test *borrowedTest = test.get();

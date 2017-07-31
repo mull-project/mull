@@ -28,8 +28,7 @@ public:
   GoogleTestRunner(llvm::TargetMachine &machine);
   ExecutionResult runTest(Test *Test, ObjectFiles &ObjectFiles) override;
 
-  //ExecutionResult runTest(Test *Test) override;
-  ExecutionResult runTest(Test *Test, std::vector<llvm::Module *> &modules) override;
+  ExecutionResult runTest(Test *Test) override;
   std::unique_ptr<CallTree> callTree() override;
   void prepareForExecution(std::vector<llvm::Module *> &modules) override;
 
