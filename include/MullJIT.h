@@ -18,6 +18,8 @@
 #include <memory>
 #include <set>
 #include <stack>
+#include <sys/mman.h>
+#include <sys/types.h>
 #include <utility>
 
 using namespace llvm;
@@ -347,7 +349,15 @@ public:
 
   void prepareForExecution() {
     assert(_callTreeMapping == nullptr && "Called twice?");
-    _callTreeMapping = (uint64_t *)calloc(functions.size(), sizeof(uint64_t));
+
+    /// Creating a memory to be shared between child and parent.
+    _callTreeMapping = (uint64_t *)mmap(NULL,
+                                        sizeof(uint64_t) * functions.size(),
+                                        PROT_READ | PROT_WRITE,
+                                        MAP_SHARED | MAP_ANONYMOUS,
+                                        -1,
+                                        0);
+    memset(_callTreeMapping, 0, functions.size());
   }
 
   void fillInCallTree(std::vector<CallTreeFunction> &functions,
@@ -453,6 +463,7 @@ private:
       }
 
       LMResources.StubsMgr = stubsManagerBuilder();
+//      LMResources.StubsMgr = make_unique<orc::LocalIndirectStubsManager<orc::OrcX86_64_SysV>>();
       auto EC = LMResources.StubsMgr->createStubs(StubInits);
       (void)EC;
       // FIXME: This should be propagated back to the user. Stub creation may
