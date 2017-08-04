@@ -6,6 +6,7 @@ set(mull_sources
   Logger.cpp
   ModuleLoader.cpp
   MullJIT.cpp
+  DynamicCallTree.cpp
 
   MutationOperators/AddMutationOperator.cpp
   MutationOperators/AndOrReplacementMutationOperator.cpp

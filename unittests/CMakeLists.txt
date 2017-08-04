@@ -3,6 +3,7 @@ set(mull_unittests_sources
   ConfigParserTests.cpp
   ContextTest.cpp
   DriverTests.cpp
+  DynamicCallTreeTests.cpp
   ForkProcessSandboxTest.cpp
   MutationPointTests.cpp
   ModuleLoaderTest.cpp

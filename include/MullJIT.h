@@ -49,7 +49,6 @@ struct CallTreeFunction {
   CallTreeFunction(llvm::Function *f) : function(f), treeRoot(nullptr) {}
 };
 
-
 /// ORC's implementation deletes body of original function
 /// We need to preserve it!
 /// TODO: Ask for the reason of such behaviour
@@ -168,7 +167,6 @@ protected:
   LogicalDylibResources DylibResources;
 };
 
-/// @brief Custom Compile On Demand layer
 class MullJIT {
 private:
 
