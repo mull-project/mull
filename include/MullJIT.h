@@ -289,7 +289,7 @@ public:
   callbackManager(llvm::orc::createLocalCompileCallbackManager(machine.getTargetTriple(), 0)),
   stubsManagerBuilder(llvm::orc::createLocalIndirectStubsManagerBuilder(machine.getTargetTriple())),
   logicalDylib(compileLayer),
-  dynamicCallTree(_callTreeMapping, functions)
+  dynamicCallTree(functions)
   {
     CallTreeFunction phonyRoot(nullptr);
     functions.push_back(phonyRoot);
@@ -345,6 +345,7 @@ public:
                                         -1,
                                         0);
     memset(_callTreeMapping, 0, functions.size());
+    dynamicCallTree.prepare(_callTreeMapping);
   }
 
   std::unique_ptr<CallTree> createCallTree() {

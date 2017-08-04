@@ -24,8 +24,9 @@ namespace mull {
 
   class DynamicCallTree {
   public:
-    DynamicCallTree(uint64_t *m, std::vector<CallTreeFunction> &f);
+    DynamicCallTree(std::vector<CallTreeFunction> &f);
 
+    void prepare(uint64_t *m);
     std::unique_ptr<CallTree> createCallTree();
     void cleanupCallTree(std::unique_ptr<CallTree> root);
   private:

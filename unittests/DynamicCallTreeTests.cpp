@@ -36,7 +36,8 @@ TEST(DynamicCallTree, empty_tree) {
 
   uint64_t mapping[6] = { 0 };
 
-  DynamicCallTree tree(mapping, functions);
+  DynamicCallTree tree(functions);
+  tree.prepare(mapping);
 
   std::unique_ptr<CallTree> callTree = tree.createCallTree();
   ASSERT_EQ(callTree->function, nullptr);
@@ -92,10 +93,13 @@ TEST(DynamicCallTree, non_empty_tree) {
   mapping[4] = 2;
   mapping[5] = 4;
 
-  DynamicCallTree tree(mapping, functions);
+  DynamicCallTree tree(functions);
+  tree.prepare(mapping);
   std::unique_ptr<CallTree> root = tree.createCallTree();
 
   /// The tree:
+  ///
+  ///   0    1     2     3     4
   ///
   ///   0 -> F1 -> F2 -> F3
   ///              F2 -> F4
