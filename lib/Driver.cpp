@@ -35,6 +35,45 @@ using namespace mull;
 using namespace std;
 using namespace std::chrono;
 
+bool shouldSkipTesteeFunction(llvm::Function *testee) {
+  if (testee->getName().find(StringRef("testing8internal")) != StringRef::npos) {
+    return true;
+  }
+
+  if (testee->getName().find(StringRef("testing15AssertionResult")) != StringRef::npos) {
+    return true;
+  }
+
+  if (testee->getName().find(StringRef("testing7Message")) != StringRef::npos) {
+    return true;
+  }
+
+  if (testee->getName().find(StringRef("clang_call_terminate")) != StringRef::npos) {
+    return true;
+  }
+
+  if (testee->hasMetadata()) {
+    int debugInfoKindID = 0;
+    MDNode *debug = testee->getMetadata(debugInfoKindID);
+    DISubprogram *subprogram = dyn_cast<DISubprogram>(debug);
+    if (subprogram) {
+      if (subprogram->getFilename().str().find("include/c++/v1") != std::string::npos) {
+        return true;
+      }
+
+      if (subprogram->getFilename().str().find("gmock") != std::string::npos) {
+        return true;
+      }
+
+      if (subprogram->getFilename().str().find("gtest") != std::string::npos) {
+        return true;
+      }
+    }
+  }
+  
+  return false;
+}
+
 std::vector<CallTree *> filterCallTree(CallTree *root, Test *test) {
   std::vector<CallTree *> roots;
 
@@ -76,6 +115,11 @@ std::vector<std::unique_ptr<Testee>> testeesFromCallTreeForTest(CallTree *root,
       nodes.pop();
 
       int distance = node->level - offset;
+
+      if (shouldSkipTesteeFunction(node->function)) {
+        continue;
+      }
+
       std::unique_ptr<Testee> testee(make_unique<Testee>(node->function,
                                                          nullptr,
                                                          parent,
@@ -170,7 +214,7 @@ std::unique_ptr<Result> Driver::Run() {
                                               borrowedTest,
                                               Cfg.getMaxDistance());
 
-//    auto testees = Finder.findTestees(borrowedTest, Ctx, Cfg.getMaxDistance());
+    Runner.cleanupCallTree(std::move(callTree));
 
     /// -1 since we are skipping the first testee
     const int testeesCount = testees.size() - 1;

@@ -14,6 +14,7 @@
 
 #include <stdlib.h>
 
+#include <queue>
 #include <list>
 #include <memory>
 #include <set>
@@ -35,9 +36,10 @@ extern "C" void mull_leaveFunction(uint64_t functionIndex);
 struct CallTree {
   llvm::Function *function;
   int level;
+  uint64_t functionsIndex;
   std::list<std::unique_ptr<CallTree>> children;
 
-  CallTree(llvm::Function *f) : function(f), level(0) {}
+  CallTree(llvm::Function *f) : function(f), level(0), functionsIndex(0) {}
 };
 
 struct CallTreeFunction {
@@ -380,6 +382,7 @@ public:
     CallTreeFunction root = functions[parent];
     assert(root.treeRoot);
     node->level = root.treeRoot->level + 1;
+    node->functionsIndex = functionIndex;
     root.treeRoot->children.push_back(std::move(node));
     callTreeMapping[functionIndex] = 0;
   }
@@ -417,6 +420,23 @@ public:
     }
 
     return phonyRoot;
+  }
+
+  void cleanupCallTree(std::unique_ptr<CallTree> root) {
+    std::queue<CallTree *> nodes;
+    nodes.push(root.get());
+
+    while (!nodes.empty()) {
+      CallTree *node = nodes.front();
+      nodes.pop();
+
+      CallTreeFunction function = functions[node->functionsIndex];
+      function.treeRoot = nullptr;
+
+      for (std::unique_ptr<CallTree> &child : node->children) {
+        nodes.push(child.get());
+      }
+    }
   }
 
 #pragma mark - Call Tree End

@@ -20,6 +20,7 @@ public:
   TestRunner(llvm::TargetMachine &targetMachine);
 
   virtual std::unique_ptr<CallTree> callTree() { return make_unique<CallTree>(nullptr); };
+  virtual void cleanupCallTree(std::unique_ptr<CallTree>) { };
   virtual void prepareForExecution(std::vector<llvm::Module *> &modules) {};
 
   virtual ExecutionResult runTest(Test *Test, ObjectFiles &ObjectFiles) = 0;

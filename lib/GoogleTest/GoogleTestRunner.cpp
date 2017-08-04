@@ -213,6 +213,10 @@ std::unique_ptr<CallTree> GoogleTestRunner::callTree() {
   return jit.createCallTree();
 }
 
+void GoogleTestRunner::cleanupCallTree(std::unique_ptr<CallTree> root) {
+  jit.cleanupCallTree(std::move(root));
+}
+
 ExecutionResult GoogleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) {
   GoogleTest_Test *GTest = dyn_cast<GoogleTest_Test>(Test);
 

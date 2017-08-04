@@ -30,6 +30,7 @@ public:
 
   ExecutionResult runTest(Test *Test) override;
   std::unique_ptr<CallTree> callTree() override;
+  void cleanupCallTree(std::unique_ptr<CallTree> root) override;
   void prepareForExecution(std::vector<llvm::Module *> &modules) override;
 
   virtual ~GoogleTestRunner() {}
