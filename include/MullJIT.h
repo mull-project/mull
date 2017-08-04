@@ -23,6 +23,8 @@
 #include <sys/types.h>
 #include <utility>
 
+#include "DynamicCallTree.h"
+
 using namespace llvm;
 
 namespace mull {
@@ -32,22 +34,6 @@ extern std::stack<uint64_t> _callstack;
 
 extern "C" void mull_enterFunction(uint64_t functionIndex);
 extern "C" void mull_leaveFunction(uint64_t functionIndex);
-
-struct CallTree {
-  llvm::Function *function;
-  int level;
-  uint64_t functionsIndex;
-  std::list<std::unique_ptr<CallTree>> children;
-
-  CallTree(llvm::Function *f) : function(f), level(0), functionsIndex(0) {}
-};
-
-struct CallTreeFunction {
-  llvm::Function *function;
-  CallTree *treeRoot;
-
-  CallTreeFunction(llvm::Function *f) : function(f), treeRoot(nullptr) {}
-};
 
 /// ORC's implementation deletes body of original function
 /// We need to preserve it!
@@ -302,7 +288,8 @@ public:
     compileLayer(linkingLayer, compiler),
   callbackManager(llvm::orc::createLocalCompileCallbackManager(machine.getTargetTriple(), 0)),
   stubsManagerBuilder(llvm::orc::createLocalIndirectStubsManagerBuilder(machine.getTargetTriple())),
-  logicalDylib(compileLayer)
+  logicalDylib(compileLayer),
+  dynamicCallTree(_callTreeMapping, functions)
   {
     CallTreeFunction phonyRoot(nullptr);
     functions.push_back(phonyRoot);
@@ -360,64 +347,9 @@ public:
     memset(_callTreeMapping, 0, functions.size());
   }
 
-  void fillInCallTree(std::vector<CallTreeFunction> &functions,
-                      uint64_t *callTreeMapping, uint64_t functionIndex) {
-    uint64_t parent = callTreeMapping[functionIndex];
-    if (parent == 0) {
-      return;
-    }
-
-    if (parent == functionIndex) {
-      parent = 0;
-    }
-
-    CallTreeFunction &function = functions[functionIndex];
-    std::unique_ptr<CallTree> node = make_unique<CallTree>(function.function);
-    function.treeRoot = node.get();
-
-    fillInCallTree(functions, callTreeMapping, parent);
-
-    CallTreeFunction root = functions[parent];
-    assert(root.treeRoot);
-    node->level = root.treeRoot->level + 1;
-    node->functionsIndex = functionIndex;
-    root.treeRoot->children.push_back(std::move(node));
-    callTreeMapping[functionIndex] = 0;
-  }
-
   std::unique_ptr<CallTree> createCallTree() {
     assert(_callTreeMapping);
-
-    ///
-    /// Building the Call Tree
-    ///
-    /// To build a call tree we insert callbacks into each function during JIT
-    /// execution. The callbacks are called within unique function id.
-    /// The callbacks then store information about program execution in a plain
-    /// array of function IDs (_callTreeMapping).
-    /// The very first element of the array (callTreeMapping[0]) is
-    /// zero and not used.
-    /// Each subsequent element may have three states:
-    ///
-    ///   1. If a function N was never called then _callTreeMapping[N] == 0
-    ///   2. If a function N was called as a very first function
-    ///   (i.e. callstack is empty) then _callTreeMapping[N] == N.
-    ///   3. If a function N is called by some other function
-    ///   (i.e. callstack is not empty) then _callTreeMapping[N] == callstack.top()
-    ///
-    /// When the execution is done we can construct a tree of a  more classic
-    /// form.
-    ///
-
-    std::unique_ptr<CallTree> phonyRoot = make_unique<CallTree>(nullptr);
-    CallTreeFunction &rootFunction = functions[0];
-    rootFunction.treeRoot = phonyRoot.get();
-
-    for (uint64_t index = 1; index < functions.size(); index++) {
-      fillInCallTree(functions, _callTreeMapping, index);
-    }
-
-    return phonyRoot;
+    return dynamicCallTree.createCallTree();
   }
 
   void cleanupCallTree(std::unique_ptr<CallTree> root) {
@@ -735,6 +667,7 @@ private:
 
   CODLogicalDylib logicalDylib;
   std::vector<CallTreeFunction> functions;
+  DynamicCallTree dynamicCallTree;
 };
 
 }

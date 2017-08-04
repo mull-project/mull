@@ -3,7 +3,8 @@
 using namespace mull;
 using namespace llvm;
 
-void fillInCallTree(std::vector<_CallTreeFunction> &functions,
+void fillInCallTree(std::vector<
+                    CallTreeFunction> &functions,
                     uint64_t *callTreeMapping, uint64_t functionIndex) {
   uint64_t parent = callTreeMapping[functionIndex];
   if (parent == 0) {
@@ -14,13 +15,13 @@ void fillInCallTree(std::vector<_CallTreeFunction> &functions,
     parent = 0;
   }
 
-  _CallTreeFunction &function = functions[functionIndex];
-  std::unique_ptr<_CallTree> node = make_unique<_CallTree>(function.function);
+  CallTreeFunction &function = functions[functionIndex];
+  std::unique_ptr<CallTree> node = make_unique<CallTree>(function.function);
   function.treeRoot = node.get();
 
   fillInCallTree(functions, callTreeMapping, parent);
 
-  _CallTreeFunction root = functions[parent];
+  CallTreeFunction root = functions[parent];
   assert(root.treeRoot);
   node->level = root.treeRoot->level + 1;
   node->functionsIndex = functionIndex;
@@ -28,10 +29,10 @@ void fillInCallTree(std::vector<_CallTreeFunction> &functions,
   callTreeMapping[functionIndex] = 0;
 }
 
-DynamicCallTree::DynamicCallTree(uint64_t *m, std::vector<_CallTreeFunction> &f)
+DynamicCallTree::DynamicCallTree(uint64_t *m, std::vector<CallTreeFunction> &f)
 : mapping(m), functions(f) {}
 
-std::unique_ptr<_CallTree> DynamicCallTree::createCallTree() {
+std::unique_ptr<CallTree> DynamicCallTree::createCallTree() {
   assert(mapping[0] == 0);
   assert(!functions.empty());
   assert(functions.begin()->function == nullptr);
@@ -58,8 +59,8 @@ std::unique_ptr<_CallTree> DynamicCallTree::createCallTree() {
   /// form.
   ///
 
-  std::unique_ptr<_CallTree> phonyRoot = make_unique<_CallTree>(nullptr);
-  _CallTreeFunction &rootFunction = functions[0];
+  std::unique_ptr<CallTree> phonyRoot = make_unique<CallTree>(nullptr);
+  CallTreeFunction &rootFunction = functions[0];
   rootFunction.treeRoot = phonyRoot.get();
 
   for (uint64_t index = 1; index < functions.size(); index++) {

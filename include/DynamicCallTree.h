@@ -7,29 +7,29 @@
 
 namespace mull {
 
-  struct _CallTree {
+  struct CallTree {
     llvm::Function *function;
     int level;
     uint64_t functionsIndex;
-    std::list<std::unique_ptr<_CallTree>> children;
-    _CallTree(llvm::Function *f) : function(f), level(0), functionsIndex(0) {}
+    std::list<std::unique_ptr<CallTree>> children;
+    CallTree(llvm::Function *f) : function(f), level(0), functionsIndex(0) {}
   };
 
-  struct _CallTreeFunction {
+  struct CallTreeFunction {
     llvm::Function *function;
-    _CallTree *treeRoot;
+    CallTree *treeRoot;
 
-    _CallTreeFunction(llvm::Function *f) : function(f), treeRoot(nullptr) {}
+    CallTreeFunction(llvm::Function *f) : function(f), treeRoot(nullptr) {}
   };
 
   class DynamicCallTree {
   public:
-    DynamicCallTree(uint64_t *m, std::vector<_CallTreeFunction> &f);
+    DynamicCallTree(uint64_t *m, std::vector<CallTreeFunction> &f);
 
-    std::unique_ptr<_CallTree> createCallTree();
+    std::unique_ptr<CallTree> createCallTree();
   private:
     uint64_t *mapping;
-    std::vector<_CallTreeFunction> &functions;
+    std::vector<CallTreeFunction> &functions;
   };
 
 }
