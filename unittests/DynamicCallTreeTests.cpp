@@ -26,7 +26,7 @@ Function *fakeFunction(const char *name) {
 }
 
 TEST(DynamicCallTree, empty_tree) {
-  std::vector<_CallTreeFunction> functions;
+  std::vector<CallTreeFunction> functions;
   functions.push_back(nullptr);
   functions.push_back(fakeFunction("F1"));
   functions.push_back(fakeFunction("F2"));
@@ -38,7 +38,7 @@ TEST(DynamicCallTree, empty_tree) {
 
   DynamicCallTree tree(mapping, functions);
 
-  std::unique_ptr<_CallTree> callTree = tree.createCallTree();
+  std::unique_ptr<CallTree> callTree = tree.createCallTree();
   ASSERT_EQ(callTree->function, nullptr);
   ASSERT_TRUE(callTree->children.empty());
 }
@@ -51,7 +51,7 @@ TEST(DynamicCallTree, non_empty_tree) {
   Function *F4 = fakeFunction("F4");
   Function *F5 = fakeFunction("F5");
 
-  std::vector<_CallTreeFunction> functions;
+  std::vector<CallTreeFunction> functions;
   functions.push_back(phonyFunction);
   functions.push_back(F1);
   functions.push_back(F2);
@@ -93,7 +93,7 @@ TEST(DynamicCallTree, non_empty_tree) {
   mapping[5] = 4;
 
   DynamicCallTree tree(mapping, functions);
-  std::unique_ptr<_CallTree> root = tree.createCallTree();
+  std::unique_ptr<CallTree> root = tree.createCallTree();
 
   /// The tree:
   ///
@@ -102,36 +102,56 @@ TEST(DynamicCallTree, non_empty_tree) {
   ///                    F4 -> F5
 
   ASSERT_EQ(root->function, nullptr);
-  ASSERT_EQ(root->children.size(), 1);
+  ASSERT_EQ(root->children.size(), 1UL);
 
-  _CallTree *f1Node = root->children.front().get();
+  CallTree *f1Node = root->children.front().get();
   ASSERT_EQ(f1Node->function, F1);
   ASSERT_EQ(f1Node->level, 1);
-  ASSERT_EQ(f1Node->functionsIndex, 1);
-  ASSERT_EQ(f1Node->children.size(), 1);
+  ASSERT_EQ(f1Node->functionsIndex, 1UL);
+  ASSERT_EQ(f1Node->children.size(), 1UL);
 
-  _CallTree *f2Node = f1Node->children.front().get();
+  CallTree *f2Node = f1Node->children.front().get();
   ASSERT_EQ(f2Node->function, F2);
   ASSERT_EQ(f2Node->level, 2);
-  ASSERT_EQ(f2Node->functionsIndex, 2);
-  ASSERT_EQ(f2Node->children.size(), 2);
+  ASSERT_EQ(f2Node->functionsIndex, 2UL);
+  ASSERT_EQ(f2Node->children.size(), 2UL);
 
-  _CallTree *f3Node = f2Node->children.front().get();
+  CallTree *f3Node = f2Node->children.front().get();
   ASSERT_EQ(f3Node->function, F3);
   ASSERT_EQ(f3Node->level, 3);
-  ASSERT_EQ(f3Node->functionsIndex, 3);
-  ASSERT_EQ(f3Node->children.size(), 0);
+  ASSERT_EQ(f3Node->functionsIndex, 3UL);
+  ASSERT_EQ(f3Node->children.size(), 0UL);
 
-  _CallTree *f4Node = f2Node->children.back().get();
+  CallTree *f4Node = f2Node->children.back().get();
   ASSERT_EQ(f4Node->function, F4);
   ASSERT_EQ(f4Node->level, 3);
-  ASSERT_EQ(f4Node->functionsIndex, 4);
-  ASSERT_EQ(f4Node->children.size(), 1);
+  ASSERT_EQ(f4Node->functionsIndex, 4UL);
+  ASSERT_EQ(f4Node->children.size(), 1UL);
 
-  _CallTree *f5Node = f4Node->children.front().get();
+  CallTree *f5Node = f4Node->children.front().get();
   ASSERT_EQ(f5Node->function, F5);
   ASSERT_EQ(f5Node->level, 4);
-  ASSERT_EQ(f5Node->functionsIndex, 5);
-  ASSERT_EQ(f5Node->children.size(), 0);
-}
+  ASSERT_EQ(f5Node->functionsIndex, 5UL);
+  ASSERT_EQ(f5Node->children.size(), 0UL);
 
+  ASSERT_EQ(functions[0].treeRoot, root.get());
+  ASSERT_EQ(functions[1].treeRoot, f1Node);
+  ASSERT_EQ(functions[2].treeRoot, f2Node);
+  ASSERT_EQ(functions[3].treeRoot, f3Node);
+  ASSERT_EQ(functions[4].treeRoot, f4Node);
+  ASSERT_EQ(functions[5].treeRoot, f5Node);
+
+  /// mapping is being cleaned up while tree is created
+  for (uint64_t index = 0; index < functions.size(); index++) {
+    ASSERT_EQ(mapping[0], 0UL);
+  }
+
+  tree.cleanupCallTree(std::move(root));
+
+  ASSERT_EQ(functions[0].treeRoot, nullptr);
+  ASSERT_EQ(functions[1].treeRoot, nullptr);
+  ASSERT_EQ(functions[2].treeRoot, nullptr);
+  ASSERT_EQ(functions[3].treeRoot, nullptr);
+  ASSERT_EQ(functions[4].treeRoot, nullptr);
+  ASSERT_EQ(functions[5].treeRoot, nullptr);
+}

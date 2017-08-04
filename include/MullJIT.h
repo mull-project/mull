@@ -353,20 +353,7 @@ public:
   }
 
   void cleanupCallTree(std::unique_ptr<CallTree> root) {
-    std::queue<CallTree *> nodes;
-    nodes.push(root.get());
-
-    while (!nodes.empty()) {
-      CallTree *node = nodes.front();
-      nodes.pop();
-
-      CallTreeFunction function = functions[node->functionsIndex];
-      function.treeRoot = nullptr;
-
-      for (std::unique_ptr<CallTree> &child : node->children) {
-        nodes.push(child.get());
-      }
-    }
+    dynamicCallTree.cleanupCallTree(std::move(root));
   }
 
 #pragma mark - Call Tree End
