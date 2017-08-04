@@ -216,6 +216,12 @@ std::unique_ptr<Result> Driver::Run() {
 
     Runner.cleanupCallTree(std::move(callTree));
 
+    if (testees.size() == 0) {
+      Logger::error().indent(4)
+        << "Driver::Run> NOTHING FOUND";
+      continue;
+    }
+
     /// -1 since we are skipping the first testee
     const int testeesCount = testees.size() - 1;
 
