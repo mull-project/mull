@@ -5,6 +5,29 @@
 using namespace mull;
 using namespace llvm;
 
+void DynamicCallTree::enterFunction(const uint64_t functionIndex,
+                                    uint64_t *mapping,
+                                    std::stack<uint64_t> &stack) {
+
+  if (stack.empty()) {
+    /// This is the first function in a chain
+    /// The root of a tree
+    mapping[functionIndex] = functionIndex;
+  } else if (mapping[functionIndex] == 0) {
+    /// This function has never been called
+    uint64_t parent = stack.top();
+    mapping[functionIndex] = parent;
+  }
+
+  stack.push(functionIndex);
+}
+
+void DynamicCallTree::leaveFunction(const uint64_t functionIndex,
+                                    uint64_t *mapping,
+                                    std::stack<uint64_t> &stack) {
+  stack.pop();
+}
+
 void fillInCallTree(std::vector<
                     CallTreeFunction> &functions,
                     uint64_t *callTreeMapping, uint64_t functionIndex) {

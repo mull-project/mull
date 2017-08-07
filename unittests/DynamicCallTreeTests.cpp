@@ -159,3 +159,104 @@ TEST(DynamicCallTree, non_empty_tree) {
   ASSERT_EQ(functions[4].treeRoot, nullptr);
   ASSERT_EQ(functions[5].treeRoot, nullptr);
 }
+
+TEST(DynamicCallTree, enter_leave_function) {
+  ///
+  /// Call trace
+  ///
+  ///   F1 -> F2 -> F3
+  ///         F2 -> F4
+  ///   F1 -> F4 -> F5
+
+  uint64_t mapping[6] = { 0 };
+  std::stack<uint64_t> stack;
+
+  DynamicCallTree::enterFunction(1, mapping, stack);
+    DynamicCallTree::enterFunction(2, mapping, stack);
+      DynamicCallTree::enterFunction(3, mapping, stack);
+      DynamicCallTree::leaveFunction(3, mapping, stack);
+      DynamicCallTree::enterFunction(4, mapping, stack);
+      DynamicCallTree::leaveFunction(4, mapping, stack);
+    DynamicCallTree::leaveFunction(2, mapping, stack);
+    DynamicCallTree::enterFunction(4, mapping, stack);
+      DynamicCallTree::enterFunction(5, mapping, stack);
+      DynamicCallTree::leaveFunction(5, mapping, stack);
+    DynamicCallTree::leaveFunction(4, mapping, stack);
+  DynamicCallTree::leaveFunction(1, mapping, stack);
+
+  ASSERT_EQ(mapping[0], 0UL);
+  ASSERT_EQ(mapping[1], 1UL);
+  ASSERT_EQ(mapping[2], 1UL);
+  ASSERT_EQ(mapping[3], 2UL);
+  ASSERT_EQ(mapping[4], 2UL);
+  ASSERT_EQ(mapping[5], 4UL);
+
+  ASSERT_TRUE(stack.empty());
+}
+
+TEST(DynamicCallTree, enter_leave_function_recursion) {
+
+
+#if 0
+  void f0();
+  void f1(int x);
+  void f2(int x);
+  void f3();
+  void f4();
+
+  void f0() {
+    f1(1);
+  }
+
+  void f1(int x) {
+    if (x == 1) {
+      f2(1);
+      f4();
+    } else if (x == 2) {
+      f3();
+    } else {
+      f4();
+    }
+  }
+
+  void f2(int x) {
+    if (x == 1) {
+      f1(2);
+    } else {
+      f4();
+    }
+  }
+
+  void f3() {
+    f1(4);
+  }
+
+  void f4() {}
+
+#endif
+  uint64_t mapping[5] = { 0 };
+  std::stack<uint64_t> stack;
+
+  DynamicCallTree::enterFunction(1, mapping, stack);
+    DynamicCallTree::enterFunction(2, mapping, stack);
+      DynamicCallTree::enterFunction(1, mapping, stack);
+        DynamicCallTree::enterFunction(3, mapping, stack);
+          DynamicCallTree::enterFunction(1, mapping, stack);
+            DynamicCallTree::enterFunction(4, mapping, stack);
+            DynamicCallTree::leaveFunction(4, mapping, stack);
+          DynamicCallTree::leaveFunction(1, mapping, stack);
+        DynamicCallTree::leaveFunction(3, mapping, stack);
+      DynamicCallTree::leaveFunction(1, mapping, stack);
+    DynamicCallTree::leaveFunction(2, mapping, stack);
+    DynamicCallTree::enterFunction(4, mapping, stack);
+    DynamicCallTree::leaveFunction(4, mapping, stack);
+  DynamicCallTree::leaveFunction(1, mapping, stack);
+
+  ASSERT_EQ(mapping[0], 0UL);
+  ASSERT_EQ(mapping[1], 1UL);
+  ASSERT_EQ(mapping[2], 1UL);
+  ASSERT_EQ(mapping[3], 1UL);
+  ASSERT_EQ(mapping[4], 1UL);
+
+  ASSERT_TRUE(stack.empty());
+}

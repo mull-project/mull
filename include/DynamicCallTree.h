@@ -1,6 +1,7 @@
 #pragma once
 
 #include <list>
+#include <stack>
 #include <vector>
 
 #include <llvm/IR/Function.h>
@@ -29,6 +30,13 @@ namespace mull {
     void prepare(uint64_t *m);
     std::unique_ptr<CallTree> createCallTree();
     void cleanupCallTree(std::unique_ptr<CallTree> root);
+
+    static void enterFunction(const uint64_t functionIndex,
+                              uint64_t *mapping,
+                              std::stack<uint64_t> &stack);
+    static void leaveFunction(const uint64_t functionIndex,
+                              uint64_t *mapping,
+                              std::stack<uint64_t> &stack);
   private:
     uint64_t *mapping;
     std::vector<CallTreeFunction> &functions;
