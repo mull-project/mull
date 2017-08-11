@@ -52,10 +52,16 @@ void *XCTestRunner::FunctionPointer(const char *functionName) {
   void *FPointer =
     reinterpret_cast<void *>(static_cast<uintptr_t>(symbol.getAddress()));
 
+  printf("getting function %s\n", functionName);
+
   assert(FPointer && "Can't find pointer to function");
 
   return FPointer;
 }
+
+struct SSS {
+	const char *ptr;
+};
 
 ExecutionResult XCTestRunner::runTest(Test *Test, ObjectFiles &objectFiles) {
   XCTest_Test *concreteTest = dyn_cast<XCTest_Test>(Test);

@@ -193,6 +193,8 @@ XCTestFinder::findTestees(Test *test,
           continue;
         }
 
+	callInstruction->dump();
+
         int callOperandIndex = callInstruction->getNumOperands() - 1;
         Value *callOperand = callInstruction->getOperand(callOperandIndex);
         Function *functionOperand = dyn_cast<Function>(callOperand);
