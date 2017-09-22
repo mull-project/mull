@@ -7,7 +7,7 @@ Get LLVM 3.9 from [LLVM Download Page](http://releases.llvm.org/).
 ```bash
 cd /opt
 wget http://releases.llvm.org/3.9.0/clang+llvm-3.9.0-x86_64-apple-darwin.tar.xz
-tar xvf
+tar xvf clang+llvm-3.9.0-x86_64-apple-darwin.tar.xz
 mv clang+llvm-3.9.0-x86_64-apple-darwin llvm-3.9
 ```
 
