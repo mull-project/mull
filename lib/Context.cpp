@@ -13,6 +13,12 @@ void Context::addModule(std::unique_ptr<MullModule> module) {
     }
   }
 
+  for (auto &alias : module->getModule()->getAliasList()) {
+    if (auto function = dyn_cast<Function>(alias.getAliasee())) {
+      FunctionsRegistry.insert(std::make_pair(alias.getName(), function));
+    }
+  }
+
   std::string identifier = module->getModule()->getModuleIdentifier();
 
   assert(moduleWithIdentifier(identifier) == nullptr &&
