@@ -3,6 +3,7 @@
 #include <llvm/IR/Function.h>
 
 #include "DynamicCallTree.h"
+#include "SimpleTest/SimpleTest_Test.h"
 
 using namespace mull;
 using namespace llvm;
@@ -196,7 +197,6 @@ TEST(DynamicCallTree, enter_leave_function) {
 
 TEST(DynamicCallTree, enter_leave_function_recursion) {
 
-
 #if 0
   void f0();
   void f1(int x);
@@ -260,3 +260,92 @@ TEST(DynamicCallTree, enter_leave_function_recursion) {
 
   ASSERT_TRUE(stack.empty());
 }
+
+TEST(DynamicCallTree, test_subtrees) {
+  Function *phonyFunction = nullptr;
+  Function *F1 = fakeFunction("F1");
+  Function *F2 = fakeFunction("F2");
+  Function *F3 = fakeFunction("F3");
+  Function *F4 = fakeFunction("F4");
+  Function *F5 = fakeFunction("F5");
+
+  std::vector<CallTreeFunction> functions;
+  functions.push_back(phonyFunction);
+  functions.push_back(F1);
+  functions.push_back(F2);
+  functions.push_back(F3);
+  functions.push_back(F4);
+  functions.push_back(F5);
+
+  ///
+  /// Call trace
+  ///
+  ///   F1 -> F2 -> F3
+  ///         F2 -> F4
+  ///   F1 -> F4 -> F5
+  ///
+
+  uint64_t mapping[6] = { 0 };
+  mapping[1] = 1;
+  mapping[2] = 1;
+  mapping[3] = 2;
+  mapping[4] = 2;
+  mapping[5] = 4;
+
+  std::unique_ptr<SimpleTest_Test> test = make_unique<SimpleTest_Test>(F2);
+
+  DynamicCallTree tree(functions);
+  tree.prepare(mapping);
+  std::unique_ptr<CallTree> callTree = tree.createCallTree();
+  std::vector<CallTree *> subtrees = tree.extractTestSubtrees(callTree.get(), test.get());
+
+  EXPECT_EQ(1L, subtrees.size());
+
+  CallTree *root = *subtrees.begin();
+  EXPECT_EQ(root->function, F2);
+}
+
+TEST(DynamicCallTree, testees) {
+  Function *phonyFunction = nullptr;
+  Function *F1 = fakeFunction("F1");
+  Function *F2 = fakeFunction("F2");
+  Function *F3 = fakeFunction("F3");
+  Function *F4 = fakeFunction("F4");
+  Function *F5 = fakeFunction("F5");
+
+  std::vector<CallTreeFunction> functions;
+  functions.push_back(phonyFunction);
+  functions.push_back(F1);
+  functions.push_back(F2);
+  functions.push_back(F3);
+  functions.push_back(F4);
+  functions.push_back(F5);
+
+  ///
+  /// Call trace
+  ///
+  ///   F1 -> F2 -> F3
+  ///         F2 -> F4
+  ///   F1 -> F4 -> F5
+  ///
+
+  uint64_t mapping[6] = { 0 };
+  mapping[1] = 1;
+  mapping[2] = 1;
+  mapping[3] = 2;
+  mapping[4] = 2;
+  mapping[5] = 4;
+
+  std::unique_ptr<SimpleTest_Test> test = make_unique<SimpleTest_Test>(F2);
+
+  DynamicCallTree tree(functions);
+  tree.prepare(mapping);
+  std::unique_ptr<CallTree> callTree = tree.createCallTree();
+  std::vector<CallTree *> subtrees = tree.extractTestSubtrees(callTree.get(), test.get());
+
+  EXPECT_EQ(1L, subtrees.size());
+
+  CallTree *root = *subtrees.begin();
+  EXPECT_EQ(root->function, F2);
+}
+

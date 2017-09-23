@@ -8,6 +8,8 @@
 
 namespace mull {
 
+  class Test;
+
   struct CallTree {
     llvm::Function *function;
     int level;
@@ -30,6 +32,7 @@ namespace mull {
     void prepare(uint64_t *m);
     std::unique_ptr<CallTree> createCallTree();
     void cleanupCallTree(std::unique_ptr<CallTree> root);
+    std::vector<CallTree *> extractTestSubtrees(CallTree *root, Test *test);
 
     static void enterFunction(const uint64_t functionIndex,
                               uint64_t *mapping,

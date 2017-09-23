@@ -74,35 +74,13 @@ bool shouldSkipTesteeFunction(llvm::Function *testee) {
   return false;
 }
 
-std::vector<CallTree *> filterCallTree(CallTree *root, Test *test) {
-  std::vector<CallTree *> roots;
-
-  std::vector<Function *> entryPoints = test->entryPoints();
-
-  std::queue<CallTree *> nodes;
-  nodes.push(root);
-  while (!nodes.empty()) {
-    CallTree *node = nodes.front();
-    nodes.pop();
-
-    if (std::find(entryPoints.begin(), entryPoints.end(), node->function) != entryPoints.end()) {
-      roots.push_back(node);
-    }
-
-    for (auto &child : node->children) {
-      nodes.push(child.get());
-    }
-  }
-
-  return roots;
-}
-
-std::vector<std::unique_ptr<Testee>> testeesFromCallTreeForTest(CallTree *root,
+std::vector<std::unique_ptr<Testee>> testeesFromCallTreeForTest(DynamicCallTree *dynamicCallTree,
+                                                                CallTree *root,
                                                                 Test *test,
                                                                 int maxDistance) {
   std::vector<std::unique_ptr<Testee>> testees;
 
-  for (CallTree *root : filterCallTree(root, test)) {
+  for (CallTree *root : dynamicCallTree->extractTestSubtrees(root, test)) {
     const int offset = root->level;
 
     std::queue<CallTree *> nodes;
@@ -182,7 +160,7 @@ std::unique_ptr<Result> Driver::Run() {
   }
 
   auto foundTests = Finder.findTests(Ctx);
-  const int testsCount = foundTests.size();
+  const size_t testsCount = foundTests.size();
 
   Logger::debug() << "Driver::Run> found "
                   << testsCount
@@ -210,7 +188,8 @@ std::unique_ptr<Result> Driver::Run() {
 
     std::unique_ptr<CallTree> callTree(Runner.callTree());
 
-    auto testees = testeesFromCallTreeForTest(callTree.get(),
+    auto testees = testeesFromCallTreeForTest(Runner.dynamicCallTree(),
+                                              callTree.get(),
                                               borrowedTest,
                                               Cfg.getMaxDistance());
 

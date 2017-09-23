@@ -15,7 +15,11 @@ class SimpleTest_Test : public Test {
 public:
   SimpleTest_Test(llvm::Function *Function);
   llvm::Function *GetTestFunction();
-
+  std::vector<llvm::Function *> entryPoints() override {
+    std::vector<llvm::Function *> entry;
+    entry.push_back(TestFunction);
+    return entry;
+  }
   std::string getTestName() override;
   std::string getTestDisplayName() override;
 

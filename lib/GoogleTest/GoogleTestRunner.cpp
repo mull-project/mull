@@ -141,6 +141,10 @@ void GoogleTestRunner::runStaticCtor(llvm::Function *Ctor) {
   ctor();
 }
 
+DynamicCallTree *GoogleTestRunner::dynamicCallTree() {
+  return jit.getDynamicCallTree();
+}
+
 void GoogleTestRunner::prepareForExecution(std::vector<llvm::Module *> &modules) {
   assert(creatorPID == getpid() && "Must be called from the main process");
 

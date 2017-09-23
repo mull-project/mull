@@ -10,6 +10,7 @@
 namespace mull {
 
 class Test;
+class DynamicCallTree;
 
 class TestRunner {
 protected:
@@ -19,6 +20,7 @@ public:
   typedef std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> OwnedObjectFiles;
   TestRunner(llvm::TargetMachine &targetMachine);
 
+  virtual DynamicCallTree *dynamicCallTree() { return nullptr; }
   virtual std::unique_ptr<CallTree> callTree() { return make_unique<CallTree>(nullptr); };
   virtual void cleanupCallTree(std::unique_ptr<CallTree>) { };
   virtual void prepareForExecution(std::vector<llvm::Module *> &modules) {};

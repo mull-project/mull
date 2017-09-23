@@ -289,6 +289,7 @@ public:
 
 #pragma mark - Call Tree Begin
 
+  DynamicCallTree *getDynamicCallTree() { return &dynamicCallTree; }
   void prepareForExecution();
   std::unique_ptr<CallTree> createCallTree();
   void cleanupCallTree(std::unique_ptr<CallTree> root);

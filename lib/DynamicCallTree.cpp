@@ -1,4 +1,5 @@
 #include "DynamicCallTree.h"
+#include "Test.h"
 
 #include <queue>
 
@@ -28,8 +29,7 @@ void DynamicCallTree::leaveFunction(const uint64_t functionIndex,
   stack.pop();
 }
 
-void fillInCallTree(std::vector<
-                    CallTreeFunction> &functions,
+void fillInCallTree(std::vector<CallTreeFunction> &functions,
                     uint64_t *callTreeMapping, uint64_t functionIndex) {
   uint64_t parent = callTreeMapping[functionIndex];
   if (parent == 0) {
@@ -117,4 +117,26 @@ void DynamicCallTree::cleanupCallTree(std::unique_ptr<CallTree> root) {
       nodes.push(child.get());
     }
   }
+}
+
+std::vector<CallTree *> DynamicCallTree::extractTestSubtrees(CallTree *root,
+                                                         Test *test) {
+  std::vector<CallTree *> subtrees;
+  std::vector<Function *> entryPoints = test->entryPoints();
+
+  std::queue<CallTree *> nodes;
+  nodes.push(root);
+  while (!nodes.empty()) {
+    CallTree *node = nodes.front();
+    nodes.pop();
+
+    if (std::find(entryPoints.begin(), entryPoints.end(), node->function) != entryPoints.end()) {
+      subtrees.push_back(node);
+    }
+
+    for (auto &child : node->children) {
+      nodes.push(child.get());
+    }
+  }
+  return subtrees;
 }
