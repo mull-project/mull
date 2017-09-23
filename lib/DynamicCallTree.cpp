@@ -1,5 +1,6 @@
 #include "DynamicCallTree.h"
 #include "Test.h"
+#include "Testee.h"
 
 #include <queue>
 
@@ -139,4 +140,44 @@ std::vector<CallTree *> DynamicCallTree::extractTestSubtrees(CallTree *root,
     }
   }
   return subtrees;
+}
+
+std::vector<std::unique_ptr<Testee>>
+DynamicCallTree::createTestees(std::vector<CallTree *> subtrees,
+                               Test *test,
+                               int maxDistance) {
+  std::vector<std::unique_ptr<Testee>> testees;
+
+  for (CallTree *root : subtrees) {
+    const int offset = root->level;
+
+    std::queue<CallTree *> nodes;
+    nodes.push(root);
+
+    Testee *parent = nullptr;
+
+    while (!nodes.empty()) {
+      CallTree *node = nodes.front();
+      nodes.pop();
+
+//      if (shouldSkipTesteeFunction(node->function)) {
+//        continue;
+//      }
+
+      int distance = node->level - offset;
+      std::unique_ptr<Testee> testee(make_unique<Testee>(node->function,
+                                                         nullptr,
+                                                         parent,
+                                                         distance));
+      parent = testee.get();
+      testees.push_back(std::move(testee));
+      if (distance < maxDistance) {
+        for (std::unique_ptr<CallTree> &child : node->children) {
+          nodes.push(child.get());
+        }
+      }
+    }
+  }
+
+  return testees;
 }

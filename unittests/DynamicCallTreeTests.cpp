@@ -3,6 +3,7 @@
 #include <llvm/IR/Function.h>
 
 #include "DynamicCallTree.h"
+#include "Testee.h"
 #include "SimpleTest/SimpleTest_Test.h"
 
 using namespace mull;
@@ -292,12 +293,12 @@ TEST(DynamicCallTree, test_subtrees) {
   mapping[4] = 2;
   mapping[5] = 4;
 
-  std::unique_ptr<SimpleTest_Test> test = make_unique<SimpleTest_Test>(F2);
+  SimpleTest_Test test(F2);
 
   DynamicCallTree tree(functions);
   tree.prepare(mapping);
   std::unique_ptr<CallTree> callTree = tree.createCallTree();
-  std::vector<CallTree *> subtrees = tree.extractTestSubtrees(callTree.get(), test.get());
+  std::vector<CallTree *> subtrees = tree.extractTestSubtrees(callTree.get(), &test);
 
   EXPECT_EQ(1L, subtrees.size());
 
@@ -336,16 +337,50 @@ TEST(DynamicCallTree, testees) {
   mapping[4] = 2;
   mapping[5] = 4;
 
-  std::unique_ptr<SimpleTest_Test> test = make_unique<SimpleTest_Test>(F2);
+  SimpleTest_Test test(F2);
 
   DynamicCallTree tree(functions);
   tree.prepare(mapping);
   std::unique_ptr<CallTree> callTree = tree.createCallTree();
-  std::vector<CallTree *> subtrees = tree.extractTestSubtrees(callTree.get(), test.get());
+  std::vector<CallTree *> subtrees = tree.extractTestSubtrees(callTree.get(), &test);
 
-  EXPECT_EQ(1L, subtrees.size());
+  {
+    std::vector<std::unique_ptr<Testee>> testees = tree.createTestees(subtrees, &test, 5);
 
-  CallTree *root = *subtrees.begin();
-  EXPECT_EQ(root->function, F2);
+    EXPECT_EQ(4U, testees.size());
+
+    Testee *testeeF2 = testees.begin()->get();
+    EXPECT_EQ(testeeF2->getTesteeFunction(), F2);
+    EXPECT_EQ(testeeF2->getDistance(), 0U);
+
+    Testee *testeeF3 = (testees.begin() + 1)->get();
+    EXPECT_EQ(testeeF3->getTesteeFunction(), F3);
+    EXPECT_EQ(testeeF3->getDistance(), 1U);
+
+    Testee *testeeF4 = (testees.begin() + 2)->get();
+    EXPECT_EQ(testeeF4->getTesteeFunction(), F4);
+    EXPECT_EQ(testeeF4->getDistance(), 1U);
+
+    Testee *testeeF5 = (testees.begin() + 3)->get();
+    EXPECT_EQ(testeeF5->getTesteeFunction(), F5);
+    EXPECT_EQ(testeeF5->getDistance(), 2U);
+  }
+
+  {
+    std::vector<std::unique_ptr<Testee>> testees = tree.createTestees(subtrees, &test, 1);
+    EXPECT_EQ(3U, testees.size());
+
+    Testee *testeeF2 = testees.begin()->get();
+    EXPECT_EQ(testeeF2->getTesteeFunction(), F2);
+    EXPECT_EQ(testeeF2->getDistance(), 0U);
+
+    Testee *testeeF3 = (testees.begin() + 1)->get();
+    EXPECT_EQ(testeeF3->getTesteeFunction(), F3);
+    EXPECT_EQ(testeeF3->getDistance(), 1U);
+
+    Testee *testeeF4 = (testees.begin() + 2)->get();
+    EXPECT_EQ(testeeF4->getTesteeFunction(), F4);
+    EXPECT_EQ(testeeF4->getDistance(), 1U);
+  }
 }
 

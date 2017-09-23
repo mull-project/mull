@@ -11,3 +11,4 @@ projects/**
 !projects/CMakeLists.txt
 tmp/
 
+cmake-build-debug/
