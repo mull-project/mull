@@ -31,6 +31,7 @@ set(mull_sources
   GoogleTest/GoogleTest_Test.cpp
   GoogleTest/GoogleTestMutationOperatorFilter.cpp
   GoogleTest/GoogleTestFinder.cpp
+  GoogleTest/GoogleTestFunctionFilter.cpp
   GoogleTest/GoogleTestRunner.cpp
 
   SQLiteReporter.cpp

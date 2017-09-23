@@ -12,8 +12,8 @@
 using namespace mull;
 using namespace llvm;
 
-TestRunner::TestRunner(llvm::TargetMachine &targetMachine)
-  : machine(targetMachine)
+TestRunner::TestRunner(llvm::TargetMachine &targetMachine, FunctionFilter filter)
+  : machine(targetMachine), functionFilter(filter)
 {
   sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
   LLVMLinkInOrcMCJITReplacement();

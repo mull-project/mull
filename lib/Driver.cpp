@@ -35,86 +35,6 @@ using namespace mull;
 using namespace std;
 using namespace std::chrono;
 
-bool shouldSkipTesteeFunction(llvm::Function *testee) {
-  if (testee->getName().find(StringRef("testing8internal")) != StringRef::npos) {
-    return true;
-  }
-
-  if (testee->getName().find(StringRef("testing15AssertionResult")) != StringRef::npos) {
-    return true;
-  }
-
-  if (testee->getName().find(StringRef("testing7Message")) != StringRef::npos) {
-    return true;
-  }
-
-  if (testee->getName().find(StringRef("clang_call_terminate")) != StringRef::npos) {
-    return true;
-  }
-
-  if (testee->hasMetadata()) {
-    int debugInfoKindID = 0;
-    MDNode *debug = testee->getMetadata(debugInfoKindID);
-    DISubprogram *subprogram = dyn_cast<DISubprogram>(debug);
-    if (subprogram) {
-      if (subprogram->getFilename().str().find("include/c++/v1") != std::string::npos) {
-        return true;
-      }
-
-      if (subprogram->getFilename().str().find("gmock") != std::string::npos) {
-        return true;
-      }
-
-      if (subprogram->getFilename().str().find("gtest") != std::string::npos) {
-        return true;
-      }
-    }
-  }
-  
-  return false;
-}
-
-std::vector<std::unique_ptr<Testee>> testeesFromCallTreeForTest(DynamicCallTree *dynamicCallTree,
-                                                                CallTree *root,
-                                                                Test *test,
-                                                                int maxDistance) {
-  std::vector<std::unique_ptr<Testee>> testees;
-
-  for (CallTree *root : dynamicCallTree->extractTestSubtrees(root, test)) {
-    const int offset = root->level;
-
-    std::queue<CallTree *> nodes;
-    nodes.push(root);
-
-    Testee *parent = nullptr;
-
-    while (!nodes.empty()) {
-      CallTree *node = nodes.front();
-      nodes.pop();
-
-      int distance = node->level - offset;
-
-      if (shouldSkipTesteeFunction(node->function)) {
-        continue;
-      }
-
-      std::unique_ptr<Testee> testee(make_unique<Testee>(node->function,
-                                                         nullptr,
-                                                         parent,
-                                                         distance));
-      parent = testee.get();
-      testees.push_back(std::move(testee));
-      if (distance < maxDistance) {
-        for (std::unique_ptr<CallTree> &child : node->children) {
-          nodes.push(child.get());
-        }
-      }
-    }
-  }
-
-  return testees;
-}
-
 /// Populate mull::Context with modules using
 /// ModulePaths from mull::Config.
 /// mull::Context should be populated using ModuleLoader
@@ -188,10 +108,11 @@ std::unique_ptr<Result> Driver::Run() {
 
     std::unique_ptr<CallTree> callTree(Runner.callTree());
 
-    auto testees = testeesFromCallTreeForTest(Runner.dynamicCallTree(),
-                                              callTree.get(),
-                                              borrowedTest,
-                                              Cfg.getMaxDistance());
+    auto subtrees = Runner.dynamicCallTree()->extractTestSubtrees(callTree.get(), borrowedTest);
+    auto testees = Runner.dynamicCallTree()->createTestees(subtrees,
+                                                           borrowedTest,
+                                                           Cfg.getMaxDistance(),
+                                                           Runner.getFunctionFilter());
 
     Runner.cleanupCallTree(std::move(callTree));
 

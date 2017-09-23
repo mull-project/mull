@@ -330,7 +330,7 @@ TEST(DynamicCallTree, testees) {
   ///   F1 -> F4 -> F5
   ///
 
-  uint64_t mapping[6] = { 0 };
+  uint64_t mapping[6] = {0};
   mapping[1] = 1;
   mapping[2] = 1;
   mapping[3] = 2;
@@ -344,8 +344,10 @@ TEST(DynamicCallTree, testees) {
   std::unique_ptr<CallTree> callTree = tree.createCallTree();
   std::vector<CallTree *> subtrees = tree.extractTestSubtrees(callTree.get(), &test);
 
+  FunctionFilter nullFilter;
+
   {
-    std::vector<std::unique_ptr<Testee>> testees = tree.createTestees(subtrees, &test, 5);
+    std::vector<std::unique_ptr<Testee>> testees = tree.createTestees(subtrees, &test, 5, nullFilter);
 
     EXPECT_EQ(4U, testees.size());
 
@@ -367,7 +369,25 @@ TEST(DynamicCallTree, testees) {
   }
 
   {
-    std::vector<std::unique_ptr<Testee>> testees = tree.createTestees(subtrees, &test, 1);
+    std::vector<std::unique_ptr<Testee>> testees = tree.createTestees(subtrees, &test, 1, nullFilter);
+    EXPECT_EQ(3U, testees.size());
+
+    Testee *testeeF2 = testees.begin()->get();
+    EXPECT_EQ(testeeF2->getTesteeFunction(), F2);
+    EXPECT_EQ(testeeF2->getDistance(), 0U);
+
+    Testee *testeeF3 = (testees.begin() + 1)->get();
+    EXPECT_EQ(testeeF3->getTesteeFunction(), F3);
+    EXPECT_EQ(testeeF3->getDistance(), 1U);
+
+    Testee *testeeF4 = (testees.begin() + 2)->get();
+    EXPECT_EQ(testeeF4->getTesteeFunction(), F4);
+    EXPECT_EQ(testeeF4->getDistance(), 1U);
+  }
+
+  {
+    StaticFunctionFilter filter({ "F5" });
+    std::vector<std::unique_ptr<Testee>> testees = tree.createTestees(subtrees, &test, 5, filter);
     EXPECT_EQ(3U, testees.size());
 
     Testee *testeeF2 = testees.begin()->get();

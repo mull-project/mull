@@ -14,6 +14,7 @@
 #include <execinfo.h>
 #include <queue>
 #include <unistd.h>
+#include <GoogleTest/GoogleTestFunctionFilter.h>
 
 using namespace mull;
 using namespace llvm;
@@ -107,7 +108,7 @@ public:
 };
 
 GoogleTestRunner::GoogleTestRunner(llvm::TargetMachine &machine)
-  : TestRunner(machine), jit(machine)
+  : TestRunner(machine, GoogleTestFunctionFilter()), jit(machine)
 {
   creatorPID = getpid();
 }

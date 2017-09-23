@@ -15,11 +15,13 @@ class DynamicCallTree;
 class TestRunner {
 protected:
   llvm::TargetMachine &machine;
+  FunctionFilter functionFilter;
 public:
   typedef std::vector<llvm::object::ObjectFile *> ObjectFiles;
   typedef std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> OwnedObjectFiles;
-  TestRunner(llvm::TargetMachine &targetMachine);
+  TestRunner(llvm::TargetMachine &targetMachine, FunctionFilter filter = FunctionFilter());
 
+  virtual FunctionFilter &getFunctionFilter() { return functionFilter; };
   virtual DynamicCallTree *dynamicCallTree() { return nullptr; }
   virtual std::unique_ptr<CallTree> callTree() { return make_unique<CallTree>(nullptr); };
   virtual void cleanupCallTree(std::unique_ptr<CallTree>) { };
