@@ -22,9 +22,6 @@ public:
                                                            Context &Ctx,
                                                            int maxDistance) = 0;
 
-  virtual std::vector<std::unique_ptr<MutationPoint>> findMutationPoints(
-                            std::vector<MutationOperator *> &MutationOperators,
-                            llvm::Function &F) = 0;
   virtual std::vector<MutationPoint *> findMutationPoints(const Context &context,
                                                           llvm::Function &F) {
     return std::vector<MutationPoint *>();
