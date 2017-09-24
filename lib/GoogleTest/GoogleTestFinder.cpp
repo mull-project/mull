@@ -380,9 +380,3 @@ GoogleTestFinder::findMutationPoints(const Context &context,
   MutationPointsRegistry.insert(std::make_pair(&testee, points));
   return points;
 }
-
-std::vector<std::unique_ptr<MutationPoint>> GoogleTestFinder::findMutationPoints(
-                             std::vector<MutationOperator *> &MutationOperators,
-                             llvm::Function &F) {
-  return std::vector<std::unique_ptr<MutationPoint>>();
-}
