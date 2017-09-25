@@ -64,36 +64,37 @@ std::string SimpleTestRunner::MangleName(const llvm::StringRef &Name) {
 }
 
 void *SimpleTestRunner::TestFunctionPointer(const llvm::Function &Function) {
-  orc::JITSymbol Symbol = ObjectLayer.findSymbol(MangleName(Function.getName()), true);
-  void *FPointer = reinterpret_cast<void *>(static_cast<uintptr_t>(Symbol.getAddress()));
-  assert(FPointer && "Can't find pointer to function");
-  return FPointer;
+  return nullptr;
+//  orc::JITSymbol Symbol = ObjectLayer.findSymbol(MangleName(Function.getName()), true);
+//  void *FPointer = reinterpret_cast<void *>(static_cast<uintptr_t>(Symbol.getAddress()));
+//  assert(FPointer && "Can't find pointer to function");
+//  return FPointer;
 }
 
-ExecutionResult SimpleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) {
-  assert(isa<SimpleTest_Test>(Test) && "Supposed to work only with");
-
-  SimpleTest_Test *SimpleTest = dyn_cast<SimpleTest_Test>(Test);
-
-  auto Handle = ObjectLayer.addObjectSet(ObjectFiles,
-                                         make_unique<SectionMemoryManager>(),
-                                         make_unique<Mull_SimpleTest_Resolver>());
-  void *FunctionPointer = TestFunctionPointer(*SimpleTest->GetTestFunction());
-
-  auto start = high_resolution_clock::now();
-  uint64_t result = ((int (*)())(intptr_t)FunctionPointer)();
-  auto elapsed = high_resolution_clock::now() - start;
-
+ExecutionResult SimpleTestRunner::runTest(Test *Test) {
+//  assert(isa<SimpleTest_Test>(Test) && "Supposed to work only with");
+//
+//  SimpleTest_Test *SimpleTest = dyn_cast<SimpleTest_Test>(Test);
+//
+//  auto Handle = ObjectLayer.addObjectSet(ObjectFiles,
+//                                         make_unique<SectionMemoryManager>(),
+//                                         make_unique<Mull_SimpleTest_Resolver>());
+//  void *FunctionPointer = TestFunctionPointer(*SimpleTest->GetTestFunction());
+//
+//  auto start = high_resolution_clock::now();
+//  uint64_t result = ((int (*)())(intptr_t)FunctionPointer)();
+//  auto elapsed = high_resolution_clock::now() - start;
+//
   ExecutionResult Result;
-  Result.RunningTime = duration_cast<std::chrono::nanoseconds>(elapsed).count();
-
-  ObjectLayer.removeObjectSet(Handle);
-
-  if (result == 1) {
-    Result.Status = ExecutionStatus::Passed;
-  } else {
+//  Result.RunningTime = duration_cast<std::chrono::nanoseconds>(elapsed).count();
+//
+//  ObjectLayer.removeObjectSet(Handle);
+//
+//  if (result == 1) {
+//    Result.Status = ExecutionStatus::Passed;
+//  } else {
     Result.Status = ExecutionStatus::Failed;
-  }
+//  }
 
   return Result;
 }

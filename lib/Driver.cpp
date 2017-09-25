@@ -28,6 +28,7 @@
 #include <fstream>
 #include <queue>
 #include <vector>
+#include <GoogleTest/GoogleTestFunctionFilter.h>
 
 using namespace llvm;
 using namespace llvm::object;
@@ -106,16 +107,16 @@ std::unique_ptr<Result> Driver::Run() {
 
     auto Result = make_unique<TestResult>(ExecResult, std::move(test));
 
-    std::unique_ptr<CallTree> callTree(Runner.callTree());
+    std::unique_ptr<CallTree> callTree(jit.createCallTree());
 
-    auto ff = FunctionFilter();
-    auto subtrees = Runner.dynamicCallTree()->extractTestSubtrees(callTree.get(), borrowedTest);
-    auto testees = Runner.dynamicCallTree()->createTestees(subtrees,
+    auto ff = GoogleTestFunctionFilter();
+    auto subtrees = jit.getDynamicCallTree()->extractTestSubtrees(callTree.get(), borrowedTest);
+    auto testees = jit.getDynamicCallTree()->createTestees(subtrees,
                                                            borrowedTest,
                                                            Cfg.getMaxDistance(),
                                                            ff);
 
-    Runner.cleanupCallTree(std::move(callTree));
+    jit.cleanupCallTree(std::move(callTree));
 
     if (testees.size() == 0) {
       Logger::error().indent(4)
@@ -182,7 +183,7 @@ std::unique_ptr<Result> Driver::Run() {
                                                ExecResult.RunningTime * 10);
 
           result = Sandbox->run([&](ExecutionResult *SharedResult) {
-            ExecutionResult R = Runner.runTest(borrowedTest, ObjectFiles);
+            ExecutionResult R = Runner.runTest(borrowedTest);
 
             assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
 

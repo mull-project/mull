@@ -142,10 +142,6 @@ void GoogleTestRunner::runStaticCtor(llvm::Function *Ctor) {
   ctor();
 }
 
-DynamicCallTree *GoogleTestRunner::dynamicCallTree() {
-  return jit.getDynamicCallTree();
-}
-
 ExecutionResult GoogleTestRunner::runTest(Test *Test) {
   GoogleTest_Test *GTest = dyn_cast<GoogleTest_Test>(Test);
 
@@ -204,82 +200,10 @@ ExecutionResult GoogleTestRunner::runTest(Test *Test) {
   return Result;
 }
 
-std::unique_ptr<CallTree> GoogleTestRunner::callTree() {
-  return jit.createCallTree();
-}
-
-void GoogleTestRunner::cleanupCallTree(std::unique_ptr<CallTree> root) {
-  jit.cleanupCallTree(std::move(root));
-}
-
 std::unique_ptr<RuntimeDyld::SymbolResolver> GoogleTestRunner::resolver() {
   return make_unique<Mull_GoogleTest_Resolver>(jit);
 }
 
 std::unique_ptr<SectionMemoryManager> GoogleTestRunner::memoryManager() {
   return make_unique<SectionMemoryManager>();
-}
-
-ExecutionResult GoogleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) {
-  GoogleTest_Test *GTest = dyn_cast<GoogleTest_Test>(Test);
-
-//  auto Handle = ObjectLayer.addObjectSet(ObjectFiles,
-//                                         make_unique<SectionMemoryManager>(),
-//                                         make_unique<Mull_GoogleTest_Resolver>());
-
-  auto start = high_resolution_clock::now();
-
-  for (auto &Ctor: GTest->GetGlobalCtors()) {
-    runStaticCtor(Ctor);
-  }
-
-  std::string filter = "--gtest_filter=" + GTest->getTestName();
-  const char *argv[] = { "mull", filter.c_str(), NULL };
-  int argc = 2;
-
-  /// Normally Google Test Driver looks like this:
-  ///
-  ///   int main(int argc, char **argv) {
-  ///     InitGoogleTest(&argc, argv);
-  ///     return UnitTest.GetInstance()->Run();
-  ///   }
-  ///
-  /// Technically we can just call `main` function, but there is a problem:
-  /// Among all the files that are being processed may be more than one
-  /// `main` function, therefore we can call wrong driver.
-  ///
-  /// To avoid this from happening we implement the driver function on our own.
-  /// We must keep in mind that each project can have its own, extended
-  /// version of the driver (LLVM itself has one).
-  ///
-
-  void *initGTestPtr = FunctionPointer("__ZN7testing14InitGoogleTestEPiPPc");
-  auto initGTest = ((void (*)(int *, const char**))(intptr_t)initGTestPtr);
-  initGTest(&argc, argv);
-
-  void *getInstancePtr = FunctionPointer("__ZN7testing8UnitTest11GetInstanceEv");
-  auto getInstance = ((UnitTest *(*)())(intptr_t)getInstancePtr);
-  UnitTest *test = getInstance();
-
-  void *runAllTestsPtr = FunctionPointer("__ZN7testing8UnitTest3RunEv");
-  auto runAllTests = ((int (*)(UnitTest *))(intptr_t)runAllTestsPtr);
-  uint64_t result = runAllTests(test);
-
-  runDestructors();
-  auto elapsed = high_resolution_clock::now() - start;
-
-  //printf("%llu %s\n", result, GTest->getTestName().c_str());
-
-  ExecutionResult Result;
-  Result.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
-
-//  ObjectLayer.removeObjectSet(Handle);
-
-  if (result == 0) {
-    Result.Status = ExecutionStatus::Passed;
-  } else {
-    Result.Status = ExecutionStatus::Failed;
-  }
-
-  return Result;
 }

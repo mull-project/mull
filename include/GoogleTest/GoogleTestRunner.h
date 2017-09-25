@@ -23,21 +23,11 @@ class GoogleTestRunner : public TestRunner {
   llvm::Mangler Mangler;
   pid_t creatorPID;
 public:
-
   GoogleTestRunner(llvm::TargetMachine &machine, MullJIT &jit);
 
   std::unique_ptr<RuntimeDyld::SymbolResolver> resolver() override;
   std::unique_ptr<SectionMemoryManager> memoryManager() override;
-
-  ExecutionResult runTest(Test *Test, ObjectFiles &ObjectFiles) override;
-
   ExecutionResult runTest(Test *Test) override;
-
-  DynamicCallTree *dynamicCallTree() override;
-  std::unique_ptr<CallTree> callTree() override;
-  void cleanupCallTree(std::unique_ptr<CallTree> root) override;
-
-  virtual ~GoogleTestRunner() {}
 
 private:
   std::string MangleName(const llvm::StringRef &Name);
