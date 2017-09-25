@@ -10,6 +10,7 @@ set(mull_sources
   MutationOperators/AndOrReplacementMutationOperator.cpp
   MutationOperators/NegateConditionMutationOperator.cpp
   MutationOperators/RemoveVoidFunctionMutationOperator.cpp
+  MutationOperators/MathSubMutationOperator.cpp
 
   Toolchain/Compiler.cpp
   Toolchain/ObjectCache.cpp
