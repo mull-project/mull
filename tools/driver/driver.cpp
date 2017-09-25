@@ -80,6 +80,8 @@ int main(int argc, char *argv[]) {
   std::unique_ptr<TestFinder> testFinder;
   std::unique_ptr<TestRunner> testRunner;
 
+  MullJIT jit(toolchain.targetMachine());
+
   auto mutationOperators = Driver::mutationOperators(config.getMutationOperators());
 
   if (testFramework == "GoogleTest") {
@@ -87,12 +89,12 @@ int main(int argc, char *argv[]) {
                                                config.getTests(),
                                                config.getExcludeLocations());
 
-    testRunner = make_unique<GoogleTestRunner>(toolchain.targetMachine());
+    testRunner = make_unique<GoogleTestRunner>(toolchain.targetMachine(), jit);
   }
 
   else if (testFramework == "SimpleTest") {
     testFinder = make_unique<SimpleTestFinder>(std::move(mutationOperators));
-    testRunner = make_unique<SimpleTestRunner>(toolchain.targetMachine());
+    testRunner = make_unique<SimpleTestRunner>(toolchain.targetMachine(), jit);
   }
 
   #if defined(MULL_SUPPORT_RUST)

@@ -107,8 +107,8 @@ public:
   }
 };
 
-GoogleTestRunner::GoogleTestRunner(llvm::TargetMachine &machine)
-  : TestRunner(machine, GoogleTestFunctionFilter()), jit(machine)
+GoogleTestRunner::GoogleTestRunner(llvm::TargetMachine &machine, MullJIT &jit)
+  : TestRunner(machine, jit)
 {
   creatorPID = getpid();
 }
@@ -117,7 +117,7 @@ std::string GoogleTestRunner::MangleName(const llvm::StringRef &Name) {
   std::string MangledName;
   {
     raw_string_ostream Stream(MangledName);
-    Mangler.getNameWithPrefix(Stream, Name, machine.createDataLayout());
+    Mangler.getNameWithPrefix(Stream, Name, targetMachine.createDataLayout());
   }
   return MangledName;
 }

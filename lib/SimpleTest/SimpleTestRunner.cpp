@@ -51,14 +51,14 @@ public:
   }
 };
 
-SimpleTestRunner::SimpleTestRunner(TargetMachine &machine)
-  : TestRunner(machine) {}
+SimpleTestRunner::SimpleTestRunner(TargetMachine &machine, MullJIT &jit) :
+    TestRunner(machine, jit) {}
 
 std::string SimpleTestRunner::MangleName(const llvm::StringRef &Name) {
   std::string MangledName;
   {
     raw_string_ostream Stream(MangledName);
-    Mangler.getNameWithPrefix(Stream, Name, machine.createDataLayout());
+    Mangler.getNameWithPrefix(Stream, Name, targetMachine.createDataLayout());
   }
   return MangledName;
 }
@@ -97,3 +97,4 @@ ExecutionResult SimpleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) 
 
   return Result;
 }
+

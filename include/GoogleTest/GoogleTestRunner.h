@@ -21,11 +21,10 @@ namespace mull {
 
 class GoogleTestRunner : public TestRunner {
   llvm::Mangler Mangler;
-  MullJIT jit;
   pid_t creatorPID;
 public:
 
-  GoogleTestRunner(llvm::TargetMachine &machine);
+  GoogleTestRunner(llvm::TargetMachine &machine, MullJIT &jit);
   ExecutionResult runTest(Test *Test, ObjectFiles &ObjectFiles) override;
 
   ExecutionResult runTest(Test *Test) override;

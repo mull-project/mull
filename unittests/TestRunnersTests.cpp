@@ -34,7 +34,8 @@ TEST(SimpleTestRunner, runTest) {
 
   Compiler compiler(*targetMachine.get());
   Context Ctx;
-  SimpleTestRunner Runner(*targetMachine.get());
+  MullJIT jit(*targetMachine.get());
+  SimpleTestRunner Runner(*targetMachine.get(), jit);
   SimpleTestRunner::ObjectFiles ObjectFiles;
   SimpleTestRunner::OwnedObjectFiles OwnedObjectFiles;
 
@@ -122,7 +123,8 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
 
   Compiler compiler(*targetMachine.get());
   Context Ctx;
-  SimpleTestRunner Runner(*targetMachine.get());
+  MullJIT jit(*targetMachine.get());
+  SimpleTestRunner Runner(*targetMachine.get(), jit);
   SimpleTestRunner::ObjectFiles ObjectFiles;
   SimpleTestRunner::OwnedObjectFiles OwnedObjectFiles;
 
@@ -205,7 +207,8 @@ TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
 
   Compiler compiler(*targetMachine.get());
   Context Ctx;
-  SimpleTestRunner Runner(*targetMachine.get());
+  MullJIT jit(*targetMachine.get());
+  SimpleTestRunner Runner(*targetMachine.get(), jit);
   SimpleTestRunner::ObjectFiles ObjectFiles;
   SimpleTestRunner::OwnedObjectFiles OwnedObjectFiles;
 

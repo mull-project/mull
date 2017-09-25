@@ -14,19 +14,18 @@ class DynamicCallTree;
 
 class TestRunner {
 protected:
-  llvm::TargetMachine &machine;
-  FunctionFilter functionFilter;
+  TargetMachine &targetMachine;
+  MullJIT &jit;
 public:
-  typedef std::vector<llvm::object::ObjectFile *> ObjectFiles;
-  typedef std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> OwnedObjectFiles;
-  TestRunner(llvm::TargetMachine &targetMachine, FunctionFilter filter = FunctionFilter());
+  TestRunner(TargetMachine &machine, MullJIT &jit);
 
-  virtual FunctionFilter &getFunctionFilter() { return functionFilter; };
   virtual DynamicCallTree *dynamicCallTree() { return nullptr; }
   virtual std::unique_ptr<CallTree> callTree() { return make_unique<CallTree>(nullptr); };
   virtual void cleanupCallTree(std::unique_ptr<CallTree>) { };
   virtual void prepareForExecution(std::vector<llvm::Module *> &modules) {};
 
+  typedef std::vector<llvm::object::ObjectFile *> ObjectFiles;
+  typedef std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> OwnedObjectFiles;
   virtual ExecutionResult runTest(Test *Test, ObjectFiles &ObjectFiles) = 0;
   virtual ExecutionResult runTest(Test *test) {
     ExecutionResult result;

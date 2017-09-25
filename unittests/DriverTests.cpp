@@ -89,7 +89,8 @@ TEST(Driver, SimpleTest_AddMutationOperator) {
 
   Toolchain toolchain(config);
   llvm::TargetMachine &machine = toolchain.targetMachine();
-  SimpleTestRunner runner(machine);
+  MullJIT jit(machine);
+  SimpleTestRunner runner(machine, jit);
 
   Driver Driver(config, loader, testFinder, runner, toolchain);
 
@@ -167,7 +168,8 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
   FakeModuleLoader loader(context, modules);
 
   Toolchain toolchain(config);
-  SimpleTestRunner runner(toolchain.targetMachine());
+  MullJIT jit(toolchain.targetMachine());
+  SimpleTestRunner runner(toolchain.targetMachine(), jit);
 
   Driver Driver(config, loader, testFinder, runner, toolchain);
 
@@ -238,7 +240,8 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
   FakeModuleLoader loader(context, modules);
 
   Toolchain toolchain(config);
-  SimpleTestRunner runner(toolchain.targetMachine());
+  MullJIT jit(toolchain.targetMachine());
+  SimpleTestRunner runner(toolchain.targetMachine(), jit);
 
   Driver Driver(config, loader, testFinder, runner, toolchain);
 
@@ -306,7 +309,8 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator) {
   FakeModuleLoader loader(context, modules);
 
   Toolchain toolchain(config);
-  SimpleTestRunner runner(toolchain.targetMachine());
+  MullJIT jit(toolchain.targetMachine());
+  SimpleTestRunner runner(toolchain.targetMachine(), jit);
 
   Driver Driver(config, loader, testFinder, runner, toolchain);
 
@@ -477,7 +481,8 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator_CPP) {
   FakeModuleLoader loader(context, modules);
 
   Toolchain toolchain(config);
-  SimpleTestRunner runner(toolchain.targetMachine());
+  MullJIT jit(toolchain.targetMachine());
+  SimpleTestRunner runner(toolchain.targetMachine(), jit);
 
   Driver Driver(config, loader, testFinder, runner, toolchain);
 
@@ -612,7 +617,8 @@ TEST(Driver, SimpleTest_TesteePathCalculation) {
   FakeModuleLoader loader(context, modules);
 
   Toolchain toolchain(config);
-  SimpleTestRunner runner(toolchain.targetMachine());
+  MullJIT jit(toolchain.targetMachine());
+  SimpleTestRunner runner(toolchain.targetMachine(), jit);
 
   Driver Driver(config, loader, testFinder, runner, toolchain);
 

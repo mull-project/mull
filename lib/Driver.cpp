@@ -108,11 +108,12 @@ std::unique_ptr<Result> Driver::Run() {
 
     std::unique_ptr<CallTree> callTree(Runner.callTree());
 
+    auto ff = FunctionFilter();
     auto subtrees = Runner.dynamicCallTree()->extractTestSubtrees(callTree.get(), borrowedTest);
     auto testees = Runner.dynamicCallTree()->createTestees(subtrees,
                                                            borrowedTest,
                                                            Cfg.getMaxDistance(),
-                                                           Runner.getFunctionFilter());
+                                                           ff);
 
     Runner.cleanupCallTree(std::move(callTree));
 
