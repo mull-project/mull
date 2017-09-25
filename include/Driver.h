@@ -9,6 +9,7 @@
 #include "Toolchain/Toolchain.h"
 
 #include "llvm/Object/ObjectFile.h"
+#include "MullJIT.h"
 
 #include <map>
 
@@ -35,12 +36,13 @@ class Driver {
   Toolchain &toolchain;
   Context Ctx;
   ProcessSandbox *Sandbox;
+  MullJIT &jit;
 
   std::map<llvm::Module *, llvm::object::ObjectFile *> InnerCache;
 
 public:
-  Driver(Config &C, ModuleLoader &ML, TestFinder &TF, TestRunner &TR, Toolchain &t)
-    : Cfg(C), Loader(ML), Finder(TF), Runner(TR), toolchain(t) {
+  Driver(Config &C, ModuleLoader &ML, TestFinder &TF, TestRunner &TR, Toolchain &t, MullJIT &jit)
+    : Cfg(C), Loader(ML), Finder(TF), Runner(TR), toolchain(t), jit(jit) {
       if (C.getFork()) {
         this->Sandbox = new ForkProcessSandbox();
       } else {

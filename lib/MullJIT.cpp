@@ -66,6 +66,8 @@ void MullJIT::addModuleSet(std::vector<llvm::Module *> &modules, std::unique_ptr
   for (auto &M : modules) {
     addLogicalModule(std::move(M));
   }
+
+  prepareForExecution();
 }
 
 llvm::orc::JITSymbol MullJIT::findSymbol(StringRef Name, bool ExportedSymbolsOnly) {

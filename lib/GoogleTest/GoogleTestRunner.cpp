@@ -146,16 +146,6 @@ DynamicCallTree *GoogleTestRunner::dynamicCallTree() {
   return jit.getDynamicCallTree();
 }
 
-void GoogleTestRunner::prepareForExecution(std::vector<llvm::Module *> &modules) {
-  assert(creatorPID == getpid() && "Must be called from the main process");
-
-  jit.addModuleSet(modules,
-                   make_unique<SectionMemoryManager>(),
-                   make_unique<Mull_GoogleTest_Resolver>(jit));
-
-  jit.prepareForExecution();
-}
-
 ExecutionResult GoogleTestRunner::runTest(Test *Test) {
   GoogleTest_Test *GTest = dyn_cast<GoogleTest_Test>(Test);
 
@@ -220,6 +210,14 @@ std::unique_ptr<CallTree> GoogleTestRunner::callTree() {
 
 void GoogleTestRunner::cleanupCallTree(std::unique_ptr<CallTree> root) {
   jit.cleanupCallTree(std::move(root));
+}
+
+std::unique_ptr<RuntimeDyld::SymbolResolver> GoogleTestRunner::resolver() {
+  return make_unique<Mull_GoogleTest_Resolver>(jit);
+}
+
+std::unique_ptr<SectionMemoryManager> GoogleTestRunner::memoryManager() {
+  return make_unique<SectionMemoryManager>();
 }
 
 ExecutionResult GoogleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) {

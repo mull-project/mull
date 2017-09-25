@@ -115,7 +115,7 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  Driver driver(config, Loader, *testFinder, *testRunner, toolchain);
+  Driver driver(config, Loader, *testFinder, *testRunner, toolchain, jit);
 
   const long timeSuiteStart =
     duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();

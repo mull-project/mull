@@ -18,11 +18,12 @@ protected:
   MullJIT &jit;
 public:
   TestRunner(TargetMachine &machine, MullJIT &jit);
+  virtual std::unique_ptr<RuntimeDyld::SymbolResolver> resolver() = 0;
+  virtual std::unique_ptr<SectionMemoryManager> memoryManager() = 0;
 
   virtual DynamicCallTree *dynamicCallTree() { return nullptr; }
   virtual std::unique_ptr<CallTree> callTree() { return make_unique<CallTree>(nullptr); };
   virtual void cleanupCallTree(std::unique_ptr<CallTree>) { };
-  virtual void prepareForExecution(std::vector<llvm::Module *> &modules) {};
 
   typedef std::vector<llvm::object::ObjectFile *> ObjectFiles;
   typedef std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> OwnedObjectFiles;

@@ -98,3 +98,11 @@ ExecutionResult SimpleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) 
   return Result;
 }
 
+std::unique_ptr<RuntimeDyld::SymbolResolver> SimpleTestRunner::resolver() {
+  return make_unique<Mull_SimpleTest_Resolver>();
+}
+
+std::unique_ptr<SectionMemoryManager> SimpleTestRunner::memoryManager() {
+  return make_unique<SectionMemoryManager>();
+}
+

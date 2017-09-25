@@ -88,7 +88,7 @@ std::unique_ptr<Result> Driver::Run() {
 
   int testIndex = 1;
   auto _modules = allModules();
-  Runner.prepareForExecution(_modules);
+  jit.addModuleSet(_modules, Runner.memoryManager(), Runner.resolver());
   for (auto &test : foundTests) {
 //    auto ObjectFiles = AllObjectFiles();
 
