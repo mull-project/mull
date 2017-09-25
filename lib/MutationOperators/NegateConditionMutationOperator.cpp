@@ -207,7 +207,7 @@ NegateConditionMutationOperator::getMutationPoints(const Context &context,
     for (auto &instruction : basicBlock.getInstList()) {
       if (canBeApplied(instruction) && !filter.shouldSkipInstruction(&instruction)) {
         auto moduleID = instruction.getModule()->getModuleIdentifier();
-        MullModule *module = context.moduleWithIdentifier(moduleID);
+        Module *module = context.moduleWithIdentifier(moduleID);
 
         MutationPointAddress address(functionIndex, basicBlockIndex, instructionIndex);
         auto mutationPoint = new MutationPoint(this, address, &instruction, module);
@@ -256,6 +256,33 @@ llvm::Value *NegateConditionMutationOperator::applyMutation(Module *M, MutationP
   /// negated comparison predicate.
   CmpInst::Predicate negatedPredicate =
     NegateConditionMutationOperator::negatedCmpInstPredicate(cmpInstruction->getPredicate());
+
+  CmpInst *replacement = CmpInst::Create(cmpInstruction->getOpcode(),
+                                         negatedPredicate,
+                                         cmpInstruction->getOperand(0),
+                                         cmpInstruction->getOperand(1),
+                                         cmpInstruction->getName());
+
+  replacement->insertAfter(cmpInstruction);
+  cmpInstruction->replaceAllUsesWith(replacement);
+  cmpInstruction->eraseFromParent();
+
+  return replacement;
+}
+
+llvm::Value *NegateConditionMutationOperator::applyMutation(Function *function, MutationPointAddress address) {
+  llvm::BasicBlock &B  = *(std::next(function->begin(), address.getBBIndex()));
+  llvm::Instruction &I = *(std::next(B.begin(), address.getIIndex()));
+
+  CmpInst *cmpInstruction = cast<CmpInst>(&I);
+
+  assert(CmpInst::classof(cmpInstruction) &&
+      "Expected instruction to be cmp instruction: Instruction::ICmp or Instruction::FCmp");
+
+  /// NOTE: Create a new CmpInst with the same operands as original instruction but with
+  /// negated comparison predicate.
+  CmpInst::Predicate negatedPredicate =
+      NegateConditionMutationOperator::negatedCmpInstPredicate(cmpInstruction->getPredicate());
 
   CmpInst *replacement = CmpInst::Create(cmpInstruction->getOpcode(),
                                          negatedPredicate,

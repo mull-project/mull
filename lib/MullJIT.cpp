@@ -1,4 +1,6 @@
 #include "MullJIT.h"
+#include "MutationPoint.h"
+#include "MutationOperator.h"
 
 namespace mull {
 
@@ -343,15 +345,24 @@ MullJIT::BaseLayerModuleSetHandleT MullJIT::emitFunction(MullJIT::LogicalModuleH
         return LDResolver->findSymbol(Name);
       });
 
-  insertCallTreeCallbacks(*M->getFunction(function.getName()), functionIndex);
+  /// TODO: this is probably very wrong way to do things
+  /// need to make sure that this method called only
+  /// before the function is about to run
+  insertCallTreeCallbacks(&module, *M->getFunction(function.getName()), functionIndex);
 
   return logicalDylib.getDylibResources().ModuleAdder(compileLayer, std::move(M),
                                                       std::move(Resolver));
 }
 
-void MullJIT::insertCallTreeCallbacks(Function &function, uint64_t index) {
+void MullJIT::insertCallTreeCallbacks(Module *module, Function &function, uint64_t index) {
   if (function.isDeclaration()) {
     return;
+  }
+
+  if (currentMutationPoint) {
+    if (currentMutationPoint->getModule() == module) {
+      tryToApplyMutation(module, &function);
+    }
   }
 
   auto &context = function.getParent()->getContext();
@@ -386,6 +397,15 @@ void MullJIT::insertCallTreeCallbacks(Function &function, uint64_t index) {
 
     CallInst *leaveFunctionCall = CallInst::Create(leaveFunction, parameters);
     leaveFunctionCall->insertBefore(returnStatement);
+  }
+}
+
+void MullJIT::tryToApplyMutation(Module *module, Function *function) {
+  assert(currentMutationPoint);
+  MutationPointAddress address = currentMutationPoint->getAddress();
+  llvm::Function &functionWithMutation = *(std::next(module->begin(), address.getFnIndex()));
+  if (function == &functionWithMutation) {
+    currentMutationPoint->getOperator()->applyMutation(function, address);
   }
 }
 

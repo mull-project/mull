@@ -48,7 +48,7 @@ RemoveVoidFunctionMutationOperator::getMutationPoints(const Context &context,
     for (auto &instruction : basicBlock.getInstList()) {
       if (canBeApplied(instruction) && !filter.shouldSkipInstruction(&instruction)) {
         auto moduleID = instruction.getModule()->getModuleIdentifier();
-        MullModule *module = context.moduleWithIdentifier(moduleID);
+        Module *module = context.moduleWithIdentifier(moduleID);
 
         MutationPointAddress address(functionIndex, basicBlockIndex, instructionIndex);
         auto mutationPoint = new MutationPoint(this, address, &instruction, module);
@@ -95,6 +95,18 @@ bool RemoveVoidFunctionMutationOperator::canBeApplied(Value &V) {
 llvm::Value *RemoveVoidFunctionMutationOperator::applyMutation(Module *M, MutationPointAddress address, Value &_V) {
   llvm::Function &F    = *(std::next(M->begin(), address.getFnIndex()));
   llvm::BasicBlock &B  = *(std::next(F.begin(), address.getBBIndex()));
+  llvm::Instruction &I = *(std::next(B.begin(), address.getIIndex()));
+
+  CallInst *callInst = dyn_cast<CallInst>(&I);
+  callInst->eraseFromParent();
+
+  /// return value here is not used and doesn't do anything outside.
+  /// TODO: remove?
+  return callInst;
+}
+
+llvm::Value *RemoveVoidFunctionMutationOperator::applyMutation(Function *function, MutationPointAddress address) {
+  llvm::BasicBlock &B  = *(std::next(function->begin(), address.getBBIndex()));
   llvm::Instruction &I = *(std::next(B.begin(), address.getIIndex()));
 
   CallInst *callInst = dyn_cast<CallInst>(&I);

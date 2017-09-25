@@ -29,6 +29,8 @@ using namespace llvm;
 
 namespace mull {
 
+class MutationPoint;
+
 extern uint64_t *_callTreeMapping;
 extern std::stack<uint64_t> _callstack;
 
@@ -296,6 +298,10 @@ public:
 
 #pragma mark - Call Tree End
 
+  void setCurrentMutationPoint(MutationPoint *point) {
+    this->currentMutationPoint = point;
+  }
+
 private:
   void addLogicalModule(llvm::Module *module);
 
@@ -308,8 +314,9 @@ private:
   BaseLayerModuleSetHandleT emitFunction(LogicalModuleHandle LMH,
                                          Function &function,
                                          uint64_t functionIndex);
+  void tryToApplyMutation(Module *module, Function *function);
 
-  void insertCallTreeCallbacks(Function &function, uint64_t index);
+  void insertCallTreeCallbacks(Module *module, Function &function, uint64_t index);
 
   std::unique_ptr<llvm::orc::JITCompileCallbackManager> callbackManager;
   std::function<std::unique_ptr<llvm::orc::IndirectStubsManager>()> stubsManagerBuilder;
@@ -317,6 +324,7 @@ private:
   CODLogicalDylib logicalDylib;
   std::vector<CallTreeFunction> functions;
   DynamicCallTree dynamicCallTree;
+  MutationPoint *currentMutationPoint;
 };
 
 }

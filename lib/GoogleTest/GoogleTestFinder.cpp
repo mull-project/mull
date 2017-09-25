@@ -79,7 +79,7 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
   auto testInfoTypeName = StringRef("class.testing::TestInfo");
 
   for (auto &currentModule : Ctx.getModules()) {
-    for (auto &globalValue : currentModule->getModule()->getGlobalList()) {
+    for (auto &globalValue : currentModule->getGlobalList()) {
       Type *globalValueType = globalValue.getValueType();
       if (globalValueType->getTypeID() != Type::PointerTyID) {
         continue;
@@ -216,7 +216,7 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
       /// and finish creating the GoogleTest_Test object
 
       Function *testBodyFunction = nullptr;
-      for (auto &func : currentModule->getModule()->getFunctionList()) {
+      for (auto &func : currentModule->getFunctionList()) {
         StringRef testBodyFunctionNameRef(testBodyFunctionName);
         auto name = func.getName();
         auto foundPosition = name.rfind(testBodyFunctionNameRef);

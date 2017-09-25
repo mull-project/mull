@@ -15,7 +15,6 @@ namespace mull {
 
 class Compiler;
 class MutationOperator;
-class MullModule;
 
 /// \brief Container class that stores information needed to find MutationPoints.
 /// We need the indexes of function, basic block and instruction to find the mutation point
@@ -51,25 +50,24 @@ class MutationPoint {
   MutationOperator *mutationOperator;
   MutationPointAddress Address;
   llvm::Value *OriginalValue;
-  MullModule *module;
+  llvm::Module *module;
   std::string uniqueIdentifier;
 
 public:
   MutationPoint(MutationOperator *op,
                 MutationPointAddress Address,
                 llvm::Value *Val,
-                MullModule *m);
+                llvm::Module *m);
   ~MutationPoint();
 
   MutationOperator *getOperator();
   MutationPointAddress getAddress();
   llvm::Value *getOriginalValue();
+  llvm::Module *getModule() { return module; }
 
   MutationOperator *getOperator() const;
   MutationPointAddress getAddress() const;
   llvm::Value *getOriginalValue() const;
-
-  std::unique_ptr<llvm::Module> cloneModuleAndApplyMutation();
 
   std::string getUniqueIdentifier();
   std::string getUniqueIdentifier() const;

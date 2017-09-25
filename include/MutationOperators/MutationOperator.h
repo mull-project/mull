@@ -4,6 +4,7 @@
 
 #include <string>
 #include <vector>
+#include <MutationPoint.h>
 
 namespace llvm {
   class Function;
@@ -30,6 +31,7 @@ public:
 
   virtual bool canBeApplied(llvm::Value &V) = 0;
   virtual llvm::Value *applyMutation(llvm::Module *M, MutationPointAddress address, llvm::Value &OriginalValue) = 0;
+  virtual llvm::Value *applyMutation(llvm::Function *function, MutationPointAddress address) { return nullptr; }
   virtual ~MutationOperator() {}
 };
 

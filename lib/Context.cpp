@@ -6,20 +6,20 @@
 using namespace mull;
 using namespace llvm;
 
-void Context::addModule(std::unique_ptr<MullModule> module) {
-  for (auto &function : module->getModule()->getFunctionList()) {
+void Context::addModule(std::unique_ptr<Module> module) {
+  for (auto &function : module->getFunctionList()) {
     if (!function.isDeclaration()) {
       FunctionsRegistry.insert(std::make_pair(function.getName(), &function));
     }
   }
 
-  for (auto &alias : module->getModule()->getAliasList()) {
+  for (auto &alias : module->getAliasList()) {
     if (auto function = dyn_cast<Function>(alias.getAliasee())) {
       FunctionsRegistry.insert(std::make_pair(alias.getName(), function));
     }
   }
 
-  std::string identifier = module->getModule()->getModuleIdentifier();
+  std::string identifier = module->getModuleIdentifier();
 
   assert(moduleWithIdentifier(identifier) == nullptr &&
          "Attempt to add a module which has been added already!");
@@ -37,7 +37,7 @@ llvm::Function *Context::lookupDefinedFunction(llvm::StringRef FunctionName) con
   return it->second;
 }
 
-MullModule *Context::moduleWithIdentifier(const std::string &identifier) {
+llvm::Module *Context::moduleWithIdentifier(const std::string &identifier) {
   auto it = moduleRegistry.find(identifier);
   if (it == moduleRegistry.end()) {
     return nullptr;
@@ -45,7 +45,7 @@ MullModule *Context::moduleWithIdentifier(const std::string &identifier) {
   return it->second;
 }
 
-MullModule *Context::moduleWithIdentifier(const std::string &identifier) const {
+llvm::Module *Context::moduleWithIdentifier(const std::string &identifier) const {
   auto it = moduleRegistry.find(identifier);
   if (it == moduleRegistry.end()) {
     return nullptr;
@@ -59,7 +59,7 @@ std::vector<llvm::Function *> Context::getStaticConstructors() {
 
   for (auto &module : Modules) {
 
-    GlobalVariable *GV = module->getModule()->getNamedGlobal("llvm.global_ctors");
+    GlobalVariable *GV = module->getNamedGlobal("llvm.global_ctors");
 
     // If this global has internal linkage, or if it has a use, then it must be
     // an old-style (llvmgcc3) static ctor with __main linked in and in use.  If

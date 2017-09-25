@@ -50,7 +50,7 @@ AndOrReplacementMutationOperator::getMutationPoints(const Context &context,
 
       if (canBeApplied(instruction) && !filter.shouldSkipInstruction(&instruction)) {
         auto moduleID = instruction.getModule()->getModuleIdentifier();
-        MullModule *module = context.moduleWithIdentifier(moduleID);
+        Module *module = context.moduleWithIdentifier(moduleID);
 
         MutationPointAddress address(functionIndex, basicBlockIndex, instructionIndex);
         auto mutationPoint = new MutationPoint(this, address, &instruction, module);

@@ -137,7 +137,7 @@ AddMutationOperator::getMutationPoints(const Context &context,
     for (auto &instruction : basicBlock.getInstList()) {
       if (canBeApplied(instruction) && !filter.shouldSkipInstruction(&instruction)) {
         auto moduleID = instruction.getModule()->getModuleIdentifier();
-        MullModule *module = context.moduleWithIdentifier(moduleID);
+        Module *module = context.moduleWithIdentifier(moduleID);
 
         MutationPointAddress address(functionIndex, basicBlockIndex, instructionIndex);
         auto mutationPoint = new MutationPoint(this, address, &instruction, module);
@@ -204,6 +204,56 @@ llvm::Value *AddMutationOperator::applyMutation(Module *M,
   }
 
   Instruction *replacement = BinaryOperator::Create(type,
+                                                    binaryOperator->getOperand(0),
+                                                    binaryOperator->getOperand(1),
+                                                    binaryOperator->getName());
+  assert(replacement);
+  if (binaryOperator->hasNoUnsignedWrap()) {
+    replacement->setHasNoUnsignedWrap();
+  }
+
+  if (binaryOperator->hasNoSignedWrap()) {
+    replacement->setHasNoSignedWrap();
+  }
+
+  /// NOTE: If I add a named instruction, and the name already exist
+  /// in a basic block, then LLVM will make another unique name of it
+  /// To prevent this name change we need to 'drop' the existing old name
+  /// TODO: Check behaviour of 'unnamed' instructions (e.g.: %0, %2, etc.)
+  binaryOperator->setName("");
+
+  replacement->insertAfter(binaryOperator);
+  binaryOperator->replaceAllUsesWith(replacement);
+  binaryOperator->eraseFromParent();
+
+  return replacement;
+}
+
+llvm::Value *AddMutationOperator::applyMutation(llvm::Function *function, MutationPointAddress address) {
+  llvm::BasicBlock &B = *(std::next(function->begin(), address.getBBIndex()));
+  llvm::Instruction &I = *(std::next(B.begin(), address.getIIndex()));
+
+  if (isAddWithOverflow(I)) {
+    CallInst *callInst = dyn_cast<CallInst>(&I);
+
+    Function *replacementFunction =
+        replacementForAddWithOverflow(callInst->getCalledFunction(),
+                                      *I.getModule());
+
+    callInst->setCalledFunction(replacementFunction);
+
+    return callInst;
+  }
+
+  /// TODO: Cover FAdd
+  /// TODO: Take care of NUW/NSW
+  BinaryOperator *binaryOperator = cast<BinaryOperator>(&I);
+
+  assert(binaryOperator->getOpcode() == Instruction::Add);
+
+  /// NOTE: Create a new BinaryOperator with the same name as existing one
+
+  Instruction *replacement = BinaryOperator::Create(Instruction::Sub,
                                                     binaryOperator->getOperand(0),
                                                     binaryOperator->getOperand(1),
                                                     binaryOperator->getName());

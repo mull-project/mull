@@ -2,7 +2,7 @@
 
 #include "ModuleLoader.h"
 
-#include "llvm/IR/Module.h"
+#include <llvm/IR/Module.h>
 
 #include <map>
 #include <string>
@@ -18,21 +18,21 @@ namespace mull {
 
 class Context {
 public:
-  typedef std::vector<std::unique_ptr<MullModule>> ModuleArrayType;
+  typedef std::vector<std::unique_ptr<llvm::Module>> ModuleArrayType;
   typedef ModuleArrayType::iterator iterator;
 
 private:
   ModuleArrayType Modules;
   std::map<std::string, llvm::Function *> FunctionsRegistry;
-  std::map<std::string, MullModule *> moduleRegistry;
+  std::map<std::string, llvm::Module *> moduleRegistry;
 
 public:
-  void addModule(std::unique_ptr<MullModule> module);
+  void addModule(std::unique_ptr<llvm::Module> module);
 
   std::vector<llvm::Function *> getStaticConstructors();
 
-  MullModule *moduleWithIdentifier(const std::string &identifier);
-  MullModule *moduleWithIdentifier(const std::string &identifier) const;
+  llvm::Module *moduleWithIdentifier(const std::string &identifier);
+  llvm::Module *moduleWithIdentifier(const std::string &identifier) const;
 
   ModuleArrayType &getModules() { return Modules; }
   llvm::Function *lookupDefinedFunction(llvm::StringRef FunctionName) const;

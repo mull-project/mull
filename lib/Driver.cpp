@@ -61,7 +61,7 @@ std::unique_ptr<Result> Driver::Run() {
   /// Therefore we load them into memory and compile immediately
   /// Later on modules used only for generating of mutants
   std::vector<std::string> bitcodePaths = Cfg.getBitcodePaths();
-  std::vector<unique_ptr<MullModule>> modules =
+  std::vector<unique_ptr<Module>> modules =
     Loader.loadModulesFromBitcodeFileList(bitcodePaths);
 
   for (auto &ownedModule : modules) {
@@ -167,17 +167,19 @@ std::unique_ptr<Result> Driver::Run() {
           result.Status = DryRun;
           result.RunningTime = ExecResult.RunningTime * 10;
         } else {
-          auto ObjectFiles = AllButOne(testee->getTesteeFunction()->getParent());
-          ObjectFile *mutant = toolchain.cache().getObject(*mutationPoint);
-          if (mutant == nullptr) {
-            auto ownedModule = mutationPoint->cloneModuleAndApplyMutation();
+          jit.setCurrentMutationPoint(mutationPoint);
 
-            auto owningObject = toolchain.compiler().compileModule(ownedModule.get());
-
-            mutant = owningObject.getBinary();
-            toolchain.cache().putObject(std::move(owningObject), *mutationPoint);
-          }
-          ObjectFiles.push_back(mutant);
+//          auto ObjectFiles = AllButOne(testee->getTesteeFunction()->getParent());
+//          ObjectFile *mutant = toolchain.cache().getObject(*mutationPoint);
+//          if (mutant == nullptr) {
+//            auto ownedModule = mutationPoint->cloneModuleAndApplyMutation();
+//
+//            auto owningObject = toolchain.compiler().compileModule(ownedModule.get());
+//
+//            mutant = owningObject.getBinary();
+//            toolchain.cache().putObject(std::move(owningObject), *mutationPoint);
+//          }
+//          ObjectFiles.push_back(mutant);
 
           const auto sandboxTimeout = std::max(30LL,
                                                ExecResult.RunningTime * 10);
@@ -189,7 +191,9 @@ std::unique_ptr<Result> Driver::Run() {
 
             *SharedResult = R;
           }, sandboxTimeout);
-          ObjectFiles.pop_back();
+//          ObjectFiles.pop_back();
+
+          jit.setCurrentMutationPoint(nullptr);
 
           assert(result.Status != ExecutionStatus::Invalid &&
                  "Expect to see valid TestResult");
@@ -295,10 +299,10 @@ std::vector<llvm::object::ObjectFile *> Driver::AllObjectFiles() {
 */
 
 std::vector<llvm::Module *> Driver::allModules() {
-  std::vector<llvm::Module *> modules;
+  std::vector<Module *> modules;
 
   for (auto &module : Ctx.getModules()) {
-    modules.push_back(module->getModule());
+    modules.push_back(module.get());
   }
 
   return modules;

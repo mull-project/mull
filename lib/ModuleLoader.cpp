@@ -29,14 +29,14 @@ static std::string MD5HashFromBuffer(StringRef buffer) {
   return Result.str();
 }
 
-std::unique_ptr<MullModule> ModuleLoader::loadModuleAtPath(const std::string &path) {
+std::unique_ptr<Module> ModuleLoader::loadModuleAtPath(const std::string &path) {
   auto BufferOrError = MemoryBuffer::getFile(path);
   if (!BufferOrError) {
     Logger::error() << "ModuleLoader> Can't load module " << path << '\n';
     return nullptr;
   }
 
-  std::string hash = MD5HashFromBuffer(BufferOrError->get()->getBuffer());
+//  std::string hash = MD5HashFromBuffer(BufferOrError->get()->getBuffer());
 
   auto llvmModule = parseBitcodeFile(BufferOrError->get()->getMemBufferRef(), Ctx);
   if (!llvmModule) {
@@ -44,16 +44,18 @@ std::unique_ptr<MullModule> ModuleLoader::loadModuleAtPath(const std::string &pa
     return nullptr;
   }
 
-  auto module = make_unique<MullModule>(std::move(llvmModule.get()), hash);
-  return module;
+  return std::move(llvmModule.get());
+
+//  auto module = make_unique<MullModule>(std::move(llvmModule.get()), hash);
+//  return module;
 }
 
-std::vector<std::unique_ptr<MullModule>>
+std::vector<std::unique_ptr<Module>>
 ModuleLoader::loadModulesFromBitcodeFileList(const std::vector<std::string> &bitcodeFileList) {
-  std::vector<std::unique_ptr<MullModule>> modules;
+  std::vector<std::unique_ptr<Module>> modules;
 
   for (const std::string &path : bitcodeFileList) {
-    std::unique_ptr<MullModule> module = loadModuleAtPath(path);
+    std::unique_ptr<Module> module = loadModuleAtPath(path);
 
     if (module == nullptr) {
       continue;

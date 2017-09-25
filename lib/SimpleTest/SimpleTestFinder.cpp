@@ -48,7 +48,7 @@ std::vector<std::unique_ptr<Test>> SimpleTestFinder::findTests(Context &Ctx) {
   std::vector<std::unique_ptr<Test>> tests;
 
   for (auto &module : Ctx.getModules()) {
-    auto &x = module->getModule()->getFunctionList();
+    auto &x = module->getFunctionList();
     for (auto &Fn : x) {
 
       /// We find C functions having test_ and the same functions if they are
