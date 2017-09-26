@@ -70,10 +70,15 @@ static std::unique_ptr<Module> parseIR(const char *IR) {
 
 #pragma mark - Mutation Operators
 
-#pragma mark - Math: Sub
+#pragma mark - Math Operators
 
 std::unique_ptr<Module> TestModuleFactory::create_SimpleTest_MathSub_module() {
   const char *fixture = "fixture_simple_test_math_sub_operator.ll";
+  return createModule(fixture, fixture);
+}
+
+std::unique_ptr<Module> TestModuleFactory::create_SimpleTest_MathMul_module() {
+  const char *fixture = "fixture_simple_test_math_mul_operator.ll";
   return createModule(fixture, fixture);
 }
 
