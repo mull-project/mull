@@ -226,6 +226,9 @@ Driver::mutationOperators(std::vector<std::string> mutationOperatorStrings) {
       else if (mutation == MathMulMutationOperator::ID) {
         mutationOperators.emplace_back(make_unique<MathMulMutationOperator>());
       }
+      else if (mutation == MathDivMutationOperator::ID) {
+        mutationOperators.emplace_back(make_unique<MathDivMutationOperator>());
+      }
       else if (mutation == NegateConditionMutationOperator::ID) {
         mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
       }
