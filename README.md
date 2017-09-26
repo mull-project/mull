@@ -64,4 +64,4 @@ Comments](http://lowlevelbits.org/llvm-based-mutation-testing-system/)
 
 The authors and developers of Mull are Alex Denisov 1101.debian@gmail.com and Stanislav Pankevich s.pankevich@gmail.com.
 
-Feel free to contact us if you have any questions about Mull and mutation testing or any other topics related to a software reliability and a software in general.
+Feel free to contact us if you have any questions about Mull and mutation testing or any other topics related to software reliability and software in general.
