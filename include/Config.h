@@ -2,6 +2,7 @@
 
 #include "Logger.h"
 #include "MutationOperators/AddMutationOperator.h"
+#include "MutationOperators/MathSubMutationOperator.h"
 #include "MutationOperators/NegateConditionMutationOperator.h"
 #include "MutationOperators/RemoveVoidFunctionMutationOperator.h"
 

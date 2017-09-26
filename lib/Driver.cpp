@@ -220,6 +220,9 @@ Driver::mutationOperators(std::vector<std::string> mutationOperatorStrings) {
       else if (mutation == AndOrReplacementMutationOperator::ID) {
         mutationOperators.emplace_back(make_unique<AndOrReplacementMutationOperator>());
       }
+      else if (mutation == MathSubMutationOperator::ID) {
+        mutationOperators.emplace_back(make_unique<MathSubMutationOperator>());
+      }
       else if (mutation == NegateConditionMutationOperator::ID) {
         mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
       }

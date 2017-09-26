@@ -190,13 +190,15 @@ TEST_F(ConfigParserTestFixture, loadConfig_MutationOperators_SpecificValue) {
 mutation_operators:
   - add_mutation_operator
   - negate_mutation_operator
+  - math_sub_mutation_operator
   )YAML";
   configWithYamlContent(configYAML);
   
   auto mutationOperators = config.getMutationOperators();
-  ASSERT_EQ(2U, mutationOperators.size());
+  ASSERT_EQ(3U, mutationOperators.size());
   ASSERT_EQ(AddMutationOperator::ID, mutationOperators[0]);
   ASSERT_EQ(NegateConditionMutationOperator::ID, mutationOperators[1]);
+  ASSERT_EQ(MathSubMutationOperator::ID, mutationOperators[2]);
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_tests_SpecificValue) {
