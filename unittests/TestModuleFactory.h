@@ -22,6 +22,7 @@ public:
 
   std::unique_ptr<Module> create_SimpleTest_MathSub_module();
   std::unique_ptr<Module> create_SimpleTest_MathMul_module();
+  std::unique_ptr<Module> create_SimpleTest_MathDiv_module();
 
   std::unique_ptr<Module> create_SimpleTest_NegateCondition_Tester_Module();
   std::unique_ptr<Module> create_SimpleTest_NegateCondition_Testee_Module();

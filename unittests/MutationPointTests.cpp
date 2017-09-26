@@ -2,6 +2,7 @@
 #include "Context.h"
 #include "SimpleTest/SimpleTestFinder.h"
 #include "MutationOperators/AddMutationOperator.h"
+#include "MutationOperators/MathDivMutationOperator.h"
 #include "MutationOperators/MathMulMutationOperator.h"
 #include "MutationOperators/MathSubMutationOperator.h"
 #include "MutationOperators/NegateConditionMutationOperator.h"
@@ -224,6 +225,66 @@ TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
 
   ASSERT_TRUE(isa<BinaryOperator>(mutatedInstruction));
   ASSERT_EQ(Instruction::SDiv, mutatedInstruction->getOpcode());
+}
+
+TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
+  auto module = TestModuleFactory.create_SimpleTest_MathDiv_module();
+
+  auto mullModule = make_unique<MullModule>(std::move(module), "");
+
+  Context Ctx;
+  Ctx.addModule(std::move(mullModule));
+
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<MathDivMutationOperator>());
+
+  SimpleTestFinder Finder(std::move(mutationOperators));
+
+  auto Tests = Finder.findTests(Ctx);
+
+  auto &Test = *(Tests.begin());
+
+  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
+
+  ASSERT_EQ(2U, Testees.size());
+
+  Function *Testee = Testees[1]->getTesteeFunction();
+  ASSERT_FALSE(Testee->empty());
+
+  ASSERT_EQ(1, Testees[1]->getDistance());
+
+  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
+  ASSERT_EQ(1U, MutationPoints.size());
+
+  MutationPoint *MP = (*(MutationPoints.begin()));
+  MutationPointAddress address = MP->getAddress();
+  ASSERT_TRUE(isa<BinaryOperator>(MP->getOriginalValue()));
+
+  std::string ReplacedInstructionName = MP->getOriginalValue()->getName().str();
+
+  std::unique_ptr<TargetMachine> targetMachine(EngineBuilder().selectTarget(Triple(),
+                                                                            "",
+                                                                            "",
+                                                                            SmallVector<std::string, 1>()));
+
+  Compiler compiler(*targetMachine.get());
+
+  auto ownedMutatedModule = MP->cloneModuleAndApplyMutation();
+
+  Function *mutatedTestee = ownedMutatedModule->getFunction("math_div");
+  ASSERT_TRUE(mutatedTestee != nullptr);
+
+  llvm::Function &mutatedFunction =
+  *(std::next(ownedMutatedModule->begin(), address.getFnIndex()));
+  llvm::BasicBlock &mutatedBasicBlock =
+  *(std::next(mutatedFunction.begin(), address.getBBIndex()));
+  llvm::Instruction *mutatedInstruction =
+  &*(std::next(mutatedBasicBlock.begin(), address.getIIndex()));
+
+  ASSERT_TRUE(mutatedInstruction != nullptr);
+
+  ASSERT_TRUE(isa<BinaryOperator>(mutatedInstruction));
+  ASSERT_EQ(Instruction::Mul, mutatedInstruction->getOpcode());
 }
 
 TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
