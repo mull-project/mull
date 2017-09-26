@@ -4,6 +4,7 @@
 #include "ModuleLoader.h"
 #include "MutationOperators/AddMutationOperator.h"
 #include "MutationOperators/AndOrReplacementMutationOperator.h"
+#include "MutationOperators/MathSubMutationOperator.h"
 #include "MutationOperators/NegateConditionMutationOperator.h"
 #include "MutationOperators/RemoveVoidFunctionMutationOperator.h"
 #include "Result.h"
@@ -103,6 +104,82 @@ TEST(Driver, SimpleTest_AddMutationOperator) {
   auto FirstResult = result->getTestResults().begin()->get();
   ASSERT_EQ(ExecutionStatus::Passed, FirstResult->getOriginalTestResult().Status);
   ASSERT_EQ("test_count_letters", FirstResult->getTestName());
+
+  auto &Mutants = FirstResult->getMutationResults();
+  ASSERT_EQ(1u, Mutants.size());
+
+  auto FirstMutant = Mutants.begin()->get();
+  ASSERT_EQ(ExecutionStatus::Failed, FirstMutant->getExecutionResult().Status);
+
+  ASSERT_NE(nullptr, FirstMutant->getMutationPoint());
+}
+
+TEST(Driver, SimpleTest_MathSubMutationOperator) {
+    /// Create Config with fake BitcodePaths
+    /// Create Fake Module Loader
+    /// Initialize Driver using ModuleLoader and Config
+    /// Driver should initialize (make them injectable? DI?)
+    /// TestRunner and TestFinder based on the Config
+    /// Then Run all the tests using driver
+
+  std::string projectName = "some_project";
+  std::string testFramework = "SimpleTest";
+
+  bool doFork = false;
+  bool dryRun = false;
+  bool useCache = false;
+  bool emitDebugInfo = false;
+  int distance = 10;
+  std::string cacheDirectory = "/tmp/mull_cache";
+
+  Config config("",
+                projectName,
+                testFramework,
+                {},
+                {},
+                {},
+                {},
+                doFork,
+                dryRun,
+                useCache,
+                emitDebugInfo,
+                MullDefaultTimeoutMilliseconds,
+                distance,
+                cacheDirectory);
+
+  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
+    std::vector<std::unique_ptr<MullModule>> modules;
+
+    auto module1 = SharedTestModuleFactory.create_SimpleTest_MathSub_module();
+    modules.push_back(make_unique<MullModule>(std::move(module1), "1234"));
+
+    return modules;
+  };
+
+  LLVMContext context;
+  FakeModuleLoader loader(context, modules);
+
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<MathSubMutationOperator>());
+
+  SimpleTestFinder testFinder(std::move(mutationOperators));
+
+  Toolchain toolchain(config);
+  llvm::TargetMachine &machine = toolchain.targetMachine();
+  SimpleTestRunner runner(machine);
+
+  Driver Driver(config, loader, testFinder, runner, toolchain);
+
+    /// Given the modules we use here we expect:
+    ///
+    /// 1 original test, which has Passed state
+    /// 1 mutant test, which has Failed state
+  auto result = Driver.Run();
+  ASSERT_EQ(1u, result->getTestResults().size());
+
+  auto FirstResult = result->getTestResults().begin()->get();
+  ASSERT_EQ(ExecutionStatus::Passed, FirstResult->getOriginalTestResult().Status);
+  ASSERT_EQ("test_math_sub", FirstResult->getTestName());
 
   auto &Mutants = FirstResult->getMutationResults();
   ASSERT_EQ(1u, Mutants.size());
