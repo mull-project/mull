@@ -19,15 +19,15 @@
 using namespace llvm;
 using namespace mull;
 
-static std::string MD5HashFromBuffer(StringRef buffer) {
-  MD5 Hasher;
-  Hasher.update(buffer);
-  MD5::MD5Result Hash;
-  Hasher.final(Hash);
-  SmallString<32> Result;
-  MD5::stringifyResult(Hash, Result);
-  return Result.str();
-}
+//static std::string MD5HashFromBuffer(StringRef buffer) {
+//  MD5 Hasher;
+//  Hasher.update(buffer);
+//  MD5::MD5Result Hash;
+//  Hasher.final(Hash);
+//  SmallString<32> Result;
+//  MD5::stringifyResult(Hash, Result);
+//  return Result.str();
+//}
 
 std::unique_ptr<Module> ModuleLoader::loadModuleAtPath(const std::string &path) {
   auto BufferOrError = MemoryBuffer::getFile(path);

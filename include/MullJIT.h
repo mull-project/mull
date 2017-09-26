@@ -314,9 +314,9 @@ private:
   BaseLayerModuleSetHandleT emitFunction(LogicalModuleHandle LMH,
                                          Function &function,
                                          uint64_t functionIndex);
-  void tryToApplyMutation(Module *module, Function *function);
+  void tryToApplyMutation(Module *module, Function *originalFunction, Function *function);
 
-  void insertCallTreeCallbacks(Module *module, Function &function, uint64_t index);
+  void insertCallTreeCallbacks(Module *module, Function *originalFunction, Function &function, uint64_t index);
 
   std::unique_ptr<llvm::orc::JITCompileCallbackManager> callbackManager;
   std::function<std::unique_ptr<llvm::orc::IndirectStubsManager>()> stubsManagerBuilder;
