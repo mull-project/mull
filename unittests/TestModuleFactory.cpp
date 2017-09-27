@@ -82,6 +82,11 @@ std::unique_ptr<Module> TestModuleFactory::create_SimpleTest_MathMul_module() {
   return createModule(fixture, fixture);
 }
 
+std::unique_ptr<Module> TestModuleFactory::create_SimpleTest_MathDiv_module() {
+  const char *fixture = "fixture_simple_test_math_div_operator.ll";
+  return createModule(fixture, fixture);
+}
+
 #pragma mark - Negate Condition
 
 std::unique_ptr<Module> TestModuleFactory::createModule(const char *fixtureName, const char *moduleIdentifier) {
