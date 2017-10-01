@@ -193,16 +193,18 @@ mutation_operators:
   - math_sub_mutation_operator
   - math_mul_mutation_operator
   - math_div_mutation_operator
+  - scalar_value_mutation_operator
   )YAML";
   configWithYamlContent(configYAML);
   
   auto mutationOperators = config.getMutationOperators();
-  ASSERT_EQ(5U, mutationOperators.size());
+  ASSERT_EQ(6U, mutationOperators.size());
   ASSERT_EQ(AddMutationOperator::ID, mutationOperators[0]);
   ASSERT_EQ(NegateConditionMutationOperator::ID, mutationOperators[1]);
   ASSERT_EQ(MathSubMutationOperator::ID, mutationOperators[2]);
   ASSERT_EQ(MathMulMutationOperator::ID, mutationOperators[3]);
   ASSERT_EQ(MathDivMutationOperator::ID, mutationOperators[4]);
+  ASSERT_EQ(ScalarValueMutationOperator::ID, mutationOperators[5]);
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_tests_SpecificValue) {

@@ -6,6 +6,7 @@
 #include "MutationOperators/NegateConditionMutationOperator.h"
 #include "MutationOperators/RemoveVoidFunctionMutationOperator.h"
 #include "MutationOperators/MathSubMutationOperator.h"
+#include "MutationOperators/ScalarValueMutationOperator.h"
 
 #include "TestModuleFactory.h"
 #include "Test.h"
@@ -298,6 +299,42 @@ TEST(SimpleTestFinder, findMutationPoints_AndOrReplacementMutationOperator) {
   ASSERT_EQ(testee5_mutationPoint2_address.getFnIndex(), 5);
   ASSERT_EQ(testee5_mutationPoint2_address.getBBIndex(), 1);
   ASSERT_EQ(testee5_mutationPoint2_address.getIIndex(), 3);
+}
+
+TEST(SimpleTestFinder, FindMutationPoints_ScalarValueMutationOperator) {
+  auto module = TestModuleFactory.create_SimpleTest_ScalarValue_module();
+
+  auto mullModule = make_unique<MullModule>(std::move(module), "");
+
+  Context Ctx;
+  Ctx.addModule(std::move(mullModule));
+
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<ScalarValueMutationOperator>());
+
+  SimpleTestFinder Finder(std::move(mutationOperators));
+  auto Tests = Finder.findTests(Ctx);
+
+  auto &Test = *Tests.begin();
+
+  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
+
+  ASSERT_EQ(2U, Testees.size());
+
+  Function *Testee = Testees[1]->getTesteeFunction();
+  ASSERT_FALSE(Testee->empty());
+
+  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
+  ASSERT_EQ(4U, MutationPoints.size());
+
+  MutationPoint *MP = (*(MutationPoints.begin()));
+
+  ASSERT_TRUE(isa<StoreInst>(MP->getOriginalValue()));
+
+  MutationPointAddress MPA = MP->getAddress();
+  ASSERT_TRUE(MPA.getFnIndex() == 0);
+  ASSERT_TRUE(MPA.getBBIndex() == 0);
+  ASSERT_TRUE(MPA.getIIndex() == 4);
 }
 
 TEST(SimpleTestFinder, FindTestees_TesteePathMemorization) {

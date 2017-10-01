@@ -7,6 +7,7 @@
 #include "MutationOperators/MathSubMutationOperator.h"
 #include "MutationOperators/NegateConditionMutationOperator.h"
 #include "MutationOperators/RemoveVoidFunctionMutationOperator.h"
+#include "MutationOperators/ScalarValueMutationOperator.h"
 
 #include "llvm/Support/YAMLTraits.h"
 

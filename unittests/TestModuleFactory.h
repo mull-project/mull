@@ -33,6 +33,8 @@ public:
   std::unique_ptr<Module> create_SimpleTest_ANDORReplacement_Module();
   std::unique_ptr<Module> create_SimpleTest_ANDORReplacement_CPPContent_Module();
 
+  std::unique_ptr<Module> create_SimpleTest_ScalarValue_module();
+
   std::unique_ptr<Module> create_SimpleTest_testeePathCalculation_testee();
   std::unique_ptr<Module> create_SimpleTest_testeePathCalculation_tester();
 
