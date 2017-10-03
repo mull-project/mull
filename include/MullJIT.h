@@ -73,54 +73,12 @@ private:
     return LambdaMaterializer<MaterializerFtor>(std::move(M));
   }
 
-  // Provide type-erasure for the Modules and MemoryManagers.
-  template <typename ResourceT>
-  class ResourceOwner {
-  public:
-    ResourceOwner() = default;
-    ResourceOwner(const ResourceOwner&) = delete;
-    ResourceOwner& operator=(const ResourceOwner&) = delete;
-    virtual ~ResourceOwner() { }
-    virtual ResourceT& getResource() const = 0;
-  };
-
-  template <typename ResourceT, typename ResourcePtrT>
-  class ResourceOwnerImpl : public ResourceOwner<ResourceT> {
-  public:
-    ResourceOwnerImpl(ResourcePtrT ResourcePtr)
-    : ResourcePtr(std::move(ResourcePtr)) {}
-    ResourceT& getResource() const override { return *ResourcePtr; }
-  private:
-    ResourcePtrT ResourcePtr;
-  };
-
-  template <typename ResourceT, typename ResourcePtrT>
-  std::unique_ptr<ResourceOwner<ResourceT>>
-  wrapOwnership(ResourcePtrT ResourcePtr) {
-    typedef ResourceOwnerImpl<ResourceT, ResourcePtrT> RO;
-    return llvm::make_unique<RO>(std::move(ResourcePtr));
-  }
-
   struct LogicalModuleResources {
     llvm::Module *SourceModule;
     std::set<const llvm::Function *> StubsToClone;
     std::unique_ptr<llvm::orc::IndirectStubsManager> StubsMgr;
 
     LogicalModuleResources() = default;
-
-    // Explicit move constructor to make MSVC happy.
-    LogicalModuleResources(LogicalModuleResources &&Other)
-    : SourceModule(std::move(Other.SourceModule)),
-    StubsToClone(std::move(Other.StubsToClone)),
-    StubsMgr(std::move(Other.StubsMgr)) {}
-
-    // Explicit move assignment to make MSVC happy.
-    LogicalModuleResources& operator=(LogicalModuleResources &&Other) {
-      SourceModule = std::move(Other.SourceModule);
-      StubsToClone = std::move(Other.StubsToClone);
-      StubsMgr = std::move(Other.StubsMgr);
-      return *this;
-    }
 
     llvm::orc::JITSymbol findSymbol(llvm::StringRef Name, bool ExportedSymbolsOnly) {
       if (Name.endswith("$stub_ptr") && !ExportedSymbolsOnly) {
@@ -129,38 +87,6 @@ private:
       }
       return StubsMgr->findStub(Name, ExportedSymbolsOnly);
     }
-
-  };
-
-  struct LogicalDylibResources {
-    typedef std::function<llvm::RuntimeDyld::SymbolInfo(const std::string&)>
-    SymbolResolverFtor;
-
-    typedef std::function<typename CompileLayer::ModuleSetHandleT(
-                                                                CompileLayer&,
-                                                                std::unique_ptr<llvm::Module>,
-                                                                std::unique_ptr<llvm::RuntimeDyld::SymbolResolver>)>
-    ModuleAdderFtor;
-
-    LogicalDylibResources() = default;
-
-    // Explicit move constructor to make MSVC happy.
-    LogicalDylibResources(LogicalDylibResources &&Other)
-    : ExternalSymbolResolver(std::move(Other.ExternalSymbolResolver)),
-    MemMgr(std::move(Other.MemMgr)),
-    ModuleAdder(std::move(Other.ModuleAdder)) {}
-
-    // Explicit move assignment operator to make MSVC happy.
-    LogicalDylibResources& operator=(LogicalDylibResources &&Other) {
-      ExternalSymbolResolver = std::move(Other.ExternalSymbolResolver);
-      MemMgr = std::move(Other.MemMgr);
-      ModuleAdder = std::move(Other.ModuleAdder);
-      return *this;
-    }
-
-    std::unique_ptr<llvm::RuntimeDyld::SymbolResolver> ExternalSymbolResolver;
-    std::unique_ptr<ResourceOwner<llvm::RuntimeDyld::MemoryManager>> MemMgr;
-    ModuleAdderFtor ModuleAdder;
   };
 
   struct LogicalModule {
@@ -176,6 +102,8 @@ private:
   };
 
   std::list<LogicalModule> logicalModules;
+  std::unique_ptr<llvm::RuntimeDyld::MemoryManager> memoryManager;
+  std::unique_ptr<llvm::RuntimeDyld::SymbolResolver> symbolResolver;
 public:
 
   /// @brief Construct a compile-on-demand layer instance.
@@ -227,7 +155,6 @@ private:
   std::vector<CallTreeFunction> functions;
   DynamicCallTree dynamicCallTree;
   MutationPoint *currentMutationPoint;
-  LogicalDylibResources logicalDylibResources;
 
   llvm::orc::JITSymbol findSymbolInLogicalModule(std::list<LogicalModule>::iterator LMH,
                                                  const std::string &Name,
@@ -246,8 +173,7 @@ private:
     if (auto Symbol = findSymbolInLogicalModule(LMH, Name, false))
       return Symbol;
 
-    for (auto LMI = logicalModules.begin(), LME = logicalModules.end();
-         LMI != LME; ++LMI) {
+    for (auto LMI = logicalModules.begin(), LME = logicalModules.end(); LMI != LME; ++LMI) {
       if (LMI != LMH)
         if (auto Symbol = findSymbolInLogicalModule(LMI, Name, false))
           return Symbol;

@@ -53,20 +53,11 @@ MullJIT::~MullJIT() {
   }
 }
 
-void MullJIT::addModuleSet(std::vector<llvm::Module *> &modules, std::unique_ptr<SectionMemoryManager> memoryManager,
+void MullJIT::addModuleSet(std::vector<llvm::Module *> &modules,
+                           std::unique_ptr<SectionMemoryManager> memoryManager,
                            std::unique_ptr<RuntimeDyld::SymbolResolver> resolver) {
-  logicalDylibResources.ExternalSymbolResolver = std::move(resolver);
-
-  auto &MemMgrRef = *memoryManager;
-  logicalDylibResources.MemMgr = wrapOwnership<RuntimeDyld::MemoryManager>(std::move(memoryManager));
-
-  logicalDylibResources.ModuleAdder =
-      [&MemMgrRef](CompileLayer &B, std::unique_ptr<Module> M,
-                   std::unique_ptr<RuntimeDyld::SymbolResolver> R) {
-        std::vector<std::unique_ptr<Module>> Ms;
-        Ms.push_back(std::move(M));
-        return B.addModuleSet(std::move(Ms), &MemMgrRef, std::move(R));
-      };
+  this->memoryManager = std::move(memoryManager);
+  this->symbolResolver = std::move(resolver);
 
   // Process each of the modules in this module set.
   for (auto module : modules) {
@@ -231,16 +222,18 @@ void MullJIT::addLogicalModule(llvm::Module *module) {
         auto &resources = logicalModuleIterator->Resources;
         if (auto Sym = resources.StubsMgr->findStub(Name, false))
           return Sym.toRuntimeDyldSymbol();
-        auto &LDResolver = logicalDylibResources.ExternalSymbolResolver;
+        auto &LDResolver = this->symbolResolver;
         return LDResolver->findSymbolInLogicalDylib(Name);
       },
       [this](const std::string &Name) {
-        auto &LDResolver = logicalDylibResources.ExternalSymbolResolver;
+        auto &LDResolver = this->symbolResolver;
         return LDResolver->findSymbol(Name);
       });
 
-  auto GVsH = logicalDylibResources.ModuleAdder(compileLayer, std::move(GVsM),
-                                                 std::move(GVsResolver));
+  std::vector<std::unique_ptr<Module>> Ms;
+  Ms.push_back(std::move(GVsM));
+  auto GVsH = compileLayer.addModuleSet(std::move(Ms), memoryManager.get(), std::move(GVsResolver));
+
   logicalModuleIterator->BaseLayerHandles.push_back(GVsH);
 }
 
@@ -343,18 +336,19 @@ MullJIT::BaseLayerModuleSetHandleT MullJIT::emitFunction(std::list<LogicalModule
       [this, LMH](const std::string &Name) {
         if (auto Sym = this->findSymbolInternally(LMH, Name))
           return Sym.toRuntimeDyldSymbol();
-        auto &LDResolver = logicalDylibResources.ExternalSymbolResolver;
+        auto &LDResolver = this->symbolResolver;
         return LDResolver->findSymbolInLogicalDylib(Name);
       },
       [this](const std::string &Name) {
-        auto &LDResolver = logicalDylibResources.ExternalSymbolResolver;
+        auto &LDResolver = this->symbolResolver;
         return LDResolver->findSymbol(Name);
       });
 
   insertCallTreeCallbacks(&module, &function, *M->getFunction(function.getName()), functionIndex);
 
-  return logicalDylibResources.ModuleAdder(compileLayer, std::move(M),
-                                           std::move(Resolver));
+  std::vector<std::unique_ptr<Module>> Ms;
+  Ms.push_back(std::move(M));
+  return compileLayer.addModuleSet(std::move(Ms), memoryManager.get(), std::move(Resolver));
 }
 
 void MullJIT::insertCallTreeCallbacks(Module *module, Function *originalFunction, Function &function, uint64_t index) {
