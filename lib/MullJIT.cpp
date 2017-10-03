@@ -37,7 +37,6 @@ void mull_moveFunctionBody(Function &OrigF, ValueToValueMapTy &VMap,
 
 MullJIT::MullJIT(llvm::TargetMachine &machine)
     : compiler(machine),
-      compileLayer(linkingLayer, compiler),
       callbackManager(llvm::orc::createLocalCompileCallbackManager(machine.getTargetTriple(), 0)),
       stubsManagerBuilder(llvm::orc::createLocalIndirectStubsManagerBuilder(machine.getTargetTriple())),
       dynamicCallTree(functions) {
@@ -48,7 +47,7 @@ MullJIT::MullJIT(llvm::TargetMachine &machine)
 MullJIT::~MullJIT() {
   for (auto &LM : logicalModules) {
     for (auto BLH : LM.BaseLayerHandles) {
-      compileLayer.removeModuleSet(BLH);
+      linkingLayer.removeObjectSet(BLH);
     }
   }
 }
@@ -73,7 +72,7 @@ llvm::orc::JITSymbol MullJIT::findSymbol(StringRef Name, bool ExportedSymbolsOnl
       return Sym;
     }
   }
-  return compileLayer.findSymbol(Name, ExportedSymbolsOnly);
+  return linkingLayer.findSymbol(Name, ExportedSymbolsOnly);
 }
 
 void MullJIT::prepareForExecution() {
@@ -101,7 +100,7 @@ void MullJIT::cleanupCallTree(std::unique_ptr<CallTree> root) {
 
 void MullJIT::addLogicalModule(llvm::Module *module) {
 
-  // Bump the linkage and rename any anonymous/privote members in SrcM to
+  // Bump the linkage and rename any anonymous/private members in SrcM to
   // ensure that everything will resolve properly after we partition SrcM.
   orc::makeAllSymbolsExternallyAccessible(*module);
 
@@ -230,9 +229,10 @@ void MullJIT::addLogicalModule(llvm::Module *module) {
         return LDResolver->findSymbol(Name);
       });
 
-  std::vector<std::unique_ptr<Module>> Ms;
-  Ms.push_back(std::move(GVsM));
-  auto GVsH = compileLayer.addModuleSet(std::move(Ms), memoryManager.get(), std::move(GVsResolver));
+  std::vector<std::unique_ptr<object::OwningBinary<object::ObjectFile>>> objects;
+  auto objectFile = llvm::make_unique<object::OwningBinary<object::ObjectFile>>(compiler(*GVsM.get()));
+  objects.push_back(std::move(objectFile));
+  auto GVsH = linkingLayer.addObjectSet(std::move(objects), memoryManager.get(), std::move(GVsResolver));
 
   logicalModuleIterator->BaseLayerHandles.push_back(GVsH);
 }
@@ -262,7 +262,7 @@ llvm::orc::TargetAddress MullJIT::extractAndCompile(std::list<LogicalModule>::it
   auto PartH = emitFunction(LMH, F, functionIndex);
 
   std::string FnName = mangle(F.getName(), module.getDataLayout());
-  auto FnBodySym = compileLayer.findSymbolIn(PartH, FnName, false);
+  auto FnBodySym = linkingLayer.findSymbolIn(PartH, FnName, false);
   assert(FnBodySym && "Couldn't find function body.");
   llvm::orc::TargetAddress FnBodyAddr = FnBodySym.getAddress();
 
@@ -273,9 +273,9 @@ llvm::orc::TargetAddress MullJIT::extractAndCompile(std::list<LogicalModule>::it
   return FnBodyAddr;
 }
 
-MullJIT::BaseLayerModuleSetHandleT MullJIT::emitFunction(std::list<LogicalModule>::iterator LMH,
-                                                         Function &function,
-                                                         uint64_t functionIndex) {
+LinkingLayer::ObjSetHandleT MullJIT::emitFunction(std::list<LogicalModule>::iterator LMH,
+                                                  Function &function,
+                                                  uint64_t functionIndex) {
   LogicalModuleResources &resources = LMH->Resources;
   Module &module = *resources.SourceModule;
 
@@ -346,9 +346,10 @@ MullJIT::BaseLayerModuleSetHandleT MullJIT::emitFunction(std::list<LogicalModule
 
   insertCallTreeCallbacks(&module, &function, *M->getFunction(function.getName()), functionIndex);
 
-  std::vector<std::unique_ptr<Module>> Ms;
-  Ms.push_back(std::move(M));
-  return compileLayer.addModuleSet(std::move(Ms), memoryManager.get(), std::move(Resolver));
+  std::vector<std::unique_ptr<object::OwningBinary<object::ObjectFile>>> objects;
+  auto objectFile = llvm::make_unique<object::OwningBinary<object::ObjectFile>>(compiler(*M.get()));
+  objects.push_back(std::move(objectFile));
+  return linkingLayer.addObjectSet(std::move(objects), memoryManager.get(), std::move(Resolver));
 }
 
 void MullJIT::insertCallTreeCallbacks(Module *module, Function *originalFunction, Function &function, uint64_t index) {

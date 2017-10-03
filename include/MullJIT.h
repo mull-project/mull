@@ -2,7 +2,6 @@
 
 #include <llvm/ExecutionEngine/Orc/CompileUtils.h>
 #include <llvm/ExecutionEngine/Orc/IndirectionUtils.h>
-#include <llvm/ExecutionEngine/Orc/IRCompileLayer.h>
 #include <llvm/ExecutionEngine/Orc/LambdaResolver.h>
 #include <llvm/ExecutionEngine/Orc/LogicalDylib.h>
 #include <llvm/ExecutionEngine/Orc/ObjectLinkingLayer.h>
@@ -45,17 +44,11 @@ void mull_moveFunctionBody(Function &OrigF, ValueToValueMapTy &VMap,
                            Function *NewF = nullptr);
 
 typedef llvm::orc::ObjectLinkingLayer<> LinkingLayer;
-typedef llvm::orc::IRCompileLayer<LinkingLayer> CompileLayer;
 
 class MullJIT {
 private:
-
-  typedef typename CompileLayer::ModuleSetHandleT BaseLayerModuleSetHandleT;
-  typedef std::vector<BaseLayerModuleSetHandleT> BaseLayerHandleList;
-
   llvm::orc::SimpleCompiler compiler;
   LinkingLayer linkingLayer;
-  CompileLayer compileLayer;
 
   template <typename MaterializerFtor>
   class LambdaMaterializer final : public llvm::ValueMaterializer {
@@ -98,7 +91,7 @@ private:
 
     LogicalModule() = default;
     LogicalModuleResources Resources;
-    BaseLayerHandleList BaseLayerHandles;
+    std::vector<LinkingLayer::ObjSetHandleT> BaseLayerHandles;
   };
 
   std::list<LogicalModule> logicalModules;
@@ -142,9 +135,9 @@ private:
                                              Function &F,
                                              uint64_t functionIndex);
 
-  BaseLayerModuleSetHandleT emitFunction(std::list<LogicalModule>::iterator LMH,
-                                         Function &function,
-                                         uint64_t functionIndex);
+  LinkingLayer::ObjSetHandleT emitFunction(std::list<LogicalModule>::iterator LMH,
+                                           Function &function,
+                                           uint64_t functionIndex);
   void tryToApplyMutation(Module *module, Function *originalFunction, Function *function);
 
   void insertCallTreeCallbacks(Module *module, Function *originalFunction, Function &function, uint64_t index);
@@ -163,7 +156,7 @@ private:
       return StubSym;
 
     for (auto BLH : LMH->BaseLayerHandles)
-      if (auto Symbol = compileLayer.findSymbolIn(BLH, Name, ExportedSymbolsOnly))
+      if (auto Symbol = linkingLayer.findSymbolIn(BLH, Name, ExportedSymbolsOnly))
         return Symbol;
     return nullptr;
   }
