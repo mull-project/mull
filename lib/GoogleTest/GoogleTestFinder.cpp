@@ -360,7 +360,7 @@ GoogleTestFinder::findTestees(Test *Test,
   return testees;
 }
 
-std::vector<MutationPoint *>
+std::vector<IMutationPoint *>
 GoogleTestFinder::findMutationPoints(const Context &context,
                                      llvm::Function &testee) {
 
@@ -368,12 +368,12 @@ GoogleTestFinder::findMutationPoints(const Context &context,
     return MutationPointsRegistry.at(&testee);
   }
 
-  std::vector<MutationPoint *> points;
+  std::vector<IMutationPoint *> points;
 
   for (auto &mutationOperator : mutationOperators) {
     for (auto point : mutationOperator->getMutationPoints(context, &testee, filter)) {
       points.push_back(point);
-      MutationPoints.emplace_back(std::unique_ptr<MutationPoint>(point));
+      MutationPoints.emplace_back(std::unique_ptr<IMutationPoint>(point));
     }
   }
 

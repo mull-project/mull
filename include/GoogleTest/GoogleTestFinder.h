@@ -23,8 +23,8 @@ class MutationPoint;
 
 class GoogleTestFinder : public TestFinder {
   llvm::StringMap<llvm::Function *> FunctionRegistry;
-  std::vector<std::unique_ptr<MutationPoint>> MutationPoints;
-  std::map<llvm::Function *, std::vector<MutationPoint *>> MutationPointsRegistry;
+  std::vector<std::unique_ptr<IMutationPoint>> MutationPoints;
+  std::map<llvm::Function *, std::vector<IMutationPoint *>> MutationPointsRegistry;
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
 
@@ -39,8 +39,8 @@ public:
                                                    Context &Ctx,
                                                    int maxDistance) override;
 
-  std::vector<MutationPoint *> findMutationPoints(const Context &context,
-                                                  llvm::Function &F) override;
+  std::vector<IMutationPoint *> findMutationPoints(const Context &context,
+                                                   llvm::Function &F) override;
 };
 
 }

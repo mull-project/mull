@@ -81,7 +81,8 @@ TEST(SimpleTestRunner, runTest) {
   /// afterwards we apply single mutation and run test again
   /// expecting it to fail
 
-  std::vector<std::unique_ptr<Testee>> Testees = testFinder.findTestees(Test.get(), Ctx, 4);
+  std::vector<std::unique_ptr<Testee>> Testees =
+    testFinder.findTestees(Test.get(), Ctx, 4);
 
   ASSERT_NE(0U, Testees.size());
   Function *Testee = Testees[1]->getTesteeFunction();
@@ -89,9 +90,10 @@ TEST(SimpleTestRunner, runTest) {
   AddMutationOperator MutOp;
   std::vector<MutationOperator *> MutOps({&MutOp});
 
-  std::vector<MutationPoint *> MutationPoints = testFinder.findMutationPoints(Ctx, *Testee);
+  std::vector<IMutationPoint *> MutationPoints =
+    testFinder.findMutationPoints(Ctx, *Testee);
 
-  MutationPoint *MP = (*(MutationPoints.begin()));
+  IMutationPoint *MP = (*(MutationPoints.begin()));
   auto ownedMutatedTesteeModule = MP->cloneModuleAndApplyMutation();
 
   {
@@ -175,10 +177,11 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   AddMutationOperator MutOp;
   std::vector<MutationOperator *> MutOps({&MutOp});
 
-  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
+  std::vector<IMutationPoint *> MutationPoints =
+    Finder.findMutationPoints(Ctx, *Testee);
   ASSERT_EQ(1U, MutationPoints.size());
 
-  MutationPoint *MP = (*(MutationPoints.begin()));
+  IMutationPoint *MP = (*(MutationPoints.begin()));
 
   auto ownedMutatedTesteeModule = MP->cloneModuleAndApplyMutation();
 

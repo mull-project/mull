@@ -22,9 +22,9 @@ public:
                                                            Context &Ctx,
                                                            int maxDistance) = 0;
 
-  virtual std::vector<MutationPoint *> findMutationPoints(const Context &context,
-                                                          llvm::Function &F) {
-    return std::vector<MutationPoint *>();
+  virtual std::vector<IMutationPoint *> findMutationPoints(const Context &context,
+                                                           llvm::Function &F) {
+    return std::vector<IMutationPoint *>();
   }
 
   virtual ~TestFinder() {}

@@ -55,12 +55,12 @@ TEST(SQLiteReporter, integrationTest) {
 
   ASSERT_FALSE(testeeFunction->empty());
 
-  std::vector<MutationPoint *> mutationPoints =
-  Finder.findMutationPoints(context, *testeeFunction);
+  std::vector<IMutationPoint *> mutationPoints =
+    Finder.findMutationPoints(context, *testeeFunction);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
-  MutationPoint *mutationPoint = (*(mutationPoints.begin()));
+  IMutationPoint *mutationPoint = (*(mutationPoints.begin()));
 
   const long long RunningTime_1 = 1;
   const long long RunningTime_2 = 2;
@@ -343,12 +343,12 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
 
   ASSERT_FALSE(testeeFunction->empty());
 
-  std::vector<MutationPoint *> mutationPoints =
-  Finder.findMutationPoints(context, *testeeFunction);
+  std::vector<IMutationPoint *> mutationPoints =
+    Finder.findMutationPoints(context, *testeeFunction);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
-  MutationPoint *mutationPoint = (*(mutationPoints.begin()));
+  IMutationPoint *mutationPoint = (*(mutationPoints.begin()));
 
   const long long RunningTime_1 = 1;
   const long long RunningTime_2 = 2;
@@ -513,12 +513,12 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
 
   ASSERT_FALSE(testeeFunction->empty());
 
-  std::vector<MutationPoint *> mutationPoints =
-  Finder.findMutationPoints(context, *testeeFunction);
+  std::vector<IMutationPoint *> mutationPoints =
+    Finder.findMutationPoints(context, *testeeFunction);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
-  MutationPoint *mutationPoint = (*(mutationPoints.begin()));
+  IMutationPoint *mutationPoint = (*(mutationPoints.begin()));
 
   const long long RunningTime_1 = 1;
   const long long RunningTime_2 = 2;

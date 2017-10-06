@@ -95,10 +95,11 @@ TEST(SimpleTestFinder, FindMutationPoints_AddMutationOperator) {
   Function *Testee = Testees[1]->getTesteeFunction();
   ASSERT_FALSE(Testee->empty());
 
-  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
+  std::vector<IMutationPoint *> MutationPoints =
+    Finder.findMutationPoints(Ctx, *Testee);
   ASSERT_EQ(1U, MutationPoints.size());
 
-  MutationPoint *MP = (*(MutationPoints.begin()));
+  IMutationPoint *MP = (*(MutationPoints.begin()));
 
   /// TODO: Don't know how to compare unique pointer addMutationOperator with
   /// MutationOperator *.
@@ -134,10 +135,12 @@ TEST(SimpleTestFinder, FindMutationPoints_MathSubMutationOperator) {
   Function *Testee = Testees[1]->getTesteeFunction();
   ASSERT_FALSE(Testee->empty());
 
-  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
+  std::vector<IMutationPoint *> MutationPoints =
+    Finder.findMutationPoints(Ctx, *Testee);
+
   ASSERT_EQ(1U, MutationPoints.size());
 
-  MutationPoint *MP = (*(MutationPoints.begin()));
+  IMutationPoint *MP = (*(MutationPoints.begin()));
 
   ASSERT_TRUE(isa<BinaryOperator>(MP->getOriginalValue()));
 
@@ -173,10 +176,12 @@ TEST(SimpleTestFinder, FindMutationPoints_NegateConditionMutationOperator) {
   Function *Testee = Testees[1]->getTesteeFunction();
   ASSERT_FALSE(Testee->empty());
 
-  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
+  std::vector<IMutationPoint *> MutationPoints =
+    Finder.findMutationPoints(Ctx, *Testee);
+
   ASSERT_EQ(1U, MutationPoints.size());
 
-  MutationPoint *MP = (*(MutationPoints.begin()));
+  IMutationPoint *MP = (*(MutationPoints.begin()));
 
   /// TODO: Don't know how to compare unique pointer addMutationOperator with
   /// MutationOperator *.
@@ -218,10 +223,12 @@ TEST(SimpleTestFinder, FindMutationPoints_RemoteVoidFunctionMutationOperator) {
   ASSERT_FALSE(Testee2->empty());
   ASSERT_FALSE(Testee3->empty());
 
-  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee2);
+  std::vector<IMutationPoint *> MutationPoints =
+    Finder.findMutationPoints(Ctx, *Testee2);
+
   ASSERT_EQ(1U, MutationPoints.size());
 
-  MutationPoint *MP = (*(MutationPoints.begin()));
+  IMutationPoint *MP = (*(MutationPoints.begin()));
 
   /// TODO: Don't know how to compare unique pointer addMutationOperator with
   /// MutationOperator *.
@@ -259,12 +266,12 @@ TEST(SimpleTestFinder, findMutationPoints_AndOrReplacementMutationOperator) {
 
   Function *testee_test_and_operator = testees[1]->getTesteeFunction(); // testee_and_operator()
 
-  std::vector<MutationPoint *> MutationPoints =
+  std::vector<IMutationPoint *> MutationPoints =
     Finder.findMutationPoints(ctx, *testee_test_and_operator);
 
   ASSERT_EQ(1U, MutationPoints.size());
 
-  MutationPoint *mutationPoint = (*(MutationPoints.begin()));
+  IMutationPoint *mutationPoint = (*(MutationPoints.begin()));
 
   MutationPointAddress mutationPointAddress = mutationPoint->getAddress();
   ASSERT_EQ(mutationPointAddress.getFnIndex(), 0);
@@ -280,19 +287,19 @@ TEST(SimpleTestFinder, findMutationPoints_AndOrReplacementMutationOperator) {
 
   Function *testee5_function = test5_testees[1]->getTesteeFunction(); // testee_and_operator()
 
-  std::vector<MutationPoint *> testee5_mutationPoints =
+  std::vector<IMutationPoint *> testee5_mutationPoints =
     Finder.findMutationPoints(ctx, *testee5_function);
 
   ASSERT_EQ(2U, testee5_mutationPoints.size());
 
-  MutationPoint *testee5_mutationPoint1 = testee5_mutationPoints[0];
+  IMutationPoint *testee5_mutationPoint1 = testee5_mutationPoints[0];
 
   MutationPointAddress testee5_mutationPoint1_address = testee5_mutationPoint1->getAddress();
   ASSERT_EQ(testee5_mutationPoint1_address.getFnIndex(), 5);
   ASSERT_EQ(testee5_mutationPoint1_address.getBBIndex(), 0);
   ASSERT_EQ(testee5_mutationPoint1_address.getIIndex(), 10);
 
-  MutationPoint *testee5_mutationPoint2 = testee5_mutationPoints[1];
+  IMutationPoint *testee5_mutationPoint2 = testee5_mutationPoints[1];
 
   MutationPointAddress testee5_mutationPoint2_address = testee5_mutationPoint2->getAddress();
   ASSERT_EQ(testee5_mutationPoint2_address.getFnIndex(), 5);

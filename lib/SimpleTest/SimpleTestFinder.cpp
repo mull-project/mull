@@ -188,10 +188,10 @@ SimpleTestFinder::findTestees(Test *Test, Context &Ctx, int maxDistance) {
   return testees;
 }
 
-std::vector<MutationPoint *>
+std::vector<IMutationPoint *>
 SimpleTestFinder::findMutationPoints(const Context &context,
                                      llvm::Function &F) {
-  std::vector<MutationPoint *> MutPoints;
+  std::vector<IMutationPoint *> MutPoints;
 
   Module *PM = F.getParent();
 

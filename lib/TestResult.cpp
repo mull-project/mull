@@ -4,7 +4,7 @@
 using namespace mull;
 
 MutationResult::MutationResult(ExecutionResult R,
-                               MutationPoint *MP,
+                               IMutationPoint *MP,
                                Testee *testee) :
   Result(R), MutPoint(MP), testee(testee) {}
 
