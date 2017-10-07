@@ -52,6 +52,7 @@ TEST(Driver, SimpleTest_AddMutationOperator) {
   bool dryRun = false;
   bool useCache = false;
   bool emitDebugInfo = false;
+  bool diagnostics = false;
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
 
@@ -66,6 +67,7 @@ TEST(Driver, SimpleTest_AddMutationOperator) {
                 dryRun,
                 useCache,
                 emitDebugInfo,
+                diagnostics,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -131,6 +133,8 @@ TEST(Driver, SimpleTest_MathSubMutationOperator) {
   bool dryRun = false;
   bool useCache = false;
   bool emitDebugInfo = false;
+  bool diagnostics = false;
+
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
 
@@ -145,6 +149,7 @@ TEST(Driver, SimpleTest_MathSubMutationOperator) {
                 dryRun,
                 useCache,
                 emitDebugInfo,
+                diagnostics,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -207,6 +212,8 @@ TEST(Driver, SimpleTest_MathMulMutationOperator) {
   bool dryRun = false;
   bool useCache = false;
   bool emitDebugInfo = false;
+  bool diagnostics = false;
+
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
 
@@ -221,6 +228,7 @@ TEST(Driver, SimpleTest_MathMulMutationOperator) {
                 dryRun,
                 useCache,
                 emitDebugInfo,
+                diagnostics,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -283,6 +291,8 @@ TEST(Driver, SimpleTest_MathDivMutationOperator) {
   bool dryRun = false;
   bool useCache = false;
   bool emitDebugInfo = false;
+  bool diagnostics = false;
+
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
 
@@ -297,6 +307,7 @@ TEST(Driver, SimpleTest_MathDivMutationOperator) {
                 dryRun,
                 useCache,
                 emitDebugInfo,
+                diagnostics,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -359,6 +370,8 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
   bool dryRun = false;
   bool useCache = false;
   bool emitDebugInfo = false;
+  bool diagnostics = false;
+
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
 
@@ -373,6 +386,7 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
                 dryRun,
                 useCache,
                 emitDebugInfo,
+                diagnostics,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -430,6 +444,8 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
   bool dryRun = false;
   bool useCache = false;
   bool emitDebugInfo = false;
+  bool diagnostics = false;
+
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
 
@@ -444,6 +460,7 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
                 dryRun,
                 useCache,
                 emitDebugInfo,
+                diagnostics,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -501,6 +518,8 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator) {
   bool dryRun = false;
   bool useCache = false;
   bool emitDebugInfo = false;
+  bool diagnostics = false;
+
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
 
@@ -515,6 +534,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator) {
                 dryRun,
                 useCache,
                 emitDebugInfo,
+                diagnostics,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -671,6 +691,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator_CPP) {
   bool dryRun = false;
   bool useCache = false;
   bool debugInfo = false;
+  bool diagnostics = false;
 
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
@@ -686,6 +707,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator_CPP) {
                 dryRun,
                 useCache,
                 debugInfo,
+                diagnostics,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -804,6 +826,8 @@ TEST(Driver, SimpleTest_TesteePathCalculation) {
   bool dryRun = false;
   bool useCache = false;
   bool emitDebugInfo = false;
+  bool diagnostics = false;
+
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
 
@@ -818,6 +842,7 @@ TEST(Driver, SimpleTest_TesteePathCalculation) {
                 dryRun,
                 useCache,
                 emitDebugInfo,
+                diagnostics,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);

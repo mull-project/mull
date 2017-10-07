@@ -34,6 +34,7 @@ set(mull_sources
   GoogleTest/GoogleTestFinder.cpp
   GoogleTest/GoogleTestRunner.cpp
 
+  IDEDiagnostics.cpp
   SQLiteReporter.cpp
 )
 

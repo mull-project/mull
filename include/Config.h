@@ -45,6 +45,8 @@ class Config {
   bool dryRun;
   bool useCache;
   bool emitDebugInfo;
+  bool diagnostics;
+
   int timeout;
   int maxDistance;
   std::string cacheDirectory;
@@ -74,6 +76,7 @@ public:
     dryRun(false),
     useCache(true),
     emitDebugInfo(false),
+    diagnostics(false),
     timeout(MullDefaultTimeoutMilliseconds),
     maxDistance(128),
     cacheDirectory("/tmp/mull_cache")
@@ -91,6 +94,7 @@ public:
          bool dryrun,
          bool cache,
          bool debugInfo,
+         bool diagnostics,
          int timeout,
          int distance,
          const std::string &cacheDir) :
@@ -105,6 +109,7 @@ public:
     dryRun(dryrun),
     useCache(cache),
     emitDebugInfo(debugInfo),
+    diagnostics(diagnostics),
     timeout(timeout),
     maxDistance(distance),
     cacheDirectory(cacheDir)
@@ -189,6 +194,10 @@ public:
 
   bool shouldEmitDebugInfo() const {
     return emitDebugInfo;
+  }
+
+  bool isDiagnosticsEnabled() const {
+    return diagnostics;
   }
 
   int getMaxDistance() const {

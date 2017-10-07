@@ -10,4 +10,5 @@ BuildNinjaRelease
 projects/**
 !projects/CMakeLists.txt
 tmp/
+*.sqlite
 

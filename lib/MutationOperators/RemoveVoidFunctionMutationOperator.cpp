@@ -4,6 +4,7 @@
 #include "MutationPoint.h"
 #include "Context.h"
 
+#include <llvm/IR/CallSite.h>
 #include "llvm/IR/InstIterator.h"
 #include "llvm/IR/Module.h"
 #include "llvm/IR/DebugLoc.h"
@@ -11,6 +12,7 @@
 
 #include <fstream>
 #include <iterator>
+#include <sstream>
 
 using namespace llvm;
 using namespace mull;
@@ -32,6 +34,21 @@ static int GetFunctionIndex(llvm::Function *function) {
   return FIndex;
 }
 
+std::string getDiagnostics(Instruction &instruction) {
+  assert(isa<CallInst>(instruction));
+  
+  CallSite callSite = CallSite(&instruction);
+
+  std::stringstream diagstream;
+
+  diagstream << "Remove Void Call: removed ";
+  diagstream << callSite.getCalledFunction()->getName().str();
+
+  std::string diagnostics = diagstream.str();
+
+  return diagnostics;
+}
+
 std::vector<MutationPoint *>
 RemoveVoidFunctionMutationOperator::getMutationPoints(const Context &context,
                                                    llvm::Function *function,
@@ -50,8 +67,12 @@ RemoveVoidFunctionMutationOperator::getMutationPoints(const Context &context,
         auto moduleID = instruction.getModule()->getModuleIdentifier();
         MullModule *module = context.moduleWithIdentifier(moduleID);
 
+        std::string diagnostics = getDiagnostics(instruction);
+
         MutationPointAddress address(functionIndex, basicBlockIndex, instructionIndex);
-        auto mutationPoint = new MutationPoint(this, address, &instruction, module);
+        auto mutationPoint =
+          new MutationPoint(this, address, &instruction, module, diagnostics);
+
         mutationPoints.push_back(mutationPoint);
       }
       instructionIndex++;
