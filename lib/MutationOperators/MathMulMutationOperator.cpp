@@ -51,8 +51,12 @@ MathMulMutationOperator::getMutationPoints(const Context &context,
         auto moduleID = instruction.getModule()->getModuleIdentifier();
         MullModule *module = context.moduleWithIdentifier(moduleID);
 
+        std::string diagnostics = "Math Mul: replaced * with /";
+
         MutationPointAddress address(functionIndex, basicBlockIndex, instructionIndex);
-        auto mutationPoint = new MutationPoint(this, address, &instruction, module);
+        auto mutationPoint =
+          new MutationPoint(this, address, &instruction, module, diagnostics);
+
         mutationPoints.push_back(mutationPoint);
       }
       instructionIndex++;
