@@ -52,8 +52,13 @@ ScalarValueMutationOperator::getMutationPoints(const Context &context,
         auto moduleID = instruction.getModule()->getModuleIdentifier();
         MullModule *module = context.moduleWithIdentifier(moduleID);
 
+        /// TODO: read specific information about replacement from canBeApplied.
+        std::string diagnostics = "Scalar Value Replacement";
+
         MutationPointAddress address(functionIndex, basicBlockIndex, instructionIndex);
-        auto mutationPoint = new MutationPoint(this, address, &instruction, module);
+        auto mutationPoint =
+          new MutationPoint(this, address, &instruction, module, diagnostics);
+
         mutationPoints.push_back(mutationPoint);
       }
       instructionIndex++;
