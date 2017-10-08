@@ -14,9 +14,21 @@
 
 #include <fstream>
 #include <iterator>
+#include <sstream>
 
 using namespace llvm;
 using namespace mull;
+
+enum ScalarValueMutationType {
+  None = 1,
+  Int,
+  Float
+};
+
+static
+ScalarValueMutationType findPossibleApplication(Value &V,
+                                                int64_t *outIntValue,
+                                                double *outDoubleValue);
 
 const std::string ScalarValueMutationOperator::ID = "scalar_value_mutation_operator";
 
@@ -48,19 +60,41 @@ ScalarValueMutationOperator::getMutationPoints(const Context &context,
     int instructionIndex = 0;
 
     for (auto &instruction : basicBlock.getInstList()) {
-      if (canBeApplied(instruction) && !filter.shouldSkipInstruction(&instruction)) {
-        auto moduleID = instruction.getModule()->getModuleIdentifier();
-        MullModule *module = context.moduleWithIdentifier(moduleID);
-
-        /// TODO: read specific information about replacement from canBeApplied.
-        std::string diagnostics = "Scalar Value Replacement";
-
-        MutationPointAddress address(functionIndex, basicBlockIndex, instructionIndex);
-        auto mutationPoint =
-          new MutationPoint(this, address, &instruction, module, diagnostics);
-
-        mutationPoints.push_back(mutationPoint);
+      if (filter.shouldSkipInstruction(&instruction)) {
+        instructionIndex++;
+        continue;
       }
+
+      int64_t intValue = 0;
+      double doubleValue = 0.0;
+
+      ScalarValueMutationType mutationType =
+        findPossibleApplication(instruction, &intValue, &doubleValue);
+      if (mutationType == ScalarValueMutationType::None) {
+        instructionIndex++;
+        continue;
+      }
+
+      auto moduleID = instruction.getModule()->getModuleIdentifier();
+      MullModule *module = context.moduleWithIdentifier(moduleID);
+
+      std::stringstream diagstream;
+      diagstream << "Scalar Value Replacement: ";
+
+      if (mutationType == ScalarValueMutationType::Int) {
+        diagstream << intValue;
+      } else {
+        diagstream << doubleValue;
+      }
+
+      std::string diagnostics = diagstream.str();
+
+      MutationPointAddress address(functionIndex, basicBlockIndex, instructionIndex);
+      auto mutationPoint =
+        new MutationPoint(this, address, &instruction, module, diagnostics);
+
+      mutationPoints.push_back(mutationPoint);
+
       instructionIndex++;
     }
     basicBlockIndex++;
@@ -69,22 +103,19 @@ ScalarValueMutationOperator::getMutationPoints(const Context &context,
   return mutationPoints;
 }
 
+/// Currently only used by SimpleTestFinder.
 bool ScalarValueMutationOperator::canBeApplied(Value &V) {
+  return findPossibleApplication(V, nullptr, nullptr) != ScalarValueMutationType::None;
+}
+
+static
+ScalarValueMutationType findPossibleApplication(Value &V,
+                                                int64_t *outIntValue,
+                                                double *outDoubleValue) {
   Instruction *instruction = dyn_cast<Instruction>(&V);
   assert(instruction);
 
   unsigned opcode = instruction->getOpcode();
-
-  // This is helpful to learn more about candidate instructions for mutation.
-  // if (opcode == Instruction::BitCast ||
-  //     opcode == Instruction::Br ||
-  //     opcode == Instruction::GetElementPtr ||
-  //     opcode == Instruction::Load) {
-  //   return false;
-  // }
-
-  // Could be included but would produce extensive garbage mutations.
-  // opcode == Instruction::Alloca
 
   if ((opcode >= Instruction::BinaryOpsBegin &&
        opcode < Instruction::BinaryOpsEnd) ||
@@ -96,21 +127,35 @@ bool ScalarValueMutationOperator::canBeApplied(Value &V) {
       opcode == Instruction::Invoke) {
 
     for (Value *operand: instruction->operands()) {
-      if (ConstantInt *_ = dyn_cast<ConstantInt>(operand)) {
-        return true;
-      }
-      if (ConstantFP *_ = dyn_cast<ConstantFP>(operand)) {
-        return true;
+      if (ConstantInt *constantInt = dyn_cast<ConstantInt>(operand)) {
+        auto intValue = constantInt->getValue();
+
+        /// Skip big number because getSExtValue throws otherwise.
+        /// TODO: consider these edge cases in unit tests.
+        if (intValue.getNumWords() > 1) {
+          continue;
+        }
+
+        if (outIntValue) {
+          *outIntValue = intValue.getSExtValue();
+        }
+
+        return ScalarValueMutationType::Int;
       }
 
-      // TODO
-      // if (ConstantExpr *_ = dyn_cast<ConstantExpr>(operand)) {
-      //  return true;
-      // }
+      if (ConstantFP *constantFloat = dyn_cast<ConstantFP>(operand)) {
+        auto floatValue = constantFloat->getValueAPF();
+
+        if (outDoubleValue) {
+          *outDoubleValue = floatValue.convertToDouble();
+        }
+
+        return ScalarValueMutationType::Float;
+      }
     }
   }
 
-  return false;
+  return ScalarValueMutationType::None;
 }
 
 static ConstantInt *getReplacementInt(ConstantInt *constantInt) {
