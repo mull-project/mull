@@ -101,6 +101,7 @@ std::unique_ptr<Result> Driver::Run() {
 
     if (ExecResult.Status != Passed) {
       Logger::error() << "error: Test has failed: " << test->getTestName() << "\n";
+      continue;
     }
 
     auto BorrowedTest = test.get();
