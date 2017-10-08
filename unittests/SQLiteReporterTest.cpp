@@ -196,6 +196,8 @@ TEST(SQLiteReporter, integrationTest_Config) {
   bool dryRun = true;
   bool useCache = true;
   bool emitDebugInfo = false;
+  bool diagnostics = false;
+
   int timeout = 42;
   int distance = 10;
   std::string cacheDirectory = "/a/cache";
@@ -206,7 +208,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
                 dynamicLibraryFileList,
                 tests,
                 {},
-                doFork, dryRun, useCache, emitDebugInfo,
+                doFork, dryRun, useCache, emitDebugInfo, diagnostics,
                 timeout, distance,
                 cacheDirectory);
 
@@ -423,6 +425,8 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   bool dryRun = true;
   bool useCache = true;
   bool emitDebugInfo = true;
+  bool diagnostics = false;
+
   int timeout = 42;
   int distance = 10;
   std::string cacheDirectory = "/a/cache";
@@ -433,7 +437,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
                 dynamicLibraryFileList,
                 configTests,
                 {},
-                doFork, dryRun, useCache, emitDebugInfo,
+                doFork, dryRun, useCache, emitDebugInfo, diagnostics,
                 timeout, distance,
                 cacheDirectory);
 
@@ -593,6 +597,8 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   bool dryRun = true;
   bool useCache = true;
   bool emitDebugInfo = false;
+  bool diagnostics = false;
+
   int timeout = 42;
   int distance = 10;
   std::string cacheDirectory = "/a/cache";
@@ -603,7 +609,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
                 dynamicLibraryFileList,
                 configTests,
                 {},
-                doFork, dryRun, useCache, emitDebugInfo,
+                doFork, dryRun, useCache, emitDebugInfo, diagnostics,
                 timeout, distance,
                 cacheDirectory);
 

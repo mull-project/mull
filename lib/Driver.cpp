@@ -180,6 +180,8 @@ std::unique_ptr<Result> Driver::Run() {
                  "Expect to see valid TestResult");
         }
 
+        diagnostics->report(mutationPoint, result.Status);
+
         auto MutResult = make_unique<MutationResult>(result, mutationPoint, testee.get());
         Result->addMutantResult(std::move(MutResult));
       }

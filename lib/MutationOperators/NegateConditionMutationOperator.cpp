@@ -12,6 +12,7 @@
 
 #include <fstream>
 #include <iterator>
+#include <sstream>
 
 using namespace llvm;
 using namespace mull;
@@ -191,6 +192,105 @@ NegateConditionMutationOperator::negatedCmpInstPredicate(llvm::CmpInst::Predicat
   }
 }
 
+static std::string describePredicate(CmpInst::Predicate predicate) {
+  switch (predicate) {
+
+    case CmpInst::FCMP_FALSE:
+      return "Always false";
+
+    case CmpInst::FCMP_OEQ:
+      return "==";
+
+    case CmpInst::FCMP_OGT:
+      return ">";
+
+    case CmpInst::FCMP_OGE:
+      return ">=";
+
+    case CmpInst::FCMP_OLT:
+      return "<";
+
+    case CmpInst::FCMP_OLE:
+      return "<=";
+
+    case CmpInst::FCMP_ONE:
+      return "!=";
+
+    case CmpInst::FCMP_ORD:
+      return "TODO: Ordered (no nans)";
+
+    case CmpInst::FCMP_UNO:
+      return "TODO: Unordered (isnan(X) | isnan(Y))";
+
+    case CmpInst::FCMP_UEQ:
+      return "=";
+
+    case CmpInst::FCMP_UGT:
+      return ">";
+
+    case CmpInst::FCMP_UGE:
+      return ">=";
+
+    case CmpInst::FCMP_ULT:
+      return "<";
+
+    case CmpInst::FCMP_ULE:
+      return "<=";
+
+    case CmpInst::FCMP_UNE:
+      return "!=";
+
+    case CmpInst::FCMP_TRUE:
+      return "TODO: Always True";
+
+    case CmpInst::ICMP_EQ:
+      return "==";
+
+    case CmpInst::ICMP_NE:
+      return "!=";
+
+    case CmpInst::ICMP_UGT:
+      return ">";
+
+    case CmpInst::ICMP_UGE:
+      return ">=";
+
+    case CmpInst::ICMP_ULT:
+      return "<";
+
+    case CmpInst::ICMP_ULE:
+      return "<=";
+
+    case CmpInst::ICMP_SGT:
+      return ">";
+
+    case CmpInst::ICMP_SGE:
+      return ">=";
+
+    case CmpInst::ICMP_SLT:
+      return "<";
+
+    case CmpInst::ICMP_SLE:
+      return "<=";
+
+    default:
+      return "TODO";
+  }
+}
+
+static std::string getDiagnostics(CmpInst::Predicate originalPredicate,
+                                  CmpInst::Predicate negatedPredicate) {
+  std::stringstream diagnostics;
+  diagnostics << "Negate Condition: replaced ";
+  diagnostics << describePredicate(originalPredicate);
+  diagnostics << " with ";
+  diagnostics << describePredicate(negatedPredicate);
+  diagnostics << " (" << originalPredicate << "->" << negatedPredicate << ")";
+  diagnostics << "\n";
+
+  return diagnostics.str();
+}
+
 std::vector<MutationPoint *>
 NegateConditionMutationOperator::getMutationPoints(const Context &context,
                                                    llvm::Function *function,
@@ -209,8 +309,15 @@ NegateConditionMutationOperator::getMutationPoints(const Context &context,
         auto moduleID = instruction.getModule()->getModuleIdentifier();
         MullModule *module = context.moduleWithIdentifier(moduleID);
 
+        CmpInst *cmpOp = dyn_cast<CmpInst>(&instruction);
+        assert(cmpOp);
+
+        std::string diagnostics =
+          getDiagnostics(cmpOp->getPredicate(),
+                         negatedCmpInstPredicate(cmpOp->getPredicate()));
+
         MutationPointAddress address(functionIndex, basicBlockIndex, instructionIndex);
-        auto mutationPoint = new MutationPoint(this, address, &instruction, module);
+        auto mutationPoint = new MutationPoint(this, address, &instruction, module, diagnostics);
         mutationPoints.push_back(mutationPoint);
       }
       instructionIndex++;

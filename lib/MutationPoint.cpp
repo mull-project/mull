@@ -12,8 +12,9 @@ using namespace std;
 MutationPoint::MutationPoint(MutationOperator *op,
                              MutationPointAddress Address,
                              Value *Val,
-                             MullModule *m) :
-  mutationOperator(op), Address(Address), OriginalValue(Val), module(m)
+                             MullModule *m,
+                             std::string diagnostics) :
+  mutationOperator(op), Address(Address), OriginalValue(Val), module(m), diagnostics(diagnostics)
 {
   string moduleID = module->getUniqueIdentifier();
   string addressID = Address.getIdentifier();
@@ -64,4 +65,12 @@ std::string MutationPoint::getUniqueIdentifier() {
 
 std::string MutationPoint::getUniqueIdentifier() const {
   return uniqueIdentifier;
+}
+
+const std::string &MutationPoint::getDiagnostics() {
+  return diagnostics;
+}
+
+const std::string &MutationPoint::getDiagnostics() const {
+  return diagnostics;
 }

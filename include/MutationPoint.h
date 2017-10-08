@@ -53,12 +53,15 @@ class MutationPoint {
   llvm::Value *OriginalValue;
   MullModule *module;
   std::string uniqueIdentifier;
+  std::string diagnostics;
 
 public:
   MutationPoint(MutationOperator *op,
                 MutationPointAddress Address,
                 llvm::Value *Val,
-                MullModule *m);
+                MullModule *m,
+                std::string diagnostics = "");
+
   ~MutationPoint();
 
   MutationOperator *getOperator();
@@ -73,6 +76,9 @@ public:
 
   std::string getUniqueIdentifier();
   std::string getUniqueIdentifier() const;
+
+  const std::string &getDiagnostics();
+  const std::string &getDiagnostics() const;
 };
 
 }

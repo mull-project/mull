@@ -3,6 +3,7 @@
 #include "Config.h"
 #include "TestResult.h"
 #include "ForkProcessSandbox.h"
+#include "IDEDiagnostics.h"
 #include "Context.h"
 #include "MutationOperators/MutationOperator.h"
 
@@ -35,6 +36,7 @@ class Driver {
   Toolchain &toolchain;
   Context Ctx;
   ProcessSandbox *Sandbox;
+  IDEDiagnostics *diagnostics;
 
   std::map<llvm::Module *, llvm::object::ObjectFile *> InnerCache;
 
@@ -46,10 +48,17 @@ public:
       } else {
         this->Sandbox = new NullProcessSandbox();
       }
+
+      if (C.isDiagnosticsEnabled()) {
+        this->diagnostics = new NormalIDEDiagnostics();
+      } else {
+        this->diagnostics = new NullIDEDiagnostics();
+      }
     }
 
   ~Driver() {
     delete this->Sandbox;
+    delete this->diagnostics;
   }
 
   std::unique_ptr<Result> Run();
