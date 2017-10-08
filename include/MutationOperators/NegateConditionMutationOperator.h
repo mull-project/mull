@@ -8,19 +8,26 @@
 
 namespace mull {
 
-  class MutationPoint;
+  class NegateConditionMutationPoint;
   class MutationPointAddress;
   class MutationOperatorFilter;
 
   class NegateConditionMutationOperator : public MutationOperator {
 
+    virtual bool canBeApplied(llvm::Value &V,
+                              llvm::CmpInst::Predicate *outPredicate,
+                              llvm::CmpInst::Predicate *outNegatedPredicate);
+
   public:
     static const std::string ID;
 
     static llvm::CmpInst::Predicate negatedCmpInstPredicate(llvm::CmpInst::Predicate predicate);
-    std::vector<MutationPoint *> getMutationPoints(const Context &context,
-                                                   llvm::Function *function,
-                                                   MutationOperatorFilter &filter) override;
+    std::vector<IMutationPoint *> getMutationPoints(const Context &context,
+                                                    llvm::Function *function,
+                                                    MutationOperatorFilter &filter) override;
+
+    llvm::Value *applyMutation2(llvm::Module *M,
+                                NegateConditionMutationPoint *mp);
 
     std::string uniqueID() override {
       return ID;

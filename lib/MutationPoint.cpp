@@ -65,3 +65,7 @@ std::string MutationPoint::getUniqueIdentifier() {
 std::string MutationPoint::getUniqueIdentifier() const {
   return uniqueIdentifier;
 }
+
+std::string MutationPoint::getDiagnostics() {
+  return "TODO: Diagnostics";
+}

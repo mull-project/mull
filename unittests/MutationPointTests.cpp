@@ -81,10 +81,12 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
 
   ASSERT_EQ(1, Testees[1]->getDistance());
 
-  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
+  std::vector<IMutationPoint *> MutationPoints =
+    Finder.findMutationPoints(Ctx, *Testee);
+
   ASSERT_EQ(1U, MutationPoints.size());
 
-  MutationPoint *MP = (*(MutationPoints.begin()));
+  IMutationPoint *MP = (*(MutationPoints.begin()));
   ASSERT_TRUE(isa<BinaryOperator>(MP->getOriginalValue()));
 
   std::string ReplacedInstructionName = MP->getOriginalValue()->getName().str();
@@ -133,10 +135,10 @@ TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
 
   ASSERT_EQ(1, Testees[1]->getDistance());
 
-  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
+  std::vector<IMutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
   ASSERT_EQ(1U, MutationPoints.size());
 
-  MutationPoint *MP = (*(MutationPoints.begin()));
+  IMutationPoint *MP = (*(MutationPoints.begin()));
   MutationPointAddress address = MP->getAddress();
   ASSERT_TRUE(isa<BinaryOperator>(MP->getOriginalValue()));
 
@@ -193,10 +195,11 @@ TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
 
   ASSERT_EQ(1, Testees[1]->getDistance());
 
-  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
+  std::vector<IMutationPoint *> MutationPoints =
+    Finder.findMutationPoints(Ctx, *Testee);
   ASSERT_EQ(1U, MutationPoints.size());
 
-  MutationPoint *MP = (*(MutationPoints.begin()));
+  IMutationPoint *MP = (*(MutationPoints.begin()));
   MutationPointAddress address = MP->getAddress();
   ASSERT_TRUE(isa<BinaryOperator>(MP->getOriginalValue()));
 
@@ -244,7 +247,8 @@ TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
 
   auto &Test = *(Tests.begin());
 
-  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
+  std::vector<std::unique_ptr<Testee>> Testees =
+    Finder.findTestees(Test.get(), Ctx, 4);
 
   ASSERT_EQ(2U, Testees.size());
 
@@ -253,10 +257,11 @@ TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
 
   ASSERT_EQ(1, Testees[1]->getDistance());
 
-  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
+  std::vector<IMutationPoint *> MutationPoints =
+    Finder.findMutationPoints(Ctx, *Testee);
   ASSERT_EQ(1U, MutationPoints.size());
 
-  MutationPoint *MP = (*(MutationPoints.begin()));
+  IMutationPoint *MP = (*(MutationPoints.begin()));
   MutationPointAddress address = MP->getAddress();
   ASSERT_TRUE(isa<BinaryOperator>(MP->getOriginalValue()));
 
@@ -313,10 +318,11 @@ TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
   Function *Testee = Testees[1]->getTesteeFunction();
   ASSERT_FALSE(Testee->empty());
 
-  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
+  std::vector<IMutationPoint *> MutationPoints =
+    Finder.findMutationPoints(Ctx, *Testee);
   ASSERT_EQ(1U, MutationPoints.size());
 
-  MutationPoint *MP = (*(MutationPoints.begin()));
+  IMutationPoint *MP = (*(MutationPoints.begin()));
   ASSERT_TRUE(isa<CmpInst>(MP->getOriginalValue()));
 
   MutationPointAddress address = MP->getAddress();
@@ -363,12 +369,12 @@ TEST(MutationPoint, SimpleTest_AndOrMutationOperator_applyMutation) {
     // testee #0 is always test itself.
     Function *test1_testee1_function = test1_testees[1]->getTesteeFunction();
 
-    std::vector<MutationPoint *> test1_testee1_mutationPoints =
+    std::vector<IMutationPoint *> test1_testee1_mutationPoints =
       Finder.findMutationPoints(ctx, *test1_testee1_function);
 
     ASSERT_EQ(1U, test1_testee1_mutationPoints.size());
 
-    MutationPoint *test1_testee1_mutationPoint1 = (*(test1_testee1_mutationPoints.begin()));
+    IMutationPoint *test1_testee1_mutationPoint1 = (*(test1_testee1_mutationPoints.begin()));
 
     MutationPointAddress test1_testee1_mutationPoint1_address =
       test1_testee1_mutationPoint1->getAddress();

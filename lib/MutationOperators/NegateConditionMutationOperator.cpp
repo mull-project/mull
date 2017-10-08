@@ -9,12 +9,156 @@
 #include "llvm/IR/Module.h"
 #include "llvm/IR/DebugLoc.h"
 #include "llvm/IR/DebugInfoMetadata.h"
+#include "llvm/Transforms/Utils/Cloning.h"
 
 #include <fstream>
 #include <iterator>
+#include <sstream>
 
 using namespace llvm;
 using namespace mull;
+
+class mull::NegateConditionMutationPoint: public IMutationPoint {
+  NegateConditionMutationOperator *mutationOperator;
+  MutationPointAddress address;
+  llvm::Value *OriginalValue;
+  MullModule *module;
+  std::string uniqueIdentifier;
+  CmpInst::Predicate originalPredicate;
+  CmpInst::Predicate negatedPredicate;
+public:
+  NegateConditionMutationPoint(NegateConditionMutationOperator *op,
+                               MutationPointAddress address,
+                               Value *Val,
+                               MullModule *m,
+                               CmpInst::Predicate originalPredicate,
+                               CmpInst::Predicate negatedPredicate) :
+  mutationOperator(op),
+  address(address),
+  OriginalValue(Val),
+  module(m),
+  originalPredicate(originalPredicate),
+  negatedPredicate(negatedPredicate)
+  {
+    std::string moduleID = module->getUniqueIdentifier();
+    std::string addressID = address.getIdentifier();
+    std::string operatorID = mutationOperator->uniqueID();
+
+    uniqueIdentifier = moduleID + "_" + addressID + "_" + operatorID;
+  }
+
+  NegateConditionMutationOperator *getOperator() {
+    return mutationOperator;
+  }
+
+  MutationPointAddress getAddress() {
+    return address;
+  }
+
+  MutationPointAddress getAddress() const {
+    return address;
+  }
+
+  Value *getOriginalValue() {
+    return OriginalValue;
+  }
+
+  Value *getOriginalValue() const {
+    return OriginalValue;
+  }
+
+  MutationOperator *getOperator() const {
+    return mutationOperator;
+  }
+
+  std::unique_ptr<llvm::Module> cloneModuleAndApplyMutation() {
+    auto copyForMutation = CloneModule(module->getModule());
+    assert(copyForMutation);
+
+    mutationOperator->applyMutation2(copyForMutation.get(),
+                                     this);
+
+    return copyForMutation;
+  }
+
+  std::string getUniqueIdentifier() {
+    return uniqueIdentifier;
+  }
+
+  std::string getUniqueIdentifier() const {
+    return uniqueIdentifier;
+  }
+
+  CmpInst::Predicate getOriginalPredicate() {
+    return originalPredicate;
+  }
+
+  CmpInst::Predicate getNegatedPredicate() {
+    return negatedPredicate;
+  }
+
+  std::string getDiagnostics() {
+    std::stringstream diagnostics;
+    diagnostics << "Negate Condition: Replaced ";
+    diagnostics << describePredicate(originalPredicate);
+    diagnostics << " with ";
+    diagnostics << describePredicate(negatedPredicate);
+    diagnostics << " (" << originalPredicate << "->" << negatedPredicate << ")";
+    diagnostics << "\n";
+
+    return diagnostics.str();
+  }
+
+  std::string describePredicate(CmpInst::Predicate predicate) {
+    switch (predicate) {
+
+      case CmpInst::FCMP_FALSE:
+        return "Always false";
+
+      case CmpInst::FCMP_OEQ:
+        return "Ordered equal";
+
+//        FCMP_OGT   =  2,  ///< 0 0 1 0    True if ordered and greater than
+//        FCMP_OGE   =  3,  ///< 0 0 1 1    True if ordered and greater than or equal
+//        FCMP_OLT   =  4,  ///< 0 1 0 0    True if ordered and less than
+//        FCMP_OLE   =  5,  ///< 0 1 0 1    True if ordered and less than or equal
+//        FCMP_ONE   =  6,  ///< 0 1 1 0    True if ordered and operands are unequal
+//        FCMP_ORD   =  7,  ///< 0 1 1 1    True if ordered (no nans)
+//        FCMP_UNO   =  8,  ///< 1 0 0 0    True if unordered: isnan(X) | isnan(Y)
+//        FCMP_UEQ   =  9,  ///< 1 0 0 1    True if unordered or equal
+//        FCMP_UGT   = 10,  ///< 1 0 1 0    True if unordered or greater than
+//        FCMP_UGE   = 11,  ///< 1 0 1 1    True if unordered, greater than, or equal
+//        FCMP_ULT   = 12,  ///< 1 1 0 0    True if unordered or less than
+//        FCMP_ULE   = 13,  ///< 1 1 0 1    True if unordered, less than, or equal
+//        FCMP_UNE   = 14,  ///< 1 1 1 0    True if unordered or not equal
+//        FCMP_TRUE  = 15,  ///< 1 1 1 1    Always true (always folded)
+//        FIRST_FCMP_PREDICATE = FCMP_FALSE,
+//        LAST_FCMP_PREDICATE = FCMP_TRUE,
+//        BAD_FCMP_PREDICATE = FCMP_TRUE + 1,
+
+      case CmpInst::ICMP_EQ:
+        return "==";
+
+      case CmpInst::ICMP_NE:
+        return "!=";
+
+//        ICMP_UGT   = 34,  ///< unsigned greater than
+//        ICMP_UGE   = 35,  ///< unsigned greater or equal
+//        ICMP_ULT   = 36,  ///< unsigned less than
+//        ICMP_ULE   = 37,  ///< unsigned less or equal
+//        ICMP_SGT   = 38,  ///< signed greater than
+//        ICMP_SGE   = 39,  ///< signed greater or equal
+//        ICMP_SLT   = 40,  ///< signed less than
+//        ICMP_SLE   = 41,  ///< signed less or equal
+//        FIRST_ICMP_PREDICATE = ICMP_EQ,
+//        LAST_ICMP_PREDICATE = ICMP_SLE,
+//        BAD_ICMP_PREDICATE = ICMP_SLE + 1
+
+      default:
+        return "TODO";
+    }
+  }
+};
 
 const std::string NegateConditionMutationOperator::ID =
   "negate_mutation_operator";
@@ -191,28 +335,44 @@ NegateConditionMutationOperator::negatedCmpInstPredicate(llvm::CmpInst::Predicat
   }
 }
 
-std::vector<MutationPoint *>
+std::vector<IMutationPoint *>
 NegateConditionMutationOperator::getMutationPoints(const Context &context,
                                                    llvm::Function *function,
                                                    MutationOperatorFilter &filter) {
   int functionIndex = GetFunctionIndex(function);
   int basicBlockIndex = 0;
 
-  std::vector<MutationPoint *> mutationPoints;
+  std::vector<IMutationPoint *> mutationPoints;
 
   for (auto &basicBlock : function->getBasicBlockList()) {
 
     int instructionIndex = 0;
 
     for (auto &instruction : basicBlock.getInstList()) {
-      if (canBeApplied(instruction) && !filter.shouldSkipInstruction(&instruction)) {
+      if (filter.shouldSkipInstruction(&instruction)) {
+        instructionIndex++;
+
+        continue;
+      }
+
+      CmpInst::Predicate originalPredicate, negatedPredicate;
+      if (canBeApplied(instruction, &originalPredicate, &negatedPredicate)) {
         auto moduleID = instruction.getModule()->getModuleIdentifier();
         MullModule *module = context.moduleWithIdentifier(moduleID);
 
         MutationPointAddress address(functionIndex, basicBlockIndex, instructionIndex);
-        auto mutationPoint = new MutationPoint(this, address, &instruction, module);
+
+        auto mutationPoint =
+          new NegateConditionMutationPoint(this,
+                                           address,
+                                           &instruction,
+                                           module,
+                                           originalPredicate,
+                                           negatedPredicate);
+
         mutationPoints.push_back(mutationPoint);
       }
+
       instructionIndex++;
     }
     basicBlockIndex++;
@@ -221,8 +381,7 @@ NegateConditionMutationOperator::getMutationPoints(const Context &context,
   return mutationPoints;
 }
 
-bool NegateConditionMutationOperator::canBeApplied(Value &V) {
-
+bool NegateConditionMutationOperator::canBeApplied(llvm::Value &V) {
   if (CmpInst *cmpOp = dyn_cast<CmpInst>(&V)) {
     if (cmpOp->getName().startswith("tobool")) {
       return false;
@@ -238,11 +397,70 @@ bool NegateConditionMutationOperator::canBeApplied(Value &V) {
   return false;
 }
 
-llvm::Value *NegateConditionMutationOperator::applyMutation(Module *M, MutationPointAddress address, Value &_V) {
-  /// In the following V argument is not used. Eventually it will be removed from
-  /// this method's signature because it will be not relevant
-  /// when mutations will be applied on copies of original module
+bool
+NegateConditionMutationOperator::canBeApplied(Value &V,
+                                              CmpInst::Predicate *outPredicate,
+                                              CmpInst::Predicate *outNegatedPredicate) {
 
+  if (CmpInst *cmpOp = dyn_cast<CmpInst>(&V)) {
+    if (cmpOp->getName().startswith("tobool")) {
+      return false;
+    }
+
+    if (cmpOp->getName().startswith("isnull")) {
+      return false;
+    }
+
+    assert(outPredicate && outNegatedPredicate);
+    CmpInst::Predicate negatedPredicate =
+      NegateConditionMutationOperator::negatedCmpInstPredicate(cmpOp->getPredicate());
+
+    *outPredicate = cmpOp->getPredicate();
+    *outNegatedPredicate = negatedPredicate;
+
+    return true;
+  }
+
+  return false;
+}
+
+llvm::Value *
+NegateConditionMutationOperator::applyMutation(Module *M,
+                                               MutationPointAddress address,
+                                               Value &_V) {
+
+  llvm::Function &F    = *(std::next(M->begin(), address.getFnIndex()));
+  llvm::BasicBlock &B  = *(std::next(F.begin(), address.getBBIndex()));
+  llvm::Instruction &I = *(std::next(B.begin(), address.getIIndex()));
+
+  CmpInst *cmpInstruction = cast<CmpInst>(&I);
+
+  assert(CmpInst::classof(cmpInstruction) &&
+         "Expected instruction to be cmp instruction: Instruction::ICmp or Instruction::FCmp");
+
+  CmpInst::Predicate negatedPredicate =
+    negatedCmpInstPredicate(cmpInstruction->getPredicate());
+
+    /// NOTE: Create a new CmpInst with the same operands as original instruction but with
+    /// negated comparison predicate.
+  CmpInst *replacement = CmpInst::Create(cmpInstruction->getOpcode(),
+                                         negatedPredicate,
+                                         cmpInstruction->getOperand(0),
+                                         cmpInstruction->getOperand(1),
+                                         cmpInstruction->getName());
+
+  replacement->insertAfter(cmpInstruction);
+  cmpInstruction->replaceAllUsesWith(replacement);
+  cmpInstruction->eraseFromParent();
+
+  return replacement;
+}
+
+llvm::Value *
+NegateConditionMutationOperator::applyMutation2(Module *M,
+                                                NegateConditionMutationPoint *mp) {
+
+  MutationPointAddress address = mp->getAddress();
   llvm::Function &F    = *(std::next(M->begin(), address.getFnIndex()));
   llvm::BasicBlock &B  = *(std::next(F.begin(), address.getBBIndex()));
   llvm::Instruction &I = *(std::next(B.begin(), address.getIIndex()));
@@ -254,11 +472,8 @@ llvm::Value *NegateConditionMutationOperator::applyMutation(Module *M, MutationP
 
   /// NOTE: Create a new CmpInst with the same operands as original instruction but with
   /// negated comparison predicate.
-  CmpInst::Predicate negatedPredicate =
-    NegateConditionMutationOperator::negatedCmpInstPredicate(cmpInstruction->getPredicate());
-
   CmpInst *replacement = CmpInst::Create(cmpInstruction->getOpcode(),
-                                         negatedPredicate,
+                                         mp->getNegatedPredicate(),
                                          cmpInstruction->getOperand(0),
                                          cmpInstruction->getOperand(1),
                                          cmpInstruction->getName());

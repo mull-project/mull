@@ -94,7 +94,7 @@ ObjectFile *ObjectCache::getObject(const MullModule &module) {
   return getObject(module.getUniqueIdentifier());
 }
 
-ObjectFile *ObjectCache::getObject(const MutationPoint &mutationPoint) {
+ObjectFile *ObjectCache::getObject(const IMutationPoint &mutationPoint) {
   return getObject(mutationPoint.getUniqueIdentifier());
 }
 
@@ -131,6 +131,6 @@ void ObjectCache::putObject(OwningBinary<ObjectFile> object,
 }
 
 void ObjectCache::putObject(OwningBinary<ObjectFile> object,
-                            const MutationPoint &mutationPoint) {
+                            const IMutationPoint &mutationPoint) {
   putObject(std::move(object), mutationPoint.getUniqueIdentifier());
 }

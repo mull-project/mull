@@ -121,14 +121,14 @@ MathSubMutationOperator::replacementForSubWithOverflow(llvm::Function *testeeFun
   return replacementFunction;
 }
 
-std::vector<MutationPoint *>
+std::vector<IMutationPoint *>
 MathSubMutationOperator::getMutationPoints(const Context &context,
                                            llvm::Function *function,
                                            MutationOperatorFilter &filter) {
   int functionIndex = GetFunctionIndex(function);
   int basicBlockIndex = 0;
 
-  std::vector<MutationPoint *> mutationPoints;
+  std::vector<IMutationPoint *> mutationPoints;
 
   for (auto &basicBlock : function->getBasicBlockList()) {
 

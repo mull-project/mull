@@ -47,7 +47,30 @@ public:
   }
 };
 
-class MutationPoint {
+class IMutationPoint {
+
+public:
+
+  virtual MutationOperator *getOperator() = 0;
+  virtual MutationOperator *getOperator() const = 0;
+
+  virtual MutationPointAddress getAddress() = 0;
+  virtual MutationPointAddress getAddress() const = 0;
+
+  virtual llvm::Value *getOriginalValue() = 0;
+  virtual llvm::Value *getOriginalValue() const = 0;
+
+  virtual std::unique_ptr<llvm::Module> cloneModuleAndApplyMutation() = 0;
+
+  virtual std::string getUniqueIdentifier() = 0;
+  virtual std::string getUniqueIdentifier() const = 0;
+
+  virtual std::string getDiagnostics() = 0;
+
+  virtual ~IMutationPoint() {};
+};
+
+class MutationPoint: public IMutationPoint {
   MutationOperator *mutationOperator;
   MutationPointAddress Address;
   llvm::Value *OriginalValue;
@@ -73,6 +96,8 @@ public:
 
   std::string getUniqueIdentifier();
   std::string getUniqueIdentifier() const;
+
+  std::string getDiagnostics();
 };
 
 }

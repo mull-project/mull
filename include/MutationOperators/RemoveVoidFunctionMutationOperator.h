@@ -17,9 +17,9 @@ namespace mull {
   public:
     static const std::string ID;
 
-    std::vector<MutationPoint *> getMutationPoints(const Context &context,
-                                                   llvm::Function *function,
-                                                   MutationOperatorFilter &filter) override;
+    std::vector<IMutationPoint *> getMutationPoints(const Context &context,
+                                                    llvm::Function *function,
+                                                    MutationOperatorFilter &filter) override;
 
     std::string uniqueID() override {
       return ID;

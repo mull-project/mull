@@ -121,14 +121,14 @@ AddMutationOperator::replacementForAddWithOverflow(llvm::Function *addFunction,
   return replacementFunction;
 }
 
-std::vector<MutationPoint *>
+std::vector<IMutationPoint *>
 AddMutationOperator::getMutationPoints(const Context &context,
                                        llvm::Function *function,
                                        MutationOperatorFilter &filter) {
   int functionIndex = GetFunctionIndex(function);
   int basicBlockIndex = 0;
 
-  std::vector<MutationPoint *> mutationPoints;
+  std::vector<IMutationPoint *> mutationPoints;
 
   for (auto &basicBlock : function->getBasicBlockList()) {
 

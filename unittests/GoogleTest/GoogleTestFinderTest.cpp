@@ -247,12 +247,12 @@ mutation_operators:
   ASSERT_FALSE(Testee->empty());
   ASSERT_EQ(Testee->getName().str(), "_ZN6Testee3sumEii");
 
-  std::vector<MutationPoint *> MutationPoints =
+  std::vector<IMutationPoint *> MutationPoints =
     Finder.findMutationPoints(Ctx, *Testee);
   
   ASSERT_EQ(1U, MutationPoints.size());
 
-  MutationPoint *MP = MutationPoints[0];
+  IMutationPoint *MP = MutationPoints[0];
 
   MutationPointAddress MPA = MP->getAddress();
   ASSERT_EQ(MPA.getFnIndex(), 0);
@@ -309,7 +309,7 @@ mutation_operators:
                                                {},
                                                { "Testee.cpp" });
 
-  std::vector<MutationPoint *> mutationPoints =
+  std::vector<IMutationPoint *> mutationPoints =
     finderWithExcludedLocations.findMutationPoints(Ctx, *Testee);
 
   ASSERT_EQ(0U, mutationPoints.size());

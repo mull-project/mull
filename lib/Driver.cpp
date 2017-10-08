@@ -180,7 +180,25 @@ std::unique_ptr<Result> Driver::Run() {
                  "Expect to see valid TestResult");
         }
 
+        if (result.Status != Passed) {
+          Instruction *instruction =
+            dyn_cast<Instruction>(mutationPoint->getOriginalValue());
+
+          std::string fileNameOrNil = "no-debug-info";
+          std::string lineOrNil = "0";
+          std::string columnOrNil = "0";
+
+          if (instruction->getMetadata(0)) {
+            fileNameOrNil = instruction->getDebugLoc()->getFilename().str();
+            lineOrNil = std::to_string(instruction->getDebugLoc()->getLine());
+            columnOrNil = std::to_string(instruction->getDebugLoc()->getColumn());
+
+            errs() << "\n";
+            errs() << fileNameOrNil << ":" << lineOrNil << ":" << columnOrNil << ": " << "warning: " << mutationPoint->getDiagnostics() << "\n";
+          }
+        }
         auto MutResult = make_unique<MutationResult>(result, mutationPoint, testee.get());
+
         Result->addMutantResult(std::move(MutResult));
       }
 
