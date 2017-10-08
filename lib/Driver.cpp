@@ -99,6 +99,11 @@ std::unique_ptr<Result> Driver::Run() {
       *SharedResult = Runner.runTest(test.get(), ObjectFiles);
     }, Cfg.getTimeout());
 
+    if (ExecResult.Status != Passed) {
+      Logger::error() << "error: Test has failed: " << test->getTestName() << "\n";
+      continue;
+    }
+
     auto BorrowedTest = test.get();
     auto Result = make_unique<TestResult>(ExecResult, std::move(test));
 
