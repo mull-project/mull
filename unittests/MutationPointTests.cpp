@@ -7,6 +7,7 @@
 #include "MutationOperators/MathSubMutationOperator.h"
 #include "MutationOperators/NegateConditionMutationOperator.h"
 #include "MutationOperators/AndOrReplacementMutationOperator.h"
+#include "MutationOperators/ScalarValueMutationOperator.h"
 #include "TestModuleFactory.h"
 #include "Toolchain/Compiler.h"
 
@@ -393,4 +394,73 @@ TEST(MutationPoint, SimpleTest_AndOrMutationOperator_applyMutation) {
     auto test1_mutatedTestee1_mutatedBranchInstruction = cast<BranchInst>(&test1_mutatedTestee1_mutatedInstruction);
     ASSERT_TRUE(test1_mutatedTestee1_mutatedBranchInstruction != nullptr);
   }
+}
+
+TEST(MutationPoint, SimpleTest_ScalarValueMutationOperator_applyMutation) {
+  auto module = TestModuleFactory.create_SimpleTest_ScalarValue_module();
+
+  auto mullModule = make_unique<MullModule>(std::move(module), "");
+
+  Context Ctx;
+  Ctx.addModule(std::move(mullModule));
+
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<ScalarValueMutationOperator>());
+
+  SimpleTestFinder Finder(std::move(mutationOperators));
+
+  auto Tests = Finder.findTests(Ctx);
+
+  auto &Test = *(Tests.begin());
+
+  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
+
+  ASSERT_EQ(2U, Testees.size());
+
+  Function *Testee = Testees[1]->getTesteeFunction();
+  ASSERT_FALSE(Testee->empty());
+
+  ASSERT_EQ(1, Testees[1]->getDistance());
+
+  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
+  ASSERT_EQ(4U, MutationPoints.size());
+
+  MutationPoint *mutationPoint1 = MutationPoints[0];
+  MutationPointAddress mutationPointAddress1 = mutationPoint1->getAddress();
+  ASSERT_TRUE(isa<StoreInst>(mutationPoint1->getOriginalValue()));
+
+  MutationPoint *mutationPoint2 = MutationPoints[1];
+  MutationPointAddress mutationPointAddress2 = mutationPoint2->getAddress();
+  ASSERT_TRUE(isa<StoreInst>(mutationPoint2->getOriginalValue()));
+
+  MutationPoint *mutationPoint3 = MutationPoints[2];
+  MutationPointAddress mutationPointAddress3 = mutationPoint3->getAddress();
+  ASSERT_TRUE(isa<BinaryOperator>(mutationPoint3->getOriginalValue()));
+
+  MutationPoint *mutationPoint4 = MutationPoints[3];
+  MutationPointAddress mutationPointAddress4 = mutationPoint4->getAddress();
+  ASSERT_TRUE(isa<BinaryOperator>(mutationPoint4->getOriginalValue()));
+
+  std::unique_ptr<TargetMachine> targetMachine(EngineBuilder().selectTarget(Triple(),
+                                                                            "",
+                                                                            "",
+                                                                            SmallVector<std::string, 1>()));
+
+  Compiler compiler(*targetMachine.get());
+
+  auto ownedMutatedModule = mutationPoint1->cloneModuleAndApplyMutation();
+
+  Function *mutatedTestee = ownedMutatedModule->getFunction("scalar_value");
+  ASSERT_TRUE(mutatedTestee != nullptr);
+
+  llvm::Function &mutatedFunction =
+    *(std::next(ownedMutatedModule->begin(), mutationPointAddress1.getFnIndex()));
+  llvm::BasicBlock &mutatedBasicBlock =
+    *(std::next(mutatedFunction.begin(), mutationPointAddress1.getBBIndex()));
+  llvm::Instruction *mutatedInstruction =
+    &*(std::next(mutatedBasicBlock.begin(), mutationPointAddress1.getIIndex()));
+
+  ASSERT_TRUE(mutatedInstruction != nullptr);
+
+  ASSERT_TRUE(isa<StoreInst>(mutatedInstruction));
 }

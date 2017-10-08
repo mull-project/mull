@@ -135,6 +135,13 @@ std::unique_ptr<Module> TestModuleFactory::create_SimpleTest_ANDORReplacement_CP
 
 #pragma mark -
 
+std::unique_ptr<Module> TestModuleFactory::create_SimpleTest_ScalarValue_module() {
+  const char *fixture = "fixture_simple_test_scalar_value_operator.ll";
+  return createModule(fixture, fixture);
+}
+
+#pragma mark -
+
 std::unique_ptr<Module> TestModuleFactory::create_SimpleTest_testeePathCalculation_testee() {
   const char *fixture = "fixture_simple_test_testee_path_calculation_testee.ll";
   return createModule(fixture, fixture);

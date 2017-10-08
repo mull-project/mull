@@ -22,6 +22,7 @@
 /// FIXME: Should be abstract
 #include "MutationOperators/AddMutationOperator.h"
 #include "MutationOperators/AndOrReplacementMutationOperator.h"
+#include "MutationOperators/ScalarValueMutationOperator.h"
 
 #include <algorithm>
 #include <chrono>
@@ -241,6 +242,9 @@ Driver::mutationOperators(std::vector<std::string> mutationOperatorStrings) {
       }
       else if (mutation == RemoveVoidFunctionMutationOperator::ID) {
         mutationOperators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
+      }
+      else if (mutation == ScalarValueMutationOperator::ID) {
+        mutationOperators.emplace_back(make_unique<ScalarValueMutationOperator>());
       }
       else {
         Logger::info() << "Driver> Unknown Mutation Operator: " << mutation << "\n";

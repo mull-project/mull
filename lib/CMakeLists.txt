@@ -13,6 +13,7 @@ set(mull_sources
   MutationOperators/MathDivMutationOperator.cpp
   MutationOperators/MathMulMutationOperator.cpp
   MutationOperators/MathSubMutationOperator.cpp
+  MutationOperators/ScalarValueMutationOperator.cpp
 
   Toolchain/Compiler.cpp
   Toolchain/ObjectCache.cpp
