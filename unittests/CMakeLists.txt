@@ -6,6 +6,7 @@ set(mull_unittests_sources
   ForkProcessSandboxTest.cpp
   MutationPointTests.cpp
   ModuleLoaderTest.cpp
+  DynamicCallTreeTests.cpp
 
   TestRunnersTests.cpp
   UniqueIdentifierTests.cpp

@@ -21,6 +21,10 @@ public:
 
   std::string getUniqueIdentifier() override { return getTestName(); };
 
+  std::vector<llvm::Function *> entryPoints() override {
+    return std::vector<llvm::Function *>({ TestFunction });
+  }
+
   static bool classof(const Test *T) {
     return T->getKind() == TK_SimpleTest;
   }

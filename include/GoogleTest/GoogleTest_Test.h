@@ -29,6 +29,10 @@ public:
   std::vector<llvm::Function *> &GetGlobalCtors();
   llvm::Function *GetTestBodyFunction();
 
+  std::vector<llvm::Function *> entryPoints() override {
+    return std::vector<llvm::Function *>({ TestBodyFunction });
+  }
+
   static bool classof(const Test *T) {
     return T->getKind() == TK_GoogleTest;
   }

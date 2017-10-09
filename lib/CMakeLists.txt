@@ -5,6 +5,8 @@ set(mull_sources
   ForkProcessSandbox.cpp
   Logger.cpp
   ModuleLoader.cpp
+  DynamicCallTree.cpp
+  Filter.cpp
 
   MutationOperators/AddMutationOperator.cpp
   MutationOperators/AndOrReplacementMutationOperator.cpp
