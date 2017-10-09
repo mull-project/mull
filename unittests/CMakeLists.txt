@@ -13,6 +13,7 @@ set(mull_unittests_sources
   MutationOperators/MutationOperatorsTests.cpp
   MutationOperators/NegateConditionMutationOperatorTest.cpp
   MutationOperators/RemoveVoidFunctionMutationOperatorTest.cpp
+  MutationOperators/ScalarValueMutationOperatorTest.cpp
 
   SimpleTest/SimpleTestFinderTest.cpp
 
