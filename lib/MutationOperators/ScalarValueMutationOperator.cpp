@@ -46,59 +46,64 @@ static int GetFunctionIndex(llvm::Function *function) {
   return FIndex;
 }
 
-std::vector<MutationPoint *>
-ScalarValueMutationOperator::getMutationPoints(const Context &context,
-                                           llvm::Function *function,
-                                           MutationOperatorFilter &filter) {
-  int functionIndex = GetFunctionIndex(function);
+static
+void EnumerateInstructions(Function &function,
+                           const std::function <void (Instruction &, int, int)>& block) {
   int basicBlockIndex = 0;
-
-  std::vector<MutationPoint *> mutationPoints;
-
-  for (auto &basicBlock : function->getBasicBlockList()) {
-
+  for (auto &basicBlock : function.getBasicBlockList()) {
     int instructionIndex = 0;
 
     for (auto &instruction : basicBlock.getInstList()) {
-      if (filter.shouldSkipInstruction(&instruction)) {
-        instructionIndex++;
-        continue;
-      }
-
-      int64_t intValue = 0;
-      double doubleValue = 0.0;
-
-      ScalarValueMutationType mutationType =
-        findPossibleApplication(instruction, &intValue, &doubleValue);
-      if (mutationType == ScalarValueMutationType::None) {
-        instructionIndex++;
-        continue;
-      }
-
-      auto moduleID = instruction.getModule()->getModuleIdentifier();
-      MullModule *module = context.moduleWithIdentifier(moduleID);
-
-      std::stringstream diagstream;
-      diagstream << "Scalar Value Replacement: ";
-
-      if (mutationType == ScalarValueMutationType::Int) {
-        diagstream << intValue;
-      } else {
-        diagstream << doubleValue;
-      }
-
-      std::string diagnostics = diagstream.str();
-
-      MutationPointAddress address(functionIndex, basicBlockIndex, instructionIndex);
-      auto mutationPoint =
-        new MutationPoint(this, address, &instruction, module, diagnostics);
-
-      mutationPoints.push_back(mutationPoint);
+      block(instruction, basicBlockIndex, instructionIndex);
 
       instructionIndex++;
     }
     basicBlockIndex++;
   }
+}
+
+std::vector<MutationPoint *>
+ScalarValueMutationOperator::getMutationPoints(const Context &context,
+                                           llvm::Function *function,
+                                           MutationOperatorFilter &filter) {
+  int functionIndex = GetFunctionIndex(function);
+
+  std::vector<MutationPoint *> mutationPoints;
+
+  EnumerateInstructions(*function, [&](Instruction &instr, int bbIndex, int iIndex) {
+    if (filter.shouldSkipInstruction(&instr)) {
+      return;
+    }
+
+    int64_t intValue = 0;
+    double doubleValue = 0.0;
+
+    ScalarValueMutationType mutationType =
+      findPossibleApplication(instr, &intValue, &doubleValue);
+    if (mutationType == ScalarValueMutationType::None) {
+      return;
+    }
+
+    auto moduleID = instr.getModule()->getModuleIdentifier();
+    MullModule *module = context.moduleWithIdentifier(moduleID);
+
+    std::stringstream diagstream;
+    diagstream << "Scalar Value Replacement: ";
+
+    if (mutationType == ScalarValueMutationType::Int) {
+      diagstream << intValue;
+    } else {
+      diagstream << doubleValue;
+    }
+
+    std::string diagnostics = diagstream.str();
+
+    MutationPointAddress address(functionIndex, bbIndex, iIndex);
+    auto mutationPoint =
+      new MutationPoint(this, address, &instr, module, diagnostics);
+
+    mutationPoints.push_back(mutationPoint);
+  });
 
   return mutationPoints;
 }
