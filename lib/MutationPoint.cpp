@@ -9,6 +9,43 @@ using namespace llvm;
 using namespace mull;
 using namespace std;
 
+#pragma mark - MutationPointAddress
+
+int MutationPointAddress::getFunctionIndex(Function *function) {
+  auto PM = function->getParent();
+
+  auto FII = std::find_if(PM->begin(), PM->end(),
+                          [function] (llvm::Function &f) {
+                            return &f == function;
+                          });
+
+  assert(FII != PM->end() && "Expected function to be found in module");
+  int FIndex = std::distance(PM->begin(), FII);
+
+  return FIndex;
+}
+
+void
+MutationPointAddress::enumerateInstructions(
+  Function &function, const std::function <void (Instruction &,
+                                                 int,
+                                                 int)>& block) {
+
+  int basicBlockIndex = 0;
+  for (auto &basicBlock : function.getBasicBlockList()) {
+    int instructionIndex = 0;
+
+    for (auto &instruction : basicBlock.getInstList()) {
+      block(instruction, basicBlockIndex, instructionIndex);
+
+      instructionIndex++;
+    }
+    basicBlockIndex++;
+  }
+}
+
+#pragma mark - MutationPoint
+
 MutationPoint::MutationPoint(MutationOperator *op,
                              MutationPointAddress Address,
                              Value *Val,

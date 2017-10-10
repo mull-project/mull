@@ -1,15 +1,18 @@
 #pragma once
 
-#include "llvm/ADT/ArrayRef.h"
-#include "llvm/Object/Binary.h"
-#include "llvm/Object/ObjectFile.h"
+#include <functional>
+#include <string>
 
 namespace llvm {
 
+class Function;
+class Instruction;
 class Value;
 class Module;
 
 }
+
+using namespace llvm;
 
 namespace mull {
 
@@ -18,8 +21,9 @@ class MutationOperator;
 class MullModule;
 
 /// \brief Container class that stores information needed to find MutationPoints.
-/// We need the indexes of function, basic block and instruction to find the mutation point
-/// in the clone of original module, when mutation operator is to apply mutation in that clone.
+/// We need the indexes of function, basic block and instruction to find the
+/// mutation point in the clone of original module, when mutation operator is
+/// to apply mutation in that clone.
 class MutationPointAddress {
   int FnIndex;
   int BBIndex;
@@ -28,7 +32,8 @@ class MutationPointAddress {
   std::string identifier;
 public:
   MutationPointAddress(int FnIndex, int BBIndex, int IIndex) :
-  FnIndex(FnIndex), BBIndex(BBIndex), IIndex(IIndex) {
+    FnIndex(FnIndex), BBIndex(BBIndex), IIndex(IIndex) {
+
     identifier = std::to_string(FnIndex) + "_" +
       std::to_string(BBIndex) + "_" +
       std::to_string(IIndex);
@@ -45,6 +50,13 @@ public:
   std::string getIdentifier() const {
     return identifier;
   }
+
+  static int getFunctionIndex(Function *function);
+  static
+  void enumerateInstructions(Function &function,
+                             const std::function <void (Instruction &,
+                                                        int,
+                                                        int)>& block);
 };
 
 class MutationPoint {
