@@ -140,7 +140,16 @@ std::unique_ptr<Result> Driver::Run() {
     auto BorrowedTest = test.get();
     auto Result = make_unique<TestResult>(ExecResult, std::move(test));
 
-    auto testees = Finder.findTestees(BorrowedTest, Ctx, Cfg.getMaxDistance());
+
+    std::unique_ptr<CallTree> callTree(dynamicCallTree.createCallTree());
+
+    auto subtrees = dynamicCallTree.extractTestSubtrees(callTree.get(), BorrowedTest);
+    auto testees = dynamicCallTree.createTestees(subtrees, BorrowedTest,
+                                                 Cfg.getMaxDistance(), filter);
+
+    dynamicCallTree.cleanupCallTree(std::move(callTree));
+
+//    auto testees = Finder.findTestees(BorrowedTest, Ctx, Cfg.getMaxDistance());
 
     /// -1 since we are skipping the first testee
     const int testeesCount = testees.size() - 1;
