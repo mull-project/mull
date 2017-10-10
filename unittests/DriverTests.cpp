@@ -828,7 +828,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator_CPP) {
 
 #pragma mark - Testee path calculation
 
-TEST(Driver, SimpleTest_TesteePathCalculation) {
+TEST(Driver, DISABLED_SimpleTest_TesteePathCalculation) {
   std::string projectName = "some_project";
   std::string testFramework = "SimpleTest";
 

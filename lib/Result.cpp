@@ -45,7 +45,7 @@ std::vector<std::string> Result::calculateCallerPath(MutationResult *mutationRes
 
     std::string fileNameOrNil = "no-debug-info";
     std::string lineOrNil = "0";
-    if (instruction->getMetadata(0)) {
+    if (instruction && instruction->getMetadata(0)) {
       fileNameOrNil = instruction->getDebugLoc()->getFilename();
       lineOrNil = std::to_string(instruction->getDebugLoc()->getLine());
     }
