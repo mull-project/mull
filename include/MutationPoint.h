@@ -12,8 +12,6 @@ class Module;
 
 }
 
-using namespace llvm;
-
 namespace mull {
 
 class Compiler;
@@ -51,10 +49,12 @@ public:
     return identifier;
   }
 
-  static int getFunctionIndex(Function *function);
+  llvm::Instruction &findInstruction(llvm::Module *module);
+
+  static int getFunctionIndex(llvm::Function *function);
   static
-  void enumerateInstructions(Function &function,
-                             const std::function <void (Instruction &,
+  void enumerateInstructions(llvm::Function &function,
+                             const std::function <void (llvm::Instruction &,
                                                         int,
                                                         int)>& block);
 };

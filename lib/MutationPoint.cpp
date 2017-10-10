@@ -11,6 +11,14 @@ using namespace std;
 
 #pragma mark - MutationPointAddress
 
+Instruction &MutationPointAddress::findInstruction(Module *module) {
+  llvm::Function &function = *(std::next(module->begin(), getFnIndex()));
+  llvm::BasicBlock &bb = *(std::next(function.begin(), getBBIndex()));
+  llvm::Instruction &instruction = *(std::next(bb.begin(), getIIndex()));
+
+  return instruction;
+}
+
 int MutationPointAddress::getFunctionIndex(Function *function) {
   auto PM = function->getParent();
 

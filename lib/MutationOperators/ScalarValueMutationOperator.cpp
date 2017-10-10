@@ -185,13 +185,12 @@ static ConstantFP *getReplacementFloat(ConstantFP *constantFloat) {
   return nullptr;
 }
 
-llvm::Value *ScalarValueMutationOperator::applyMutation(Module *M,
-                                                        MutationPointAddress address,
-                                                        Value &_V) {
+llvm::Value *
+ScalarValueMutationOperator::applyMutation(Module *M,
+                                           MutationPointAddress address,
+                                           Value &_V) {
 
-  llvm::Function &F = *(std::next(M->begin(), address.getFnIndex()));
-  llvm::BasicBlock &B = *(std::next(F.begin(), address.getBBIndex()));
-  llvm::Instruction &I = *(std::next(B.begin(), address.getIIndex()));
+  llvm::Instruction &I = address.findInstruction(M);
 
   for (unsigned int i = 0; i < I.getNumOperands(); i++) {
     Value *operand = I.getOperand(i);
