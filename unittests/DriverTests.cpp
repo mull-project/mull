@@ -1,6 +1,7 @@
 #include "Config.h"
 #include "Context.h"
 #include "Driver.h"
+#include "Filter.h"
 #include "ModuleLoader.h"
 #include "MutationOperators/AddMutationOperator.h"
 #include "MutationOperators/AndOrReplacementMutationOperator.h"
@@ -19,15 +20,15 @@
 #include "Toolchain/Toolchain.h"
 
 #include <functional>
-#include "llvm/ADT/SmallString.h"
-#include "llvm/ADT/Twine.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
-#include "llvm/Support/Casting.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/SourceMgr.h"
-#include "llvm/Support/YAMLParser.h"
+#include <llvm/ADT/SmallString.h>
+#include <llvm/ADT/Twine.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
+#include <llvm/Support/Casting.h>
+#include <llvm/Support/Debug.h>
+#include <llvm/Support/MemoryBuffer.h>
+#include <llvm/Support/SourceMgr.h>
+#include <llvm/Support/YAMLParser.h>
 
 #include "gtest/gtest.h"
 
@@ -96,8 +97,9 @@ TEST(Driver, SimpleTest_AddMutationOperator) {
   Toolchain toolchain(config);
   llvm::TargetMachine &machine = toolchain.targetMachine();
   SimpleTestRunner runner(machine);
+  Filter filter;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter);
 
   /// Given the modules we use here we expect:
   ///
@@ -175,8 +177,9 @@ TEST(Driver, SimpleTest_MathSubMutationOperator) {
   Toolchain toolchain(config);
   llvm::TargetMachine &machine = toolchain.targetMachine();
   SimpleTestRunner runner(machine);
+  Filter filter;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter);
 
     /// Given the modules we use here we expect:
     ///
@@ -254,8 +257,9 @@ TEST(Driver, SimpleTest_MathMulMutationOperator) {
   Toolchain toolchain(config);
   llvm::TargetMachine &machine = toolchain.targetMachine();
   SimpleTestRunner runner(machine);
+  Filter filter;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter);
 
     /// Given the modules we use here we expect:
     ///
@@ -333,8 +337,9 @@ TEST(Driver, SimpleTest_MathDivMutationOperator) {
   Toolchain toolchain(config);
   llvm::TargetMachine &machine = toolchain.targetMachine();
   SimpleTestRunner runner(machine);
+  Filter filter;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter);
 
     /// Given the modules we use here we expect:
     ///
@@ -414,8 +419,9 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
 
   Toolchain toolchain(config);
   SimpleTestRunner runner(toolchain.targetMachine());
+  Filter filter;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter);
 
   /// Given the modules we use here we expect:
   ///
@@ -488,8 +494,9 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
 
   Toolchain toolchain(config);
   SimpleTestRunner runner(toolchain.targetMachine());
+  Filter filter;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter);
 
   /// Given the modules we use here we expect:
   ///
@@ -559,8 +566,9 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator) {
 
   Toolchain toolchain(config);
   SimpleTestRunner runner(toolchain.targetMachine());
+  Filter filter;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter);
 
   auto result = Driver.Run();
   ASSERT_EQ(8U, result->getTestResults().size());
@@ -732,8 +740,9 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator_CPP) {
 
   Toolchain toolchain(config);
   SimpleTestRunner runner(toolchain.targetMachine());
+  Filter filter;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter);
 
   auto result = Driver.Run();
   ASSERT_EQ(6U, result->getTestResults().size());
@@ -870,8 +879,9 @@ TEST(Driver, SimpleTest_TesteePathCalculation) {
 
   Toolchain toolchain(config);
   SimpleTestRunner runner(toolchain.targetMachine());
+  Filter filter;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter);
 
   /// Given the modules we use here we expect:
   ///

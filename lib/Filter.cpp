@@ -30,7 +30,7 @@ bool Filter::shouldSkipFunction(llvm::Function *function) {
   return false;
 }
 
-void Filter::skipByName(std::string &nameSubstring) {
+void Filter::skipByName(const std::string &nameSubstring) {
   names.push_back(nameSubstring);
 }
 
@@ -38,7 +38,7 @@ void Filter::skipByName(const char *nameSubstring) {
   names.push_back(std::string(nameSubstring));
 }
 
-void Filter::skipByLocation(std::string &locationSubstring) {
+void Filter::skipByLocation(const std::string &locationSubstring) {
   locations.push_back(locationSubstring);
 }
 
