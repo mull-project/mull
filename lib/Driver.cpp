@@ -22,12 +22,38 @@
 #include <chrono>
 #include <fstream>
 #include <vector>
+#include <sys/mman.h>
+#include <sys/types.h>
 
 using namespace llvm;
 using namespace llvm::object;
 using namespace mull;
 using namespace std;
 using namespace std::chrono;
+
+namespace mull {
+
+uint64_t *_callTreeMapping = nullptr;
+std::stack<uint64_t> _callstack;
+
+extern "C" void mull_enterFunction(uint64_t functionIndex) {
+  assert(_callTreeMapping);
+  DynamicCallTree::enterFunction(functionIndex, _callTreeMapping, _callstack);
+}
+
+extern "C" void mull_leaveFunction(uint64_t functionIndex) {
+  assert(_callTreeMapping);
+  DynamicCallTree::leaveFunction(functionIndex, _callTreeMapping, _callstack);
+}
+
+}
+
+Driver::~Driver() {
+  delete this->Sandbox;
+  delete this->diagnostics;
+  munmap(_callTreeMapping, functions.size());
+  _callTreeMapping = nullptr;
+}
 
 /// Populate mull::Context with modules using
 /// ModulePaths from mull::Config.
@@ -61,6 +87,16 @@ std::unique_ptr<Result> Driver::Run() {
     MullModule &module = *ownedModule.get();
     assert(ownedModule && "Can't load module");
 
+    for (auto &function: module.getModule()->getFunctionList()) {
+      if (function.isDeclaration()) {
+        continue;
+      }
+      CallTreeFunction callTreeFunction(&function);
+      uint64_t index = functions.size();
+      functions.push_back(callTreeFunction);
+      injectCallbacks(&function, index);
+    }
+
     ObjectFile *objectFile = toolchain.cache().getObject(module);
 
     if (objectFile == nullptr) {
@@ -72,6 +108,8 @@ std::unique_ptr<Result> Driver::Run() {
     InnerCache.insert(std::make_pair(module.getModule(), objectFile));
     Ctx.addModule(std::move(ownedModule));
   }
+
+  prepareForExecution();
 
   auto foundTests = Finder.findTests(Ctx);
   const int testsCount = foundTests.size();
@@ -196,6 +234,131 @@ std::unique_ptr<Result> Driver::Run() {
                                                        std::move(allTestees));
 
   return result;
+}
+
+void Driver::prepareForExecution() {
+  assert(_callTreeMapping == nullptr && "Called twice?");
+  assert(functions.size() > 1 && "Functions must be filled in before this call");
+
+  /// Creating a memory to be shared between child and parent.
+  _callTreeMapping = (uint64_t *) mmap(NULL,
+                                       sizeof(uint64_t) * functions.size(),
+                                       PROT_READ | PROT_WRITE,
+                                       MAP_SHARED | MAP_ANONYMOUS,
+                                       -1,
+                                       0);
+  memset(_callTreeMapping, 0, functions.size());
+  dynamicCallTree.prepare(_callTreeMapping);
+}
+
+void Driver::injectCallbacks(llvm::Function *function, uint64_t index) {
+  auto &context = function->getParent()->getContext();
+  auto parameterType = Type::getInt64Ty(context);
+  auto voidType = Type::getVoidTy(context);
+  std::vector<Type *> parameterTypes(1, parameterType);
+
+  FunctionType *callbackType = FunctionType::get(voidType, parameterTypes, false);
+
+  Value *functionIndex = ConstantInt::get(parameterType, index);
+  std::vector<Value *> parameters(1, functionIndex);
+
+  Function *enterFunction = function->getParent()->getFunction("mull_enterFunction");
+  Function *leaveFunction = function->getParent()->getFunction("mull_leaveFunction");
+
+  if (enterFunction == nullptr && leaveFunction == nullptr) {
+    enterFunction = Function::Create(callbackType,
+                                     Function::ExternalLinkage,
+                                     "mull_enterFunction",
+                                     function->getParent());
+
+    leaveFunction = Function::Create(callbackType,
+                                     Function::ExternalLinkage,
+                                     "mull_leaveFunction",
+                                     function->getParent());
+  }
+
+  assert(enterFunction);
+  assert(leaveFunction);
+
+  auto &entryBlock = *function->getBasicBlockList().begin();
+  CallInst *enterFunctionCall = CallInst::Create(enterFunction, parameters);
+  enterFunctionCall->insertBefore(&*entryBlock.getInstList().begin());
+
+  for (auto &block : function->getBasicBlockList()) {
+    ReturnInst *returnStatement = nullptr;
+    if (!(returnStatement = dyn_cast<ReturnInst>(block.getTerminator()))) {
+      continue;
+    }
+
+    CallInst *leaveFunctionCall = CallInst::Create(leaveFunction, parameters);
+    leaveFunctionCall->insertBefore(returnStatement);
+  }
+}
+
+std::vector<std::unique_ptr<MutationOperator>>
+Driver::mutationOperators(std::vector<std::string> mutationOperatorStrings) {
+    if (mutationOperatorStrings.size() == 0) {
+      Logger::info()
+        << "Driver> No mutation operators specified in a config file. "
+        << "Defaulting to default operators:" << "\n";
+
+      auto mutationOperators = defaultMutationOperators();
+
+      for (auto &mutationOperator: mutationOperators) {
+        Logger::info() << "\t" << mutationOperator.get()->uniqueID() << "\n";
+      }
+
+      return mutationOperators;
+    }
+
+    std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+    for (auto mutation : mutationOperatorStrings) {
+      if (mutation == AddMutationOperator::ID) {
+        mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+      }
+      else if (mutation == AndOrReplacementMutationOperator::ID) {
+        mutationOperators.emplace_back(make_unique<AndOrReplacementMutationOperator>());
+      }
+      else if (mutation == MathSubMutationOperator::ID) {
+        mutationOperators.emplace_back(make_unique<MathSubMutationOperator>());
+      }
+      else if (mutation == MathMulMutationOperator::ID) {
+        mutationOperators.emplace_back(make_unique<MathMulMutationOperator>());
+      }
+      else if (mutation == MathDivMutationOperator::ID) {
+        mutationOperators.emplace_back(make_unique<MathDivMutationOperator>());
+      }
+      else if (mutation == NegateConditionMutationOperator::ID) {
+        mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
+      }
+      else if (mutation == RemoveVoidFunctionMutationOperator::ID) {
+        mutationOperators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
+      }
+      else if (mutation == ScalarValueMutationOperator::ID) {
+        mutationOperators.emplace_back(make_unique<ScalarValueMutationOperator>());
+      }
+      else {
+        Logger::info() << "Driver> Unknown Mutation Operator: " << mutation << "\n";
+      }
+    }
+
+    if (mutationOperators.size() == 0) {
+      Logger::info()
+        << "Driver> No valid mutation operators found in a config file.\n";
+    }
+
+    return mutationOperators;
+}
+
+std::vector<std::unique_ptr<MutationOperator>>
+Driver::defaultMutationOperators() {
+  std::vector<std::unique_ptr<MutationOperator>> operators;
+
+  operators.emplace_back(make_unique<AddMutationOperator>());
+  operators.emplace_back(make_unique<NegateConditionMutationOperator>());
+  operators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
+
+  return operators;
 }
 
 std::vector<llvm::object::ObjectFile *> Driver::AllButOne(llvm::Module *One) {
