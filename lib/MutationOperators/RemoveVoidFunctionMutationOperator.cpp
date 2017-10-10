@@ -96,6 +96,10 @@ bool RemoveVoidFunctionMutationOperator::canBeApplied(Value &V) {
         return false;
       }
 
+      if (calledFunction->getName().startswith("mull_")) {
+        return false;
+      }
+
       /// TODO: This might also filter out important code. Review this later.
       if (calledFunction->getName().endswith("D1Ev") ||
           calledFunction->getName().endswith("D2Ev") ||
