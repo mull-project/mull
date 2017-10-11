@@ -32,45 +32,20 @@ ScalarValueMutationType findPossibleApplication(Value &V,
 
 const std::string ScalarValueMutationOperator::ID = "scalar_value_mutation_operator";
 
-static int GetFunctionIndex(llvm::Function *function) {
-  auto PM = function->getParent();
-
-  auto FII = std::find_if(PM->begin(), PM->end(),
-                          [function] (llvm::Function &f) {
-                            return &f == function;
-                          });
-
-  assert(FII != PM->end() && "Expected function to be found in module");
-  int FIndex = std::distance(PM->begin(), FII);
-
-  return FIndex;
-}
-
-static
-void EnumerateInstructions(Function &function,
-                           const std::function <void (Instruction &, int, int)>& block) {
-  int basicBlockIndex = 0;
-  for (auto &basicBlock : function.getBasicBlockList()) {
-    int instructionIndex = 0;
-
-    for (auto &instruction : basicBlock.getInstList()) {
-      block(instruction, basicBlockIndex, instructionIndex);
-
-      instructionIndex++;
-    }
-    basicBlockIndex++;
-  }
-}
-
 std::vector<MutationPoint *>
 ScalarValueMutationOperator::getMutationPoints(const Context &context,
                                            llvm::Function *function,
                                            MutationOperatorFilter &filter) {
-  int functionIndex = GetFunctionIndex(function);
+
+  int functionIndex = MutationPointAddress::getFunctionIndex(function);
 
   std::vector<MutationPoint *> mutationPoints;
 
-  EnumerateInstructions(*function, [&](Instruction &instr, int bbIndex, int iIndex) {
+  MutationPointAddress::enumerateInstructions(*function,
+                                              [&](Instruction &instr,
+                                                  int bbIndex,
+                                                  int iIndex) {
+
     if (filter.shouldSkipInstruction(&instr)) {
       return;
     }
@@ -210,13 +185,12 @@ static ConstantFP *getReplacementFloat(ConstantFP *constantFloat) {
   return nullptr;
 }
 
-llvm::Value *ScalarValueMutationOperator::applyMutation(Module *M,
-                                                        MutationPointAddress address,
-                                                        Value &_V) {
+llvm::Value *
+ScalarValueMutationOperator::applyMutation(Module *M,
+                                           MutationPointAddress address,
+                                           Value &_V) {
 
-  llvm::Function &F = *(std::next(M->begin(), address.getFnIndex()));
-  llvm::BasicBlock &B = *(std::next(F.begin(), address.getBBIndex()));
-  llvm::Instruction &I = *(std::next(B.begin(), address.getIIndex()));
+  llvm::Instruction &I = address.findInstruction(M);
 
   for (unsigned int i = 0; i < I.getNumOperands(); i++) {
     Value *operand = I.getOperand(i);
