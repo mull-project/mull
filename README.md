@@ -1,5 +1,8 @@
 # Mull
 
+![Screenshot](/screenshot.png)
+
+
 See [LLVM-based Mutation Testing System. Request For
 Comments](http://lowlevelbits.org/llvm-based-mutation-testing-system/) and [FOSDEM 2017: Mutation Testing, Leaving the Stone Age by Alex Denisov](https://www.youtube.com/watch?v=YEgiyiICkpQ).
 
