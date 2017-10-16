@@ -6,11 +6,11 @@
 #include "MutationPoint.h"
 
 #include <llvm/IR/Constants.h>
-#include "llvm/IR/InstIterator.h"
-#include "llvm/IR/Instructions.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IR/DebugLoc.h"
-#include "llvm/IR/DebugInfoMetadata.h"
+#include <llvm/IR/InstIterator.h>
+#include <llvm/IR/Instructions.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/DebugLoc.h>
+#include <llvm/IR/DebugInfoMetadata.h>
 
 #include <fstream>
 #include <iterator>
@@ -27,20 +27,22 @@ enum ScalarValueMutationType {
 
 static
 ScalarValueMutationType findPossibleApplication(Value &V,
-                                                int64_t *outIntValue,
-                                                double *outDoubleValue);
+                                                std::string &outDiagnostics);
+static ConstantInt *getReplacementInt(ConstantInt *constantInt);
+static ConstantFP *getReplacementFloat(ConstantFP *constantFloat);
 
 const std::string ScalarValueMutationOperator::ID = "scalar_value_mutation_operator";
 
 std::vector<MutationPoint *>
 ScalarValueMutationOperator::getMutationPoints(const Context &context,
-                                           llvm::Function *function,
-                                           MutationOperatorFilter &filter) {
+                                               llvm::Function *function,
+                                               MutationOperatorFilter &filter) {
 
   int functionIndex = MutationPointAddress::getFunctionIndex(function);
 
   std::vector<MutationPoint *> mutationPoints;
 
+  std::string diagnostics;
   MutationPointAddress::enumerateInstructions(*function,
                                               [&](Instruction &instr,
                                                   int bbIndex,
@@ -50,28 +52,14 @@ ScalarValueMutationOperator::getMutationPoints(const Context &context,
       return;
     }
 
-    int64_t intValue = 0;
-    double doubleValue = 0.0;
-
     ScalarValueMutationType mutationType =
-      findPossibleApplication(instr, &intValue, &doubleValue);
+      findPossibleApplication(instr, diagnostics);
     if (mutationType == ScalarValueMutationType::None) {
       return;
     }
 
     auto moduleID = instr.getModule()->getModuleIdentifier();
     MullModule *module = context.moduleWithIdentifier(moduleID);
-
-    std::stringstream diagstream;
-    diagstream << "Scalar Value Replacement: ";
-
-    if (mutationType == ScalarValueMutationType::Int) {
-      diagstream << intValue;
-    } else {
-      diagstream << doubleValue;
-    }
-
-    std::string diagnostics = diagstream.str();
 
     MutationPointAddress address(functionIndex, bbIndex, iIndex);
     auto mutationPoint =
@@ -85,13 +73,13 @@ ScalarValueMutationOperator::getMutationPoints(const Context &context,
 
 /// Currently only used by SimpleTestFinder.
 bool ScalarValueMutationOperator::canBeApplied(Value &V) {
-  return findPossibleApplication(V, nullptr, nullptr) != ScalarValueMutationType::None;
+  std::string diagnostics;
+  return findPossibleApplication(V, diagnostics) != ScalarValueMutationType::None;
 }
 
 static
 ScalarValueMutationType findPossibleApplication(Value &V,
-                                                int64_t *outIntValue,
-                                                double *outDoubleValue) {
+                                                std::string &outDiagnostics) {
   Instruction *instruction = dyn_cast<Instruction>(&V);
   assert(instruction);
 
@@ -110,25 +98,40 @@ ScalarValueMutationType findPossibleApplication(Value &V,
       if (ConstantInt *constantInt = dyn_cast<ConstantInt>(operand)) {
         auto intValue = constantInt->getValue();
 
+        auto replacementInt = getReplacementInt(constantInt);
+        auto replacementIntValue = replacementInt->getValue();
+
         /// Skip big number because getSExtValue throws otherwise.
         /// TODO: consider these edge cases in unit tests.
         if (intValue.getNumWords() > 1) {
           continue;
         }
 
-        if (outIntValue) {
-          *outIntValue = intValue.getSExtValue();
-        }
+        std::stringstream diagstream;
+        diagstream << "Scalar Value Replacement: ";
+
+        diagstream << intValue.getSExtValue();
+        diagstream << " -> ";
+        diagstream << replacementIntValue.getSExtValue();
+
+        outDiagnostics.assign(diagstream.str());
 
         return ScalarValueMutationType::Int;
       }
 
       if (ConstantFP *constantFloat = dyn_cast<ConstantFP>(operand)) {
         auto floatValue = constantFloat->getValueAPF();
+        auto replacementFloat = getReplacementFloat(constantFloat);
+        auto replacementFloatValue = replacementFloat->getValueAPF();
 
-        if (outDoubleValue) {
-          *outDoubleValue = floatValue.convertToDouble();
-        }
+        std::stringstream diagstream;
+        diagstream << "Scalar Value Replacement: ";
+
+        diagstream << floatValue.convertToDouble();
+        diagstream << " -> ";
+        diagstream << replacementFloatValue.convertToDouble();
+
+        outDiagnostics.assign(diagstream.str());
 
         return ScalarValueMutationType::Float;
       }
@@ -149,9 +152,9 @@ static ConstantInt *getReplacementInt(ConstantInt *constantInt) {
   // TODO: Review the rules for mutation.
   // TODO: Didn't find a better way of testing APInt for zero-ness.
   if (intValue.isNegative() == false && intValue.isStrictlyPositive() == false) {
-    replacementIntValue = APInt(intValue.getBitWidth(), 1);
+    replacementIntValue = APInt(8U, 1);
   } else {
-    replacementIntValue = APInt(intValue.getBitWidth(), 0);
+    replacementIntValue = APInt(8U, 0);
   }
 
   ConstantInt *replacement = dyn_cast<ConstantInt>(ConstantInt::get(type, replacementIntValue));
