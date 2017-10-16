@@ -8,6 +8,7 @@ set(mull_sources
 
   MutationOperators/AddMutationOperator.cpp
   MutationOperators/AndOrReplacementMutationOperator.cpp
+  MutationOperators/MutationOperatorsFactory.cpp
   MutationOperators/NegateConditionMutationOperator.cpp
   MutationOperators/RemoveVoidFunctionMutationOperator.cpp
   MutationOperators/MathDivMutationOperator.cpp
