@@ -4,7 +4,7 @@
 #include "ConfigParser.h"
 #include "Logger.h"
 #include "ModuleLoader.h"
-#include "MutationPoint.h"
+#include "MutationOperators/MutationOperatorsFactory.h"
 #include "SQLiteReporter.h"
 #include "Result.h"
 
@@ -80,7 +80,9 @@ int main(int argc, char *argv[]) {
   std::unique_ptr<TestFinder> testFinder;
   std::unique_ptr<TestRunner> testRunner;
 
-  auto mutationOperators = Driver::mutationOperators(config.getMutationOperators());
+  auto mutationOperatorsFactory = MutationOperatorsFactory();
+  auto mutationOperators =
+    mutationOperatorsFactory.mutationOperators(config.getMutationOperators());
 
   if (testFramework == "GoogleTest") {
     testFinder = make_unique<GoogleTestFinder>(std::move(mutationOperators),

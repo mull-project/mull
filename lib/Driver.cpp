@@ -7,22 +7,16 @@
 #include "Result.h"
 #include "TestResult.h"
 
-#include "llvm/IR/Constants.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IR/Value.h"
-#include "llvm/IR/Verifier.h"
-#include "llvm/Transforms/Utils/Cloning.h"
-
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/DebugInfoMetadata.h"
-
 #include "TestFinder.h"
 #include "TestRunner.h"
 
-/// FIXME: Should be abstract
-#include "MutationOperators/AddMutationOperator.h"
-#include "MutationOperators/AndOrReplacementMutationOperator.h"
-#include "MutationOperators/ScalarValueMutationOperator.h"
+#include <llvm/IR/Constants.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/Value.h>
+#include <llvm/IR/Verifier.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/DebugInfoMetadata.h>
+#include <llvm/Transforms/Utils/Cloning.h>
 
 #include <algorithm>
 #include <chrono>
@@ -202,72 +196,6 @@ std::unique_ptr<Result> Driver::Run() {
                                                        std::move(allTestees));
 
   return result;
-}
-
-std::vector<std::unique_ptr<MutationOperator>>
-Driver::mutationOperators(std::vector<std::string> mutationOperatorStrings) {
-    if (mutationOperatorStrings.size() == 0) {
-      Logger::info()
-        << "Driver> No mutation operators specified in a config file. "
-        << "Defaulting to default operators:" << "\n";
-
-      auto mutationOperators = defaultMutationOperators();
-
-      for (auto &mutationOperator: mutationOperators) {
-        Logger::info() << "\t" << mutationOperator.get()->uniqueID() << "\n";
-      }
-
-      return mutationOperators;
-    }
-
-    std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
-    for (auto mutation : mutationOperatorStrings) {
-      if (mutation == AddMutationOperator::ID) {
-        mutationOperators.emplace_back(make_unique<AddMutationOperator>());
-      }
-      else if (mutation == AndOrReplacementMutationOperator::ID) {
-        mutationOperators.emplace_back(make_unique<AndOrReplacementMutationOperator>());
-      }
-      else if (mutation == MathSubMutationOperator::ID) {
-        mutationOperators.emplace_back(make_unique<MathSubMutationOperator>());
-      }
-      else if (mutation == MathMulMutationOperator::ID) {
-        mutationOperators.emplace_back(make_unique<MathMulMutationOperator>());
-      }
-      else if (mutation == MathDivMutationOperator::ID) {
-        mutationOperators.emplace_back(make_unique<MathDivMutationOperator>());
-      }
-      else if (mutation == NegateConditionMutationOperator::ID) {
-        mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
-      }
-      else if (mutation == RemoveVoidFunctionMutationOperator::ID) {
-        mutationOperators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
-      }
-      else if (mutation == ScalarValueMutationOperator::ID) {
-        mutationOperators.emplace_back(make_unique<ScalarValueMutationOperator>());
-      }
-      else {
-        Logger::info() << "Driver> Unknown Mutation Operator: " << mutation << "\n";
-      }
-    }
-
-    if (mutationOperators.size() == 0) {
-      Logger::info()
-        << "Driver> No valid mutation operators found in a config file.\n";
-    }
-
-    return mutationOperators;
-}
-
-std::vector<std::unique_ptr<MutationOperator>>
-Driver::defaultMutationOperators() {
-  std::vector<std::unique_ptr<MutationOperator>> operators;
-
-  operators.emplace_back(make_unique<AddMutationOperator>());
-  operators.emplace_back(make_unique<NegateConditionMutationOperator>());
-  operators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
-
-  return operators;
 }
 
 std::vector<llvm::object::ObjectFile *> Driver::AllButOne(llvm::Module *One) {

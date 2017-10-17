@@ -4,7 +4,7 @@
 #include "Context.h"
 #include "Config.h"
 #include "ConfigParser.h"
-#include "MutationOperators/AddMutationOperator.h"
+#include "MutationOperators/MutationOperatorsFactory.h"
 #include "TestModuleFactory.h"
 #include "GoogleTest/GoogleTest_Test.h"
 
@@ -43,7 +43,7 @@ mutation_operators:
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(Input);
 
-  auto mutationOperators = Driver::mutationOperators(Cfg.getMutationOperators());
+  auto mutationOperators = MutationOperatorsFactory().mutationOperators(Cfg.getMutationOperators());
   GoogleTestFinder Finder(std::move(mutationOperators), {}, {});
 
   auto tests = Finder.findTests(Ctx);
@@ -76,7 +76,8 @@ mutation_operators:
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(Input);
 
-  auto mutationOperators = Driver::mutationOperators(Cfg.getMutationOperators());
+  auto mutationOperators =
+    MutationOperatorsFactory().mutationOperators(Cfg.getMutationOperators());
 
   GoogleTestFinder Finder(std::move(mutationOperators),
                           { "HelloTest.testSumOfTestee" },
@@ -112,7 +113,8 @@ mutation_operators:
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(Input);
 
-  auto mutationOperators = Driver::mutationOperators(Cfg.getMutationOperators());
+  auto mutationOperators =
+    MutationOperatorsFactory().mutationOperators(Cfg.getMutationOperators());
   GoogleTestFinder Finder(std::move(mutationOperators), {}, {});
   
   auto Tests = Finder.findTests(Ctx);
@@ -151,7 +153,8 @@ mutation_operators:
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(Input);
 
-  auto mutationOperators = Driver::mutationOperators(Cfg.getMutationOperators());
+  auto mutationOperators =
+    MutationOperatorsFactory().mutationOperators(Cfg.getMutationOperators());
   GoogleTestFinder Finder(std::move(mutationOperators), {}, {});
 
   auto Tests = Finder.findTests(Ctx);
@@ -188,7 +191,9 @@ TEST(GoogleTestFinder, findTestees_with_excludeLocations) {
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(Input);
 
-  auto mutationOperators = Driver::mutationOperators(Cfg.getMutationOperators());
+  auto mutationOperators =
+    MutationOperatorsFactory().mutationOperators(Cfg.getMutationOperators());
+
   GoogleTestFinder Finder(std::move(mutationOperators), {}, { "Testee.cpp" });
 
   auto Tests = Finder.findTests(Ctx);
@@ -227,7 +232,9 @@ mutation_operators:
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(Input);
 
-  auto mutationOperators = Driver::mutationOperators(Cfg.getMutationOperators());
+  auto mutationOperators =
+    MutationOperatorsFactory().mutationOperators(Cfg.getMutationOperators());
+
   ASSERT_EQ(mutationOperators.size(), 1U);
 
   GoogleTestFinder Finder(std::move(mutationOperators), {}, {});
@@ -281,7 +288,9 @@ mutation_operators:
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(Input);
 
-  auto mutationOperators = Driver::mutationOperators(Cfg.getMutationOperators());
+  auto mutationOperators =
+    MutationOperatorsFactory().mutationOperators(Cfg.getMutationOperators());
+
   ASSERT_EQ(mutationOperators.size(), 1U);
 
   GoogleTestFinder Finder(std::move(mutationOperators), {}, {});
@@ -302,7 +311,8 @@ mutation_operators:
   ASSERT_EQ(Testee->getName().str(), "_ZN6Testee3sumEii");
 
   // Now we create another find with excludeLocations set to "- Testee.cpp"
-  auto mutationOperators2 = Driver::mutationOperators(Cfg.getMutationOperators());
+  auto mutationOperators2 =
+    MutationOperatorsFactory().mutationOperators(Cfg.getMutationOperators());
   ASSERT_EQ(mutationOperators2.size(), 1U);
 
   GoogleTestFinder finderWithExcludedLocations(std::move(mutationOperators2),

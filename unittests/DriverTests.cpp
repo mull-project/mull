@@ -7,6 +7,7 @@
 #include "MutationOperators/MathDivMutationOperator.h"
 #include "MutationOperators/MathMulMutationOperator.h"
 #include "MutationOperators/MathSubMutationOperator.h"
+#include "MutationOperators/MutationOperatorsFactory.h"
 #include "MutationOperators/NegateConditionMutationOperator.h"
 #include "MutationOperators/RemoveVoidFunctionMutationOperator.h"
 #include "Result.h"
