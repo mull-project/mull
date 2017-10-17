@@ -18,7 +18,7 @@
 using namespace llvm;
 using namespace mull;
 
-const std::string AndOrReplacementMutationOperator::ID = "add_or_replacement_mutation_operator";
+const std::string AndOrReplacementMutationOperator::ID = "and_or_replacement_mutation_operator";
 
 static int GetFunctionIndex(llvm::Function *function) {
   auto PM = function->getParent();
