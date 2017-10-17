@@ -133,10 +133,17 @@ std::unique_ptr<Module> TestModuleFactory::create_SimpleTest_ANDORReplacement_CP
   return createModule(fixture, fixture);
 }
 
-#pragma mark -
+#pragma mark - Scalar Value
 
 std::unique_ptr<Module> TestModuleFactory::create_SimpleTest_ScalarValue_module() {
   const char *fixture = "fixture_simple_test_scalar_value_operator.ll";
+  return createModule(fixture, fixture);
+}
+
+#pragma mark - Replace Call
+
+std::unique_ptr<Module> TestModuleFactory::create_SimpleTest_ReplaceCall_module() {
+  const char *fixture = "fixture_simple_test_replace_call_operator.ll";
   return createModule(fixture, fixture);
 }
 

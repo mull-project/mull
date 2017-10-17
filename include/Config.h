@@ -1,16 +1,8 @@
 #pragma once
 
 #include "Logger.h"
-#include "MutationOperators/AddMutationOperator.h"
-#include "MutationOperators/MathDivMutationOperator.h"
-#include "MutationOperators/MathMulMutationOperator.h"
-#include "MutationOperators/MathSubMutationOperator.h"
-#include "MutationOperators/NegateConditionMutationOperator.h"
-#include "MutationOperators/RemoveVoidFunctionMutationOperator.h"
-#include "MutationOperators/ScalarValueMutationOperator.h"
 
-#include "llvm/Support/YAMLTraits.h"
-
+#include <llvm/Support/YAMLTraits.h>
 #include <fstream>
 #include <sstream>
 #include <string>

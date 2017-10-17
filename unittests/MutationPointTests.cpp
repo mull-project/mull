@@ -6,6 +6,7 @@
 #include "MutationOperators/NegateConditionMutationOperator.h"
 #include "MutationOperators/AndOrReplacementMutationOperator.h"
 #include "MutationOperators/ScalarValueMutationOperator.h"
+#include "MutationOperators/ReplaceCallMutationOperator.h"
 #include "TestModuleFactory.h"
 #include "Testee.h"
 #include "MutationsFinder.h"
@@ -373,4 +374,41 @@ TEST(MutationPoint, SimpleTest_ScalarValueMutationOperator_applyMutation) {
   ASSERT_TRUE(mutatedInstruction != nullptr);
 
   ASSERT_TRUE(isa<StoreInst>(mutatedInstruction));
+}
+
+TEST(MutationPoint, SimpleTest_ReplaceCallMutationOperator_applyMutation) {
+  auto module = TestModuleFactory.create_SimpleTest_ReplaceCall_module();
+
+  auto mullModule = make_unique<MullModule>(std::move(module), "");
+
+  Context Ctx;
+  Ctx.addModule(std::move(mullModule));
+
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<ReplaceCallMutationOperator>());
+
+  MutationsFinder finder(std::move(mutationOperators));
+
+  Function *testeeFunction = Ctx.lookupDefinedFunction("replace_call");
+  ASSERT_FALSE(testeeFunction->empty());
+  Testee testee(testeeFunction, 1);
+  Filter filter;
+
+  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(Ctx, testee, filter);
+
+  ASSERT_EQ(1U, mutationPoints.size());
+
+  MutationPoint *mutationPoint1 = mutationPoints[0];
+  MutationPointAddress mutationPointAddress1 = mutationPoint1->getAddress();
+  ASSERT_TRUE(isa<CallInst>(mutationPoint1->getOriginalValue()));
+
+  auto ownedMutatedModule = mutationPoint1->cloneModuleAndApplyMutation();
+
+  Function *mutatedTestee = ownedMutatedModule->getFunction("replace_call");
+  ASSERT_TRUE(mutatedTestee != nullptr);
+
+  llvm::Instruction &instructionByMutationAddress =
+    mutationPointAddress1.findInstruction(ownedMutatedModule.get());
+
+  ASSERT_TRUE(isa<BinaryOperator>(instructionByMutationAddress));
 }
