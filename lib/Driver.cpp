@@ -6,10 +6,10 @@
 #include "ModuleLoader.h"
 #include "Result.h"
 #include "TestResult.h"
-
 #include "TestFinder.h"
 #include "TestRunner.h"
 
+#include <llvm/ExecutionEngine/Orc/JITSymbol.h>
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Value.h>
@@ -33,17 +33,20 @@ using namespace std::chrono;
 
 namespace mull {
 
-uint64_t *_callTreeMapping = nullptr;
-std::stack<uint64_t> _callstack;
-
-extern "C" void mull_enterFunction(uint64_t functionIndex) {
-  assert(_callTreeMapping);
-  DynamicCallTree::enterFunction(functionIndex, _callTreeMapping, _callstack);
+extern "C" void mull_enterFunction(Driver *driver, uint64_t functionIndex) {
+  assert(driver);
+  assert(driver->callTreeMapping());
+  DynamicCallTree::enterFunction(functionIndex,
+                                 driver->callTreeMapping(),
+                                 driver->callstack());
 }
 
-extern "C" void mull_leaveFunction(uint64_t functionIndex) {
-  assert(_callTreeMapping);
-  DynamicCallTree::leaveFunction(functionIndex, _callTreeMapping, _callstack);
+extern "C" void mull_leaveFunction(Driver *driver, uint64_t functionIndex) {
+  assert(driver);
+  assert(driver->callTreeMapping());
+  DynamicCallTree::leaveFunction(functionIndex,
+                                 driver->callTreeMapping(),
+                                 driver->callstack());
 }
 
 }
@@ -52,7 +55,6 @@ Driver::~Driver() {
   delete this->Sandbox;
   delete this->diagnostics;
   munmap(_callTreeMapping, functions.size());
-  _callTreeMapping = nullptr;
 }
 
 /// Populate mull::Context with modules using
@@ -86,6 +88,7 @@ std::unique_ptr<Result> Driver::Run() {
   for (auto &ownedModule : modules) {
     MullModule &module = *ownedModule.get();
     assert(ownedModule && "Can't load module");
+    Ctx.addModule(std::move(ownedModule));
 
     for (auto &function: module.getModule()->getFunctionList()) {
       if (function.isDeclaration()) {
@@ -102,11 +105,10 @@ std::unique_ptr<Result> Driver::Run() {
     if (objectFile == nullptr) {
       auto owningObjectFile = toolchain.compiler().compileModule(*module.clone().get());
       objectFile = owningObjectFile.getBinary();
-      toolchain.cache().putObject(std::move(owningObjectFile), *ownedModule.get());
+      toolchain.cache().putObject(std::move(owningObjectFile), module);
     }
 
     InnerCache.insert(std::make_pair(module.getModule(), objectFile));
-    Ctx.addModule(std::move(ownedModule));
   }
 
   prepareForExecution();
@@ -128,6 +130,7 @@ std::unique_ptr<Result> Driver::Run() {
       << test->getTestName()
       << "\n";
 
+    _callstack = stack<uint64_t>();
     ExecutionResult ExecResult = Sandbox->run([&](ExecutionResult *SharedResult) {
       *SharedResult = Runner.runTest(test.get(), ObjectFiles);
     }, Cfg.getTimeout());
@@ -140,7 +143,6 @@ std::unique_ptr<Result> Driver::Run() {
     auto BorrowedTest = test.get();
     auto Result = make_unique<TestResult>(ExecResult, std::move(test));
 
-
     std::unique_ptr<CallTree> callTree(dynamicCallTree.createCallTree());
 
     auto subtrees = dynamicCallTree.extractTestSubtrees(callTree.get(), BorrowedTest);
@@ -148,8 +150,10 @@ std::unique_ptr<Result> Driver::Run() {
                                                  Cfg.getMaxDistance(), filter);
 
     dynamicCallTree.cleanupCallTree(std::move(callTree));
-
-//    auto testees = Finder.findTestees(BorrowedTest, Ctx, Cfg.getMaxDistance());
+    if (testees.empty()) {
+      Logger::error() << "error: Coult not find any testees: " << BorrowedTest->getTestName() << "\n";
+      continue;
+    }
 
     /// -1 since we are skipping the first testee
     const int testeesCount = testees.size() - 1;
@@ -183,9 +187,6 @@ std::unique_ptr<Result> Driver::Run() {
 
       auto ObjectFiles = AllButOne(testee->getTesteeFunction()->getParent());
       for (auto mutationPoint : MPoints) {
-        //        Logger::info() << "\t\t\tDriver::Run::run mutant:" << "\t";
-        //        mutationPoint->getOriginalValue()->print(Logger::info());
-        //        Logger::info() << "\n";
 
         Logger::debug() << ".";
 
@@ -237,8 +238,6 @@ std::unique_ptr<Result> Driver::Run() {
     Results.push_back(std::move(Result));
   }
 
-  //Logger::info() << "Driver::Run::end\n";
-
   std::unique_ptr<Result> result = make_unique<Result>(std::move(Results),
                                                        std::move(allTestees));
 
@@ -262,14 +261,20 @@ void Driver::prepareForExecution() {
 
 void Driver::injectCallbacks(llvm::Function *function, uint64_t index) {
   auto &context = function->getParent()->getContext();
-  auto parameterType = Type::getInt64Ty(context);
+  auto int64Type = Type::getInt64Ty(context);
+  auto driverPointerType = Type::getVoidTy(context)->getPointerTo();
   auto voidType = Type::getVoidTy(context);
-  std::vector<Type *> parameterTypes(1, parameterType);
+  std::vector<Type *> parameterTypes({driverPointerType, int64Type});
 
   FunctionType *callbackType = FunctionType::get(voidType, parameterTypes, false);
 
-  Value *functionIndex = ConstantInt::get(parameterType, index);
-  std::vector<Value *> parameters(1, functionIndex);
+  Value *functionIndex = ConstantInt::get(int64Type, index);
+  uint32_t pointerWidth = toolchain.targetMachine().createDataLayout().getPointerSize();
+  ConstantInt *driverPointerAddress = ConstantInt::get(context, APInt(pointerWidth * 8, (orc::TargetAddress)this));
+  Value *driverPointer = ConstantExpr::getCast(Instruction::IntToPtr,
+                                               driverPointerAddress,
+                                               int64Type->getPointerTo());
+  std::vector<Value *> parameters({driverPointer, functionIndex});
 
   Function *enterFunction = function->getParent()->getFunction("mull_enterFunction");
   Function *leaveFunction = function->getParent()->getFunction("mull_leaveFunction");
@@ -302,72 +307,6 @@ void Driver::injectCallbacks(llvm::Function *function, uint64_t index) {
     CallInst *leaveFunctionCall = CallInst::Create(leaveFunction, parameters);
     leaveFunctionCall->insertBefore(returnStatement);
   }
-}
-
-std::vector<std::unique_ptr<MutationOperator>>
-Driver::mutationOperators(std::vector<std::string> mutationOperatorStrings) {
-    if (mutationOperatorStrings.size() == 0) {
-      Logger::info()
-        << "Driver> No mutation operators specified in a config file. "
-        << "Defaulting to default operators:" << "\n";
-
-      auto mutationOperators = defaultMutationOperators();
-
-      for (auto &mutationOperator: mutationOperators) {
-        Logger::info() << "\t" << mutationOperator.get()->uniqueID() << "\n";
-      }
-
-      return mutationOperators;
-    }
-
-    std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
-    for (auto mutation : mutationOperatorStrings) {
-      if (mutation == AddMutationOperator::ID) {
-        mutationOperators.emplace_back(make_unique<AddMutationOperator>());
-      }
-      else if (mutation == AndOrReplacementMutationOperator::ID) {
-        mutationOperators.emplace_back(make_unique<AndOrReplacementMutationOperator>());
-      }
-      else if (mutation == MathSubMutationOperator::ID) {
-        mutationOperators.emplace_back(make_unique<MathSubMutationOperator>());
-      }
-      else if (mutation == MathMulMutationOperator::ID) {
-        mutationOperators.emplace_back(make_unique<MathMulMutationOperator>());
-      }
-      else if (mutation == MathDivMutationOperator::ID) {
-        mutationOperators.emplace_back(make_unique<MathDivMutationOperator>());
-      }
-      else if (mutation == NegateConditionMutationOperator::ID) {
-        mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
-      }
-      else if (mutation == RemoveVoidFunctionMutationOperator::ID) {
-        mutationOperators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
-      }
-      else if (mutation == ScalarValueMutationOperator::ID) {
-        mutationOperators.emplace_back(make_unique<ScalarValueMutationOperator>());
-      }
-      else {
-        Logger::info() << "Driver> Unknown Mutation Operator: " << mutation << "\n";
-      }
-    }
-
-    if (mutationOperators.size() == 0) {
-      Logger::info()
-        << "Driver> No valid mutation operators found in a config file.\n";
-    }
-
-    return mutationOperators;
-}
-
-std::vector<std::unique_ptr<MutationOperator>>
-Driver::defaultMutationOperators() {
-  std::vector<std::unique_ptr<MutationOperator>> operators;
-
-  operators.emplace_back(make_unique<AddMutationOperator>());
-  operators.emplace_back(make_unique<NegateConditionMutationOperator>());
-  operators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
-
-  return operators;
 }
 
 std::vector<llvm::object::ObjectFile *> Driver::AllButOne(llvm::Module *One) {

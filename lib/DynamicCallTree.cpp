@@ -33,6 +33,8 @@ void DynamicCallTree::leaveFunction(const uint64_t functionIndex,
 
 void fillInCallTree(std::vector<CallTreeFunction> &functions,
                     uint64_t *callTreeMapping, uint64_t functionIndex) {
+  assert(functionIndex < functions.size());
+
   uint64_t parent = callTreeMapping[functionIndex];
   if (parent == 0) {
     return;

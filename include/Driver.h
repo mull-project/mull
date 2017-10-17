@@ -30,11 +30,10 @@ class Result;
 class TestFinder;
 class TestRunner;
 
-extern uint64_t *_callTreeMapping;
-extern std::stack<uint64_t> _callstack;
+class Driver;
 
-extern "C" void mull_enterFunction(uint64_t functionIndex);
-extern "C" void mull_leaveFunction(uint64_t functionIndex);
+extern "C" void mull_enterFunction(Driver *driver, uint64_t functionIndex);
+extern "C" void mull_leaveFunction(Driver *driver, uint64_t functionIndex);
 
 class Driver {
   Config &Cfg;
@@ -48,12 +47,14 @@ class Driver {
   IDEDiagnostics *diagnostics;
   std::vector<CallTreeFunction> functions;
   DynamicCallTree dynamicCallTree;
+  uint64_t *_callTreeMapping;
+  std::stack<uint64_t> _callstack;
 
   std::map<llvm::Module *, llvm::object::ObjectFile *> InnerCache;
 
 public:
   Driver(Config &C, ModuleLoader &ML, TestFinder &TF, TestRunner &TR, Toolchain &t, Filter &f)
-    : Cfg(C), Loader(ML), Finder(TF), Runner(TR), toolchain(t), filter(f), dynamicCallTree(functions) {
+    : Cfg(C), Loader(ML), Finder(TF), Runner(TR), toolchain(t), filter(f), dynamicCallTree(functions), _callTreeMapping(nullptr) {
 
       CallTreeFunction phonyRoot(nullptr);
       functions.push_back(phonyRoot);
@@ -74,6 +75,12 @@ public:
   ~Driver();
 
   std::unique_ptr<Result> Run();
+  uint64_t *callTreeMapping() {
+    return _callTreeMapping;
+  }
+  std::stack<uint64_t> &callstack() {
+    return _callstack;
+  }
 
 private:
   void prepareForExecution();
