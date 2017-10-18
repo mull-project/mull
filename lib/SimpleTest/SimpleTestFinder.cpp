@@ -3,16 +3,15 @@
 #include "Context.h"
 #include "Logger.h"
 #include "MutationPoint.h"
-#include "Testee.h"
 
 #include "MutationOperators/AddMutationOperator.h"
 #include "MutationOperators/NegateConditionMutationOperator.h"
 
-#include "llvm/IR/InstIterator.h"
-#include "llvm/IR/Instructions.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
-#include "llvm/Support/Debug.h"
+#include <llvm/IR/InstIterator.h>
+#include <llvm/IR/Instructions.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
+#include <llvm/Support/Debug.h>
 
 #include "SimpleTest/SimpleTest_Test.h"
 
@@ -23,22 +22,6 @@
 
 using namespace mull;
 using namespace llvm;
-
-static bool shouldSkipDefinedFunction(llvm::Function *definedFunction) {
-
-  //  if (definedFunction->hasMetadata()) {
-  //    int debugInfoKindID = 0;
-  //    MDNode *debug = definedFunction->getMetadata(debugInfoKindID);
-  //    DISubprogram *subprogram = dyn_cast<DISubprogram>(debug);
-  //    if (subprogram) {
-  //      if (subprogram->getFilename().contains("include/c++/v1")) {
-  //        return true;
-  //      }
-  //    }
-  //  }
-
-  return false;
-}
 
 SimpleTestFinder::SimpleTestFinder(
     std::vector<std::unique_ptr<MutationOperator>> mutationOperators)
@@ -64,125 +47,6 @@ std::vector<std::unique_ptr<Test>> SimpleTestFinder::findTests(Context &Ctx) {
   }
 
   return tests;
-}
-
-std::vector<std::unique_ptr<Testee>>
-SimpleTestFinder::findTestees(Test *Test, Context &Ctx, int maxDistance) {
-  SimpleTest_Test *SimpleTest = dyn_cast<SimpleTest_Test>(Test);
-
-  Function *testFunction = SimpleTest->GetTestFunction();
-
-  std::vector<std::unique_ptr<Testee>> testees;
-  std::queue<std::unique_ptr<Testee>> traversees;
-  std::set<Function *> checkedFunctions;
-
-  Module *testBodyModule = testFunction->getParent();
-
-  traversees.push(make_unique<Testee>(testFunction, 0));
-
-  while (!traversees.empty()) {
-    std::unique_ptr<Testee> traversee = std::move(traversees.front());
-
-    traversees.pop();
-
-    Function *traverseeFunction = traversee->getTesteeFunction();
-    const int mutationDistance = traversee->getDistance();
-
-    /// If the function we are processing is in the same translation unit
-    /// as the test itself, then we are not looking for mutation points
-    /// in this function assuming it to be a helper function.
-    /// The only exception is the test function itself that is especially
-    /// important for path calculations that are done later in SQLiteReporter.
-    testees.push_back(std::move(traversee));
-
-    /// The function reached the max allowed distance
-    /// Hence we don't go deeper
-    if (mutationDistance == maxDistance) {
-      continue;
-    }
-
-    for (auto &BB : *traverseeFunction) {
-      for (auto &I : BB) {
-        auto *instruction = &I;
-
-        CallInst *callInstruction = dyn_cast<CallInst>(instruction);
-        if (callInstruction == nullptr) {
-          continue;
-        }
-
-        int callOperandIndex = callInstruction->getNumOperands() - 1;
-        Value *callOperand = callInstruction->getOperand(callOperandIndex);
-        Function *functionOperand = dyn_cast<Function>(callOperand);
-
-        if (!functionOperand) {
-          continue;
-        }
-
-        /// Two modules may have static function with the same name, e.g.:
-        ///
-        ///   // ModuleA
-        ///   define range() {
-        ///     // ...
-        ///   }
-        ///
-        ///   define test_A() {
-        ///     call range()
-        ///   }
-        ///
-        ///   // ModuleB
-        ///   define range() {
-        ///     // ...
-        ///   }
-        ///
-        ///   define test_B() {
-        ///     call range()
-        ///   }
-        ///
-        /// Depending on the order of processing either `range` from `A` or `B`
-        /// will be added to the `context`, hence we may find function `range`
-        /// from module `B` while processing body of the `test_A`.
-        /// To avoid this problem we first look for function inside of a current
-        /// module.
-        ///
-        /// FIXME: Context should report if a function being added already exist
-        /// FIXME: What other problems such behaviour may bring?
-
-        Function *definedFunction =
-            testBodyModule->getFunction(functionOperand->getName());
-
-        if (!definedFunction || definedFunction->isDeclaration()) {
-          definedFunction =
-              Ctx.lookupDefinedFunction(functionOperand->getName());
-        }
-
-        if (definedFunction) {
-          auto functionWasNotProcessed =
-              checkedFunctions.find(definedFunction) == checkedFunctions.end();
-          checkedFunctions.insert(definedFunction);
-
-          if (functionWasNotProcessed) {
-            /// Filtering
-            if (shouldSkipDefinedFunction(definedFunction)) {
-              continue;
-            }
-
-            /// The code below is not actually correct
-            /// For each C++ constructor compiler can generate up to three
-            /// functions*. Which means that the distance might be incorrect
-            /// We need to find a clever way to fix this problem
-            ///
-            /// * Here is a good overview of what's going on:
-            /// http://stackoverflow.com/a/6921467/829116
-            ///
-            traversees.push(make_unique<Testee>(definedFunction,
-                                                mutationDistance + 1));
-          }
-        }
-      }
-    }
-  }
-
-  return testees;
 }
 
 std::vector<MutationPoint *>

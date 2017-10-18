@@ -4,7 +4,7 @@
 #include "MutationPoint.h"
 #include "TestFinder.h"
 
-#include "llvm/ADT/StringMap.h"
+#include <llvm/ADT/StringMap.h>
 
 #include <map>
 #include <vector>
@@ -35,9 +35,6 @@ public:
                    std::vector<std::string> excludeLocations);
 
   std::vector<std::unique_ptr<Test>> findTests(Context &Ctx) override;
-  std::vector<std::unique_ptr<Testee>> findTestees(Test *Test,
-                                                   Context &Ctx,
-                                                   int maxDistance) override;
 
   std::vector<MutationPoint *> findMutationPoints(const Context &context,
                                                   llvm::Function &F) override;
