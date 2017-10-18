@@ -90,125 +90,6 @@ mutation_operators:
   ASSERT_EQ("HelloTest.testSumOfTestee", Test1->getTestName());
 }
 
-#pragma mark - Finding Testees
-
-TEST(GoogleTestFinder, findTestees) {
-  auto ModuleWithTests   = TestModuleFactory.createGoogleTestTesterModule();
-  auto ModuleWithTestees = TestModuleFactory.createGoogleTestTesteeModule();
-
-  auto mullModuleWithTests   = make_unique<MullModule>(std::move(ModuleWithTests), "");
-  auto mullModuleWithTestees = make_unique<MullModule>(std::move(ModuleWithTestees), "");
-
-  Context Ctx;
-  Ctx.addModule(std::move(mullModuleWithTests));
-  Ctx.addModule(std::move(mullModuleWithTestees));
-  
-  const char *configYAML = R"YAML(
-mutation_operators:
-  - add_mutation_operator
-  )YAML";
-  
-  yaml::Input Input(configYAML);
-  
-  ConfigParser Parser;
-  auto Cfg = Parser.loadConfig(Input);
-
-  auto mutationOperators =
-    MutationOperatorsFactory().mutationOperators(Cfg.getMutationOperators());
-  GoogleTestFinder Finder(std::move(mutationOperators), {}, {});
-  
-  auto Tests = Finder.findTests(Ctx);
-
-  ASSERT_EQ(2U, Tests.size());
-
-  auto &Test = *(Tests.begin());
-
-  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
-
-  ASSERT_EQ(2U, Testees.size());
-
-  Function *Testee = Testees[0]->getTesteeFunction();
-  ASSERT_FALSE(Testee->empty());
-
-  ASSERT_EQ(0, Testees[0]->getDistance());
-  ASSERT_EQ(1, Testees[1]->getDistance());
-}
-
-TEST(GoogleTestFinder, findTestees_testeesAsInvokeInstr) {
-  auto module =
-    TestModuleFactory.createGoogleTestFinder_invokeInstTestee_Module();
-
-  auto mullModule = make_unique<MullModule>(std::move(module), "");
-
-  Context Ctx;
-  Ctx.addModule(std::move(mullModule));
-
-  const char *configYAML = R"YAML(
-mutation_operators:
-  - add_mutation_operator
-  )YAML";
-
-  yaml::Input Input(configYAML);
-
-  ConfigParser Parser;
-  auto Cfg = Parser.loadConfig(Input);
-
-  auto mutationOperators =
-    MutationOperatorsFactory().mutationOperators(Cfg.getMutationOperators());
-  GoogleTestFinder Finder(std::move(mutationOperators), {}, {});
-
-  auto Tests = Finder.findTests(Ctx);
-
-  ASSERT_EQ(1U, Tests.size());
-
-  auto &Test = *(Tests.begin());
-
-  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
-  ASSERT_EQ(2U, Testees.size());
-
-  // the first testee is always test itself, its test body.
-  Function *testee1 = Testees[0]->getTesteeFunction();
-  ASSERT_EQ(testee1->getName().str(), "_ZN44HelloTest_testTesteeCalledAsInvokeInstr_Test8TestBodyEv");
-
-  Function *testee2 = Testees[1]->getTesteeFunction();
-  ASSERT_EQ(testee2->getName().str(), "_ZL6testeev");
-}
-
-TEST(GoogleTestFinder, findTestees_with_excludeLocations) {
-  auto ModuleWithTests   = TestModuleFactory.createGoogleTestTesterModule();
-  auto ModuleWithTestees = TestModuleFactory.createGoogleTestTesteeModule();
-
-  auto mullModuleWithTests   = make_unique<MullModule>(std::move(ModuleWithTests), "");
-  auto mullModuleWithTestees = make_unique<MullModule>(std::move(ModuleWithTestees), "");
-
-  Context Ctx;
-  Ctx.addModule(std::move(mullModuleWithTests));
-  Ctx.addModule(std::move(mullModuleWithTestees));
-
-  const char *configYAML = "";
-  yaml::Input Input(configYAML);
-
-  ConfigParser Parser;
-  auto Cfg = Parser.loadConfig(Input);
-
-  auto mutationOperators =
-    MutationOperatorsFactory().mutationOperators(Cfg.getMutationOperators());
-
-  GoogleTestFinder Finder(std::move(mutationOperators), {}, { "Testee.cpp" });
-
-  auto Tests = Finder.findTests(Ctx);
-
-  ASSERT_EQ(2U, Tests.size());
-
-  auto &Test = *(Tests.begin());
-
-  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
-
-  // Test itself is always the first testee - it is not filtered out.
-  // But the second testee *is* filtered out so having 1 instead of 2.
-  ASSERT_EQ(1U, Testees.size());
-}
-
 #pragma mark - Finding Mutation Points
 
 TEST(GoogleTestFinder, findMutationPoints) {
@@ -239,17 +120,7 @@ mutation_operators:
 
   GoogleTestFinder Finder(std::move(mutationOperators), {}, {});
 
-  auto Tests = Finder.findTests(Ctx);
-
-  ASSERT_EQ(2U, Tests.size());
-
-  auto &Test = *Tests.begin();
-
-  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
-
-  ASSERT_EQ(2U, Testees.size());
-
-  Function *Testee = Testees[1]->getTesteeFunction();
+  Function *Testee = Ctx.lookupDefinedFunction("_ZN6Testee3sumEii");
 
   ASSERT_FALSE(Testee->empty());
   ASSERT_EQ(Testee->getName().str(), "_ZN6Testee3sumEii");
@@ -295,17 +166,7 @@ mutation_operators:
 
   GoogleTestFinder Finder(std::move(mutationOperators), {}, {});
 
-  auto Tests = Finder.findTests(Ctx);
-
-  ASSERT_EQ(2U, Tests.size());
-
-  auto &Test = *Tests.begin();
-
-  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
-
-  ASSERT_EQ(2U, Testees.size());
-
-  Function *Testee = Testees[1]->getTesteeFunction();
+  Function *Testee = Ctx.lookupDefinedFunction("_ZN6Testee3sumEii");
 
   ASSERT_FALSE(Testee->empty());
   ASSERT_EQ(Testee->getName().str(), "_ZN6Testee3sumEii");

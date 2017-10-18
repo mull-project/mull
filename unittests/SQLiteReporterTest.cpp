@@ -45,18 +45,18 @@ TEST(SQLiteReporter, integrationTest) {
 
   auto &test = *tests.begin();
 
-  std::vector<std::unique_ptr<Testee>> testees =
-  Finder.findTestees(test.get(), context, 4);
-
-  ASSERT_EQ(2U, testees.size());
-
-  Testee *testee = testees[1].get();
-  Function *testeeFunction = testee->getTesteeFunction();
-
+  Function *testeeFunction = context.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(testeeFunction->empty());
+  std::vector<std::unique_ptr<Testee>> testees;
+  {
+    std::unique_ptr<Testee> testee(new Testee(testeeFunction, nullptr, nullptr, 1));
+    testees.push_back(std::move(testee));
+  }
+
+  Testee *testee = testees.begin()->get();
 
   std::vector<MutationPoint *> mutationPoints =
-  Finder.findMutationPoints(context, *testeeFunction);
+    Finder.findMutationPoints(context, *testeeFunction);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -78,7 +78,7 @@ TEST(SQLiteReporter, integrationTest) {
   mutatedTestExecutionResult.stderrOutput = "mutatedTestExecutionResult.STDERR";
 
   std::unique_ptr<TestResult> testResult =
-  make_unique<TestResult>(testExecutionResult, std::move(test));
+    make_unique<TestResult>(testExecutionResult, std::move(test));
 
   auto mutationResult = make_unique<MutationResult>(mutatedTestExecutionResult,
                                                     mutationPoint,
@@ -335,15 +335,16 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
 
   auto &test = *tests.begin();
 
-  std::vector<std::unique_ptr<Testee>> testees =
-    Finder.findTestees(test.get(), context, 4);
-
-  ASSERT_EQ(2U, testees.size());
-
-  Testee *testee = testees[1].get();
-  Function *testeeFunction = testee->getTesteeFunction();
-
+  Function *testeeFunction = context.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(testeeFunction->empty());
+
+  std::vector<std::unique_ptr<Testee>> testees;
+  {
+    std::unique_ptr<Testee> testee(new Testee(testeeFunction, nullptr, nullptr, 1));
+    testees.push_back(std::move(testee));
+  }
+
+  Testee *testee = testees.begin()->get();
 
   std::vector<MutationPoint *> mutationPoints =
   Finder.findMutationPoints(context, *testeeFunction);
@@ -504,21 +505,20 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
 
   SimpleTestFinder Finder(std::move(mutationOperators));
   auto tests = Finder.findTests(context);
-
   auto &test = *tests.begin();
 
-  std::vector<std::unique_ptr<Testee>> testees =
-    Finder.findTestees(test.get(), context, 4);
-
-  ASSERT_EQ(2U, testees.size());
-
-  Testee *testee = testees[1].get();
-  Function *testeeFunction = testee->getTesteeFunction();
-
+  Function *testeeFunction = context.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(testeeFunction->empty());
 
+  std::vector<std::unique_ptr<Testee>> testees;
+  {
+    std::unique_ptr<Testee> testee(new Testee(testeeFunction, nullptr, nullptr, 1));
+    testees.push_back(std::move(testee));
+  }
+  Testee *testee = testees.begin()->get();
+
   std::vector<MutationPoint *> mutationPoints =
-  Finder.findMutationPoints(context, *testeeFunction);
+    Finder.findMutationPoints(context, *testeeFunction);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
