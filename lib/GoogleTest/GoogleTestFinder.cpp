@@ -4,15 +4,15 @@
 #include "Logger.h"
 #include "MutationOperators/MutationOperator.h"
 
-#include "llvm/IR/CallSite.h"
-#include "llvm/IR/Constants.h"
-#include "llvm/IR/DebugInfoMetadata.h"
-#include "llvm/IR/InstIterator.h"
-#include "llvm/IR/Instructions.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
-#include "llvm/Support/Debug.h"
-#include "llvm/Support/raw_ostream.h"
+#include <llvm/IR/CallSite.h>
+#include <llvm/IR/Constants.h>
+#include <llvm/IR/DebugInfoMetadata.h>
+#include <llvm/IR/InstIterator.h>
+#include <llvm/IR/Instructions.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
+#include <llvm/Support/Debug.h>
+#include <llvm/Support/raw_ostream.h>
 
 #include "GoogleTest/GoogleTest_Test.h"
 
@@ -234,128 +234,6 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
   }
 
   return tests;
-}
-
-std::vector<std::unique_ptr<Testee>>
-GoogleTestFinder::findTestees(Test *Test,
-                              Context &Ctx,
-                              int maxDistance) {
-  GoogleTest_Test *googleTest = dyn_cast<GoogleTest_Test>(Test);
-
-  Function *testFunction = googleTest->GetTestBodyFunction();
-
-  std::vector<std::unique_ptr<Testee>> testees;
-
-  std::queue<std::unique_ptr<Testee>> traversees;
-  std::set<Function *> checkedFunctions;
-
-  Module *testBodyModule = testFunction->getParent();
-
-  traversees.push(make_unique<Testee>(testFunction, nullptr, nullptr, 0));
-
-  while (!traversees.empty()) {
-    std::unique_ptr<Testee> traversee = std::move(traversees.front());
-    Testee *traverseePointer = traversee.get();
-
-    traversees.pop();
-
-    Function *traverseeFunction = traversee->getTesteeFunction();
-    const int mutationDistance = traversee->getDistance();
-
-    testees.push_back(std::move(traversee));
-
-    /// The function reached the max allowed distance
-    /// Hence we don't go deeper
-    if (mutationDistance == maxDistance) {
-      continue;
-    }
-
-    for (auto &BB : *traverseeFunction) {
-      for (auto &I : BB) {
-        auto *instruction = &I;
-
-        CallSite callInstruction(instruction);
-        if (callInstruction.isCall() == false &&
-            callInstruction.isInvoke() == false) {
-          continue;
-        }
-
-        Function *calledFunction = callInstruction.getCalledFunction();
-        if (!calledFunction) {
-          continue;
-        }
-
-        /// Two modules may have static function with the same name, e.g.:
-        ///
-        ///   // ModuleA
-        ///   define range() {
-        ///     // ...
-        ///   }
-        ///
-        ///   define test_A() {
-        ///     call range()
-        ///   }
-        ///
-        ///   // ModuleB
-        ///   define range() {
-        ///     // ...
-        ///   }
-        ///
-        ///   define test_B() {
-        ///     call range()
-        ///   }
-        ///
-        /// Depending on the order of processing either `range` from `A` or `B`
-        /// will be added to the `context`, hence we may find function `range`
-        /// from module `B` while processing body of the `test_A`.
-        /// To avoid this problem we first look for function inside of a current
-        /// module.
-        ///
-        /// FIXME: Context should report if a function being added already exist
-        /// FIXME: What other problems such behaviour may bring?
-
-        Function *definedFunction =
-          testBodyModule->getFunction(calledFunction->getName());
-
-        if (!definedFunction || definedFunction->isDeclaration()) {
-          definedFunction =
-            Ctx.lookupDefinedFunction(calledFunction->getName());
-        } else {
-          //Logger::debug() << "GoogleTestFinder> did not find a function: "
-          //                << definedFunction->getName() << '\n';
-        }
-
-        if (definedFunction) {
-          auto functionWasNotProcessed =
-            checkedFunctions.find(definedFunction) == checkedFunctions.end();
-
-          checkedFunctions.insert(definedFunction);
-
-          if (functionWasNotProcessed) {
-            /// Filtering
-            if (filter.shouldSkipTesteeFunction(definedFunction)) {
-              continue;
-            }
-
-            /// The code below is not actually correct
-            /// For each C++ constructor compiler can generate up to three
-            /// functions*. Which means that the distance might be incorrect
-            /// We need to find a clever way to fix this problem
-            ///
-            /// * Here is a good overview of what's going on:
-            /// http://stackoverflow.com/a/6921467/829116
-            ///
-            traversees.push(make_unique<Testee>(definedFunction,
-                                                instruction,
-                                                traverseePointer,
-                                                mutationDistance + 1));
-          }
-        }
-      }
-    }
-  }
-  
-  return testees;
 }
 
 std::vector<MutationPoint *>

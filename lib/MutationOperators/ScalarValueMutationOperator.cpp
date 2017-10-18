@@ -94,6 +94,14 @@ ScalarValueMutationType findPossibleApplication(Value &V,
       opcode == Instruction::Call ||
       opcode == Instruction::Invoke) {
 
+    if (CallInst *callInstruction = dyn_cast<CallInst>(instruction)) {
+      if (Function *callee = dyn_cast<Function>(callInstruction->getCalledValue())) {
+        if (callee->getName().startswith("mull_")) {
+          return ScalarValueMutationType::None;
+        }
+      }
+    }
+
     for (Value *operand: instruction->operands()) {
       if (ConstantInt *constantInt = dyn_cast<ConstantInt>(operand)) {
         auto intValue = constantInt->getValue();

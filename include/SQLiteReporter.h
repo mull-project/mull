@@ -22,9 +22,6 @@ public:
                      const ResultTime &resultTime);
 
   std::string getDatabasePath();
-
-  // Exposed for testing.
-  std::string getCallerPathAsString(const std::vector<std::string> &callerPath);
 };
 
 }

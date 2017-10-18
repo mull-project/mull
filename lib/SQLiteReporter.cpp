@@ -242,18 +242,13 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
       assume(execution_result_statement_finalize_result == SQLITE_OK,
              "SQLite error: Expected finalize of execution result statement to succeed.");
 
-      std::vector<std::string> callerPath = result.get()->calculateCallerPath(mutation.get());
-
-      std::string callerPathAsString = getCallerPathAsString(callerPath);
-
       int mutationExecutionResultID = sqlite3_last_insert_rowid(database);
       std::string insertMutationResultSQL = std::string("INSERT INTO mutation_result VALUES (")
           + "'" + std::to_string(mutationExecutionResultID) + "',"
           + "'" + testID + "',"
           + "'" + mutationPointID + "',"
-          + "'" + std::to_string(mutation->getMutationDistance()) + "',"
-          + "'" + callerPathAsString + "'"
-          ");";
+          + "'" + std::to_string(mutation->getMutationDistance()) + "'"
+          + ");";
 
       sqlite_exec(database, insertMutationResultSQL.c_str());
     }
@@ -296,24 +291,6 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
   outs() << "Results can be found at '" << databasePath << "'\n";
 }
 
-#pragma mark -
-
-std::string SQLiteReporter::getCallerPathAsString(const std::vector<std::string> &callerPath) {
-  std::string callerPathAsString;
-
-  unsigned int indentation = 0;
-  for (size_t i = 0; i < callerPath.size(); ++i) {
-    if (i != 0) {
-      callerPathAsString.append("\n");
-    }
-
-    callerPathAsString.append(std::string(2 * indentation++, ' '));
-    callerPathAsString.append(callerPath[i]);
-  }
-
-  return callerPathAsString;
-}
-
 #pragma mark - Database Schema
 
 static const char *CreateTables = R"CreateTables(
@@ -346,8 +323,7 @@ CREATE TABLE mutation_result (
   execution_result_id INT,
   test_id TEXT,
   mutation_point_id TEXT,
-  mutation_distance INT,
-  __tmp_caller_path TEXT
+  mutation_distance INT
 );
 
 CREATE TABLE mutation_point_debug (

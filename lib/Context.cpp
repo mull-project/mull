@@ -8,6 +8,11 @@ using namespace llvm;
 
 void Context::addModule(std::unique_ptr<MullModule> module) {
   for (auto &function : module->getModule()->getFunctionList()) {
+    if (function.getName().equals("mull_enterFunction") ||
+        function.getName().equals("mull_leaveFunction")) {
+      function.deleteBody();
+    }
+
     if (!function.isDeclaration()) {
       FunctionsRegistry.insert(std::make_pair(function.getName(), &function));
     }

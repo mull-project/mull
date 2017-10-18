@@ -81,11 +81,7 @@ TEST(SimpleTestRunner, runTest) {
   /// afterwards we apply single mutation and run test again
   /// expecting it to fail
 
-  std::vector<std::unique_ptr<Testee>> Testees = testFinder.findTestees(Test.get(), Ctx, 4);
-
-  ASSERT_NE(0U, Testees.size());
-  Function *Testee = Testees[1]->getTesteeFunction();
-
+  Function *Testee = Ctx.lookupDefinedFunction("count_letters");
   AddMutationOperator MutOp;
   std::vector<MutationOperator *> MutOps({&MutOp});
 
@@ -165,13 +161,7 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   /// afterwards we apply single mutation and run test again
   /// expecting it to fail
 
-  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
-
-  // 2 testees: test_main, sum
-  ASSERT_EQ(2U, Testees.size());
-
-  Function *Testee = Testees[1]->getTesteeFunction();
-
+  Function *Testee = Ctx.lookupDefinedFunction("sum");
   AddMutationOperator MutOp;
   std::vector<MutationOperator *> MutOps({&MutOp});
 

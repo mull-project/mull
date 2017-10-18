@@ -69,18 +69,8 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
 
   SimpleTestFinder Finder(std::move(mutationOperators));
 
-  auto Tests = Finder.findTests(Ctx);
-
-  auto &Test = *(Tests.begin());
-
-  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
-
-  ASSERT_EQ(2U, Testees.size());
-
-  Function *Testee = Testees[1]->getTesteeFunction();
+  Function *Testee = Ctx.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(Testee->empty());
-
-  ASSERT_EQ(1, Testees[1]->getDistance());
 
   std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
   ASSERT_EQ(1U, MutationPoints.size());
@@ -121,18 +111,8 @@ TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
 
   SimpleTestFinder Finder(std::move(mutationOperators));
 
-  auto Tests = Finder.findTests(Ctx);
-
-  auto &Test = *(Tests.begin());
-
-  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
-
-  ASSERT_EQ(2U, Testees.size());
-
-  Function *Testee = Testees[1]->getTesteeFunction();
+  Function *Testee = Ctx.lookupDefinedFunction("math_sub");
   ASSERT_FALSE(Testee->empty());
-
-  ASSERT_EQ(1, Testees[1]->getDistance());
 
   std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
   ASSERT_EQ(1U, MutationPoints.size());
@@ -181,18 +161,8 @@ TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
 
   SimpleTestFinder Finder(std::move(mutationOperators));
 
-  auto Tests = Finder.findTests(Ctx);
-
-  auto &Test = *(Tests.begin());
-
-  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
-
-  ASSERT_EQ(2U, Testees.size());
-
-  Function *Testee = Testees[1]->getTesteeFunction();
+  Function *Testee = Ctx.lookupDefinedFunction("math_mul");
   ASSERT_FALSE(Testee->empty());
-
-  ASSERT_EQ(1, Testees[1]->getDistance());
 
   std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
   ASSERT_EQ(1U, MutationPoints.size());
@@ -241,18 +211,8 @@ TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
 
   SimpleTestFinder Finder(std::move(mutationOperators));
 
-  auto Tests = Finder.findTests(Ctx);
-
-  auto &Test = *(Tests.begin());
-
-  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
-
-  ASSERT_EQ(2U, Testees.size());
-
-  Function *Testee = Testees[1]->getTesteeFunction();
+  Function *Testee = Ctx.lookupDefinedFunction("math_div");
   ASSERT_FALSE(Testee->empty());
-
-  ASSERT_EQ(1, Testees[1]->getDistance());
 
   std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
   ASSERT_EQ(1U, MutationPoints.size());
@@ -303,15 +263,8 @@ TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
   mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
 
   SimpleTestFinder Finder(std::move(mutationOperators));
-  auto Tests = Finder.findTests(Ctx);
 
-  auto &Test = *(Tests.begin());
-
-  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
-
-  ASSERT_EQ(2U, Testees.size());
-
-  Function *Testee = Testees[1]->getTesteeFunction();
+  Function *Testee = Ctx.lookupDefinedFunction("max");
   ASSERT_FALSE(Testee->empty());
 
   std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
@@ -350,19 +303,8 @@ TEST(MutationPoint, SimpleTest_AndOrMutationOperator_applyMutation) {
 
   SimpleTestFinder Finder(std::move(mutationOperators));
 
-  auto tests = Finder.findTests(ctx);
-  ASSERT_EQ(8U, tests.size());
-
   {
-    auto &test1 = tests[0];
-
-    std::vector<std::unique_ptr<Testee>> test1_testees = Finder.findTestees(test1.get(), ctx, 4);
-
-    ASSERT_EQ(2U, test1_testees.size());
-
-    // testee_AND_operator_2branches()
-    // testee #0 is always test itself.
-    Function *test1_testee1_function = test1_testees[1]->getTesteeFunction();
+    Function *test1_testee1_function = ctx.lookupDefinedFunction("testee_AND_operator_2branches");
 
     std::vector<MutationPoint *> test1_testee1_mutationPoints =
       Finder.findMutationPoints(ctx, *test1_testee1_function);
@@ -409,18 +351,8 @@ TEST(MutationPoint, SimpleTest_ScalarValueMutationOperator_applyMutation) {
 
   SimpleTestFinder Finder(std::move(mutationOperators));
 
-  auto Tests = Finder.findTests(Ctx);
-
-  auto &Test = *(Tests.begin());
-
-  std::vector<std::unique_ptr<Testee>> Testees = Finder.findTestees(Test.get(), Ctx, 4);
-
-  ASSERT_EQ(2U, Testees.size());
-
-  Function *Testee = Testees[1]->getTesteeFunction();
+  Function *Testee = Ctx.lookupDefinedFunction("scalar_value");
   ASSERT_FALSE(Testee->empty());
-
-  ASSERT_EQ(1, Testees[1]->getDistance());
 
   std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
   ASSERT_EQ(4U, MutationPoints.size());

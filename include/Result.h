@@ -29,7 +29,5 @@ namespace mull {
     std::vector<std::unique_ptr<Testee>> const& getAllTestees() {
       return allTestees;
     }
-
-    std::vector<std::string> calculateCallerPath(MutationResult *mutationResult);
   };
 }

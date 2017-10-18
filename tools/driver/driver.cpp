@@ -2,6 +2,7 @@
 
 #include "Config.h"
 #include "ConfigParser.h"
+#include "Filter.h"
 #include "Logger.h"
 #include "ModuleLoader.h"
 #include "MutationOperators/MutationOperatorsFactory.h"
@@ -20,12 +21,12 @@
 #include "Rust/RustTestRunner.h"
 #endif
 
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/SourceMgr.h"
-#include "llvm/Support/TargetSelect.h"
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/YAMLParser.h"
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/Support/MemoryBuffer.h>
+#include <llvm/Support/SourceMgr.h>
+#include <llvm/Support/TargetSelect.h>
+#include <llvm/Support/CommandLine.h>
+#include <llvm/Support/YAMLParser.h>
 
 #include <chrono>
 #include <string>
@@ -74,6 +75,11 @@ int main(int argc, char *argv[]) {
   LLVMContext Ctx;
   ModuleLoader Loader(Ctx);
   Toolchain toolchain(config);
+  Filter filter;
+
+  for (const std::string &location: config.getExcludeLocations()) {
+    filter.skipByLocation(location);
+  }
 
   const std::string &testFramework = config.getTestFramework();
 
@@ -85,6 +91,15 @@ int main(int argc, char *argv[]) {
     mutationOperatorsFactory.mutationOperators(config.getMutationOperators());
 
   if (testFramework == "GoogleTest") {
+    filter.skipByName("testing8internal");
+    filter.skipByName("testing15AssertionResult");
+    filter.skipByName("testing7Message");
+    filter.skipByName("clang_call_terminate");
+
+    filter.skipByLocation("include/c++/v1");
+    filter.skipByLocation("gtest");
+    filter.skipByLocation("gmock");
+
     testFinder = make_unique<GoogleTestFinder>(std::move(mutationOperators),
                                                config.getTests(),
                                                config.getExcludeLocations());
@@ -115,7 +130,7 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  Driver driver(config, Loader, *testFinder, *testRunner, toolchain);
+  Driver driver(config, Loader, *testFinder, *testRunner, toolchain, filter);
 
   const long timeSuiteStart =
     duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
