@@ -251,11 +251,10 @@ GoogleTestFinder::findTestees(Test *Test,
 
   Module *testBodyModule = testFunction->getParent();
 
-  traversees.push(make_unique<Testee>(testFunction, nullptr, nullptr, 0));
+  traversees.push(make_unique<Testee>(testFunction, 0));
 
   while (!traversees.empty()) {
     std::unique_ptr<Testee> traversee = std::move(traversees.front());
-    Testee *traverseePointer = traversee.get();
 
     traversees.pop();
 
@@ -346,8 +345,6 @@ GoogleTestFinder::findTestees(Test *Test,
             /// http://stackoverflow.com/a/6921467/829116
             ///
             traversees.push(make_unique<Testee>(definedFunction,
-                                                instruction,
-                                                traverseePointer,
                                                 mutationDistance + 1));
           }
         }

@@ -49,7 +49,7 @@ TEST(SQLiteReporter, integrationTest) {
   ASSERT_FALSE(testeeFunction->empty());
   std::vector<std::unique_ptr<Testee>> testees;
   {
-    std::unique_ptr<Testee> testee(new Testee(testeeFunction, nullptr, nullptr, 1));
+    std::unique_ptr<Testee> testee(new Testee(testeeFunction, 1));
     testees.push_back(std::move(testee));
   }
 
@@ -300,20 +300,6 @@ TEST(SQLiteReporter, integrationTest_Config) {
   sqlite3_close(database);
 }
 
-TEST(SQLiteReporter, callerPathToString) {
-  std::vector<std::string> callerPath;
-
-  callerPath.push_back("func1:12");
-  callerPath.push_back("func2:14");
-  callerPath.push_back("func3:16");
-
-  SQLiteReporter reporter("caller path to string");
-
-  std::string expectedCallerPathString = "func1:12\n  func2:14\n    func3:16";
-  ASSERT_EQ(reporter.getCallerPathAsString(callerPath),
-            expectedCallerPathString);
-}
-
 TEST(SQLiteReporter, do_emitDebugInfo) {
   TestModuleFactory testModuleFactory;
   auto ModuleWithTests   = testModuleFactory.createTesterModule();
@@ -340,7 +326,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
 
   std::vector<std::unique_ptr<Testee>> testees;
   {
-    std::unique_ptr<Testee> testee(new Testee(testeeFunction, nullptr, nullptr, 1));
+    std::unique_ptr<Testee> testee(new Testee(testeeFunction, 1));
     testees.push_back(std::move(testee));
   }
 
@@ -512,7 +498,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
 
   std::vector<std::unique_ptr<Testee>> testees;
   {
-    std::unique_ptr<Testee> testee(new Testee(testeeFunction, nullptr, nullptr, 1));
+    std::unique_ptr<Testee> testee(new Testee(testeeFunction, 1));
     testees.push_back(std::move(testee));
   }
   Testee *testee = testees.begin()->get();

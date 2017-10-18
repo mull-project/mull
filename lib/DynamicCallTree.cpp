@@ -158,8 +158,6 @@ DynamicCallTree::createTestees(std::vector<CallTree *> subtrees,
     std::queue<CallTree *> nodes;
     nodes.push(root);
 
-    Testee *parent = nullptr;
-
     while (!nodes.empty()) {
       CallTree *node = nodes.front();
       nodes.pop();
@@ -170,10 +168,7 @@ DynamicCallTree::createTestees(std::vector<CallTree *> subtrees,
 
       int distance = node->level - offset;
       std::unique_ptr<Testee> testee(make_unique<Testee>(node->function,
-                                                         nullptr,
-                                                         parent,
                                                          distance));
-      parent = testee.get();
       testees.push_back(std::move(testee));
       if (distance < maxDistance) {
         for (std::unique_ptr<CallTree> &child : node->children) {
