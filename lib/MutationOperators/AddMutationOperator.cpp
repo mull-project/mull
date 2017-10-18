@@ -121,6 +121,18 @@ AddMutationOperator::replacementForAddWithOverflow(llvm::Function *addFunction,
   return replacementFunction;
 }
 
+MutationPoint *AddMutationOperator::getMutationPoint(MullModule *module,
+                                                     MutationPointAddress &address,
+                                                     llvm::Instruction *instruction) {
+  if (canBeApplied(*instruction)) {
+    std::string diagnostics = "Math Add: replaced + with -";
+
+    return new MutationPoint(this, address, instruction, module, diagnostics);
+  }
+
+  return nullptr;
+}
+
 std::vector<MutationPoint *>
 AddMutationOperator::getMutationPoints(const Context &context,
                                        llvm::Function *function,

@@ -33,6 +33,17 @@ static int GetFunctionIndex(llvm::Function *function) {
   return FIndex;
 }
 
+MutationPoint *
+MathMulMutationOperator::getMutationPoint(MullModule *module,
+                                          MutationPointAddress &address,
+                                          llvm::Instruction *instruction) {
+  if (canBeApplied(*instruction)) {
+    std::string diagnostics = "Math Mul: replaced * with /";
+    return new MutationPoint(this, address, instruction, module, diagnostics);
+  }
+  return nullptr;
+}
+
 std::vector<MutationPoint *>
 MathMulMutationOperator::getMutationPoints(const Context &context,
                                            llvm::Function *function,

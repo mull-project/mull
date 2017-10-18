@@ -4,6 +4,9 @@
 #include "MutationPoint.h"
 #include "TestModuleFactory.h"
 #include "Toolchain/Compiler.h"
+#include "Filter.h"
+#include "Testee.h"
+#include "MutationsFinder.h"
 
 #include "llvm/IR/Instructions.h"
 #include "llvm/IR/LLVMContext.h"
@@ -16,7 +19,7 @@ using namespace llvm;
 
 static TestModuleFactory TestModuleFactory;
 
-TEST(ScalarValueMutationOperator, getMutationPoints) {
+TEST(ScalarValueMutationOperator, getMutationPoint) {
   auto module = TestModuleFactory.create_SimpleTest_ScalarValue_module();
 
   auto mullModule = make_unique<MullModule>(std::move(module), "");
@@ -24,15 +27,16 @@ TEST(ScalarValueMutationOperator, getMutationPoints) {
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
 
-  NullMutationOperatorFilter NOT_RELEVANT;
   auto scalarValueFunction = mullContext.lookupDefinedFunction("scalar_value");
+  Testee testee(scalarValueFunction, 1);
+  std::vector<std::unique_ptr<MutationOperator>> operators;
+  operators.emplace_back(make_unique<ScalarValueMutationOperator>());
+  MutationsFinder finder(std::move(operators));
+  Filter filter;
 
-  ScalarValueMutationOperator mutationOperator;
-
-  std::vector<MutationPoint *> mutationPoints =
-    mutationOperator.getMutationPoints(mullContext,
-                                       scalarValueFunction,
-                                       NOT_RELEVANT);
+  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(mullContext,
+                                                                         testee,
+                                                                         filter);
 
   ASSERT_EQ(mutationPoints.size(), 4U);
 

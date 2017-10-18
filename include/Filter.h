@@ -4,12 +4,14 @@
 #include <vector>
 
 #include <llvm/IR/Function.h>
+#include <llvm/IR/Instruction.h>
 
 namespace mull {
 
 class Filter {
 public:
   bool shouldSkipFunction(llvm::Function *function);
+  bool shouldSkipInstruction(llvm::Instruction *instruction) { return false; }
 
   void skipByName(const std::string &nameSubstring);
   void skipByName(const char *nameSubstring);

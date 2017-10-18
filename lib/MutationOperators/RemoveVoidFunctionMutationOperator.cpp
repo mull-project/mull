@@ -49,6 +49,19 @@ std::string getDiagnostics(Instruction &instruction) {
   return diagnostics;
 }
 
+
+MutationPoint *
+RemoveVoidFunctionMutationOperator::getMutationPoint(MullModule *module,
+                                                     MutationPointAddress &address,
+                                                     llvm::Instruction *instruction) {
+  if (canBeApplied(*instruction)) {
+    std::string diagnostics = getDiagnostics(*instruction);
+    return new MutationPoint(this, address, instruction, module, diagnostics);
+  }
+
+  return nullptr;
+}
+
 std::vector<MutationPoint *>
 RemoveVoidFunctionMutationOperator::getMutationPoints(const Context &context,
                                                    llvm::Function *function,

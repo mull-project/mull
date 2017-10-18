@@ -4,6 +4,9 @@
 #include "MutationOperators/MutationOperatorFilter.h"
 #include "MutationOperators/NegateConditionMutationOperator.h"
 #include "Context.h"
+#include "Filter.h"
+#include "MutationsFinder.h"
+#include "Testee.h"
 
 #include "llvm/IR/Argument.h"
 #include "llvm/IR/BasicBlock.h"
@@ -80,15 +83,18 @@ TEST(NegateConditionMutationOperator, getMutationPoints_no_filter) {
 
   Function *function = llvmModule->getFunction("_ZN4llvm5APInt12tcExtractBitEPKyj");
   assert(function);
+  Testee testee(function, 1);
 
   auto module = make_unique<MullModule>(std::move(llvmModule), "APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutation_operator");
   Context context;
   context.addModule(std::move(module));
 
-  NegateConditionMutationOperator mutationOperator;
-  NullMutationOperatorFilter filter;
+  std::vector<std::unique_ptr<MutationOperator>> operators;
+  operators.emplace_back(make_unique<NegateConditionMutationOperator>());
+  MutationsFinder finder(std::move(operators));
+  Filter filter;
 
-  auto mutationPoints = mutationOperator.getMutationPoints(context, function, filter);
+  auto mutationPoints = finder.getMutationPoints(context, testee, filter);
   EXPECT_EQ(1U, mutationPoints.size());
   EXPECT_EQ(0, mutationPoints[0]->getAddress().getFnIndex());
   EXPECT_EQ(0, mutationPoints[0]->getAddress().getBBIndex());
@@ -102,15 +108,18 @@ TEST(NegateConditionMutationOperator, getMutationPoints_filter_to_bool_converion
 
   Function *function = llvmModule->getFunction("_ZNK4llvm7APFloat11isSignalingEv");
   assert(function);
+  Testee testee(function, 1);
 
   auto module = make_unique<MullModule>(std::move(llvmModule), "APFloat_019fc57b8bd190d33389137abbe7145e_214_2_7_negate_mutation_operator");
   Context context;
   context.addModule(std::move(module));
 
-  NegateConditionMutationOperator mutationOperator;
-  NullMutationOperatorFilter filter;
+  std::vector<std::unique_ptr<MutationOperator>> operators;
+  operators.emplace_back(make_unique<NegateConditionMutationOperator>());
+  MutationsFinder finder(std::move(operators));
+  Filter filter;
 
-  auto mutationPoints = mutationOperator.getMutationPoints(context, function, filter);
+  auto mutationPoints = finder.getMutationPoints(context, testee, filter);
   EXPECT_EQ(0U, mutationPoints.size());
 }
 
@@ -121,14 +130,17 @@ TEST(NegateConditionMutationOperator, getMutationPoints_filter_is_null) {
 
   Function *function = llvmModule->getFunction("_ZN4llvm7APFloat15freeSignificandEv");
   assert(function);
+  Testee testee(function, 1);
 
   auto module = make_unique<MullModule>(std::move(llvmModule), "APFloat_019fc57b8bd190d33389137abbe7145e_5_1_3_negate_mutation_operator");
   Context context;
   context.addModule(std::move(module));
 
-  NegateConditionMutationOperator mutationOperator;
-  NullMutationOperatorFilter filter;
+  std::vector<std::unique_ptr<MutationOperator>> operators;
+  operators.emplace_back(make_unique<NegateConditionMutationOperator>());
+  MutationsFinder finder(std::move(operators));
+  Filter filter;
 
-  auto mutationPoints = mutationOperator.getMutationPoints(context, function, filter);
+  auto mutationPoints = finder.getMutationPoints(context, testee, filter);
   EXPECT_EQ(0U, mutationPoints.size());
 }

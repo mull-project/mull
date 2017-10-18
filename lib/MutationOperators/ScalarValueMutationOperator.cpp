@@ -33,6 +33,21 @@ static ConstantFP *getReplacementFloat(ConstantFP *constantFloat);
 
 const std::string ScalarValueMutationOperator::ID = "scalar_value_mutation_operator";
 
+
+MutationPoint *
+ScalarValueMutationOperator::getMutationPoint(MullModule *module,
+                                              MutationPointAddress &address,
+                                              llvm::Instruction *instruction) {
+  std::string diagnostics;
+  ScalarValueMutationType mutationType =
+    findPossibleApplication(*instruction, diagnostics);
+  if (mutationType == ScalarValueMutationType::None) {
+    return nullptr;
+  }
+
+  return new MutationPoint(this, address, instruction, module, diagnostics);
+}
+
 std::vector<MutationPoint *>
 ScalarValueMutationOperator::getMutationPoints(const Context &context,
                                                llvm::Function *function,

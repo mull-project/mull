@@ -7,6 +7,7 @@ set(mull_sources
   ModuleLoader.cpp
   DynamicCallTree.cpp
   Filter.cpp
+  MutationsFinder.cpp
 
   MutationOperators/AddMutationOperator.cpp
   MutationOperators/AndOrReplacementMutationOperator.cpp

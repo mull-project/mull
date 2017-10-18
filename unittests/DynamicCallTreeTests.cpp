@@ -301,7 +301,7 @@ TEST(DynamicCallTree, test_subtrees) {
   std::unique_ptr<CallTree> callTree = tree.createCallTree();
   std::vector<CallTree *> subtrees = tree.extractTestSubtrees(callTree.get(), &test);
 
-  EXPECT_EQ(1L, subtrees.size());
+  EXPECT_EQ(1UL, subtrees.size());
 
   CallTree *root = *subtrees.begin();
   EXPECT_EQ(root->function, F2);
@@ -354,7 +354,7 @@ TEST(DynamicCallTree, testees) {
 
     Testee *testeeF2 = testees.begin()->get();
     EXPECT_EQ(testeeF2->getTesteeFunction(), F2);
-    EXPECT_EQ(testeeF2->getDistance(), 0U);
+    EXPECT_EQ(testeeF2->getDistance(), 0);
 
     Testee *testeeF3 = (testees.begin() + 1)->get();
     EXPECT_EQ(testeeF3->getTesteeFunction(), F3);

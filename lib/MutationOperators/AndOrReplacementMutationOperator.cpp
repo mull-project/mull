@@ -34,6 +34,18 @@ static int GetFunctionIndex(llvm::Function *function) {
   return FIndex;
 }
 
+MutationPoint *
+AndOrReplacementMutationOperator::getMutationPoint(MullModule *module,
+                                                   MutationPointAddress &address,
+                                                   llvm::Instruction *instruction) {
+  if (canBeApplied(*instruction)) {
+    std::string diagnostics = "AND-OR Replacement";
+    return new MutationPoint(this, address, instruction, module, diagnostics);
+  }
+  return nullptr;
+}
+
+
 std::vector<MutationPoint *>
 AndOrReplacementMutationOperator::getMutationPoints(const Context &context,
                                                     llvm::Function *function,

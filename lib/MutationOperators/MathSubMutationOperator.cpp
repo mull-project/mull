@@ -121,6 +121,17 @@ MathSubMutationOperator::replacementForSubWithOverflow(llvm::Function *testeeFun
   return replacementFunction;
 }
 
+MutationPoint *
+MathSubMutationOperator::getMutationPoint(MullModule *module,
+                                          MutationPointAddress &address,
+                                          llvm::Instruction *instruction) {
+  if (canBeApplied(*instruction)) {
+    std::string diagnostics = "Math Sub: replaced - with +";
+    return new MutationPoint(this, address, instruction, module, diagnostics);
+  }
+  return nullptr;
+}
+
 std::vector<MutationPoint *>
 MathSubMutationOperator::getMutationPoints(const Context &context,
                                            llvm::Function *function,

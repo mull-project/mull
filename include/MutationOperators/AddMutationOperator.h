@@ -21,6 +21,10 @@ class AddMutationOperator : public MutationOperator {
 public:
   static const std::string ID;
 
+  MutationPoint *getMutationPoint(MullModule *module,
+                                  MutationPointAddress &address,
+                                  llvm::Instruction *instruction) override;
+
   std::vector<MutationPoint *> getMutationPoints(const Context &context,
                                                  llvm::Function *function,
                                                  MutationOperatorFilter &filter) override;
