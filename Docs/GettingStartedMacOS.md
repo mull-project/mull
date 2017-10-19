@@ -32,12 +32,12 @@ cd mull
 ## Running tests
 
 ```bash
-make -f Makefile.macos test
+make -f Makefile.macos xcode.test
 ```
 
 ## Building Mull as Xcode project
 
 ```bash
-make -f Makefile.macos build_xcode
+make -f Makefile.macos xcode.build
 open Mull.xcodeproj
 ```
