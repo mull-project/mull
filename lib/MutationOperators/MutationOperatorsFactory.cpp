@@ -1,7 +1,7 @@
 #include "MutationOperatorsFactory.h"
 
 #include "MutationOperator.h"
-#include "MutationOperators/AddMutationOperator.h"
+#include "MutationOperators/MathAddMutationOperator.h"
 #include "MutationOperators/AndOrReplacementMutationOperator.h"
 #include "MutationOperators/MathSubMutationOperator.h"
 #include "MutationOperators/MathDivMutationOperator.h"
@@ -36,8 +36,8 @@ MutationOperatorsFactory::mutationOperators(
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   for (auto mutation : mutationOperatorStrings) {
-    if (mutation == AddMutationOperator::ID) {
-      mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+    if (mutation == MathAddMutationOperator::ID) {
+      mutationOperators.emplace_back(make_unique<MathAddMutationOperator>());
     }
     else if (mutation == AndOrReplacementMutationOperator::ID) {
       mutationOperators.emplace_back(make_unique<AndOrReplacementMutationOperator>());
@@ -80,7 +80,7 @@ std::vector<std::unique_ptr<MutationOperator>>
 MutationOperatorsFactory::defaultMutationOperators() {
   std::vector<std::unique_ptr<MutationOperator>> operators;
 
-  operators.emplace_back(make_unique<AddMutationOperator>());
+  operators.emplace_back(make_unique<MathAddMutationOperator>());
   operators.emplace_back(make_unique<NegateConditionMutationOperator>());
   operators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
 

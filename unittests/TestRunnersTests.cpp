@@ -1,6 +1,6 @@
 
 #include "Context.h"
-#include "MutationOperators/AddMutationOperator.h"
+#include "MutationOperators/MathAddMutationOperator.h"
 #include "SimpleTest/SimpleTestFinder.h"
 #include "TestModuleFactory.h"
 #include "Toolchain/Compiler.h"
@@ -54,7 +54,7 @@ TEST(SimpleTestRunner, runTest) {
   Ctx.addModule(std::move(mullOwnedModuleWithTestees));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
-  mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+  mutationOperators.emplace_back(make_unique<MathAddMutationOperator>());
   MutationsFinder mutationsFinder(std::move(mutationOperators));
   Filter filter;
 
@@ -140,7 +140,7 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   Ctx.addModule(std::move(mullOwnedModuleWithTestees));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
-  mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+  mutationOperators.emplace_back(make_unique<MathAddMutationOperator>());
   MutationsFinder mutationsFinder(std::move(mutationOperators));
   Filter filter;
 

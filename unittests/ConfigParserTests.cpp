@@ -1,6 +1,6 @@
 #include "ConfigParserTestFixture.h"
 
-#include "MutationOperators/AddMutationOperator.h"
+#include "MutationOperators/MathAddMutationOperator.h"
 #include "MutationOperators/MathDivMutationOperator.h"
 #include "MutationOperators/MathMulMutationOperator.h"
 #include "MutationOperators/MathSubMutationOperator.h"
@@ -197,7 +197,7 @@ TEST_F(ConfigParserTestFixture, loadConfig_MutationOperators_Unspecified) {
 TEST_F(ConfigParserTestFixture, loadConfig_MutationOperators_SpecificValue) {
   const char *configYAML = R"YAML(
 mutation_operators:
-  - add_mutation_operator
+  - math_add_mutation_operator
   - negate_mutation_operator
   - math_sub_mutation_operator
   - math_mul_mutation_operator
@@ -209,7 +209,7 @@ mutation_operators:
   
   auto mutationOperators = config.getMutationOperators();
   ASSERT_EQ(7U, mutationOperators.size());
-  ASSERT_EQ(AddMutationOperator::ID, mutationOperators[0]);
+  ASSERT_EQ(MathAddMutationOperator::ID, mutationOperators[0]);
   ASSERT_EQ(NegateConditionMutationOperator::ID, mutationOperators[1]);
   ASSERT_EQ(MathSubMutationOperator::ID, mutationOperators[2]);
   ASSERT_EQ(MathMulMutationOperator::ID, mutationOperators[3]);

@@ -3,7 +3,7 @@
 #include "Driver.h"
 #include "Filter.h"
 #include "ModuleLoader.h"
-#include "MutationOperators/AddMutationOperator.h"
+#include "MutationOperators/MathAddMutationOperator.h"
 #include "MutationOperators/AndOrReplacementMutationOperator.h"
 #include "MutationOperators/MathDivMutationOperator.h"
 #include "MutationOperators/MathMulMutationOperator.h"
@@ -40,7 +40,7 @@ static TestModuleFactory SharedTestModuleFactory;
 
 #pragma mark - Mutation operators
 
-TEST(Driver, SimpleTest_AddMutationOperator) {
+TEST(Driver, SimpleTest_MathAddMutationOperator) {
   /// Create Config with fake BitcodePaths
   /// Create Fake Module Loader
   /// Initialize Driver using ModuleLoader and Config
@@ -91,7 +91,7 @@ TEST(Driver, SimpleTest_AddMutationOperator) {
   FakeModuleLoader loader(context, modules);
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
-  mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+  mutationOperators.emplace_back(make_unique<MathAddMutationOperator>());
   MutationsFinder finder(std::move(mutationOperators));
 
   SimpleTestFinder testFinder;

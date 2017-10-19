@@ -1,5 +1,5 @@
 #include "MutationOperators/MutationOperator.h"
-#include "MutationOperators/AddMutationOperator.h"
+#include "MutationOperators/MathAddMutationOperator.h"
 
 #include "llvm/IR/Argument.h"
 #include "llvm/IR/BasicBlock.h"
@@ -20,14 +20,14 @@ using namespace llvm;
 
 static LLVMContext Ctx;
 
-TEST(MutationOperators, AddMutationOperator) {
+TEST(MutationOperators, MathAddMutationOperator) {
   ConstantInt *A = ConstantInt::get(Type::getInt32Ty(Ctx), 42, 0);
   ConstantInt *B = ConstantInt::get(Type::getInt32Ty(Ctx), 43, 0);
 
   ConstantFP *FA = ConstantFP::get(Ctx, APFloat(42.0f));
   ConstantFP *FB = ConstantFP::get(Ctx, APFloat(43.0f));
 
-  AddMutationOperator mutationOperator;
+  MathAddMutationOperator mutationOperator;
 
   std::unique_ptr<BinaryOperator> Add(BinaryOperator::CreateAdd(A, B));
   EXPECT_EQ(true, mutationOperator.canBeApplied(*Add));

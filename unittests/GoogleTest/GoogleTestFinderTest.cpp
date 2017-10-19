@@ -35,7 +35,7 @@ TEST(GoogleTestFinder, FindTest) {
 
   const char *configYAML = R"YAML(
 mutation_operators:
-- add_mutation_operator
+- math_add_mutation_operator
 - negate_mutation_operator
 - remove_void_function_mutation_operator
 )YAML";
@@ -68,7 +68,7 @@ TEST(GoogleTestFinder, findTests_filter) {
 
   const char *configYAML = R"YAML(
 mutation_operators:
-  - add_mutation_operator
+  - math_add_mutation_operator
   - negate_mutation_operator
   - remove_void_function_mutation_operator
   )YAML";
