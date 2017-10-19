@@ -33,7 +33,6 @@ static ConstantFP *getReplacementFloat(ConstantFP *constantFloat);
 
 const std::string ScalarValueMutationOperator::ID = "scalar_value_mutation_operator";
 
-
 MutationPoint *
 ScalarValueMutationOperator::getMutationPoint(MullModule *module,
                                               MutationPointAddress &address,
@@ -46,44 +45,6 @@ ScalarValueMutationOperator::getMutationPoint(MullModule *module,
   }
 
   return new MutationPoint(this, address, instruction, module, diagnostics);
-}
-
-std::vector<MutationPoint *>
-ScalarValueMutationOperator::getMutationPoints(const Context &context,
-                                               llvm::Function *function,
-                                               MutationOperatorFilter &filter) {
-
-  int functionIndex = MutationPointAddress::getFunctionIndex(function);
-
-  std::vector<MutationPoint *> mutationPoints;
-
-  std::string diagnostics;
-  MutationPointAddress::enumerateInstructions(*function,
-                                              [&](Instruction &instr,
-                                                  int bbIndex,
-                                                  int iIndex) {
-
-    if (filter.shouldSkipInstruction(&instr)) {
-      return;
-    }
-
-    ScalarValueMutationType mutationType =
-      findPossibleApplication(instr, diagnostics);
-    if (mutationType == ScalarValueMutationType::None) {
-      return;
-    }
-
-    auto moduleID = instr.getModule()->getModuleIdentifier();
-    MullModule *module = context.moduleWithIdentifier(moduleID);
-
-    MutationPointAddress address(functionIndex, bbIndex, iIndex);
-    auto mutationPoint =
-      new MutationPoint(this, address, &instr, module, diagnostics);
-
-    mutationPoints.push_back(mutationPoint);
-  });
-
-  return mutationPoints;
 }
 
 /// Currently only used by SimpleTestFinder.

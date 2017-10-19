@@ -30,10 +30,6 @@ public:
                                   MutationPointAddress &address,
                                   llvm::Instruction *instruction) override;
 
-  std::vector<MutationPoint *> getMutationPoints(const Context &context,
-                                                 llvm::Function *function,
-                                                 MutationOperatorFilter &filter) override;
-
   std::string uniqueID() override {
     return ID;
   }
