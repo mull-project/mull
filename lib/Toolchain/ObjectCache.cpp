@@ -32,6 +32,13 @@ ObjectCache::ObjectCache(bool useCache, const std::string &cacheDir)
   : useOnDiskCache(useCache),
     cacheDirectory(cacheDir)
 {
+  if (useOnDiskCache) {
+    Logger::info() << "Unfortunately On-Disk cache is broken at the moment\n";
+    Logger::info() << "See this issue for more details: https://github.com/mull-project/mull/issues/234\n";
+    Logger::info() << "Falling back to in-memory cache\n";
+    useOnDiskCache = false;
+  }
+
   if (useOnDiskCache && !cacheDirectoryExists(cacheDirectory)) {
     Logger::info() << "Cache directory '" << cacheDirectory
                    << "' is not accessible\n";
