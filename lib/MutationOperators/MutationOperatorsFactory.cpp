@@ -8,6 +8,7 @@
 #include "MutationOperators/MathMulMutationOperator.h"
 #include "MutationOperators/NegateConditionMutationOperator.h"
 #include "MutationOperators/RemoveVoidFunctionMutationOperator.h"
+#include "MutationOperators/ReplaceCallMutationOperator.h"
 #include "MutationOperators/ScalarValueMutationOperator.h"
 #include "Logger.h"
 
@@ -55,6 +56,9 @@ MutationOperatorsFactory::mutationOperators(
     }
     else if (mutation == RemoveVoidFunctionMutationOperator::ID) {
       mutationOperators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
+    }
+    else if (mutation == ReplaceCallMutationOperator::ID) {
+      mutationOperators.emplace_back(make_unique<ReplaceCallMutationOperator>());
     }
     else if (mutation == ScalarValueMutationOperator::ID) {
       mutationOperators.emplace_back(make_unique<ScalarValueMutationOperator>());
