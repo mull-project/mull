@@ -12,23 +12,21 @@ MULL=$(MULL_UNITTESTS_DIR)/MullUnitTests
 # http://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
 .PHONY: help
 help: ## Show this help message.
-	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_\.-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
 install: build_ninja
 	cd $(BUILD_DIR_NINJA) && ninja install
 
-test: test_unit
+test: ninja.test ## Run unit tests (runs tests using Ninja)
 
-test_unit: build_ninja ## Run Unit Tests (Builds Ninja cache first if it does not exist)
-	cd $(BUILD_DIR_NINJA) && ninja MullUnitTests
-
-	cd $(MULL_UNITTESTS_DIR) && $(MULL)
+clean: ninja.clean xcode.clean ## Delete CMake build caches: Xcode and Ninja.
 
 CMAKE_COMMAND_LINE_DEBUG_FLAGS=# --trace # --debug-output # --debug-output --trace --trace-expand # --trace # --debug-output #
 
-.PHONY: build build_xcode build_ninja
+# Xcode
+.PHONY: xcode.build xcode.rebuild xcode.open xcode.reopen xcode.clean
 
-build_xcode: ## Build Xcode project with CMake.
+xcode.build: ## Build Xcode project with CMake.
 	mkdir -p $(BUILD_DIR_XCODE)
 
 	rm -rfv $(BUILD_DIR_XCODE)/CMakeCache.txt
@@ -37,9 +35,28 @@ build_xcode: ## Build Xcode project with CMake.
     -DCMAKE_TOOLCHAIN_FILE=$(MULL_CMAKE_TOOLCHAIN) \
     -DMULL_SUPPORT_RUST=0
 
-rebuild_xcode: build_xcode reopen ## Build Xcode project with CMake, kill Xcode, reopen the project in Xcode
+xcode.rebuild: xcode.build xcode.reopen ## Build Xcode project with CMake, kill Xcode, reopen the project in Xcode
 
-build_ninja: ## Build Ninja project with CMake.
+## Xcode-specific tools.
+## TODO: maybe extract to Makefile.Xcode?
+xcode.open: ## Open Mull.xcodeproj in Xcode
+	open BuildXcode/Mull.xcodeproj
+
+# This reopen task is mostly needed to do a work that involves serious
+# modifications of CMake's files: **/CMakeLists.txt and toolchain files.
+# Xcode does not pickup all of the changes in CMake without being reopened.
+xcode.reopen: ## Kill Xcode and open Mull.xcodeproj in Xcode.
+	killall Xcode || true
+	open BuildXcode/Mull.xcodeproj
+
+xcode.clean: ## Delete Xcode CMake build cache.
+	rm -rfv $(BUILD_DIR_XCODE)
+
+# Ninja
+
+.PHONY: ninja.build ninja.test ninja.clean
+
+ninja.build: ## Build Ninja project with CMake.
 	mkdir -p $(BUILD_DIR_NINJA)
 
 	rm -rfv $(BUILD_DIR_NINJA)/CMakeCache.txt
@@ -50,23 +67,10 @@ build_ninja: ## Build Ninja project with CMake.
     -DMULL_SUPPORT_RUST=0 \
     ../
 
-## Xcode-specific tools.
-## TODO: maybe extract to Makefile.Xcode?
-open: ## Open Mull.xcodeproj in Xcode
-	open BuildXcode/Mull.xcodeproj
+ninja.test: ninja.build ## Run Unit Tests (Builds Ninja cache first if it does not exist)
+	cd $(BUILD_DIR_NINJA) && ninja MullUnitTests
 
-# This reopen task is mostly needed to do a work that involves serious
-# modifications of CMake's files: **/CMakeLists.txt and toolchain files.
-# Xcode does not pickup all of the changes in CMake without being reopened.
-reopen: ## Kill Xcode and open Mull.xcodeproj in Xcode.
-	killall Xcode || true
-	open BuildXcode/Mull.xcodeproj
+	cd $(MULL_UNITTESTS_DIR) && $(MULL)
 
-clean: clean_ninja clean_xcode ## Delete CMake build caches: Xcode and Ninja.
-
-clean_xcode: ## Delete Xcode CMake build cache.
-	rm -rfv $(BUILD_DIR_XCODE)
-
-clean_ninja: ## Delete Ninja CMake build cache.
+ninja.clean: ## Delete Ninja CMake build cache.
 	rm -rfv $(BUILD_DIR_NINJA)
-
