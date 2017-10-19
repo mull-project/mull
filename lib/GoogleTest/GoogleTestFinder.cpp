@@ -1,8 +1,8 @@
 #include "GoogleTest/GoogleTestFinder.h"
 
 #include "Context.h"
+#include "Filter.h"
 #include "Logger.h"
-#include "MutationOperators/MutationOperator.h"
 
 #include <llvm/IR/CallSite.h>
 #include <llvm/IR/Constants.h>
@@ -16,29 +16,10 @@
 
 #include "GoogleTest/GoogleTest_Test.h"
 
-#include "MutationOperators/AddMutationOperator.h"
-#include "MutationOperators/NegateConditionMutationOperator.h"
-#include "MutationOperators/RemoveVoidFunctionMutationOperator.h"
-
-#include <queue>
-#include <set>
 #include <vector>
-
-#include <cxxabi.h>
 
 using namespace mull;
 using namespace llvm;
-
-GoogleTestFinder::GoogleTestFinder(
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators,
-  std::vector<std::string> testsToFilter,
-  std::vector<std::string> excludeLocations)
-  : TestFinder(),
-  mutationOperators(std::move(mutationOperators)),
-  filter(GoogleTestMutationOperatorFilter(testsToFilter, excludeLocations))
-{
-
-}
 
 /// The algorithm is the following:
 ///
@@ -73,12 +54,13 @@ GoogleTestFinder::GoogleTestFinder(
 /// Note: except of Typed and Value Prametrized Tests
 ///
 
-std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
+std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &context,
+                                                               Filter &filter) {
   std::vector<std::unique_ptr<Test>> tests;
 
   auto testInfoTypeName = StringRef("class.testing::TestInfo");
 
-  for (auto &currentModule : Ctx.getModules()) {
+  for (auto &currentModule : context.getModules()) {
     for (auto &globalValue : currentModule->getModule()->getGlobalList()) {
       Type *globalValueType = globalValue.getValueType();
       if (globalValueType->getTypeID() != Type::PointerTyID) {
@@ -228,31 +210,10 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
 
       tests.emplace_back(make_unique<GoogleTest_Test>(testName,
                                                       testBodyFunction,
-                                                      Ctx.getStaticConstructors()));
+                                                      context.getStaticConstructors()));
     }
 
   }
 
   return tests;
-}
-
-std::vector<MutationPoint *>
-GoogleTestFinder::findMutationPoints(const Context &context,
-                                     llvm::Function &testee) {
-
-  if (MutationPointsRegistry.count(&testee) != 0) {
-    return MutationPointsRegistry.at(&testee);
-  }
-
-  std::vector<MutationPoint *> points;
-
-  for (auto &mutationOperator : mutationOperators) {
-    for (auto point : mutationOperator->getMutationPoints(context, &testee, filter)) {
-      points.push_back(point);
-      MutationPoints.emplace_back(std::unique_ptr<MutationPoint>(point));
-    }
-  }
-
-  MutationPointsRegistry.insert(std::make_pair(&testee, points));
-  return points;
 }

@@ -16,6 +16,7 @@
 #include "SimpleTest/SimpleTestRunner.h"
 #include "TestModuleFactory.h"
 #include "TestResult.h"
+#include "MutationsFinder.h"
 
 #include "Toolchain/Toolchain.h"
 
@@ -91,15 +92,16 @@ TEST(Driver, SimpleTest_AddMutationOperator) {
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+  MutationsFinder finder(std::move(mutationOperators));
 
-  SimpleTestFinder testFinder(std::move(mutationOperators));
+  SimpleTestFinder testFinder;
 
   Toolchain toolchain(config);
   llvm::TargetMachine &machine = toolchain.targetMachine();
   SimpleTestRunner runner(machine);
   Filter filter;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder);
 
   /// Given the modules we use here we expect:
   ///
@@ -171,15 +173,15 @@ TEST(Driver, SimpleTest_MathSubMutationOperator) {
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<MathSubMutationOperator>());
-
-  SimpleTestFinder testFinder(std::move(mutationOperators));
+  MutationsFinder finder(std::move(mutationOperators));
+  SimpleTestFinder testFinder;
 
   Toolchain toolchain(config);
   llvm::TargetMachine &machine = toolchain.targetMachine();
   SimpleTestRunner runner(machine);
   Filter filter;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder);
 
     /// Given the modules we use here we expect:
     ///
@@ -251,15 +253,15 @@ TEST(Driver, SimpleTest_MathMulMutationOperator) {
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<MathMulMutationOperator>());
-
-  SimpleTestFinder testFinder(std::move(mutationOperators));
+  MutationsFinder finder(std::move(mutationOperators));
+  SimpleTestFinder testFinder;
 
   Toolchain toolchain(config);
   llvm::TargetMachine &machine = toolchain.targetMachine();
   SimpleTestRunner runner(machine);
   Filter filter;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder);
 
     /// Given the modules we use here we expect:
     ///
@@ -331,15 +333,15 @@ TEST(Driver, SimpleTest_MathDivMutationOperator) {
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<MathDivMutationOperator>());
-
-  SimpleTestFinder testFinder(std::move(mutationOperators));
+  MutationsFinder finder(std::move(mutationOperators));
+  SimpleTestFinder testFinder;
 
   Toolchain toolchain(config);
   llvm::TargetMachine &machine = toolchain.targetMachine();
   SimpleTestRunner runner(machine);
   Filter filter;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder);
 
     /// Given the modules we use here we expect:
     ///
@@ -399,8 +401,8 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
-
-  SimpleTestFinder testFinder(std::move(mutationOperators));
+  MutationsFinder finder(std::move(mutationOperators));
+  SimpleTestFinder testFinder;
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
@@ -421,7 +423,7 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
   SimpleTestRunner runner(toolchain.targetMachine());
   Filter filter;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder);
 
   /// Given the modules we use here we expect:
   ///
@@ -474,8 +476,8 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
-
-  SimpleTestFinder testFinder(std::move(mutationOperators));
+  MutationsFinder finder(std::move(mutationOperators));
+  SimpleTestFinder testFinder;
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
@@ -496,7 +498,7 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
   SimpleTestRunner runner(toolchain.targetMachine());
   Filter filter;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder);
 
   /// Given the modules we use here we expect:
   ///
@@ -549,8 +551,8 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator) {
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AndOrReplacementMutationOperator>());
-
-  SimpleTestFinder testFinder(std::move(mutationOperators));
+  MutationsFinder finder(std::move(mutationOperators));
+  SimpleTestFinder testFinder;
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
@@ -568,7 +570,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator) {
   SimpleTestRunner runner(toolchain.targetMachine());
   Filter filter;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder);
 
   auto result = Driver.Run();
   ASSERT_EQ(8U, result->getTestResults().size());
@@ -723,8 +725,8 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator_CPP) {
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AndOrReplacementMutationOperator>());
-
-  SimpleTestFinder testFinder(std::move(mutationOperators));
+  MutationsFinder finder(std::move(mutationOperators));
+  SimpleTestFinder testFinder;
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
@@ -742,7 +744,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator_CPP) {
   SimpleTestRunner runner(toolchain.targetMachine());
   Filter filter;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder);
 
   auto result = Driver.Run();
   ASSERT_EQ(6U, result->getTestResults().size());
@@ -825,7 +827,3 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator_CPP) {
     ASSERT_EQ(ExecutionStatus::Crashed, mutant6_1->getExecutionResult().Status);
   }
 }
-
-#pragma mark - Testee path calculation
-
-

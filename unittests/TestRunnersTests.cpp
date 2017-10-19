@@ -5,6 +5,9 @@
 #include "TestModuleFactory.h"
 #include "Toolchain/Compiler.h"
 #include "SimpleTest/SimpleTestRunner.h"
+#include "MutationsFinder.h"
+#include "Filter.h"
+#include "Testee.h"
 
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/IR/InstrTypes.h"
@@ -52,10 +55,12 @@ TEST(SimpleTestRunner, runTest) {
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+  MutationsFinder mutationsFinder(std::move(mutationOperators));
+  Filter filter;
 
-  SimpleTestFinder testFinder(std::move(mutationOperators));
+  SimpleTestFinder testFinder;
 
-  auto Tests = testFinder.findTests(Ctx);
+  auto Tests = testFinder.findTests(Ctx, filter);
 
   ASSERT_NE(0U, Tests.size());
 
@@ -81,11 +86,11 @@ TEST(SimpleTestRunner, runTest) {
   /// afterwards we apply single mutation and run test again
   /// expecting it to fail
 
-  Function *Testee = Ctx.lookupDefinedFunction("count_letters");
-  AddMutationOperator MutOp;
-  std::vector<MutationOperator *> MutOps({&MutOp});
+  Function *testeeFunction = Ctx.lookupDefinedFunction("count_letters");
+  Testee testee(testeeFunction, 1);
 
-  std::vector<MutationPoint *> MutationPoints = testFinder.findMutationPoints(Ctx, *Testee);
+  std::vector<MutationPoint *> MutationPoints =
+    mutationsFinder.getMutationPoints(Ctx, testee, filter);
 
   MutationPoint *MP = (*(MutationPoints.begin()));
   auto ownedMutatedTesteeModule = MP->cloneModuleAndApplyMutation();
@@ -136,10 +141,12 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+  MutationsFinder mutationsFinder(std::move(mutationOperators));
+  Filter filter;
 
-  SimpleTestFinder Finder(std::move(mutationOperators));
+  SimpleTestFinder Finder;
 
-  auto Tests = Finder.findTests(Ctx);
+  auto Tests = Finder.findTests(Ctx, filter);
 
   ASSERT_EQ(1U, Tests.size());
 
@@ -161,11 +168,10 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   /// afterwards we apply single mutation and run test again
   /// expecting it to fail
 
-  Function *Testee = Ctx.lookupDefinedFunction("sum");
-  AddMutationOperator MutOp;
-  std::vector<MutationOperator *> MutOps({&MutOp});
+  Function *testeeFunction = Ctx.lookupDefinedFunction("sum");
+  Testee testee(testeeFunction, 1);
 
-  std::vector<MutationPoint *> MutationPoints = Finder.findMutationPoints(Ctx, *Testee);
+  std::vector<MutationPoint *> MutationPoints = mutationsFinder.getMutationPoints(Ctx, testee, filter);
   ASSERT_EQ(1U, MutationPoints.size());
 
   MutationPoint *MP = (*(MutationPoints.begin()));
@@ -212,13 +218,10 @@ TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
 
   Ctx.addModule(std::move(mullOwnedModuleWithTests));
   Ctx.addModule(std::move(mullOwnedModuleWithTestees));
+  Filter filter;
+  SimpleTestFinder testFinder;
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
-  mutationOperators.emplace_back(make_unique<AddMutationOperator>());
-
-  SimpleTestFinder testFinder(std::move(mutationOperators));
-
-  auto Tests = testFinder.findTests(Ctx);
+  auto Tests = testFinder.findTests(Ctx, filter);
 
   ASSERT_NE(0U, Tests.size());
 

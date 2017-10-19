@@ -7,6 +7,7 @@ set(mull_sources
   ModuleLoader.cpp
   DynamicCallTree.cpp
   Filter.cpp
+  MutationsFinder.cpp
 
   MutationOperators/AddMutationOperator.cpp
   MutationOperators/AndOrReplacementMutationOperator.cpp
@@ -33,7 +34,6 @@ set(mull_sources
   SimpleTest/SimpleTestRunner.cpp
 
   GoogleTest/GoogleTest_Test.cpp
-  GoogleTest/GoogleTestMutationOperatorFilter.cpp
   GoogleTest/GoogleTestFinder.cpp
   GoogleTest/GoogleTestRunner.cpp
 

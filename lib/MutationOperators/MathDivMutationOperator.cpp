@@ -2,7 +2,6 @@
 
 #include "Context.h"
 #include "Logger.h"
-#include "MutationOperators/MutationOperatorFilter.h"
 #include "MutationPoint.h"
 
 #include <llvm/IR/InstIterator.h>
@@ -19,52 +18,16 @@ using namespace mull;
 
 const std::string MathDivMutationOperator::ID = "math_div_mutation_operator";
 
-static int GetFunctionIndex(llvm::Function *function) {
-  auto PM = function->getParent();
-
-  auto FII = std::find_if(PM->begin(), PM->end(),
-                          [function] (llvm::Function &f) {
-                            return &f == function;
-                          });
-
-  assert(FII != PM->end() && "Expected function to be found in module");
-  int FIndex = std::distance(PM->begin(), FII);
-
-  return FIndex;
-}
-
-std::vector<MutationPoint *>
-MathDivMutationOperator::getMutationPoints(const Context &context,
-                                           llvm::Function *function,
-                                           MutationOperatorFilter &filter) {
-  int functionIndex = GetFunctionIndex(function);
-  int basicBlockIndex = 0;
-
-  std::vector<MutationPoint *> mutationPoints;
-
-  for (auto &basicBlock : function->getBasicBlockList()) {
-
-    int instructionIndex = 0;
-
-    for (auto &instruction : basicBlock.getInstList()) {
-      if (canBeApplied(instruction) && !filter.shouldSkipInstruction(&instruction)) {
-        auto moduleID = instruction.getModule()->getModuleIdentifier();
-        MullModule *module = context.moduleWithIdentifier(moduleID);
-
-        std::string diagnostics = "Math Div: replaced / with *";
-
-        MutationPointAddress address(functionIndex, basicBlockIndex, instructionIndex);
-        auto mutationPoint =
-          new MutationPoint(this, address, &instruction, module, diagnostics);
-
-        mutationPoints.push_back(mutationPoint);
-      }
-      instructionIndex++;
-    }
-    basicBlockIndex++;
+MutationPoint *
+MathDivMutationOperator::getMutationPoint(MullModule *module,
+                                          MutationPointAddress &address,
+                                          llvm::Instruction *instruction) {
+  if (canBeApplied(*instruction)) {
+    std::string diagnostics = "Math Div: replaced / with *";
+    return new MutationPoint(this, address, instruction, module, diagnostics);
   }
 
-  return mutationPoints;
+  return nullptr;
 }
 
 bool MathDivMutationOperator::canBeApplied(Value &V) {

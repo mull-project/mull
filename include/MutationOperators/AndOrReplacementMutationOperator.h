@@ -19,15 +19,16 @@ enum AND_OR_MutationType {
 namespace llvm {
   class BasicBlock;
   class BranchInst;
+  class Instruction;
 }
 
 using namespace llvm;
 
 namespace mull {
 
+  class MullModule;
   class MutationPoint;
   class MutationPointAddress;
-  class MutationOperatorFilter;
 
   class AndOrReplacementMutationOperator : public MutationOperator {
 
@@ -59,9 +60,9 @@ namespace mull {
   public:
     static const std::string ID;
 
-    std::vector<MutationPoint *> getMutationPoints(const Context &context,
-                                                   llvm::Function *function,
-                                                   MutationOperatorFilter &filter) override;
+    MutationPoint *getMutationPoint(MullModule *module,
+                                    MutationPointAddress &address,
+                                    llvm::Instruction *instruction) override;
 
     std::string uniqueID() override {
       return ID;

@@ -13,7 +13,7 @@ class MutationOperatorsFactory {
   std::vector<std::unique_ptr<MutationOperator>> defaultMutationOperators();
 
 public:
-
+  
   std::vector<std::unique_ptr<MutationOperator>>
   mutationOperators(std::vector<std::string> mutationOperatorStrings);
 

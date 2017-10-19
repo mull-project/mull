@@ -2,7 +2,6 @@
 
 #include "Context.h"
 #include "Logger.h"
-#include "MutationOperators/MutationOperatorFilter.h"
 #include "MutationPoint.h"
 
 #include <llvm/IR/Constants.h>
@@ -33,42 +32,18 @@ static ConstantFP *getReplacementFloat(ConstantFP *constantFloat);
 
 const std::string ScalarValueMutationOperator::ID = "scalar_value_mutation_operator";
 
-std::vector<MutationPoint *>
-ScalarValueMutationOperator::getMutationPoints(const Context &context,
-                                               llvm::Function *function,
-                                               MutationOperatorFilter &filter) {
-
-  int functionIndex = MutationPointAddress::getFunctionIndex(function);
-
-  std::vector<MutationPoint *> mutationPoints;
-
+MutationPoint *
+ScalarValueMutationOperator::getMutationPoint(MullModule *module,
+                                              MutationPointAddress &address,
+                                              llvm::Instruction *instruction) {
   std::string diagnostics;
-  MutationPointAddress::enumerateInstructions(*function,
-                                              [&](Instruction &instr,
-                                                  int bbIndex,
-                                                  int iIndex) {
+  ScalarValueMutationType mutationType =
+    findPossibleApplication(*instruction, diagnostics);
+  if (mutationType == ScalarValueMutationType::None) {
+    return nullptr;
+  }
 
-    if (filter.shouldSkipInstruction(&instr)) {
-      return;
-    }
-
-    ScalarValueMutationType mutationType =
-      findPossibleApplication(instr, diagnostics);
-    if (mutationType == ScalarValueMutationType::None) {
-      return;
-    }
-
-    auto moduleID = instr.getModule()->getModuleIdentifier();
-    MullModule *module = context.moduleWithIdentifier(moduleID);
-
-    MutationPointAddress address(functionIndex, bbIndex, iIndex);
-    auto mutationPoint =
-      new MutationPoint(this, address, &instr, module, diagnostics);
-
-    mutationPoints.push_back(mutationPoint);
-  });
-
-  return mutationPoints;
+  return new MutationPoint(this, address, instruction, module, diagnostics);
 }
 
 /// Currently only used by SimpleTestFinder.

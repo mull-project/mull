@@ -8,6 +8,7 @@
 #include "MutationOperators/MutationOperatorsFactory.h"
 #include "SQLiteReporter.h"
 #include "Result.h"
+#include "MutationsFinder.h"
 
 #include "Toolchain/Toolchain.h"
 
@@ -81,6 +82,10 @@ int main(int argc, char *argv[]) {
     filter.skipByLocation(location);
   }
 
+  for (const std::string &test: config.getTests()) {
+    filter.includeTest(test);
+  }
+
   const std::string &testFramework = config.getTestFramework();
 
   std::unique_ptr<TestFinder> testFinder;
@@ -89,6 +94,7 @@ int main(int argc, char *argv[]) {
   auto mutationOperatorsFactory = MutationOperatorsFactory();
   auto mutationOperators =
     mutationOperatorsFactory.mutationOperators(config.getMutationOperators());
+  MutationsFinder mutationsFinder(std::move(mutationOperators));
 
   if (testFramework == "GoogleTest") {
     filter.skipByName("testing8internal");
@@ -100,15 +106,12 @@ int main(int argc, char *argv[]) {
     filter.skipByLocation("gtest");
     filter.skipByLocation("gmock");
 
-    testFinder = make_unique<GoogleTestFinder>(std::move(mutationOperators),
-                                               config.getTests(),
-                                               config.getExcludeLocations());
-
+    testFinder = make_unique<GoogleTestFinder>();
     testRunner = make_unique<GoogleTestRunner>(toolchain.targetMachine());
   }
 
   else if (testFramework == "SimpleTest") {
-    testFinder = make_unique<SimpleTestFinder>(std::move(mutationOperators));
+    testFinder = make_unique<SimpleTestFinder>();
     testRunner = make_unique<SimpleTestRunner>(toolchain.targetMachine());
   }
 
@@ -130,7 +133,7 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  Driver driver(config, Loader, *testFinder, *testRunner, toolchain, filter);
+  Driver driver(config, Loader, *testFinder, *testRunner, toolchain, filter, mutationsFinder);
 
   const long timeSuiteStart =
     duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();

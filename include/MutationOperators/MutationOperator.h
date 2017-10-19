@@ -1,7 +1,5 @@
 #pragma once
 
-#include "MutationOperators/MutationOperatorFilter.h"
-
 #include <string>
 #include <vector>
 
@@ -9,20 +7,21 @@ namespace llvm {
   class Function;
   class Value;
   class Module;
+  class Instruction;
 }
 
 namespace mull {
 
 class Context;
+class MullModule;
 class MutationPoint;
 class MutationPointAddress;
-class MutationOperatorFilter;
 
 class MutationOperator {
 public:
-  virtual std::vector<MutationPoint *> getMutationPoints(const Context &context,
-                                                         llvm::Function *function,
-                                                         MutationOperatorFilter &filter) = 0;
+  virtual MutationPoint *getMutationPoint(MullModule *module,
+                                          MutationPointAddress &address,
+                                          llvm::Instruction *instruction) = 0;
 
   /// FIXME: Renmae to 'getUniqueIdentifier'
   virtual std::string uniqueID() = 0;

@@ -8,6 +8,7 @@
 #include "TestResult.h"
 #include "TestFinder.h"
 #include "TestRunner.h"
+#include "MutationsFinder.h"
 
 #include <llvm/ExecutionEngine/Orc/JITSymbol.h>
 #include <llvm/IR/Constants.h>
@@ -113,7 +114,7 @@ std::unique_ptr<Result> Driver::Run() {
 
   prepareForExecution();
 
-  auto foundTests = Finder.findTests(Ctx);
+  auto foundTests = Finder.findTests(Ctx, filter);
   const int testsCount = foundTests.size();
 
   Logger::debug() << "Driver::Run> found "
@@ -167,7 +168,7 @@ std::unique_ptr<Result> Driver::Run() {
          testee_it != ee;
          ++testee_it) {
 
-      auto &&testee = *testee_it;
+      std::unique_ptr<Testee> &testee = *testee_it;
 
       Logger::debug().indent(8)
         << "Driver::Run::process testee "
@@ -175,7 +176,7 @@ std::unique_ptr<Result> Driver::Run() {
         << testee->getTesteeFunction()->getName()
         << ", ";
 
-      auto MPoints = Finder.findMutationPoints(Ctx, *(testee->getTesteeFunction()));
+      auto MPoints = mutationsFinder.getMutationPoints(Ctx, *testee.get(), filter);
       if (MPoints.empty()) {
         Logger::debug() << "no mutation points, skipping.\n";
 

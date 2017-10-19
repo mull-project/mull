@@ -4,16 +4,20 @@
 
 #include <vector>
 
+namespace llvm {
+class Instruction;
+}
+
 namespace mull {
 
+class MullModule;
 class MutationPoint;
 class MutationPointAddress;
-class MutationOperatorFilter;
 
 /// Arithmetic with Overflow Intrinsics
 /// http://llvm.org/docs/LangRef.html#id1468
 class MathSubMutationOperator : public MutationOperator {
-
+  
   bool isSubWithOverflow(llvm::Value &V);
   llvm::Function *replacementForSubWithOverflow(llvm::Function *testeeFunction,
                                                 llvm::Module &module);
@@ -21,9 +25,9 @@ class MathSubMutationOperator : public MutationOperator {
 public:
   static const std::string ID;
 
-  std::vector<MutationPoint *> getMutationPoints(const Context &context,
-                                                 llvm::Function *function,
-                                                 MutationOperatorFilter &filter) override;
+  MutationPoint *getMutationPoint(MullModule *module,
+                                  MutationPointAddress &address,
+                                  llvm::Instruction *instruction) override;
 
   std::string uniqueID() override {
     return ID;

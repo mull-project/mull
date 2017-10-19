@@ -1,4 +1,3 @@
-
 #include "Config.h"
 #include "Context.h"
 #include "SQLiteReporter.h"
@@ -6,6 +5,8 @@
 #include "SimpleTest/SimpleTestFinder.h"
 #include "SimpleTest/SimpleTest_Test.h"
 #include "TestModuleFactory.h"
+#include "MutationsFinder.h"
+#include "Filter.h"
 
 #include "gtest/gtest.h"
 
@@ -39,9 +40,11 @@ TEST(SQLiteReporter, integrationTest) {
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   std::unique_ptr<AddMutationOperator> addMutationOperator = make_unique<AddMutationOperator>();
   mutationOperators.emplace_back(std::move(addMutationOperator));
+  MutationsFinder mutationsFinder(std::move(mutationOperators));
+  Filter filter;
 
-  SimpleTestFinder Finder(std::move(mutationOperators));
-  auto tests = Finder.findTests(context);
+  SimpleTestFinder testFinder;
+  auto tests = testFinder.findTests(context, filter);
 
   auto &test = *tests.begin();
 
@@ -55,8 +58,7 @@ TEST(SQLiteReporter, integrationTest) {
 
   Testee *testee = testees.begin()->get();
 
-  std::vector<MutationPoint *> mutationPoints =
-    Finder.findMutationPoints(context, *testeeFunction);
+  std::vector<MutationPoint *> mutationPoints = mutationsFinder.getMutationPoints(context, *testee, filter);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -315,9 +317,10 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   std::unique_ptr<AddMutationOperator> addMutationOperator = make_unique<AddMutationOperator>();
   mutationOperators.emplace_back(std::move(addMutationOperator));
-
-  SimpleTestFinder Finder(std::move(mutationOperators));
-  auto tests = Finder.findTests(context);
+  MutationsFinder mutationsFinder(std::move(mutationOperators));
+  Filter filter;
+  SimpleTestFinder testFinder;
+  auto tests = testFinder.findTests(context, filter);
 
   auto &test = *tests.begin();
 
@@ -333,7 +336,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   Testee *testee = testees.begin()->get();
 
   std::vector<MutationPoint *> mutationPoints =
-  Finder.findMutationPoints(context, *testeeFunction);
+    mutationsFinder.getMutationPoints(context, *testee, filter);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -488,9 +491,11 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   std::unique_ptr<AddMutationOperator> addMutationOperator = make_unique<AddMutationOperator>();
   mutationOperators.emplace_back(std::move(addMutationOperator));
+  MutationsFinder mutationsFinder(std::move(mutationOperators));
+  Filter filter;
 
-  SimpleTestFinder Finder(std::move(mutationOperators));
-  auto tests = Finder.findTests(context);
+  SimpleTestFinder testFinder;
+  auto tests = testFinder.findTests(context, filter);
   auto &test = *tests.begin();
 
   Function *testeeFunction = context.lookupDefinedFunction("count_letters");
@@ -504,7 +509,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   Testee *testee = testees.begin()->get();
 
   std::vector<MutationPoint *> mutationPoints =
-    Finder.findMutationPoints(context, *testeeFunction);
+    mutationsFinder.getMutationPoints(context, *testee, filter);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -526,7 +531,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   mutatedTestExecutionResult.stderrOutput = "mutatedTestExecutionResult.STDERR";
 
   std::unique_ptr<TestResult> testResult =
-  make_unique<TestResult>(testExecutionResult, std::move(test));
+    make_unique<TestResult>(testExecutionResult, std::move(test));
 
   auto mutationResult = make_unique<MutationResult>(mutatedTestExecutionResult,
                                                     mutationPoint,

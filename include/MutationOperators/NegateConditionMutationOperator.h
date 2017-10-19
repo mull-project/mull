@@ -6,21 +6,26 @@
 
 #include <vector>
 
+namespace llvm {
+class Instruction;
+}
+
 namespace mull {
 
+  class MullModule;
   class MutationPoint;
   class MutationPointAddress;
-  class MutationOperatorFilter;
 
   class NegateConditionMutationOperator : public MutationOperator {
-
+    
   public:
     static const std::string ID;
 
     static llvm::CmpInst::Predicate negatedCmpInstPredicate(llvm::CmpInst::Predicate predicate);
-    std::vector<MutationPoint *> getMutationPoints(const Context &context,
-                                                   llvm::Function *function,
-                                                   MutationOperatorFilter &filter) override;
+
+    MutationPoint *getMutationPoint(MullModule *module,
+                                    MutationPointAddress &address,
+                                    llvm::Instruction *instruction) override;
 
     std::string uniqueID() override {
       return ID;

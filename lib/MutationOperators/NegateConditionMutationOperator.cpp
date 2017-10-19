@@ -1,5 +1,4 @@
 #include "MutationOperators/NegateConditionMutationOperator.h"
-#include "MutationOperators/MutationOperatorFilter.h"
 
 #include "Context.h"
 #include "Logger.h"
@@ -40,20 +39,6 @@ const std::string NegateConditionMutationOperator::ID =
 /// `delete` instructions named `isnullX`, where `X` follows the same
 /// pattern as `tobool`'s `X`.
 ///
-
-static int GetFunctionIndex(llvm::Function *function) {
-  auto PM = function->getParent();
-
-  auto FII = std::find_if(PM->begin(), PM->end(),
-                          [function] (llvm::Function &f) {
-                            return &f == function;
-                          });
-
-  assert(FII != PM->end() && "Expected function to be found in module");
-  int FIndex = std::distance(PM->begin(), FII);
-
-  return FIndex;
-}
 
 llvm::CmpInst::Predicate
 NegateConditionMutationOperator::negatedCmpInstPredicate(llvm::CmpInst::Predicate predicate) {
@@ -291,41 +276,22 @@ static std::string getDiagnostics(CmpInst::Predicate originalPredicate,
   return diagnostics.str();
 }
 
-std::vector<MutationPoint *>
-NegateConditionMutationOperator::getMutationPoints(const Context &context,
-                                                   llvm::Function *function,
-                                                   MutationOperatorFilter &filter) {
-  int functionIndex = GetFunctionIndex(function);
-  int basicBlockIndex = 0;
 
-  std::vector<MutationPoint *> mutationPoints;
+MutationPoint *
+NegateConditionMutationOperator::getMutationPoint(MullModule *module,
+                                                  MutationPointAddress &address,
+                                                  llvm::Instruction *instruction) {
+  if (canBeApplied(*instruction)) {
+    CmpInst *cmpOp = dyn_cast<CmpInst>(instruction);
+    assert(cmpOp);
 
-  for (auto &basicBlock : function->getBasicBlockList()) {
+    std::string diagnostics =
+      getDiagnostics(cmpOp->getPredicate(),
+                     negatedCmpInstPredicate(cmpOp->getPredicate()));
 
-    int instructionIndex = 0;
-
-    for (auto &instruction : basicBlock.getInstList()) {
-      if (canBeApplied(instruction) && !filter.shouldSkipInstruction(&instruction)) {
-        auto moduleID = instruction.getModule()->getModuleIdentifier();
-        MullModule *module = context.moduleWithIdentifier(moduleID);
-
-        CmpInst *cmpOp = dyn_cast<CmpInst>(&instruction);
-        assert(cmpOp);
-
-        std::string diagnostics =
-          getDiagnostics(cmpOp->getPredicate(),
-                         negatedCmpInstPredicate(cmpOp->getPredicate()));
-
-        MutationPointAddress address(functionIndex, basicBlockIndex, instructionIndex);
-        auto mutationPoint = new MutationPoint(this, address, &instruction, module, diagnostics);
-        mutationPoints.push_back(mutationPoint);
-      }
-      instructionIndex++;
-    }
-    basicBlockIndex++;
+    return new MutationPoint(this, address, instruction, module, diagnostics);
   }
-
-  return mutationPoints;
+  return nullptr;
 }
 
 bool NegateConditionMutationOperator::canBeApplied(Value &V) {
