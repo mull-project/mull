@@ -358,15 +358,15 @@ TEST(DynamicCallTree, testees) {
 
     Testee *testeeF3 = (testees.begin() + 1)->get();
     EXPECT_EQ(testeeF3->getTesteeFunction(), F3);
-    EXPECT_EQ(testeeF3->getDistance(), 1U);
+    EXPECT_EQ(testeeF3->getDistance(), 1);
 
     Testee *testeeF4 = (testees.begin() + 2)->get();
     EXPECT_EQ(testeeF4->getTesteeFunction(), F4);
-    EXPECT_EQ(testeeF4->getDistance(), 1U);
+    EXPECT_EQ(testeeF4->getDistance(), 1);
 
     Testee *testeeF5 = (testees.begin() + 3)->get();
     EXPECT_EQ(testeeF5->getTesteeFunction(), F5);
-    EXPECT_EQ(testeeF5->getDistance(), 2U);
+    EXPECT_EQ(testeeF5->getDistance(), 2);
   }
 
   {

@@ -29,6 +29,7 @@ class ModuleLoader;
 class Result;
 class TestFinder;
 class TestRunner;
+class MutationsFinder;
 
 class Driver;
 
@@ -42,6 +43,7 @@ class Driver {
   TestRunner &Runner;
   Toolchain &toolchain;
   Filter &filter;
+  MutationsFinder &mutationsFinder;
   Context Ctx;
   ProcessSandbox *Sandbox;
   IDEDiagnostics *diagnostics;
@@ -53,8 +55,8 @@ class Driver {
   std::map<llvm::Module *, llvm::object::ObjectFile *> InnerCache;
 
 public:
-  Driver(Config &C, ModuleLoader &ML, TestFinder &TF, TestRunner &TR, Toolchain &t, Filter &f)
-    : Cfg(C), Loader(ML), Finder(TF), Runner(TR), toolchain(t), filter(f), dynamicCallTree(functions), _callTreeMapping(nullptr) {
+  Driver(Config &C, ModuleLoader &ML, TestFinder &TF, TestRunner &TR, Toolchain &t, Filter &f, MutationsFinder &mutationsFinder)
+    : Cfg(C), Loader(ML), Finder(TF), Runner(TR), toolchain(t), filter(f), mutationsFinder(mutationsFinder), dynamicCallTree(functions), _callTreeMapping(nullptr) {
 
       CallTreeFunction phonyRoot(nullptr);
       functions.push_back(phonyRoot);

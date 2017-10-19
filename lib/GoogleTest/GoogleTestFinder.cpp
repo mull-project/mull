@@ -30,11 +30,9 @@ using namespace mull;
 using namespace llvm;
 
 GoogleTestFinder::GoogleTestFinder(
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators,
   std::vector<std::string> testsToFilter,
   std::vector<std::string> excludeLocations)
   : TestFinder(),
-  mutationOperators(std::move(mutationOperators)),
   filter(GoogleTestMutationOperatorFilter(testsToFilter, excludeLocations))
 {
 
@@ -234,25 +232,4 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &Ctx) {
   }
 
   return tests;
-}
-
-std::vector<MutationPoint *>
-GoogleTestFinder::findMutationPoints(const Context &context,
-                                     llvm::Function &testee) {
-
-  if (MutationPointsRegistry.count(&testee) != 0) {
-    return MutationPointsRegistry.at(&testee);
-  }
-
-  std::vector<MutationPoint *> points;
-
-  for (auto &mutationOperator : mutationOperators) {
-    for (auto point : mutationOperator->getMutationPoints(context, &testee, filter)) {
-      points.push_back(point);
-      MutationPoints.emplace_back(std::unique_ptr<MutationPoint>(point));
-    }
-  }
-
-  MutationPointsRegistry.insert(std::make_pair(&testee, points));
-  return points;
 }
