@@ -11,6 +11,7 @@
 - [Step 4: Running Mull](#step-4-running-mull)
 - [Known issues](#known-issues)
   - [LLVM ERROR: Program used external function which could not be resolved!](#llvm-error-program-used-external-function-which-could-not-be-resolved)
+  - [error: Invalid record](#error-invalid-record)
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
@@ -62,8 +63,16 @@ TODO
 
 ### LLVM ERROR: Program used external function which could not be resolved!
 
-TODO
-
 ```
 LLVM ERROR: Program used external function '__ZN7testing4TestD2Ev' which could not be resolved!
 ```
+
+TODO
+
+### error: Invalid record
+
+```
+error: Invalid record (Producer: 'APPLE_1_900.0.38_0' Reader: 'LLVM 3.9.0')
+```
+
+TODO
