@@ -29,6 +29,7 @@ build Mull.
 - **Math: Add,Sub,Mul,Div**: replaces + with -, - with +, * with /, / with *.
 - **Negate Condition**: inverses conditions like `A -> !A` or `== -> !=`.
 - **Remove Void Function Call**: removes a function which doesn't have a return value.
+- **Replace Call**: replaces function calls with Int, Float and Double return values with number 42. Alpha state, not enabled by default.
 - **Scalar Value**: replaces 0 with 1, other numbers with 0. Alpha state, not enabled by default.
 - **AND <-> OR**: replaces `&& -> ||` and vice versa. Alpha state, not enabled by default.
 
