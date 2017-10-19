@@ -1,5 +1,5 @@
 #include "Context.h"
-#include "MutationOperators/AddMutationOperator.h"
+#include "MutationOperators/MathAddMutationOperator.h"
 #include "MutationOperators/MathDivMutationOperator.h"
 #include "MutationOperators/MathMulMutationOperator.h"
 #include "MutationOperators/MathSubMutationOperator.h"
@@ -66,7 +66,7 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
   Ctx.addModule(std::move(mullModuleWithTestees));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
-  mutationOperators.emplace_back(make_unique<AddMutationOperator>());
+  mutationOperators.emplace_back(make_unique<MathAddMutationOperator>());
   MutationsFinder finder(std::move(mutationOperators));
 
   Function *testeeFunction = Ctx.lookupDefinedFunction("count_letters");

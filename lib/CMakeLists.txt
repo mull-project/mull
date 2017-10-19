@@ -9,7 +9,7 @@ set(mull_sources
   Filter.cpp
   MutationsFinder.cpp
 
-  MutationOperators/AddMutationOperator.cpp
+  MutationOperators/MathAddMutationOperator.cpp
   MutationOperators/AndOrReplacementMutationOperator.cpp
   MutationOperators/MutationOperatorsFactory.cpp
   MutationOperators/NegateConditionMutationOperator.cpp

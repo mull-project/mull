@@ -1,4 +1,4 @@
-#include "MutationOperators/AddMutationOperator.h"
+#include "MutationOperators/MathAddMutationOperator.h"
 
 #include "Context.h"
 #include "Logger.h"
@@ -16,9 +16,9 @@
 using namespace llvm;
 using namespace mull;
 
-const std::string AddMutationOperator::ID = "add_mutation_operator";
+const std::string MathAddMutationOperator::ID = "math_add_mutation_operator";
 
-bool AddMutationOperator::isAddWithOverflow(llvm::Value &V) {
+bool MathAddMutationOperator::isAddWithOverflow(llvm::Value &V) {
   if (CallInst *callInst = dyn_cast<CallInst>(&V)) {
     Function *calledFunction = callInst->getCalledFunction();
 
@@ -35,9 +35,10 @@ bool AddMutationOperator::isAddWithOverflow(llvm::Value &V) {
   return false;
 }
 
+
 llvm::Function *
-AddMutationOperator::replacementForAddWithOverflow(llvm::Function *addFunction,
-                                                   llvm::Module &module) {
+MathAddMutationOperator::replacementForAddWithOverflow(llvm::Function *addFunction,
+                                                       llvm::Module &module) {
 
   std::string name = addFunction->getName().str();
 
@@ -85,7 +86,7 @@ AddMutationOperator::replacementForAddWithOverflow(llvm::Function *addFunction,
   }
 
   else {
-    Logger::debug() << "AddMutationOperator> unknown add function: "
+    Logger::debug() << "MathAddMutationOperator> unknown add function: "
                     << name
                     << ".\n";
   }
@@ -106,9 +107,10 @@ AddMutationOperator::replacementForAddWithOverflow(llvm::Function *addFunction,
   return replacementFunction;
 }
 
-MutationPoint *AddMutationOperator::getMutationPoint(MullModule *module,
-                                                     MutationPointAddress &address,
-                                                     llvm::Instruction *instruction) {
+MutationPoint *
+MathAddMutationOperator::getMutationPoint(MullModule *module,
+                                          MutationPointAddress &address,
+                                          llvm::Instruction *instruction) {
   if (canBeApplied(*instruction)) {
     std::string diagnostics = "Math Add: replaced + with -";
 
@@ -118,7 +120,7 @@ MutationPoint *AddMutationOperator::getMutationPoint(MullModule *module,
   return nullptr;
 }
 
-bool AddMutationOperator::canBeApplied(Value &V) {
+bool MathAddMutationOperator::canBeApplied(Value &V) {
   if (BinaryOperator *BinOp = dyn_cast<BinaryOperator>(&V)) {
     BinaryOperator::BinaryOps Opcode = BinOp->getOpcode();
 
@@ -134,9 +136,10 @@ bool AddMutationOperator::canBeApplied(Value &V) {
   return false;
 }
 
-llvm::Value *AddMutationOperator::applyMutation(Module *M,
-                                                MutationPointAddress address,
-                                                Value &_V) {
+llvm::Value *
+MathAddMutationOperator::applyMutation(Module *M,
+                                       MutationPointAddress address,
+                                       Value &_V) {
 
   /// In the following V argument is not used. Eventually it will be removed from
   /// this method's signature because it will be not relevant
