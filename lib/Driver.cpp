@@ -114,7 +114,7 @@ std::unique_ptr<Result> Driver::Run() {
 
   prepareForExecution();
 
-  auto foundTests = Finder.findTests(Ctx);
+  auto foundTests = Finder.findTests(Ctx, filter);
   const int testsCount = foundTests.size();
 
   Logger::debug() << "Driver::Run> found "

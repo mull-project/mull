@@ -1,5 +1,4 @@
 #include "MutationOperators/NegateConditionMutationOperator.h"
-#include "MutationOperators/MutationOperatorFilter.h"
 
 #include "Context.h"
 #include "Logger.h"

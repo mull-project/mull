@@ -29,7 +29,6 @@ namespace mull {
   class MullModule;
   class MutationPoint;
   class MutationPointAddress;
-  class MutationOperatorFilter;
 
   class AndOrReplacementMutationOperator : public MutationOperator {
 

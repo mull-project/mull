@@ -8,7 +8,6 @@ namespace mull {
 
 class MutationPoint;
 class MutationPointAddress;
-class MutationOperatorFilter;
 
 /// Arithmetic with Overflow Intrinsics
 /// http://llvm.org/docs/LangRef.html#id1468

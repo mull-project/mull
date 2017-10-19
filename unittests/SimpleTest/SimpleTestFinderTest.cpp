@@ -1,7 +1,7 @@
 #include "SimpleTest/SimpleTestFinder.h"
 
 #include "Context.h"
-
+#include "Filter.h"
 #include "TestModuleFactory.h"
 #include "Test.h"
 #include "SimpleTest/SimpleTest_Test.h"
@@ -25,9 +25,10 @@ TEST(SimpleTestFinder, FindTest) {
   Context Ctx;
   Ctx.addModule(std::move(mullModuleWithTests));
 
+  Filter filter;
   SimpleTestFinder finder;
 
-  auto tests = finder.findTests(Ctx);
+  auto tests = finder.findTests(Ctx, filter);
 
   ASSERT_EQ(1U, tests.size());
 }

@@ -60,7 +60,7 @@ TEST(SimpleTestRunner, runTest) {
 
   SimpleTestFinder testFinder;
 
-  auto Tests = testFinder.findTests(Ctx);
+  auto Tests = testFinder.findTests(Ctx, filter);
 
   ASSERT_NE(0U, Tests.size());
 
@@ -146,7 +146,7 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
 
   SimpleTestFinder Finder;
 
-  auto Tests = Finder.findTests(Ctx);
+  auto Tests = Finder.findTests(Ctx, filter);
 
   ASSERT_EQ(1U, Tests.size());
 
@@ -218,10 +218,10 @@ TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
 
   Ctx.addModule(std::move(mullOwnedModuleWithTests));
   Ctx.addModule(std::move(mullOwnedModuleWithTestees));
-
+  Filter filter;
   SimpleTestFinder testFinder;
 
-  auto Tests = testFinder.findTests(Ctx);
+  auto Tests = testFinder.findTests(Ctx, filter);
 
   ASSERT_NE(0U, Tests.size());
 

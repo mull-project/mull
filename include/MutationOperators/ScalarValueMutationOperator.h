@@ -13,7 +13,6 @@ namespace mull {
 class MullModule;
 class MutationPoint;
 class MutationPointAddress;
-class MutationOperatorFilter;
 
 class ScalarValueMutationOperator : public MutationOperator {
 

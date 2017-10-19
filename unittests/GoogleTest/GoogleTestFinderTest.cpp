@@ -45,9 +45,10 @@ mutation_operators:
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(Input);
 
-  GoogleTestFinder Finder({}, {});
+  Filter filter;
+  GoogleTestFinder Finder;
 
-  auto tests = Finder.findTests(Ctx);
+  auto tests = Finder.findTests(Ctx, filter);
 
   ASSERT_EQ(2U, tests.size());
 
@@ -77,9 +78,11 @@ mutation_operators:
   ConfigParser Parser;
   auto Cfg = Parser.loadConfig(Input);
 
-  GoogleTestFinder Finder({ "HelloTest.testSumOfTestee" }, {});
+  Filter filter;
+  filter.includeTest("HelloTest.testSumOfTestee");
+  GoogleTestFinder Finder;
 
-  auto tests = Finder.findTests(Ctx);
+  auto tests = Finder.findTests(Ctx, filter);
 
   ASSERT_EQ(1U, tests.size());
   GoogleTest_Test *Test1 = dyn_cast<GoogleTest_Test>(tests[0].get());

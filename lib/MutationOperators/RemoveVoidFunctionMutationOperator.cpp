@@ -1,5 +1,4 @@
 #include "MutationOperators/RemoveVoidFunctionMutationOperator.h"
-#include "MutationOperators/MutationOperatorFilter.h"
 
 #include "MutationPoint.h"
 #include "Context.h"

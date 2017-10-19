@@ -1,7 +1,5 @@
 #pragma once
 
-#include "MutationOperators/MutationOperatorFilter.h"
-
 #include <string>
 #include <vector>
 
@@ -18,7 +16,6 @@ class Context;
 class MullModule;
 class MutationPoint;
 class MutationPointAddress;
-class MutationOperatorFilter;
 
 class MutationOperator {
 public:

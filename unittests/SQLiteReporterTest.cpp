@@ -44,7 +44,7 @@ TEST(SQLiteReporter, integrationTest) {
   Filter filter;
 
   SimpleTestFinder testFinder;
-  auto tests = testFinder.findTests(context);
+  auto tests = testFinder.findTests(context, filter);
 
   auto &test = *tests.begin();
 
@@ -320,7 +320,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   MutationsFinder mutationsFinder(std::move(mutationOperators));
   Filter filter;
   SimpleTestFinder testFinder;
-  auto tests = testFinder.findTests(context);
+  auto tests = testFinder.findTests(context, filter);
 
   auto &test = *tests.begin();
 
@@ -495,7 +495,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   Filter filter;
 
   SimpleTestFinder testFinder;
-  auto tests = testFinder.findTests(context);
+  auto tests = testFinder.findTests(context, filter);
   auto &test = *tests.begin();
 
   Function *testeeFunction = context.lookupDefinedFunction("count_letters");

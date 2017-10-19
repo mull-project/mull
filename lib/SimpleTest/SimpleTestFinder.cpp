@@ -2,21 +2,20 @@
 #include "SimpleTest/SimpleTest_Test.h"
 #include "Context.h"
 #include "Logger.h"
+#include "Filter.h"
 
 #include <llvm/IR/Module.h>
 
-#include <algorithm>
-#include <queue>
-#include <set>
 #include <vector>
 
 using namespace mull;
 using namespace llvm;
 
-std::vector<std::unique_ptr<Test>> SimpleTestFinder::findTests(Context &Ctx) {
+std::vector<std::unique_ptr<Test>> SimpleTestFinder::findTests(Context &context,
+                                                               Filter &filter) {
   std::vector<std::unique_ptr<Test>> tests;
 
-  for (auto &module : Ctx.getModules()) {
+  for (auto &module : context.getModules()) {
     auto &x = module->getModule()->getFunctionList();
     for (auto &Fn : x) {
 

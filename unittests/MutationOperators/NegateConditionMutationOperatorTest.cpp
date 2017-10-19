@@ -1,7 +1,6 @@
 
 #include "MutationPoint.h"
 #include "MutationOperators/MutationOperator.h"
-#include "MutationOperators/MutationOperatorFilter.h"
 #include "MutationOperators/NegateConditionMutationOperator.h"
 #include "Context.h"
 #include "Filter.h"

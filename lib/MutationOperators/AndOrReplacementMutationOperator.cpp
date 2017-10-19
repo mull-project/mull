@@ -2,7 +2,6 @@
 
 #include "Context.h"
 #include "Logger.h"
-#include "MutationOperators/MutationOperatorFilter.h"
 #include "MutationPoint.h"
 
 #include "llvm/IR/Constants.h"
