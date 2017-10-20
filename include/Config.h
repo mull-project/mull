@@ -67,7 +67,7 @@ public:
     excludeLocations(),
     fork(true),
     dryRun(false),
-    useCache(true),
+    useCache(false),
     emitDebugInfo(false),
     diagnostics(false),
     timeout(MullDefaultTimeoutMilliseconds),
