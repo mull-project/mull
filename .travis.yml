@@ -22,5 +22,4 @@ before_install:
 
 # Build steps
 script:
-- make -f Makefile.macos test_unit
-
+- make -f Makefile.macos ninja.test
