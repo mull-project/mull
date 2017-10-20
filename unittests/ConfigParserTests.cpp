@@ -148,12 +148,12 @@ TEST_F(ConfigParserTestFixture, loadConfig_DryRun_SpecificValue) {
 
 TEST_F(ConfigParserTestFixture, loadConfig_UseCache_Unspecified) {
   configWithYamlContent("");
-  ASSERT_TRUE(config.getUseCache());
+  ASSERT_FALSE(config.getUseCache());
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_UseCache_SpecificValue) {
-  configWithYamlContent("use_cache: false\n");
-  ASSERT_FALSE(config.getUseCache());
+  configWithYamlContent("use_cache: true\n");
+  ASSERT_TRUE(config.getUseCache());
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_emitDebugInfo_Unspecified) {
