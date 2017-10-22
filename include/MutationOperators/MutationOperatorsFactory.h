@@ -4,19 +4,19 @@
 
 #include <string>
 #include <vector>
+#include <map>
 
 namespace mull {
 
-class MutationOperator;
-
 class MutationOperatorsFactory {
-  std::vector<std::unique_ptr<MutationOperator>> defaultMutationOperators();
+  std::map<std::string, std::unique_ptr<MutationOperator>> mutationsMapping;
+  std::map<std::string, std::vector<std::string>> groupsMapping;
 
+  void init();
 public:
-  
+  MutationOperatorsFactory();
   std::vector<std::unique_ptr<MutationOperator>>
-  mutationOperators(std::vector<std::string> mutationOperatorStrings);
-
+    mutationOperators(const std::vector<std::string> groups);
 };
 
 } // namespace mull

@@ -1,11 +1,11 @@
 #include "MutationOperatorsFactory.h"
 
 #include "MutationOperator.h"
-#include "MutationOperators/MathAddMutationOperator.h"
 #include "MutationOperators/AndOrReplacementMutationOperator.h"
-#include "MutationOperators/MathSubMutationOperator.h"
+#include "MutationOperators/MathAddMutationOperator.h"
 #include "MutationOperators/MathDivMutationOperator.h"
 #include "MutationOperators/MathMulMutationOperator.h"
+#include "MutationOperators/MathSubMutationOperator.h"
 #include "MutationOperators/NegateConditionMutationOperator.h"
 #include "MutationOperators/RemoveVoidFunctionMutationOperator.h"
 #include "MutationOperators/ReplaceCallMutationOperator.h"
@@ -14,75 +14,128 @@
 
 #include <llvm/ADT/STLExtras.h>
 
+#include <set>
+
 using namespace mull;
+using namespace std;
 
-std::vector<std::unique_ptr<MutationOperator>>
-MutationOperatorsFactory::mutationOperators(
-  std::vector<std::string> mutationOperatorStrings) {
+static const string MathOperatorsGroup = "math";
+static const string ConditionalOperatorsGroup = "conditional";
+static const string FunctionsOperatorsGroup = "functions";
+static const string ConstantOperatorsGroup = "constant";
 
-  if (mutationOperatorStrings.size() == 0) {
-    Logger::info()
-    << "Driver> No mutation operators specified in a config file. "
-    << "Defaulting to default operators:" << "\n";
+static const string DefaultOperatorsGroup = "default";
+static const string ExperimentalOperatorsGroup = "experimental";
 
-    auto mutationOperators = defaultMutationOperators();
+static const string AllOperatorsGroup = "all";
 
-    for (auto &mutationOperator: mutationOperators) {
-      Logger::info() << "\t" << mutationOperator.get()->uniqueID() << "\n";
+static void expandGroups(const vector<string> &groups,
+                         const map<string, vector<string>> &mapping,
+                         set<string> &expandedGroups) {
+  for (const string &group: groups) {
+    if (mapping.count(group) == 0) {
+      expandedGroups.insert(group);
+      continue;
     }
+    expandGroups(mapping.at(group), mapping, expandedGroups);
+  }
+}
 
-    return mutationOperators;
+MutationOperatorsFactory::MutationOperatorsFactory() {
+  groupsMapping[ConditionalOperatorsGroup] = {
+    AndOrReplacementMutationOperator::ID,
+    NegateConditionMutationOperator::ID
+  };
+  groupsMapping[MathOperatorsGroup] = {
+    MathAddMutationOperator::ID,
+    MathSubMutationOperator::ID,
+    MathMulMutationOperator::ID,
+    MathDivMutationOperator::ID
+  };
+  groupsMapping[FunctionsOperatorsGroup] = {
+    ReplaceCallMutationOperator::ID,
+    RemoveVoidFunctionMutationOperator::ID
+  };
+  groupsMapping[ConstantOperatorsGroup] = {
+    ScalarValueMutationOperator::ID
+  };
+  groupsMapping[DefaultOperatorsGroup] = {
+    MathAddMutationOperator::ID,
+    NegateConditionMutationOperator::ID,
+    RemoveVoidFunctionMutationOperator::ID
+  };
+  groupsMapping[ExperimentalOperatorsGroup] = {
+    MathSubMutationOperator::ID,
+    MathMulMutationOperator::ID,
+    MathDivMutationOperator::ID,
+    AndOrReplacementMutationOperator::ID,
+    ReplaceCallMutationOperator::ID,
+    ScalarValueMutationOperator::ID
+  };
+  groupsMapping[AllOperatorsGroup] = {
+    DefaultOperatorsGroup,
+    ExperimentalOperatorsGroup
+  };
+}
+
+void MutationOperatorsFactory::init() {
+  mutationsMapping[MathAddMutationOperator::ID] =
+    make_unique<MathAddMutationOperator>();
+  mutationsMapping[MathSubMutationOperator::ID] =
+    make_unique<MathSubMutationOperator>();
+  mutationsMapping[MathDivMutationOperator::ID] =
+    make_unique<MathDivMutationOperator>();
+  mutationsMapping[MathMulMutationOperator::ID] =
+    make_unique<MathMulMutationOperator>();
+
+  mutationsMapping[NegateConditionMutationOperator::ID] =
+    make_unique<NegateConditionMutationOperator>();
+  mutationsMapping[AndOrReplacementMutationOperator::ID] =
+    make_unique<AndOrReplacementMutationOperator>();
+
+  mutationsMapping[ReplaceCallMutationOperator::ID] =
+    make_unique<ReplaceCallMutationOperator>();
+  mutationsMapping[RemoveVoidFunctionMutationOperator::ID] =
+    make_unique<RemoveVoidFunctionMutationOperator>();
+
+  mutationsMapping[ScalarValueMutationOperator::ID] =
+    make_unique<ScalarValueMutationOperator>();
+}
+
+vector<unique_ptr<MutationOperator>>
+MutationOperatorsFactory::mutationOperators(const vector<string> groups) {
+  /// We need to recreate all mutation operators in case this method called
+  /// more than once. It does not happen during normal program execution,
+  /// but happens a lot during testing
+  init();
+
+  set<string> expandedGroups;
+
+  if (groups.size() == 0) {
+    Logger::info()
+      << "No mutation operators specified in a config file.\n"
+      << "Switching to default operators.\n";
+
+    expandGroups({ DefaultOperatorsGroup }, groupsMapping, expandedGroups);
+  } else {
+    expandGroups(groups, groupsMapping, expandedGroups);
   }
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
-  for (auto mutation : mutationOperatorStrings) {
-    if (mutation == MathAddMutationOperator::ID) {
-      mutationOperators.emplace_back(make_unique<MathAddMutationOperator>());
+  vector<unique_ptr<MutationOperator>> mutationOperators;
+
+  for (string group: expandedGroups) {
+    if (mutationsMapping.count(group) == 0) {
+      Logger::error() << "Unknown mutation operator: '" << group << "'\n";
+      continue;
     }
-    else if (mutation == AndOrReplacementMutationOperator::ID) {
-      mutationOperators.emplace_back(make_unique<AndOrReplacementMutationOperator>());
-    }
-    else if (mutation == MathSubMutationOperator::ID) {
-      mutationOperators.emplace_back(make_unique<MathSubMutationOperator>());
-    }
-    else if (mutation == MathMulMutationOperator::ID) {
-      mutationOperators.emplace_back(make_unique<MathMulMutationOperator>());
-    }
-    else if (mutation == MathDivMutationOperator::ID) {
-      mutationOperators.emplace_back(make_unique<MathDivMutationOperator>());
-    }
-    else if (mutation == NegateConditionMutationOperator::ID) {
-      mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
-    }
-    else if (mutation == RemoveVoidFunctionMutationOperator::ID) {
-      mutationOperators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
-    }
-    else if (mutation == ReplaceCallMutationOperator::ID) {
-      mutationOperators.emplace_back(make_unique<ReplaceCallMutationOperator>());
-    }
-    else if (mutation == ScalarValueMutationOperator::ID) {
-      mutationOperators.emplace_back(make_unique<ScalarValueMutationOperator>());
-    }
-    else {
-      Logger::info() << "Driver> Unknown Mutation Operator: " << mutation << "\n";
-    }
+    mutationOperators.emplace_back(std::move(mutationsMapping.at(group)));
+    mutationsMapping.erase(group);
   }
 
   if (mutationOperators.size() == 0) {
-    Logger::info()
-    << "Driver> No valid mutation operators found in a config file.\n";
+    Logger::error()
+      << "No valid mutation operators found in a config file.\n";
   }
 
   return mutationOperators;
-}
-
-std::vector<std::unique_ptr<MutationOperator>>
-MutationOperatorsFactory::defaultMutationOperators() {
-  std::vector<std::unique_ptr<MutationOperator>> operators;
-
-  operators.emplace_back(make_unique<MathAddMutationOperator>());
-  operators.emplace_back(make_unique<NegateConditionMutationOperator>());
-  operators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
-
-  return operators;
 }
