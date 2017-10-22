@@ -2,6 +2,8 @@
 
 #include "Test.h"
 
+#include <memory>
+
 namespace mull {
 
 class Context;
