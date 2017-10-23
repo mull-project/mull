@@ -9,6 +9,7 @@
   - [Example: Fmt library](#example-fmt-library)
 - [Step 3: Creating config.yml file](#step-3-creating-configyml-file)
 - [Step 4: Running Mull](#step-4-running-mull)
+- [Step 5: Generating HTML report](#step-5-generating-html-report)
 - [Known issues](#known-issues)
   - [LLVM ERROR: Program used external function which could not be resolved!](#llvm-error-program-used-external-function-which-could-not-be-resolved)
   - [error: Invalid record](#error-invalid-record)
