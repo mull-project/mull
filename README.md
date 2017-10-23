@@ -13,9 +13,7 @@ Comments](http://lowlevelbits.org/llvm-based-mutation-testing-system/) and [FOSD
 Mull is being developed against OSX. Also it is known to work against
 Linux Ubuntu 16.04 and CentOS 7.
 
-- [Getting started on Mac OS](/Docs/GettingStartedMacOS.md)
-- [Getting started on Ubuntu](/Docs/GettingStartedUbuntu.md)
-- [Getting started on CentOS](/Docs/GettingStartedCentOS7.md)
+[How to run Mull](Docs/HowToRunMull.md)
 
 ## Notes
 
