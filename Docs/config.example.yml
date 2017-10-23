@@ -1,0 +1,36 @@
+## Required parameters.
+project_name: openlibm-mull
+bitcode_file_list: /Users/Stanislaw/RootStanislaw/Projects/mull-and-ESA/openlibm_bitcodefilelist.txt
+
+## Optional parameters.
+# fork: true
+# dry_run: false
+# test_framework: GoogleTest
+# diagnostics: false
+
+## Mutation Operators.
+## You can enable any of the following, the parsing is inclusive.
+## If mutation_operators is missing altogether Mull defaults to 'default' group.
+mutation_operators:
+## Groups of operators can be specified:
+- default        #
+# - math         # Consists of math_*_mutation_operator (4 math mutation operators).
+# - conditional  # negate_mutation_operator + and_or_replacement_mutation_operator.
+# - functions    # remove_void_function_mutation_operator + replace_call_mutation_operator
+# - all          # enables all available mutation operators.
+# - experimental # enables experimental mutation operators.
+#
+## Or single mutation operators:
+# Mathematical.
+# - math_add_mutation_operator
+# - math_mul_mutation_operator
+# - math_sub_mutation_operator
+# - math_div_mutation_operator
+# Conditional
+# - negate_mutation_operator
+# - and_or_replacement_mutation_operator
+# Functions
+# - remove_void_function_mutation_operator
+# - replace_call_mutation_operator
+# Constants
+# - scalar_value_mutation_operator

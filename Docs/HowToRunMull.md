@@ -53,11 +53,39 @@ find `pwd` -iname "*.o" > ../fmt.bitcode.list
 
 ## Step 3: Creating config.yml file
 
+See [example of config.yml](/Docs/config.example.yml).
+
 TODO
 
 ## Step 4: Running Mull
 
 TODO
+
+When `mull-driver` finishes running your project it produces something like
+this:
+
+```
+Results can be found at '/opt/mull/Examples/HelloWorld/1508698142.sqlite'
+```
+
+## Step 5: Generating HTML report
+
+The reporting is done by a Ruby gem that lives in a separate repository.
+
+```bash
+git clone https://github.com/mull-project/mull-reporter-sqlite
+cd mull-reporter-sqlite
+bundle # this installs the dependencies from the Ruby world
+```
+
+To run report you take the path to `.sqlite` file generated at step 4 and run:
+
+```bash
+REPORT=/path/to/file.sqlite make build
+```
+
+Note: You might have to tinker with Ruby stuff a bit. Please ask if you have
+any troubles.
 
 ## Known issues
 
