@@ -110,26 +110,44 @@ public:
 };
 
 GoogleTestRunner::GoogleTestRunner(llvm::TargetMachine &machine)
-  : TestRunner(machine) {}
+  : TestRunner(machine) {
+}
 
-std::string GoogleTestRunner::MangleName(const llvm::StringRef &Name) {
+/// We use LLVM Mangler class for low-level mangling: '_' prefixing.
+/// Examples:
+/// Mac OS:
+/// _ZN7testing14InitGoogleTestEPiPPc -> __ZN7testing14InitGoogleTestEPiPPc
+/// On Linux it has no effect:
+/// _ZN7testing14InitGoogleTestEPiPPc -> _ZN7testing14InitGoogleTestEPiPPc
+/// TODO: extract it to a separate class.
+/// TODO: remove braces?
+std::string GoogleTestRunner::getNameWithPrefix(const std::string &name) {
+  const llvm::StringRef &stringRefName = name;
   std::string MangledName;
   {
     raw_string_ostream Stream(MangledName);
-    Mangler.getNameWithPrefix(Stream, Name, machine.createDataLayout());
+    Mangler.getNameWithPrefix(Stream, stringRefName, machine.createDataLayout());
   }
   return MangledName;
 }
 
 void *GoogleTestRunner::GetCtorPointer(const llvm::Function &Function) {
-  return FunctionPointer(MangleName(Function.getName()).c_str());
+  return getFunctionPointer(getNameWithPrefix(Function.getName().str()));
 }
 
-void *GoogleTestRunner::FunctionPointer(const char *FunctionName) {
-  JITSymbol Symbol = ObjectLayer.findSymbol(FunctionName, false);
-  void *FPointer = reinterpret_cast<void *>(static_cast<uintptr_t>(Symbol.getAddress()));
-  assert(FPointer && "Can't find pointer to function");
-  return FPointer;
+void *GoogleTestRunner::getFunctionPointer(const std::string &functionName) {
+  JITSymbol symbol = ObjectLayer.findSymbol(functionName, false);
+
+  void *fpointer =
+    reinterpret_cast<void *>(static_cast<uintptr_t>(symbol.getAddress()));
+
+  if (fpointer == nullptr) {
+    errs() << "GoogleTestRunner> Can't find pointer to function: "
+           << functionName << "\n";
+    exit(1);
+  }
+
+  return fpointer;
 }
 
 void GoogleTestRunner::runStaticCtor(llvm::Function *Ctor) {
@@ -174,15 +192,19 @@ ExecutionResult GoogleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) 
   /// version of the driver (LLVM itself has one).
   ///
 
-  void *initGTestPtr = FunctionPointer("__ZN7testing14InitGoogleTestEPiPPc");
+  void *initGTestPtr =
+    getFunctionPointer(getNameWithPrefix("_ZN7testing14InitGoogleTestEPiPPc"));
+
   auto initGTest = ((void (*)(int *, const char**))(intptr_t)initGTestPtr);
   initGTest(&argc, argv);
 
-  void *getInstancePtr = FunctionPointer("__ZN7testing8UnitTest11GetInstanceEv");
+  void *getInstancePtr =
+    getFunctionPointer(getNameWithPrefix("_ZN7testing8UnitTest11GetInstanceEv"));
   auto getInstance = ((UnitTest *(*)())(intptr_t)getInstancePtr);
   UnitTest *test = getInstance();
 
-  void *runAllTestsPtr = FunctionPointer("__ZN7testing8UnitTest3RunEv");
+  void *runAllTestsPtr =
+    getFunctionPointer(getNameWithPrefix("_ZN7testing8UnitTest3RunEv"));
   auto runAllTests = ((int (*)(UnitTest *))(intptr_t)runAllTestsPtr);
   uint64_t result = runAllTests(test);
 

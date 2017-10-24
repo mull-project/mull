@@ -7,8 +7,10 @@
 #include "MutationOperators/MutationOperatorsFactory.h"
 #include "TestModuleFactory.h"
 #include "GoogleTest/GoogleTest_Test.h"
+#include "GoogleTest/GoogleTestRunner.h"
 #include "Filter.h"
 #include "MutationsFinder.h"
+#include "Toolchain/Toolchain.h"
 
 #include "llvm/IR/CallSite.h"
 #include "llvm/IR/InstrTypes.h"
@@ -16,6 +18,7 @@
 #include "llvm/IR/Module.h"
 #include "llvm/Support/SourceMgr.h"
 #include "llvm/Support/YAMLTraits.h"
+#include <llvm/Support/DynamicLibrary.h>
 
 #include "gtest/gtest.h"
 
@@ -43,7 +46,7 @@ mutation_operators:
   yaml::Input Input(configYAML);
   
   ConfigParser Parser;
-  auto Cfg = Parser.loadConfig(Input);
+  auto config = Parser.loadConfig(Input);
 
   Filter filter;
   GoogleTestFinder Finder;
@@ -76,7 +79,7 @@ mutation_operators:
   yaml::Input Input(configYAML);
 
   ConfigParser Parser;
-  auto Cfg = Parser.loadConfig(Input);
+  auto config = Parser.loadConfig(Input);
 
   Filter filter;
   filter.includeTest("HelloTest.testSumOfTestee");
@@ -87,4 +90,56 @@ mutation_operators:
   ASSERT_EQ(1U, tests.size());
   GoogleTest_Test *Test1 = dyn_cast<GoogleTest_Test>(tests[0].get());
   ASSERT_EQ("HelloTest.testSumOfTestee", Test1->getTestName());
+}
+
+TEST(DISABLED_GoogleTestRunner, runTest) {
+  const char *configYAML = R"YAML(
+mutation_operators:
+  - math_add_mutation_operator
+  - negate_mutation_operator
+  - remove_void_function_mutation_operator
+  )YAML";
+
+  yaml::Input Input(configYAML);
+
+  ConfigParser Parser;
+  auto config = Parser.loadConfig(Input);
+
+  Toolchain toolchain(config);
+
+  auto moduleWithTests = TestModuleFactory.createGoogleTestTesterModule();
+  auto moduleWithTestees = TestModuleFactory.createGoogleTestTesteeModule();
+
+  auto compiledModule_tests =
+    toolchain.compiler().compileModule(moduleWithTests.get());
+  auto compiledModule_testees =   toolchain.compiler().compileModule(moduleWithTestees.get());
+
+  auto mullModuleWithTests = make_unique<MullModule>(std::move(moduleWithTests), "");
+  auto mullModuleWithTestees = make_unique<MullModule>(std::move(moduleWithTestees), "");
+
+  Context Ctx;
+  Ctx.addModule(std::move(mullModuleWithTests));
+  Ctx.addModule(std::move(mullModuleWithTestees));
+
+  Filter filter;
+  GoogleTestFinder Finder;
+
+  auto tests = Finder.findTests(Ctx, filter);
+
+  ASSERT_EQ(2U, tests.size());
+
+  GoogleTest_Test *Test1 = dyn_cast<GoogleTest_Test>(tests[0].get());
+  ASSERT_EQ("HelloTest.testSumOfTestee", Test1->getTestName());
+
+  GoogleTest_Test *Test2 = dyn_cast<GoogleTest_Test>(tests[1].get());
+  ASSERT_EQ("HelloTest.testSumOfTestee2", Test2->getTestName());
+
+  GoogleTestRunner runner(toolchain.targetMachine());
+
+  std::vector<llvm::object::ObjectFile *> objects({
+    compiledModule_tests.getBinary(),
+    compiledModule_testees.getBinary()
+  });
+
+  runner.runTest(Test1, objects);
 }
