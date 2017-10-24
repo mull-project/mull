@@ -16,6 +16,8 @@
 #include "GoogleTest/GoogleTestRunner.h"
 #include "SimpleTest/SimpleTestFinder.h"
 #include "SimpleTest/SimpleTestRunner.h"
+#include "CustomTestFramework/CustomTestFinder.h"
+#include "CustomTestFramework/CustomTestRunner.h"
 
 #if defined(MULL_SUPPORT_RUST)
 #include "Rust/RustTestFinder.h"
@@ -113,6 +115,11 @@ int main(int argc, char *argv[]) {
   else if (testFramework == "SimpleTest") {
     testFinder = make_unique<SimpleTestFinder>();
     testRunner = make_unique<SimpleTestRunner>(toolchain.targetMachine());
+  }
+
+  else if (testFramework == "CustomTest") {
+    testFinder = make_unique<CustomTestFinder>(config.getCustomTests());
+    testRunner = make_unique<CustomTestRunner>(toolchain.targetMachine());
   }
 
   #if defined(MULL_SUPPORT_RUST)
