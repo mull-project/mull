@@ -12,6 +12,29 @@ LLVM_YAML_IS_SEQUENCE_VECTOR(std::string)
 namespace llvm {
 namespace yaml {
 class Input;
+
+template <>
+struct SequenceTraits<std::vector<mull::CustomTestDefinition>> {
+  static size_t size(IO &io, std::vector<mull::CustomTestDefinition> &list) {
+    return list.size();
+  }
+  static mull::CustomTestDefinition &element(IO &io, std::vector<mull::CustomTestDefinition> &list, size_t index) {
+    mull::CustomTestDefinition t;
+    list.push_back(t);
+    return list.back();
+  }
+};
+
+template <>
+struct MappingTraits<mull::CustomTestDefinition> {
+  static void mapping(IO &io, mull::CustomTestDefinition &test) {
+    io.mapRequired("name", test.testName);
+    io.mapRequired("method", test.methodName);
+    io.mapOptional("program", test.programName);
+    io.mapRequired("arguments", test.callArguments);
+  }
+};
+
 template <>
 struct MappingTraits<mull::Config>
 {
@@ -24,6 +47,7 @@ struct MappingTraits<mull::Config>
     io.mapOptional("mutation_operators", config.mutationOperators);
     io.mapOptional("tests", config.tests);
     io.mapOptional("exclude_locations", config.excludeLocations);
+    io.mapOptional("custom_tests", config.customTests);
     io.mapOptional("fork", config.fork);
     io.mapOptional("dry_run", config.dryRun);
     io.mapOptional("use_cache", config.useCache);

@@ -40,6 +40,7 @@ set(mull_sources
 
   CustomTestFramework/CustomTest_Test.cpp
   CustomTestFramework/CustomTestRunner.cpp
+  CustomTestFramework/CustomTestFinder.cpp
 
   IDEDiagnostics.cpp
   SQLiteReporter.cpp
