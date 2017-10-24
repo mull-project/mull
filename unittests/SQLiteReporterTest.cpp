@@ -210,7 +210,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
                 operators,
                 dynamicLibraryFileList,
                 tests,
-                {},
+                {}, {},
                 doFork, dryRun, useCache, emitDebugInfo, diagnostics,
                 timeout, distance,
                 cacheDirectory);
@@ -427,7 +427,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
                 operators,
                 dynamicLibraryFileList,
                 configTests,
-                {},
+                {}, {},
                 doFork, dryRun, useCache, emitDebugInfo, diagnostics,
                 timeout, distance,
                 cacheDirectory);
@@ -600,7 +600,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
                 operators,
                 dynamicLibraryFileList,
                 configTests,
-                {},
+                {}, {},
                 doFork, dryRun, useCache, emitDebugInfo, diagnostics,
                 timeout, distance,
                 cacheDirectory);

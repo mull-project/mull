@@ -38,6 +38,10 @@ set(mull_sources
   GoogleTest/GoogleTestFinder.cpp
   GoogleTest/GoogleTestRunner.cpp
 
+  CustomTestFramework/CustomTest_Test.cpp
+  CustomTestFramework/CustomTestRunner.cpp
+  CustomTestFramework/CustomTestFinder.cpp
+
   IDEDiagnostics.cpp
   SQLiteReporter.cpp
 )

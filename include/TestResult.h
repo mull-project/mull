@@ -28,6 +28,7 @@ enum ExecutionStatus {
 
 struct ExecutionResult {
   ExecutionStatus Status;
+  int exitStatus;
   long long RunningTime;
   std::string stdoutOutput;
   std::string stderrOutput;

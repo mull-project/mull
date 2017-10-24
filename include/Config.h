@@ -23,6 +23,23 @@ struct MappingTraits;
 }
 namespace mull {
 
+struct CustomTestDefinition {
+  std::string testName;
+  std::string methodName;
+  std::string programName;
+  std::vector<std::string> callArguments;
+  CustomTestDefinition(const std::string &name,
+                       const std::string &method,
+                       const std::string &program,
+                       const std::vector<std::string> arguments)
+  : testName(name),
+  methodName(method),
+  programName(program),
+  callArguments(arguments) {}
+
+  CustomTestDefinition() {}
+};
+
 class Config {
   std::string bitcodeFileList;
 
@@ -33,6 +50,7 @@ class Config {
   std::string dynamicLibraryFileList;
   std::vector<std::string> tests;
   std::vector<std::string> excludeLocations;
+  std::vector<CustomTestDefinition> customTests;
 
   bool fork;
   bool dryRun;
@@ -65,6 +83,7 @@ public:
     dynamicLibraryFileList(),
     tests(),
     excludeLocations(),
+    customTests(),
     fork(true),
     dryRun(false),
     useCache(false),
@@ -83,6 +102,7 @@ public:
          const std::string &dynamicLibraryFileList,
          const std::vector<std::string> tests,
          const std::vector<std::string> excludeLocations,
+         const std::vector<CustomTestDefinition> definitions,
          bool fork,
          bool dryrun,
          bool cache,
@@ -98,6 +118,7 @@ public:
     dynamicLibraryFileList(dynamicLibraryFileList),
     tests(tests),
     excludeLocations(excludeLocations),
+    customTests(definitions),
     fork(fork),
     dryRun(dryrun),
     useCache(cache),
@@ -167,6 +188,10 @@ public:
 
   const std::vector<std::string> &getExcludeLocations() const {
     return excludeLocations;
+  }
+
+  const std::vector<CustomTestDefinition> &getCustomTests() const {
+    return customTests;
   }
 
   bool getFork() const {

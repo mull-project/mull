@@ -17,6 +17,8 @@
 #include "TestModuleFactory.h"
 #include "TestResult.h"
 #include "MutationsFinder.h"
+#include "CustomTestFramework/CustomTestFinder.h"
+#include "CustomTestFramework/CustomTestRunner.h"
 
 #include "Toolchain/Toolchain.h"
 
@@ -62,6 +64,7 @@ TEST(Driver, SimpleTest_MathAddMutationOperator) {
   Config config("",
                 projectName,
                 testFramework,
+                {},
                 {},
                 {},
                 {},
@@ -150,6 +153,7 @@ TEST(Driver, SimpleTest_MathSubMutationOperator) {
                 {},
                 {},
                 {},
+                {},
                 doFork,
                 dryRun,
                 useCache,
@@ -226,6 +230,7 @@ TEST(Driver, SimpleTest_MathMulMutationOperator) {
   Config config("",
                 projectName,
                 testFramework,
+                {},
                 {},
                 {},
                 {},
@@ -310,6 +315,7 @@ TEST(Driver, SimpleTest_MathDivMutationOperator) {
                 {},
                 {},
                 {},
+                {},
                 doFork,
                 dryRun,
                 useCache,
@@ -390,6 +396,7 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
                 {},
                 {},
                 {},
+                {},
                 doFork,
                 dryRun,
                 useCache,
@@ -465,6 +472,7 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
                 {},
                 {},
                 {},
+                {},
                 doFork,
                 dryRun,
                 useCache,
@@ -536,6 +544,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator) {
   Config config("",
                 projectName,
                 testFramework,
+                {},
                 {},
                 {},
                 {},
@@ -714,6 +723,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator_CPP) {
                 {},
                 {},
                 {},
+                {},
                 doFork,
                 dryRun,
                 useCache,
@@ -826,4 +836,85 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator_CPP) {
     auto mutant6_1 = mutants6.begin()->get();
     ASSERT_EQ(ExecutionStatus::Crashed, mutant6_1->getExecutionResult().Status);
   }
+}
+
+TEST(Driver, customTest) {
+  std::string projectName = "some_custom_project";
+  std::string testFramework = "CustomTest";
+
+  bool doFork = false;
+  bool dryRun = false;
+  bool useCache = false;
+  bool emitDebugInfo = false;
+  bool diagnostics = false;
+
+  int distance = 10;
+  std::string cacheDirectory = "/tmp/mull_cache";
+
+  std::vector<CustomTestDefinition> testDefinitions({
+    CustomTestDefinition("failing", "failing_test", "mull", { "failing_test" }),
+    CustomTestDefinition("passing", "passing_test", "mull", { "passing_test" })
+  });
+
+  Config config("",
+                projectName,
+                testFramework,
+                {},
+                {},
+                {},
+                {},
+                testDefinitions,
+                doFork,
+                dryRun,
+                useCache,
+                emitDebugInfo,
+                diagnostics,
+                MullDefaultTimeoutMilliseconds,
+                distance,
+                cacheDirectory);
+
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<MathAddMutationOperator>());
+  MutationsFinder finder(std::move(mutationOperators));
+  CustomTestFinder testFinder(config.getCustomTests());
+
+  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
+    std::vector<std::unique_ptr<MullModule>> modules;
+    {
+      auto module = SharedTestModuleFactory.createCustomTest_Distance_DistanceModule();
+      modules.push_back(make_unique<MullModule>(std::move(module),
+                                                "CustomTest_Distance_DistanceModule"));
+    }
+    {
+      auto module = SharedTestModuleFactory.createCustomTest_Distance_MainModule();
+      modules.push_back(make_unique<MullModule>(std::move(module),
+                                                "CustomTest_Distance_MainModule"));
+    }
+    {
+      auto module = SharedTestModuleFactory.createCustomTest_Distance_TestModule();
+      modules.push_back(make_unique<MullModule>(std::move(module),
+                                                "CustomTest_Distance_TestModule"));
+    }
+
+    return modules;
+  };
+
+  LLVMContext context;
+  FakeModuleLoader loader(context, modules);
+
+  Toolchain toolchain(config);
+  CustomTestRunner runner(toolchain.targetMachine());
+  Filter filter;
+  filter.includeTest("passing");
+
+  Driver driver(config, loader, testFinder, runner, toolchain, filter, finder);
+
+  auto result = driver.Run();
+  ASSERT_EQ(1U, result->getTestResults().size());
+
+  TestResult *testResult = result->getTestResults().begin()->get();
+  ASSERT_NE(testResult, nullptr);
+  ASSERT_EQ(ExecutionStatus::Passed, testResult->getOriginalTestResult().Status);
+  ASSERT_EQ("passing", testResult->getTestName());
+  ASSERT_EQ(3UL, testResult->getMutationResults().size());
 }

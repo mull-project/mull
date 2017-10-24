@@ -226,6 +226,22 @@ std::unique_ptr<Module> TestModuleFactory::APFloat_019fc57b8bd190d33389137abbe71
   return createModule(fixture, fixture);
 }
 
+std::unique_ptr<Module> TestModuleFactory::createCustomTest_Distance_DistanceModule() {
+  const char *fixture = "custom_test/distance/distance.ll";
+  return createModule(fixture, fixture);
+}
+
+std::unique_ptr<Module> TestModuleFactory::createCustomTest_Distance_MainModule() {
+  const char *fixture = "custom_test/distance/main.ll";
+  return createModule(fixture, fixture);
+}
+
+std::unique_ptr<Module> TestModuleFactory::createCustomTest_Distance_TestModule() {
+  const char *fixture = "custom_test/distance/test.ll";
+  return createModule(fixture, fixture);
+}
+
+
 #pragma mark - Rust
 
 std::unique_ptr<Module> TestModuleFactory::rustModule() {
