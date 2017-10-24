@@ -26,6 +26,7 @@ $ wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
 Then install:
 
 ```bash
+$ apt-get update
 $ apt-get -y install git make vim ninja-build wget \
                      libz-dev sqlite3 libsqlite3-dev ncurses-dev \
                      cmake \
