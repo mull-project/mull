@@ -131,11 +131,13 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
       Instruction *instruction = dyn_cast<Instruction>(mutationPoint->getOriginalValue());
 
       std::string fileNameOrNil = "no-debug-info";
+      std::string directoryOrNil = "no-debug-info";
       std::string lineOrNil = "0";
       std::string columnOrNil = "0";
 
       if (instruction->getMetadata(0)) {
         fileNameOrNil = instruction->getDebugLoc()->getFilename().str();
+        directoryOrNil = instruction->getDebugLoc()->getDirectory().str();
         lineOrNil = std::to_string(instruction->getDebugLoc()->getLine());
         columnOrNil = std::to_string(instruction->getDebugLoc()->getColumn());
       }
@@ -148,6 +150,8 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
         + "'" + std::to_string(mutationPoint->getAddress().getBBIndex()) + "',"
         + "'" + std::to_string(mutationPoint->getAddress().getIIndex()) + "',"
         + "'" + fileNameOrNil + "',"
+        + "'" + directoryOrNil + "',"
+        + "'" + mutationPoint->getDiagnostics() + "',"
         + "'" + lineOrNil + "',"
         + "'" + columnOrNil + "',"
         + "'" + mutationPoint->getUniqueIdentifier() + "'"+
@@ -314,6 +318,8 @@ CREATE TABLE mutation_point (
   basic_block_index INT,
   instruction_index INT,
   filename TEXT,
+  directory TEXT,
+  diagnostics TEXT,
   line_number INT,
   column_number INT,
   unique_id TEXT UNIQUE
