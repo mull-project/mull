@@ -54,6 +54,10 @@ public:
   std::unique_ptr<Module> APFloat_019fc57b8bd190d33389137abbe7145e_214_2_7_negate_mutation_operatorModule();
   std::unique_ptr<Module> APFloat_019fc57b8bd190d33389137abbe7145e_5_1_3_negate_mutation_operatorModule();
 
+  std::unique_ptr<Module> createCustomTest_Distance_DistanceModule();
+  std::unique_ptr<Module> createCustomTest_Distance_MainModule();
+  std::unique_ptr<Module> createCustomTest_Distance_TestModule();
+
 #pragma mark - Rust
   std::unique_ptr<Module> rustModule();
 

@@ -21,6 +21,8 @@ set(mull_unittests_sources
 
   GoogleTest/GoogleTestFinderTest.cpp
 
+  CustomTestFramework/CustomTestRunnerTests.cpp
+
   SQLiteReporterTest.cpp
 
   TestModuleFactory.cpp
