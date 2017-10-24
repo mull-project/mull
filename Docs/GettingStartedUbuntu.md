@@ -18,6 +18,7 @@ Add LLVM sources for binary distributions as recommended by
 
 ```
 $ echo "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-3.9 main" >> /etc/apt/sources.list.d/llvm.list
+$ apt-get update
 $ apt-get -y install wget
 $ wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
 ```
@@ -25,7 +26,6 @@ $ wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
 Then install:
 
 ```bash
-$ apt-get update
 $ apt-get -y install git make vim ninja-build wget \
                      libz-dev sqlite3 libsqlite3-dev ncurses-dev \
                      cmake \
