@@ -49,6 +49,11 @@ static bool findPossibleApplication(Value &V, std::string &outDiagnostics) {
     return false;
   }
 
+  if (callSite.getCalledFunction() &&
+      callSite.getCalledFunction()->getName().startswith("llvm.objectsize")) {
+    return false;
+  }
+
   std::stringstream diagnosticsStream;
 
   diagnosticsStream << "Replace Call: replaced a call to function ";
