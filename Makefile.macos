@@ -76,5 +76,9 @@ ninja.test: ninja.build ## Run Unit Tests (Builds Ninja cache first if it does n
 
 	cd $(MULL_UNITTESTS_DIR) && $(MULL)
 
+ninja.example: ninja.driver
+	cd Examples/HelloWorld && \
+        make example MULL=$(BUILD_DIR_NINJA)/tools/driver/mull-driver MULL_CC=/opt/llvm-3.9/bin/clang
+
 ninja.clean: ## Delete Ninja CMake build cache.
 	rm -rfv $(BUILD_DIR_NINJA)
