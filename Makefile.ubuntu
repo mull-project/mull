@@ -2,6 +2,8 @@ MAKEFLAGS += --warn-undefined-variables
 
 CMAKE_COMMAND_LINE_DEBUG_FLAGS=# --trace --debug-output --trace-expand
 
+MULL_CC=/usr/lib/llvm-3.9/bin/clang
+
 BUILD_DIR_NINJA?=$(PWD)/BuildNinja
 
 MULL_CMAKE_TOOLCHAIN?=$(PWD)/Mull.toolchain.ubuntu.cmake
@@ -27,6 +29,11 @@ test_unit: build_ninja ## Run Unit Tests (Builds Ninja cache first if it does no
 	# http://stackoverflow.com/a/12399085/598057
 	cd $(MULL_UNITTESTS_DIR) && LD_LIBRARY_PATH=$(BUILD_DIR_NINJA)/lib $(MULL)
 
+example: build_ninja_driver
+	cd Examples/HelloWorld && make example MULL=$(BUILD_DIR_NINJA)/tools/driver/mull-driver MULL_CC=$(MULL_CC)
+
+example_run: build_ninja_driver
+	cd Examples/HelloWorld && make run MULL=$(BUILD_DIR_NINJA)/tools/driver/mull-driver MULL_CC=$(MULL_CC)
 
 .PHONY: build_ninja
 
@@ -40,6 +47,9 @@ build_ninja: ## Build Ninja project with CMake.
 
 build_ninja_mull: build_ninja ## Build Mull target
 	cd $(BUILD_DIR_NINJA) && ninja mull
+
+build_ninja_driver: build_ninja ## Build mull-driver target
+	cd $(BUILD_DIR_NINJA) && ninja mull-driver
 
 clean: clean_ninja ## Delete CMake build caches: Xcode and Ninja.
 

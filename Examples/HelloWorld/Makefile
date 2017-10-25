@@ -19,11 +19,16 @@ GTEST_DIR=$(PWD)/../../googletest
 
 GTEST_HEADER_SEARCH_FLAGS=-I$(GTEST_DIR) -I$(GTEST_DIR)/include
 
+# -pthread is needed for GoogleTest.
 PTHREADS:=""
 UNAME_S := $(shell uname -s)
 ifeq ($(UNAME_S),Linux)
     PTHREADS += -pthread
 endif
+
+# - fno-use-cxa-atexit is needed to prevent from happening:
+# LLVM ERROR: Program used external function '__dso_handle' which could not be resolved!
+CXXFLAGS=-fno-use-cxa-atexit
 
 OBJECTS=$(BUILD_DIR)/HelloWorld.o
 LLVM_IR=$(BUILD_DIR)/HelloWorld.ll
@@ -41,6 +46,7 @@ config:
 	echo $(BUILD_DIR)/HelloWorld.bc > $(BUILD_DIR)/bitcodelist
 	echo $(BUILD_DIR)/gtest.bc >> $(BUILD_DIR)/bitcodelist
 	echo "bitcode_file_list: $(BUILD_DIR)/bitcodelist" > $(BUILD_DIR)/config.yml
+	# echo "fork: false" >> $(BUILD_DIR)/config.yml
 
 mull: config
 	$(MULL) $(BUILD_DIR)/config.yml
@@ -56,7 +62,7 @@ $(BUILD_DIR):
 ## Bitcode
 
 $(BUILD_DIR)/%.bc:
-	$(MULL_CC) -emit-llvm -c $(GTEST_HEADER_SEARCH_FLAGS) $(PWD)/$*.cpp -o $@
+	$(MULL_CC) -emit-llvm -c $(CXXFLAGS) $(GTEST_HEADER_SEARCH_FLAGS) $(PWD)/$*.cpp -o $@
 
 ## LLVM IR
 
@@ -85,7 +91,7 @@ $(BUILD_DIR)/gtest.o:
 	$(MULL_CC) -c $(GTEST_HEADER_SEARCH_FLAGS) $(GTEST_DIR)/src/gtest-all.cc -o $@
 
 $(BUILD_DIR)/gtest.bc:
-	$(MULL_CC) -c -emit-llvm $(GTEST_HEADER_SEARCH_FLAGS) $(GTEST_DIR)/src/gtest-all.cc -o $@
+	$(MULL_CC) -c -emit-llvm $(CXXFLAGS) $(GTEST_HEADER_SEARCH_FLAGS) $(GTEST_DIR)/src/gtest-all.cc -o $@
 
 $(BUILD_DIR)/gtest_main.o:
 	$(MULL_CC) -c $(GTEST_HEADER_SEARCH_FLAGS) $(GTEST_DIR)/src/gtest_main.cc -o $@
