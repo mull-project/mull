@@ -1,11 +1,11 @@
 MAKEFLAGS=--warn-undefined-variables
 
-CC=/usr/local/opt/llvm/bin/clang
+CC=/opt/llvm-3.9/bin/clang
 
 # CC=xcrun -sdk macosx clang
 
 BUILD_DIR=build
-GTEST_DIR=../../googletest
+GTEST_DIR=../../../googletest
 DRIVER_DIR=UnitTestMain
 
 HEADER_SEARCH_FLAGS=-I$(GTEST_DIR) -I$(GTEST_DIR)/include
@@ -17,8 +17,7 @@ SYSROOT=-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.pl
 #NO_CXA=-fno-use-cxa-atexit
 NO_CXA=
 
-CC_FLAGS=-g -fno-exceptions $(STD_VERSION) $(HEADER_SEARCH_FLAGS) $(MACRO_DEFINITONS) $(MACOSX_VERSION) $(SYSROOT) $(NO_CXA)
-# CC_FLAGS=-g -fno-exceptions -fPIC $(STD_VERSION) $(HEADER_SEARCH_FLAGS) $(MACRO_DEFINITONS) $(MACOSX_VERSION) $(SYSROOT) $(NO_CXA)
+CC_FLAGS=-g -fno-exceptions -fno-rtti -fPIC $(STD_VERSION) $(HEADER_SEARCH_FLAGS) $(MACRO_DEFINITONS) $(MACOSX_VERSION) $(SYSROOT) $(NO_CXA)
 
 OBJECTS= $(BUILD_DIR)/Test.o \
         $(BUILD_DIR)/Testee.o

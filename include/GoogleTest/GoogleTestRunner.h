@@ -26,9 +26,10 @@ public:
   ExecutionResult runTest(Test *Test, ObjectFiles &ObjectFiles) override;
 
 private:
-  std::string MangleName(const llvm::StringRef &Name);
+  std::string getNameWithPrefix(const std::string &name);
+
   void *GetCtorPointer(const llvm::Function &Function);
-  void *FunctionPointer(const char *FunctionName);
+  void *getFunctionPointer(const std::string &functionName);
 
   void runStaticCtor(llvm::Function *Ctor);
 };
