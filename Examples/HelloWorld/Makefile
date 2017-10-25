@@ -26,9 +26,7 @@ ifeq ($(UNAME_S),Linux)
     PTHREADS += -pthread
 endif
 
-# - fno-use-cxa-atexit is needed to prevent from happening:
-# LLVM ERROR: Program used external function '__dso_handle' which could not be resolved!
-CXXFLAGS=-fno-use-cxa-atexit
+CXXFLAGS=-g -O0
 
 OBJECTS=$(BUILD_DIR)/HelloWorld.o
 LLVM_IR=$(BUILD_DIR)/HelloWorld.ll

@@ -1,5 +1,7 @@
 MAKEFLAGS += --warn-undefined-variables
 
+MULL_CC=/opt/llvm-3.9.0/bin/clang
+
 CMAKE_COMMAND_LINE_DEBUG_FLAGS=# --trace --debug-output --trace-expand
 
 BUILD_DIR_NINJA_DEBUG?=$(PWD)/BuildNinjaDebug
@@ -29,6 +31,15 @@ test_unit: build_ninja_debug ## Run Unit Tests (Builds Ninja cache first if it d
 	# TODO: A common but dirty solution, people should learn about rpath
 	# http://stackoverflow.com/a/12399085/598057
 	cd $(MULL_UNITTESTS_DIR) && LD_LIBRARY_PATH=$(BUILD_DIR_NINJA_DEBUG)/lib $(MULL)
+
+example: build_ninja_driver
+	cd Examples/HelloWorld && make example MULL=$(BUILD_DIR_NINJA_DEBUG)/tools/driver/mull-driver MULL_CC=$(MULL_CC)
+
+example_run: build_ninja_driver
+	cd Examples/HelloWorld && make run MULL=$(BUILD_DIR_NINJA_DEBUG)/tools/driver/mull-driver MULL_CC=$(MULL_CC)
+
+build_ninja_driver: build_ninja_debug ## Build mull-driver target
+	cd $(BUILD_DIR_NINJA_DEBUG) && ninja mull-driver
 
 build_ninja_debug: ## Build Ninja project with CMake (Debug configuration, for development).
 	mkdir -p $(BUILD_DIR_NINJA_DEBUG)
