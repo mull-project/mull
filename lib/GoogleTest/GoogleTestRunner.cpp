@@ -133,15 +133,26 @@ public:
 };
 
 GoogleTestRunner::GoogleTestRunner(llvm::TargetMachine &machine)
-  : TestRunner(machine), mapping() {
+  : TestRunner(machine) {
+  // TODO: Would be create to not have all of the following here.
+  // Some builder class?
   DataLayout dataLayout = machine.createDataLayout();
 
   std::string atExitFunction = getNameWithPrefix("__cxa_atexit", dataLayout);
   std::string dsoHandleFunction = getNameWithPrefix("__dso_handle", dataLayout);
   mapping[atExitFunction] = "mull__cxa_atexit";
   mapping[dsoHandleFunction] = "mull__dso_handle";
-
   this->mapping = mapping;
+
+  fGoogleTestInit.assign(
+    getNameWithPrefix("_ZN7testing14InitGoogleTestEPiPPc", dataLayout)
+  );
+  fGoogleTestInstance.assign(
+    getNameWithPrefix("_ZN7testing8UnitTest11GetInstanceEv", dataLayout)
+  );
+  fGoogleTestRun.assign(
+    getNameWithPrefix("_ZN7testing8UnitTest3RunEv", dataLayout)
+  );
 }
 
 void *GoogleTestRunner::GetCtorPointer(const llvm::Function &Function) {
@@ -207,22 +218,18 @@ ExecutionResult GoogleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) 
   /// version of the driver (LLVM itself has one).
   ///
 
-  void *initGTestPtr =
-    getFunctionPointer(getNameWithPrefix("_ZN7testing14InitGoogleTestEPiPPc",
-                                         machine.createDataLayout()));
+  void *initGTestPtr = getFunctionPointer(fGoogleTestInit);
 
   auto initGTest = ((void (*)(int *, const char**))(intptr_t)initGTestPtr);
   initGTest(&argc, argv);
 
-  void *getInstancePtr =
-    getFunctionPointer(getNameWithPrefix("_ZN7testing8UnitTest11GetInstanceEv",
-                                         machine.createDataLayout()));
+  void *getInstancePtr = getFunctionPointer(fGoogleTestInstance);
+
   auto getInstance = ((UnitTest *(*)())(intptr_t)getInstancePtr);
   UnitTest *test = getInstance();
 
-  void *runAllTestsPtr =
-    getFunctionPointer(getNameWithPrefix("_ZN7testing8UnitTest3RunEv",
-                                         machine.createDataLayout()));
+  void *runAllTestsPtr = getFunctionPointer(fGoogleTestRun);
+
   auto runAllTests = ((int (*)(UnitTest *))(intptr_t)runAllTestsPtr);
   uint64_t result = runAllTests(test);
 

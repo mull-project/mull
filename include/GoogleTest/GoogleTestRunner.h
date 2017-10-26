@@ -22,6 +22,10 @@ class GoogleTestRunner : public TestRunner {
 
   std::map<std::string, std::string> mapping;
 
+  std::string fGoogleTestInit;
+  std::string fGoogleTestInstance;
+  std::string fGoogleTestRun;
+
 public:
 
   GoogleTestRunner(llvm::TargetMachine &machine);
