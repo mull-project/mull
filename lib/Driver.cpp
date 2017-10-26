@@ -138,6 +138,10 @@ std::unique_ptr<Result> Driver::Run() {
 
     if (ExecResult.Status != Passed) {
       Logger::error() << "error: Test has failed: " << test->getTestName() << "\n";
+      Logger::error() << "status: " << ExecResult.getStatusAsString() << "\n";
+      Logger::error() << "exit code: " << ExecResult.exitStatus << "\n";
+      Logger::error() << "stdout: " << ExecResult.stdoutOutput << "\n";
+      Logger::error() << "stderr: " << ExecResult.stderrOutput << "\n";
       continue;
     }
 

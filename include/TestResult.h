@@ -32,6 +32,25 @@ struct ExecutionResult {
   long long RunningTime;
   std::string stdoutOutput;
   std::string stderrOutput;
+
+  std::string getStatusAsString() {
+    switch (this->Status) {
+      case Invalid:
+        return "Invalid";
+      case Failed:
+        return "Failed";
+      case Passed:
+        return "Passed";
+      case Timedout:
+        return "Timedout";
+      case Crashed:
+        return "Crashed";
+      case AbnormalExit:
+        return "AbnormalExit";
+      case DryRun:
+        return "DryRun";
+    }
+  }
 };
 
 class MutationResult {
