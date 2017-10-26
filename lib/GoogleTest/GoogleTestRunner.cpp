@@ -87,32 +87,6 @@ extern "C" int mull_printf(const char *fmt, ...) {
 
 extern "C" void *mull__dso_handle = nullptr;
 
-class Mull_GoogleTest_Resolver : public RuntimeDyld::SymbolResolver {
-public:
-
-  RuntimeDyld::SymbolInfo findSymbol(const std::string &Name) {
-    if (Name == "___cxa_atexit") {
-      return findSymbol("mull__cxa_atexit");
-    }
-
-    if (Name == "___dso_handle") {
-      return findSymbol("mull__dso_handle");
-    }
-
-    if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(Name))
-      return RuntimeDyld::SymbolInfo(SymAddr, JITSymbolFlags::Exported);
-
-    return RuntimeDyld::SymbolInfo(nullptr);
-  }
-
-  RuntimeDyld::SymbolInfo findSymbolInLogicalDylib(const std::string &Name) {
-    return RuntimeDyld::SymbolInfo(nullptr);   }
-};
-
-GoogleTestRunner::GoogleTestRunner(llvm::TargetMachine &machine)
-  : TestRunner(machine) {
-}
-
 /// We use LLVM Mangler class for low-level mangling: '_' prefixing.
 /// Examples:
 /// Mac OS:
@@ -121,18 +95,69 @@ GoogleTestRunner::GoogleTestRunner(llvm::TargetMachine &machine)
 /// _ZN7testing14InitGoogleTestEPiPPc -> _ZN7testing14InitGoogleTestEPiPPc
 /// TODO: extract it to a separate class.
 /// TODO: remove braces?
-std::string GoogleTestRunner::getNameWithPrefix(const std::string &name) {
+static std::string getNameWithPrefix(const std::string &name,
+                                     const llvm::DataLayout &dataLayout) {
   const llvm::StringRef &stringRefName = name;
   std::string MangledName;
   {
     raw_string_ostream Stream(MangledName);
-    Mangler.getNameWithPrefix(Stream, stringRefName, machine.createDataLayout());
+    llvm::Mangler::getNameWithPrefix(Stream,
+                                     stringRefName,
+                                     dataLayout);
   }
   return MangledName;
 }
 
+class Mull_GoogleTest_Resolver : public RuntimeDyld::SymbolResolver {
+
+  std::map<std::string, std::string> mapping;
+
+public:
+
+  Mull_GoogleTest_Resolver(std::map<std::string, std::string> mapping)
+    : mapping(mapping) {}
+
+  RuntimeDyld::SymbolInfo findSymbol(const std::string &name) {
+    if (mapping.count(name) > 0) {
+      return findSymbol(mapping[name]);
+    }
+
+    if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(name))
+      return RuntimeDyld::SymbolInfo(SymAddr, JITSymbolFlags::Exported);
+
+    return RuntimeDyld::SymbolInfo(nullptr);
+  }
+
+  RuntimeDyld::SymbolInfo findSymbolInLogicalDylib(const std::string &name) {
+    return RuntimeDyld::SymbolInfo(nullptr);   }
+};
+
+GoogleTestRunner::GoogleTestRunner(llvm::TargetMachine &machine)
+  : TestRunner(machine) {
+  // TODO: Would be create to not have all of the following here.
+  // Some builder class?
+  DataLayout dataLayout = machine.createDataLayout();
+
+  std::string atExitFunction = getNameWithPrefix("__cxa_atexit", dataLayout);
+  std::string dsoHandleFunction = getNameWithPrefix("__dso_handle", dataLayout);
+  mapping[atExitFunction] = "mull__cxa_atexit";
+  mapping[dsoHandleFunction] = "mull__dso_handle";
+  this->mapping = mapping;
+
+  fGoogleTestInit.assign(
+    getNameWithPrefix("_ZN7testing14InitGoogleTestEPiPPc", dataLayout)
+  );
+  fGoogleTestInstance.assign(
+    getNameWithPrefix("_ZN7testing8UnitTest11GetInstanceEv", dataLayout)
+  );
+  fGoogleTestRun.assign(
+    getNameWithPrefix("_ZN7testing8UnitTest3RunEv", dataLayout)
+  );
+}
+
 void *GoogleTestRunner::GetCtorPointer(const llvm::Function &Function) {
-  return getFunctionPointer(getNameWithPrefix(Function.getName().str()));
+  return getFunctionPointer(getNameWithPrefix(Function.getName().str(),
+                                              machine.createDataLayout()));
 }
 
 void *GoogleTestRunner::getFunctionPointer(const std::string &functionName) {
@@ -162,9 +187,10 @@ void GoogleTestRunner::runStaticCtor(llvm::Function *Ctor) {
 ExecutionResult GoogleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) {
   GoogleTest_Test *GTest = dyn_cast<GoogleTest_Test>(Test);
 
-  auto Handle = ObjectLayer.addObjectSet(ObjectFiles,
-                                         make_unique<SectionMemoryManager>(),
-                                         make_unique<Mull_GoogleTest_Resolver>());
+  auto Handle =
+    ObjectLayer.addObjectSet(ObjectFiles,
+                             make_unique<SectionMemoryManager>(),
+                             make_unique<Mull_GoogleTest_Resolver>(this->mapping));
 
   auto start = high_resolution_clock::now();
 
@@ -192,19 +218,18 @@ ExecutionResult GoogleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) 
   /// version of the driver (LLVM itself has one).
   ///
 
-  void *initGTestPtr =
-    getFunctionPointer(getNameWithPrefix("_ZN7testing14InitGoogleTestEPiPPc"));
+  void *initGTestPtr = getFunctionPointer(fGoogleTestInit);
 
   auto initGTest = ((void (*)(int *, const char**))(intptr_t)initGTestPtr);
   initGTest(&argc, argv);
 
-  void *getInstancePtr =
-    getFunctionPointer(getNameWithPrefix("_ZN7testing8UnitTest11GetInstanceEv"));
+  void *getInstancePtr = getFunctionPointer(fGoogleTestInstance);
+
   auto getInstance = ((UnitTest *(*)())(intptr_t)getInstancePtr);
   UnitTest *test = getInstance();
 
-  void *runAllTestsPtr =
-    getFunctionPointer(getNameWithPrefix("_ZN7testing8UnitTest3RunEv"));
+  void *runAllTestsPtr = getFunctionPointer(fGoogleTestRun);
+
   auto runAllTests = ((int (*)(UnitTest *))(intptr_t)runAllTestsPtr);
   uint64_t result = runAllTests(test);
 
