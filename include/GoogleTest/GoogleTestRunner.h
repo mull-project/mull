@@ -17,17 +17,17 @@ class Module;
 
 namespace mull {
 
-  class GoogleTestRunner : public TestRunner {
+class GoogleTestRunner : public TestRunner {
   llvm::orc::ObjectLinkingLayer<> ObjectLayer;
-  llvm::Mangler Mangler;
+
+  std::map<std::string, std::string> mapping;
+
 public:
 
   GoogleTestRunner(llvm::TargetMachine &machine);
   ExecutionResult runTest(Test *Test, ObjectFiles &ObjectFiles) override;
 
 private:
-  std::string getNameWithPrefix(const std::string &name);
-
   void *GetCtorPointer(const llvm::Function &Function);
   void *getFunctionPointer(const std::string &functionName);
 

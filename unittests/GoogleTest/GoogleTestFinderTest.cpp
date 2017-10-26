@@ -92,7 +92,7 @@ mutation_operators:
   ASSERT_EQ("HelloTest.testSumOfTestee", Test1->getTestName());
 }
 
-TEST(DISABLED_GoogleTestRunner, runTest) {
+TEST(GoogleTestRunner, runTest) {
   const char *configYAML = R"YAML(
 mutation_operators:
   - math_add_mutation_operator
