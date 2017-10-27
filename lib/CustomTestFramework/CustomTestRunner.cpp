@@ -149,7 +149,7 @@ ExecutionResult CustomTestRunner::runTest(Test *test, ObjectFiles &objectFiles) 
 
   for (int i = 0; i < argc; i++) {
     std::string &argument = arguments[i];
-    argv[i] = new char[argument.length()];
+    argv[i] = new char[argument.length() + 1];
     strcpy(argv[i], argument.c_str());
   }
 
