@@ -22,4 +22,6 @@ before_install:
 
 # Build steps
 script:
-- make -f Makefile.macos ninja.test
+- make -f Makefile.macos travis
+
+
