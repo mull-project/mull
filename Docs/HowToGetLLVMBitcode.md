@@ -22,6 +22,12 @@ information that is attached to mutation points.
 might have exotic build systems where `-O0` must be explicitly enforced, for
 example: `s/-O3/-O0/g`, so it is a good practice to always specify this flag to make sure Mull works on unoptimized code.
 
+**Important note:** Do not use Mac OS's Clang to compile the
+files to a bitcode. Mull is built on top of Clang/LLVM 3.9 which does not work
+with Clang/LLVM of Apple. If you followed the Getting Started instructions
+you should have LLVM 3.9 in place, we recommend to use `llvm-3.9/bin/clang`
+to build LLVM bitcode.
+
 ## -emit-llvm
 
 ```bash
