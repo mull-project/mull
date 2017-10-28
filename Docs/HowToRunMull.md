@@ -50,7 +50,12 @@ TODO
 
 ## Step 4: Running Mull
 
-TODO
+Once `config.yml` file is in place, run `mull-driver` with a path to this file
+as the first argument:
+
+```bash
+mull-driver /opt/mull/Examples/HelloWorld/build/config.yml
+```
 
 When `mull-driver` finishes running your project it produces something like
 this:
@@ -80,7 +85,26 @@ any troubles.
 
 ## Example: Hello World
 
-See [Examples/HelloWorld](https://github.com/mull-project/mull/tree/master/Examples/HelloWorld).
+The test project [Examples/HelloWorld](https://github.com/mull-project/mull/tree/master/Examples/HelloWorld) demonstrates how to run Mull on a simple CPP file
+with tests based on Google Test. It exercises the following steps:
+
+- Hello.cpp file is compiled to LLVM bitcode: `Hello.bc`.
+- Google Test framework's sources, which Mull has in the project tree, are
+ compiled to LLVM bitcode: `gtest.bc`.
+- file `bitcodelist` is created with the following contents:
+
+```yaml
+/opt/mull/Examples/HelloWorld/build/HelloWorld.bc
+/opt/mull/Examples/HelloWorld/build/gtest.bc
+```
+
+- file `config.yml` created with the following contents:
+
+```yaml
+bitcode_file_list: /opt/mull/Examples/HelloWorld/build/bitcodelist
+```
+
+- `mull-driver /opt/mull/Examples/HelloWorld/build/config.yml` is called.
 
 ## Known issues
 
@@ -98,4 +122,7 @@ TODO
 error: Invalid record (Producer: 'APPLE_1_900.0.38_0' Reader: 'LLVM 3.9.0')
 ```
 
-TODO
+This error indicates that you compiled your files to LLVM bitcode with default
+Mac OS's `clang` compiler which does not work well with LLVM 3.9 that Mull is
+based on. Check [How to get LLVM Bitcode](/Docs/HowToGetLLVMBitcode) for further
+details.
