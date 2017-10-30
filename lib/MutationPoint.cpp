@@ -82,6 +82,10 @@ Value *MutationPoint::getOriginalValue() {
   return OriginalValue;
 }
 
+MullModule *MutationPoint::getOriginalModule() {
+  return module;
+}
+
 MutationOperator *MutationPoint::getOperator() const {
   return mutationOperator;
 }
@@ -92,6 +96,10 @@ MutationPointAddress MutationPoint::getAddress() const {
 
 Value *MutationPoint::getOriginalValue() const {
   return OriginalValue;
+}
+
+MullModule *MutationPoint::getOriginalModule() const {
+  return module;
 }
 
 std::unique_ptr<llvm::Module>

@@ -80,10 +80,12 @@ public:
   MutationOperator *getOperator();
   MutationPointAddress getAddress();
   llvm::Value *getOriginalValue();
+  MullModule *getOriginalModule();
 
   MutationOperator *getOperator() const;
   MutationPointAddress getAddress() const;
   llvm::Value *getOriginalValue() const;
+  MullModule *getOriginalModule() const;
 
   std::unique_ptr<llvm::Module> cloneModuleAndApplyMutation();
 
