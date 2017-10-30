@@ -1,16 +1,17 @@
-
+#include "Config.h"
 #include "Context.h"
 #include "MutationOperators/ScalarValueMutationOperator.h"
 #include "MutationPoint.h"
 #include "TestModuleFactory.h"
 #include "Toolchain/Compiler.h"
+#include "Toolchain/Toolchain.h"
 #include "Filter.h"
 #include "Testee.h"
 #include "MutationsFinder.h"
 
-#include "llvm/IR/Instructions.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
+#include <llvm/IR/Instructions.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
 
 #include "gtest/gtest.h"
 
@@ -60,4 +61,19 @@ TEST(ScalarValueMutationOperator, getMutationPoint) {
   ASSERT_EQ(mutationPoints[3]->getAddress().getFnIndex(), 0);
   ASSERT_EQ(mutationPoints[3]->getAddress().getBBIndex(), 0);
   ASSERT_EQ(mutationPoints[3]->getAddress().getIIndex(), 12);
+}
+
+TEST(ScalarValueMutationOperator, failingMutationPoint) {
+  auto module = TestModuleFactory.create_CustomTest_OpenSSL_bio_enc_test_module();
+
+  auto mullModule = make_unique<MullModule>(std::move(module), "");
+
+  MutationPointAddress address(15, 10, 7);
+  ScalarValueMutationOperator mutationOperator;
+  MutationPoint point(&mutationOperator, address, nullptr, mullModule.get());
+
+  Config config;
+  Toolchain toolchain(config);
+  auto mutant = point.cloneModuleAndApplyMutation();
+  toolchain.compiler().compileModule(mutant.get());
 }

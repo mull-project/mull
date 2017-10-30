@@ -58,6 +58,8 @@ public:
   std::unique_ptr<Module> createCustomTest_Distance_MainModule();
   std::unique_ptr<Module> createCustomTest_Distance_TestModule();
 
+  std::unique_ptr<Module> create_CustomTest_OpenSSL_bio_enc_test_module();
+
 #pragma mark - Rust
   std::unique_ptr<Module> rustModule();
 
