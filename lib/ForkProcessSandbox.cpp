@@ -58,6 +58,10 @@ static std::string readFileAndUnlink(const char *filename) {
   return output;
 }
 
+void handle_alarm_signal(int signal, struct __siginfo *info, void *context) {
+  exit(mull::ForkProcessSandbox::MullTimeoutCode);
+}
+
 mull::ExecutionResult
 mull::ForkProcessSandbox::run(std::function<void (ExecutionResult *)> function,
                               long long timeoutMilliseconds) {
@@ -68,97 +72,76 @@ mull::ForkProcessSandbox::run(std::function<void (ExecutionResult *)> function,
   mktemp(stdoutFilename);
 
   /// Creating a memory to be shared between child and parent.
-  void *SharedMemory = mmap(NULL,
+  void *sharedMemory = mmap(NULL,
                             sizeof(ExecutionResult),
                             PROT_READ | PROT_WRITE,
                             MAP_SHARED | MAP_ANONYMOUS,
                             -1,
                             0);
 
-  ExecutionResult *sharedResult = new (SharedMemory) ExecutionResult();
+  ExecutionResult *sharedResult = new (sharedMemory) ExecutionResult();
 
-  const pid_t watchdogPID = mullFork("watchdog");
-  if (watchdogPID == 0) {
+  auto start = high_resolution_clock::now();
+  const pid_t workerPID = mullFork("worker");
+  if (workerPID == 0) {
+    struct sigaction action;
+    memset(&action, 0, sizeof(action));
+    action.sa_sigaction = &handle_alarm_signal;
+    sigaction(SIGALRM, &action, NULL);
 
-    const pid_t timerPID = mullFork("timer");
-    if (timerPID == 0) {
-      std::this_thread::sleep_for(std::chrono::milliseconds(timeoutMilliseconds));
-      exit(0);
-    }
+    useconds_t timeout = timeoutMilliseconds * 1000;
+    ualarm(timeout, 0);
 
-    const pid_t workerPID = mullFork("worker");
+    freopen(stderrFilename, "w", stderr);
+    freopen(stdoutFilename, "w", stdout);
 
-    auto start = high_resolution_clock::now();
+    function(sharedResult);
 
-    if (workerPID == 0) {
-      freopen(stderrFilename, "w", stderr);
-      freopen(stdoutFilename, "w", stdout);
-
-      function(sharedResult);
-
-      fflush(stderr);
-      fflush(stdout);
-      exit(MullExitCode);
-    }
-
-    int status = 0;
-    const pid_t exitedPID = waitpid(WAIT_ANY, &status, 0);
-    if (exitedPID == timerPID) {
-      /// Timer Process finished first, meaning that the worker timed out
-      kill(workerPID, SIGKILL);
-      auto elapsed = high_resolution_clock::now() - start;
-
-      ExecutionResult result;
-      result.Status = Timedout;
-      result.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
-      *sharedResult = result;
-    } else if (exitedPID == workerPID) {
-      kill(timerPID, SIGKILL);
-
-      /// Worker Process finished first
-      /// Need to check whether it has signaled (crashed) or finished normally
-      if (WIFSIGNALED(status)) {
-        auto elapsed = high_resolution_clock::now() - start;
-        ExecutionResult result;
-        result.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
-        result.Status = Crashed;
-        *sharedResult = result;
-      }
-
-      else if (WIFEXITED(status) && WEXITSTATUS(status) != MullExitCode) {
-        auto elapsed = high_resolution_clock::now() - start;
-        ExecutionResult result;
-        result.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
-        result.Status = AbnormalExit;
-        *sharedResult = result;
-      }
-    } else {
-      llvm_unreachable("Should not reach!");
-    }
-
-    wait(nullptr);
-    exit(0);
+    fflush(stderr);
+    fflush(stdout);
+    exit(MullExitCode);
   } else {
+    int status = 0;
     pid_t pid = 0;
-    while ( (pid = waitpid(watchdogPID, 0, 0)) == -1 ) {}
+    while ( (pid = waitpid(workerPID, &status, 0)) == -1 ) {}
+
+    auto elapsed = high_resolution_clock::now() - start;
+    ExecutionResult abnormalResult;
+    abnormalResult.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
+    abnormalResult.exitStatus = WEXITSTATUS(status);
+
+    if (WIFSIGNALED(status)) {
+      abnormalResult.Status = Crashed;
+      *sharedResult = abnormalResult;
+    }
+
+    else if (WIFEXITED(status) && WEXITSTATUS(status) == MullTimeoutCode) {
+      abnormalResult.Status = Timedout;
+      *sharedResult = abnormalResult;
+    }
+
+    else if (WIFEXITED(status) && WEXITSTATUS(status) != MullExitCode) {
+      abnormalResult.Status = AbnormalExit;
+      *sharedResult = abnormalResult;
+    }
+
+    wait(0);
+
+    ExecutionResult result = *sharedResult;
+
+    result.stderrOutput = readFileAndUnlink(stderrFilename);
+    result.stdoutOutput = readFileAndUnlink(stdoutFilename);
+
+    int munmapResult = munmap(sharedMemory, sizeof(ExecutionResult));
+    (void)munmapResult;
+
+    /// Check that mummap succeeds:
+    /// "On success, munmap() returns 0, on failure -1, and errno is set (probably to EINVAL)."
+    /// http://linux.die.net/man/2/munmap
+    assert(munmapResult == 0);
+
+    return result;
   }
-
-  wait(0);
-
-  ExecutionResult result = *sharedResult;
-
-  result.stderrOutput = readFileAndUnlink(stderrFilename);
-  result.stdoutOutput = readFileAndUnlink(stdoutFilename);
-
-  int munmapResult = munmap(SharedMemory, sizeof(ExecutionResult));
-  (void)munmapResult;
-
-  /// Check that mummap succeeds:
-  /// "On success, munmap() returns 0, on failure -1, and errno is set (probably to EINVAL)."
-  /// http://linux.die.net/man/2/munmap
-  assert(munmapResult == 0);
-
-  return result;
 }
 
 mull::ExecutionResult mull::NullProcessSandbox::run(std::function<void (ExecutionResult *)> function,

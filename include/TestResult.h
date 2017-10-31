@@ -18,12 +18,12 @@ class Test;
 
 enum ExecutionStatus {
   Invalid = 0,
-  Failed,
-  Passed,
-  Timedout,
-  Crashed,
-  AbnormalExit,
-  DryRun
+  Failed = 1,
+  Passed = 2,
+  Timedout = 3,
+  Crashed = 4,
+  AbnormalExit = 5,
+  DryRun = 6
 };
 
 struct ExecutionResult {
