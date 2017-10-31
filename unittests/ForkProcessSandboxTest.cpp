@@ -10,10 +10,10 @@ using namespace llvm;
 /// on a cold start (fresh start without a "warmup").
 static const long long Timeout = 1000;
 
-TEST(ForkProcessSandbox, CaptureOutputFromChildProcess) {
+TEST(ForkProcessSandbox, captureOutputFromChildProcess) {
 
-  static const char StdoutMessage[] = "Printing to stdout from a sandboxed child\n";
-  static const char StderrMessage[] = "Printing to stderr from a sandboxed child\n";
+  static const char stdoutMessage[] = "Printing to stdout from a sandboxed child\n";
+  static const char stderrMessage[] = "Printing to stderr from a sandboxed child\n";
 
   ForkProcessSandbox sandbox;
 
@@ -22,8 +22,8 @@ TEST(ForkProcessSandbox, CaptureOutputFromChildProcess) {
     R.Status = Passed;
     R.RunningTime = 1;
 
-    printf("%s", StdoutMessage);
-    fprintf(stderr, "%s", StderrMessage);
+    printf("%s", stdoutMessage);
+    fprintf(stderr, "%s", stderrMessage);
 
     *SharedResult = R;
   }, Timeout);
@@ -31,8 +31,8 @@ TEST(ForkProcessSandbox, CaptureOutputFromChildProcess) {
   ASSERT_EQ(result.Status, Passed);
   ASSERT_EQ(result.RunningTime, 1);
 
-  ASSERT_EQ(strcmp(result.stdoutOutput.c_str(), StdoutMessage), 0);
-  ASSERT_EQ(strcmp(result.stderrOutput.c_str(), StderrMessage), 0);
+  ASSERT_EQ(strcmp(result.stdoutOutput.c_str(), stdoutMessage), 0);
+  ASSERT_EQ(strcmp(result.stderrOutput.c_str(), stderrMessage), 0);
 }
 
 #pragma mark - Possible execution scenarios
