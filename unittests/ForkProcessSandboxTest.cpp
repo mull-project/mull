@@ -66,3 +66,23 @@ TEST(ForkProcessSandbox, statusAbnormalExit_IfExitingWithZeroButResultWasNotSet)
 
   ASSERT_EQ(result.Status, AbnormalExit);
 }
+
+TEST(ForkProcessSandbox, statusTimeout) {
+  ForkProcessSandbox sandbox;
+
+  ExecutionResult result = sandbox.run([&](ExecutionResult *_) {
+    sleep(3);
+  }, Timeout);
+
+  ASSERT_EQ(result.Status, Timedout);
+}
+
+TEST(ForkProcessSandbox, statusCrashed) {
+  ForkProcessSandbox sandbox;
+
+  ExecutionResult result = sandbox.run([&](ExecutionResult *_) {
+    abort();
+  }, Timeout);
+
+  ASSERT_EQ(result.Status, Crashed);
+}
