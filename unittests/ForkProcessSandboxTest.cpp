@@ -17,19 +17,14 @@ TEST(ForkProcessSandbox, captureOutputFromChildProcess) {
 
   ForkProcessSandbox sandbox;
 
-  ExecutionResult result = sandbox.run([&](ExecutionResult *SharedResult) {
-    ExecutionResult R;
-    R.Status = Passed;
-    R.RunningTime = 1;
-
+  ExecutionResult result = sandbox.run([&]() {
     printf("%s", stdoutMessage);
     fprintf(stderr, "%s", stderrMessage);
 
-    *SharedResult = R;
+    return ExecutionStatus::Passed;
   }, Timeout);
 
   ASSERT_EQ(result.Status, Passed);
-  ASSERT_EQ(result.RunningTime, 1);
 
   ASSERT_EQ(strcmp(result.stdoutOutput.c_str(), stdoutMessage), 0);
   ASSERT_EQ(strcmp(result.stderrOutput.c_str(), stderrMessage), 0);
@@ -40,8 +35,8 @@ TEST(ForkProcessSandbox, captureOutputFromChildProcess) {
 TEST(ForkProcessSandbox, statusPassedIfExitingWithZeroAndResultWasSet) {
   ForkProcessSandbox sandbox;
 
-  ExecutionResult result = sandbox.run([&](ExecutionResult *SharedResult) {
-    SharedResult->Status = Passed;
+  ExecutionResult result = sandbox.run([&]() {
+    return ExecutionStatus::Passed;
   }, Timeout);
 
   ASSERT_EQ(result.Status, Passed);
@@ -50,8 +45,9 @@ TEST(ForkProcessSandbox, statusPassedIfExitingWithZeroAndResultWasSet) {
 TEST(ForkProcessSandbox, statusAbnormalExit_IfExitingWithNonZero) {
   ForkProcessSandbox sandbox;
 
-  ExecutionResult result = sandbox.run([&](ExecutionResult *SharedResult) {
+  ExecutionResult result = sandbox.run([&]() {
     exit(1);
+    return ExecutionStatus::Passed;
   }, Timeout);
 
   ASSERT_EQ(result.Status, AbnormalExit);
@@ -60,8 +56,9 @@ TEST(ForkProcessSandbox, statusAbnormalExit_IfExitingWithNonZero) {
 TEST(ForkProcessSandbox, statusAbnormalExit_IfExitingWithZeroButResultWasNotSet) {
   ForkProcessSandbox sandbox;
 
-  ExecutionResult result = sandbox.run([&](ExecutionResult *SharedResult) {
+  ExecutionResult result = sandbox.run([&]() {
     exit(0);
+    return ExecutionStatus::Passed;
   }, Timeout);
 
   ASSERT_EQ(result.Status, AbnormalExit);
@@ -70,8 +67,9 @@ TEST(ForkProcessSandbox, statusAbnormalExit_IfExitingWithZeroButResultWasNotSet)
 TEST(ForkProcessSandbox, statusTimeout) {
   ForkProcessSandbox sandbox;
 
-  ExecutionResult result = sandbox.run([&](ExecutionResult *_) {
+  ExecutionResult result = sandbox.run([&]() {
     sleep(3);
+    return ExecutionStatus::Passed;
   }, Timeout);
 
   ASSERT_EQ(result.Status, Timedout);
@@ -80,8 +78,9 @@ TEST(ForkProcessSandbox, statusTimeout) {
 TEST(ForkProcessSandbox, statusCrashed) {
   ForkProcessSandbox sandbox;
 
-  ExecutionResult result = sandbox.run([&](ExecutionResult *_) {
+  ExecutionResult result = sandbox.run([&]() {
     abort();
+    return ExecutionStatus::Passed;
   }, Timeout);
 
   ASSERT_EQ(result.Status, Crashed);

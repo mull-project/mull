@@ -1,14 +1,13 @@
 
 #include <functional>
+#include "TestResult.h"
 
 namespace mull {
-
-struct ExecutionResult;
 
 class ProcessSandbox {
 public:
   virtual ~ProcessSandbox() {}
-  virtual ExecutionResult run(std::function<void (ExecutionResult *)> function,
+  virtual ExecutionResult run(std::function<ExecutionStatus ()> function,
                               long long timeoutMilliseconds) = 0;
 };
 
@@ -17,13 +16,13 @@ public:
   const static int MullExitCode = 227;
   const static int MullTimeoutCode = 239;
 
-  ExecutionResult run(std::function<void (ExecutionResult *)> function,
+  ExecutionResult run(std::function<ExecutionStatus ()> function,
                       long long timeoutMilliseconds);
 };
 
 class NullProcessSandbox : public ProcessSandbox {
 public:
-  ExecutionResult run(std::function<void (ExecutionResult *)> function,
+  ExecutionResult run(std::function<ExecutionStatus ()> function,
                       long long timeoutMilliseconds);
 };
 

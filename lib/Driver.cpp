@@ -132,8 +132,8 @@ std::unique_ptr<Result> Driver::Run() {
       << "\n";
 
     _callstack = stack<uint64_t>();
-    ExecutionResult ExecResult = Sandbox->run([&](ExecutionResult *SharedResult) {
-      *SharedResult = Runner.runTest(test.get(), ObjectFiles);
+    ExecutionResult ExecResult = Sandbox->run([&]() {
+      return Runner.runTest(test.get(), ObjectFiles);
     }, Cfg.getTimeout());
 
     if (ExecResult.Status != Passed) {
@@ -215,13 +215,12 @@ std::unique_ptr<Result> Driver::Run() {
           const auto sandboxTimeout = std::max(30LL,
                                                ExecResult.RunningTime * 10);
 
-          result = Sandbox->run([&](ExecutionResult *SharedResult) {
-            ExecutionResult R = Runner.runTest(BorrowedTest, ObjectFiles);
-
-            assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
-
-            *SharedResult = R;
+          result = Sandbox->run([&]() {
+            ExecutionStatus status = Runner.runTest(BorrowedTest, ObjectFiles);
+            assert(status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
+            return status;
           }, sandboxTimeout);
+
           ObjectFiles.pop_back();
 
           assert(result.Status != ExecutionStatus::Invalid &&
@@ -230,14 +229,15 @@ std::unique_ptr<Result> Driver::Run() {
 
         diagnostics->report(mutationPoint, result.Status);
 
-        auto MutResult = make_unique<MutationResult>(result, mutationPoint, testee.get());
-        Result->addMutantResult(std::move(MutResult));
+        auto mutationResult = make_unique<MutationResult>(result, mutationPoint, testee.get());
+        Result->addMutantResult(std::move(mutationResult));
       }
 
       Logger::debug() << "\n";
     }
 
-    allTestees.insert(allTestees.end(),std::make_move_iterator(testees.begin()),
+    allTestees.insert(allTestees.end(),
+                      std::make_move_iterator(testees.begin()),
                       std::make_move_iterator(testees.end()));
 
     Results.push_back(std::move(Result));

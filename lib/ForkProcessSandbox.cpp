@@ -15,11 +15,6 @@
 
 using namespace std::chrono;
 
-enum {
-  FPSPipeWrite = 1,
-  FPSPipeRead = 0
-};
-
 static pid_t mullFork(const char *processName) {
   static int childrenCount = 0;
   childrenCount++;
@@ -63,7 +58,7 @@ void handle_alarm_signal(int signal, struct __siginfo *info, void *context) {
 }
 
 mull::ExecutionResult
-mull::ForkProcessSandbox::run(std::function<void (ExecutionResult *)> function,
+mull::ForkProcessSandbox::run(std::function<ExecutionStatus (void)> function,
                               long long timeoutMilliseconds) {
 
   char stderrFilename[] = "/tmp/mull.stderr.XXXXX";
@@ -72,14 +67,12 @@ mull::ForkProcessSandbox::run(std::function<void (ExecutionResult *)> function,
   mktemp(stdoutFilename);
 
   /// Creating a memory to be shared between child and parent.
-  void *sharedMemory = mmap(NULL,
-                            sizeof(ExecutionResult),
-                            PROT_READ | PROT_WRITE,
-                            MAP_SHARED | MAP_ANONYMOUS,
-                            -1,
-                            0);
-
-  ExecutionResult *sharedResult = new (sharedMemory) ExecutionResult();
+  ExecutionStatus *sharedStatus = (ExecutionStatus *)mmap(NULL,
+                                                          sizeof(ExecutionStatus),
+                                                          PROT_READ | PROT_WRITE,
+                                                          MAP_SHARED | MAP_ANONYMOUS,
+                                                          -1,
+                                                          0);
 
   auto start = high_resolution_clock::now();
   const pid_t workerPID = mullFork("worker");
@@ -95,7 +88,7 @@ mull::ForkProcessSandbox::run(std::function<void (ExecutionResult *)> function,
     freopen(stderrFilename, "w", stderr);
     freopen(stdoutFilename, "w", stdout);
 
-    function(sharedResult);
+    *sharedStatus = function();
 
     fflush(stderr);
     fflush(stdout);
@@ -106,55 +99,40 @@ mull::ForkProcessSandbox::run(std::function<void (ExecutionResult *)> function,
     while ( (pid = waitpid(workerPID, &status, 0)) == -1 ) {}
 
     auto elapsed = high_resolution_clock::now() - start;
-    ExecutionResult abnormalResult;
-    abnormalResult.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
-    abnormalResult.exitStatus = WEXITSTATUS(status);
-
-    if (WIFSIGNALED(status)) {
-      abnormalResult.Status = Crashed;
-      *sharedResult = abnormalResult;
-    }
-
-    else if (WIFEXITED(status) && WEXITSTATUS(status) == MullTimeoutCode) {
-      abnormalResult.Status = Timedout;
-      *sharedResult = abnormalResult;
-    }
-
-    else if (WIFEXITED(status) && WEXITSTATUS(status) != MullExitCode) {
-      abnormalResult.Status = AbnormalExit;
-      *sharedResult = abnormalResult;
-    }
-
-    wait(0);
-
-    ExecutionResult result = *sharedResult;
-
+    ExecutionResult result;
+    result.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
+    result.exitStatus = WEXITSTATUS(status);
     result.stderrOutput = readFileAndUnlink(stderrFilename);
     result.stdoutOutput = readFileAndUnlink(stdoutFilename);
+    result.Status = *sharedStatus;
 
-    int munmapResult = munmap(sharedMemory, sizeof(ExecutionResult));
-    (void)munmapResult;
+    int munmapResult = munmap(sharedStatus, sizeof(ExecutionStatus));
 
     /// Check that mummap succeeds:
     /// "On success, munmap() returns 0, on failure -1, and errno is set (probably to EINVAL)."
     /// http://linux.die.net/man/2/munmap
     assert(munmapResult == 0);
+    (void)munmapResult;
+
+    if (WIFSIGNALED(status)) {
+      result.Status = Crashed;
+    }
+
+    else if (WIFEXITED(status) && WEXITSTATUS(status) == MullTimeoutCode) {
+      result.Status = Timedout;
+    }
+
+    else if (WIFEXITED(status) && WEXITSTATUS(status) != MullExitCode) {
+      result.Status = AbnormalExit;
+    }
 
     return result;
   }
 }
 
-mull::ExecutionResult mull::NullProcessSandbox::run(std::function<void (ExecutionResult *)> function,
-                                                        long long timeoutMilliseconds) {
-  void *SharedMemory = malloc(sizeof(ExecutionResult));
-
-  ExecutionResult *SharedResult = new (SharedMemory) ExecutionResult();
-
-  function(SharedResult);
-
-  ExecutionResult Result = *SharedResult;
-
-  free(SharedMemory);
-
-  return Result;
+mull::ExecutionResult mull::NullProcessSandbox::run(std::function<ExecutionStatus (void)> function,
+                                                    long long timeoutMilliseconds) {
+  ExecutionResult result;
+  result.Status = function();
+  return result;
 }

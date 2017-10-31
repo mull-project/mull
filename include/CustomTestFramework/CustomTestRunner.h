@@ -23,7 +23,7 @@ namespace mull {
 public:
 
   CustomTestRunner(llvm::TargetMachine &machine);
-  ExecutionResult runTest(Test *Test, ObjectFiles &ObjectFiles) override;
+  ExecutionStatus runTest(Test *test, ObjectFiles &objectFiles) override;
 
 private:
   std::string MangleName(const llvm::StringRef &Name);

@@ -1,5 +1,6 @@
 #include "ModuleLoader.h"
 #include "TestModuleFactory.h"
+#include "ForkProcessSandbox.h"
 
 #include "Toolchain/Toolchain.h"
 #include "Config.h"
@@ -17,6 +18,7 @@ using namespace std;
 
 static TestModuleFactory SharedTestModuleFactory;
 static LLVMContext context;
+const static int TestTimeout = 1000;
 
 static vector<unique_ptr<MullModule>> loadTestModules() {
   function<vector<unique_ptr<MullModule>> ()> modules = [](){
@@ -59,9 +61,11 @@ TEST(CustomTestRunner, noTestNameSpecified) {
   }
 
   CustomTest_Test test("test", "mull", {}, nullptr, {});
-  ExecutionResult result = runner.runTest(&test, objects);
+  ForkProcessSandbox sandbox;
+  ExecutionResult result = sandbox.run([&]() {
+    return runner.runTest(&test, objects);
+  }, TestTimeout);
   ASSERT_EQ(result.Status, ExecutionStatus::Failed);
-  ASSERT_EQ(result.exitStatus, 48);
 }
 
 TEST(CustomTestRunner, tooManyParameters) {
@@ -79,9 +83,11 @@ TEST(CustomTestRunner, tooManyParameters) {
   }
 
   CustomTest_Test test("test", "mull", { "arg1", "arg2" }, nullptr, {});
-  ExecutionResult result = runner.runTest(&test, objects);
+  ForkProcessSandbox sandbox;
+  ExecutionResult result = sandbox.run([&]() {
+    return runner.runTest(&test, objects);
+  }, TestTimeout);
   ASSERT_EQ(result.Status, ExecutionStatus::Failed);
-  ASSERT_EQ(result.exitStatus, 93);
 }
 
 TEST(CustomTestRunner, runPassingTest) {
@@ -99,9 +105,11 @@ TEST(CustomTestRunner, runPassingTest) {
   }
 
   CustomTest_Test test("test", "mull", { "passing_test" }, nullptr, {});
-  ExecutionResult result = runner.runTest(&test, objects);
+  ForkProcessSandbox sandbox;
+  ExecutionResult result = sandbox.run([&]() {
+    return runner.runTest(&test, objects);
+  }, TestTimeout);
   ASSERT_EQ(result.Status, ExecutionStatus::Passed);
-  ASSERT_EQ(result.exitStatus, 0);
 }
 
 TEST(CustomTestRunner, runFailingTest) {
@@ -124,9 +132,11 @@ TEST(CustomTestRunner, runFailingTest) {
   }
 
   CustomTest_Test test("test", "mull", { "failing_test" }, nullptr, { constructor });
-  ExecutionResult result = runner.runTest(&test, objects);
+  ForkProcessSandbox sandbox;
+  ExecutionResult result = sandbox.run([&]() {
+    return runner.runTest(&test, objects);
+  }, TestTimeout);
   ASSERT_EQ(result.Status, ExecutionStatus::Failed);
-  ASSERT_EQ(result.exitStatus, 112);
 }
 
 TEST(CustomTestRunner, attemptToRunUnknownTest) {
@@ -144,7 +154,9 @@ TEST(CustomTestRunner, attemptToRunUnknownTest) {
   }
 
   CustomTest_Test test("test", "mull", { "foobar" }, nullptr, {});
-  ExecutionResult result = runner.runTest(&test, objects);
+  ForkProcessSandbox sandbox;
+  ExecutionResult result = sandbox.run([&]() {
+    return runner.runTest(&test, objects);
+  }, TestTimeout);
   ASSERT_EQ(result.Status, ExecutionStatus::Failed);
-  ASSERT_EQ(result.exitStatus, 120);
 }
