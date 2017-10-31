@@ -114,14 +114,14 @@ TEST(Driver, SimpleTest_MathAddMutationOperator) {
   ASSERT_EQ(1u, result->getTestResults().size());
 
   auto FirstResult = result->getTestResults().begin()->get();
-  ASSERT_EQ(ExecutionStatus::Passed, FirstResult->getOriginalTestResult().Status);
+  ASSERT_EQ(ExecutionStatus::Passed, FirstResult->getOriginalTestResult().status);
   ASSERT_EQ("test_count_letters", FirstResult->getTestName());
 
   auto &Mutants = FirstResult->getMutationResults();
   ASSERT_EQ(1u, Mutants.size());
 
   auto FirstMutant = Mutants.begin()->get();
-  ASSERT_EQ(ExecutionStatus::Failed, FirstMutant->getExecutionResult().Status);
+  ASSERT_EQ(ExecutionStatus::Failed, FirstMutant->getExecutionResult().status);
 
   ASSERT_NE(nullptr, FirstMutant->getMutationPoint());
 }
@@ -195,14 +195,14 @@ TEST(Driver, SimpleTest_MathSubMutationOperator) {
   ASSERT_EQ(1u, result->getTestResults().size());
 
   auto FirstResult = result->getTestResults().begin()->get();
-  ASSERT_EQ(ExecutionStatus::Passed, FirstResult->getOriginalTestResult().Status);
+  ASSERT_EQ(ExecutionStatus::Passed, FirstResult->getOriginalTestResult().status);
   ASSERT_EQ("test_math_sub", FirstResult->getTestName());
 
   auto &Mutants = FirstResult->getMutationResults();
   ASSERT_EQ(1u, Mutants.size());
 
   auto FirstMutant = Mutants.begin()->get();
-  ASSERT_EQ(ExecutionStatus::Failed, FirstMutant->getExecutionResult().Status);
+  ASSERT_EQ(ExecutionStatus::Failed, FirstMutant->getExecutionResult().status);
 
   ASSERT_NE(nullptr, FirstMutant->getMutationPoint());
 }
@@ -276,14 +276,14 @@ TEST(Driver, SimpleTest_MathMulMutationOperator) {
   ASSERT_EQ(1u, result->getTestResults().size());
 
   auto FirstResult = result->getTestResults().begin()->get();
-  ASSERT_EQ(ExecutionStatus::Passed, FirstResult->getOriginalTestResult().Status);
+  ASSERT_EQ(ExecutionStatus::Passed, FirstResult->getOriginalTestResult().status);
   ASSERT_EQ("test_math_mul", FirstResult->getTestName());
 
   auto &Mutants = FirstResult->getMutationResults();
   ASSERT_EQ(1u, Mutants.size());
 
   auto FirstMutant = Mutants.begin()->get();
-  ASSERT_EQ(ExecutionStatus::Failed, FirstMutant->getExecutionResult().Status);
+  ASSERT_EQ(ExecutionStatus::Failed, FirstMutant->getExecutionResult().status);
 
   ASSERT_NE(nullptr, FirstMutant->getMutationPoint());
 }
@@ -357,14 +357,14 @@ TEST(Driver, SimpleTest_MathDivMutationOperator) {
   ASSERT_EQ(1u, result->getTestResults().size());
 
   auto FirstResult = result->getTestResults().begin()->get();
-  ASSERT_EQ(ExecutionStatus::Passed, FirstResult->getOriginalTestResult().Status);
+  ASSERT_EQ(ExecutionStatus::Passed, FirstResult->getOriginalTestResult().status);
   ASSERT_EQ("test_math_div", FirstResult->getTestName());
 
   auto &Mutants = FirstResult->getMutationResults();
   ASSERT_EQ(1u, Mutants.size());
 
   auto FirstMutant = Mutants.begin()->get();
-  ASSERT_EQ(ExecutionStatus::Failed, FirstMutant->getExecutionResult().Status);
+  ASSERT_EQ(ExecutionStatus::Failed, FirstMutant->getExecutionResult().status);
 
   ASSERT_NE(nullptr, FirstMutant->getMutationPoint());
 }
@@ -440,14 +440,14 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
   ASSERT_EQ(1u, result->getTestResults().size());
 
   auto FirstResult = result->getTestResults().begin()->get();
-  ASSERT_EQ(ExecutionStatus::Passed, FirstResult->getOriginalTestResult().Status);
+  ASSERT_EQ(ExecutionStatus::Passed, FirstResult->getOriginalTestResult().status);
   ASSERT_EQ("test_max", FirstResult->getTestName());
 
   auto &Mutants = FirstResult->getMutationResults();
   ASSERT_EQ(1u, Mutants.size());
 
   auto FirstMutant = Mutants.begin()->get();
-  ASSERT_EQ(ExecutionStatus::Failed, FirstMutant->getExecutionResult().Status);
+  ASSERT_EQ(ExecutionStatus::Failed, FirstMutant->getExecutionResult().status);
 
   ASSERT_NE(nullptr, FirstMutant->getMutationPoint());
 }
@@ -516,14 +516,14 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
   ASSERT_EQ(1u, result->getTestResults().size());
 
   auto FirstResult = result->getTestResults().begin()->get();
-  ASSERT_EQ(ExecutionStatus::Passed, FirstResult->getOriginalTestResult().Status);
+  ASSERT_EQ(ExecutionStatus::Passed, FirstResult->getOriginalTestResult().status);
   ASSERT_EQ("test_func_with_a_void_function_inside", FirstResult->getTestName());
 
   auto &Mutants = FirstResult->getMutationResults();
   ASSERT_EQ(1u, Mutants.size());
 
   auto FirstMutant = Mutants.begin()->get();
-  ASSERT_EQ(ExecutionStatus::Failed, FirstMutant->getExecutionResult().Status);
+  ASSERT_EQ(ExecutionStatus::Failed, FirstMutant->getExecutionResult().status);
 
   ASSERT_NE(nullptr, FirstMutant->getMutationPoint());
 }
@@ -587,59 +587,59 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator) {
   /// Mutation #1: AND operator with 2 branches.
   {
     auto result1 = result->getTestResults().begin()->get();
-    ASSERT_EQ(ExecutionStatus::Passed, result1->getOriginalTestResult().Status);
+    ASSERT_EQ(ExecutionStatus::Passed, result1->getOriginalTestResult().status);
     ASSERT_EQ("test_AND_operator_2branches", result1->getTestName());
 
     auto &mutants1 = result1->getMutationResults();
     ASSERT_EQ(1U, mutants1.size());
 
     auto mutant1_1 = mutants1.begin()->get();
-    ASSERT_EQ(ExecutionStatus::Failed, mutant1_1->getExecutionResult().Status);
+    ASSERT_EQ(ExecutionStatus::Failed, mutant1_1->getExecutionResult().status);
   }
 
   /// Mutation #2: AND operator with 1 branch.
   {
     auto result2 = result->getTestResults()[1].get();
-    ASSERT_EQ(ExecutionStatus::Passed, result2->getOriginalTestResult().Status);
+    ASSERT_EQ(ExecutionStatus::Passed, result2->getOriginalTestResult().status);
     ASSERT_EQ("test_AND_operator_1branch", result2->getTestName());
 
     auto &mutants2 = result2->getMutationResults();
     ASSERT_EQ(1U, mutants2.size());
 
     auto mutant2_1 = mutants2.begin()->get();
-    ASSERT_EQ(ExecutionStatus::Failed, mutant2_1->getExecutionResult().Status);
+    ASSERT_EQ(ExecutionStatus::Failed, mutant2_1->getExecutionResult().status);
   }
 
   /// Mutation #3: OR operator with 2 branches.
   {
     auto result3 = result->getTestResults()[2].get();
-    ASSERT_EQ(ExecutionStatus::Passed, result3->getOriginalTestResult().Status);
+    ASSERT_EQ(ExecutionStatus::Passed, result3->getOriginalTestResult().status);
     ASSERT_EQ("test_OR_operator_2branches", result3->getTestName());
 
     auto &mutants3 = result3->getMutationResults();
     ASSERT_EQ(1U, mutants3.size());
 
     auto mutant3_1 = mutants3.begin()->get();
-    ASSERT_EQ(ExecutionStatus::Failed, mutant3_1->getExecutionResult().Status);
+    ASSERT_EQ(ExecutionStatus::Failed, mutant3_1->getExecutionResult().status);
   }
 
   /// Mutation #4: OR operator with 1 branch.
   {
     auto result4 = result->getTestResults()[3].get();
-    ASSERT_EQ(ExecutionStatus::Passed, result4->getOriginalTestResult().Status);
+    ASSERT_EQ(ExecutionStatus::Passed, result4->getOriginalTestResult().status);
     ASSERT_EQ("test_OR_operator_1branch", result4->getTestName());
 
     auto &mutants4 = result4->getMutationResults();
     ASSERT_EQ(1U, mutants4.size());
 
     auto mutant4_1 = mutants4.begin()->get();
-    ASSERT_EQ(ExecutionStatus::Failed, mutant4_1->getExecutionResult().Status);
+    ASSERT_EQ(ExecutionStatus::Failed, mutant4_1->getExecutionResult().status);
   }
 
   /// Mutation #5: Compound AND then OR expression.
   {
     auto result5 = result->getTestResults()[4].get();
-    ASSERT_EQ(ExecutionStatus::Passed, result5->getOriginalTestResult().Status);
+    ASSERT_EQ(ExecutionStatus::Passed, result5->getOriginalTestResult().status);
     ASSERT_EQ("test_compound_AND_then_OR_operator", result5->getTestName());
 
     auto &mutants5 = result5->getMutationResults();
@@ -647,59 +647,59 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator) {
 
     // Mutant 5.1 should pass because it is a relaxing AND -> OR replacement.
     auto mutant5_1 = mutants5[0].get();
-    ASSERT_EQ(ExecutionStatus::Passed, mutant5_1->getExecutionResult().Status);
+    ASSERT_EQ(ExecutionStatus::Passed, mutant5_1->getExecutionResult().status);
 
     // Mutant 5.2 should pass because it is a stressing OR -> AND replacement.
     auto mutant5_2 = mutants5[1].get();
-    ASSERT_EQ(ExecutionStatus::Failed, mutant5_2->getExecutionResult().Status);
+    ASSERT_EQ(ExecutionStatus::Failed, mutant5_2->getExecutionResult().status);
   }
 
   /// Mutation #6: Compound AND then AND expression.
   {
     auto result6 = result->getTestResults()[5].get();
-    ASSERT_EQ(ExecutionStatus::Passed, result6->getOriginalTestResult().Status);
+    ASSERT_EQ(ExecutionStatus::Passed, result6->getOriginalTestResult().status);
     ASSERT_EQ("test_compound_AND_then_AND_operator", result6->getTestName());
 
     auto &mutants6 = result6->getMutationResults();
     ASSERT_EQ(2U, mutants6.size());
 
     auto mutant6_1 = mutants6[0].get();
-    ASSERT_EQ(ExecutionStatus::Failed, mutant6_1->getExecutionResult().Status);
+    ASSERT_EQ(ExecutionStatus::Failed, mutant6_1->getExecutionResult().status);
 
     auto mutant6_2 = mutants6[1].get();
-    ASSERT_EQ(ExecutionStatus::Passed, mutant6_2->getExecutionResult().Status);
+    ASSERT_EQ(ExecutionStatus::Passed, mutant6_2->getExecutionResult().status);
   }
 
   /// Mutation #7: Compound OR then AND expression.
   {
     auto result7 = result->getTestResults()[6].get();
-    ASSERT_EQ(ExecutionStatus::Passed, result7->getOriginalTestResult().Status);
+    ASSERT_EQ(ExecutionStatus::Passed, result7->getOriginalTestResult().status);
     ASSERT_EQ("test_compound_OR_then_AND_operator", result7->getTestName());
 
     auto &mutants6 = result7->getMutationResults();
     ASSERT_EQ(2U, mutants6.size());
 
     auto mutant6_1 = mutants6[0].get();
-    ASSERT_EQ(ExecutionStatus::Failed, mutant6_1->getExecutionResult().Status);
+    ASSERT_EQ(ExecutionStatus::Failed, mutant6_1->getExecutionResult().status);
 
     auto mutant6_2 = mutants6[1].get();
-    ASSERT_EQ(ExecutionStatus::Passed, mutant6_2->getExecutionResult().Status);
+    ASSERT_EQ(ExecutionStatus::Passed, mutant6_2->getExecutionResult().status);
   }
 
   /// Mutation #8: Compound OR then OR expression.
   {
     auto result8 = result->getTestResults()[7].get();
-    ASSERT_EQ(ExecutionStatus::Passed, result8->getOriginalTestResult().Status);
+    ASSERT_EQ(ExecutionStatus::Passed, result8->getOriginalTestResult().status);
     ASSERT_EQ("test_compound_OR_then_OR_operator", result8->getTestName());
 
     auto &mutants8 = result8->getMutationResults();
     ASSERT_EQ(2U, mutants8.size());
 
     auto mutant8_1 = mutants8[0].get();
-    ASSERT_EQ(ExecutionStatus::Failed, mutant8_1->getExecutionResult().Status);
+    ASSERT_EQ(ExecutionStatus::Failed, mutant8_1->getExecutionResult().status);
 
     auto mutant8_2 = mutants8[1].get();
-    ASSERT_EQ(ExecutionStatus::Passed, mutant8_2->getExecutionResult().Status);
+    ASSERT_EQ(ExecutionStatus::Passed, mutant8_2->getExecutionResult().status);
   }
 }
 
@@ -762,79 +762,79 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator_CPP) {
   /// Mutation #1: OR operator
   {
     auto result1 = result->getTestResults().begin()->get();
-    ASSERT_EQ(ExecutionStatus::Passed, result1->getOriginalTestResult().Status);
+    ASSERT_EQ(ExecutionStatus::Passed, result1->getOriginalTestResult().status);
     ASSERT_EQ("_Z25test_OR_operator_with_CPPv", result1->getTestName());
 
     auto &mutants1 = result1->getMutationResults();
     ASSERT_EQ(1U, mutants1.size());
 
     auto mutant1_1 = mutants1.begin()->get();
-    ASSERT_EQ(ExecutionStatus::Failed, mutant1_1->getExecutionResult().Status);
+    ASSERT_EQ(ExecutionStatus::Failed, mutant1_1->getExecutionResult().status);
   }
 
   /// Mutation #2: OR operator (PHI case)
   {
     auto result2 = result->getTestResults()[1].get();
-    ASSERT_EQ(ExecutionStatus::Passed, result2->getOriginalTestResult().Status);
+    ASSERT_EQ(ExecutionStatus::Passed, result2->getOriginalTestResult().status);
     ASSERT_EQ("_Z34test_OR_operator_with_CPP_PHI_casev", result2->getTestName());
 
     auto &mutants2 = result2->getMutationResults();
     ASSERT_EQ(1U, mutants2.size());
 
     auto mutant2_1 = mutants2.begin()->get();
-    ASSERT_EQ(ExecutionStatus::Failed, mutant2_1->getExecutionResult().Status);
+    ASSERT_EQ(ExecutionStatus::Failed, mutant2_1->getExecutionResult().status);
   }
 
   /// Mutation #3: OR operator (Assert)
   {
     auto result3 = result->getTestResults()[2].get();
-    ASSERT_EQ(ExecutionStatus::Passed, result3->getOriginalTestResult().Status);
+    ASSERT_EQ(ExecutionStatus::Passed, result3->getOriginalTestResult().status);
     ASSERT_EQ("_Z36test_OR_operator_with_CPP_and_assertv", result3->getTestName());
 
     auto &mutants3 = result3->getMutationResults();
     ASSERT_EQ(1U, mutants3.size());
 
     auto mutant3_1 = mutants3.begin()->get();
-    ASSERT_EQ(ExecutionStatus::Crashed, mutant3_1->getExecutionResult().Status);
+    ASSERT_EQ(ExecutionStatus::Crashed, mutant3_1->getExecutionResult().status);
   }
 
   /// Mutation #4: AND operator
   {
     auto result4 = result->getTestResults()[3].get();
-    ASSERT_EQ(ExecutionStatus::Passed, result4->getOriginalTestResult().Status);
+    ASSERT_EQ(ExecutionStatus::Passed, result4->getOriginalTestResult().status);
     ASSERT_EQ("_Z26test_AND_operator_with_CPPv", result4->getTestName());
 
     auto &mutants4 = result4->getMutationResults();
     ASSERT_EQ(1U, mutants4.size());
 
     auto mutant4_1 = mutants4.begin()->get();
-    ASSERT_EQ(ExecutionStatus::Failed, mutant4_1->getExecutionResult().Status);
+    ASSERT_EQ(ExecutionStatus::Failed, mutant4_1->getExecutionResult().status);
   }
 
   /// Mutation #5: AND operator (PHI case)
   {
     auto result5 = result->getTestResults()[4].get();
-    ASSERT_EQ(ExecutionStatus::Passed, result5->getOriginalTestResult().Status);
+    ASSERT_EQ(ExecutionStatus::Passed, result5->getOriginalTestResult().status);
     ASSERT_EQ("_Z35test_AND_operator_with_CPP_PHI_casev", result5->getTestName());
 
     auto &mutants5 = result5->getMutationResults();
     ASSERT_EQ(1U, mutants5.size());
 
     auto mutant5_1 = mutants5.begin()->get();
-    ASSERT_EQ(ExecutionStatus::Failed, mutant5_1->getExecutionResult().Status);
+    ASSERT_EQ(ExecutionStatus::Failed, mutant5_1->getExecutionResult().status);
   }
 
   /// Mutation #6: AND operator (Assert)
   {
     auto result6 = result->getTestResults()[5].get();
-    ASSERT_EQ(ExecutionStatus::Passed, result6->getOriginalTestResult().Status);
+    ASSERT_EQ(ExecutionStatus::Passed, result6->getOriginalTestResult().status);
     ASSERT_EQ("_Z37test_AND_operator_with_CPP_and_assertv", result6->getTestName());
 
     auto &mutants6 = result6->getMutationResults();
     ASSERT_EQ(1U, mutants6.size());
 
     auto mutant6_1 = mutants6.begin()->get();
-    ASSERT_EQ(ExecutionStatus::Crashed, mutant6_1->getExecutionResult().Status);
+    ASSERT_EQ(ExecutionStatus::Crashed, mutant6_1->getExecutionResult().status);
   }
 }
 
@@ -914,7 +914,7 @@ TEST(Driver, customTest) {
 
   TestResult *testResult = result->getTestResults().begin()->get();
   ASSERT_NE(testResult, nullptr);
-  ASSERT_EQ(ExecutionStatus::Passed, testResult->getOriginalTestResult().Status);
+  ASSERT_EQ(ExecutionStatus::Passed, testResult->getOriginalTestResult().status);
   ASSERT_EQ("passing", testResult->getTestName());
   ASSERT_EQ(3UL, testResult->getMutationResults().size());
 }

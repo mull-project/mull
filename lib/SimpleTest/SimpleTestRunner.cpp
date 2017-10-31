@@ -70,30 +70,22 @@ void *SimpleTestRunner::TestFunctionPointer(const llvm::Function &Function) {
   return FPointer;
 }
 
-ExecutionResult SimpleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) {
-  assert(isa<SimpleTest_Test>(Test) && "Supposed to work only with");
+ExecutionStatus SimpleTestRunner::runTest(Test *test, ObjectFiles &objectFiles) {
+  assert(isa<SimpleTest_Test>(test) && "Supposed to work only with");
 
-  SimpleTest_Test *SimpleTest = dyn_cast<SimpleTest_Test>(Test);
+  SimpleTest_Test *SimpleTest = dyn_cast<SimpleTest_Test>(test);
 
-  auto Handle = ObjectLayer.addObjectSet(ObjectFiles,
+  auto Handle = ObjectLayer.addObjectSet(objectFiles,
                                          make_unique<SectionMemoryManager>(),
                                          make_unique<Mull_SimpleTest_Resolver>());
   void *FunctionPointer = TestFunctionPointer(*SimpleTest->GetTestFunction());
 
-  auto start = high_resolution_clock::now();
   uint64_t result = ((int (*)())(intptr_t)FunctionPointer)();
-  auto elapsed = high_resolution_clock::now() - start;
-
-  ExecutionResult Result;
-  Result.RunningTime = duration_cast<std::chrono::nanoseconds>(elapsed).count();
 
   ObjectLayer.removeObjectSet(Handle);
 
   if (result == 1) {
-    Result.Status = ExecutionStatus::Passed;
-  } else {
-    Result.Status = ExecutionStatus::Failed;
+    return ExecutionStatus::Passed;
   }
-
-  return Result;
+  return ExecutionStatus::Failed;
 }

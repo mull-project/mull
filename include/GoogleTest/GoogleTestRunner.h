@@ -29,7 +29,7 @@ class GoogleTestRunner : public TestRunner {
 public:
 
   GoogleTestRunner(llvm::TargetMachine &machine);
-  ExecutionResult runTest(Test *Test, ObjectFiles &ObjectFiles) override;
+  ExecutionStatus runTest(Test *test, ObjectFiles &objectFiles) override;
 
 private:
   void *GetCtorPointer(const llvm::Function &Function);

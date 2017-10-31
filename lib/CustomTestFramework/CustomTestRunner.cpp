@@ -129,14 +129,12 @@ void CustomTestRunner::runStaticCtor(llvm::Function *Ctor) {
   ctor();
 }
 
-ExecutionResult CustomTestRunner::runTest(Test *test, ObjectFiles &objectFiles) {
+ExecutionStatus CustomTestRunner::runTest(Test *test, ObjectFiles &objectFiles) {
   CustomTest_Test *customTest = dyn_cast<CustomTest_Test>(test);
 
   auto Handle = ObjectLayer.addObjectSet(objectFiles,
                                          make_unique<SectionMemoryManager>(),
                                          make_unique<Mull_CustomTest_Resolver>());
-
-  auto start = high_resolution_clock::now();
 
   for (auto &constructor: customTest->getConstructors()) {
     runStaticCtor(constructor);
@@ -163,18 +161,12 @@ ExecutionResult CustomTestRunner::runTest(Test *test, ObjectFiles &objectFiles) 
   delete[] argv;
 
   runDestructors();
-  auto elapsed = high_resolution_clock::now() - start;
-
-  ExecutionResult executionResult;
-  executionResult.exitStatus = exitStatus;
-  executionResult.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
 
   ObjectLayer.removeObjectSet(Handle);
+
   if (exitStatus == 0) {
-    executionResult.Status = ExecutionStatus::Passed;
-  } else {
-    executionResult.Status = ExecutionStatus::Failed;
+    return ExecutionStatus::Passed;
   }
 
-  return executionResult;
+  return ExecutionStatus::Failed;
 }

@@ -184,15 +184,13 @@ void GoogleTestRunner::runStaticCtor(llvm::Function *Ctor) {
   ctor();
 }
 
-ExecutionResult GoogleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) {
-  GoogleTest_Test *GTest = dyn_cast<GoogleTest_Test>(Test);
+ExecutionStatus GoogleTestRunner::runTest(Test *test, ObjectFiles &objectFiles) {
+  GoogleTest_Test *GTest = dyn_cast<GoogleTest_Test>(test);
 
   auto Handle =
-    ObjectLayer.addObjectSet(ObjectFiles,
+    ObjectLayer.addObjectSet(objectFiles,
                              make_unique<SectionMemoryManager>(),
                              make_unique<Mull_GoogleTest_Resolver>(this->mapping));
-
-  auto start = high_resolution_clock::now();
 
   for (auto &Ctor: GTest->GetGlobalCtors()) {
     runStaticCtor(Ctor);
@@ -226,28 +224,19 @@ ExecutionResult GoogleTestRunner::runTest(Test *Test, ObjectFiles &ObjectFiles) 
   void *getInstancePtr = getFunctionPointer(fGoogleTestInstance);
 
   auto getInstance = ((UnitTest *(*)())(intptr_t)getInstancePtr);
-  UnitTest *test = getInstance();
+  UnitTest *unitTest = getInstance();
 
   void *runAllTestsPtr = getFunctionPointer(fGoogleTestRun);
 
   auto runAllTests = ((int (*)(UnitTest *))(intptr_t)runAllTestsPtr);
-  uint64_t result = runAllTests(test);
+  uint64_t result = runAllTests(unitTest);
 
   runDestructors();
-  auto elapsed = high_resolution_clock::now() - start;
-
-  //printf("%llu %s\n", result, GTest->getTestName().c_str());
-
-  ExecutionResult Result;
-  Result.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
 
   ObjectLayer.removeObjectSet(Handle);
 
   if (result == 0) {
-    Result.Status = ExecutionStatus::Passed;
-  } else {
-    Result.Status = ExecutionStatus::Failed;
+    return ExecutionStatus::Passed;
   }
-
-  return Result;
+  return ExecutionStatus::Failed;
 }

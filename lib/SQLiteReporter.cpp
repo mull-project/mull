@@ -106,8 +106,8 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
 
     ExecutionResult testExecutionResult = testResult->getOriginalTestResult();
     std::string insertResultSQL = std::string("INSERT INTO execution_result VALUES (")
-      + "'" + std::to_string(testExecutionResult.Status) + "',"
-      + "'" + std::to_string(testExecutionResult.RunningTime) + "',"
+      + "'" + std::to_string(testExecutionResult.status) + "',"
+      + "'" + std::to_string(testExecutionResult.runningTime) + "',"
       + "" + "?1" + ","
       + "" + "?2" + ");";
     sqlite3_stmt *stmt;
@@ -213,8 +213,8 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
       /// Execution result
       ExecutionResult mutationExecutionResult = mutation->getExecutionResult();
       std::string insertMutationExecutionResultSQL = std::string("INSERT INTO execution_result VALUES (")
-        + "'" + std::to_string(mutationExecutionResult.Status) + "',"
-        + "'" + std::to_string(mutationExecutionResult.RunningTime) + "',"
+        + "'" + std::to_string(mutationExecutionResult.status) + "',"
+        + "'" + std::to_string(mutationExecutionResult.runningTime) + "',"
         + "" + "?" + ","
         + "" + "?" + ");";
 

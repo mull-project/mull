@@ -132,11 +132,11 @@ std::unique_ptr<Result> Driver::Run() {
       << "\n";
 
     _callstack = stack<uint64_t>();
-    ExecutionResult ExecResult = Sandbox->run([&](ExecutionResult *SharedResult) {
-      *SharedResult = Runner.runTest(test.get(), ObjectFiles);
+    ExecutionResult ExecResult = Sandbox->run([&]() {
+      return Runner.runTest(test.get(), ObjectFiles);
     }, Cfg.getTimeout());
 
-    if (ExecResult.Status != Passed) {
+    if (ExecResult.status != Passed) {
       Logger::error() << "error: Test has failed: " << test->getTestName() << "\n";
       Logger::error() << "status: " << ExecResult.getStatusAsString() << "\n";
       Logger::error() << "exit code: " << ExecResult.exitStatus << "\n";
@@ -198,8 +198,8 @@ std::unique_ptr<Result> Driver::Run() {
         ExecutionResult result;
         bool dryRun = Cfg.isDryRun();
         if (dryRun) {
-          result.Status = DryRun;
-          result.RunningTime = ExecResult.RunningTime * 10;
+          result.status = DryRun;
+          result.runningTime = ExecResult.runningTime * 10;
         } else {
           ObjectFile *mutant = toolchain.cache().getObject(*mutationPoint);
           if (mutant == nullptr) {
@@ -213,31 +213,31 @@ std::unique_ptr<Result> Driver::Run() {
           ObjectFiles.push_back(mutant);
 
           const auto sandboxTimeout = std::max(30LL,
-                                               ExecResult.RunningTime * 10);
+                                               ExecResult.runningTime * 10);
 
-          result = Sandbox->run([&](ExecutionResult *SharedResult) {
-            ExecutionResult R = Runner.runTest(BorrowedTest, ObjectFiles);
-
-            assert(R.Status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
-
-            *SharedResult = R;
+          result = Sandbox->run([&]() {
+            ExecutionStatus status = Runner.runTest(BorrowedTest, ObjectFiles);
+            assert(status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
+            return status;
           }, sandboxTimeout);
+
           ObjectFiles.pop_back();
 
-          assert(result.Status != ExecutionStatus::Invalid &&
+          assert(result.status != ExecutionStatus::Invalid &&
                  "Expect to see valid TestResult");
         }
 
-        diagnostics->report(mutationPoint, result.Status);
+        diagnostics->report(mutationPoint, result.status);
 
-        auto MutResult = make_unique<MutationResult>(result, mutationPoint, testee.get());
-        Result->addMutantResult(std::move(MutResult));
+        auto mutationResult = make_unique<MutationResult>(result, mutationPoint, testee.get());
+        Result->addMutantResult(std::move(mutationResult));
       }
 
       Logger::debug() << "\n";
     }
 
-    allTestees.insert(allTestees.end(),std::make_move_iterator(testees.begin()),
+    allTestees.insert(allTestees.end(),
+                      std::make_move_iterator(testees.begin()),
                       std::make_move_iterator(testees.end()));
 
     Results.push_back(std::move(Result));

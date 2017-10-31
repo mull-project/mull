@@ -79,7 +79,7 @@ TEST(SimpleTestRunner, runTest) {
   }
 
   /// Here we run test with original testee function
-  ASSERT_EQ(ExecutionStatus::Passed, Runner.runTest(Test.get(), ObjectFiles).Status);
+  ASSERT_EQ(ExecutionStatus::Passed, Runner.runTest(Test.get(), ObjectFiles));
 
   ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
 
@@ -107,7 +107,7 @@ TEST(SimpleTestRunner, runTest) {
     OwnedObjectFiles.push_back(std::move(Obj));
   }
 
-  ASSERT_EQ(ExecutionStatus::Failed, Runner.runTest(Test.get(), ObjectFiles).Status);
+  ASSERT_EQ(ExecutionStatus::Failed, Runner.runTest(Test.get(), ObjectFiles));
 
   ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
 }
@@ -161,7 +161,7 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   OwnedObjectFiles.push_back(std::move(Obj));
 
   /// Here we run test with original testee function
-  ASSERT_EQ(ExecutionStatus::Passed, Runner.runTest(Test.get(), ObjectFiles).Status);
+  ASSERT_EQ(ExecutionStatus::Passed, Runner.runTest(Test.get(), ObjectFiles));
 
   ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
 
@@ -186,7 +186,7 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
-  ASSERT_EQ(ExecutionStatus::Failed, Runner.runTest(Test.get(), ObjectFiles).Status);
+  ASSERT_EQ(ExecutionStatus::Failed, Runner.runTest(Test.get(), ObjectFiles));
   ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
 }
 
@@ -237,5 +237,5 @@ TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
   ObjectFiles.push_back(Obj.getBinary());
   OwnedObjectFiles.push_back(std::move(Obj));
 
-  ASSERT_EQ(ExecutionStatus::Passed, Runner.runTest(Test.get(), ObjectFiles).Status);
+  ASSERT_EQ(ExecutionStatus::Passed, Runner.runTest(Test.get(), ObjectFiles));
 }
