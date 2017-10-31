@@ -20,7 +20,7 @@ enum {
   FPSPipeRead = 0
 };
 
-pid_t mullFork(const char *processName) {
+static pid_t mullFork(const char *processName) {
   static int childrenCount = 0;
   childrenCount++;
   const pid_t pid = fork();
@@ -35,22 +35,37 @@ pid_t mullFork(const char *processName) {
   return pid;
 }
 
+static std::string readFileAndUnlink(const char *filename) {
+  FILE *file = fopen(filename, "r");
+  if (!file) {
+    perror("fopen");
+    exit(1);
+  }
+  if (unlink(filename) == -1) {
+    perror("unlink");
+  }
+
+  fseek(file, 0, SEEK_END);
+  int size = ftell(file);
+  rewind(file);
+
+  char *buffer = (char *)malloc(sizeof(char) * (size + 1));
+  fread(buffer, sizeof(char), size, file);
+  buffer[size] = '\0';
+  std::string output(buffer);
+  free(buffer);
+
+  return output;
+}
+
 mull::ExecutionResult
 mull::ForkProcessSandbox::run(std::function<void (ExecutionResult *)> function,
-                                long long timeoutMilliseconds) {
+                              long long timeoutMilliseconds) {
 
-  /// Preparing pipes for child process to write to and parent process to read from.
-  int stdout_file_descriptor[2];
-  int stderr_file_descriptor[2];
-  if (pipe(stdout_file_descriptor) == -1) {
-    perror("stdout pipe");
-    exit(1);
-  }
-
-  if (pipe(stderr_file_descriptor) == -1) {
-    perror("stderr_pipe");
-    exit(1);
-  }
+  char stderrFilename[] = "/tmp/mull.stderr.XXXXX";
+  mktemp(stderrFilename);
+  char stdoutFilename[] = "/tmp/mull.stdout.XXXXX";
+  mktemp(stdoutFilename);
 
   /// Creating a memory to be shared between child and parent.
   void *SharedMemory = mmap(NULL,
@@ -76,18 +91,13 @@ mull::ForkProcessSandbox::run(std::function<void (ExecutionResult *)> function,
     auto start = high_resolution_clock::now();
 
     if (workerPID == 0) {
-      while ((dup2(stdout_file_descriptor[FPSPipeWrite], STDOUT_FILENO) == -1) && (errno == EINTR)) { }
-      while ((dup2(stderr_file_descriptor[FPSPipeWrite], STDERR_FILENO) == -1) && (errno == EINTR)) { }
-
-      close(stdout_file_descriptor[FPSPipeWrite]);
-      close(stdout_file_descriptor[FPSPipeRead]);
-      close(stderr_file_descriptor[FPSPipeWrite]);
-      close(stderr_file_descriptor[FPSPipeRead]);
-
-      //      execl("/bin/pwd", "pwd", (char*)0);
+      freopen(stderrFilename, "w", stderr);
+      freopen(stdoutFilename, "w", stdout);
 
       function(sharedResult);
 
+      fflush(stderr);
+      fflush(stdout);
       exit(MullExitCode);
     }
 
@@ -133,56 +143,12 @@ mull::ForkProcessSandbox::run(std::function<void (ExecutionResult *)> function,
     while ( (pid = waitpid(watchdogPID, 0, 0)) == -1 ) {}
   }
 
-  close(stdout_file_descriptor[FPSPipeWrite]);
-  close(stderr_file_descriptor[FPSPipeWrite]);
-
-  char child_stdout_buffer[4096];
-  char child_stderr_buffer[4096];
-
-  std::string stdoutOutput;
-  std::string stderrOutput;
-
-  while (1) {
-    ssize_t count = read(stdout_file_descriptor[0], child_stdout_buffer, sizeof(child_stdout_buffer));
-    if (count == -1) {
-      if (errno == EINTR) {
-        continue;
-      } else {
-        perror("read");
-        exit(1);
-      }
-    } else if (count == 0) {
-      break;
-    } else {
-      stdoutOutput.append(child_stdout_buffer, 0, count);
-    }
-  }
-
-  while (1) {
-    ssize_t count = read(stderr_file_descriptor[0], child_stderr_buffer, sizeof(child_stderr_buffer));
-    if (count == -1) {
-      if (errno == EINTR) {
-        continue;
-      } else {
-        perror("read");
-        exit(1);
-      }
-    } else if (count == 0) {
-      break;
-    } else {
-      stderrOutput.append(child_stderr_buffer, 0, count);
-    }
-  }
-
-  close(stdout_file_descriptor[FPSPipeRead]);
-  close(stderr_file_descriptor[FPSPipeRead]);
-
   wait(0);
 
   ExecutionResult result = *sharedResult;
 
-  result.stdoutOutput = stdoutOutput;
-  result.stderrOutput = stderrOutput;
+  result.stderrOutput = readFileAndUnlink(stderrFilename);
+  result.stdoutOutput = readFileAndUnlink(stdoutFilename);
 
   int munmapResult = munmap(SharedMemory, sizeof(ExecutionResult));
   (void)munmapResult;
