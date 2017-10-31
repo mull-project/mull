@@ -69,14 +69,14 @@ TEST(SQLiteReporter, integrationTest) {
   const long long RunningTime_2 = 2;
 
   ExecutionResult testExecutionResult;
-  testExecutionResult.Status = Passed;
-  testExecutionResult.RunningTime = RunningTime_1;
+  testExecutionResult.status = Passed;
+  testExecutionResult.runningTime = RunningTime_1;
   testExecutionResult.stdoutOutput = "testExecutionResult.STDOUT";
   testExecutionResult.stderrOutput = "testExecutionResult.STDERR";
 
   ExecutionResult mutatedTestExecutionResult;
-  mutatedTestExecutionResult.Status = Failed;
-  mutatedTestExecutionResult.RunningTime = RunningTime_2;
+  mutatedTestExecutionResult.status = Failed;
+  mutatedTestExecutionResult.runningTime = RunningTime_2;
   mutatedTestExecutionResult.stdoutOutput = "mutatedTestExecutionResult.STDOUT";
   mutatedTestExecutionResult.stderrOutput = "mutatedTestExecutionResult.STDERR";
 
@@ -132,8 +132,8 @@ TEST(SQLiteReporter, integrationTest) {
       column3_stdout  = sqlite3_column_text (selectStmt, 2);
       column4_stderr  = sqlite3_column_text (selectStmt, 3);
 
-      ASSERT_EQ(column1_status, executionResults[numberOfRows].Status);
-      ASSERT_EQ(column2_duration, executionResults[numberOfRows].RunningTime);
+      ASSERT_EQ(column1_status, executionResults[numberOfRows].status);
+      ASSERT_EQ(column2_duration, executionResults[numberOfRows].runningTime);
 
       ASSERT_EQ(strcmp((const char *)column3_stdout,
                        executionResults[numberOfRows].stdoutOutput.c_str()), 0);
@@ -347,14 +347,14 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   const long long RunningTime_2 = 2;
 
   ExecutionResult testExecutionResult;
-  testExecutionResult.Status = Passed;
-  testExecutionResult.RunningTime = RunningTime_1;
+  testExecutionResult.status = Passed;
+  testExecutionResult.runningTime = RunningTime_1;
   testExecutionResult.stdoutOutput = "testExecutionResult.STDOUT";
   testExecutionResult.stderrOutput = "testExecutionResult.STDERR";
 
   ExecutionResult mutatedTestExecutionResult;
-  mutatedTestExecutionResult.Status = Failed;
-  mutatedTestExecutionResult.RunningTime = RunningTime_2;
+  mutatedTestExecutionResult.status = Failed;
+  mutatedTestExecutionResult.runningTime = RunningTime_2;
   mutatedTestExecutionResult.stdoutOutput = "mutatedTestExecutionResult.STDOUT";
   mutatedTestExecutionResult.stderrOutput = "mutatedTestExecutionResult.STDERR";
 
@@ -520,14 +520,14 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   const long long RunningTime_2 = 2;
 
   ExecutionResult testExecutionResult;
-  testExecutionResult.Status = Passed;
-  testExecutionResult.RunningTime = RunningTime_1;
+  testExecutionResult.status = Passed;
+  testExecutionResult.runningTime = RunningTime_1;
   testExecutionResult.stdoutOutput = "testExecutionResult.STDOUT";
   testExecutionResult.stderrOutput = "testExecutionResult.STDERR";
 
   ExecutionResult mutatedTestExecutionResult;
-  mutatedTestExecutionResult.Status = Failed;
-  mutatedTestExecutionResult.RunningTime = RunningTime_2;
+  mutatedTestExecutionResult.status = Failed;
+  mutatedTestExecutionResult.runningTime = RunningTime_2;
   mutatedTestExecutionResult.stdoutOutput = "mutatedTestExecutionResult.STDOUT";
   mutatedTestExecutionResult.stderrOutput = "mutatedTestExecutionResult.STDERR";
 

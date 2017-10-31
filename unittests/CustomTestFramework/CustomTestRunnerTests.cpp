@@ -65,7 +65,7 @@ TEST(CustomTestRunner, noTestNameSpecified) {
   ExecutionResult result = sandbox.run([&]() {
     return runner.runTest(&test, objects);
   }, TestTimeout);
-  ASSERT_EQ(result.Status, ExecutionStatus::Failed);
+  ASSERT_EQ(result.status, ExecutionStatus::Failed);
 }
 
 TEST(CustomTestRunner, tooManyParameters) {
@@ -87,7 +87,7 @@ TEST(CustomTestRunner, tooManyParameters) {
   ExecutionResult result = sandbox.run([&]() {
     return runner.runTest(&test, objects);
   }, TestTimeout);
-  ASSERT_EQ(result.Status, ExecutionStatus::Failed);
+  ASSERT_EQ(result.status, ExecutionStatus::Failed);
 }
 
 TEST(CustomTestRunner, runPassingTest) {
@@ -109,7 +109,7 @@ TEST(CustomTestRunner, runPassingTest) {
   ExecutionResult result = sandbox.run([&]() {
     return runner.runTest(&test, objects);
   }, TestTimeout);
-  ASSERT_EQ(result.Status, ExecutionStatus::Passed);
+  ASSERT_EQ(result.status, ExecutionStatus::Passed);
 }
 
 TEST(CustomTestRunner, runFailingTest) {
@@ -136,7 +136,7 @@ TEST(CustomTestRunner, runFailingTest) {
   ExecutionResult result = sandbox.run([&]() {
     return runner.runTest(&test, objects);
   }, TestTimeout);
-  ASSERT_EQ(result.Status, ExecutionStatus::Failed);
+  ASSERT_EQ(result.status, ExecutionStatus::Failed);
 }
 
 TEST(CustomTestRunner, attemptToRunUnknownTest) {
@@ -158,5 +158,5 @@ TEST(CustomTestRunner, attemptToRunUnknownTest) {
   ExecutionResult result = sandbox.run([&]() {
     return runner.runTest(&test, objects);
   }, TestTimeout);
-  ASSERT_EQ(result.Status, ExecutionStatus::Failed);
+  ASSERT_EQ(result.status, ExecutionStatus::Failed);
 }

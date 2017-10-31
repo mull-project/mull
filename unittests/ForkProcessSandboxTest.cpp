@@ -24,7 +24,7 @@ TEST(ForkProcessSandbox, captureOutputFromChildProcess) {
     return ExecutionStatus::Passed;
   }, Timeout);
 
-  ASSERT_EQ(result.Status, Passed);
+  ASSERT_EQ(result.status, Passed);
 
   ASSERT_EQ(strcmp(result.stdoutOutput.c_str(), stdoutMessage), 0);
   ASSERT_EQ(strcmp(result.stderrOutput.c_str(), stderrMessage), 0);
@@ -39,7 +39,7 @@ TEST(ForkProcessSandbox, statusPassedIfExitingWithZeroAndResultWasSet) {
     return ExecutionStatus::Passed;
   }, Timeout);
 
-  ASSERT_EQ(result.Status, Passed);
+  ASSERT_EQ(result.status, Passed);
 }
 
 TEST(ForkProcessSandbox, statusAbnormalExit_IfExitingWithNonZero) {
@@ -50,7 +50,7 @@ TEST(ForkProcessSandbox, statusAbnormalExit_IfExitingWithNonZero) {
     return ExecutionStatus::Passed;
   }, Timeout);
 
-  ASSERT_EQ(result.Status, AbnormalExit);
+  ASSERT_EQ(result.status, AbnormalExit);
 }
 
 TEST(ForkProcessSandbox, statusAbnormalExit_IfExitingWithZeroButResultWasNotSet) {
@@ -61,7 +61,7 @@ TEST(ForkProcessSandbox, statusAbnormalExit_IfExitingWithZeroButResultWasNotSet)
     return ExecutionStatus::Passed;
   }, Timeout);
 
-  ASSERT_EQ(result.Status, AbnormalExit);
+  ASSERT_EQ(result.status, AbnormalExit);
 }
 
 TEST(ForkProcessSandbox, statusTimeout) {
@@ -72,7 +72,7 @@ TEST(ForkProcessSandbox, statusTimeout) {
     return ExecutionStatus::Passed;
   }, Timeout);
 
-  ASSERT_EQ(result.Status, Timedout);
+  ASSERT_EQ(result.status, Timedout);
 }
 
 TEST(ForkProcessSandbox, statusCrashed) {
@@ -83,5 +83,5 @@ TEST(ForkProcessSandbox, statusCrashed) {
     return ExecutionStatus::Passed;
   }, Timeout);
 
-  ASSERT_EQ(result.Status, Crashed);
+  ASSERT_EQ(result.status, Crashed);
 }

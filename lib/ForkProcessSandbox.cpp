@@ -100,11 +100,11 @@ mull::ForkProcessSandbox::run(std::function<ExecutionStatus (void)> function,
 
     auto elapsed = high_resolution_clock::now() - start;
     ExecutionResult result;
-    result.RunningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
+    result.runningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
     result.exitStatus = WEXITSTATUS(status);
     result.stderrOutput = readFileAndUnlink(stderrFilename);
     result.stdoutOutput = readFileAndUnlink(stdoutFilename);
-    result.Status = *sharedStatus;
+    result.status = *sharedStatus;
 
     int munmapResult = munmap(sharedStatus, sizeof(ExecutionStatus));
 
@@ -115,15 +115,15 @@ mull::ForkProcessSandbox::run(std::function<ExecutionStatus (void)> function,
     (void)munmapResult;
 
     if (WIFSIGNALED(status)) {
-      result.Status = Crashed;
+      result.status = Crashed;
     }
 
     else if (WIFEXITED(status) && WEXITSTATUS(status) == MullTimeoutCode) {
-      result.Status = Timedout;
+      result.status = Timedout;
     }
 
     else if (WIFEXITED(status) && WEXITSTATUS(status) != MullExitCode) {
-      result.Status = AbnormalExit;
+      result.status = AbnormalExit;
     }
 
     return result;
@@ -133,6 +133,6 @@ mull::ForkProcessSandbox::run(std::function<ExecutionStatus (void)> function,
 mull::ExecutionResult mull::NullProcessSandbox::run(std::function<ExecutionStatus (void)> function,
                                                     long long timeoutMilliseconds) {
   ExecutionResult result;
-  result.Status = function();
+  result.status = function();
   return result;
 }

@@ -27,14 +27,14 @@ enum ExecutionStatus {
 };
 
 struct ExecutionResult {
-  ExecutionStatus Status;
+  ExecutionStatus status;
   int exitStatus;
-  long long RunningTime;
+  long long runningTime;
   std::string stdoutOutput;
   std::string stderrOutput;
 
   std::string getStatusAsString() {
-    switch (this->Status) {
+    switch (this->status) {
       case Invalid:
         return "Invalid";
       case Failed:
