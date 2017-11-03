@@ -53,7 +53,7 @@ static std::string readFileAndUnlink(const char *filename) {
   return output;
 }
 
-void handle_alarm_signal(int signal, struct __siginfo *info, void *context) {
+void handle_alarm_signal(int signal, siginfo_t *info, void *context) {
   exit(mull::ForkProcessSandbox::MullTimeoutCode);
 }
 
