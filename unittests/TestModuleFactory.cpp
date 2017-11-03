@@ -241,6 +241,10 @@ std::unique_ptr<Module> TestModuleFactory::createCustomTest_Distance_TestModule(
   return createModule(fixture, fixture);
 }
 
+std::unique_ptr<Module> TestModuleFactory::create_CustomTest_OpenSSL_bio_enc_test_module() {
+  const char *fixture = "openssl_bio_enc_test.o.ll";
+  return createModule(fixture, fixture);
+}
 
 #pragma mark - Rust
 

@@ -24,13 +24,17 @@ enum ScalarValueMutationType {
   Float
 };
 
+const std::string ScalarValueMutationOperator::ID = "scalar_value_mutation_operator";
+
+#pragma mark - Prototypes
+
 static
 ScalarValueMutationType findPossibleApplication(Value &V,
                                                 std::string &outDiagnostics);
 static ConstantInt *getReplacementInt(ConstantInt *constantInt);
 static ConstantFP *getReplacementFloat(ConstantFP *constantFloat);
 
-const std::string ScalarValueMutationOperator::ID = "scalar_value_mutation_operator";
+#pragma mark - Implementations
 
 MutationPoint *
 ScalarValueMutationOperator::getMutationPoint(MullModule *module,
@@ -125,22 +129,14 @@ ScalarValueMutationType findPossibleApplication(Value &V,
 }
 
 static ConstantInt *getReplacementInt(ConstantInt *constantInt) {
-  auto type = constantInt->getType();
+  uint64_t replacementValue = constantInt->isZero() ? 1 : 0;
 
-  auto intValue = constantInt->getValue();
+  APInt replacementIntValue =
+    APInt(constantInt->getBitWidth(), replacementValue);
 
-  // TODO: Refactor to avoid unnecessary construction.
-  APInt replacementIntValue;
-
-  // TODO: Review the rules for mutation.
-  // TODO: Didn't find a better way of testing APInt for zero-ness.
-  if (intValue.isNegative() == false && intValue.isStrictlyPositive() == false) {
-    replacementIntValue = APInt(8U, 1);
-  } else {
-    replacementIntValue = APInt(8U, 0);
-  }
-
-  ConstantInt *replacement = dyn_cast<ConstantInt>(ConstantInt::get(type, replacementIntValue));
+  ConstantInt *replacement =
+    dyn_cast<ConstantInt>(ConstantInt::get(constantInt->getType(),
+                                           replacementIntValue));
 
   return replacement;
 }
