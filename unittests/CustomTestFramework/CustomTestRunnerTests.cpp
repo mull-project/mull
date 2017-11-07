@@ -23,21 +23,10 @@ const static int TestTimeout = 1000;
 static vector<unique_ptr<MullModule>> loadTestModules() {
   function<vector<unique_ptr<MullModule>> ()> modules = [](){
     vector<unique_ptr<MullModule>> modules;
-    {
-      auto module = SharedTestModuleFactory.createCustomTest_Distance_DistanceModule();
-      modules.push_back(make_unique<MullModule>(move(module),
-                                                "CustomTest_Distance_DistanceModule"));
-    }
-    {
-      auto module = SharedTestModuleFactory.createCustomTest_Distance_MainModule();
-      modules.push_back(make_unique<MullModule>(move(module),
-                                                "CustomTest_Distance_MainModule"));
-    }
-    {
-      auto module = SharedTestModuleFactory.createCustomTest_Distance_TestModule();
-      modules.push_back(make_unique<MullModule>(move(module),
-                                                "CustomTest_Distance_TestModule"));
-    }
+
+    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_DistanceModule());
+    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_MainModule());
+    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_TestModule());
 
     return modules;
   };

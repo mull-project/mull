@@ -7,17 +7,17 @@
 #include "MutationsFinder.h"
 #include "Testee.h"
 
-#include "llvm/IR/Argument.h"
-#include "llvm/IR/BasicBlock.h"
-#include "llvm/IR/Constants.h"
-#include "llvm/IR/DerivedTypes.h"
-#include "llvm/IR/Function.h"
-#include "llvm/IR/InstrTypes.h"
-#include "llvm/IR/Instructions.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IR/Type.h"
-#include "llvm/IR/Value.h"
+#include <llvm/IR/Argument.h>
+#include <llvm/IR/BasicBlock.h>
+#include <llvm/IR/Constants.h>
+#include <llvm/IR/DerivedTypes.h>
+#include <llvm/IR/Function.h>
+#include <llvm/IR/InstrTypes.h>
+#include <llvm/IR/Instructions.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/Type.h>
+#include <llvm/IR/Value.h>
 
 #include "TestModuleFactory.h"
 
@@ -77,14 +77,14 @@ TEST(NegateConditionMutationOperator, negatedCmpInstPredicate) {
 
 TEST(NegateConditionMutationOperator, getMutationPoints_no_filter) {
   TestModuleFactory factory;
-  auto llvmModule = factory.APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutation_operatorModule();
+  auto module = factory.APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutation_operatorModule();
+  auto llvmModule = module->getModule();
   assert(llvmModule);
 
   Function *function = llvmModule->getFunction("_ZN4llvm5APInt12tcExtractBitEPKyj");
   assert(function);
   Testee testee(function, 1);
 
-  auto module = make_unique<MullModule>(std::move(llvmModule), "APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutation_operator");
   Context context;
   context.addModule(std::move(module));
 
@@ -102,14 +102,14 @@ TEST(NegateConditionMutationOperator, getMutationPoints_no_filter) {
 
 TEST(NegateConditionMutationOperator, getMutationPoints_filter_to_bool_converion) {
   TestModuleFactory factory;
-  auto llvmModule = factory.APFloat_019fc57b8bd190d33389137abbe7145e_214_2_7_negate_mutation_operatorModule();
+  auto module = factory.APFloat_019fc57b8bd190d33389137abbe7145e_214_2_7_negate_mutation_operatorModule();
+  auto llvmModule = module->getModule();
   assert(llvmModule);
 
   Function *function = llvmModule->getFunction("_ZNK4llvm7APFloat11isSignalingEv");
   assert(function);
   Testee testee(function, 1);
 
-  auto module = make_unique<MullModule>(std::move(llvmModule), "APFloat_019fc57b8bd190d33389137abbe7145e_214_2_7_negate_mutation_operator");
   Context context;
   context.addModule(std::move(module));
 
@@ -124,14 +124,14 @@ TEST(NegateConditionMutationOperator, getMutationPoints_filter_to_bool_converion
 
 TEST(NegateConditionMutationOperator, getMutationPoints_filter_is_null) {
   TestModuleFactory factory;
-  auto llvmModule = factory.APFloat_019fc57b8bd190d33389137abbe7145e_5_1_3_negate_mutation_operatorModule();
+  auto module = factory.APFloat_019fc57b8bd190d33389137abbe7145e_5_1_3_negate_mutation_operatorModule();
+  auto llvmModule = module->getModule();
   assert(llvmModule);
 
   Function *function = llvmModule->getFunction("_ZN4llvm7APFloat15freeSignificandEv");
   assert(function);
   Testee testee(function, 1);
 
-  auto module = make_unique<MullModule>(std::move(llvmModule), "APFloat_019fc57b8bd190d33389137abbe7145e_5_1_3_negate_mutation_operator");
   Context context;
   context.addModule(std::move(module));
 

@@ -12,9 +12,9 @@
 #include "gtest/gtest.h"
 
 #include <cstring>
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IR/Type.h"
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/Type.h>
 #include <sqlite3.h>
 
 using namespace mull;
@@ -28,11 +28,9 @@ TEST(SQLiteReporter, integrationTest) {
   /// mutated test execution.
 
   TestModuleFactory testModuleFactory;
-  auto ModuleWithTests   = testModuleFactory.createTesterModule();
-  auto ModuleWithTestees = testModuleFactory.createTesteeModule();
 
-  auto mullModuleWithTests   = make_unique<MullModule>(std::move(ModuleWithTests), "");
-  auto mullModuleWithTestees = make_unique<MullModule>(std::move(ModuleWithTestees), "");
+  auto mullModuleWithTests   = testModuleFactory.createTesterModule();
+  auto mullModuleWithTestees = testModuleFactory.createTesteeModule();
 
   Context context;
   context.addModule(std::move(mullModuleWithTests));
@@ -305,11 +303,9 @@ TEST(SQLiteReporter, integrationTest_Config) {
 
 TEST(SQLiteReporter, do_emitDebugInfo) {
   TestModuleFactory testModuleFactory;
-  auto ModuleWithTests   = testModuleFactory.createTesterModule();
-  auto ModuleWithTestees = testModuleFactory.createTesteeModule();
 
-  auto mullModuleWithTests   = make_unique<MullModule>(std::move(ModuleWithTests), "");
-  auto mullModuleWithTestees = make_unique<MullModule>(std::move(ModuleWithTestees), "");
+  auto mullModuleWithTests   = testModuleFactory.createTesterModule();
+  auto mullModuleWithTestees = testModuleFactory.createTesteeModule();
 
   Context context;
   context.addModule(std::move(mullModuleWithTests));
@@ -479,11 +475,9 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
 
 TEST(SQLiteReporter, do_not_emitDebugInfo) {
   TestModuleFactory testModuleFactory;
-  auto ModuleWithTests   = testModuleFactory.createTesterModule();
-  auto ModuleWithTestees = testModuleFactory.createTesteeModule();
 
-  auto mullModuleWithTests   = make_unique<MullModule>(std::move(ModuleWithTests), "");
-  auto mullModuleWithTestees = make_unique<MullModule>(std::move(ModuleWithTestees), "");
+  auto mullModuleWithTests   = testModuleFactory.createTesterModule();
+  auto mullModuleWithTestees = testModuleFactory.createTesteeModule();
 
   Context context;
   context.addModule(std::move(mullModuleWithTests));
