@@ -102,14 +102,8 @@ MullModule *MutationPoint::getOriginalModule() const {
   return module;
 }
 
-std::unique_ptr<llvm::Module>
-MutationPoint::cloneModuleAndApplyMutation() {
-  auto copyForMutation = CloneModule(module->getModule());
-  assert(copyForMutation);
-
-  mutationOperator->applyMutation(copyForMutation.get(), Address, *OriginalValue);
-
-  return copyForMutation;
+void MutationPoint::applyMutation(MullModule &module) {
+  mutationOperator->applyMutation(module.getModule(), Address, *OriginalValue);
 }
 
 std::string MutationPoint::getUniqueIdentifier() {

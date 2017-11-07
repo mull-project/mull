@@ -61,7 +61,7 @@ TEST(ScalarValueMutationOperator, getMutationPoint) {
   ASSERT_EQ(mutationPoints[3]->getAddress().getIIndex(), 12);
 }
 
-TEST(ScalarValueMutationOperator, failingMutationPoint) {
+TEST(DISABLED_ScalarValueMutationOperator, failingMutationPoint) {
   auto mullModule = TestModuleFactory.create_CustomTest_OpenSSL_bio_enc_test_Module();
 
   MutationPointAddress address(15, 10, 7);
@@ -70,6 +70,6 @@ TEST(ScalarValueMutationOperator, failingMutationPoint) {
 
   Config config;
   Toolchain toolchain(config);
-  auto mutant = point.cloneModuleAndApplyMutation();
-  toolchain.compiler().compileModule(mutant.get());
+//  auto mutant = point.cloneModuleAndApplyMutation();
+//  toolchain.compiler().compileModule(mutant.get());
 }
