@@ -12,14 +12,14 @@
 #include "MutationsFinder.h"
 #include "Filter.h"
 
-#include "llvm/ExecutionEngine/ExecutionEngine.h"
-#include "llvm/IR/InstrTypes.h"
-#include "llvm/IR/Instructions.h"
-#include "llvm/IR/InstIterator.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
-#include "llvm/Support/SourceMgr.h"
-#include "llvm/Transforms/Utils/Cloning.h"
+#include <llvm/ExecutionEngine/ExecutionEngine.h>
+#include <llvm/IR/InstrTypes.h>
+#include <llvm/IR/Instructions.h>
+#include <llvm/IR/InstIterator.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
+#include <llvm/Support/SourceMgr.h>
+#include <llvm/Transforms/Utils/Cloning.h>
 
 #include "gtest/gtest.h"
 
@@ -58,12 +58,9 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
   auto ModuleWithTests   = TestModuleFactory.createTesterModule();
   auto ModuleWithTestees = TestModuleFactory.createTesteeModule();
 
-  auto mullModuleWithTests   = make_unique<MullModule>(std::move(ModuleWithTests), "");
-  auto mullModuleWithTestees = make_unique<MullModule>(std::move(ModuleWithTestees), "");
-
   Context Ctx;
-  Ctx.addModule(std::move(mullModuleWithTests));
-  Ctx.addModule(std::move(mullModuleWithTestees));
+  Ctx.addModule(std::move(ModuleWithTests));
+  Ctx.addModule(std::move(ModuleWithTestees));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<MathAddMutationOperator>());
@@ -99,10 +96,8 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
 TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
   auto module = TestModuleFactory.create_SimpleTest_MathSub_module();
 
-  auto mullModule = make_unique<MullModule>(std::move(module), "");
-
   Context Ctx;
-  Ctx.addModule(std::move(mullModule));
+  Ctx.addModule(std::move(module));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<MathSubMutationOperator>());
@@ -143,10 +138,8 @@ TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
 TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
   auto module = TestModuleFactory.create_SimpleTest_MathMul_module();
 
-  auto mullModule = make_unique<MullModule>(std::move(module), "");
-
   Context Ctx;
-  Ctx.addModule(std::move(mullModule));
+  Ctx.addModule(std::move(module));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<MathMulMutationOperator>());
@@ -188,10 +181,8 @@ TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
 TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
   auto module = TestModuleFactory.create_SimpleTest_MathDiv_module();
 
-  auto mullModule = make_unique<MullModule>(std::move(module), "");
-
   Context Ctx;
-  Ctx.addModule(std::move(mullModule));
+  Ctx.addModule(std::move(module));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<MathDivMutationOperator>());
@@ -236,12 +227,9 @@ TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
   auto ModuleWithTests   = TestModuleFactory.create_SimpleTest_NegateCondition_Tester_Module();
   auto ModuleWithTestees = TestModuleFactory.create_SimpleTest_NegateCondition_Testee_Module();
 
-  auto mullModuleWithTests   = make_unique<MullModule>(std::move(ModuleWithTests), "");
-  auto mullModuleWithTestees = make_unique<MullModule>(std::move(ModuleWithTestees), "");
-
   Context Ctx;
-  Ctx.addModule(std::move(mullModuleWithTests));
-  Ctx.addModule(std::move(mullModuleWithTestees));
+  Ctx.addModule(std::move(ModuleWithTests));
+  Ctx.addModule(std::move(ModuleWithTestees));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
@@ -278,10 +266,8 @@ TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
 TEST(MutationPoint, SimpleTest_AndOrMutationOperator_applyMutation) {
   auto module = TestModuleFactory.create_SimpleTest_ANDORReplacement_Module();
 
-  auto mullModule = make_unique<MullModule>(std::move(module), "");
-
   Context ctx;
-  ctx.addModule(std::move(mullModule));
+  ctx.addModule(std::move(module));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AndOrReplacementMutationOperator>());
@@ -326,10 +312,8 @@ TEST(MutationPoint, SimpleTest_AndOrMutationOperator_applyMutation) {
 TEST(MutationPoint, SimpleTest_ScalarValueMutationOperator_applyMutation) {
   auto module = TestModuleFactory.create_SimpleTest_ScalarValue_module();
 
-  auto mullModule = make_unique<MullModule>(std::move(module), "");
-
   Context Ctx;
-  Ctx.addModule(std::move(mullModule));
+  Ctx.addModule(std::move(module));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<ScalarValueMutationOperator>());
@@ -379,10 +363,8 @@ TEST(MutationPoint, SimpleTest_ScalarValueMutationOperator_applyMutation) {
 TEST(MutationPoint, SimpleTest_ReplaceCallMutationOperator_applyMutation) {
   auto module = TestModuleFactory.create_SimpleTest_ReplaceCall_module();
 
-  auto mullModule = make_unique<MullModule>(std::move(module), "");
-
   Context Ctx;
-  Ctx.addModule(std::move(mullModule));
+  Ctx.addModule(std::move(module));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<ReplaceCallMutationOperator>());

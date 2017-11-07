@@ -12,12 +12,12 @@
 #include "MutationsFinder.h"
 #include "Toolchain/Toolchain.h"
 
-#include "llvm/IR/CallSite.h"
-#include "llvm/IR/InstrTypes.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
-#include "llvm/Support/SourceMgr.h"
-#include "llvm/Support/YAMLTraits.h"
+#include <llvm/IR/CallSite.h>
+#include <llvm/IR/InstrTypes.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
+#include <llvm/Support/SourceMgr.h>
+#include <llvm/Support/YAMLTraits.h>
 #include <llvm/Support/DynamicLibrary.h>
 
 #include "gtest/gtest.h"
@@ -30,11 +30,10 @@ static TestModuleFactory TestModuleFactory;
 #pragma mark - Finding Tests
 
 TEST(GoogleTestFinder, FindTest) {
-  auto ModuleWithTests     = TestModuleFactory.createGoogleTestTesterModule();
-  auto mullModuleWithTests = make_unique<MullModule>(std::move(ModuleWithTests), "");
+  auto ModuleWithTests = TestModuleFactory.createGoogleTestTesterModule();
 
   Context Ctx;
-  Ctx.addModule(std::move(mullModuleWithTests));
+  Ctx.addModule(std::move(ModuleWithTests));
 
   const char *configYAML = R"YAML(
 mutation_operators:
@@ -63,11 +62,10 @@ mutation_operators:
 }
 
 TEST(GoogleTestFinder, findTests_filter) {
-  auto ModuleWithTests       = TestModuleFactory.createGoogleTestTesterModule();
-  auto mullModuleWithTests = make_unique<MullModule>(std::move(ModuleWithTests), "");
+  auto ModuleWithTests     = TestModuleFactory.createGoogleTestTesterModule();
 
   Context Ctx;
-  Ctx.addModule(std::move(mullModuleWithTests));
+  Ctx.addModule(std::move(ModuleWithTests));
 
   const char *configYAML = R"YAML(
 mutation_operators:
@@ -111,15 +109,12 @@ mutation_operators:
   auto moduleWithTestees = TestModuleFactory.createGoogleTestTesteeModule();
 
   auto compiledModule_tests =
-    toolchain.compiler().compileModule(moduleWithTests.get());
-  auto compiledModule_testees =   toolchain.compiler().compileModule(moduleWithTestees.get());
-
-  auto mullModuleWithTests = make_unique<MullModule>(std::move(moduleWithTests), "");
-  auto mullModuleWithTestees = make_unique<MullModule>(std::move(moduleWithTestees), "");
+    toolchain.compiler().compileModule(moduleWithTests->getModule());
+  auto compiledModule_testees = toolchain.compiler().compileModule(moduleWithTestees->getModule());
 
   Context Ctx;
-  Ctx.addModule(std::move(mullModuleWithTests));
-  Ctx.addModule(std::move(mullModuleWithTestees));
+  Ctx.addModule(std::move(moduleWithTests));
+  Ctx.addModule(std::move(moduleWithTestees));
 
   Filter filter;
   GoogleTestFinder Finder;

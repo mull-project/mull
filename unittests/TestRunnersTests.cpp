@@ -9,15 +9,15 @@
 #include "Filter.h"
 #include "Testee.h"
 
-#include "llvm/ExecutionEngine/ExecutionEngine.h"
-#include "llvm/IR/InstrTypes.h"
-#include "llvm/IR/InstIterator.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
-#include "llvm/Support/DynamicLibrary.h"
-#include "llvm/Support/SourceMgr.h"
-#include "llvm/Support/TargetSelect.h"
-#include "llvm/Transforms/Utils/Cloning.h"
+#include <llvm/ExecutionEngine/ExecutionEngine.h>
+#include <llvm/IR/InstrTypes.h>
+#include <llvm/IR/InstIterator.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
+#include <llvm/Support/DynamicLibrary.h>
+#include <llvm/Support/SourceMgr.h>
+#include <llvm/Support/TargetSelect.h>
+#include <llvm/Transforms/Utils/Cloning.h>
 
 #include "gtest/gtest.h"
 
@@ -44,14 +44,11 @@ TEST(SimpleTestRunner, runTest) {
   auto OwnedModuleWithTests   = TestModuleFactory.createTesterModule();
   auto OwnedModuleWithTestees = TestModuleFactory.createTesteeModule();
 
-  Module *ModuleWithTests   = OwnedModuleWithTests.get();
-  Module *ModuleWithTestees = OwnedModuleWithTestees.get();
+  Module *ModuleWithTests   = OwnedModuleWithTests->getModule();
+  Module *ModuleWithTestees = OwnedModuleWithTestees->getModule();
 
-  auto mullOwnedModuleWithTests   = make_unique<MullModule>(std::move(OwnedModuleWithTests), "");
-  auto mullOwnedModuleWithTestees = make_unique<MullModule>(std::move(OwnedModuleWithTestees), "");
-
-  Ctx.addModule(std::move(mullOwnedModuleWithTests));
-  Ctx.addModule(std::move(mullOwnedModuleWithTestees));
+  Ctx.addModule(std::move(OwnedModuleWithTests));
+  Ctx.addModule(std::move(OwnedModuleWithTestees));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<MathAddMutationOperator>());
@@ -130,14 +127,11 @@ TEST(SimpleTestRunner, runTestUsingLibC) {
   auto OwnedModuleWithTests   = TestModuleFactory.createLibCTesterModule();
   auto OwnedModuleWithTestees = TestModuleFactory.createLibCTesteeModule();
 
-  Module *ModuleWithTests   = OwnedModuleWithTests.get();
-  Module *ModuleWithTestees = OwnedModuleWithTestees.get();
+  Module *ModuleWithTests   = OwnedModuleWithTests->getModule();
+  Module *ModuleWithTestees = OwnedModuleWithTestees->getModule();
 
-  auto mullOwnedModuleWithTests   = make_unique<MullModule>(std::move(OwnedModuleWithTests), "");
-  auto mullOwnedModuleWithTestees = make_unique<MullModule>(std::move(OwnedModuleWithTestees), "");
-
-  Ctx.addModule(std::move(mullOwnedModuleWithTests));
-  Ctx.addModule(std::move(mullOwnedModuleWithTestees));
+  Ctx.addModule(std::move(OwnedModuleWithTests));
+  Ctx.addModule(std::move(OwnedModuleWithTestees));
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<MathAddMutationOperator>());
@@ -210,14 +204,11 @@ TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
   auto OwnedModuleWithTests   = TestModuleFactory.createExternalLibTesterModule();
   auto OwnedModuleWithTestees = TestModuleFactory.createExternalLibTesteeModule();
 
-  Module *ModuleWithTests   = OwnedModuleWithTests.get();
-  Module *ModuleWithTestees = OwnedModuleWithTestees.get();
+  Module *ModuleWithTests   = OwnedModuleWithTests->getModule();
+  Module *ModuleWithTestees = OwnedModuleWithTestees->getModule();
 
-  auto mullOwnedModuleWithTests   = make_unique<MullModule>(std::move(OwnedModuleWithTests), "");
-  auto mullOwnedModuleWithTestees = make_unique<MullModule>(std::move(OwnedModuleWithTestees), "");
-
-  Ctx.addModule(std::move(mullOwnedModuleWithTests));
-  Ctx.addModule(std::move(mullOwnedModuleWithTestees));
+  Ctx.addModule(std::move(OwnedModuleWithTests));
+  Ctx.addModule(std::move(OwnedModuleWithTestees));
   Filter filter;
   SimpleTestFinder testFinder;
 

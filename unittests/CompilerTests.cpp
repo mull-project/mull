@@ -2,11 +2,11 @@
 #include "ModuleLoader.h"
 #include "TestModuleFactory.h"
 
-#include "llvm/ExecutionEngine/ExecutionEngine.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
-#include "llvm/Support/SourceMgr.h"
-#include "llvm/Support/TargetSelect.h"
+#include <llvm/ExecutionEngine/ExecutionEngine.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
+#include <llvm/Support/SourceMgr.h>
+#include <llvm/Support/TargetSelect.h>
 
 #include "gtest/gtest.h"
 
@@ -26,9 +26,8 @@ TEST(Compiler, CompileModule) {
 
   Compiler compiler(*targetMachine.get());
 
-  auto someModule = TestModuleFactory.createTesterModule();
-  MullModule mullModule(std::move(someModule), "");
-  auto Binary = compiler.compileModule(mullModule);
+  auto module = TestModuleFactory.createTesterModule();
+  auto Binary = compiler.compileModule(module->getModule());
 
   ASSERT_NE(nullptr, Binary.getBinary());
 }
