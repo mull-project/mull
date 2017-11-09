@@ -6,3 +6,5 @@ simple_test/mutation_operators/and_or_replacement_cpp/test_and_or_operators.bc
 simple_test/mutation_operators/math_div/math_div.bc
 simple_test/mutation_operators/math_mul/math_mul.bc
 simple_test/mutation_operators/math_sub/math_sub.bc
+simple_test/mutation_operators/negate_condition/testee.bc
+simple_test/mutation_operators/negate_condition/tester.bc

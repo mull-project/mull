@@ -130,13 +130,13 @@ TestModuleFactory::createModule(const char *fixtureName,
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_NegateCondition_Tester_Module() {
-  const char *fixture = "fixture_simple_test_negate_condition_operator_tester.ll";
-  return createModule(fixture, fixture);
+  const char *fixture = "simple_test/mutation_operators/negate_condition/tester.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_NegateCondition_Testee_Module() {
-  const char *fixture = "fixture_simple_test_negate_condition_operator_testee.ll";
-  return createModule(fixture, fixture);
+  const char *fixture = "simple_test/mutation_operators/negate_condition/testee.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
 #pragma mark - Remove Void Function
