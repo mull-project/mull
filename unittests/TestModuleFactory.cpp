@@ -4,9 +4,12 @@
 #include "Logger.h"
 
 #include <llvm/AsmParser/Parser.h>
-#include <llvm/IR/Verifier.h>
+#include <llvm/Bitcode/ReaderWriter.h>
+#include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
+#include <llvm/IR/Verifier.h>
 #include <llvm/Support/Debug.h>
+#include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/SourceMgr.h>
 
 #include <iostream>
@@ -67,6 +70,29 @@ static std::unique_ptr<Module> parseIR(const char *rawBitcode) {
 
   assert(!llvm::verifyModule(*module, &dbgs()));
 
+  return module;
+}
+
+static std::unique_ptr<MullModule>
+createModuleFromBitcode(const char *fixtureName,
+                        const char *moduleIdentifier) {
+  std::string fixtureFullPath = fixturePath(fixtureName);
+
+  auto bufferOrError = MemoryBuffer::getFile(fixtureFullPath);
+  if (!bufferOrError) {
+    Logger::error() << "TestModuleFactory> Can't load module " << fixtureFullPath << '\n';
+    abort();
+  }
+
+  auto llvmModule = parseBitcodeFile(bufferOrError->get()->getMemBufferRef(), GlobalCtx);
+  if (!llvmModule) {
+    Logger::error() << "TestModuleFactory> Can't load module " << fixtureFullPath << '\n';
+    abort();
+  }
+
+  llvmModule.get()->setModuleIdentifier(moduleIdentifier);
+
+  auto module = make_unique<MullModule>(std::move(llvmModule.get()), "fake_hash");
   return module;
 }
 
@@ -231,18 +257,18 @@ std::unique_ptr<MullModule> TestModuleFactory::APFloat_019fc57b8bd190d33389137ab
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::createCustomTest_Distance_DistanceModule() {
-  const char *fixture = "custom_test/distance/distance.ll";
-  return createModule(fixture, fixture);
+  const char *fixture = "custom_test/distance/distance.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::createCustomTest_Distance_MainModule() {
-  const char *fixture = "custom_test/distance/main.ll";
-  return createModule(fixture, fixture);
+  const char *fixture = "custom_test/distance/main.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::createCustomTest_Distance_TestModule() {
-  const char *fixture = "custom_test/distance/test.ll";
-  return createModule(fixture, fixture);
+  const char *fixture = "custom_test/distance/test.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::create_CustomTest_OpenSSL_bio_enc_test_module() {
