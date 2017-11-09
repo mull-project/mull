@@ -179,10 +179,6 @@ std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ReplaceCall_mod
 
 #pragma mark -
 
-std::string TestModuleFactory::testerModulePath_IR() {
-  return fixturePath("fixture_simple_test_tester_module.ll");
-}
-
 std::string TestModuleFactory::testerModulePath_Bitcode() {
   return fixturePath("fixture_simple_test_tester_module.bc");
 }
