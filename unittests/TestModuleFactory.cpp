@@ -215,13 +215,13 @@ std::unique_ptr<MullModule> TestModuleFactory::createExternalLibTesteeModule() {
 #pragma mark - Google Test
 
 std::unique_ptr<MullModule> TestModuleFactory::createGoogleTestTesterModule() {
-  return createModule("fixture_google_test_tester_module.ll",
-                      "google_test_tester");
+  return createModuleFromBitcode("google_test/google_test/Test.bc",
+                                 "google_test_tester");
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::createGoogleTestTesteeModule() {
-  return createModule("fixture_google_test_testee_module.ll",
-                      "google_test_testee");
+  return createModuleFromBitcode("google_test/google_test/Testee.bc",
+                                 "google_test_testee");
 }
 
 #pragma mark -

@@ -2,6 +2,9 @@ MAKEFLAGS=--warn-undefined-variables
 
 CC=/opt/llvm-3.9/bin/clang
 
+LEVEL=../../..
+FIXTURES_DIR=$(LEVEL)/unittests/fixtures/google_test/google_test/
+
 # CC=xcrun -sdk macosx clang
 
 BUILD_DIR=build
@@ -37,13 +40,13 @@ $(BUILD_DIR):
 
 bitcode: $(BITCODE)
 
+synchronize_fixtures: bitcode $(FIXTURES_DIR)
+	cp $(BUILD_DIR)/*.bc $(FIXTURES_DIR)
+
 driver: $(BUILD_DIR) $(BUILD_DIR)/tests
 
 run: driver
 	$(BUILD_DIR)/tests
-
-$(BUILD_DIR):
-	mkdir $@
 
 ## Bitcode
 
@@ -72,7 +75,9 @@ $(BUILD_DIR)/Testee.o:
 $(BUILD_DIR)/tests: $(OBJECTS)
 	ld -L $(GTEST_DIR) -lgtest -lgtest_main -macosx_version_min 10.12 -lc++ -lc $^ -o $@
 
+$(FIXTURES_DIR):
+	mkdir -p $(FIXTURES_DIR)
+
 clean:
 	rm -rf $(BUILD_DIR)
-
 
