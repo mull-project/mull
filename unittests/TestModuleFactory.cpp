@@ -106,8 +106,8 @@ std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_MathSub_module(
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_MathMul_module() {
-  const char *fixture = "fixture_simple_test_math_mul_operator.ll";
-  return createModule(fixture, fixture);
+  const char *fixture = "simple_test/mutation_operators/math_mul/math_mul.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_MathDiv_module() {
