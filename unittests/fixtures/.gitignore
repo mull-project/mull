@@ -1,3 +1,5 @@
 custom_test/distance/distance.bc
 custom_test/distance/main.bc
 custom_test/distance/test.bc
+simple_test/mutation_operators/and_or_replacement/test_and_or_operators.bc
+simple_test/mutation_operators/and_or_replacement_cpp/test_and_or_operators.bc
