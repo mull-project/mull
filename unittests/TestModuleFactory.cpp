@@ -101,8 +101,8 @@ createModuleFromBitcode(const char *fixtureName,
 #pragma mark - Math Operators
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_MathSub_module() {
-  const char *fixture = "fixture_simple_test_math_sub_operator.ll";
-  return createModule(fixture, fixture);
+  const char *fixture = "simple_test/mutation_operators/math_sub/math_sub.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_MathMul_module() {
