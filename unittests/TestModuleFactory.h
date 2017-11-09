@@ -36,9 +36,6 @@ public:
 
   std::unique_ptr<MullModule> create_SimpleTest_ReplaceCall_module();
 
-  std::unique_ptr<MullModule> create_SimpleTest_testeePathCalculation_testee();
-  std::unique_ptr<MullModule> create_SimpleTest_testeePathCalculation_tester();
-
   std::unique_ptr<MullModule> createLibCTesterModule();
   std::unique_ptr<MullModule> createLibCTesteeModule();
 

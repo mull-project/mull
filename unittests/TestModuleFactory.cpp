@@ -179,16 +179,6 @@ std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ReplaceCall_mod
 
 #pragma mark -
 
-std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_testeePathCalculation_testee() {
-  const char *fixture = "fixture_simple_test_testee_path_calculation_testee.ll";
-  return createModule(fixture, fixture);
-}
-
-std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_testeePathCalculation_tester() {
-  const char *fixture = "fixture_simple_test_testee_path_calculation_tester.ll";
-  return createModule(fixture, fixture);
-}
-
 std::string TestModuleFactory::testerModulePath_IR() {
   return fixturePath("fixture_simple_test_tester_module.ll");
 }
