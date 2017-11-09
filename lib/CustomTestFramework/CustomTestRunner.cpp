@@ -110,14 +110,22 @@ std::string CustomTestRunner::MangleName(const llvm::StringRef &Name) {
 }
 
 void *CustomTestRunner::GetCtorPointer(const llvm::Function &Function) {
-  return FunctionPointer(MangleName(Function.getName()).c_str());
+  return getFunctionPointer(MangleName(Function.getName()).c_str());
 }
 
-void *CustomTestRunner::FunctionPointer(const char *FunctionName) {
-  JITSymbol Symbol = ObjectLayer.findSymbol(FunctionName, false);
-  void *FPointer = reinterpret_cast<void *>(static_cast<uintptr_t>(Symbol.getAddress()));
-  assert(FPointer && "Can't find pointer to function");
-  return FPointer;
+void *CustomTestRunner::getFunctionPointer(const std::string &functionName) {
+  JITSymbol symbol = ObjectLayer.findSymbol(functionName, false);
+
+  void *fpointer =
+    reinterpret_cast<void *>(static_cast<uintptr_t>(symbol.getAddress()));
+
+  if (fpointer == nullptr) {
+    errs() << "CustomTestRunner> Can't find pointer to function: "
+    << functionName << "\n";
+    exit(1);
+  }
+
+  return fpointer;
 }
 
 void CustomTestRunner::runStaticCtor(llvm::Function *Ctor) {
@@ -151,7 +159,7 @@ ExecutionStatus CustomTestRunner::runTest(Test *test, ObjectFiles &objectFiles) 
     strcpy(argv[i], argument.c_str());
   }
 
-  void *mainPointer = FunctionPointer("_main");
+  void *mainPointer = getFunctionPointer("_main");
   auto main = ((int (*)(int, char**))(intptr_t)mainPointer);
   int exitStatus = main(argc, argv);
 
