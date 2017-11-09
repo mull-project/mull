@@ -142,13 +142,13 @@ std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_NegateCondition
 #pragma mark - Remove Void Function
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_RemoveVoidFunction_Tester_Module() {
-  const char *fixture = "fixture_simple_test_remove_void_function_operator_tester.ll";
-  return createModule(fixture, fixture);
+  const char *fixture = "simple_test/mutation_operators/remove_void_function/tester.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_RemoveVoidFunction_Testee_Module() {
-  const char *fixture = "fixture_simple_test_remove_void_function_operator_testee.ll";
-  return createModule(fixture, fixture);
+  const char *fixture = "simple_test/mutation_operators/remove_void_function/testee.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
 #pragma mark - AND <-> OR Replacement

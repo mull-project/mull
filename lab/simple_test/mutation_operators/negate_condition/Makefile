@@ -16,7 +16,7 @@ tester.o:
 	$(CC) -c tester.c
 
 main: testee.o tester.o
-	clang -Wall -o main testee.o tester.o main.c
+	$(CC) -Wall -o main testee.o tester.o main.c
 
 bitcode: testee.o tester.o
 
