@@ -166,8 +166,8 @@ std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ANDORReplacemen
 #pragma mark - Scalar Value
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ScalarValue_module() {
-  const char *fixture = "fixture_simple_test_scalar_value_operator.ll";
-  return createModule(fixture, fixture);
+  const char *fixture = "simple_test/mutation_operators/scalar_value/scalar_value.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
 #pragma mark - Replace Call
