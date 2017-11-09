@@ -28,8 +28,7 @@ public:
 private:
   std::string MangleName(const llvm::StringRef &Name);
   void *GetCtorPointer(const llvm::Function &Function);
-  void *FunctionPointer(const char *FunctionName);
-
+  void *getFunctionPointer(const std::string &functionName);
   void runStaticCtor(llvm::Function *Ctor);
 };
 
