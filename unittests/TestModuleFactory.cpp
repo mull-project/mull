@@ -111,8 +111,8 @@ std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_MathMul_module(
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_MathDiv_module() {
-  const char *fixture = "fixture_simple_test_math_div_operator.ll";
-  return createModule(fixture, fixture);
+  const char *fixture = "simple_test/mutation_operators/math_div/math_div.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
 #pragma mark - Negate Condition
