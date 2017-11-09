@@ -10,3 +10,4 @@ simple_test/mutation_operators/negate_condition/testee.bc
 simple_test/mutation_operators/negate_condition/tester.bc
 simple_test/mutation_operators/remove_void_function/testee.bc
 simple_test/mutation_operators/remove_void_function/tester.bc
+simple_test/mutation_operators/replace_call/replace_call.bc

@@ -173,8 +173,8 @@ std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ScalarValue_mod
 #pragma mark - Replace Call
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ReplaceCall_module() {
-  const char *fixture = "fixture_simple_test_replace_call_operator.ll";
-  return createModule(fixture, fixture);
+  const char *fixture = "simple_test/mutation_operators/replace_call/replace_call.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
 #pragma mark -
