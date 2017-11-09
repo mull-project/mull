@@ -17,9 +17,13 @@ help: ## Show this help message.
 install: build_ninja
 	cd $(BUILD_DIR_NINJA) && ninja install
 
-test: ninja.test ## Run unit tests (runs tests using Ninja)
+generate_fixtures: ## Generates fixtures for tests
+	cd lab && make synchronize_fixtures
+
+test: generate_fixtures ninja.test ## Run unit tests (runs tests using Ninja)
 
 clean: ninja.clean xcode.clean ## Delete CMake build caches: Xcode and Ninja.
+	cd lab && make clean
 
 example: ninja.driver
 	cd Examples/HelloWorld && \

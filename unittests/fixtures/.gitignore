@@ -14,3 +14,6 @@ simple_test/mutation_operators/replace_call/replace_call.bc
 simple_test/mutation_operators/scalar_value/scalar_value.bc
 google_test/google_test/Test.bc
 google_test/google_test/Testee.bc
+custom_test/distance/distance.ll
+custom_test/distance/main.ll
+custom_test/distance/test.ll
