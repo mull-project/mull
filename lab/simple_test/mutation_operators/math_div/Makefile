@@ -1,4 +1,4 @@
-CC ~= /opt/llvm-3.9/bin/clang
+CC=/opt/llvm-3.9/bin/clang
 LEVEL=../../../..
 FIXTURES_DIR=$(LEVEL)/unittests/fixtures/simple_test/mutation_operators/math_div/
 

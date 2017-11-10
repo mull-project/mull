@@ -1,4 +1,4 @@
-CC=clang
+CC=/opt/llvm-3.9/bin/clang
 BUILD_DIR=./build
 FIXTURES_DIR=../../unittests/fixtures/custom_test/distance/
 

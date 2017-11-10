@@ -1,4 +1,4 @@
-CXX=/usr/local/opt/llvm@3.9/bin/clang++
+CXX=/opt/llvm-3.9/bin/clang++
 LEVEL=../../../..
 FIXTURES_DIR=$(LEVEL)/unittests/fixtures/simple_test/mutation_operators/and_or_replacement_cpp/
 
