@@ -23,7 +23,10 @@ help: ## Show this help message.
 install: build_ninja_release ## Build using Ninja in Release mode and install to /opt/mull-driver
 	cd $(BUILD_DIR_NINJA_RELEASE) && ninja install
 
-test: test_unit
+generate_fixtures: ## Generates fixtures for tests
+	cd lab && make synchronize_fixtures
+
+test: generate_fixtures test_unit
 
 test_unit: build_ninja_debug ## Run Unit Tests (Builds Ninja cache first if it does not exist)
 	cd $(BUILD_DIR_NINJA_DEBUG) && ninja MullUnitTests
@@ -59,6 +62,7 @@ build_ninja_release: ## Build Ninja project with CMake (Release build)
           -DCMAKE_INSTALL_PREFIX=/opt/mull-driver 
 
 clean: clean_ninja ## Delete CMake build caches: Ninja.
+	cd lab && clean
 
 clean_ninja: ## Delete Ninja CMake build cache.
 	rm -rfv $(BUILD_DIR_NINJA_DEBUG)

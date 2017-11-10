@@ -20,7 +20,10 @@ help: ## Show this help message.
 install: build_ninja
 	cd $(BUILD_DIR_NINJA) && ninja install
 
-test: test_unit
+generate_fixtures: ## Generates fixtures for tests
+	cd lab && make synchronize_fixtures
+
+test: generate_fixtures test_unit
 
 test_unit: build_ninja ## Run Unit Tests (Builds Ninja cache first if it does not exist)
 	cd $(BUILD_DIR_NINJA) && ninja MullUnitTests
@@ -52,6 +55,7 @@ build_ninja_driver: build_ninja ## Build mull-driver target
 	cd $(BUILD_DIR_NINJA) && ninja mull-driver
 
 clean: clean_ninja ## Delete CMake build caches: Xcode and Ninja.
+	cd lab && make clean
 
 clean_ninja: ## Delete Ninja CMake build cache.
 	rm -rfv $(BUILD_DIR_NINJA)

@@ -4,9 +4,12 @@
 #include "Logger.h"
 
 #include <llvm/AsmParser/Parser.h>
-#include <llvm/IR/Verifier.h>
+#include <llvm/Bitcode/ReaderWriter.h>
+#include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
+#include <llvm/IR/Verifier.h>
 #include <llvm/Support/Debug.h>
+#include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/SourceMgr.h>
 
 #include <iostream>
@@ -70,23 +73,46 @@ static std::unique_ptr<Module> parseIR(const char *rawBitcode) {
   return module;
 }
 
+static std::unique_ptr<MullModule>
+createModuleFromBitcode(const char *fixtureName,
+                        const char *moduleIdentifier) {
+  std::string fixtureFullPath = fixturePath(fixtureName);
+
+  auto bufferOrError = MemoryBuffer::getFile(fixtureFullPath);
+  if (!bufferOrError) {
+    Logger::error() << "TestModuleFactory> Can't load module " << fixtureFullPath << '\n';
+    abort();
+  }
+
+  auto llvmModule = parseBitcodeFile(bufferOrError->get()->getMemBufferRef(), GlobalCtx);
+  if (!llvmModule) {
+    Logger::error() << "TestModuleFactory> Can't load module " << fixtureFullPath << '\n';
+    abort();
+  }
+
+  llvmModule.get()->setModuleIdentifier(moduleIdentifier);
+
+  auto module = make_unique<MullModule>(std::move(llvmModule.get()), "fake_hash");
+  return module;
+}
+
 #pragma mark - Mutation Operators
 
 #pragma mark - Math Operators
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_MathSub_module() {
-  const char *fixture = "fixture_simple_test_math_sub_operator.ll";
-  return createModule(fixture, fixture);
+  const char *fixture = "simple_test/mutation_operators/math_sub/math_sub.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_MathMul_module() {
-  const char *fixture = "fixture_simple_test_math_mul_operator.ll";
-  return createModule(fixture, fixture);
+  const char *fixture = "simple_test/mutation_operators/math_mul/math_mul.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_MathDiv_module() {
-  const char *fixture = "fixture_simple_test_math_div_operator.ll";
-  return createModule(fixture, fixture);
+  const char *fixture = "simple_test/mutation_operators/math_div/math_div.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
 #pragma mark - Negate Condition
@@ -104,68 +130,54 @@ TestModuleFactory::createModule(const char *fixtureName,
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_NegateCondition_Tester_Module() {
-  const char *fixture = "fixture_simple_test_negate_condition_operator_tester.ll";
-  return createModule(fixture, fixture);
+  const char *fixture = "simple_test/mutation_operators/negate_condition/tester.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_NegateCondition_Testee_Module() {
-  const char *fixture = "fixture_simple_test_negate_condition_operator_testee.ll";
-  return createModule(fixture, fixture);
+  const char *fixture = "simple_test/mutation_operators/negate_condition/testee.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
 #pragma mark - Remove Void Function
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_RemoveVoidFunction_Tester_Module() {
-  const char *fixture = "fixture_simple_test_remove_void_function_operator_tester.ll";
-  return createModule(fixture, fixture);
+  const char *fixture = "simple_test/mutation_operators/remove_void_function/tester.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_RemoveVoidFunction_Testee_Module() {
-  const char *fixture = "fixture_simple_test_remove_void_function_operator_testee.ll";
-  return createModule(fixture, fixture);
+  const char *fixture = "simple_test/mutation_operators/remove_void_function/testee.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
 #pragma mark - AND <-> OR Replacement
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ANDORReplacement_Module() {
-  const char *fixture = "fixture_simple_test_and_or_replacement_operator.ll";
-  return createModule(fixture, fixture);
+  const char *fixture = "simple_test/mutation_operators/and_or_replacement/test_and_or_operators.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ANDORReplacement_CPPContent_Module() {
-  const char *fixture = "fixture_simple_test_and_or_replacement_operator_cpp_content.ll";
-  return createModule(fixture, fixture);
+  const char *fixture = "simple_test/mutation_operators/and_or_replacement_cpp/test_and_or_operators.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
 #pragma mark - Scalar Value
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ScalarValue_module() {
-  const char *fixture = "fixture_simple_test_scalar_value_operator.ll";
-  return createModule(fixture, fixture);
+  const char *fixture = "simple_test/mutation_operators/scalar_value/scalar_value.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
 #pragma mark - Replace Call
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ReplaceCall_module() {
-  const char *fixture = "fixture_simple_test_replace_call_operator.ll";
-  return createModule(fixture, fixture);
+  const char *fixture = "simple_test/mutation_operators/replace_call/replace_call.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
 #pragma mark -
-
-std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_testeePathCalculation_testee() {
-  const char *fixture = "fixture_simple_test_testee_path_calculation_testee.ll";
-  return createModule(fixture, fixture);
-}
-
-std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_testeePathCalculation_tester() {
-  const char *fixture = "fixture_simple_test_testee_path_calculation_tester.ll";
-  return createModule(fixture, fixture);
-}
-
-std::string TestModuleFactory::testerModulePath_IR() {
-  return fixturePath("fixture_simple_test_tester_module.ll");
-}
 
 std::string TestModuleFactory::testerModulePath_Bitcode() {
   return fixturePath("fixture_simple_test_tester_module.bc");
@@ -199,18 +211,13 @@ std::unique_ptr<MullModule> TestModuleFactory::createExternalLibTesteeModule() {
 #pragma mark - Google Test
 
 std::unique_ptr<MullModule> TestModuleFactory::createGoogleTestTesterModule() {
-  return createModule("fixture_google_test_tester_module.ll",
-                      "google_test_tester");
+  return createModuleFromBitcode("google_test/google_test/Test.bc",
+                                 "google_test_tester");
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::createGoogleTestTesteeModule() {
-  return createModule("fixture_google_test_testee_module.ll",
-                      "google_test_testee");
-}
-
-std::unique_ptr<MullModule> TestModuleFactory::createGoogleTestFinder_invokeInstTestee_Module() {
-  return createModule("fixture_google_test_finder_invoke_instruction.ll",
-                      "google_test_finder_invoke_instr_testee");
+  return createModuleFromBitcode("google_test/google_test/Testee.bc",
+                                 "google_test_testee");
 }
 
 #pragma mark -
@@ -231,18 +238,18 @@ std::unique_ptr<MullModule> TestModuleFactory::APFloat_019fc57b8bd190d33389137ab
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::createCustomTest_Distance_DistanceModule() {
-  const char *fixture = "custom_test/distance/distance.ll";
-  return createModule(fixture, fixture);
+  const char *fixture = "custom_test/distance/distance.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::createCustomTest_Distance_MainModule() {
-  const char *fixture = "custom_test/distance/main.ll";
-  return createModule(fixture, fixture);
+  const char *fixture = "custom_test/distance/main.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::createCustomTest_Distance_TestModule() {
-  const char *fixture = "custom_test/distance/test.ll";
-  return createModule(fixture, fixture);
+  const char *fixture = "custom_test/distance/test.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::create_CustomTest_OpenSSL_bio_enc_test_module() {
