@@ -15,8 +15,8 @@ public:
   std::unique_ptr<MullModule> createModule(const char *fixtureName,
                                            const char *moduleIdentifier);
   
-  std::unique_ptr<MullModule> createTesterModule();
-  std::unique_ptr<MullModule> createTesteeModule();
+  std::unique_ptr<MullModule> createSimpleTest_CountLettersTestModule();
+  std::unique_ptr<MullModule> createSimpleTest_CountLettersModule();
 
   std::unique_ptr<MullModule> create_SimpleTest_MathSub_module();
   std::unique_ptr<MullModule> create_SimpleTest_MathMul_module();

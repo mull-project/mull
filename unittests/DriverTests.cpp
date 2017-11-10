@@ -81,8 +81,8 @@ TEST(Driver, SimpleTest_MathAddMutationOperator) {
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
 
-    modules.push_back(SharedTestModuleFactory.createTesterModule());
-    modules.push_back(SharedTestModuleFactory.createTesteeModule());
+    modules.push_back(SharedTestModuleFactory.createSimpleTest_CountLettersTestModule());
+    modules.push_back(SharedTestModuleFactory.createSimpleTest_CountLettersModule());
 
     return modules;
   };

@@ -14,7 +14,7 @@ using namespace llvm;
 static TestModuleFactory TestModuleFactory;
 
 TEST(Context, AddModule) {
-  auto moduleWithTests = TestModuleFactory.createTesterModule();
+  auto moduleWithTests = TestModuleFactory.createSimpleTest_CountLettersTestModule();
 
   Context Ctx;
   Ctx.addModule(std::move(moduleWithTests));

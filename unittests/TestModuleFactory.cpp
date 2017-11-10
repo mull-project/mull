@@ -183,13 +183,13 @@ std::string TestModuleFactory::testerModulePath_Bitcode() {
   return fixturePath("fixture_simple_test_tester_module.bc");
 }
 
-std::unique_ptr<MullModule> TestModuleFactory::createTesterModule() {
-  const char *fixture = "fixture_simple_test_tester_module.ll";
-  return createModule(fixture, fixture);
+std::unique_ptr<MullModule> TestModuleFactory::createSimpleTest_CountLettersTestModule() {
+  const char *fixture = "simple_test/count_letters/test_count_letters.bc";
+  return createModuleFromBitcode(fixture, fixture);
 }
 
-std::unique_ptr<MullModule> TestModuleFactory::createTesteeModule() {
-  return createModule("fixture_testee_module.ll", "count_letters");
+std::unique_ptr<MullModule> TestModuleFactory::createSimpleTest_CountLettersModule() {
+  return createModuleFromBitcode("simple_test/count_letters/count_letters.bc", "count_letters");
 }
 
 #pragma mark - Google Test
