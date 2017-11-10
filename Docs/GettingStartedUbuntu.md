@@ -17,9 +17,9 @@ Add LLVM sources for binary distributions as recommended by
 [http://apt.llvm.org/](http://apt.llvm.org/):
 
 ```
-$ echo "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-3.9 main" >> /etc/apt/sources.list.d/llvm.list
 $ apt-get update
 $ apt-get -y install wget
+$ echo "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-3.9 main" >> /etc/apt/sources.list.d/llvm.list
 $ wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
 ```
 
