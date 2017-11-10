@@ -41,8 +41,8 @@ static llvm::Instruction &FunctionInstructionByAddress(Function &F, MutationPoin
 }
 
 TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
-  auto ModuleWithTests   = TestModuleFactory.createSimpleTest_CountLettersTestModule();
-  auto ModuleWithTestees = TestModuleFactory.createSimpleTest_CountLettersModule();
+  auto ModuleWithTests   = TestModuleFactory.create_SimpleTest_CountLettersTest_Module();
+  auto ModuleWithTestees = TestModuleFactory.create_SimpleTest_CountLetters_Module();
 
   Context Ctx;
   Ctx.addModule(std::move(ModuleWithTests));
@@ -86,7 +86,7 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
-  auto module = TestModuleFactory.create_SimpleTest_MathSub_module();
+  auto module = TestModuleFactory.create_SimpleTest_MathSub_Module();
 
   Context Ctx;
   Ctx.addModule(std::move(module));
@@ -128,7 +128,7 @@ TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
-  auto module = TestModuleFactory.create_SimpleTest_MathMul_module();
+  auto module = TestModuleFactory.create_SimpleTest_MathMul_Module();
 
   Context Ctx;
   Ctx.addModule(std::move(module));
@@ -171,7 +171,7 @@ TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
-  auto module = TestModuleFactory.create_SimpleTest_MathDiv_module();
+  auto module = TestModuleFactory.create_SimpleTest_MathDiv_Module();
 
   Context Ctx;
   Ctx.addModule(std::move(module));
@@ -302,7 +302,7 @@ TEST(MutationPoint, SimpleTest_AndOrMutationOperator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_ScalarValueMutationOperator_applyMutation) {
-  auto module = TestModuleFactory.create_SimpleTest_ScalarValue_module();
+  auto module = TestModuleFactory.create_SimpleTest_ScalarValue_Module();
 
   Context Ctx;
   Ctx.addModule(std::move(module));
@@ -353,7 +353,7 @@ TEST(MutationPoint, SimpleTest_ScalarValueMutationOperator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_ReplaceCallMutationOperator_applyMutation) {
-  auto module = TestModuleFactory.create_SimpleTest_ReplaceCall_module();
+  auto module = TestModuleFactory.create_SimpleTest_ReplaceCall_Module();
 
   Context Ctx;
   Ctx.addModule(std::move(module));

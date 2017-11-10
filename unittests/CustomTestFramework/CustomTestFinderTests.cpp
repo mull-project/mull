@@ -22,9 +22,9 @@ static vector<unique_ptr<MullModule>> loadTestModules() {
   function<vector<unique_ptr<MullModule>> ()> modules = [](){
     vector<unique_ptr<MullModule>> modules;
 
-    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_DistanceModule());
-    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_MainModule());
-    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_TestModule());
+    modules.push_back(SharedTestModuleFactory.create_CustomTest_Distance_Distance_Module());
+    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Main_Module());
+    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Test_Module());
 
     return modules;
   };

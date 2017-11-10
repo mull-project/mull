@@ -100,17 +100,17 @@ createModuleFromBitcode(const char *fixtureName,
 
 #pragma mark - Math Operators
 
-std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_MathSub_module() {
+std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_MathSub_Module() {
   const char *fixture = "simple_test/mutation_operators/math_sub/math_sub.bc";
   return createModuleFromBitcode(fixture, fixture);
 }
 
-std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_MathMul_module() {
+std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_MathMul_Module() {
   const char *fixture = "simple_test/mutation_operators/math_mul/math_mul.bc";
   return createModuleFromBitcode(fixture, fixture);
 }
 
-std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_MathDiv_module() {
+std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_MathDiv_Module() {
   const char *fixture = "simple_test/mutation_operators/math_div/math_div.bc";
   return createModuleFromBitcode(fixture, fixture);
 }
@@ -165,14 +165,14 @@ std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ANDORReplacemen
 
 #pragma mark - Scalar Value
 
-std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ScalarValue_module() {
+std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ScalarValue_Module() {
   const char *fixture = "simple_test/mutation_operators/scalar_value/scalar_value.bc";
   return createModuleFromBitcode(fixture, fixture);
 }
 
 #pragma mark - Replace Call
 
-std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ReplaceCall_module() {
+std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ReplaceCall_Module() {
   const char *fixture = "simple_test/mutation_operators/replace_call/replace_call.bc";
   return createModuleFromBitcode(fixture, fixture);
 }
@@ -183,23 +183,23 @@ std::string TestModuleFactory::testerModulePath_Bitcode() {
   return fixturePath("fixture_simple_test_tester_module.bc");
 }
 
-std::unique_ptr<MullModule> TestModuleFactory::createSimpleTest_CountLettersTestModule() {
+std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_CountLettersTest_Module() {
   const char *fixture = "simple_test/count_letters/test_count_letters.bc";
   return createModuleFromBitcode(fixture, fixture);
 }
 
-std::unique_ptr<MullModule> TestModuleFactory::createSimpleTest_CountLettersModule() {
+std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_CountLetters_Module() {
   return createModuleFromBitcode("simple_test/count_letters/count_letters.bc", "count_letters");
 }
 
 #pragma mark - Google Test
 
-std::unique_ptr<MullModule> TestModuleFactory::createGoogleTestTesterModule() {
+std::unique_ptr<MullModule> TestModuleFactory::create_GoogleTest_Tester_Module() {
   return createModuleFromBitcode("google_test/google_test/Test.bc",
                                  "google_test_tester");
 }
 
-std::unique_ptr<MullModule> TestModuleFactory::createGoogleTestTesteeModule() {
+std::unique_ptr<MullModule> TestModuleFactory::create_GoogleTest_Testee_Module() {
   return createModuleFromBitcode("google_test/google_test/Testee.bc",
                                  "google_test_testee");
 }
@@ -221,22 +221,22 @@ std::unique_ptr<MullModule> TestModuleFactory::APFloat_019fc57b8bd190d33389137ab
   return createModule(fixture, fixture);
 }
 
-std::unique_ptr<MullModule> TestModuleFactory::createCustomTest_Distance_DistanceModule() {
+std::unique_ptr<MullModule> TestModuleFactory::create_CustomTest_Distance_Distance_Module() {
   const char *fixture = "custom_test/distance/distance.bc";
   return createModuleFromBitcode(fixture, fixture);
 }
 
-std::unique_ptr<MullModule> TestModuleFactory::createCustomTest_Distance_MainModule() {
+std::unique_ptr<MullModule> TestModuleFactory::createCustomTest_Distance_Main_Module() {
   const char *fixture = "custom_test/distance/main.bc";
   return createModuleFromBitcode(fixture, fixture);
 }
 
-std::unique_ptr<MullModule> TestModuleFactory::createCustomTest_Distance_TestModule() {
+std::unique_ptr<MullModule> TestModuleFactory::createCustomTest_Distance_Test_Module() {
   const char *fixture = "custom_test/distance/test.bc";
   return createModuleFromBitcode(fixture, fixture);
 }
 
-std::unique_ptr<MullModule> TestModuleFactory::create_CustomTest_OpenSSL_bio_enc_test_module() {
+std::unique_ptr<MullModule> TestModuleFactory::create_CustomTest_OpenSSL_bio_enc_test_Module() {
   const char *fixture = "openssl_bio_enc_test.o.ll";
   return createModule(fixture, fixture);
 }

@@ -30,7 +30,7 @@ static TestModuleFactory TestModuleFactory;
 #pragma mark - Finding Tests
 
 TEST(GoogleTestFinder, FindTest) {
-  auto ModuleWithTests = TestModuleFactory.createGoogleTestTesterModule();
+  auto ModuleWithTests = TestModuleFactory.create_GoogleTest_Tester_Module();
 
   Context Ctx;
   Ctx.addModule(std::move(ModuleWithTests));
@@ -62,7 +62,7 @@ mutation_operators:
 }
 
 TEST(GoogleTestFinder, findTests_filter) {
-  auto ModuleWithTests     = TestModuleFactory.createGoogleTestTesterModule();
+  auto ModuleWithTests     = TestModuleFactory.create_GoogleTest_Tester_Module();
 
   Context Ctx;
   Ctx.addModule(std::move(ModuleWithTests));
@@ -105,8 +105,8 @@ mutation_operators:
 
   Toolchain toolchain(config);
 
-  auto moduleWithTests = TestModuleFactory.createGoogleTestTesterModule();
-  auto moduleWithTestees = TestModuleFactory.createGoogleTestTesteeModule();
+  auto moduleWithTests = TestModuleFactory.create_GoogleTest_Tester_Module();
+  auto moduleWithTestees = TestModuleFactory.create_GoogleTest_Testee_Module();
 
   auto compiledModule_tests =
     toolchain.compiler().compileModule(moduleWithTests->getModule());

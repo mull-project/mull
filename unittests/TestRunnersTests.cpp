@@ -41,8 +41,8 @@ TEST(SimpleTestRunner, runTest) {
   SimpleTestRunner::ObjectFiles ObjectFiles;
   SimpleTestRunner::OwnedObjectFiles OwnedObjectFiles;
 
-  auto OwnedModuleWithTests   = TestModuleFactory.createSimpleTest_CountLettersTestModule();
-  auto OwnedModuleWithTestees = TestModuleFactory.createSimpleTest_CountLettersModule();
+  auto OwnedModuleWithTests   = TestModuleFactory.create_SimpleTest_CountLettersTest_Module();
+  auto OwnedModuleWithTestees = TestModuleFactory.create_SimpleTest_CountLetters_Module();
 
   Module *ModuleWithTests   = OwnedModuleWithTests->getModule();
   Module *ModuleWithTestees = OwnedModuleWithTestees->getModule();

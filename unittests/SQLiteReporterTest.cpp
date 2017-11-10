@@ -29,8 +29,8 @@ TEST(SQLiteReporter, integrationTest) {
 
   TestModuleFactory testModuleFactory;
 
-  auto mullModuleWithTests   = testModuleFactory.createSimpleTest_CountLettersTestModule();
-  auto mullModuleWithTestees = testModuleFactory.createSimpleTest_CountLettersModule();
+  auto mullModuleWithTests   = testModuleFactory.create_SimpleTest_CountLettersTest_Module();
+  auto mullModuleWithTestees = testModuleFactory.create_SimpleTest_CountLetters_Module();
 
   Context context;
   context.addModule(std::move(mullModuleWithTests));
@@ -304,8 +304,8 @@ TEST(SQLiteReporter, integrationTest_Config) {
 TEST(SQLiteReporter, do_emitDebugInfo) {
   TestModuleFactory testModuleFactory;
 
-  auto mullModuleWithTests   = testModuleFactory.createSimpleTest_CountLettersTestModule();
-  auto mullModuleWithTestees = testModuleFactory.createSimpleTest_CountLettersModule();
+  auto mullModuleWithTests   = testModuleFactory.create_SimpleTest_CountLettersTest_Module();
+  auto mullModuleWithTestees = testModuleFactory.create_SimpleTest_CountLetters_Module();
 
   Context context;
   context.addModule(std::move(mullModuleWithTests));
@@ -476,8 +476,8 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
 TEST(SQLiteReporter, do_not_emitDebugInfo) {
   TestModuleFactory testModuleFactory;
 
-  auto mullModuleWithTests   = testModuleFactory.createSimpleTest_CountLettersTestModule();
-  auto mullModuleWithTestees = testModuleFactory.createSimpleTest_CountLettersModule();
+  auto mullModuleWithTests   = testModuleFactory.create_SimpleTest_CountLettersTest_Module();
+  auto mullModuleWithTestees = testModuleFactory.create_SimpleTest_CountLetters_Module();
 
   Context context;
   context.addModule(std::move(mullModuleWithTests));

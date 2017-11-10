@@ -19,7 +19,7 @@ using namespace llvm;
 static TestModuleFactory TestModuleFactory;
 
 TEST(SimpleTestFinder, findTest) {
-  auto module = TestModuleFactory.createSimpleTest_CountLettersTestModule();
+  auto module = TestModuleFactory.create_SimpleTest_CountLettersTest_Module();
 
   Context context;
   context.addModule(std::move(module));
