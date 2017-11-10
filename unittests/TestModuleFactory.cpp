@@ -192,22 +192,6 @@ std::unique_ptr<MullModule> TestModuleFactory::createTesteeModule() {
   return createModule("fixture_testee_module.ll", "count_letters");
 }
 
-std::unique_ptr<MullModule> TestModuleFactory::createLibCTesterModule() {
-  return createModule("fixture_lib_c_tester_module.ll", "test_main");
-}
-
-std::unique_ptr<MullModule> TestModuleFactory::createLibCTesteeModule() {
-  return createModule("fixture_lib_c_testee_module.ll", "sum");
-}
-
-std::unique_ptr<MullModule> TestModuleFactory::createExternalLibTesterModule() {
-  return createModule("fixture_external_lib_tester_module.ll", "test_in_memory_db");
-}
-
-std::unique_ptr<MullModule> TestModuleFactory::createExternalLibTesteeModule() {
-  return createModule("fixture_external_lib_testee_module.ll", "in_memory_db");
-}
-
 #pragma mark - Google Test
 
 std::unique_ptr<MullModule> TestModuleFactory::createGoogleTestTesterModule() {

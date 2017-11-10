@@ -35,12 +35,6 @@ public:
 
   std::unique_ptr<MullModule> create_SimpleTest_ReplaceCall_module();
 
-  std::unique_ptr<MullModule> createLibCTesterModule();
-  std::unique_ptr<MullModule> createLibCTesteeModule();
-
-  std::unique_ptr<MullModule> createExternalLibTesterModule();
-  std::unique_ptr<MullModule> createExternalLibTesteeModule();
-
   std::unique_ptr<MullModule> createGoogleTestTesterModule();
   std::unique_ptr<MullModule> createGoogleTestTesteeModule();
 
