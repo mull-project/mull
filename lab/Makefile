@@ -10,6 +10,7 @@ synchronize_fixtures:
 	cd ./simple_test/mutation_operators/remove_void_function/ && make synchronize_fixtures
 	cd ./simple_test/mutation_operators/replace_call/ && make synchronize_fixtures
 	cd ./simple_test/mutation_operators/scalar_value/ && make synchronize_fixtures
+	cd ./simple_test/count_letters && make synchronize_fixtures
 
 clean:
 	cd ./custom_test/ && make clean
@@ -23,4 +24,5 @@ clean:
 	cd ./simple_test/mutation_operators/remove_void_function/ && make clean
 	cd ./simple_test/mutation_operators/replace_call/ && make clean
 	cd ./simple_test/mutation_operators/scalar_value/ && make clean
+	cd ./simple_test/count_letters && make clean
 
