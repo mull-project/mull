@@ -16,7 +16,7 @@ MACRO_DEFINITONS=-DGTEST_NO_LLVM_RAW_OSTREAM=1
 STD_VERSION=-std=c++11
 # This also depends on min mac version of google test.
 MACOSX_VERSION=-mmacosx-version-min=10.12
-SYSROOT=-isysroot /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
+SYSROOT=-isysroot $(shell xcrun --sdk macosx --show-sdk-path)
 #NO_CXA=-fno-use-cxa-atexit
 NO_CXA=
 
@@ -50,26 +50,26 @@ run: driver
 
 ## Bitcode
 
-$(BUILD_DIR)/Test.bc:
+$(BUILD_DIR)/Test.bc: $(BUILD_DIR)
 	$(CC) -emit-llvm -c $(CC_FLAGS) ./Test.cpp -o $@
 
-$(BUILD_DIR)/Testee.bc:
+$(BUILD_DIR)/Testee.bc: $(BUILD_DIR)
 	$(CC) -emit-llvm -c $(CC_FLAGS) ./Testee.cpp -o $@
 
 ## LLVM IR
 
-$(BUILD_DIR)/Test.ll:
+$(BUILD_DIR)/Test.ll: $(BUILD_DIR)
 	$(CC) -S -emit-llvm -c $(CC_FLAGS) ./Test.cpp -o $@
 
-$(BUILD_DIR)/Testee.ll:
+$(BUILD_DIR)/Testee.ll: $(BUILD_DIR)
 	$(CC) -S -emit-llvm -c $(CC_FLAGS) ./Testee.cpp -o $@
 
 ## Mach-o
 
-$(BUILD_DIR)/Test.o:
+$(BUILD_DIR)/Test.o: $(BUILD_DIR)
 	$(CC) -c $(CC_FLAGS) ./Test.cpp -o $@
 
-$(BUILD_DIR)/Testee.o:
+$(BUILD_DIR)/Testee.o: $(BUILD_DIR)
 	$(CC) -c $(CC_FLAGS) ./Testee.cpp -o $@
 
 $(BUILD_DIR)/tests: $(OBJECTS)
