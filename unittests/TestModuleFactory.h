@@ -15,12 +15,12 @@ public:
   std::unique_ptr<MullModule> createModule(const char *fixtureName,
                                            const char *moduleIdentifier);
   
-  std::unique_ptr<MullModule> createTesterModule();
-  std::unique_ptr<MullModule> createTesteeModule();
+  std::unique_ptr<MullModule> create_SimpleTest_CountLettersTest_Module();
+  std::unique_ptr<MullModule> create_SimpleTest_CountLetters_Module();
 
-  std::unique_ptr<MullModule> create_SimpleTest_MathSub_module();
-  std::unique_ptr<MullModule> create_SimpleTest_MathMul_module();
-  std::unique_ptr<MullModule> create_SimpleTest_MathDiv_module();
+  std::unique_ptr<MullModule> create_SimpleTest_MathSub_Module();
+  std::unique_ptr<MullModule> create_SimpleTest_MathMul_Module();
+  std::unique_ptr<MullModule> create_SimpleTest_MathDiv_Module();
 
   std::unique_ptr<MullModule> create_SimpleTest_NegateCondition_Tester_Module();
   std::unique_ptr<MullModule> create_SimpleTest_NegateCondition_Testee_Module();
@@ -31,28 +31,22 @@ public:
   std::unique_ptr<MullModule> create_SimpleTest_ANDORReplacement_Module();
   std::unique_ptr<MullModule> create_SimpleTest_ANDORReplacement_CPPContent_Module();
 
-  std::unique_ptr<MullModule> create_SimpleTest_ScalarValue_module();
+  std::unique_ptr<MullModule> create_SimpleTest_ScalarValue_Module();
 
-  std::unique_ptr<MullModule> create_SimpleTest_ReplaceCall_module();
+  std::unique_ptr<MullModule> create_SimpleTest_ReplaceCall_Module();
 
-  std::unique_ptr<MullModule> createLibCTesterModule();
-  std::unique_ptr<MullModule> createLibCTesteeModule();
-
-  std::unique_ptr<MullModule> createExternalLibTesterModule();
-  std::unique_ptr<MullModule> createExternalLibTesteeModule();
-
-  std::unique_ptr<MullModule> createGoogleTestTesterModule();
-  std::unique_ptr<MullModule> createGoogleTestTesteeModule();
+  std::unique_ptr<MullModule> create_GoogleTest_Tester_Module();
+  std::unique_ptr<MullModule> create_GoogleTest_Testee_Module();
 
   std::unique_ptr<MullModule> APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutation_operatorModule();
   std::unique_ptr<MullModule> APFloat_019fc57b8bd190d33389137abbe7145e_214_2_7_negate_mutation_operatorModule();
   std::unique_ptr<MullModule> APFloat_019fc57b8bd190d33389137abbe7145e_5_1_3_negate_mutation_operatorModule();
 
-  std::unique_ptr<MullModule> createCustomTest_Distance_DistanceModule();
-  std::unique_ptr<MullModule> createCustomTest_Distance_MainModule();
-  std::unique_ptr<MullModule> createCustomTest_Distance_TestModule();
+  std::unique_ptr<MullModule> create_CustomTest_Distance_Distance_Module();
+  std::unique_ptr<MullModule> createCustomTest_Distance_Main_Module();
+  std::unique_ptr<MullModule> createCustomTest_Distance_Test_Module();
 
-  std::unique_ptr<MullModule> create_CustomTest_OpenSSL_bio_enc_test_module();
+  std::unique_ptr<MullModule> create_CustomTest_OpenSSL_bio_enc_test_Module();
 
 #pragma mark - Rust
   std::unique_ptr<MullModule> rustModule();

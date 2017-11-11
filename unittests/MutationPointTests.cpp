@@ -40,23 +40,9 @@ static llvm::Instruction &FunctionInstructionByAddress(Function &F, MutationPoin
   return NewInstruction;
 }
 
-Instruction *getFirstNamedInstruction(Function &F, const StringRef &Name) {
-  for (inst_iterator I = inst_begin(F), E = inst_end(F); I != E; ++I) {
-    Instruction &Instr = *I;
-
-    //printf("Found instruction: %s\n", Instr.getName().str().c_str());
-
-    if (Instr.getName().equals(Name)) {
-      return &*I;
-    }
-  }
-
-  return nullptr;
-}
-
 TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
-  auto ModuleWithTests   = TestModuleFactory.createTesterModule();
-  auto ModuleWithTestees = TestModuleFactory.createTesteeModule();
+  auto ModuleWithTests   = TestModuleFactory.create_SimpleTest_CountLettersTest_Module();
+  auto ModuleWithTestees = TestModuleFactory.create_SimpleTest_CountLetters_Module();
 
   Context Ctx;
   Ctx.addModule(std::move(ModuleWithTests));
@@ -77,6 +63,7 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
   ASSERT_EQ(1U, mutationPoints.size());
 
   MutationPoint *MP = (*(mutationPoints.begin()));
+  MutationPointAddress address = MP->getAddress();
   ASSERT_TRUE(isa<BinaryOperator>(MP->getOriginalValue()));
 
   std::string ReplacedInstructionName = MP->getOriginalValue()->getName().str();
@@ -86,7 +73,12 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
   Function *mutatedTestee = ownedMutatedModule->getFunction("count_letters");
   ASSERT_TRUE(mutatedTestee != nullptr);
 
-  Instruction *mutatedInstruction = getFirstNamedInstruction(*mutatedTestee, "add");
+  llvm::Function &mutatedFunction =
+    *(std::next(ownedMutatedModule->begin(), address.getFnIndex()));
+  llvm::BasicBlock &mutatedBasicBlock =
+    *(std::next(mutatedFunction.begin(), address.getBBIndex()));
+  llvm::Instruction *mutatedInstruction =
+    &*(std::next(mutatedBasicBlock.begin(), address.getIIndex()));
   ASSERT_TRUE(mutatedInstruction != nullptr);
 
   ASSERT_TRUE(isa<BinaryOperator>(mutatedInstruction));
@@ -94,7 +86,7 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
-  auto module = TestModuleFactory.create_SimpleTest_MathSub_module();
+  auto module = TestModuleFactory.create_SimpleTest_MathSub_Module();
 
   Context Ctx;
   Ctx.addModule(std::move(module));
@@ -136,7 +128,7 @@ TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
-  auto module = TestModuleFactory.create_SimpleTest_MathMul_module();
+  auto module = TestModuleFactory.create_SimpleTest_MathMul_Module();
 
   Context Ctx;
   Ctx.addModule(std::move(module));
@@ -179,7 +171,7 @@ TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
-  auto module = TestModuleFactory.create_SimpleTest_MathDiv_module();
+  auto module = TestModuleFactory.create_SimpleTest_MathDiv_Module();
 
   Context Ctx;
   Ctx.addModule(std::move(module));
@@ -310,7 +302,7 @@ TEST(MutationPoint, SimpleTest_AndOrMutationOperator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_ScalarValueMutationOperator_applyMutation) {
-  auto module = TestModuleFactory.create_SimpleTest_ScalarValue_module();
+  auto module = TestModuleFactory.create_SimpleTest_ScalarValue_Module();
 
   Context Ctx;
   Ctx.addModule(std::move(module));
@@ -361,7 +353,7 @@ TEST(MutationPoint, SimpleTest_ScalarValueMutationOperator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_ReplaceCallMutationOperator_applyMutation) {
-  auto module = TestModuleFactory.create_SimpleTest_ReplaceCall_module();
+  auto module = TestModuleFactory.create_SimpleTest_ReplaceCall_Module();
 
   Context Ctx;
   Ctx.addModule(std::move(module));

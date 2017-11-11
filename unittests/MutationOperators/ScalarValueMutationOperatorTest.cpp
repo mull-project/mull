@@ -21,7 +21,7 @@ using namespace llvm;
 static TestModuleFactory TestModuleFactory;
 
 TEST(ScalarValueMutationOperator, getMutationPoint) {
-  auto mullModule = TestModuleFactory.create_SimpleTest_ScalarValue_module();
+  auto mullModule = TestModuleFactory.create_SimpleTest_ScalarValue_Module();
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
@@ -62,7 +62,7 @@ TEST(ScalarValueMutationOperator, getMutationPoint) {
 }
 
 TEST(ScalarValueMutationOperator, failingMutationPoint) {
-  auto mullModule = TestModuleFactory.create_CustomTest_OpenSSL_bio_enc_test_module();
+  auto mullModule = TestModuleFactory.create_CustomTest_OpenSSL_bio_enc_test_Module();
 
   MutationPointAddress address(15, 10, 7);
   ScalarValueMutationOperator mutationOperator;

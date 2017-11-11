@@ -81,8 +81,8 @@ TEST(Driver, SimpleTest_MathAddMutationOperator) {
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
 
-    modules.push_back(SharedTestModuleFactory.createTesterModule());
-    modules.push_back(SharedTestModuleFactory.createTesteeModule());
+    modules.push_back(SharedTestModuleFactory.create_SimpleTest_CountLettersTest_Module());
+    modules.push_back(SharedTestModuleFactory.create_SimpleTest_CountLetters_Module());
 
     return modules;
   };
@@ -163,7 +163,7 @@ TEST(Driver, SimpleTest_MathSubMutationOperator) {
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
 
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_MathSub_module());
+    modules.push_back(SharedTestModuleFactory.create_SimpleTest_MathSub_Module());
 
     return modules;
   };
@@ -243,7 +243,7 @@ TEST(Driver, SimpleTest_MathMulMutationOperator) {
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
 
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_MathMul_module());
+    modules.push_back(SharedTestModuleFactory.create_SimpleTest_MathMul_Module());
 
     return modules;
   };
@@ -323,7 +323,7 @@ TEST(Driver, SimpleTest_MathDivMutationOperator) {
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
 
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_MathDiv_module());
+    modules.push_back(SharedTestModuleFactory.create_SimpleTest_MathDiv_Module());
 
     return modules;
   };
@@ -867,9 +867,9 @@ TEST(Driver, customTest) {
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
 
-    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_DistanceModule());
-    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_MainModule());
-    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_TestModule());
+    modules.push_back(SharedTestModuleFactory.create_CustomTest_Distance_Distance_Module());
+    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Main_Module());
+    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Test_Module());
 
     return modules;
   };

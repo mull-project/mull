@@ -41,8 +41,8 @@ TEST(SimpleTestRunner, runTest) {
   SimpleTestRunner::ObjectFiles ObjectFiles;
   SimpleTestRunner::OwnedObjectFiles OwnedObjectFiles;
 
-  auto OwnedModuleWithTests   = TestModuleFactory.createTesterModule();
-  auto OwnedModuleWithTestees = TestModuleFactory.createTesteeModule();
+  auto OwnedModuleWithTests   = TestModuleFactory.create_SimpleTest_CountLettersTest_Module();
+  auto OwnedModuleWithTestees = TestModuleFactory.create_SimpleTest_CountLetters_Module();
 
   Module *ModuleWithTests   = OwnedModuleWithTests->getModule();
   Module *ModuleWithTestees = OwnedModuleWithTestees->getModule();
@@ -107,126 +107,4 @@ TEST(SimpleTestRunner, runTest) {
   ASSERT_EQ(ExecutionStatus::Failed, Runner.runTest(Test.get(), ObjectFiles));
 
   ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
-}
-
-TEST(SimpleTestRunner, runTestUsingLibC) {
-  InitializeNativeTarget();
-  InitializeNativeTargetAsmPrinter();
-  InitializeNativeTargetAsmParser();
-
-  std::unique_ptr<TargetMachine> targetMachine(
-                                EngineBuilder().selectTarget(Triple(), "", "",
-                                SmallVector<std::string, 1>()));
-
-  Compiler compiler(*targetMachine.get());
-  Context Ctx;
-  SimpleTestRunner Runner(*targetMachine.get());
-  SimpleTestRunner::ObjectFiles ObjectFiles;
-  SimpleTestRunner::OwnedObjectFiles OwnedObjectFiles;
-
-  auto OwnedModuleWithTests   = TestModuleFactory.createLibCTesterModule();
-  auto OwnedModuleWithTestees = TestModuleFactory.createLibCTesteeModule();
-
-  Module *ModuleWithTests   = OwnedModuleWithTests->getModule();
-  Module *ModuleWithTestees = OwnedModuleWithTestees->getModule();
-
-  Ctx.addModule(std::move(OwnedModuleWithTests));
-  Ctx.addModule(std::move(OwnedModuleWithTestees));
-
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
-  mutationOperators.emplace_back(make_unique<MathAddMutationOperator>());
-  MutationsFinder mutationsFinder(std::move(mutationOperators));
-  Filter filter;
-
-  SimpleTestFinder Finder;
-
-  auto Tests = Finder.findTests(Ctx, filter);
-
-  ASSERT_EQ(1U, Tests.size());
-
-  auto &Test = *(Tests.begin());
-
-  auto Obj = compiler.compileModule(ModuleWithTests);
-  ObjectFiles.push_back(Obj.getBinary());
-  OwnedObjectFiles.push_back(std::move(Obj));
-
-  Obj = compiler.compileModule(ModuleWithTestees);
-  ObjectFiles.push_back(Obj.getBinary());
-  OwnedObjectFiles.push_back(std::move(Obj));
-
-  /// Here we run test with original testee function
-  ASSERT_EQ(ExecutionStatus::Passed, Runner.runTest(Test.get(), ObjectFiles));
-
-  ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
-
-  /// afterwards we apply single mutation and run test again
-  /// expecting it to fail
-
-  Function *testeeFunction = Ctx.lookupDefinedFunction("sum");
-  Testee testee(testeeFunction, 1);
-
-  std::vector<MutationPoint *> MutationPoints = mutationsFinder.getMutationPoints(Ctx, testee, filter);
-  ASSERT_EQ(1U, MutationPoints.size());
-
-  MutationPoint *MP = (*(MutationPoints.begin()));
-
-  auto ownedMutatedTesteeModule = MP->cloneModuleAndApplyMutation();
-
-  Obj = compiler.compileModule(ModuleWithTests);
-  ObjectFiles.push_back(Obj.getBinary());
-  OwnedObjectFiles.push_back(std::move(Obj));
-
-  Obj = compiler.compileModule(ownedMutatedTesteeModule.get());
-  ObjectFiles.push_back(Obj.getBinary());
-  OwnedObjectFiles.push_back(std::move(Obj));
-
-  ASSERT_EQ(ExecutionStatus::Failed, Runner.runTest(Test.get(), ObjectFiles));
-  ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
-}
-
-TEST(SimpleTestRunner, runTestUsingExternalLibrary) {
-  InitializeNativeTarget();
-  InitializeNativeTargetAsmPrinter();
-  InitializeNativeTargetAsmParser();
-
-  std::unique_ptr<TargetMachine> targetMachine(
-                                EngineBuilder().selectTarget(Triple(), "", "",
-                                SmallVector<std::string, 1>()));
-
-  Compiler compiler(*targetMachine.get());
-  Context Ctx;
-  SimpleTestRunner Runner(*targetMachine.get());
-  SimpleTestRunner::ObjectFiles ObjectFiles;
-  SimpleTestRunner::OwnedObjectFiles OwnedObjectFiles;
-
-  /// No mutations applied here, since the only point of interest
-  /// is an external libraries, in this case it is 'sqlite3'
-  auto OwnedModuleWithTests   = TestModuleFactory.createExternalLibTesterModule();
-  auto OwnedModuleWithTestees = TestModuleFactory.createExternalLibTesteeModule();
-
-  Module *ModuleWithTests   = OwnedModuleWithTests->getModule();
-  Module *ModuleWithTestees = OwnedModuleWithTestees->getModule();
-
-  Ctx.addModule(std::move(OwnedModuleWithTests));
-  Ctx.addModule(std::move(OwnedModuleWithTestees));
-  Filter filter;
-  SimpleTestFinder testFinder;
-
-  auto Tests = testFinder.findTests(Ctx, filter);
-
-  ASSERT_NE(0U, Tests.size());
-
-  auto &Test = *(Tests.begin());
-
-  llvm::sys::DynamicLibrary::LoadLibraryPermanently("/usr/lib/libsqlite3.dylib");
-
-  auto Obj = compiler.compileModule(ModuleWithTestees);
-  ObjectFiles.push_back(Obj.getBinary());
-  OwnedObjectFiles.push_back(std::move(Obj));
-
-  Obj = compiler.compileModule(ModuleWithTests);
-  ObjectFiles.push_back(Obj.getBinary());
-  OwnedObjectFiles.push_back(std::move(Obj));
-
-  ASSERT_EQ(ExecutionStatus::Passed, Runner.runTest(Test.get(), ObjectFiles));
 }
