@@ -77,7 +77,6 @@ Driver::~Driver() {
 
 std::unique_ptr<Result> Driver::Run() {
   std::vector<std::unique_ptr<TestResult>> Results;
-  std::vector<std::unique_ptr<Testee>> allTestees;
 
   /// Assumption: all modules will be used during the execution
   /// Therefore we load them into memory and compile immediately
@@ -236,15 +235,10 @@ std::unique_ptr<Result> Driver::Run() {
       Logger::debug() << "\n";
     }
 
-    allTestees.insert(allTestees.end(),
-                      std::make_move_iterator(testees.begin()),
-                      std::make_move_iterator(testees.end()));
-
     Results.push_back(std::move(Result));
   }
 
-  std::unique_ptr<Result> result = make_unique<Result>(std::move(Results),
-                                                       std::move(allTestees));
+  std::unique_ptr<Result> result = make_unique<Result>(std::move(Results));
 
   return result;
 }
