@@ -2,16 +2,16 @@
 
 #include "Logger.h"
 
-#include "llvm/AsmParser/Parser.h"
+#include <llvm/AsmParser/Parser.h>
 
 // TODO: uncomment when upgrading back to LLVM 4.0
 // #include "llvm/Bitcode/BitcodeReader.h"
-#include "llvm/Bitcode/ReaderWriter.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
-#include "llvm/Support/MD5.h"
-#include "llvm/Support/MemoryBuffer.h"
-#include "llvm/Support/SourceMgr.h"
+#include <llvm/Bitcode/ReaderWriter.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
+#include <llvm/Support/MD5.h>
+#include <llvm/Support/MemoryBuffer.h>
+#include <llvm/Support/SourceMgr.h>
 
 #include <fstream>
 #include <iostream>
@@ -44,7 +44,7 @@ std::unique_ptr<MullModule> ModuleLoader::loadModuleAtPath(const std::string &pa
     return nullptr;
   }
 
-  auto module = make_unique<MullModule>(std::move(llvmModule.get()), hash);
+  auto module = make_unique<MullModule>(std::move(llvmModule.get()), hash, path);
   return module;
 }
 

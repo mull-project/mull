@@ -90,20 +90,25 @@ std::unique_ptr<Result> Driver::Run() {
     assert(ownedModule && "Can't load module");
     Ctx.addModule(std::move(ownedModule));
 
-    for (auto &function: module.getModule()->getFunctionList()) {
-      if (function.isDeclaration()) {
-        continue;
-      }
-      CallTreeFunction callTreeFunction(&function);
-      uint64_t index = functions.size();
-      functions.push_back(callTreeFunction);
-      injectCallbacks(&function, index);
-    }
-
     ObjectFile *objectFile = toolchain.cache().getObject(module);
 
     if (objectFile == nullptr) {
-      auto owningObjectFile = toolchain.compiler().compileModule(*module.clone().get());
+      LLVMContext localContext;
+
+      auto clonedModule = module.clone(localContext);
+
+      for (auto &function: module.getModule()->getFunctionList()) {
+        if (function.isDeclaration()) {
+          continue;
+        }
+        CallTreeFunction callTreeFunction(&function);
+        uint64_t index = functions.size();
+        functions.push_back(callTreeFunction);
+        auto clonedFunction = clonedModule->getModule()->getFunction(function.getName());
+        injectCallbacks(clonedFunction, index);
+      }
+
+      auto owningObjectFile = toolchain.compiler().compileModule(*clonedModule.get());
       objectFile = owningObjectFile.getBinary();
       toolchain.cache().putObject(std::move(owningObjectFile), module);
     }
@@ -202,9 +207,11 @@ std::unique_ptr<Result> Driver::Run() {
         } else {
           ObjectFile *mutant = toolchain.cache().getObject(*mutationPoint);
           if (mutant == nullptr) {
-            auto ownedModule = mutationPoint->cloneModuleAndApplyMutation();
+            LLVMContext localContext;
+            auto clonedModule = mutationPoint->getOriginalModule()->clone(localContext);
+            mutationPoint->applyMutation(*clonedModule.get());
 
-            auto owningObject = toolchain.compiler().compileModule(ownedModule.get());
+            auto owningObject = toolchain.compiler().compileModule(*clonedModule.get());
 
             mutant = owningObject.getBinary();
             toolchain.cache().putObject(std::move(owningObject), *mutationPoint);

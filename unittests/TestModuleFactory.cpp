@@ -92,7 +92,9 @@ createModuleFromBitcode(const char *fixtureName,
 
   llvmModule.get()->setModuleIdentifier(moduleIdentifier);
 
-  auto module = make_unique<MullModule>(std::move(llvmModule.get()), "fake_hash");
+  auto module = make_unique<MullModule>(std::move(llvmModule.get()),
+                                        "fake_hash",
+                                        fixtureFullPath);
   return module;
 }
 
@@ -126,7 +128,7 @@ TestModuleFactory::createModule(const char *fixtureName,
   
   module->setModuleIdentifier(moduleIdentifier);
 
-  return make_unique<MullModule>(std::move(module), "");
+  return make_unique<MullModule>(std::move(module), "fake_hash", "fake_path");
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_NegateCondition_Tester_Module() {

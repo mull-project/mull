@@ -87,7 +87,7 @@ public:
   llvm::Value *getOriginalValue() const;
   MullModule *getOriginalModule() const;
 
-  std::unique_ptr<llvm::Module> cloneModuleAndApplyMutation();
+  void applyMutation(MullModule &module);
 
   std::string getUniqueIdentifier();
   std::string getUniqueIdentifier() const;

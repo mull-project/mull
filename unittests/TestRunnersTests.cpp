@@ -90,7 +90,10 @@ TEST(SimpleTestRunner, runTest) {
     mutationsFinder.getMutationPoints(Ctx, testee, filter);
 
   MutationPoint *MP = (*(MutationPoints.begin()));
-  auto ownedMutatedTesteeModule = MP->cloneModuleAndApplyMutation();
+
+  LLVMContext localContext;
+  auto ownedMutatedTesteeModule = MP->getOriginalModule()->clone(localContext);
+  MP->applyMutation(*ownedMutatedTesteeModule.get());
 
   {
     auto Obj = compiler.compileModule(ModuleWithTests);
@@ -99,7 +102,7 @@ TEST(SimpleTestRunner, runTest) {
   }
 
   {
-    auto Obj = compiler.compileModule(ownedMutatedTesteeModule.get());
+    auto Obj = compiler.compileModule(ownedMutatedTesteeModule->getModule());
     ObjectFiles.push_back(Obj.getBinary());
     OwnedObjectFiles.push_back(std::move(Obj));
   }
