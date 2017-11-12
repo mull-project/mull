@@ -61,9 +61,9 @@ mull::ExecutionResult
 mull::ForkProcessSandbox::run(std::function<ExecutionStatus (void)> function,
                               long long timeoutMilliseconds) {
 
-  char stderrFilename[] = "/tmp/mull.stderr.XXXXX";
+  char stderrFilename[] = "/tmp/mull.stderr.XXXXXX";
   mktemp(stderrFilename);
-  char stdoutFilename[] = "/tmp/mull.stdout.XXXXX";
+  char stdoutFilename[] = "/tmp/mull.stdout.XXXXXX";
   mktemp(stdoutFilename);
 
   /// Creating a memory to be shared between child and parent.
