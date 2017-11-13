@@ -5,8 +5,8 @@ using namespace mull;
 
 MutationResult::MutationResult(ExecutionResult R,
                                MutationPoint *MP,
-                               Testee *testee) :
-  Result(R), MutPoint(MP), testee(testee) {}
+                               int distance) :
+  Result(R), MutPoint(MP), distance(distance)  {}
 
 TestResult::TestResult(ExecutionResult OriginalResult,
                        std::unique_ptr<Test> T) :
