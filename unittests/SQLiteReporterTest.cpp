@@ -78,7 +78,7 @@ TEST(SQLiteReporter, integrationTest) {
 
   auto mutationResult = make_unique<MutationResult>(mutatedTestExecutionResult,
                                                     mutationPoint,
-                                                    &testee);
+                                                    testee.getDistance());
 
   testResult->addMutantResult(std::move(mutationResult));
 
@@ -345,7 +345,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
 
   auto mutationResult = make_unique<MutationResult>(mutatedTestExecutionResult,
                                                     mutationPoint,
-                                                    &testee);
+                                                    testee.getDistance());
 
   testResult->addMutantResult(std::move(mutationResult));
 
@@ -510,7 +510,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
 
   auto mutationResult = make_unique<MutationResult>(mutatedTestExecutionResult,
                                                     mutationPoint,
-                                                    &testee);
+                                                    testee.getDistance());
 
   testResult->addMutantResult(std::move(mutationResult));
 

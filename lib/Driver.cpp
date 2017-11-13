@@ -235,7 +235,7 @@ std::unique_ptr<Result> Driver::Run() {
 
         diagnostics->report(mutationPoint, result.status);
 
-        auto mutationResult = make_unique<MutationResult>(result, mutationPoint, testee.get());
+        auto mutationResult = make_unique<MutationResult>(result, mutationPoint, testee->getDistance());
         Result->addMutantResult(std::move(mutationResult));
       }
 

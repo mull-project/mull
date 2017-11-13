@@ -56,15 +56,14 @@ struct ExecutionResult {
 class MutationResult {
   ExecutionResult Result;
   MutationPoint *MutPoint;
-  Testee *testee;
+  int distance;
 
 public:
-  MutationResult(ExecutionResult R, mull::MutationPoint *MP, Testee *testee);
+  MutationResult(ExecutionResult R, mull::MutationPoint *MP, int distance);
 
   ExecutionResult getExecutionResult()  { return Result; }
   MutationPoint* getMutationPoint()     { return MutPoint; }
-  int getMutationDistance()             { return testee->getDistance(); }
-  Testee *getTestee()                    { return testee; }
+  int getMutationDistance()             { return distance; }
 };
 
 class TestResult {
