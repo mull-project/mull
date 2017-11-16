@@ -25,6 +25,7 @@ container.create: ## Create container (create before running with .run).
 	docker run \
            --cap-add=SYS_PTRACE \
            --security-opt seccomp=unconfined \
+           --mount type=bind,source=/opt/mull-ubuntu-docker-shared,target=/opt/mull-ubuntu-docker-shared \
            -ti --name=$(CONTAINER_NAME) $(IMAGE_NAME)
 
 container.delete: ## Delete container.
