@@ -136,6 +136,8 @@ std::unique_ptr<Result> Driver::Run() {
       << "\n";
 
     _callstack = stack<uint64_t>();
+    memset(_callTreeMapping, 0, functions.size() * sizeof(_callTreeMapping[0]));
+
     ExecutionResult ExecResult = Sandbox->run([&]() {
       return Runner.runTest(test.get(), ObjectFiles);
     }, Cfg.getTimeout());
@@ -261,7 +263,7 @@ void Driver::prepareForExecution() {
                                        MAP_SHARED | MAP_ANONYMOUS,
                                        -1,
                                        0);
-  memset(_callTreeMapping, 0, functions.size());
+  memset(_callTreeMapping, 0, functions.size() * sizeof(_callTreeMapping[0]));
   dynamicCallTree.prepare(_callTreeMapping);
 }
 
