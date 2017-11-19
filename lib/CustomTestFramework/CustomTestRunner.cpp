@@ -100,16 +100,14 @@ public:
 };
 
 CustomTestRunner::CustomTestRunner(llvm::TargetMachine &machine)
-  : TestRunner(machine), mangler(Mangler()) {
+  : TestRunner(machine), mangler(Mangler(machine.createDataLayout())) {
 
   // TODO: Would be great to not have all of the following here.
   // Some builder class?
   DataLayout dataLayout = machine.createDataLayout();
 
-  std::string atExitFunction = mangler.getNameWithPrefix("__cxa_atexit",
-                                                         dataLayout);
-  std::string dsoHandleFunction = mangler.getNameWithPrefix("__dso_handle",
-                                                            dataLayout);
+  std::string atExitFunction = mangler.getNameWithPrefix("__cxa_atexit");
+  std::string dsoHandleFunction = mangler.getNameWithPrefix("__dso_handle");
 
   mapping[atExitFunction]    = "mull__cxa_atexit";
   mapping[dsoHandleFunction] = "mull__dso_handle";
@@ -117,9 +115,7 @@ CustomTestRunner::CustomTestRunner(llvm::TargetMachine &machine)
 }
 
 void *CustomTestRunner::GetCtorPointer(const llvm::Function &Function) {
-  return
-    getFunctionPointer(mangler.getNameWithPrefix(Function.getName(),
-                                                 machine.createDataLayout()));
+  return getFunctionPointer(mangler.getNameWithPrefix(Function.getName()));
 }
 
 void *CustomTestRunner::getFunctionPointer(const std::string &functionName) {

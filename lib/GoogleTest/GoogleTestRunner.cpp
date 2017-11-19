@@ -114,35 +114,31 @@ public:
 };
 
 GoogleTestRunner::GoogleTestRunner(llvm::TargetMachine &machine)
-  : TestRunner(machine), mangler(Mangler()) {
+  : TestRunner(machine), mangler(Mangler(machine.createDataLayout())) {
   // TODO: Would be great to not have all of the following here.
   // Some builder class?
-  DataLayout dataLayout = machine.createDataLayout();
 
-  std::string atExitFunction = mangler.getNameWithPrefix("__cxa_atexit",
-                                                         dataLayout);
-  std::string dsoHandleFunction = mangler.getNameWithPrefix("__dso_handle",
-                                                            dataLayout);
+  std::string atExitFunction = mangler.getNameWithPrefix("__cxa_atexit");
+  std::string dsoHandleFunction = mangler.getNameWithPrefix("__dso_handle");
 
   mapping[atExitFunction] = "mull__cxa_atexit";
   mapping[dsoHandleFunction] = "mull__dso_handle";
   this->mapping = mapping;
 
   fGoogleTestInit.assign(
-    mangler.getNameWithPrefix("_ZN7testing14InitGoogleTestEPiPPc", dataLayout)
+    mangler.getNameWithPrefix("_ZN7testing14InitGoogleTestEPiPPc")
   );
   fGoogleTestInstance.assign(
-    mangler.getNameWithPrefix("_ZN7testing8UnitTest11GetInstanceEv", dataLayout)
+    mangler.getNameWithPrefix("_ZN7testing8UnitTest11GetInstanceEv")
   );
   fGoogleTestRun.assign(
-    mangler.getNameWithPrefix("_ZN7testing8UnitTest3RunEv", dataLayout)
+    mangler.getNameWithPrefix("_ZN7testing8UnitTest3RunEv")
   );
 }
 
 void *GoogleTestRunner::GetCtorPointer(const llvm::Function &Function) {
   return
-    getFunctionPointer(mangler.getNameWithPrefix(Function.getName().str(),
-                                                 machine.createDataLayout()));
+    getFunctionPointer(mangler.getNameWithPrefix(Function.getName().str()));
 }
 
 void *GoogleTestRunner::getFunctionPointer(const std::string &functionName) {
