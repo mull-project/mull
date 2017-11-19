@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Mangler.h"
 #include "TestRunner.h"
 
 #include "llvm/ExecutionEngine/Orc/ObjectLinkingLayer.h"
@@ -19,7 +20,7 @@ namespace mull {
 
 class GoogleTestRunner : public TestRunner {
   llvm::orc::ObjectLinkingLayer<> ObjectLayer;
-
+  mull::Mangler mangler;
   std::map<std::string, std::string> mapping;
 
   std::string fGoogleTestInit;
