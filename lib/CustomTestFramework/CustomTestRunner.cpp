@@ -76,19 +76,21 @@ static void runDestructors() {
 extern "C" void *mull_custom_test_dso_handle = nullptr;
 
 class Mull_CustomTest_Resolver : public RuntimeDyld::SymbolResolver {
+  std::map<std::string, std::string> mapping;
+
 public:
 
-  RuntimeDyld::SymbolInfo findSymbol(const std::string &Name) {
-    if (Name == "___cxa_atexit") {
-      return findSymbol("mull_custom_test_cxa_atexit");
+  Mull_CustomTest_Resolver(std::map<std::string, std::string> mapping)
+    : mapping(mapping) {}
+
+  RuntimeDyld::SymbolInfo findSymbol(const std::string &name) {
+    if (mapping.count(name) > 0) {
+      return findSymbol(mapping[name]);
     }
 
-    if (Name == "___dso_handle") {
-      return findSymbol("mull_custom_test_dso_handle");
-    }
-
-    if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(Name))
+    if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(name)) {
       return RuntimeDyld::SymbolInfo(SymAddr, JITSymbolFlags::Exported);
+    }
 
     return RuntimeDyld::SymbolInfo(nullptr);
   }
@@ -98,19 +100,26 @@ public:
 };
 
 CustomTestRunner::CustomTestRunner(llvm::TargetMachine &machine)
-  : TestRunner(machine) {}
+  : TestRunner(machine), mangler(Mangler()) {
 
-std::string CustomTestRunner::MangleName(const llvm::StringRef &Name) {
-  std::string MangledName;
-  {
-    raw_string_ostream Stream(MangledName);
-    Mangler.getNameWithPrefix(Stream, Name, machine.createDataLayout());
-  }
-  return MangledName;
+  // TODO: Would be great to not have all of the following here.
+  // Some builder class?
+  DataLayout dataLayout = machine.createDataLayout();
+
+  std::string atExitFunction = mangler.getNameWithPrefix("__cxa_atexit",
+                                                         dataLayout);
+  std::string dsoHandleFunction = mangler.getNameWithPrefix("__dso_handle",
+                                                            dataLayout);
+
+  mapping[atExitFunction]    = "mull__cxa_atexit";
+  mapping[dsoHandleFunction] = "mull__dso_handle";
+  this->mapping = mapping;
 }
 
 void *CustomTestRunner::GetCtorPointer(const llvm::Function &Function) {
-  return getFunctionPointer(MangleName(Function.getName()).c_str());
+  return
+    getFunctionPointer(mangler.getNameWithPrefix(Function.getName(),
+                                                 machine.createDataLayout()));
 }
 
 void *CustomTestRunner::getFunctionPointer(const std::string &functionName) {
@@ -140,9 +149,10 @@ void CustomTestRunner::runStaticCtor(llvm::Function *Ctor) {
 ExecutionStatus CustomTestRunner::runTest(Test *test, ObjectFiles &objectFiles) {
   CustomTest_Test *customTest = dyn_cast<CustomTest_Test>(test);
 
-  auto Handle = ObjectLayer.addObjectSet(objectFiles,
-                                         make_unique<SectionMemoryManager>(),
-                                         make_unique<Mull_CustomTest_Resolver>());
+  auto Handle =
+    ObjectLayer.addObjectSet(objectFiles,
+                             make_unique<SectionMemoryManager>(),
+                             make_unique<Mull_CustomTest_Resolver>(this->mapping));
 
   for (auto &constructor: customTest->getConstructors()) {
     runStaticCtor(constructor);

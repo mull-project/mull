@@ -102,8 +102,9 @@ public:
       return findSymbol(mapping[name]);
     }
 
-    if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(name))
+    if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(name)) {
       return RuntimeDyld::SymbolInfo(SymAddr, JITSymbolFlags::Exported);
+    }
 
     return RuntimeDyld::SymbolInfo(nullptr);
   }

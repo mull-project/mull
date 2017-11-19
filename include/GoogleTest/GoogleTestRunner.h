@@ -1,7 +1,8 @@
 #pragma once
 
-#include "Mangler.h"
 #include "TestRunner.h"
+
+#include "Mangler.h"
 
 #include "llvm/ExecutionEngine/Orc/ObjectLinkingLayer.h"
 #include "llvm/IR/Mangler.h"

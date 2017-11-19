@@ -2,6 +2,8 @@
 
 #include "TestRunner.h"
 
+#include "Mangler.h"
+
 #include "llvm/ExecutionEngine/Orc/ObjectLinkingLayer.h"
 #include "llvm/IR/Mangler.h"
 #include "llvm/Object/Binary.h"
@@ -17,16 +19,17 @@ class Module;
 
 namespace mull {
 
-  class CustomTestRunner : public TestRunner {
+class CustomTestRunner : public TestRunner {
   llvm::orc::ObjectLinkingLayer<> ObjectLayer;
-  llvm::Mangler Mangler;
+  mull::Mangler mangler;
+  std::map<std::string, std::string> mapping;
+
 public:
 
   CustomTestRunner(llvm::TargetMachine &machine);
   ExecutionStatus runTest(Test *test, ObjectFiles &objectFiles) override;
 
 private:
-  std::string MangleName(const llvm::StringRef &Name);
   void *GetCtorPointer(const llvm::Function &Function);
   void *getFunctionPointer(const std::string &functionName);
   void runStaticCtor(llvm::Function *Ctor);
