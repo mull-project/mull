@@ -165,7 +165,7 @@ ExecutionStatus CustomTestRunner::runTest(Test *test, ObjectFiles &objectFiles) 
     strcpy(argv[i], argument.c_str());
   }
 
-  void *mainPointer = getFunctionPointer("_main");
+  void *mainPointer = getFunctionPointer(mangler.getNameWithPrefix("main"));
   auto main = ((int (*)(int, char**))(intptr_t)mainPointer);
   int exitStatus = main(argc, argv);
 
