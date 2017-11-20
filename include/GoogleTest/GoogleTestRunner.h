@@ -2,6 +2,8 @@
 
 #include "TestRunner.h"
 
+#include "Mangler.h"
+
 #include "llvm/ExecutionEngine/Orc/ObjectLinkingLayer.h"
 #include "llvm/IR/Mangler.h"
 #include "llvm/Object/Binary.h"
@@ -19,7 +21,7 @@ namespace mull {
 
 class GoogleTestRunner : public TestRunner {
   llvm::orc::ObjectLinkingLayer<> ObjectLayer;
-
+  mull::Mangler mangler;
   std::map<std::string, std::string> mapping;
 
   std::string fGoogleTestInit;

@@ -1,6 +1,7 @@
 #include "GoogleTest/GoogleTestRunner.h"
 
 #include "GoogleTest/GoogleTest_Test.h"
+#include "Mangler.h"
 
 #include "llvm/ExecutionEngine/ExecutionEngine.h"
 #include "llvm/ExecutionEngine/OrcMCJITReplacement.h"
@@ -87,27 +88,6 @@ extern "C" int mull_printf(const char *fmt, ...) {
 
 extern "C" void *mull__dso_handle = nullptr;
 
-/// We use LLVM Mangler class for low-level mangling: '_' prefixing.
-/// Examples:
-/// Mac OS:
-/// _ZN7testing14InitGoogleTestEPiPPc -> __ZN7testing14InitGoogleTestEPiPPc
-/// On Linux it has no effect:
-/// _ZN7testing14InitGoogleTestEPiPPc -> _ZN7testing14InitGoogleTestEPiPPc
-/// TODO: extract it to a separate class.
-/// TODO: remove braces?
-static std::string getNameWithPrefix(const std::string &name,
-                                     const llvm::DataLayout &dataLayout) {
-  const llvm::StringRef &stringRefName = name;
-  std::string MangledName;
-  {
-    raw_string_ostream Stream(MangledName);
-    llvm::Mangler::getNameWithPrefix(Stream,
-                                     stringRefName,
-                                     dataLayout);
-  }
-  return MangledName;
-}
-
 class Mull_GoogleTest_Resolver : public RuntimeDyld::SymbolResolver {
 
   std::map<std::string, std::string> mapping;
@@ -122,8 +102,9 @@ public:
       return findSymbol(mapping[name]);
     }
 
-    if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(name))
+    if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(name)) {
       return RuntimeDyld::SymbolInfo(SymAddr, JITSymbolFlags::Exported);
+    }
 
     return RuntimeDyld::SymbolInfo(nullptr);
   }
@@ -133,31 +114,31 @@ public:
 };
 
 GoogleTestRunner::GoogleTestRunner(llvm::TargetMachine &machine)
-  : TestRunner(machine) {
-  // TODO: Would be create to not have all of the following here.
+  : TestRunner(machine), mangler(Mangler(machine.createDataLayout())) {
+  // TODO: Would be great to not have all of the following here.
   // Some builder class?
-  DataLayout dataLayout = machine.createDataLayout();
 
-  std::string atExitFunction = getNameWithPrefix("__cxa_atexit", dataLayout);
-  std::string dsoHandleFunction = getNameWithPrefix("__dso_handle", dataLayout);
+  std::string atExitFunction = mangler.getNameWithPrefix("__cxa_atexit");
+  std::string dsoHandleFunction = mangler.getNameWithPrefix("__dso_handle");
+
   mapping[atExitFunction] = "mull__cxa_atexit";
   mapping[dsoHandleFunction] = "mull__dso_handle";
   this->mapping = mapping;
 
   fGoogleTestInit.assign(
-    getNameWithPrefix("_ZN7testing14InitGoogleTestEPiPPc", dataLayout)
+    mangler.getNameWithPrefix("_ZN7testing14InitGoogleTestEPiPPc")
   );
   fGoogleTestInstance.assign(
-    getNameWithPrefix("_ZN7testing8UnitTest11GetInstanceEv", dataLayout)
+    mangler.getNameWithPrefix("_ZN7testing8UnitTest11GetInstanceEv")
   );
   fGoogleTestRun.assign(
-    getNameWithPrefix("_ZN7testing8UnitTest3RunEv", dataLayout)
+    mangler.getNameWithPrefix("_ZN7testing8UnitTest3RunEv")
   );
 }
 
 void *GoogleTestRunner::GetCtorPointer(const llvm::Function &Function) {
-  return getFunctionPointer(getNameWithPrefix(Function.getName().str(),
-                                              machine.createDataLayout()));
+  return
+    getFunctionPointer(mangler.getNameWithPrefix(Function.getName().str()));
 }
 
 void *GoogleTestRunner::getFunctionPointer(const std::string &functionName) {

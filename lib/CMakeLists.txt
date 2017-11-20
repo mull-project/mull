@@ -4,6 +4,7 @@ set(mull_sources
   Driver.cpp
   ForkProcessSandbox.cpp
   Logger.cpp
+  Mangler.cpp
   ModuleLoader.cpp
   DynamicCallTree.cpp
   Filter.cpp
