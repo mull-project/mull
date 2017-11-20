@@ -24,20 +24,8 @@ static inline bool fileExists(const std::string& name) {
   return f.good();
 }
 
-static std::string fixturePath(const char *fixtureName) {
-  char cFixtureFullPath[256];
-
-  getcwd(cFixtureFullPath, 255);
-  strcat(cFixtureFullPath, "/fixtures/");
-  strcat(cFixtureFullPath, fixtureName);
-
-  std::string fixtureFullPath(cFixtureFullPath);
-
-  return fixtureFullPath;
-}
-
 static std::string createFixture(const char *fixtureName) {
-  std::string fixtureFullPath = fixturePath(fixtureName);
+  std::string fixtureFullPath = TestModuleFactory::fixturePath(fixtureName);
 
   if (fileExists(fixtureFullPath) == false) {
     mull::Logger::debug() << "Could not find a fixture at path: "
@@ -76,7 +64,7 @@ static std::unique_ptr<Module> parseIR(const char *rawBitcode) {
 static std::unique_ptr<MullModule>
 createModuleFromBitcode(const char *fixtureName,
                         const char *moduleIdentifier) {
-  std::string fixtureFullPath = fixturePath(fixtureName);
+  std::string fixtureFullPath = TestModuleFactory::fixturePath(fixtureName);
 
   auto bufferOrError = MemoryBuffer::getFile(fixtureFullPath);
   if (!bufferOrError) {
@@ -96,6 +84,30 @@ createModuleFromBitcode(const char *fixtureName,
                                         "fake_hash",
                                         fixtureFullPath);
   return module;
+}
+
+std::string TestModuleFactory::fixturePath(const char *fixtureName) {
+  char cFixtureFullPath[256];
+
+  getcwd(cFixtureFullPath, 255);
+  strcat(cFixtureFullPath, "/fixtures/");
+  strcat(cFixtureFullPath, fixtureName);
+
+  std::string fixtureFullPath(cFixtureFullPath);
+
+  return fixtureFullPath;
+}
+
+std::unique_ptr<MullModule>
+TestModuleFactory::createModule(const char *fixtureName,
+                                const char *moduleIdentifier) {
+  std::string contents = createFixture(fixtureName);
+
+  auto module = parseIR(contents.c_str());
+
+  module->setModuleIdentifier(moduleIdentifier);
+
+  return make_unique<MullModule>(std::move(module), "fake_hash", "fake_path");
 }
 
 #pragma mark - Mutation Operators
@@ -118,18 +130,6 @@ std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_MathDiv_Module(
 }
 
 #pragma mark - Negate Condition
-
-std::unique_ptr<MullModule>
-TestModuleFactory::createModule(const char *fixtureName,
-                                const char *moduleIdentifier) {
-  std::string contents = createFixture(fixtureName);
-  
-  auto module = parseIR(contents.c_str());
-  
-  module->setModuleIdentifier(moduleIdentifier);
-
-  return make_unique<MullModule>(std::move(module), "fake_hash", "fake_path");
-}
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_NegateCondition_Tester_Module() {
   const char *fixture = "simple_test/mutation_operators/negate_condition/tester.bc";

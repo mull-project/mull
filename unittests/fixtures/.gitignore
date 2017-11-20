@@ -19,3 +19,7 @@ custom_test/distance/main.ll
 custom_test/distance/test.ll
 simple_test/count_letters/count_letters.bc
 simple_test/count_letters/test_count_letters.bc
+custom_test/dylibs/dynamic_libraries.list
+custom_test/dylibs/libdistance.dylib
+custom_test/dylibs/main.bc
+custom_test/dylibs/test.bc

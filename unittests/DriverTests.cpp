@@ -893,3 +893,75 @@ TEST(Driver, customTest) {
   ASSERT_EQ("passing", testResult->getTestName());
   ASSERT_EQ(3UL, testResult->getMutationResults().size());
 }
+
+TEST(Driver, customTest_WithDynamicLabraries) {
+  std::string projectName = "some_custom_project_with_dylibs";
+  std::string testFramework = "CustomTest";
+
+  bool doFork = false;
+  bool dryRun = false;
+  bool useCache = false;
+  bool emitDebugInfo = false;
+  bool diagnostics = false;
+
+  int distance = 10;
+  std::string cacheDirectory = "/tmp/mull_cache";
+
+  std::vector<CustomTestDefinition> testDefinitions({
+    CustomTestDefinition("passing", "passing_test", "mull", { "passing_test" })
+  });
+
+  std::string dynamicLibrariesPath =
+    TestModuleFactory::fixturePath("custom_test/dylibs/dynamic_libraries.list");
+
+  Config config("",
+                projectName,
+                testFramework,
+                {},
+                dynamicLibrariesPath,
+                {},
+                {},
+                testDefinitions,
+                doFork,
+                dryRun,
+                useCache,
+                emitDebugInfo,
+                diagnostics,
+                MullDefaultTimeoutMilliseconds,
+                distance,
+                cacheDirectory);
+
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<MathAddMutationOperator>());
+  MutationsFinder finder(std::move(mutationOperators));
+  CustomTestFinder testFinder(config.getCustomTests());
+
+  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
+    std::vector<std::unique_ptr<MullModule>> modules;
+
+    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Main_Module());
+    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Test_Module());
+
+    return modules;
+  };
+
+  LLVMContext context;
+  FakeModuleLoader loader(context, modules);
+
+  Toolchain toolchain(config);
+  CustomTestRunner runner(toolchain.targetMachine());
+  Filter filter;
+  filter.includeTest("passing");
+
+  Driver driver(config, loader, testFinder, runner, toolchain, filter, finder);
+
+  auto result = driver.Run();
+  ASSERT_EQ(1U, result->getTestResults().size());
+
+  TestResult *testResult = result->getTestResults().begin()->get();
+  ASSERT_NE(testResult, nullptr);
+  ASSERT_EQ(ExecutionStatus::Passed, testResult->getOriginalTestResult().status);
+  ASSERT_EQ("passing", testResult->getTestName());
+  /// Could not find any mutations because there was no bitcode for testees
+  ASSERT_EQ(0UL, testResult->getMutationResults().size());
+}

@@ -10,6 +10,8 @@ using namespace mull;
 class TestModuleFactory {
 
 public:
+  static std::string fixturePath(const char *fixtureName);
+
   std::string testerModulePath_Bitcode();
   
   std::unique_ptr<MullModule> createModule(const char *fixtureName,
