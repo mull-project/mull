@@ -155,9 +155,11 @@ TEST(SQLiteReporter, integrationTest_Config) {
 
   const std::string bitcodeFileList = "/tmp/bitcode_file_list.txt";
   const std::string dynamicLibraryFileList = "/tmp/dynamic_library_file_list.txt";
+  const std::string objectFileList = "/tmp/object_file.list";
 
   std::ofstream bitcodeFile(bitcodeFileList);
   std::ofstream dynamicLibraryFile(dynamicLibraryFileList);
+  std::ofstream objectFile(objectFileList);
 
   if (!bitcodeFile) {
     std::cerr << "Cannot open the output file." << std::endl;
@@ -176,6 +178,15 @@ TEST(SQLiteReporter, integrationTest_Config) {
 
   dynamicLibraryFile << "sqlite3.dylib" << std::endl;
   dynamicLibraryFile << "libz.dylib" << std::endl;
+
+  if (!objectFile) {
+    std::cerr << "Cannot open the output file." << std::endl;
+
+    ASSERT_FALSE(true);
+  }
+
+  objectFile << "foo.o" << std::endl;
+  objectFile << "bar.o" << std::endl;
 
   std::vector<std::string> operators({
     "add_mutation",
@@ -201,6 +212,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
                 testFramework,
                 operators,
                 dynamicLibraryFileList,
+                objectFileList,
                 tests,
                 {}, {},
                 doFork, dryRun, useCache, emitDebugInfo, diagnostics,
@@ -229,52 +241,56 @@ TEST(SQLiteReporter, integrationTest_Config) {
   const unsigned char *column2_bitcodePaths = nullptr;
   const unsigned char *column3_operators = nullptr;
   const unsigned char *column4_dylibs = nullptr;
-  const unsigned char *column5_tests = nullptr;
+  const unsigned char *column5_objectFiles = nullptr;
+  const unsigned char *column6_tests = nullptr;
 
-  int column6_fork = 0;
-  int column7_dryRun = 0;
-  int column8_useCache = 0;
-  int column9_timeout = 0;
-  int column10_distance = 0;
-  const unsigned char *column11_cacheDirectory = nullptr;
-  int column12_timeStart = 0;
-  int column13_timeEnd = 0;
-  int column14_emitDebugInfo = 0;
+  int column7_fork = 0;
+  int column8_dryRun = 0;
+  int column9_useCache = 0;
+  int column10_timeout = 0;
+  int column11_distance = 0;
+  const unsigned char *column12_cacheDirectory = nullptr;
+  int column13_timeStart = 0;
+  int column14_timeEnd = 0;
+  int column15_emitDebugInfo = 0;
 
   int numberOfRows = 0;
   while (1) {
     int stepResult = sqlite3_step (selectStmt);
 
     if (stepResult == SQLITE_ROW) {
-      column1_projectName = sqlite3_column_text(selectStmt, 0);
-      column2_bitcodePaths = sqlite3_column_text(selectStmt, 1);
-      column3_operators = sqlite3_column_text(selectStmt, 2);
-      column4_dylibs = sqlite3_column_text(selectStmt, 3);
-      column5_tests = sqlite3_column_text(selectStmt, 4);
-      column6_fork = sqlite3_column_int(selectStmt, 5);
-      column7_dryRun = sqlite3_column_int(selectStmt, 6);
-      column8_useCache = sqlite3_column_int(selectStmt, 7);
-      column9_timeout = sqlite3_column_int(selectStmt, 8);
-      column10_distance = sqlite3_column_int(selectStmt, 9);
-      column11_cacheDirectory = sqlite3_column_text(selectStmt, 10);
-      column12_timeStart = sqlite3_column_int(selectStmt, 11);
-      column13_timeEnd = sqlite3_column_int(selectStmt, 12);
-      column14_emitDebugInfo = sqlite3_column_int(selectStmt, 14);
+      int row = 0;
+      column1_projectName = sqlite3_column_text(selectStmt, row++);
+      column2_bitcodePaths = sqlite3_column_text(selectStmt, row++);
+      column3_operators = sqlite3_column_text(selectStmt, row++);
+      column4_dylibs = sqlite3_column_text(selectStmt, row++);
+      column5_objectFiles = sqlite3_column_text(selectStmt, row++);
+      column6_tests = sqlite3_column_text(selectStmt, row++);
+      column7_fork = sqlite3_column_int(selectStmt, row++);
+      column8_dryRun = sqlite3_column_int(selectStmt, row++);
+      column9_useCache = sqlite3_column_int(selectStmt, row++);
+      column10_timeout = sqlite3_column_int(selectStmt, row++);
+      column11_distance = sqlite3_column_int(selectStmt, row++);
+      column12_cacheDirectory = sqlite3_column_text(selectStmt, row++);
+      column13_timeStart = sqlite3_column_int(selectStmt, row++);
+      column14_timeEnd = sqlite3_column_int(selectStmt, row++);
+      column15_emitDebugInfo = sqlite3_column_int(selectStmt, row++);
 
       ASSERT_EQ(strcmp((const char *)column1_projectName, projectName.c_str()), 0);
       ASSERT_EQ(strcmp((const char *)column2_bitcodePaths, "tester.bc,testee.bc"), 0);
       ASSERT_EQ(strcmp((const char *)column3_operators, "add_mutation,negate_condition"), 0);
       ASSERT_EQ(strcmp((const char *)column4_dylibs, "sqlite3.dylib,libz.dylib"), 0);
-      ASSERT_EQ(strcmp((const char *)column5_tests, "test_method1,test_method2"), 0);
-      ASSERT_EQ(column6_fork, true);
-      ASSERT_EQ(column7_dryRun, true);
-      ASSERT_EQ(column8_useCache, true);
-      ASSERT_EQ(column9_timeout, 42);
-      ASSERT_EQ(column10_distance, 10);
-      ASSERT_EQ(strcmp((const char *)column11_cacheDirectory, "/a/cache"), 0);
-      ASSERT_EQ(column12_timeStart, 1234);
-      ASSERT_EQ(column13_timeEnd, 5678);
-      ASSERT_EQ(column14_emitDebugInfo, 0);
+      ASSERT_EQ(strcmp((const char *)column5_objectFiles, "foo.o,bar.o"), 0);
+      ASSERT_EQ(strcmp((const char *)column6_tests, "test_method1,test_method2"), 0);
+      ASSERT_EQ(column7_fork, true);
+      ASSERT_EQ(column8_dryRun, true);
+      ASSERT_EQ(column9_useCache, true);
+      ASSERT_EQ(column10_timeout, 42);
+      ASSERT_EQ(column11_distance, 10);
+      ASSERT_EQ(strcmp((const char *)column12_cacheDirectory, "/a/cache"), 0);
+      ASSERT_EQ(column13_timeStart, 1234);
+      ASSERT_EQ(column14_timeEnd, 5678);
+      ASSERT_EQ(column15_emitDebugInfo, 0);
 
       numberOfRows++;
     }
@@ -361,27 +377,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
 
   const std::string bitcodeFileList = "/tmp/bitcode_file_list.txt";
   const std::string dynamicLibraryFileList = "/tmp/dynamic_library_file_list.txt";
-
-  std::ofstream bitcodeFile(bitcodeFileList);
-  std::ofstream dynamicLibraryFile(dynamicLibraryFileList);
-
-  if (!bitcodeFile) {
-    std::cerr << "Cannot open the output file." << std::endl;
-
-    ASSERT_FALSE(true);
-  }
-
-  bitcodeFile << "tester.bc" << std::endl;
-  bitcodeFile << "testee.bc" << std::endl;
-
-  if (!dynamicLibraryFile) {
-    std::cerr << "Cannot open the output file." << std::endl;
-
-    ASSERT_FALSE(true);
-  }
-
-  dynamicLibraryFile << "sqlite3.dylib" << std::endl;
-  dynamicLibraryFile << "libz.dylib" << std::endl;
+  const std::string objectFileList = "/tmp/object_file.list";
 
   std::vector<std::string> operators({
     "add_mutation",
@@ -407,6 +403,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
                 testFramework,
                 operators,
                 dynamicLibraryFileList,
+                objectFileList,
                 configTests,
                 {}, {},
                 doFork, dryRun, useCache, emitDebugInfo, diagnostics,
@@ -526,27 +523,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
 
   const std::string bitcodeFileList = "/tmp/bitcode_file_list.txt";
   const std::string dynamicLibraryFileList = "/tmp/dynamic_library_file_list.txt";
-
-  std::ofstream bitcodeFile(bitcodeFileList);
-  std::ofstream dynamicLibraryFile(dynamicLibraryFileList);
-
-  if (!bitcodeFile) {
-    std::cerr << "Cannot open the output file." << std::endl;
-
-    ASSERT_FALSE(true);
-  }
-
-  bitcodeFile << "tester.bc" << std::endl;
-  bitcodeFile << "testee.bc" << std::endl;
-
-  if (!dynamicLibraryFile) {
-    std::cerr << "Cannot open the output file." << std::endl;
-
-    ASSERT_FALSE(true);
-  }
-
-  dynamicLibraryFile << "sqlite3.dylib" << std::endl;
-  dynamicLibraryFile << "libz.dylib" << std::endl;
+  const std::string objectFileList = "/tmp/object_file.list";
 
   std::vector<std::string> operators({
     "add_mutation",
@@ -572,6 +549,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
                 testFramework,
                 operators,
                 dynamicLibraryFileList,
+                objectFileList,
                 configTests,
                 {}, {},
                 doFork, dryRun, useCache, emitDebugInfo, diagnostics,

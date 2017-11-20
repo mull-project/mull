@@ -111,6 +111,61 @@ TEST_F(ConfigParserTestFixture, loadConfig_bitcodeFileList_dynamicLibraryFileLis
   ASSERT_EQ(errors.size(), 0U);
 }
 
+TEST_F(ConfigParserTestFixture, loadConfig_objectFileList) {
+  const std::string bitcodeFileList = "/tmp/bitcode_file.list";
+  const std::string objectFiles = "/tmp/object_files.list";
+
+  std::ofstream bitcodeFileStream(bitcodeFileList);
+  if (!bitcodeFileStream) {
+    std::cerr << "Cannot open the output file." << std::endl;
+    ASSERT_FALSE(true);
+  }
+
+  std::ofstream objectFileStream(objectFiles);
+
+  if (!objectFileStream) {
+    std::cerr << "Cannot open the output file." << std::endl;
+    ASSERT_FALSE(true);
+  }
+
+  objectFileStream << "foo.o" << std::endl;
+  objectFileStream << "bar.o" << std::endl;
+  objectFileStream << "# baz.o"  << std::endl;
+
+  const char *configYAML =
+    "bitcode_file_list: /tmp/bitcode_file.list\n"
+    "object_file_list: /tmp/object_files.list";
+  configWithYamlContent(configYAML);
+
+  ASSERT_EQ("/tmp/object_files.list", config.getObjectFileList());
+
+  ASSERT_EQ(2U, config.getObjectFilesPaths().size());
+  ASSERT_EQ("foo.o", *(config.getObjectFilesPaths().begin()));
+  ASSERT_EQ("bar.o", *(config.getObjectFilesPaths().end() - 1));
+
+  auto errors = config.validate();
+  ASSERT_EQ(errors.size(), 0U);
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_objectFileList_nonExistingFile) {
+  const std::string bitcodeFileList = "/tmp/bitcode_file.list";
+
+  std::ofstream bitcodeFileStream(bitcodeFileList);
+  if (!bitcodeFileStream) {
+    std::cerr << "Cannot open the output file." << std::endl;
+    ASSERT_FALSE(true);
+  }
+
+  const char *configYAML =
+    "bitcode_file_list: /tmp/bitcode_file.list\n"
+    "object_file_list: /tmp/object_files.list.does.not.exist";
+
+  configWithYamlContent(configYAML);
+
+  auto errors = config.validate();
+  ASSERT_EQ(errors.size(), 1U);
+}
+
 TEST_F(ConfigParserTestFixture, loadConfig_Fork_True) {
   configWithYamlContent("fork: true\n");
   ASSERT_EQ(true, config.getFork());
