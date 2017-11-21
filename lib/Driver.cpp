@@ -18,6 +18,7 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/Transforms/Utils/Cloning.h>
+#include <llvm/Support/DynamicLibrary.h>
 
 #include <algorithm>
 #include <chrono>
@@ -139,6 +140,10 @@ std::unique_ptr<Result> Driver::Run() {
     memset(_callTreeMapping, 0, functions.size() * sizeof(_callTreeMapping[0]));
 
     ExecutionResult ExecResult = Sandbox->run([&]() {
+      for (std::string &dylibPath: Cfg.getDynamicLibrariesPaths()) {
+        sys::DynamicLibrary::LoadLibraryPermanently(dylibPath.c_str());
+      }
+
       return Runner.runTest(test.get(), ObjectFiles);
     }, Cfg.getTimeout());
 
@@ -224,6 +229,9 @@ std::unique_ptr<Result> Driver::Run() {
                                                ExecResult.runningTime * 10);
 
           result = Sandbox->run([&]() {
+            for (std::string &dylibPath: Cfg.getDynamicLibrariesPaths()) {
+              sys::DynamicLibrary::LoadLibraryPermanently(dylibPath.c_str());
+            }
             ExecutionStatus status = Runner.runTest(BorrowedTest, ObjectFiles);
             assert(status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
             return status;
