@@ -48,6 +48,10 @@ public:
   std::unique_ptr<MullModule> createCustomTest_Distance_Main_Module();
   std::unique_ptr<MullModule> createCustomTest_Distance_Test_Module();
 
+  std::unique_ptr<MullModule> createCustomTest_DylibsAndObjects_Test_Module();
+  std::unique_ptr<MullModule> createCustomTest_DylibsAndObjects_Main_Module();
+  std::unique_ptr<MullModule> createCustomTest_DylibsAndObjects_Distance_Module();
+
   std::unique_ptr<MullModule> create_CustomTest_OpenSSL_bio_enc_test_Module();
 
 #pragma mark - Rust

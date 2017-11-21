@@ -1,5 +1,8 @@
-extern int printf(const char *, ...);
-extern int strcmp(const char *, const char *);
+//extern int printf(const char *, ...);
+//extern int strcmp(const char *, const char *);
+
+#include <stdio.h>
+#include <string.h>
 
 extern int fail;
 extern int success;
@@ -14,6 +17,7 @@ __attribute__((constructor)) static void initGlobalVariable() {
 }
 
 int main(int argc, char **argv) {
+  void *p = &strcmp;
   if (argc == 1) {
     printf("no test specified\n");
     return 48;
@@ -25,6 +29,8 @@ int main(int argc, char **argv) {
   }
 
   const char *testName = argv[1];
+
+  /* printf("%p\n", &strcmp); */
 
   if (strcmp(testName, "passing_test") == 0) {
     int result = passing_test();

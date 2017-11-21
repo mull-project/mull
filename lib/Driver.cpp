@@ -117,6 +117,30 @@ std::unique_ptr<Result> Driver::Run() {
     InnerCache.insert(std::make_pair(module.getModule(), objectFile));
   }
 
+  for (std::string &objectFilePath: Cfg.getObjectFilesPaths()) {
+    ErrorOr<std::unique_ptr<MemoryBuffer>> buffer =
+      MemoryBuffer::getFile(objectFilePath.c_str());
+
+    if (!buffer) {
+      Logger::error() << "Cannot load object file: " << objectFilePath << "\n";
+      continue;
+    }
+
+    Expected<std::unique_ptr<ObjectFile>> objectOrError =
+      ObjectFile::createObjectFile(buffer.get()->getMemBufferRef());
+
+    if (!objectOrError) {
+      Logger::error() << "Cannot create object file: " << objectFilePath << "\n";
+      continue;
+    }
+
+    std::unique_ptr<ObjectFile> objectFile(std::move(objectOrError.get()));
+
+    auto owningObject = OwningBinary<ObjectFile>(std::move(objectFile),
+                                                 std::move(buffer.get()));
+    precompiledObjectFiles.push_back(std::move(owningObject));
+  }
+
   prepareForExecution();
 
   auto foundTests = Finder.findTests(Ctx, filter);
@@ -334,6 +358,10 @@ std::vector<llvm::object::ObjectFile *> Driver::AllButOne(llvm::Module *One) {
     }
   }
 
+  for (OwningBinary<ObjectFile> &object: precompiledObjectFiles) {
+    Objects.push_back(object.getBinary());
+  }
+
   return Objects;
 }
 
@@ -342,6 +370,10 @@ std::vector<llvm::object::ObjectFile *> Driver::AllObjectFiles() {
 
   for (auto &CachedEntry : InnerCache) {
     Objects.push_back(CachedEntry.second);
+  }
+
+  for (OwningBinary<ObjectFile> &object: precompiledObjectFiles) {
+    Objects.push_back(object.getBinary());
   }
 
   return Objects;

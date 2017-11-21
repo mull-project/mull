@@ -53,10 +53,11 @@ class Driver {
   std::stack<uint64_t> _callstack;
 
   std::map<llvm::Module *, llvm::object::ObjectFile *> InnerCache;
+  std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> precompiledObjectFiles;
 
 public:
   Driver(Config &C, ModuleLoader &ML, TestFinder &TF, TestRunner &TR, Toolchain &t, Filter &f, MutationsFinder &mutationsFinder)
-    : Cfg(C), Loader(ML), Finder(TF), Runner(TR), toolchain(t), filter(f), mutationsFinder(mutationsFinder), dynamicCallTree(functions), _callTreeMapping(nullptr) {
+    : Cfg(C), Loader(ML), Finder(TF), Runner(TR), toolchain(t), filter(f), mutationsFinder(mutationsFinder), dynamicCallTree(functions), _callTreeMapping(nullptr), precompiledObjectFiles() {
 
       CallTreeFunction phonyRoot(nullptr);
       functions.push_back(phonyRoot);

@@ -238,6 +238,21 @@ std::unique_ptr<MullModule> TestModuleFactory::createCustomTest_Distance_Test_Mo
   return createModuleFromBitcode(fixture, fixture);
 }
 
+std::unique_ptr<MullModule> TestModuleFactory::createCustomTest_DylibsAndObjects_Test_Module() {
+  const char *fixture = "custom_test/dylibs_and_objects/test.bc";
+  return createModuleFromBitcode(fixture, fixture);
+}
+
+std::unique_ptr<MullModule> TestModuleFactory::createCustomTest_DylibsAndObjects_Main_Module() {
+  const char *fixture = "custom_test/dylibs_and_objects/main.bc";
+  return createModuleFromBitcode(fixture, fixture);
+}
+
+std::unique_ptr<MullModule> TestModuleFactory::createCustomTest_DylibsAndObjects_Distance_Module() {
+  const char *fixture = "custom_test/dylibs_and_objects/distance.bc";
+  return createModuleFromBitcode(fixture, fixture);
+}
+
 std::unique_ptr<MullModule> TestModuleFactory::create_CustomTest_OpenSSL_bio_enc_test_Module() {
   const char *fixture = "openssl_bio_enc_test.o.ll";
   return createModule(fixture, fixture);
