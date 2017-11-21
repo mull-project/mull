@@ -1,5 +1,6 @@
 synchronize_fixtures:
 	cd ./custom_test/ && make synchronize_fixtures
+	cd ./dylibs/ && make synchronize_fixtures
 	cd ./google_test/google_test/ && make synchronize_fixtures
 	cd ./simple_test/mutation_operators/and_or_replacement && make synchronize_fixtures
 	cd ./simple_test/mutation_operators/and_or_replacement_cpp/ && make synchronize_fixtures
@@ -14,6 +15,7 @@ synchronize_fixtures:
 
 clean:
 	cd ./custom_test/ && make clean
+	cd ./dylibs/ && make clean
 	cd ./google_test/google_test/ && make clean
 	cd ./simple_test/mutation_operators/and_or_replacement/ && make clean
 	cd ./simple_test/mutation_operators/and_or_replacement_cpp/ && make clean
