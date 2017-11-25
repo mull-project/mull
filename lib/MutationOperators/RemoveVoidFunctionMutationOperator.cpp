@@ -64,6 +64,15 @@ bool RemoveVoidFunctionMutationOperator::canBeApplied(Value &V) {
         return false;
       }
 
+      if (calledFunction->getName().str().find("clang_call_terminate") != std::string::npos) {
+        return false;
+      }
+
+      /// Do not remove 'void operator delete(void *)'
+      if (calledFunction->getName().endswith("ZdlPv")) {
+        return false;
+      }
+
       /// TODO: This might also filter out important code. Review this later.
       if (calledFunction->getName().endswith("D1Ev") ||
           calledFunction->getName().endswith("D2Ev") ||
