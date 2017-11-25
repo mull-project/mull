@@ -49,6 +49,7 @@ static std::string readFileAndUnlink(const char *filename) {
   buffer[size] = '\0';
   std::string output(buffer);
   free(buffer);
+  fclose(file);
 
   return output;
 }
