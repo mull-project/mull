@@ -48,6 +48,7 @@ class Config {
 
   std::vector<std::string> mutationOperators;
   std::string dynamicLibraryFileList;
+  std::string objectFileList;
   std::vector<std::string> tests;
   std::vector<std::string> excludeLocations;
   std::vector<CustomTestDefinition> customTests;
@@ -81,6 +82,7 @@ public:
       // }
     ),
     dynamicLibraryFileList(),
+    objectFileList(),
     tests(),
     excludeLocations(),
     customTests(),
@@ -100,6 +102,7 @@ public:
          const std::string &testFramework,
          const std::vector<std::string> mutationOperators,
          const std::string &dynamicLibraryFileList,
+         const std::string &objectFileList,
          const std::vector<std::string> tests,
          const std::vector<std::string> excludeLocations,
          const std::vector<CustomTestDefinition> definitions,
@@ -116,6 +119,7 @@ public:
     testFramework(testFramework),
     mutationOperators(mutationOperators),
     dynamicLibraryFileList(dynamicLibraryFileList),
+    objectFileList(objectFileList),
     tests(tests),
     excludeLocations(excludeLocations),
     customTests(definitions),
@@ -177,6 +181,26 @@ public:
 
     return dynamicLibrariesPaths;
   }
+
+  const std::string &getObjectFileList() const {
+    return objectFileList;
+  }
+
+  std::vector<std::string> getObjectFilesPaths() const {
+    std::vector<std::string> objectFilesPaths;
+
+    std::ifstream ifs(objectFileList);
+
+    for (std::string path; getline(ifs, path); ) {
+      if (path.at(0) == '#') {
+        continue;
+      }
+
+      objectFilesPaths.push_back(path);
+    }
+
+    return objectFilesPaths;
+  }
   
   const std::vector<std::string> &getMutationOperators() const {
     return mutationOperators;
@@ -230,6 +254,7 @@ public:
     Logger::debug() << "Config>\n"
     << "\t" << "bitcode_file_list: " << bitcodeFileList << '\n'
     << "\t" << "dynamic_library_file_list: " << dynamicLibraryFileList << '\n'
+    << "\t" << "object_file_list: " << objectFileList << '\n'
     << "\t" << "project_name: " << getProjectName() << '\n'
     << "\t" << "test_framework: " << getTestFramework() << '\n'
     << "\t" << "distance: " << getMaxDistance() << '\n'
@@ -287,10 +312,23 @@ public:
       
       if (dynamicLibraryFile.good() == false) {
         std::stringstream error;
-        
+
         error << "dynamic_library_file_list parameter points to a non-existing file: "
         << dynamicLibraryFileList;
         
+        errors.push_back(error.str());
+      }
+    }
+
+    if (objectFileList.empty() == false) {
+      std::ifstream objectFiles(objectFileList.c_str());
+
+      if (objectFiles.good() == false) {
+        std::stringstream error;
+
+        error << "object_file_list parameter points to a non-existing file: "
+        << objectFileList;
+
         errors.push_back(error.str());
       }
     }

@@ -19,7 +19,9 @@ custom_test/distance/main.ll
 custom_test/distance/test.ll
 simple_test/count_letters/count_letters.bc
 simple_test/count_letters/test_count_letters.bc
-custom_test/dylibs/dynamic_libraries.list
-custom_test/dylibs/libdistance.dylib
-custom_test/dylibs/main.bc
-custom_test/dylibs/test.bc
+custom_test/dylibs_and_objects/dynamic_libraries.list
+custom_test/dylibs_and_objects/object_files.list
+custom_test/dylibs_and_objects/libdistance.dylib
+custom_test/dylibs_and_objects/test.bc
+custom_test/dylibs_and_objects/distance.bc
+custom_test/dylibs_and_objects/main.bc

@@ -157,13 +157,14 @@ ExecutionStatus CustomTestRunner::runTest(Test *test, ObjectFiles &objectFiles) 
   std::vector<std::string> arguments = customTest->getArguments();
   arguments.insert(arguments.begin(), customTest->getProgramName());
   int argc = arguments.size();
-  char **argv = new char*[argc];
+  char **argv = new char*[argc + 1];
 
   for (int i = 0; i < argc; i++) {
     std::string &argument = arguments[i];
     argv[i] = new char[argument.length() + 1];
     strcpy(argv[i], argument.c_str());
   }
+  argv[argc] = nullptr;
 
   void *mainPointer = getFunctionPointer(mangler.getNameWithPrefix("main"));
   auto main = ((int (*)(int, char**))(intptr_t)mainPointer);
