@@ -35,9 +35,14 @@ build Mull.
 
 There are the questions we want to answer with Mull eventually.
 
-- Can mutation testing actually detect serious errors in the real-world programs?
+- Can mutation testing actually detect serious errors in the real-world
+programs?
 - What are the most effective mutation operators?
-- Is there any equivalence between mutation testing and different kinds of testing coverage especially MC/DC coverage?
+- Is there any equivalence between mutation testing and different kinds of
+testing coverage especially MC/DC coverage?
+- Can mutation testing be combined with other techniques like symbolic
+execution, fuzz testing, genetic programming, etc., to help in automatic test
+generation?
 
 ## Useful Material
 
@@ -56,6 +61,10 @@ Comments](http://lowlevelbits.org/llvm-based-mutation-testing-system/)
 [Mull and Klee, part 1: mutation testing analysis for Klee's Tutorial Two](http://stanislaw.github.io/2017/05/07/mull-and-klee-part1.html)
 
 [Using mutation testing score to measure a reliability of a single function](http://stanislaw.github.io/2017/05/05/unbreakable-code.html)
+
+### Stack Exchange
+
+[Mutation testing: is it useful for assessing test quality?](https://sqa.stackexchange.com/questions/5255/mutation-testing-is-it-useful-for-assessing-test-quality)
 
 ### Talks
 
