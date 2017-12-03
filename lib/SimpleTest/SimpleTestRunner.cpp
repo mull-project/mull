@@ -1,46 +1,22 @@
 #include "SimpleTest/SimpleTestRunner.h"
 
-#include "llvm/ExecutionEngine/ExecutionEngine.h"
-#include "llvm/ExecutionEngine/OrcMCJITReplacement.h"
-#include "llvm/ExecutionEngine/GenericValue.h"
-
 /// TODO: enable back for LLVM 4.0
 //#include "llvm/ExecutionEngine/JITSymbol.h"
-#include "llvm/ExecutionEngine/RTDyldMemoryManager.h"
-#include "llvm/ExecutionEngine/SectionMemoryManager.h"
-#include "llvm/Support/DynamicLibrary.h"
+#include <llvm/ExecutionEngine/RTDyldMemoryManager.h>
+#include <llvm/ExecutionEngine/SectionMemoryManager.h>
+#include <llvm/Support/DynamicLibrary.h>
 
 #include "SimpleTest/SimpleTest_Test.h"
 
-#include <chrono>
-#include <cstdarg>
-
 using namespace mull;
 using namespace llvm;
-using namespace std::chrono;
-
-extern "C" int mull_simple_test_printf(const char *fmt, ...) {
-  va_list arglist;
-
-  printf("Printf called from JIT: \n");
-
-  va_start(arglist, fmt);
-  vprintf(fmt, arglist);
-  va_end(arglist);
-
-  return 0;
-}
 
 class Mull_SimpleTest_Resolver : public RuntimeDyld::SymbolResolver {
 public:
 
   RuntimeDyld::SymbolInfo findSymbol(const std::string &Name) {
-    //if (Name == "_printf") {
-    //  return findSymbol("mull_simple_test_printf");
-    //}
-
-    if (auto SymAddr = RTDyldMemoryManager::getSymbolAddressInProcess(Name)) {
-      return RuntimeDyld::SymbolInfo(SymAddr, JITSymbolFlags::Exported);
+    if (auto address = RTDyldMemoryManager::getSymbolAddressInProcess(Name)) {
+      return RuntimeDyld::SymbolInfo(address, JITSymbolFlags::Exported);
     }
 
     return RuntimeDyld::SymbolInfo(nullptr);

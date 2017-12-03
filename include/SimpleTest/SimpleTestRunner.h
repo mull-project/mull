@@ -2,8 +2,8 @@
 
 #include "TestRunner.h"
 
-#include "llvm/ExecutionEngine/Orc/ObjectLinkingLayer.h"
-#include "llvm/IR/Mangler.h"
+#include <llvm/ExecutionEngine/Orc/ObjectLinkingLayer.h>
+#include <llvm/IR/Mangler.h>
 
 namespace llvm {
 
