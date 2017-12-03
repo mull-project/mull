@@ -4,11 +4,12 @@
 
 #include "Mangler.h"
 
-#include "llvm/ExecutionEngine/Orc/ObjectLinkingLayer.h"
-#include "llvm/IR/Mangler.h"
-#include "llvm/Object/Binary.h"
-#include "llvm/Object/ObjectFile.h"
-#include "llvm/Target/TargetMachine.h"
+#include <llvm/ExecutionEngine/Orc/ExecutionUtils.h>
+#include <llvm/ExecutionEngine/Orc/ObjectLinkingLayer.h>
+#include <llvm/IR/Mangler.h>
+#include <llvm/Object/Binary.h>
+#include <llvm/Object/ObjectFile.h>
+#include <llvm/Target/TargetMachine.h>
 
 namespace llvm {
 
@@ -22,7 +23,7 @@ namespace mull {
 class GoogleTestRunner : public TestRunner {
   llvm::orc::ObjectLinkingLayer<> ObjectLayer;
   mull::Mangler mangler;
-  std::map<std::string, std::string> mapping;
+  llvm::orc::LocalCXXRuntimeOverrides overrides;
 
   std::string fGoogleTestInit;
   std::string fGoogleTestInstance;
