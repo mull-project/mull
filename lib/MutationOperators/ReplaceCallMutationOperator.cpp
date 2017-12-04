@@ -90,7 +90,8 @@ llvm::Value *getReplacement(Type *returnType, llvm::LLVMContext &context) {
   static const int MagicValue = 42;
 
   if (returnType->isIntegerTy()) {
-    APInt replacementIntValue = APInt(8U, MagicValue);
+    APInt replacementIntValue = APInt(returnType->getIntegerBitWidth(),
+                                      MagicValue);
 
     return ConstantInt::get(context,
                             replacementIntValue);
