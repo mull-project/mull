@@ -15,6 +15,7 @@ set(mull_sources
   MutationOperators/MutationOperatorsFactory.cpp
   MutationOperators/NegateConditionMutationOperator.cpp
   MutationOperators/RemoveVoidFunctionMutationOperator.cpp
+  MutationOperators/ReplaceAssignmentMutationOperator.cpp
   MutationOperators/ReplaceCallMutationOperator.cpp
   MutationOperators/MathDivMutationOperator.cpp
   MutationOperators/MathMulMutationOperator.cpp

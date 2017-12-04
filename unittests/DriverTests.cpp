@@ -11,6 +11,7 @@
 #include "MutationOperators/MutationOperatorsFactory.h"
 #include "MutationOperators/NegateConditionMutationOperator.h"
 #include "MutationOperators/RemoveVoidFunctionMutationOperator.h"
+#include "MutationOperators/ReplaceAssignmentMutationOperator.h"
 #include "Result.h"
 #include "SimpleTest/SimpleTestFinder.h"
 #include "SimpleTest/SimpleTestRunner.h"
@@ -830,6 +831,76 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator_CPP) {
     auto mutant6_1 = mutants6.begin()->get();
     ASSERT_EQ(ExecutionStatus::Crashed, mutant6_1->getExecutionResult().status);
   }
+}
+
+TEST(Driver, SimpleTest_ReplaceAssignmentMutationOperator_CPP) {
+  std::string projectName = "some_project";
+  std::string testFramework = "SimpleTest";
+
+  bool doFork = false;
+  bool dryRun = false;
+  bool useCache = false;
+  bool debugInfo = false;
+  bool diagnostics = false;
+
+  int distance = 10;
+  std::string cacheDirectory = "/tmp/mull_cache";
+
+  Config config("",
+                projectName,
+                testFramework,
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                doFork,
+                dryRun,
+                useCache,
+                debugInfo,
+                diagnostics,
+                MullDefaultTimeoutMilliseconds,
+                distance,
+                cacheDirectory);
+
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<ReplaceAssignmentMutationOperator>());
+  MutationsFinder finder(std::move(mutationOperators));
+  SimpleTestFinder testFinder;
+
+  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
+    std::vector<std::unique_ptr<MullModule>> modules;
+
+    modules.push_back(SharedTestModuleFactory.create_SimpleTest_ReplaceAssignment_Module());
+
+    return modules;
+  };
+
+  LLVMContext context;
+  FakeModuleLoader loader(context, modules);
+
+  Toolchain toolchain(config);
+  SimpleTestRunner runner(toolchain.targetMachine());
+  Filter filter;
+
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder);
+
+  auto result = Driver.Run();
+  EXPECT_EQ(1U, result->getTestResults().size());
+
+  auto result1 = result->getTestResults().begin()->get();
+  EXPECT_EQ(ExecutionStatus::Passed, result1->getOriginalTestResult().status);
+  EXPECT_EQ("test_replace_assignment", result1->getTestName());
+
+  auto &mutants1 = result1->getMutationResults();
+  EXPECT_EQ(2U, mutants1.size());
+
+  auto &mutant1_1 = mutants1.at(0);
+  EXPECT_EQ(ExecutionStatus::Failed, mutant1_1->getExecutionResult().status);
+
+  auto &mutant1_2 = mutants1.at(1);
+  EXPECT_EQ(ExecutionStatus::Failed, mutant1_2->getExecutionResult().status);
 }
 
 TEST(Driver, customTest) {

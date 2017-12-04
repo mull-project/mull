@@ -8,6 +8,7 @@ synchronize_fixtures:
 	cd ./simple_test/mutation_operators/math_sub/ && make synchronize_fixtures
 	cd ./simple_test/mutation_operators/negate_condition/ && make synchronize_fixtures
 	cd ./simple_test/mutation_operators/remove_void_function/ && make synchronize_fixtures
+	cd ./simple_test/mutation_operators/replace_assignment/ && make synchronize_fixtures
 	cd ./simple_test/mutation_operators/replace_call/ && make synchronize_fixtures
 	cd ./simple_test/mutation_operators/scalar_value/ && make synchronize_fixtures
 	cd ./simple_test/count_letters && make synchronize_fixtures

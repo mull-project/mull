@@ -6,6 +6,7 @@
 #include "MutationOperators/NegateConditionMutationOperator.h"
 #include "MutationOperators/AndOrReplacementMutationOperator.h"
 #include "MutationOperators/ScalarValueMutationOperator.h"
+#include "MutationOperators/ReplaceAssignmentMutationOperator.h"
 #include "MutationOperators/ReplaceCallMutationOperator.h"
 #include "TestModuleFactory.h"
 #include "Testee.h"
@@ -401,4 +402,41 @@ TEST(MutationPoint, SimpleTest_ReplaceCallMutationOperator_applyMutation) {
     mutationPointAddress1.findInstruction(ownedMutatedModule->getModule());
 
   ASSERT_TRUE(isa<BinaryOperator>(instructionByMutationAddress));
+}
+
+TEST(MutationPoint, SimpleTest_ReplaceAssignmentMutationOperator_applyMutation) {
+    auto module = TestModuleFactory.create_SimpleTest_ReplaceAssignment_Module();
+
+    Context Ctx;
+    Ctx.addModule(std::move(module));
+
+    std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+    mutationOperators.emplace_back(make_unique<ReplaceAssignmentMutationOperator>());
+
+    MutationsFinder finder(std::move(mutationOperators));
+
+    Function *testeeFunction = Ctx.lookupDefinedFunction("replace_assignment");
+    ASSERT_FALSE(testeeFunction->empty());
+    Testee testee(testeeFunction, 1);
+    Filter filter;
+
+    std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(Ctx, testee, filter);
+
+    EXPECT_EQ(2U, mutationPoints.size());
+
+    MutationPoint *mutationPoint1 = mutationPoints[0];
+    MutationPointAddress mutationPointAddress1 = mutationPoint1->getAddress();
+    EXPECT_TRUE(isa<StoreInst>(mutationPoint1->getOriginalValue()));
+
+    LLVMContext localContext;
+    auto ownedMutatedModule = mutationPoint1->getOriginalModule()->clone(localContext);
+    mutationPoint1->applyMutation(*ownedMutatedModule.get());
+
+    Function *mutatedTestee = ownedMutatedModule->getModule()->getFunction("replace_assignment");
+    ASSERT_TRUE(mutatedTestee != nullptr);
+
+    llvm::Instruction &instructionByMutationAddress =
+    mutationPointAddress1.findInstruction(ownedMutatedModule->getModule());
+
+    ASSERT_TRUE(isa<StoreInst>(instructionByMutationAddress));
 }
