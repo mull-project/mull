@@ -145,7 +145,7 @@ TEST(MutationsOperatorFactory, CompositeOperators) {
 
   {
     operators = factory.mutationOperators({ "experimental" });
-    ASSERT_EQ(operators.size(), 6UL);
+    ASSERT_EQ(operators.size(), 7UL);
 
     searchResult = find_if(operators.begin(), operators.end(), predicate("math_div_mutation_operator"));
     ASSERT_NE(searchResult, operators.end());
@@ -154,6 +154,9 @@ TEST(MutationsOperatorFactory, CompositeOperators) {
     searchResult = find_if(operators.begin(), operators.end(), predicate("math_sub_mutation_operator"));
     ASSERT_NE(searchResult, operators.end());
     searchResult = find_if(operators.begin(), operators.end(), predicate("and_or_replacement_mutation_operator"));
+    ASSERT_NE(searchResult, operators.end());
+    searchResult = find_if(operators.begin(), operators.end(),
+      predicate("replace_assignment_mutation_operator"));
     ASSERT_NE(searchResult, operators.end());
     searchResult = find_if(operators.begin(), operators.end(), predicate("replace_call_mutation_operator"));
     ASSERT_NE(searchResult, operators.end());
@@ -163,7 +166,7 @@ TEST(MutationsOperatorFactory, CompositeOperators) {
 
   {
     operators = factory.mutationOperators({ "all" });
-    ASSERT_EQ(operators.size(), 9UL);
+    ASSERT_EQ(operators.size(), 10UL);
 
     searchResult = find_if(operators.begin(), operators.end(), predicate("math_add_mutation_operator"));
     ASSERT_NE(searchResult, operators.end());
@@ -178,6 +181,9 @@ TEST(MutationsOperatorFactory, CompositeOperators) {
     searchResult = find_if(operators.begin(), operators.end(), predicate("negate_mutation_operator"));
     ASSERT_NE(searchResult, operators.end());
     searchResult = find_if(operators.begin(), operators.end(), predicate("remove_void_function_mutation_operator"));
+    ASSERT_NE(searchResult, operators.end());
+    searchResult = find_if(operators.begin(), operators.end(),
+      predicate("replace_assignment_mutation_operator"));
     ASSERT_NE(searchResult, operators.end());
     searchResult = find_if(operators.begin(), operators.end(), predicate("replace_call_mutation_operator"));
     ASSERT_NE(searchResult, operators.end());
@@ -187,7 +193,7 @@ TEST(MutationsOperatorFactory, CompositeOperators) {
 
   {
     operators = factory.mutationOperators({ "default", "experimental" });
-    ASSERT_EQ(operators.size(), 9UL);
+    ASSERT_EQ(operators.size(), 10UL);
 
     searchResult = find_if(operators.begin(), operators.end(), predicate("math_add_mutation_operator"));
     ASSERT_NE(searchResult, operators.end());
@@ -202,6 +208,9 @@ TEST(MutationsOperatorFactory, CompositeOperators) {
     searchResult = find_if(operators.begin(), operators.end(), predicate("negate_mutation_operator"));
     ASSERT_NE(searchResult, operators.end());
     searchResult = find_if(operators.begin(), operators.end(), predicate("remove_void_function_mutation_operator"));
+    ASSERT_NE(searchResult, operators.end());
+    searchResult = find_if(operators.begin(), operators.end(),
+      predicate("replace_assignment_mutation_operator"));
     ASSERT_NE(searchResult, operators.end());
     searchResult = find_if(operators.begin(), operators.end(), predicate("replace_call_mutation_operator"));
     ASSERT_NE(searchResult, operators.end());

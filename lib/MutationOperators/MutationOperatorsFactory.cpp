@@ -8,6 +8,7 @@
 #include "MutationOperators/MathSubMutationOperator.h"
 #include "MutationOperators/NegateConditionMutationOperator.h"
 #include "MutationOperators/RemoveVoidFunctionMutationOperator.h"
+#include "MutationOperators/ReplaceAssignmentMutationOperator.h"
 #include "MutationOperators/ReplaceCallMutationOperator.h"
 #include "MutationOperators/ScalarValueMutationOperator.h"
 #include "Logger.h"
@@ -69,6 +70,7 @@ MutationOperatorsFactory::MutationOperatorsFactory() {
     MathMulMutationOperator::ID,
     MathDivMutationOperator::ID,
     AndOrReplacementMutationOperator::ID,
+    ReplaceAssignmentMutationOperator::ID,
     ReplaceCallMutationOperator::ID,
     ScalarValueMutationOperator::ID
   };
@@ -93,6 +95,8 @@ void MutationOperatorsFactory::init() {
   mutationsMapping[AndOrReplacementMutationOperator::ID] =
     make_unique<AndOrReplacementMutationOperator>();
 
+  mutationsMapping[ReplaceAssignmentMutationOperator::ID] =
+    make_unique<ReplaceAssignmentMutationOperator>();
   mutationsMapping[ReplaceCallMutationOperator::ID] =
     make_unique<ReplaceCallMutationOperator>();
   mutationsMapping[RemoveVoidFunctionMutationOperator::ID] =

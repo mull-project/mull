@@ -172,6 +172,13 @@ std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ScalarValue_Mod
   return createModuleFromBitcode(fixture, fixture);
 }
 
+#pragma mark - Replace Assignment
+
+std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ReplaceAssignment_Module() {
+    const char *fixture = "simple_test/mutation_operators/replace_assignment/replace_assignment.bc";
+    return createModuleFromBitcode(fixture, fixture);
+}
+
 #pragma mark - Replace Call
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ReplaceCall_Module() {

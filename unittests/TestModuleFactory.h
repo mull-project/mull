@@ -35,6 +35,7 @@ public:
 
   std::unique_ptr<MullModule> create_SimpleTest_ScalarValue_Module();
 
+  std::unique_ptr<MullModule> create_SimpleTest_ReplaceAssignment_Module();
   std::unique_ptr<MullModule> create_SimpleTest_ReplaceCall_Module();
 
   std::unique_ptr<MullModule> create_GoogleTest_Tester_Module();
