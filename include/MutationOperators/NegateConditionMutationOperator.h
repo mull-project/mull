@@ -23,7 +23,7 @@ namespace mull {
 
     static llvm::CmpInst::Predicate negatedCmpInstPredicate(llvm::CmpInst::Predicate predicate);
 
-    MutationPoint *getMutationPoint(MullModule *module,
+    MutationPoint *getMutationPoint(const MullModule &module,
                                     MutationPointAddress &address,
                                     llvm::Instruction *instruction) override;
 

@@ -80,8 +80,8 @@ TEST(Driver, SimpleTest_MathAddMutationOperator) {
                 distance,
                 cacheDirectory);
 
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
+  std::function<std::vector<MullModule> ()> modules = [](){
+    std::vector<MullModule> modules;
 
     modules.push_back(SharedTestModuleFactory.create_SimpleTest_CountLettersTest_Module());
     modules.push_back(SharedTestModuleFactory.create_SimpleTest_CountLetters_Module());
@@ -163,8 +163,8 @@ TEST(Driver, SimpleTest_MathSubMutationOperator) {
                 distance,
                 cacheDirectory);
 
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
+  std::function<std::vector<MullModule> ()> modules = [](){
+    std::vector<MullModule> modules;
 
     modules.push_back(SharedTestModuleFactory.create_SimpleTest_MathSub_Module());
 
@@ -244,8 +244,8 @@ TEST(Driver, SimpleTest_MathMulMutationOperator) {
                 distance,
                 cacheDirectory);
 
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
+  std::function<std::vector<MullModule> ()> modules = [](){
+    std::vector<MullModule> modules;
 
     modules.push_back(SharedTestModuleFactory.create_SimpleTest_MathMul_Module());
 
@@ -325,8 +325,8 @@ TEST(Driver, SimpleTest_MathDivMutationOperator) {
                 distance,
                 cacheDirectory);
 
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
+  std::function<std::vector<MullModule> ()> modules = [](){
+    std::vector<MullModule> modules;
 
     modules.push_back(SharedTestModuleFactory.create_SimpleTest_MathDiv_Module());
 
@@ -411,8 +411,8 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
   MutationsFinder finder(std::move(mutationOperators));
   SimpleTestFinder testFinder;
 
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
+  std::function<std::vector<MullModule> ()> modules = [](){
+    std::vector<MullModule> modules;
 
     modules.push_back(SharedTestModuleFactory.create_SimpleTest_NegateCondition_Tester_Module());
     modules.push_back(SharedTestModuleFactory.create_SimpleTest_NegateCondition_Testee_Module());
@@ -485,8 +485,8 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
   MutationsFinder finder(std::move(mutationOperators));
   SimpleTestFinder testFinder;
 
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
+  std::function<std::vector<MullModule> ()> modules = [](){
+    std::vector<MullModule> modules;
 
     modules.push_back(SharedTestModuleFactory.create_SimpleTest_RemoveVoidFunction_Tester_Module());
     modules.push_back(SharedTestModuleFactory.create_SimpleTest_RemoveVoidFunction_Testee_Module());
@@ -559,8 +559,8 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator) {
   MutationsFinder finder(std::move(mutationOperators));
   SimpleTestFinder testFinder;
 
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
+  std::function<std::vector<MullModule> ()> modules = [](){
+    std::vector<MullModule> modules;
 
     modules.push_back(SharedTestModuleFactory.create_SimpleTest_ANDORReplacement_Module());
 
@@ -734,8 +734,8 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator_CPP) {
   MutationsFinder finder(std::move(mutationOperators));
   SimpleTestFinder testFinder;
 
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
+  std::function<std::vector<MullModule> ()> modules = [](){
+    std::vector<MullModule> modules;
 
     modules.push_back(SharedTestModuleFactory.create_SimpleTest_ANDORReplacement_CPPContent_Module());
 
@@ -869,8 +869,8 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutationOperator_CPP) {
   MutationsFinder finder(std::move(mutationOperators));
   SimpleTestFinder testFinder;
 
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
+  std::function<std::vector<MullModule> ()> modules = [](){
+    std::vector<MullModule> modules;
 
     modules.push_back(SharedTestModuleFactory.create_SimpleTest_ReplaceAssignment_Module());
 
@@ -944,8 +944,8 @@ TEST(Driver, customTest) {
   MutationsFinder finder(std::move(mutationOperators));
   CustomTestFinder testFinder(config.getCustomTests());
 
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
+  std::function<std::vector<MullModule> ()> modules = [](){
+    std::vector<MullModule> modules;
 
     modules.push_back(SharedTestModuleFactory.create_CustomTest_Distance_Distance_Module());
     modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Main_Module());
@@ -1017,8 +1017,8 @@ TEST(Driver, customTest_withDynamicLibraries) {
   MutationsFinder finder(std::move(mutationOperators));
   CustomTestFinder testFinder(config.getCustomTests());
 
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
+  std::function<std::vector<MullModule> ()> modules = [](){
+    std::vector<MullModule> modules;
 
     modules.push_back(SharedTestModuleFactory.createCustomTest_DylibsAndObjects_Test_Module());
     modules.push_back(SharedTestModuleFactory.createCustomTest_DylibsAndObjects_Main_Module());
@@ -1092,8 +1092,8 @@ TEST(Driver, DISABLED_customTest_withDynamicLibraries_and_ObjectFiles) {
   MutationsFinder finder(std::move(mutationOperators));
   CustomTestFinder testFinder(config.getCustomTests());
 
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
+  std::function<std::vector<MullModule> ()> modules = [](){
+    std::vector<MullModule> modules;
 
     modules.push_back(SharedTestModuleFactory.createCustomTest_DylibsAndObjects_Test_Module());
 

@@ -20,7 +20,7 @@ using namespace mull;
 const std::string AndOrReplacementMutationOperator::ID = "and_or_replacement_mutation_operator";
 
 MutationPoint *
-AndOrReplacementMutationOperator::getMutationPoint(MullModule *module,
+AndOrReplacementMutationOperator::getMutationPoint(const MullModule &module,
                                                    MutationPointAddress &address,
                                                    llvm::Instruction *instruction) {
   if (canBeApplied(*instruction)) {

@@ -83,20 +83,17 @@ std::unique_ptr<Result> Driver::Run() {
   /// Therefore we load them into memory and compile immediately
   /// Later on modules used only for generating of mutants
   std::vector<std::string> bitcodePaths = Cfg.getBitcodePaths();
-  std::vector<unique_ptr<MullModule>> modules =
+  std::vector<MullModule> modules =
     Loader.loadModulesFromBitcodeFileList(bitcodePaths);
+  Ctx.reserveSpace(modules.size());
 
-  for (auto &ownedModule : modules) {
-    MullModule &module = *ownedModule.get();
-    assert(ownedModule && "Can't load module");
-    Ctx.addModule(std::move(ownedModule));
-
+  for (auto &module : modules) {
     ObjectFile *objectFile = toolchain.cache().getObject(module);
 
     if (objectFile == nullptr) {
       LLVMContext localContext;
 
-      auto clonedModule = module.clone(localContext);
+      const MullModule clonedModule = module.clone(localContext);
 
       for (auto &function: module.getModule()->getFunctionList()) {
         if (function.isDeclaration()) {
@@ -105,16 +102,18 @@ std::unique_ptr<Result> Driver::Run() {
         CallTreeFunction callTreeFunction(&function);
         uint64_t index = functions.size();
         functions.push_back(callTreeFunction);
-        auto clonedFunction = clonedModule->getModule()->getFunction(function.getName());
+        auto clonedFunction = clonedModule.getModule()->getFunction(function.getName());
         injectCallbacks(clonedFunction, index);
       }
 
-      auto owningObjectFile = toolchain.compiler().compileModule(*clonedModule.get());
+      auto owningObjectFile = toolchain.compiler().compileModule(clonedModule);
       objectFile = owningObjectFile.getBinary();
       toolchain.cache().putObject(std::move(owningObjectFile), module);
     }
 
     InnerCache.insert(std::make_pair(module.getModule(), objectFile));
+
+    Ctx.addModule(std::move(module));
   }
 
   for (std::string &objectFilePath: Cfg.getObjectFilesPaths()) {
@@ -239,10 +238,10 @@ std::unique_ptr<Result> Driver::Run() {
           ObjectFile *mutant = toolchain.cache().getObject(*mutationPoint);
           if (mutant == nullptr) {
             LLVMContext localContext;
-            auto clonedModule = mutationPoint->getOriginalModule()->clone(localContext);
-            mutationPoint->applyMutation(*clonedModule.get());
+            auto clonedModule = mutationPoint->getOriginalModule().clone(localContext);
+            mutationPoint->applyMutation(clonedModule);
 
-            auto owningObject = toolchain.compiler().compileModule(*clonedModule.get());
+            auto owningObject = toolchain.compiler().compileModule(clonedModule);
 
             mutant = owningObject.getBinary();
             toolchain.cache().putObject(std::move(owningObject), *mutationPoint);

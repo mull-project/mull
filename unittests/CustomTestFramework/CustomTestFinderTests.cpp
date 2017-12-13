@@ -18,9 +18,9 @@ using namespace std;
 static TestModuleFactory SharedTestModuleFactory;
 static LLVMContext context;
 
-static vector<unique_ptr<MullModule>> loadTestModules() {
-  function<vector<unique_ptr<MullModule>> ()> modules = [](){
-    vector<unique_ptr<MullModule>> modules;
+static vector<MullModule> loadTestModules() {
+  function<vector<MullModule> ()> modules = [](){
+    vector<MullModule> modules;
 
     modules.push_back(SharedTestModuleFactory.create_CustomTest_Distance_Distance_Module());
     modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Main_Module());

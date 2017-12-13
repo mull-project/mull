@@ -27,7 +27,7 @@ TEST(Compiler, CompileModule) {
   Compiler compiler(*targetMachine.get());
 
   auto module = TestModuleFactory.create_SimpleTest_CountLettersTest_Module();
-  auto Binary = compiler.compileModule(module->getModule());
+  auto Binary = compiler.compileModule(module.getModule());
 
   ASSERT_NE(nullptr, Binary.getBinary());
 }

@@ -70,14 +70,14 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
   std::string ReplacedInstructionName = MP->getOriginalValue()->getName().str();
 
   LLVMContext localContext;
-  auto ownedMutatedModule = MP->getOriginalModule()->clone(localContext);
-  MP->applyMutation(*ownedMutatedModule.get());
+  auto ownedMutatedModule = MP->getOriginalModule().clone(localContext);
+  MP->applyMutation(ownedMutatedModule);
 
-  Function *mutatedTestee = ownedMutatedModule->getModule()->getFunction("count_letters");
+  Function *mutatedTestee = ownedMutatedModule.getModule()->getFunction("count_letters");
   ASSERT_TRUE(mutatedTestee != nullptr);
 
   llvm::Function &mutatedFunction =
-    *(std::next(ownedMutatedModule->getModule()->begin(), address.getFnIndex()));
+    *(std::next(ownedMutatedModule.getModule()->begin(), address.getFnIndex()));
   llvm::BasicBlock &mutatedBasicBlock =
     *(std::next(mutatedFunction.begin(), address.getBBIndex()));
   llvm::Instruction *mutatedInstruction =
@@ -113,14 +113,14 @@ TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
   std::string ReplacedInstructionName = MP->getOriginalValue()->getName().str();
 
   LLVMContext localContext;
-  auto ownedMutatedModule = MP->getOriginalModule()->clone(localContext);
-  MP->applyMutation(*ownedMutatedModule.get());
+  auto ownedMutatedModule = MP->getOriginalModule().clone(localContext);
+  MP->applyMutation(ownedMutatedModule);
 
-  Function *mutatedTestee = ownedMutatedModule->getModule()->getFunction("math_sub");
+  Function *mutatedTestee = ownedMutatedModule.getModule()->getFunction("math_sub");
   ASSERT_TRUE(mutatedTestee != nullptr);
 
   llvm::Function &mutatedFunction =
-    *(std::next(ownedMutatedModule->getModule()->begin(), address.getFnIndex()));
+    *(std::next(ownedMutatedModule.getModule()->begin(), address.getFnIndex()));
   llvm::BasicBlock &mutatedBasicBlock =
     *(std::next(mutatedFunction.begin(), address.getBBIndex()));
   llvm::Instruction *mutatedInstruction =
@@ -158,14 +158,14 @@ TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
   std::string ReplacedInstructionName = MP->getOriginalValue()->getName().str();
 
   LLVMContext localContext;
-  auto ownedMutatedModule = MP->getOriginalModule()->clone(localContext);
-  MP->applyMutation(*ownedMutatedModule.get());
+  auto ownedMutatedModule = MP->getOriginalModule().clone(localContext);
+  MP->applyMutation(ownedMutatedModule);
 
-  Function *mutatedTestee = ownedMutatedModule->getModule()->getFunction("math_mul");
+  Function *mutatedTestee = ownedMutatedModule.getModule()->getFunction("math_mul");
   ASSERT_TRUE(mutatedTestee != nullptr);
 
   llvm::Function &mutatedFunction =
-    *(std::next(ownedMutatedModule->getModule()->begin(), address.getFnIndex()));
+    *(std::next(ownedMutatedModule.getModule()->begin(), address.getFnIndex()));
   llvm::BasicBlock &mutatedBasicBlock =
     *(std::next(mutatedFunction.begin(), address.getBBIndex()));
   llvm::Instruction *mutatedInstruction =
@@ -205,14 +205,14 @@ TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
   std::string ReplacedInstructionName = MP->getOriginalValue()->getName().str();
 
   LLVMContext localContext;
-  auto ownedMutatedModule = MP->getOriginalModule()->clone(localContext);
-  MP->applyMutation(*ownedMutatedModule.get());
+  auto ownedMutatedModule = MP->getOriginalModule().clone(localContext);
+  MP->applyMutation(ownedMutatedModule);
 
-  Function *mutatedTestee = ownedMutatedModule->getModule()->getFunction("math_div");
+  Function *mutatedTestee = ownedMutatedModule.getModule()->getFunction("math_div");
   ASSERT_TRUE(mutatedTestee != nullptr);
 
   llvm::Function &mutatedFunction =
-    *(std::next(ownedMutatedModule->getModule()->begin(), address.getFnIndex()));
+    *(std::next(ownedMutatedModule.getModule()->begin(), address.getFnIndex()));
   llvm::BasicBlock &mutatedBasicBlock =
     *(std::next(mutatedFunction.begin(), address.getBBIndex()));
   llvm::Instruction *mutatedInstruction =
@@ -252,10 +252,10 @@ TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
   ASSERT_EQ(&FunctionInstructionByAddress(*testeeFunction, address), MP->getOriginalValue());
 
   LLVMContext localContext;
-  auto ownedMutatedModule = MP->getOriginalModule()->clone(localContext);
-  MP->applyMutation(*ownedMutatedModule.get());
+  auto ownedMutatedModule = MP->getOriginalModule().clone(localContext);
+  MP->applyMutation(ownedMutatedModule);
 
-  Function *mutatedTestee = ownedMutatedModule->getModule()->getFunction("max");
+  Function *mutatedTestee = ownedMutatedModule.getModule()->getFunction("max");
   ASSERT_TRUE(mutatedTestee != nullptr);
 
   auto &mutatedInstruction = FunctionInstructionByAddress(*mutatedTestee,
@@ -299,10 +299,10 @@ TEST(MutationPoint, SimpleTest_AndOrMutationOperator_applyMutation) {
                                             mutationPoint->getOriginalValue());
 
     LLVMContext localContext;
-    auto ownedMutatedModule = mutationPoint->getOriginalModule()->clone(localContext);
-    mutationPoint->applyMutation(*ownedMutatedModule.get());
+    auto ownedMutatedModule = mutationPoint->getOriginalModule().clone(localContext);
+    mutationPoint->applyMutation(ownedMutatedModule);
 
-    Function *mutatedTesteeFunction = ownedMutatedModule->getModule()->getFunction("testee_AND_operator_2branches");
+    Function *mutatedTesteeFunction = ownedMutatedModule.getModule()->getFunction("testee_AND_operator_2branches");
     ASSERT_TRUE(mutatedTesteeFunction != nullptr);
 
     auto &mutatedInstruction = FunctionInstructionByAddress(*mutatedTesteeFunction, address);
@@ -349,14 +349,14 @@ TEST(MutationPoint, SimpleTest_ScalarValueMutationOperator_applyMutation) {
   ASSERT_TRUE(isa<BinaryOperator>(mutationPoint4->getOriginalValue()));
 
   LLVMContext localContext;
-  auto ownedMutatedModule = mutationPoint1->getOriginalModule()->clone(localContext);
-  mutationPoint1->applyMutation(*ownedMutatedModule.get());
+  auto ownedMutatedModule = mutationPoint1->getOriginalModule().clone(localContext);
+  mutationPoint1->applyMutation(ownedMutatedModule);
 
-  Function *mutatedTestee = ownedMutatedModule->getModule()->getFunction("scalar_value");
+  Function *mutatedTestee = ownedMutatedModule.getModule()->getFunction("scalar_value");
   ASSERT_TRUE(mutatedTestee != nullptr);
 
   llvm::Function &mutatedFunction =
-    *(std::next(ownedMutatedModule->getModule()->begin(), mutationPointAddress1.getFnIndex()));
+    *(std::next(ownedMutatedModule.getModule()->begin(), mutationPointAddress1.getFnIndex()));
   llvm::BasicBlock &mutatedBasicBlock =
     *(std::next(mutatedFunction.begin(), mutationPointAddress1.getBBIndex()));
   llvm::Instruction *mutatedInstruction =
@@ -392,14 +392,14 @@ TEST(MutationPoint, SimpleTest_ReplaceCallMutationOperator_applyMutation) {
   ASSERT_TRUE(isa<CallInst>(mutationPoint1->getOriginalValue()));
 
   LLVMContext localContext;
-  auto ownedMutatedModule = mutationPoint1->getOriginalModule()->clone(localContext);
-  mutationPoint1->applyMutation(*ownedMutatedModule.get());
+  auto ownedMutatedModule = mutationPoint1->getOriginalModule().clone(localContext);
+  mutationPoint1->applyMutation(ownedMutatedModule);
 
-  Function *mutatedTestee = ownedMutatedModule->getModule()->getFunction("replace_call");
+  Function *mutatedTestee = ownedMutatedModule.getModule()->getFunction("replace_call");
   ASSERT_TRUE(mutatedTestee != nullptr);
 
   llvm::Instruction &instructionByMutationAddress =
-    mutationPointAddress1.findInstruction(ownedMutatedModule->getModule());
+    mutationPointAddress1.findInstruction(ownedMutatedModule.getModule());
 
   ASSERT_TRUE(isa<BinaryOperator>(instructionByMutationAddress));
 }
@@ -429,14 +429,14 @@ TEST(MutationPoint, SimpleTest_ReplaceAssignmentMutationOperator_applyMutation) 
     EXPECT_TRUE(isa<StoreInst>(mutationPoint1->getOriginalValue()));
 
     LLVMContext localContext;
-    auto ownedMutatedModule = mutationPoint1->getOriginalModule()->clone(localContext);
-    mutationPoint1->applyMutation(*ownedMutatedModule.get());
+    auto ownedMutatedModule = mutationPoint1->getOriginalModule().clone(localContext);
+    mutationPoint1->applyMutation(ownedMutatedModule);
 
-    Function *mutatedTestee = ownedMutatedModule->getModule()->getFunction("replace_assignment");
+    Function *mutatedTestee = ownedMutatedModule.getModule()->getFunction("replace_assignment");
     ASSERT_TRUE(mutatedTestee != nullptr);
 
     llvm::Instruction &instructionByMutationAddress =
-    mutationPointAddress1.findInstruction(ownedMutatedModule->getModule());
+    mutationPointAddress1.findInstruction(ownedMutatedModule.getModule());
 
     ASSERT_TRUE(isa<StoreInst>(instructionByMutationAddress));
 }

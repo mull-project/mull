@@ -78,7 +78,7 @@ TEST(NegateConditionMutationOperator, negatedCmpInstPredicate) {
 TEST(NegateConditionMutationOperator, getMutationPoints_no_filter) {
   TestModuleFactory factory;
   auto module = factory.APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutation_operatorModule();
-  auto llvmModule = module->getModule();
+  auto llvmModule = module.getModule();
   assert(llvmModule);
 
   Function *function = llvmModule->getFunction("_ZN4llvm5APInt12tcExtractBitEPKyj");
@@ -103,7 +103,7 @@ TEST(NegateConditionMutationOperator, getMutationPoints_no_filter) {
 TEST(NegateConditionMutationOperator, getMutationPoints_filter_to_bool_converion) {
   TestModuleFactory factory;
   auto module = factory.APFloat_019fc57b8bd190d33389137abbe7145e_214_2_7_negate_mutation_operatorModule();
-  auto llvmModule = module->getModule();
+  auto llvmModule = module.getModule();
   assert(llvmModule);
 
   Function *function = llvmModule->getFunction("_ZNK4llvm7APFloat11isSignalingEv");
@@ -125,7 +125,7 @@ TEST(NegateConditionMutationOperator, getMutationPoints_filter_to_bool_converion
 TEST(NegateConditionMutationOperator, getMutationPoints_filter_is_null) {
   TestModuleFactory factory;
   auto module = factory.APFloat_019fc57b8bd190d33389137abbe7145e_5_1_3_negate_mutation_operatorModule();
-  auto llvmModule = module->getModule();
+  auto llvmModule = module.getModule();
   assert(llvmModule);
 
   Function *function = llvmModule->getFunction("_ZN4llvm7APFloat15freeSignificandEv");

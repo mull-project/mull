@@ -44,8 +44,8 @@ TEST(SimpleTestRunner, runTest) {
   auto OwnedModuleWithTests   = TestModuleFactory.create_SimpleTest_CountLettersTest_Module();
   auto OwnedModuleWithTestees = TestModuleFactory.create_SimpleTest_CountLetters_Module();
 
-  Module *ModuleWithTests   = OwnedModuleWithTests->getModule();
-  Module *ModuleWithTestees = OwnedModuleWithTestees->getModule();
+  Module *ModuleWithTests   = OwnedModuleWithTests.getModule();
+  Module *ModuleWithTestees = OwnedModuleWithTestees.getModule();
 
   Ctx.addModule(std::move(OwnedModuleWithTests));
   Ctx.addModule(std::move(OwnedModuleWithTestees));
@@ -92,8 +92,8 @@ TEST(SimpleTestRunner, runTest) {
   MutationPoint *MP = (*(MutationPoints.begin()));
 
   LLVMContext localContext;
-  auto ownedMutatedTesteeModule = MP->getOriginalModule()->clone(localContext);
-  MP->applyMutation(*ownedMutatedTesteeModule.get());
+  auto ownedMutatedTesteeModule = MP->getOriginalModule().clone(localContext);
+  MP->applyMutation(ownedMutatedTesteeModule);
 
   {
     auto Obj = compiler.compileModule(ModuleWithTests);
@@ -102,7 +102,7 @@ TEST(SimpleTestRunner, runTest) {
   }
 
   {
-    auto Obj = compiler.compileModule(ownedMutatedTesteeModule->getModule());
+    auto Obj = compiler.compileModule(ownedMutatedTesteeModule.getModule());
     ObjectFiles.push_back(Obj.getBinary());
     OwnedObjectFiles.push_back(std::move(Obj));
   }

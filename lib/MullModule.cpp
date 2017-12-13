@@ -29,33 +29,54 @@ static string fileNameFromPath(const string &path) {
   return filename;
 }
 
-MullModule::MullModule(std::unique_ptr<llvm::Module> llvmModule)
-  : module(std::move(llvmModule)),
-    uniqueIdentifier("")
+MullModule::MullModule()
+: module(unique_ptr<Module>(nullptr)),
+  uniqueIdentifier(),
+  modulePath()
 {
 }
 
 MullModule::MullModule(std::unique_ptr<llvm::Module> llvmModule,
                        const std::string &md5,
                        const std::string &path)
-: module(std::move(llvmModule)), modulePath(path)
+: module(std::move(llvmModule)),
+  uniqueIdentifier(fileNameFromPath(module->getModuleIdentifier()) + "_" + md5),
+  modulePath(path)
 {
-  uniqueIdentifier = fileNameFromPath(module->getModuleIdentifier()) + "_" + md5;
 }
 
-std::unique_ptr<MullModule> MullModule::clone(LLVMContext &context) {
+MullModule MullModule::invalidModule() {
+  return MullModule();
+}
+
+MullModule MullModule::validModule(std::unique_ptr<llvm::Module> llvmModule,
+                                   const std::string &md5,
+                                   const std::string &path) {
+  return MullModule(std::move(llvmModule), md5, path);
+}
+
+MullModule::MullModule(MullModule &&that) {
+  this->module = std::move(that.module);
+  this->uniqueIdentifier = std::move(that.uniqueIdentifier);
+  this->modulePath = std::move(that.modulePath);
+}
+
+bool MullModule::isInvalid() const {
+  return this->module.get() == nullptr;
+}
+
+MullModule MullModule::clone(LLVMContext &context) const {
   auto bufferOrError = MemoryBuffer::getFile(modulePath);
   if (!bufferOrError) {
     Logger::error() << "MullModule::clone> Can't load module " << modulePath << '\n';
-    return nullptr;
+    return MullModule::invalidModule();
   }
 
   auto llvmModule = parseBitcodeFile(bufferOrError->get()->getMemBufferRef(), context);
   if (!llvmModule) {
     Logger::error() << "MullModule::clone> Can't load module " << modulePath << '\n';
-    return nullptr;
+    return MullModule::invalidModule();
   }
 
-  auto module = make_unique<MullModule>(std::move(llvmModule.get()), "", modulePath);
-  return module;
+  return MullModule(std::move(llvmModule.get()), "", modulePath);
 }

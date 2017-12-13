@@ -19,7 +19,7 @@ using namespace mull;
 const std::string MathDivMutationOperator::ID = "math_div_mutation_operator";
 
 MutationPoint *
-MathDivMutationOperator::getMutationPoint(MullModule *module,
+MathDivMutationOperator::getMutationPoint(const MullModule &module,
                                           MutationPointAddress &address,
                                           llvm::Instruction *instruction) {
   if (canBeApplied(*instruction)) {

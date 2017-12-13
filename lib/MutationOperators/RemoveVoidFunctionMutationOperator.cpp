@@ -36,7 +36,7 @@ std::string getDiagnostics(Instruction &instruction) {
 
 
 MutationPoint *
-RemoveVoidFunctionMutationOperator::getMutationPoint(MullModule *module,
+RemoveVoidFunctionMutationOperator::getMutationPoint(const MullModule &module,
                                                      MutationPointAddress &address,
                                                      llvm::Instruction *instruction) {
   if (canBeApplied(*instruction)) {

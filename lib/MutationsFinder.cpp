@@ -35,7 +35,8 @@ std::vector<MutationPoint *> MutationsFinder::getMutationPoints(const Context &c
 
   Function *function = testee.getTesteeFunction();
   auto moduleID = function->getParent()->getModuleIdentifier();
-  MullModule *module = context.moduleWithIdentifier(moduleID);
+  const MullModule &module = context.moduleWithIdentifier(moduleID);
+  assert(!module.isInvalid());
 
   int functionIndex = GetFunctionIndex(function);
   for (auto &mutationOperator : operators) {

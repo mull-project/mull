@@ -20,9 +20,9 @@ static TestModuleFactory SharedTestModuleFactory;
 static LLVMContext context;
 const static int TestTimeout = 1000;
 
-static vector<unique_ptr<MullModule>> loadTestModules() {
-  function<vector<unique_ptr<MullModule>> ()> modules = [](){
-    vector<unique_ptr<MullModule>> modules;
+static vector<MullModule> loadTestModules() {
+  function<vector<MullModule> ()> modules = [](){
+    vector<MullModule> modules;
 
     modules.push_back(SharedTestModuleFactory.create_CustomTest_Distance_Distance_Module());
     modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Main_Module());
@@ -44,7 +44,7 @@ TEST(CustomTestRunner, noTestNameSpecified) {
   vector<object::ObjectFile *> objects;
   auto loadedModules = loadTestModules();
   for (auto &m : loadedModules) {
-    auto object = toolchain.compiler().compileModule(*m.get());
+    auto object = toolchain.compiler().compileModule(m);
     objects.push_back(object.getBinary());
     ownedObjects.push_back(move(object));
   }
@@ -66,7 +66,7 @@ TEST(CustomTestRunner, tooManyParameters) {
   vector<object::ObjectFile *> objects;
   auto loadedModules = loadTestModules();
   for (auto &m : loadedModules) {
-    auto object = toolchain.compiler().compileModule(*m.get());
+    auto object = toolchain.compiler().compileModule(m);
     objects.push_back(object.getBinary());
     ownedObjects.push_back(move(object));
   }
@@ -88,7 +88,7 @@ TEST(CustomTestRunner, runPassingTest) {
   vector<object::ObjectFile *> objects;
   auto loadedModules = loadTestModules();
   for (auto &m : loadedModules) {
-    auto object = toolchain.compiler().compileModule(*m.get());
+    auto object = toolchain.compiler().compileModule(m);
     objects.push_back(object.getBinary());
     ownedObjects.push_back(move(object));
   }
@@ -111,11 +111,11 @@ TEST(CustomTestRunner, runFailingTest) {
   vector<object::ObjectFile *> objects;
   auto loadedModules = loadTestModules();
   for (auto &m : loadedModules) {
-    Module *module = m.get()->getModule();
+    Module *module = m.getModule();
     if (!constructor) {
       constructor = module->getFunction("initGlobalVariable");
     }
-    auto object = toolchain.compiler().compileModule(*m.get());
+    auto object = toolchain.compiler().compileModule(m);
     objects.push_back(object.getBinary());
     ownedObjects.push_back(move(object));
   }
@@ -137,7 +137,7 @@ TEST(CustomTestRunner, attemptToRunUnknownTest) {
   vector<object::ObjectFile *> objects;
   auto loadedModules = loadTestModules();
   for (auto &m : loadedModules) {
-    auto object = toolchain.compiler().compileModule(*m.get());
+    auto object = toolchain.compiler().compileModule(m);
     objects.push_back(object.getBinary());
     ownedObjects.push_back(move(object));
   }

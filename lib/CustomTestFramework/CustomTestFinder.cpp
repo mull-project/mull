@@ -29,7 +29,7 @@ std::vector<std::unique_ptr<Test>> CustomTestFinder::findTests(Context &context,
   std::vector<std::unique_ptr<Test>> tests;
 
   for (auto &currentModule : context.getModules()) {
-    for (auto &function: currentModule->getModule()->getFunctionList()) {
+    for (auto &function: currentModule.getModule()->getFunctionList()) {
       if (function.isDeclaration()) {
         continue;
       }

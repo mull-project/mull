@@ -60,7 +60,7 @@ namespace mull {
   public:
     static const std::string ID;
 
-    MutationPoint *getMutationPoint(MullModule *module,
+    MutationPoint *getMutationPoint(const MullModule &module,
                                     MutationPointAddress &address,
                                     llvm::Instruction *instruction) override;
 

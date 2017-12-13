@@ -66,7 +66,7 @@ TEST(DISABLED_ScalarValueMutationOperator, failingMutationPoint) {
 
   MutationPointAddress address(15, 10, 7);
   ScalarValueMutationOperator mutationOperator;
-  MutationPoint point(&mutationOperator, address, nullptr, mullModule.get());
+  MutationPoint point(&mutationOperator, address, nullptr, mullModule);
 
   Config config;
   Toolchain toolchain(config);

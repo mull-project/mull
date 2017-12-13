@@ -107,7 +107,7 @@ MathSubMutationOperator::replacementForSubWithOverflow(llvm::Function *testeeFun
 }
 
 MutationPoint *
-MathSubMutationOperator::getMutationPoint(MullModule *module,
+MathSubMutationOperator::getMutationPoint(const MullModule &module,
                                           MutationPointAddress &address,
                                           llvm::Instruction *instruction) {
   if (canBeApplied(*instruction)) {
