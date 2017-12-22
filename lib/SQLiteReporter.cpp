@@ -7,11 +7,11 @@
 
 #include "MutationOperators/MutationOperator.h"
 
-#include "llvm/IR/DebugInfoMetadata.h"
-#include "llvm/IR/Instruction.h"
-#include "llvm/IR/Function.h"
-#include "llvm/IR/Module.h"
-#include "llvm/Support/raw_ostream.h"
+#include <llvm/IR/DebugInfoMetadata.h>
+#include <llvm/IR/Instruction.h>
+#include <llvm/IR/Function.h>
+#include <llvm/IR/Module.h>
+#include <llvm/Support/raw_ostream.h>
 
 #include <sqlite3.h>
 #include <sstream>
@@ -102,10 +102,12 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
   createTables(database);
 
   for (auto &testResult : result->getTestResults()) {
-    std::string testID = testResult->getDisplayName();
+    std::string testName = testResult->getDisplayName();
+    std::string testUniqueId = testResult->getTestUniqueIdentifier();
 
     ExecutionResult testExecutionResult = testResult->getOriginalTestResult();
     std::string insertResultSQL = std::string("INSERT INTO execution_result VALUES (")
+      + "'" + testUniqueId + "',"
       + "'" + std::to_string(testExecutionResult.status) + "',"
       + "'" + std::to_string(testExecutionResult.runningTime) + "',"
       + "" + "?1" + ","
@@ -116,12 +118,10 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
     sqlite3_bind_text(stmt, 2, testExecutionResult.stderrOutput.c_str(), -1, SQLITE_STATIC);
     
     sqlite_step(database, stmt);
-    
-    int testResultID = sqlite3_last_insert_rowid(database);
 
     std::string insertTestSQL = std::string("INSERT INTO test VALUES (")
-      + "'" + testID + "',"
-      + "'" + std::to_string(testResultID) + "');";
+      + "'" + testName + "',"
+      + "'" + testUniqueId + "');";
     sqlite_exec(database, insertTestSQL.c_str());
 
     for (auto &mutation : testResult->getMutationResults()) {
@@ -213,6 +213,7 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
       /// Execution result
       ExecutionResult mutationExecutionResult = mutation->getExecutionResult();
       std::string insertMutationExecutionResultSQL = std::string("INSERT INTO execution_result VALUES (")
+        + "'" + mutationPoint->getOperator()->uniqueID() + "',"
         + "'" + std::to_string(mutationExecutionResult.status) + "',"
         + "'" + std::to_string(mutationExecutionResult.runningTime) + "',"
         + "" + "?" + ","
@@ -246,10 +247,8 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
       assume(execution_result_statement_finalize_result == SQLITE_OK,
              "SQLite error: Expected finalize of execution result statement to succeed.");
 
-      int mutationExecutionResultID = sqlite3_last_insert_rowid(database);
       std::string insertMutationResultSQL = std::string("INSERT INTO mutation_result VALUES (")
-          + "'" + std::to_string(mutationExecutionResultID) + "',"
-          + "'" + testID + "',"
+          + "'" + testUniqueId + "',"
           + "'" + mutationPointID + "',"
           + "'" + std::to_string(mutation->getMutationDistance()) + "'"
           + ");";
@@ -301,6 +300,7 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
 
 static const char *CreateTables = R"CreateTables(
 CREATE TABLE execution_result (
+  unique_id TEXT,
   status INT,
   duration INT,
   stdout TEXT,
@@ -309,7 +309,7 @@ CREATE TABLE execution_result (
 
 CREATE TABLE test (
   test_name TEXT,
-  execution_result_id INT
+  unique_id TEXT
 );
 
 CREATE TABLE mutation_point (
@@ -328,7 +328,6 @@ CREATE TABLE mutation_point (
 );
 
 CREATE TABLE mutation_result (
-  execution_result_id INT,
   test_id TEXT,
   mutation_point_id TEXT,
   mutation_distance INT

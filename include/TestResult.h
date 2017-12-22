@@ -78,6 +78,7 @@ public:
 
   std::string getTestName();
   std::string getDisplayName();
+  std::string getTestUniqueIdentifier();
 
   std::vector<std::unique_ptr<MutationResult>> &getMutationResults();
   ExecutionResult getOriginalTestResult();

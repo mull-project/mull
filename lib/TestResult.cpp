@@ -24,6 +24,10 @@ std::string TestResult::getDisplayName() {
   return TestPtr->getTestDisplayName();
 }
 
+std::string TestResult::getTestUniqueIdentifier() {
+  return TestPtr->getUniqueIdentifier();
+}
+
 std::vector<std::unique_ptr<MutationResult>> &TestResult::getMutationResults() {
   return MutationResults;
 }

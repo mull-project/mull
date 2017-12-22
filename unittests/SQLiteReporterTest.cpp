@@ -118,11 +118,11 @@ TEST(SQLiteReporter, integrationTest) {
     int stepResult = sqlite3_step (selectStmt);
 
     if (stepResult == SQLITE_ROW) {
-      column1_status = sqlite3_column_int(selectStmt, 0);
-      column2_duration = sqlite3_column_int(selectStmt, 1);
+      column1_status = sqlite3_column_int(selectStmt, 1);
+      column2_duration = sqlite3_column_int(selectStmt, 2);
 
-      column3_stdout  = sqlite3_column_text (selectStmt, 2);
-      column4_stderr  = sqlite3_column_text (selectStmt, 3);
+      column3_stdout  = sqlite3_column_text (selectStmt, 3);
+      column4_stderr  = sqlite3_column_text (selectStmt, 4);
 
       ASSERT_EQ(column1_status, executionResults[numberOfRows].status);
       ASSERT_EQ(column2_duration, executionResults[numberOfRows].runningTime);
