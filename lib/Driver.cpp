@@ -77,7 +77,7 @@ Driver::~Driver() {
 /// all the results of each mutant within corresponding MutationPoint
 
 std::unique_ptr<Result> Driver::Run() {
-  std::vector<std::unique_ptr<TestResult>> Results;
+  std::vector<std::unique_ptr<TestResult>> testResults;
 
   /// Assumption: all modules will be used during the execution
   /// Therefore we load them into memory and compile immediately
@@ -152,7 +152,7 @@ std::unique_ptr<Result> Driver::Run() {
 
   int testIndex = 1;
   for (auto &test : foundTests) {
-    auto ObjectFiles = AllObjectFiles();
+    auto objectFiles = AllObjectFiles();
 
     Logger::debug().indent(4)
       << "Driver::Run> current test "
@@ -163,35 +163,35 @@ std::unique_ptr<Result> Driver::Run() {
     _callstack = stack<uint64_t>();
     memset(_callTreeMapping, 0, functions.size() * sizeof(_callTreeMapping[0]));
 
-    ExecutionResult ExecResult = Sandbox->run([&]() {
+    ExecutionResult testExecutionResult = Sandbox->run([&]() {
       for (std::string &dylibPath: Cfg.getDynamicLibrariesPaths()) {
         sys::DynamicLibrary::LoadLibraryPermanently(dylibPath.c_str());
       }
 
-      return Runner.runTest(test.get(), ObjectFiles);
+      return Runner.runTest(test.get(), objectFiles);
     }, Cfg.getTimeout());
 
-    if (ExecResult.status != Passed) {
+    if (testExecutionResult.status != Passed) {
       Logger::error() << "error: Test has failed: " << test->getTestName() << "\n";
-      Logger::error() << "status: " << ExecResult.getStatusAsString() << "\n";
-      Logger::error() << "exit code: " << ExecResult.exitStatus << "\n";
-      Logger::error() << "stdout: " << ExecResult.stdoutOutput << "\n";
-      Logger::error() << "stderr: " << ExecResult.stderrOutput << "\n";
+      Logger::error() << "status: " << testExecutionResult.getStatusAsString() << "\n";
+      Logger::error() << "exit code: " << testExecutionResult.exitStatus << "\n";
+      Logger::error() << "stdout: " << testExecutionResult.stdoutOutput << "\n";
+      Logger::error() << "stderr: " << testExecutionResult.stderrOutput << "\n";
       continue;
     }
 
-    auto BorrowedTest = test.get();
-    auto Result = make_unique<TestResult>(ExecResult, std::move(test));
+    auto borrowedTest = test.get();
+    auto testResult = make_unique<TestResult>(testExecutionResult, std::move(test));
 
     std::unique_ptr<CallTree> callTree(dynamicCallTree.createCallTree());
 
-    auto subtrees = dynamicCallTree.extractTestSubtrees(callTree.get(), BorrowedTest);
-    auto testees = dynamicCallTree.createTestees(subtrees, BorrowedTest,
+    auto subtrees = dynamicCallTree.extractTestSubtrees(callTree.get(), borrowedTest);
+    auto testees = dynamicCallTree.createTestees(subtrees, borrowedTest,
                                                  Cfg.getMaxDistance(), filter);
 
     dynamicCallTree.cleanupCallTree(std::move(callTree));
     if (testees.empty()) {
-      Logger::error() << "error: Coult not find any testees: " << BorrowedTest->getTestName() << "\n";
+      Logger::error() << "error: Coult not find any testees: " << borrowedTest->getTestName() << "\n";
       continue;
     }
 
@@ -215,18 +215,18 @@ std::unique_ptr<Result> Driver::Run() {
         << testee->getTesteeFunction()->getName()
         << ", ";
 
-      auto MPoints = mutationsFinder.getMutationPoints(Ctx, *testee.get(), filter);
-      if (MPoints.empty()) {
+      auto mutationPoints = mutationsFinder.getMutationPoints(Ctx, *testee.get(), filter);
+      if (mutationPoints.empty()) {
         Logger::debug() << "no mutation points, skipping.\n";
 
         continue;
       }
 
-      Logger::debug() << "against " << MPoints.size() << " mutation points\n";
+      Logger::debug() << "against " << mutationPoints.size() << " mutation points\n";
       Logger::debug().indent(8) << "";
 
-      auto ObjectFiles = AllButOne(testee->getTesteeFunction()->getParent());
-      for (auto mutationPoint : MPoints) {
+      auto objectFilesWithMutant = AllButOne(testee->getTesteeFunction()->getParent());
+      for (auto mutationPoint : mutationPoints) {
 
         Logger::debug() << ".";
 
@@ -234,7 +234,7 @@ std::unique_ptr<Result> Driver::Run() {
         bool dryRun = Cfg.isDryRun();
         if (dryRun) {
           result.status = DryRun;
-          result.runningTime = ExecResult.runningTime * 10;
+          result.runningTime = testExecutionResult.runningTime * 10;
         } else {
           ObjectFile *mutant = toolchain.cache().getObject(*mutationPoint);
           if (mutant == nullptr) {
@@ -247,21 +247,21 @@ std::unique_ptr<Result> Driver::Run() {
             mutant = owningObject.getBinary();
             toolchain.cache().putObject(std::move(owningObject), *mutationPoint);
           }
-          ObjectFiles.push_back(mutant);
+          objectFilesWithMutant.push_back(mutant);
 
           const auto sandboxTimeout = std::max(30LL,
-                                               ExecResult.runningTime * 10);
+                                               testExecutionResult.runningTime * 10);
 
           result = Sandbox->run([&]() {
             for (std::string &dylibPath: Cfg.getDynamicLibrariesPaths()) {
               sys::DynamicLibrary::LoadLibraryPermanently(dylibPath.c_str());
             }
-            ExecutionStatus status = Runner.runTest(BorrowedTest, ObjectFiles);
+            ExecutionStatus status = Runner.runTest(borrowedTest, objectFilesWithMutant);
             assert(status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
             return status;
           }, sandboxTimeout);
 
-          ObjectFiles.pop_back();
+          objectFilesWithMutant.pop_back();
 
           assert(result.status != ExecutionStatus::Invalid &&
                  "Expect to see valid TestResult");
@@ -270,16 +270,16 @@ std::unique_ptr<Result> Driver::Run() {
         diagnostics->report(mutationPoint, result.status);
 
         auto mutationResult = make_unique<MutationResult>(result, mutationPoint, testee->getDistance());
-        Result->addMutantResult(std::move(mutationResult));
+        testResult->addMutantResult(std::move(mutationResult));
       }
 
       Logger::debug() << "\n";
     }
 
-    Results.push_back(std::move(Result));
+    testResults.push_back(std::move(testResult));
   }
 
-  std::unique_ptr<Result> result = make_unique<Result>(std::move(Results));
+  std::unique_ptr<Result> result = make_unique<Result>(std::move(testResults));
 
   return result;
 }
