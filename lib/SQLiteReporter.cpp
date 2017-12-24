@@ -213,7 +213,7 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
       /// Execution result
       ExecutionResult mutationExecutionResult = mutation->getExecutionResult();
       std::string insertMutationExecutionResultSQL = std::string("INSERT INTO execution_result VALUES (")
-        + "'" + mutationPoint->getOperator()->uniqueID() + "',"
+        + "'" + mutationPoint->getUniqueIdentifier() + "',"
         + "'" + std::to_string(mutationExecutionResult.status) + "',"
         + "'" + std::to_string(mutationExecutionResult.runningTime) + "',"
         + "" + "?" + ","
@@ -300,7 +300,7 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
 
 static const char *CreateTables = R"CreateTables(
 CREATE TABLE execution_result (
-  unique_id TEXT,
+  unique_id TEXT UNIQUE,
   status INT,
   duration INT,
   stdout TEXT,
@@ -309,7 +309,7 @@ CREATE TABLE execution_result (
 
 CREATE TABLE test (
   test_name TEXT,
-  unique_id TEXT
+  unique_id TEXT UNIQUE
 );
 
 CREATE TABLE mutation_point (
