@@ -31,9 +31,20 @@ MutationsFinder::MutationsFinder(std::vector<std::unique_ptr<MutationOperator>> 
 std::vector<MutationPoint *> MutationsFinder::getMutationPoints(const Context &context,
                                                                 Testee &testee,
                                                                 Filter &filter) {
-  std::vector<MutationPoint *> points;
+  std::vector<std::unique_ptr<MutationPoint>> ownedPoints;
+  std::vector<MutationPoint *> mutationPoints;
 
   Function *function = testee.getTesteeFunction();
+
+  if (cachedPoints.count(function)) {
+    auto &points = cachedPoints.at(function);
+    for (auto &point : points) {
+      mutationPoints.push_back(point.get());
+    }
+
+    return mutationPoints;
+  }
+
   auto moduleID = function->getParent()->getModuleIdentifier();
   MullModule *module = context.moduleWithIdentifier(moduleID);
 
@@ -55,7 +66,7 @@ std::vector<MutationPoint *> MutationsFinder::getMutationPoints(const Context &c
                                                                   address,
                                                                   &instruction);
         if (point) {
-          points.push_back(point);
+          mutationPoints.push_back(point);
           ownedPoints.emplace_back(std::unique_ptr<MutationPoint>(point));
         }
         instructionIndex++;
@@ -65,5 +76,7 @@ std::vector<MutationPoint *> MutationsFinder::getMutationPoints(const Context &c
 
   }
 
-  return points;
+  cachedPoints[function] = std::move(ownedPoints);
+
+  return mutationPoints;
 }

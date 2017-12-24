@@ -1,9 +1,14 @@
 #pragma once
 
 #include <vector>
+#include <map>
 
 #include "MutationOperators/MutationOperator.h"
 #include "MutationPoint.h"
+
+namespace llvm {
+  class Function;
+}
 
 namespace mull {
   class Context;
@@ -12,7 +17,7 @@ namespace mull {
 
   class MutationsFinder {
     std::vector<std::unique_ptr<MutationOperator>> operators;
-    std::vector<std::unique_ptr<MutationPoint>> ownedPoints;
+    std::map<llvm::Function *, std::vector<std::unique_ptr<MutationPoint>>> cachedPoints;
   public:
     MutationsFinder(std::vector<std::unique_ptr<MutationOperator>> operators);
     std::vector<MutationPoint *> getMutationPoints(const Context &context,
