@@ -55,7 +55,7 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
 
   Function *testeeFunction = Ctx.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(testeeFunction->empty());
-  Testee testee(testeeFunction, 0);
+  Testee testee(testeeFunction, nullptr, 0);
 
   Filter filter;
   std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(Ctx,
@@ -100,7 +100,7 @@ TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
 
   Function *testeeFunction = Ctx.lookupDefinedFunction("math_sub");
   ASSERT_FALSE(testeeFunction->empty());
-  Testee testee(testeeFunction, 1);
+  Testee testee(testeeFunction, nullptr, 1);
   Filter filter;
 
   std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(Ctx, testee, filter);
@@ -144,7 +144,7 @@ TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
 
   Function *testeeFunction = Ctx.lookupDefinedFunction("math_mul");
   ASSERT_FALSE(testeeFunction->empty());
-  Testee testee(testeeFunction, 1);
+  Testee testee(testeeFunction, nullptr, 1);
   Filter filter;
 
   std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(Ctx, testee, filter);
@@ -190,7 +190,7 @@ TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
 
   Function *testeeFunction = Ctx.lookupDefinedFunction("math_div");
   ASSERT_FALSE(testeeFunction->empty());
-  Testee testee(testeeFunction, 1);
+  Testee testee(testeeFunction, nullptr, 1);
   Filter filter;
 
   std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(Ctx,
@@ -238,7 +238,7 @@ TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
 
   Function *testeeFunction = Ctx.lookupDefinedFunction("max");
   ASSERT_FALSE(testeeFunction->empty());
-  Testee testee(testeeFunction, 1);
+  Testee testee(testeeFunction, nullptr, 1);
   Filter filter;
 
   std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(Ctx, testee, filter);
@@ -280,7 +280,7 @@ TEST(MutationPoint, SimpleTest_AndOrMutationOperator_applyMutation) {
 
   {
     Function *testeeFunction = ctx.lookupDefinedFunction("testee_AND_operator_2branches");
-    Testee testee(testeeFunction, 1);
+    Testee testee(testeeFunction, nullptr, 1);
 
     std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(ctx,
                                                                            testee,
@@ -326,7 +326,7 @@ TEST(MutationPoint, SimpleTest_ScalarValueMutationOperator_applyMutation) {
 
   Function *testeeFunction = Ctx.lookupDefinedFunction("scalar_value");
   ASSERT_FALSE(testeeFunction->empty());
-  Testee testee(testeeFunction, 1);
+  Testee testee(testeeFunction, nullptr, 1);
   Filter filter;
 
   std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(Ctx, testee, filter);
@@ -380,7 +380,7 @@ TEST(MutationPoint, SimpleTest_ReplaceCallMutationOperator_applyMutation) {
 
   Function *testeeFunction = Ctx.lookupDefinedFunction("replace_call");
   ASSERT_FALSE(testeeFunction->empty());
-  Testee testee(testeeFunction, 1);
+  Testee testee(testeeFunction, nullptr, 1);
   Filter filter;
 
   std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(Ctx, testee, filter);
@@ -417,7 +417,7 @@ TEST(MutationPoint, SimpleTest_ReplaceAssignmentMutationOperator_applyMutation) 
 
     Function *testeeFunction = Ctx.lookupDefinedFunction("replace_assignment");
     ASSERT_FALSE(testeeFunction->empty());
-    Testee testee(testeeFunction, 1);
+    Testee testee(testeeFunction, nullptr, 1);
     Filter filter;
 
     std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(Ctx, testee, filter);

@@ -50,7 +50,7 @@ TEST(SQLiteReporter, integrationTest) {
   Function *testeeFunction = context.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(testeeFunction->empty());
 
-  Testee testee(testeeFunction, 1);
+  Testee testee(testeeFunction, test.get(), 1);
 
   std::vector<MutationPoint *> mutationPoints = mutationsFinder.getMutationPoints(context, testee, filter);
 
@@ -332,7 +332,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   Function *testeeFunction = context.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(testeeFunction->empty());
 
-  Testee testee(testeeFunction, 1);
+  Testee testee(testeeFunction, test.get(), 1);
 
   std::vector<MutationPoint *> mutationPoints =
     mutationsFinder.getMutationPoints(context, testee, filter);
@@ -478,7 +478,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   Function *testeeFunction = context.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(testeeFunction->empty());
 
-  Testee testee(testeeFunction, 1);
+  Testee testee(testeeFunction, test.get(), 1);
 
   std::vector<MutationPoint *> mutationPoints =
     mutationsFinder.getMutationPoints(context, testee, filter);

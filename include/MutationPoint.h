@@ -3,6 +3,7 @@
 #include <functional>
 #include <string>
 #include <memory>
+#include <vector>
 
 namespace llvm {
 
@@ -18,6 +19,7 @@ namespace mull {
 class Compiler;
 class MutationOperator;
 class MullModule;
+class Test;
 
 /// \brief Container class that stores information needed to find MutationPoints.
 /// We need the indexes of function, basic block and instruction to find the
@@ -67,6 +69,7 @@ class MutationPoint {
   MullModule *module;
   std::string uniqueIdentifier;
   std::string diagnostics;
+  std::vector<std::pair<Test *, int>> reachableTests;
 
 public:
   MutationPoint(MutationOperator *op,
@@ -87,7 +90,10 @@ public:
   llvm::Value *getOriginalValue() const;
   MullModule *getOriginalModule() const;
 
+  void addReachableTest(Test *test, int distance);
   void applyMutation(MullModule &module);
+
+  const std::vector<std::pair<Test *, int>> &getReachableTests() const;
 
   std::string getUniqueIdentifier();
   std::string getUniqueIdentifier() const;

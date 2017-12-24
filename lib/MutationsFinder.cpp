@@ -39,6 +39,7 @@ std::vector<MutationPoint *> MutationsFinder::getMutationPoints(const Context &c
   if (cachedPoints.count(function)) {
     auto &points = cachedPoints.at(function);
     for (auto &point : points) {
+      point->addReachableTest(testee.getTest(), testee.getDistance());
       mutationPoints.push_back(point.get());
     }
 
@@ -66,6 +67,7 @@ std::vector<MutationPoint *> MutationsFinder::getMutationPoints(const Context &c
                                                                   address,
                                                                   &instruction);
         if (point) {
+          point->addReachableTest(testee.getTest(), testee.getDistance());
           mutationPoints.push_back(point);
           ownedPoints.emplace_back(std::unique_ptr<MutationPoint>(point));
         }
