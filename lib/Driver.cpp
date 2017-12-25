@@ -150,6 +150,64 @@ std::unique_ptr<Result> Driver::Run() {
                   << testsCount
                   << " tests\n";
 
+#if 1
+
+  {
+    for (std::string &dylibPath: Cfg.getDynamicLibrariesPaths()) {
+      sys::DynamicLibrary::LoadLibraryPermanently(dylibPath.c_str());
+    }
+
+    std::vector<MutationPoint *> allMutationPoints;
+    auto objectFiles = AllObjectFiles();
+    for (auto &test : foundTests) {
+      _callstack = stack<uint64_t>();
+      memset(_callTreeMapping, 0, functions.size() * sizeof(_callTreeMapping[0]));
+
+      ExecutionResult testExecutionResult = Sandbox->run([&]() {
+        return Runner.runTest(test.get(), objectFiles);
+      }, Cfg.getTimeout());
+
+      if (testExecutionResult.status != Passed) {
+        continue;
+      }
+
+      std::unique_ptr<CallTree> callTree(dynamicCallTree.createCallTree());
+
+      auto subtrees = dynamicCallTree.extractTestSubtrees(callTree.get(), test.get());
+      auto testees = dynamicCallTree.createTestees(subtrees, test.get(),
+                                                   Cfg.getMaxDistance(),
+                                                   filter);
+
+      dynamicCallTree.cleanupCallTree(std::move(callTree));
+      if (testees.empty()) {
+        continue;
+      }
+
+      for (auto testee_it = std::next(testees.begin()), ee = testees.end();
+           testee_it != ee;
+           ++testee_it) {
+
+        std::unique_ptr<Testee> &testee = *testee_it;
+
+        auto mutationPoints = mutationsFinder.getMutationPoints(Ctx, *testee.get(), filter);
+        std::copy(mutationPoints.begin(), mutationPoints.end(), std::back_inserter(allMutationPoints));
+      }
+    }
+
+    Logger::debug().indent(4)
+      << "Driver::Run> found " << allMutationPoints.size() << " mutations\n";
+
+    for (auto mutationPoint : allMutationPoints) {
+      auto objectFilesWithMutant = AllButOne(mutationPoint->getOriginalModule()->getModule());
+    }
+
+    exit(135);
+  }
+
+#endif
+
+  /// =========
+
   int testIndex = 1;
   for (auto &test : foundTests) {
     auto objectFiles = AllObjectFiles();
@@ -269,7 +327,9 @@ std::unique_ptr<Result> Driver::Run() {
 
         diagnostics->report(mutationPoint, result.status);
 
-        auto mutationResult = make_unique<MutationResult>(result, mutationPoint, testee->getDistance());
+        auto mutationResult = make_unique<MutationResult>(result,
+                                                          mutationPoint,
+                                                          testee->getDistance());
         testResult->addMutantResult(std::move(mutationResult));
       }
 
