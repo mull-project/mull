@@ -46,6 +46,7 @@ std::vector<MutationPoint *> MutationsFinder::getMutationPoints(const Context &c
       int instructionIndex = 0;
       for (auto &instruction : basicBlock.getInstList()) {
         if (filter.shouldSkipInstruction(&instruction)) {
+          instructionIndex++;
           continue;
         }
 
