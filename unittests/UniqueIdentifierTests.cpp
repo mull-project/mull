@@ -22,7 +22,7 @@ TEST(MullModule, uniqueIdentifier) {
   string moduleMD5  = "de5070f8606cc2a8ee794b2ab56b31f2";
   string uniqueID   = moduleName + "_" + moduleMD5;
 
-  ASSERT_EQ(module->getUniqueIdentifier(), uniqueID);
+  ASSERT_EQ(module.getUniqueIdentifier(), uniqueID);
 }
 
 TEST(MutationPoint, uniqueIdentifier) {
@@ -33,7 +33,7 @@ TEST(MutationPoint, uniqueIdentifier) {
   MutationPointAddress address(2, 3, 5);
   MathAddMutationOperator mutationOperator;
 
-  MutationPoint point(&mutationOperator, address, nullptr, module.get());
+  MutationPoint point(&mutationOperator, address, nullptr, module);
 
   string moduleName = "fixture_simple_test_tester_module";
   string moduleMD5  = "de5070f8606cc2a8ee794b2ab56b31f2";

@@ -278,7 +278,7 @@ static std::string getDiagnostics(CmpInst::Predicate originalPredicate,
 
 
 MutationPoint *
-NegateConditionMutationOperator::getMutationPoint(MullModule *module,
+NegateConditionMutationOperator::getMutationPoint(const MullModule &module,
                                                   MutationPointAddress &address,
                                                   llvm::Instruction *instruction) {
   if (canBeApplied(*instruction)) {

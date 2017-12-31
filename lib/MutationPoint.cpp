@@ -57,11 +57,11 @@ MutationPointAddress::enumerateInstructions(
 MutationPoint::MutationPoint(MutationOperator *op,
                              MutationPointAddress Address,
                              Value *Val,
-                             MullModule *m,
+                             const MullModule &m,
                              std::string diagnostics) :
   mutationOperator(op), Address(Address), OriginalValue(Val), module(m), diagnostics(diagnostics)
 {
-  string moduleID = module->getUniqueIdentifier();
+  string moduleID = module.getUniqueIdentifier();
   string addressID = Address.getIdentifier();
   string operatorID = mutationOperator->uniqueID();
 
@@ -82,7 +82,7 @@ Value *MutationPoint::getOriginalValue() {
   return OriginalValue;
 }
 
-MullModule *MutationPoint::getOriginalModule() {
+const MullModule &MutationPoint::getOriginalModule() {
   return module;
 }
 
@@ -98,7 +98,7 @@ Value *MutationPoint::getOriginalValue() const {
   return OriginalValue;
 }
 
-MullModule *MutationPoint::getOriginalModule() const {
+const MullModule &MutationPoint::getOriginalModule() const {
   return module;
 }
 

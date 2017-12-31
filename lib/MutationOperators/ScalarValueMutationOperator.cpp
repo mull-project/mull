@@ -37,7 +37,7 @@ static ConstantFP *getReplacementFloat(ConstantFP *constantFloat);
 #pragma mark - Implementations
 
 MutationPoint *
-ScalarValueMutationOperator::getMutationPoint(MullModule *module,
+ScalarValueMutationOperator::getMutationPoint(const MullModule &module,
                                               MutationPointAddress &address,
                                               llvm::Instruction *instruction) {
   std::string diagnostics;

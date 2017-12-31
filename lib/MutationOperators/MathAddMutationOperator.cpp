@@ -108,7 +108,7 @@ MathAddMutationOperator::replacementForAddWithOverflow(llvm::Function *addFuncti
 }
 
 MutationPoint *
-MathAddMutationOperator::getMutationPoint(MullModule *module,
+MathAddMutationOperator::getMutationPoint(const MullModule &module,
                                           MutationPointAddress &address,
                                           llvm::Instruction *instruction) {
   if (canBeApplied(*instruction)) {

@@ -21,7 +21,7 @@ TEST(ModuleLoaderTest, loadModuleFromBitcodeListFile) {
   std::string bitcodeFile = testModuleFactory.testerModulePath_Bitcode();
 
   std::vector<std::string> bitcodePaths = { bitcodeFile };
-  std::vector<std::unique_ptr<MullModule>> modules =
+  std::vector<MullModule> modules =
     loader.loadModulesFromBitcodeFileList(bitcodePaths);
 
   ASSERT_EQ(modules.size(), 1U);

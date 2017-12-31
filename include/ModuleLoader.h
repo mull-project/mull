@@ -19,9 +19,9 @@ public:
   ModuleLoader(llvm::LLVMContext &C) : Ctx(C) {}
   virtual ~ModuleLoader() {}
 
-  virtual std::unique_ptr<MullModule> loadModuleAtPath(const std::string &path);
+  virtual MullModule loadModuleAtPath(const std::string &path);
 
-  virtual std::vector<std::unique_ptr<MullModule>>
+  virtual std::vector<MullModule>
     loadModulesFromBitcodeFileList(const std::vector<std::string> &path);
 };
 

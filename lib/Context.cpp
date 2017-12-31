@@ -6,8 +6,12 @@
 using namespace mull;
 using namespace llvm;
 
-void Context::addModule(std::unique_ptr<MullModule> module) {
-  for (auto &function : module->getModule()->getFunctionList()) {
+void Context::reserveSpace(size_t size) {
+  Modules.reserve(size);
+}
+
+void Context::addModule(MullModule module) {
+  for (auto &function : module.getModule()->getFunctionList()) {
     if (function.getName().equals("mull_enterFunction") ||
         function.getName().equals("mull_leaveFunction")) {
       function.deleteBody();
@@ -18,20 +22,23 @@ void Context::addModule(std::unique_ptr<MullModule> module) {
     }
   }
 
-  for (auto &alias : module->getModule()->getAliasList()) {
+  for (auto &alias : module.getModule()->getAliasList()) {
     if (auto function = dyn_cast<Function>(alias.getAliasee())) {
       FunctionsRegistry.insert(std::make_pair(alias.getName(), function));
     }
   }
 
-  std::string identifier = module->getModule()->getModuleIdentifier();
 
-  assert(moduleWithIdentifier(identifier) == nullptr &&
-         "Attempt to add a module which has been added already!");
 
-  moduleRegistry.insert(std::make_pair(identifier,
-                                       module.get()));
-  Modules.emplace_back(std::move(module));
+//  assert(moduleWithIdentifier(identifier) == nullptr &&
+//         "Attempt to add a module which has been added already!");
+
+  Modules.push_back(std::move(module));
+
+  MullModule &movedModule = Modules.back();
+  std::string identifier = movedModule.getModule()->getModuleIdentifier();
+
+  moduleRegistry.insert(std::make_pair(identifier, &movedModule));
 }
 
 llvm::Function *Context::lookupDefinedFunction(llvm::StringRef FunctionName) {
@@ -42,20 +49,20 @@ llvm::Function *Context::lookupDefinedFunction(llvm::StringRef FunctionName) {
   return it->second;
 }
 
-MullModule *Context::moduleWithIdentifier(const std::string &identifier) {
+const MullModule &Context::moduleWithIdentifier(const std::string &identifier) {
   auto it = moduleRegistry.find(identifier);
   if (it == moduleRegistry.end()) {
-    return nullptr;
+    return invalidModule;
   }
-  return it->second;
+  return *(it->second);
 }
 
-MullModule *Context::moduleWithIdentifier(const std::string &identifier) const {
+const MullModule &Context::moduleWithIdentifier(const std::string &identifier) const {
   auto it = moduleRegistry.find(identifier);
   if (it == moduleRegistry.end()) {
-    return nullptr;
+    return invalidModule;
   }
-  return it->second;
+  return *(it->second);
 }
 
 std::vector<llvm::Function *> Context::getStaticConstructors() {
@@ -64,7 +71,7 @@ std::vector<llvm::Function *> Context::getStaticConstructors() {
 
   for (auto &module : Modules) {
 
-    GlobalVariable *GV = module->getModule()->getNamedGlobal("llvm.global_ctors");
+    GlobalVariable *GV = module.getModule()->getNamedGlobal("llvm.global_ctors");
 
     // If this global has internal linkage, or if it has a use, then it must be
     // an old-style (llvmgcc3) static ctor with __main linked in and in use.  If

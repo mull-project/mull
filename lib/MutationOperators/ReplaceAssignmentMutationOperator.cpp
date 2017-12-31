@@ -58,7 +58,7 @@ static bool findPossibleApplication(Value &V, std::string &outDiagnostics) {
 }
 
 MutationPoint *
-ReplaceAssignmentMutationOperator::getMutationPoint(MullModule *module,
+ReplaceAssignmentMutationOperator::getMutationPoint(const MullModule &module,
                                                     MutationPointAddress &address,
                                                     llvm::Instruction *instruction) {
 

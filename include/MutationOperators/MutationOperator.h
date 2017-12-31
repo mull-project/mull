@@ -19,7 +19,7 @@ class MutationPointAddress;
 
 class MutationOperator {
 public:
-  virtual MutationPoint *getMutationPoint(MullModule *module,
+  virtual MutationPoint *getMutationPoint(const MullModule &module,
                                           MutationPointAddress &address,
                                           llvm::Instruction *instruction) = 0;
 
