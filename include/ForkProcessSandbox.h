@@ -1,6 +1,6 @@
 
 #include <functional>
-#include "TestResult.h"
+#include "ExecutionResult.h"
 
 namespace mull {
 

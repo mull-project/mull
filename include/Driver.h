@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Config.h"
-#include "TestResult.h"
+#include "ExecutionResult.h"
+#include "MutationResult.h"
 #include "ForkProcessSandbox.h"
 #include "IDEDiagnostics.h"
 #include "Context.h"
@@ -94,6 +95,9 @@ private:
 
   /// Returns cached object files for all modules
   std::vector<llvm::object::ObjectFile *> AllObjectFiles();
+
+  std::vector<std::unique_ptr<MutationResult>> dryRunMutations(const std::vector<MutationPoint *> &mutationPoints);
+  std::vector<std::unique_ptr<MutationResult>> runMutations(const std::vector<MutationPoint *> &mutationPoints);
 };
 
 }

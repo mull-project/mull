@@ -1,10 +1,10 @@
 #include "ForkProcessSandbox.h"
-#include "TestResult.h"
+#include "ExecutionResult.h"
 
 #include "gtest/gtest.h"
 
 using namespace mull;
-using namespace llvm;
+//using namespace llvm;
 
 /// The timeout should be long enough to overlive the unit test suite running
 /// on a cold start (fresh start without a "warmup").

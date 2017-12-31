@@ -28,7 +28,7 @@ class GoogleTestRunner : public TestRunner {
   std::string fGoogleTestInit;
   std::string fGoogleTestInstance;
   std::string fGoogleTestRun;
-
+  llvm::orc::ObjectLinkingLayer<>::ObjSetHandleT handle;
 public:
 
   GoogleTestRunner(llvm::TargetMachine &machine);
