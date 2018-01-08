@@ -160,6 +160,11 @@ std::unique_ptr<Result> Driver::Run() {
     }
   }
 
+  {
+    /// Cleans up the memory allocated for the vector itself as well
+    std::vector<OwningBinary<ObjectFile>>().swap(instrumentedObjectFiles);
+  }
+
   Logger::debug() << "Driver::Run> found " << allMutationPoints.size() << " mutations\n";
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;

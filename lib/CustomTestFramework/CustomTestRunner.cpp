@@ -19,12 +19,14 @@ public:
     : overrides(overrides), test(test), instrumentationInfoName(instrumentationInfoName) {}
 
   RuntimeDyld::SymbolInfo findSymbol(const std::string &name) {
-    if (auto address = RTDyldMemoryManager::getSymbolAddressInProcess(name)) {
-      return RuntimeDyld::SymbolInfo(address, JITSymbolFlags::Exported);
-    }
-
+    /// Overrides should go first, otherwise functions of the host process
+    /// will take over and crash the system later
     if (auto symbol = overrides.searchOverrides(name)) {
       return symbol;
+    }
+
+    if (auto address = RTDyldMemoryManager::getSymbolAddressInProcess(name)) {
+      return RuntimeDyld::SymbolInfo(address, JITSymbolFlags::Exported);
     }
 
     if (name == instrumentationInfoName) {
