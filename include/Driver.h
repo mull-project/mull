@@ -7,8 +7,8 @@
 #include "IDEDiagnostics.h"
 #include "Context.h"
 #include "MutationOperators/MutationOperator.h"
-#include "Instrumentation/DynamicCallTree.h"
 #include "Instrumentation/Callbacks.h"
+#include "Instrumentation/InstrumentationInfo.h"
 
 #include "Toolchain/Toolchain.h"
 
@@ -47,16 +47,14 @@ class Driver {
   ProcessSandbox *Sandbox;
   IDEDiagnostics *diagnostics;
   std::vector<CallTreeFunction> functions;
-  DynamicCallTree dynamicCallTree;
-  uint64_t *_callTreeMapping;
-  std::stack<uint64_t> _callstack;
 
   std::map<llvm::Module *, llvm::object::ObjectFile *> InnerCache;
   std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> precompiledObjectFiles;
   Callbacks callbacks;
+  InstrumentationInfo instrumentationInfo;
 public:
   Driver(Config &C, ModuleLoader &ML, TestFinder &TF, TestRunner &TR, Toolchain &t, Filter &f, MutationsFinder &mutationsFinder)
-    : Cfg(C), Loader(ML), Finder(TF), Runner(TR), toolchain(t), filter(f), mutationsFinder(mutationsFinder), dynamicCallTree(functions), _callTreeMapping(nullptr), precompiledObjectFiles(), callbacks(t) {
+    : Cfg(C), Loader(ML), Finder(TF), Runner(TR), toolchain(t), filter(f), mutationsFinder(mutationsFinder), precompiledObjectFiles(), callbacks(t), instrumentationInfo(functions) {
 
       CallTreeFunction phonyRoot(nullptr);
       functions.push_back(phonyRoot);
@@ -78,15 +76,13 @@ public:
 
   std::unique_ptr<Result> Run();
   uint64_t *callTreeMapping() {
-    return _callTreeMapping;
+    return instrumentationInfo.callTreeMapping();
   }
   std::stack<uint64_t> &callstack() {
-    return _callstack;
+    return instrumentationInfo.callstack();
   }
 
 private:
-  void prepareForExecution();
-
   /// Returns cached object files for all modules excerpt one provided
   std::vector<llvm::object::ObjectFile *> AllButOne(llvm::Module *One);
 

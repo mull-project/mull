@@ -27,7 +27,6 @@ using namespace std;
 Driver::~Driver() {
   delete this->Sandbox;
   delete this->diagnostics;
-  munmap(_callTreeMapping, functions.size());
 }
 
 /// Populate mull::Context with modules using
@@ -110,7 +109,7 @@ std::unique_ptr<Result> Driver::Run() {
     precompiledObjectFiles.push_back(std::move(owningObject));
   }
 
-  prepareForExecution();
+  instrumentationInfo.prepare(functions.size());
 
   auto foundTests = Finder.findTests(Ctx, filter);
   const int testsCount = foundTests.size();
@@ -131,8 +130,7 @@ std::unique_ptr<Result> Driver::Run() {
   for (auto &test : foundTests) {
     Logger::debug().indent(2) << "[" << testIndex++ << "/" << testsCount << "] " << test->getTestDisplayName() << ": ";
 
-    _callstack = stack<uint64_t>();
-    memset(_callTreeMapping, 0, functions.size() * sizeof(_callTreeMapping[0]));
+    instrumentationInfo.reset();
 
     ExecutionResult testExecutionResult = Sandbox->run([&]() {
       return Runner.runTest(test.get(), objectFiles);
@@ -146,14 +144,7 @@ std::unique_ptr<Result> Driver::Run() {
       continue;
     }
 
-    std::unique_ptr<CallTree> callTree(dynamicCallTree.createCallTree());
-
-    auto subtrees = dynamicCallTree.extractTestSubtrees(callTree.get(), test.get());
-    auto testees = dynamicCallTree.createTestees(subtrees, test.get(),
-                                                 Cfg.getMaxDistance(),
-                                                 filter);
-
-    dynamicCallTree.cleanupCallTree(std::move(callTree));
+    auto testees = instrumentationInfo.getTestees(test.get(), filter, Cfg.getMaxDistance());
     if (testees.empty()) {
       continue;
     }
@@ -277,21 +268,6 @@ std::vector<std::unique_ptr<MutationResult>> Driver::runMutations(const std::vec
   }
 
   return mutationResults;
-}
-
-void Driver::prepareForExecution() {
-  assert(_callTreeMapping == nullptr && "Called twice?");
-  assert(functions.size() > 1 && "Functions must be filled in before this call");
-
-  /// Creating a memory to be shared between child and parent.
-  _callTreeMapping = (uint64_t *) mmap(NULL,
-                                       sizeof(uint64_t) * functions.size(),
-                                       PROT_READ | PROT_WRITE,
-                                       MAP_SHARED | MAP_ANONYMOUS,
-                                       -1,
-                                       0);
-  memset(_callTreeMapping, 0, functions.size() * sizeof(_callTreeMapping[0]));
-  dynamicCallTree.prepare(_callTreeMapping);
 }
 
 std::vector<llvm::object::ObjectFile *> Driver::AllButOne(llvm::Module *One) {
