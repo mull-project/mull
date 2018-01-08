@@ -3,7 +3,7 @@
 #include <llvm/IR/Function.h>
 #include <stack>
 
-#include "DynamicCallTree.h"
+#include "Instrumentation/DynamicCallTree.h"
 #include "Testee.h"
 #include "SimpleTest/SimpleTest_Test.h"
 

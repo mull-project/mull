@@ -6,9 +6,10 @@ set(mull_sources
   Logger.cpp
   Mangler.cpp
   ModuleLoader.cpp
-  DynamicCallTree.cpp
   Filter.cpp
   MutationsFinder.cpp
+
+  Instrumentation/DynamicCallTree.cpp
 
   MutationOperators/MathAddMutationOperator.cpp
   MutationOperators/AndOrReplacementMutationOperator.cpp
@@ -54,6 +55,7 @@ set(mull_header_dirs
   ${MULL_INCLUDE_DIR}/GoogleTest
   ${MULL_INCLUDE_DIR}/SimpleTest
   ${MULL_INCLUDE_DIR}/Toolchain
+  ${MULL_INCLUDE_DIR}/Instrumentation
 )
 
 set(mull_additional_libraries

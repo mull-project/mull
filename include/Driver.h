@@ -7,7 +7,7 @@
 #include "IDEDiagnostics.h"
 #include "Context.h"
 #include "MutationOperators/MutationOperator.h"
-#include "DynamicCallTree.h"
+#include "Instrumentation/DynamicCallTree.h"
 
 #include "Toolchain/Toolchain.h"
 
