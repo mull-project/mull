@@ -11,18 +11,9 @@
 #include "TestRunner.h"
 #include "MutationsFinder.h"
 
-#include <llvm/ExecutionEngine/Orc/JITSymbol.h>
-#include <llvm/IR/Constants.h>
-#include <llvm/IR/Module.h>
-#include <llvm/IR/Value.h>
-#include <llvm/IR/Verifier.h>
-#include <llvm/IR/LLVMContext.h>
-#include <llvm/IR/DebugInfoMetadata.h>
-#include <llvm/Transforms/Utils/Cloning.h>
 #include <llvm/Support/DynamicLibrary.h>
 
 #include <algorithm>
-#include <chrono>
 #include <fstream>
 #include <vector>
 #include <sys/mman.h>
@@ -32,27 +23,6 @@ using namespace llvm;
 using namespace llvm::object;
 using namespace mull;
 using namespace std;
-using namespace std::chrono;
-
-namespace mull {
-
-extern "C" void mull_enterFunction(Driver *driver, uint64_t functionIndex) {
-  assert(driver);
-  assert(driver->callTreeMapping());
-  DynamicCallTree::enterFunction(functionIndex,
-                                 driver->callTreeMapping(),
-                                 driver->callstack());
-}
-
-extern "C" void mull_leaveFunction(Driver *driver, uint64_t functionIndex) {
-  assert(driver);
-  assert(driver->callTreeMapping());
-  DynamicCallTree::leaveFunction(functionIndex,
-                                 driver->callTreeMapping(),
-                                 driver->callstack());
-}
-
-}
 
 Driver::~Driver() {
   delete this->Sandbox;
@@ -105,7 +75,7 @@ std::unique_ptr<Result> Driver::Run() {
         uint64_t index = functions.size();
         functions.push_back(callTreeFunction);
         auto clonedFunction = clonedModule->getModule()->getFunction(function.getName());
-        injectCallbacks(clonedFunction, index);
+        callbacks.injectCallbacks(clonedFunction, index, this);
       }
 
       auto owningObjectFile = toolchain.compiler().compileModule(*clonedModule.get());
@@ -322,56 +292,6 @@ void Driver::prepareForExecution() {
                                        0);
   memset(_callTreeMapping, 0, functions.size() * sizeof(_callTreeMapping[0]));
   dynamicCallTree.prepare(_callTreeMapping);
-}
-
-void Driver::injectCallbacks(llvm::Function *function, uint64_t index) {
-  auto &context = function->getParent()->getContext();
-  auto int64Type = Type::getInt64Ty(context);
-  auto driverPointerType = Type::getVoidTy(context)->getPointerTo();
-  auto voidType = Type::getVoidTy(context);
-  std::vector<Type *> parameterTypes({driverPointerType, int64Type});
-
-  FunctionType *callbackType = FunctionType::get(voidType, parameterTypes, false);
-
-  Value *functionIndex = ConstantInt::get(int64Type, index);
-  uint32_t pointerWidth = toolchain.targetMachine().createDataLayout().getPointerSize();
-  ConstantInt *driverPointerAddress = ConstantInt::get(context, APInt(pointerWidth * 8, (orc::TargetAddress)this));
-  Value *driverPointer = ConstantExpr::getCast(Instruction::IntToPtr,
-                                               driverPointerAddress,
-                                               int64Type->getPointerTo());
-  std::vector<Value *> parameters({driverPointer, functionIndex});
-
-  Function *enterFunction = function->getParent()->getFunction("mull_enterFunction");
-  Function *leaveFunction = function->getParent()->getFunction("mull_leaveFunction");
-
-  if (enterFunction == nullptr && leaveFunction == nullptr) {
-    enterFunction = Function::Create(callbackType,
-                                     Function::ExternalLinkage,
-                                     "mull_enterFunction",
-                                     function->getParent());
-
-    leaveFunction = Function::Create(callbackType,
-                                     Function::ExternalLinkage,
-                                     "mull_leaveFunction",
-                                     function->getParent());
-  }
-
-  assert(enterFunction);
-  assert(leaveFunction);
-
-  auto &entryBlock = *function->getBasicBlockList().begin();
-  CallInst *enterFunctionCall = CallInst::Create(enterFunction, parameters);
-  enterFunctionCall->insertBefore(&*entryBlock.getInstList().begin());
-
-  for (auto &block : function->getBasicBlockList()) {
-    ReturnInst *returnStatement = nullptr;
-    if (!(returnStatement = dyn_cast<ReturnInst>(block.getTerminator()))) {
-      continue;
-    }
-
-    CallInst *leaveFunctionCall = CallInst::Create(leaveFunction, parameters);
-    leaveFunctionCall->insertBefore(returnStatement);
-  }
 }
 
 std::vector<llvm::object::ObjectFile *> Driver::AllButOne(llvm::Module *One) {

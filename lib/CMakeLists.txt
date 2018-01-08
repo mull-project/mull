@@ -10,6 +10,7 @@ set(mull_sources
   MutationsFinder.cpp
 
   Instrumentation/DynamicCallTree.cpp
+  Instrumentation/Callbacks.cpp
 
   MutationOperators/MathAddMutationOperator.cpp
   MutationOperators/AndOrReplacementMutationOperator.cpp

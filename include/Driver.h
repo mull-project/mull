@@ -8,6 +8,7 @@
 #include "Context.h"
 #include "MutationOperators/MutationOperator.h"
 #include "Instrumentation/DynamicCallTree.h"
+#include "Instrumentation/Callbacks.h"
 
 #include "Toolchain/Toolchain.h"
 
@@ -34,9 +35,6 @@ class MutationsFinder;
 
 class Driver;
 
-extern "C" void mull_enterFunction(Driver *driver, uint64_t functionIndex);
-extern "C" void mull_leaveFunction(Driver *driver, uint64_t functionIndex);
-
 class Driver {
   Config &Cfg;
   ModuleLoader &Loader;
@@ -55,10 +53,10 @@ class Driver {
 
   std::map<llvm::Module *, llvm::object::ObjectFile *> InnerCache;
   std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> precompiledObjectFiles;
-
+  Callbacks callbacks;
 public:
   Driver(Config &C, ModuleLoader &ML, TestFinder &TF, TestRunner &TR, Toolchain &t, Filter &f, MutationsFinder &mutationsFinder)
-    : Cfg(C), Loader(ML), Finder(TF), Runner(TR), toolchain(t), filter(f), mutationsFinder(mutationsFinder), dynamicCallTree(functions), _callTreeMapping(nullptr), precompiledObjectFiles() {
+    : Cfg(C), Loader(ML), Finder(TF), Runner(TR), toolchain(t), filter(f), mutationsFinder(mutationsFinder), dynamicCallTree(functions), _callTreeMapping(nullptr), precompiledObjectFiles(), callbacks(t) {
 
       CallTreeFunction phonyRoot(nullptr);
       functions.push_back(phonyRoot);
@@ -88,7 +86,6 @@ public:
 
 private:
   void prepareForExecution();
-  void injectCallbacks(llvm::Function *function, uint64_t index);
 
   /// Returns cached object files for all modules excerpt one provided
   std::vector<llvm::object::ObjectFile *> AllButOne(llvm::Module *One);
