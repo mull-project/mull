@@ -247,7 +247,7 @@ std::vector<std::unique_ptr<MutationResult>> Driver::dryRunMutations(const std::
 std::vector<std::unique_ptr<MutationResult>> Driver::runMutations(const std::vector<MutationPoint *> &mutationPoints) {
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
 
-  const auto failFastEnabled = true;
+  const auto failFastEnabled = false;
 
   const auto mutationsCount = mutationPoints.size();
   auto mutantIndex = 1;
