@@ -48,6 +48,7 @@ class Driver {
 
   std::map<llvm::Module *, llvm::object::ObjectFile *> InnerCache;
   std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> precompiledObjectFiles;
+  std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> instrumentedObjectFiles;
   Instrumentation instrumentation;
 public:
   Driver(Config &C, ModuleLoader &ML, TestFinder &TF, TestRunner &TR, Toolchain &t, Filter &f, MutationsFinder &mutationsFinder)
@@ -74,8 +75,7 @@ private:
   /// Returns cached object files for all modules excerpt one provided
   std::vector<llvm::object::ObjectFile *> AllButOne(llvm::Module *One);
 
-  /// Returns cached object files for all modules
-  std::vector<llvm::object::ObjectFile *> AllObjectFiles();
+  std::vector<llvm::object::ObjectFile *> AllInstrumentedObjectFiles();
 
   std::vector<std::unique_ptr<MutationResult>> dryRunMutations(const std::vector<MutationPoint *> &mutationPoints);
   std::vector<std::unique_ptr<MutationResult>> runMutations(const std::vector<MutationPoint *> &mutationPoints);

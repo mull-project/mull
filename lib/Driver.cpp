@@ -63,17 +63,25 @@ std::unique_ptr<Result> Driver::Run() {
 
     if (objectFile == nullptr) {
       LLVMContext localContext;
-
       auto clonedModule = module.clone(localContext);
-
-      instrumentation.insertCallbacks(module.getModule(), clonedModule->getModule());
-
       auto owningObjectFile = toolchain.compiler().compileModule(*clonedModule.get());
       objectFile = owningObjectFile.getBinary();
       toolchain.cache().putObject(std::move(owningObjectFile), module);
     }
 
     InnerCache.insert(std::make_pair(module.getModule(), objectFile));
+
+    {
+      LLVMContext instrumentationContext;
+
+      auto clonedModule = module.clone(instrumentationContext);
+
+      instrumentation.insertCallbacks(module.getModule(), clonedModule->getModule());
+
+      auto owningObjectFile = toolchain.compiler().compileModule(*clonedModule.get());
+      instrumentedObjectFiles.push_back(std::move(owningObjectFile));
+    }
+
   }
 
   for (std::string &objectFilePath: Cfg.getObjectFilesPaths()) {
@@ -114,7 +122,7 @@ std::unique_ptr<Result> Driver::Run() {
   Logger::debug() << "Driver::Run> running tests and searching mutations\n";
 
   std::vector<MutationPoint *> allMutationPoints;
-  auto objectFiles = AllObjectFiles();
+  auto objectFiles = AllInstrumentedObjectFiles();
   auto testIndex = 1;
   for (auto &test : foundTests) {
     Logger::debug().indent(2) << "[" << testIndex++ << "/" << testsCount << "] " << test->getTestDisplayName() << ": ";
@@ -278,16 +286,16 @@ std::vector<llvm::object::ObjectFile *> Driver::AllButOne(llvm::Module *One) {
   return Objects;
 }
 
-std::vector<llvm::object::ObjectFile *> Driver::AllObjectFiles() {
-  std::vector<llvm::object::ObjectFile *> Objects;
+std::vector<llvm::object::ObjectFile *> Driver::AllInstrumentedObjectFiles() {
+  std::vector<llvm::object::ObjectFile *> objects;
 
-  for (auto &CachedEntry : InnerCache) {
-    Objects.push_back(CachedEntry.second);
+  for (auto &ownedObject : instrumentedObjectFiles) {
+    objects.push_back(ownedObject.getBinary());
   }
 
-  for (OwningBinary<ObjectFile> &object: precompiledObjectFiles) {
-    Objects.push_back(object.getBinary());
+  for (auto &ownedObject : precompiledObjectFiles) {
+    objects.push_back(ownedObject.getBinary());
   }
 
-  return Objects;
+  return objects;
 }

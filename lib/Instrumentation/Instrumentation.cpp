@@ -39,6 +39,6 @@ void Instrumentation::setupInstrumentationInfo(Test *test) {
 }
 
 void Instrumentation::cleanupInstrumentationInfo(Test *test) {
-  //test->getInstrumentationInfo().cleanup(functions.size());
+  test->getInstrumentationInfo().cleanup(functions.size());
 }
 
