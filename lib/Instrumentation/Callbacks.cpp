@@ -1,5 +1,6 @@
 #include "Instrumentation/Callbacks.h"
 #include "Instrumentation/DynamicCallTree.h"
+#include "Instrumentation/Instrumentation.h"
 #include "Driver.h"
 
 #include <llvm/ExecutionEngine/Orc/JITSymbol.h>
@@ -11,27 +12,27 @@ using namespace llvm;
 
 namespace mull {
 
-extern "C" void mull_enterFunction(Driver *driver, uint64_t functionIndex) {
-  assert(driver);
-  assert(driver->callTreeMapping());
+extern "C" void mull_enterFunction(InstrumentationInfo *info, uint64_t functionIndex) {
+  assert(info);
+  assert(info->callTreeMapping());
   DynamicCallTree::enterFunction(functionIndex,
-                                 driver->callTreeMapping(),
-                                 driver->callstack());
+                                 info->callTreeMapping(),
+                                 info->callstack());
 }
 
-extern "C" void mull_leaveFunction(Driver *driver, uint64_t functionIndex) {
-  assert(driver);
-  assert(driver->callTreeMapping());
+extern "C" void mull_leaveFunction(InstrumentationInfo *info, uint64_t functionIndex) {
+  assert(info);
+  assert(info->callTreeMapping());
   DynamicCallTree::leaveFunction(functionIndex,
-                                 driver->callTreeMapping(),
-                                 driver->callstack());
+                                 info->callTreeMapping(),
+                                 info->callstack());
 }
 
 }
 
 Callbacks::Callbacks(Toolchain &t) : toolchain(t) {}
 
-void Callbacks::injectCallbacks(llvm::Function *function, uint64_t index, Driver *driver) {
+void Callbacks::injectCallbacks(llvm::Function *function, uint64_t index, InstrumentationInfo &info) {
   auto &context = function->getParent()->getContext();
   auto int64Type = Type::getInt64Ty(context);
   auto driverPointerType = Type::getVoidTy(context)->getPointerTo();
@@ -42,7 +43,7 @@ void Callbacks::injectCallbacks(llvm::Function *function, uint64_t index, Driver
 
   Value *functionIndex = ConstantInt::get(int64Type, index);
   uint32_t pointerWidth = toolchain.targetMachine().createDataLayout().getPointerSize();
-  ConstantInt *driverPointerAddress = ConstantInt::get(context, APInt(pointerWidth * 8, (orc::TargetAddress)driver));
+  ConstantInt *driverPointerAddress = ConstantInt::get(context, APInt(pointerWidth * 8, (orc::TargetAddress)&info));
   Value *driverPointer = ConstantExpr::getCast(Instruction::IntToPtr,
                                                driverPointerAddress,
                                                int64Type->getPointerTo());

@@ -12,6 +12,7 @@ set(mull_sources
   Instrumentation/DynamicCallTree.cpp
   Instrumentation/Callbacks.cpp
   Instrumentation/InstrumentationInfo.cpp
+  Instrumentation/Instrumentation.cpp
 
   MutationOperators/MathAddMutationOperator.cpp
   MutationOperators/AndOrReplacementMutationOperator.cpp

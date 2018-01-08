@@ -7,16 +7,16 @@ namespace llvm {
 }
 
 namespace mull {
-  class Driver;
   class Toolchain;
+  class InstrumentationInfo;
 
-  extern "C" void mull_enterFunction(Driver *driver, uint64_t functionIndex);
-  extern "C" void mull_leaveFunction(Driver *driver, uint64_t functionIndex);
+  extern "C" void mull_enterFunction(InstrumentationInfo *info, uint64_t functionIndex);
+  extern "C" void mull_leaveFunction(InstrumentationInfo *info, uint64_t functionIndex);
 
   class Callbacks {
   public:
     explicit Callbacks(Toolchain &t);
-    void injectCallbacks(llvm::Function *function, uint64_t index, Driver *driver);
+    void injectCallbacks(llvm::Function *function, uint64_t index, InstrumentationInfo &info);
   private:
     Toolchain &toolchain;
   };
