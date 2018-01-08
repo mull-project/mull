@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Instrumentation/Callbacks.h"
-#include "Instrumentation/InstrumentationInfo.h"
 #include "Instrumentation/DynamicCallTree.h"
 #include "Testee.h"
 
@@ -26,11 +25,10 @@ namespace mull {
 
     std::vector<std::unique_ptr<Testee>> getTestees(Test *test, Filter &filter, int distance);
 
-    void prepare();
-    void reset();
+    void setupInstrumentationInfo(Test *test);
+    void cleanupInstrumentationInfo(Test *test);
   private:
     Callbacks callbacks;
     std::vector<CallTreeFunction> functions;
-    InstrumentationInfo instrumentationInfo;
   };
 }

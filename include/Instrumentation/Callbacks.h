@@ -4,6 +4,7 @@
 
 namespace llvm {
   class Function;
+  class Module;
 }
 
 namespace mull {
@@ -16,7 +17,8 @@ namespace mull {
   class Callbacks {
   public:
     explicit Callbacks(Toolchain &t);
-    void injectCallbacks(llvm::Function *function, uint64_t index, InstrumentationInfo &info);
+    void injectCallbacks(llvm::Function *function, uint64_t index);
+    void injectInstrumentationInfoPointer(llvm::Module *module);
   private:
     Toolchain &toolchain;
   };

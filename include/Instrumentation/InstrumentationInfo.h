@@ -21,11 +21,10 @@ namespace mull {
     std::vector<std::unique_ptr<Testee>> getTestees(std::vector<CallTreeFunction> &functions, Test *test, Filter &filter, int distance);
 
     void prepare(size_t mappingSize);
-    void reset();
+    void cleanup(size_t mappingSize);
   private:
     DynamicCallTree dynamicCallTree;
     uint64_t *_callTreeMapping;
-    size_t mappingSize;
     std::stack<uint64_t> _callstack;
   };
 }

@@ -6,22 +6,21 @@
 using namespace mull;
 
 InstrumentationInfo::InstrumentationInfo()
-: _callTreeMapping(nullptr), mappingSize(0), _callstack() {}
+: _callTreeMapping(nullptr), _callstack() {}
 
-InstrumentationInfo::~InstrumentationInfo() {
-  munmap(_callTreeMapping, mappingSize);
-}
+InstrumentationInfo::~InstrumentationInfo() {}
 
 uint64_t *InstrumentationInfo::callTreeMapping() {
   return _callTreeMapping;
 }
+
 std::stack<uint64_t> &InstrumentationInfo::callstack() {
   return _callstack;
 }
 
-void InstrumentationInfo::reset() {
+void InstrumentationInfo::cleanup(size_t mappingSize) {
   _callstack = std::stack<uint64_t>();
-  memset(_callTreeMapping, 0, mappingSize * sizeof(_callTreeMapping[0]));
+  munmap(_callTreeMapping, mappingSize);
 }
 
 void InstrumentationInfo::prepare(size_t mappingSize) {

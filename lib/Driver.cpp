@@ -100,8 +100,6 @@ std::unique_ptr<Result> Driver::Run() {
     precompiledObjectFiles.push_back(std::move(owningObject));
   }
 
-  instrumentation.prepare();
-
   auto foundTests = Finder.findTests(Ctx, filter);
   const int testsCount = foundTests.size();
 
@@ -121,7 +119,7 @@ std::unique_ptr<Result> Driver::Run() {
   for (auto &test : foundTests) {
     Logger::debug().indent(2) << "[" << testIndex++ << "/" << testsCount << "] " << test->getTestDisplayName() << ": ";
 
-    instrumentation.reset();
+    instrumentation.setupInstrumentationInfo(test.get());
 
     ExecutionResult testExecutionResult = Sandbox->run([&]() {
       return Runner.runTest(test.get(), objectFiles);
@@ -132,10 +130,13 @@ std::unique_ptr<Result> Driver::Run() {
     test->setExecutionResult(testExecutionResult);
 
     if (testExecutionResult.status != Passed) {
+      instrumentation.cleanupInstrumentationInfo(test.get());
       continue;
     }
 
     auto testees = instrumentation.getTestees(test.get(), filter, Cfg.getMaxDistance());
+    instrumentation.cleanupInstrumentationInfo(test.get());
+
     if (testees.empty()) {
       continue;
     }

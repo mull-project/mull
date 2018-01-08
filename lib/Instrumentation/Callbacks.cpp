@@ -6,6 +6,7 @@
 #include <llvm/ExecutionEngine/Orc/JITSymbol.h>
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/Instructions.h>
+#include <llvm/IR/GlobalVariable.h>
 
 using namespace mull;
 using namespace llvm;
@@ -32,7 +33,11 @@ extern "C" void mull_leaveFunction(InstrumentationInfo *info, uint64_t functionI
 
 Callbacks::Callbacks(Toolchain &t) : toolchain(t) {}
 
-void Callbacks::injectCallbacks(llvm::Function *function, uint64_t index, InstrumentationInfo &info) {
+void Callbacks::injectInstrumentationInfoPointer(llvm::Module *module) {
+  
+}
+
+void Callbacks::injectCallbacks(llvm::Function *function, uint64_t index) {
   auto &context = function->getParent()->getContext();
   auto int64Type = Type::getInt64Ty(context);
   auto driverPointerType = Type::getVoidTy(context)->getPointerTo();
@@ -43,7 +48,7 @@ void Callbacks::injectCallbacks(llvm::Function *function, uint64_t index, Instru
 
   Value *functionIndex = ConstantInt::get(int64Type, index);
   uint32_t pointerWidth = toolchain.targetMachine().createDataLayout().getPointerSize();
-  ConstantInt *driverPointerAddress = ConstantInt::get(context, APInt(pointerWidth * 8, (orc::TargetAddress)&info));
+  ConstantInt *driverPointerAddress = ConstantInt::get(context, APInt(pointerWidth * 8, (orc::TargetAddress)0));
   Value *driverPointer = ConstantExpr::getCast(Instruction::IntToPtr,
                                                driverPointerAddress,
                                                int64Type->getPointerTo());

@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "ExecutionResult.h"
+#include "Instrumentation/InstrumentationInfo.h"
 
 namespace llvm {
 class Function;
@@ -20,6 +21,7 @@ public:
 
   void setExecutionResult(ExecutionResult result) { executionResult = result; }
   ExecutionResult &getExecutionResult() { return executionResult; }
+  InstrumentationInfo &getInstrumentationInfo() { return instrumentationInfo; }
 
   /// Entry points into the test might be the test body, setup/teardown,
   /// before each/before all functions, and so on.
@@ -38,6 +40,7 @@ public:
   Test(TestKind K) : Kind(K) {}
 private:
   ExecutionResult executionResult;
+  InstrumentationInfo instrumentationInfo;
   const TestKind Kind;
 };
 
