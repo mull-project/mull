@@ -41,6 +41,7 @@ public:
 private:
   ExecutionResult executionResult;
   InstrumentationInfo instrumentationInfo;
+
   const TestKind Kind;
 };
 

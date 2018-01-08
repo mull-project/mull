@@ -24,6 +24,7 @@ class CustomTestRunner : public TestRunner {
   llvm::orc::ObjectLinkingLayer<> ObjectLayer;
   mull::Mangler mangler;
   llvm::orc::LocalCXXRuntimeOverrides overrides;
+  std::string instrumentationInfoName;
 public:
 
   CustomTestRunner(llvm::TargetMachine &machine);
