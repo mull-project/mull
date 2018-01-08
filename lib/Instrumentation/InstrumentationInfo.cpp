@@ -35,15 +35,14 @@ void InstrumentationInfo::prepare(size_t mappingSize) {
                                        -1,
                                        0);
   memset(_callTreeMapping, 0, mappingSize * sizeof(_callTreeMapping[0]));
-  dynamicCallTree.prepare(_callTreeMapping);
 }
 
 std::vector<std::unique_ptr<Testee>>
 InstrumentationInfo::getTestees(std::vector<CallTreeFunction> &functions, Test *test, Filter &filter, int distance) {
-  std::unique_ptr<CallTree> callTree(dynamicCallTree.createCallTree(functions));
+  std::unique_ptr<CallTree> callTree(DynamicCallTree::createCallTree(_callTreeMapping, functions));
 
-  auto subtrees = dynamicCallTree.extractTestSubtrees(callTree.get(), test);
-  auto testees = dynamicCallTree.createTestees(subtrees, test, distance, filter);
+  auto subtrees = DynamicCallTree::extractTestSubtrees(callTree.get(), test);
+  auto testees = DynamicCallTree::createTestees(subtrees, test, distance, filter);
 
   return testees;
 }

@@ -58,16 +58,7 @@ void fillInCallTree(std::vector<CallTreeFunction> &functions,
   callTreeMapping[functionIndex] = 0;
 }
 
-DynamicCallTree::DynamicCallTree()
-: mapping(nullptr) {}
-
-void DynamicCallTree::prepare(uint64_t *m) {
-  assert(m != nullptr);
-  assert(mapping == nullptr);
-  mapping = m;
-}
-
-std::unique_ptr<CallTree> DynamicCallTree::createCallTree(std::vector<CallTreeFunction> functions) {
+std::unique_ptr<CallTree> DynamicCallTree::createCallTree(uint64_t *mapping, std::vector<CallTreeFunction> functions) {
   assert(mapping != nullptr);
   assert(mapping[0] == 0);
   assert(!functions.empty());

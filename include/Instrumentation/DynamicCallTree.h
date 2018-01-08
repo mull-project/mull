@@ -28,26 +28,25 @@ namespace mull {
     CallTreeFunction(llvm::Function *f) : function(f), treeRoot(nullptr) {}
   };
 
-  class DynamicCallTree {
-  public:
-    DynamicCallTree();
+/// TODO: What is the good practice for this? maybe namespace?
+class DynamicCallTree {
+public:
+  DynamicCallTree() = delete;
+  ~DynamicCallTree() = delete;
 
-    void prepare(uint64_t *m);
-    std::unique_ptr<CallTree> createCallTree(std::vector<CallTreeFunction> functions);
-    std::vector<CallTree *> extractTestSubtrees(CallTree *root, Test *test);
-    std::vector<std::unique_ptr<Testee>> createTestees(std::vector<CallTree *> subtrees,
-                                                       Test *test,
-                                                       int distance,
-                                                       Filter &filter);
+  static std::unique_ptr<CallTree> createCallTree(uint64_t *mapping, std::vector<CallTreeFunction> functions);
+  static std::vector<CallTree *> extractTestSubtrees(CallTree *root, Test *test);
+  static std::vector<std::unique_ptr<Testee>> createTestees(std::vector<CallTree *> subtrees,
+                                                            Test *test,
+                                                            int distance,
+                                                            Filter &filter);
 
-    static void enterFunction(const uint64_t functionIndex,
-                              uint64_t *mapping,
-                              std::stack<uint64_t> &stack);
-    static void leaveFunction(const uint64_t functionIndex,
-                              uint64_t *mapping,
-                              std::stack<uint64_t> &stack);
-  private:
-    uint64_t *mapping;
-  };
+  static void enterFunction(const uint64_t functionIndex,
+                            uint64_t *mapping,
+                            std::stack<uint64_t> &stack);
+  static void leaveFunction(const uint64_t functionIndex,
+                            uint64_t *mapping,
+                            std::stack<uint64_t> &stack);
+};
 
 }

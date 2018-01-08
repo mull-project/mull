@@ -39,10 +39,7 @@ TEST(DynamicCallTree, empty_tree) {
 
   uint64_t mapping[6] = { 0 };
 
-  DynamicCallTree tree;
-  tree.prepare(mapping);
-
-  std::unique_ptr<CallTree> callTree = tree.createCallTree(functions);
+  std::unique_ptr<CallTree> callTree = DynamicCallTree::createCallTree(mapping, functions);
   ASSERT_EQ(callTree->function, nullptr);
   ASSERT_TRUE(callTree->children.empty());
 }
@@ -96,9 +93,7 @@ TEST(DynamicCallTree, non_empty_tree) {
   mapping[4] = 2;
   mapping[5] = 4;
 
-  DynamicCallTree tree;
-  tree.prepare(mapping);
-  std::unique_ptr<CallTree> root = tree.createCallTree(functions);
+  std::unique_ptr<CallTree> root = DynamicCallTree::createCallTree(mapping, functions);
 
   /// The tree:
   ///
@@ -287,10 +282,8 @@ TEST(DynamicCallTree, test_subtrees) {
 
   SimpleTest_Test test(F2);
 
-  DynamicCallTree tree;
-  tree.prepare(mapping);
-  std::unique_ptr<CallTree> callTree = tree.createCallTree(functions);
-  std::vector<CallTree *> subtrees = tree.extractTestSubtrees(callTree.get(), &test);
+  std::unique_ptr<CallTree> callTree = DynamicCallTree::createCallTree(mapping, functions);
+  std::vector<CallTree *> subtrees = DynamicCallTree::extractTestSubtrees(callTree.get(), &test);
 
   EXPECT_EQ(1UL, subtrees.size());
 
@@ -331,15 +324,13 @@ TEST(DynamicCallTree, testees) {
 
   SimpleTest_Test test(F2);
 
-  DynamicCallTree tree;
-  tree.prepare(mapping);
-  std::unique_ptr<CallTree> callTree = tree.createCallTree(functions);
-  std::vector<CallTree *> subtrees = tree.extractTestSubtrees(callTree.get(), &test);
+  std::unique_ptr<CallTree> callTree = DynamicCallTree::createCallTree(mapping, functions);
+  std::vector<CallTree *> subtrees = DynamicCallTree::extractTestSubtrees(callTree.get(), &test);
 
   Filter nullFilter;
 
   {
-    std::vector<std::unique_ptr<Testee>> testees = tree.createTestees(subtrees, &test, 5, nullFilter);
+    std::vector<std::unique_ptr<Testee>> testees = DynamicCallTree::createTestees(subtrees, &test, 5, nullFilter);
 
     EXPECT_EQ(4U, testees.size());
 
@@ -361,7 +352,7 @@ TEST(DynamicCallTree, testees) {
   }
 
   {
-    std::vector<std::unique_ptr<Testee>> testees = tree.createTestees(subtrees, &test, 1, nullFilter);
+    std::vector<std::unique_ptr<Testee>> testees = DynamicCallTree::createTestees(subtrees, &test, 1, nullFilter);
     EXPECT_EQ(3U, testees.size());
 
     Testee *testeeF2 = testees.begin()->get();
@@ -380,7 +371,7 @@ TEST(DynamicCallTree, testees) {
   {
     Filter filter;
     filter.skipByName("F5");
-    std::vector<std::unique_ptr<Testee>> testees = tree.createTestees(subtrees, &test, 5, filter);
+    std::vector<std::unique_ptr<Testee>> testees = DynamicCallTree::createTestees(subtrees, &test, 5, filter);
     EXPECT_EQ(3U, testees.size());
 
     Testee *testeeF2 = testees.begin()->get();

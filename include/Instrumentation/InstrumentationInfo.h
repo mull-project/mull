@@ -23,7 +23,6 @@ namespace mull {
     void prepare(size_t mappingSize);
     void cleanup(size_t mappingSize);
   private:
-    DynamicCallTree dynamicCallTree;
     uint64_t *_callTreeMapping;
     std::stack<uint64_t> _callstack;
   };
