@@ -7,8 +7,8 @@
 using namespace mull;
 using namespace llvm;
 
-Instrumentation::Instrumentation(Toolchain &toolchain)
-: callbacks(toolchain), functions() {
+Instrumentation::Instrumentation()
+: callbacks(), functions() {
   CallTreeFunction phonyRoot(nullptr);
   functions.push_back(phonyRoot);
 }

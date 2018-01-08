@@ -11,14 +11,13 @@ namespace llvm {
 }
 
 namespace mull {
-  class Toolchain;
   class Driver;
   class Test;
   class Filter;
 
   class Instrumentation {
   public:
-    Instrumentation(Toolchain &toolchain);
+    Instrumentation();
 
     void insertCallbacks(llvm::Module *originalModule,
                          llvm::Module *instrumentedModule);

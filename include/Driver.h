@@ -51,7 +51,7 @@ class Driver {
   Instrumentation instrumentation;
 public:
   Driver(Config &C, ModuleLoader &ML, TestFinder &TF, TestRunner &TR, Toolchain &t, Filter &f, MutationsFinder &mutationsFinder)
-    : Cfg(C), Loader(ML), Finder(TF), Runner(TR), toolchain(t), filter(f), mutationsFinder(mutationsFinder), precompiledObjectFiles(), instrumentation(t) {
+    : Cfg(C), Loader(ML), Finder(TF), Runner(TR), toolchain(t), filter(f), mutationsFinder(mutationsFinder), precompiledObjectFiles(), instrumentation() {
 
       if (C.getFork()) {
         this->Sandbox = new ForkProcessSandbox();

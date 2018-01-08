@@ -31,7 +31,7 @@ extern "C" void mull_leaveFunction(InstrumentationInfo *info, uint64_t functionI
 
 }
 
-Callbacks::Callbacks(Toolchain &t) : toolchain(t) {}
+Callbacks::Callbacks() {}
 
 Value *Callbacks::injectInstrumentationInfoPointer(llvm::Module *module) {
   auto &context = module->getContext();

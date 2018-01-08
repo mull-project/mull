@@ -9,7 +9,6 @@ namespace llvm {
 }
 
 namespace mull {
-  class Toolchain;
   class InstrumentationInfo;
 
   extern "C" void mull_enterFunction(InstrumentationInfo *info, uint64_t functionIndex);
@@ -17,10 +16,9 @@ namespace mull {
 
   class Callbacks {
   public:
-    explicit Callbacks(Toolchain &t);
+    Callbacks();
     void injectCallbacks(llvm::Function *function, uint64_t index, llvm::Value *infoPointer);
     llvm::Value *injectInstrumentationInfoPointer(llvm::Module *module);
   private:
-    Toolchain &toolchain;
   };
 }
