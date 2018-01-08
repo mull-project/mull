@@ -33,11 +33,13 @@ extern "C" void mull_leaveFunction(InstrumentationInfo *info, uint64_t functionI
 
 Callbacks::Callbacks(Toolchain &t) : toolchain(t) {}
 
-void Callbacks::injectInstrumentationInfoPointer(llvm::Module *module) {
-  
+Value *Callbacks::injectInstrumentationInfoPointer(llvm::Module *module) {
+  auto &context = module->getContext();
+  auto driverPointerType = Type::getVoidTy(context)->getPointerTo();
+  return module->getOrInsertGlobal("mull_instrumentation_info", driverPointerType);
 }
 
-void Callbacks::injectCallbacks(llvm::Function *function, uint64_t index) {
+void Callbacks::injectCallbacks(llvm::Function *function, uint64_t index, Value *infoPointer) {
   auto &context = function->getParent()->getContext();
   auto int64Type = Type::getInt64Ty(context);
   auto driverPointerType = Type::getVoidTy(context)->getPointerTo();
@@ -47,12 +49,7 @@ void Callbacks::injectCallbacks(llvm::Function *function, uint64_t index) {
   FunctionType *callbackType = FunctionType::get(voidType, parameterTypes, false);
 
   Value *functionIndex = ConstantInt::get(int64Type, index);
-  uint32_t pointerWidth = toolchain.targetMachine().createDataLayout().getPointerSize();
-  ConstantInt *driverPointerAddress = ConstantInt::get(context, APInt(pointerWidth * 8, (orc::TargetAddress)0));
-  Value *driverPointer = ConstantExpr::getCast(Instruction::IntToPtr,
-                                               driverPointerAddress,
-                                               int64Type->getPointerTo());
-  std::vector<Value *> parameters({driverPointer, functionIndex});
+  std::vector<Value *> parameters({infoPointer, functionIndex});
 
   Function *enterFunction = function->getParent()->getFunction("mull_enterFunction");
   Function *leaveFunction = function->getParent()->getFunction("mull_leaveFunction");

@@ -68,6 +68,8 @@ std::unique_ptr<Result> Driver::Run() {
 
       instrumentation.insertCallbacks(module.getModule(), clonedModule->getModule());
 
+      clonedModule->getModule()->dump();
+
       auto owningObjectFile = toolchain.compiler().compileModule(*clonedModule.get());
       objectFile = owningObjectFile.getBinary();
       toolchain.cache().putObject(std::move(owningObjectFile), module);

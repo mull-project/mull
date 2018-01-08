@@ -15,6 +15,7 @@ Instrumentation::Instrumentation(Toolchain &toolchain)
 
 void Instrumentation::insertCallbacks(llvm::Module *originalModule,
                                       llvm::Module *instrumentedModule) {
+  auto info = callbacks.injectInstrumentationInfoPointer(instrumentedModule);
 
   for (auto &function: originalModule->getFunctionList()) {
     if (function.isDeclaration()) {
@@ -24,7 +25,7 @@ void Instrumentation::insertCallbacks(llvm::Module *originalModule,
     uint64_t index = functions.size();
     functions.push_back(callTreeFunction);
     auto clonedFunction = instrumentedModule->getFunction(function.getName());
-    callbacks.injectCallbacks(clonedFunction, index);
+    callbacks.injectCallbacks(clonedFunction, index, info);
   }
 }
 
