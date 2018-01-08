@@ -39,10 +39,10 @@ TEST(DynamicCallTree, empty_tree) {
 
   uint64_t mapping[6] = { 0 };
 
-  DynamicCallTree tree(functions);
+  DynamicCallTree tree;
   tree.prepare(mapping);
 
-  std::unique_ptr<CallTree> callTree = tree.createCallTree();
+  std::unique_ptr<CallTree> callTree = tree.createCallTree(functions);
   ASSERT_EQ(callTree->function, nullptr);
   ASSERT_TRUE(callTree->children.empty());
 }
@@ -96,9 +96,9 @@ TEST(DynamicCallTree, non_empty_tree) {
   mapping[4] = 2;
   mapping[5] = 4;
 
-  DynamicCallTree tree(functions);
+  DynamicCallTree tree;
   tree.prepare(mapping);
-  std::unique_ptr<CallTree> root = tree.createCallTree();
+  std::unique_ptr<CallTree> root = tree.createCallTree(functions);
 
   /// The tree:
   ///
@@ -141,19 +141,10 @@ TEST(DynamicCallTree, non_empty_tree) {
   ASSERT_EQ(f5Node->functionsIndex, 5UL);
   ASSERT_EQ(f5Node->children.size(), 0UL);
 
-  ASSERT_EQ(functions[0].treeRoot, root.get());
-  ASSERT_EQ(functions[1].treeRoot, f1Node);
-  ASSERT_EQ(functions[2].treeRoot, f2Node);
-  ASSERT_EQ(functions[3].treeRoot, f3Node);
-  ASSERT_EQ(functions[4].treeRoot, f4Node);
-  ASSERT_EQ(functions[5].treeRoot, f5Node);
-
   /// mapping is being cleaned up while tree is created
   for (uint64_t index = 0; index < functions.size(); index++) {
     ASSERT_EQ(mapping[0], 0UL);
   }
-
-  tree.cleanupCallTree(std::move(root));
 
   ASSERT_EQ(functions[0].treeRoot, nullptr);
   ASSERT_EQ(functions[1].treeRoot, nullptr);
@@ -296,9 +287,9 @@ TEST(DynamicCallTree, test_subtrees) {
 
   SimpleTest_Test test(F2);
 
-  DynamicCallTree tree(functions);
+  DynamicCallTree tree;
   tree.prepare(mapping);
-  std::unique_ptr<CallTree> callTree = tree.createCallTree();
+  std::unique_ptr<CallTree> callTree = tree.createCallTree(functions);
   std::vector<CallTree *> subtrees = tree.extractTestSubtrees(callTree.get(), &test);
 
   EXPECT_EQ(1UL, subtrees.size());
@@ -340,9 +331,9 @@ TEST(DynamicCallTree, testees) {
 
   SimpleTest_Test test(F2);
 
-  DynamicCallTree tree(functions);
+  DynamicCallTree tree;
   tree.prepare(mapping);
-  std::unique_ptr<CallTree> callTree = tree.createCallTree();
+  std::unique_ptr<CallTree> callTree = tree.createCallTree(functions);
   std::vector<CallTree *> subtrees = tree.extractTestSubtrees(callTree.get(), &test);
 
   Filter nullFilter;

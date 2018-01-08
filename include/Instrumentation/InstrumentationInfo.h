@@ -12,13 +12,13 @@ namespace mull {
 
   class InstrumentationInfo {
   public:
-    InstrumentationInfo(std::vector<CallTreeFunction> &f);
+    InstrumentationInfo();
     ~InstrumentationInfo();
 
     uint64_t *callTreeMapping();
     std::stack<uint64_t> &callstack();
 
-    std::vector<std::unique_ptr<Testee>> getTestees(Test *test, Filter &filter, int distance);
+    std::vector<std::unique_ptr<Testee>> getTestees(std::vector<CallTreeFunction> &functions, Test *test, Filter &filter, int distance);
 
     void prepare(size_t mappingSize);
     void reset();

@@ -54,7 +54,7 @@ class Driver {
   InstrumentationInfo instrumentationInfo;
 public:
   Driver(Config &C, ModuleLoader &ML, TestFinder &TF, TestRunner &TR, Toolchain &t, Filter &f, MutationsFinder &mutationsFinder)
-    : Cfg(C), Loader(ML), Finder(TF), Runner(TR), toolchain(t), filter(f), mutationsFinder(mutationsFinder), precompiledObjectFiles(), callbacks(t), instrumentationInfo(functions) {
+    : Cfg(C), Loader(ML), Finder(TF), Runner(TR), toolchain(t), filter(f), mutationsFinder(mutationsFinder), precompiledObjectFiles(), callbacks(t), instrumentationInfo() {
 
       CallTreeFunction phonyRoot(nullptr);
       functions.push_back(phonyRoot);

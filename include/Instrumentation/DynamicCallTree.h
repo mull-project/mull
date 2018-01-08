@@ -30,11 +30,10 @@ namespace mull {
 
   class DynamicCallTree {
   public:
-    DynamicCallTree(std::vector<CallTreeFunction> &f);
+    DynamicCallTree();
 
     void prepare(uint64_t *m);
-    std::unique_ptr<CallTree> createCallTree();
-    void cleanupCallTree(std::unique_ptr<CallTree> root);
+    std::unique_ptr<CallTree> createCallTree(std::vector<CallTreeFunction> functions);
     std::vector<CallTree *> extractTestSubtrees(CallTree *root, Test *test);
     std::vector<std::unique_ptr<Testee>> createTestees(std::vector<CallTree *> subtrees,
                                                        Test *test,
@@ -49,7 +48,6 @@ namespace mull {
                               std::stack<uint64_t> &stack);
   private:
     uint64_t *mapping;
-    std::vector<CallTreeFunction> &functions;
   };
 
 }

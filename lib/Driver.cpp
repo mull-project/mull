@@ -144,7 +144,7 @@ std::unique_ptr<Result> Driver::Run() {
       continue;
     }
 
-    auto testees = instrumentationInfo.getTestees(test.get(), filter, Cfg.getMaxDistance());
+    auto testees = instrumentationInfo.getTestees(functions, test.get(), filter, Cfg.getMaxDistance());
     if (testees.empty()) {
       continue;
     }

@@ -58,8 +58,8 @@ void fillInCallTree(std::vector<CallTreeFunction> &functions,
   callTreeMapping[functionIndex] = 0;
 }
 
-DynamicCallTree::DynamicCallTree(std::vector<CallTreeFunction> &f)
-: mapping(nullptr), functions(f) {}
+DynamicCallTree::DynamicCallTree()
+: mapping(nullptr) {}
 
 void DynamicCallTree::prepare(uint64_t *m) {
   assert(m != nullptr);
@@ -67,7 +67,7 @@ void DynamicCallTree::prepare(uint64_t *m) {
   mapping = m;
 }
 
-std::unique_ptr<CallTree> DynamicCallTree::createCallTree() {
+std::unique_ptr<CallTree> DynamicCallTree::createCallTree(std::vector<CallTreeFunction> functions) {
   assert(mapping != nullptr);
   assert(mapping[0] == 0);
   assert(!functions.empty());
@@ -104,23 +104,6 @@ std::unique_ptr<CallTree> DynamicCallTree::createCallTree() {
   }
 
   return phonyRoot;
-}
-
-void DynamicCallTree::cleanupCallTree(std::unique_ptr<CallTree> root) {
-  std::queue<CallTree *> nodes;
-  nodes.push(root.get());
-
-  while (!nodes.empty()) {
-    CallTree *node = nodes.front();
-    nodes.pop();
-
-    CallTreeFunction &function = functions[node->functionsIndex];
-    function.treeRoot = nullptr;
-
-    for (std::unique_ptr<CallTree> &child : node->children) {
-      nodes.push(child.get());
-    }
-  }
 }
 
 std::vector<CallTree *> DynamicCallTree::extractTestSubtrees(CallTree *root,

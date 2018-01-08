@@ -5,8 +5,8 @@
 
 using namespace mull;
 
-InstrumentationInfo::InstrumentationInfo(std::vector<CallTreeFunction> &f)
-: dynamicCallTree(f), _callTreeMapping(nullptr), mappingSize(0), _callstack() {}
+InstrumentationInfo::InstrumentationInfo()
+: _callTreeMapping(nullptr), mappingSize(0), _callstack() {}
 
 InstrumentationInfo::~InstrumentationInfo() {
   munmap(_callTreeMapping, mappingSize);
@@ -40,12 +40,11 @@ void InstrumentationInfo::prepare(size_t mappingSize) {
 }
 
 std::vector<std::unique_ptr<Testee>>
-InstrumentationInfo::getTestees(Test *test, Filter &filter, int distance) {
-  std::unique_ptr<CallTree> callTree(dynamicCallTree.createCallTree());
+InstrumentationInfo::getTestees(std::vector<CallTreeFunction> &functions, Test *test, Filter &filter, int distance) {
+  std::unique_ptr<CallTree> callTree(dynamicCallTree.createCallTree(functions));
 
   auto subtrees = dynamicCallTree.extractTestSubtrees(callTree.get(), test);
   auto testees = dynamicCallTree.createTestees(subtrees, test, distance, filter);
 
-  dynamicCallTree.cleanupCallTree(std::move(callTree));
   return testees;
 }
