@@ -9,7 +9,7 @@ namespace llvm {
 }
 
 namespace mull {
-  class InstrumentationInfo;
+  struct InstrumentationInfo;
 
   extern "C" void mull_enterFunction(InstrumentationInfo *info, uint64_t functionIndex);
   extern "C" void mull_leaveFunction(InstrumentationInfo *info, uint64_t functionIndex);

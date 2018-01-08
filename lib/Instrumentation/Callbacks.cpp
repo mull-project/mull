@@ -15,18 +15,14 @@ namespace mull {
 
 extern "C" void mull_enterFunction(InstrumentationInfo *info, uint64_t functionIndex) {
   assert(info);
-  assert(info->callTreeMapping());
-  DynamicCallTree::enterFunction(functionIndex,
-                                 info->callTreeMapping(),
-                                 info->callstack());
+  assert(info->callTreeMapping);
+  DynamicCallTree::enterFunction(functionIndex, info->callTreeMapping, info->callstack);
 }
 
 extern "C" void mull_leaveFunction(InstrumentationInfo *info, uint64_t functionIndex) {
   assert(info);
-  assert(info->callTreeMapping());
-  DynamicCallTree::leaveFunction(functionIndex,
-                                 info->callTreeMapping(),
-                                 info->callstack());
+  assert(info->callTreeMapping);
+  DynamicCallTree::leaveFunction(functionIndex, info->callTreeMapping, info->callstack);
 }
 
 }
