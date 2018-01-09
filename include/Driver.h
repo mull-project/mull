@@ -49,6 +49,7 @@ class Driver {
   std::map<llvm::Module *, llvm::object::ObjectFile *> InnerCache;
   std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> precompiledObjectFiles;
   std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> instrumentedObjectFiles;
+  std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> ownedObjectFiles;
   Instrumentation instrumentation;
 public:
   Driver(Config &C, ModuleLoader &ML, TestFinder &TF, TestRunner &TR, Toolchain &t, Filter &f, MutationsFinder &mutationsFinder)

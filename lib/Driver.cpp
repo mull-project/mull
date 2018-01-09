@@ -59,17 +59,16 @@ std::unique_ptr<Result> Driver::Run() {
     assert(ownedModule && "Can't load module");
     Ctx.addModule(std::move(ownedModule));
 
-    ObjectFile *objectFile = toolchain.cache().getObject(module);
-
-    if (objectFile == nullptr) {
+    auto objectFile = toolchain.cache().getObject(module);
+    if (objectFile.getBinary() == nullptr) {
       LLVMContext localContext;
       auto clonedModule = module.clone(localContext);
-      auto owningObjectFile = toolchain.compiler().compileModule(*clonedModule.get());
-      objectFile = owningObjectFile.getBinary();
-      toolchain.cache().putObject(std::move(owningObjectFile), module);
+      objectFile = toolchain.compiler().compileModule(*clonedModule.get());
+      toolchain.cache().putObject(objectFile, module);
     }
 
-    InnerCache.insert(std::make_pair(module.getModule(), objectFile));
+    InnerCache.insert(std::make_pair(module.getModule(), objectFile.getBinary()));
+    ownedObjectFiles.push_back(std::move(objectFile));
 
     {
       LLVMContext instrumentationContext;
@@ -223,13 +222,16 @@ std::vector<std::unique_ptr<MutationResult>> Driver::runMutations(const std::vec
 
     Logger::debug() << "[" << mutantIndex++ << "/" << mutationsCount << "]: "  << mutationPoint->getUniqueIdentifier() << "\n";
 
-    LLVMContext localContext;
-    auto clonedModule = mutationPoint->getOriginalModule()->clone(localContext);
-    mutationPoint->applyMutation(*clonedModule.get());
-    auto ownedMutant = toolchain.compiler().compileModule(*clonedModule.get());
-    ObjectFile *mutant = ownedMutant.getBinary();
+    auto mutant = toolchain.cache().getObject(*mutationPoint);
+    if (mutant.getBinary() == nullptr) {
+      LLVMContext localContext;
+      auto clonedModule = mutationPoint->getOriginalModule()->clone(localContext);
+      mutationPoint->applyMutation(*clonedModule.get());
+      mutant = toolchain.compiler().compileModule(*clonedModule.get());
+      toolchain.cache().putObject(mutant, *mutationPoint);
+    }
 
-    objectFilesWithMutant.push_back(mutant);
+    objectFilesWithMutant.push_back(mutant.getBinary());
 
     auto testsCount = mutationPoint->getReachableTests().size();
     auto testIndex = 1;
