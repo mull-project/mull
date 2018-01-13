@@ -19,6 +19,8 @@ class Function;
 
 namespace mull {
 
+struct InstrumentationInfo;
+
 class GoogleTestRunner : public TestRunner {
   llvm::orc::ObjectLinkingLayer<> ObjectLayer;
   mull::Mangler mangler;
@@ -28,10 +30,15 @@ class GoogleTestRunner : public TestRunner {
   std::string fGoogleTestInstance;
   std::string fGoogleTestRun;
   std::string instrumentationInfoName;
+  llvm::orc::ObjectLinkingLayer<>::ObjSetHandleT handle;
+  InstrumentationInfo **trampoline;
 public:
 
   GoogleTestRunner(llvm::TargetMachine &machine);
-  ExecutionStatus runTest(Test *test, ObjectFiles &objectFiles) override;
+  ~GoogleTestRunner();
+
+  void loadProgram(ObjectFiles &objectFiles) override;
+  ExecutionStatus runTest(Test *test) override;
 
 private:
   void *GetCtorPointer(const llvm::Function &Function);

@@ -135,6 +135,6 @@ mutation_operators:
     compiledModule_tests.getBinary(),
     compiledModule_testees.getBinary()
   });
-
-  runner.runTest(Test1, objects);
+  runner.loadProgram(objects);
+  runner.runTest(Test1);
 }

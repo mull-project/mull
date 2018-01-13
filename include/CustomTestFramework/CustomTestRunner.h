@@ -19,16 +19,21 @@ class Module;
 }
 
 namespace mull {
+struct InstrumentationInfo;
 
 class CustomTestRunner : public TestRunner {
   llvm::orc::ObjectLinkingLayer<> ObjectLayer;
   mull::Mangler mangler;
   llvm::orc::LocalCXXRuntimeOverrides overrides;
   std::string instrumentationInfoName;
+  llvm::orc::ObjectLinkingLayer<>::ObjSetHandleT handle;
+  InstrumentationInfo **trampoline;
 public:
 
   CustomTestRunner(llvm::TargetMachine &machine);
-  ExecutionStatus runTest(Test *test, ObjectFiles &objectFiles) override;
+  ~CustomTestRunner();
+  void loadProgram(ObjectFiles &objectFiles) override;
+  ExecutionStatus runTest(Test *test) override;
 
 private:
   void *GetCtorPointer(const llvm::Function &Function);

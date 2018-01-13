@@ -8,15 +8,18 @@ using namespace mull;
 using namespace llvm;
 using namespace llvm::orc;
 
+static llvm::orc::ObjectLinkingLayer<>::ObjSetHandleT MullCustomTestDummyHandle;
+
 class Mull_CustomTest_Resolver : public RuntimeDyld::SymbolResolver {
   LocalCXXRuntimeOverrides &overrides;
-  Test *test;
   std::string instrumentationInfoName;
+  InstrumentationInfo **trampoline;
 public:
 
-  Mull_CustomTest_Resolver(LocalCXXRuntimeOverrides &overrides, Test *test,
-                           std::string instrumentationInfoName)
-    : overrides(overrides), test(test), instrumentationInfoName(instrumentationInfoName) {}
+  Mull_CustomTest_Resolver(LocalCXXRuntimeOverrides &overrides,
+                           std::string instrumentationInfoName,
+                           InstrumentationInfo **trampoline)
+    : overrides(overrides), instrumentationInfoName(instrumentationInfoName), trampoline(trampoline) {}
 
   RuntimeDyld::SymbolInfo findSymbol(const std::string &name) {
     /// Overrides should go first, otherwise functions of the host process
@@ -30,7 +33,7 @@ public:
     }
 
     if (name == instrumentationInfoName) {
-      return RuntimeDyld::SymbolInfo((uint64_t)&test->getInstrumentationInfo(), JITSymbolFlags::Exported);
+      return RuntimeDyld::SymbolInfo((uint64_t)trampoline, JITSymbolFlags::Exported);
     }
 
     return RuntimeDyld::SymbolInfo(nullptr);
@@ -47,8 +50,14 @@ CustomTestRunner::CustomTestRunner(llvm::TargetMachine &machine) :
   overrides([this](const char *name) {
     return this->mangler.getNameWithPrefix(name);
   }),
-  instrumentationInfoName(mangler.getNameWithPrefix("mull_instrumentation_info"))
+  instrumentationInfoName(mangler.getNameWithPrefix("mull_instrumentation_info")),
+  handle(MullCustomTestDummyHandle),
+  trampoline(new InstrumentationInfo*)
 {
+}
+
+CustomTestRunner::~CustomTestRunner() {
+  delete trampoline;
 }
 
 void *CustomTestRunner::GetCtorPointer(const llvm::Function &Function) {
@@ -79,14 +88,24 @@ void CustomTestRunner::runStaticCtor(llvm::Function *Ctor) {
   ctor();
 }
 
-ExecutionStatus CustomTestRunner::runTest(Test *test, ObjectFiles &objectFiles) {
-  CustomTest_Test *customTest = dyn_cast<CustomTest_Test>(test);
+void CustomTestRunner::loadProgram(ObjectFiles &objectFiles) {
+  //  handle = llvm::orc::ObjectLinkingLayer<>::ObjSetHandleT handle;
+  if (handle != MullCustomTestDummyHandle) {
+    ObjectLayer.removeObjectSet(handle);
+  }
 
-  auto Handle =
-    ObjectLayer.addObjectSet(objectFiles,
-                             make_unique<SectionMemoryManager>(),
-                             make_unique<Mull_CustomTest_Resolver>(overrides, test,
-                                                                   instrumentationInfoName));
+  handle = ObjectLayer.addObjectSet(objectFiles,
+                                    make_unique<SectionMemoryManager>(),
+                                    make_unique<Mull_CustomTest_Resolver>(overrides,
+                                                                          instrumentationInfoName,
+                                                                          trampoline));
+  ObjectLayer.emitAndFinalize(handle);
+}
+
+ExecutionStatus CustomTestRunner::runTest(Test *test) {
+  *trampoline = &test->getInstrumentationInfo();
+
+  CustomTest_Test *customTest = dyn_cast<CustomTest_Test>(test);
 
   for (auto &constructor: customTest->getConstructors()) {
     runStaticCtor(constructor);
@@ -114,8 +133,6 @@ ExecutionStatus CustomTestRunner::runTest(Test *test, ObjectFiles &objectFiles) 
   delete[] argv;
 
   overrides.runDestructors();
-
-  ObjectLayer.removeObjectSet(Handle);
 
   if (exitStatus == 0) {
     return ExecutionStatus::Passed;
