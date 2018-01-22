@@ -72,6 +72,21 @@ public:
         break;
     }
   }
+  enum class UseCache {
+    No,
+    Yes
+  };
+  static std::string cachingToString(UseCache caching) {
+    switch (caching) {
+      case UseCache::Yes:
+        return "yes";
+        break;
+
+      case UseCache::No:
+        return "no";
+        break;
+    }
+  }
 private:
   std::string bitcodeFileList;
 
@@ -87,7 +102,7 @@ private:
 
   Fork fork;
   DryRunMode dryRun;
-  bool useCache;
+  UseCache caching;
   bool emitDebugInfo;
   bool diagnostics;
 
@@ -120,7 +135,7 @@ public:
     customTests(),
     fork(Fork::Enabled),
     dryRun(DryRunMode::Disabled),
-    useCache(false),
+    caching(UseCache::No),
     emitDebugInfo(false),
     diagnostics(false),
     timeout(MullDefaultTimeoutMilliseconds),
@@ -140,7 +155,7 @@ public:
          const std::vector<CustomTestDefinition> definitions,
          Fork fork,
          DryRunMode dryRun,
-         bool cache,
+         UseCache cache,
          bool debugInfo,
          bool diagnostics,
          int timeout,
@@ -157,7 +172,7 @@ public:
     customTests(definitions),
     fork(fork),
     dryRun(dryRun),
-    useCache(cache),
+    caching(cache),
     emitDebugInfo(debugInfo),
     diagnostics(diagnostics),
     timeout(timeout),
@@ -258,8 +273,8 @@ public:
     return timeout;
   }
 
-  bool getUseCache() const {
-    return useCache;
+  bool cachingEnabled() const {
+    return caching == UseCache::Yes;
   }
 
   bool dryRunModeEnabled() const {
@@ -292,6 +307,7 @@ public:
     << "\t" << "distance: " << getMaxDistance() << '\n'
     << "\t" << "dry_run: " << dryRunToString(dryRun) << '\n'
     << "\t" << "fork: " << forkToString(fork) << '\n'
+    << "\t" << "use_cache: " << cachingToString(caching) << '\n'
     << "\t" << "emit_debug_info: " << shouldEmitDebugInfo() << '\n';
 
     if (mutationOperators.empty() == false) {

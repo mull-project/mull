@@ -218,7 +218,6 @@ TEST(SQLiteReporter, integrationTest_Config) {
     "test_method2"
   });
 
-  bool useCache = true;
   bool emitDebugInfo = false;
   bool diagnostics = false;
 
@@ -235,7 +234,8 @@ TEST(SQLiteReporter, integrationTest_Config) {
                 {}, {},
                 Config::Fork::Enabled,
                 Config::DryRunMode::Enabled,
-                useCache, emitDebugInfo, diagnostics,
+                Config::UseCache::Yes,
+                emitDebugInfo, diagnostics,
                 timeout, distance,
                 cacheDirectory);
 
@@ -411,7 +411,6 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
     "test_method2"
   });
 
-  bool useCache = true;
   bool emitDebugInfo = true;
   bool diagnostics = false;
 
@@ -428,7 +427,8 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
                 {}, {},
                 Config::Fork::Enabled,
                 Config::DryRunMode::Enabled,
-                useCache, emitDebugInfo, diagnostics,
+                Config::UseCache::Yes,
+                emitDebugInfo, diagnostics,
                 timeout, distance,
                 cacheDirectory);
 
@@ -555,7 +555,6 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
     "test_method2"
   });
 
-  bool useCache = true;
   bool emitDebugInfo = false;
   bool diagnostics = false;
 
@@ -572,7 +571,8 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
                 {}, {},
                 Config::Fork::Enabled,
                 Config::DryRunMode::Enabled,
-                useCache, emitDebugInfo, diagnostics,
+                Config::UseCache::Yes,
+                emitDebugInfo, diagnostics,
                 timeout, distance,
                 cacheDirectory);
 
