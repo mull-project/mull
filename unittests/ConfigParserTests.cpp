@@ -226,6 +226,31 @@ TEST_F(ConfigParserTestFixture, loadConfig_DryRun_Disabled) {
   ASSERT_FALSE(config.dryRunModeEnabled());
 }
 
+TEST_F(ConfigParserTestFixture, loadConfig_Diagnostics_Unspecified) {
+  configWithYamlContent("dry_run: true\n");
+  ASSERT_FALSE(config.isDiagnosticsEnabled());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_Diagnostics_True) {
+  configWithYamlContent("diagnostics: true\n");
+  ASSERT_TRUE(config.isDiagnosticsEnabled());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_Diagnostics_Enabled) {
+  configWithYamlContent("diagnostics: enabled\n");
+  ASSERT_TRUE(config.isDiagnosticsEnabled());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_Diagnostics_False) {
+  configWithYamlContent("diagnostics: false\n");
+  ASSERT_FALSE(config.isDiagnosticsEnabled());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_Diagnostics_Disabled) {
+  configWithYamlContent("diagnostics: disabled\n");
+  ASSERT_FALSE(config.isDiagnosticsEnabled());
+}
+
 TEST_F(ConfigParserTestFixture, loadConfig_UseCache_Unspecified) {
   configWithYamlContent("");
   ASSERT_FALSE(config.cachingEnabled());

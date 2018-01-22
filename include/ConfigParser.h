@@ -76,6 +76,16 @@ struct ScalarEnumerationTraits<mull::Config::EmitDebugInfo> {
 };
 
 template <>
+struct ScalarEnumerationTraits<mull::Config::Diagnostics> {
+  static void enumeration(IO &io, mull::Config::Diagnostics &value) {
+    io.enumCase(value, "true",  mull::Config::Diagnostics::Enabled);
+    io.enumCase(value, "enabled",  mull::Config::Diagnostics::Enabled);
+    io.enumCase(value, "false",  mull::Config::Diagnostics::Disabled);
+    io.enumCase(value, "disabled",  mull::Config::Diagnostics::Disabled);
+  }
+};
+
+template <>
 struct MappingTraits<mull::Config>
 {
   static void mapping(IO& io, mull::Config& config)

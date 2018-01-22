@@ -218,8 +218,6 @@ TEST(SQLiteReporter, integrationTest_Config) {
     "test_method2"
   });
 
-  bool diagnostics = false;
-
   int timeout = 42;
   int distance = 10;
   std::string cacheDirectory = "/a/cache";
@@ -235,7 +233,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
                 Config::DryRunMode::Enabled,
                 Config::UseCache::Yes,
                 Config::EmitDebugInfo::No,
-                diagnostics,
+                Config::Diagnostics::Disabled,
                 timeout, distance,
                 cacheDirectory);
 
@@ -411,8 +409,6 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
     "test_method2"
   });
 
-  bool diagnostics = false;
-
   int timeout = 42;
   int distance = 10;
   std::string cacheDirectory = "/a/cache";
@@ -428,7 +424,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
                 Config::DryRunMode::Enabled,
                 Config::UseCache::Yes,
                 Config::EmitDebugInfo::Yes,
-                diagnostics,
+                Config::Diagnostics::Disabled,
                 timeout, distance,
                 cacheDirectory);
 
@@ -555,8 +551,6 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
     "test_method2"
   });
 
-  bool diagnostics = false;
-
   int timeout = 42;
   int distance = 10;
   std::string cacheDirectory = "/a/cache";
@@ -572,7 +566,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
                 Config::DryRunMode::Enabled,
                 Config::UseCache::Yes,
                 Config::EmitDebugInfo::No,
-                diagnostics,
+                Config::Diagnostics::Disabled,
                 timeout, distance,
                 cacheDirectory);
 

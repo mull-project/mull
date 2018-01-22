@@ -102,6 +102,21 @@ public:
         break;
     }
   }
+  enum class Diagnostics {
+    Disabled,
+    Enabled
+  };
+  static std::string diagnosticsToString(Diagnostics diagnostics) {
+    switch (diagnostics) {
+      case Diagnostics::Enabled:
+        return "enabled";
+        break;
+
+      case Diagnostics::Disabled:
+        return "disabled";
+        break;
+    }
+  }
 private:
   std::string bitcodeFileList;
 
@@ -119,7 +134,7 @@ private:
   DryRunMode dryRun;
   UseCache caching;
   EmitDebugInfo emitDebugInfo;
-  bool diagnostics;
+  Diagnostics diagnostics;
 
   int timeout;
   int maxDistance;
@@ -152,7 +167,7 @@ public:
     dryRun(DryRunMode::Disabled),
     caching(UseCache::No),
     emitDebugInfo(EmitDebugInfo::No),
-    diagnostics(false),
+    diagnostics(Diagnostics::Disabled),
     timeout(MullDefaultTimeoutMilliseconds),
     maxDistance(128),
     cacheDirectory("/tmp/mull_cache")
@@ -172,7 +187,7 @@ public:
          DryRunMode dryRun,
          UseCache cache,
          EmitDebugInfo debugInfo,
-         bool diagnostics,
+         Diagnostics diagnostics,
          int timeout,
          int distance,
          const std::string &cacheDir) :
@@ -301,7 +316,7 @@ public:
   }
 
   bool isDiagnosticsEnabled() const {
-    return diagnostics;
+    return diagnostics == Diagnostics::Enabled;
   }
 
   int getMaxDistance() const {
@@ -323,6 +338,7 @@ public:
     << "\t" << "dry_run: " << dryRunToString(dryRun) << '\n'
     << "\t" << "fork: " << forkToString(fork) << '\n'
     << "\t" << "use_cache: " << cachingToString(caching) << '\n'
+    << "\t" << "diagnostics: " << diagnosticsToString(diagnostics) << '\n'
     << "\t" << "emit_debug_info: " << emitDebugInfoToString(emitDebugInfo) << '\n';
 
     if (mutationOperators.empty() == false) {
