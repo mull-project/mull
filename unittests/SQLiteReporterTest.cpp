@@ -218,7 +218,6 @@ TEST(SQLiteReporter, integrationTest_Config) {
     "test_method2"
   });
 
-  bool doFork = true;
   bool dryRun = true;
   bool useCache = true;
   bool emitDebugInfo = false;
@@ -235,7 +234,8 @@ TEST(SQLiteReporter, integrationTest_Config) {
                 objectFileList,
                 selectedTests,
                 {}, {},
-                doFork, dryRun, useCache, emitDebugInfo, diagnostics,
+                Config::Fork::Enabled,
+                dryRun, useCache, emitDebugInfo, diagnostics,
                 timeout, distance,
                 cacheDirectory);
 
@@ -411,7 +411,6 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
     "test_method2"
   });
 
-  bool doFork = true;
   bool dryRun = true;
   bool useCache = true;
   bool emitDebugInfo = true;
@@ -428,7 +427,8 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
                 objectFileList,
                 configTests,
                 {}, {},
-                doFork, dryRun, useCache, emitDebugInfo, diagnostics,
+                Config::Fork::Enabled,
+                dryRun, useCache, emitDebugInfo, diagnostics,
                 timeout, distance,
                 cacheDirectory);
 
@@ -555,7 +555,6 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
     "test_method2"
   });
 
-  bool doFork = true;
   bool dryRun = true;
   bool useCache = true;
   bool emitDebugInfo = false;
@@ -572,7 +571,8 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
                 objectFileList,
                 configTests,
                 {}, {},
-                doFork, dryRun, useCache, emitDebugInfo, diagnostics,
+                Config::Fork::Enabled,
+                dryRun, useCache, emitDebugInfo, diagnostics,
                 timeout, distance,
                 cacheDirectory);
 

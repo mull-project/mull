@@ -168,17 +168,27 @@ TEST_F(ConfigParserTestFixture, loadConfig_objectFileList_nonExistingFile) {
 
 TEST_F(ConfigParserTestFixture, loadConfig_Fork_True) {
   configWithYamlContent("fork: true\n");
-  ASSERT_EQ(true, config.getFork());
+  ASSERT_EQ(true, config.forkEnabled());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_Fork_Enabled) {
+  configWithYamlContent("fork: enabled\n");
+  ASSERT_EQ(true, config.forkEnabled());
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_Fork_False) {
   configWithYamlContent("fork: false\n");
-  ASSERT_EQ(false, config.getFork());
+  ASSERT_EQ(false, config.forkEnabled());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_Fork_Disabled) {
+  configWithYamlContent("fork: disabled\n");
+  ASSERT_EQ(false, config.forkEnabled());
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_Fork_Unspecified) {
   configWithYamlContent("");
-  ASSERT_EQ(true, config.getFork());
+  ASSERT_EQ(true, config.forkEnabled());
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_Timeout_Unspecified) {

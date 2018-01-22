@@ -283,7 +283,7 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
     + "'" + csvDynamicLibraries + "',"
     + "'" + csvObjectFiles + "',"
     + "'" + csvTests + "',"
-    + "'" + std::to_string(config.getFork()) + "',"
+    + "'" + std::to_string(config.forkEnabled()) + "',"
     + "'" + std::to_string(config.isDryRun()) + "',"
     + "'" + std::to_string(config.getUseCache()) + "',"
     + "'" + std::to_string(config.getTimeout()) + "',"

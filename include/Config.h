@@ -41,6 +41,23 @@ struct CustomTestDefinition {
 };
 
 class Config {
+public:
+  enum class Fork {
+    Disabled,
+    Enabled
+  };
+  static std::string forkToString(Fork fork) {
+    switch (fork) {
+      case Fork::Enabled:
+        return "enabled";
+        break;
+
+      case Fork::Disabled:
+        return "disabled";
+        break;
+    }
+  }
+private:
   std::string bitcodeFileList;
 
   std::string projectName;
@@ -53,7 +70,7 @@ class Config {
   std::vector<std::string> excludeLocations;
   std::vector<CustomTestDefinition> customTests;
 
-  bool fork;
+  Fork fork;
   bool dryRun;
   bool useCache;
   bool emitDebugInfo;
@@ -86,7 +103,7 @@ public:
     tests(),
     excludeLocations(),
     customTests(),
-    fork(true),
+    fork(Fork::Enabled),
     dryRun(false),
     useCache(false),
     emitDebugInfo(false),
@@ -106,7 +123,7 @@ public:
          const std::vector<std::string> tests,
          const std::vector<std::string> excludeLocations,
          const std::vector<CustomTestDefinition> definitions,
-         bool fork,
+         Fork fork,
          bool dryrun,
          bool cache,
          bool debugInfo,
@@ -218,8 +235,8 @@ public:
     return customTests;
   }
 
-  bool getFork() const {
-    return fork;
+  bool forkEnabled() const {
+    return fork == Fork::Enabled;
   }
 
   int getTimeout() const {
@@ -259,7 +276,7 @@ public:
     << "\t" << "test_framework: " << getTestFramework() << '\n'
     << "\t" << "distance: " << getMaxDistance() << '\n'
     << "\t" << "dry_run: " << isDryRun() << '\n'
-    << "\t" << "fork: " << getFork() << '\n'
+    << "\t" << "fork: " << forkToString(fork) << '\n'
     << "\t" << "emit_debug_info: " << shouldEmitDebugInfo() << '\n';
 
     if (mutationOperators.empty() == false) {

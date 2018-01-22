@@ -36,6 +36,16 @@ struct MappingTraits<mull::CustomTestDefinition> {
 };
 
 template <>
+struct ScalarEnumerationTraits<mull::Config::Fork> {
+  static void enumeration(IO &io, mull::Config::Fork &fork) {
+    io.enumCase(fork, "true",  mull::Config::Fork::Enabled);
+    io.enumCase(fork, "enabled",  mull::Config::Fork::Enabled);
+    io.enumCase(fork, "false",  mull::Config::Fork::Disabled);
+    io.enumCase(fork, "disabled",  mull::Config::Fork::Disabled);
+  }
+};
+
+template <>
 struct MappingTraits<mull::Config>
 {
   static void mapping(IO& io, mull::Config& config)

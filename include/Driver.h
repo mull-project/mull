@@ -55,7 +55,7 @@ public:
   Driver(Config &C, ModuleLoader &ML, TestFinder &TF, TestRunner &TR, Toolchain &t, Filter &f, MutationsFinder &mutationsFinder)
     : Cfg(C), Loader(ML), Finder(TF), Runner(TR), toolchain(t), filter(f), mutationsFinder(mutationsFinder), precompiledObjectFiles(), instrumentation() {
 
-      if (C.getFork()) {
+      if (C.forkEnabled()) {
         this->Sandbox = new ForkProcessSandbox();
       } else {
         this->Sandbox = new NullProcessSandbox();
