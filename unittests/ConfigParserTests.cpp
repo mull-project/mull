@@ -256,9 +256,24 @@ TEST_F(ConfigParserTestFixture, loadConfig_emitDebugInfo_Unspecified) {
   ASSERT_FALSE(config.shouldEmitDebugInfo());
 }
 
-TEST_F(ConfigParserTestFixture, loadConfig_emitDebugInfo_SpecificValue) {
+TEST_F(ConfigParserTestFixture, loadConfig_emitDebugInfo_True) {
   configWithYamlContent("emit_debug_info: true\n");
   ASSERT_TRUE(config.shouldEmitDebugInfo());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_emitDebugInfo_Yes) {
+  configWithYamlContent("emit_debug_info: yes\n");
+  ASSERT_TRUE(config.shouldEmitDebugInfo());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_emitDebugInfo_False) {
+  configWithYamlContent("emit_debug_info: false\n");
+  ASSERT_FALSE(config.shouldEmitDebugInfo());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_emitDebugInfo_No) {
+  configWithYamlContent("emit_debug_info: no\n");
+  ASSERT_FALSE(config.shouldEmitDebugInfo());
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_MaxDistance_Unspecified) {

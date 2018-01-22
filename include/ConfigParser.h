@@ -66,6 +66,16 @@ struct ScalarEnumerationTraits<mull::Config::UseCache> {
 };
 
 template <>
+struct ScalarEnumerationTraits<mull::Config::EmitDebugInfo> {
+  static void enumeration(IO &io, mull::Config::EmitDebugInfo &value) {
+    io.enumCase(value, "true",  mull::Config::EmitDebugInfo::Yes);
+    io.enumCase(value, "yes",  mull::Config::EmitDebugInfo::Yes);
+    io.enumCase(value, "false",  mull::Config::EmitDebugInfo::No);
+    io.enumCase(value, "no",  mull::Config::EmitDebugInfo::No);
+  }
+};
+
+template <>
 struct MappingTraits<mull::Config>
 {
   static void mapping(IO& io, mull::Config& config)

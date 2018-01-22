@@ -87,6 +87,21 @@ public:
         break;
     }
   }
+  enum class EmitDebugInfo {
+    No,
+    Yes
+  };
+  static std::string emitDebugInfoToString(EmitDebugInfo emitDebugInfo) {
+    switch (emitDebugInfo) {
+      case EmitDebugInfo::Yes:
+        return "yes";
+        break;
+
+      case EmitDebugInfo::No:
+        return "no";
+        break;
+    }
+  }
 private:
   std::string bitcodeFileList;
 
@@ -103,7 +118,7 @@ private:
   Fork fork;
   DryRunMode dryRun;
   UseCache caching;
-  bool emitDebugInfo;
+  EmitDebugInfo emitDebugInfo;
   bool diagnostics;
 
   int timeout;
@@ -136,7 +151,7 @@ public:
     fork(Fork::Enabled),
     dryRun(DryRunMode::Disabled),
     caching(UseCache::No),
-    emitDebugInfo(false),
+    emitDebugInfo(EmitDebugInfo::No),
     diagnostics(false),
     timeout(MullDefaultTimeoutMilliseconds),
     maxDistance(128),
@@ -156,7 +171,7 @@ public:
          Fork fork,
          DryRunMode dryRun,
          UseCache cache,
-         bool debugInfo,
+         EmitDebugInfo debugInfo,
          bool diagnostics,
          int timeout,
          int distance,
@@ -282,7 +297,7 @@ public:
   }
 
   bool shouldEmitDebugInfo() const {
-    return emitDebugInfo;
+    return emitDebugInfo == EmitDebugInfo::Yes;
   }
 
   bool isDiagnosticsEnabled() const {
@@ -308,7 +323,7 @@ public:
     << "\t" << "dry_run: " << dryRunToString(dryRun) << '\n'
     << "\t" << "fork: " << forkToString(fork) << '\n'
     << "\t" << "use_cache: " << cachingToString(caching) << '\n'
-    << "\t" << "emit_debug_info: " << shouldEmitDebugInfo() << '\n';
+    << "\t" << "emit_debug_info: " << emitDebugInfoToString(emitDebugInfo) << '\n';
 
     if (mutationOperators.empty() == false) {
       Logger::debug() << "\t" << "mutation_operators: " << '\n';
