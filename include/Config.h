@@ -57,6 +57,21 @@ public:
         break;
     }
   }
+  enum class DryRunMode {
+    Disabled,
+    Enabled
+  };
+  static std::string dryRunToString(DryRunMode dryRun) {
+    switch (dryRun) {
+      case DryRunMode::Enabled:
+        return "enabled";
+        break;
+
+      case DryRunMode::Disabled:
+        return "disabled";
+        break;
+    }
+  }
 private:
   std::string bitcodeFileList;
 
@@ -71,7 +86,7 @@ private:
   std::vector<CustomTestDefinition> customTests;
 
   Fork fork;
-  bool dryRun;
+  DryRunMode dryRun;
   bool useCache;
   bool emitDebugInfo;
   bool diagnostics;
@@ -104,7 +119,7 @@ public:
     excludeLocations(),
     customTests(),
     fork(Fork::Enabled),
-    dryRun(false),
+    dryRun(DryRunMode::Disabled),
     useCache(false),
     emitDebugInfo(false),
     diagnostics(false),
@@ -124,7 +139,7 @@ public:
          const std::vector<std::string> excludeLocations,
          const std::vector<CustomTestDefinition> definitions,
          Fork fork,
-         bool dryrun,
+         DryRunMode dryRun,
          bool cache,
          bool debugInfo,
          bool diagnostics,
@@ -141,7 +156,7 @@ public:
     excludeLocations(excludeLocations),
     customTests(definitions),
     fork(fork),
-    dryRun(dryrun),
+    dryRun(dryRun),
     useCache(cache),
     emitDebugInfo(debugInfo),
     diagnostics(diagnostics),
@@ -247,8 +262,8 @@ public:
     return useCache;
   }
 
-  bool isDryRun() const {
-    return dryRun;
+  bool dryRunModeEnabled() const {
+    return dryRun == DryRunMode::Enabled;
   }
 
   bool shouldEmitDebugInfo() const {
@@ -275,7 +290,7 @@ public:
     << "\t" << "project_name: " << getProjectName() << '\n'
     << "\t" << "test_framework: " << getTestFramework() << '\n'
     << "\t" << "distance: " << getMaxDistance() << '\n'
-    << "\t" << "dry_run: " << isDryRun() << '\n'
+    << "\t" << "dry_run: " << dryRunToString(dryRun) << '\n'
     << "\t" << "fork: " << forkToString(fork) << '\n'
     << "\t" << "emit_debug_info: " << shouldEmitDebugInfo() << '\n';
 

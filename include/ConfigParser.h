@@ -46,6 +46,16 @@ struct ScalarEnumerationTraits<mull::Config::Fork> {
 };
 
 template <>
+struct ScalarEnumerationTraits<mull::Config::DryRunMode> {
+  static void enumeration(IO &io, mull::Config::DryRunMode &value) {
+    io.enumCase(value, "true",  mull::Config::DryRunMode::Enabled);
+    io.enumCase(value, "enabled",  mull::Config::DryRunMode::Enabled);
+    io.enumCase(value, "false",  mull::Config::DryRunMode::Disabled);
+    io.enumCase(value, "disabled",  mull::Config::DryRunMode::Disabled);
+  }
+};
+
+template <>
 struct MappingTraits<mull::Config>
 {
   static void mapping(IO& io, mull::Config& config)

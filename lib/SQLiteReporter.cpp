@@ -284,7 +284,7 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
     + "'" + csvObjectFiles + "',"
     + "'" + csvTests + "',"
     + "'" + std::to_string(config.forkEnabled()) + "',"
-    + "'" + std::to_string(config.isDryRun()) + "',"
+    + "'" + std::to_string(config.dryRunModeEnabled()) + "',"
     + "'" + std::to_string(config.getUseCache()) + "',"
     + "'" + std::to_string(config.getTimeout()) + "',"
     + "'" + std::to_string(config.getMaxDistance()) + "',"

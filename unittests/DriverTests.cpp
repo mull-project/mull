@@ -54,7 +54,6 @@ TEST(Driver, SimpleTest_MathAddMutationOperator) {
   std::string projectName = "some_project";
   std::string testFramework = "SimpleTest";
 
-  bool dryRun = false;
   bool useCache = false;
   bool emitDebugInfo = false;
   bool diagnostics = false;
@@ -71,7 +70,7 @@ TEST(Driver, SimpleTest_MathAddMutationOperator) {
                 {},
                 {},
                 Config::Fork::Disabled,
-                dryRun,
+                Config::DryRunMode::Disabled,
                 useCache,
                 emitDebugInfo,
                 diagnostics,
@@ -136,7 +135,6 @@ TEST(Driver, SimpleTest_MathSubMutationOperator) {
   std::string projectName = "some_project";
   std::string testFramework = "SimpleTest";
 
-  bool dryRun = false;
   bool useCache = false;
   bool emitDebugInfo = false;
   bool diagnostics = false;
@@ -154,7 +152,7 @@ TEST(Driver, SimpleTest_MathSubMutationOperator) {
                 {},
                 {},
                 Config::Fork::Disabled,
-                dryRun,
+                Config::DryRunMode::Disabled,
                 useCache,
                 emitDebugInfo,
                 diagnostics,
@@ -217,7 +215,6 @@ TEST(Driver, SimpleTest_MathMulMutationOperator) {
   std::string projectName = "some_project";
   std::string testFramework = "SimpleTest";
 
-  bool dryRun = false;
   bool useCache = false;
   bool emitDebugInfo = false;
   bool diagnostics = false;
@@ -235,7 +232,7 @@ TEST(Driver, SimpleTest_MathMulMutationOperator) {
                 {},
                 {},
                 Config::Fork::Disabled,
-                dryRun,
+                Config::DryRunMode::Disabled,
                 useCache,
                 emitDebugInfo,
                 diagnostics,
@@ -297,7 +294,6 @@ TEST(Driver, SimpleTest_MathDivMutationOperator) {
   std::string projectName = "some_project";
   std::string testFramework = "SimpleTest";
 
-  bool dryRun = false;
   bool useCache = false;
   bool emitDebugInfo = false;
   bool diagnostics = false;
@@ -315,7 +311,7 @@ TEST(Driver, SimpleTest_MathDivMutationOperator) {
                 {},
                 {},
                 Config::Fork::Disabled,
-                dryRun,
+                Config::DryRunMode::Disabled,
                 useCache,
                 emitDebugInfo,
                 diagnostics,
@@ -377,7 +373,6 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
   std::string projectName = "some_project";
   std::string testFramework = "SimpleTest";
 
-  bool dryRun = false;
   bool useCache = false;
   bool emitDebugInfo = false;
   bool diagnostics = false;
@@ -395,7 +390,7 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
                 {},
                 {},
                 Config::Fork::Disabled,
-                dryRun,
+                Config::DryRunMode::Disabled,
                 useCache,
                 emitDebugInfo,
                 diagnostics,
@@ -450,7 +445,6 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
   std::string projectName = "some_project";
   std::string testFramework = "SimpleTest";
 
-  bool dryRun = false;
   bool useCache = false;
   bool emitDebugInfo = false;
   bool diagnostics = false;
@@ -468,7 +462,7 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
                 {},
                 {},
                 Config::Fork::Disabled,
-                dryRun,
+                Config::DryRunMode::Disabled,
                 useCache,
                 emitDebugInfo,
                 diagnostics,
@@ -523,7 +517,6 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator) {
   std::string projectName = "some_project";
   std::string testFramework = "SimpleTest";
 
-  bool dryRun = false;
   bool useCache = false;
   bool emitDebugInfo = false;
   bool diagnostics = false;
@@ -541,7 +534,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator) {
                 {},
                 {},
                 Config::Fork::Disabled,
-                dryRun,
+                Config::DryRunMode::Disabled,
                 useCache,
                 emitDebugInfo,
                 diagnostics,
@@ -669,7 +662,6 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator_CPP) {
   std::string projectName = "some_project";
   std::string testFramework = "SimpleTest";
 
-  bool dryRun = false;
   bool useCache = false;
   bool debugInfo = false;
   bool diagnostics = false;
@@ -688,7 +680,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator_CPP) {
                 {},
                 // this test crashes in 2 tests, so we want a sandbox.
                 Config::Fork::Enabled,
-                dryRun,
+                Config::DryRunMode::Disabled,
                 useCache,
                 debugInfo,
                 diagnostics,
@@ -778,7 +770,6 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutationOperator_CPP) {
   std::string projectName = "some_project";
   std::string testFramework = "SimpleTest";
 
-  bool dryRun = false;
   bool useCache = false;
   bool debugInfo = false;
   bool diagnostics = false;
@@ -796,7 +787,7 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutationOperator_CPP) {
                 {},
                 {},
                 Config::Fork::Disabled,
-                dryRun,
+                Config::DryRunMode::Disabled,
                 useCache,
                 debugInfo,
                 diagnostics,
@@ -848,7 +839,6 @@ TEST(Driver, customTest) {
   std::string projectName = "some_custom_project";
   std::string testFramework = "CustomTest";
 
-  bool dryRun = false;
   bool useCache = false;
   bool emitDebugInfo = false;
   bool diagnostics = false;
@@ -871,7 +861,7 @@ TEST(Driver, customTest) {
                 {},
                 testDefinitions,
                 Config::Fork::Disabled,
-                dryRun,
+                Config::DryRunMode::Disabled,
                 useCache,
                 emitDebugInfo,
                 diagnostics,
@@ -920,7 +910,6 @@ TEST(Driver, customTest_withDynamicLibraries) {
   std::string projectName = "some_custom_project_with_dylibs";
   std::string testFramework = "CustomTest";
 
-  bool dryRun = false;
   bool useCache = false;
   bool emitDebugInfo = false;
   bool diagnostics = false;
@@ -945,7 +934,7 @@ TEST(Driver, customTest_withDynamicLibraries) {
                 {},
                 testDefinitions,
                 Config::Fork::Disabled,
-                dryRun,
+                Config::DryRunMode::Disabled,
                 useCache,
                 emitDebugInfo,
                 diagnostics,
@@ -992,7 +981,6 @@ TEST(Driver, DISABLED_customTest_withDynamicLibraries_and_ObjectFiles) {
   std::string projectName = "some_custom_project_with_dylibs_and_object_files";
   std::string testFramework = "CustomTest";
 
-  bool dryRun = false;
   bool useCache = false;
   bool emitDebugInfo = false;
   bool diagnostics = false;
@@ -1019,7 +1007,7 @@ TEST(Driver, DISABLED_customTest_withDynamicLibraries_and_ObjectFiles) {
                 {},
                 testDefinitions,
                 Config::Fork::Disabled,
-                dryRun,
+                Config::DryRunMode::Disabled,
                 useCache,
                 emitDebugInfo,
                 diagnostics,

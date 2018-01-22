@@ -203,12 +203,27 @@ TEST_F(ConfigParserTestFixture, loadConfig_Timeout_SpecificValue) {
 
 TEST_F(ConfigParserTestFixture, loadConfig_DryRun_Unspecified) {
   configWithYamlContent("");
-  ASSERT_FALSE(config.isDryRun());
+  ASSERT_FALSE(config.dryRunModeEnabled());
 }
 
-TEST_F(ConfigParserTestFixture, loadConfig_DryRun_SpecificValue) {
+TEST_F(ConfigParserTestFixture, loadConfig_DryRun_True) {
   configWithYamlContent("dry_run: true\n");
-  ASSERT_TRUE(config.isDryRun());
+  ASSERT_TRUE(config.dryRunModeEnabled());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_DryRun_Enabled) {
+  configWithYamlContent("dry_run: enabled\n");
+  ASSERT_TRUE(config.dryRunModeEnabled());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_DryRun_False) {
+  configWithYamlContent("dry_run: false\n");
+  ASSERT_FALSE(config.dryRunModeEnabled());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_DryRun_Disabled) {
+  configWithYamlContent("dry_run: disabled\n");
+  ASSERT_FALSE(config.dryRunModeEnabled());
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_UseCache_Unspecified) {
