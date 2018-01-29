@@ -76,7 +76,8 @@ TEST(SimpleTestRunner, runTest) {
   }
 
   /// Here we run test with original testee function
-  ASSERT_EQ(ExecutionStatus::Passed, Runner.runTest(Test.get(), ObjectFiles));
+  Runner.loadProgram(ObjectFiles);
+  ASSERT_EQ(ExecutionStatus::Passed, Runner.runTest(Test.get()));
 
   ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
 
@@ -107,7 +108,8 @@ TEST(SimpleTestRunner, runTest) {
     OwnedObjectFiles.push_back(std::move(Obj));
   }
 
-  ASSERT_EQ(ExecutionStatus::Failed, Runner.runTest(Test.get(), ObjectFiles));
+  Runner.loadProgram(ObjectFiles);
+  ASSERT_EQ(ExecutionStatus::Failed, Runner.runTest(Test.get()));
 
   ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
 }

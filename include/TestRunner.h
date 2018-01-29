@@ -18,9 +18,10 @@ public:
   typedef std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> OwnedObjectFiles;
   TestRunner(llvm::TargetMachine &targetMachine);
 
-  virtual ExecutionStatus runTest(Test *test, ObjectFiles &objectFiles) = 0;
+  virtual void loadProgram(ObjectFiles &objectFiles) = 0;
+  virtual ExecutionStatus runTest(Test *test) = 0;
 
-  virtual ~TestRunner() {}
+  virtual ~TestRunner() = default;
 };
 
 }

@@ -13,13 +13,15 @@ using namespace llvm;
 
 namespace mull {
 
-extern "C" void mull_enterFunction(InstrumentationInfo *info, uint64_t functionIndex) {
+extern "C" void mull_enterFunction(void **trampoline, uint64_t functionIndex) {
+  InstrumentationInfo *info = (InstrumentationInfo *)*trampoline;
   assert(info);
   assert(info->callTreeMapping);
   DynamicCallTree::enterFunction(functionIndex, info->callTreeMapping, info->callstack);
 }
 
-extern "C" void mull_leaveFunction(InstrumentationInfo *info, uint64_t functionIndex) {
+extern "C" void mull_leaveFunction(void **trampoline, uint64_t functionIndex) {
+  InstrumentationInfo *info = (InstrumentationInfo *)*trampoline;
   assert(info);
   assert(info->callTreeMapping);
   DynamicCallTree::leaveFunction(functionIndex, info->callTreeMapping, info->callstack);
@@ -31,14 +33,14 @@ Callbacks::Callbacks() {}
 
 Value *Callbacks::injectInstrumentationInfoPointer(llvm::Module *module) {
   auto &context = module->getContext();
-  auto driverPointerType = Type::getVoidTy(context)->getPointerTo();
+  auto driverPointerType = Type::getVoidTy(context)->getPointerTo()->getPointerTo();
   return module->getOrInsertGlobal("mull_instrumentation_info", driverPointerType);
 }
 
 void Callbacks::injectCallbacks(llvm::Function *function, uint64_t index, Value *infoPointer) {
   auto &context = function->getParent()->getContext();
   auto int64Type = Type::getInt64Ty(context);
-  auto driverPointerType = Type::getVoidTy(context)->getPointerTo();
+  auto driverPointerType = Type::getVoidTy(context)->getPointerTo()->getPointerTo();
   auto voidType = Type::getVoidTy(context);
   std::vector<Type *> parameterTypes({driverPointerType, int64Type});
 

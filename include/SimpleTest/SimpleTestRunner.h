@@ -15,13 +15,18 @@ class TargetMachine;
 namespace mull {
 
 class Test;
+struct InstrumentationInfo;
 
 class SimpleTestRunner : public TestRunner {
   llvm::orc::ObjectLinkingLayer<> ObjectLayer;
   llvm::Mangler Mangler;
+  llvm::orc::ObjectLinkingLayer<>::ObjSetHandleT handle;
+  InstrumentationInfo **trampoline;
 public:
   SimpleTestRunner(llvm::TargetMachine &targetMachine);
-  ExecutionStatus runTest(Test *test, TestRunner::ObjectFiles &objectFiles) override;
+  ~SimpleTestRunner() override;
+  void loadProgram(ObjectFiles &objectFiles) override;
+  ExecutionStatus runTest(Test *test) override;
 
 private:
   std::string MangleName(const llvm::StringRef &Name);

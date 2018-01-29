@@ -11,8 +11,8 @@ namespace llvm {
 namespace mull {
   struct InstrumentationInfo;
 
-  extern "C" void mull_enterFunction(InstrumentationInfo *info, uint64_t functionIndex);
-  extern "C" void mull_leaveFunction(InstrumentationInfo *info, uint64_t functionIndex);
+  extern "C" void mull_enterFunction(void **trampoline, uint64_t functionIndex);
+  extern "C" void mull_leaveFunction(void **trampoline, uint64_t functionIndex);
 
   class Callbacks {
   public:

@@ -51,8 +51,9 @@ TEST(CustomTestRunner, noTestNameSpecified) {
 
   CustomTest_Test test("test", "mull", {}, nullptr, {});
   ForkProcessSandbox sandbox;
+  runner.loadProgram(objects);
   ExecutionResult result = sandbox.run([&]() {
-    return runner.runTest(&test, objects);
+    return runner.runTest(&test);
   }, TestTimeout);
   ASSERT_EQ(result.status, ExecutionStatus::Failed);
 }
@@ -73,8 +74,9 @@ TEST(CustomTestRunner, tooManyParameters) {
 
   CustomTest_Test test("test", "mull", { "arg1", "arg2" }, nullptr, {});
   ForkProcessSandbox sandbox;
+  runner.loadProgram(objects);
   ExecutionResult result = sandbox.run([&]() {
-    return runner.runTest(&test, objects);
+    return runner.runTest(&test);
   }, TestTimeout);
   ASSERT_EQ(result.status, ExecutionStatus::Failed);
 }
@@ -95,8 +97,9 @@ TEST(CustomTestRunner, runPassingTest) {
 
   CustomTest_Test test("test", "mull", { "passing_test" }, nullptr, {});
   ForkProcessSandbox sandbox;
+  runner.loadProgram(objects);
   ExecutionResult result = sandbox.run([&]() {
-    return runner.runTest(&test, objects);
+    return runner.runTest(&test);
   }, TestTimeout);
   ASSERT_EQ(result.status, ExecutionStatus::Passed);
 }
@@ -122,8 +125,9 @@ TEST(CustomTestRunner, runFailingTest) {
 
   CustomTest_Test test("test", "mull", { "failing_test" }, nullptr, { constructor });
   ForkProcessSandbox sandbox;
+  runner.loadProgram(objects);
   ExecutionResult result = sandbox.run([&]() {
-    return runner.runTest(&test, objects);
+    return runner.runTest(&test);
   }, TestTimeout);
   ASSERT_EQ(result.status, ExecutionStatus::Failed);
 }
@@ -144,8 +148,9 @@ TEST(CustomTestRunner, attemptToRunUnknownTest) {
 
   CustomTest_Test test("test", "mull", { "foobar" }, nullptr, {});
   ForkProcessSandbox sandbox;
+  runner.loadProgram(objects);
   ExecutionResult result = sandbox.run([&]() {
-    return runner.runTest(&test, objects);
+    return runner.runTest(&test);
   }, TestTimeout);
   ASSERT_EQ(result.status, ExecutionStatus::Failed);
 }

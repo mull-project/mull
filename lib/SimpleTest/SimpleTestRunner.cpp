@@ -13,12 +13,14 @@
 using namespace mull;
 using namespace llvm;
 
+static llvm::orc::ObjectLinkingLayer<>::ObjSetHandleT MullSimpleTestDummyHandle;
+
 class Mull_SimpleTest_Resolver : public RuntimeDyld::SymbolResolver {
-  Test *test;
   std::string instrumentationInfoName;
+  InstrumentationInfo **trampoline;
 public:
-  Mull_SimpleTest_Resolver(Test *t, std::string instrumentationInfo)
-  : test(t), instrumentationInfoName(instrumentationInfo) {}
+  Mull_SimpleTest_Resolver(std::string instrumentationInfo, InstrumentationInfo **trampoline)
+  : instrumentationInfoName(instrumentationInfo), trampoline(trampoline) {}
 
   RuntimeDyld::SymbolInfo findSymbol(const std::string &Name) {
     if (auto address = RTDyldMemoryManager::getSymbolAddressInProcess(Name)) {
@@ -26,7 +28,7 @@ public:
     }
 
     if (Name == instrumentationInfoName) {
-      return RuntimeDyld::SymbolInfo((uint64_t)&test->getInstrumentationInfo(), JITSymbolFlags::Exported);
+      return RuntimeDyld::SymbolInfo((uint64_t)trampoline, JITSymbolFlags::Exported);
     }
 
     return RuntimeDyld::SymbolInfo(nullptr);
@@ -38,7 +40,14 @@ public:
 };
 
 SimpleTestRunner::SimpleTestRunner(TargetMachine &machine)
-  : TestRunner(machine) {}
+  : TestRunner(machine),
+    handle(MullSimpleTestDummyHandle),
+    trampoline(new InstrumentationInfo*)
+{}
+
+SimpleTestRunner::~SimpleTestRunner() {
+  delete trampoline;
+}
 
 std::string SimpleTestRunner::MangleName(const llvm::StringRef &Name) {
   std::string MangledName;
@@ -56,19 +65,25 @@ void *SimpleTestRunner::TestFunctionPointer(const llvm::Function &Function) {
   return FPointer;
 }
 
-ExecutionStatus SimpleTestRunner::runTest(Test *test, ObjectFiles &objectFiles) {
+void SimpleTestRunner::loadProgram(ObjectFiles &objectFiles) {
+  if (handle != MullSimpleTestDummyHandle) {
+    ObjectLayer.removeObjectSet(handle);
+  }
+  handle = ObjectLayer.addObjectSet(objectFiles,
+                                    make_unique<SectionMemoryManager>(),
+                                    make_unique<Mull_SimpleTest_Resolver>(MangleName("mull_instrumentation_info"), trampoline));
+  ObjectLayer.emitAndFinalize(handle);
+}
+
+ExecutionStatus SimpleTestRunner::runTest(Test *test) {
+  *trampoline = &test->getInstrumentationInfo();
   assert(isa<SimpleTest_Test>(test) && "Supposed to work only with");
 
   SimpleTest_Test *SimpleTest = dyn_cast<SimpleTest_Test>(test);
 
-  auto Handle = ObjectLayer.addObjectSet(objectFiles,
-                                         make_unique<SectionMemoryManager>(),
-                                         make_unique<Mull_SimpleTest_Resolver>(test, MangleName("mull_instrumentation_info")));
   void *FunctionPointer = TestFunctionPointer(*SimpleTest->GetTestFunction());
 
   uint64_t result = ((int (*)())(intptr_t)FunctionPointer)();
-
-  ObjectLayer.removeObjectSet(Handle);
 
   if (result == 1) {
     return ExecutionStatus::Passed;
