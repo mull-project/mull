@@ -28,7 +28,6 @@ set(mull_sources
 
   MullModule.cpp
   MutationPoint.cpp
-  TestResult.cpp
   TestRunner.cpp
   Testee.cpp
 

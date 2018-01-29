@@ -8,6 +8,7 @@
 #include "TestModuleFactory.h"
 #include "MutationsFinder.h"
 #include "Filter.h"
+#include "Testee.h"
 
 #include "gtest/gtest.h"
 
@@ -50,13 +51,22 @@ TEST(SQLiteReporter, integrationTest) {
   Function *testeeFunction = context.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(testeeFunction->empty());
 
-  Testee testee(testeeFunction, 1);
+  Testee testee(testeeFunction, test.get(), 1);
 
   std::vector<MutationPoint *> mutationPoints = mutationsFinder.getMutationPoints(context, testee, filter);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
   MutationPoint *mutationPoint = (*(mutationPoints.begin()));
+
+  std::vector<std::string> testIds({
+    test->getUniqueIdentifier(),
+    test->getUniqueIdentifier()
+  });
+  std::vector<std::string> mutationPointIds({
+    "",
+    mutationPoint->getUniqueIdentifier()
+  });
 
   const long long RunningTime_1 = 1;
   const long long RunningTime_2 = 2;
@@ -67,27 +77,27 @@ TEST(SQLiteReporter, integrationTest) {
   testExecutionResult.stdoutOutput = "testExecutionResult.STDOUT";
   testExecutionResult.stderrOutput = "testExecutionResult.STDERR";
 
+  test->setExecutionResult(testExecutionResult);
+
   ExecutionResult mutatedTestExecutionResult;
   mutatedTestExecutionResult.status = Failed;
   mutatedTestExecutionResult.runningTime = RunningTime_2;
   mutatedTestExecutionResult.stdoutOutput = "mutatedTestExecutionResult.STDOUT";
   mutatedTestExecutionResult.stderrOutput = "mutatedTestExecutionResult.STDERR";
 
-  std::unique_ptr<TestResult> testResult =
-    make_unique<TestResult>(testExecutionResult, std::move(test));
-
   auto mutationResult = make_unique<MutationResult>(mutatedTestExecutionResult,
                                                     mutationPoint,
-                                                    testee.getDistance());
+                                                    testee.getDistance(),
+                                                    test.get());
 
-  testResult->addMutantResult(std::move(mutationResult));
-
-  std::vector<std::unique_ptr<TestResult>> results;
-  results.push_back(std::move(testResult));
+  std::vector<std::unique_ptr<MutationResult>> mutationResults;
+  mutationResults.push_back(std::move(mutationResult));
 
   ResultTime resultTime(1234, 5678);
 
-  std::unique_ptr<Result> result = make_unique<Result>(std::move(results));
+  std::unique_ptr<Result> result = make_unique<Result>(std::move(tests),
+                                                       std::move(mutationResults),
+                                                       mutationPoints);
 
   /// STEP2. Reporting results to SQLite
   SQLiteReporter reporter("integration test");
@@ -108,28 +118,38 @@ TEST(SQLiteReporter, integrationTest) {
   sqlite3_stmt *selectStmt;
   sqlite3_prepare(database, selectQuery.c_str(), selectQuery.size(), &selectStmt, NULL);
 
-  int column1_status;
-  int column2_duration;
-  const unsigned char * column3_stdout;
-  const unsigned char * column4_stderr;
+  const unsigned char *column_test_id;
+  const unsigned char *column_mutation_point_id;
+  int column_status;
+  int column_duration;
+  const unsigned char *column_stdout;
+  const unsigned char *column_stderr;
 
   int numberOfRows = 0;
   while (1) {
     int stepResult = sqlite3_step (selectStmt);
 
     if (stepResult == SQLITE_ROW) {
-      column1_status = sqlite3_column_int(selectStmt, 0);
-      column2_duration = sqlite3_column_int(selectStmt, 1);
+      column_test_id = sqlite3_column_text(selectStmt, 0);
+      column_mutation_point_id = sqlite3_column_text(selectStmt, 1);
 
-      column3_stdout  = sqlite3_column_text (selectStmt, 2);
-      column4_stderr  = sqlite3_column_text (selectStmt, 3);
+      column_status = sqlite3_column_int(selectStmt, 2);
+      column_duration = sqlite3_column_int(selectStmt, 3);
 
-      ASSERT_EQ(column1_status, executionResults[numberOfRows].status);
-      ASSERT_EQ(column2_duration, executionResults[numberOfRows].runningTime);
+      column_stdout  = sqlite3_column_text(selectStmt, 4);
+      column_stderr  = sqlite3_column_text(selectStmt, 5);
 
-      ASSERT_EQ(strcmp((const char *)column3_stdout,
+      ASSERT_EQ(strcmp((const char *)column_test_id,
+                       testIds[numberOfRows].c_str()), 0);
+      ASSERT_EQ(strcmp((const char *)column_mutation_point_id,
+                       mutationPointIds[numberOfRows].c_str()), 0);
+
+      ASSERT_EQ(column_status, executionResults[numberOfRows].status);
+      ASSERT_EQ(column_duration, executionResults[numberOfRows].runningTime);
+
+      ASSERT_EQ(strcmp((const char *)column_stdout,
                        executionResults[numberOfRows].stdoutOutput.c_str()), 0);
-      ASSERT_EQ(strcmp((const char *)column4_stderr,
+      ASSERT_EQ(strcmp((const char *)column_stderr,
                        executionResults[numberOfRows].stderrOutput.c_str()), 0);
 
       numberOfRows++;
@@ -193,7 +213,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
     "negate_condition"
   });
 
-  std::vector<std::string> tests({
+  std::vector<std::string> selectedTests({
     "test_method1",
     "test_method2"
   });
@@ -213,7 +233,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
                 operators,
                 dynamicLibraryFileList,
                 objectFileList,
-                tests,
+                selectedTests,
                 {}, {},
                 doFork, dryRun, useCache, emitDebugInfo, diagnostics,
                 timeout, distance,
@@ -221,11 +241,15 @@ TEST(SQLiteReporter, integrationTest_Config) {
 
   SQLiteReporter reporter(config.getProjectName());
 
-  std::vector<std::unique_ptr<TestResult>> testResults;
-
   ResultTime resultTime(1234, 5678);
 
-  std::unique_ptr<Result> result = make_unique<Result>(std::move(testResults));
+  std::vector<std::unique_ptr<MutationResult>> mutationResults;
+  std::vector<std::unique_ptr<mull::Test>> tests;
+  std::vector<MutationPoint *> mutationPoints;
+
+  std::unique_ptr<Result> result = make_unique<Result>(std::move(tests),
+                                                       std::move(mutationResults),
+                                                       mutationPoints);
   reporter.reportResults(result, config, resultTime);
 
   std::string databasePath = reporter.getDatabasePath();
@@ -332,7 +356,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   Function *testeeFunction = context.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(testeeFunction->empty());
 
-  Testee testee(testeeFunction, 1);
+  Testee testee(testeeFunction, test.get(), 1);
 
   std::vector<MutationPoint *> mutationPoints =
     mutationsFinder.getMutationPoints(context, testee, filter);
@@ -356,21 +380,19 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   mutatedTestExecutionResult.stdoutOutput = "mutatedTestExecutionResult.STDOUT";
   mutatedTestExecutionResult.stderrOutput = "mutatedTestExecutionResult.STDERR";
 
-  std::unique_ptr<TestResult> testResult =
-    make_unique<TestResult>(testExecutionResult, std::move(test));
+  std::vector<std::unique_ptr<MutationResult>> mutationResults;
 
   auto mutationResult = make_unique<MutationResult>(mutatedTestExecutionResult,
                                                     mutationPoint,
-                                                    testee.getDistance());
-
-  testResult->addMutantResult(std::move(mutationResult));
-
-  std::vector<std::unique_ptr<TestResult>> results;
-  results.push_back(std::move(testResult));
+                                                    testee.getDistance(),
+                                                    test.get());
+  mutationResults.push_back(std::move(mutationResult));
 
   ResultTime resultTime(1234, 5678);
 
-  std::unique_ptr<Result> result = make_unique<Result>(std::move(results));
+  std::unique_ptr<Result> result = make_unique<Result>(std::move(tests),
+                                                       std::move(mutationResults),
+                                                       mutationPoints);
 
   std::string projectName("Integration Test Do Emit Debug Info");
   std::string testFramework = "SimpleTest";
@@ -478,7 +500,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   Function *testeeFunction = context.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(testeeFunction->empty());
 
-  Testee testee(testeeFunction, 1);
+  Testee testee(testeeFunction, test.get(), 1);
 
   std::vector<MutationPoint *> mutationPoints =
     mutationsFinder.getMutationPoints(context, testee, filter);
@@ -502,21 +524,19 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   mutatedTestExecutionResult.stdoutOutput = "mutatedTestExecutionResult.STDOUT";
   mutatedTestExecutionResult.stderrOutput = "mutatedTestExecutionResult.STDERR";
 
-  std::unique_ptr<TestResult> testResult =
-    make_unique<TestResult>(testExecutionResult, std::move(test));
+  std::vector<std::unique_ptr<MutationResult>> mutationResults;
 
   auto mutationResult = make_unique<MutationResult>(mutatedTestExecutionResult,
                                                     mutationPoint,
-                                                    testee.getDistance());
-
-  testResult->addMutantResult(std::move(mutationResult));
-
-  std::vector<std::unique_ptr<TestResult>> results;
-  results.push_back(std::move(testResult));
+                                                    testee.getDistance(),
+                                                    test.get());
+  mutationResults.push_back(std::move(mutationResult));
 
   ResultTime resultTime(1234, 5678);
 
-  std::unique_ptr<Result> result = make_unique<Result>(std::move(results));
+  std::unique_ptr<Result> result = make_unique<Result>(std::move(tests),
+                                                       std::move(mutationResults),
+                                                       mutationPoints);
 
   std::string projectName("Integration Test Do Not Emit Debug Info");
   std::string testFramework = "SimpleTest";

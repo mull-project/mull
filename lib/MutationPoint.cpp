@@ -59,7 +59,8 @@ MutationPoint::MutationPoint(MutationOperator *op,
                              Value *Val,
                              MullModule *m,
                              std::string diagnostics) :
-  mutationOperator(op), Address(Address), OriginalValue(Val), module(m), diagnostics(diagnostics)
+  mutationOperator(op), Address(Address), OriginalValue(Val),
+  module(m), diagnostics(diagnostics), reachableTests()
 {
   string moduleID = module->getUniqueIdentifier();
   string addressID = Address.getIdentifier();
@@ -102,8 +103,16 @@ MullModule *MutationPoint::getOriginalModule() const {
   return module;
 }
 
+void MutationPoint::addReachableTest(Test *test, int distance) {
+  reachableTests.push_back(make_pair(test, distance));
+}
+
 void MutationPoint::applyMutation(MullModule &module) {
   mutationOperator->applyMutation(module.getModule(), Address, *OriginalValue);
+}
+
+const std::vector<std::pair<Test *, int>> &MutationPoint::getReachableTests() const {
+  return reachableTests;
 }
 
 std::string MutationPoint::getUniqueIdentifier() {

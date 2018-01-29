@@ -27,7 +27,7 @@ TEST(ScalarValueMutationOperator, getMutationPoint) {
   mullContext.addModule(std::move(mullModule));
 
   auto scalarValueFunction = mullContext.lookupDefinedFunction("scalar_value");
-  Testee testee(scalarValueFunction, 1);
+  Testee testee(scalarValueFunction, nullptr, 1);
   std::vector<std::unique_ptr<MutationOperator>> operators;
   operators.emplace_back(make_unique<ScalarValueMutationOperator>());
   MutationsFinder finder(std::move(operators));

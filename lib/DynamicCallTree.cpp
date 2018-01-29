@@ -168,6 +168,7 @@ DynamicCallTree::createTestees(std::vector<CallTree *> subtrees,
 
       int distance = node->level - offset;
       std::unique_ptr<Testee> testee(make_unique<Testee>(node->function,
+                                                         test,
                                                          distance));
       testees.push_back(std::move(testee));
       if (distance < maxDistance) {

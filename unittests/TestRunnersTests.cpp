@@ -84,7 +84,7 @@ TEST(SimpleTestRunner, runTest) {
   /// expecting it to fail
 
   Function *testeeFunction = Ctx.lookupDefinedFunction("count_letters");
-  Testee testee(testeeFunction, 1);
+  Testee testee(testeeFunction, Test.get(), 1);
 
   std::vector<MutationPoint *> MutationPoints =
     mutationsFinder.getMutationPoints(Ctx, testee, filter);

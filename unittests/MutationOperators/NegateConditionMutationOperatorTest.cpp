@@ -83,7 +83,7 @@ TEST(NegateConditionMutationOperator, getMutationPoints_no_filter) {
 
   Function *function = llvmModule->getFunction("_ZN4llvm5APInt12tcExtractBitEPKyj");
   assert(function);
-  Testee testee(function, 1);
+  Testee testee(function, nullptr, 1);
 
   Context context;
   context.addModule(std::move(module));
@@ -108,7 +108,7 @@ TEST(NegateConditionMutationOperator, getMutationPoints_filter_to_bool_converion
 
   Function *function = llvmModule->getFunction("_ZNK4llvm7APFloat11isSignalingEv");
   assert(function);
-  Testee testee(function, 1);
+  Testee testee(function, nullptr, 1);
 
   Context context;
   context.addModule(std::move(module));
@@ -130,7 +130,7 @@ TEST(NegateConditionMutationOperator, getMutationPoints_filter_is_null) {
 
   Function *function = llvmModule->getFunction("_ZN4llvm7APFloat15freeSignificandEv");
   assert(function);
-  Testee testee(function, 1);
+  Testee testee(function, nullptr, 1);
 
   Context context;
   context.addModule(std::move(module));

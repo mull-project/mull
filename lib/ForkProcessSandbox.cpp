@@ -1,7 +1,7 @@
 #include "ForkProcessSandbox.h"
 
 #include "Logger.h"
-#include "TestResult.h"
+#include "ExecutionResult.h"
 
 #include <errno.h>
 #include <chrono>

@@ -5,7 +5,8 @@
 #include "Logger.h"
 #include "ModuleLoader.h"
 #include "Result.h"
-#include "TestResult.h"
+#include "Testee.h"
+#include "MutationResult.h"
 #include "TestFinder.h"
 #include "TestRunner.h"
 #include "MutationsFinder.h"
@@ -77,8 +78,6 @@ Driver::~Driver() {
 /// all the results of each mutant within corresponding MutationPoint
 
 std::unique_ptr<Result> Driver::Run() {
-  std::vector<std::unique_ptr<TestResult>> Results;
-
   /// Assumption: all modules will be used during the execution
   /// Therefore we load them into memory and compile immediately
   /// Later on modules used only for generating of mutants
@@ -150,138 +149,164 @@ std::unique_ptr<Result> Driver::Run() {
                   << testsCount
                   << " tests\n";
 
-  int testIndex = 1;
-  for (auto &test : foundTests) {
-    auto ObjectFiles = AllObjectFiles();
+  for (std::string &dylibPath: Cfg.getDynamicLibrariesPaths()) {
+    sys::DynamicLibrary::LoadLibraryPermanently(dylibPath.c_str());
+  }
 
-    Logger::debug().indent(4)
-      << "Driver::Run> current test "
-      << "[" << testIndex++ << "/" << testsCount << "]: "
-      << test->getTestName()
-      << "\n";
+  Logger::debug() << "Driver::Run> running tests and searching mutations\n";
+
+  std::vector<MutationPoint *> allMutationPoints;
+  auto objectFiles = AllObjectFiles();
+  auto testIndex = 1;
+  for (auto &test : foundTests) {
+    Logger::debug().indent(2) << "[" << testIndex++ << "/" << testsCount << "] " << test->getTestDisplayName() << ": ";
 
     _callstack = stack<uint64_t>();
     memset(_callTreeMapping, 0, functions.size() * sizeof(_callTreeMapping[0]));
 
-    ExecutionResult ExecResult = Sandbox->run([&]() {
-      for (std::string &dylibPath: Cfg.getDynamicLibrariesPaths()) {
-        sys::DynamicLibrary::LoadLibraryPermanently(dylibPath.c_str());
-      }
-
-      return Runner.runTest(test.get(), ObjectFiles);
+    ExecutionResult testExecutionResult = Sandbox->run([&]() {
+      return Runner.runTest(test.get(), objectFiles);
     }, Cfg.getTimeout());
 
-    if (ExecResult.status != Passed) {
-      Logger::error() << "error: Test has failed: " << test->getTestName() << "\n";
-      Logger::error() << "status: " << ExecResult.getStatusAsString() << "\n";
-      Logger::error() << "exit code: " << ExecResult.exitStatus << "\n";
-      Logger::error() << "stdout: " << ExecResult.stdoutOutput << "\n";
-      Logger::error() << "stderr: " << ExecResult.stderrOutput << "\n";
+    Logger::debug() << testExecutionResult.getStatusAsString() << "\n";
+
+    test->setExecutionResult(testExecutionResult);
+
+    if (testExecutionResult.status != Passed) {
       continue;
     }
-
-    auto BorrowedTest = test.get();
-    auto Result = make_unique<TestResult>(ExecResult, std::move(test));
 
     std::unique_ptr<CallTree> callTree(dynamicCallTree.createCallTree());
 
-    auto subtrees = dynamicCallTree.extractTestSubtrees(callTree.get(), BorrowedTest);
-    auto testees = dynamicCallTree.createTestees(subtrees, BorrowedTest,
-                                                 Cfg.getMaxDistance(), filter);
+    auto subtrees = dynamicCallTree.extractTestSubtrees(callTree.get(), test.get());
+    auto testees = dynamicCallTree.createTestees(subtrees, test.get(),
+                                                 Cfg.getMaxDistance(),
+                                                 filter);
 
     dynamicCallTree.cleanupCallTree(std::move(callTree));
     if (testees.empty()) {
-      Logger::error() << "error: Coult not find any testees: " << BorrowedTest->getTestName() << "\n";
       continue;
     }
 
-    /// -1 since we are skipping the first testee
-    const int testeesCount = testees.size() - 1;
-
-    Logger::debug().indent(4)
-      << "Driver::Run> found "
-      << testeesCount << " testees\n";
-
-    int testeeIndex = 1;
     for (auto testee_it = std::next(testees.begin()), ee = testees.end();
          testee_it != ee;
          ++testee_it) {
 
       std::unique_ptr<Testee> &testee = *testee_it;
 
-      Logger::debug().indent(8)
-        << "Driver::Run::process testee "
-        << "[" << testeeIndex++ << "/" << testeesCount << "]: "
-        << testee->getTesteeFunction()->getName()
-        << ", ";
-
-      auto MPoints = mutationsFinder.getMutationPoints(Ctx, *testee.get(), filter);
-      if (MPoints.empty()) {
-        Logger::debug() << "no mutation points, skipping.\n";
-
-        continue;
-      }
-
-      Logger::debug() << "against " << MPoints.size() << " mutation points\n";
-      Logger::debug().indent(8) << "";
-
-      auto ObjectFiles = AllButOne(testee->getTesteeFunction()->getParent());
-      for (auto mutationPoint : MPoints) {
-
-        Logger::debug() << ".";
-
-        ExecutionResult result;
-        bool dryRun = Cfg.isDryRun();
-        if (dryRun) {
-          result.status = DryRun;
-          result.runningTime = ExecResult.runningTime * 10;
-        } else {
-          ObjectFile *mutant = toolchain.cache().getObject(*mutationPoint);
-          if (mutant == nullptr) {
-            LLVMContext localContext;
-            auto clonedModule = mutationPoint->getOriginalModule()->clone(localContext);
-            mutationPoint->applyMutation(*clonedModule.get());
-
-            auto owningObject = toolchain.compiler().compileModule(*clonedModule.get());
-
-            mutant = owningObject.getBinary();
-            toolchain.cache().putObject(std::move(owningObject), *mutationPoint);
-          }
-          ObjectFiles.push_back(mutant);
-
-          const auto sandboxTimeout = std::max(30LL,
-                                               ExecResult.runningTime * 10);
-
-          result = Sandbox->run([&]() {
-            for (std::string &dylibPath: Cfg.getDynamicLibrariesPaths()) {
-              sys::DynamicLibrary::LoadLibraryPermanently(dylibPath.c_str());
-            }
-            ExecutionStatus status = Runner.runTest(BorrowedTest, ObjectFiles);
-            assert(status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
-            return status;
-          }, sandboxTimeout);
-
-          ObjectFiles.pop_back();
-
-          assert(result.status != ExecutionStatus::Invalid &&
-                 "Expect to see valid TestResult");
-        }
-
-        diagnostics->report(mutationPoint, result.status);
-
-        auto mutationResult = make_unique<MutationResult>(result, mutationPoint, testee->getDistance());
-        Result->addMutantResult(std::move(mutationResult));
-      }
-
-      Logger::debug() << "\n";
+      auto mutationPoints = mutationsFinder.getMutationPoints(Ctx, *testee.get(), filter);
+      std::copy(mutationPoints.begin(), mutationPoints.end(), std::back_inserter(allMutationPoints));
     }
-
-    Results.push_back(std::move(Result));
   }
 
-  std::unique_ptr<Result> result = make_unique<Result>(std::move(Results));
+  Logger::debug() << "Driver::Run> found " << allMutationPoints.size() << " mutations\n";
 
-  return result;
+  std::vector<std::unique_ptr<MutationResult>> mutationResults;
+  if (Cfg.isDryRun()) {
+    mutationResults = dryRunMutations(allMutationPoints);
+  } else {
+    mutationResults = runMutations(allMutationPoints);
+  }
+
+  return make_unique<Result>(std::move(foundTests), std::move(mutationResults), allMutationPoints);
+}
+
+std::vector<std::unique_ptr<MutationResult>> Driver::dryRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
+  std::vector<std::unique_ptr<MutationResult>> mutationResults;
+
+  const auto mutationsCount = mutationPoints.size();
+  auto mutantIndex = 1;
+
+  for (auto mutationPoint : mutationPoints) {
+    Logger::debug() << "[" << mutantIndex++ << "/" << mutationsCount << "]: "  << mutationPoint->getUniqueIdentifier() << "\n";
+
+    auto testsCount = mutationPoint->getReachableTests().size();
+    auto testIndex = 1;
+
+    for (auto &reachableTest : mutationPoint->getReachableTests()) {
+      auto test = reachableTest.first;
+      auto distance = reachableTest.second;
+
+      Logger::debug().indent(2) << "[" << testIndex++ << "/" << testsCount << "] " << test->getTestDisplayName() << ": ";
+
+      auto timeout = test->getExecutionResult().runningTime * 10;
+
+      ExecutionResult result;
+      result.status = DryRun;
+      result.runningTime = timeout;
+
+      Logger::debug() << result.getStatusAsString() << "\n";
+
+      mutationResults.push_back(make_unique<MutationResult>(result, mutationPoint, distance, test));
+    }
+  }
+
+  return mutationResults;
+}
+
+std::vector<std::unique_ptr<MutationResult>> Driver::runMutations(const std::vector<MutationPoint *> &mutationPoints) {
+  std::vector<std::unique_ptr<MutationResult>> mutationResults;
+
+  const auto failFastEnabled = false;
+
+  const auto mutationsCount = mutationPoints.size();
+  auto mutantIndex = 1;
+
+  for (auto mutationPoint : mutationPoints) {
+    auto objectFilesWithMutant = AllButOne(mutationPoint->getOriginalModule()->getModule());
+
+    Logger::debug() << "[" << mutantIndex++ << "/" << mutationsCount << "]: "  << mutationPoint->getUniqueIdentifier() << "\n";
+
+    LLVMContext localContext;
+    auto clonedModule = mutationPoint->getOriginalModule()->clone(localContext);
+    mutationPoint->applyMutation(*clonedModule.get());
+    auto ownedMutant = toolchain.compiler().compileModule(*clonedModule.get());
+    ObjectFile *mutant = ownedMutant.getBinary();
+
+    objectFilesWithMutant.push_back(mutant);
+
+    auto testsCount = mutationPoint->getReachableTests().size();
+    auto testIndex = 1;
+
+    auto alreadyFailed = false;
+
+    for (auto &reachableTest : mutationPoint->getReachableTests()) {
+      auto test = reachableTest.first;
+      auto distance = reachableTest.second;
+
+      Logger::debug().indent(2) << "[" << testIndex++ << "/" << testsCount << "] " << test->getTestDisplayName() << ": ";
+
+      ExecutionResult result;
+
+      if (failFastEnabled && alreadyFailed) {
+        result.status = ExecutionStatus::FailFast;
+      } else {
+        const auto timeout = test->getExecutionResult().runningTime * 10;
+        const auto sandboxTimeout = std::max(30LL, timeout);
+
+        result = Sandbox->run([&]() {
+          ExecutionStatus status = Runner.runTest(test, objectFilesWithMutant);
+          assert(status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
+          return status;
+        }, sandboxTimeout);
+
+        assert(result.status != ExecutionStatus::Invalid &&
+               "Expect to see valid TestResult");
+
+        if (result.status != ExecutionStatus::Passed) {
+          alreadyFailed = true;
+        }
+      }
+
+      Logger::debug() << result.getStatusAsString() << "\n";
+
+      mutationResults.push_back(make_unique<MutationResult>(result, mutationPoint, distance, test));
+    }
+
+    objectFilesWithMutant.pop_back();
+  }
+
+  return mutationResults;
 }
 
 void Driver::prepareForExecution() {
