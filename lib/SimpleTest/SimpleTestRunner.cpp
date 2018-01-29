@@ -8,15 +8,25 @@
 
 #include "SimpleTest/SimpleTest_Test.h"
 
+#include <string>
+
 using namespace mull;
 using namespace llvm;
 
 class Mull_SimpleTest_Resolver : public RuntimeDyld::SymbolResolver {
+  Test *test;
+  std::string instrumentationInfoName;
 public:
+  Mull_SimpleTest_Resolver(Test *t, std::string instrumentationInfo)
+  : test(t), instrumentationInfoName(instrumentationInfo) {}
 
   RuntimeDyld::SymbolInfo findSymbol(const std::string &Name) {
     if (auto address = RTDyldMemoryManager::getSymbolAddressInProcess(Name)) {
       return RuntimeDyld::SymbolInfo(address, JITSymbolFlags::Exported);
+    }
+
+    if (Name == instrumentationInfoName) {
+      return RuntimeDyld::SymbolInfo((uint64_t)&test->getInstrumentationInfo(), JITSymbolFlags::Exported);
     }
 
     return RuntimeDyld::SymbolInfo(nullptr);
@@ -53,7 +63,7 @@ ExecutionStatus SimpleTestRunner::runTest(Test *test, ObjectFiles &objectFiles) 
 
   auto Handle = ObjectLayer.addObjectSet(objectFiles,
                                          make_unique<SectionMemoryManager>(),
-                                         make_unique<Mull_SimpleTest_Resolver>());
+                                         make_unique<Mull_SimpleTest_Resolver>(test, MangleName("mull_instrumentation_info")));
   void *FunctionPointer = TestFunctionPointer(*SimpleTest->GetTestFunction());
 
   uint64_t result = ((int (*)())(intptr_t)FunctionPointer)();

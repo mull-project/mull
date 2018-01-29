@@ -27,6 +27,7 @@ class GoogleTestRunner : public TestRunner {
   std::string fGoogleTestInit;
   std::string fGoogleTestInstance;
   std::string fGoogleTestRun;
+  std::string instrumentationInfoName;
 public:
 
   GoogleTestRunner(llvm::TargetMachine &machine);

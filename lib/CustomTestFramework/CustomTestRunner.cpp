@@ -10,18 +10,27 @@ using namespace llvm::orc;
 
 class Mull_CustomTest_Resolver : public RuntimeDyld::SymbolResolver {
   LocalCXXRuntimeOverrides &overrides;
+  Test *test;
+  std::string instrumentationInfoName;
 public:
 
-  Mull_CustomTest_Resolver(LocalCXXRuntimeOverrides &overrides)
-    : overrides(overrides) {}
+  Mull_CustomTest_Resolver(LocalCXXRuntimeOverrides &overrides, Test *test,
+                           std::string instrumentationInfoName)
+    : overrides(overrides), test(test), instrumentationInfoName(instrumentationInfoName) {}
 
   RuntimeDyld::SymbolInfo findSymbol(const std::string &name) {
+    /// Overrides should go first, otherwise functions of the host process
+    /// will take over and crash the system later
     if (auto symbol = overrides.searchOverrides(name)) {
       return symbol;
     }
 
     if (auto address = RTDyldMemoryManager::getSymbolAddressInProcess(name)) {
       return RuntimeDyld::SymbolInfo(address, JITSymbolFlags::Exported);
+    }
+
+    if (name == instrumentationInfoName) {
+      return RuntimeDyld::SymbolInfo((uint64_t)&test->getInstrumentationInfo(), JITSymbolFlags::Exported);
     }
 
     return RuntimeDyld::SymbolInfo(nullptr);
@@ -37,7 +46,8 @@ CustomTestRunner::CustomTestRunner(llvm::TargetMachine &machine) :
   mangler(Mangler(machine.createDataLayout())),
   overrides([this](const char *name) {
     return this->mangler.getNameWithPrefix(name);
-  })
+  }),
+  instrumentationInfoName(mangler.getNameWithPrefix("mull_instrumentation_info"))
 {
 }
 
@@ -75,7 +85,8 @@ ExecutionStatus CustomTestRunner::runTest(Test *test, ObjectFiles &objectFiles) 
   auto Handle =
     ObjectLayer.addObjectSet(objectFiles,
                              make_unique<SectionMemoryManager>(),
-                             make_unique<Mull_CustomTest_Resolver>(overrides));
+                             make_unique<Mull_CustomTest_Resolver>(overrides, test,
+                                                                   instrumentationInfoName));
 
   for (auto &constructor: customTest->getConstructors()) {
     runStaticCtor(constructor);

@@ -11,18 +11,9 @@
 #include "TestRunner.h"
 #include "MutationsFinder.h"
 
-#include <llvm/ExecutionEngine/Orc/JITSymbol.h>
-#include <llvm/IR/Constants.h>
-#include <llvm/IR/Module.h>
-#include <llvm/IR/Value.h>
-#include <llvm/IR/Verifier.h>
-#include <llvm/IR/LLVMContext.h>
-#include <llvm/IR/DebugInfoMetadata.h>
-#include <llvm/Transforms/Utils/Cloning.h>
 #include <llvm/Support/DynamicLibrary.h>
 
 #include <algorithm>
-#include <chrono>
 #include <fstream>
 #include <vector>
 #include <sys/mman.h>
@@ -32,32 +23,10 @@ using namespace llvm;
 using namespace llvm::object;
 using namespace mull;
 using namespace std;
-using namespace std::chrono;
-
-namespace mull {
-
-extern "C" void mull_enterFunction(Driver *driver, uint64_t functionIndex) {
-  assert(driver);
-  assert(driver->callTreeMapping());
-  DynamicCallTree::enterFunction(functionIndex,
-                                 driver->callTreeMapping(),
-                                 driver->callstack());
-}
-
-extern "C" void mull_leaveFunction(Driver *driver, uint64_t functionIndex) {
-  assert(driver);
-  assert(driver->callTreeMapping());
-  DynamicCallTree::leaveFunction(functionIndex,
-                                 driver->callTreeMapping(),
-                                 driver->callstack());
-}
-
-}
 
 Driver::~Driver() {
   delete this->Sandbox;
   delete this->diagnostics;
-  munmap(_callTreeMapping, functions.size());
 }
 
 /// Populate mull::Context with modules using
@@ -94,26 +63,25 @@ std::unique_ptr<Result> Driver::Run() {
 
     if (objectFile == nullptr) {
       LLVMContext localContext;
-
       auto clonedModule = module.clone(localContext);
-
-      for (auto &function: module.getModule()->getFunctionList()) {
-        if (function.isDeclaration()) {
-          continue;
-        }
-        CallTreeFunction callTreeFunction(&function);
-        uint64_t index = functions.size();
-        functions.push_back(callTreeFunction);
-        auto clonedFunction = clonedModule->getModule()->getFunction(function.getName());
-        injectCallbacks(clonedFunction, index);
-      }
-
       auto owningObjectFile = toolchain.compiler().compileModule(*clonedModule.get());
       objectFile = owningObjectFile.getBinary();
       toolchain.cache().putObject(std::move(owningObjectFile), module);
     }
 
     InnerCache.insert(std::make_pair(module.getModule(), objectFile));
+
+    {
+      LLVMContext instrumentationContext;
+
+      auto clonedModule = module.clone(instrumentationContext);
+
+      instrumentation.insertCallbacks(module.getModule(), clonedModule->getModule());
+
+      auto owningObjectFile = toolchain.compiler().compileModule(*clonedModule.get());
+      instrumentedObjectFiles.push_back(std::move(owningObjectFile));
+    }
+
   }
 
   for (std::string &objectFilePath: Cfg.getObjectFilesPaths()) {
@@ -140,8 +108,6 @@ std::unique_ptr<Result> Driver::Run() {
     precompiledObjectFiles.push_back(std::move(owningObject));
   }
 
-  prepareForExecution();
-
   auto foundTests = Finder.findTests(Ctx, filter);
   const int testsCount = foundTests.size();
 
@@ -156,13 +122,12 @@ std::unique_ptr<Result> Driver::Run() {
   Logger::debug() << "Driver::Run> running tests and searching mutations\n";
 
   std::vector<MutationPoint *> allMutationPoints;
-  auto objectFiles = AllObjectFiles();
+  auto objectFiles = AllInstrumentedObjectFiles();
   auto testIndex = 1;
   for (auto &test : foundTests) {
     Logger::debug().indent(2) << "[" << testIndex++ << "/" << testsCount << "] " << test->getTestDisplayName() << ": ";
 
-    _callstack = stack<uint64_t>();
-    memset(_callTreeMapping, 0, functions.size() * sizeof(_callTreeMapping[0]));
+    instrumentation.setupInstrumentationInfo(test.get());
 
     ExecutionResult testExecutionResult = Sandbox->run([&]() {
       return Runner.runTest(test.get(), objectFiles);
@@ -173,17 +138,13 @@ std::unique_ptr<Result> Driver::Run() {
     test->setExecutionResult(testExecutionResult);
 
     if (testExecutionResult.status != Passed) {
+      instrumentation.cleanupInstrumentationInfo(test.get());
       continue;
     }
 
-    std::unique_ptr<CallTree> callTree(dynamicCallTree.createCallTree());
+    auto testees = instrumentation.getTestees(test.get(), filter, Cfg.getMaxDistance());
+    instrumentation.cleanupInstrumentationInfo(test.get());
 
-    auto subtrees = dynamicCallTree.extractTestSubtrees(callTree.get(), test.get());
-    auto testees = dynamicCallTree.createTestees(subtrees, test.get(),
-                                                 Cfg.getMaxDistance(),
-                                                 filter);
-
-    dynamicCallTree.cleanupCallTree(std::move(callTree));
     if (testees.empty()) {
       continue;
     }
@@ -197,6 +158,11 @@ std::unique_ptr<Result> Driver::Run() {
       auto mutationPoints = mutationsFinder.getMutationPoints(Ctx, *testee.get(), filter);
       std::copy(mutationPoints.begin(), mutationPoints.end(), std::back_inserter(allMutationPoints));
     }
+  }
+
+  {
+    /// Cleans up the memory allocated for the vector itself as well
+    std::vector<OwningBinary<ObjectFile>>().swap(instrumentedObjectFiles);
   }
 
   Logger::debug() << "Driver::Run> found " << allMutationPoints.size() << " mutations\n";
@@ -309,71 +275,6 @@ std::vector<std::unique_ptr<MutationResult>> Driver::runMutations(const std::vec
   return mutationResults;
 }
 
-void Driver::prepareForExecution() {
-  assert(_callTreeMapping == nullptr && "Called twice?");
-  assert(functions.size() > 1 && "Functions must be filled in before this call");
-
-  /// Creating a memory to be shared between child and parent.
-  _callTreeMapping = (uint64_t *) mmap(NULL,
-                                       sizeof(uint64_t) * functions.size(),
-                                       PROT_READ | PROT_WRITE,
-                                       MAP_SHARED | MAP_ANONYMOUS,
-                                       -1,
-                                       0);
-  memset(_callTreeMapping, 0, functions.size() * sizeof(_callTreeMapping[0]));
-  dynamicCallTree.prepare(_callTreeMapping);
-}
-
-void Driver::injectCallbacks(llvm::Function *function, uint64_t index) {
-  auto &context = function->getParent()->getContext();
-  auto int64Type = Type::getInt64Ty(context);
-  auto driverPointerType = Type::getVoidTy(context)->getPointerTo();
-  auto voidType = Type::getVoidTy(context);
-  std::vector<Type *> parameterTypes({driverPointerType, int64Type});
-
-  FunctionType *callbackType = FunctionType::get(voidType, parameterTypes, false);
-
-  Value *functionIndex = ConstantInt::get(int64Type, index);
-  uint32_t pointerWidth = toolchain.targetMachine().createDataLayout().getPointerSize();
-  ConstantInt *driverPointerAddress = ConstantInt::get(context, APInt(pointerWidth * 8, (orc::TargetAddress)this));
-  Value *driverPointer = ConstantExpr::getCast(Instruction::IntToPtr,
-                                               driverPointerAddress,
-                                               int64Type->getPointerTo());
-  std::vector<Value *> parameters({driverPointer, functionIndex});
-
-  Function *enterFunction = function->getParent()->getFunction("mull_enterFunction");
-  Function *leaveFunction = function->getParent()->getFunction("mull_leaveFunction");
-
-  if (enterFunction == nullptr && leaveFunction == nullptr) {
-    enterFunction = Function::Create(callbackType,
-                                     Function::ExternalLinkage,
-                                     "mull_enterFunction",
-                                     function->getParent());
-
-    leaveFunction = Function::Create(callbackType,
-                                     Function::ExternalLinkage,
-                                     "mull_leaveFunction",
-                                     function->getParent());
-  }
-
-  assert(enterFunction);
-  assert(leaveFunction);
-
-  auto &entryBlock = *function->getBasicBlockList().begin();
-  CallInst *enterFunctionCall = CallInst::Create(enterFunction, parameters);
-  enterFunctionCall->insertBefore(&*entryBlock.getInstList().begin());
-
-  for (auto &block : function->getBasicBlockList()) {
-    ReturnInst *returnStatement = nullptr;
-    if (!(returnStatement = dyn_cast<ReturnInst>(block.getTerminator()))) {
-      continue;
-    }
-
-    CallInst *leaveFunctionCall = CallInst::Create(leaveFunction, parameters);
-    leaveFunctionCall->insertBefore(returnStatement);
-  }
-}
-
 std::vector<llvm::object::ObjectFile *> Driver::AllButOne(llvm::Module *One) {
   std::vector<llvm::object::ObjectFile *> Objects;
 
@@ -390,16 +291,16 @@ std::vector<llvm::object::ObjectFile *> Driver::AllButOne(llvm::Module *One) {
   return Objects;
 }
 
-std::vector<llvm::object::ObjectFile *> Driver::AllObjectFiles() {
-  std::vector<llvm::object::ObjectFile *> Objects;
+std::vector<llvm::object::ObjectFile *> Driver::AllInstrumentedObjectFiles() {
+  std::vector<llvm::object::ObjectFile *> objects;
 
-  for (auto &CachedEntry : InnerCache) {
-    Objects.push_back(CachedEntry.second);
+  for (auto &ownedObject : instrumentedObjectFiles) {
+    objects.push_back(ownedObject.getBinary());
   }
 
-  for (OwningBinary<ObjectFile> &object: precompiledObjectFiles) {
-    Objects.push_back(object.getBinary());
+  for (auto &ownedObject : precompiledObjectFiles) {
+    objects.push_back(ownedObject.getBinary());
   }
 
-  return Objects;
+  return objects;
 }
