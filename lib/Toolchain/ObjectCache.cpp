@@ -32,13 +32,6 @@ ObjectCache::ObjectCache(bool useCache, const std::string &cacheDir)
   : useOnDiskCache(useCache),
     cacheDirectory(cacheDir)
 {
-  if (useOnDiskCache) {
-    Logger::info() << "Unfortunately On-Disk cache is broken at the moment\n";
-    Logger::info() << "See this issue for more details: https://github.com/mull-project/mull/issues/234\n";
-    Logger::info() << "Falling back to in-memory cache\n";
-    useOnDiskCache = false;
-  }
-
   if (useOnDiskCache && !cacheDirectoryExists(cacheDirectory)) {
     Logger::info() << "Cache directory '" << cacheDirectory
                    << "' is not accessible\n";
@@ -47,18 +40,9 @@ ObjectCache::ObjectCache(bool useCache, const std::string &cacheDir)
   }
 }
 
-ObjectFile *ObjectCache::getObjectFromMemory(const std::string &identifier) {
-  if (inMemoryCache.count(identifier) != 0) {
-    auto &owningObject = inMemoryCache.at(identifier);
-    return owningObject.getBinary();
-  }
-
-  return nullptr;
-}
-
-ObjectFile *ObjectCache::getObjectFromDisk(const std::string &identifier) {
+OwningBinary<ObjectFile> ObjectCache::getObjectFromDisk(const std::string &identifier) {
   if (!useOnDiskCache) {
-    return nullptr;
+    return OwningBinary<ObjectFile>();
   }
 
   std::string cacheName(cacheDirectory + "/" + identifier + ".o");
@@ -67,52 +51,33 @@ ObjectFile *ObjectCache::getObjectFromDisk(const std::string &identifier) {
     MemoryBuffer::getFile(cacheName.c_str());
 
   if (!buffer) {
-    return nullptr;
+    return OwningBinary<ObjectFile>();
   }
 
   Expected<std::unique_ptr<ObjectFile>> objectOrError =
     ObjectFile::createObjectFile(buffer.get()->getMemBufferRef());
 
   if (!objectOrError) {
-    return nullptr;
+    return OwningBinary<ObjectFile>();
   }
 
   std::unique_ptr<ObjectFile> objectFile(std::move(objectOrError.get()));
 
   auto owningObject = OwningBinary<ObjectFile>(std::move(objectFile),
                                                std::move(buffer.get()));
-  auto object = owningObject.getBinary();
-  if (object != nullptr) {
-    inMemoryCache.insert(std::make_pair(identifier, std::move(owningObject)));
-  }
-
-  return object;
+  return owningObject;
 }
 
-ObjectFile *ObjectCache::getObject(const std::string &identifier) {
-  ObjectFile *objectFile = getObjectFromMemory(identifier);
-  if (objectFile == nullptr) {
-    objectFile = getObjectFromDisk(identifier);
-  }
-  return objectFile;
+OwningBinary<ObjectFile> ObjectCache::getObject(const MullModule &module) {
+  return getObjectFromDisk(module.getUniqueIdentifier());
 }
 
-ObjectFile *ObjectCache::getObject(const MullModule &module) {
-  return getObject(module.getUniqueIdentifier());
-}
-
-ObjectFile *ObjectCache::getObject(const MutationPoint &mutationPoint) {
-  return getObject(mutationPoint.getUniqueIdentifier());
-}
-
-void ObjectCache::putObjectInMemory(
-                    llvm::object::OwningBinary<llvm::object::ObjectFile> object,
-                    const std::string &identifier) {
-  inMemoryCache.insert(std::make_pair(identifier, std::move(object)));
+OwningBinary<ObjectFile> ObjectCache::getObject(const MutationPoint &mutationPoint) {
+  return getObjectFromDisk(mutationPoint.getUniqueIdentifier());
 }
 
 void ObjectCache::putObjectOnDisk(
-                  llvm::object::OwningBinary<llvm::object::ObjectFile> &object,
+                  OwningBinary<ObjectFile> &object,
                   const std::string &identifier) {
   if (!useOnDiskCache) {
     return;
@@ -126,18 +91,12 @@ void ObjectCache::putObjectOnDisk(
   outfile.close();
 }
 
-void ObjectCache::putObject(OwningBinary<ObjectFile> object,
-                            const std::string &identifier) {
-  putObjectOnDisk(object, identifier);
-  putObjectInMemory(std::move(object), identifier);
-}
-
-void ObjectCache::putObject(OwningBinary<ObjectFile> object,
+void ObjectCache::putObject(OwningBinary<ObjectFile> &object,
                             const MullModule &module) {
-  putObject(std::move(object), module.getUniqueIdentifier());
+  putObjectOnDisk(object, module.getUniqueIdentifier());
 }
 
-void ObjectCache::putObject(OwningBinary<ObjectFile> object,
+void ObjectCache::putObject(OwningBinary<ObjectFile> &object,
                             const MutationPoint &mutationPoint) {
-  putObject(std::move(object), mutationPoint.getUniqueIdentifier());
+  putObjectOnDisk(object, mutationPoint.getUniqueIdentifier());
 }
