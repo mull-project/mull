@@ -6,7 +6,7 @@ bitcode_file_list: /Users/Stanislaw/RootStanislaw/Projects/mull-and-ESA/openlibm
 # fork: true
 # dry_run: false
 # test_framework: GoogleTest
-# diagnostics: false
+# diagnostics: none # none/survived/killed/all
 
 ## Mutation Operators.
 ## You can enable any of the following, the parsing is inclusive.

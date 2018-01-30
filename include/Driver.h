@@ -61,8 +61,9 @@ public:
         this->Sandbox = new NullProcessSandbox();
       }
 
-      if (C.isDiagnosticsEnabled()) {
-        this->diagnostics = new NormalIDEDiagnostics();
+      Config::Diagnostics diagnostics = C.getDiagnostics();
+      if (diagnostics != Config::Diagnostics::None) {
+        this->diagnostics = new NormalIDEDiagnostics(diagnostics);
       } else {
         this->diagnostics = new NullIDEDiagnostics();
       }

@@ -227,28 +227,28 @@ TEST_F(ConfigParserTestFixture, loadConfig_DryRun_Disabled) {
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_Diagnostics_Unspecified) {
-  configWithYamlContent("dry_run: true\n");
-  ASSERT_FALSE(config.isDiagnosticsEnabled());
+  configWithYamlContent("");
+  ASSERT_EQ(config.getDiagnostics(), Config::Diagnostics::None);
 }
 
-TEST_F(ConfigParserTestFixture, loadConfig_Diagnostics_True) {
-  configWithYamlContent("diagnostics: true\n");
-  ASSERT_TRUE(config.isDiagnosticsEnabled());
+TEST_F(ConfigParserTestFixture, loadConfig_Diagnostics_Survived) {
+  configWithYamlContent("diagnostics: survived\n");
+  ASSERT_EQ(config.getDiagnostics(), Config::Diagnostics::Survived);
 }
 
-TEST_F(ConfigParserTestFixture, loadConfig_Diagnostics_Enabled) {
-  configWithYamlContent("diagnostics: enabled\n");
-  ASSERT_TRUE(config.isDiagnosticsEnabled());
+TEST_F(ConfigParserTestFixture, loadConfig_Diagnostics_Killed) {
+  configWithYamlContent("diagnostics: killed\n");
+  ASSERT_EQ(config.getDiagnostics(), Config::Diagnostics::Killed);
 }
 
-TEST_F(ConfigParserTestFixture, loadConfig_Diagnostics_False) {
-  configWithYamlContent("diagnostics: false\n");
-  ASSERT_FALSE(config.isDiagnosticsEnabled());
+TEST_F(ConfigParserTestFixture, loadConfig_Diagnostics_All) {
+  configWithYamlContent("diagnostics: all\n");
+  ASSERT_EQ(config.getDiagnostics(), Config::Diagnostics::All);
 }
 
-TEST_F(ConfigParserTestFixture, loadConfig_Diagnostics_Disabled) {
-  configWithYamlContent("diagnostics: disabled\n");
-  ASSERT_FALSE(config.isDiagnosticsEnabled());
+TEST_F(ConfigParserTestFixture, loadConfig_Diagnostics_None) {
+  configWithYamlContent("diagnostics: none\n");
+  ASSERT_EQ(config.getDiagnostics(), Config::Diagnostics::None);
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_UseCache_Unspecified) {
