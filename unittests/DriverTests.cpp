@@ -91,10 +91,6 @@ TEST(Driver, RunningWithNoTests) {
 
   Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder);
 
-    /// Given the modules we use here we expect:
-    ///
-    /// 1 original test, which has Passed state
-    /// 1 mutant test, which has Failed state
   auto result = Driver.Run();
   ASSERT_EQ(0u, result->getTests().size());
   ASSERT_EQ(0u, result->getMutationResults().size());
