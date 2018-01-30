@@ -21,7 +21,7 @@ Toolchain::Toolchain(Config &config) :
   nativeTarget(),
   machine(llvm::EngineBuilder().selectTarget(llvm::Triple(), "", "",
                                          llvm::SmallVector<std::string, 1>())),
-  objectCache(config.getUseCache(), config.getCacheDirectory()),
+  objectCache(config.cachingEnabled(), config.getCacheDirectory()),
   simpleCompiler(*machine.get())
 {
 }

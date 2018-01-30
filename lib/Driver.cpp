@@ -61,7 +61,7 @@ std::unique_ptr<Result> Driver::Run() {
     assert(ownedModule && "Can't load module");
     Ctx.addModule(std::move(ownedModule));
 
-    if (!Cfg.isDryRun()) {
+    if (!Cfg.dryRunModeEnabled()) {
       auto objectFile = toolchain.cache().getObject(module);
       if (objectFile.getBinary() == nullptr) {
         LLVMContext localContext;
@@ -172,7 +172,7 @@ std::unique_ptr<Result> Driver::Run() {
   Logger::debug() << "Driver::Run> found " << allMutationPoints.size() << " mutations\n";
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
-  if (Cfg.isDryRun()) {
+  if (Cfg.dryRunModeEnabled()) {
     mutationResults = dryRunMutations(allMutationPoints);
   } else {
     mutationResults = runMutations(allMutationPoints);

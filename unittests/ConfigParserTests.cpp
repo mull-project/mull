@@ -168,17 +168,27 @@ TEST_F(ConfigParserTestFixture, loadConfig_objectFileList_nonExistingFile) {
 
 TEST_F(ConfigParserTestFixture, loadConfig_Fork_True) {
   configWithYamlContent("fork: true\n");
-  ASSERT_EQ(true, config.getFork());
+  ASSERT_EQ(true, config.forkEnabled());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_Fork_Enabled) {
+  configWithYamlContent("fork: enabled\n");
+  ASSERT_EQ(true, config.forkEnabled());
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_Fork_False) {
   configWithYamlContent("fork: false\n");
-  ASSERT_EQ(false, config.getFork());
+  ASSERT_EQ(false, config.forkEnabled());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_Fork_Disabled) {
+  configWithYamlContent("fork: disabled\n");
+  ASSERT_EQ(false, config.forkEnabled());
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_Fork_Unspecified) {
   configWithYamlContent("");
-  ASSERT_EQ(true, config.getFork());
+  ASSERT_EQ(true, config.forkEnabled());
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_Timeout_Unspecified) {
@@ -193,22 +203,77 @@ TEST_F(ConfigParserTestFixture, loadConfig_Timeout_SpecificValue) {
 
 TEST_F(ConfigParserTestFixture, loadConfig_DryRun_Unspecified) {
   configWithYamlContent("");
-  ASSERT_FALSE(config.isDryRun());
+  ASSERT_FALSE(config.dryRunModeEnabled());
 }
 
-TEST_F(ConfigParserTestFixture, loadConfig_DryRun_SpecificValue) {
+TEST_F(ConfigParserTestFixture, loadConfig_DryRun_True) {
   configWithYamlContent("dry_run: true\n");
-  ASSERT_TRUE(config.isDryRun());
+  ASSERT_TRUE(config.dryRunModeEnabled());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_DryRun_Enabled) {
+  configWithYamlContent("dry_run: enabled\n");
+  ASSERT_TRUE(config.dryRunModeEnabled());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_DryRun_False) {
+  configWithYamlContent("dry_run: false\n");
+  ASSERT_FALSE(config.dryRunModeEnabled());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_DryRun_Disabled) {
+  configWithYamlContent("dry_run: disabled\n");
+  ASSERT_FALSE(config.dryRunModeEnabled());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_Diagnostics_Unspecified) {
+  configWithYamlContent("dry_run: true\n");
+  ASSERT_FALSE(config.isDiagnosticsEnabled());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_Diagnostics_True) {
+  configWithYamlContent("diagnostics: true\n");
+  ASSERT_TRUE(config.isDiagnosticsEnabled());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_Diagnostics_Enabled) {
+  configWithYamlContent("diagnostics: enabled\n");
+  ASSERT_TRUE(config.isDiagnosticsEnabled());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_Diagnostics_False) {
+  configWithYamlContent("diagnostics: false\n");
+  ASSERT_FALSE(config.isDiagnosticsEnabled());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_Diagnostics_Disabled) {
+  configWithYamlContent("diagnostics: disabled\n");
+  ASSERT_FALSE(config.isDiagnosticsEnabled());
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_UseCache_Unspecified) {
   configWithYamlContent("");
-  ASSERT_FALSE(config.getUseCache());
+  ASSERT_FALSE(config.cachingEnabled());
 }
 
-TEST_F(ConfigParserTestFixture, loadConfig_UseCache_SpecificValue) {
+TEST_F(ConfigParserTestFixture, loadConfig_UseCache_True) {
   configWithYamlContent("use_cache: true\n");
-  ASSERT_TRUE(config.getUseCache());
+  ASSERT_TRUE(config.cachingEnabled());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_UseCache_Yes) {
+  configWithYamlContent("use_cache: yes\n");
+  ASSERT_TRUE(config.cachingEnabled());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_UseCache_False) {
+  configWithYamlContent("use_cache: false\n");
+  ASSERT_FALSE(config.cachingEnabled());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_UseCache_No) {
+  configWithYamlContent("use_cache: no\n");
+  ASSERT_FALSE(config.cachingEnabled());
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_emitDebugInfo_Unspecified) {
@@ -216,9 +281,24 @@ TEST_F(ConfigParserTestFixture, loadConfig_emitDebugInfo_Unspecified) {
   ASSERT_FALSE(config.shouldEmitDebugInfo());
 }
 
-TEST_F(ConfigParserTestFixture, loadConfig_emitDebugInfo_SpecificValue) {
+TEST_F(ConfigParserTestFixture, loadConfig_emitDebugInfo_True) {
   configWithYamlContent("emit_debug_info: true\n");
   ASSERT_TRUE(config.shouldEmitDebugInfo());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_emitDebugInfo_Yes) {
+  configWithYamlContent("emit_debug_info: yes\n");
+  ASSERT_TRUE(config.shouldEmitDebugInfo());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_emitDebugInfo_False) {
+  configWithYamlContent("emit_debug_info: false\n");
+  ASSERT_FALSE(config.shouldEmitDebugInfo());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_emitDebugInfo_No) {
+  configWithYamlContent("emit_debug_info: no\n");
+  ASSERT_FALSE(config.shouldEmitDebugInfo());
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_MaxDistance_Unspecified) {

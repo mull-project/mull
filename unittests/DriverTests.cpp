@@ -54,11 +54,6 @@ TEST(Driver, SimpleTest_MathAddMutationOperator) {
   std::string projectName = "some_project";
   std::string testFramework = "SimpleTest";
 
-  bool doFork = false;
-  bool dryRun = false;
-  bool useCache = false;
-  bool emitDebugInfo = false;
-  bool diagnostics = false;
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
 
@@ -71,11 +66,11 @@ TEST(Driver, SimpleTest_MathAddMutationOperator) {
                 {},
                 {},
                 {},
-                doFork,
-                dryRun,
-                useCache,
-                emitDebugInfo,
-                diagnostics,
+                Config::Fork::Disabled,
+                Config::DryRunMode::Disabled,
+                Config::UseCache::No,
+                Config::EmitDebugInfo::No,
+                Config::Diagnostics::Disabled,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -137,12 +132,6 @@ TEST(Driver, SimpleTest_MathSubMutationOperator) {
   std::string projectName = "some_project";
   std::string testFramework = "SimpleTest";
 
-  bool doFork = false;
-  bool dryRun = false;
-  bool useCache = false;
-  bool emitDebugInfo = false;
-  bool diagnostics = false;
-
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
 
@@ -155,11 +144,11 @@ TEST(Driver, SimpleTest_MathSubMutationOperator) {
                 {},
                 {},
                 {},
-                doFork,
-                dryRun,
-                useCache,
-                emitDebugInfo,
-                diagnostics,
+                Config::Fork::Disabled,
+                Config::DryRunMode::Disabled,
+                Config::UseCache::No,
+                Config::EmitDebugInfo::No,
+                Config::Diagnostics::Disabled,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -219,12 +208,6 @@ TEST(Driver, SimpleTest_MathMulMutationOperator) {
   std::string projectName = "some_project";
   std::string testFramework = "SimpleTest";
 
-  bool doFork = false;
-  bool dryRun = false;
-  bool useCache = false;
-  bool emitDebugInfo = false;
-  bool diagnostics = false;
-
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
 
@@ -237,11 +220,11 @@ TEST(Driver, SimpleTest_MathMulMutationOperator) {
                 {},
                 {},
                 {},
-                doFork,
-                dryRun,
-                useCache,
-                emitDebugInfo,
-                diagnostics,
+                Config::Fork::Disabled,
+                Config::DryRunMode::Disabled,
+                Config::UseCache::No,
+                Config::EmitDebugInfo::No,
+                Config::Diagnostics::Disabled,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -300,12 +283,6 @@ TEST(Driver, SimpleTest_MathDivMutationOperator) {
   std::string projectName = "some_project";
   std::string testFramework = "SimpleTest";
 
-  bool doFork = false;
-  bool dryRun = false;
-  bool useCache = false;
-  bool emitDebugInfo = false;
-  bool diagnostics = false;
-
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
 
@@ -318,11 +295,11 @@ TEST(Driver, SimpleTest_MathDivMutationOperator) {
                 {},
                 {},
                 {},
-                doFork,
-                dryRun,
-                useCache,
-                emitDebugInfo,
-                diagnostics,
+                Config::Fork::Disabled,
+                Config::DryRunMode::Disabled,
+                Config::UseCache::No,
+                Config::EmitDebugInfo::No,
+                Config::Diagnostics::Disabled,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -381,12 +358,6 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
   std::string projectName = "some_project";
   std::string testFramework = "SimpleTest";
 
-  bool doFork = false;
-  bool dryRun = false;
-  bool useCache = false;
-  bool emitDebugInfo = false;
-  bool diagnostics = false;
-
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
 
@@ -399,11 +370,11 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
                 {},
                 {},
                 {},
-                doFork,
-                dryRun,
-                useCache,
-                emitDebugInfo,
-                diagnostics,
+                Config::Fork::Disabled,
+                Config::DryRunMode::Disabled,
+                Config::UseCache::No,
+                Config::EmitDebugInfo::No,
+                Config::Diagnostics::Disabled,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -455,12 +426,6 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
   std::string projectName = "some_project";
   std::string testFramework = "SimpleTest";
 
-  bool doFork = false;
-  bool dryRun = false;
-  bool useCache = false;
-  bool emitDebugInfo = false;
-  bool diagnostics = false;
-
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
 
@@ -473,11 +438,11 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
                 {},
                 {},
                 {},
-                doFork,
-                dryRun,
-                useCache,
-                emitDebugInfo,
-                diagnostics,
+                Config::Fork::Disabled,
+                Config::DryRunMode::Disabled,
+                Config::UseCache::No,
+                Config::EmitDebugInfo::No,
+                Config::Diagnostics::Disabled,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -529,12 +494,6 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator) {
   std::string projectName = "some_project";
   std::string testFramework = "SimpleTest";
 
-  bool doFork = false;
-  bool dryRun = false;
-  bool useCache = false;
-  bool emitDebugInfo = false;
-  bool diagnostics = false;
-
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
 
@@ -547,11 +506,11 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator) {
                 {},
                 {},
                 {},
-                doFork,
-                dryRun,
-                useCache,
-                emitDebugInfo,
-                diagnostics,
+                Config::Fork::Disabled,
+                Config::DryRunMode::Disabled,
+                Config::UseCache::No,
+                Config::EmitDebugInfo::No,
+                Config::Diagnostics::Disabled,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -676,12 +635,6 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator_CPP) {
   std::string projectName = "some_project";
   std::string testFramework = "SimpleTest";
 
-  bool doFork = true; // this test crashes in 2 tests, so we want a sandbox.
-  bool dryRun = false;
-  bool useCache = false;
-  bool debugInfo = false;
-  bool diagnostics = false;
-
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
 
@@ -694,11 +647,12 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator_CPP) {
                 {},
                 {},
                 {},
-                doFork,
-                dryRun,
-                useCache,
-                debugInfo,
-                diagnostics,
+                // this test crashes in 2 tests, so we want a sandbox.
+                Config::Fork::Enabled,
+                Config::DryRunMode::Disabled,
+                Config::UseCache::No,
+                Config::EmitDebugInfo::No,
+                Config::Diagnostics::Disabled,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -785,12 +739,6 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutationOperator_CPP) {
   std::string projectName = "some_project";
   std::string testFramework = "SimpleTest";
 
-  bool doFork = false;
-  bool dryRun = false;
-  bool useCache = false;
-  bool debugInfo = false;
-  bool diagnostics = false;
-
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
 
@@ -803,11 +751,11 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutationOperator_CPP) {
                 {},
                 {},
                 {},
-                doFork,
-                dryRun,
-                useCache,
-                debugInfo,
-                diagnostics,
+                Config::Fork::Disabled,
+                Config::DryRunMode::Disabled,
+                Config::UseCache::No,
+                Config::EmitDebugInfo::No,
+                Config::Diagnostics::Disabled,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -856,12 +804,6 @@ TEST(Driver, customTest) {
   std::string projectName = "some_custom_project";
   std::string testFramework = "CustomTest";
 
-  bool doFork = false;
-  bool dryRun = false;
-  bool useCache = false;
-  bool emitDebugInfo = false;
-  bool diagnostics = false;
-
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
 
@@ -879,11 +821,11 @@ TEST(Driver, customTest) {
                 {},
                 {},
                 testDefinitions,
-                doFork,
-                dryRun,
-                useCache,
-                emitDebugInfo,
-                diagnostics,
+                Config::Fork::Disabled,
+                Config::DryRunMode::Disabled,
+                Config::UseCache::No,
+                Config::EmitDebugInfo::No,
+                Config::Diagnostics::Disabled,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -929,12 +871,6 @@ TEST(Driver, customTest_withDynamicLibraries) {
   std::string projectName = "some_custom_project_with_dylibs";
   std::string testFramework = "CustomTest";
 
-  bool doFork = false;
-  bool dryRun = false;
-  bool useCache = false;
-  bool emitDebugInfo = false;
-  bool diagnostics = false;
-
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
 
@@ -954,11 +890,11 @@ TEST(Driver, customTest_withDynamicLibraries) {
                 {},
                 {},
                 testDefinitions,
-                doFork,
-                dryRun,
-                useCache,
-                emitDebugInfo,
-                diagnostics,
+                Config::Fork::Disabled,
+                Config::DryRunMode::Disabled,
+                Config::UseCache::No,
+                Config::EmitDebugInfo::No,
+                Config::Diagnostics::Disabled,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -1002,12 +938,6 @@ TEST(Driver, DISABLED_customTest_withDynamicLibraries_and_ObjectFiles) {
   std::string projectName = "some_custom_project_with_dylibs_and_object_files";
   std::string testFramework = "CustomTest";
 
-  bool doFork = false;
-  bool dryRun = false;
-  bool useCache = false;
-  bool emitDebugInfo = false;
-  bool diagnostics = false;
-
   int distance = 10;
   std::string cacheDirectory = "/tmp/mull_cache";
 
@@ -1029,11 +959,11 @@ TEST(Driver, DISABLED_customTest_withDynamicLibraries_and_ObjectFiles) {
                 {},
                 {},
                 testDefinitions,
-                doFork,
-                dryRun,
-                useCache,
-                emitDebugInfo,
-                diagnostics,
+                Config::Fork::Disabled,
+                Config::DryRunMode::Disabled,
+                Config::UseCache::No,
+                Config::EmitDebugInfo::No,
+                Config::Diagnostics::Disabled,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);

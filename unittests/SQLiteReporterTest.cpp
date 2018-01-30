@@ -218,12 +218,6 @@ TEST(SQLiteReporter, integrationTest_Config) {
     "test_method2"
   });
 
-  bool doFork = true;
-  bool dryRun = true;
-  bool useCache = true;
-  bool emitDebugInfo = false;
-  bool diagnostics = false;
-
   int timeout = 42;
   int distance = 10;
   std::string cacheDirectory = "/a/cache";
@@ -235,7 +229,11 @@ TEST(SQLiteReporter, integrationTest_Config) {
                 objectFileList,
                 selectedTests,
                 {}, {},
-                doFork, dryRun, useCache, emitDebugInfo, diagnostics,
+                Config::Fork::Enabled,
+                Config::DryRunMode::Enabled,
+                Config::UseCache::Yes,
+                Config::EmitDebugInfo::No,
+                Config::Diagnostics::Disabled,
                 timeout, distance,
                 cacheDirectory);
 
@@ -411,12 +409,6 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
     "test_method2"
   });
 
-  bool doFork = true;
-  bool dryRun = true;
-  bool useCache = true;
-  bool emitDebugInfo = true;
-  bool diagnostics = false;
-
   int timeout = 42;
   int distance = 10;
   std::string cacheDirectory = "/a/cache";
@@ -428,7 +420,11 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
                 objectFileList,
                 configTests,
                 {}, {},
-                doFork, dryRun, useCache, emitDebugInfo, diagnostics,
+                Config::Fork::Enabled,
+                Config::DryRunMode::Enabled,
+                Config::UseCache::Yes,
+                Config::EmitDebugInfo::Yes,
+                Config::Diagnostics::Disabled,
                 timeout, distance,
                 cacheDirectory);
 
@@ -555,12 +551,6 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
     "test_method2"
   });
 
-  bool doFork = true;
-  bool dryRun = true;
-  bool useCache = true;
-  bool emitDebugInfo = false;
-  bool diagnostics = false;
-
   int timeout = 42;
   int distance = 10;
   std::string cacheDirectory = "/a/cache";
@@ -572,7 +562,11 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
                 objectFileList,
                 configTests,
                 {}, {},
-                doFork, dryRun, useCache, emitDebugInfo, diagnostics,
+                Config::Fork::Enabled,
+                Config::DryRunMode::Enabled,
+                Config::UseCache::Yes,
+                Config::EmitDebugInfo::No,
+                Config::Diagnostics::Disabled,
                 timeout, distance,
                 cacheDirectory);
 

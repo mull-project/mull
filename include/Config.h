@@ -41,6 +41,83 @@ struct CustomTestDefinition {
 };
 
 class Config {
+public:
+  enum class Fork {
+    Disabled,
+    Enabled
+  };
+  static std::string forkToString(Fork fork) {
+    switch (fork) {
+      case Fork::Enabled:
+        return "enabled";
+        break;
+
+      case Fork::Disabled:
+        return "disabled";
+        break;
+    }
+  }
+  enum class DryRunMode {
+    Disabled,
+    Enabled
+  };
+  static std::string dryRunToString(DryRunMode dryRun) {
+    switch (dryRun) {
+      case DryRunMode::Enabled:
+        return "enabled";
+        break;
+
+      case DryRunMode::Disabled:
+        return "disabled";
+        break;
+    }
+  }
+  enum class UseCache {
+    No,
+    Yes
+  };
+  static std::string cachingToString(UseCache caching) {
+    switch (caching) {
+      case UseCache::Yes:
+        return "yes";
+        break;
+
+      case UseCache::No:
+        return "no";
+        break;
+    }
+  }
+  enum class EmitDebugInfo {
+    No,
+    Yes
+  };
+  static std::string emitDebugInfoToString(EmitDebugInfo emitDebugInfo) {
+    switch (emitDebugInfo) {
+      case EmitDebugInfo::Yes:
+        return "yes";
+        break;
+
+      case EmitDebugInfo::No:
+        return "no";
+        break;
+    }
+  }
+  enum class Diagnostics {
+    Disabled,
+    Enabled
+  };
+  static std::string diagnosticsToString(Diagnostics diagnostics) {
+    switch (diagnostics) {
+      case Diagnostics::Enabled:
+        return "enabled";
+        break;
+
+      case Diagnostics::Disabled:
+        return "disabled";
+        break;
+    }
+  }
+private:
   std::string bitcodeFileList;
 
   std::string projectName;
@@ -53,11 +130,11 @@ class Config {
   std::vector<std::string> excludeLocations;
   std::vector<CustomTestDefinition> customTests;
 
-  bool fork;
-  bool dryRun;
-  bool useCache;
-  bool emitDebugInfo;
-  bool diagnostics;
+  Fork fork;
+  DryRunMode dryRun;
+  UseCache caching;
+  EmitDebugInfo emitDebugInfo;
+  Diagnostics diagnostics;
 
   int timeout;
   int maxDistance;
@@ -86,11 +163,11 @@ public:
     tests(),
     excludeLocations(),
     customTests(),
-    fork(true),
-    dryRun(false),
-    useCache(false),
-    emitDebugInfo(false),
-    diagnostics(false),
+    fork(Fork::Enabled),
+    dryRun(DryRunMode::Disabled),
+    caching(UseCache::No),
+    emitDebugInfo(EmitDebugInfo::No),
+    diagnostics(Diagnostics::Disabled),
     timeout(MullDefaultTimeoutMilliseconds),
     maxDistance(128),
     cacheDirectory("/tmp/mull_cache")
@@ -106,11 +183,11 @@ public:
          const std::vector<std::string> tests,
          const std::vector<std::string> excludeLocations,
          const std::vector<CustomTestDefinition> definitions,
-         bool fork,
-         bool dryrun,
-         bool cache,
-         bool debugInfo,
-         bool diagnostics,
+         Fork fork,
+         DryRunMode dryRun,
+         UseCache cache,
+         EmitDebugInfo debugInfo,
+         Diagnostics diagnostics,
          int timeout,
          int distance,
          const std::string &cacheDir) :
@@ -124,8 +201,8 @@ public:
     excludeLocations(excludeLocations),
     customTests(definitions),
     fork(fork),
-    dryRun(dryrun),
-    useCache(cache),
+    dryRun(dryRun),
+    caching(cache),
     emitDebugInfo(debugInfo),
     diagnostics(diagnostics),
     timeout(timeout),
@@ -218,28 +295,28 @@ public:
     return customTests;
   }
 
-  bool getFork() const {
-    return fork;
+  bool forkEnabled() const {
+    return fork == Fork::Enabled;
   }
 
   int getTimeout() const {
     return timeout;
   }
 
-  bool getUseCache() const {
-    return useCache;
+  bool cachingEnabled() const {
+    return caching == UseCache::Yes;
   }
 
-  bool isDryRun() const {
-    return dryRun;
+  bool dryRunModeEnabled() const {
+    return dryRun == DryRunMode::Enabled;
   }
 
   bool shouldEmitDebugInfo() const {
-    return emitDebugInfo;
+    return emitDebugInfo == EmitDebugInfo::Yes;
   }
 
   bool isDiagnosticsEnabled() const {
-    return diagnostics;
+    return diagnostics == Diagnostics::Enabled;
   }
 
   int getMaxDistance() const {
@@ -258,9 +335,11 @@ public:
     << "\t" << "project_name: " << getProjectName() << '\n'
     << "\t" << "test_framework: " << getTestFramework() << '\n'
     << "\t" << "distance: " << getMaxDistance() << '\n'
-    << "\t" << "dry_run: " << isDryRun() << '\n'
-    << "\t" << "fork: " << getFork() << '\n'
-    << "\t" << "emit_debug_info: " << shouldEmitDebugInfo() << '\n';
+    << "\t" << "dry_run: " << dryRunToString(dryRun) << '\n'
+    << "\t" << "fork: " << forkToString(fork) << '\n'
+    << "\t" << "use_cache: " << cachingToString(caching) << '\n'
+    << "\t" << "diagnostics: " << diagnosticsToString(diagnostics) << '\n'
+    << "\t" << "emit_debug_info: " << emitDebugInfoToString(emitDebugInfo) << '\n';
 
     if (mutationOperators.empty() == false) {
       Logger::debug() << "\t" << "mutation_operators: " << '\n';
