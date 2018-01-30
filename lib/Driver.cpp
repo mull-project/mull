@@ -24,7 +24,7 @@ using namespace llvm::object;
 using namespace mull;
 using namespace std;
 
-static const auto failFastEnabled = true;
+static const auto failFastEnabled = false;
 
 Driver::~Driver() {
   delete this->Sandbox;
