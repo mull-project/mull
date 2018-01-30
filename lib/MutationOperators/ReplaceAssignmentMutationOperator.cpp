@@ -114,7 +114,6 @@ ReplaceAssignmentMutationOperator::applyMutation(Module *M,
   Value *replacement = getReplacement(returnedType, instruction.getContext());
 
   storeInstruction->setOperand(0, replacement);
-  storeOperand->replaceAllUsesWith(replacement);
 
   return nullptr;
 }
