@@ -233,7 +233,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
                 Config::DryRunMode::Enabled,
                 Config::UseCache::Yes,
                 Config::EmitDebugInfo::No,
-                Config::Diagnostics::Disabled,
+                Config::Diagnostics::None,
                 timeout, distance,
                 cacheDirectory);
 
@@ -424,7 +424,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
                 Config::DryRunMode::Enabled,
                 Config::UseCache::Yes,
                 Config::EmitDebugInfo::Yes,
-                Config::Diagnostics::Disabled,
+                Config::Diagnostics::None,
                 timeout, distance,
                 cacheDirectory);
 
@@ -566,7 +566,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
                 Config::DryRunMode::Enabled,
                 Config::UseCache::Yes,
                 Config::EmitDebugInfo::No,
-                Config::Diagnostics::Disabled,
+                Config::Diagnostics::None,
                 timeout, distance,
                 cacheDirectory);
 

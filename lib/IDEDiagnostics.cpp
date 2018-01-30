@@ -10,8 +10,16 @@ using namespace mull;
 using namespace llvm;
 
 void NormalIDEDiagnostics::report(mull::MutationPoint *mutationPoint,
-                                  ExecutionStatus Status) {
-  if (Status != Passed) {
+                                  bool killed) {
+  if (diagnostics == Config::Diagnostics::None) {
+    return;
+  }
+
+  if (diagnostics == Config::Diagnostics::Survived && killed) {
+    return;
+  }
+
+  if (diagnostics == Config::Diagnostics::Killed && killed == false) {
     return;
   }
 

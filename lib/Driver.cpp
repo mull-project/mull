@@ -241,8 +241,7 @@ std::vector<std::unique_ptr<MutationResult>> Driver::runMutations(const std::vec
     auto testsCount = mutationPoint->getReachableTests().size();
     auto testIndex = 1;
 
-    auto alreadyFailed = false;
-
+    auto atLeastOneTestFailed = false;
     for (auto &reachableTest : mutationPoint->getReachableTests()) {
       auto test = reachableTest.first;
       auto distance = reachableTest.second;
@@ -251,7 +250,7 @@ std::vector<std::unique_ptr<MutationResult>> Driver::runMutations(const std::vec
 
       ExecutionResult result;
 
-      if (failFastEnabled && alreadyFailed) {
+      if (failFastEnabled && atLeastOneTestFailed) {
         result.status = ExecutionStatus::FailFast;
       } else {
         const auto timeout = test->getExecutionResult().runningTime * 10;
@@ -267,7 +266,7 @@ std::vector<std::unique_ptr<MutationResult>> Driver::runMutations(const std::vec
                "Expect to see valid TestResult");
 
         if (result.status != ExecutionStatus::Passed) {
-          alreadyFailed = true;
+          atLeastOneTestFailed = true;
         }
       }
 
@@ -275,6 +274,8 @@ std::vector<std::unique_ptr<MutationResult>> Driver::runMutations(const std::vec
 
       mutationResults.push_back(make_unique<MutationResult>(result, mutationPoint, distance, test));
     }
+
+    diagnostics->report(mutationPoint, atLeastOneTestFailed);
 
     objectFilesWithMutant.pop_back();
   }

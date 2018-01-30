@@ -70,7 +70,7 @@ TEST(Driver, SimpleTest_MathAddMutationOperator) {
                 Config::DryRunMode::Disabled,
                 Config::UseCache::No,
                 Config::EmitDebugInfo::No,
-                Config::Diagnostics::Disabled,
+                Config::Diagnostics::None,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -148,7 +148,7 @@ TEST(Driver, SimpleTest_MathSubMutationOperator) {
                 Config::DryRunMode::Disabled,
                 Config::UseCache::No,
                 Config::EmitDebugInfo::No,
-                Config::Diagnostics::Disabled,
+                Config::Diagnostics::None,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -224,7 +224,7 @@ TEST(Driver, SimpleTest_MathMulMutationOperator) {
                 Config::DryRunMode::Disabled,
                 Config::UseCache::No,
                 Config::EmitDebugInfo::No,
-                Config::Diagnostics::Disabled,
+                Config::Diagnostics::None,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -299,7 +299,7 @@ TEST(Driver, SimpleTest_MathDivMutationOperator) {
                 Config::DryRunMode::Disabled,
                 Config::UseCache::No,
                 Config::EmitDebugInfo::No,
-                Config::Diagnostics::Disabled,
+                Config::Diagnostics::None,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -374,7 +374,7 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
                 Config::DryRunMode::Disabled,
                 Config::UseCache::No,
                 Config::EmitDebugInfo::No,
-                Config::Diagnostics::Disabled,
+                Config::Diagnostics::None,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -442,7 +442,7 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
                 Config::DryRunMode::Disabled,
                 Config::UseCache::No,
                 Config::EmitDebugInfo::No,
-                Config::Diagnostics::Disabled,
+                Config::Diagnostics::None,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -510,7 +510,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator) {
                 Config::DryRunMode::Disabled,
                 Config::UseCache::No,
                 Config::EmitDebugInfo::No,
-                Config::Diagnostics::Disabled,
+                Config::Diagnostics::None,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -652,7 +652,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator_CPP) {
                 Config::DryRunMode::Disabled,
                 Config::UseCache::No,
                 Config::EmitDebugInfo::No,
-                Config::Diagnostics::Disabled,
+                Config::Diagnostics::None,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -755,7 +755,7 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutationOperator_CPP) {
                 Config::DryRunMode::Disabled,
                 Config::UseCache::No,
                 Config::EmitDebugInfo::No,
-                Config::Diagnostics::Disabled,
+                Config::Diagnostics::None,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -825,7 +825,7 @@ TEST(Driver, customTest) {
                 Config::DryRunMode::Disabled,
                 Config::UseCache::No,
                 Config::EmitDebugInfo::No,
-                Config::Diagnostics::Disabled,
+                Config::Diagnostics::None,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -894,7 +894,7 @@ TEST(Driver, customTest_withDynamicLibraries) {
                 Config::DryRunMode::Disabled,
                 Config::UseCache::No,
                 Config::EmitDebugInfo::No,
-                Config::Diagnostics::Disabled,
+                Config::Diagnostics::None,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);
@@ -963,7 +963,7 @@ TEST(Driver, DISABLED_customTest_withDynamicLibraries_and_ObjectFiles) {
                 Config::DryRunMode::Disabled,
                 Config::UseCache::No,
                 Config::EmitDebugInfo::No,
-                Config::Diagnostics::Disabled,
+                Config::Diagnostics::None,
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory);

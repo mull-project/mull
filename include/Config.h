@@ -103,18 +103,25 @@ public:
     }
   }
   enum class Diagnostics {
-    Disabled,
-    Enabled
+    None,
+    Survived,
+    Killed,
+    All
   };
   static std::string diagnosticsToString(Diagnostics diagnostics) {
     switch (diagnostics) {
-      case Diagnostics::Enabled:
-        return "enabled";
-        break;
-
-      case Diagnostics::Disabled:
-        return "disabled";
-        break;
+      case Diagnostics::None: {
+        return "none";
+      }
+      case Diagnostics::Survived: {
+        return "survived";
+      }
+      case Diagnostics::Killed: {
+        return "killed";
+      }
+      case Diagnostics::All: {
+        return "all";
+      }
     }
   }
 private:
@@ -167,7 +174,7 @@ public:
     dryRun(DryRunMode::Disabled),
     caching(UseCache::No),
     emitDebugInfo(EmitDebugInfo::No),
-    diagnostics(Diagnostics::Disabled),
+    diagnostics(Diagnostics::None),
     timeout(MullDefaultTimeoutMilliseconds),
     maxDistance(128),
     cacheDirectory("/tmp/mull_cache")
@@ -315,8 +322,8 @@ public:
     return emitDebugInfo == EmitDebugInfo::Yes;
   }
 
-  bool isDiagnosticsEnabled() const {
-    return diagnostics == Diagnostics::Enabled;
+  Diagnostics getDiagnostics() const {
+    return diagnostics;
   }
 
   int getMaxDistance() const {
