@@ -41,6 +41,61 @@ using namespace llvm;
 
 static TestModuleFactory SharedTestModuleFactory;
 
+#pragma mark - Running Driver with no tests
+
+TEST(Driver, RunningWithNoTests) {
+  std::string projectName = "some_project";
+  std::string testFramework = "SimpleTest";
+
+  int distance = 10;
+  std::string cacheDirectory = "/tmp/mull_cache";
+
+  Config config("",
+                projectName,
+                testFramework,
+                {},
+                {},
+                {},
+                {},
+                {},
+                {},
+                Config::Fork::Disabled,
+                Config::DryRunMode::Disabled,
+                Config::UseCache::No,
+                Config::EmitDebugInfo::No,
+                Config::Diagnostics::None,
+                MullDefaultTimeoutMilliseconds,
+                distance,
+                cacheDirectory);
+
+  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
+    std::vector<std::unique_ptr<MullModule>> modules;
+
+    // No tests loaded!
+
+    return modules;
+  };
+
+  LLVMContext context;
+  FakeModuleLoader loader(context, modules);
+
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  MutationsFinder finder(std::move(mutationOperators));
+
+  SimpleTestFinder testFinder;
+
+  Toolchain toolchain(config);
+  llvm::TargetMachine &machine = toolchain.targetMachine();
+  SimpleTestRunner runner(machine);
+  Filter filter;
+
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder);
+
+  auto result = Driver.Run();
+  ASSERT_EQ(0u, result->getTests().size());
+  ASSERT_EQ(0u, result->getMutationResults().size());
+}
+
 #pragma mark - Mutation operators
 
 TEST(Driver, SimpleTest_MathAddMutationOperator) {

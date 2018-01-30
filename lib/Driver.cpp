@@ -118,6 +118,12 @@ std::unique_ptr<Result> Driver::Run() {
                   << testsCount
                   << " tests\n";
 
+  if (testsCount == 0) {
+    return make_unique<Result>(std::move(foundTests),
+                               std::vector<std::unique_ptr<MutationResult>>(),
+                               std::vector<MutationPoint *>());
+  }
+
   for (std::string &dylibPath: Cfg.getDynamicLibrariesPaths()) {
     sys::DynamicLibrary::LoadLibraryPermanently(dylibPath.c_str());
   }
