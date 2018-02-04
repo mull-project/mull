@@ -231,7 +231,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
                 {}, {},
                 Config::Fork::Enabled,
                 Config::DryRunMode::Enabled,
-                Config::FailFastMode::Disabled,
+                Config::FailFastMode::Enabled,
                 Config::UseCache::Yes,
                 Config::EmitDebugInfo::No,
                 Config::Diagnostics::None,
@@ -269,6 +269,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
 
   int column7_fork = 0;
   int column8_dryRun = 0;
+  int column_failFast = 0;
   int column9_useCache = 0;
   int column10_timeout = 0;
   int column11_distance = 0;
@@ -291,6 +292,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
       column6_tests = sqlite3_column_text(selectStmt, row++);
       column7_fork = sqlite3_column_int(selectStmt, row++);
       column8_dryRun = sqlite3_column_int(selectStmt, row++);
+      column_failFast = sqlite3_column_int(selectStmt, row++);
       column9_useCache = sqlite3_column_int(selectStmt, row++);
       column10_timeout = sqlite3_column_int(selectStmt, row++);
       column11_distance = sqlite3_column_int(selectStmt, row++);
@@ -307,6 +309,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
       ASSERT_EQ(strcmp((const char *)column6_tests, "test_method1,test_method2"), 0);
       ASSERT_EQ(column7_fork, true);
       ASSERT_EQ(column8_dryRun, true);
+      ASSERT_EQ(column_failFast, true);
       ASSERT_EQ(column9_useCache, true);
       ASSERT_EQ(column10_timeout, 42);
       ASSERT_EQ(column11_distance, 10);
