@@ -24,8 +24,6 @@ using namespace llvm::object;
 using namespace mull;
 using namespace std;
 
-static const auto failFastEnabled = false;
-
 Driver::~Driver() {
   delete this->Sandbox;
   delete this->diagnostics;
@@ -256,7 +254,7 @@ std::vector<std::unique_ptr<MutationResult>> Driver::runMutations(const std::vec
 
       ExecutionResult result;
 
-      if (failFastEnabled && atLeastOneTestFailed) {
+      if (Cfg.failFastModeEnabled() && atLeastOneTestFailed) {
         result.status = ExecutionStatus::FailFast;
       } else {
         const auto timeout = test->getExecutionResult().runningTime * 10;
