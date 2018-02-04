@@ -35,30 +35,30 @@ class MutationsFinder;
 class Driver;
 
 class Driver {
-  Config &Cfg;
-  ModuleLoader &Loader;
-  TestFinder &Finder;
-  TestRunner &Runner;
+  Config &config;
+  ModuleLoader &loader;
+  TestFinder &finder;
+  TestRunner &runner;
   Toolchain &toolchain;
   Filter &filter;
   MutationsFinder &mutationsFinder;
-  Context Ctx;
-  ProcessSandbox *Sandbox;
+  Context context;
+  ProcessSandbox *sandbox;
   IDEDiagnostics *diagnostics;
 
-  std::map<llvm::Module *, llvm::object::ObjectFile *> InnerCache;
+  std::map<llvm::Module *, llvm::object::ObjectFile *> innerCache;
   std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> precompiledObjectFiles;
   std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> instrumentedObjectFiles;
   std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> ownedObjectFiles;
   Instrumentation instrumentation;
 public:
   Driver(Config &C, ModuleLoader &ML, TestFinder &TF, TestRunner &TR, Toolchain &t, Filter &f, MutationsFinder &mutationsFinder)
-    : Cfg(C), Loader(ML), Finder(TF), Runner(TR), toolchain(t), filter(f), mutationsFinder(mutationsFinder), precompiledObjectFiles(), instrumentation() {
+    : config(C), loader(ML), finder(TF), runner(TR), toolchain(t), filter(f), mutationsFinder(mutationsFinder), precompiledObjectFiles(), instrumentation() {
 
       if (C.forkEnabled()) {
-        this->Sandbox = new ForkProcessSandbox();
+        this->sandbox = new ForkProcessSandbox();
       } else {
-        this->Sandbox = new NullProcessSandbox();
+        this->sandbox = new NullProcessSandbox();
       }
 
       Config::Diagnostics diagnostics = C.getDiagnostics();
