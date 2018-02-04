@@ -56,6 +56,14 @@ struct ScalarEnumerationTraits<mull::Config::DryRunMode> {
 };
 
 template <>
+struct ScalarEnumerationTraits<mull::Config::FailFastMode> {
+  static void enumeration(IO &io, mull::Config::FailFastMode &value) {
+    io.enumCase(value, "enabled",  mull::Config::FailFastMode::Enabled);
+    io.enumCase(value, "disabled",  mull::Config::FailFastMode::Disabled);
+  }
+};
+
+template <>
 struct ScalarEnumerationTraits<mull::Config::UseCache> {
   static void enumeration(IO &io, mull::Config::UseCache &value) {
     io.enumCase(value, "true",  mull::Config::UseCache::Yes);
@@ -101,6 +109,7 @@ struct MappingTraits<mull::Config>
     io.mapOptional("custom_tests", config.customTests);
     io.mapOptional("fork", config.fork);
     io.mapOptional("dry_run", config.dryRun);
+    io.mapOptional("fail_fast", config.failFast);
     io.mapOptional("use_cache", config.caching);
     io.mapOptional("emit_debug_info", config.emitDebugInfo);
     io.mapOptional("diagnostics", config.diagnostics);

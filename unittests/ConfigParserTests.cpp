@@ -226,6 +226,21 @@ TEST_F(ConfigParserTestFixture, loadConfig_DryRun_Disabled) {
   ASSERT_FALSE(config.dryRunModeEnabled());
 }
 
+TEST_F(ConfigParserTestFixture, loadConfig_FailFast_Unspecified) {
+  configWithYamlContent("");
+  ASSERT_FALSE(config.failFastModeEnabled());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_FailFast_Enabled) {
+  configWithYamlContent("fail_fast: enabled\n");
+  ASSERT_TRUE(config.failFastModeEnabled());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_FailFast_Disabled) {
+  configWithYamlContent("fail_fast: disabled\n");
+  ASSERT_FALSE(config.failFastModeEnabled());
+}
+
 TEST_F(ConfigParserTestFixture, loadConfig_Diagnostics_Unspecified) {
   configWithYamlContent("");
   ASSERT_EQ(config.getDiagnostics(), Config::Diagnostics::None);
