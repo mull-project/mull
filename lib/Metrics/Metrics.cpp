@@ -158,7 +158,7 @@ void Metrics::dump() {
   cout << endl;
 
   cout << "Load original program: ............ " << loadOriginalProgram.duration() << MetricsMeasure::precision() << endl;
-  cout << "Load mutant (avg): ................ " << accumulate_duration(loadMutant) / loadMutant.size() << MetricsMeasure::precision() << endl;
+  cout << "Load mutant (avg): ................ " << accumulate_duration(loadMutant) / (loadMutant.size() ? loadMutant.size() : 1) << MetricsMeasure::precision() << endl;
   cout << "Load mutant (total): .............. " << accumulate_duration(loadMutant) << MetricsMeasure::precision() << endl;
   cout << endl;
 
@@ -167,14 +167,14 @@ void Metrics::dump() {
   cout << "Mutant compilation (total): ....... " << accumulate_duration(compileMutant) << MetricsMeasure::precision() << endl;
   cout << endl;
 
-  cout << "Original compilation (avg): ....... " << accumulate_duration(originalModuleCompilation) / originalModuleCompilation.size() << MetricsMeasure::precision() << endl;
-  cout << "Instrumented compilation (avg): ... " << accumulate_duration(instrumentedModuleCompilation) / instrumentedModuleCompilation.size() << MetricsMeasure::precision() << endl;
-  cout << "Mutant compilation (avg): ......... " << accumulate_duration(compileMutant) / compileMutant.size() << MetricsMeasure::precision() << endl;
+  cout << "Original compilation (avg): ....... " << accumulate_duration(originalModuleCompilation) / (originalModuleCompilation.size() ? originalModuleCompilation.size() : 1) << MetricsMeasure::precision() << endl;
+  cout << "Instrumented compilation (avg): ... " << accumulate_duration(instrumentedModuleCompilation) / (instrumentedModuleCompilation.size() ? instrumentedModuleCompilation.size() : 1) << MetricsMeasure::precision() << endl;
+  cout << "Mutant compilation (avg): ......... " << accumulate_duration(compileMutant) / (compileMutant.size() ? compileMutant.size() : 1) << MetricsMeasure::precision() << endl;
   cout << endl;
 
   cout << "Tests run time (total): ........... " << accumulate_duration(runOriginalTest) << MetricsMeasure::precision() << endl;
   cout << "Mutants run time (total): ......... " << totalMutantRunTime << MetricsMeasure::precision() << endl;
-  cout << "Tests run time (avg): ............. " << accumulate_duration(runOriginalTest) / runOriginalTest.size() << MetricsMeasure::precision() << endl;
-  cout << "Mutants run time (avg): ........... " << totalMutantRunTime / mutantRuns.size() << MetricsMeasure::precision() << endl;
+  cout << "Tests run time (avg): ............. " << accumulate_duration(runOriginalTest) / (runOriginalTest.size() ? runOriginalTest.size() : 1) << MetricsMeasure::precision() << endl;
+  cout << "Mutants run time (avg): ........... " << totalMutantRunTime / (mutantRuns.size() ? mutantRuns.size() : 1) << MetricsMeasure::precision() << endl;
   cout << endl;
 }
