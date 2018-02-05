@@ -23,6 +23,10 @@ struct MetricsMeasure {
   Duration duration() {
     return (end - begin).count();
   }
+
+  static const char *precision() {
+    return "ms";
+  }
 };
 
 class Metrics {

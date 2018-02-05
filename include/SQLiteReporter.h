@@ -8,7 +8,7 @@ namespace mull {
 
 class Result;
 class Config;
-class MetricsMeasure;
+struct MetricsMeasure;
 
 class SQLiteReporter {
 
