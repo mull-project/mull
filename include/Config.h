@@ -72,6 +72,21 @@ public:
         break;
     }
   }
+  enum class FailFastMode {
+    Disabled,
+    Enabled
+  };
+  static std::string failFastToString(FailFastMode failFast) {
+    switch (failFast) {
+      case FailFastMode::Enabled:
+        return "enabled";
+        break;
+
+      case FailFastMode::Disabled:
+        return "disabled";
+        break;
+    }
+  }
   enum class UseCache {
     No,
     Yes
@@ -139,6 +154,7 @@ private:
 
   Fork fork;
   DryRunMode dryRun;
+  FailFastMode failFast;
   UseCache caching;
   EmitDebugInfo emitDebugInfo;
   Diagnostics diagnostics;
@@ -172,6 +188,7 @@ public:
     customTests(),
     fork(Fork::Enabled),
     dryRun(DryRunMode::Disabled),
+    failFast(FailFastMode::Disabled),
     caching(UseCache::No),
     emitDebugInfo(EmitDebugInfo::No),
     diagnostics(Diagnostics::None),
@@ -192,6 +209,7 @@ public:
          const std::vector<CustomTestDefinition> definitions,
          Fork fork,
          DryRunMode dryRun,
+         FailFastMode failFast,
          UseCache cache,
          EmitDebugInfo debugInfo,
          Diagnostics diagnostics,
@@ -209,6 +227,7 @@ public:
     customTests(definitions),
     fork(fork),
     dryRun(dryRun),
+    failFast(failFast),
     caching(cache),
     emitDebugInfo(debugInfo),
     diagnostics(diagnostics),
@@ -318,6 +337,10 @@ public:
     return dryRun == DryRunMode::Enabled;
   }
 
+  bool failFastModeEnabled() const {
+    return failFast == FailFastMode::Enabled;
+  }
+
   bool shouldEmitDebugInfo() const {
     return emitDebugInfo == EmitDebugInfo::Yes;
   }
@@ -343,6 +366,7 @@ public:
     << "\t" << "test_framework: " << getTestFramework() << '\n'
     << "\t" << "distance: " << getMaxDistance() << '\n'
     << "\t" << "dry_run: " << dryRunToString(dryRun) << '\n'
+    << "\t" << "fail_fast: " << failFastToString(failFast) << '\n'
     << "\t" << "fork: " << forkToString(fork) << '\n'
     << "\t" << "use_cache: " << cachingToString(caching) << '\n'
     << "\t" << "diagnostics: " << diagnosticsToString(diagnostics) << '\n'

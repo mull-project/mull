@@ -285,6 +285,7 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
     + "'" + csvTests + "',"
     + "'" + std::to_string(config.forkEnabled()) + "',"
     + "'" + std::to_string(config.dryRunModeEnabled()) + "',"
+    + "'" + std::to_string(config.failFastModeEnabled()) + "',"
     + "'" + std::to_string(config.cachingEnabled()) + "',"
     + "'" + std::to_string(config.getTimeout()) + "',"
     + "'" + std::to_string(config.getMaxDistance()) + "',"
@@ -359,6 +360,7 @@ CREATE TABLE config (
   tests TEXT,
   fork INT,
   dry_run INT,
+  fail_fast INT,
   use_cache INT,
   timeout INT,
   max_distance INT,
