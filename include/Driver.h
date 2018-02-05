@@ -31,8 +31,7 @@ class Result;
 class TestFinder;
 class TestRunner;
 class MutationsFinder;
-
-class Driver;
+class Metrics;
 
 class Driver {
   Config &config;
@@ -51,9 +50,10 @@ class Driver {
   std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> instrumentedObjectFiles;
   std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> ownedObjectFiles;
   Instrumentation instrumentation;
+  Metrics &metrics;
 public:
-  Driver(Config &C, ModuleLoader &ML, TestFinder &TF, TestRunner &TR, Toolchain &t, Filter &f, MutationsFinder &mutationsFinder)
-    : config(C), loader(ML), finder(TF), runner(TR), toolchain(t), filter(f), mutationsFinder(mutationsFinder), precompiledObjectFiles(), instrumentation() {
+  Driver(Config &C, ModuleLoader &ML, TestFinder &TF, TestRunner &TR, Toolchain &t, Filter &f, MutationsFinder &mutationsFinder, Metrics &metrics)
+    : config(C), loader(ML), finder(TF), runner(TR), toolchain(t), filter(f), mutationsFinder(mutationsFinder), precompiledObjectFiles(), instrumentation(), metrics(metrics) {
 
       if (C.forkEnabled()) {
         this->sandbox = new ForkProcessSandbox();

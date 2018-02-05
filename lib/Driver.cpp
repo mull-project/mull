@@ -10,6 +10,7 @@
 #include "TestFinder.h"
 #include "TestRunner.h"
 #include "MutationsFinder.h"
+#include "Metrics/Metrics.h"
 
 #include <llvm/Support/DynamicLibrary.h>
 
@@ -50,9 +51,11 @@ std::unique_ptr<Result> Driver::Run() {
   /// Assumption: all modules will be used during the execution
   /// Therefore we load them into memory and compile immediately
   /// Later on modules used only for generating of mutants
+  metrics.beginLoadModules();
   std::vector<std::string> bitcodePaths = config.getBitcodePaths();
   std::vector<unique_ptr<MullModule>> modules =
     loader.loadModulesFromBitcodeFileList(bitcodePaths);
+  metrics.endLoadModules();
 
   for (auto &ownedModule : modules) {
     MullModule &module = *ownedModule.get();
@@ -60,6 +63,7 @@ std::unique_ptr<Result> Driver::Run() {
     context.addModule(std::move(ownedModule));
 
     if (!config.dryRunModeEnabled()) {
+      metrics.beginCompileOriginalModule(module.getModule());
       auto objectFile = toolchain.cache().getObject(module);
       if (objectFile.getBinary() == nullptr) {
         LLVMContext localContext;
@@ -70,9 +74,11 @@ std::unique_ptr<Result> Driver::Run() {
 
       innerCache.insert(std::make_pair(module.getModule(), objectFile.getBinary()));
       ownedObjectFiles.push_back(std::move(objectFile));
+      metrics.endCompileOriginalModule(module.getModule());
     }
 
     {
+      metrics.beginCompileInstrumentedModule(module.getModule());
       LLVMContext instrumentationContext;
 
       auto clonedModule = module.clone(instrumentationContext);
@@ -81,10 +87,12 @@ std::unique_ptr<Result> Driver::Run() {
 
       auto owningObjectFile = toolchain.compiler().compileModule(*clonedModule.get());
       instrumentedObjectFiles.push_back(std::move(owningObjectFile));
+      metrics.endCompileInstrumentedModule(module.getModule());
     }
 
   }
 
+  metrics.beginLoadPrecompiledObjectFiles();
   for (std::string &objectFilePath: config.getObjectFilesPaths()) {
     ErrorOr<std::unique_ptr<MemoryBuffer>> buffer =
       MemoryBuffer::getFile(objectFilePath.c_str());
@@ -108,8 +116,11 @@ std::unique_ptr<Result> Driver::Run() {
                                                  std::move(buffer.get()));
     precompiledObjectFiles.push_back(std::move(owningObject));
   }
+  metrics.endLoadPrecompiledObjectFiles();
 
+  metrics.beginFindTests();
   auto foundTests = finder.findTests(context, filter);
+  metrics.endFindTests();
   const int testsCount = foundTests.size();
 
   Logger::debug() << "Driver::Run> found "
@@ -122,38 +133,47 @@ std::unique_ptr<Result> Driver::Run() {
                                std::vector<MutationPoint *>());
   }
 
+  metrics.beginLoadDynamicLibraries();
   for (std::string &dylibPath: config.getDynamicLibrariesPaths()) {
     sys::DynamicLibrary::LoadLibraryPermanently(dylibPath.c_str());
   }
+  metrics.endLoadDynamicLibraries();
 
   Logger::debug() << "Driver::Run> running tests and searching mutations\n";
 
   std::vector<MutationPoint *> allMutationPoints;
   auto objectFiles = AllInstrumentedObjectFiles();
+
+  metrics.beginLoadOriginalProgram();
   runner.loadProgram(objectFiles);
+  metrics.endLoadOriginalProgram();
+
   auto testIndex = 1;
   for (auto &test : foundTests) {
     Logger::debug().indent(2) << "[" << testIndex++ << "/" << testsCount << "] " << test->getTestDisplayName() << ": ";
 
     instrumentation.setupInstrumentationInfo(test.get());
 
+    metrics.beginRunOriginalTest(test.get());
     ExecutionResult testExecutionResult = sandbox->run([&]() {
       return runner.runTest(test.get());
     }, config.getTimeout());
+    metrics.endRunOriginalTest(test.get());
 
     Logger::debug() << testExecutionResult.getStatusAsString() << "\n";
 
     test->setExecutionResult(testExecutionResult);
 
-    if (testExecutionResult.status != Passed) {
-      instrumentation.cleanupInstrumentationInfo(test.get());
-      continue;
-    }
+    std::vector<std::unique_ptr<Testee>> testees;
 
-    auto testees = instrumentation.getTestees(test.get(), filter, config.getMaxDistance());
+    metrics.beginFindMutationsForTest(test.get());
+    if (testExecutionResult.status == Passed) {
+      testees = instrumentation.getTestees(test.get(), filter, config.getMaxDistance());
+    }
     instrumentation.cleanupInstrumentationInfo(test.get());
 
     if (testees.empty()) {
+      metrics.endFindMutationsForTest(test.get());
       continue;
     }
 
@@ -166,6 +186,8 @@ std::unique_ptr<Result> Driver::Run() {
       auto mutationPoints = mutationsFinder.getMutationPoints(context, *testee.get(), filter);
       std::copy(mutationPoints.begin(), mutationPoints.end(), std::back_inserter(allMutationPoints));
     }
+
+    metrics.endFindMutationsForTest(test.get());
   }
 
   {
@@ -229,6 +251,7 @@ std::vector<std::unique_ptr<MutationResult>> Driver::runMutations(const std::vec
 
     Logger::debug() << "[" << mutantIndex++ << "/" << mutationsCount << "]: "  << mutationPoint->getUniqueIdentifier() << "\n";
 
+    metrics.beginCompileMutant(mutationPoint);
     auto mutant = toolchain.cache().getObject(*mutationPoint);
     if (mutant.getBinary() == nullptr) {
       LLVMContext localContext;
@@ -237,10 +260,13 @@ std::vector<std::unique_ptr<MutationResult>> Driver::runMutations(const std::vec
       mutant = toolchain.compiler().compileModule(*clonedModule.get());
       toolchain.cache().putObject(mutant, *mutationPoint);
     }
+    metrics.endCompileMutant(mutationPoint);
 
     objectFilesWithMutant.push_back(mutant.getBinary());
 
+    metrics.beginLoadMutatedProgram(mutationPoint);
     runner.loadProgram(objectFilesWithMutant);
+    metrics.endLoadMutatedProgram(mutationPoint);
 
     auto testsCount = mutationPoint->getReachableTests().size();
     auto testIndex = 1;
@@ -252,8 +278,9 @@ std::vector<std::unique_ptr<MutationResult>> Driver::runMutations(const std::vec
 
       Logger::debug().indent(2) << "[" << testIndex++ << "/" << testsCount << "] " << test->getTestDisplayName() << ": ";
 
-      ExecutionResult result;
+      metrics.beginRunMutant(mutationPoint, test);
 
+      ExecutionResult result;
       if (config.failFastModeEnabled() && atLeastOneTestFailed) {
         result.status = ExecutionStatus::FailFast;
       } else {
@@ -273,6 +300,7 @@ std::vector<std::unique_ptr<MutationResult>> Driver::runMutations(const std::vec
           atLeastOneTestFailed = true;
         }
       }
+      metrics.endRunMutant(mutationPoint, test);
 
       Logger::debug() << result.getStatusAsString() << "\n";
 
