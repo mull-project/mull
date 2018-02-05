@@ -70,6 +70,10 @@ public:
   void endReportResult();
 
   void dump();
+
+  MetricsMeasure &driverRunTime() {
+    return runTime;
+  }
 private:
   MetricsMeasure loadModules;
   MetricsMeasure loadPrecompiledObjectFiles;

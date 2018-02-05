@@ -7,6 +7,7 @@
 #include "MutationResult.h"
 
 #include "MutationOperators/MutationOperator.h"
+#include "Metrics/Metrics.h"
 
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/Instruction.h>
@@ -93,7 +94,7 @@ std::string mull::SQLiteReporter::getDatabasePath() {
 
 void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
                                          const Config &config,
-                                         const ResultTime &resultTime) {
+                                         const MetricsMeasure &resultTime) {
 
   std::string databasePath = getDatabasePath();
 
@@ -267,8 +268,8 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
   {
     // Start and end times are not part of a config however we are
     // mixing them in to make them into a final report.
-    const long startTime = resultTime.start;
-    const long endTime = resultTime.end;
+    const long startTime = resultTime.begin.count();
+    const long endTime = resultTime.end.count();
 
     std::string csvBitcodePaths = vectorToCsv(config.getBitcodePaths());
     std::string csvMutationOperators = vectorToCsv(config.getMutationOperators());

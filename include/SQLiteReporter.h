@@ -8,6 +8,7 @@ namespace mull {
 
 class Result;
 class Config;
+class MetricsMeasure;
 
 class SQLiteReporter {
 
@@ -19,7 +20,7 @@ public:
 
   void reportResults(const std::unique_ptr<Result> &result,
                      const Config &config,
-                     const ResultTime &resultTime);
+                     const MetricsMeasure &resultTime);
 
   std::string getDatabasePath();
 };
