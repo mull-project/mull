@@ -48,6 +48,8 @@ set(mull_sources
 
   IDEDiagnostics.cpp
   SQLiteReporter.cpp
+
+  Metrics/Metrics.cpp
 )
 
 set(mull_header_dirs

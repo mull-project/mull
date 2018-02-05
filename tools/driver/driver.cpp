@@ -11,6 +11,7 @@
 #include "MutationsFinder.h"
 
 #include "Toolchain/Toolchain.h"
+#include "Metrics/Metrics.h"
 
 #include "GoogleTest/GoogleTestFinder.h"
 #include "GoogleTest/GoogleTestRunner.h"
@@ -140,20 +141,27 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  Driver driver(config, Loader, *testFinder, *testRunner, toolchain, filter, mutationsFinder);
+  Metrics metrics;
+  Driver driver(config, Loader, *testFinder, *testRunner, toolchain, filter, mutationsFinder, metrics);
 
   const long timeSuiteStart =
     duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 
+  metrics.beginRun();
   auto result = driver.Run();
+  metrics.endRun();
 
   const long timeSuiteEnd =
     duration_cast<milliseconds>(system_clock::now().time_since_epoch()).count();
 
   ResultTime resultTime(timeSuiteStart, timeSuiteEnd);
 
+  metrics.beginReportResult();
   SQLiteReporter reporter(config.getProjectName());
   reporter.reportResults(result, config, resultTime);
+  metrics.endReportResult();
+
+  metrics.dump();
 
   llvm_shutdown();
   return EXIT_SUCCESS;

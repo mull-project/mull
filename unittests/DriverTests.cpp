@@ -22,6 +22,7 @@
 #include "CustomTestFramework/CustomTestRunner.h"
 
 #include "Toolchain/Toolchain.h"
+#include "Metrics/Metrics.h"
 
 #include <functional>
 #include <llvm/ADT/SmallString.h>
@@ -89,8 +90,9 @@ TEST(Driver, RunningWithNoTests) {
   llvm::TargetMachine &machine = toolchain.targetMachine();
   SimpleTestRunner runner(machine);
   Filter filter;
+  Metrics metrics;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics);
 
   auto result = Driver.Run();
   ASSERT_EQ(0u, result->getTests().size());
@@ -154,8 +156,9 @@ TEST(Driver, SimpleTest_MathAddMutationOperator) {
   llvm::TargetMachine &machine = toolchain.targetMachine();
   SimpleTestRunner runner(machine);
   Filter filter;
+  Metrics metrics;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics);
 
   /// Given the modules we use here we expect:
   ///
@@ -231,8 +234,9 @@ TEST(Driver, SimpleTest_MathSubMutationOperator) {
   llvm::TargetMachine &machine = toolchain.targetMachine();
   SimpleTestRunner runner(machine);
   Filter filter;
+  Metrics metrics;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics);
 
     /// Given the modules we use here we expect:
     ///
@@ -308,8 +312,9 @@ TEST(Driver, SimpleTest_MathMulMutationOperator) {
   llvm::TargetMachine &machine = toolchain.targetMachine();
   SimpleTestRunner runner(machine);
   Filter filter;
+  Metrics metrics;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics);
 
     /// Given the modules we use here we expect:
     ///
@@ -384,8 +389,9 @@ TEST(Driver, SimpleTest_MathDivMutationOperator) {
   llvm::TargetMachine &machine = toolchain.targetMachine();
   SimpleTestRunner runner(machine);
   Filter filter;
+  Metrics metrics;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics);
 
     /// Given the modules we use here we expect:
     ///
@@ -460,8 +466,9 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
   Toolchain toolchain(config);
   SimpleTestRunner runner(toolchain.targetMachine());
   Filter filter;
+  Metrics metrics;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics);
 
   /// Given the modules we use here we expect:
   ///
@@ -529,8 +536,9 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
   Toolchain toolchain(config);
   SimpleTestRunner runner(toolchain.targetMachine());
   Filter filter;
+  Metrics metrics;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics);
 
   /// Given the modules we use here we expect:
   ///
@@ -597,8 +605,9 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator) {
   Toolchain toolchain(config);
   SimpleTestRunner runner(toolchain.targetMachine());
   Filter filter;
+  Metrics metrics;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics);
 
   auto result = Driver.Run();
   ASSERT_EQ(8U, result->getTests().size());
@@ -740,8 +749,9 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator_CPP) {
   Toolchain toolchain(config);
   SimpleTestRunner runner(toolchain.targetMachine());
   Filter filter;
+  Metrics metrics;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics);
 
   auto result = Driver.Run();
   ASSERT_EQ(6U, result->getTests().size());
@@ -844,8 +854,9 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutationOperator_CPP) {
   Toolchain toolchain(config);
   SimpleTestRunner runner(toolchain.targetMachine());
   Filter filter;
+  Metrics metrics;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics);
 
   auto result = Driver.Run();
   EXPECT_EQ(1U, result->getTests().size());
@@ -918,8 +929,9 @@ TEST(Driver, customTest) {
   CustomTestRunner runner(toolchain.targetMachine());
   Filter filter;
   filter.includeTest("passing");
+  Metrics metrics;
 
-  Driver driver(config, loader, testFinder, runner, toolchain, filter, finder);
+  Driver driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
@@ -987,8 +999,9 @@ TEST(Driver, customTest_withDynamicLibraries) {
   CustomTestRunner runner(toolchain.targetMachine());
   Filter filter;
   filter.includeTest("passing");
+  Metrics metrics;
 
-  Driver driver(config, loader, testFinder, runner, toolchain, filter, finder);
+  Driver driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
@@ -1056,8 +1069,9 @@ TEST(Driver, DISABLED_customTest_withDynamicLibraries_and_ObjectFiles) {
   CustomTestRunner runner(toolchain.targetMachine());
   Filter filter;
   filter.includeTest("passing");
+  Metrics metrics;
 
-  Driver driver(config, loader, testFinder, runner, toolchain, filter, finder);
+  Driver driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
