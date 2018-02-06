@@ -17,9 +17,14 @@ Instrumentation::Instrumentation()
   functions.push_back(phonyRoot);
 }
 
+const char *Instrumentation::instrumentationInfoVariableName() {
+  return "mull_instrumentation_info";
+}
+
 void Instrumentation::insertCallbacks(llvm::Module *originalModule,
                                       llvm::Module *instrumentedModule) {
-  auto info = callbacks.injectInstrumentationInfoPointer(instrumentedModule);
+  auto info = callbacks.injectInstrumentationInfoPointer(instrumentedModule,
+                                                         instrumentationInfoVariableName());
 
   for (auto &function: originalModule->getFunctionList()) {
     if (function.isDeclaration()) {

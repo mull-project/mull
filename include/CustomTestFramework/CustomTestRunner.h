@@ -6,7 +6,6 @@
 
 #include <llvm/ExecutionEngine/Orc/ExecutionUtils.h>
 #include <llvm/ExecutionEngine/Orc/ObjectLinkingLayer.h>
-#include <llvm/IR/Mangler.h>
 #include <llvm/Object/Binary.h>
 #include <llvm/Object/ObjectFile.h>
 #include <llvm/Target/TargetMachine.h>
@@ -19,19 +18,21 @@ class Module;
 }
 
 namespace mull {
+class Instrumentation;
 struct InstrumentationInfo;
 
 class CustomTestRunner : public TestRunner {
   llvm::orc::ObjectLinkingLayer<> ObjectLayer;
-  mull::Mangler mangler;
+  Mangler mangler;
   llvm::orc::LocalCXXRuntimeOverrides overrides;
-  std::string instrumentationInfoName;
   llvm::orc::ObjectLinkingLayer<>::ObjSetHandleT handle;
   InstrumentationInfo **trampoline;
 public:
 
   CustomTestRunner(llvm::TargetMachine &machine);
   ~CustomTestRunner();
+
+  void loadInstrumentedProgram(ObjectFiles &objectFiles, Instrumentation &instrumentation) override;
   void loadProgram(ObjectFiles &objectFiles) override;
   ExecutionStatus runTest(Test *test) override;
 

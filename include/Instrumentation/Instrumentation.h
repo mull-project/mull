@@ -26,6 +26,8 @@ namespace mull {
 
     void setupInstrumentationInfo(Test *test);
     void cleanupInstrumentationInfo(Test *test);
+
+    const char *instrumentationInfoVariableName();
   private:
     Callbacks callbacks;
     std::vector<CallTreeFunction> functions;

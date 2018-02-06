@@ -1,7 +1,9 @@
 #include "CustomTestFramework/CustomTestRunner.h"
 #include "CustomTestFramework/CustomTest_Test.h"
 
-#include <llvm/ExecutionEngine/RTDyldMemoryManager.h>
+#include "Toolchain/Resolvers/InstrumentationResolver.h"
+#include "Toolchain/Resolvers/NativeResolver.h"
+
 #include <llvm/ExecutionEngine/SectionMemoryManager.h>
 
 using namespace mull;
@@ -10,47 +12,12 @@ using namespace llvm::orc;
 
 static llvm::orc::ObjectLinkingLayer<>::ObjSetHandleT MullCustomTestDummyHandle;
 
-class Mull_CustomTest_Resolver : public RuntimeDyld::SymbolResolver {
-  LocalCXXRuntimeOverrides &overrides;
-  std::string instrumentationInfoName;
-  InstrumentationInfo **trampoline;
-public:
-
-  Mull_CustomTest_Resolver(LocalCXXRuntimeOverrides &overrides,
-                           std::string instrumentationInfoName,
-                           InstrumentationInfo **trampoline)
-    : overrides(overrides), instrumentationInfoName(instrumentationInfoName), trampoline(trampoline) {}
-
-  RuntimeDyld::SymbolInfo findSymbol(const std::string &name) {
-    /// Overrides should go first, otherwise functions of the host process
-    /// will take over and crash the system later
-    if (auto symbol = overrides.searchOverrides(name)) {
-      return symbol;
-    }
-
-    if (auto address = RTDyldMemoryManager::getSymbolAddressInProcess(name)) {
-      return RuntimeDyld::SymbolInfo(address, JITSymbolFlags::Exported);
-    }
-
-    if (name == instrumentationInfoName) {
-      return RuntimeDyld::SymbolInfo((uint64_t)trampoline, JITSymbolFlags::Exported);
-    }
-
-    return RuntimeDyld::SymbolInfo(nullptr);
-  }
-
-  RuntimeDyld::SymbolInfo findSymbolInLogicalDylib(const std::string &Name) {
-    return RuntimeDyld::SymbolInfo(nullptr);
-  }
-};
-
 CustomTestRunner::CustomTestRunner(llvm::TargetMachine &machine) :
   TestRunner(machine),
   mangler(Mangler(machine.createDataLayout())),
   overrides([this](const char *name) {
     return this->mangler.getNameWithPrefix(name);
   }),
-  instrumentationInfoName(mangler.getNameWithPrefix("mull_instrumentation_info")),
   handle(MullCustomTestDummyHandle),
   trampoline(new InstrumentationInfo*)
 {
@@ -88,17 +55,29 @@ void CustomTestRunner::runStaticCtor(llvm::Function *Ctor) {
   ctor();
 }
 
-void CustomTestRunner::loadProgram(ObjectFiles &objectFiles) {
-  //  handle = llvm::orc::ObjectLinkingLayer<>::ObjSetHandleT handle;
+void CustomTestRunner::loadInstrumentedProgram(ObjectFiles &objectFiles,
+                                               Instrumentation &instrumentation) {
   if (handle != MullCustomTestDummyHandle) {
     ObjectLayer.removeObjectSet(handle);
   }
 
   handle = ObjectLayer.addObjectSet(objectFiles,
                                     make_unique<SectionMemoryManager>(),
-                                    make_unique<Mull_CustomTest_Resolver>(overrides,
-                                                                          instrumentationInfoName,
-                                                                          trampoline));
+                                    make_unique<InstrumentationResolver>(overrides,
+                                                                         instrumentation,
+                                                                         mangler,
+                                                                         trampoline));
+  ObjectLayer.emitAndFinalize(handle);
+}
+
+void CustomTestRunner::loadProgram(ObjectFiles &objectFiles) {
+  if (handle != MullCustomTestDummyHandle) {
+    ObjectLayer.removeObjectSet(handle);
+  }
+
+  handle = ObjectLayer.addObjectSet(objectFiles,
+                                    make_unique<SectionMemoryManager>(),
+                                    make_unique<NativeResolver>(overrides));
   ObjectLayer.emitAndFinalize(handle);
 }
 

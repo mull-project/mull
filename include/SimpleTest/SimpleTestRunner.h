@@ -1,9 +1,10 @@
 #pragma once
 
 #include "TestRunner.h"
+#include "Mangler.h"
 
+#include <llvm/ExecutionEngine/Orc/ExecutionUtils.h>
 #include <llvm/ExecutionEngine/Orc/ObjectLinkingLayer.h>
-#include <llvm/IR/Mangler.h>
 
 namespace llvm {
 
@@ -19,17 +20,19 @@ struct InstrumentationInfo;
 
 class SimpleTestRunner : public TestRunner {
   llvm::orc::ObjectLinkingLayer<> ObjectLayer;
-  llvm::Mangler Mangler;
   llvm::orc::ObjectLinkingLayer<>::ObjSetHandleT handle;
+  Mangler mangler;
+  llvm::orc::LocalCXXRuntimeOverrides overrides;
   InstrumentationInfo **trampoline;
 public:
   SimpleTestRunner(llvm::TargetMachine &targetMachine);
   ~SimpleTestRunner() override;
+  void loadInstrumentedProgram(ObjectFiles &objectFiles,
+                               Instrumentation &instrumentation) override;
   void loadProgram(ObjectFiles &objectFiles) override;
   ExecutionStatus runTest(Test *test) override;
 
 private:
-  std::string MangleName(const llvm::StringRef &Name);
   void *TestFunctionPointer(const llvm::Function &Function);
 };
 
