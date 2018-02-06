@@ -6,7 +6,6 @@
 
 #include <llvm/ExecutionEngine/Orc/ExecutionUtils.h>
 #include <llvm/ExecutionEngine/Orc/ObjectLinkingLayer.h>
-#include <llvm/IR/Mangler.h>
 #include <llvm/Object/Binary.h>
 #include <llvm/Object/ObjectFile.h>
 #include <llvm/Target/TargetMachine.h>
@@ -23,13 +22,12 @@ struct InstrumentationInfo;
 
 class GoogleTestRunner : public TestRunner {
   llvm::orc::ObjectLinkingLayer<> ObjectLayer;
-  mull::Mangler mangler;
+  Mangler mangler;
   llvm::orc::LocalCXXRuntimeOverrides overrides;
 
   std::string fGoogleTestInit;
   std::string fGoogleTestInstance;
   std::string fGoogleTestRun;
-  std::string instrumentationInfoName;
   llvm::orc::ObjectLinkingLayer<>::ObjSetHandleT handle;
   InstrumentationInfo **trampoline;
 public:
@@ -37,6 +35,7 @@ public:
   GoogleTestRunner(llvm::TargetMachine &machine);
   ~GoogleTestRunner();
 
+  void loadInstrumentedProgram(ObjectFiles &objectFiles, Instrumentation &instrumentation) override;
   void loadProgram(ObjectFiles &objectFiles) override;
   ExecutionStatus runTest(Test *test) override;
 

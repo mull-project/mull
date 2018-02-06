@@ -9,6 +9,7 @@
 namespace mull {
 
 class Test;
+class Instrumentation;
 
 class TestRunner {
 protected:
@@ -18,6 +19,7 @@ public:
   typedef std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> OwnedObjectFiles;
   TestRunner(llvm::TargetMachine &targetMachine);
 
+  virtual void loadInstrumentedProgram(ObjectFiles &objectFiles, Instrumentation &instrumentation) = 0;
   virtual void loadProgram(ObjectFiles &objectFiles) = 0;
   virtual ExecutionStatus runTest(Test *test) = 0;
 

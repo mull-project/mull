@@ -18,7 +18,8 @@ namespace mull {
   public:
     Callbacks();
     void injectCallbacks(llvm::Function *function, uint64_t index, llvm::Value *infoPointer);
-    llvm::Value *injectInstrumentationInfoPointer(llvm::Module *module);
+    llvm::Value *injectInstrumentationInfoPointer(llvm::Module *module,
+                                                  const char *variableName);
   private:
   };
 }

@@ -28,6 +28,8 @@ set(mull_sources
   Toolchain/Compiler.cpp
   Toolchain/ObjectCache.cpp
   Toolchain/Toolchain.cpp
+  Toolchain/Resolvers/InstrumentationResolver.cpp
+  Toolchain/Resolvers/NativeResolver.cpp
 
   MullModule.cpp
   MutationPoint.cpp

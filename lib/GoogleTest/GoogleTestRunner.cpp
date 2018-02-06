@@ -3,10 +3,10 @@
 #include "GoogleTest/GoogleTest_Test.h"
 #include "Mangler.h"
 
-#include <llvm/IR/Function.h>
-#include <llvm/IR/Module.h>
+#include "Toolchain/Resolvers/InstrumentationResolver.h"
+#include "Toolchain/Resolvers/NativeResolver.h"
 
-#include <llvm/ExecutionEngine/RTDyldMemoryManager.h>
+#include <llvm/IR/Function.h>
 #include <llvm/ExecutionEngine/SectionMemoryManager.h>
 
 using namespace mull;
@@ -19,39 +19,6 @@ namespace {
 
 static llvm::orc::ObjectLinkingLayer<>::ObjSetHandleT MullGTEstDummyHandle;
 
-class Mull_GoogleTest_Resolver : public RuntimeDyld::SymbolResolver {
-  LocalCXXRuntimeOverrides &overrides;
-  std::string instrumentationInfoName;
-  InstrumentationInfo **trampoline;
-public:
-  Mull_GoogleTest_Resolver(LocalCXXRuntimeOverrides &overrides,
-                           std::string instrumentationInfoName,
-                           InstrumentationInfo **trampoline)
-    : overrides(overrides), instrumentationInfoName(instrumentationInfoName), trampoline(trampoline) {}
-
-  RuntimeDyld::SymbolInfo findSymbol(const std::string &name) {
-    /// Overrides should go first, otherwise functions of the host process
-    /// will take over and crash the system later
-    if (auto symbol = overrides.searchOverrides(name)) {
-      return symbol;
-    }
-
-    if (auto address = RTDyldMemoryManager::getSymbolAddressInProcess(name)) {
-      return RuntimeDyld::SymbolInfo(address, JITSymbolFlags::Exported);
-    }
-
-    if (name == instrumentationInfoName) {
-      return RuntimeDyld::SymbolInfo((uint64_t)trampoline, JITSymbolFlags::Exported);
-    }
-
-    return RuntimeDyld::SymbolInfo(nullptr);
-  }
-
-  RuntimeDyld::SymbolInfo findSymbolInLogicalDylib(const std::string &name) {
-    return RuntimeDyld::SymbolInfo(nullptr);
-  }
-};
-
 GoogleTestRunner::GoogleTestRunner(llvm::TargetMachine &machine) :
   TestRunner(machine),
   mangler(Mangler(machine.createDataLayout())),
@@ -61,7 +28,6 @@ GoogleTestRunner::GoogleTestRunner(llvm::TargetMachine &machine) :
   fGoogleTestInit(mangler.getNameWithPrefix("_ZN7testing14InitGoogleTestEPiPPc")),
   fGoogleTestInstance(mangler.getNameWithPrefix("_ZN7testing8UnitTest11GetInstanceEv")),
   fGoogleTestRun(mangler.getNameWithPrefix("_ZN7testing8UnitTest3RunEv")),
-  instrumentationInfoName(mangler.getNameWithPrefix("mull_instrumentation_info")),
   handle(MullGTEstDummyHandle),
   trampoline(new InstrumentationInfo*)
 {
@@ -100,6 +66,21 @@ void GoogleTestRunner::runStaticCtor(llvm::Function *Ctor) {
   ctor();
 }
 
+void GoogleTestRunner::loadInstrumentedProgram(ObjectFiles &objectFiles,
+                                               Instrumentation &instrumentation) {
+  if (handle != MullGTEstDummyHandle) {
+    ObjectLayer.removeObjectSet(handle);
+  }
+
+  handle = ObjectLayer.addObjectSet(objectFiles,
+                                    make_unique<SectionMemoryManager>(),
+                                    make_unique<InstrumentationResolver>(overrides,
+                                                                         instrumentation,
+                                                                         mangler,
+                                                                         trampoline));
+  ObjectLayer.emitAndFinalize(handle);
+}
+
 void GoogleTestRunner::loadProgram(ObjectFiles &objectFiles) {
   if (handle != MullGTEstDummyHandle) {
     ObjectLayer.removeObjectSet(handle);
@@ -107,9 +88,7 @@ void GoogleTestRunner::loadProgram(ObjectFiles &objectFiles) {
 
   handle = ObjectLayer.addObjectSet(objectFiles,
                                     make_unique<SectionMemoryManager>(),
-                                    make_unique<Mull_GoogleTest_Resolver>(overrides,
-                                                                          instrumentationInfoName,
-                                                                          trampoline));
+                                    make_unique<NativeResolver>(overrides));
   ObjectLayer.emitAndFinalize(handle);
 }
 

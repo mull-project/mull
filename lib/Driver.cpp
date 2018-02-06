@@ -145,7 +145,7 @@ std::unique_ptr<Result> Driver::Run() {
   auto objectFiles = AllInstrumentedObjectFiles();
 
   metrics.beginLoadOriginalProgram();
-  runner.loadProgram(objectFiles);
+  runner.loadInstrumentedProgram(objectFiles, instrumentation);
   metrics.endLoadOriginalProgram();
 
   auto testIndex = 1;
