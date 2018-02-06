@@ -29,16 +29,27 @@ extern "C" void mull_leaveFunction(void **trampoline, uint64_t functionIndex) {
 
 }
 
-Callbacks::Callbacks() {}
-
-Value *Callbacks::injectInstrumentationInfoPointer(llvm::Module *module,
+Value *Callbacks::injectInstrumentationInfoPointer(Module *module,
                                                    const char *variableName) {
   auto &context = module->getContext();
   auto trampolineType = Type::getVoidTy(context)->getPointerTo()->getPointerTo();
   return module->getOrInsertGlobal(variableName, trampolineType);
 }
 
-void Callbacks::injectCallbacks(llvm::Function *function, uint64_t index, Value *infoPointer) {
+Value *Callbacks::injectFunctionIndexOffset(Module *module,
+                                            const char *functionIndexOffsetPrefix) {
+  auto &context = module->getContext();
+  auto functionIndexOffsetType = Type::getInt64Ty(context);
+  std::string functionIndexOffset(functionIndexOffsetPrefix);
+  functionIndexOffset += module->getModuleIdentifier();
+
+  return module->getOrInsertGlobal(functionIndexOffset, functionIndexOffsetType);
+}
+
+void Callbacks::injectCallbacks(llvm::Function *function,
+                                uint64_t index,
+                                Value *infoPointer,
+                                Value *offset) {
   auto &context = function->getParent()->getContext();
   auto int64Type = Type::getInt64Ty(context);
   auto trampolineType = Type::getVoidTy(context)->getPointerTo()->getPointerTo();
@@ -46,9 +57,6 @@ void Callbacks::injectCallbacks(llvm::Function *function, uint64_t index, Value 
   std::vector<Type *> parameterTypes({trampolineType, int64Type});
 
   FunctionType *callbackType = FunctionType::get(voidType, parameterTypes, false);
-
-  Value *functionIndex = ConstantInt::get(int64Type, index);
-  std::vector<Value *> parameters({infoPointer, functionIndex});
 
   Function *enterFunction = function->getParent()->getFunction("mull_enterFunction");
   Function *leaveFunction = function->getParent()->getFunction("mull_leaveFunction");
@@ -68,9 +76,19 @@ void Callbacks::injectCallbacks(llvm::Function *function, uint64_t index, Value 
   assert(enterFunction);
   assert(leaveFunction);
 
+  Value *functionIndex = ConstantInt::get(int64Type, index);
+
   auto &entryBlock = *function->getBasicBlockList().begin();
-  CallInst *enterFunctionCall = CallInst::Create(enterFunction, parameters);
-  enterFunctionCall->insertBefore(&*entryBlock.getInstList().begin());
+  auto firstInstruction = &*entryBlock.getInstList().begin();
+  Value *indexAndOffset = BinaryOperator::Create(Instruction::Add,
+                                                 functionIndex,
+                                                 offset,
+                                                 "functionIndex",
+                                                 firstInstruction);
+  std::vector<Value *> enterParameters({infoPointer, indexAndOffset});
+
+  CallInst *enterFunctionCall = CallInst::Create(enterFunction, enterParameters);
+  enterFunctionCall->insertBefore(firstInstruction);
 
   for (auto &block : function->getBasicBlockList()) {
     ReturnInst *returnStatement = nullptr;
@@ -78,7 +96,14 @@ void Callbacks::injectCallbacks(llvm::Function *function, uint64_t index, Value 
       continue;
     }
 
-    CallInst *leaveFunctionCall = CallInst::Create(leaveFunction, parameters);
+    Value *indexAndOffset = BinaryOperator::Create(Instruction::Add,
+                                                   functionIndex,
+                                                   offset,
+                                                   "functionIndex",
+                                                   returnStatement);
+    std::vector<Value *> leaveParameters({infoPointer, indexAndOffset});
+
+    CallInst *leaveFunctionCall = CallInst::Create(leaveFunction, leaveParameters);
     leaveFunctionCall->insertBefore(returnStatement);
   }
 }

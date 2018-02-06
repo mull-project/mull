@@ -17,24 +17,44 @@ Instrumentation::Instrumentation()
   functions.push_back(phonyRoot);
 }
 
+std::map<std::string, uint64_t> &Instrumentation::getFunctionOffsetMapping() {
+  return functionOffsetMapping;
+}
+
 const char *Instrumentation::instrumentationInfoVariableName() {
   return "mull_instrumentation_info";
 }
 
-void Instrumentation::insertCallbacks(llvm::Module *originalModule,
-                                      llvm::Module *instrumentedModule) {
-  auto info = callbacks.injectInstrumentationInfoPointer(instrumentedModule,
-                                                         instrumentationInfoVariableName());
+const char *Instrumentation::functionIndexOffsetPrefix() {
+  return "mull_function_index_offset_";
+}
+
+void Instrumentation::recordFunctions(llvm::Module *originalModule) {
+  uint64_t offset = functions.size();
+  functionOffsetMapping[originalModule->getModuleIdentifier()] = offset;
 
   for (auto &function: originalModule->getFunctionList()) {
     if (function.isDeclaration()) {
       continue;
     }
     CallTreeFunction callTreeFunction(&function);
-    uint64_t index = functions.size();
     functions.push_back(callTreeFunction);
-    auto clonedFunction = instrumentedModule->getFunction(function.getName());
-    callbacks.injectCallbacks(clonedFunction, index, info);
+  }
+}
+
+void Instrumentation::insertCallbacks(llvm::Module *instrumentedModule) {
+  auto info = callbacks.injectInstrumentationInfoPointer(instrumentedModule,
+                                                         instrumentationInfoVariableName());
+  auto offset = callbacks.injectFunctionIndexOffset(instrumentedModule,
+                                                    functionIndexOffsetPrefix());
+
+  uint64_t index = 0;
+  for (auto &function: instrumentedModule->getFunctionList()) {
+    if (function.isDeclaration()) {
+      continue;
+    }
+    callbacks.injectCallbacks(&function, index, info, offset);
+    index++;
   }
 }
 

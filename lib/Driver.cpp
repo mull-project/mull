@@ -62,6 +62,8 @@ std::unique_ptr<Result> Driver::Run() {
     assert(ownedModule && "Can't load module");
     context.addModule(std::move(ownedModule));
 
+    instrumentation.recordFunctions(module.getModule());
+
     if (!config.dryRunModeEnabled()) {
       metrics.beginCompileOriginalModule(module.getModule());
       auto objectFile = toolchain.cache().getObject(module);
@@ -79,11 +81,11 @@ std::unique_ptr<Result> Driver::Run() {
 
     {
       metrics.beginCompileInstrumentedModule(module.getModule());
-      LLVMContext instrumentationContext;
 
+      LLVMContext instrumentationContext;
       auto clonedModule = module.clone(instrumentationContext);
 
-      instrumentation.insertCallbacks(module.getModule(), clonedModule->getModule());
+      instrumentation.insertCallbacks(clonedModule->getModule());
 
       auto owningObjectFile = toolchain.compiler().compileModule(*clonedModule.get());
       instrumentedObjectFiles.push_back(std::move(owningObjectFile));
