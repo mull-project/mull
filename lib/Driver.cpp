@@ -79,18 +79,21 @@ std::unique_ptr<Result> Driver::Run() {
       metrics.endCompileOriginalModule(module.getModule());
     }
 
-    {
-      metrics.beginCompileInstrumentedModule(module.getModule());
+    metrics.beginCompileInstrumentedModule(module.getModule());
 
+    auto objectFile = toolchain.cache().getInstrumentedObject(module);
+    if (objectFile.getBinary() == nullptr) {
       LLVMContext instrumentationContext;
       auto clonedModule = module.clone(instrumentationContext);
 
       instrumentation.insertCallbacks(clonedModule->getModule());
-
-      auto owningObjectFile = toolchain.compiler().compileModule(*clonedModule.get());
-      instrumentedObjectFiles.push_back(std::move(owningObjectFile));
-      metrics.endCompileInstrumentedModule(module.getModule());
+      objectFile = toolchain.compiler().compileModule(*clonedModule.get());
+      toolchain.cache().putInstrumentedObject(objectFile, module);
     }
+
+    instrumentedObjectFiles.push_back(std::move(objectFile));
+
+    metrics.endCompileInstrumentedModule(module.getModule());
 
   }
 

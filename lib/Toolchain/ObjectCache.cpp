@@ -68,6 +68,12 @@ OwningBinary<ObjectFile> ObjectCache::getObjectFromDisk(const std::string &ident
   return owningObject;
 }
 
+OwningBinary<ObjectFile> ObjectCache::getInstrumentedObject(const MullModule &module) {
+  std::string filename("instrumented_");
+  filename += module.getUniqueIdentifier();
+  return getObjectFromDisk(filename);
+}
+
 OwningBinary<ObjectFile> ObjectCache::getObject(const MullModule &module) {
   return getObjectFromDisk(module.getUniqueIdentifier());
 }
@@ -89,6 +95,13 @@ void ObjectCache::putObjectOnDisk(
   outfile.write(object.getBinary()->getMemoryBufferRef().getBufferStart(),
                 object.getBinary()->getMemoryBufferRef().getBufferSize());
   outfile.close();
+}
+
+void ObjectCache::putInstrumentedObject(OwningBinary<ObjectFile> &object,
+                                        const MullModule &module) {
+  std::string filename("instrumented_");
+  filename += module.getUniqueIdentifier();
+  putObjectOnDisk(object, filename);
 }
 
 void ObjectCache::putObject(OwningBinary<ObjectFile> &object,

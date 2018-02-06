@@ -15,12 +15,14 @@ namespace mull {
   public:
     ObjectCache(bool useCache, const std::string &cacheDir);
 
+    llvm::object::OwningBinary<llvm::object::ObjectFile> getInstrumentedObject(const MullModule &module);
     llvm::object::OwningBinary<llvm::object::ObjectFile> getObject(const MullModule &module);
     llvm::object::OwningBinary<llvm::object::ObjectFile> getObject(const MutationPoint &mutationPoint);
 
+    void putInstrumentedObject(llvm::object::OwningBinary<llvm::object::ObjectFile> &object,
+                               const MullModule &module);
     void putObject(llvm::object::OwningBinary<llvm::object::ObjectFile> &object,
                    const MullModule &module);
-
     void putObject(llvm::object::OwningBinary<llvm::object::ObjectFile> &object,
                    const MutationPoint &mutationPoint);
 
