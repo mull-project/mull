@@ -9,6 +9,7 @@
 #include "MutationsFinder.h"
 #include "Filter.h"
 #include "Testee.h"
+#include "Metrics/Metrics.h"
 
 #include "gtest/gtest.h"
 
@@ -93,7 +94,7 @@ TEST(SQLiteReporter, integrationTest) {
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
   mutationResults.push_back(std::move(mutationResult));
 
-  ResultTime resultTime(1234, 5678);
+  MetricsMeasure resultTime;
 
   std::unique_ptr<Result> result = make_unique<Result>(std::move(tests),
                                                        std::move(mutationResults),
@@ -240,7 +241,9 @@ TEST(SQLiteReporter, integrationTest_Config) {
 
   SQLiteReporter reporter(config.getProjectName());
 
-  ResultTime resultTime(1234, 5678);
+  MetricsMeasure resultTime;
+  resultTime.begin = MetricsMeasure::Precision(1234);
+  resultTime.end = MetricsMeasure::Precision(5678);
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
   std::vector<std::unique_ptr<mull::Test>> tests;
@@ -390,7 +393,9 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
                                                     test.get());
   mutationResults.push_back(std::move(mutationResult));
 
-  ResultTime resultTime(1234, 5678);
+  MetricsMeasure resultTime;
+  resultTime.begin = MetricsMeasure::Precision(1234);
+  resultTime.end = MetricsMeasure::Precision(5678);
 
   std::unique_ptr<Result> result = make_unique<Result>(std::move(tests),
                                                        std::move(mutationResults),
@@ -533,7 +538,9 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
                                                     test.get());
   mutationResults.push_back(std::move(mutationResult));
 
-  ResultTime resultTime(1234, 5678);
+  MetricsMeasure resultTime;
+  resultTime.begin = MetricsMeasure::Precision(1234);
+  resultTime.end = MetricsMeasure::Precision(5678);
 
   std::unique_ptr<Result> result = make_unique<Result>(std::move(tests),
                                                        std::move(mutationResults),
