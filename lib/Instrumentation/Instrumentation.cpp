@@ -17,7 +17,7 @@ Instrumentation::Instrumentation()
   functions.push_back(phonyRoot);
 }
 
-std::map<std::string, uint64_t> &Instrumentation::getFunctionOffsetMapping() {
+std::map<std::string, uint32_t> &Instrumentation::getFunctionOffsetMapping() {
   return functionOffsetMapping;
 }
 
@@ -30,7 +30,7 @@ const char *Instrumentation::functionIndexOffsetPrefix() {
 }
 
 void Instrumentation::recordFunctions(llvm::Module *originalModule) {
-  uint64_t offset = functions.size();
+  uint32_t offset = functions.size();
   functionOffsetMapping[originalModule->getModuleIdentifier()] = offset;
 
   for (auto &function: originalModule->getFunctionList()) {
@@ -48,7 +48,7 @@ void Instrumentation::insertCallbacks(llvm::Module *instrumentedModule) {
   auto offset = callbacks.injectFunctionIndexOffset(instrumentedModule,
                                                     functionIndexOffsetPrefix());
 
-  uint64_t index = 0;
+  uint32_t index = 0;
   for (auto &function: instrumentedModule->getFunctionList()) {
     if (function.isDeclaration()) {
       continue;
@@ -81,12 +81,12 @@ void Instrumentation::setupInstrumentationInfo(Test *test) {
                         PROT_READ | PROT_WRITE,
                         MAP_SHARED | MAP_ANONYMOUS,
                         -1, 0);
-  mapping = static_cast<uint64_t *>(rawMemory);
+  mapping = static_cast<uint32_t *>(rawMemory);
   memset(mapping, 0, mappingSize);
 }
 
 void Instrumentation::cleanupInstrumentationInfo(Test *test) {
-  std::stack<uint64_t>().swap(test->getInstrumentationInfo().callstack);
+  std::stack<uint32_t>().swap(test->getInstrumentationInfo().callstack);
   munmap(test->getInstrumentationInfo().callTreeMapping, functions.size());
 }
 

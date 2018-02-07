@@ -13,14 +13,14 @@ using namespace llvm;
 
 namespace mull {
 
-extern "C" void mull_enterFunction(void **trampoline, uint64_t functionIndex) {
+extern "C" void mull_enterFunction(void **trampoline, uint32_t functionIndex) {
   InstrumentationInfo *info = (InstrumentationInfo *)*trampoline;
   assert(info);
   assert(info->callTreeMapping);
   DynamicCallTree::enterFunction(functionIndex, info->callTreeMapping, info->callstack);
 }
 
-extern "C" void mull_leaveFunction(void **trampoline, uint64_t functionIndex) {
+extern "C" void mull_leaveFunction(void **trampoline, uint32_t functionIndex) {
   InstrumentationInfo *info = (InstrumentationInfo *)*trampoline;
   assert(info);
   assert(info->callTreeMapping);
@@ -39,7 +39,7 @@ Value *Callbacks::injectInstrumentationInfoPointer(Module *module,
 Value *Callbacks::injectFunctionIndexOffset(Module *module,
                                             const char *functionIndexOffsetPrefix) {
   auto &context = module->getContext();
-  auto functionIndexOffsetType = Type::getInt64Ty(context);
+  auto functionIndexOffsetType = Type::getInt32Ty(context);
   std::string functionIndexOffset(functionIndexOffsetPrefix);
   functionIndexOffset += module->getModuleIdentifier();
 
@@ -47,14 +47,14 @@ Value *Callbacks::injectFunctionIndexOffset(Module *module,
 }
 
 void Callbacks::injectCallbacks(llvm::Function *function,
-                                uint64_t index,
+                                uint32_t index,
                                 Value *infoPointer,
                                 Value *offset) {
   auto &context = function->getParent()->getContext();
-  auto int64Type = Type::getInt64Ty(context);
+  auto intType = Type::getInt32Ty(context);
   auto trampolineType = Type::getVoidTy(context)->getPointerTo()->getPointerTo();
   auto voidType = Type::getVoidTy(context);
-  std::vector<Type *> parameterTypes({trampolineType, int64Type});
+  std::vector<Type *> parameterTypes({trampolineType, intType});
 
   FunctionType *callbackType = FunctionType::get(voidType, parameterTypes, false);
 
@@ -76,13 +76,13 @@ void Callbacks::injectCallbacks(llvm::Function *function,
   assert(enterFunction);
   assert(leaveFunction);
 
-  Value *functionIndex = ConstantInt::get(int64Type, index);
+  Value *functionIndex = ConstantInt::get(intType, index);
 
   auto &entryBlock = *function->getBasicBlockList().begin();
   auto firstInstruction = &*entryBlock.getInstList().begin();
   Value *indexAndOffset = BinaryOperator::Create(Instruction::Add,
-                                                 functionIndex,
                                                  offset,
+                                                 functionIndex,
                                                  "functionIndex",
                                                  firstInstruction);
   std::vector<Value *> enterParameters({infoPointer, indexAndOffset});

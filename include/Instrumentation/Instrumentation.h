@@ -27,13 +27,13 @@ namespace mull {
     void setupInstrumentationInfo(Test *test);
     void cleanupInstrumentationInfo(Test *test);
 
-    std::map<std::string, uint64_t> &getFunctionOffsetMapping();
+    std::map<std::string, uint32_t> &getFunctionOffsetMapping();
 
     const char *instrumentationInfoVariableName();
     const char *functionIndexOffsetPrefix();
   private:
     Callbacks callbacks;
     std::vector<CallTreeFunction> functions;
-    std::map<std::string, uint64_t> functionOffsetMapping;
+    std::map<std::string, uint32_t> functionOffsetMapping;
   };
 }
