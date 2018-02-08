@@ -103,6 +103,8 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
 
   createTables(database);
 
+  sqlite_exec(database, "BEGIN TRANSACTION");
+
   for (auto &test : result->getTests()) {
     std::string testName = test->getTestDisplayName();
     std::string testUniqueId = test->getUniqueIdentifier();
@@ -298,6 +300,8 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
 
     sqlite_exec(database, insertConfigSQL.c_str());
   }
+
+  sqlite_exec(database, "END TRANSACTION");
 
   sqlite3_close(database);
 
