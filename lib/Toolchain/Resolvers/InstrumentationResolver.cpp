@@ -37,8 +37,7 @@ RuntimeDyld::SymbolInfo InstrumentationResolver::findSymbol(const std::string &n
   if (name.find(functionOffsetPrefix) != std::string::npos) {
     auto moduleName = name.substr(functionOffsetPrefix.length());
     auto &mapping = instrumentation.getFunctionOffsetMapping();
-    auto &offset = mapping[moduleName];
-    return RuntimeDyld::SymbolInfo((uint64_t)*&offset, JITSymbolFlags::Exported);
+    return RuntimeDyld::SymbolInfo((uint64_t)&mapping[moduleName], JITSymbolFlags::Exported);
   }
 
   return RuntimeDyld::SymbolInfo(nullptr);

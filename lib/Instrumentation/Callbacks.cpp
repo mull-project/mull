@@ -80,9 +80,11 @@ void Callbacks::injectCallbacks(llvm::Function *function,
 
   auto &entryBlock = *function->getBasicBlockList().begin();
   auto firstInstruction = &*entryBlock.getInstList().begin();
+
+  Value *offsetValue = new LoadInst(offset, "offset", firstInstruction);
   Value *indexAndOffset = BinaryOperator::Create(Instruction::Add,
-                                                 offset,
                                                  functionIndex,
+                                                 offsetValue,
                                                  "functionIndex",
                                                  firstInstruction);
   std::vector<Value *> enterParameters({infoPointer, indexAndOffset});
@@ -96,9 +98,10 @@ void Callbacks::injectCallbacks(llvm::Function *function,
       continue;
     }
 
+    Value *offsetValue = new LoadInst(offset, "offset", returnStatement);
     Value *indexAndOffset = BinaryOperator::Create(Instruction::Add,
                                                    functionIndex,
-                                                   offset,
+                                                   offsetValue,
                                                    "functionIndex",
                                                    returnStatement);
     std::vector<Value *> leaveParameters({infoPointer, indexAndOffset});
