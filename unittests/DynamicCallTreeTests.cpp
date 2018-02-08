@@ -37,7 +37,7 @@ TEST(DynamicCallTree, empty_tree) {
   functions.push_back(fakeFunction("F4"));
   functions.push_back(fakeFunction("F5"));
 
-  uint64_t mapping[6] = { 0 };
+  uint32_t mapping[6] = { 0 };
 
   std::unique_ptr<CallTree> callTree = DynamicCallTree::createCallTree(mapping, functions);
   ASSERT_EQ(callTree->function, nullptr);
@@ -86,7 +86,7 @@ TEST(DynamicCallTree, non_empty_tree) {
   /// FINISH       1   1   2   2   4   {}
   ///
 
-  uint64_t mapping[6] = { 0 };
+  uint32_t mapping[6] = { 0 };
   mapping[1] = 1;
   mapping[2] = 1;
   mapping[3] = 2;
@@ -137,7 +137,7 @@ TEST(DynamicCallTree, non_empty_tree) {
   ASSERT_EQ(f5Node->children.size(), 0UL);
 
   /// mapping is being cleaned up while tree is created
-  for (uint64_t index = 0; index < functions.size(); index++) {
+  for (uint32_t index = 0; index < functions.size(); index++) {
     ASSERT_EQ(mapping[0], 0UL);
   }
 
@@ -157,8 +157,8 @@ TEST(DynamicCallTree, enter_leave_function) {
   ///         F2 -> F4
   ///   F1 -> F4 -> F5
 
-  uint64_t mapping[6] = { 0 };
-  std::stack<uint64_t> stack;
+  uint32_t mapping[6] = { 0 };
+  std::stack<uint32_t> stack;
 
   DynamicCallTree::enterFunction(1, mapping, stack);
     DynamicCallTree::enterFunction(2, mapping, stack);
@@ -222,8 +222,8 @@ TEST(DynamicCallTree, enter_leave_function_recursion) {
   void f4() {}
 
 #endif
-  uint64_t mapping[5] = { 0 };
-  std::stack<uint64_t> stack;
+  uint32_t mapping[5] = { 0 };
+  std::stack<uint32_t> stack;
 
   DynamicCallTree::enterFunction(1, mapping, stack);
     DynamicCallTree::enterFunction(2, mapping, stack);
@@ -273,7 +273,7 @@ TEST(DynamicCallTree, test_subtrees) {
   ///   F1 -> F4 -> F5
   ///
 
-  uint64_t mapping[6] = { 0 };
+  uint32_t mapping[6] = { 0 };
   mapping[1] = 1;
   mapping[2] = 1;
   mapping[3] = 2;
@@ -315,7 +315,7 @@ TEST(DynamicCallTree, testees) {
   ///   F1 -> F4 -> F5
   ///
 
-  uint64_t mapping[6] = {0};
+  uint32_t mapping[6] = {0};
   mapping[1] = 1;
   mapping[2] = 1;
   mapping[3] = 2;

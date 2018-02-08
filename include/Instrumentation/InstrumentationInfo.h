@@ -5,8 +5,8 @@
 
 namespace mull {
 struct InstrumentationInfo {
-  InstrumentationInfo() :callTreeMapping(nullptr), callstack() {}
-  uint64_t *callTreeMapping;
-  std::stack<uint64_t> callstack;
+  InstrumentationInfo() : callTreeMapping(nullptr), callstack() {}
+  uint32_t *callTreeMapping;
+  std::stack<uint32_t> callstack;
 };
 }

@@ -17,7 +17,9 @@ struct InstrumentationInfo;
 
 class InstrumentationResolver : public llvm::RuntimeDyld::SymbolResolver {
   llvm::orc::LocalCXXRuntimeOverrides &overrides;
+  Instrumentation &instrumentation;
   std::string instrumentationInfoName;
+  std::string functionOffsetPrefix;
   InstrumentationInfo **trampoline;
 public:
   InstrumentationResolver(llvm::orc::LocalCXXRuntimeOverrides &overrides,

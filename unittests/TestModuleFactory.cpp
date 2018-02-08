@@ -78,8 +78,6 @@ createModuleFromBitcode(const char *fixtureName,
     abort();
   }
 
-  llvmModule.get()->setModuleIdentifier(moduleIdentifier);
-
   auto module = make_unique<MullModule>(std::move(llvmModule.get()),
                                         "fake_hash",
                                         fixtureFullPath);

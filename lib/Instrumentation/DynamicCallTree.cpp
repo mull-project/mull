@@ -8,9 +8,9 @@
 using namespace mull;
 using namespace llvm;
 
-void DynamicCallTree::enterFunction(const uint64_t functionIndex,
-                                    uint64_t *mapping,
-                                    std::stack<uint64_t> &stack) {
+void DynamicCallTree::enterFunction(const uint32_t functionIndex,
+                                    uint32_t *mapping,
+                                    std::stack<uint32_t> &stack) {
 
   if (stack.empty()) {
     /// This is the first function in a chain
@@ -18,24 +18,24 @@ void DynamicCallTree::enterFunction(const uint64_t functionIndex,
     mapping[functionIndex] = functionIndex;
   } else if (mapping[functionIndex] == 0) {
     /// This function has never been called
-    uint64_t parent = stack.top();
+    uint32_t parent = stack.top();
     mapping[functionIndex] = parent;
   }
 
   stack.push(functionIndex);
 }
 
-void DynamicCallTree::leaveFunction(const uint64_t functionIndex,
-                                    uint64_t *mapping,
-                                    std::stack<uint64_t> &stack) {
+void DynamicCallTree::leaveFunction(const uint32_t functionIndex,
+                                    uint32_t *mapping,
+                                    std::stack<uint32_t> &stack) {
   stack.pop();
 }
 
 void fillInCallTree(std::vector<CallTreeFunction> &functions,
-                    uint64_t *callTreeMapping, uint64_t functionIndex) {
+                    uint32_t *callTreeMapping, uint32_t functionIndex) {
   assert(functionIndex < functions.size());
 
-  uint64_t parent = callTreeMapping[functionIndex];
+  uint32_t parent = callTreeMapping[functionIndex];
   if (parent == 0) {
     return;
   }
@@ -58,7 +58,7 @@ void fillInCallTree(std::vector<CallTreeFunction> &functions,
   callTreeMapping[functionIndex] = 0;
 }
 
-std::unique_ptr<CallTree> DynamicCallTree::createCallTree(uint64_t *mapping, std::vector<CallTreeFunction> functions) {
+std::unique_ptr<CallTree> DynamicCallTree::createCallTree(uint32_t *mapping, std::vector<CallTreeFunction> functions) {
   assert(mapping != nullptr);
   assert(mapping[0] == 0);
   assert(!functions.empty());
@@ -90,7 +90,7 @@ std::unique_ptr<CallTree> DynamicCallTree::createCallTree(uint64_t *mapping, std
   CallTreeFunction &rootFunction = functions[0];
   rootFunction.treeRoot = phonyRoot.get();
 
-  for (uint64_t index = 1; index < functions.size(); index++) {
+  for (uint32_t index = 1; index < functions.size(); index++) {
     fillInCallTree(functions, mapping, index);
   }
 

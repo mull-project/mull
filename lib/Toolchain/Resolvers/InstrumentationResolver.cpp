@@ -14,7 +14,9 @@ InstrumentationResolver::InstrumentationResolver(orc::LocalCXXRuntimeOverrides &
                                                  Mangler &mangler,
                                                  InstrumentationInfo **trampoline)
 : overrides(overrides),
+instrumentation(instrumentation),
 instrumentationInfoName(mangler.getNameWithPrefix(instrumentation.instrumentationInfoVariableName())),
+functionOffsetPrefix(mangler.getNameWithPrefix(instrumentation.functionIndexOffsetPrefix())),
 trampoline(trampoline) {}
 
 RuntimeDyld::SymbolInfo InstrumentationResolver::findSymbol(const std::string &name) {
@@ -30,6 +32,12 @@ RuntimeDyld::SymbolInfo InstrumentationResolver::findSymbol(const std::string &n
 
   if (name == instrumentationInfoName) {
     return RuntimeDyld::SymbolInfo((uint64_t)trampoline, JITSymbolFlags::Exported);
+  }
+
+  if (name.find(functionOffsetPrefix) != std::string::npos) {
+    auto moduleName = name.substr(functionOffsetPrefix.length());
+    auto &mapping = instrumentation.getFunctionOffsetMapping();
+    return RuntimeDyld::SymbolInfo((uint64_t)&mapping[moduleName], JITSymbolFlags::Exported);
   }
 
   return RuntimeDyld::SymbolInfo(nullptr);
