@@ -237,7 +237,8 @@ TEST(SQLiteReporter, integrationTest_Config) {
                 Config::EmitDebugInfo::No,
                 Config::Diagnostics::None,
                 timeout, distance,
-                cacheDirectory);
+                cacheDirectory,
+                JunkDetectionConfig::disabled());
 
   SQLiteReporter reporter(config.getProjectName());
 
@@ -436,7 +437,8 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
                 Config::EmitDebugInfo::Yes,
                 Config::Diagnostics::None,
                 timeout, distance,
-                cacheDirectory);
+                cacheDirectory,
+                JunkDetectionConfig::disabled());
 
   SQLiteReporter reporter(projectName);
   reporter.reportResults(result, config, resultTime);
@@ -581,7 +583,8 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
                 Config::EmitDebugInfo::No,
                 Config::Diagnostics::None,
                 timeout, distance,
-                cacheDirectory);
+                cacheDirectory,
+                JunkDetectionConfig::disabled());
 
   SQLiteReporter reporter(projectName);
   reporter.reportResults(result, config, resultTime);

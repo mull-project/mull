@@ -411,3 +411,18 @@ exclude_locations:
   ASSERT_EQ("include/c++/v1", excludeLocations[0]);
   ASSERT_EQ("llvm/include", excludeLocations[1]);
 }
+
+TEST_F(ConfigParserTestFixture, loadConfig_junkDetectionConfig_unspecified) {
+  configWithYamlContent("");
+  ASSERT_FALSE(config.junkDetectionEnabled());
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_junkDetectionConfig_specified) {
+  const char *configYAML = R"YAML(
+junk_detection:
+  detector: all
+  enabled: yes
+  )YAML";
+  configWithYamlContent(configYAML);
+  ASSERT_TRUE(config.junkDetectionEnabled());
+}

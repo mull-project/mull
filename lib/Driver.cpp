@@ -11,6 +11,7 @@
 #include "TestRunner.h"
 #include "MutationsFinder.h"
 #include "Metrics/Metrics.h"
+#include "JunkDetection/JunkDetector.h"
 
 #include <llvm/Support/DynamicLibrary.h>
 
@@ -201,15 +202,26 @@ std::unique_ptr<Result> Driver::Run() {
   }
 
   Logger::debug() << "Driver::Run> found " << allMutationPoints.size() << " mutations\n";
+  std::vector<MutationPoint *> nonJunkMutationPoints;
+  if (config.junkDetectionEnabled()) {
+    for (auto point: allMutationPoints) {
+      if (!junkDetector.isJunk(point)) {
+        nonJunkMutationPoints.push_back(point);
+      }
+    }
+    Logger::debug() << "Driver::Run> filtered out " << allMutationPoints.size() - nonJunkMutationPoints.size() << " junk mutations\n";
+  } else {
+    allMutationPoints.swap(nonJunkMutationPoints);
+  }
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
   if (config.dryRunModeEnabled()) {
-    mutationResults = dryRunMutations(allMutationPoints);
+    mutationResults = dryRunMutations(nonJunkMutationPoints);
   } else {
-    mutationResults = runMutations(allMutationPoints);
+    mutationResults = runMutations(nonJunkMutationPoints);
   }
 
-  return make_unique<Result>(std::move(foundTests), std::move(mutationResults), allMutationPoints);
+  return make_unique<Result>(std::move(foundTests), std::move(mutationResults), nonJunkMutationPoints);
 }
 
 std::vector<std::unique_ptr<MutationResult>> Driver::dryRunMutations(const std::vector<MutationPoint *> &mutationPoints) {

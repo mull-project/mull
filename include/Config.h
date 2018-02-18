@@ -40,6 +40,33 @@ struct CustomTestDefinition {
   CustomTestDefinition() {}
 };
 
+struct JunkDetectionConfig {
+  enum class JunkDetectionToggle {
+    Enabled,
+    Disabled
+  };
+
+  JunkDetectionToggle toggle;
+  std::string detectorName;
+  JunkDetectionConfig() : toggle(JunkDetectionToggle::Disabled), detectorName("") {}
+
+  static JunkDetectionConfig enabled() {
+    JunkDetectionConfig config;
+    config.toggle = JunkDetectionToggle::Enabled;
+    return config;
+  }
+
+  static JunkDetectionConfig disabled() {
+    JunkDetectionConfig config;
+    config.toggle = JunkDetectionToggle::Disabled;
+    return config;
+  }
+
+  bool isEnabled() const {
+    return toggle == JunkDetectionToggle::Enabled;
+  }
+};
+
 class Config {
 public:
   enum class Fork {
@@ -163,6 +190,8 @@ private:
   int maxDistance;
   std::string cacheDirectory;
 
+  JunkDetectionConfig junkDetection;
+
   friend llvm::yaml::MappingTraits<mull::Config>;
 public:
   // Constructor initializes defaults.
@@ -194,7 +223,8 @@ public:
     diagnostics(Diagnostics::None),
     timeout(MullDefaultTimeoutMilliseconds),
     maxDistance(128),
-    cacheDirectory("/tmp/mull_cache")
+    cacheDirectory("/tmp/mull_cache"),
+    junkDetection()
   {
   }
 
@@ -215,7 +245,8 @@ public:
          Diagnostics diagnostics,
          int timeout,
          int distance,
-         const std::string &cacheDir) :
+         const std::string &cacheDir,
+         JunkDetectionConfig junkDetection) :
     bitcodeFileList(bitcodeFileList),
     projectName(project),
     testFramework(testFramework),
@@ -233,7 +264,8 @@ public:
     diagnostics(diagnostics),
     timeout(timeout),
     maxDistance(distance),
-    cacheDirectory(cacheDir)
+    cacheDirectory(cacheDir),
+    junkDetection(junkDetection)
   {
   }
 
@@ -345,6 +377,10 @@ public:
     return emitDebugInfo == EmitDebugInfo::Yes;
   }
 
+  bool junkDetectionEnabled() const {
+    return junkDetection.isEnabled();
+  }
+
   Diagnostics getDiagnostics() const {
     return diagnostics;
   }
@@ -369,6 +405,7 @@ public:
     << "\t" << "fail_fast: " << failFastToString(failFast) << '\n'
     << "\t" << "fork: " << forkToString(fork) << '\n'
     << "\t" << "use_cache: " << cachingToString(caching) << '\n'
+    << "\t" << "junk_detection: " << (junkDetectionEnabled() ? "enabled" : "disabled" ) << '\n'
     << "\t" << "diagnostics: " << diagnosticsToString(diagnostics) << '\n'
     << "\t" << "emit_debug_info: " << emitDebugInfoToString(emitDebugInfo) << '\n';
 
