@@ -1,31 +1,26 @@
+FIXTURE_DIRS=\
+  ./custom_test \
+  ./google_test/google_test/ \
+  ./simple_test/mutation_operators/and_or_replacement \
+  ./simple_test/mutation_operators/and_or_replacement_cpp/ \
+  ./simple_test/mutation_operators/math_div/ \
+  ./simple_test/mutation_operators/math_mul/ \
+  ./simple_test/mutation_operators/math_sub/ \
+  ./simple_test/mutation_operators/negate_condition/ \
+  ./simple_test/mutation_operators/remove_void_function/ \
+  ./simple_test/mutation_operators/replace_assignment/ \
+  ./simple_test/mutation_operators/replace_call/ \
+  ./simple_test/mutation_operators/scalar_value/ \
+  ./simple_test/count_letters \
+  ./dylibs_and_objects \
+
 synchronize_fixtures:
-	cd ./custom_test/ && make synchronize_fixtures
-	cd ./google_test/google_test/ && make synchronize_fixtures
-	cd ./simple_test/mutation_operators/and_or_replacement && make synchronize_fixtures
-	cd ./simple_test/mutation_operators/and_or_replacement_cpp/ && make synchronize_fixtures
-	cd ./simple_test/mutation_operators/math_div/ && make synchronize_fixtures
-	cd ./simple_test/mutation_operators/math_mul/ && make synchronize_fixtures
-	cd ./simple_test/mutation_operators/math_sub/ && make synchronize_fixtures
-	cd ./simple_test/mutation_operators/negate_condition/ && make synchronize_fixtures
-	cd ./simple_test/mutation_operators/remove_void_function/ && make synchronize_fixtures
-	cd ./simple_test/mutation_operators/replace_assignment/ && make synchronize_fixtures
-	cd ./simple_test/mutation_operators/replace_call/ && make synchronize_fixtures
-	cd ./simple_test/mutation_operators/scalar_value/ && make synchronize_fixtures
-	cd ./simple_test/count_letters && make synchronize_fixtures
-	cd ./dylibs_and_objects && make synchronize_fixtures
+	@for path in ${FIXTURE_DIRS}; do \
+		cd $$path && make synchronize_fixtures; cd -; \
+	done
 
 clean:
-	cd ./custom_test/ && make clean
-	cd ./google_test/google_test/ && make clean
-	cd ./simple_test/mutation_operators/and_or_replacement/ && make clean
-	cd ./simple_test/mutation_operators/and_or_replacement_cpp/ && make clean
-	cd ./simple_test/mutation_operators/math_div/ && make clean
-	cd ./simple_test/mutation_operators/math_mul/ && make clean
-	cd ./simple_test/mutation_operators/math_sub/ && make clean
-	cd ./simple_test/mutation_operators/negate_condition/ && make clean
-	cd ./simple_test/mutation_operators/remove_void_function/ && make clean
-	cd ./simple_test/mutation_operators/replace_call/ && make clean
-	cd ./simple_test/mutation_operators/scalar_value/ && make clean
-	cd ./simple_test/count_letters && make clean
-	cd ./dylibs_and_objects && make clean
+	@for path in ${FIXTURE_DIRS}; do \
+		cd $$path && make clean; cd -; \
+	done
 
