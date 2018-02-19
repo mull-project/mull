@@ -13,6 +13,7 @@ FIXTURE_DIRS=\
   ./simple_test/mutation_operators/scalar_value/ \
   ./simple_test/count_letters \
   ./dylibs_and_objects \
+  ./mutators/cxx/boundary \
 
 synchronize_fixtures:
 	@for path in ${FIXTURE_DIRS}; do \
