@@ -381,6 +381,10 @@ public:
     return junkDetection.isEnabled();
   }
 
+  JunkDetectionConfig &junkDetectionConfig() {
+    return junkDetection;
+  }
+
   Diagnostics getDiagnostics() const {
     return diagnostics;
   }
