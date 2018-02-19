@@ -32,6 +32,7 @@ class TestFinder;
 class TestRunner;
 class MutationsFinder;
 class Metrics;
+class JunkDetector;
 
 class Driver {
   Config &config;
@@ -51,9 +52,10 @@ class Driver {
   std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> ownedObjectFiles;
   Instrumentation instrumentation;
   Metrics &metrics;
+  JunkDetector &junkDetector;
 public:
-  Driver(Config &C, ModuleLoader &ML, TestFinder &TF, TestRunner &TR, Toolchain &t, Filter &f, MutationsFinder &mutationsFinder, Metrics &metrics)
-    : config(C), loader(ML), finder(TF), runner(TR), toolchain(t), filter(f), mutationsFinder(mutationsFinder), precompiledObjectFiles(), instrumentation(), metrics(metrics) {
+  Driver(Config &C, ModuleLoader &ML, TestFinder &TF, TestRunner &TR, Toolchain &t, Filter &f, MutationsFinder &mutationsFinder, Metrics &metrics, JunkDetector &junkDetector)
+    : config(C), loader(ML), finder(TF), runner(TR), toolchain(t), filter(f), mutationsFinder(mutationsFinder), precompiledObjectFiles(), instrumentation(), metrics(metrics), junkDetector(junkDetector) {
 
       if (C.forkEnabled()) {
         this->sandbox = new ForkProcessSandbox();

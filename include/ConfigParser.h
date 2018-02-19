@@ -36,6 +36,26 @@ struct MappingTraits<mull::CustomTestDefinition> {
 };
 
 template <>
+struct MappingTraits<mull::JunkDetectionConfig> {
+  static void mapping(IO &io, mull::JunkDetectionConfig &config) {
+    io.mapRequired("detector", config.detectorName);
+    io.mapOptional("enabled", config.toggle);
+  }
+};
+
+template <>
+struct ScalarEnumerationTraits<mull::JunkDetectionConfig::JunkDetectionToggle> {
+  static void enumeration(IO &io, mull::JunkDetectionConfig::JunkDetectionToggle &toggle) {
+    io.enumCase(toggle, "true",  mull::JunkDetectionConfig::JunkDetectionToggle::Enabled);
+    io.enumCase(toggle, "yes",  mull::JunkDetectionConfig::JunkDetectionToggle::Enabled);
+    io.enumCase(toggle, "enabled",  mull::JunkDetectionConfig::JunkDetectionToggle::Enabled);
+    io.enumCase(toggle, "false",  mull::JunkDetectionConfig::JunkDetectionToggle::Disabled);
+    io.enumCase(toggle, "no",  mull::JunkDetectionConfig::JunkDetectionToggle::Disabled);
+    io.enumCase(toggle, "disabled",  mull::JunkDetectionConfig::JunkDetectionToggle::Disabled);
+  }
+};
+
+template <>
 struct ScalarEnumerationTraits<mull::Config::Fork> {
   static void enumeration(IO &io, mull::Config::Fork &fork) {
     io.enumCase(fork, "true",  mull::Config::Fork::Enabled);
@@ -116,6 +136,7 @@ struct MappingTraits<mull::Config>
     io.mapOptional("timeout", config.timeout);
     io.mapOptional("max_distance", config.maxDistance);
     io.mapOptional("cache_directory", config.cacheDirectory);
+    io.mapOptional("junk_detection", config.junkDetection);
   }
 };
 }

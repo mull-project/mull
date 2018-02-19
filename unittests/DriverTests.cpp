@@ -21,6 +21,7 @@
 #include "CustomTestFramework/CustomTestFinder.h"
 #include "CustomTestFramework/CustomTestRunner.h"
 
+#include "JunkDetection/JunkDetector.h"
 #include "Toolchain/Toolchain.h"
 #include "Metrics/Metrics.h"
 
@@ -68,7 +69,8 @@ TEST(Driver, RunningWithNoTests) {
                 Config::Diagnostics::None,
                 MullDefaultTimeoutMilliseconds,
                 distance,
-                cacheDirectory);
+                cacheDirectory,
+                JunkDetectionConfig::disabled());
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
@@ -91,8 +93,9 @@ TEST(Driver, RunningWithNoTests) {
   SimpleTestRunner runner(machine);
   Filter filter;
   Metrics metrics;
+  NullJunkDetector junkDetector;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
   auto result = Driver.Run();
   ASSERT_EQ(0u, result->getTests().size());
@@ -132,7 +135,8 @@ TEST(Driver, SimpleTest_MathAddMutationOperator) {
                 Config::Diagnostics::None,
                 MullDefaultTimeoutMilliseconds,
                 distance,
-                cacheDirectory);
+                cacheDirectory,
+                JunkDetectionConfig::disabled());
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
@@ -157,8 +161,9 @@ TEST(Driver, SimpleTest_MathAddMutationOperator) {
   SimpleTestRunner runner(machine);
   Filter filter;
   Metrics metrics;
+  NullJunkDetector junkDetector;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
   /// Given the modules we use here we expect:
   ///
@@ -212,7 +217,8 @@ TEST(Driver, SimpleTest_MathSubMutationOperator) {
                 Config::Diagnostics::None,
                 MullDefaultTimeoutMilliseconds,
                 distance,
-                cacheDirectory);
+                cacheDirectory,
+                JunkDetectionConfig::disabled());
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
@@ -235,8 +241,9 @@ TEST(Driver, SimpleTest_MathSubMutationOperator) {
   SimpleTestRunner runner(machine);
   Filter filter;
   Metrics metrics;
+  NullJunkDetector junkDetector;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
     /// Given the modules we use here we expect:
     ///
@@ -290,7 +297,8 @@ TEST(Driver, SimpleTest_MathMulMutationOperator) {
                 Config::Diagnostics::None,
                 MullDefaultTimeoutMilliseconds,
                 distance,
-                cacheDirectory);
+                cacheDirectory,
+                JunkDetectionConfig::disabled());
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
@@ -313,8 +321,9 @@ TEST(Driver, SimpleTest_MathMulMutationOperator) {
   SimpleTestRunner runner(machine);
   Filter filter;
   Metrics metrics;
+  NullJunkDetector junkDetector;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
     /// Given the modules we use here we expect:
     ///
@@ -367,7 +376,8 @@ TEST(Driver, SimpleTest_MathDivMutationOperator) {
                 Config::Diagnostics::None,
                 MullDefaultTimeoutMilliseconds,
                 distance,
-                cacheDirectory);
+                cacheDirectory,
+                JunkDetectionConfig::disabled());
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
@@ -390,8 +400,9 @@ TEST(Driver, SimpleTest_MathDivMutationOperator) {
   SimpleTestRunner runner(machine);
   Filter filter;
   Metrics metrics;
+  NullJunkDetector junkDetector;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
     /// Given the modules we use here we expect:
     ///
@@ -444,7 +455,8 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
                 Config::Diagnostics::None,
                 MullDefaultTimeoutMilliseconds,
                 distance,
-                cacheDirectory);
+                cacheDirectory,
+                JunkDetectionConfig::disabled());
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
@@ -467,8 +479,9 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
   SimpleTestRunner runner(toolchain.targetMachine());
   Filter filter;
   Metrics metrics;
+  NullJunkDetector junkDetector;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
   /// Given the modules we use here we expect:
   ///
@@ -514,7 +527,8 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
                 Config::Diagnostics::None,
                 MullDefaultTimeoutMilliseconds,
                 distance,
-                cacheDirectory);
+                cacheDirectory,
+                JunkDetectionConfig::disabled());
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
@@ -537,8 +551,9 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
   SimpleTestRunner runner(toolchain.targetMachine());
   Filter filter;
   Metrics metrics;
+  NullJunkDetector junkDetector;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
   /// Given the modules we use here we expect:
   ///
@@ -584,7 +599,8 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator) {
                 Config::Diagnostics::None,
                 MullDefaultTimeoutMilliseconds,
                 distance,
-                cacheDirectory);
+                cacheDirectory,
+                JunkDetectionConfig::disabled());
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AndOrReplacementMutationOperator>());
@@ -606,8 +622,9 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator) {
   SimpleTestRunner runner(toolchain.targetMachine());
   Filter filter;
   Metrics metrics;
+  NullJunkDetector junkDetector;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
   auto result = Driver.Run();
   ASSERT_EQ(8U, result->getTests().size());
@@ -728,7 +745,8 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator_CPP) {
                 Config::Diagnostics::None,
                 MullDefaultTimeoutMilliseconds,
                 distance,
-                cacheDirectory);
+                cacheDirectory,
+                JunkDetectionConfig::disabled());
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AndOrReplacementMutationOperator>());
@@ -750,8 +768,9 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator_CPP) {
   SimpleTestRunner runner(toolchain.targetMachine());
   Filter filter;
   Metrics metrics;
+  NullJunkDetector junkDetector;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
   auto result = Driver.Run();
   ASSERT_EQ(6U, result->getTests().size());
@@ -833,7 +852,8 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutationOperator_CPP) {
                 Config::Diagnostics::None,
                 MullDefaultTimeoutMilliseconds,
                 distance,
-                cacheDirectory);
+                cacheDirectory,
+                JunkDetectionConfig::disabled());
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<ReplaceAssignmentMutationOperator>());
@@ -855,8 +875,9 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutationOperator_CPP) {
   SimpleTestRunner runner(toolchain.targetMachine());
   Filter filter;
   Metrics metrics;
+  NullJunkDetector junkDetector;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics);
+  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
   auto result = Driver.Run();
   EXPECT_EQ(1U, result->getTests().size());
@@ -905,7 +926,8 @@ TEST(Driver, customTest) {
                 Config::Diagnostics::None,
                 MullDefaultTimeoutMilliseconds,
                 distance,
-                cacheDirectory);
+                cacheDirectory,
+                JunkDetectionConfig::disabled());
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<MathAddMutationOperator>());
@@ -930,8 +952,9 @@ TEST(Driver, customTest) {
   Filter filter;
   filter.includeTest("passing");
   Metrics metrics;
+  NullJunkDetector junkDetector;
 
-  Driver driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics);
+  Driver driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
@@ -976,7 +999,8 @@ TEST(Driver, customTest_withDynamicLibraries) {
                 Config::Diagnostics::None,
                 MullDefaultTimeoutMilliseconds,
                 distance,
-                cacheDirectory);
+                cacheDirectory,
+                JunkDetectionConfig::disabled());
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<MathAddMutationOperator>());
@@ -1000,8 +1024,9 @@ TEST(Driver, customTest_withDynamicLibraries) {
   Filter filter;
   filter.includeTest("passing");
   Metrics metrics;
+  NullJunkDetector junkDetector;
 
-  Driver driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics);
+  Driver driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
@@ -1012,6 +1037,134 @@ TEST(Driver, customTest_withDynamicLibraries) {
   ASSERT_EQ("passing", test->getTestName());
   /// Could not find any mutations because there was no bitcode for testees
   ASSERT_EQ(0UL, result->getMutationResults().size());
+}
+
+TEST(Driver, junkDetector_enabled) {
+  std::string projectName = "some_custom_project_junkDetectorAllJunk";
+  std::string testFramework = "CustomTest";
+
+  int distance = 10;
+  std::string cacheDirectory = "/tmp/mull_cache";
+
+  std::vector<CustomTestDefinition> testDefinitions({
+    CustomTestDefinition("failing", "failing_test", "mull", { "failing_test" }),
+    CustomTestDefinition("passing", "passing_test", "mull", { "passing_test" })
+  });
+
+  Config config("",
+                projectName,
+                testFramework,
+                {},
+                {},
+                {},
+                {},
+                {},
+                testDefinitions,
+                Config::Fork::Disabled,
+                Config::DryRunMode::Disabled,
+                Config::FailFastMode::Disabled,
+                Config::UseCache::No,
+                Config::EmitDebugInfo::No,
+                Config::Diagnostics::None,
+                MullDefaultTimeoutMilliseconds,
+                distance,
+                cacheDirectory,
+                JunkDetectionConfig::enabled());
+
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<MathAddMutationOperator>());
+  MutationsFinder finder(std::move(mutationOperators));
+  CustomTestFinder testFinder(config.getCustomTests());
+
+  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
+    std::vector<std::unique_ptr<MullModule>> modules;
+
+    modules.push_back(SharedTestModuleFactory.create_CustomTest_Distance_Distance_Module());
+    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Main_Module());
+    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Test_Module());
+
+    return modules;
+  };
+
+  LLVMContext context;
+  FakeModuleLoader loader(context, modules);
+
+  Toolchain toolchain(config);
+  CustomTestRunner runner(toolchain.targetMachine());
+  Filter filter;
+  filter.includeTest("passing");
+  Metrics metrics;
+  AllJunkDetector junkDetector;
+
+  Driver driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+
+  auto result = driver.Run();
+  ASSERT_EQ(1U, result->getTests().size());
+  ASSERT_EQ(0UL, result->getMutationResults().size());
+}
+
+TEST(Driver, junkDetector_disabled) {
+  std::string projectName = "some_custom_project_junkDetectorAllJunk";
+  std::string testFramework = "CustomTest";
+
+  int distance = 10;
+  std::string cacheDirectory = "/tmp/mull_cache";
+
+  std::vector<CustomTestDefinition> testDefinitions({
+    CustomTestDefinition("failing", "failing_test", "mull", { "failing_test" }),
+    CustomTestDefinition("passing", "passing_test", "mull", { "passing_test" })
+  });
+
+  Config config("",
+                projectName,
+                testFramework,
+                {},
+                {},
+                {},
+                {},
+                {},
+                testDefinitions,
+                Config::Fork::Disabled,
+                Config::DryRunMode::Disabled,
+                Config::FailFastMode::Disabled,
+                Config::UseCache::No,
+                Config::EmitDebugInfo::No,
+                Config::Diagnostics::None,
+                MullDefaultTimeoutMilliseconds,
+                distance,
+                cacheDirectory,
+                JunkDetectionConfig::disabled());
+
+  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  mutationOperators.emplace_back(make_unique<MathAddMutationOperator>());
+  MutationsFinder finder(std::move(mutationOperators));
+  CustomTestFinder testFinder(config.getCustomTests());
+
+  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
+    std::vector<std::unique_ptr<MullModule>> modules;
+
+    modules.push_back(SharedTestModuleFactory.create_CustomTest_Distance_Distance_Module());
+    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Main_Module());
+    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Test_Module());
+
+    return modules;
+  };
+
+  LLVMContext context;
+  FakeModuleLoader loader(context, modules);
+
+  Toolchain toolchain(config);
+  CustomTestRunner runner(toolchain.targetMachine());
+  Filter filter;
+  filter.includeTest("passing");
+  Metrics metrics;
+  AllJunkDetector junkDetector;
+
+  Driver driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+
+  auto result = driver.Run();
+  ASSERT_EQ(1U, result->getTests().size());
+  ASSERT_EQ(3UL, result->getMutationResults().size());
 }
 
 TEST(Driver, DISABLED_customTest_withDynamicLibraries_and_ObjectFiles) {
@@ -1047,7 +1200,8 @@ TEST(Driver, DISABLED_customTest_withDynamicLibraries_and_ObjectFiles) {
                 Config::Diagnostics::None,
                 MullDefaultTimeoutMilliseconds,
                 distance,
-                cacheDirectory);
+                cacheDirectory,
+                JunkDetectionConfig::disabled());
 
   std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<MathAddMutationOperator>());
@@ -1070,8 +1224,9 @@ TEST(Driver, DISABLED_customTest_withDynamicLibraries_and_ObjectFiles) {
   Filter filter;
   filter.includeTest("passing");
   Metrics metrics;
+  NullJunkDetector junkDetector;
 
-  Driver driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics);
+  Driver driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());

@@ -12,6 +12,7 @@
 
 #include "Toolchain/Toolchain.h"
 #include "Metrics/Metrics.h"
+#include "JunkDetection/JunkDetector.h"
 
 #include "GoogleTest/GoogleTestFinder.h"
 #include "GoogleTest/GoogleTestRunner.h"
@@ -139,8 +140,21 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
+  std::unique_ptr<JunkDetector> junkDetector(make_unique<NullJunkDetector>());
+  if (config.junkDetectionEnabled()) {
+    std::string detector = config.junkDetectionConfig().detectorName;
+    if (detector == "all") {
+      junkDetector = make_unique<AllJunkDetector>();
+    } else if (detector == "none") {
+      junkDetector = make_unique<NullJunkDetector>();
+    } else {
+      Logger::error() << "mull-driver> Unknown junk detector provided: "
+        << "`" << detector << "`. ";
+    }
+  }
+
   Metrics metrics;
-  Driver driver(config, Loader, *testFinder, *testRunner, toolchain, filter, mutationsFinder, metrics);
+  Driver driver(config, Loader, *testFinder, *testRunner, toolchain, filter, mutationsFinder, metrics, *junkDetector);
 
   metrics.beginRun();
   auto result = driver.Run();
