@@ -26,6 +26,8 @@ set(mull_sources
   MutationOperators/MathSubMutationOperator.cpp
   MutationOperators/ScalarValueMutationOperator.cpp
 
+  MutationOperators/CXX/Conditionals/BoundaryMutator.cpp
+
   Toolchain/Compiler.cpp
   Toolchain/ObjectCache.cpp
   Toolchain/Toolchain.cpp
