@@ -24,6 +24,7 @@ public:
   static const std::string ID;
   std::string uniqueID() override;
   std::string uniqueID() const override;
+  MutatorKind mutatorKind() override;
 
   static bool isGT(llvm::Instruction *instruction);
   static bool isGTE(llvm::Instruction *instruction);

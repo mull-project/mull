@@ -19,6 +19,8 @@ set(mull_unittests_sources
 
   MutationOperators/CXX/Conditionals/BoundaryMutatorTests.cpp
 
+  JunkDetection/CXXJunkDetectorTests.cpp
+
   SimpleTest/SimpleTestFinderTest.cpp
 
   GoogleTest/GoogleTestFinderTest.cpp

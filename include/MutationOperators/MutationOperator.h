@@ -17,6 +17,11 @@ class MullModule;
 class MutationPoint;
 class MutationPointAddress;
 
+enum class MutatorKind {
+  Unknown,
+  CXXBoundaryMutator
+};
+
 class MutationOperator {
 public:
   virtual MutationPoint *getMutationPoint(MullModule *module,
@@ -26,6 +31,7 @@ public:
   /// FIXME: Renmae to 'getUniqueIdentifier'
   virtual std::string uniqueID() = 0;
   virtual std::string uniqueID() const = 0;
+  virtual MutatorKind mutatorKind()  { return MutatorKind::Unknown; }
 
   virtual bool canBeApplied(llvm::Value &V) = 0;
   virtual llvm::Value *applyMutation(llvm::Module *M, MutationPointAddress address, llvm::Value &OriginalValue) = 0;

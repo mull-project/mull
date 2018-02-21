@@ -67,6 +67,7 @@ find_library(MULL_DEPENDENCY_LIBZ z HINTS ${MULL_TOOLCHAIN_LIBZ_PATH})
 find_library(MULL_DEPENDENCY_NCURSES ncurses)
 ## Mull's own dependencies:
 find_library(MULL_DEPENDENCY_SQLITE sqlite3 HINTS ${MULL_TOOLCHAIN_SQLITE_PATH})
+find_library(MULL_DEPENDENCY_LIBCLANG clang HINTS ${LLVM_LIB_PATH})
 
 include_directories(${MULL_INCLUDE_DIR})
 

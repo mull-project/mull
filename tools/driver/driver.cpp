@@ -13,6 +13,7 @@
 #include "Toolchain/Toolchain.h"
 #include "Metrics/Metrics.h"
 #include "JunkDetection/JunkDetector.h"
+#include "JunkDetection/CXX/CXXJunkDetector.h"
 
 #include "GoogleTest/GoogleTestFinder.h"
 #include "GoogleTest/GoogleTestRunner.h"
@@ -147,6 +148,8 @@ int main(int argc, char *argv[]) {
       junkDetector = make_unique<AllJunkDetector>();
     } else if (detector == "none") {
       junkDetector = make_unique<NullJunkDetector>();
+    } else if (detector == "cxx") {
+      junkDetector = make_unique<CXXJunkDetector>();
     } else {
       Logger::error() << "mull-driver> Unknown junk detector provided: "
         << "`" << detector << "`. ";
