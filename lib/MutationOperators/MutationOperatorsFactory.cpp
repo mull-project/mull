@@ -11,6 +11,9 @@
 #include "MutationOperators/ReplaceAssignmentMutationOperator.h"
 #include "MutationOperators/ReplaceCallMutationOperator.h"
 #include "MutationOperators/ScalarValueMutationOperator.h"
+
+#include "MutationOperators/CXX/Conditionals/BoundaryMutator.h"
+
 #include "Logger.h"
 
 #include <llvm/ADT/STLExtras.h>
@@ -27,6 +30,8 @@ static const string ConstantOperatorsGroup = "constant";
 
 static const string DefaultOperatorsGroup = "default";
 static const string ExperimentalOperatorsGroup = "experimental";
+
+static const string CXXOperatorsGroup = "cxx";
 
 static const string AllOperatorsGroup = "all";
 
@@ -74,6 +79,9 @@ MutationOperatorsFactory::MutationOperatorsFactory() {
     ReplaceCallMutationOperator::ID,
     ScalarValueMutationOperator::ID
   };
+  groupsMapping[CXXOperatorsGroup] = {
+    cxx::BoundaryMutator::ID
+  };
   groupsMapping[AllOperatorsGroup] = {
     DefaultOperatorsGroup,
     ExperimentalOperatorsGroup
@@ -104,6 +112,9 @@ void MutationOperatorsFactory::init() {
 
   mutationsMapping[ScalarValueMutationOperator::ID] =
     make_unique<ScalarValueMutationOperator>();
+
+  mutationsMapping[cxx::BoundaryMutator::ID] =
+    make_unique<cxx::BoundaryMutator>();
 }
 
 vector<unique_ptr<MutationOperator>>
