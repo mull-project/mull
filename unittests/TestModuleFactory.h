@@ -55,6 +55,8 @@ public:
 
   std::unique_ptr<MullModule> create_CustomTest_OpenSSL_bio_enc_test_Module();
 
+  std::unique_ptr<MullModule> create_CXX_BoundaryMutator_Module();
+
 #pragma mark - Rust
   std::unique_ptr<MullModule> rustModule();
 
