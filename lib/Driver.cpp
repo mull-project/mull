@@ -49,9 +49,22 @@ Driver::~Driver() {
 /// all the results of each mutant within corresponding MutationPoint
 
 std::unique_ptr<Result> Driver::Run() {
-  /// Assumption: all modules will be used during the execution
-  /// Therefore we load them into memory and compile immediately
-  /// Later on modules used only for generating of mutants
+  loadBitcodeFilesIntoMemory();
+  compileInstrumentedBitcodeFiles();
+  loadPrecompiledObjectFiles();
+  loadDynamicLibraries();
+
+  auto tests = findTests();
+  auto mutationPoints = findMutationPoints(tests);
+  auto nonJunkMutationPoints = filterOutJunkMutations(std::move(mutationPoints));
+  auto mutationResults = runMutations(nonJunkMutationPoints);
+
+  return make_unique<Result>(std::move(tests),
+                             std::move(mutationResults),
+                             std::move(nonJunkMutationPoints));
+}
+
+void Driver::loadBitcodeFilesIntoMemory() {
   metrics.beginLoadModules();
   std::vector<std::string> bitcodePaths = config.getBitcodePaths();
   std::vector<unique_ptr<MullModule>> modules =
@@ -59,26 +72,16 @@ std::unique_ptr<Result> Driver::Run() {
   metrics.endLoadModules();
 
   for (auto &ownedModule : modules) {
-    MullModule &module = *ownedModule.get();
     assert(ownedModule && "Can't load module");
     context.addModule(std::move(ownedModule));
+  }
+}
+
+void Driver::compileInstrumentedBitcodeFiles() {
+  for (auto &ownedModule : context.getModules()) {
+    MullModule &module = *ownedModule.get();
 
     instrumentation.recordFunctions(module.getModule());
-
-    if (!config.dryRunModeEnabled()) {
-      metrics.beginCompileOriginalModule(module.getModule());
-      auto objectFile = toolchain.cache().getObject(module);
-      if (objectFile.getBinary() == nullptr) {
-        LLVMContext localContext;
-        auto clonedModule = module.clone(localContext);
-        objectFile = toolchain.compiler().compileModule(*clonedModule.get());
-        toolchain.cache().putObject(objectFile, module);
-      }
-
-      innerCache.insert(std::make_pair(module.getModule(), objectFile.getBinary()));
-      ownedObjectFiles.push_back(std::move(objectFile));
-      metrics.endCompileOriginalModule(module.getModule());
-    }
 
     metrics.beginCompileInstrumentedModule(module.getModule());
 
@@ -95,13 +98,14 @@ std::unique_ptr<Result> Driver::Run() {
     instrumentedObjectFiles.push_back(std::move(objectFile));
 
     metrics.endCompileInstrumentedModule(module.getModule());
-
   }
+}
 
+void Driver::loadPrecompiledObjectFiles() {
   metrics.beginLoadPrecompiledObjectFiles();
   for (std::string &objectFilePath: config.getObjectFilesPaths()) {
     ErrorOr<std::unique_ptr<MemoryBuffer>> buffer =
-      MemoryBuffer::getFile(objectFilePath.c_str());
+    MemoryBuffer::getFile(objectFilePath.c_str());
 
     if (!buffer) {
       Logger::error() << "Cannot load object file: " << objectFilePath << "\n";
@@ -109,7 +113,7 @@ std::unique_ptr<Result> Driver::Run() {
     }
 
     Expected<std::unique_ptr<ObjectFile>> objectOrError =
-      ObjectFile::createObjectFile(buffer.get()->getMemBufferRef());
+    ObjectFile::createObjectFile(buffer.get()->getMemBufferRef());
 
     if (!objectOrError) {
       Logger::error() << "Cannot create object file: " << objectFilePath << "\n";
@@ -123,31 +127,35 @@ std::unique_ptr<Result> Driver::Run() {
     precompiledObjectFiles.push_back(std::move(owningObject));
   }
   metrics.endLoadPrecompiledObjectFiles();
+}
 
-  metrics.beginFindTests();
-  auto foundTests = finder.findTests(context, filter);
-  metrics.endFindTests();
-  const int testsCount = foundTests.size();
-
-  Logger::debug() << "Driver::Run> found "
-                  << testsCount
-                  << " tests\n";
-
-  if (testsCount == 0) {
-    return make_unique<Result>(std::move(foundTests),
-                               std::vector<std::unique_ptr<MutationResult>>(),
-                               std::vector<MutationPoint *>());
-  }
-
+void Driver::loadDynamicLibraries() {
   metrics.beginLoadDynamicLibraries();
   for (std::string &dylibPath: config.getDynamicLibrariesPaths()) {
     sys::DynamicLibrary::LoadLibraryPermanently(dylibPath.c_str());
   }
   metrics.endLoadDynamicLibraries();
+}
 
-  Logger::debug() << "Driver::Run> running tests and searching mutations\n";
+std::vector<std::unique_ptr<Test>> Driver::findTests() {
+  metrics.beginFindTests();
+  auto tests = finder.findTests(context, filter);
+  metrics.endFindTests();
 
-  std::vector<MutationPoint *> allMutationPoints;
+  Logger::debug() << "Found " << tests.size() << " tests\n";
+
+  return tests;
+}
+
+std::vector<MutationPoint *>
+Driver::findMutationPoints(std::vector<std::unique_ptr<Test>> &tests) {
+  if (tests.empty()) {
+    return std::vector<MutationPoint *>();
+  }
+
+  Logger::debug() << "Running tests and searching mutations\n";
+
+  std::vector<MutationPoint *> mutationPoints;
   auto objectFiles = AllInstrumentedObjectFiles();
 
   metrics.beginLoadOriginalProgram();
@@ -155,7 +163,9 @@ std::unique_ptr<Result> Driver::Run() {
   metrics.endLoadOriginalProgram();
 
   auto testIndex = 1;
-  for (auto &test : foundTests) {
+  auto testsCount = tests.size();
+
+  for (auto &test : tests) {
     Logger::debug().indent(2) << "[" << testIndex++ << "/" << testsCount << "] " << test->getTestDisplayName() << ": ";
 
     instrumentation.setupInstrumentationInfo(test.get());
@@ -189,8 +199,8 @@ std::unique_ptr<Result> Driver::Run() {
 
       std::unique_ptr<Testee> &testee = *testee_it;
 
-      auto mutationPoints = mutationsFinder.getMutationPoints(context, *testee.get(), filter);
-      std::copy(mutationPoints.begin(), mutationPoints.end(), std::back_inserter(allMutationPoints));
+      auto points = mutationsFinder.getMutationPoints(context, *testee.get(), filter);
+      std::copy(points.begin(), points.end(), std::back_inserter(mutationPoints));
     }
 
     metrics.endFindMutationsForTest(test.get());
@@ -201,30 +211,46 @@ std::unique_ptr<Result> Driver::Run() {
     std::vector<OwningBinary<ObjectFile>>().swap(instrumentedObjectFiles);
   }
 
-  Logger::debug() << "Driver::Run> found " << allMutationPoints.size() << " mutations\n";
+  Logger::debug() << "Found " << mutationPoints.size() << " mutations\n";
+
+  return mutationPoints;
+}
+
+std::vector<MutationPoint *>
+Driver::filterOutJunkMutations(std::vector<MutationPoint *> mutationPoints) {
   std::vector<MutationPoint *> nonJunkMutationPoints;
   if (config.junkDetectionEnabled()) {
-    for (auto point: allMutationPoints) {
+    for (auto point: mutationPoints) {
       if (!junkDetector.isJunk(point)) {
         nonJunkMutationPoints.push_back(point);
       }
     }
-    Logger::debug() << "Driver::Run> filtered out " << allMutationPoints.size() - nonJunkMutationPoints.size() << " junk mutations\n";
+    auto junkSize = mutationPoints.size() - nonJunkMutationPoints.size();
+    Logger::debug() << "Filtered out " << junkSize << " junk mutations\n";
   } else {
-    allMutationPoints.swap(nonJunkMutationPoints);
+    mutationPoints.swap(nonJunkMutationPoints);
   }
 
-  std::vector<std::unique_ptr<MutationResult>> mutationResults;
-  if (config.dryRunModeEnabled()) {
-    mutationResults = dryRunMutations(nonJunkMutationPoints);
-  } else {
-    mutationResults = runMutations(nonJunkMutationPoints);
-  }
-
-  return make_unique<Result>(std::move(foundTests), std::move(mutationResults), nonJunkMutationPoints);
+  return nonJunkMutationPoints;
 }
 
-std::vector<std::unique_ptr<MutationResult>> Driver::dryRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
+std::vector<std::unique_ptr<MutationResult>>
+Driver::runMutations(std::vector<MutationPoint *> &mutationPoints) {
+  if (mutationPoints.empty()) {
+    return std::vector<std::unique_ptr<MutationResult>>();
+  }
+
+  if (config.dryRunModeEnabled()) {
+    return dryRunMutations(mutationPoints);
+  }
+
+  return normalRunMutations(mutationPoints);
+}
+
+#pragma mark -
+
+std::vector<std::unique_ptr<MutationResult>>
+Driver::dryRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
 
   const auto mutationsCount = mutationPoints.size();
@@ -257,7 +283,22 @@ std::vector<std::unique_ptr<MutationResult>> Driver::dryRunMutations(const std::
   return mutationResults;
 }
 
-std::vector<std::unique_ptr<MutationResult>> Driver::runMutations(const std::vector<MutationPoint *> &mutationPoints) {
+std::vector<std::unique_ptr<MutationResult>> Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
+  for (auto &module : context.getModules()) {
+    metrics.beginCompileOriginalModule(module->getModule());
+    auto objectFile = toolchain.cache().getObject(*module);
+    if (objectFile.getBinary() == nullptr) {
+      LLVMContext localContext;
+      auto clonedModule = module->clone(localContext);
+      objectFile = toolchain.compiler().compileModule(*clonedModule.get());
+      toolchain.cache().putObject(objectFile, *module);
+    }
+
+    innerCache.insert(std::make_pair(module->getModule(), objectFile.getBinary()));
+    ownedObjectFiles.push_back(std::move(objectFile));
+    metrics.endCompileOriginalModule(module->getModule());
+  }
+
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
 
   const auto mutationsCount = mutationPoints.size();
