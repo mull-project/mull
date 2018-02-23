@@ -8,7 +8,7 @@
 #include "Context.h"
 #include "MutationOperators/MutationOperator.h"
 #include "Instrumentation/Instrumentation.h"
-
+#include "Test.h"
 #include "Toolchain/Toolchain.h"
 
 #include <llvm/Object/ObjectFile.h>
@@ -76,13 +76,24 @@ public:
   std::unique_ptr<Result> Run();
 
 private:
+  void loadBitcodeFilesIntoMemory();
+  void compileInstrumentedBitcodeFiles();
+  void loadPrecompiledObjectFiles();
+  void loadDynamicLibraries();
+
+  std::vector<std::unique_ptr<Test>> findTests();
+  std::vector<MutationPoint *> findMutationPoints(std::vector<std::unique_ptr<Test>> &tests);
+  std::vector<MutationPoint *> filterOutJunkMutations(std::vector<MutationPoint *> mutationPoints);
+
+  std::vector<std::unique_ptr<MutationResult>> runMutations(std::vector<MutationPoint *> &mutationPoints);
+
   /// Returns cached object files for all modules excerpt one provided
   std::vector<llvm::object::ObjectFile *> AllButOne(llvm::Module *One);
 
   std::vector<llvm::object::ObjectFile *> AllInstrumentedObjectFiles();
 
   std::vector<std::unique_ptr<MutationResult>> dryRunMutations(const std::vector<MutationPoint *> &mutationPoints);
-  std::vector<std::unique_ptr<MutationResult>> runMutations(const std::vector<MutationPoint *> &mutationPoints);
+  std::vector<std::unique_ptr<MutationResult>> normalRunMutations(const std::vector<MutationPoint *> &mutationPoints);
 };
 
 }
