@@ -58,6 +58,7 @@ set(mull_sources
   JunkDetection/CXX/CXXJunkDetector.cpp
 
   Reporters/SQLiteReporter.cpp
+  Reporters/TimeReporter.cpp
 )
 
 set(mull_header_dirs

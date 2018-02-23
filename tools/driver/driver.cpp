@@ -7,6 +7,7 @@
 #include "ModuleLoader.h"
 #include "MutationOperators/MutationOperatorsFactory.h"
 #include "Reporters/SQLiteReporter.h"
+#include "Reporters/TimeReporter.h"
 #include "Result.h"
 #include "MutationsFinder.h"
 
@@ -166,6 +167,10 @@ int main(int argc, char *argv[]) {
       reporters.push_back(make_unique<SQLiteReporter>(config.getProjectName()));
     }
 
+    else if (reporter == "time") {
+      reporters.push_back(make_unique<TimeReporter>());
+    }
+
     else {
       Logger::error() << "mull-driver> Unknown reporter provided: "
         << "`" << reporter << "`. ";
@@ -179,13 +184,9 @@ int main(int argc, char *argv[]) {
   auto result = driver.Run();
   metrics.endRun();
 
-  metrics.beginReportResult();
   for (auto &reporter: reporters) {
     reporter->reportResults(*result, config, metrics);
   }
-  metrics.endReportResult();
-
-  metrics.dump();
 
   llvm_shutdown();
   return EXIT_SUCCESS;
