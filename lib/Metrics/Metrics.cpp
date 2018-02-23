@@ -11,7 +11,7 @@ MetricsMeasure::Precision currentTimestamp() {
 }
 
 template <class Key>
-MetricsMeasure::Duration accumulate_duration(std::map<Key, MetricsMeasure> &metrics) {
+MetricsMeasure::Duration accumulate_duration(const std::map<Key, MetricsMeasure> &metrics) {
   MetricsMeasure::Duration total(0);
   for (auto &pair: metrics) {
     total += pair.second.duration();
@@ -133,7 +133,7 @@ void Metrics::endReportResult() {
   reportResult.end = currentTimestamp();
 }
 
-void Metrics::dump() {
+void Metrics::dump() const {
   using namespace std;
 
   MetricsMeasure::Duration totalMutantRunTime(0);
@@ -145,7 +145,7 @@ void Metrics::dump() {
   cout << endl;
 
   cout << "Total run time: ................... " << runTime.duration() << MetricsMeasure::precision() << endl;
-  cout << "Saving result: .................... " << reportResult.duration() << MetricsMeasure::precision() << endl;
+  // cout << "Saving result: .................... " << reportResult.duration() << MetricsMeasure::precision() << endl;
   cout << endl;
 
   cout << "Find tests: ....................... " << findTests.duration() << MetricsMeasure::precision() << endl;

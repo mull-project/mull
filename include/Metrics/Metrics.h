@@ -20,7 +20,7 @@ struct MetricsMeasure {
   Precision end;
 
   MetricsMeasure() : begin(0), end(0) {}
-  Duration duration() {
+  Duration duration() const {
     return (end - begin).count();
   }
 
@@ -73,10 +73,15 @@ public:
   void beginReportResult();
   void endReportResult();
 
-  void dump();
+  void dump() const;
 
-  MetricsMeasure &driverRunTime() {
+  const MetricsMeasure &driverRunTime() const {
     return runTime;
+  }
+
+
+  void setDriverRunTime(MetricsMeasure measure) {
+    runTime = measure;
   }
 private:
   MetricsMeasure loadModules;

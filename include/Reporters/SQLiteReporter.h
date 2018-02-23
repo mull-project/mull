@@ -1,4 +1,4 @@
-#include "Result.h"
+#include "Reporters/Reporter.h"
 
 #include <string>
 #include <vector>
@@ -8,9 +8,9 @@ namespace mull {
 
 class Result;
 class Config;
-struct MetricsMeasure;
+class Metrics;
 
-class SQLiteReporter {
+class SQLiteReporter : public Reporter {
 
 private:
   std::string databasePath;
@@ -18,9 +18,9 @@ private:
 public:
   SQLiteReporter(const std::string &projectName = std::string(""));
 
-  void reportResults(const std::unique_ptr<Result> &result,
+  void reportResults(const Result &result,
                      const Config &config,
-                     const MetricsMeasure &resultTime);
+                     const Metrics &metrics) override;
 
   std::string getDatabasePath();
 };

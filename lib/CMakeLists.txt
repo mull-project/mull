@@ -52,11 +52,13 @@ set(mull_sources
   CustomTestFramework/CustomTestFinder.cpp
 
   IDEDiagnostics.cpp
-  SQLiteReporter.cpp
 
   Metrics/Metrics.cpp
 
   JunkDetection/CXX/CXXJunkDetector.cpp
+
+  Reporters/SQLiteReporter.cpp
+  Reporters/TimeReporter.cpp
 )
 
 set(mull_header_dirs

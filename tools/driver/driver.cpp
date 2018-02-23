@@ -6,7 +6,8 @@
 #include "Logger.h"
 #include "ModuleLoader.h"
 #include "MutationOperators/MutationOperatorsFactory.h"
-#include "SQLiteReporter.h"
+#include "Reporters/SQLiteReporter.h"
+#include "Reporters/TimeReporter.h"
 #include "Result.h"
 #include "MutationsFinder.h"
 
@@ -156,6 +157,26 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  std::vector<std::unique_ptr<Reporter>> reporters;
+  if (config.getReporters().empty()) {
+    reporters.push_back(make_unique<SQLiteReporter>(config.getProjectName()));
+  }
+
+  for (auto &reporter: config.getReporters()) {
+    if (reporter == "sqlite") {
+      reporters.push_back(make_unique<SQLiteReporter>(config.getProjectName()));
+    }
+
+    else if (reporter == "time") {
+      reporters.push_back(make_unique<TimeReporter>());
+    }
+
+    else {
+      Logger::error() << "mull-driver> Unknown reporter provided: "
+        << "`" << reporter << "`. ";
+    }
+  }
+
   Metrics metrics;
   Driver driver(config, Loader, *testFinder, *testRunner, toolchain, filter, mutationsFinder, metrics, *junkDetector);
 
@@ -163,12 +184,9 @@ int main(int argc, char *argv[]) {
   auto result = driver.Run();
   metrics.endRun();
 
-  metrics.beginReportResult();
-  SQLiteReporter reporter(config.getProjectName());
-  reporter.reportResults(result, config, metrics.driverRunTime());
-  metrics.endReportResult();
-
-  metrics.dump();
+  for (auto &reporter: reporters) {
+    reporter->reportResults(*result, config, metrics);
+  }
 
   llvm_shutdown();
   return EXIT_SUCCESS;

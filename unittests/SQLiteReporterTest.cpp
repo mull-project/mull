@@ -1,6 +1,6 @@
 #include "Config.h"
 #include "Context.h"
-#include "SQLiteReporter.h"
+#include "Reporters/SQLiteReporter.h"
 #include "Result.h"
 #include "MutationOperators/MathAddMutationOperator.h"
 #include "SimpleTest/SimpleTestFinder.h"
@@ -96,13 +96,13 @@ TEST(SQLiteReporter, integrationTest) {
 
   MetricsMeasure resultTime;
 
-  std::unique_ptr<Result> result = make_unique<Result>(std::move(tests),
-                                                       std::move(mutationResults),
-                                                       mutationPoints);
+  Result result(std::move(tests), std::move(mutationResults), mutationPoints);
 
   /// STEP2. Reporting results to SQLite
   SQLiteReporter reporter("integration test");
-  reporter.reportResults(result, Config(), resultTime);
+  Metrics metrics;
+  metrics.setDriverRunTime(resultTime);
+  reporter.reportResults(result, Config(), metrics);
 
   /// STEP3. Making assertions.
   std::vector<ExecutionResult> executionResults {
@@ -226,6 +226,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
                 projectName,
                 testFramework,
                 operators,
+                {},
                 dynamicLibraryFileList,
                 objectFileList,
                 selectedTests,
@@ -250,10 +251,10 @@ TEST(SQLiteReporter, integrationTest_Config) {
   std::vector<std::unique_ptr<mull::Test>> tests;
   std::vector<MutationPoint *> mutationPoints;
 
-  std::unique_ptr<Result> result = make_unique<Result>(std::move(tests),
-                                                       std::move(mutationResults),
-                                                       mutationPoints);
-  reporter.reportResults(result, config, resultTime);
+  Result result(std::move(tests), std::move(mutationResults), mutationPoints);
+  Metrics metrics;
+  metrics.setDriverRunTime(resultTime);
+  reporter.reportResults(result, config, metrics);
 
   std::string databasePath = reporter.getDatabasePath();
 
@@ -398,9 +399,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   resultTime.begin = MetricsMeasure::Precision(1234);
   resultTime.end = MetricsMeasure::Precision(5678);
 
-  std::unique_ptr<Result> result = make_unique<Result>(std::move(tests),
-                                                       std::move(mutationResults),
-                                                       mutationPoints);
+  Result result(std::move(tests), std::move(mutationResults), mutationPoints);
 
   std::string projectName("Integration Test Do Emit Debug Info");
   std::string testFramework = "SimpleTest";
@@ -426,6 +425,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
                 projectName,
                 testFramework,
                 operators,
+                {},
                 dynamicLibraryFileList,
                 objectFileList,
                 configTests,
@@ -441,7 +441,9 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
                 JunkDetectionConfig::disabled());
 
   SQLiteReporter reporter(projectName);
-  reporter.reportResults(result, config, resultTime);
+  Metrics metrics;
+  metrics.setDriverRunTime(resultTime);
+  reporter.reportResults(result, config, metrics);
 
   std::vector<ExecutionResult> executionResults {
     testExecutionResult,
@@ -544,9 +546,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   resultTime.begin = MetricsMeasure::Precision(1234);
   resultTime.end = MetricsMeasure::Precision(5678);
 
-  std::unique_ptr<Result> result = make_unique<Result>(std::move(tests),
-                                                       std::move(mutationResults),
-                                                       mutationPoints);
+  Result result(std::move(tests), std::move(mutationResults), mutationPoints);
 
   std::string projectName("Integration Test Do Not Emit Debug Info");
   std::string testFramework = "SimpleTest";
@@ -572,6 +572,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
                 projectName,
                 testFramework,
                 operators,
+                {},
                 dynamicLibraryFileList,
                 objectFileList,
                 configTests,
@@ -587,7 +588,9 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
                 JunkDetectionConfig::disabled());
 
   SQLiteReporter reporter(projectName);
-  reporter.reportResults(result, config, resultTime);
+  Metrics metrics;
+  metrics.setDriverRunTime(resultTime);
+  reporter.reportResults(result, config, metrics);
 
   std::vector<ExecutionResult> executionResults {
     testExecutionResult,

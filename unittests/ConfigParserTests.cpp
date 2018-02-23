@@ -426,3 +426,17 @@ junk_detection:
   configWithYamlContent(configYAML);
   ASSERT_TRUE(config.junkDetectionEnabled());
 }
+
+TEST_F(ConfigParserTestFixture, loadConfig_reporters) {
+  const char *configYAML = R"YAML(
+reporters:
+  - sqlite
+  - cli
+  )YAML";
+  configWithYamlContent(configYAML);
+
+  auto reporters = config.getReporters();
+  ASSERT_EQ(2U, reporters.size());
+  ASSERT_EQ("sqlite", reporters[0]);
+  ASSERT_EQ("cli", reporters[1]);
+}

@@ -129,6 +129,7 @@ Config::Config() :
                     //   RemoveVoidFunctionMutationOperator::ID
                     // }
                     ),
+  reporters(),
   dynamicLibraryFileList(),
   objectFileList(),
   tests(),
@@ -150,6 +151,7 @@ Config::Config(const std::string &bitcodeFileList,
                const std::string &project,
                const std::string &testFramework,
                const std::vector<std::string> mutationOperators,
+               const std::vector<std::string> reporters,
                const std::string &dynamicLibraryFileList,
                const std::string &objectFileList,
                const std::vector<std::string> tests,
@@ -169,6 +171,7 @@ bitcodeFileList(bitcodeFileList),
 projectName(project),
 testFramework(testFramework),
 mutationOperators(mutationOperators),
+reporters(reporters),
 dynamicLibraryFileList(dynamicLibraryFileList),
 objectFileList(objectFileList),
 tests(tests),
@@ -257,6 +260,10 @@ std::vector<std::string> Config::getObjectFilesPaths() const {
 
 const std::vector<std::string> &Config::getMutationOperators() const {
   return mutationOperators;
+}
+
+const std::vector<std::string> &Config::getReporters() const {
+  return reporters;
 }
 
 const std::vector<std::string> &Config::getTests() const {
