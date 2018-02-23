@@ -41,7 +41,7 @@ TEST(CXX_BoundaryMutator, findMutations) {
     std::copy(points.begin(), points.end(), std::back_inserter(allMutationPoints));
   }
 
-  ASSERT_EQ(allMutationPoints.size(), 6U);
+  ASSERT_EQ(allMutationPoints.size(), 7U);
 }
 
 TEST(CXX_BoundaryMutator, applyMutations) {
@@ -86,5 +86,5 @@ TEST(CXX_BoundaryMutator, applyMutations) {
     }
   }
 
-  ASSERT_EQ(allMutationPoints.size(), 6U);
+  ASSERT_EQ(allMutationPoints.size(), 7U);
 }

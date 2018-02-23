@@ -55,6 +55,8 @@ set(mull_sources
   SQLiteReporter.cpp
 
   Metrics/Metrics.cpp
+
+  JunkDetection/CXX/CXXJunkDetector.cpp
 )
 
 set(mull_header_dirs
@@ -74,6 +76,7 @@ set(mull_additional_libraries
   ${MULL_DEPENDENCY_NCURSES}
 
   ${MULL_DEPENDENCY_SQLITE}
+  ${MULL_DEPENDENCY_LIBCLANG}
 )
 
 set(mull_link_flags "") # to be filled later

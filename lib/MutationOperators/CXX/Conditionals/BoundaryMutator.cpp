@@ -208,6 +208,10 @@ std::string cxx::BoundaryMutator::uniqueID() const {
   return ID;
 }
 
+MutatorKind cxx::BoundaryMutator::mutatorKind() {
+  return MutatorKind::CXXBoundaryMutator;
+}
+
 MutationPoint *
 cxx::BoundaryMutator::getMutationPoint(MullModule *module,
                                        MutationPointAddress &address,

@@ -8,10 +8,10 @@ BITCODE_FILES=main.bc
 bitcode: $(BUILD_DIR) $(BITCODE_FILES)
 
 %.bc: %.c
-	$(CC) -c -emit-llvm $*.c -o $(BUILD_DIR)/$*.bc
+	$(CC) -c -emit-llvm -g $*.c -o $(BUILD_DIR)/$*.bc
 
 %.bc: %.cpp
-	$(CC) -c -emit-llvm $*.cpp -o $(BUILD_DIR)/$*.bc
+	$(CC) -c -emit-llvm -g $*.cpp -o $(BUILD_DIR)/$*.bc
 
 synchronize_fixtures: bitcode $(FIXTURES_DIR)
 	cp $(BUILD_DIR)/*.bc $(FIXTURES_DIR)

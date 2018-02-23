@@ -1,3 +1,9 @@
+class CPlusPlus {
+  void foobar();
+};
+
+#define m(x) x
+
 int f(int a, int b) {
   int r = 0;
   if (a > b) {
@@ -36,6 +42,14 @@ int ff(int x, int g) {
   delete [] mem;
 
   return r;
+}
+
+int fff(int a, int b) {
+  if (m(a > b)) {
+    return a;
+  }
+
+  return b;
 }
 
 int main() {
