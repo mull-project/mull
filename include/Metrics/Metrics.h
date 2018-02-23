@@ -75,8 +75,13 @@ public:
 
   void dump();
 
-  MetricsMeasure &driverRunTime() {
+  const MetricsMeasure &driverRunTime() const {
     return runTime;
+  }
+
+
+  void setDriverRunTime(MetricsMeasure measure) {
+    runTime = measure;
   }
 private:
   MetricsMeasure loadModules;

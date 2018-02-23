@@ -21,15 +21,15 @@ namespace mull {
       mutationPoints(std::move(mutationPoints))
     {}
 
-    std::vector<std::unique_ptr<Test>> const& getTests() {
+    std::vector<std::unique_ptr<Test>> const& getTests() const {
       return tests;
     }
 
-    std::vector<std::unique_ptr<MutationResult>> const& getMutationResults() {
+    std::vector<std::unique_ptr<MutationResult>> const& getMutationResults() const {
       return mutationResults;
     }
 
-    std::vector<MutationPoint *> const& getMutationPoints() {
+    std::vector<MutationPoint *> const& getMutationPoints() const {
       return mutationPoints;
     }
   };

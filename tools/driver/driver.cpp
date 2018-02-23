@@ -6,7 +6,7 @@
 #include "Logger.h"
 #include "ModuleLoader.h"
 #include "MutationOperators/MutationOperatorsFactory.h"
-#include "SQLiteReporter.h"
+#include "Reporters/SQLiteReporter.h"
 #include "Result.h"
 #include "MutationsFinder.h"
 
@@ -165,7 +165,7 @@ int main(int argc, char *argv[]) {
 
   metrics.beginReportResult();
   SQLiteReporter reporter(config.getProjectName());
-  reporter.reportResults(result, config, metrics.driverRunTime());
+  reporter.reportResults(*result, config, metrics);
   metrics.endReportResult();
 
   metrics.dump();

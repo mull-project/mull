@@ -84,9 +84,9 @@ std::string mull::SQLiteReporter::getDatabasePath() {
   return databasePath;
 }
 
-void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
+void mull::SQLiteReporter::reportResults(const Result &result,
                                          const Config &config,
-                                         const MetricsMeasure &resultTime) {
+                                         const Metrics &metrics) {
 
   std::string databasePath = getDatabasePath();
 
@@ -105,7 +105,7 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
   sqlite3_stmt *insertTestStmt;
   sqlite3_prepare(database, insertTestQuery, -1, &insertTestStmt, NULL);
 
-  for (auto &test : result->getTests()) {
+  for (auto &test : result.getTests()) {
     std::string testName = test->getTestDisplayName();
     std::string testUniqueId = test->getUniqueIdentifier();
     ExecutionResult testExecutionResult = test->getExecutionResult();
@@ -135,7 +135,7 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
   sqlite3_stmt *insertMutationResultStmt;
   sqlite3_prepare(database, insertMutationResultQuery, -1, &insertMutationResultStmt, NULL);
 
-  for (auto &mutationResult : result->getMutationResults()) {
+  for (auto &mutationResult : result.getMutationResults()) {
     MutationPoint *mutationPoint = mutationResult->getMutationPoint();
     std::string testId = mutationResult->getTest()->getUniqueIdentifier();
     std::string pointId = mutationPoint->getUniqueIdentifier();
@@ -172,7 +172,7 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
   sqlite3_stmt *insertMutationPointDebugStmt;
   sqlite3_prepare(database, insertMutationPointDebugQuery, -1, &insertMutationPointDebugStmt, NULL);
 
-  for (auto mutationPoint : result->getMutationPoints()) {
+  for (auto mutationPoint : result.getMutationPoints()) {
     Instruction *instruction = dyn_cast<Instruction>(mutationPoint->getOriginalValue());
 
     std::string fileNameOrNil = "no-debug-info";
@@ -251,8 +251,8 @@ void mull::SQLiteReporter::reportResults(const std::unique_ptr<Result> &result,
 
     // Start and end times are not part of a config however we are
     // mixing them in to make them into a final report.
-    const long startTime = resultTime.begin.count();
-    const long endTime = resultTime.end.count();
+    const long startTime = metrics.driverRunTime().begin.count();
+    const long endTime = metrics.driverRunTime().end.count();
 
     std::string csvBitcodePaths = vectorToCsv(config.getBitcodePaths());
     std::string csvMutationOperators = vectorToCsv(config.getMutationOperators());

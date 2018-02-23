@@ -1,5 +1,3 @@
-#include "Result.h"
-
 #include <string>
 #include <vector>
 #include <memory>
@@ -8,7 +6,7 @@ namespace mull {
 
 class Result;
 class Config;
-struct MetricsMeasure;
+class Metrics;
 
 class SQLiteReporter {
 
@@ -18,9 +16,9 @@ private:
 public:
   SQLiteReporter(const std::string &projectName = std::string(""));
 
-  void reportResults(const std::unique_ptr<Result> &result,
+  void reportResults(const Result &result,
                      const Config &config,
-                     const MetricsMeasure &resultTime);
+                     const Metrics &metrics);
 
   std::string getDatabasePath();
 };
