@@ -156,6 +156,22 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  std::vector<std::unique_ptr<Reporter>> reporters;
+  if (config.getReporters().empty()) {
+    reporters.push_back(make_unique<SQLiteReporter>(config.getProjectName()));
+  }
+
+  for (auto &reporter: config.getReporters()) {
+    if (reporter == "sqlite") {
+      reporters.push_back(make_unique<SQLiteReporter>(config.getProjectName()));
+    }
+
+    else {
+      Logger::error() << "mull-driver> Unknown reporter provided: "
+        << "`" << reporter << "`. ";
+    }
+  }
+
   Metrics metrics;
   Driver driver(config, Loader, *testFinder, *testRunner, toolchain, filter, mutationsFinder, metrics, *junkDetector);
 
@@ -164,8 +180,9 @@ int main(int argc, char *argv[]) {
   metrics.endRun();
 
   metrics.beginReportResult();
-  SQLiteReporter reporter(config.getProjectName());
-  reporter.reportResults(*result, config, metrics);
+  for (auto &reporter: reporters) {
+    reporter->reportResults(*result, config, metrics);
+  }
   metrics.endReportResult();
 
   metrics.dump();

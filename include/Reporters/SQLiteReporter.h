@@ -1,3 +1,5 @@
+#include "Reporters/Reporter.h"
+
 #include <string>
 #include <vector>
 #include <memory>
@@ -8,7 +10,7 @@ class Result;
 class Config;
 class Metrics;
 
-class SQLiteReporter {
+class SQLiteReporter : public Reporter {
 
 private:
   std::string databasePath;
@@ -18,7 +20,7 @@ public:
 
   void reportResults(const Result &result,
                      const Config &config,
-                     const Metrics &metrics);
+                     const Metrics &metrics) override;
 
   std::string getDatabasePath();
 };
