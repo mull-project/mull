@@ -1,6 +1,6 @@
 #include "Config.h"
 #include "Context.h"
-#include "SQLiteReporter.h"
+#include "Reporters/SQLiteReporter.h"
 #include "Result.h"
 #include "MutationOperators/MathAddMutationOperator.h"
 #include "SimpleTest/SimpleTestFinder.h"
@@ -226,6 +226,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
                 projectName,
                 testFramework,
                 operators,
+                {},
                 dynamicLibraryFileList,
                 objectFileList,
                 selectedTests,
@@ -426,6 +427,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
                 projectName,
                 testFramework,
                 operators,
+                {},
                 dynamicLibraryFileList,
                 objectFileList,
                 configTests,
@@ -572,6 +574,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
                 projectName,
                 testFramework,
                 operators,
+                {},
                 dynamicLibraryFileList,
                 objectFileList,
                 configTests,

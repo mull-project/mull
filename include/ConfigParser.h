@@ -124,6 +124,7 @@ struct MappingTraits<mull::Config>
     io.mapOptional("dynamic_library_file_list", config.dynamicLibraryFileList);
     io.mapOptional("object_file_list", config.objectFileList);
     io.mapOptional("mutation_operators", config.mutationOperators);
+    io.mapOptional("reporters", config.reporters);
     io.mapOptional("tests", config.tests);
     io.mapOptional("exclude_locations", config.excludeLocations);
     io.mapOptional("custom_tests", config.customTests);

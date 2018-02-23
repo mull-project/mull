@@ -94,6 +94,7 @@ private:
   std::string testFramework;
 
   std::vector<std::string> mutationOperators;
+  std::vector<std::string> reporters;
   std::string dynamicLibraryFileList;
   std::string objectFileList;
   std::vector<std::string> tests;
@@ -121,6 +122,7 @@ public:
          const std::string &project,
          const std::string &testFramework,
          const std::vector<std::string> mutationOperators,
+         const std::vector<std::string> reporters,
          const std::string &dynamicLibraryFileList,
          const std::string &objectFileList,
          const std::vector<std::string> tests,
@@ -150,6 +152,7 @@ public:
   std::vector<std::string> getDynamicLibrariesPaths() const;
   
   const std::vector<std::string> &getMutationOperators() const;
+  const std::vector<std::string> &getReporters() const;
   const std::vector<std::string> &getTests() const;
   const std::vector<std::string> &getExcludeLocations() const;
 

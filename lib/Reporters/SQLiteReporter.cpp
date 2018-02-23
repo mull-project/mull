@@ -1,4 +1,4 @@
-#include "SQLiteReporter.h"
+#include "Reporters/SQLiteReporter.h"
 
 #include "ExecutionResult.h"
 #include "Config.h"
