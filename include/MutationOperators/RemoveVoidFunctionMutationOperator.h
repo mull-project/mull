@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MutationOperators/MutationOperator.h"
+#include "MutationOperators/Mutator.h"
 
 #include "llvm/IR/Instructions.h"
 
@@ -16,7 +16,7 @@ namespace mull {
   class MutationPoint;
   class MutationPointAddress;
 
-  class RemoveVoidFunctionMutationOperator : public MutationOperator {
+  class RemoveVoidFunctionMutationOperator : public Mutator {
     
   public:
     static const std::string ID;

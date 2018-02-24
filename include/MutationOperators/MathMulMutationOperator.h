@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MutationOperators/MutationOperator.h"
+#include "MutationOperators/Mutator.h"
 
 #include <vector>
 
@@ -14,7 +14,7 @@ class MullModule;
 class MutationPoint;
 class MutationPointAddress;
 
-class MathMulMutationOperator : public MutationOperator {
+class MathMulMutationOperator : public Mutator {
 
 public:
   static const std::string ID;

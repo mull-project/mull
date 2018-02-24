@@ -6,7 +6,7 @@
 #include "ForkProcessSandbox.h"
 #include "IDEDiagnostics.h"
 #include "Context.h"
-#include "MutationOperators/MutationOperator.h"
+#include "MutationOperators/Mutator.h"
 #include "Instrumentation/Instrumentation.h"
 #include "Test.h"
 #include "Toolchain/Toolchain.h"

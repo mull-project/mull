@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MutationOperator.h"
+#include "Mutator.h"
 
 #include <string>
 #include <vector>
@@ -10,13 +10,13 @@
 namespace mull {
 
 class MutationOperatorsFactory {
-  std::map<std::string, std::unique_ptr<MutationOperator>> mutationsMapping;
+  std::map<std::string, std::unique_ptr<Mutator>> mutationsMapping;
   std::map<std::string, std::vector<std::string>> groupsMapping;
 
   void init();
 public:
   MutationOperatorsFactory();
-  std::vector<std::unique_ptr<MutationOperator>>
+  std::vector<std::unique_ptr<Mutator>>
     mutationOperators(const std::vector<std::string> groups);
 };
 

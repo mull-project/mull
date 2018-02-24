@@ -10,8 +10,8 @@ using namespace std;
 
 TEST(MutationsOperatorFactory, SingleOperators) {
   MutationOperatorsFactory factory;
-  vector<unique_ptr<MutationOperator>> operators;
-  MutationOperator *mutationOperator = nullptr;
+  vector<unique_ptr<Mutator>> operators;
+  Mutator *mutationOperator = nullptr;
 
   {
     operators = factory.mutationOperators({ "math_add_mutation_operator" });
@@ -77,17 +77,16 @@ TEST(MutationsOperatorFactory, SingleOperators) {
   }
 }
 
-static std::function<bool (unique_ptr<MutationOperator>&)>
-predicate(const char *name) {
-  return [=](const unique_ptr<MutationOperator>& o) {
+static std::function<bool (unique_ptr<Mutator>&)> predicate(const char *name) {
+  return [=](const unique_ptr<Mutator>& o) {
     return o->uniqueID() == name;
   };
 }
 
 TEST(MutationsOperatorFactory, CompositeOperators) {
   MutationOperatorsFactory factory;
-  vector<unique_ptr<MutationOperator>> operators;
-  vector<unique_ptr<MutationOperator>>::iterator searchResult;
+  vector<unique_ptr<Mutator>> operators;
+  vector<unique_ptr<Mutator>>::iterator searchResult;
 
   {
     operators = factory.mutationOperators({ "math" });
@@ -224,9 +223,9 @@ TEST(MutationsOperatorFactory, CompositeOperators) {
 
 TEST(MutationsOperatorFactory, UniqueOperators) {
   MutationOperatorsFactory factory;
-  vector<unique_ptr<MutationOperator>> operators;
-  vector<unique_ptr<MutationOperator>>::iterator searchResult;
-  MutationOperator *mutationOperator = nullptr;
+  vector<unique_ptr<Mutator>> operators;
+  vector<unique_ptr<Mutator>>::iterator searchResult;
+  Mutator *mutationOperator = nullptr;
 
   {
     operators = factory.mutationOperators({

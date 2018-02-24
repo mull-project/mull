@@ -27,7 +27,7 @@ TEST(CXX_BoundaryMutator, findMutations) {
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
 
-  std::vector<std::unique_ptr<MutationOperator>> operators;
+  std::vector<std::unique_ptr<Mutator>> operators;
   operators.emplace_back(make_unique<ConditionalsBoundaryMutator>());
   MutationsFinder finder(std::move(operators));
   Filter filter;
@@ -53,7 +53,7 @@ TEST(CXX_BoundaryMutator, applyMutations) {
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
 
-  std::vector<std::unique_ptr<MutationOperator>> operators;
+  std::vector<std::unique_ptr<Mutator>> operators;
   operators.emplace_back(make_unique<ConditionalsBoundaryMutator>());
   MutationsFinder finder(std::move(operators));
   Filter filter;

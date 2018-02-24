@@ -1,6 +1,6 @@
 
 #include "MutationPoint.h"
-#include "MutationOperators/MutationOperator.h"
+#include "MutationOperators/Mutator.h"
 #include "MutationOperators/NegateConditionMutationOperator.h"
 #include "Context.h"
 #include "Filter.h"
@@ -88,7 +88,7 @@ TEST(NegateConditionMutationOperator, getMutationPoints_no_filter) {
   Context context;
   context.addModule(std::move(module));
 
-  std::vector<std::unique_ptr<MutationOperator>> operators;
+  std::vector<std::unique_ptr<Mutator>> operators;
   operators.emplace_back(make_unique<NegateConditionMutationOperator>());
   MutationsFinder finder(std::move(operators));
   Filter filter;
@@ -113,7 +113,7 @@ TEST(NegateConditionMutationOperator, getMutationPoints_filter_to_bool_converion
   Context context;
   context.addModule(std::move(module));
 
-  std::vector<std::unique_ptr<MutationOperator>> operators;
+  std::vector<std::unique_ptr<Mutator>> operators;
   operators.emplace_back(make_unique<NegateConditionMutationOperator>());
   MutationsFinder finder(std::move(operators));
   Filter filter;
@@ -135,7 +135,7 @@ TEST(NegateConditionMutationOperator, getMutationPoints_filter_is_null) {
   Context context;
   context.addModule(std::move(module));
 
-  std::vector<std::unique_ptr<MutationOperator>> operators;
+  std::vector<std::unique_ptr<Mutator>> operators;
   operators.emplace_back(make_unique<NegateConditionMutationOperator>());
   MutationsFinder finder(std::move(operators));
   Filter filter;

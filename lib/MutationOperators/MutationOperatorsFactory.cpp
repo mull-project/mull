@@ -1,6 +1,6 @@
 #include "MutationOperatorsFactory.h"
 
-#include "MutationOperator.h"
+#include "Mutator.h"
 #include "MutationOperators/AndOrReplacementMutationOperator.h"
 #include "MutationOperators/MathAddMutationOperator.h"
 #include "MutationOperators/MathDivMutationOperator.h"
@@ -119,7 +119,7 @@ void MutationOperatorsFactory::init() {
     make_unique<ConditionalsBoundaryMutator>();
 }
 
-vector<unique_ptr<MutationOperator>>
+vector<unique_ptr<Mutator>>
 MutationOperatorsFactory::mutationOperators(const vector<string> groups) {
   /// We need to recreate all mutation operators in case this method called
   /// more than once. It does not happen during normal program execution,
@@ -138,7 +138,7 @@ MutationOperatorsFactory::mutationOperators(const vector<string> groups) {
     expandGroups(groups, groupsMapping, expandedGroups);
   }
 
-  vector<unique_ptr<MutationOperator>> mutationOperators;
+  vector<unique_ptr<Mutator>> mutationOperators;
 
   for (string group: expandedGroups) {
     if (mutationsMapping.count(group) == 0) {

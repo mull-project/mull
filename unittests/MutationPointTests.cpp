@@ -49,7 +49,7 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
   Ctx.addModule(std::move(ModuleWithTests));
   Ctx.addModule(std::move(ModuleWithTestees));
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::vector<std::unique_ptr<Mutator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<MathAddMutationOperator>());
   MutationsFinder finder(std::move(mutationOperators));
 
@@ -94,7 +94,7 @@ TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
   Context Ctx;
   Ctx.addModule(std::move(module));
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::vector<std::unique_ptr<Mutator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<MathSubMutationOperator>());
   MutationsFinder finder(std::move(mutationOperators));
 
@@ -138,7 +138,7 @@ TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
   Context Ctx;
   Ctx.addModule(std::move(module));
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::vector<std::unique_ptr<Mutator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<MathMulMutationOperator>());
   MutationsFinder finder(std::move(mutationOperators));
 
@@ -183,7 +183,7 @@ TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
   Context Ctx;
   Ctx.addModule(std::move(module));
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::vector<std::unique_ptr<Mutator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<MathDivMutationOperator>());
 
   MutationsFinder finder(std::move(mutationOperators));
@@ -232,7 +232,7 @@ TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
   Ctx.addModule(std::move(ModuleWithTests));
   Ctx.addModule(std::move(ModuleWithTestees));
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::vector<std::unique_ptr<Mutator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
   MutationsFinder finder(std::move(mutationOperators));
 
@@ -272,7 +272,7 @@ TEST(MutationPoint, SimpleTest_AndOrMutationOperator_applyMutation) {
   Context ctx;
   ctx.addModule(std::move(module));
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::vector<std::unique_ptr<Mutator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AndOrReplacementMutationOperator>());
 
   MutationsFinder finder(std::move(mutationOperators));
@@ -320,7 +320,7 @@ TEST(MutationPoint, SimpleTest_ScalarValueMutationOperator_applyMutation) {
   Context Ctx;
   Ctx.addModule(std::move(module));
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::vector<std::unique_ptr<Mutator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<ScalarValueMutationOperator>());
   MutationsFinder finder(std::move(mutationOperators));
 
@@ -373,7 +373,7 @@ TEST(MutationPoint, SimpleTest_ReplaceCallMutationOperator_applyMutation) {
   Context Ctx;
   Ctx.addModule(std::move(module));
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::vector<std::unique_ptr<Mutator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<ReplaceCallMutationOperator>());
 
   MutationsFinder finder(std::move(mutationOperators));
@@ -410,7 +410,7 @@ TEST(MutationPoint, SimpleTest_ReplaceAssignmentMutationOperator_applyMutation) 
     Context Ctx;
     Ctx.addModule(std::move(module));
 
-    std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+    std::vector<std::unique_ptr<Mutator>> mutationOperators;
     mutationOperators.emplace_back(make_unique<ReplaceAssignmentMutationOperator>());
 
     MutationsFinder finder(std::move(mutationOperators));

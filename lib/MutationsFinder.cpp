@@ -25,7 +25,7 @@ static int GetFunctionIndex(llvm::Function *function) {
   return index;
 }
 
-MutationsFinder::MutationsFinder(std::vector<std::unique_ptr<MutationOperator>> operators)
+MutationsFinder::MutationsFinder(std::vector<std::unique_ptr<Mutator>> operators)
 : operators(std::move(operators)) {}
 
 std::vector<MutationPoint *> MutationsFinder::getMutationPoints(const Context &context,

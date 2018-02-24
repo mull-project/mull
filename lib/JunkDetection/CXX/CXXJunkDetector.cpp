@@ -1,7 +1,7 @@
 #include "JunkDetection/CXX/CXXJunkDetector.h"
 
 #include "MutationPoint.h"
-#include "MutationOperators/MutationOperator.h"
+#include "MutationOperators/Mutator.h"
 #include "Logger.h"
 
 #include <llvm/IR/DebugInfoMetadata.h>

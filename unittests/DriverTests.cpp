@@ -84,7 +84,7 @@ TEST(Driver, RunningWithNoTests) {
   LLVMContext context;
   FakeModuleLoader loader(context, modules);
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::vector<std::unique_ptr<Mutator>> mutationOperators;
   MutationsFinder finder(std::move(mutationOperators));
 
   SimpleTestFinder testFinder;
@@ -152,7 +152,7 @@ TEST(Driver, SimpleTest_MathAddMutationOperator) {
   LLVMContext context;
   FakeModuleLoader loader(context, modules);
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::vector<std::unique_ptr<Mutator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<MathAddMutationOperator>());
   MutationsFinder finder(std::move(mutationOperators));
 
@@ -234,7 +234,7 @@ TEST(Driver, SimpleTest_MathSubMutationOperator) {
   LLVMContext context;
   FakeModuleLoader loader(context, modules);
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::vector<std::unique_ptr<Mutator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<MathSubMutationOperator>());
   MutationsFinder finder(std::move(mutationOperators));
   SimpleTestFinder testFinder;
@@ -315,7 +315,7 @@ TEST(Driver, SimpleTest_MathMulMutationOperator) {
   LLVMContext context;
   FakeModuleLoader loader(context, modules);
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::vector<std::unique_ptr<Mutator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<MathMulMutationOperator>());
   MutationsFinder finder(std::move(mutationOperators));
   SimpleTestFinder testFinder;
@@ -395,7 +395,7 @@ TEST(Driver, SimpleTest_MathDivMutationOperator) {
   LLVMContext context;
   FakeModuleLoader loader(context, modules);
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::vector<std::unique_ptr<Mutator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<MathDivMutationOperator>());
   MutationsFinder finder(std::move(mutationOperators));
   SimpleTestFinder testFinder;
@@ -464,7 +464,7 @@ TEST(Driver, SimpleTest_NegateConditionMutationOperator) {
                 cacheDirectory,
                 JunkDetectionConfig::disabled());
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::vector<std::unique_ptr<Mutator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
   MutationsFinder finder(std::move(mutationOperators));
   SimpleTestFinder testFinder;
@@ -537,7 +537,7 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutationOperator) {
                 cacheDirectory,
                 JunkDetectionConfig::disabled());
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::vector<std::unique_ptr<Mutator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<RemoveVoidFunctionMutationOperator>());
   MutationsFinder finder(std::move(mutationOperators));
   SimpleTestFinder testFinder;
@@ -610,7 +610,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator) {
                 cacheDirectory,
                 JunkDetectionConfig::disabled());
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::vector<std::unique_ptr<Mutator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AndOrReplacementMutationOperator>());
   MutationsFinder finder(std::move(mutationOperators));
   SimpleTestFinder testFinder;
@@ -757,7 +757,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutationOperator_CPP) {
                 cacheDirectory,
                 JunkDetectionConfig::disabled());
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::vector<std::unique_ptr<Mutator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<AndOrReplacementMutationOperator>());
   MutationsFinder finder(std::move(mutationOperators));
   SimpleTestFinder testFinder;
@@ -865,7 +865,7 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutationOperator_CPP) {
                 cacheDirectory,
                 JunkDetectionConfig::disabled());
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::vector<std::unique_ptr<Mutator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<ReplaceAssignmentMutationOperator>());
   MutationsFinder finder(std::move(mutationOperators));
   SimpleTestFinder testFinder;
@@ -940,7 +940,7 @@ TEST(Driver, customTest) {
                 cacheDirectory,
                 JunkDetectionConfig::disabled());
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::vector<std::unique_ptr<Mutator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<MathAddMutationOperator>());
   MutationsFinder finder(std::move(mutationOperators));
   CustomTestFinder testFinder(config.getCustomTests());
@@ -1014,7 +1014,7 @@ TEST(Driver, customTest_withDynamicLibraries) {
                 cacheDirectory,
                 JunkDetectionConfig::disabled());
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::vector<std::unique_ptr<Mutator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<MathAddMutationOperator>());
   MutationsFinder finder(std::move(mutationOperators));
   CustomTestFinder testFinder(config.getCustomTests());
@@ -1084,7 +1084,7 @@ TEST(Driver, junkDetector_enabled) {
                 cacheDirectory,
                 JunkDetectionConfig::enabled());
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::vector<std::unique_ptr<Mutator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<MathAddMutationOperator>());
   MutationsFinder finder(std::move(mutationOperators));
   CustomTestFinder testFinder(config.getCustomTests());
@@ -1149,7 +1149,7 @@ TEST(Driver, junkDetector_disabled) {
                 cacheDirectory,
                 JunkDetectionConfig::disabled());
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::vector<std::unique_ptr<Mutator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<MathAddMutationOperator>());
   MutationsFinder finder(std::move(mutationOperators));
   CustomTestFinder testFinder(config.getCustomTests());
@@ -1218,7 +1218,7 @@ TEST(Driver, DISABLED_customTest_withDynamicLibraries_and_ObjectFiles) {
                 cacheDirectory,
                 JunkDetectionConfig::disabled());
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
+  std::vector<std::unique_ptr<Mutator>> mutationOperators;
   mutationOperators.emplace_back(make_unique<MathAddMutationOperator>());
   MutationsFinder finder(std::move(mutationOperators));
   CustomTestFinder testFinder(config.getCustomTests());

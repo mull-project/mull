@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MutationOperators/MutationOperator.h"
+#include "MutationOperators/Mutator.h"
 
 #include <vector>
 
@@ -30,7 +30,7 @@ namespace mull {
   class MutationPoint;
   class MutationPointAddress;
 
-  class AndOrReplacementMutationOperator : public MutationOperator {
+  class AndOrReplacementMutationOperator : public Mutator {
 
     AND_OR_MutationType findPossibleMutationInBranch(BranchInst *branchInst,
                                                      BranchInst **secondBranchInst);

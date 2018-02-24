@@ -17,7 +17,7 @@ class Module;
 namespace mull {
 
 class Compiler;
-class MutationOperator;
+class Mutator;
 class MullModule;
 class Test;
 
@@ -63,7 +63,7 @@ public:
 };
 
 class MutationPoint {
-  MutationOperator *mutationOperator;
+  Mutator *mutationOperator;
   MutationPointAddress Address;
   llvm::Value *OriginalValue;
   MullModule *module;
@@ -72,7 +72,7 @@ class MutationPoint {
   std::vector<std::pair<Test *, int>> reachableTests;
 
 public:
-  MutationPoint(MutationOperator *op,
+  MutationPoint(Mutator *op,
                 MutationPointAddress Address,
                 llvm::Value *Val,
                 MullModule *m,
@@ -80,12 +80,12 @@ public:
 
   ~MutationPoint();
 
-  MutationOperator *getOperator();
+  Mutator *getOperator();
   MutationPointAddress getAddress();
   llvm::Value *getOriginalValue();
   MullModule *getOriginalModule();
 
-  MutationOperator *getOperator() const;
+  Mutator *getOperator() const;
   MutationPointAddress getAddress() const;
   llvm::Value *getOriginalValue() const;
   MullModule *getOriginalModule() const;

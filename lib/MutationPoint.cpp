@@ -2,7 +2,7 @@
 #include "Toolchain/Compiler.h"
 #include "ModuleLoader.h"
 
-#include "MutationOperators/MutationOperator.h"
+#include "MutationOperators/Mutator.h"
 #include "llvm/Transforms/Utils/Cloning.h"
 
 using namespace llvm;
@@ -54,7 +54,7 @@ MutationPointAddress::enumerateInstructions(
 
 #pragma mark - MutationPoint
 
-MutationPoint::MutationPoint(MutationOperator *op,
+MutationPoint::MutationPoint(Mutator *op,
                              MutationPointAddress Address,
                              Value *Val,
                              MullModule *m,
@@ -71,7 +71,7 @@ MutationPoint::MutationPoint(MutationOperator *op,
 
 MutationPoint::~MutationPoint() {}
 
-MutationOperator *MutationPoint::getOperator() {
+Mutator *MutationPoint::getOperator() {
   return mutationOperator;
 }
 
@@ -87,7 +87,7 @@ MullModule *MutationPoint::getOriginalModule() {
   return module;
 }
 
-MutationOperator *MutationPoint::getOperator() const {
+Mutator *MutationPoint::getOperator() const {
   return mutationOperator;
 }
 

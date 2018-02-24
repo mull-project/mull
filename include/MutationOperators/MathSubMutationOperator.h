@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MutationOperators/MutationOperator.h"
+#include "MutationOperators/Mutator.h"
 
 #include <vector>
 
@@ -16,7 +16,7 @@ class MutationPointAddress;
 
 /// Arithmetic with Overflow Intrinsics
 /// http://llvm.org/docs/LangRef.html#id1468
-class MathSubMutationOperator : public MutationOperator {
+class MathSubMutationOperator : public Mutator {
   
   bool isSubWithOverflow(llvm::Value &V);
   llvm::Function *replacementForSubWithOverflow(llvm::Function *testeeFunction,
