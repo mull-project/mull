@@ -277,8 +277,8 @@ void mull::SQLiteReporter::reportResults(const Result &result,
 
     sqlite3_bind_text(insertConfigStmt, index++, config.getCacheDirectory().c_str(), -1, SQLITE_TRANSIENT);
 
-    sqlite3_bind_int(insertConfigStmt, index++, startTime);
-    sqlite3_bind_int(insertConfigStmt, index++, endTime);
+    sqlite3_bind_int64(insertConfigStmt, index++, startTime);
+    sqlite3_bind_int64(insertConfigStmt, index++, endTime);
 
     sqlite3_step(insertConfigStmt);
   }
