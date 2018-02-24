@@ -14,6 +14,7 @@
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Module.h>
 #include <llvm/Support/raw_ostream.h>
+#include <llvm/Support/Path.h>
 
 #include <sqlite3.h>
 #include <sstream>
@@ -183,6 +184,11 @@ void mull::SQLiteReporter::reportResults(const Result &result,
     if (instruction->getMetadata(0)) {
       fileNameOrNil = instruction->getDebugLoc()->getFilename().str();
       directoryOrNil = instruction->getDebugLoc()->getDirectory().str();
+
+      if (!sys::path::is_absolute(fileNameOrNil)) {
+        fileNameOrNil = directoryOrNil + sys::path::get_separator().str() + fileNameOrNil;
+      }
+
       lineOrNull = instruction->getDebugLoc()->getLine();
       columnOrNull = instruction->getDebugLoc()->getColumn();
     }
