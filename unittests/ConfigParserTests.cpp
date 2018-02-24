@@ -1,13 +1,13 @@
 #include "ConfigParserTestFixture.h"
 
-#include "MutationOperators/MathAddMutator.h"
-#include "MutationOperators/MathDivMutator.h"
-#include "MutationOperators/MathMulMutator.h"
-#include "MutationOperators/MathSubMutator.h"
-#include "MutationOperators/NegateConditionMutator.h"
-#include "MutationOperators/RemoveVoidFunctionMutator.h"
-#include "MutationOperators/ReplaceCallMutator.h"
-#include "MutationOperators/ScalarValueMutator.h"
+#include "Mutators/MathAddMutator.h"
+#include "Mutators/MathDivMutator.h"
+#include "Mutators/MathMulMutator.h"
+#include "Mutators/MathSubMutator.h"
+#include "Mutators/NegateConditionMutator.h"
+#include "Mutators/RemoveVoidFunctionMutator.h"
+#include "Mutators/ReplaceCallMutator.h"
+#include "Mutators/ScalarValueMutator.h"
 
 TEST_F(ConfigParserTestFixture, loadConfig_bitcodeFileList_unspecified) {
   const char *configYAML = "";

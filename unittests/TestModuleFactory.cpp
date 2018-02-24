@@ -113,74 +113,74 @@ TestModuleFactory::createModule(const char *fixtureName,
 #pragma mark - Math Operators
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_MathSub_Module() {
-  const char *fixture = "simple_test/mutation_operators/math_sub/math_sub.bc";
+  const char *fixture = "simple_test/mutators/math_sub/math_sub.bc";
   return createModuleFromBitcode(fixture, fixture);
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_MathMul_Module() {
-  const char *fixture = "simple_test/mutation_operators/math_mul/math_mul.bc";
+  const char *fixture = "simple_test/mutators/math_mul/math_mul.bc";
   return createModuleFromBitcode(fixture, fixture);
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_MathDiv_Module() {
-  const char *fixture = "simple_test/mutation_operators/math_div/math_div.bc";
+  const char *fixture = "simple_test/mutators/math_div/math_div.bc";
   return createModuleFromBitcode(fixture, fixture);
 }
 
 #pragma mark - Negate Condition
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_NegateCondition_Tester_Module() {
-  const char *fixture = "simple_test/mutation_operators/negate_condition/tester.bc";
+  const char *fixture = "simple_test/mutators/negate_condition/tester.bc";
   return createModuleFromBitcode(fixture, fixture);
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_NegateCondition_Testee_Module() {
-  const char *fixture = "simple_test/mutation_operators/negate_condition/testee.bc";
+  const char *fixture = "simple_test/mutators/negate_condition/testee.bc";
   return createModuleFromBitcode(fixture, fixture);
 }
 
 #pragma mark - Remove Void Function
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_RemoveVoidFunction_Tester_Module() {
-  const char *fixture = "simple_test/mutation_operators/remove_void_function/tester.bc";
+  const char *fixture = "simple_test/mutators/remove_void_function/tester.bc";
   return createModuleFromBitcode(fixture, fixture);
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_RemoveVoidFunction_Testee_Module() {
-  const char *fixture = "simple_test/mutation_operators/remove_void_function/testee.bc";
+  const char *fixture = "simple_test/mutators/remove_void_function/testee.bc";
   return createModuleFromBitcode(fixture, fixture);
 }
 
 #pragma mark - AND <-> OR Replacement
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ANDORReplacement_Module() {
-  const char *fixture = "simple_test/mutation_operators/and_or_replacement/test_and_or_operators.bc";
+  const char *fixture = "simple_test/mutators/and_or_replacement/test_and_or_operators.bc";
   return createModuleFromBitcode(fixture, fixture);
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ANDORReplacement_CPPContent_Module() {
-  const char *fixture = "simple_test/mutation_operators/and_or_replacement_cpp/test_and_or_operators.bc";
+  const char *fixture = "simple_test/mutators/and_or_replacement_cpp/test_and_or_operators.bc";
   return createModuleFromBitcode(fixture, fixture);
 }
 
 #pragma mark - Scalar Value
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ScalarValue_Module() {
-  const char *fixture = "simple_test/mutation_operators/scalar_value/scalar_value.bc";
+  const char *fixture = "simple_test/mutators/scalar_value/scalar_value.bc";
   return createModuleFromBitcode(fixture, fixture);
 }
 
 #pragma mark - Replace Assignment
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ReplaceAssignment_Module() {
-    const char *fixture = "simple_test/mutation_operators/replace_assignment/replace_assignment.bc";
+    const char *fixture = "simple_test/mutators/replace_assignment/replace_assignment.bc";
     return createModuleFromBitcode(fixture, fixture);
 }
 
 #pragma mark - Replace Call
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ReplaceCall_Module() {
-  const char *fixture = "simple_test/mutation_operators/replace_call/replace_call.bc";
+  const char *fixture = "simple_test/mutators/replace_call/replace_call.bc";
   return createModuleFromBitcode(fixture, fixture);
 }
 

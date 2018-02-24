@@ -3,7 +3,7 @@
 #include <vector>
 #include <map>
 
-#include "MutationOperators/Mutator.h"
+#include "Mutators/Mutator.h"
 #include "MutationPoint.h"
 
 namespace llvm {

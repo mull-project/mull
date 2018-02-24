@@ -14,19 +14,19 @@ set(mull_sources
   Instrumentation/Callbacks.cpp
   Instrumentation/Instrumentation.cpp
 
-  MutationOperators/MathAddMutator.cpp
-  MutationOperators/AndOrReplacementMutator.cpp
-  MutationOperators/MutatorsFactory.cpp
-  MutationOperators/NegateConditionMutator.cpp
-  MutationOperators/RemoveVoidFunctionMutator.cpp
-  MutationOperators/ReplaceAssignmentMutator.cpp
-  MutationOperators/ReplaceCallMutator.cpp
-  MutationOperators/MathDivMutator.cpp
-  MutationOperators/MathMulMutator.cpp
-  MutationOperators/MathSubMutator.cpp
-  MutationOperators/ScalarValueMutator.cpp
+  Mutators/MathAddMutator.cpp
+  Mutators/AndOrReplacementMutator.cpp
+  Mutators/MutatorsFactory.cpp
+  Mutators/NegateConditionMutator.cpp
+  Mutators/RemoveVoidFunctionMutator.cpp
+  Mutators/ReplaceAssignmentMutator.cpp
+  Mutators/ReplaceCallMutator.cpp
+  Mutators/MathDivMutator.cpp
+  Mutators/MathMulMutator.cpp
+  Mutators/MathSubMutator.cpp
+  Mutators/ScalarValueMutator.cpp
 
-  MutationOperators/ConditionalsBoundaryMutator.cpp
+  Mutators/ConditionalsBoundaryMutator.cpp
 
   Toolchain/Compiler.cpp
   Toolchain/ObjectCache.cpp
@@ -63,7 +63,7 @@ set(mull_sources
 
 set(mull_header_dirs
   ${MULL_INCLUDE_DIR}
-  ${MULL_INCLUDE_DIR}/MutationOperators
+  ${MULL_INCLUDE_DIR}/Mutators
   ${MULL_INCLUDE_DIR}/Context
   ${MULL_INCLUDE_DIR}/GoogleTest
   ${MULL_INCLUDE_DIR}/SimpleTest

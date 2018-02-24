@@ -1,6 +1,6 @@
 #include "Config.h"
 #include "Context.h"
-#include "MutationOperators/ConditionalsBoundaryMutator.h"
+#include "Mutators/ConditionalsBoundaryMutator.h"
 #include "MutationPoint.h"
 #include "TestModuleFactory.h"
 #include "Toolchain/Compiler.h"

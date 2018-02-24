@@ -6,7 +6,7 @@
 #include "Result.h"
 #include "MutationResult.h"
 
-#include "MutationOperators/Mutator.h"
+#include "Mutators/Mutator.h"
 #include "Metrics/Metrics.h"
 
 #include <llvm/IR/DebugInfoMetadata.h>

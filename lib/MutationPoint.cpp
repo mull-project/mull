@@ -2,8 +2,8 @@
 #include "Toolchain/Compiler.h"
 #include "ModuleLoader.h"
 
-#include "MutationOperators/Mutator.h"
-#include "llvm/Transforms/Utils/Cloning.h"
+#include "Mutators/Mutator.h"
+#include <llvm/Transforms/Utils/Cloning.h>
 
 using namespace llvm;
 using namespace mull;

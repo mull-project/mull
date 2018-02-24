@@ -2,7 +2,7 @@
 #include "Context.h"
 #include "Reporters/SQLiteReporter.h"
 #include "Result.h"
-#include "MutationOperators/MathAddMutator.h"
+#include "Mutators/MathAddMutator.h"
 #include "SimpleTest/SimpleTestFinder.h"
 #include "SimpleTest/SimpleTest_Test.h"
 #include "TestModuleFactory.h"

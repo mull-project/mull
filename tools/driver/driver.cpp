@@ -5,7 +5,7 @@
 #include "Filter.h"
 #include "Logger.h"
 #include "ModuleLoader.h"
-#include "MutationOperators/MutatorsFactory.h"
+#include "Mutators/MutatorsFactory.h"
 #include "Reporters/SQLiteReporter.h"
 #include "Reporters/TimeReporter.h"
 #include "Result.h"
