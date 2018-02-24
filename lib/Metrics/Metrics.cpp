@@ -6,7 +6,7 @@ using namespace mull;
 
 MetricsMeasure::Precision currentTimestamp() {
   using namespace std::chrono;
-  using clock = high_resolution_clock;
+  using clock = system_clock;
   return duration_cast<MetricsMeasure::Precision>(clock::now().time_since_epoch());
 }
 
