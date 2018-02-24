@@ -28,56 +28,56 @@ using namespace llvm;
 
 static LLVMContext Ctx;
 
-TEST(NegateConditionMutationOperator, canBeApplied) {
+TEST(NegateConditionMutator, canBeApplied) {
   LLVMContext context;
 
   // Get pointers to the constants.
   Value *One = ConstantInt::get(Type::getInt32Ty(context), 1);
   Value *Two = ConstantInt::get(Type::getInt32Ty(context), 2);
 
-  NegateConditionMutator mutationOperator;
+  NegateConditionMutator mutator;
 
   // Create the "if (arg <= 2) goto exitbb"
   std::unique_ptr<Value> CondInst = make_unique<ICmpInst>(ICmpInst::ICMP_SLE, One, Two, "cond");
 
-  EXPECT_EQ(true, mutationOperator.canBeApplied(*CondInst));
+  EXPECT_EQ(true, mutator.canBeApplied(*CondInst));
 }
 
-TEST(NegateConditionMutationOperator, canBeApplied_tobool) {
+TEST(NegateConditionMutator, canBeApplied_tobool) {
   LLVMContext context;
 
   Value *One = ConstantInt::get(Type::getInt32Ty(context), 1);
   Value *Two = ConstantInt::get(Type::getInt32Ty(context), 2);
 
-  NegateConditionMutator mutationOperator;
+  NegateConditionMutator mutator;
 
   std::unique_ptr<Value> CondInst = make_unique<ICmpInst>(ICmpInst::ICMP_SLE, One, Two, "tobool");
 
-  EXPECT_FALSE(mutationOperator.canBeApplied(*CondInst));
+  EXPECT_FALSE(mutator.canBeApplied(*CondInst));
 }
 
-TEST(NegateConditionMutationOperator, canBeApplied_isnull) {
+TEST(NegateConditionMutator, canBeApplied_isnull) {
   LLVMContext context;
 
   Value *One = ConstantInt::get(Type::getInt32Ty(context), 1);
   Value *Two = ConstantInt::get(Type::getInt32Ty(context), 2);
 
-  NegateConditionMutator mutationOperator;
+  NegateConditionMutator mutator;
 
   std::unique_ptr<Value> CondInst = make_unique<ICmpInst>(ICmpInst::ICMP_SLE, One, Two, "isnull");
 
-  EXPECT_FALSE(mutationOperator.canBeApplied(*CondInst));
+  EXPECT_FALSE(mutator.canBeApplied(*CondInst));
 }
 
-TEST(NegateConditionMutationOperator, negatedCmpInstPredicate) {
+TEST(NegateConditionMutator, negatedCmpInstPredicate) {
   //llvm::CmpInst::Predicate::
 
   EXPECT_EQ(NegateConditionMutator::negatedCmpInstPredicate(CmpInst::ICMP_SLT), CmpInst::ICMP_SGE);
 }
 
-TEST(NegateConditionMutationOperator, getMutationPoints_no_filter) {
+TEST(NegateConditionMutator, getMutationPoints_no_filter) {
   TestModuleFactory factory;
-  auto module = factory.APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutation_operatorModule();
+  auto module = factory.APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutatorModule();
   auto llvmModule = module->getModule();
   assert(llvmModule);
 
@@ -88,9 +88,9 @@ TEST(NegateConditionMutationOperator, getMutationPoints_no_filter) {
   Context context;
   context.addModule(std::move(module));
 
-  std::vector<std::unique_ptr<Mutator>> operators;
-  operators.emplace_back(make_unique<NegateConditionMutator>());
-  MutationsFinder finder(std::move(operators));
+  std::vector<std::unique_ptr<Mutator>> mutators;
+  mutators.emplace_back(make_unique<NegateConditionMutator>());
+  MutationsFinder finder(std::move(mutators));
   Filter filter;
 
   auto mutationPoints = finder.getMutationPoints(context, testee, filter);
@@ -100,9 +100,9 @@ TEST(NegateConditionMutationOperator, getMutationPoints_no_filter) {
   EXPECT_EQ(15, mutationPoints[0]->getAddress().getIIndex());
 }
 
-TEST(NegateConditionMutationOperator, getMutationPoints_filter_to_bool_converion) {
+TEST(NegateConditionMutator, getMutationPoints_filter_to_bool_converion) {
   TestModuleFactory factory;
-  auto module = factory.APFloat_019fc57b8bd190d33389137abbe7145e_214_2_7_negate_mutation_operatorModule();
+  auto module = factory.APFloat_019fc57b8bd190d33389137abbe7145e_214_2_7_negate_mutatorModule();
   auto llvmModule = module->getModule();
   assert(llvmModule);
 
@@ -113,18 +113,18 @@ TEST(NegateConditionMutationOperator, getMutationPoints_filter_to_bool_converion
   Context context;
   context.addModule(std::move(module));
 
-  std::vector<std::unique_ptr<Mutator>> operators;
-  operators.emplace_back(make_unique<NegateConditionMutator>());
-  MutationsFinder finder(std::move(operators));
+  std::vector<std::unique_ptr<Mutator>> mutators;
+  mutators.emplace_back(make_unique<NegateConditionMutator>());
+  MutationsFinder finder(std::move(mutators));
   Filter filter;
 
   auto mutationPoints = finder.getMutationPoints(context, testee, filter);
   EXPECT_EQ(0U, mutationPoints.size());
 }
 
-TEST(NegateConditionMutationOperator, getMutationPoints_filter_is_null) {
+TEST(NegateConditionMutator, getMutationPoints_filter_is_null) {
   TestModuleFactory factory;
-  auto module = factory.APFloat_019fc57b8bd190d33389137abbe7145e_5_1_3_negate_mutation_operatorModule();
+  auto module = factory.APFloat_019fc57b8bd190d33389137abbe7145e_5_1_3_negate_mutatorModule();
   auto llvmModule = module->getModule();
   assert(llvmModule);
 
@@ -135,9 +135,9 @@ TEST(NegateConditionMutationOperator, getMutationPoints_filter_is_null) {
   Context context;
   context.addModule(std::move(module));
 
-  std::vector<std::unique_ptr<Mutator>> operators;
-  operators.emplace_back(make_unique<NegateConditionMutator>());
-  MutationsFinder finder(std::move(operators));
+  std::vector<std::unique_ptr<Mutator>> mutators;
+  mutators.emplace_back(make_unique<NegateConditionMutator>());
+  MutationsFinder finder(std::move(mutators));
   Filter filter;
 
   auto mutationPoints = finder.getMutationPoints(context, testee, filter);

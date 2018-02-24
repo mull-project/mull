@@ -16,7 +16,7 @@
 using namespace llvm;
 using namespace mull;
 
-const std::string MathAddMutator::ID = "math_add_mutation_operator";
+const std::string MathAddMutator::ID = "math_add_mutator";
 
 bool MathAddMutator::isAddWithOverflow(llvm::Value &V) {
   if (CallInst *callInst = dyn_cast<CallInst>(&V)) {
@@ -86,7 +86,7 @@ MathAddMutator::replacementForAddWithOverflow(llvm::Function *addFunction,
   }
 
   else {
-    Logger::debug() << "MathAddMutationOperator> unknown add function: "
+    Logger::debug() << "MathAddMutator> unknown add function: "
                     << name
                     << ".\n";
   }
@@ -109,8 +109,8 @@ MathAddMutator::replacementForAddWithOverflow(llvm::Function *addFunction,
 
 MutationPoint *
 MathAddMutator::getMutationPoint(MullModule *module,
-                                          MutationPointAddress &address,
-                                          llvm::Instruction *instruction) {
+                                 MutationPointAddress &address,
+                                 llvm::Instruction *instruction) {
   if (canBeApplied(*instruction)) {
     std::string diagnostics = "Math Add: replaced + with -";
 

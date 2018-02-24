@@ -20,7 +20,7 @@ using namespace llvm;
 
 static TestModuleFactory TestModuleFactory;
 
-TEST(ScalarValueMutationOperator, getMutationPoint) {
+TEST(ScalarValueMutator, getMutationPoint) {
   auto mullModule = TestModuleFactory.create_SimpleTest_ScalarValue_Module();
 
   Context mullContext;
@@ -28,9 +28,9 @@ TEST(ScalarValueMutationOperator, getMutationPoint) {
 
   auto scalarValueFunction = mullContext.lookupDefinedFunction("scalar_value");
   Testee testee(scalarValueFunction, nullptr, 1);
-  std::vector<std::unique_ptr<Mutator>> operators;
-  operators.emplace_back(make_unique<ScalarValueMutator>());
-  MutationsFinder finder(std::move(operators));
+  std::vector<std::unique_ptr<Mutator>> mutators;
+  mutators.emplace_back(make_unique<ScalarValueMutator>());
+  MutationsFinder finder(std::move(mutators));
   Filter filter;
 
   std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(mullContext,
@@ -61,12 +61,12 @@ TEST(ScalarValueMutationOperator, getMutationPoint) {
   ASSERT_EQ(mutationPoints[3]->getAddress().getIIndex(), 12);
 }
 
-TEST(DISABLED_ScalarValueMutationOperator, failingMutationPoint) {
+TEST(DISABLED_ScalarValueMutator, failingMutationPoint) {
   auto mullModule = TestModuleFactory.create_CustomTest_OpenSSL_bio_enc_test_Module();
 
   MutationPointAddress address(15, 10, 7);
-  ScalarValueMutator mutationOperator;
-  MutationPoint point(&mutationOperator, address, nullptr, mullModule.get());
+  ScalarValueMutator mutator;
+  MutationPoint point(&mutator, address, nullptr, mullModule.get());
 
   Config config;
   Toolchain toolchain(config);

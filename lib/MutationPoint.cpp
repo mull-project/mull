@@ -54,25 +54,25 @@ MutationPointAddress::enumerateInstructions(
 
 #pragma mark - MutationPoint
 
-MutationPoint::MutationPoint(Mutator *op,
+MutationPoint::MutationPoint(Mutator *mutator,
                              MutationPointAddress Address,
                              Value *Val,
                              MullModule *m,
                              std::string diagnostics) :
-  mutationOperator(op), Address(Address), OriginalValue(Val),
+  mutator(mutator), Address(Address), OriginalValue(Val),
   module(m), diagnostics(diagnostics), reachableTests()
 {
   string moduleID = module->getUniqueIdentifier();
   string addressID = Address.getIdentifier();
-  string operatorID = mutationOperator->uniqueID();
+  string mutatorID = mutator->uniqueID();
 
-  uniqueIdentifier = moduleID + "_" + addressID + "_" + operatorID;
+  uniqueIdentifier = moduleID + "_" + addressID + "_" + mutatorID;
 }
 
 MutationPoint::~MutationPoint() {}
 
-Mutator *MutationPoint::getOperator() {
-  return mutationOperator;
+Mutator *MutationPoint::getMutator() {
+  return mutator;
 }
 
 MutationPointAddress MutationPoint::getAddress() {
@@ -87,8 +87,8 @@ MullModule *MutationPoint::getOriginalModule() {
   return module;
 }
 
-Mutator *MutationPoint::getOperator() const {
-  return mutationOperator;
+Mutator *MutationPoint::getMutator() const {
+  return mutator;
 }
 
 MutationPointAddress MutationPoint::getAddress() const {
@@ -108,7 +108,7 @@ void MutationPoint::addReachableTest(Test *test, int distance) {
 }
 
 void MutationPoint::applyMutation(MullModule &module) {
-  mutationOperator->applyMutation(module.getModule(), Address, *OriginalValue);
+  mutator->applyMutation(module.getModule(), Address, *OriginalValue);
 }
 
 const std::vector<std::pair<Test *, int>> &MutationPoint::getReachableTests() const {

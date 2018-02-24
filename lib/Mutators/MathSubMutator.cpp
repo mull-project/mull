@@ -16,7 +16,7 @@
 using namespace llvm;
 using namespace mull;
 
-const std::string MathSubMutator::ID = "math_sub_mutation_operator";
+const std::string MathSubMutator::ID = "math_sub_mutator";
 
 bool MathSubMutator::isSubWithOverflow(llvm::Value &V) {
   if (CallInst *callInst = dyn_cast<CallInst>(&V)) {
@@ -85,7 +85,7 @@ MathSubMutator::replacementForSubWithOverflow(llvm::Function *testeeFunction,
   }
 
   else {
-    Logger::debug() << "MathSubMutationOperator> unknown add function: "
+    Logger::debug() << "MathSubMutator> unknown add function: "
                     << name
                     << ".\n";
   }

@@ -28,9 +28,9 @@ TEST(CXXJunkDetector, boundary_mutator) {
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
 
-  std::vector<std::unique_ptr<Mutator>> operators;
-  operators.emplace_back(make_unique<ConditionalsBoundaryMutator>());
-  MutationsFinder finder(std::move(operators));
+  std::vector<std::unique_ptr<Mutator>> mutatorss;
+  mutatorss.emplace_back(make_unique<ConditionalsBoundaryMutator>());
+  MutationsFinder finder(std::move(mutatorss));
   Filter filter;
 
   std::vector<MutationPoint *> allMutationPoints;

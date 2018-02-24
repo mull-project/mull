@@ -23,7 +23,7 @@ class Test;
 
 /// \brief Container class that stores information needed to find MutationPoints.
 /// We need the indexes of function, basic block and instruction to find the
-/// mutation point in the clone of original module, when mutation operator is
+/// mutation point in the clone of original module, when mutator is
 /// to apply mutation in that clone.
 class MutationPointAddress {
   int FnIndex;
@@ -63,7 +63,7 @@ public:
 };
 
 class MutationPoint {
-  Mutator *mutationOperator;
+  Mutator *mutator;
   MutationPointAddress Address;
   llvm::Value *OriginalValue;
   MullModule *module;
@@ -72,7 +72,7 @@ class MutationPoint {
   std::vector<std::pair<Test *, int>> reachableTests;
 
 public:
-  MutationPoint(Mutator *op,
+  MutationPoint(Mutator *mutator,
                 MutationPointAddress Address,
                 llvm::Value *Val,
                 MullModule *m,
@@ -80,12 +80,12 @@ public:
 
   ~MutationPoint();
 
-  Mutator *getOperator();
+  Mutator *getMutator();
   MutationPointAddress getAddress();
   llvm::Value *getOriginalValue();
   MullModule *getOriginalModule();
 
-  Mutator *getOperator() const;
+  Mutator *getMutator() const;
   MutationPointAddress getAddress() const;
   llvm::Value *getOriginalValue() const;
   MullModule *getOriginalModule() const;

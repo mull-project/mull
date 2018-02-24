@@ -24,7 +24,7 @@ using namespace llvm;
 
 static LLVMContext Ctx;
 
-TEST(RemoveVoidFunctionMutationOperator, canBeApplied) {
+TEST(RemoveVoidFunctionMutator, canBeApplied) {
   /// Does this test make sense at all?
   LLVMContext context;
 
@@ -43,9 +43,9 @@ TEST(RemoveVoidFunctionMutationOperator, canBeApplied) {
 
   BasicBlock *bb = BasicBlock::Create(context, "not_relevant", callerFunction);
 
-  RemoveVoidFunctionMutator mutationOperator;
+  RemoveVoidFunctionMutator mutator;
 
   CallInst *callInst = CallInst::Create(voidFunction, "", bb);
 
-  EXPECT_EQ(true, mutationOperator.canBeApplied(*callInst));
+  EXPECT_EQ(true, mutator.canBeApplied(*callInst));
 }

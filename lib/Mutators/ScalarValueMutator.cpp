@@ -24,7 +24,7 @@ enum ScalarValueMutationType {
   Float
 };
 
-const std::string ScalarValueMutator::ID = "scalar_value_mutation_operator";
+const std::string ScalarValueMutator::ID = "scalar_value_mutator";
 
 #pragma mark - Prototypes
 

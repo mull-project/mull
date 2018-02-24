@@ -27,14 +27,14 @@ TEST(Mutators, MathAddMutator) {
   ConstantFP *FA = ConstantFP::get(Ctx, APFloat(42.0f));
   ConstantFP *FB = ConstantFP::get(Ctx, APFloat(43.0f));
 
-  MathAddMutator mutationOperator;
+  MathAddMutator mutator;
 
   std::unique_ptr<BinaryOperator> Add(BinaryOperator::CreateAdd(A, B));
-  EXPECT_EQ(true, mutationOperator.canBeApplied(*Add));
+  EXPECT_EQ(true, mutator.canBeApplied(*Add));
 
   std::unique_ptr<BinaryOperator> FAdd(BinaryOperator::CreateFAdd(FA, FB));
-  EXPECT_EQ(true, mutationOperator.canBeApplied(*FAdd));
+  EXPECT_EQ(true, mutator.canBeApplied(*FAdd));
 
   std::unique_ptr<BinaryOperator> FSub(BinaryOperator::CreateFSub(FA, FB));
-  EXPECT_EQ(false, mutationOperator.canBeApplied(*FSub));
+  EXPECT_EQ(false, mutator.canBeApplied(*FSub));
 }

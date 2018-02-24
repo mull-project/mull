@@ -17,7 +17,7 @@
 using namespace llvm;
 using namespace mull;
 
-const std::string ReplaceCallMutator::ID = "replace_call_mutation_operator";
+const std::string ReplaceCallMutator::ID = "replace_call_mutator";
 
 static bool findPossibleApplication(Value &V, std::string &outDiagnostics);
 

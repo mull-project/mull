@@ -119,14 +119,14 @@ Config::Config() :
   bitcodeFileList(""),
   projectName(""),
   testFramework("GoogleTest"),
-  mutationOperators(
-                    // Yaml::Traits stops reading mutation_operators from config.yaml
-                    // if these 3 default operators are set here (BUG?).
+  mutators(
+                    // Yaml::Traits stops reading mutators from config.yaml
+                    // if these 3 default mutators are set here (BUG?).
                     // So leaving out the empty ()
                     // {
-                    //   MathAddMutationOperator::ID,
-                    //   NegateConditionMutationOperator::ID,
-                    //   RemoveVoidFunctionMutationOperator::ID
+                    //   MathAddMutator::ID,
+                    //   NegateConditionMutator::ID,
+                    //   RemoveVoidFunctionMutator::ID
                     // }
                     ),
   reporters(),
@@ -150,7 +150,7 @@ Config::Config() :
 Config::Config(const std::string &bitcodeFileList,
                const std::string &project,
                const std::string &testFramework,
-               const std::vector<std::string> mutationOperators,
+               const std::vector<std::string> mutators,
                const std::vector<std::string> reporters,
                const std::string &dynamicLibraryFileList,
                const std::string &objectFileList,
@@ -170,7 +170,7 @@ Config::Config(const std::string &bitcodeFileList,
 bitcodeFileList(bitcodeFileList),
 projectName(project),
 testFramework(testFramework),
-mutationOperators(mutationOperators),
+mutators(mutators),
 reporters(reporters),
 dynamicLibraryFileList(dynamicLibraryFileList),
 objectFileList(objectFileList),
@@ -258,8 +258,8 @@ std::vector<std::string> Config::getObjectFilesPaths() const {
   return objectFilesPaths;
 }
 
-const std::vector<std::string> &Config::getMutationOperators() const {
-  return mutationOperators;
+const std::vector<std::string> &Config::getMutators() const {
+  return mutators;
 }
 
 const std::vector<std::string> &Config::getReporters() const {
@@ -338,11 +338,11 @@ void Config::dump() const {
   << "\t" << "diagnostics: " << diagnosticsToString(diagnostics) << '\n'
   << "\t" << "emit_debug_info: " << emitDebugInfoToString(emitDebugInfo) << '\n';
 
-  if (mutationOperators.empty() == false) {
-    Logger::debug() << "\t" << "mutation_operators: " << '\n';
+  if (mutators.empty() == false) {
+    Logger::debug() << "\t" << "mutators: " << '\n';
 
-    for (auto mutationOperator : mutationOperators) {
-      Logger::debug() << "\t- " << mutationOperator << '\n';
+    for (auto mutator : mutators) {
+      Logger::debug() << "\t- " << mutator << '\n';
     }
   }
 

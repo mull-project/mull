@@ -336,36 +336,36 @@ TEST_F(ConfigParserTestFixture, loadConfig_CacheDirectory_SpecificValue) {
   ASSERT_EQ("/var/tmp", config.getCacheDirectory());
 }
 
-TEST_F(ConfigParserTestFixture, loadConfig_MutationOperators_Unspecified) {
+TEST_F(ConfigParserTestFixture, loadConfig_Mutators_Unspecified) {
   const char *configYAML = "";
   configWithYamlContent(configYAML);
 
-  auto mutationOperators = config.getMutationOperators();
-  ASSERT_EQ(0U, mutationOperators.size());
+  auto mutators = config.getMutators();
+  ASSERT_EQ(0U, mutators.size());
 }
 
-TEST_F(ConfigParserTestFixture, loadConfig_MutationOperators_SpecificValue) {
+TEST_F(ConfigParserTestFixture, loadConfig_Mutators_SpecificValue) {
   const char *configYAML = R"YAML(
-mutation_operators:
-  - math_add_mutation_operator
-  - negate_mutation_operator
-  - math_sub_mutation_operator
-  - math_mul_mutation_operator
-  - math_div_mutation_operator
-  - scalar_value_mutation_operator
-  - replace_call_mutation_operator
+mutators:
+  - math_add_mutator
+  - negate_mutator
+  - math_sub_mutator
+  - math_mul_mutator
+  - math_div_mutator
+  - scalar_value_mutator
+  - replace_call_mutator
   )YAML";
   configWithYamlContent(configYAML);
   
-  auto mutationOperators = config.getMutationOperators();
-  ASSERT_EQ(7U, mutationOperators.size());
-  ASSERT_EQ(MathAddMutator::ID, mutationOperators[0]);
-  ASSERT_EQ(NegateConditionMutator::ID, mutationOperators[1]);
-  ASSERT_EQ(MathSubMutator::ID, mutationOperators[2]);
-  ASSERT_EQ(MathMulMutator::ID, mutationOperators[3]);
-  ASSERT_EQ(MathDivMutator::ID, mutationOperators[4]);
-  ASSERT_EQ(ScalarValueMutator::ID, mutationOperators[5]);
-  ASSERT_EQ(ReplaceCallMutator::ID, mutationOperators[6]);
+  auto mutators = config.getMutators();
+  ASSERT_EQ(7U, mutators.size());
+  ASSERT_EQ(MathAddMutator::ID, mutators[0]);
+  ASSERT_EQ(NegateConditionMutator::ID, mutators[1]);
+  ASSERT_EQ(MathSubMutator::ID, mutators[2]);
+  ASSERT_EQ(MathMulMutator::ID, mutators[3]);
+  ASSERT_EQ(MathDivMutator::ID, mutators[4]);
+  ASSERT_EQ(ScalarValueMutator::ID, mutators[5]);
+  ASSERT_EQ(ReplaceCallMutator::ID, mutators[6]);
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_tests_SpecificValue) {

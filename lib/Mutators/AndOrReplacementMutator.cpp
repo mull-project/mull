@@ -17,12 +17,12 @@
 using namespace llvm;
 using namespace mull;
 
-const std::string AndOrReplacementMutator::ID = "and_or_replacement_mutation_operator";
+const std::string AndOrReplacementMutator::ID = "and_or_replacement_mutator";
 
 MutationPoint *
 AndOrReplacementMutator::getMutationPoint(MullModule *module,
-                                                   MutationPointAddress &address,
-                                                   llvm::Instruction *instruction) {
+                                          MutationPointAddress &address,
+                                          llvm::Instruction *instruction) {
   if (canBeApplied(*instruction)) {
     std::string diagnostics = "AND-OR Replacement";
     return new MutationPoint(this, address, instruction, module, diagnostics);

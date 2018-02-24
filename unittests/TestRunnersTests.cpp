@@ -50,9 +50,9 @@ TEST(SimpleTestRunner, runTest) {
   Ctx.addModule(std::move(OwnedModuleWithTests));
   Ctx.addModule(std::move(OwnedModuleWithTestees));
 
-  std::vector<std::unique_ptr<Mutator>> mutationOperators;
-  mutationOperators.emplace_back(make_unique<MathAddMutator>());
-  MutationsFinder mutationsFinder(std::move(mutationOperators));
+  std::vector<std::unique_ptr<Mutator>> mutators;
+  mutators.emplace_back(make_unique<MathAddMutator>());
+  MutationsFinder mutationsFinder(std::move(mutators));
   Filter filter;
 
   SimpleTestFinder testFinder;

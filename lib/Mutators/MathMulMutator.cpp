@@ -16,7 +16,7 @@
 using namespace llvm;
 using namespace mull;
 
-const std::string MathMulMutator::ID = "math_mul_mutation_operator";
+const std::string MathMulMutator::ID = "math_mul_mutator";
 
 MutationPoint *
 MathMulMutator::getMutationPoint(MullModule *module,

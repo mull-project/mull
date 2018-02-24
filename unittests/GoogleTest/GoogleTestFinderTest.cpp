@@ -36,10 +36,10 @@ TEST(GoogleTestFinder, FindTest) {
   Ctx.addModule(std::move(ModuleWithTests));
 
   const char *configYAML = R"YAML(
-mutation_operators:
-- math_add_mutation_operator
-- negate_mutation_operator
-- remove_void_function_mutation_operator
+mutators:
+- math_add_mutator
+- negate_mutator
+- remove_void_function_mutator
 )YAML";
   
   yaml::Input Input(configYAML);
@@ -68,10 +68,10 @@ TEST(GoogleTestFinder, findTests_filter) {
   Ctx.addModule(std::move(ModuleWithTests));
 
   const char *configYAML = R"YAML(
-mutation_operators:
-  - math_add_mutation_operator
-  - negate_mutation_operator
-  - remove_void_function_mutation_operator
+mutators:
+  - math_add_mutator
+  - negate_mutator
+  - remove_void_function_mutator
   )YAML";
 
   yaml::Input Input(configYAML);
@@ -92,10 +92,10 @@ mutation_operators:
 
 TEST(DISABLED_GoogleTestRunner, runTest) {
   const char *configYAML = R"YAML(
-mutation_operators:
-  - math_add_mutation_operator
-  - negate_mutation_operator
-  - remove_void_function_mutation_operator
+mutators:
+  - math_add_mutator
+  - negate_mutator
+  - remove_void_function_mutator
   )YAML";
 
   yaml::Input Input(configYAML);

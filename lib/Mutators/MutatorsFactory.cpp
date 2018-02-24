@@ -22,17 +22,17 @@
 using namespace mull;
 using namespace std;
 
-static const string MathOperatorsGroup = "math";
-static const string ConditionalOperatorsGroup = "conditional";
-static const string FunctionsOperatorsGroup = "functions";
-static const string ConstantOperatorsGroup = "constant";
+static const string MathMutatorsGroup = "math";
+static const string ConditionalMutatorsGroup = "conditional";
+static const string FunctionsMutatorsGroup = "functions";
+static const string ConstantMutatorsGroup = "constant";
 
-static const string DefaultOperatorsGroup = "default";
-static const string ExperimentalOperatorsGroup = "experimental";
+static const string DefaultMutatorsGroup = "default";
+static const string ExperimentalMutatorsGroup = "experimental";
 
-static const string CXXOperatorsGroup = "cxx";
+static const string CXXMutatorsGroup = "cxx";
 
-static const string AllOperatorsGroup = "all";
+static const string AllMutatorsGroup = "all";
 
 static void expandGroups(const vector<string> &groups,
                          const map<string, vector<string>> &mapping,
@@ -47,30 +47,30 @@ static void expandGroups(const vector<string> &groups,
 }
 
 MutatorsFactory::MutatorsFactory() {
-  groupsMapping[ConditionalOperatorsGroup] = {
+  groupsMapping[ConditionalMutatorsGroup] = {
     AndOrReplacementMutator::ID,
     NegateConditionMutator::ID,
     ConditionalsBoundaryMutator::ID
   };
-  groupsMapping[MathOperatorsGroup] = {
+  groupsMapping[MathMutatorsGroup] = {
     MathAddMutator::ID,
     MathSubMutator::ID,
     MathMulMutator::ID,
     MathDivMutator::ID
   };
-  groupsMapping[FunctionsOperatorsGroup] = {
+  groupsMapping[FunctionsMutatorsGroup] = {
     ReplaceCallMutator::ID,
     RemoveVoidFunctionMutator::ID
   };
-  groupsMapping[ConstantOperatorsGroup] = {
+  groupsMapping[ConstantMutatorsGroup] = {
     ScalarValueMutator::ID
   };
-  groupsMapping[DefaultOperatorsGroup] = {
+  groupsMapping[DefaultMutatorsGroup] = {
     MathAddMutator::ID,
     NegateConditionMutator::ID,
     RemoveVoidFunctionMutator::ID
   };
-  groupsMapping[ExperimentalOperatorsGroup] = {
+  groupsMapping[ExperimentalMutatorsGroup] = {
     MathSubMutator::ID,
     MathMulMutator::ID,
     MathDivMutator::ID,
@@ -80,47 +80,47 @@ MutatorsFactory::MutatorsFactory() {
     ScalarValueMutator::ID,
     ConditionalsBoundaryMutator::ID
   };
-  groupsMapping[CXXOperatorsGroup] = {
+  groupsMapping[CXXMutatorsGroup] = {
     ConditionalsBoundaryMutator::ID
   };
-  groupsMapping[AllOperatorsGroup] = {
-    DefaultOperatorsGroup,
-    ExperimentalOperatorsGroup
+  groupsMapping[AllMutatorsGroup] = {
+    DefaultMutatorsGroup,
+    ExperimentalMutatorsGroup
   };
 }
 
 void MutatorsFactory::init() {
-  mutationsMapping[MathAddMutator::ID] =
+  mutatorsMapping[MathAddMutator::ID] =
     make_unique<MathAddMutator>();
-  mutationsMapping[MathSubMutator::ID] =
+  mutatorsMapping[MathSubMutator::ID] =
     make_unique<MathSubMutator>();
-  mutationsMapping[MathDivMutator::ID] =
+  mutatorsMapping[MathDivMutator::ID] =
     make_unique<MathDivMutator>();
-  mutationsMapping[MathMulMutator::ID] =
+  mutatorsMapping[MathMulMutator::ID] =
     make_unique<MathMulMutator>();
 
-  mutationsMapping[NegateConditionMutator::ID] =
+  mutatorsMapping[NegateConditionMutator::ID] =
     make_unique<NegateConditionMutator>();
-  mutationsMapping[AndOrReplacementMutator::ID] =
+  mutatorsMapping[AndOrReplacementMutator::ID] =
     make_unique<AndOrReplacementMutator>();
 
-  mutationsMapping[ReplaceAssignmentMutator::ID] =
+  mutatorsMapping[ReplaceAssignmentMutator::ID] =
     make_unique<ReplaceAssignmentMutator>();
-  mutationsMapping[ReplaceCallMutator::ID] =
+  mutatorsMapping[ReplaceCallMutator::ID] =
     make_unique<ReplaceCallMutator>();
-  mutationsMapping[RemoveVoidFunctionMutator::ID] =
+  mutatorsMapping[RemoveVoidFunctionMutator::ID] =
     make_unique<RemoveVoidFunctionMutator>();
 
-  mutationsMapping[ScalarValueMutator::ID] =
+  mutatorsMapping[ScalarValueMutator::ID] =
     make_unique<ScalarValueMutator>();
 
-  mutationsMapping[ConditionalsBoundaryMutator::ID] =
+  mutatorsMapping[ConditionalsBoundaryMutator::ID] =
     make_unique<ConditionalsBoundaryMutator>();
 }
 
 vector<unique_ptr<Mutator>>
-MutatorsFactory::mutationOperators(const vector<string> groups) {
-  /// We need to recreate all mutation operators in case this method called
+MutatorsFactory::mutators(const vector<string> groups) {
+  /// We need to recreate all mutators in case this method called
   /// more than once. It does not happen during normal program execution,
   /// but happens a lot during testing
   init();
@@ -129,29 +129,29 @@ MutatorsFactory::mutationOperators(const vector<string> groups) {
 
   if (groups.size() == 0) {
     Logger::info()
-      << "No mutation operators specified in a config file.\n"
-      << "Switching to default operators.\n";
+      << "No mutators specified in a config file.\n"
+      << "Switching to default mutators.\n";
 
-    expandGroups({ DefaultOperatorsGroup }, groupsMapping, expandedGroups);
+    expandGroups({ DefaultMutatorsGroup }, groupsMapping, expandedGroups);
   } else {
     expandGroups(groups, groupsMapping, expandedGroups);
   }
 
-  vector<unique_ptr<Mutator>> mutationOperators;
+  vector<unique_ptr<Mutator>> mutators;
 
   for (string group: expandedGroups) {
-    if (mutationsMapping.count(group) == 0) {
-      Logger::error() << "Unknown mutation operator: '" << group << "'\n";
+    if (mutatorsMapping.count(group) == 0) {
+      Logger::error() << "Unknown mutator: '" << group << "'\n";
       continue;
     }
-    mutationOperators.emplace_back(std::move(mutationsMapping.at(group)));
-    mutationsMapping.erase(group);
+    mutators.emplace_back(std::move(mutatorsMapping.at(group)));
+    mutatorsMapping.erase(group);
   }
 
-  if (mutationOperators.size() == 0) {
+  if (mutators.size() == 0) {
     Logger::error()
-      << "No valid mutation operators found in a config file.\n";
+      << "No valid mutators found in a config file.\n";
   }
 
-  return mutationOperators;
+  return mutators;
 }

@@ -31,19 +31,19 @@ TEST(MutationPoint, uniqueIdentifier) {
   auto module = loader.loadModuleAtPath(testModuleFactory.testerModulePath_Bitcode());
 
   MutationPointAddress address(2, 3, 5);
-  MathAddMutator mutationOperator;
+  MathAddMutator mutator;
 
-  MutationPoint point(&mutationOperator, address, nullptr, module.get());
+  MutationPoint point(&mutator, address, nullptr, module.get());
 
   string moduleName = "fixture_simple_test_tester_module";
   string moduleMD5  = "de5070f8606cc2a8ee794b2ab56b31f2";
   string addressString = "2_3_5";
-  string operatorName = "math_add_mutation_operator";
+  string mutatorName = "math_add_mutator";
 
   string uniqueID = moduleName + "_"
       + moduleMD5 + "_"
       + addressString + "_"
-      + operatorName;
+      + mutatorName;
 
   ASSERT_EQ(point.getUniqueIdentifier(), uniqueID);
 }

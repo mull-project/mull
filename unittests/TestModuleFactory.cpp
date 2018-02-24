@@ -108,9 +108,9 @@ TestModuleFactory::createModule(const char *fixtureName,
   return make_unique<MullModule>(std::move(module), "fake_hash", "fake_path");
 }
 
-#pragma mark - Mutation Operators
+#pragma mark - Mutators
 
-#pragma mark - Math Operators
+#pragma mark - Math Mutators
 
 std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_MathSub_Module() {
   const char *fixture = "simple_test/mutators/math_sub/math_sub.bc";
@@ -213,18 +213,18 @@ std::unique_ptr<MullModule> TestModuleFactory::create_GoogleTest_Testee_Module()
 
 #pragma mark -
 
-std::unique_ptr<MullModule> TestModuleFactory::APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutation_operatorModule() {
-  const char *fixture = "APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutation_operator.ll";
+std::unique_ptr<MullModule> TestModuleFactory::APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutatorModule() {
+  const char *fixture = "APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutator.ll";
   return createModule(fixture, fixture);
 }
 
-std::unique_ptr<MullModule> TestModuleFactory::APFloat_019fc57b8bd190d33389137abbe7145e_214_2_7_negate_mutation_operatorModule() {
-  const char *fixture = "APFloat_019fc57b8bd190d33389137abbe7145e_214_2_7_negate_mutation_operator.ll";
+std::unique_ptr<MullModule> TestModuleFactory::APFloat_019fc57b8bd190d33389137abbe7145e_214_2_7_negate_mutatorModule() {
+  const char *fixture = "APFloat_019fc57b8bd190d33389137abbe7145e_214_2_7_negate_mutator.ll";
   return createModule(fixture, fixture);
 }
 
-std::unique_ptr<MullModule> TestModuleFactory::APFloat_019fc57b8bd190d33389137abbe7145e_5_1_3_negate_mutation_operatorModule() {
-  const char *fixture = "APFloat_019fc57b8bd190d33389137abbe7145e_5_1_3_negate_mutation_operator.ll";
+std::unique_ptr<MullModule> TestModuleFactory::APFloat_019fc57b8bd190d33389137abbe7145e_5_1_3_negate_mutatorModule() {
+  const char *fixture = "APFloat_019fc57b8bd190d33389137abbe7145e_5_1_3_negate_mutator.ll";
   return createModule(fixture, fixture);
 }
 
