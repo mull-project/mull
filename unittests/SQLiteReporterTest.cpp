@@ -2,7 +2,7 @@
 #include "Context.h"
 #include "Reporters/SQLiteReporter.h"
 #include "Result.h"
-#include "MutationOperators/MathAddMutationOperator.h"
+#include "MutationOperators/MathAddMutator.h"
 #include "SimpleTest/SimpleTestFinder.h"
 #include "SimpleTest/SimpleTest_Test.h"
 #include "TestModuleFactory.h"
@@ -39,7 +39,7 @@ TEST(SQLiteReporter, integrationTest) {
   context.addModule(std::move(mullModuleWithTestees));
 
   std::vector<std::unique_ptr<Mutator>> mutationOperators;
-  std::unique_ptr<MathAddMutationOperator> addMutationOperator = make_unique<MathAddMutationOperator>();
+  std::unique_ptr<MathAddMutator> addMutationOperator = make_unique<MathAddMutator>();
   mutationOperators.emplace_back(std::move(addMutationOperator));
   MutationsFinder mutationsFinder(std::move(mutationOperators));
   Filter filter;
@@ -351,7 +351,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   context.addModule(std::move(mullModuleWithTestees));
 
   std::vector<std::unique_ptr<Mutator>> mutationOperators;
-  std::unique_ptr<MathAddMutationOperator> addMutationOperator = make_unique<MathAddMutationOperator>();
+  std::unique_ptr<MathAddMutator> addMutationOperator = make_unique<MathAddMutator>();
   mutationOperators.emplace_back(std::move(addMutationOperator));
   MutationsFinder mutationsFinder(std::move(mutationOperators));
   Filter filter;
@@ -498,7 +498,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   context.addModule(std::move(mullModuleWithTestees));
 
   std::vector<std::unique_ptr<Mutator>> mutationOperators;
-  std::unique_ptr<MathAddMutationOperator> addMutationOperator = make_unique<MathAddMutationOperator>();
+  std::unique_ptr<MathAddMutator> addMutationOperator = make_unique<MathAddMutator>();
   mutationOperators.emplace_back(std::move(addMutationOperator));
   MutationsFinder mutationsFinder(std::move(mutationOperators));
   Filter filter;

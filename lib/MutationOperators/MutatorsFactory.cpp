@@ -1,16 +1,16 @@
-#include "MutationOperatorsFactory.h"
+#include "MutatorsFactory.h"
 
 #include "Mutator.h"
-#include "MutationOperators/AndOrReplacementMutationOperator.h"
-#include "MutationOperators/MathAddMutationOperator.h"
-#include "MutationOperators/MathDivMutationOperator.h"
-#include "MutationOperators/MathMulMutationOperator.h"
-#include "MutationOperators/MathSubMutationOperator.h"
-#include "MutationOperators/NegateConditionMutationOperator.h"
-#include "MutationOperators/RemoveVoidFunctionMutationOperator.h"
-#include "MutationOperators/ReplaceAssignmentMutationOperator.h"
-#include "MutationOperators/ReplaceCallMutationOperator.h"
-#include "MutationOperators/ScalarValueMutationOperator.h"
+#include "MutationOperators/AndOrReplacementMutator.h"
+#include "MutationOperators/MathAddMutator.h"
+#include "MutationOperators/MathDivMutator.h"
+#include "MutationOperators/MathMulMutator.h"
+#include "MutationOperators/MathSubMutator.h"
+#include "MutationOperators/NegateConditionMutator.h"
+#include "MutationOperators/RemoveVoidFunctionMutator.h"
+#include "MutationOperators/ReplaceAssignmentMutator.h"
+#include "MutationOperators/ReplaceCallMutator.h"
+#include "MutationOperators/ScalarValueMutator.h"
 
 #include "MutationOperators/ConditionalsBoundaryMutator.h"
 
@@ -47,38 +47,38 @@ static void expandGroups(const vector<string> &groups,
   }
 }
 
-MutationOperatorsFactory::MutationOperatorsFactory() {
+MutatorsFactory::MutatorsFactory() {
   groupsMapping[ConditionalOperatorsGroup] = {
-    AndOrReplacementMutationOperator::ID,
-    NegateConditionMutationOperator::ID,
+    AndOrReplacementMutator::ID,
+    NegateConditionMutator::ID,
     ConditionalsBoundaryMutator::ID
   };
   groupsMapping[MathOperatorsGroup] = {
-    MathAddMutationOperator::ID,
-    MathSubMutationOperator::ID,
-    MathMulMutationOperator::ID,
-    MathDivMutationOperator::ID
+    MathAddMutator::ID,
+    MathSubMutator::ID,
+    MathMulMutator::ID,
+    MathDivMutator::ID
   };
   groupsMapping[FunctionsOperatorsGroup] = {
-    ReplaceCallMutationOperator::ID,
-    RemoveVoidFunctionMutationOperator::ID
+    ReplaceCallMutator::ID,
+    RemoveVoidFunctionMutator::ID
   };
   groupsMapping[ConstantOperatorsGroup] = {
-    ScalarValueMutationOperator::ID
+    ScalarValueMutator::ID
   };
   groupsMapping[DefaultOperatorsGroup] = {
-    MathAddMutationOperator::ID,
-    NegateConditionMutationOperator::ID,
-    RemoveVoidFunctionMutationOperator::ID
+    MathAddMutator::ID,
+    NegateConditionMutator::ID,
+    RemoveVoidFunctionMutator::ID
   };
   groupsMapping[ExperimentalOperatorsGroup] = {
-    MathSubMutationOperator::ID,
-    MathMulMutationOperator::ID,
-    MathDivMutationOperator::ID,
-    AndOrReplacementMutationOperator::ID,
-    ReplaceAssignmentMutationOperator::ID,
-    ReplaceCallMutationOperator::ID,
-    ScalarValueMutationOperator::ID,
+    MathSubMutator::ID,
+    MathMulMutator::ID,
+    MathDivMutator::ID,
+    AndOrReplacementMutator::ID,
+    ReplaceAssignmentMutator::ID,
+    ReplaceCallMutator::ID,
+    ScalarValueMutator::ID,
     ConditionalsBoundaryMutator::ID
   };
   groupsMapping[CXXOperatorsGroup] = {
@@ -90,37 +90,37 @@ MutationOperatorsFactory::MutationOperatorsFactory() {
   };
 }
 
-void MutationOperatorsFactory::init() {
-  mutationsMapping[MathAddMutationOperator::ID] =
-    make_unique<MathAddMutationOperator>();
-  mutationsMapping[MathSubMutationOperator::ID] =
-    make_unique<MathSubMutationOperator>();
-  mutationsMapping[MathDivMutationOperator::ID] =
-    make_unique<MathDivMutationOperator>();
-  mutationsMapping[MathMulMutationOperator::ID] =
-    make_unique<MathMulMutationOperator>();
+void MutatorsFactory::init() {
+  mutationsMapping[MathAddMutator::ID] =
+    make_unique<MathAddMutator>();
+  mutationsMapping[MathSubMutator::ID] =
+    make_unique<MathSubMutator>();
+  mutationsMapping[MathDivMutator::ID] =
+    make_unique<MathDivMutator>();
+  mutationsMapping[MathMulMutator::ID] =
+    make_unique<MathMulMutator>();
 
-  mutationsMapping[NegateConditionMutationOperator::ID] =
-    make_unique<NegateConditionMutationOperator>();
-  mutationsMapping[AndOrReplacementMutationOperator::ID] =
-    make_unique<AndOrReplacementMutationOperator>();
+  mutationsMapping[NegateConditionMutator::ID] =
+    make_unique<NegateConditionMutator>();
+  mutationsMapping[AndOrReplacementMutator::ID] =
+    make_unique<AndOrReplacementMutator>();
 
-  mutationsMapping[ReplaceAssignmentMutationOperator::ID] =
-    make_unique<ReplaceAssignmentMutationOperator>();
-  mutationsMapping[ReplaceCallMutationOperator::ID] =
-    make_unique<ReplaceCallMutationOperator>();
-  mutationsMapping[RemoveVoidFunctionMutationOperator::ID] =
-    make_unique<RemoveVoidFunctionMutationOperator>();
+  mutationsMapping[ReplaceAssignmentMutator::ID] =
+    make_unique<ReplaceAssignmentMutator>();
+  mutationsMapping[ReplaceCallMutator::ID] =
+    make_unique<ReplaceCallMutator>();
+  mutationsMapping[RemoveVoidFunctionMutator::ID] =
+    make_unique<RemoveVoidFunctionMutator>();
 
-  mutationsMapping[ScalarValueMutationOperator::ID] =
-    make_unique<ScalarValueMutationOperator>();
+  mutationsMapping[ScalarValueMutator::ID] =
+    make_unique<ScalarValueMutator>();
 
   mutationsMapping[ConditionalsBoundaryMutator::ID] =
     make_unique<ConditionalsBoundaryMutator>();
 }
 
 vector<unique_ptr<Mutator>>
-MutationOperatorsFactory::mutationOperators(const vector<string> groups) {
+MutatorsFactory::mutationOperators(const vector<string> groups) {
   /// We need to recreate all mutation operators in case this method called
   /// more than once. It does not happen during normal program execution,
   /// but happens a lot during testing

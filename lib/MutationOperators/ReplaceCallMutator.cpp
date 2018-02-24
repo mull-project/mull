@@ -1,4 +1,4 @@
-#include "MutationOperators/ReplaceCallMutationOperator.h"
+#include "MutationOperators/ReplaceCallMutator.h"
 
 #include "Context.h"
 #include "Logger.h"
@@ -17,11 +17,11 @@
 using namespace llvm;
 using namespace mull;
 
-const std::string ReplaceCallMutationOperator::ID = "replace_call_mutation_operator";
+const std::string ReplaceCallMutator::ID = "replace_call_mutation_operator";
 
 static bool findPossibleApplication(Value &V, std::string &outDiagnostics);
 
-bool ReplaceCallMutationOperator::canBeApplied(Value &V) {
+bool ReplaceCallMutator::canBeApplied(Value &V) {
   std::string diagnostics;
 
   return findPossibleApplication(V, diagnostics);
@@ -69,7 +69,7 @@ static bool findPossibleApplication(Value &V, std::string &outDiagnostics) {
 }
 
 MutationPoint *
-ReplaceCallMutationOperator::getMutationPoint(MullModule *module,
+ReplaceCallMutator::getMutationPoint(MullModule *module,
                                               MutationPointAddress &address,
                                               llvm::Instruction *instruction) {
 
@@ -111,7 +111,7 @@ llvm::Value *getReplacement(Type *returnType, llvm::LLVMContext &context) {
 }
 
 llvm::Value *
-ReplaceCallMutationOperator::applyMutation(Module *M,
+ReplaceCallMutator::applyMutation(Module *M,
                                            MutationPointAddress address,
                                            Value &_V) {
 

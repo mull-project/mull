@@ -1,7 +1,7 @@
 
 #include "MutationPoint.h"
 #include "MutationOperators/Mutator.h"
-#include "MutationOperators/NegateConditionMutationOperator.h"
+#include "MutationOperators/NegateConditionMutator.h"
 #include "Context.h"
 #include "Filter.h"
 #include "MutationsFinder.h"
@@ -35,7 +35,7 @@ TEST(NegateConditionMutationOperator, canBeApplied) {
   Value *One = ConstantInt::get(Type::getInt32Ty(context), 1);
   Value *Two = ConstantInt::get(Type::getInt32Ty(context), 2);
 
-  NegateConditionMutationOperator mutationOperator;
+  NegateConditionMutator mutationOperator;
 
   // Create the "if (arg <= 2) goto exitbb"
   std::unique_ptr<Value> CondInst = make_unique<ICmpInst>(ICmpInst::ICMP_SLE, One, Two, "cond");
@@ -49,7 +49,7 @@ TEST(NegateConditionMutationOperator, canBeApplied_tobool) {
   Value *One = ConstantInt::get(Type::getInt32Ty(context), 1);
   Value *Two = ConstantInt::get(Type::getInt32Ty(context), 2);
 
-  NegateConditionMutationOperator mutationOperator;
+  NegateConditionMutator mutationOperator;
 
   std::unique_ptr<Value> CondInst = make_unique<ICmpInst>(ICmpInst::ICMP_SLE, One, Two, "tobool");
 
@@ -62,7 +62,7 @@ TEST(NegateConditionMutationOperator, canBeApplied_isnull) {
   Value *One = ConstantInt::get(Type::getInt32Ty(context), 1);
   Value *Two = ConstantInt::get(Type::getInt32Ty(context), 2);
 
-  NegateConditionMutationOperator mutationOperator;
+  NegateConditionMutator mutationOperator;
 
   std::unique_ptr<Value> CondInst = make_unique<ICmpInst>(ICmpInst::ICMP_SLE, One, Two, "isnull");
 
@@ -72,7 +72,7 @@ TEST(NegateConditionMutationOperator, canBeApplied_isnull) {
 TEST(NegateConditionMutationOperator, negatedCmpInstPredicate) {
   //llvm::CmpInst::Predicate::
 
-  EXPECT_EQ(NegateConditionMutationOperator::negatedCmpInstPredicate(CmpInst::ICMP_SLT), CmpInst::ICMP_SGE);
+  EXPECT_EQ(NegateConditionMutator::negatedCmpInstPredicate(CmpInst::ICMP_SLT), CmpInst::ICMP_SGE);
 }
 
 TEST(NegateConditionMutationOperator, getMutationPoints_no_filter) {
@@ -89,7 +89,7 @@ TEST(NegateConditionMutationOperator, getMutationPoints_no_filter) {
   context.addModule(std::move(module));
 
   std::vector<std::unique_ptr<Mutator>> operators;
-  operators.emplace_back(make_unique<NegateConditionMutationOperator>());
+  operators.emplace_back(make_unique<NegateConditionMutator>());
   MutationsFinder finder(std::move(operators));
   Filter filter;
 
@@ -114,7 +114,7 @@ TEST(NegateConditionMutationOperator, getMutationPoints_filter_to_bool_converion
   context.addModule(std::move(module));
 
   std::vector<std::unique_ptr<Mutator>> operators;
-  operators.emplace_back(make_unique<NegateConditionMutationOperator>());
+  operators.emplace_back(make_unique<NegateConditionMutator>());
   MutationsFinder finder(std::move(operators));
   Filter filter;
 
@@ -136,7 +136,7 @@ TEST(NegateConditionMutationOperator, getMutationPoints_filter_is_null) {
   context.addModule(std::move(module));
 
   std::vector<std::unique_ptr<Mutator>> operators;
-  operators.emplace_back(make_unique<NegateConditionMutationOperator>());
+  operators.emplace_back(make_unique<NegateConditionMutator>());
   MutationsFinder finder(std::move(operators));
   Filter filter;
 

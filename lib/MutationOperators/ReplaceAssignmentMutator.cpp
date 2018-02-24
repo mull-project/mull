@@ -1,4 +1,4 @@
-#include "MutationOperators/ReplaceAssignmentMutationOperator.h"
+#include "MutationOperators/ReplaceAssignmentMutator.h"
 
 #include "Context.h"
 #include "Logger.h"
@@ -17,13 +17,13 @@
 using namespace llvm;
 using namespace mull;
 
-const std::string ReplaceAssignmentMutationOperator::ID = "replace_assignment_mutation_operator";
+const std::string ReplaceAssignmentMutator::ID = "replace_assignment_mutation_operator";
 
 static bool findPossibleApplication(Value &V, std::string &outDiagnostics);
 static
 llvm::Value *getReplacement(Type *returnType, llvm::LLVMContext &context);
 
-bool ReplaceAssignmentMutationOperator::canBeApplied(Value &V) {
+bool ReplaceAssignmentMutator::canBeApplied(Value &V) {
   std::string diagnostics;
 
   return findPossibleApplication(V, diagnostics);
@@ -58,7 +58,7 @@ static bool findPossibleApplication(Value &V, std::string &outDiagnostics) {
 }
 
 MutationPoint *
-ReplaceAssignmentMutationOperator::getMutationPoint(MullModule *module,
+ReplaceAssignmentMutator::getMutationPoint(MullModule *module,
                                                     MutationPointAddress &address,
                                                     llvm::Instruction *instruction) {
 
@@ -100,7 +100,7 @@ llvm::Value *getReplacement(Type *returnType, llvm::LLVMContext &context) {
 }
 
 llvm::Value *
-ReplaceAssignmentMutationOperator::applyMutation(Module *M,
+ReplaceAssignmentMutator::applyMutation(Module *M,
                                                  MutationPointAddress address,
                                                  Value &_V) {
 

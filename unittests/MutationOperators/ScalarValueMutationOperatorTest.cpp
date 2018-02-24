@@ -1,6 +1,6 @@
 #include "Config.h"
 #include "Context.h"
-#include "MutationOperators/ScalarValueMutationOperator.h"
+#include "MutationOperators/ScalarValueMutator.h"
 #include "MutationPoint.h"
 #include "TestModuleFactory.h"
 #include "Toolchain/Compiler.h"
@@ -29,7 +29,7 @@ TEST(ScalarValueMutationOperator, getMutationPoint) {
   auto scalarValueFunction = mullContext.lookupDefinedFunction("scalar_value");
   Testee testee(scalarValueFunction, nullptr, 1);
   std::vector<std::unique_ptr<Mutator>> operators;
-  operators.emplace_back(make_unique<ScalarValueMutationOperator>());
+  operators.emplace_back(make_unique<ScalarValueMutator>());
   MutationsFinder finder(std::move(operators));
   Filter filter;
 
@@ -65,7 +65,7 @@ TEST(DISABLED_ScalarValueMutationOperator, failingMutationPoint) {
   auto mullModule = TestModuleFactory.create_CustomTest_OpenSSL_bio_enc_test_Module();
 
   MutationPointAddress address(15, 10, 7);
-  ScalarValueMutationOperator mutationOperator;
+  ScalarValueMutator mutationOperator;
   MutationPoint point(&mutationOperator, address, nullptr, mullModule.get());
 
   Config config;

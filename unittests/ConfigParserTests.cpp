@@ -1,13 +1,13 @@
 #include "ConfigParserTestFixture.h"
 
-#include "MutationOperators/MathAddMutationOperator.h"
-#include "MutationOperators/MathDivMutationOperator.h"
-#include "MutationOperators/MathMulMutationOperator.h"
-#include "MutationOperators/MathSubMutationOperator.h"
-#include "MutationOperators/NegateConditionMutationOperator.h"
-#include "MutationOperators/RemoveVoidFunctionMutationOperator.h"
-#include "MutationOperators/ReplaceCallMutationOperator.h"
-#include "MutationOperators/ScalarValueMutationOperator.h"
+#include "MutationOperators/MathAddMutator.h"
+#include "MutationOperators/MathDivMutator.h"
+#include "MutationOperators/MathMulMutator.h"
+#include "MutationOperators/MathSubMutator.h"
+#include "MutationOperators/NegateConditionMutator.h"
+#include "MutationOperators/RemoveVoidFunctionMutator.h"
+#include "MutationOperators/ReplaceCallMutator.h"
+#include "MutationOperators/ScalarValueMutator.h"
 
 TEST_F(ConfigParserTestFixture, loadConfig_bitcodeFileList_unspecified) {
   const char *configYAML = "";
@@ -359,13 +359,13 @@ mutation_operators:
   
   auto mutationOperators = config.getMutationOperators();
   ASSERT_EQ(7U, mutationOperators.size());
-  ASSERT_EQ(MathAddMutationOperator::ID, mutationOperators[0]);
-  ASSERT_EQ(NegateConditionMutationOperator::ID, mutationOperators[1]);
-  ASSERT_EQ(MathSubMutationOperator::ID, mutationOperators[2]);
-  ASSERT_EQ(MathMulMutationOperator::ID, mutationOperators[3]);
-  ASSERT_EQ(MathDivMutationOperator::ID, mutationOperators[4]);
-  ASSERT_EQ(ScalarValueMutationOperator::ID, mutationOperators[5]);
-  ASSERT_EQ(ReplaceCallMutationOperator::ID, mutationOperators[6]);
+  ASSERT_EQ(MathAddMutator::ID, mutationOperators[0]);
+  ASSERT_EQ(NegateConditionMutator::ID, mutationOperators[1]);
+  ASSERT_EQ(MathSubMutator::ID, mutationOperators[2]);
+  ASSERT_EQ(MathMulMutator::ID, mutationOperators[3]);
+  ASSERT_EQ(MathDivMutator::ID, mutationOperators[4]);
+  ASSERT_EQ(ScalarValueMutator::ID, mutationOperators[5]);
+  ASSERT_EQ(ReplaceCallMutator::ID, mutationOperators[6]);
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_tests_SpecificValue) {

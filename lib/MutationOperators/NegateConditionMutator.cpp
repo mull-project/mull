@@ -1,4 +1,4 @@
-#include "MutationOperators/NegateConditionMutationOperator.h"
+#include "MutationOperators/NegateConditionMutator.h"
 
 #include "Context.h"
 #include "Logger.h"
@@ -16,7 +16,7 @@
 using namespace llvm;
 using namespace mull;
 
-const std::string NegateConditionMutationOperator::ID =
+const std::string NegateConditionMutator::ID =
   "negate_mutation_operator";
 
 ///
@@ -41,7 +41,7 @@ const std::string NegateConditionMutationOperator::ID =
 ///
 
 llvm::CmpInst::Predicate
-NegateConditionMutationOperator::negatedCmpInstPredicate(llvm::CmpInst::Predicate predicate) {
+NegateConditionMutator::negatedCmpInstPredicate(llvm::CmpInst::Predicate predicate) {
 
   switch (predicate) {
 
@@ -278,7 +278,7 @@ static std::string getDiagnostics(CmpInst::Predicate originalPredicate,
 
 
 MutationPoint *
-NegateConditionMutationOperator::getMutationPoint(MullModule *module,
+NegateConditionMutator::getMutationPoint(MullModule *module,
                                                   MutationPointAddress &address,
                                                   llvm::Instruction *instruction) {
   if (canBeApplied(*instruction)) {
@@ -294,7 +294,7 @@ NegateConditionMutationOperator::getMutationPoint(MullModule *module,
   return nullptr;
 }
 
-bool NegateConditionMutationOperator::canBeApplied(Value &V) {
+bool NegateConditionMutator::canBeApplied(Value &V) {
 
   if (CmpInst *cmpOp = dyn_cast<CmpInst>(&V)) {
     if (cmpOp->getName().startswith("tobool")) {
@@ -311,7 +311,7 @@ bool NegateConditionMutationOperator::canBeApplied(Value &V) {
   return false;
 }
 
-llvm::Value *NegateConditionMutationOperator::applyMutation(Module *M, MutationPointAddress address, Value &_V) {
+llvm::Value *NegateConditionMutator::applyMutation(Module *M, MutationPointAddress address, Value &_V) {
   /// In the following V argument is not used. Eventually it will be removed from
   /// this method's signature because it will be not relevant
   /// when mutations will be applied on copies of original module
@@ -328,7 +328,7 @@ llvm::Value *NegateConditionMutationOperator::applyMutation(Module *M, MutationP
   /// NOTE: Create a new CmpInst with the same operands as original instruction but with
   /// negated comparison predicate.
   CmpInst::Predicate negatedPredicate =
-    NegateConditionMutationOperator::negatedCmpInstPredicate(cmpInstruction->getPredicate());
+    NegateConditionMutator::negatedCmpInstPredicate(cmpInstruction->getPredicate());
 
   CmpInst *replacement = CmpInst::Create(cmpInstruction->getOpcode(),
                                          negatedPredicate,

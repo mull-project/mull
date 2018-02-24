@@ -1,5 +1,5 @@
 #include "MutationOperators/Mutator.h"
-#include "MutationOperators/MathAddMutationOperator.h"
+#include "MutationOperators/MathAddMutator.h"
 
 #include "llvm/IR/Argument.h"
 #include "llvm/IR/BasicBlock.h"
@@ -27,7 +27,7 @@ TEST(MutationOperators, MathAddMutationOperator) {
   ConstantFP *FA = ConstantFP::get(Ctx, APFloat(42.0f));
   ConstantFP *FB = ConstantFP::get(Ctx, APFloat(43.0f));
 
-  MathAddMutationOperator mutationOperator;
+  MathAddMutator mutationOperator;
 
   std::unique_ptr<BinaryOperator> Add(BinaryOperator::CreateAdd(A, B));
   EXPECT_EQ(true, mutationOperator.canBeApplied(*Add));

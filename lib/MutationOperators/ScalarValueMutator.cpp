@@ -1,4 +1,4 @@
-#include "MutationOperators/ScalarValueMutationOperator.h"
+#include "MutationOperators/ScalarValueMutator.h"
 
 #include "Context.h"
 #include "Logger.h"
@@ -24,7 +24,7 @@ enum ScalarValueMutationType {
   Float
 };
 
-const std::string ScalarValueMutationOperator::ID = "scalar_value_mutation_operator";
+const std::string ScalarValueMutator::ID = "scalar_value_mutation_operator";
 
 #pragma mark - Prototypes
 
@@ -37,7 +37,7 @@ static ConstantFP *getReplacementFloat(ConstantFP *constantFloat);
 #pragma mark - Implementations
 
 MutationPoint *
-ScalarValueMutationOperator::getMutationPoint(MullModule *module,
+ScalarValueMutator::getMutationPoint(MullModule *module,
                                               MutationPointAddress &address,
                                               llvm::Instruction *instruction) {
   std::string diagnostics;
@@ -51,7 +51,7 @@ ScalarValueMutationOperator::getMutationPoint(MullModule *module,
 }
 
 /// Currently only used by SimpleTestFinder.
-bool ScalarValueMutationOperator::canBeApplied(Value &V) {
+bool ScalarValueMutator::canBeApplied(Value &V) {
   std::string diagnostics;
   return findPossibleApplication(V, diagnostics) != ScalarValueMutationType::None;
 }
@@ -168,7 +168,7 @@ static ConstantFP *getReplacementFloat(ConstantFP *constantFloat) {
 }
 
 llvm::Value *
-ScalarValueMutationOperator::applyMutation(Module *M,
+ScalarValueMutator::applyMutation(Module *M,
                                            MutationPointAddress address,
                                            Value &_V) {
 

@@ -1,6 +1,6 @@
 
 #include "MutationOperators/Mutator.h"
-#include "MutationOperators/RemoveVoidFunctionMutationOperator.h"
+#include "MutationOperators/RemoveVoidFunctionMutator.h"
 #include "Context.h"
 
 #include "llvm/IR/Argument.h"
@@ -43,7 +43,7 @@ TEST(RemoveVoidFunctionMutationOperator, canBeApplied) {
 
   BasicBlock *bb = BasicBlock::Create(context, "not_relevant", callerFunction);
 
-  RemoveVoidFunctionMutationOperator mutationOperator;
+  RemoveVoidFunctionMutator mutationOperator;
 
   CallInst *callInst = CallInst::Create(voidFunction, "", bb);
 

@@ -1,4 +1,4 @@
-#include "MutationOperators/MathMulMutationOperator.h"
+#include "MutationOperators/MathDivMutator.h"
 
 #include "Context.h"
 #include "Logger.h"
@@ -16,24 +16,27 @@
 using namespace llvm;
 using namespace mull;
 
-const std::string MathMulMutationOperator::ID = "math_mul_mutation_operator";
+const std::string MathDivMutator::ID = "math_div_mutation_operator";
 
 MutationPoint *
-MathMulMutationOperator::getMutationPoint(MullModule *module,
+MathDivMutator::getMutationPoint(MullModule *module,
                                           MutationPointAddress &address,
                                           llvm::Instruction *instruction) {
   if (canBeApplied(*instruction)) {
-    std::string diagnostics = "Math Mul: replaced * with /";
+    std::string diagnostics = "Math Div: replaced / with *";
     return new MutationPoint(this, address, instruction, module, diagnostics);
   }
+
   return nullptr;
 }
 
-bool MathMulMutationOperator::canBeApplied(Value &V) {
+bool MathDivMutator::canBeApplied(Value &V) {
   if (BinaryOperator *BinOp = dyn_cast<BinaryOperator>(&V)) {
     BinaryOperator::BinaryOps Opcode = BinOp->getOpcode();
 
-    if (Opcode == Instruction::Mul || Opcode == Instruction::FMul) {
+    if (Opcode == Instruction::UDiv ||
+        Opcode == Instruction::SDiv ||
+        Opcode == Instruction::FDiv) {
       return true;
     }
   }
@@ -41,7 +44,7 @@ bool MathMulMutationOperator::canBeApplied(Value &V) {
   return false;
 }
 
-llvm::Value *MathMulMutationOperator::applyMutation(Module *M,
+llvm::Value *MathDivMutator::applyMutation(Module *M,
                                                     MutationPointAddress address,
                                                     Value &_V) {
 
@@ -54,17 +57,16 @@ llvm::Value *MathMulMutationOperator::applyMutation(Module *M,
 
   /// TODO: Take care of NUW/NSW
   BinaryOperator *binaryOperator = cast<BinaryOperator>(&I);
-  assert(binaryOperator->getOpcode() == Instruction::Mul ||
-         binaryOperator->getOpcode() == Instruction::FMul);
+  assert(binaryOperator->getOpcode() == Instruction::SDiv ||
+         binaryOperator->getOpcode() == Instruction::UDiv ||
+         binaryOperator->getOpcode() == Instruction::FDiv);
 
-  /// Seems fine to always mutate Mul to SDiv.
-  auto type = Instruction::SDiv;
-  if (binaryOperator->getOpcode() == Instruction::FMul) {
-    type = Instruction::FDiv;
+  auto type = Instruction::Mul;
+  if (binaryOperator->getOpcode() == Instruction::FDiv) {
+    type = Instruction::FMul;
   }
 
   /// NOTE: Create a new BinaryOperator with the same name as existing one
-
   Instruction *replacement = BinaryOperator::Create(type,
                                                     binaryOperator->getOperand(0),
                                                     binaryOperator->getOperand(1),

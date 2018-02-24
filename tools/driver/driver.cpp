@@ -5,7 +5,7 @@
 #include "Filter.h"
 #include "Logger.h"
 #include "ModuleLoader.h"
-#include "MutationOperators/MutationOperatorsFactory.h"
+#include "MutationOperators/MutatorsFactory.h"
 #include "Reporters/SQLiteReporter.h"
 #include "Reporters/TimeReporter.h"
 #include "Result.h"
@@ -95,7 +95,7 @@ int main(int argc, char *argv[]) {
   std::unique_ptr<TestFinder> testFinder;
   std::unique_ptr<TestRunner> testRunner;
 
-  auto mutationOperatorsFactory = MutationOperatorsFactory();
+  auto mutationOperatorsFactory = MutatorsFactory();
   auto mutationOperators =
     mutationOperatorsFactory.mutationOperators(config.getMutationOperators());
   MutationsFinder mutationsFinder(std::move(mutationOperators));

@@ -1,4 +1,4 @@
-#include "MutationOperators/MathSubMutationOperator.h"
+#include "MutationOperators/MathAddMutator.h"
 
 #include "Context.h"
 #include "Logger.h"
@@ -16,9 +16,9 @@
 using namespace llvm;
 using namespace mull;
 
-const std::string MathSubMutationOperator::ID = "math_sub_mutation_operator";
+const std::string MathAddMutator::ID = "math_add_mutation_operator";
 
-bool MathSubMutationOperator::isSubWithOverflow(llvm::Value &V) {
+bool MathAddMutator::isAddWithOverflow(llvm::Value &V) {
   if (CallInst *callInst = dyn_cast<CallInst>(&V)) {
     Function *calledFunction = callInst->getCalledFunction();
 
@@ -26,8 +26,8 @@ bool MathSubMutationOperator::isSubWithOverflow(llvm::Value &V) {
       return false;
     }
 
-    if (calledFunction->getName().startswith("llvm.ssub") ||
-        calledFunction->getName().startswith("llvm.usub")) {
+    if (calledFunction->getName().startswith("llvm.sadd") ||
+        calledFunction->getName().startswith("llvm.uadd")) {
       return true;
     }
   }
@@ -35,57 +35,58 @@ bool MathSubMutationOperator::isSubWithOverflow(llvm::Value &V) {
   return false;
 }
 
+
 llvm::Function *
-MathSubMutationOperator::replacementForSubWithOverflow(llvm::Function *testeeFunction,
+MathAddMutator::replacementForAddWithOverflow(llvm::Function *addFunction,
                                                        llvm::Module &module) {
 
-  std::string name = testeeFunction->getName().str();
+  std::string name = addFunction->getName().str();
 
   std::string replacementName = "";
   Type *replacementType = nullptr;
 
-  if (name == "llvm.ssub.with.overflow.i8") {
-    replacementName = "llvm.sadd.with.overflow.i8";
+  if (name == "llvm.sadd.with.overflow.i8") {
+    replacementName = "llvm.ssub.with.overflow.i8";
     replacementType = Type::getInt8Ty(module.getContext());
   }
 
-  else if (name == "llvm.ssub.with.overflow.i16") {
-    replacementName = "llvm.sadd.with.overflow.i16";
+  else if (name == "llvm.sadd.with.overflow.i16") {
+    replacementName = "llvm.ssub.with.overflow.i16";
     replacementType = Type::getInt16Ty(module.getContext());
   }
 
-  else if (name == "llvm.ssub.with.overflow.i32") {
-    replacementName = "llvm.sadd.with.overflow.i32";
+  else if (name == "llvm.sadd.with.overflow.i32") {
+    replacementName = "llvm.ssub.with.overflow.i32";
     replacementType = Type::getInt32Ty(module.getContext());
   }
 
-  else if (name == "llvm.ssub.with.overflow.i64") {
-    replacementName = "llvm.sadd.with.overflow.i64";
+  else if (name == "llvm.sadd.with.overflow.i64") {
+    replacementName = "llvm.ssub.with.overflow.i64";
     replacementType = Type::getInt64Ty(module.getContext());
   }
 
-  else if (name == "llvm.usub.with.overflow.i8") {
-    replacementName = "llvm.uadd.with.overflow.i8";
+  else if (name == "llvm.uadd.with.overflow.i8") {
+    replacementName = "llvm.usub.with.overflow.i8";
     replacementType = Type::getInt8Ty(module.getContext());
   }
 
-  else if (name == "llvm.usub.with.overflow.i16") {
-    replacementName = "llvm.uadd.with.overflow.i16";
+  else if (name == "llvm.uadd.with.overflow.i16") {
+    replacementName = "llvm.usub.with.overflow.i16";
     replacementType = Type::getInt16Ty(module.getContext());
   }
 
-  else if (name == "llvm.usub.with.overflow.i32") {
-    replacementName = "llvm.uadd.with.overflow.i32";
+  else if (name == "llvm.uadd.with.overflow.i32") {
+    replacementName = "llvm.usub.with.overflow.i32";
     replacementType = Type::getInt32Ty(module.getContext());
   }
 
-  else if (name == "llvm.usub.with.overflow.i64") {
-    replacementName = "llvm.uadd.with.overflow.i64";
+  else if (name == "llvm.uadd.with.overflow.i64") {
+    replacementName = "llvm.usub.with.overflow.i64";
     replacementType = Type::getInt64Ty(module.getContext());
   }
 
   else {
-    Logger::debug() << "MathSubMutationOperator> unknown add function: "
+    Logger::debug() << "MathAddMutationOperator> unknown add function: "
                     << name
                     << ".\n";
   }
@@ -107,35 +108,38 @@ MathSubMutationOperator::replacementForSubWithOverflow(llvm::Function *testeeFun
 }
 
 MutationPoint *
-MathSubMutationOperator::getMutationPoint(MullModule *module,
+MathAddMutator::getMutationPoint(MullModule *module,
                                           MutationPointAddress &address,
                                           llvm::Instruction *instruction) {
   if (canBeApplied(*instruction)) {
-    std::string diagnostics = "Math Sub: replaced - with +";
+    std::string diagnostics = "Math Add: replaced + with -";
+
     return new MutationPoint(this, address, instruction, module, diagnostics);
   }
+
   return nullptr;
 }
 
-bool MathSubMutationOperator::canBeApplied(Value &V) {
+bool MathAddMutator::canBeApplied(Value &V) {
   if (BinaryOperator *BinOp = dyn_cast<BinaryOperator>(&V)) {
     BinaryOperator::BinaryOps Opcode = BinOp->getOpcode();
 
-    if (Opcode == Instruction::Sub || Opcode == Instruction::FSub) {
+    if (Opcode == Instruction::Add || Opcode == Instruction::FAdd) {
       return true;
     }
   }
 
-  if (isSubWithOverflow(V)) {
+  if (isAddWithOverflow(V)) {
     return true;
   }
 
   return false;
 }
 
-llvm::Value *MathSubMutationOperator::applyMutation(Module *M,
-                                                    MutationPointAddress address,
-                                                    Value &_V) {
+llvm::Value *
+MathAddMutator::applyMutation(Module *M,
+                                       MutationPointAddress address,
+                                       Value &_V) {
 
   /// In the following V argument is not used. Eventually it will be removed from
   /// this method's signature because it will be not relevant
@@ -144,11 +148,11 @@ llvm::Value *MathSubMutationOperator::applyMutation(Module *M,
   llvm::BasicBlock &B = *(std::next(F.begin(), address.getBBIndex()));
   llvm::Instruction &I = *(std::next(B.begin(), address.getIIndex()));
 
-  if (isSubWithOverflow(I)) {
+  if (isAddWithOverflow(I)) {
     CallInst *callInst = dyn_cast<CallInst>(&I);
 
     Function *replacementFunction =
-      replacementForSubWithOverflow(callInst->getCalledFunction(),
+      replacementForAddWithOverflow(callInst->getCalledFunction(),
                                     *I.getModule());
 
     callInst->setCalledFunction(replacementFunction);
@@ -158,15 +162,16 @@ llvm::Value *MathSubMutationOperator::applyMutation(Module *M,
 
   /// TODO: Take care of NUW/NSW
   BinaryOperator *binaryOperator = cast<BinaryOperator>(&I);
-  assert(binaryOperator->getOpcode() == Instruction::Sub ||
-         binaryOperator->getOpcode() == Instruction::FSub);
 
-  auto type = Instruction::Add;
-  if (binaryOperator->getOpcode() == Instruction::FSub) {
-    type = Instruction::FAdd;
-  }
+  assert(binaryOperator->getOpcode() == Instruction::Add ||
+         binaryOperator->getOpcode() == Instruction::FAdd);
 
   /// NOTE: Create a new BinaryOperator with the same name as existing one
+
+  auto type = Instruction::Sub;
+  if (binaryOperator->getOpcode() == Instruction::FAdd) {
+    type = Instruction::FSub;
+  }
 
   Instruction *replacement = BinaryOperator::Create(type,
                                                     binaryOperator->getOperand(0),

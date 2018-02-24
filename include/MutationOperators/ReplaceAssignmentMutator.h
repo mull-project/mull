@@ -8,9 +8,8 @@ namespace mull {
 
 class MutationPoint;
 class MutationPointAddress;
-class MutationOperatorFilter;
 
-class ReplaceAssignmentMutationOperator : public Mutator {
+class ReplaceAssignmentMutator : public Mutator {
 
 public:
   static const std::string ID;

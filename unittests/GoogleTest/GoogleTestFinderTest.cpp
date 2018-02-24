@@ -4,7 +4,7 @@
 #include "Context.h"
 #include "Config.h"
 #include "ConfigParser.h"
-#include "MutationOperators/MutationOperatorsFactory.h"
+#include "MutationOperators/MutatorsFactory.h"
 #include "TestModuleFactory.h"
 #include "GoogleTest/GoogleTest_Test.h"
 #include "GoogleTest/GoogleTestRunner.h"

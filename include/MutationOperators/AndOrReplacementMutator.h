@@ -30,7 +30,7 @@ namespace mull {
   class MutationPoint;
   class MutationPointAddress;
 
-  class AndOrReplacementMutationOperator : public Mutator {
+  class AndOrReplacementMutator : public Mutator {
 
     AND_OR_MutationType findPossibleMutationInBranch(BranchInst *branchInst,
                                                      BranchInst **secondBranchInst);

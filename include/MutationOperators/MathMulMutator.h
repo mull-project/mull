@@ -4,13 +4,17 @@
 
 #include <vector>
 
+namespace llvm {
+class Instruction;
+}
+
 namespace mull {
 
+class MullModule;
 class MutationPoint;
 class MutationPointAddress;
-class MutationOperatorFilter;
 
-class ReplaceCallMutationOperator : public Mutator {
+class MathMulMutator : public Mutator {
 
 public:
   static const std::string ID;

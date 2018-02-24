@@ -1,4 +1,4 @@
-#include "MutationOperators/MathAddMutationOperator.h"
+#include "MutationOperators/MathAddMutator.h"
 #include "ModuleLoader.h"
 #include "MutationPoint.h"
 
@@ -31,7 +31,7 @@ TEST(MutationPoint, uniqueIdentifier) {
   auto module = loader.loadModuleAtPath(testModuleFactory.testerModulePath_Bitcode());
 
   MutationPointAddress address(2, 3, 5);
-  MathAddMutationOperator mutationOperator;
+  MathAddMutator mutationOperator;
 
   MutationPoint point(&mutationOperator, address, nullptr, module.get());
 

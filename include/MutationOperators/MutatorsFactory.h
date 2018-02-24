@@ -9,13 +9,13 @@
 
 namespace mull {
 
-class MutationOperatorsFactory {
+class MutatorsFactory {
   std::map<std::string, std::unique_ptr<Mutator>> mutationsMapping;
   std::map<std::string, std::vector<std::string>> groupsMapping;
 
   void init();
 public:
-  MutationOperatorsFactory();
+  MutatorsFactory();
   std::vector<std::unique_ptr<Mutator>>
     mutationOperators(const std::vector<std::string> groups);
 };

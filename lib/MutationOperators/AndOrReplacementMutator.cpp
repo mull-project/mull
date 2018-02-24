@@ -1,4 +1,4 @@
-#include "MutationOperators/AndOrReplacementMutationOperator.h"
+#include "MutationOperators/AndOrReplacementMutator.h"
 
 #include "Context.h"
 #include "Logger.h"
@@ -17,10 +17,10 @@
 using namespace llvm;
 using namespace mull;
 
-const std::string AndOrReplacementMutationOperator::ID = "and_or_replacement_mutation_operator";
+const std::string AndOrReplacementMutator::ID = "and_or_replacement_mutation_operator";
 
 MutationPoint *
-AndOrReplacementMutationOperator::getMutationPoint(MullModule *module,
+AndOrReplacementMutator::getMutationPoint(MullModule *module,
                                                    MutationPointAddress &address,
                                                    llvm::Instruction *instruction) {
   if (canBeApplied(*instruction)) {
@@ -30,7 +30,7 @@ AndOrReplacementMutationOperator::getMutationPoint(MullModule *module,
   return nullptr;
 }
 
-bool AndOrReplacementMutationOperator::canBeApplied(Value &V) {
+bool AndOrReplacementMutator::canBeApplied(Value &V) {
   BranchInst *branchInst = dyn_cast<BranchInst>(&V);
 
   if (branchInst == nullptr) {
@@ -65,7 +65,7 @@ bool AndOrReplacementMutationOperator::canBeApplied(Value &V) {
   return false;
 }
 
-llvm::Value *AndOrReplacementMutationOperator::applyMutation(Module *M,
+llvm::Value *AndOrReplacementMutator::applyMutation(Module *M,
                                                              MutationPointAddress address,
                                                              Value &_V) {
   /// In the following V argument is not used. Eventually it will be removed from
@@ -114,7 +114,7 @@ llvm::Value *AndOrReplacementMutationOperator::applyMutation(Module *M,
 #pragma mark - Private: Apply mutations: AND -> OR
 
 llvm::Value *
-AndOrReplacementMutationOperator::applyMutationANDToOR_Pattern1(Module *M,
+AndOrReplacementMutator::applyMutationANDToOR_Pattern1(Module *M,
                                                                 BranchInst *firstBranch,
                                                                 BranchInst *secondBranch) {
 
@@ -182,7 +182,7 @@ AndOrReplacementMutationOperator::applyMutationANDToOR_Pattern1(Module *M,
 }
 
 llvm::Value *
-AndOrReplacementMutationOperator::applyMutationANDToOR_Pattern2(Module *M,
+AndOrReplacementMutator::applyMutationANDToOR_Pattern2(Module *M,
                                                                 BranchInst *firstBranch,
                                                                 BranchInst *secondBranch) {
 
@@ -250,7 +250,7 @@ AndOrReplacementMutationOperator::applyMutationANDToOR_Pattern2(Module *M,
 }
 
 llvm::Value *
-AndOrReplacementMutationOperator::applyMutationANDToOR_Pattern3(Module *M,
+AndOrReplacementMutator::applyMutationANDToOR_Pattern3(Module *M,
                                                                 BranchInst *firstBranch,
                                                                 BranchInst *secondBranch) {
 
@@ -304,7 +304,7 @@ AndOrReplacementMutationOperator::applyMutationANDToOR_Pattern3(Module *M,
 #pragma mark - Private: Apply mutations: OR -> AND
 
 llvm::Value *
-AndOrReplacementMutationOperator::applyMutationORToAND_Pattern1(Module *M,
+AndOrReplacementMutator::applyMutationORToAND_Pattern1(Module *M,
                                                                 BranchInst *firstBranch,
                                                                 BranchInst *secondBranch) {
 
@@ -373,7 +373,7 @@ AndOrReplacementMutationOperator::applyMutationORToAND_Pattern1(Module *M,
 }
 
 llvm::Value *
-AndOrReplacementMutationOperator::applyMutationORToAND_Pattern2(Module *M,
+AndOrReplacementMutator::applyMutationORToAND_Pattern2(Module *M,
                                                                 BranchInst *firstBranch,
                                                                 BranchInst *secondBranch) {
 
@@ -442,7 +442,7 @@ AndOrReplacementMutationOperator::applyMutationORToAND_Pattern2(Module *M,
 }
 
 llvm::Value *
-AndOrReplacementMutationOperator::applyMutationORToAND_Pattern3(Module *M,
+AndOrReplacementMutator::applyMutationORToAND_Pattern3(Module *M,
                                                                 BranchInst *firstBranch,
                                                                 BranchInst *secondBranch) {
 
@@ -495,7 +495,7 @@ AndOrReplacementMutationOperator::applyMutationORToAND_Pattern3(Module *M,
 #pragma mark - Private: Finding possible mutations
 
 AND_OR_MutationType
-AndOrReplacementMutationOperator::findPossibleMutationInBranch(BranchInst *branchInst,
+AndOrReplacementMutator::findPossibleMutationInBranch(BranchInst *branchInst,
                                                                BranchInst **secondBranchInst) {
 
   if (branchInst->isConditional() == false) {

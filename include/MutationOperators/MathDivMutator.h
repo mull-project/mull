@@ -14,7 +14,7 @@ class MullModule;
 class MutationPoint;
 class MutationPointAddress;
 
-class MathDivMutationOperator : public Mutator {
+class MathDivMutator : public Mutator {
 
 public:
   static const std::string ID;

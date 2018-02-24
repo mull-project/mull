@@ -14,17 +14,17 @@ set(mull_sources
   Instrumentation/Callbacks.cpp
   Instrumentation/Instrumentation.cpp
 
-  MutationOperators/MathAddMutationOperator.cpp
-  MutationOperators/AndOrReplacementMutationOperator.cpp
-  MutationOperators/MutationOperatorsFactory.cpp
-  MutationOperators/NegateConditionMutationOperator.cpp
-  MutationOperators/RemoveVoidFunctionMutationOperator.cpp
-  MutationOperators/ReplaceAssignmentMutationOperator.cpp
-  MutationOperators/ReplaceCallMutationOperator.cpp
-  MutationOperators/MathDivMutationOperator.cpp
-  MutationOperators/MathMulMutationOperator.cpp
-  MutationOperators/MathSubMutationOperator.cpp
-  MutationOperators/ScalarValueMutationOperator.cpp
+  MutationOperators/MathAddMutator.cpp
+  MutationOperators/AndOrReplacementMutator.cpp
+  MutationOperators/MutatorsFactory.cpp
+  MutationOperators/NegateConditionMutator.cpp
+  MutationOperators/RemoveVoidFunctionMutator.cpp
+  MutationOperators/ReplaceAssignmentMutator.cpp
+  MutationOperators/ReplaceCallMutator.cpp
+  MutationOperators/MathDivMutator.cpp
+  MutationOperators/MathMulMutator.cpp
+  MutationOperators/MathSubMutator.cpp
+  MutationOperators/ScalarValueMutator.cpp
 
   MutationOperators/ConditionalsBoundaryMutator.cpp
 

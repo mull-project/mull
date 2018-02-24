@@ -1,4 +1,4 @@
-#include "MutationOperators/RemoveVoidFunctionMutationOperator.h"
+#include "MutationOperators/RemoveVoidFunctionMutator.h"
 
 #include "MutationPoint.h"
 #include "Context.h"
@@ -16,7 +16,7 @@
 using namespace llvm;
 using namespace mull;
 
-const std::string RemoveVoidFunctionMutationOperator::ID =
+const std::string RemoveVoidFunctionMutator::ID =
   "remove_void_function_mutation_operator";
 
 std::string getDiagnostics(Instruction &instruction) {
@@ -36,7 +36,7 @@ std::string getDiagnostics(Instruction &instruction) {
 
 
 MutationPoint *
-RemoveVoidFunctionMutationOperator::getMutationPoint(MullModule *module,
+RemoveVoidFunctionMutator::getMutationPoint(MullModule *module,
                                                      MutationPointAddress &address,
                                                      llvm::Instruction *instruction) {
   if (canBeApplied(*instruction)) {
@@ -47,7 +47,7 @@ RemoveVoidFunctionMutationOperator::getMutationPoint(MullModule *module,
   return nullptr;
 }
 
-bool RemoveVoidFunctionMutationOperator::canBeApplied(Value &V) {
+bool RemoveVoidFunctionMutator::canBeApplied(Value &V) {
   if (CallInst *callInst = dyn_cast<CallInst>(&V)) {
 
     /// How it can be that there is no a called function?
@@ -90,7 +90,7 @@ bool RemoveVoidFunctionMutationOperator::canBeApplied(Value &V) {
   return false;
 }
 
-llvm::Value *RemoveVoidFunctionMutationOperator::applyMutation(Module *M, MutationPointAddress address, Value &_V) {
+llvm::Value *RemoveVoidFunctionMutator::applyMutation(Module *M, MutationPointAddress address, Value &_V) {
   llvm::Function &F    = *(std::next(M->begin(), address.getFnIndex()));
   llvm::BasicBlock &B  = *(std::next(F.begin(), address.getBBIndex()));
   llvm::Instruction &I = *(std::next(B.begin(), address.getIIndex()));

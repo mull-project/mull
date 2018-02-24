@@ -16,7 +16,7 @@ namespace mull {
   class MutationPoint;
   class MutationPointAddress;
 
-  class RemoveVoidFunctionMutationOperator : public Mutator {
+  class RemoveVoidFunctionMutator : public Mutator {
     
   public:
     static const std::string ID;

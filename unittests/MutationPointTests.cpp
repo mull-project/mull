@@ -1,13 +1,13 @@
 #include "Context.h"
-#include "MutationOperators/MathAddMutationOperator.h"
-#include "MutationOperators/MathDivMutationOperator.h"
-#include "MutationOperators/MathMulMutationOperator.h"
-#include "MutationOperators/MathSubMutationOperator.h"
-#include "MutationOperators/NegateConditionMutationOperator.h"
-#include "MutationOperators/AndOrReplacementMutationOperator.h"
-#include "MutationOperators/ScalarValueMutationOperator.h"
-#include "MutationOperators/ReplaceAssignmentMutationOperator.h"
-#include "MutationOperators/ReplaceCallMutationOperator.h"
+#include "MutationOperators/MathAddMutator.h"
+#include "MutationOperators/MathDivMutator.h"
+#include "MutationOperators/MathMulMutator.h"
+#include "MutationOperators/MathSubMutator.h"
+#include "MutationOperators/NegateConditionMutator.h"
+#include "MutationOperators/AndOrReplacementMutator.h"
+#include "MutationOperators/ScalarValueMutator.h"
+#include "MutationOperators/ReplaceAssignmentMutator.h"
+#include "MutationOperators/ReplaceCallMutator.h"
 #include "TestModuleFactory.h"
 #include "Testee.h"
 #include "MutationsFinder.h"
@@ -50,7 +50,7 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
   Ctx.addModule(std::move(ModuleWithTestees));
 
   std::vector<std::unique_ptr<Mutator>> mutationOperators;
-  mutationOperators.emplace_back(make_unique<MathAddMutationOperator>());
+  mutationOperators.emplace_back(make_unique<MathAddMutator>());
   MutationsFinder finder(std::move(mutationOperators));
 
   Function *testeeFunction = Ctx.lookupDefinedFunction("count_letters");
@@ -95,7 +95,7 @@ TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
   Ctx.addModule(std::move(module));
 
   std::vector<std::unique_ptr<Mutator>> mutationOperators;
-  mutationOperators.emplace_back(make_unique<MathSubMutationOperator>());
+  mutationOperators.emplace_back(make_unique<MathSubMutator>());
   MutationsFinder finder(std::move(mutationOperators));
 
   Function *testeeFunction = Ctx.lookupDefinedFunction("math_sub");
@@ -139,7 +139,7 @@ TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
   Ctx.addModule(std::move(module));
 
   std::vector<std::unique_ptr<Mutator>> mutationOperators;
-  mutationOperators.emplace_back(make_unique<MathMulMutationOperator>());
+  mutationOperators.emplace_back(make_unique<MathMulMutator>());
   MutationsFinder finder(std::move(mutationOperators));
 
   Function *testeeFunction = Ctx.lookupDefinedFunction("math_mul");
@@ -184,7 +184,7 @@ TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
   Ctx.addModule(std::move(module));
 
   std::vector<std::unique_ptr<Mutator>> mutationOperators;
-  mutationOperators.emplace_back(make_unique<MathDivMutationOperator>());
+  mutationOperators.emplace_back(make_unique<MathDivMutator>());
 
   MutationsFinder finder(std::move(mutationOperators));
 
@@ -233,7 +233,7 @@ TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
   Ctx.addModule(std::move(ModuleWithTestees));
 
   std::vector<std::unique_ptr<Mutator>> mutationOperators;
-  mutationOperators.emplace_back(make_unique<NegateConditionMutationOperator>());
+  mutationOperators.emplace_back(make_unique<NegateConditionMutator>());
   MutationsFinder finder(std::move(mutationOperators));
 
   Function *testeeFunction = Ctx.lookupDefinedFunction("max");
@@ -273,7 +273,7 @@ TEST(MutationPoint, SimpleTest_AndOrMutationOperator_applyMutation) {
   ctx.addModule(std::move(module));
 
   std::vector<std::unique_ptr<Mutator>> mutationOperators;
-  mutationOperators.emplace_back(make_unique<AndOrReplacementMutationOperator>());
+  mutationOperators.emplace_back(make_unique<AndOrReplacementMutator>());
 
   MutationsFinder finder(std::move(mutationOperators));
   Filter filter;
@@ -321,7 +321,7 @@ TEST(MutationPoint, SimpleTest_ScalarValueMutationOperator_applyMutation) {
   Ctx.addModule(std::move(module));
 
   std::vector<std::unique_ptr<Mutator>> mutationOperators;
-  mutationOperators.emplace_back(make_unique<ScalarValueMutationOperator>());
+  mutationOperators.emplace_back(make_unique<ScalarValueMutator>());
   MutationsFinder finder(std::move(mutationOperators));
 
   Function *testeeFunction = Ctx.lookupDefinedFunction("scalar_value");
@@ -374,7 +374,7 @@ TEST(MutationPoint, SimpleTest_ReplaceCallMutationOperator_applyMutation) {
   Ctx.addModule(std::move(module));
 
   std::vector<std::unique_ptr<Mutator>> mutationOperators;
-  mutationOperators.emplace_back(make_unique<ReplaceCallMutationOperator>());
+  mutationOperators.emplace_back(make_unique<ReplaceCallMutator>());
 
   MutationsFinder finder(std::move(mutationOperators));
 
@@ -411,7 +411,7 @@ TEST(MutationPoint, SimpleTest_ReplaceAssignmentMutationOperator_applyMutation) 
     Ctx.addModule(std::move(module));
 
     std::vector<std::unique_ptr<Mutator>> mutationOperators;
-    mutationOperators.emplace_back(make_unique<ReplaceAssignmentMutationOperator>());
+    mutationOperators.emplace_back(make_unique<ReplaceAssignmentMutator>());
 
     MutationsFinder finder(std::move(mutationOperators));
 

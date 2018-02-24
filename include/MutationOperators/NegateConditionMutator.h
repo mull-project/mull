@@ -16,7 +16,7 @@ namespace mull {
   class MutationPoint;
   class MutationPointAddress;
 
-  class NegateConditionMutationOperator : public Mutator {
+  class NegateConditionMutator : public Mutator {
     
   public:
     static const std::string ID;

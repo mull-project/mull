@@ -1,4 +1,4 @@
-#include "MutationOperators/MutationOperatorsFactory.h"
+#include "MutationOperators/MutatorsFactory.h"
 
 #include "gtest/gtest.h"
 
@@ -9,7 +9,7 @@ using namespace llvm;
 using namespace std;
 
 TEST(MutationsOperatorFactory, SingleOperators) {
-  MutationOperatorsFactory factory;
+  MutatorsFactory factory;
   vector<unique_ptr<Mutator>> operators;
   Mutator *mutationOperator = nullptr;
 
@@ -84,7 +84,7 @@ static std::function<bool (unique_ptr<Mutator>&)> predicate(const char *name) {
 }
 
 TEST(MutationsOperatorFactory, CompositeOperators) {
-  MutationOperatorsFactory factory;
+  MutatorsFactory factory;
   vector<unique_ptr<Mutator>> operators;
   vector<unique_ptr<Mutator>>::iterator searchResult;
 
@@ -222,7 +222,7 @@ TEST(MutationsOperatorFactory, CompositeOperators) {
 }
 
 TEST(MutationsOperatorFactory, UniqueOperators) {
-  MutationOperatorsFactory factory;
+  MutatorsFactory factory;
   vector<unique_ptr<Mutator>> operators;
   vector<unique_ptr<Mutator>>::iterator searchResult;
   Mutator *mutationOperator = nullptr;
