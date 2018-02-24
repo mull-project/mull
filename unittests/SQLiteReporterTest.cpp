@@ -2,7 +2,7 @@
 #include "Context.h"
 #include "Reporters/SQLiteReporter.h"
 #include "Result.h"
-#include "MutationOperators/MathAddMutationOperator.h"
+#include "Mutators/MathAddMutator.h"
 #include "SimpleTest/SimpleTestFinder.h"
 #include "SimpleTest/SimpleTest_Test.h"
 #include "TestModuleFactory.h"
@@ -38,10 +38,10 @@ TEST(SQLiteReporter, integrationTest) {
   context.addModule(std::move(mullModuleWithTests));
   context.addModule(std::move(mullModuleWithTestees));
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
-  std::unique_ptr<MathAddMutationOperator> addMutationOperator = make_unique<MathAddMutationOperator>();
-  mutationOperators.emplace_back(std::move(addMutationOperator));
-  MutationsFinder mutationsFinder(std::move(mutationOperators));
+  std::vector<std::unique_ptr<Mutator>> mutators;
+  std::unique_ptr<MathAddMutator> addMutator = make_unique<MathAddMutator>();
+  mutators.emplace_back(std::move(addMutator));
+  MutationsFinder mutationsFinder(std::move(mutators));
   Filter filter;
 
   SimpleTestFinder testFinder;
@@ -267,7 +267,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
 
   const unsigned char *column1_projectName = nullptr;
   const unsigned char *column2_bitcodePaths = nullptr;
-  const unsigned char *column3_operators = nullptr;
+  const unsigned char *column3_mutators = nullptr;
   const unsigned char *column4_dylibs = nullptr;
   const unsigned char *column5_objectFiles = nullptr;
   const unsigned char *column6_tests = nullptr;
@@ -291,7 +291,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
       int row = 0;
       column1_projectName = sqlite3_column_text(selectStmt, row++);
       column2_bitcodePaths = sqlite3_column_text(selectStmt, row++);
-      column3_operators = sqlite3_column_text(selectStmt, row++);
+      column3_mutators = sqlite3_column_text(selectStmt, row++);
       column4_dylibs = sqlite3_column_text(selectStmt, row++);
       column5_objectFiles = sqlite3_column_text(selectStmt, row++);
       column6_tests = sqlite3_column_text(selectStmt, row++);
@@ -308,7 +308,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
 
       ASSERT_EQ(strcmp((const char *)column1_projectName, projectName.c_str()), 0);
       ASSERT_EQ(strcmp((const char *)column2_bitcodePaths, "tester.bc,testee.bc"), 0);
-      ASSERT_EQ(strcmp((const char *)column3_operators, "add_mutation,negate_condition"), 0);
+      ASSERT_EQ(strcmp((const char *)column3_mutators, "add_mutation,negate_condition"), 0);
       ASSERT_EQ(strcmp((const char *)column4_dylibs, "sqlite3.dylib,libz.dylib"), 0);
       ASSERT_EQ(strcmp((const char *)column5_objectFiles, "foo.o,bar.o"), 0);
       ASSERT_EQ(strcmp((const char *)column6_tests, "test_method1,test_method2"), 0);
@@ -350,10 +350,10 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   context.addModule(std::move(mullModuleWithTests));
   context.addModule(std::move(mullModuleWithTestees));
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
-  std::unique_ptr<MathAddMutationOperator> addMutationOperator = make_unique<MathAddMutationOperator>();
-  mutationOperators.emplace_back(std::move(addMutationOperator));
-  MutationsFinder mutationsFinder(std::move(mutationOperators));
+  std::vector<std::unique_ptr<Mutator>> mutators;
+  std::unique_ptr<MathAddMutator> addMutator = make_unique<MathAddMutator>();
+  mutators.emplace_back(std::move(addMutator));
+  MutationsFinder mutationsFinder(std::move(mutators));
   Filter filter;
   SimpleTestFinder testFinder;
   auto tests = testFinder.findTests(context, filter);
@@ -497,10 +497,10 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   context.addModule(std::move(mullModuleWithTests));
   context.addModule(std::move(mullModuleWithTestees));
 
-  std::vector<std::unique_ptr<MutationOperator>> mutationOperators;
-  std::unique_ptr<MathAddMutationOperator> addMutationOperator = make_unique<MathAddMutationOperator>();
-  mutationOperators.emplace_back(std::move(addMutationOperator));
-  MutationsFinder mutationsFinder(std::move(mutationOperators));
+  std::vector<std::unique_ptr<Mutator>> mutators;
+  std::unique_ptr<MathAddMutator> addMutator = make_unique<MathAddMutator>();
+  mutators.emplace_back(std::move(addMutator));
+  MutationsFinder mutationsFinder(std::move(mutators));
   Filter filter;
 
   SimpleTestFinder testFinder;

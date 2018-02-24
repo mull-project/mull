@@ -3,7 +3,7 @@
 #include <vector>
 #include <map>
 
-#include "MutationOperators/MutationOperator.h"
+#include "Mutators/Mutator.h"
 #include "MutationPoint.h"
 
 namespace llvm {
@@ -16,10 +16,10 @@ namespace mull {
   class Testee;
 
   class MutationsFinder {
-    std::vector<std::unique_ptr<MutationOperator>> operators;
+    std::vector<std::unique_ptr<Mutator>> mutators;
     std::map<llvm::Function *, std::vector<std::unique_ptr<MutationPoint>>> cachedPoints;
   public:
-    MutationsFinder(std::vector<std::unique_ptr<MutationOperator>> operators);
+    MutationsFinder(std::vector<std::unique_ptr<Mutator>> mutators);
     std::vector<MutationPoint *> getMutationPoints(const Context &context,
                                                    Testee &testee,
                                                    Filter &filter);

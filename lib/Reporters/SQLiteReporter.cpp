@@ -6,7 +6,7 @@
 #include "Result.h"
 #include "MutationResult.h"
 
-#include "MutationOperators/MutationOperator.h"
+#include "Mutators/Mutator.h"
 #include "Metrics/Metrics.h"
 
 #include <llvm/IR/DebugInfoMetadata.h>
@@ -188,7 +188,7 @@ void mull::SQLiteReporter::reportResults(const Result &result,
     }
 
     int index = 1;
-    sqlite3_bind_text(insertMutationPointStmt, index++, mutationPoint->getOperator()->uniqueID().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(insertMutationPointStmt, index++, mutationPoint->getMutator()->uniqueID().c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(insertMutationPointStmt, index++, instruction->getParent()->getParent()->getParent()->getModuleIdentifier().c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(insertMutationPointStmt, index++, instruction->getParent()->getParent()->getName().str().c_str(), -1, SQLITE_TRANSIENT);
 
@@ -255,7 +255,7 @@ void mull::SQLiteReporter::reportResults(const Result &result,
     const long endTime = metrics.driverRunTime().end.count();
 
     std::string csvBitcodePaths = vectorToCsv(config.getBitcodePaths());
-    std::string csvMutationOperators = vectorToCsv(config.getMutationOperators());
+    std::string csvMutators = vectorToCsv(config.getMutators());
     std::string csvDynamicLibraries = vectorToCsv(config.getDynamicLibrariesPaths());
     std::string csvObjectFiles = vectorToCsv(config.getObjectFilesPaths());
     std::string csvTests = vectorToCsv(config.getTests());
@@ -263,7 +263,7 @@ void mull::SQLiteReporter::reportResults(const Result &result,
     int index = 1;
     sqlite3_bind_text(insertConfigStmt, index++, config.getProjectName().c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(insertConfigStmt, index++, csvBitcodePaths.c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(insertConfigStmt, index++, csvMutationOperators.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(insertConfigStmt, index++, csvMutators.c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(insertConfigStmt, index++, csvDynamicLibraries.c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(insertConfigStmt, index++, csvObjectFiles.c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(insertConfigStmt, index++, csvTests.c_str(), -1, SQLITE_TRANSIENT);
@@ -308,7 +308,7 @@ CREATE TABLE test (
 );
 
 CREATE TABLE mutation_point (
-  mutation_operator TEXT,
+  mutator TEXT,
   module_name TEXT,
   function_name TEXT,
   function_index INT,
@@ -342,7 +342,7 @@ CREATE TABLE mutation_point_debug (
 CREATE TABLE config (
   project_name TEXT,
   bitcode_paths TEXT,
-  mutation_operators TEXT,
+  mutators TEXT,
   dynamic_libraries TEXT,
   object_files TEXT,
   tests TEXT,

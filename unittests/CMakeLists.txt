@@ -7,17 +7,16 @@ set(mull_unittests_sources
   MutationPointTests.cpp
   ModuleLoaderTest.cpp
   DynamicCallTreeTests.cpp
-  MutationOperatorsFactoryTests.cpp
+  MutatorsFactoryTests.cpp
 
   TestRunnersTests.cpp
   UniqueIdentifierTests.cpp
 
-  MutationOperators/MutationOperatorsTests.cpp
-  MutationOperators/NegateConditionMutationOperatorTest.cpp
-  MutationOperators/RemoveVoidFunctionMutationOperatorTest.cpp
-  MutationOperators/ScalarValueMutationOperatorTest.cpp
-
-  MutationOperators/ConditionalsBoundaryMutatorTests.cpp
+  Mutators/MutatorsTests.cpp
+  Mutators/NegateConditionMutatorTest.cpp
+  Mutators/RemoveVoidFunctionMutatorTest.cpp
+  Mutators/ScalarValueMutatorTest.cpp
+  Mutators/ConditionalsBoundaryMutatorTests.cpp
 
   JunkDetection/CXXJunkDetectorTests.cpp
 

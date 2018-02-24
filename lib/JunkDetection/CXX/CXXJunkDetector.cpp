@@ -1,7 +1,7 @@
 #include "JunkDetection/CXX/CXXJunkDetector.h"
 
 #include "MutationPoint.h"
-#include "MutationOperators/MutationOperator.h"
+#include "Mutators/Mutator.h"
 #include "Logger.h"
 
 #include <llvm/IR/DebugInfoMetadata.h>
@@ -109,7 +109,7 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     return true;
   }
 
-  switch (point->getOperator()->mutatorKind()) {
+  switch (point->getMutator()->mutatorKind()) {
     case MutatorKind::ConditionalsBoundaryMutator:
       return isJunkBoundary(cursor, location, address, point);
       break;
@@ -117,7 +117,7 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     default:
       Logger::warn()
         << "CXXJunkDetector does not support '"
-        << point->getOperator()->uniqueID()
+        << point->getMutator()->uniqueID()
         << "'\n";
       break;
   }

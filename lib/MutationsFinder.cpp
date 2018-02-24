@@ -25,8 +25,8 @@ static int GetFunctionIndex(llvm::Function *function) {
   return index;
 }
 
-MutationsFinder::MutationsFinder(std::vector<std::unique_ptr<MutationOperator>> operators)
-: operators(std::move(operators)) {}
+MutationsFinder::MutationsFinder(std::vector<std::unique_ptr<Mutator>> mutators)
+: mutators(std::move(mutators)) {}
 
 std::vector<MutationPoint *> MutationsFinder::getMutationPoints(const Context &context,
                                                                 Testee &testee,
@@ -49,7 +49,7 @@ std::vector<MutationPoint *> MutationsFinder::getMutationPoints(const Context &c
   MullModule *module = context.moduleWithIdentifier(moduleID);
 
   int functionIndex = GetFunctionIndex(function);
-  for (auto &mutationOperator : operators) {
+  for (auto &mutator : mutators) {
 
     int basicBlockIndex = 0;
     for (auto &basicBlock : function->getBasicBlockList()) {
@@ -62,9 +62,9 @@ std::vector<MutationPoint *> MutationsFinder::getMutationPoints(const Context &c
         }
 
         MutationPointAddress address(functionIndex, basicBlockIndex, instructionIndex);
-        MutationPoint *point = mutationOperator->getMutationPoint(module,
-                                                                  address,
-                                                                  &instruction);
+        MutationPoint *point = mutator->getMutationPoint(module,
+                                                         address,
+                                                         &instruction);
         if (point) {
           point->addReachableTest(testee.getTest(), testee.getDistance());
           mutationPoints.push_back(point);

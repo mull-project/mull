@@ -5,7 +5,7 @@
 #include "Filter.h"
 #include "Logger.h"
 #include "ModuleLoader.h"
-#include "MutationOperators/MutationOperatorsFactory.h"
+#include "Mutators/MutatorsFactory.h"
 #include "Reporters/SQLiteReporter.h"
 #include "Reporters/TimeReporter.h"
 #include "Result.h"
@@ -95,10 +95,9 @@ int main(int argc, char *argv[]) {
   std::unique_ptr<TestFinder> testFinder;
   std::unique_ptr<TestRunner> testRunner;
 
-  auto mutationOperatorsFactory = MutationOperatorsFactory();
-  auto mutationOperators =
-    mutationOperatorsFactory.mutationOperators(config.getMutationOperators());
-  MutationsFinder mutationsFinder(std::move(mutationOperators));
+  auto mutatorsFactory = MutatorsFactory();
+  auto mutators = mutatorsFactory.mutators(config.getMutators());
+  MutationsFinder mutationsFinder(std::move(mutators));
 
   if (testFramework == "GoogleTest") {
     filter.skipByName("testing8internal");
