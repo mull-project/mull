@@ -105,11 +105,13 @@ TEST(MutationsOperatorFactory, CompositeOperators) {
 
   {
     operators = factory.mutationOperators({ "conditional" });
-    ASSERT_EQ(operators.size(), 2UL);
+    ASSERT_EQ(operators.size(), 3UL);
 
     searchResult = find_if(operators.begin(), operators.end(), predicate("and_or_replacement_mutation_operator"));
     ASSERT_NE(searchResult, operators.end());
     searchResult = find_if(operators.begin(), operators.end(), predicate("negate_mutation_operator"));
+    ASSERT_NE(searchResult, operators.end());
+    searchResult = find_if(operators.begin(), operators.end(), predicate("conditionals_boundary_mutator"));
     ASSERT_NE(searchResult, operators.end());
   }
 
@@ -145,7 +147,7 @@ TEST(MutationsOperatorFactory, CompositeOperators) {
 
   {
     operators = factory.mutationOperators({ "experimental" });
-    ASSERT_EQ(operators.size(), 7UL);
+    ASSERT_EQ(operators.size(), 8UL);
 
     searchResult = find_if(operators.begin(), operators.end(), predicate("math_div_mutation_operator"));
     ASSERT_NE(searchResult, operators.end());
@@ -155,18 +157,19 @@ TEST(MutationsOperatorFactory, CompositeOperators) {
     ASSERT_NE(searchResult, operators.end());
     searchResult = find_if(operators.begin(), operators.end(), predicate("and_or_replacement_mutation_operator"));
     ASSERT_NE(searchResult, operators.end());
-    searchResult = find_if(operators.begin(), operators.end(),
-      predicate("replace_assignment_mutation_operator"));
+    searchResult = find_if(operators.begin(), operators.end(), predicate("replace_assignment_mutation_operator"));
     ASSERT_NE(searchResult, operators.end());
     searchResult = find_if(operators.begin(), operators.end(), predicate("replace_call_mutation_operator"));
     ASSERT_NE(searchResult, operators.end());
     searchResult = find_if(operators.begin(), operators.end(), predicate("scalar_value_mutation_operator"));
+    ASSERT_NE(searchResult, operators.end());
+    searchResult = find_if(operators.begin(), operators.end(), predicate("conditionals_boundary_mutator"));
     ASSERT_NE(searchResult, operators.end());
   }
 
   {
     operators = factory.mutationOperators({ "all" });
-    ASSERT_EQ(operators.size(), 10UL);
+    ASSERT_EQ(operators.size(), 11UL);
 
     searchResult = find_if(operators.begin(), operators.end(), predicate("math_add_mutation_operator"));
     ASSERT_NE(searchResult, operators.end());
@@ -182,18 +185,19 @@ TEST(MutationsOperatorFactory, CompositeOperators) {
     ASSERT_NE(searchResult, operators.end());
     searchResult = find_if(operators.begin(), operators.end(), predicate("remove_void_function_mutation_operator"));
     ASSERT_NE(searchResult, operators.end());
-    searchResult = find_if(operators.begin(), operators.end(),
-      predicate("replace_assignment_mutation_operator"));
+    searchResult = find_if(operators.begin(), operators.end(), predicate("replace_assignment_mutation_operator"));
     ASSERT_NE(searchResult, operators.end());
     searchResult = find_if(operators.begin(), operators.end(), predicate("replace_call_mutation_operator"));
     ASSERT_NE(searchResult, operators.end());
     searchResult = find_if(operators.begin(), operators.end(), predicate("scalar_value_mutation_operator"));
     ASSERT_NE(searchResult, operators.end());
+    searchResult = find_if(operators.begin(), operators.end(), predicate("conditionals_boundary_mutator"));
+    ASSERT_NE(searchResult, operators.end());
   }
 
   {
     operators = factory.mutationOperators({ "default", "experimental" });
-    ASSERT_EQ(operators.size(), 10UL);
+    ASSERT_EQ(operators.size(), 11UL);
 
     searchResult = find_if(operators.begin(), operators.end(), predicate("math_add_mutation_operator"));
     ASSERT_NE(searchResult, operators.end());
@@ -209,8 +213,7 @@ TEST(MutationsOperatorFactory, CompositeOperators) {
     ASSERT_NE(searchResult, operators.end());
     searchResult = find_if(operators.begin(), operators.end(), predicate("remove_void_function_mutation_operator"));
     ASSERT_NE(searchResult, operators.end());
-    searchResult = find_if(operators.begin(), operators.end(),
-      predicate("replace_assignment_mutation_operator"));
+    searchResult = find_if(operators.begin(), operators.end(), predicate("replace_assignment_mutation_operator"));
     ASSERT_NE(searchResult, operators.end());
     searchResult = find_if(operators.begin(), operators.end(), predicate("replace_call_mutation_operator"));
     ASSERT_NE(searchResult, operators.end());

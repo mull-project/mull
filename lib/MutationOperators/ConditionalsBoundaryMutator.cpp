@@ -1,4 +1,4 @@
-#include "MutationOperators/CXX/Conditionals/BoundaryMutator.h"
+#include "MutationOperators/ConditionalsBoundaryMutator.h"
 
 #include "Context.h"
 #include "Logger.h"
@@ -16,7 +16,7 @@
 using namespace llvm;
 using namespace mull;
 
-const std::string cxx::BoundaryMutator::ID = "cxx_boundary_mutator";
+const std::string ConditionalsBoundaryMutator::ID = "conditionals_boundary_mutator";
 
 ///
 /// This mutator changes boundaries of conditionals:
@@ -108,7 +108,7 @@ static std::string getDiagnostics(CmpInst::Predicate originalPredicate,
   return diagnostics.str();
 }
 
-bool cxx::BoundaryMutator::isGT(llvm::Instruction *instruction) {
+bool ConditionalsBoundaryMutator::isGT(llvm::Instruction *instruction) {
   CmpInst *cmp = dyn_cast<CmpInst>(instruction);
   if (cmp == nullptr) {
     return false;
@@ -131,7 +131,7 @@ bool cxx::BoundaryMutator::isGT(llvm::Instruction *instruction) {
   return false;
 }
 
-bool cxx::BoundaryMutator::isGTE(llvm::Instruction *instruction) {
+bool ConditionalsBoundaryMutator::isGTE(llvm::Instruction *instruction) {
   CmpInst *cmp = dyn_cast<CmpInst>(instruction);
   if (cmp == nullptr) {
     return false;
@@ -154,7 +154,7 @@ bool cxx::BoundaryMutator::isGTE(llvm::Instruction *instruction) {
   return false;
 }
 
-bool cxx::BoundaryMutator::isLT(llvm::Instruction *instruction) {
+bool ConditionalsBoundaryMutator::isLT(llvm::Instruction *instruction) {
   CmpInst *cmp = dyn_cast<CmpInst>(instruction);
   if (cmp == nullptr) {
     return false;
@@ -177,7 +177,7 @@ bool cxx::BoundaryMutator::isLT(llvm::Instruction *instruction) {
   return false;
 }
 
-bool cxx::BoundaryMutator::isLTE(llvm::Instruction *instruction) {
+bool ConditionalsBoundaryMutator::isLTE(llvm::Instruction *instruction) {
   CmpInst *cmp = dyn_cast<CmpInst>(instruction);
   if (cmp == nullptr) {
     return false;
@@ -200,22 +200,22 @@ bool cxx::BoundaryMutator::isLTE(llvm::Instruction *instruction) {
   return false;
 }
 
-std::string cxx::BoundaryMutator::uniqueID() {
+std::string ConditionalsBoundaryMutator::uniqueID() {
   return ID;
 }
 
-std::string cxx::BoundaryMutator::uniqueID() const {
+std::string ConditionalsBoundaryMutator::uniqueID() const {
   return ID;
 }
 
-MutatorKind cxx::BoundaryMutator::mutatorKind() {
-  return MutatorKind::CXXBoundaryMutator;
+MutatorKind ConditionalsBoundaryMutator::mutatorKind() {
+  return MutatorKind::ConditionalsBoundaryMutator;
 }
 
 MutationPoint *
-cxx::BoundaryMutator::getMutationPoint(MullModule *module,
-                                       MutationPointAddress &address,
-                                       Instruction *instruction) {
+ConditionalsBoundaryMutator::getMutationPoint(MullModule *module,
+                                              MutationPointAddress &address,
+                                              Instruction *instruction) {
   CmpInst *cmpOp = dyn_cast<CmpInst>(instruction);
   if (cmpOp == nullptr) {
     return nullptr;
@@ -233,12 +233,12 @@ cxx::BoundaryMutator::getMutationPoint(MullModule *module,
   return new MutationPoint(this, address, instruction, module, diagnostics);
 }
 
-bool cxx::BoundaryMutator::canBeApplied(Value &V) {
+bool ConditionalsBoundaryMutator::canBeApplied(Value &V) {
   llvm_unreachable("not used here anymore");
   return false;
 }
 
-Value *cxx::BoundaryMutator::applyMutation(Module *M, MutationPointAddress address, Value &_V) {
+Value *ConditionalsBoundaryMutator::applyMutation(Module *M, MutationPointAddress address, Value &_V) {
   /// In the following V argument is not used. Eventually it will be removed from
   /// this method's signature because it will be not relevant
   /// when mutations will be applied on copies of original module

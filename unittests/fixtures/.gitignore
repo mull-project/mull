@@ -26,4 +26,4 @@ custom_test/dylibs_and_objects/libdistance.dylib
 custom_test/dylibs_and_objects/test.bc
 custom_test/dylibs_and_objects/distance.bc
 custom_test/dylibs_and_objects/main.bc
-mutators/cxx/boundary/*.bc
+mutators/boundary/*.bc

@@ -110,7 +110,7 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
   }
 
   switch (point->getOperator()->mutatorKind()) {
-    case MutatorKind::CXXBoundaryMutator:
+    case MutatorKind::ConditionalsBoundaryMutator:
       return isJunkBoundary(cursor, location, address, point);
       break;
 

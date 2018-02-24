@@ -2,7 +2,7 @@
 
 #include "MutationOperators/MutationOperator.h"
 
-#include "llvm/IR/Instructions.h"
+#include <llvm/IR/Instructions.h>
 
 #include <vector>
 
@@ -16,9 +16,7 @@ class MullModule;
 class MutationPoint;
 class MutationPointAddress;
 
-namespace cxx {
-
-class BoundaryMutator : public MutationOperator {
+class ConditionalsBoundaryMutator : public MutationOperator {
 
 public:
   static const std::string ID;
@@ -38,8 +36,6 @@ public:
   bool canBeApplied(llvm::Value &V) override;
   llvm::Value *applyMutation(llvm::Module *M, MutationPointAddress address, llvm::Value &OriginalValue) override;
 };
-
-}
 
 }
 

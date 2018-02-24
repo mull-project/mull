@@ -1,7 +1,7 @@
 CC=/opt/llvm-3.9/bin/clang
-LEVEL=../../../..
+LEVEL=../../..
 BUILD_DIR=./build
-FIXTURES_DIR=$(LEVEL)/unittests/fixtures/mutators/cxx/boundary
+FIXTURES_DIR=$(LEVEL)/unittests/fixtures/mutators/boundary
 
 BITCODE_FILES=main.bc
 

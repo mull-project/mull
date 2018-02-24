@@ -263,8 +263,8 @@ std::unique_ptr<MullModule> TestModuleFactory::create_CustomTest_OpenSSL_bio_enc
   return createModule(fixture, fixture);
 }
 
-std::unique_ptr<MullModule> TestModuleFactory::create_CXX_BoundaryMutator_Module() {
-  const char *fixture = "mutators/cxx/boundary/main.bc";
+std::unique_ptr<MullModule> TestModuleFactory::create_ConditionalsBoundaryMutator_Module() {
+  const char *fixture = "mutators/boundary/main.bc";
   return createModuleFromBitcode(fixture, fixture);
 }
 
