@@ -1,6 +1,6 @@
 #include "Config.h"
 #include "Context.h"
-#include "MutationOperators/CXX/Conditionals/BoundaryMutator.h"
+#include "MutationOperators/ConditionalsBoundaryMutator.h"
 #include "MutationPoint.h"
 #include "TestModuleFactory.h"
 #include "Toolchain/Compiler.h"
@@ -21,14 +21,14 @@ using namespace llvm;
 static TestModuleFactory TestModuleFactory;
 
 TEST(CXX_BoundaryMutator, findMutations) {
-  auto mullModule = TestModuleFactory.create_CXX_BoundaryMutator_Module();
+  auto mullModule = TestModuleFactory.create_ConditionalsBoundaryMutator_Module();
   auto module = mullModule->getModule();
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
 
   std::vector<std::unique_ptr<MutationOperator>> operators;
-  operators.emplace_back(make_unique<cxx::BoundaryMutator>());
+  operators.emplace_back(make_unique<ConditionalsBoundaryMutator>());
   MutationsFinder finder(std::move(operators));
   Filter filter;
 
@@ -45,8 +45,8 @@ TEST(CXX_BoundaryMutator, findMutations) {
 }
 
 TEST(CXX_BoundaryMutator, applyMutations) {
-  auto mullModule = TestModuleFactory.create_CXX_BoundaryMutator_Module();
-  auto mutatedModule = TestModuleFactory.create_CXX_BoundaryMutator_Module();
+  auto mullModule = TestModuleFactory.create_ConditionalsBoundaryMutator_Module();
+  auto mutatedModule = TestModuleFactory.create_ConditionalsBoundaryMutator_Module();
   auto borrowedModule = mullModule.get();
   auto module = borrowedModule->getModule();
 
@@ -54,7 +54,7 @@ TEST(CXX_BoundaryMutator, applyMutations) {
   mullContext.addModule(std::move(mullModule));
 
   std::vector<std::unique_ptr<MutationOperator>> operators;
-  operators.emplace_back(make_unique<cxx::BoundaryMutator>());
+  operators.emplace_back(make_unique<ConditionalsBoundaryMutator>());
   MutationsFinder finder(std::move(operators));
   Filter filter;
 
@@ -72,17 +72,17 @@ TEST(CXX_BoundaryMutator, applyMutations) {
     point->applyMutation(*mutatedModule.get());
     Instruction *mutatedInstruction = &point->getAddress().findInstruction(mutatedModule->getModule());
 
-    if (cxx::BoundaryMutator::isGT(originalInstruction)) {
-      ASSERT_TRUE(cxx::BoundaryMutator::isGTE(mutatedInstruction));
+    if (ConditionalsBoundaryMutator::isGT(originalInstruction)) {
+      ASSERT_TRUE(ConditionalsBoundaryMutator::isGTE(mutatedInstruction));
     }
-    else if (cxx::BoundaryMutator::isGTE(originalInstruction)) {
-      ASSERT_TRUE(cxx::BoundaryMutator::isGT(mutatedInstruction));
+    else if (ConditionalsBoundaryMutator::isGTE(originalInstruction)) {
+      ASSERT_TRUE(ConditionalsBoundaryMutator::isGT(mutatedInstruction));
     }
-    else if (cxx::BoundaryMutator::isLTE(originalInstruction)) {
-      ASSERT_TRUE(cxx::BoundaryMutator::isLT(mutatedInstruction));
+    else if (ConditionalsBoundaryMutator::isLTE(originalInstruction)) {
+      ASSERT_TRUE(ConditionalsBoundaryMutator::isLT(mutatedInstruction));
     }
-    else if (cxx::BoundaryMutator::isLT(originalInstruction)) {
-      ASSERT_TRUE(cxx::BoundaryMutator::isLTE(mutatedInstruction));
+    else if (ConditionalsBoundaryMutator::isLT(originalInstruction)) {
+      ASSERT_TRUE(ConditionalsBoundaryMutator::isLTE(mutatedInstruction));
     }
   }
 

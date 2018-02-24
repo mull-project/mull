@@ -12,7 +12,7 @@
 #include "MutationOperators/ReplaceCallMutationOperator.h"
 #include "MutationOperators/ScalarValueMutationOperator.h"
 
-#include "MutationOperators/CXX/Conditionals/BoundaryMutator.h"
+#include "MutationOperators/ConditionalsBoundaryMutator.h"
 
 #include "Logger.h"
 
@@ -50,7 +50,8 @@ static void expandGroups(const vector<string> &groups,
 MutationOperatorsFactory::MutationOperatorsFactory() {
   groupsMapping[ConditionalOperatorsGroup] = {
     AndOrReplacementMutationOperator::ID,
-    NegateConditionMutationOperator::ID
+    NegateConditionMutationOperator::ID,
+    ConditionalsBoundaryMutator::ID
   };
   groupsMapping[MathOperatorsGroup] = {
     MathAddMutationOperator::ID,
@@ -77,10 +78,11 @@ MutationOperatorsFactory::MutationOperatorsFactory() {
     AndOrReplacementMutationOperator::ID,
     ReplaceAssignmentMutationOperator::ID,
     ReplaceCallMutationOperator::ID,
-    ScalarValueMutationOperator::ID
+    ScalarValueMutationOperator::ID,
+    ConditionalsBoundaryMutator::ID
   };
   groupsMapping[CXXOperatorsGroup] = {
-    cxx::BoundaryMutator::ID
+    ConditionalsBoundaryMutator::ID
   };
   groupsMapping[AllOperatorsGroup] = {
     DefaultOperatorsGroup,
@@ -113,8 +115,8 @@ void MutationOperatorsFactory::init() {
   mutationsMapping[ScalarValueMutationOperator::ID] =
     make_unique<ScalarValueMutationOperator>();
 
-  mutationsMapping[cxx::BoundaryMutator::ID] =
-    make_unique<cxx::BoundaryMutator>();
+  mutationsMapping[ConditionalsBoundaryMutator::ID] =
+    make_unique<ConditionalsBoundaryMutator>();
 }
 
 vector<unique_ptr<MutationOperator>>

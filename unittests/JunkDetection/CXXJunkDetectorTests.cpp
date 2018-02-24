@@ -1,6 +1,6 @@
 #include "Config.h"
 #include "Context.h"
-#include "MutationOperators/CXX/Conditionals/BoundaryMutator.h"
+#include "MutationOperators/ConditionalsBoundaryMutator.h"
 #include "MutationPoint.h"
 #include "TestModuleFactory.h"
 #include "Toolchain/Compiler.h"
@@ -22,14 +22,14 @@ using namespace llvm;
 static TestModuleFactory TestModuleFactory;
 
 TEST(CXXJunkDetector, boundary_mutator) {
-  auto mullModule = TestModuleFactory.create_CXX_BoundaryMutator_Module();
+  auto mullModule = TestModuleFactory.create_ConditionalsBoundaryMutator_Module();
   auto module = mullModule->getModule();
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
 
   std::vector<std::unique_ptr<MutationOperator>> operators;
-  operators.emplace_back(make_unique<cxx::BoundaryMutator>());
+  operators.emplace_back(make_unique<ConditionalsBoundaryMutator>());
   MutationsFinder finder(std::move(operators));
   Filter filter;
 

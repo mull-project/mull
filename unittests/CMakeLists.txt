@@ -17,7 +17,7 @@ set(mull_unittests_sources
   MutationOperators/RemoveVoidFunctionMutationOperatorTest.cpp
   MutationOperators/ScalarValueMutationOperatorTest.cpp
 
-  MutationOperators/CXX/Conditionals/BoundaryMutatorTests.cpp
+  MutationOperators/ConditionalsBoundaryMutatorTests.cpp
 
   JunkDetection/CXXJunkDetectorTests.cpp
 
