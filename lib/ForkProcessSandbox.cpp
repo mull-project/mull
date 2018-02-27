@@ -34,10 +34,12 @@ static std::string readFileAndUnlink(const char *filename) {
   FILE *file = fopen(filename, "r");
   if (!file) {
     perror("fopen");
-    exit(1);
+    printf("fopen: %s\n", filename);
+    return std::string("Mull error: could not read output");
   }
   if (unlink(filename) == -1) {
     perror("unlink");
+    printf("unlink: %s\n", filename);
   }
 
   fseek(file, 0, SEEK_END);
@@ -64,6 +66,7 @@ mull::ForkProcessSandbox::run(std::function<ExecutionStatus (void)> function,
 
   char stderrFilename[] = "/tmp/mull.stderr.XXXXXX";
   mktemp(stderrFilename);
+
   char stdoutFilename[] = "/tmp/mull.stdout.XXXXXX";
   mktemp(stdoutFilename);
 
@@ -78,6 +81,9 @@ mull::ForkProcessSandbox::run(std::function<ExecutionStatus (void)> function,
   auto start = high_resolution_clock::now();
   const pid_t workerPID = mullFork("worker");
   if (workerPID == 0) {
+    freopen(stderrFilename, "w", stderr);
+    freopen(stdoutFilename, "w", stdout);
+
     struct sigaction action;
     memset(&action, 0, sizeof(action));
     action.sa_sigaction = &handle_alarm_signal;
@@ -85,9 +91,6 @@ mull::ForkProcessSandbox::run(std::function<ExecutionStatus (void)> function,
 
     useconds_t timeout = timeoutMilliseconds * 1000;
     ualarm(timeout, 0);
-
-    freopen(stderrFilename, "w", stderr);
-    freopen(stdoutFilename, "w", stdout);
 
     *sharedStatus = function();
 
