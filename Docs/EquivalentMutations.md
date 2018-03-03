@@ -32,3 +32,17 @@ filter for this function to exclude the mutations from being generated.
 
 We are not sure about the best strategy here but this case seems to be also
 approachable.
+
+### Conditionals Boundary
+
+```c
+if (level === currLevel) {
+  // ...
+}
+else if (level > currLevel) { // <-- Conditionals Boundary does >= and nothing changes.
+  // ...
+}
+else {
+  // ...
+}
+```
