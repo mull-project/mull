@@ -168,6 +168,15 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     case MutatorKind::ConditionalsBoundaryMutator:
       return isJunkBoundary(cursor, location, address, point);
       break;
+    case MutatorKind::MathAddMutator:
+      return isJunkMathAdd(cursor, location, address, point);
+      break;
+    case MutatorKind::NegateMutator:
+      return isJunkNegate(cursor, location, address, point);
+      break;
+    case MutatorKind::RemoveVoidFunctionMutator:
+      return isJunkRemoveVoid(cursor, location, address, point);
+      break;
 
     default:
       Logger::warn()
@@ -186,9 +195,58 @@ bool CXXJunkDetector::isJunkBoundary(CXCursor cursor,
                                      MutationPoint *point) {
   CXCursorKind kind = clang_getCursorKind(cursor);
 
-  if (kind != CXCursor_BinaryOperator) {
+  if (kind != CXCursor_BinaryOperator &&
+      kind != CXCursor_OverloadedDeclRef) {
     return true;
   }
 
   return false;
 }
+
+bool CXXJunkDetector::isJunkMathAdd(CXCursor cursor,
+                                    CXSourceLocation location,
+                                    PhysicalAddress &address,
+                                    MutationPoint *point) {
+  CXCursorKind kind = clang_getCursorKind(cursor);
+
+  if (kind != CXCursor_BinaryOperator &&
+      kind != CXCursor_UnaryOperator &&
+      kind != CXCursor_OverloadedDeclRef &&
+      kind != CXCursor_CompoundAssignOperator) {
+    return true;
+  }
+
+  return false;
+}
+
+bool CXXJunkDetector::isJunkNegate(CXCursor cursor,
+                                    CXSourceLocation location,
+                                    PhysicalAddress &address,
+                                    MutationPoint *point) {
+  CXCursorKind kind = clang_getCursorKind(cursor);
+
+  if (kind != CXCursor_BinaryOperator &&
+      kind != CXCursor_OverloadedDeclRef) {
+    return true;
+  }
+
+  return false;
+}
+
+bool CXXJunkDetector::isJunkRemoveVoid(CXCursor cursor,
+                                       CXSourceLocation location,
+                                       PhysicalAddress &address,
+                                       MutationPoint *point) {
+  CXCursorKind kind = clang_getCursorKind(cursor);
+
+  if (kind != CXCursor_CXXThisExpr &&
+      kind != CXCursor_MemberRefExpr &&
+      kind != CXCursor_NamespaceRef &&
+      kind != CXCursor_OverloadedDeclRef &&
+      kind != CXCursor_TypeRef) {
+    return true;
+  }
+
+  return false;
+}
+
