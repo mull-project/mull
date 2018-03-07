@@ -27,3 +27,5 @@ custom_test/dylibs_and_objects/test.bc
 custom_test/dylibs_and_objects/distance.bc
 custom_test/dylibs_and_objects/main.bc
 mutators/boundary/*.bc
+junk_detection/**/*.bc
+junk_detection/**/*.json
