@@ -40,6 +40,7 @@ private:
   CXIndex index;
   std::map<std::string, CXTranslationUnit> units;
   std::unique_ptr<clang::tooling::CompilationDatabase> compdb;
+  std::vector<std::string> compilationFlags;
 };
 
 }

@@ -110,7 +110,7 @@ bool PhysicalAddress::valid() {
   return false;
 }
 
-#pragma mark - Junk Detector
+#pragma mark - CHDir
 
 class CHDir {
 public:
@@ -136,16 +136,83 @@ private:
   std::string prevWorkDir;
 };
 
-CXXJunkDetector::CXXJunkDetector(JunkDetectionConfig &config)
-: index(clang_createIndex(true, true)) {
-  if (config.cxxCompDBDirectory.size()) {
-    using namespace clang::tooling;
-    std::string error;
-    compdb = CompilationDatabase::loadFromDirectory(config.cxxCompDBDirectory, error);
-    if (compdb == nullptr) {
-      errs() << error << "\n";
+#pragma mark - LibClang arguments
+
+struct LibClangArgs {
+  int argc;
+  char **argv;
+  LibClangArgs() : argc(0), argv(nullptr) {}
+  ~LibClangArgs() {
+    for (int i = 0; i < argc; i++) {
+      delete [] argv[i];
+    }
+    if (argv != nullptr) {
+      delete [] argv;
     }
   }
+};
+
+void copyCompilationFlag(char **storage, const std::string &flag) {
+  *storage = new char[flag.size() + 1];
+  strncpy(*storage, flag.c_str(), flag.size());
+  (*storage)[flag.size()] = '\0';
+}
+
+LibClangArgs getLibClangArgs(std::vector<std::string> &commands) {
+  LibClangArgs args;
+
+  if (commands.empty()) {
+    args.argc = 1;
+    args.argv = new char*[args.argc];
+    copyCompilationFlag(&args.argv[0], std::string());
+  } else {
+    args.argc = commands.size();
+    args.argv = new char*[args.argc];
+    for (int i = 0; i < args.argc; i++) {
+      auto flag = commands[i];
+      if (flag == "-c") {
+        /// skipping this argument, otherwise clang can not parse AST
+        /// for whatever reason...
+        copyCompilationFlag(&args.argv[i++], std::string());
+        copyCompilationFlag(&args.argv[i], std::string());
+        continue;
+      }
+      copyCompilationFlag(&args.argv[i], flag);
+    }
+  }
+  return args;
+}
+
+#pragma mark - Junk Detector
+
+static std::unique_ptr<clang::tooling::CompilationDatabase>
+getCompilationDatabase(const std::string &compdbDirectory) {
+  if (compdbDirectory.empty()) {
+    return nullptr;
+  }
+  std::string error;
+  auto compdb = clang::tooling::CompilationDatabase::loadFromDirectory(compdbDirectory, error);
+  if (compdb == nullptr) {
+    Logger::error() << error << ": " << compdbDirectory << "\n";
+  }
+  return compdb;
+}
+
+static std::vector<std::string> getCompilationFlags(const std::string &flags) {
+  if (flags.empty()) {
+    return std::vector<std::string>();
+  }
+
+  std::istringstream iss(flags);
+  std::vector<std::string> results((std::istream_iterator<std::string>(iss)),
+                                    std::istream_iterator<std::string>());
+  return results;
+}
+
+CXXJunkDetector::CXXJunkDetector(JunkDetectionConfig &config)
+: index(clang_createIndex(true, true)) {
+  compdb = getCompilationDatabase(config.cxxCompDBDirectory);
+  compilationFlags = getCompilationFlags(config.cxxCompilationFlags);
 }
 
 CXXJunkDetector::~CXXJunkDetector() {
@@ -162,56 +229,33 @@ CXXJunkDetector::translationUnit(const PhysicalAddress &address,
     return units[sourceFile];
   }
 
-  CHDir changeDir;
+  std::vector<std::string> commandLine;
+  std::string directory = address.directory;
 
-  int argc = 1;
-  char **argv = nullptr;
-
-  std::vector<clang::tooling::CompileCommand> commands;
   if (compdb != nullptr) {
-    commands = compdb->getCompileCommands(sourceFile);
-  }
-  if (commands.empty()) {
-    argv = new char*[argc];
-    argv[0] = new char[1];
-    argv[0][0] = '\0';
-    changeDir.enter(address.directory);
-  } else {
-    auto command = *commands.begin();
-    changeDir.enter(command.Directory);
-    argc = command.CommandLine.size();
-    argv = new char*[argc];
-    for (int i = 0; i < argc; i++) {
-      auto commandLine = command.CommandLine[i];
-      if (commandLine == "-c") {
-        /// skipping this argument, otherwise clang can not parse AST
-        /// for whatever reason...
-        argv[i] = new char[1];
-        argv[i][0] = '\0';
-        argv[i + 1] = new char[1];
-        argv[i + 1][0] = '\0';
-        i++;
-        continue;
-      }
-      argv[i] = new char[commandLine.size() + 1];
-      strncpy(argv[i], commandLine.c_str(), commandLine.size());
-      argv[i][commandLine.size()] = '\0';
+    auto commands = compdb->getCompileCommands(sourceFile);
+    if (!commands.empty()) {
+      auto command = *commands.begin();
+      commandLine = command.CommandLine;
+      directory = command.Directory;
+    } else {
+      commandLine = compilationFlags;
     }
+  } else {
+    commandLine = compilationFlags;
   }
 
-//      const char *argv[] = { "-I", "include", nullptr };
-//      const int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+  CHDir changeDir;
+  changeDir.enter(directory);
+  LibClangArgs args = getLibClangArgs(commandLine);
+
   CXTranslationUnit unit = nullptr;
   CXErrorCode code = clang_parseTranslationUnit2(index,
                                                  sourceFile.c_str(),
-                                                 argv, argc,
+                                                 args.argv, args.argc,
                                                  nullptr, 0,
                                                  CXTranslationUnit_KeepGoing,
                                                  &unit);
-  for (int i = 0; i < argc; i++) {
-    delete [] argv[i];
-  }
-  delete [] argv;
 
   if (unit == nullptr) {
     Logger::error() << "Cannot parse translation unit: " << sourceFile << "\n";

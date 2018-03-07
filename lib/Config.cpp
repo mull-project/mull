@@ -23,7 +23,8 @@ CustomTestDefinition::CustomTestDefinition(const std::string &name,
 JunkDetectionConfig::JunkDetectionConfig()
 : toggle(JunkDetectionToggle::Disabled),
   detectorName(""),
-  cxxCompDBDirectory("") {}
+  cxxCompDBDirectory(""),
+  cxxCompilationFlags("") {}
 
 JunkDetectionConfig JunkDetectionConfig::enabled() {
   JunkDetectionConfig config;

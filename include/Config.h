@@ -45,6 +45,7 @@ struct JunkDetectionConfig {
   JunkDetectionToggle toggle;
   std::string detectorName;
   std::string cxxCompDBDirectory;
+  std::string cxxCompilationFlags;
 
   JunkDetectionConfig();
   bool isEnabled() const;
