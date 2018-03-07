@@ -149,7 +149,7 @@ int main(int argc, char *argv[]) {
     } else if (detector == "none") {
       junkDetector = make_unique<NullJunkDetector>();
     } else if (detector == "cxx") {
-      junkDetector = make_unique<CXXJunkDetector>();
+      junkDetector = make_unique<CXXJunkDetector>(config.junkDetectionConfig());
     } else {
       Logger::error() << "mull-driver> Unknown junk detector provided: "
         << "`" << detector << "`. ";
