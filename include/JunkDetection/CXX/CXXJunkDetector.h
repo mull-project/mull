@@ -11,6 +11,7 @@
 namespace mull {
 
 class MutationPoint;
+struct JunkDetectionConfig;
 
 struct PhysicalAddress {
   std::string directory;
@@ -23,14 +24,13 @@ struct PhysicalAddress {
 
 class CXXJunkDetector : public JunkDetector {
 public:
-  CXXJunkDetector();
+  CXXJunkDetector(JunkDetectionConfig &config);
   ~CXXJunkDetector();
 
   bool isJunk(MutationPoint *point) override;
 private:
   std::pair<CXCursor, CXSourceLocation> cursorAndLocation(PhysicalAddress &address, MutationPoint *point);
-  CXTranslationUnit translationUnit(const std::string &directory,
-                                    const std::string &sourceFile);
+  CXTranslationUnit translationUnit(const PhysicalAddress &address, const std::string &sourceFile);
 
   bool isJunkBoundary(CXCursor cursor, CXSourceLocation location, PhysicalAddress &address, MutationPoint *point);
   bool isJunkMathAdd(CXCursor cursor, CXSourceLocation location, PhysicalAddress &address, MutationPoint *point);

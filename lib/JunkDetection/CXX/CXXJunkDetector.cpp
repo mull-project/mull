@@ -3,6 +3,7 @@
 #include "MutationPoint.h"
 #include "Mutators/Mutator.h"
 #include "Logger.h"
+#include "Config.h"
 
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/DebugLoc.h>
@@ -113,14 +114,16 @@ bool PhysicalAddress::valid() {
 
 class CHDir {
 public:
-  CHDir(const std::string &workDir) {
+  CHDir() {
     char cwd[MAXPATHLEN];
     if (getcwd(cwd, sizeof(cwd)) == nullptr) {
       perror("getcwd");
     } else {
       prevWorkDir = std::string(cwd);
     }
-    if (chdir(workDir.c_str()) == -1) {
+  }
+  void enter(const std::string &wd) {
+    if (chdir(wd.c_str()) == -1) {
       perror("chdir");
     }
   }
@@ -133,13 +136,15 @@ private:
   std::string prevWorkDir;
 };
 
-CXXJunkDetector::CXXJunkDetector() : index(clang_createIndex(true, true)) {
-  using namespace clang::tooling;
-  std::string buildDir("/opt/mull/llvm/build/");
-  std::string error;
-  compdb = CompilationDatabase::loadFromDirectory(buildDir, error);
-  if (compdb == nullptr) {
-    errs() << error << "\n";
+CXXJunkDetector::CXXJunkDetector(JunkDetectionConfig &config)
+: index(clang_createIndex(true, true)) {
+  if (config.cxxCompDBDirectory.size()) {
+    using namespace clang::tooling;
+    std::string error;
+    compdb = CompilationDatabase::loadFromDirectory(config.cxxCompDBDirectory, error);
+    if (compdb == nullptr) {
+      errs() << error << "\n";
+    }
   }
 }
 
@@ -151,24 +156,29 @@ CXXJunkDetector::~CXXJunkDetector() {
 }
 
 CXTranslationUnit
-CXXJunkDetector::translationUnit(const std::string &directory,
+CXXJunkDetector::translationUnit(const PhysicalAddress &address,
                                  const std::string &sourceFile) {
   if (units.count(sourceFile) != 0) {
     return units[sourceFile];
   }
 
+  CHDir changeDir;
+
   int argc = 1;
   char **argv = nullptr;
 
-  CHDir chdir(directory);
-
-  auto commands = compdb->getCompileCommands(sourceFile);
+  std::vector<clang::tooling::CompileCommand> commands;
+  if (compdb != nullptr) {
+    commands = compdb->getCompileCommands(sourceFile);
+  }
   if (commands.empty()) {
     argv = new char*[argc];
     argv[0] = new char[1];
     argv[0][0] = '\0';
+    changeDir.enter(address.directory);
   } else {
     auto command = *commands.begin();
+    changeDir.enter(command.Directory);
     argc = command.CommandLine.size();
     argv = new char*[argc];
     for (int i = 0; i < argc; i++) {
@@ -189,8 +199,8 @@ CXXJunkDetector::translationUnit(const std::string &directory,
     }
   }
 
-  //    const char *argv[] = { nullptr };
-  //    const int argc = sizeof(argv) / sizeof(argv[0]) - 1;
+//      const char *argv[] = { "-I", "include", nullptr };
+//      const int argc = sizeof(argv) / sizeof(argv[0]) - 1;
   CXTranslationUnit unit = nullptr;
   CXErrorCode code = clang_parseTranslationUnit2(index,
                                                  sourceFile.c_str(),
@@ -222,7 +232,7 @@ CXXJunkDetector::cursorAndLocation(PhysicalAddress &address,
 
   std::string sourceFile = instruction->getModule()->getSourceFileName();
 
-  CXTranslationUnit unit = translationUnit(address.directory, sourceFile);
+  CXTranslationUnit unit = translationUnit(address, sourceFile);
 
   if (unit == nullptr) {
     return std::make_pair(clang_getNullCursor(), clang_getNullLocation());

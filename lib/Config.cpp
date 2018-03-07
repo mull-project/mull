@@ -20,7 +20,10 @@ CustomTestDefinition::CustomTestDefinition(const std::string &name,
                                            const std::vector<std::string> arguments)
 : testName(name), methodName(method), programName(program), callArguments(arguments) {}
 
-JunkDetectionConfig::JunkDetectionConfig() : toggle(JunkDetectionToggle::Disabled), detectorName("") {}
+JunkDetectionConfig::JunkDetectionConfig()
+: toggle(JunkDetectionToggle::Disabled),
+  detectorName(""),
+  cxxCompDBDirectory("") {}
 
 JunkDetectionConfig JunkDetectionConfig::enabled() {
   JunkDetectionConfig config;

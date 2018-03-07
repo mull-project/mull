@@ -268,6 +268,26 @@ std::unique_ptr<MullModule> TestModuleFactory::create_ConditionalsBoundaryMutato
   return createModuleFromBitcode(fixture, fixture);
 }
 
+std::unique_ptr<MullModule> TestModuleFactory::create_CompilationDatabase_AbsolutePath_Module() {
+  const char *fixture = "junk_detection/compdb_absolute_paths/main.bc";
+  return createModuleFromBitcode(fixture, fixture);
+}
+
+std::string TestModuleFactory::CompilationDatabase_AbsolutePath_Directory() {
+  const char *directory = "junk_detection/compdb_absolute_paths/";
+  return fixturePath(directory);
+}
+
+std::unique_ptr<MullModule> TestModuleFactory::create_CompilationDatabase_RelativePath_Module() {
+  const char *fixture = "junk_detection/compdb_relative_paths/main.bc";
+  return createModuleFromBitcode(fixture, fixture);
+}
+
+std::string TestModuleFactory::CompilationDatabase_RelativePath_Directory() {
+  const char *directory = "junk_detection/compdb_relative_paths/";
+  return fixturePath(directory);
+}
+
 #pragma mark - Rust
 
 std::unique_ptr<MullModule> TestModuleFactory::rustModule() {
