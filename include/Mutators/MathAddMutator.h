@@ -24,6 +24,7 @@ public:
   MutationPoint *getMutationPoint(MullModule *module,
                                   MutationPointAddress &address,
                                   llvm::Instruction *instruction) override;
+  MutatorKind mutatorKind() override { return MutatorKind::MathAddMutator; }
 
   std::string uniqueID() override {
     return ID;

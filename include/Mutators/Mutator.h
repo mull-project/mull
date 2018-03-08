@@ -19,7 +19,10 @@ class MutationPointAddress;
 
 enum class MutatorKind {
   Unknown,
-  ConditionalsBoundaryMutator
+  ConditionalsBoundaryMutator,
+  MathAddMutator,
+  NegateMutator,
+  RemoveVoidFunctionMutator
 };
 
 class Mutator {

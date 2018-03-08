@@ -28,6 +28,9 @@ private:
   std::pair<CXCursor, CXSourceLocation> cursorAndLocation(PhysicalAddress &address);
 
   bool isJunkBoundary(CXCursor cursor, CXSourceLocation location, PhysicalAddress &address, MutationPoint *point);
+  bool isJunkMathAdd(CXCursor cursor, CXSourceLocation location, PhysicalAddress &address, MutationPoint *point);
+  bool isJunkNegate(CXCursor cursor, CXSourceLocation location, PhysicalAddress &address, MutationPoint *point);
+  bool isJunkRemoveVoid(CXCursor cursor, CXSourceLocation location, PhysicalAddress &address, MutationPoint *point);
 
   CXIndex index;
   std::map<std::string, CXTranslationUnit> units;

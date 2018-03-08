@@ -25,6 +25,8 @@ namespace mull {
                                     MutationPointAddress &address,
                                     llvm::Instruction *instruction) override;
 
+    MutatorKind mutatorKind() override { return MutatorKind::RemoveVoidFunctionMutator; }
+
     std::string uniqueID() override {
       return ID;
     }

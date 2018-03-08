@@ -26,7 +26,7 @@ namespace mull {
     MutationPoint *getMutationPoint(MullModule *module,
                                     MutationPointAddress &address,
                                     llvm::Instruction *instruction) override;
-
+    MutatorKind mutatorKind() override { return MutatorKind::NegateMutator; }
     std::string uniqueID() override {
       return ID;
     }
