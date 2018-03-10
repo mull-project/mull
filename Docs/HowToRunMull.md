@@ -124,5 +124,5 @@ error: Invalid record (Producer: 'APPLE_1_900.0.38_0' Reader: 'LLVM 3.9.0')
 
 This error indicates that you compiled your files to LLVM bitcode with default
 Mac OS's `clang` compiler which does not work well with LLVM 3.9 that Mull is
-based on. Check [How to get LLVM Bitcode](/Docs/HowToGetLLVMBitcode) for further
+based on. Check [How to get LLVM Bitcode](/Docs/HowToGetLLVMBitcode.md) for further
 details.
