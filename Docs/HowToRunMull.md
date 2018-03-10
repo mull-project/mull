@@ -32,7 +32,7 @@ See:
 To run your project with Mull you need to build your project as LLVM bitcode.
 
 Read the dedicated tutorial before going further:
-[How to get LLVM Bitcode](/Docs/HowToGetLLVMBitcode).
+[How to get LLVM Bitcode](/Docs/HowToGetLLVMBitcode.md).
 
 Mull works with a project that has tests so both project files and its test
 files have to be compiled to LLVM bitcode.
