@@ -14,6 +14,7 @@ FIXTURE_DIRS=\
   ./simple_test/count_letters \
   ./dylibs_and_objects \
   ./mutators/boundary \
+  ./junk_detection/compdb \
 
 synchronize_fixtures:
 	@for path in ${FIXTURE_DIRS}; do \

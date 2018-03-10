@@ -40,6 +40,8 @@ struct MappingTraits<mull::JunkDetectionConfig> {
   static void mapping(IO &io, mull::JunkDetectionConfig &config) {
     io.mapRequired("detector", config.detectorName);
     io.mapOptional("enabled", config.toggle);
+    io.mapOptional("cxx_compdb_dir", config.cxxCompDBDirectory);
+    io.mapOptional("cxx_compilation_flags", config.cxxCompilationFlags);
   }
 };
 

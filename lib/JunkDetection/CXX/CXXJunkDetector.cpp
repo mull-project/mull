@@ -3,6 +3,7 @@
 #include "MutationPoint.h"
 #include "Mutators/Mutator.h"
 #include "Logger.h"
+#include "Config.h"
 
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/DebugLoc.h>
@@ -10,8 +11,10 @@
 #include <llvm/IR/Function.h>
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/Instruction.h>
-
 #include <llvm/Support/Path.h>
+#include <clang/Tooling/CompilationDatabase.h>
+#include <unistd.h>
+#include <sys/param.h>
 
 using namespace mull;
 using namespace llvm;
@@ -81,13 +84,14 @@ PhysicalAddress getAddress(MutationPoint *point) {
       auto debugInfo = instruction->getDebugLoc();
 
       auto file = debugInfo->getFilename().str();
+      auto directory = debugInfo->getDirectory().str();
       if (sys::path::is_absolute(file)) {
         address.filepath = file;
       } else {
-        auto directory = debugInfo->getDirectory().str();
         address.filepath = directory + sys::path::get_separator().str() + file;
       }
 
+      address.directory = directory;
       address.line = debugInfo->getLine();
       address.column = debugInfo->getColumn();
     }
@@ -96,19 +100,120 @@ PhysicalAddress getAddress(MutationPoint *point) {
   return address;
 }
 
-PhysicalAddress::PhysicalAddress() : filepath(""), line(0), column(0) {}
+PhysicalAddress::PhysicalAddress() : directory(""), filepath(""), line(0), column(0) {}
 
 bool PhysicalAddress::valid() {
-  if (filepath != "" && line != 0 && column != 0) {
+  if (directory != "" && filepath != "" && line != 0 && column != 0) {
     return true;
   }
 
   return false;
 }
 
+#pragma mark - CHDir
+
+class CHDir {
+public:
+  CHDir() {
+    char cwd[MAXPATHLEN];
+    if (getcwd(cwd, sizeof(cwd)) == nullptr) {
+      perror("getcwd");
+    } else {
+      prevWorkDir = std::string(cwd);
+    }
+  }
+  void enter(const std::string &wd) {
+    if (chdir(wd.c_str()) == -1) {
+      perror("chdir");
+    }
+  }
+  ~CHDir() {
+    if (chdir(prevWorkDir.c_str()) == -1) {
+      perror("~chdir");
+    }
+  }
+private:
+  std::string prevWorkDir;
+};
+
+#pragma mark - LibClang arguments
+
+struct LibClangArgs {
+  int argc;
+  char **argv;
+  LibClangArgs() : argc(0), argv(nullptr) {}
+  ~LibClangArgs() {
+    for (int i = 0; i < argc; i++) {
+      delete [] argv[i];
+    }
+    if (argv != nullptr) {
+      delete [] argv;
+    }
+  }
+};
+
+void copyCompilationFlag(char **storage, const std::string &flag) {
+  *storage = new char[flag.size() + 1];
+  strncpy(*storage, flag.c_str(), flag.size());
+  (*storage)[flag.size()] = '\0';
+}
+
+LibClangArgs getLibClangArgs(std::vector<std::string> &commands) {
+  LibClangArgs args;
+
+  if (commands.empty()) {
+    args.argc = 1;
+    args.argv = new char*[args.argc];
+    copyCompilationFlag(&args.argv[0], std::string());
+  } else {
+    args.argc = commands.size();
+    args.argv = new char*[args.argc];
+    for (int i = 0; i < args.argc; i++) {
+      auto flag = commands[i];
+      if (flag == "-c") {
+        /// skipping this argument, otherwise clang can not parse AST
+        /// for whatever reason...
+        copyCompilationFlag(&args.argv[i++], std::string());
+        copyCompilationFlag(&args.argv[i], std::string());
+        continue;
+      }
+      copyCompilationFlag(&args.argv[i], flag);
+    }
+  }
+  return args;
+}
+
 #pragma mark - Junk Detector
 
-CXXJunkDetector::CXXJunkDetector() : index(clang_createIndex(true, true)) {}
+static std::unique_ptr<clang::tooling::CompilationDatabase>
+getCompilationDatabase(const std::string &compdbDirectory) {
+  if (compdbDirectory.empty()) {
+    return nullptr;
+  }
+  std::string error;
+  auto compdb = clang::tooling::CompilationDatabase::loadFromDirectory(compdbDirectory, error);
+  if (compdb == nullptr) {
+    Logger::error() << error << ": " << compdbDirectory << "\n";
+  }
+  return compdb;
+}
+
+static std::vector<std::string> getCompilationFlags(const std::string &flags) {
+  if (flags.empty()) {
+    return std::vector<std::string>();
+  }
+
+  std::istringstream iss(flags);
+  std::vector<std::string> results((std::istream_iterator<std::string>(iss)),
+                                    std::istream_iterator<std::string>());
+  return results;
+}
+
+CXXJunkDetector::CXXJunkDetector(JunkDetectionConfig &config)
+: index(clang_createIndex(true, true)) {
+  compdb = getCompilationDatabase(config.cxxCompDBDirectory);
+  compilationFlags = getCompilationFlags(config.cxxCompilationFlags);
+}
 
 CXXJunkDetector::~CXXJunkDetector() {
   for (auto &pair : units) {
@@ -117,24 +222,62 @@ CXXJunkDetector::~CXXJunkDetector() {
   clang_disposeIndex(index);
 }
 
-std::pair<CXCursor, CXSourceLocation>
-CXXJunkDetector::cursorAndLocation(PhysicalAddress &address) {
-  if (units.count(address.filepath) == 0) {
-    const char *argv[] = { nullptr };
-    const int argc = sizeof(argv) / sizeof(argv[0]) - 1;
-    CXTranslationUnit unit = clang_parseTranslationUnit(index,
-                                                        address.filepath.c_str(),
-                                                        argv, argc,
-                                                        nullptr, 0,
-                                                        CXTranslationUnit_KeepGoing);
-    if (unit == nullptr) {
-      Logger::error() << "Cannot parse translation unit: " << address.filepath << "\n";
-      return std::make_pair(clang_getNullCursor(), clang_getNullLocation());
-    }
-    units[address.filepath] = unit;
+CXTranslationUnit
+CXXJunkDetector::translationUnit(const PhysicalAddress &address,
+                                 const std::string &sourceFile) {
+  if (units.count(sourceFile) != 0) {
+    return units[sourceFile];
   }
 
-  CXTranslationUnit unit = units[address.filepath];
+  std::vector<std::string> commandLine;
+  std::string directory = address.directory;
+
+  if (compdb != nullptr) {
+    auto commands = compdb->getCompileCommands(sourceFile);
+    if (!commands.empty()) {
+      auto command = *commands.begin();
+      commandLine = command.CommandLine;
+      directory = command.Directory;
+    } else {
+      commandLine = compilationFlags;
+    }
+  } else {
+    commandLine = compilationFlags;
+  }
+
+  CHDir changeDir;
+  changeDir.enter(directory);
+  LibClangArgs args = getLibClangArgs(commandLine);
+
+  CXTranslationUnit unit = nullptr;
+  CXErrorCode code = clang_parseTranslationUnit2(index,
+                                                 sourceFile.c_str(),
+                                                 args.argv, args.argc,
+                                                 nullptr, 0,
+                                                 CXTranslationUnit_KeepGoing,
+                                                 &unit);
+
+  if (unit == nullptr) {
+    Logger::error() << "Cannot parse translation unit: " << sourceFile << "\n";
+    Logger::error() << "CXErrorCode: " << code << "\n";
+    return nullptr;
+  }
+  units[sourceFile] = unit;
+  return unit;
+}
+
+std::pair<CXCursor, CXSourceLocation>
+CXXJunkDetector::cursorAndLocation(PhysicalAddress &address,
+                                   MutationPoint *point) {
+  Instruction *instruction = dyn_cast<Instruction>(point->getOriginalValue());
+  if (instruction == nullptr) {
+    return std::make_pair(clang_getNullCursor(), clang_getNullLocation());
+  }
+
+  std::string sourceFile = instruction->getModule()->getSourceFileName();
+
+  CXTranslationUnit unit = translationUnit(address, sourceFile);
+
   if (unit == nullptr) {
     return std::make_pair(clang_getNullCursor(), clang_getNullLocation());
   }
@@ -156,7 +299,7 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     return true;
   }
 
-  auto pair = cursorAndLocation(address);
+  auto pair = cursorAndLocation(address, point);
   auto cursor = pair.first;
   auto location = pair.second;
 

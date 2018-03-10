@@ -6,11 +6,15 @@
 #include <string>
 #include <clang-c/Index.h>
 
+#include <clang/Tooling/CompilationDatabase.h>
+
 namespace mull {
 
 class MutationPoint;
+struct JunkDetectionConfig;
 
 struct PhysicalAddress {
+  std::string directory;
   std::string filepath;
   uint32_t line;
   uint32_t column;
@@ -20,12 +24,13 @@ struct PhysicalAddress {
 
 class CXXJunkDetector : public JunkDetector {
 public:
-  CXXJunkDetector();
+  CXXJunkDetector(JunkDetectionConfig &config);
   ~CXXJunkDetector();
 
   bool isJunk(MutationPoint *point) override;
 private:
-  std::pair<CXCursor, CXSourceLocation> cursorAndLocation(PhysicalAddress &address);
+  std::pair<CXCursor, CXSourceLocation> cursorAndLocation(PhysicalAddress &address, MutationPoint *point);
+  CXTranslationUnit translationUnit(const PhysicalAddress &address, const std::string &sourceFile);
 
   bool isJunkBoundary(CXCursor cursor, CXSourceLocation location, PhysicalAddress &address, MutationPoint *point);
   bool isJunkMathAdd(CXCursor cursor, CXSourceLocation location, PhysicalAddress &address, MutationPoint *point);
@@ -34,6 +39,8 @@ private:
 
   CXIndex index;
   std::map<std::string, CXTranslationUnit> units;
+  std::unique_ptr<clang::tooling::CompilationDatabase> compdb;
+  std::vector<std::string> compilationFlags;
 };
 
 }

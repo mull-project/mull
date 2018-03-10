@@ -56,6 +56,11 @@ public:
   std::unique_ptr<MullModule> create_CustomTest_OpenSSL_bio_enc_test_Module();
 
   std::unique_ptr<MullModule> create_ConditionalsBoundaryMutator_Module();
+  std::unique_ptr<MullModule> create_CompilationDatabase_AbsolutePath_Module();
+  std::string CompilationDatabase_AbsolutePath_Directory();
+
+  std::unique_ptr<MullModule> create_CompilationDatabase_RelativePath_Module();
+  std::string CompilationDatabase_RelativePath_Directory();
 
 #pragma mark - Rust
   std::unique_ptr<MullModule> rustModule();

@@ -79,6 +79,8 @@ set(mull_additional_libraries
 
   ${MULL_DEPENDENCY_SQLITE}
   ${MULL_DEPENDENCY_LIBCLANG}
+  ${MULL_DEPENDENCY_LIBCLANG_TOOLING}
+  ${MULL_DEPENDENCY_LIBCLANG_BASIC}
 )
 
 set(mull_link_flags "") # to be filled later
