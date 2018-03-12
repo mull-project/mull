@@ -1,4 +1,5 @@
-CC=/opt/llvm-3.9/bin/clang
+include ../Makefile.common
+
 BUILD_DIR=./build
 LEVEL=../..
 FIXTURES_DIR=$(PWD)/$(LEVEL)/unittests/fixtures/custom_test/dylibs_and_objects

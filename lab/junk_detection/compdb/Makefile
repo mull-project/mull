@@ -1,4 +1,5 @@
-CC=/opt/llvm-3.9/bin/clang
+include ../../Makefile.common
+
 LEVEL=../../..
 BUILD_DIR=./build
 FIXTURES_DIR_RELATIVE=$(LEVEL)/unittests/fixtures/junk_detection/compdb_relative_paths

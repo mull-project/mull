@@ -1,4 +1,5 @@
-CC=/opt/llvm-3.9/bin/clang
+include ../../Makefile.common
+
 LEVEL=../../..
 BUILD_DIR=./build
 FIXTURES_DIR=$(LEVEL)/unittests/fixtures/mutators/boundary
