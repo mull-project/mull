@@ -282,6 +282,10 @@ const std::vector<CustomTestDefinition> &Config::getCustomTests() const {
   return customTests;
 }
 
+void Config::addCustomTest(CustomTestDefinition customTest) {
+  customTests.push_back(customTest);
+}
+
 bool Config::forkEnabled() const {
   return fork == Fork::Enabled;
 }

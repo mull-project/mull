@@ -160,6 +160,8 @@ public:
 
   const std::vector<CustomTestDefinition> &getCustomTests() const;
 
+  void addCustomTest(CustomTestDefinition customTest);
+
   JunkDetectionConfig &junkDetectionConfig();
   Diagnostics getDiagnostics() const;
 

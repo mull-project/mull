@@ -196,3 +196,30 @@ custom_tests:
   constructor = *(passingTest->getConstructors().begin());
   ASSERT_EQ(constructor->getName(), "initGlobalVariable");
 }
+
+TEST(CustomTestFinder, findTests_withEmptyConfig) {
+  auto loadedModules = loadTestModules();
+  Context context;
+  for (auto &module: loadedModules) {
+    context.addModule(move(module));
+  }
+
+  const char *rawConfig = "";
+
+  yaml::Input input(rawConfig);
+
+  ConfigParser parser;
+  auto config = parser.loadConfig(input);
+
+  Filter filter;
+  CustomTestFinder testFinder(config.getCustomTests());
+
+  vector<unique_ptr<mull::Test>> tests = testFinder.findTests(context, filter);
+  ASSERT_EQ(1U, tests.size());
+
+  CustomTest_Test *test = dyn_cast<CustomTest_Test>(tests.begin()->get());
+  ASSERT_NE(test, nullptr);
+  ASSERT_EQ(test->getTestName(), "main");
+  ASSERT_EQ(test->getProgramName(), "mull");
+  ASSERT_EQ(test->getArguments().size(), 0UL);
+}
