@@ -57,7 +57,7 @@ static std::string readFileAndUnlink(const char *filename) {
 }
 
 void handle_alarm_signal(int signal, siginfo_t *info, void *context) {
-  exit(mull::ForkProcessSandbox::MullTimeoutCode);
+  _exit(mull::ForkProcessSandbox::MullTimeoutCode);
 }
 
 mull::ExecutionResult
@@ -96,7 +96,7 @@ mull::ForkProcessSandbox::run(std::function<ExecutionStatus (void)> function,
 
     fflush(stderr);
     fflush(stdout);
-    exit(MullExitCode);
+    _exit(MullExitCode);
   } else {
     int status = 0;
     pid_t pid = 0;
