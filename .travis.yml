@@ -1,15 +1,13 @@
 language: cpp
-
-compiler:
-- clang
+sudo: required
 
 os:
 - osx
+- linux
 
 before_install:
 - if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then make -f Makefile.macos travis_install; fi
-- pwd
-- cd /Users/travis/build/mull-project/mull
+- if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then make -f Makefile.ubuntu travis_install; fi
 
 # Uncomment this line when support Rust
 # - if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then curl -sf https://static.rust-lang.org/rustup.sh | sudo sh; fi
@@ -17,4 +15,5 @@ before_install:
 # Build steps
 script:
 - if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then make -f Makefile.macos travis; fi
+- if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then make -f Makefile.ubuntu travis; fi
 
