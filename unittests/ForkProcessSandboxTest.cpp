@@ -8,7 +8,7 @@ using namespace mull;
 
 /// The timeout should be long enough to overlive the unit test suite running
 /// on a cold start (fresh start without a "warmup").
-static const long long Timeout = 1000;
+static const long long Timeout = 900;
 
 TEST(ForkProcessSandbox, captureOutputFromChildProcess) {
 
