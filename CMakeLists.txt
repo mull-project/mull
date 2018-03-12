@@ -48,7 +48,8 @@ set(llvm_components
   "asmparser"
   "orcjit"
   "support"
-  "x86")
+  "x86"
+  "option")
 llvm_get_libs(MULL_DEPENDENCY_LLVM_LIBRARIES "${llvm_components}")
 
 # https://cmake.org/Wiki/CMake_RPATH_handling#Always_full_RPATH
