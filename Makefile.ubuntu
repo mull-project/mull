@@ -38,6 +38,8 @@ example: build_ninja_driver
 example_run: build_ninja_driver
 	cd Examples/HelloWorld && make run MULL=$(BUILD_DIR_NINJA)/tools/driver/mull-driver MULL_CC=$(MULL_CC)
 
+travis: test example
+
 .PHONY: build_ninja
 
 build_ninja: ## Build Ninja project with CMake.
