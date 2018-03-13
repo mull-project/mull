@@ -38,6 +38,22 @@ example: build_ninja_driver
 example_run: build_ninja_driver
 	cd Examples/HelloWorld && make run MULL=$(BUILD_DIR_NINJA)/tools/driver/mull-driver MULL_CC=$(MULL_CC)
 
+travis: test #example
+
+travis_install:
+	sudo apt-get update
+	sudo apt-get -y install wget
+	echo "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-3.9 main" | sudo tee /etc/apt/sources.list.d/llvm.list > /dev/null
+	sudo wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
+	sudo apt-get update
+	sudo apt-get -y install git cmake make vim ninja-build wget \
+                     libz-dev sqlite3 libsqlite3-dev ncurses-dev \
+                     llvm-3.9 clang-3.9 llvm-3.9-dev libclang-3.9-dev \
+                     binutils-2.26
+	ld --version
+	sudo update-alternatives --install /usr/bin/ld ld /usr/bin/ld-2.26 1
+	ld --version
+
 .PHONY: build_ninja
 
 build_ninja: ## Build Ninja project with CMake.

@@ -1,11 +1,9 @@
 MAKEFLAGS=--warn-undefined-variables
 
-CC=/opt/llvm-3.9/bin/clang
+include ../../Makefile.common
 
 LEVEL=../../..
 FIXTURES_DIR=$(LEVEL)/unittests/fixtures/google_test/google_test/
-
-# CC=xcrun -sdk macosx clang
 
 BUILD_DIR=build
 GTEST_DIR=../../../googletest
@@ -14,13 +12,8 @@ DRIVER_DIR=UnitTestMain
 HEADER_SEARCH_FLAGS=-I$(GTEST_DIR) -I$(GTEST_DIR)/include
 MACRO_DEFINITONS=-DGTEST_NO_LLVM_RAW_OSTREAM=1
 STD_VERSION=-std=c++11
-# This also depends on min mac version of google test.
-MACOSX_VERSION=-mmacosx-version-min=10.12
-SYSROOT=-isysroot $(shell xcrun --sdk macosx --show-sdk-path)
-#NO_CXA=-fno-use-cxa-atexit
-NO_CXA=
 
-CC_FLAGS=-g -fno-exceptions -fno-rtti -fPIC $(STD_VERSION) $(HEADER_SEARCH_FLAGS) $(MACRO_DEFINITONS) $(MACOSX_VERSION) $(SYSROOT) $(NO_CXA)
+CC_FLAGS=-g -fno-exceptions -fno-rtti -fPIC $(STD_VERSION) $(HEADER_SEARCH_FLAGS) $(MACRO_DEFINITONS) $(MACOSX_VERSION) $(SYSROOT)
 
 OBJECTS= $(BUILD_DIR)/Test.o \
         $(BUILD_DIR)/Testee.o

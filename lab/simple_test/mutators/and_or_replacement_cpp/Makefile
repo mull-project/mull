@@ -1,4 +1,5 @@
-CXX=/opt/llvm-3.9/bin/clang++
+include ../../../Makefile.common
+
 LEVEL=../../../..
 FIXTURES_DIR=$(LEVEL)/unittests/fixtures/simple_test/mutators/and_or_replacement_cpp/
 

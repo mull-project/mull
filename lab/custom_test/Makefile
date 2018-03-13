@@ -1,4 +1,5 @@
-CC=/opt/llvm-3.9/bin/clang
+include ../Makefile.common
+
 BUILD_DIR=./build
 FIXTURES_DIR=../../unittests/fixtures/custom_test/distance/
 

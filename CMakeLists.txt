@@ -48,7 +48,8 @@ set(llvm_components
   "asmparser"
   "orcjit"
   "support"
-  "x86")
+  "x86"
+  "option")
 llvm_get_libs(MULL_DEPENDENCY_LLVM_LIBRARIES "${llvm_components}")
 
 # https://cmake.org/Wiki/CMake_RPATH_handling#Always_full_RPATH
@@ -70,7 +71,15 @@ find_library(MULL_DEPENDENCY_SQLITE sqlite3 HINTS ${MULL_TOOLCHAIN_SQLITE_PATH})
 find_library(MULL_DEPENDENCY_LIBCLANG clang HINTS ${LLVM_LIB_PATH})
 find_library(MULL_DEPENDENCY_LIBCLANG_TOOLING clangTooling HINTS ${LLVM_LIB_PATH})
 find_library(MULL_DEPENDENCY_LIBCLANG_BASIC clangBasic HINTS ${LLVM_LIB_PATH})
-
+find_library(MULL_DEPENDENCY_LIBCLANG_FRONTEND clangFrontend HINTS ${LLVM_LIB_PATH})
+find_library(MULL_DEPENDENCY_LIBCLANG_AST clangAST HINTS ${LLVM_LIB_PATH})
+find_library(MULL_DEPENDENCY_LIBCLANG_LEX clangLex HINTS ${LLVM_LIB_PATH})
+find_library(MULL_DEPENDENCY_LIBCLANG_DRIVER clangDriver HINTS ${LLVM_LIB_PATH})
+find_library(MULL_DEPENDENCY_LIBCLANG_SEMA clangSema HINTS ${LLVM_LIB_PATH})
+find_library(MULL_DEPENDENCY_LIBCLANG_SERIALIZATION clangSerialization HINTS ${LLVM_LIB_PATH})
+find_library(MULL_DEPENDENCY_LIBCLANG_ANALYSIS clangAnalysis HINTS ${LLVM_LIB_PATH})
+find_library(MULL_DEPENDENCY_LIBCLANG_PARSE clangParse HINTS ${LLVM_LIB_PATH})
+find_library(MULL_DEPENDENCY_LIBCLANG_EDIT clangEdit HINTS ${LLVM_LIB_PATH})
 
 
 include_directories(${MULL_INCLUDE_DIR})

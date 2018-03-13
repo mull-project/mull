@@ -35,6 +35,18 @@ example.run: ninja.driver
 
 travis: test example
 
+travis_install:
+	brew update
+	brew upgrade cmake
+	brew install zlib
+	brew install ncurses
+	brew install sqlite
+	brew install ninja
+	cd /opt && \
+    sudo wget http://releases.llvm.org/3.9.0/clang+llvm-3.9.0-x86_64-apple-darwin.tar.xz && \
+    sudo tar xvf clang+llvm-3.9.0-x86_64-apple-darwin.tar.xz && \
+    sudo mv clang+llvm-3.9.0-x86_64-apple-darwin llvm-3.9
+
 CMAKE_COMMAND_LINE_DEBUG_FLAGS=# --trace # --debug-output # --debug-output --trace --trace-expand # --trace # --debug-output #
 
 # Xcode
