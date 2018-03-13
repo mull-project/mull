@@ -3,9 +3,9 @@
 #include "Config.h"
 #include "Logger.h"
 
-#include "llvm/ADT/STLExtras.h"
-#include "llvm/Support/SourceMgr.h"
-#include "llvm/Support/YAMLParser.h"
+#include <llvm/ADT/STLExtras.h>
+#include <llvm/Support/SourceMgr.h>
+#include <llvm/Support/YAMLParser.h>
 
 #include <memory>
 
@@ -29,11 +29,23 @@ Config ConfigParser::loadConfig(const char *filename) {
     }
   }
 
+  /// FIXME: I could not find a better place for this code.
+  if (config.getCustomTests().empty()) {
+    config.addCustomTest(CustomTestDefinition("main", "main", "mull", {}));
+    config.addCustomTest(CustomTestDefinition("main", "_main", "mull", {}));
+  }
+
   return config;
 }
 
 Config ConfigParser::loadConfig(yaml::Input &input) {
   Config config;
   input >> config;
+
+  /// FIXME: I could not find a better place for this code.
+  if (config.getCustomTests().empty()) {
+    config.addCustomTest(CustomTestDefinition("main", "main", "mull", {}));
+    config.addCustomTest(CustomTestDefinition("main", "_main", "mull", {}));
+  }
   return config;
 }

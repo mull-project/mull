@@ -2,7 +2,7 @@
 
 #include "Config.h"
 
-#include "llvm/Support/YAMLTraits.h"
+#include <llvm/Support/YAMLTraits.h>
 
 #ifndef YAML_STRING_SEQUENCE
 #define YAML_STRING_SEQUENCE
