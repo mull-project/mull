@@ -41,5 +41,5 @@ make -f Makefile.macos test
 
 ```bash
 make -f Makefile.macos xcode.build
-open Mull.xcodeproj
+open BuildXcode/Mull.xcodeproj
 ```
