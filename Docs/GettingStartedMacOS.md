@@ -15,11 +15,13 @@ mv clang+llvm-3.9.0-x86_64-apple-darwin llvm-3.9
 
 ```bash
 # These are needed by LLVM
-brew install zlib
-brew install ncurses
+brew install zlib ncurses
 
 # SQLite is needed for Mull to generate reports.
 brew install sqlite
+
+# These are development dependencies
+brew install cmake ninja
 ```
 
 ## Getting Mull
@@ -32,7 +34,7 @@ cd mull
 ## Running tests
 
 ```bash
-make -f Makefile.macos xcode.test
+make -f Makefile.macos test
 ```
 
 ## Building Mull as Xcode project
