@@ -10,6 +10,7 @@
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <sys/time.h>
 #include <thread>
 #include <unistd.h>
 
@@ -60,6 +61,30 @@ void handle_alarm_signal(int signal, siginfo_t *info, void *context) {
   _exit(mull::ForkProcessSandbox::MullTimeoutCode);
 }
 
+void handle_timeout(long long timeoutMilliseconds) {
+  struct sigaction action;
+  memset(&action, 0, sizeof(action));
+  action.sa_sigaction = &handle_alarm_signal;
+  if (sigaction(SIGALRM, &action, NULL) != 0) {
+    perror("sigaction");
+    abort();
+  }
+
+  struct itimerval timer;
+  timer.it_value.tv_sec = timeoutMilliseconds / 1000;
+  /// Cut off seconds, and convert what's left into microseconds
+  timer.it_value.tv_usec = (timeoutMilliseconds % 1000) * 1000;
+
+  /// Do not repeat
+  timer.it_interval.tv_sec = 0;
+  timer.it_interval.tv_usec = 0;
+
+  if (setitimer(ITIMER_REAL, &timer, nullptr) != 0) {
+    perror("setitimer");
+    abort();
+  }
+}
+
 mull::ExecutionResult
 mull::ForkProcessSandbox::run(std::function<ExecutionStatus (void)> function,
                               long long timeoutMilliseconds) {
@@ -84,13 +109,7 @@ mull::ForkProcessSandbox::run(std::function<ExecutionStatus (void)> function,
     freopen(stderrFilename, "w", stderr);
     freopen(stdoutFilename, "w", stdout);
 
-    struct sigaction action;
-    memset(&action, 0, sizeof(action));
-    action.sa_sigaction = &handle_alarm_signal;
-    sigaction(SIGALRM, &action, NULL);
-
-    useconds_t timeout = timeoutMilliseconds * 1000;
-    ualarm(timeout, 0);
+    handle_timeout(timeoutMilliseconds);
 
     *sharedStatus = function();
 
