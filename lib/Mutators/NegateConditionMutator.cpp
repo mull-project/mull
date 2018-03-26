@@ -279,11 +279,15 @@ static std::string getDiagnostics(CmpInst::Predicate originalPredicate,
 
 MutationPoint *
 NegateConditionMutator::getMutationPoint(MullModule *module,
-                                                  MutationPointAddress &address,
-                                                  llvm::Instruction *instruction) {
+                                         MutationPointAddress &address,
+                                         llvm::Instruction *instruction) {
   if (canBeApplied(*instruction)) {
     CmpInst *cmpOp = dyn_cast<CmpInst>(instruction);
     assert(cmpOp);
+
+    if (cmpOp->getPredicate() == CmpInst::FCMP_UNO) {
+      return nullptr;
+    }
 
     std::string diagnostics =
       getDiagnostics(cmpOp->getPredicate(),
