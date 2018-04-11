@@ -48,6 +48,9 @@ generation?
 
 ### Papers
 
+[Mull it over: mutation testing based on LLVM (preprint)]
+(https://lowlevelbits.org/pdfs/Mull_Mutation_2018.pdf)
+
 [An Analysis and Survey of the Development of
 Mutation Testing](http://www0.cs.ucl.ac.uk/staff/mharman/tse-mutation-survey.pdf)
 
