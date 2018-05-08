@@ -35,7 +35,13 @@ help: ## Show this help message.
 generate_fixtures: ## Generates fixtures for tests
 	cd lab && make synchronize_fixtures
 
-clean: xcode.clean ninja.clean
+clean: xcode.clean ninja.clean ## Remove all the build artefacts
+	@true
+
+test: ninja.run.unit-tests ## Run unit tests
+	@true
+
+install: ninja.install.mull-driver ## Install mull-driver into INSTALL_DIR (default: /usr/local/)
 	@true
 
 ###

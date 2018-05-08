@@ -34,12 +34,29 @@ cd mull
 ## Running tests
 
 ```bash
-make -f Makefile.macos test
+make test
 ```
 
 ## Building Mull as Xcode project
 
 ```bash
-make -f Makefile.macos xcode.build
+make xcode.init
 open BuildXcode/Mull.xcodeproj
 ```
+
+## Building and installing Mull
+
+The following command will build and install `mull-driver` into `/usr/local/bin`
+
+```bash
+make install
+```
+
+**Check if you have enough permissions to write into `/usr/local/bin` if it fails.**
+
+Alternatively, choose a different location use the following command:
+
+```bash
+make install INSTALL_DIR=/foo/bar
+```
+
