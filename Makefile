@@ -6,6 +6,8 @@ BUILD_DIR_NINJA?=$(PWD)/BuildNinja
 MULL_UNIT_TESTS_DIR=$(BUILD_DIR_NINJA)/unittests
 MULL_UNIT_TESTS=$(MULL_UNIT_TESTS_DIR)/MullUnitTests
 
+INSTALL_DIR?=/usr/local/mull
+
 CMAKE_COMMAND_LINE_DEBUG_FLAGS=# --trace # --debug-output # --debug-output --trace --trace-expand # --trace # --debug-output #
 
 OS?=$(shell uname -s)
@@ -40,7 +42,7 @@ generate_fixtures: ## Generates fixtures for tests
 ninja.init: $(BUILD_DIR_NINJA) ## Prepare Ninja project on macOS
 	rm -rfv $(BUILD_DIR_NINJA)/CMakeCache.txt
 	cd $(BUILD_DIR_NINJA) && cmake -G Ninja \
-    -DCMAKE_INSTALL_PREFIX=/usr/local/mull \
+    -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) \
     $(CMAKE_COMMAND_LINE_DEBUG_FLAGS) \
     -DLLVM_ROOT=$(LLVM_ROOT) \
     -DMULL_SUPPORT_RUST=0 \
@@ -53,10 +55,13 @@ ninja.build.mull-driver: ninja.init ## Build mull-driver on macOS
 ninja.build.unit-tests: ninja.init generate_fixtures ## Build unit-tests on macOS
 	cd $(BUILD_DIR_NINJA) && ninja MullUnitTests
 
-ninja.build.example: ninja.build.mull-driver ## Build example on macOS
+ninja.install.mull-driver: ninja.build.mull-driver ## Install mull driver
+	cd $(BUILD_DIR_NINJA) && ninja install
+
+ninja.build.example: ninja.install.mull-driver ## Build example on macOS
 	cd Examples/HelloWorld && \
     make example \
-      MULL=$(BUILD_DIR_NINJA)/tools/driver/mull-driver \
+      MULL=$(INSTALL_DIR)/bin/mull-driver \
       MULL_CC=$(LLVM_ROOT)/bin/clang
 
 ninja.run.unit-tests: ninja.build.unit-tests ## Run unit-tests on macOS
@@ -65,7 +70,7 @@ ninja.run.unit-tests: ninja.build.unit-tests ## Run unit-tests on macOS
 ninja.run.example: ninja.build.example ## Run example on macOS
 	cd Examples/HelloWorld && \
     make run \
-      MULL=$(BUILD_DIR_NINJA)/tools/driver/mull-driver \
+      MULL=$(INSTALL_DIR)/bin/mull-driver \
       MULL_CC=$(LLVM_ROOT)/bin/clang
 
 ninja.clean:
