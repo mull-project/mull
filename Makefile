@@ -35,6 +35,9 @@ help: ## Show this help message.
 generate_fixtures: ## Generates fixtures for tests
 	cd lab && make synchronize_fixtures
 
+clean: xcode.clean ninja.clean
+	@true
+
 ###
 ###  Ninja
 ###
@@ -110,4 +113,33 @@ travis.install.ubuntu:
 	ld --version
 	sudo update-alternatives --install /usr/bin/ld ld /usr/bin/ld-2.26 1
 	ld --version
+
+###
+###  Xcode
+###
+
+xcode.init: $(BUILD_DIR_XCODE) ## Build Xcode project with CMake.
+	rm -rfv $(BUILD_DIR_XCODE)/CMakeCache.txt
+	cd $(BUILD_DIR_XCODE) && cmake ../ -G Xcode \
+    $(CMAKE_COMMAND_LINE_DEBUG_FLAGS) \
+    -DLLVM_ROOT=$(LLVM_ROOT) \
+    -DMULL_SUPPORT_RUST=0
+
+xcode.kill-and-rebuild: xcode.init xcode.kill-and-reopen ## Build Xcode project with CMake, kill Xcode, reopen the project in Xcode
+
+xcode.open: xcode.init ## Open Mull.xcodeproj in Xcode
+	open $(BUILD_DIR_XCODE)/Mull.xcodeproj
+
+# This reopen task is mostly needed to do a work that involves serious
+# modifications of CMake's files: **/CMakeLists.txt and toolchain files.
+# Xcode does not pickup all of the changes in CMake without being reopened.
+xcode.kill-and-reopen: xcode.init ## Kill Xcode and open Mull.xcodeproj in Xcode.
+	killall Xcode || true
+	open $(BUILD_DIR_XCODE)/Mull.xcodeproj
+
+xcode.clean: ## Delete Xcode CMake build cache.
+	rm -rfv $(BUILD_DIR_XCODE)
+
+$(BUILD_DIR_XCODE):
+	mkdir $(BUILD_DIR_XCODE)
 
