@@ -6,7 +6,7 @@ BUILD_DIR_NINJA?=$(PWD)/BuildNinja
 MULL_UNIT_TESTS_DIR=$(BUILD_DIR_NINJA)/unittests
 MULL_UNIT_TESTS=$(MULL_UNIT_TESTS_DIR)/MullUnitTests
 
-INSTALL_DIR?=/usr/local/mull
+INSTALL_DIR?=/usr/local
 
 CMAKE_COMMAND_LINE_DEBUG_FLAGS=# --trace # --debug-output # --debug-output --trace --trace-expand # --trace # --debug-output #
 
