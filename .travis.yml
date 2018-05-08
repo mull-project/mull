@@ -6,7 +6,7 @@ os:
 - linux
 
 before_install:
-- if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then make -f Makefile.macos travis_install; fi
+- if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then make travis.install.macos; fi
 - if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then make -f Makefile.ubuntu travis_install; fi
 
 # Uncomment this line when support Rust
@@ -14,6 +14,6 @@ before_install:
 
 # Build steps
 script:
-- if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then make -f Makefile.macos travis; fi
+- if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then make travis.test.macos; fi
 - if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then make -f Makefile.ubuntu travis; fi
 
