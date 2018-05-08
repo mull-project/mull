@@ -69,8 +69,9 @@ ninja.install.mull-driver: ninja.build.mull-driver ## Install mull driver
 
 ninja.build.example: ninja.install.mull-driver ## Build example on macOS
 	cd Examples/HelloWorld && \
+    export PATH=$(INSTALL_DIR)/bin:$(PATH) && \
     make example \
-      MULL=$(INSTALL_DIR)/bin/mull-driver \
+      MULL=mull-driver \
       MULL_CC=$(LLVM_ROOT)/bin/clang
 
 ninja.run.unit-tests: ninja.build.unit-tests ## Run unit-tests on macOS
@@ -78,9 +79,11 @@ ninja.run.unit-tests: ninja.build.unit-tests ## Run unit-tests on macOS
 
 ninja.run.example: ninja.build.example ## Run example on macOS
 	cd Examples/HelloWorld && \
+    export PATH=$(INSTALL_DIR)/bin:$(PATH) && \
     make run \
-      MULL=$(INSTALL_DIR)/bin/mull-driver \
+      MULL=mull-driver \
       MULL_CC=$(LLVM_ROOT)/bin/clang
+
 
 ninja.clean:
 	rm -rfv $(BUILD_DIR_NINJA)
