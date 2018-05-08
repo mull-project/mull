@@ -1,4 +1,5 @@
 language: cpp
+compiler: clang
 sudo: required
 
 os:
