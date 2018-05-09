@@ -1,5 +1,7 @@
 # Getting started on CentOS 7
 
+**This page could be outdated!**
+
 ## Installing dependencies
 
 ```

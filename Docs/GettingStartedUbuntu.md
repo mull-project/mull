@@ -17,33 +17,48 @@ Add LLVM sources for binary distributions as recommended by
 [http://apt.llvm.org/](http://apt.llvm.org/):
 
 ```
-$ apt-get update
-$ apt-get -y install wget
-$ echo "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-3.9 main" >> /etc/apt/sources.list.d/llvm.list
-$ wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
+apt-get update
+apt-get -y install wget
+echo "deb http://apt.llvm.org/xenial/ llvm-toolchain-xenial-3.9 main" >> /etc/apt/sources.list.d/llvm.list
+wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add -
 ```
 
 Then install:
 
 ```bash
-$ apt-get update
-$ apt-get -y install git make vim ninja-build wget \
-                     libz-dev sqlite3 libsqlite3-dev ncurses-dev \
-                     cmake \
-                     llvm-3.9 clang-3.9 llvm-3.9-dev
+apt-get update
+apt-get -y install git make vim ninja-build wget \
+                   libz-dev sqlite3 libsqlite3-dev ncurses-dev \
+                   cmake \
+                   llvm-3.9 clang-3.9 llvm-3.9-dev
 ```
 
 ### Cloning mull
 
 ```bash
-$ cd /opt
-$ git clone https://github.com/mull-project/mull.git
-$ cd mull
+cd /opt
+git clone https://github.com/mull-project/mull.git
+cd mull
 ```
 
 ### Running tests
 
 ```bash
-make -f Makefile.ubuntu test
+make test
 ```
 
+### Building and installing Mull
+
+The following command will build and install `mull-driver` into `/usr/local/bin`
+
+```bash
+make install
+```
+
+**Check if you have enough permissions to write into `/usr/local/bin` if it fails.**
+
+Alternatively, choose a different location use the following command:
+
+```bash
+make install INSTALL_DIR=/foo/bar
+```

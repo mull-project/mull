@@ -16,11 +16,11 @@ find_package(Threads REQUIRED)
 
 add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=c++11>)
 
-if (NOT CMAKE_TOOLCHAIN_FILE)
-message(FATAL_ERROR "This CMakeLists.txt file expects cmake to be called with a CMake toolchain file:
-cmake ... -DCMAKE_TOOLCHAIN_FILE=path_to_your_toolchain_file.
-See example: Mull.toolchain.OSX.cmake")
-endif()
+# if (NOT CMAKE_TOOLCHAIN_FILE)
+# message(FATAL_ERROR "This CMakeLists.txt file expects cmake to be called with a CMake toolchain file:
+# cmake ... -DCMAKE_TOOLCHAIN_FILE=path_to_your_toolchain_file.
+# See example: Mull.toolchain.OSX.cmake")
+# endif()
 
 if (NOT LLVM_ROOT)
   message(FATAL_ERROR "This CMakeLists.txt file expects cmake to be called with a

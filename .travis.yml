@@ -1,4 +1,5 @@
 language: cpp
+compiler: clang
 sudo: required
 
 os:
@@ -6,14 +7,13 @@ os:
 - linux
 
 before_install:
-- if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then make -f Makefile.macos travis_install; fi
-- if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then make -f Makefile.ubuntu travis_install; fi
+- if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then make travis.install.macos; fi
+- if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then make travis.install.ubuntu; fi
 
 # Uncomment this line when support Rust
 # - if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then curl -sf https://static.rust-lang.org/rustup.sh | sudo sh; fi
 
 # Build steps
 script:
-- if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then make -f Makefile.macos travis; fi
-- if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then make -f Makefile.ubuntu travis; fi
+  - make travis.test INSTALL_DIR=/tmp/mull
 
