@@ -5,6 +5,8 @@ if (NOT LLVM_ROOT)
 endif()
 
 set(LLVM_CONFIG_PATH "${LLVM_ROOT}/bin/llvm-config")
+set(LLVM_CC "${LLVM_ROOT}/bin/clang")
+set(LLVM_CXX "${LLVM_ROOT}/bin/clang++")
 
 # Getting LLVM CXX flags using llvm-config
 function(llvm_get_cxx_flags OUT_CXX_FLAGS)

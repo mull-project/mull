@@ -65,6 +65,8 @@ target_link_libraries(MullUnitTests
   ${CMAKE_THREAD_LIBS_INIT}
 )
 
+add_dependencies(MullUnitTests fixtures)
+
 # compile flags
 get_target_property(default_compile_flags MullUnitTests COMPILE_FLAGS)
 if(NOT default_compile_flags)

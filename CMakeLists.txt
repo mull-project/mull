@@ -102,5 +102,6 @@ endif()
 add_subdirectory(lib)
 add_subdirectory(googletest)
 add_subdirectory(tools)
+add_subdirectory(lab)
 add_subdirectory(unittests)
 
