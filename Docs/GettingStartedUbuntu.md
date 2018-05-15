@@ -30,7 +30,7 @@ apt-get update
 apt-get -y install git make vim ninja-build wget \
                    libz-dev sqlite3 libsqlite3-dev ncurses-dev \
                    cmake \
-                   llvm-3.9 clang-3.9 llvm-3.9-dev
+                   llvm-3.9 clang-3.9 llvm-3.9-dev libclang-3.9-dev
 ```
 
 ### Cloning mull
