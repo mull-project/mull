@@ -127,7 +127,7 @@ travis.install.ubuntu:
 ###
 
 xcode.init: $(BUILD_DIR_XCODE) ## Build Xcode project with CMake.
-	rm -rfv $(BUILD_DIR_XCODE)/CMakeCache.txt
+	#rm -rfv $(BUILD_DIR_XCODE)/CMakeCache.txt
 	cd $(BUILD_DIR_XCODE) && cmake ../ -G Xcode \
     $(CMAKE_COMMAND_LINE_DEBUG_FLAGS) \
     -DLLVM_ROOT=$(LLVM_ROOT) \
