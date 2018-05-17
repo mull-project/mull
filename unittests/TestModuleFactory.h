@@ -45,10 +45,6 @@ public:
   std::unique_ptr<MullModule> APFloat_019fc57b8bd190d33389137abbe7145e_214_2_7_negate_mutatorModule();
   std::unique_ptr<MullModule> APFloat_019fc57b8bd190d33389137abbe7145e_5_1_3_negate_mutatorModule();
 
-  std::unique_ptr<MullModule> create_CustomTest_Distance_Distance_Module();
-  std::unique_ptr<MullModule> createCustomTest_Distance_Main_Module();
-  std::unique_ptr<MullModule> createCustomTest_Distance_Test_Module();
-
   std::unique_ptr<MullModule> createCustomTest_DylibsAndObjects_Test_Module();
   std::unique_ptr<MullModule> createCustomTest_DylibsAndObjects_Main_Module();
   std::unique_ptr<MullModule> createCustomTest_DylibsAndObjects_Distance_Module();

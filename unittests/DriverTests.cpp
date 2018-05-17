@@ -37,10 +37,14 @@
 #include <llvm/Support/YAMLParser.h>
 
 #include "gtest/gtest.h"
+#include "FixturesFactory.h"
 
 using namespace mull;
 using namespace llvm;
 
+static LLVMContext globalContext;
+static ModuleLoader loader(globalContext);
+static FixturesFactory factory(loader);
 static TestModuleFactory SharedTestModuleFactory;
 
 #pragma mark - Running Driver with no tests
@@ -948,9 +952,9 @@ TEST(Driver, customTest) {
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
 
-    modules.push_back(SharedTestModuleFactory.create_CustomTest_Distance_Distance_Module());
-    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Main_Module());
-    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Test_Module());
+    modules.push_back(factory.create_custom_test_distance_bc());
+    modules.push_back(factory.create_custom_test_main_bc());
+    modules.push_back(factory.create_custom_test_test_bc());
 
     return modules;
   };
@@ -1092,9 +1096,9 @@ TEST(Driver, junkDetector_enabled) {
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
 
-    modules.push_back(SharedTestModuleFactory.create_CustomTest_Distance_Distance_Module());
-    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Main_Module());
-    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Test_Module());
+    modules.push_back(factory.create_custom_test_distance_bc());
+    modules.push_back(factory.create_custom_test_main_bc());
+    modules.push_back(factory.create_custom_test_test_bc());
 
     return modules;
   };
@@ -1157,9 +1161,9 @@ TEST(Driver, junkDetector_disabled) {
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
 
-    modules.push_back(SharedTestModuleFactory.create_CustomTest_Distance_Distance_Module());
-    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Main_Module());
-    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Test_Module());
+    modules.push_back(factory.create_custom_test_distance_bc());
+    modules.push_back(factory.create_custom_test_main_bc());
+    modules.push_back(factory.create_custom_test_test_bc());
 
     return modules;
   };

@@ -228,21 +228,6 @@ std::unique_ptr<MullModule> TestModuleFactory::APFloat_019fc57b8bd190d33389137ab
   return createModule(fixture, fixture);
 }
 
-std::unique_ptr<MullModule> TestModuleFactory::create_CustomTest_Distance_Distance_Module() {
-  const char *fixture = "custom_test/distance/distance.bc";
-  return createModuleFromBitcode(fixture, fixture);
-}
-
-std::unique_ptr<MullModule> TestModuleFactory::createCustomTest_Distance_Main_Module() {
-  const char *fixture = "custom_test/distance/main.bc";
-  return createModuleFromBitcode(fixture, fixture);
-}
-
-std::unique_ptr<MullModule> TestModuleFactory::createCustomTest_Distance_Test_Module() {
-  const char *fixture = "custom_test/distance/test.bc";
-  return createModuleFromBitcode(fixture, fixture);
-}
-
 std::unique_ptr<MullModule> TestModuleFactory::createCustomTest_DylibsAndObjects_Test_Module() {
   const char *fixture = "custom_test/dylibs_and_objects/test.bc";
   return createModuleFromBitcode(fixture, fixture);
