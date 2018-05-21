@@ -231,7 +231,7 @@ TEST(Driver, SimpleTest_MathSubMutator) {
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
 
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_MathSub_Module());
+    modules.push_back(factory.create_simple_test_mutators_math_sub_math_sub_bc());
 
     return modules;
   };
@@ -312,7 +312,7 @@ TEST(Driver, SimpleTest_MathMulMutator) {
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
 
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_MathMul_Module());
+    modules.push_back(factory.create_simple_test_mutators_math_mul_math_mul_bc());
 
     return modules;
   };
@@ -392,7 +392,7 @@ TEST(Driver, SimpleTest_MathDivMutator) {
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
 
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_MathDiv_Module());
+    modules.push_back(factory.create_simple_test_mutators_math_div_math_div_bc());
 
     return modules;
   };
@@ -477,8 +477,8 @@ TEST(Driver, SimpleTest_NegateConditionMutator) {
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
 
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_NegateCondition_Tester_Module());
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_NegateCondition_Testee_Module());
+    modules.push_back(factory.create_simple_test_mutators_negate_condition_tester_bc());
+    modules.push_back(factory.create_simple_test_mutators_negate_condition_testee_bc());
 
     return modules;
   };
@@ -550,8 +550,8 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutator) {
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
 
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_RemoveVoidFunction_Tester_Module());
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_RemoveVoidFunction_Testee_Module());
+    modules.push_back(factory.create_simple_test_mutators_remove_void_function_tester_bc());
+    modules.push_back(factory.create_simple_test_mutators_remove_void_function_testee_bc());
 
     return modules;
   };
@@ -623,7 +623,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
 
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_ANDORReplacement_Module());
+    modules.push_back(factory.create_simple_test_mutators_and_or_replacement_test_and_or_operators_bc());
 
     return modules;
   };
@@ -770,7 +770,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator_CPP) {
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
 
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_ANDORReplacement_CPPContent_Module());
+    modules.push_back(factory.create_simple_test_mutators_and_or_replacement_cpp_test_and_or_operators_bc());
 
     return modules;
   };
@@ -878,7 +878,7 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutator_CPP) {
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
 
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_ReplaceAssignment_Module());
+    modules.push_back(factory.create_simple_test_mutators_replace_assignment_replace_assignment_bc());
 
     return modules;
   };

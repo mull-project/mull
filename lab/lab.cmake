@@ -15,6 +15,21 @@ function(detect_compiler)
   endif()
 endfunction()
 
+function(detect_flags)
+  cmake_parse_arguments(DETECT_FLAGS "" "EXTENSION" "CFLAGS;CXXFLAGS;FLAGS" ${ARGN})
+
+  string(TOLOWER ${DETECT_FLAGS_EXTENSION} extension)
+  string(COMPARE EQUAL ${extension} ".c" is_c_source_file)
+  string(COMPARE EQUAL ${extension} ".cpp" is_cpp_source_file)
+  if (${is_c_source_file})
+    set(${DETECT_FLAGS_FLAGS} ${DETECT_FLAGS_CFLAGS} PARENT_SCOPE)
+  elseif(${is_cpp_source_file})
+    set(${DETECT_FLAGS_FLAGS} ${DETECT_FLAGS_CXXFLAGS} PARENT_SCOPE)
+  else()
+    message(FATAL_ERROR "Could not detect flags for '${DETECT_FLAGS_EXTENSION}'")
+  endif()
+endfunction()
+
 function(add_fixtures_target target)
   add_custom_target(fixtures)
   define_property(TARGET
@@ -25,7 +40,11 @@ function(add_fixtures_target target)
 endfunction()
 
 function(generate_fixtures)
-  cmake_parse_arguments(GENERATE_BITCODE "" "TARGET" "SOURCES" ${ARGN})
+  cmake_parse_arguments(GENERATE_BITCODE
+    ""
+    "TARGET"  # Single value arguments
+    "SOURCES;CFLAGS;CXXFLAGS" # Multiple values arguments
+    ${ARGN})
 
   add_custom_target(${GENERATE_BITCODE_TARGET})
 
@@ -43,9 +62,16 @@ function(generate_fixtures)
       COMPILER compiler
     )
 
+    detect_flags(
+      EXTENSION ${input_extension}
+      CFLAGS ${GENERATE_BITCODE_CFLAGS}
+      CXXFLAGS ${GENERATE_BITCODE_CXXFLAGS}
+      FLAGS out_flags
+    )
+
     add_custom_command(
       OUTPUT ${output}
-      COMMAND ${compiler} -c -emit-llvm ${input} -o ${output}
+      COMMAND ${compiler} ${out_flags} -c -emit-llvm ${input} -o ${output}
       DEPENDS ${input}
     )
 

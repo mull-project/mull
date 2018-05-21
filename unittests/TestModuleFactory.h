@@ -17,24 +17,6 @@ public:
   std::unique_ptr<MullModule> createModule(const char *fixtureName,
                                            const char *moduleIdentifier);
 
-  std::unique_ptr<MullModule> create_SimpleTest_MathSub_Module();
-  std::unique_ptr<MullModule> create_SimpleTest_MathMul_Module();
-  std::unique_ptr<MullModule> create_SimpleTest_MathDiv_Module();
-
-  std::unique_ptr<MullModule> create_SimpleTest_NegateCondition_Tester_Module();
-  std::unique_ptr<MullModule> create_SimpleTest_NegateCondition_Testee_Module();
-
-  std::unique_ptr<MullModule> create_SimpleTest_RemoveVoidFunction_Tester_Module();
-  std::unique_ptr<MullModule> create_SimpleTest_RemoveVoidFunction_Testee_Module();
-
-  std::unique_ptr<MullModule> create_SimpleTest_ANDORReplacement_Module();
-  std::unique_ptr<MullModule> create_SimpleTest_ANDORReplacement_CPPContent_Module();
-
-  std::unique_ptr<MullModule> create_SimpleTest_ScalarValue_Module();
-
-  std::unique_ptr<MullModule> create_SimpleTest_ReplaceAssignment_Module();
-  std::unique_ptr<MullModule> create_SimpleTest_ReplaceCall_Module();
-
   std::unique_ptr<MullModule> create_GoogleTest_Tester_Module();
   std::unique_ptr<MullModule> create_GoogleTest_Testee_Module();
 

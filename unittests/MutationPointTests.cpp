@@ -8,7 +8,6 @@
 #include "Mutators/ScalarValueMutator.h"
 #include "Mutators/ReplaceAssignmentMutator.h"
 #include "Mutators/ReplaceCallMutator.h"
-#include "TestModuleFactory.h"
 #include "Testee.h"
 #include "MutationsFinder.h"
 #include "Filter.h"
@@ -32,8 +31,6 @@ using namespace llvm;
 static LLVMContext globalContext;
 static ModuleLoader loader(globalContext);
 static FixturesFactory factory(loader);
-
-static TestModuleFactory TestModuleFactory;
 
 static llvm::Instruction &FunctionInstructionByAddress(Function &F, MutationPointAddress address) {
   printf("ModuleInstructionByAddress: %d %d %d\n",
@@ -95,7 +92,7 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
-  auto module = TestModuleFactory.create_SimpleTest_MathSub_Module();
+  auto module = factory.create_simple_test_mutators_math_sub_math_sub_bc();
 
   Context Ctx;
   Ctx.addModule(std::move(module));
@@ -139,7 +136,7 @@ TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
-  auto module = TestModuleFactory.create_SimpleTest_MathMul_Module();
+  auto module = factory.create_simple_test_mutators_math_mul_math_mul_bc();
 
   Context Ctx;
   Ctx.addModule(std::move(module));
@@ -184,7 +181,7 @@ TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
-  auto module = TestModuleFactory.create_SimpleTest_MathDiv_Module();
+  auto module = factory.create_simple_test_mutators_math_div_math_div_bc();
 
   Context Ctx;
   Ctx.addModule(std::move(module));
@@ -231,8 +228,8 @@ TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
-  auto ModuleWithTests   = TestModuleFactory.create_SimpleTest_NegateCondition_Tester_Module();
-  auto ModuleWithTestees = TestModuleFactory.create_SimpleTest_NegateCondition_Testee_Module();
+  auto ModuleWithTests   = factory.create_simple_test_mutators_negate_condition_tester_bc();
+  auto ModuleWithTestees = factory.create_simple_test_mutators_negate_condition_testee_bc();
 
   Context Ctx;
   Ctx.addModule(std::move(ModuleWithTests));
@@ -273,7 +270,7 @@ TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_AndOrMutator_applyMutation) {
-  auto module = TestModuleFactory.create_SimpleTest_ANDORReplacement_Module();
+  auto module = factory.create_simple_test_mutators_and_or_replacement_test_and_or_operators_bc();
 
   Context ctx;
   ctx.addModule(std::move(module));
@@ -321,7 +318,7 @@ TEST(MutationPoint, SimpleTest_AndOrMutator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_ScalarValueMutator_applyMutation) {
-  auto module = TestModuleFactory.create_SimpleTest_ScalarValue_Module();
+  auto module = factory.create_simple_test_mutators_scalar_value_scalar_value_bc();
 
   Context Ctx;
   Ctx.addModule(std::move(module));
@@ -374,7 +371,7 @@ TEST(MutationPoint, SimpleTest_ScalarValueMutator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_ReplaceCallMutator_applyMutation) {
-  auto module = TestModuleFactory.create_SimpleTest_ReplaceCall_Module();
+  auto module = factory.create_simple_test_mutators_replace_call_replace_call_bc();
 
   Context Ctx;
   Ctx.addModule(std::move(module));
@@ -411,7 +408,7 @@ TEST(MutationPoint, SimpleTest_ReplaceCallMutator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_ReplaceAssignmentMutator_applyMutation) {
-    auto module = TestModuleFactory.create_SimpleTest_ReplaceAssignment_Module();
+    auto module = factory.create_simple_test_mutators_replace_assignment_replace_assignment_bc();
 
     Context Ctx;
     Ctx.addModule(std::move(module));

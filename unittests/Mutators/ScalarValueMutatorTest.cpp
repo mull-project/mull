@@ -15,13 +15,19 @@
 
 #include "gtest/gtest.h"
 
+#include "FixturesFactory.h"
+
 using namespace mull;
 using namespace llvm;
+
+static LLVMContext globalContext;
+static ModuleLoader loader(globalContext);
+static FixturesFactory factory(loader);
 
 static TestModuleFactory TestModuleFactory;
 
 TEST(ScalarValueMutator, getMutationPoint) {
-  auto mullModule = TestModuleFactory.create_SimpleTest_ScalarValue_Module();
+  auto mullModule = factory.create_simple_test_mutators_scalar_value_scalar_value_bc();
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
