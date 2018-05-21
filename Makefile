@@ -49,7 +49,6 @@ install: ninja.install.mull-driver ## Install mull-driver into INSTALL_DIR (defa
 ###
 
 ninja.init: $(BUILD_DIR_NINJA) ## Prepare Ninja project on macOS
-	rm -rfv $(BUILD_DIR_NINJA)/CMakeCache.txt
 	cd $(BUILD_DIR_NINJA) && cmake -G Ninja \
     -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) \
     $(CMAKE_COMMAND_LINE_DEBUG_FLAGS) \
@@ -128,7 +127,7 @@ travis.install.ubuntu:
 ###
 
 xcode.init: $(BUILD_DIR_XCODE) ## Build Xcode project with CMake.
-	rm -rfv $(BUILD_DIR_XCODE)/CMakeCache.txt
+	#rm -rfv $(BUILD_DIR_XCODE)/CMakeCache.txt
 	cd $(BUILD_DIR_XCODE) && cmake ../ -G Xcode \
     $(CMAKE_COMMAND_LINE_DEBUG_FLAGS) \
     -DLLVM_ROOT=$(LLVM_ROOT) \

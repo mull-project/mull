@@ -5,7 +5,6 @@
 #include "Mutators/MathAddMutator.h"
 #include "SimpleTest/SimpleTestFinder.h"
 #include "SimpleTest/SimpleTest_Test.h"
-#include "TestModuleFactory.h"
 #include "MutationsFinder.h"
 #include "Filter.h"
 #include "Testee.h"
@@ -19,8 +18,14 @@
 #include <llvm/IR/Type.h>
 #include <sqlite3.h>
 
+#include "FixturesFactory.h"
+
 using namespace mull;
 using namespace llvm;
+
+static LLVMContext globalContext;
+static ModuleLoader loader(globalContext);
+static FixturesFactory factory(loader);
 
 TEST(SQLiteReporter, integrationTest) {
 
@@ -29,10 +34,8 @@ TEST(SQLiteReporter, integrationTest) {
   /// - 1 test execution result which includes 1 normal test execution and 1
   /// mutated test execution.
 
-  TestModuleFactory testModuleFactory;
-
-  auto mullModuleWithTests   = testModuleFactory.create_SimpleTest_CountLettersTest_Module();
-  auto mullModuleWithTestees = testModuleFactory.create_SimpleTest_CountLetters_Module();
+  auto mullModuleWithTests   = factory.create_simple_test_count_letters_test_count_letters_bc();
+  auto mullModuleWithTestees = factory.create_simple_test_count_letters_count_letters_bc();
 
   Context context;
   context.addModule(std::move(mullModuleWithTests));
@@ -341,10 +344,8 @@ TEST(SQLiteReporter, integrationTest_Config) {
 }
 
 TEST(SQLiteReporter, do_emitDebugInfo) {
-  TestModuleFactory testModuleFactory;
-
-  auto mullModuleWithTests   = testModuleFactory.create_SimpleTest_CountLettersTest_Module();
-  auto mullModuleWithTestees = testModuleFactory.create_SimpleTest_CountLetters_Module();
+  auto mullModuleWithTests   = factory.create_simple_test_count_letters_test_count_letters_bc();
+  auto mullModuleWithTestees = factory.create_simple_test_count_letters_count_letters_bc();
 
   Context context;
   context.addModule(std::move(mullModuleWithTests));
@@ -488,10 +489,8 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
 }
 
 TEST(SQLiteReporter, do_not_emitDebugInfo) {
-  TestModuleFactory testModuleFactory;
-
-  auto mullModuleWithTests   = testModuleFactory.create_SimpleTest_CountLettersTest_Module();
-  auto mullModuleWithTestees = testModuleFactory.create_SimpleTest_CountLetters_Module();
+  auto mullModuleWithTests   = factory.create_simple_test_count_letters_test_count_letters_bc();
+  auto mullModuleWithTestees = factory.create_simple_test_count_letters_count_letters_bc();
 
   Context context;
   context.addModule(std::move(mullModuleWithTests));

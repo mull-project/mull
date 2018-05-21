@@ -8,13 +8,17 @@
 
 #include "gtest/gtest.h"
 
+#include "FixturesFactory.h"
+
 using namespace mull;
 using namespace llvm;
 
-static TestModuleFactory TestModuleFactory;
+static LLVMContext globalContext;
+static ModuleLoader loader(globalContext);
+static FixturesFactory factory(loader);
 
 TEST(Context, AddModule) {
-  auto moduleWithTests = TestModuleFactory.create_SimpleTest_CountLettersTest_Module();
+  auto moduleWithTests = factory.create_simple_test_count_letters_test_count_letters_bc();
 
   Context Ctx;
   Ctx.addModule(std::move(moduleWithTests));

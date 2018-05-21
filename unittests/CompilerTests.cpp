@@ -10,10 +10,14 @@
 
 #include "gtest/gtest.h"
 
+#include "FixturesFactory.h"
+
 using namespace llvm;
 using namespace mull;
 
-static TestModuleFactory TestModuleFactory;
+static LLVMContext globalContext;
+static ModuleLoader loader(globalContext);
+static FixturesFactory factory(loader);
 
 TEST(Compiler, CompileModule) {
   InitializeNativeTarget();
@@ -26,7 +30,7 @@ TEST(Compiler, CompileModule) {
 
   Compiler compiler(*targetMachine.get());
 
-  auto module = TestModuleFactory.create_SimpleTest_CountLettersTest_Module();
+  auto module = factory.create_simple_test_count_letters_count_letters_bc();
   auto Binary = compiler.compileModule(module->getModule());
 
   ASSERT_NE(nullptr, Binary.getBinary());

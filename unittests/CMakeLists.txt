@@ -65,6 +65,8 @@ target_link_libraries(MullUnitTests
   ${CMAKE_THREAD_LIBS_INIT}
 )
 
+add_dependencies(MullUnitTests fixtures)
+
 # compile flags
 get_target_property(default_compile_flags MullUnitTests COMPILE_FLAGS)
 if(NOT default_compile_flags)
@@ -98,3 +100,9 @@ set_target_properties(MullUnitTests
 add_custom_command(TARGET MullUnitTests POST_BUILD
                    COMMAND ${CMAKE_COMMAND} -E create_symlink
                    ${CMAKE_CURRENT_LIST_DIR}/fixtures $<TARGET_FILE_DIR:MullUnitTests>/fixtures)
+
+target_include_directories(MullUnitTests PUBLIC
+  ${FIXTURES_FACTORY_INCLUDE_DIR}
+)
+
+add_dependencies(MullUnitTests fixtures)

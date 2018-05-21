@@ -108,95 +108,10 @@ TestModuleFactory::createModule(const char *fixtureName,
   return make_unique<MullModule>(std::move(module), "fake_hash", "fake_path");
 }
 
-#pragma mark - Mutators
-
-#pragma mark - Math Mutators
-
-std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_MathSub_Module() {
-  const char *fixture = "simple_test/mutators/math_sub/math_sub.bc";
-  return createModuleFromBitcode(fixture, fixture);
-}
-
-std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_MathMul_Module() {
-  const char *fixture = "simple_test/mutators/math_mul/math_mul.bc";
-  return createModuleFromBitcode(fixture, fixture);
-}
-
-std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_MathDiv_Module() {
-  const char *fixture = "simple_test/mutators/math_div/math_div.bc";
-  return createModuleFromBitcode(fixture, fixture);
-}
-
-#pragma mark - Negate Condition
-
-std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_NegateCondition_Tester_Module() {
-  const char *fixture = "simple_test/mutators/negate_condition/tester.bc";
-  return createModuleFromBitcode(fixture, fixture);
-}
-
-std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_NegateCondition_Testee_Module() {
-  const char *fixture = "simple_test/mutators/negate_condition/testee.bc";
-  return createModuleFromBitcode(fixture, fixture);
-}
-
-#pragma mark - Remove Void Function
-
-std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_RemoveVoidFunction_Tester_Module() {
-  const char *fixture = "simple_test/mutators/remove_void_function/tester.bc";
-  return createModuleFromBitcode(fixture, fixture);
-}
-
-std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_RemoveVoidFunction_Testee_Module() {
-  const char *fixture = "simple_test/mutators/remove_void_function/testee.bc";
-  return createModuleFromBitcode(fixture, fixture);
-}
-
-#pragma mark - AND <-> OR Replacement
-
-std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ANDORReplacement_Module() {
-  const char *fixture = "simple_test/mutators/and_or_replacement/test_and_or_operators.bc";
-  return createModuleFromBitcode(fixture, fixture);
-}
-
-std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ANDORReplacement_CPPContent_Module() {
-  const char *fixture = "simple_test/mutators/and_or_replacement_cpp/test_and_or_operators.bc";
-  return createModuleFromBitcode(fixture, fixture);
-}
-
-#pragma mark - Scalar Value
-
-std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ScalarValue_Module() {
-  const char *fixture = "simple_test/mutators/scalar_value/scalar_value.bc";
-  return createModuleFromBitcode(fixture, fixture);
-}
-
-#pragma mark - Replace Assignment
-
-std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ReplaceAssignment_Module() {
-    const char *fixture = "simple_test/mutators/replace_assignment/replace_assignment.bc";
-    return createModuleFromBitcode(fixture, fixture);
-}
-
-#pragma mark - Replace Call
-
-std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_ReplaceCall_Module() {
-  const char *fixture = "simple_test/mutators/replace_call/replace_call.bc";
-  return createModuleFromBitcode(fixture, fixture);
-}
-
 #pragma mark -
 
 std::string TestModuleFactory::testerModulePath_Bitcode() {
   return fixturePath("fixture_simple_test_tester_module.bc");
-}
-
-std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_CountLettersTest_Module() {
-  const char *fixture = "simple_test/count_letters/test_count_letters.bc";
-  return createModuleFromBitcode(fixture, fixture);
-}
-
-std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_CountLetters_Module() {
-  return createModuleFromBitcode("simple_test/count_letters/count_letters.bc", "count_letters");
 }
 
 #pragma mark - Google Test
@@ -226,21 +141,6 @@ std::unique_ptr<MullModule> TestModuleFactory::APFloat_019fc57b8bd190d33389137ab
 std::unique_ptr<MullModule> TestModuleFactory::APFloat_019fc57b8bd190d33389137abbe7145e_5_1_3_negate_mutatorModule() {
   const char *fixture = "APFloat_019fc57b8bd190d33389137abbe7145e_5_1_3_negate_mutator.ll";
   return createModule(fixture, fixture);
-}
-
-std::unique_ptr<MullModule> TestModuleFactory::create_CustomTest_Distance_Distance_Module() {
-  const char *fixture = "custom_test/distance/distance.bc";
-  return createModuleFromBitcode(fixture, fixture);
-}
-
-std::unique_ptr<MullModule> TestModuleFactory::createCustomTest_Distance_Main_Module() {
-  const char *fixture = "custom_test/distance/main.bc";
-  return createModuleFromBitcode(fixture, fixture);
-}
-
-std::unique_ptr<MullModule> TestModuleFactory::createCustomTest_Distance_Test_Module() {
-  const char *fixture = "custom_test/distance/test.bc";
-  return createModuleFromBitcode(fixture, fixture);
 }
 
 std::unique_ptr<MullModule> TestModuleFactory::createCustomTest_DylibsAndObjects_Test_Module() {

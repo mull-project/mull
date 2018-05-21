@@ -2,7 +2,6 @@
 
 #include "Context.h"
 #include "Filter.h"
-#include "TestModuleFactory.h"
 #include "Test.h"
 #include "SimpleTest/SimpleTest_Test.h"
 
@@ -13,13 +12,17 @@
 
 #include "gtest/gtest.h"
 
+#include "FixturesFactory.h"
+
 using namespace mull;
 using namespace llvm;
 
-static TestModuleFactory TestModuleFactory;
+static LLVMContext globalContext;
+static ModuleLoader loader(globalContext);
+static FixturesFactory factory(loader);
 
 TEST(SimpleTestFinder, findTest) {
-  auto module = TestModuleFactory.create_SimpleTest_CountLettersTest_Module();
+  auto module = factory.create_simple_test_count_letters_test_count_letters_bc();
 
   Context context;
   context.addModule(std::move(module));

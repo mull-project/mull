@@ -11,22 +11,24 @@
 #include <llvm/IR/Module.h>
 
 #include "gtest/gtest.h"
+#include "FixturesFactory.h"
 
 using namespace mull;
 using namespace llvm;
 using namespace std;
 
-static TestModuleFactory SharedTestModuleFactory;
 static LLVMContext context;
+static ModuleLoader loader(context);
+static FixturesFactory factory(loader);
 const static int TestTimeout = 1000;
 
 static vector<unique_ptr<MullModule>> loadTestModules() {
   function<vector<unique_ptr<MullModule>> ()> modules = [](){
     vector<unique_ptr<MullModule>> modules;
 
-    modules.push_back(SharedTestModuleFactory.create_CustomTest_Distance_Distance_Module());
-    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Main_Module());
-    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Test_Module());
+    modules.push_back(factory.create_custom_test_distance_bc());
+    modules.push_back(factory.create_custom_test_main_bc());
+    modules.push_back(factory.create_custom_test_test_bc());
 
     return modules;
   };
