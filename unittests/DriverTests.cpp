@@ -45,6 +45,7 @@ using namespace llvm;
 static LLVMContext globalContext;
 static ModuleLoader loader(globalContext);
 static FixturesFactory factory(loader);
+
 static TestModuleFactory SharedTestModuleFactory;
 
 #pragma mark - Running Driver with no tests
@@ -147,8 +148,8 @@ TEST(Driver, SimpleTest_MathAddMutator) {
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
 
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_CountLettersTest_Module());
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_CountLetters_Module());
+    modules.push_back(factory.create_simple_test_count_letters_test_count_letters_bc());
+    modules.push_back(factory.create_simple_test_count_letters_count_letters_bc());
 
     return modules;
   };

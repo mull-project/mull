@@ -190,15 +190,6 @@ std::string TestModuleFactory::testerModulePath_Bitcode() {
   return fixturePath("fixture_simple_test_tester_module.bc");
 }
 
-std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_CountLettersTest_Module() {
-  const char *fixture = "simple_test/count_letters/test_count_letters.bc";
-  return createModuleFromBitcode(fixture, fixture);
-}
-
-std::unique_ptr<MullModule> TestModuleFactory::create_SimpleTest_CountLetters_Module() {
-  return createModuleFromBitcode("simple_test/count_letters/count_letters.bc", "count_letters");
-}
-
 #pragma mark - Google Test
 
 std::unique_ptr<MullModule> TestModuleFactory::create_GoogleTest_Tester_Module() {

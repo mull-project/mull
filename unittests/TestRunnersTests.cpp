@@ -2,7 +2,6 @@
 #include "Context.h"
 #include "Mutators/MathAddMutator.h"
 #include "SimpleTest/SimpleTestFinder.h"
-#include "TestModuleFactory.h"
 #include "Toolchain/Compiler.h"
 #include "SimpleTest/SimpleTestRunner.h"
 #include "MutationsFinder.h"
@@ -21,10 +20,14 @@
 
 #include "gtest/gtest.h"
 
+#include "FixturesFactory.h"
+
 using namespace mull;
 using namespace llvm;
 
-static TestModuleFactory TestModuleFactory;
+static LLVMContext globalContext;
+static ModuleLoader loader(globalContext);
+static FixturesFactory factory(loader);
 
 TEST(SimpleTestRunner, runTest) {
   InitializeNativeTarget();
@@ -41,8 +44,8 @@ TEST(SimpleTestRunner, runTest) {
   SimpleTestRunner::ObjectFiles ObjectFiles;
   SimpleTestRunner::OwnedObjectFiles OwnedObjectFiles;
 
-  auto OwnedModuleWithTests   = TestModuleFactory.create_SimpleTest_CountLettersTest_Module();
-  auto OwnedModuleWithTestees = TestModuleFactory.create_SimpleTest_CountLetters_Module();
+  auto OwnedModuleWithTests   = factory.create_simple_test_count_letters_test_count_letters_bc();
+  auto OwnedModuleWithTestees = factory.create_simple_test_count_letters_count_letters_bc();
 
   Module *ModuleWithTests   = OwnedModuleWithTests->getModule();
   Module *ModuleWithTestees = OwnedModuleWithTestees->getModule();

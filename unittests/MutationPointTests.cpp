@@ -24,8 +24,14 @@
 
 #include "gtest/gtest.h"
 
+#include "FixturesFactory.h"
+
 using namespace mull;
 using namespace llvm;
+
+static LLVMContext globalContext;
+static ModuleLoader loader(globalContext);
+static FixturesFactory factory(loader);
 
 static TestModuleFactory TestModuleFactory;
 
@@ -42,8 +48,8 @@ static llvm::Instruction &FunctionInstructionByAddress(Function &F, MutationPoin
 }
 
 TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
-  auto ModuleWithTests   = TestModuleFactory.create_SimpleTest_CountLettersTest_Module();
-  auto ModuleWithTestees = TestModuleFactory.create_SimpleTest_CountLetters_Module();
+  auto ModuleWithTests   = factory.create_simple_test_count_letters_test_count_letters_bc();
+  auto ModuleWithTestees = factory.create_simple_test_count_letters_count_letters_bc();
 
   Context Ctx;
   Ctx.addModule(std::move(ModuleWithTests));
