@@ -99,6 +99,7 @@ if(MULL_SUPPORT_RUST)
   add_definitions(-DMULL_SUPPORT_RUST=1)
 endif()
 
+add_subdirectory(lab)
 add_subdirectory(lib)
 add_subdirectory(googletest)
 add_subdirectory(tools)

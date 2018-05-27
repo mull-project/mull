@@ -1,16 +1,15 @@
+CC=@CURRENT_CC@
+CXX=@CURRENT_CXX@
+
 UNAME=$(shell uname)
 
 ifeq ($(UNAME), Linux)
 
-CC=clang-3.9
-CXX=clang++-3.9
 SYSROOT=
 MACOSX_VERSION=
 
 else ifeq ($(UNAME), Darwin)
 
-CC=/opt/llvm-3.9/bin/clang
-CXX=/opt/llvm-3.9/bin/clang++
 SYSROOT=-isysroot $(shell xcrun --sdk macosx --show-sdk-path)
 MACOSX_VERSION=-mmacosx-version-min=10.12
 
