@@ -49,7 +49,6 @@ install: ninja.install.mull-driver ## Install mull-driver into INSTALL_DIR (defa
 ###
 
 ninja.init: $(BUILD_DIR_NINJA) ## Prepare Ninja project on macOS
-	rm -rfv $(BUILD_DIR_NINJA)/CMakeCache.txt
 	cd $(BUILD_DIR_NINJA) && cmake -G Ninja \
     -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) \
     $(CMAKE_COMMAND_LINE_DEBUG_FLAGS) \
@@ -57,11 +56,11 @@ ninja.init: $(BUILD_DIR_NINJA) ## Prepare Ninja project on macOS
     -DMULL_SUPPORT_RUST=0 \
     ../
 
-ninja.build.mull-driver: ninja.init ## Build mull-driver on macOS
+ninja.build.mull-driver: ## Build mull-driver on macOS
 	cd $(BUILD_DIR_NINJA) && ninja mull-driver
 	@echo "Resulting binary:\n"$(BUILD_DIR_NINJA)/tools/driver/mull-driver
 
-ninja.build.unit-tests: ninja.init generate_fixtures ## Build unit-tests on macOS
+ninja.build.unit-tests: generate_fixtures ## Build unit-tests on macOS
 	cd $(BUILD_DIR_NINJA) && ninja MullUnitTests
 
 ninja.install.mull-driver: ninja.build.mull-driver ## Install mull driver
@@ -95,7 +94,7 @@ $(BUILD_DIR_NINJA):
 ### Travis
 ###
 
-travis.test: ninja.run.unit-tests ninja.run.example
+travis.test: ninja.init ninja.run.unit-tests ninja.run.example
 
 travis.install.macos:
 	brew update
@@ -128,21 +127,20 @@ travis.install.ubuntu:
 ###
 
 xcode.init: $(BUILD_DIR_XCODE) ## Build Xcode project with CMake.
-	rm -rfv $(BUILD_DIR_XCODE)/CMakeCache.txt
 	cd $(BUILD_DIR_XCODE) && cmake ../ -G Xcode \
     $(CMAKE_COMMAND_LINE_DEBUG_FLAGS) \
     -DLLVM_ROOT=$(LLVM_ROOT) \
     -DMULL_SUPPORT_RUST=0
 
-xcode.kill-and-rebuild: xcode.init xcode.kill-and-reopen ## Build Xcode project with CMake, kill Xcode, reopen the project in Xcode
+xcode.kill-and-rebuild: xcode.kill-and-reopen ## Build Xcode project with CMake, kill Xcode, reopen the project in Xcode
 
-xcode.open: xcode.init ## Open Mull.xcodeproj in Xcode
+xcode.open: ## Open Mull.xcodeproj in Xcode
 	open $(BUILD_DIR_XCODE)/Mull.xcodeproj
 
 # This reopen task is mostly needed to do a work that involves serious
 # modifications of CMake's files: **/CMakeLists.txt and toolchain files.
 # Xcode does not pickup all of the changes in CMake without being reopened.
-xcode.kill-and-reopen: xcode.init ## Kill Xcode and open Mull.xcodeproj in Xcode.
+xcode.kill-and-reopen: ## Kill Xcode and open Mull.xcodeproj in Xcode.
 	killall Xcode || true
 	open $(BUILD_DIR_XCODE)/Mull.xcodeproj
 

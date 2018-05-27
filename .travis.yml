@@ -15,5 +15,5 @@ before_install:
 
 # Build steps
 script:
-  - make travis.test INSTALL_DIR=/tmp/mull
+  - make ninja.init travis.test INSTALL_DIR=/tmp/mull
 
