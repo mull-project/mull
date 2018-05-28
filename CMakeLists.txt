@@ -23,9 +23,9 @@ add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-std=c++11>)
 # endif()
 
 if (NOT LLVM_ROOT)
-  message(FATAL_ERROR "This CMakeLists.txt file expects cmake to be called with a
-    CMake toolchain file which provides LLVM_ROOT:\n \
-    -DCMAKE_TOOLCHAIN_FILE=path_to_your_toolchain")
+  message(FATAL_ERROR "This CMakeLists.txt file expects cmake to be called with
+  LLVM_ROOT provided:\n \
+  -DLLVM_ROOT=path-to-llvm-installation")
 endif()
 
 include(Mull.LLVM.cmake)
@@ -42,6 +42,18 @@ llvm_get_link_flags(LLVM_LINK_FLAGS)
 # the libraries are linked and that causes missing symbols.
 # https://github.com/eliben/llvm-clang-samples/pull/11
 set(LLVM_LINK_FLAGS "${LLVM_LINK_FLAGS} -Wl,-undefined,dynamic_lookup")
+
+# To link the final executable correctly on Linux the LLVM and clang libraries
+# should be given to a linker in the right order. Alternatively, the libraries
+# could be wrapped into a --start-group/--end-group. Unfortunately, MacOS linker
+# does not support these options, so we do this trick here
+if (APPLE)
+  set (LD_START_GROUP "")
+  set (LD_END_GROUP "")
+else()
+  set (LD_START_GROUP "-Wl,--start-group")
+  set (LD_END_GROUP "-Wl,--end-group")
+endif()
 
 # LLVM libraries
 set(llvm_components
