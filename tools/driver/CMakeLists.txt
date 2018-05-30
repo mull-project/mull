@@ -30,7 +30,7 @@ if(NOT ${default_link_flags})
 set(default_link_flags "")
 endif()
 set(mull_driver_link_flags
-  "${default_link_flags} ${LLVM_LINK_FLAGS}"
+  "${default_link_flags} ${LLVM_LINK_FLAGS} -rdynamic"
 )
 set_target_properties(mull-driver PROPERTIES LINK_FLAGS "${mull_driver_link_flags}")
 

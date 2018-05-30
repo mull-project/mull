@@ -82,7 +82,7 @@ if(NOT ${default_link_flags})
 set(default_link_flags "")
 endif()
 set(mull_unittests_link_flags
-  "${default_link_flags} ${LLVM_LINK_FLAGS}"
+  "${default_link_flags} ${LLVM_LINK_FLAGS} -rdynamic"
 )
 set_target_properties(MullUnitTests PROPERTIES LINK_FLAGS "${mull_unittests_link_flags}")
 
