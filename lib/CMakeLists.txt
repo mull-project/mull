@@ -72,12 +72,13 @@ set(mull_header_dirs
 )
 
 set(mull_additional_libraries
-  ${MULL_DEPENDENCY_LLVM_LIBRARIES}
-
   ${MULL_DEPENDENCY_LIBZ}
   ${MULL_DEPENDENCY_NCURSES}
-
   ${MULL_DEPENDENCY_SQLITE}
+
+  ${LD_START_GROUP}
+  ${MULL_DEPENDENCY_LLVM_LIBRARIES}
+
   ${MULL_DEPENDENCY_LIBCLANG}
   ${MULL_DEPENDENCY_LIBCLANG_TOOLING}
   ${MULL_DEPENDENCY_LIBCLANG_BASIC}
@@ -90,6 +91,7 @@ set(mull_additional_libraries
   ${MULL_DEPENDENCY_LIBCLANG_ANALYSIS}
   ${MULL_DEPENDENCY_LIBCLANG_PARSE}
   ${MULL_DEPENDENCY_LIBCLANG_EDIT}
+  ${LD_END_GROUP}
 )
 
 set(mull_link_flags "") # to be filled later
@@ -140,7 +142,7 @@ endif()
 # CMake to regenerate. https://cmake.org/cmake/help/v3.0/command/file.html
 file(GLOB_RECURSE mull_header_files ${MULL_INCLUDE_DIR}/*.h)
 
-add_library(mull SHARED ${mull_sources} ${mull_header_files})
+add_library(mull ${mull_sources} ${mull_header_files})
 
 set_source_files_properties(${mull_header_dirs} PROPERTIES HEADER_FILE_ONLY ON)
 include_directories(${mull_header_dirs})
@@ -190,4 +192,6 @@ endforeach()
 
 INSTALL(TARGETS mull
   LIBRARY DESTINATION lib
+  ARCHIVE DESTINATION lib
 )
+
