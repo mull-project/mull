@@ -12,3 +12,4 @@ projects/**
 tmp/
 *.sqlite
 
+cmake-build*

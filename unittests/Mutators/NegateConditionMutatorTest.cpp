@@ -38,7 +38,7 @@ TEST(NegateConditionMutator, canBeApplied) {
   NegateConditionMutator mutator;
 
   // Create the "if (arg <= 2) goto exitbb"
-  std::unique_ptr<Value> CondInst = make_unique<ICmpInst>(ICmpInst::ICMP_SLE, One, Two, "cond");
+  std::unique_ptr<ICmpInst> CondInst = make_unique<ICmpInst>(ICmpInst::ICMP_SLE, One, Two, "cond");
 
   EXPECT_EQ(true, mutator.canBeApplied(*CondInst));
 }
@@ -51,7 +51,7 @@ TEST(NegateConditionMutator, canBeApplied_tobool) {
 
   NegateConditionMutator mutator;
 
-  std::unique_ptr<Value> CondInst = make_unique<ICmpInst>(ICmpInst::ICMP_SLE, One, Two, "tobool");
+  std::unique_ptr<ICmpInst> CondInst = make_unique<ICmpInst>(ICmpInst::ICMP_SLE, One, Two, "tobool");
 
   EXPECT_FALSE(mutator.canBeApplied(*CondInst));
 }
@@ -64,7 +64,7 @@ TEST(NegateConditionMutator, canBeApplied_isnull) {
 
   NegateConditionMutator mutator;
 
-  std::unique_ptr<Value> CondInst = make_unique<ICmpInst>(ICmpInst::ICMP_SLE, One, Two, "isnull");
+  std::unique_ptr<ICmpInst> CondInst = make_unique<ICmpInst>(ICmpInst::ICMP_SLE, One, Two, "isnull");
 
   EXPECT_FALSE(mutator.canBeApplied(*CondInst));
 }

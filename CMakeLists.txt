@@ -112,6 +112,11 @@ if(MULL_SUPPORT_RUST)
 endif()
 
 add_subdirectory(lab)
+
+llvm_get_version(LLVM_VERSION)
+add_subdirectory(LLVMCompatibility/${LLVM_VERSION})
+include_directories(LLVMCompatibility/${LLVM_VERSION})
+
 add_subdirectory(lib)
 add_subdirectory(googletest)
 add_subdirectory(tools)

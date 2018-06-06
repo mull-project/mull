@@ -40,10 +40,10 @@ void *GoogleTestRunner::GetCtorPointer(const llvm::Function &Function) {
 }
 
 void *GoogleTestRunner::getFunctionPointer(const std::string &functionName) {
-  JITSymbol symbol = jit.getSymbol(functionName);
+  JITSymbol &symbol = jit.getSymbol(functionName);
 
   void *fpointer =
-    reinterpret_cast<void *>(static_cast<uintptr_t>(symbol.getAddress()));
+    reinterpret_cast<void *>(static_cast<uintptr_t>(llvm_compat::JITSymbolAddress(symbol)));
 
   if (fpointer == nullptr) {
     errs() << "GoogleTestRunner> Can't find pointer to function: "

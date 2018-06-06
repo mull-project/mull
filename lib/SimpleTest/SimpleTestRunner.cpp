@@ -27,8 +27,8 @@ SimpleTestRunner::~SimpleTestRunner() {
 }
 
 void *SimpleTestRunner::TestFunctionPointer(const llvm::Function &Function) {
-  orc::JITSymbol Symbol = jit.getSymbol(mangler.getNameWithPrefix(Function.getName()));
-  void *FPointer = reinterpret_cast<void *>(static_cast<uintptr_t>(Symbol.getAddress()));
+  llvm_compat::JITSymbol &symbol = jit.getSymbol(mangler.getNameWithPrefix(Function.getName()));
+  void *FPointer = reinterpret_cast<void *>(static_cast<uintptr_t>(llvm_compat::JITSymbolAddress(symbol)));
   assert(FPointer && "Can't find pointer to function");
   return FPointer;
 }

@@ -1,20 +1,20 @@
 #pragma once
 
-#include <llvm/ExecutionEngine/Orc/JITSymbol.h>
+#include "LLVMCompatibility.h"
 
 namespace mull {
 
 class JITEngine {
   std::vector<llvm::object::ObjectFile *> objectFiles;
-  llvm::StringMap<llvm::orc::JITSymbol> symbolTable;
-  llvm::orc::JITSymbol symbolNotFound;
+  llvm::StringMap<llvm_compat::JITSymbol> symbolTable;
+  llvm_compat::JITSymbol symbolNotFound;
   std::unique_ptr<llvm::RuntimeDyld::MemoryManager> memoryManager;
 public:
   JITEngine();
   void addObjectFiles(std::vector<llvm::object::ObjectFile *> &files,
-                      llvm::RuntimeDyld::SymbolResolver  &resolver,
+                      llvm_compat::SymbolResolver  &resolver,
                       std::unique_ptr<llvm::RuntimeDyld::MemoryManager> memoryManager);
-  llvm::orc::JITSymbol &getSymbol(llvm::StringRef name);
+  llvm_compat::JITSymbol &getSymbol(llvm::StringRef name);
 };
 
 }

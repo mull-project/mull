@@ -29,10 +29,10 @@ void *CustomTestRunner::GetCtorPointer(const llvm::Function &Function) {
 }
 
 void *CustomTestRunner::getFunctionPointer(const std::string &functionName) {
-  JITSymbol symbol = jit.getSymbol(functionName);
+  JITSymbol &symbol = jit.getSymbol(functionName);
 
   void *fpointer =
-    reinterpret_cast<void *>(static_cast<uintptr_t>(symbol.getAddress()));
+    reinterpret_cast<void *>(static_cast<uintptr_t>(llvm_compat::JITSymbolAddress(symbol)));
 
   if (fpointer == nullptr) {
     errs() << "CustomTestRunner> Can't find pointer to function: "

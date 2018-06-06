@@ -92,3 +92,20 @@ function(llvm_get_libs OUT_LIBS components)
   endif()
   set(${OUT_LIBS} ${llvm_libs} PARENT_SCOPE)
 endfunction()
+
+function(llvm_get_version OUT_VERSION)
+  set(config_command ${LLVM_CONFIG_PATH}
+    "--version"
+  )
+  execute_process(
+    COMMAND ${config_command}
+    RESULT_VARIABLE EXIT_CODE
+    OUTPUT_VARIABLE config_output
+  )
+  if(${EXIT_CODE})
+    message(FATAL_ERROR "Cannot detect LLVM's version")
+  endif()
+  string(STRIP ${config_output} config_output)
+  set(${OUT_VERSION} ${config_output} PARENT_SCOPE)
+endfunction()
+

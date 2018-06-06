@@ -67,19 +67,18 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &context,
         continue;
       }
 
-      /// Downgrading from LLVM 4.0 to 3.9:
-      /// in 4.0 the pointer type is used instead of sequential type.
-      // - Type *globalType = Ty->getPointerElementType();
-      // - if (!globalType) {
-      // -   continue;
-      // - }
-      // - StructType *STy = dyn_cast<StructType>(globalType);
-      Type *sequentialType = globalValueType->getSequentialElementType();
-      if (!sequentialType) {
+      Type *globalType = nullptr;
+      if (globalValueType->getTypeID() == Type::PointerTyID) {
+        globalType = globalValueType->getPointerElementType();
+      } else {
+        globalType = globalValueType->getSequentialElementType();
+      }
+
+      if (!globalType) {
         continue;
       }
 
-      StructType *structType = dyn_cast<StructType>(sequentialType);
+      StructType *structType = dyn_cast<StructType>(globalType);
       if (!structType) {
         continue;
       }

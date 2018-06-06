@@ -19,7 +19,7 @@ instrumentationInfoName(mangler.getNameWithPrefix(instrumentation.instrumentatio
 functionOffsetPrefix(mangler.getNameWithPrefix(instrumentation.functionIndexOffsetPrefix())),
 trampoline(trampoline) {}
 
-RuntimeDyld::SymbolInfo InstrumentationResolver::findSymbol(const std::string &name) {
+llvm_compat::JITSymbolInfo InstrumentationResolver::findSymbol(const std::string &name) {
   /// Overrides should go first, otherwise functions of the host process
   /// will take over and crash the system later
   if (auto symbol = overrides.searchOverrides(name)) {
@@ -27,22 +27,22 @@ RuntimeDyld::SymbolInfo InstrumentationResolver::findSymbol(const std::string &n
   }
 
   if (auto address = RTDyldMemoryManager::getSymbolAddressInProcess(name)) {
-    return RuntimeDyld::SymbolInfo(address, JITSymbolFlags::Exported);
+    return llvm_compat::JITSymbolInfo(address, JITSymbolFlags::Exported);
   }
 
   if (name == instrumentationInfoName) {
-    return RuntimeDyld::SymbolInfo((uint64_t)trampoline, JITSymbolFlags::Exported);
+    return llvm_compat::JITSymbolInfo((uint64_t)trampoline, JITSymbolFlags::Exported);
   }
 
   if (name.find(functionOffsetPrefix) != std::string::npos) {
     auto moduleName = name.substr(functionOffsetPrefix.length());
     auto &mapping = instrumentation.getFunctionOffsetMapping();
-    return RuntimeDyld::SymbolInfo((uint64_t)&mapping[moduleName], JITSymbolFlags::Exported);
+    return llvm_compat::JITSymbolInfo((uint64_t)&mapping[moduleName], JITSymbolFlags::Exported);
   }
 
-  return RuntimeDyld::SymbolInfo(nullptr);
+  return llvm_compat::JITSymbolInfo(nullptr);
 }
 
-RuntimeDyld::SymbolInfo InstrumentationResolver::findSymbolInLogicalDylib(const std::string &name) {
-  return RuntimeDyld::SymbolInfo(nullptr);
+llvm_compat::JITSymbolInfo InstrumentationResolver::findSymbolInLogicalDylib(const std::string &name) {
+  return llvm_compat::JITSymbolInfo(nullptr);
 }
