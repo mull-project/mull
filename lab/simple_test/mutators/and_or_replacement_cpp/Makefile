@@ -7,11 +7,12 @@ default: main
 	./main
 
 test_and_or_operators.o: test_and_or_operators.cpp
-	$(CXX) -g -S -emit-llvm test_and_or_operators.cpp
-	$(CXX) -g -c -emit-llvm test_and_or_operators.cpp
 	$(CXX) -c test_and_or_operators.cpp
 
-bitcode: test_and_or_operators.o
+test_and_or_operators.bc: test_and_or_operators.cpp
+	$(CXX) -g -c -emit-llvm test_and_or_operators.cpp
+
+bitcode: test_and_or_operators.bc
 
 main: test_and_or_operators.o
 	$(CXX) -Wall -o main test_and_or_operators.o main.cpp
