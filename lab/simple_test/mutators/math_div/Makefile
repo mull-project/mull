@@ -1,30 +1,37 @@
 include ../../../Makefile.common
 
-LEVEL=../../../..
-FIXTURES_DIR=$(LEVEL)/unittests/fixtures/simple_test/mutators/math_div/
+BUILD_DIR=./build
+FIXTURES_DIR=../../../../unittests/fixtures/simple_test/mutators/math_div
 
-default: main
-	./main
+SOURCES=$(wildcard *.c)
+OBJECTS=$(addprefix $(BUILD_DIR)/, $(SOURCES:.c=.o))
+BITCODE=$(addprefix $(BUILD_DIR)/, $(SOURCES:.c=.bc))
+LLVM_IR=$(addprefix $(BUILD_DIR)/, $(SOURCES:.c=.ll))
 
-main: math_div.o
-	$(CC) -Wall -o main math_div.o main.c
+binary: $(OBJECTS)
+	$(CC) $^ -o $(BUILD_DIR)/$@
 
-math_div.o:
-	$(CC) -c -emit-llvm math_div.c
-	$(CC) -S -emit-llvm math_div.c
-	$(CC) -c math_div.c
+bitcode: $(BITCODE)
 
-bitcode: math_div.o
+llvm_ir: $(LLVM_IR)
 
-synchronize_fixtures: bitcode $(FIXTURES_DIR)
-	cp ./*.bc $(FIXTURES_DIR)
+$(BUILD_DIR)/%.o: %.c $(BUILD_DIR)
+	$(CC) -c -o $@ $<
+
+$(BUILD_DIR)/%.bc: %.c $(BUILD_DIR)
+	$(CC) -emit-llvm -c -o $@ $<
+
+$(BUILD_DIR)/%.ll: %.c $(BUILD_DIR)
+	$(CC) -S -emit-llvm -c -o $@ $<
+
+$(BUILD_DIR):
+	mkdir -p $(BUILD_DIR)
 
 $(FIXTURES_DIR):
 	mkdir -p $(FIXTURES_DIR)
 
-clean:
-	rm -rf main
-	rm -rf *.o
-	rm -rf *.bc
-	rm -rf *.ll
+synchronize_fixtures: llvm_ir bitcode $(FIXTURES_DIR)
+	cp $(BUILD_DIR)/math_div.bc $(FIXTURES_DIR)
 
+clean:
+	rm -rf build
