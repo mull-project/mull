@@ -2,9 +2,9 @@
 
 #include "TestRunner.h"
 #include "Mangler.h"
+#include "Toolchain/JITEngine.h"
 
 #include <llvm/ExecutionEngine/Orc/ExecutionUtils.h>
-#include <llvm/ExecutionEngine/Orc/ObjectLinkingLayer.h>
 
 namespace llvm {
 
@@ -19,8 +19,7 @@ class Test;
 struct InstrumentationInfo;
 
 class SimpleTestRunner : public TestRunner {
-  llvm::orc::ObjectLinkingLayer<> ObjectLayer;
-  llvm::orc::ObjectLinkingLayer<>::ObjSetHandleT handle;
+  JITEngine jit;
   Mangler mangler;
   llvm::orc::LocalCXXRuntimeOverrides overrides;
   InstrumentationInfo **trampoline;

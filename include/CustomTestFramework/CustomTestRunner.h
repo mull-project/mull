@@ -1,8 +1,8 @@
 #pragma once
 
 #include "TestRunner.h"
-
 #include "Mangler.h"
+#include "Toolchain/JITEngine.h"
 
 #include <llvm/ExecutionEngine/Orc/ExecutionUtils.h>
 #include <llvm/ExecutionEngine/Orc/ObjectLinkingLayer.h>
@@ -22,10 +22,9 @@ class Instrumentation;
 struct InstrumentationInfo;
 
 class CustomTestRunner : public TestRunner {
-  llvm::orc::ObjectLinkingLayer<> ObjectLayer;
+  JITEngine jit;
   Mangler mangler;
   llvm::orc::LocalCXXRuntimeOverrides overrides;
-  llvm::orc::ObjectLinkingLayer<>::ObjSetHandleT handle;
   InstrumentationInfo **trampoline;
 public:
 

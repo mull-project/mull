@@ -3,9 +3,9 @@
 #include "TestRunner.h"
 
 #include "Mangler.h"
+#include "Toolchain/JITEngine.h"
 
 #include <llvm/ExecutionEngine/Orc/ExecutionUtils.h>
-#include <llvm/ExecutionEngine/Orc/ObjectLinkingLayer.h>
 #include <llvm/Object/Binary.h>
 #include <llvm/Object/ObjectFile.h>
 #include <llvm/Target/TargetMachine.h>
@@ -21,14 +21,13 @@ namespace mull {
 struct InstrumentationInfo;
 
 class GoogleTestRunner : public TestRunner {
-  llvm::orc::ObjectLinkingLayer<> ObjectLayer;
+  JITEngine jit;
   Mangler mangler;
   llvm::orc::LocalCXXRuntimeOverrides overrides;
 
   std::string fGoogleTestInit;
   std::string fGoogleTestInstance;
   std::string fGoogleTestRun;
-  llvm::orc::ObjectLinkingLayer<>::ObjSetHandleT handle;
   InstrumentationInfo **trampoline;
 public:
 

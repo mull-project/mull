@@ -17,8 +17,6 @@ namespace {
   class UnitTest;
 }
 
-static llvm::orc::ObjectLinkingLayer<>::ObjSetHandleT MullGTEstDummyHandle;
-
 GoogleTestRunner::GoogleTestRunner(llvm::TargetMachine &machine) :
   TestRunner(machine),
   mangler(Mangler(machine.createDataLayout())),
@@ -28,7 +26,6 @@ GoogleTestRunner::GoogleTestRunner(llvm::TargetMachine &machine) :
   fGoogleTestInit(mangler.getNameWithPrefix("_ZN7testing14InitGoogleTestEPiPPc")),
   fGoogleTestInstance(mangler.getNameWithPrefix("_ZN7testing8UnitTest11GetInstanceEv")),
   fGoogleTestRun(mangler.getNameWithPrefix("_ZN7testing8UnitTest3RunEv")),
-  handle(MullGTEstDummyHandle),
   trampoline(new InstrumentationInfo*)
 {
 }
@@ -43,7 +40,7 @@ void *GoogleTestRunner::GetCtorPointer(const llvm::Function &Function) {
 }
 
 void *GoogleTestRunner::getFunctionPointer(const std::string &functionName) {
-  JITSymbol symbol = ObjectLayer.findSymbol(functionName, false);
+  JITSymbol symbol = jit.getSymbol(functionName);
 
   void *fpointer =
     reinterpret_cast<void *>(static_cast<uintptr_t>(symbol.getAddress()));
@@ -68,28 +65,13 @@ void GoogleTestRunner::runStaticCtor(llvm::Function *Ctor) {
 
 void GoogleTestRunner::loadInstrumentedProgram(ObjectFiles &objectFiles,
                                                Instrumentation &instrumentation) {
-  if (handle != MullGTEstDummyHandle) {
-    ObjectLayer.removeObjectSet(handle);
-  }
-
-  handle = ObjectLayer.addObjectSet(objectFiles,
-                                    make_unique<SectionMemoryManager>(),
-                                    make_unique<InstrumentationResolver>(overrides,
-                                                                         instrumentation,
-                                                                         mangler,
-                                                                         trampoline));
-  ObjectLayer.emitAndFinalize(handle);
+  InstrumentationResolver resolver(overrides, instrumentation, mangler, trampoline);
+  jit.addObjectFiles(objectFiles, resolver, make_unique<SectionMemoryManager>());
 }
 
 void GoogleTestRunner::loadProgram(ObjectFiles &objectFiles) {
-  if (handle != MullGTEstDummyHandle) {
-    ObjectLayer.removeObjectSet(handle);
-  }
-
-  handle = ObjectLayer.addObjectSet(objectFiles,
-                                    make_unique<SectionMemoryManager>(),
-                                    make_unique<NativeResolver>(overrides));
-  ObjectLayer.emitAndFinalize(handle);
+  NativeResolver resolver(overrides);
+  jit.addObjectFiles(objectFiles, resolver, make_unique<SectionMemoryManager>());
 }
 
 ExecutionStatus GoogleTestRunner::runTest(Test *test) {

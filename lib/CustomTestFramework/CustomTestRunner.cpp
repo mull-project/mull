@@ -10,15 +10,12 @@ using namespace mull;
 using namespace llvm;
 using namespace llvm::orc;
 
-static llvm::orc::ObjectLinkingLayer<>::ObjSetHandleT MullCustomTestDummyHandle;
-
 CustomTestRunner::CustomTestRunner(llvm::TargetMachine &machine) :
   TestRunner(machine),
   mangler(Mangler(machine.createDataLayout())),
   overrides([this](const char *name) {
     return this->mangler.getNameWithPrefix(name);
   }),
-  handle(MullCustomTestDummyHandle),
   trampoline(new InstrumentationInfo*)
 {
 }
@@ -32,7 +29,7 @@ void *CustomTestRunner::GetCtorPointer(const llvm::Function &Function) {
 }
 
 void *CustomTestRunner::getFunctionPointer(const std::string &functionName) {
-  JITSymbol symbol = ObjectLayer.findSymbol(functionName, false);
+  JITSymbol symbol = jit.getSymbol(functionName);
 
   void *fpointer =
     reinterpret_cast<void *>(static_cast<uintptr_t>(symbol.getAddress()));
@@ -57,28 +54,13 @@ void CustomTestRunner::runStaticCtor(llvm::Function *Ctor) {
 
 void CustomTestRunner::loadInstrumentedProgram(ObjectFiles &objectFiles,
                                                Instrumentation &instrumentation) {
-  if (handle != MullCustomTestDummyHandle) {
-    ObjectLayer.removeObjectSet(handle);
-  }
-
-  handle = ObjectLayer.addObjectSet(objectFiles,
-                                    make_unique<SectionMemoryManager>(),
-                                    make_unique<InstrumentationResolver>(overrides,
-                                                                         instrumentation,
-                                                                         mangler,
-                                                                         trampoline));
-  ObjectLayer.emitAndFinalize(handle);
+  InstrumentationResolver resolver(overrides, instrumentation, mangler, trampoline);
+  jit.addObjectFiles(objectFiles, resolver, make_unique<SectionMemoryManager>());
 }
 
 void CustomTestRunner::loadProgram(ObjectFiles &objectFiles) {
-  if (handle != MullCustomTestDummyHandle) {
-    ObjectLayer.removeObjectSet(handle);
-  }
-
-  handle = ObjectLayer.addObjectSet(objectFiles,
-                                    make_unique<SectionMemoryManager>(),
-                                    make_unique<NativeResolver>(overrides));
-  ObjectLayer.emitAndFinalize(handle);
+  NativeResolver resolver(overrides);
+  jit.addObjectFiles(objectFiles, resolver, make_unique<SectionMemoryManager>());
 }
 
 ExecutionStatus CustomTestRunner::runTest(Test *test) {
