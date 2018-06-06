@@ -31,8 +31,7 @@ $(FIXTURES_DIR):
 	mkdir -p $(FIXTURES_DIR)
 
 synchronize_fixtures: llvm_ir bitcode $(FIXTURES_DIR)
-	cp $(BUILD_DIR)/*.ll $(FIXTURES_DIR)
-	cp $(BUILD_DIR)/*.bc $(FIXTURES_DIR)
+	cp $(BUILD_DIR)/math_sub.bc $(FIXTURES_DIR)
 
 clean:
 	rm -rf build
