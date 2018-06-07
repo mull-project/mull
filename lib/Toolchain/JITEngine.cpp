@@ -7,10 +7,10 @@ using namespace llvm;
 JITEngine::JITEngine() : symbolNotFound(nullptr) {}
 
 void JITEngine::addObjectFiles(std::vector<object::ObjectFile *> &files,
-                               RuntimeDyld::SymbolResolver &resolver,
+                               llvm_compat::SymbolResolver &resolver,
                                std::unique_ptr<llvm::RuntimeDyld::MemoryManager> memManager) {
   std::vector<object::ObjectFile *>().swap(objectFiles);
-  llvm::StringMap<orc::JITSymbol>().swap(symbolTable);
+  llvm::StringMap<llvm_compat::JITSymbolInfo>().swap(symbolTable);
   memoryManager = std::move(memManager);
 
   for (auto object : files) {
@@ -27,8 +27,8 @@ void JITEngine::addObjectFiles(std::vector<object::ObjectFile *> &files,
         continue;
       }
 
-      auto flags = orc::JITSymbol::flagsFromObjectSymbol(symbol);
-      symbolTable.insert(std::make_pair(name.get(), orc::JITSymbol(0, flags)));
+      auto flags = llvm_compat::JITSymbolFlagsFromObjectSymbol(symbol);
+      symbolTable.insert(std::make_pair(name.get(), llvm_compat::JITSymbol(0, flags)));
     }
 
   }
@@ -47,7 +47,7 @@ void JITEngine::addObjectFiles(std::vector<object::ObjectFile *> &files,
   dynamicLoader.finalizeWithMemoryManagerLocking();
 }
 
-llvm::orc::JITSymbol &JITEngine::getSymbol(llvm::StringRef name) {
+llvm_compat::JITSymbol &JITEngine::getSymbol(llvm::StringRef name) {
   auto symbolIterator = symbolTable.find(name);
   if (symbolIterator == symbolTable.end()) {
     return symbolNotFound;
