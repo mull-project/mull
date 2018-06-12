@@ -107,19 +107,20 @@ travis.install.macos:
 	brew install sqlite
 	brew install ninja
 	cd /opt && \
-    sudo wget http://releases.llvm.org/3.9.0/clang+llvm-3.9.0-x86_64-apple-darwin.tar.xz && \
-    sudo tar xvf clang+llvm-3.9.0-x86_64-apple-darwin.tar.xz && \
-    sudo mv clang+llvm-3.9.0-x86_64-apple-darwin llvm-3.9
+    sudo wget http://releases.llvm.org/$$LLVM_VERSION.0/clang+llvm-$$LLVM_VERSION.0-x86_64-apple-darwin.tar.xz && \
+    sudo tar xf clang+llvm-$$LLVM_VERSION.0-x86_64-apple-darwin.tar.xz && \
+    sudo mv clang+llvm-$$LLVM_VERSION.0-x86_64-apple-darwin /opt/llvm-$$LLVM_VERSION
 
 travis.install.ubuntu:
+	sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 	sudo apt-get update
 	sudo apt-get -y install wget
-	echo "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-3.9 main" | sudo tee /etc/apt/sources.list.d/llvm.list > /dev/null
+	echo "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-$$LLVM_VERSION main" | sudo tee /etc/apt/sources.list.d/llvm.list > /dev/null
 	sudo wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
 	sudo apt-get update
 	sudo apt-get -y install git cmake make vim ninja-build wget \
                      libz-dev sqlite3 libsqlite3-dev ncurses-dev \
-                     llvm-3.9 clang-3.9 llvm-3.9-dev libclang-3.9-dev \
+                     llvm-$$LLVM_VERSION clang-$$LLVM_VERSION llvm-$$LLVM_VERSION-dev libclang-$$LLVM_VERSION-dev \
                      binutils-2.26
 	ld --version
 	sudo update-alternatives --install /usr/bin/ld ld /usr/bin/ld-2.26 1

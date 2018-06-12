@@ -29,7 +29,7 @@ raw_ostream& operator<<(raw_ostream& stream, const CXString& str) {
 
 void dump_cursor(CXCursor cursor, CXSourceLocation location, PhysicalAddress &address, MutationPoint *point) {
   errs() << point->getUniqueIdentifier() << "\n";
-  point->getOriginalValue()->dump();
+  point->getOriginalValue()->print(llvm::errs());
   Instruction *in = dyn_cast<Instruction>(point->getOriginalValue());
   errs() << in->getParent()->getParent()->getParent()->getModuleIdentifier() << "\n";
 
