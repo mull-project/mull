@@ -2,7 +2,12 @@
 
 ## Getting LLVM
 
-Get LLVM 3.9 from [LLVM Download Page](http://releases.llvm.org/).
+Get LLVM from [LLVM Download Page](http://releases.llvm.org/).
+
+Mull supports different versions of LLVM. Please substitute `3.9` in
+the following documentation with the actual version you use.
+List of supported versions can be found in the [`LLVMCompatibility/`](https://github.com/mull-project/mull/tree/master/LLVMCompatibility)
+directory in the root of the repository.
 
 ```bash
 cd /opt

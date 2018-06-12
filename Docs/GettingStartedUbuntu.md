@@ -16,6 +16,11 @@ $ docker start -ai mull_linux_container
 Add LLVM sources for binary distributions as recommended by
 [http://apt.llvm.org/](http://apt.llvm.org/):
 
+Mull supports different versions of LLVM. Please substitute `3.9` in
+the following documentation with the actual version you use.
+List of supported versions can be found in the [`LLVMCompatibility/`](https://github.com/mull-project/mull/tree/master/LLVMCompatibility)
+directory in the root of the repository.
+
 ```
 apt-get update
 apt-get -y install wget
