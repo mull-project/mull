@@ -10,14 +10,16 @@ Comments](http://lowlevelbits.org/llvm-based-mutation-testing-system/) and [FOSD
 
 ## Getting started
 
-Mull is being developed against OSX. Also it is known to work against
-Linux Ubuntu 16.04 and CentOS 7.
+Mull is being developed and tested against macOS and Linux Ubuntu.
+Also it is known to work against CentOS 7.
+
+ Currently supported LLVM versions: 3.9, 4.0, 5.0, 6.0.
 
 [How to run Mull](Docs/HowToRunMull.md)
 
 ## Notes
 
-Use `make -f Makefile.macos help` to see the common tasks used by developers.
+Use `make help` to see the common tasks used by developers.
 
 Use `MullUnitTests` scheme to run the tests. Use `mull-driver` scheme to
 build Mull.
