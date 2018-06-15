@@ -102,7 +102,7 @@ void mull::SQLiteReporter::reportResults(const Result &result,
   sqlite3_stmt *insertExecutionResultStmt;
   sqlite3_prepare(database, insertExecutionResultQuery, -1, &insertExecutionResultStmt, NULL);
 
-  const char *insertTestQuery = "INSERT INTO test VALUES (?1, ?2)";
+  const char *insertTestQuery = "INSERT INTO test VALUES (?1, ?2, ?3, ?4)";
   sqlite3_stmt *insertTestStmt;
   sqlite3_prepare(database, insertTestQuery, -1, &insertTestStmt, NULL);
 
@@ -110,6 +110,23 @@ void mull::SQLiteReporter::reportResults(const Result &result,
     std::string testName = test->getTestDisplayName();
     std::string testUniqueId = test->getUniqueIdentifier();
     ExecutionResult testExecutionResult = test->getExecutionResult();
+
+    std::string testLocationFile = "no-debug-info";
+    std::string testLocationDirectory = "no-debug-info";
+    unsigned int testLocationLine = 0;
+
+    Function *testBody = test->testBodyFunction();
+    if (testBody->getMetadata(0)) {
+      DISubprogram *debugInfo = dyn_cast<DISubprogram>(testBody->getMetadata(0));
+
+      testLocationFile = debugInfo->getFilename();
+      testLocationDirectory = debugInfo->getDirectory();
+      testLocationLine = debugInfo->getLine();
+
+      if (!sys::path::is_absolute(testLocationFile)) {
+        testLocationFile = testLocationDirectory + sys::path::get_separator().str() + testLocationFile;
+      }
+    }
 
     int executionResultIndex = 1;
     sqlite3_bind_text(insertExecutionResultStmt, executionResultIndex++, testUniqueId.c_str(), -1, SQLITE_TRANSIENT);
@@ -122,6 +139,8 @@ void mull::SQLiteReporter::reportResults(const Result &result,
     int testIndex = 1;
     sqlite3_bind_text(insertTestStmt, testIndex++, testName.c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(insertTestStmt, testIndex++, testUniqueId.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(insertTestStmt, testIndex++, testLocationFile.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int(insertTestStmt, testIndex++, testLocationLine);
 
     sqlite_step(database, insertExecutionResultStmt);
     sqlite3_clear_bindings(insertExecutionResultStmt);
@@ -310,7 +329,9 @@ CREATE TABLE execution_result (
 
 CREATE TABLE test (
   test_name TEXT,
-  unique_id TEXT UNIQUE
+  unique_id TEXT UNIQUE,
+  location_file TEXT,
+  location_line INT
 );
 
 CREATE TABLE mutation_point (

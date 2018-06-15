@@ -34,6 +34,10 @@ public:
     return std::vector<llvm::Function *>({ testFunction });
   }
 
+  llvm::Function *testBodyFunction() override {
+    return testFunction;
+  }
+
   std::vector<std::string> &getArguments() { return arguments; }
   std::string &getProgramName() { return programName; }
   std::vector<llvm::Function *> &getConstructors() { return staticConstructors; }
