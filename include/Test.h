@@ -30,6 +30,8 @@ public:
     return std::vector<llvm::Function *>();
   }
 
+  virtual llvm::Function *testBodyFunction() = 0;
+
   enum TestKind {
     TK_SimpleTest,
     TK_GoogleTest,

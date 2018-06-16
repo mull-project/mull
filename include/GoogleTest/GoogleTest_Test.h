@@ -33,6 +33,10 @@ public:
     return std::vector<llvm::Function *>({ TestBodyFunction });
   }
 
+  llvm::Function *testBodyFunction() override {
+    return TestBodyFunction;
+  }
+
   static bool classof(const Test *T) {
     return T->getKind() == TK_GoogleTest;
   }

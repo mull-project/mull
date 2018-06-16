@@ -19,7 +19,7 @@ $(BUILD_DIR)/%.o: %.c $(BUILD_DIR)
 	$(CC) -c -o $@ $<
 
 $(BUILD_DIR)/%.bc: %.c $(BUILD_DIR)
-	$(CC) -emit-llvm -c -o $@ $<
+	$(CC) -g -emit-llvm -c -o $@ $<
 
 $(BUILD_DIR)/%.ll: %.c $(BUILD_DIR)
 	$(CC) -S -emit-llvm -c -o $@ $<

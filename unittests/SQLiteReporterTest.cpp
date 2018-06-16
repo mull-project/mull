@@ -115,58 +115,104 @@ TEST(SQLiteReporter, integrationTest) {
   sqlite3 *database;
   sqlite3_open(databasePath.c_str(), &database);
 
-  std::string selectQuery = "SELECT * FROM execution_result";
-  sqlite3_stmt *selectStmt;
-  sqlite3_prepare(database, selectQuery.c_str(), selectQuery.size(), &selectStmt, NULL);
+  {
+    std::string selectQuery = "SELECT * FROM execution_result";
+    sqlite3_stmt *selectStmt;
+    sqlite3_prepare(database, selectQuery.c_str(), selectQuery.size(), &selectStmt, NULL);
 
-  const unsigned char *column_test_id;
-  const unsigned char *column_mutation_point_id;
-  int column_status;
-  int column_duration;
-  const unsigned char *column_stdout;
-  const unsigned char *column_stderr;
+    const unsigned char *column_test_id;
+    const unsigned char *column_mutation_point_id;
+    int column_status;
+    int column_duration;
+    const unsigned char *column_stdout;
+    const unsigned char *column_stderr;
 
-  int numberOfRows = 0;
-  while (1) {
-    int stepResult = sqlite3_step (selectStmt);
+    int numberOfRows = 0;
+    while (1) {
+      int stepResult = sqlite3_step (selectStmt);
 
-    if (stepResult == SQLITE_ROW) {
-      column_test_id = sqlite3_column_text(selectStmt, 0);
-      column_mutation_point_id = sqlite3_column_text(selectStmt, 1);
+      if (stepResult == SQLITE_ROW) {
+        column_test_id = sqlite3_column_text(selectStmt, 0);
+        column_mutation_point_id = sqlite3_column_text(selectStmt, 1);
 
-      column_status = sqlite3_column_int(selectStmt, 2);
-      column_duration = sqlite3_column_int(selectStmt, 3);
+        column_status = sqlite3_column_int(selectStmt, 2);
+        column_duration = sqlite3_column_int(selectStmt, 3);
 
-      column_stdout  = sqlite3_column_text(selectStmt, 4);
-      column_stderr  = sqlite3_column_text(selectStmt, 5);
+        column_stdout  = sqlite3_column_text(selectStmt, 4);
+        column_stderr  = sqlite3_column_text(selectStmt, 5);
 
-      ASSERT_EQ(strcmp((const char *)column_test_id,
-                       testIds[numberOfRows].c_str()), 0);
-      ASSERT_EQ(strcmp((const char *)column_mutation_point_id,
-                       mutationPointIds[numberOfRows].c_str()), 0);
+        ASSERT_EQ(strcmp((const char *)column_test_id,
+                         testIds[numberOfRows].c_str()), 0);
+        ASSERT_EQ(strcmp((const char *)column_mutation_point_id,
+                         mutationPointIds[numberOfRows].c_str()), 0);
 
-      ASSERT_EQ(column_status, executionResults[numberOfRows].status);
-      ASSERT_EQ(column_duration, executionResults[numberOfRows].runningTime);
+        ASSERT_EQ(column_status, executionResults[numberOfRows].status);
+        ASSERT_EQ(column_duration, executionResults[numberOfRows].runningTime);
 
-      ASSERT_EQ(strcmp((const char *)column_stdout,
-                       executionResults[numberOfRows].stdoutOutput.c_str()), 0);
-      ASSERT_EQ(strcmp((const char *)column_stderr,
-                       executionResults[numberOfRows].stderrOutput.c_str()), 0);
+        ASSERT_EQ(strcmp((const char *)column_stdout,
+                         executionResults[numberOfRows].stdoutOutput.c_str()), 0);
+        ASSERT_EQ(strcmp((const char *)column_stderr,
+                         executionResults[numberOfRows].stderrOutput.c_str()), 0);
 
-      numberOfRows++;
+        numberOfRows++;
+      } else if (stepResult == SQLITE_DONE) {
+        break;
+      } else {
+        fprintf (stderr, "Failed.\n");
+        exit (1);
+      }
     }
-    else if (stepResult == SQLITE_DONE) {
-      break;
-    }
-    else {
-      fprintf (stderr, "Failed.\n");
-      exit (1);
-    }
+
+    ASSERT_EQ(numberOfRows, 2);
+
+    sqlite3_finalize(selectStmt);
   }
 
-  ASSERT_EQ(numberOfRows, 2);
+  {
+    std::string selectQuery = "SELECT * FROM test";
+    sqlite3_stmt *selectStmt;
+    sqlite3_prepare(database, selectQuery.c_str(), selectQuery.size(), &selectStmt, NULL);
 
-  sqlite3_finalize(selectStmt);
+    const unsigned char *test_name;
+    const unsigned char *test_unique_id;
+    const unsigned char *test_location_file;
+    int test_location_line;
+
+    int numberOfRows = 0;
+    while (1) {
+      int stepResult = sqlite3_step (selectStmt);
+
+      if (stepResult == SQLITE_ROW) {
+        int column = 0;
+        test_name = sqlite3_column_text(selectStmt, column++);
+        test_unique_id = sqlite3_column_text(selectStmt, column++);
+        test_location_file = sqlite3_column_text(selectStmt, column++);
+        test_location_line = sqlite3_column_int(selectStmt, column++);
+
+        ASSERT_EQ(strcmp((const char *)test_name,
+                         "test_count_letters"), 0);
+        ASSERT_EQ(strcmp((const char *)test_unique_id,
+                         "test_count_letters"), 0);
+
+        const char *location = "simple_test/count_letters/test_count_letters.c";
+        ASSERT_NE(strstr((const char *)test_location_file, location), nullptr);
+
+        ASSERT_EQ(test_location_line, 3);
+
+        numberOfRows++;
+      } else if (stepResult == SQLITE_DONE) {
+        break;
+      } else {
+        fprintf (stderr, "Failed.\n");
+        exit (1);
+      }
+    }
+
+    ASSERT_EQ(numberOfRows, 1);
+
+    sqlite3_finalize(selectStmt);
+  }
+
   sqlite3_close(database);
 }
 
@@ -627,9 +673,9 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
       exit (1);
     }
   }
-  
+
   ASSERT_EQ(numberOfRows, 1);
-  
+
   sqlite3_finalize(selectStmt);
   sqlite3_close(database);
 }
