@@ -1,8 +1,10 @@
 #include "WeakTestsReporter.h"
 #include "ExecutionResult.h"
 
+#include <algorithm>
 #include <sqlite3.h>
 #include <string>
+#include <stdlib.h>
 #include <utility>
 #include <vector>
 #include <map>
@@ -78,7 +80,7 @@ public:
     return survivedMutants;
   }
 
-  int mutationScore() {
+  int mutationScore() const {
     if (killedMutants.empty()) {
       return 0;
     }
@@ -96,12 +98,6 @@ private:
   std::vector<Mutant> killedMutants;
 };
 
-struct {
-  bool operator()(TestResult &a, TestResult &b) const {
-    return a.mutationScore() < b.mutationScore();
-  }
-} TestResultComparator;
-
 static std::set<std::string> fetchKilledMutants(const std::string &reportPath) {
   sqlite3 *database;
   sqlite3_open(reportPath.c_str(), &database);
@@ -112,10 +108,10 @@ static std::set<std::string> fetchKilledMutants(const std::string &reportPath) {
   group by mutation_point_id;
 )query";
 
-  std::string selectQuery;
+  std::string selectQuery(query);
 
   sqlite3_stmt *selectStatement;
-  sqlite3_prepare(database, query, static_cast<int>(strlen(query)),
+  sqlite3_prepare(database, selectQuery.c_str(), selectQuery.length(),
                   &selectStatement, nullptr);
 
   std::set<std::string> killedMutants;
@@ -171,10 +167,10 @@ readReportFromSQLite(const std::string &reportPath,
   order by test_id;
 )query";
 
-  std::string selectQuery;
+  std::string selectQuery(query);
 
   sqlite3_stmt *selectStatement;
-  sqlite3_prepare(database, query, static_cast<int>(strlen(query)),
+  sqlite3_prepare(database, selectQuery.c_str(), selectQuery.length(),
                   &selectStatement, nullptr);
   std::map<std::string, TestResult> results;
 
@@ -257,7 +253,10 @@ void mull::WeakTestsReporter::showReport(const char *reportPath, int lowerBound,
                                          bool includeMutants) {
   auto killedMutants = fetchKilledMutants(reportPath);
   auto results = readReportFromSQLite(reportPath, killedMutants);
-  std::sort(results.begin(), results.end(), TestResultComparator);
+  std::sort(results.begin(), results.end(), [](const TestResult &a, const TestResult &b) {
+    return a.mutationScore() < b.mutationScore();
+  });
+
   for (auto result : results) {
     auto score = result.mutationScore();
     if (score > lowerBound) {

@@ -20,7 +20,8 @@ static int GetFunctionIndex(llvm::Function *function) {
 
   assert(functionIterator != parent->end()
          && "Expected function to be found in module");
-  int index = std::distance(parent->begin(), functionIterator);
+  int index = static_cast<int>(std::distance(parent->begin(),
+                                             functionIterator));
 
   return index;
 }
