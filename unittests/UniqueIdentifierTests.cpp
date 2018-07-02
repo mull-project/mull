@@ -1,9 +1,10 @@
 #include "Mutators/MathAddMutator.h"
 #include "ModuleLoader.h"
 #include "MutationPoint.h"
+#include "SourceLocation.h"
 
 #include "TestModuleFactory.h"
-#include "llvm/IR/Module.h"
+#include <llvm/IR/Module.h>
 
 #include "gtest/gtest.h"
 
@@ -33,7 +34,7 @@ TEST(MutationPoint, uniqueIdentifier) {
   MutationPointAddress address(2, 3, 5);
   MathAddMutator mutator;
 
-  MutationPoint point(&mutator, address, nullptr, module.get());
+  MutationPoint point(&mutator, address, nullptr, module.get(), "diagnostics", SourceLocation::nullSourceLocation());
 
   string moduleName = "fixture_simple_test_tester_module";
   string moduleMD5  = "de5070f8606cc2a8ee794b2ab56b31f2";

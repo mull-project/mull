@@ -22,8 +22,9 @@ namespace mull {
     static const std::string ID;
 
     MutationPoint *getMutationPoint(MullModule *module,
-                                    MutationPointAddress &address,
-                                    llvm::Instruction *instruction) override;
+                                        MutationPointAddress &address,
+                                        llvm::Instruction *instruction,
+                                        SourceLocation &sourceLocation) override;
 
     MutatorKind mutatorKind() override { return MutatorKind::RemoveVoidFunctionMutator; }
 

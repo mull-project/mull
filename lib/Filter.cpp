@@ -4,22 +4,20 @@
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Instructions.h>
+#include "SourceLocation.h"
 
 using namespace llvm;
 using namespace mull;
 
 bool Filter::shouldSkipInstruction(llvm::Instruction *instruction) {
-  if (instruction->hasMetadata()) {
-    int debugInfoKindID = 0;
-    MDNode *debug = instruction->getMetadata(debugInfoKindID);
+  SourceLocation location = SourceLocation::sourceLocationFromInstruction(instruction);
+  if (location.isNull()) {
+    return false;
+  }
 
-    DILocation *location = dyn_cast<DILocation>(debug);
-    if (location) {
-      for (std::string &fileLocation : locations) {
-        if (location->getFilename().str().find(fileLocation) != std::string::npos) {
-          return true;
-        }
-      }
+  for (auto &fileLocation : locations) {
+    if (location.filePath.find(fileLocation) != std::string::npos) {
+      return true;
     }
   }
 
@@ -33,16 +31,14 @@ bool Filter::shouldSkipFunction(llvm::Function *function) {
     }
   }
 
-  if (function->hasMetadata()) {
-    int debugInfoKindID = 0;
-    MDNode *debug = function->getMetadata(debugInfoKindID);
-    DISubprogram *subprogram = dyn_cast<DISubprogram>(debug);
-    if (subprogram) {
-      for (std::string &location : locations) {
-        if (subprogram->getFilename().str().find(location) != std::string::npos) {
-          return true;
-        }
-      }
+  SourceLocation location = SourceLocation::sourceLocationFromFunction(function);
+  if (location.isNull()) {
+    return false;
+  }
+
+  for (auto &fileLocation : locations) {
+    if (location.filePath.find(fileLocation) != std::string::npos) {
+      return true;
     }
   }
 

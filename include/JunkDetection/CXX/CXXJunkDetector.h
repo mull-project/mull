@@ -1,6 +1,7 @@
 #pragma once
 
 #include "JunkDetection/JunkDetector.h"
+#include "SourceLocation.h"
 
 #include <map>
 #include <string>
@@ -13,15 +14,6 @@ namespace mull {
 class MutationPoint;
 struct JunkDetectionConfig;
 
-struct PhysicalAddress {
-  std::string directory;
-  std::string filepath;
-  uint32_t line;
-  uint32_t column;
-  PhysicalAddress();
-  bool valid();
-};
-
 class CXXJunkDetector : public JunkDetector {
 public:
   CXXJunkDetector(JunkDetectionConfig &config);
@@ -29,13 +21,13 @@ public:
 
   bool isJunk(MutationPoint *point) override;
 private:
-  std::pair<CXCursor, CXSourceLocation> cursorAndLocation(PhysicalAddress &address, MutationPoint *point);
-  CXTranslationUnit translationUnit(const PhysicalAddress &address, const std::string &sourceFile);
+  std::pair<CXCursor, CXSourceLocation> cursorAndLocation(MutationPoint *point);
+  CXTranslationUnit translationUnit(const SourceLocation &location, const std::string &sourceFile);
 
-  bool isJunkBoundary(CXCursor cursor, CXSourceLocation location, PhysicalAddress &address, MutationPoint *point);
-  bool isJunkMathAdd(CXCursor cursor, CXSourceLocation location, PhysicalAddress &address, MutationPoint *point);
-  bool isJunkNegate(CXCursor cursor, CXSourceLocation location, PhysicalAddress &address, MutationPoint *point);
-  bool isJunkRemoveVoid(CXCursor cursor, CXSourceLocation location, PhysicalAddress &address, MutationPoint *point);
+  bool isJunkBoundary(CXCursor cursor, CXSourceLocation location, MutationPoint *point);
+  bool isJunkMathAdd(CXCursor cursor, CXSourceLocation location, MutationPoint *point);
+  bool isJunkNegate(CXCursor cursor, CXSourceLocation location, MutationPoint *point);
+  bool isJunkRemoveVoid(CXCursor cursor, CXSourceLocation location, MutationPoint *point);
 
   CXIndex index;
   std::map<std::string, CXTranslationUnit> units;

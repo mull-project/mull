@@ -24,8 +24,9 @@ namespace mull {
     static llvm::CmpInst::Predicate negatedCmpInstPredicate(llvm::CmpInst::Predicate predicate);
 
     MutationPoint *getMutationPoint(MullModule *module,
-                                    MutationPointAddress &address,
-                                    llvm::Instruction *instruction) override;
+                                        MutationPointAddress &address,
+                                        llvm::Instruction *instruction,
+                                        SourceLocation &sourceLocation) override;
     MutatorKind mutatorKind() override { return MutatorKind::NegateMutator; }
     std::string uniqueID() override {
       return ID;

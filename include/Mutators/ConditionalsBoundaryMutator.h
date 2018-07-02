@@ -30,8 +30,9 @@ public:
   static bool isLTE(llvm::Instruction *instruction);
 
   MutationPoint *getMutationPoint(MullModule *module,
-                                  MutationPointAddress &address,
-                                  llvm::Instruction *instruction) override;
+                                    MutationPointAddress &address,
+                                    llvm::Instruction *instruction,
+                                    SourceLocation &sourceLocation) override;
 
   bool canBeApplied(llvm::Value &V) override;
   llvm::Value *applyMutation(llvm::Module *M, MutationPointAddress address, llvm::Value &OriginalValue) override;
