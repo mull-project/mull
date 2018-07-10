@@ -46,6 +46,12 @@ git clone https://github.com/mull-project/mull.git
 cd mull
 ```
 
+### Initialize the build system
+
+```
+make ninja.init LLVM_ROOT=/usr/lib/llvm-3.9
+```
+
 ### Running tests
 
 ```bash
