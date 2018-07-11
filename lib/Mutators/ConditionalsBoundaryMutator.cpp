@@ -239,7 +239,9 @@ bool ConditionalsBoundaryMutator::canBeApplied(Value &V) {
   return false;
 }
 
-Value *ConditionalsBoundaryMutator::applyMutation(Module *M, MutationPointAddress address, Value &_V) {
+Value *ConditionalsBoundaryMutator::applyMutation(Module *M,
+                                                  MutationPointAddress &address,
+                                                  Value &_V) {
   /// In the following V argument is not used. Eventually it will be removed from
   /// this method's signature because it will be not relevant
   /// when mutations will be applied on copies of original module

@@ -316,7 +316,9 @@ bool NegateConditionMutator::canBeApplied(Value &V) {
   return false;
 }
 
-llvm::Value *NegateConditionMutator::applyMutation(Module *M, MutationPointAddress address, Value &_V) {
+llvm::Value *NegateConditionMutator::applyMutation(Module *M,
+                                                   MutationPointAddress &address,
+                                                   Value &_V) {
   /// In the following V argument is not used. Eventually it will be removed from
   /// this method's signature because it will be not relevant
   /// when mutations will be applied on copies of original module

@@ -170,8 +170,8 @@ static ConstantFP *getReplacementFloat(ConstantFP *constantFloat) {
 
 llvm::Value *
 ScalarValueMutator::applyMutation(Module *M,
-                                           MutationPointAddress address,
-                                           Value &_V) {
+                                  MutationPointAddress &address,
+                                  Value &_V) {
 
   llvm::Instruction &I = address.findInstruction(M);
 

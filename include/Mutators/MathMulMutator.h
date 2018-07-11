@@ -33,7 +33,7 @@ public:
 
   bool canBeApplied(llvm::Value &V) override;
   llvm::Value *applyMutation(llvm::Module *M,
-                             MutationPointAddress address,
+                             MutationPointAddress &address,
                              llvm::Value &OriginalValue) override;
 };
 

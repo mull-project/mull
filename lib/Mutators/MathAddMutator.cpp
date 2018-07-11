@@ -139,8 +139,8 @@ bool MathAddMutator::canBeApplied(Value &V) {
 
 llvm::Value *
 MathAddMutator::applyMutation(Module *M,
-                                       MutationPointAddress address,
-                                       Value &_V) {
+                              MutationPointAddress &address,
+                              Value &_V) {
 
   /// In the following V argument is not used. Eventually it will be removed from
   /// this method's signature because it will be not relevant

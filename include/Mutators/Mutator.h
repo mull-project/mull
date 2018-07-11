@@ -29,9 +29,9 @@ enum class MutatorKind {
 class Mutator {
 public:
   virtual MutationPoint *getMutationPoint(MullModule *module,
-                                            MutationPointAddress &address,
-                                            llvm::Instruction *instruction,
-                                            SourceLocation &sourceLocation) = 0;
+                                          MutationPointAddress &address,
+                                          llvm::Instruction *instruction,
+                                          SourceLocation &sourceLocation) = 0;
 
   /// FIXME: Rename to 'getUniqueIdentifier'
   virtual std::string uniqueID() = 0;
@@ -39,7 +39,9 @@ public:
   virtual MutatorKind mutatorKind()  { return MutatorKind::Unknown; }
 
   virtual bool canBeApplied(llvm::Value &V) = 0;
-  virtual llvm::Value *applyMutation(llvm::Module *M, MutationPointAddress address, llvm::Value &OriginalValue) = 0;
+  virtual llvm::Value *applyMutation(llvm::Module *M,
+                                     MutationPointAddress &address,
+                                     llvm::Value &OriginalValue) = 0;
   virtual ~Mutator() = default;
 };
 
