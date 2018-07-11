@@ -38,9 +38,8 @@ public:
   }
 
   bool canBeApplied(llvm::Value &V) override;
-  llvm::Value *applyMutation(llvm::Module *M,
-                             MutationPointAddress &address,
-                             llvm::Value &OriginalValue) override;
+  llvm::Value *
+  applyMutation(llvm::Module *module, MutationPointAddress &address) override;
 };
 
 }

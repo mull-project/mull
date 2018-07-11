@@ -101,11 +101,9 @@ llvm::Value *getReplacement(Type *returnType, llvm::LLVMContext &context) {
 }
 
 llvm::Value *
-ReplaceAssignmentMutator::applyMutation(Module *M,
-                                        MutationPointAddress &address,
-                                        Value &_V) {
-
-  llvm::Instruction &instruction = address.findInstruction(M);
+ReplaceAssignmentMutator::applyMutation(llvm::Module *module,
+                                        MutationPointAddress &address) {
+  llvm::Instruction &instruction = address.findInstruction(module);
 
   StoreInst *storeInstruction = dyn_cast<StoreInst>(&instruction);
 

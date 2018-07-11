@@ -109,7 +109,7 @@ void MutationPoint::addReachableTest(Test *test, int distance) {
 }
 
 void MutationPoint::applyMutation(MullModule &module) {
-  mutator->applyMutation(module.getModule(), Address, *OriginalValue);
+  mutator->applyMutation(module.getModule(), Address);
 }
 
 const std::vector<std::pair<Test *, int>> &MutationPoint::getReachableTests() const {

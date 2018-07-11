@@ -169,11 +169,9 @@ static ConstantFP *getReplacementFloat(ConstantFP *constantFloat) {
 }
 
 llvm::Value *
-ScalarValueMutator::applyMutation(Module *M,
-                                  MutationPointAddress &address,
-                                  Value &_V) {
-
-  llvm::Instruction &I = address.findInstruction(M);
+ScalarValueMutator::applyMutation(llvm::Module *module,
+                                  MutationPointAddress &address) {
+  llvm::Instruction &I = address.findInstruction(module);
 
   for (unsigned int i = 0; i < I.getNumOperands(); i++) {
     Value *operand = I.getOperand(i);

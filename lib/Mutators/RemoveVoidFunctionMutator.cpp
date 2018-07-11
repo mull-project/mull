@@ -91,17 +91,12 @@ bool RemoveVoidFunctionMutator::canBeApplied(Value &V) {
   return false;
 }
 
-llvm::Value *RemoveVoidFunctionMutator::applyMutation(Module *M,
-                                                      MutationPointAddress &address,
-                                                      Value &_V) {
-  llvm::Function &F    = *(std::next(M->begin(), address.getFnIndex()));
-  llvm::BasicBlock &B  = *(std::next(F.begin(), address.getBBIndex()));
-  llvm::Instruction &I = *(std::next(B.begin(), address.getIIndex()));
+llvm::Value *RemoveVoidFunctionMutator::applyMutation(llvm::Module *module,
+                                                      MutationPointAddress &address) {
+  llvm::Instruction &I = address.findInstruction(module);
 
   CallInst *callInst = dyn_cast<CallInst>(&I);
   callInst->eraseFromParent();
 
-  /// return value here is not used and doesn't do anything outside.
-  /// TODO: remove?
-  return callInst;
+  return nullptr;
 }

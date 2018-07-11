@@ -42,16 +42,9 @@ bool MathMulMutator::canBeApplied(Value &V) {
   return false;
 }
 
-llvm::Value *MathMulMutator::applyMutation(Module *M,
-                                           MutationPointAddress &address,
-                                           Value &_V) {
-
-  /// In the following V argument is not used. Eventually it will be removed from
-  /// this method's signature because it will be not relevant
-  /// when mutations will be applied on copies of original module
-  llvm::Function &F = *(std::next(M->begin(), address.getFnIndex()));
-  llvm::BasicBlock &B = *(std::next(F.begin(), address.getBBIndex()));
-  llvm::Instruction &I = *(std::next(B.begin(), address.getIIndex()));
+llvm::Value *MathMulMutator::applyMutation(llvm::Module *module,
+                                           MutationPointAddress &address) {
+  llvm::Instruction &I = address.findInstruction(module);
 
   /// TODO: Take care of NUW/NSW
   BinaryOperator *binaryOperator = cast<BinaryOperator>(&I);
