@@ -200,11 +200,11 @@ bool ConditionalsBoundaryMutator::isLTE(llvm::Instruction *instruction) {
   return false;
 }
 
-std::string ConditionalsBoundaryMutator::uniqueID() {
+std::string ConditionalsBoundaryMutator::getUniqueIdentifier() {
   return ID;
 }
 
-std::string ConditionalsBoundaryMutator::uniqueID() const {
+std::string ConditionalsBoundaryMutator::getUniqueIdentifier() const {
   return ID;
 }
 

@@ -291,7 +291,7 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     default:
       Logger::warn()
         << "CXXJunkDetector does not support '"
-        << point->getMutator()->uniqueID()
+        << point->getMutator()->getUniqueIdentifier()
         << "'\n";
       break;
   }

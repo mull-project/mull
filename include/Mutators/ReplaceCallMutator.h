@@ -19,10 +19,10 @@ public:
                                     llvm::Instruction *instruction,
                                     SourceLocation &sourceLocation) override;
 
-  std::string uniqueID() override {
+  std::string getUniqueIdentifier() override {
     return ID;
   }
-  std::string uniqueID() const override {
+  std::string getUniqueIdentifier() const override {
     return ID;
   }
 

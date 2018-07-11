@@ -17,69 +17,69 @@ TEST(MutatorsFactory, SingleMutators) {
     mutators = factory.mutators({ "math_add_mutator" });
     ASSERT_EQ(mutators.size(), 1UL);
     mutator = mutators[0].get();
-    ASSERT_EQ(mutator->uniqueID(), "math_add_mutator");
+    ASSERT_EQ(mutator->getUniqueIdentifier(), "math_add_mutator");
   }
 
   {
     mutators = factory.mutators({ "math_div_mutator" });
     ASSERT_EQ(mutators.size(), 1UL);
     mutator = mutators[0].get();
-    ASSERT_EQ(mutator->uniqueID(), "math_div_mutator");
+    ASSERT_EQ(mutator->getUniqueIdentifier(), "math_div_mutator");
   }
 
   {
     mutators = factory.mutators({ "math_mul_mutator" });
     ASSERT_EQ(mutators.size(), 1UL);
     mutator = mutators[0].get();
-    ASSERT_EQ(mutator->uniqueID(), "math_mul_mutator");
+    ASSERT_EQ(mutator->getUniqueIdentifier(), "math_mul_mutator");
   }
 
   {
     mutators = factory.mutators({ "math_sub_mutator" });
     ASSERT_EQ(mutators.size(), 1UL);
     mutator = mutators[0].get();
-    ASSERT_EQ(mutator->uniqueID(), "math_sub_mutator");
+    ASSERT_EQ(mutator->getUniqueIdentifier(), "math_sub_mutator");
   }
 
   {
     mutators = factory.mutators({ "and_or_replacement_mutator" });
     ASSERT_EQ(mutators.size(), 1UL);
     mutator = mutators[0].get();
-    ASSERT_EQ(mutator->uniqueID(), "and_or_replacement_mutator");
+    ASSERT_EQ(mutator->getUniqueIdentifier(), "and_or_replacement_mutator");
   }
 
   {
     mutators = factory.mutators({ "negate_mutator" });
     ASSERT_EQ(mutators.size(), 1UL);
     mutator = mutators[0].get();
-    ASSERT_EQ(mutator->uniqueID(), "negate_mutator");
+    ASSERT_EQ(mutator->getUniqueIdentifier(), "negate_mutator");
   }
 
   {
     mutators = factory.mutators({ "remove_void_function_mutator" });
     ASSERT_EQ(mutators.size(), 1UL);
     mutator = mutators[0].get();
-    ASSERT_EQ(mutator->uniqueID(), "remove_void_function_mutator");
+    ASSERT_EQ(mutator->getUniqueIdentifier(), "remove_void_function_mutator");
   }
 
   {
     mutators = factory.mutators({ "replace_call_mutator" });
     ASSERT_EQ(mutators.size(), 1UL);
     mutator = mutators[0].get();
-    ASSERT_EQ(mutator->uniqueID(), "replace_call_mutator");
+    ASSERT_EQ(mutator->getUniqueIdentifier(), "replace_call_mutator");
   }
 
   {
     mutators = factory.mutators({ "scalar_value_mutator" });
     ASSERT_EQ(mutators.size(), 1UL);
     mutator = mutators[0].get();
-    ASSERT_EQ(mutator->uniqueID(), "scalar_value_mutator");
+    ASSERT_EQ(mutator->getUniqueIdentifier(), "scalar_value_mutator");
   }
 }
 
 static std::function<bool (unique_ptr<Mutator>&)> predicate(const char *name) {
   return [=](const unique_ptr<Mutator>& o) {
-    return o->uniqueID() == name;
+    return o->getUniqueIdentifier() == name;
   };
 }
 
@@ -234,7 +234,7 @@ TEST(MutatorsFactory, UniqueMutators) {
     });
     ASSERT_EQ(mutators.size(), 1UL);
     mutator = mutators[0].get();
-    ASSERT_EQ(mutator->uniqueID(), "math_add_mutator");
+    ASSERT_EQ(mutator->getUniqueIdentifier(), "math_add_mutator");
   }
 
   {

@@ -65,7 +65,7 @@ MutationPoint::MutationPoint(Mutator *mutator,
 {
   string moduleID = module->getUniqueIdentifier();
   string addressID = Address.getIdentifier();
-  string mutatorID = mutator->uniqueID();
+  string mutatorID = mutator->getUniqueIdentifier();
 
   uniqueIdentifier = moduleID + "_" + addressID + "_" + mutatorID;
 }

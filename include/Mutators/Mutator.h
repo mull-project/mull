@@ -4,10 +4,10 @@
 #include <vector>
 
 namespace llvm {
-  class Function;
-  class Value;
-  class Module;
-  class Instruction;
+class Function;
+class Value;
+class Module;
+class Instruction;
 }
 
 namespace mull {
@@ -33,9 +33,8 @@ public:
                                           llvm::Instruction *instruction,
                                           SourceLocation &sourceLocation) = 0;
 
-  /// FIXME: Rename to 'getUniqueIdentifier'
-  virtual std::string uniqueID() = 0;
-  virtual std::string uniqueID() const = 0;
+  virtual std::string getUniqueIdentifier() = 0;
+  virtual std::string getUniqueIdentifier() const = 0;
   virtual MutatorKind mutatorKind()  { return MutatorKind::Unknown; }
 
   virtual bool canBeApplied(llvm::Value &V) = 0;

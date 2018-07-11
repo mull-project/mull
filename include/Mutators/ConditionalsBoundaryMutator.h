@@ -20,8 +20,8 @@ class ConditionalsBoundaryMutator : public Mutator {
 
 public:
   static const std::string ID;
-  std::string uniqueID() override;
-  std::string uniqueID() const override;
+  std::string getUniqueIdentifier() override;
+  std::string getUniqueIdentifier() const override;
   MutatorKind mutatorKind() override;
 
   static bool isGT(llvm::Instruction *instruction);

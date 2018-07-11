@@ -183,7 +183,8 @@ void mull::SQLiteReporter::reportResults(const Result &result,
     SourceLocation location = SourceLocation::sourceLocationFromInstruction(instruction);
 
     int index = 1;
-    sqlite3_bind_text(insertMutationPointStmt, index++, mutationPoint->getMutator()->uniqueID().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(insertMutationPointStmt, index++,
+                      mutationPoint->getMutator()->getUniqueIdentifier().c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(insertMutationPointStmt, index++, instruction->getParent()->getParent()->getParent()->getModuleIdentifier().c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(insertMutationPointStmt, index++, instruction->getParent()->getParent()->getName().str().c_str(), -1, SQLITE_TRANSIENT);
 
