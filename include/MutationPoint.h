@@ -5,6 +5,8 @@
 #include <memory>
 #include <vector>
 
+#include "SourceLocation.h"
+
 namespace llvm {
 
 class Function;
@@ -69,14 +71,15 @@ class MutationPoint {
   MullModule *module;
   std::string uniqueIdentifier;
   std::string diagnostics;
+  const SourceLocation sourceLocation;
   std::vector<std::pair<Test *, int>> reachableTests;
-
 public:
   MutationPoint(Mutator *mutator,
                 MutationPointAddress Address,
                 llvm::Value *Val,
                 MullModule *m,
-                std::string diagnostics = "");
+                std::string diagnostics,
+                const SourceLocation &location);
 
   ~MutationPoint();
 
@@ -89,6 +92,7 @@ public:
   MutationPointAddress getAddress() const;
   llvm::Value *getOriginalValue() const;
   MullModule *getOriginalModule() const;
+  const SourceLocation &getSourceLocation() const;
 
   void addReachableTest(Test *test, int distance);
   void applyMutation(MullModule &module);

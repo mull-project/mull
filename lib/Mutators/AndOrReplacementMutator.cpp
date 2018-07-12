@@ -3,6 +3,7 @@
 #include "Context.h"
 #include "Logger.h"
 #include "MutationPoint.h"
+#include "SourceLocation.h"
 
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/InstIterator.h>
@@ -22,10 +23,11 @@ const std::string AndOrReplacementMutator::ID = "and_or_replacement_mutator";
 MutationPoint *
 AndOrReplacementMutator::getMutationPoint(MullModule *module,
                                           MutationPointAddress &address,
-                                          llvm::Instruction *instruction) {
+                                          llvm::Instruction *instruction,
+                                          SourceLocation &sourceLocation) {
   if (canBeApplied(*instruction)) {
     std::string diagnostics = "AND-OR Replacement";
-    return new MutationPoint(this, address, instruction, module, diagnostics);
+    return new MutationPoint(this, address, instruction, module, diagnostics, sourceLocation);
   }
   return nullptr;
 }
@@ -42,15 +44,10 @@ bool AndOrReplacementMutator::canBeApplied(Value &V) {
   }
 
   /// TODO: Discuss how to filter out irrelevant branch instructions.
-  if (branchInst->hasMetadata()) {
-    int debugInfoKindID = 0;
-
-    MDNode *debug = branchInst->getMetadata(debugInfoKindID);
-    DILocation *location = dyn_cast<DILocation>(debug);
-    if (location) {
-      if (location->getFilename().str().find("include/c++/v1") != std::string::npos) {
-        return false;
-      }
+  SourceLocation location = SourceLocation::sourceLocationFromInstruction(branchInst);
+  if (!location.isNull()) {
+    if (location.filePath.find("include/c++/v1") != std::string::npos) {
+      return false;
     }
   }
 
@@ -66,8 +63,8 @@ bool AndOrReplacementMutator::canBeApplied(Value &V) {
 }
 
 llvm::Value *AndOrReplacementMutator::applyMutation(Module *M,
-                                                             MutationPointAddress address,
-                                                             Value &_V) {
+                                                    MutationPointAddress address,
+                                                    Value &_V) {
   /// In the following V argument is not used. Eventually it will be removed from
   /// this method's signature because it will be not relevant
   /// when mutations will be applied on copies of original module

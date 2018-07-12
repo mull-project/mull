@@ -3,6 +3,7 @@
 #include "Filter.h"
 #include "Testee.h"
 #include "MutationPoint.h"
+#include "SourceLocation.h"
 
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Module.h>
@@ -62,10 +63,10 @@ std::vector<MutationPoint *> MutationsFinder::getMutationPoints(const Context &c
           continue;
         }
 
+        auto location = SourceLocation::sourceLocationFromInstruction(&instruction);
+
         MutationPointAddress address(functionIndex, basicBlockIndex, instructionIndex);
-        MutationPoint *point = mutator->getMutationPoint(module,
-                                                         address,
-                                                         &instruction);
+        MutationPoint *point = mutator->getMutationPoint(module, address, &instruction, location);
         if (point) {
           point->addReachableTest(testee.getTest(), testee.getDistance());
           mutationPoints.push_back(point);

@@ -27,13 +27,14 @@ raw_ostream& operator<<(raw_ostream& stream, const CXString& str) {
   return stream;
 }
 
-void dump_cursor(CXCursor cursor, CXSourceLocation location, PhysicalAddress &address, MutationPoint *point) {
+void dump_cursor(CXCursor cursor, CXSourceLocation location, MutationPoint *point) {
+  auto sourceLocation = point->getSourceLocation();
   errs() << point->getUniqueIdentifier() << "\n";
   point->getOriginalValue()->print(llvm::errs());
   Instruction *in = dyn_cast<Instruction>(point->getOriginalValue());
   errs() << in->getParent()->getParent()->getParent()->getModuleIdentifier() << "\n";
 
-  errs() << address.filepath << ":" << address.line << ":" << address.column << "\n";
+  errs() << sourceLocation.filePath << ":" << sourceLocation.line << ":" << sourceLocation.column << "\n";
   CXCursorKind kind = clang_getCursorKind(cursor);
   errs() << "Kind '" << clang_getCursorKindSpelling(kind) << "'\n";
 
@@ -57,7 +58,7 @@ void dump_cursor(CXCursor cursor, CXSourceLocation location, PhysicalAddress &ad
 
   auto length = endOffset - beginOffset;
 
-  FILE *f = fopen(address.filepath.c_str(), "rb");
+  FILE *f = fopen(sourceLocation.filePath.c_str(), "rb");
 
   fseek(f, beginOffset, SEEK_SET);
   char *buffer = new char[length + 1];
@@ -72,42 +73,6 @@ void dump_cursor(CXCursor cursor, CXSourceLocation location, PhysicalAddress &ad
   errs() << "^\n";
 
   delete[] buffer;
-}
-
-#pragma mark - Phisycal Address
-
-PhysicalAddress getAddress(MutationPoint *point) {
-  PhysicalAddress address;
-
-  if (auto instruction = dyn_cast<Instruction>(point->getOriginalValue())) {
-    if (instruction->getMetadata(0)) {
-      auto debugInfo = instruction->getDebugLoc();
-
-      auto file = debugInfo->getFilename().str();
-      auto directory = debugInfo->getDirectory().str();
-      if (sys::path::is_absolute(file)) {
-        address.filepath = file;
-      } else {
-        address.filepath = directory + sys::path::get_separator().str() + file;
-      }
-
-      address.directory = directory;
-      address.line = debugInfo->getLine();
-      address.column = debugInfo->getColumn();
-    }
-  }
-
-  return address;
-}
-
-PhysicalAddress::PhysicalAddress() : directory(""), filepath(""), line(0), column(0) {}
-
-bool PhysicalAddress::valid() {
-  if (directory != "" && filepath != "" && line != 0 && column != 0) {
-    return true;
-  }
-
-  return false;
 }
 
 #pragma mark - CHDir
@@ -166,7 +131,7 @@ LibClangArgs getLibClangArgs(std::vector<std::string> &commands) {
     args.argv = new char*[args.argc];
     copyCompilationFlag(&args.argv[0], std::string());
   } else {
-    args.argc = commands.size();
+    args.argc = static_cast<int>(commands.size());
     args.argv = new char*[args.argc];
     for (int i = 0; i < args.argc; i++) {
       auto flag = commands[i];
@@ -223,14 +188,14 @@ CXXJunkDetector::~CXXJunkDetector() {
 }
 
 CXTranslationUnit
-CXXJunkDetector::translationUnit(const PhysicalAddress &address,
+CXXJunkDetector::translationUnit(const SourceLocation &location,
                                  const std::string &sourceFile) {
   if (units.count(sourceFile) != 0) {
     return units[sourceFile];
   }
 
   std::vector<std::string> commandLine;
-  std::string directory = address.directory;
+  std::string directory = location.directory;
 
   if (compdb != nullptr) {
     auto commands = compdb->getCompileCommands(sourceFile);
@@ -267,8 +232,8 @@ CXXJunkDetector::translationUnit(const PhysicalAddress &address,
 }
 
 std::pair<CXCursor, CXSourceLocation>
-CXXJunkDetector::cursorAndLocation(PhysicalAddress &address,
-                                   MutationPoint *point) {
+CXXJunkDetector::cursorAndLocation(MutationPoint *point) {
+  auto sourceLocation = point->getSourceLocation();
   Instruction *instruction = dyn_cast<Instruction>(point->getOriginalValue());
   if (instruction == nullptr) {
     return std::make_pair(clang_getNullCursor(), clang_getNullLocation());
@@ -276,30 +241,32 @@ CXXJunkDetector::cursorAndLocation(PhysicalAddress &address,
 
   std::string sourceFile = instruction->getModule()->getSourceFileName();
 
-  CXTranslationUnit unit = translationUnit(address, sourceFile);
+  CXTranslationUnit unit = translationUnit(sourceLocation, sourceFile);
 
   if (unit == nullptr) {
     return std::make_pair(clang_getNullCursor(), clang_getNullLocation());
   }
 
-  CXFile file = clang_getFile(unit, address.filepath.c_str());
+  CXFile file = clang_getFile(unit, sourceLocation.filePath.c_str());
   if (file == nullptr) {
-    Logger::error() << "Cannot get file from TU: " << address.filepath << "\n";
+    Logger::error() << "Cannot get file from TU: " << sourceLocation.filePath << "\n";
     return std::make_pair(clang_getNullCursor(), clang_getNullLocation());
   }
 
-  CXSourceLocation location = clang_getLocation(unit, file, address.line, address.column);
+  CXSourceLocation location = clang_getLocation(unit, file,
+                                                static_cast<unsigned int>(sourceLocation.line),
+                                                static_cast<unsigned int>(sourceLocation.column));
 
   return std::make_pair(clang_getCursor(unit, location), location);
 }
 
 bool CXXJunkDetector::isJunk(MutationPoint *point) {
-  auto address = getAddress(point);
-  if (!address.valid()) {
+  auto sourceLocation = point->getSourceLocation();
+  if (sourceLocation.isNull()) {
     return true;
   }
 
-  auto pair = cursorAndLocation(address, point);
+  auto pair = cursorAndLocation(point);
   auto cursor = pair.first;
   auto location = pair.second;
 
@@ -309,16 +276,16 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
 
   switch (point->getMutator()->mutatorKind()) {
     case MutatorKind::ConditionalsBoundaryMutator:
-      return isJunkBoundary(cursor, location, address, point);
+      return isJunkBoundary(cursor, location, point);
       break;
     case MutatorKind::MathAddMutator:
-      return isJunkMathAdd(cursor, location, address, point);
+      return isJunkMathAdd(cursor, location, point);
       break;
     case MutatorKind::NegateMutator:
-      return isJunkNegate(cursor, location, address, point);
+      return isJunkNegate(cursor, location, point);
       break;
     case MutatorKind::RemoveVoidFunctionMutator:
-      return isJunkRemoveVoid(cursor, location, address, point);
+      return isJunkRemoveVoid(cursor, location, point);
       break;
 
     default:
@@ -334,7 +301,6 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
 
 bool CXXJunkDetector::isJunkBoundary(CXCursor cursor,
                                      CXSourceLocation location,
-                                     PhysicalAddress &address,
                                      MutationPoint *point) {
   CXCursorKind kind = clang_getCursorKind(cursor);
 
@@ -348,7 +314,6 @@ bool CXXJunkDetector::isJunkBoundary(CXCursor cursor,
 
 bool CXXJunkDetector::isJunkMathAdd(CXCursor cursor,
                                     CXSourceLocation location,
-                                    PhysicalAddress &address,
                                     MutationPoint *point) {
   CXCursorKind kind = clang_getCursorKind(cursor);
 
@@ -364,7 +329,6 @@ bool CXXJunkDetector::isJunkMathAdd(CXCursor cursor,
 
 bool CXXJunkDetector::isJunkNegate(CXCursor cursor,
                                     CXSourceLocation location,
-                                    PhysicalAddress &address,
                                     MutationPoint *point) {
   CXCursorKind kind = clang_getCursorKind(cursor);
 
@@ -378,7 +342,6 @@ bool CXXJunkDetector::isJunkNegate(CXCursor cursor,
 
 bool CXXJunkDetector::isJunkRemoveVoid(CXCursor cursor,
                                        CXSourceLocation location,
-                                       PhysicalAddress &address,
                                        MutationPoint *point) {
   CXCursorKind kind = clang_getCursorKind(cursor);
 

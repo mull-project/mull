@@ -20,11 +20,12 @@ const std::string MathMulMutator::ID = "math_mul_mutator";
 
 MutationPoint *
 MathMulMutator::getMutationPoint(MullModule *module,
-                                          MutationPointAddress &address,
-                                          llvm::Instruction *instruction) {
+                                 MutationPointAddress &address,
+                                 llvm::Instruction *instruction,
+                                 SourceLocation &sourceLocation) {
   if (canBeApplied(*instruction)) {
     std::string diagnostics = "Math Mul: replaced * with /";
-    return new MutationPoint(this, address, instruction, module, diagnostics);
+    return new MutationPoint(this, address, instruction, module, diagnostics, sourceLocation);
   }
   return nullptr;
 }

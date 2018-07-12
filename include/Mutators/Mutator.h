@@ -16,6 +16,7 @@ class Context;
 class MullModule;
 class MutationPoint;
 class MutationPointAddress;
+struct SourceLocation;
 
 enum class MutatorKind {
   Unknown,
@@ -28,10 +29,11 @@ enum class MutatorKind {
 class Mutator {
 public:
   virtual MutationPoint *getMutationPoint(MullModule *module,
-                                          MutationPointAddress &address,
-                                          llvm::Instruction *instruction) = 0;
+                                            MutationPointAddress &address,
+                                            llvm::Instruction *instruction,
+                                            SourceLocation &sourceLocation) = 0;
 
-  /// FIXME: Renmae to 'getUniqueIdentifier'
+  /// FIXME: Rename to 'getUniqueIdentifier'
   virtual std::string uniqueID() = 0;
   virtual std::string uniqueID() const = 0;
   virtual MutatorKind mutatorKind()  { return MutatorKind::Unknown; }

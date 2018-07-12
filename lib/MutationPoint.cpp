@@ -58,9 +58,10 @@ MutationPoint::MutationPoint(Mutator *mutator,
                              MutationPointAddress Address,
                              Value *Val,
                              MullModule *m,
-                             std::string diagnostics) :
+                             std::string diagnostics,
+                             const SourceLocation &location) :
   mutator(mutator), Address(Address), OriginalValue(Val),
-  module(m), diagnostics(diagnostics), reachableTests()
+  module(m), diagnostics(diagnostics), sourceLocation(location), reachableTests()
 {
   string moduleID = module->getUniqueIdentifier();
   string addressID = Address.getIdentifier();
@@ -129,4 +130,8 @@ const std::string &MutationPoint::getDiagnostics() {
 
 const std::string &MutationPoint::getDiagnostics() const {
   return diagnostics;
+}
+
+const SourceLocation &MutationPoint::getSourceLocation() const {
+  return sourceLocation;
 }

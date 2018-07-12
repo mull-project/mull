@@ -60,6 +60,7 @@ set(mull_sources
 
   Reporters/SQLiteReporter.cpp
   Reporters/TimeReporter.cpp
+  SourceLocation.cpp
 )
 
 set(mull_header_dirs
