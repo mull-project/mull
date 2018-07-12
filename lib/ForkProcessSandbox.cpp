@@ -3,16 +3,17 @@
 #include "Logger.h"
 #include "ExecutionResult.h"
 
-#include <errno.h>
+#include <cerrno>
 #include <chrono>
-#include <signal.h>
-#include <string.h>
+#include <csignal>
+#include <cstring>
 #include <sys/mman.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <sys/time.h>
 #include <thread>
 #include <unistd.h>
+#include <llvm/Support/FileSystem.h>
 
 using namespace std::chrono;
 
@@ -62,15 +63,15 @@ void handle_alarm_signal(int signal, siginfo_t *info, void *context) {
 }
 
 void handle_timeout(long long timeoutMilliseconds) {
-  struct sigaction action;
+  struct sigaction action{};
   memset(&action, 0, sizeof(action));
   action.sa_sigaction = &handle_alarm_signal;
-  if (sigaction(SIGALRM, &action, NULL) != 0) {
+  if (sigaction(SIGALRM, &action, nullptr) != 0) {
     perror("sigaction");
     abort();
   }
 
-  struct itimerval timer;
+  struct itimerval timer{};
   timer.it_value.tv_sec = timeoutMilliseconds / 1000;
   /// Cut off seconds, and convert what's left into microseconds
   timer.it_value.tv_usec = (timeoutMilliseconds % 1000) * 1000;
@@ -88,15 +89,14 @@ void handle_timeout(long long timeoutMilliseconds) {
 mull::ExecutionResult
 mull::ForkProcessSandbox::run(std::function<ExecutionStatus (void)> function,
                               long long timeoutMilliseconds) {
+  llvm::SmallString<32> stderrFilename;
+  llvm::sys::fs::createUniqueFile("/tmp/mull.stderr.%%%%%%", stderrFilename);
 
-  char stderrFilename[] = "/tmp/mull.stderr.XXXXXX";
-  mktemp(stderrFilename);
-
-  char stdoutFilename[] = "/tmp/mull.stdout.XXXXXX";
-  mktemp(stdoutFilename);
+  llvm::SmallString<32> stdoutFilename;
+  llvm::sys::fs::createUniqueFile("/tmp/mull.stdout.%%%%%%", stdoutFilename);
 
   /// Creating a memory to be shared between child and parent.
-  ExecutionStatus *sharedStatus = (ExecutionStatus *)mmap(NULL,
+  ExecutionStatus *sharedStatus = (ExecutionStatus *)mmap(nullptr,
                                                           sizeof(ExecutionStatus),
                                                           PROT_READ | PROT_WRITE,
                                                           MAP_SHARED | MAP_ANONYMOUS,
@@ -106,8 +106,8 @@ mull::ForkProcessSandbox::run(std::function<ExecutionStatus (void)> function,
   auto start = high_resolution_clock::now();
   const pid_t workerPID = mullFork("worker");
   if (workerPID == 0) {
-    freopen(stderrFilename, "w", stderr);
-    freopen(stdoutFilename, "w", stdout);
+    freopen(stderrFilename.c_str(), "w", stderr);
+    freopen(stdoutFilename.c_str(), "w", stdout);
 
     handle_timeout(timeoutMilliseconds);
 
@@ -125,8 +125,8 @@ mull::ForkProcessSandbox::run(std::function<ExecutionStatus (void)> function,
     ExecutionResult result;
     result.runningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
     result.exitStatus = WEXITSTATUS(status);
-    result.stderrOutput = readFileAndUnlink(stderrFilename);
-    result.stdoutOutput = readFileAndUnlink(stdoutFilename);
+    result.stderrOutput = readFileAndUnlink(stderrFilename.c_str());
+    result.stdoutOutput = readFileAndUnlink(stdoutFilename.c_str());
     result.status = *sharedStatus;
 
     int munmapResult = munmap(sharedStatus, sizeof(ExecutionStatus));
