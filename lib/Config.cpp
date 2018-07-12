@@ -2,18 +2,19 @@
 #include "Config.h"
 
 #include <llvm/Support/YAMLTraits.h>
+#include <llvm/Support/FileSystem.h>
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
-#include <llvm/Support/FileSystem.h>
 
 int MullDefaultTimeoutMilliseconds = 3000;
 
 using namespace mull;
 
 
-CustomTestDefinition::CustomTestDefinition() {}
+CustomTestDefinition::CustomTestDefinition() = default;
 
 CustomTestDefinition::CustomTestDefinition(const std::string &name,
                                            const std::string &method,
@@ -191,7 +192,7 @@ diagnostics(diagnostics),
 timeout(timeout),
 maxDistance(distance),
 cacheDirectory(cacheDir),
-junkDetection(junkDetection)
+junkDetection(std::move(junkDetection))
 {
 }
 
@@ -350,7 +351,7 @@ void Config::dump() const {
   if (!mutators.empty()) {
     Logger::debug() << "\t" << "mutators: " << '\n';
 
-    for (auto mutator : mutators) {
+    for (const auto &mutator : mutators) {
       Logger::debug() << "\t- " << mutator << '\n';
     }
   }
@@ -358,7 +359,7 @@ void Config::dump() const {
   if (!getTests().empty()) {
     Logger::debug() << "\t" << "tests: " << '\n';
 
-    for (auto test : getTests()) {
+    for (const auto &test : getTests()) {
       Logger::debug() << "\t- " << test << '\n';
     }
   }
@@ -366,7 +367,7 @@ void Config::dump() const {
   if (!getExcludeLocations().empty()) {
     Logger::debug() << "\t" << "exclude_locations: " << '\n';
 
-    for (auto excludeLocation : getExcludeLocations()) {
+    for (const auto &excludeLocation : getExcludeLocations()) {
       Logger::debug() << "\t- " << excludeLocation << '\n';
     }
   }
