@@ -20,18 +20,12 @@
 
 static LLVMContext GlobalCtx;
 
-static inline bool fileExists(const std::string& name) {
-  std::ifstream f(name.c_str());
-  return f.good();
-}
-
 static std::string createFixture(const char *fixtureName) {
   std::string fixtureFullPath = TestModuleFactory::fixturePath(fixtureName);
 
-  if (fileExists(fixtureFullPath) == false) {
+  if (!llvm::sys::fs::exists(fixtureFullPath)) {
     mull::Logger::debug() << "Could not find a fixture at path: "
                           << fixtureFullPath << '\n';
-
     exit(1);
   }
 

@@ -4,39 +4,24 @@
 #include "MullModule.h"
 #include "MutationPoint.h"
 
-#include <dirent.h>
-#include <sys/stat.h>
-
 using namespace mull;
 using namespace llvm;
 using namespace llvm::object;
-
-static bool cacheDirectoryExists(const std::string &path) {
-  const char *c_path = path.c_str();
-  DIR *cacheDir = opendir(c_path);
-  if (cacheDir) {
-    /// If we can open the dir, then it exists
-    closedir(cacheDir);
-    return true;
-  } else {
-    /// Otherwise - attempt to create one
-    if (mkdir(c_path, S_IRWXU) == 0) {
-      return true;
-    }
-  }
-
-  return false;
-}
 
 ObjectCache::ObjectCache(bool useCache, const std::string &cacheDir)
   : useOnDiskCache(useCache),
     cacheDirectory(cacheDir)
 {
-  if (useOnDiskCache && !cacheDirectoryExists(cacheDirectory)) {
-    Logger::info() << "Cache directory '" << cacheDirectory
-                   << "' is not accessible\n";
-    Logger::info() << "falling back to in-memory cache\n";
-    useOnDiskCache = false;
+  if (useOnDiskCache) {
+    auto error = llvm::sys::fs::create_directories(cacheDir);
+    if (error) {
+      Logger::info() << "Cache directory '" << cacheDirectory
+                     << "' is not accessible\n";
+      Logger::info() << "Underlying issue:\n";
+      Logger::info() << error.message() << "\n";
+      Logger::info() << "falling back to in-memory cache\n";
+      useOnDiskCache = false;
+    }
   }
 }
 
