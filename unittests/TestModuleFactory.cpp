@@ -10,11 +10,13 @@
 #include <llvm/Support/Debug.h>
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/SourceMgr.h>
+#include <llvm/Support/Path.h>
 
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <unistd.h>
+#include <sys/param.h>
 
 static LLVMContext GlobalCtx;
 
@@ -84,15 +86,15 @@ createModuleFromBitcode(const char *fixtureName,
 }
 
 std::string TestModuleFactory::fixturePath(const char *fixtureName) {
-  char cFixtureFullPath[256];
+  SmallString<MAXPATHLEN> fixturePath;
 
-  getcwd(cFixtureFullPath, 255);
-  strcat(cFixtureFullPath, "/fixtures/");
-  strcat(cFixtureFullPath, fixtureName);
+  auto error = llvm::sys::fs::current_path(fixturePath);
+  if (error) {
+    Logger::error() << error.message() << "\n";
+  }
+  llvm::sys::path::append(fixturePath, "fixtures", fixtureName);
 
-  std::string fixtureFullPath(cFixtureFullPath);
-
-  return fixtureFullPath;
+  return fixturePath.str();
 }
 
 std::unique_ptr<MullModule>

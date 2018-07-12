@@ -21,6 +21,7 @@
 #include <string>
 #include <sys/param.h>
 #include <unistd.h>
+#include <llvm/Support/FileSystem.h>
 
 using namespace mull;
 using namespace llvm;
@@ -64,9 +65,11 @@ void sqlite_step(sqlite3 *database, sqlite3_stmt *stmt) {
 }
 
 SQLiteReporter::SQLiteReporter(const std::string &projectName) {
-  char wd[MAXPATHLEN] = { 0 };
-  getwd(wd);
-  std::string currentDirectory(wd);
+  SmallString<MAXPATHLEN> databasePath;
+  auto error = llvm::sys::fs::current_path(databasePath);
+  if (error) {
+    Logger::error() << error.message() << "\n";
+  }
 
   time_t ct;
   time(&ct);
@@ -76,9 +79,9 @@ SQLiteReporter::SQLiteReporter(const std::string &projectName) {
     projectNameComponent += "_";
   }
 
-  std::string databasePath = currentDirectory + "/" + projectNameComponent + currentTime + ".sqlite";
+  llvm::sys::path::append(databasePath, projectNameComponent + currentTime + ".sqlite");
 
-  this->databasePath = databasePath;
+  this->databasePath = databasePath.str();
 }
 
 std::string mull::SQLiteReporter::getDatabasePath() {
