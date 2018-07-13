@@ -62,15 +62,9 @@ bool AndOrReplacementMutator::canBeApplied(Value &V) {
   return false;
 }
 
-llvm::Value *AndOrReplacementMutator::applyMutation(Module *M,
-                                                    MutationPointAddress address,
-                                                    Value &_V) {
-  /// In the following V argument is not used. Eventually it will be removed from
-  /// this method's signature because it will be not relevant
-  /// when mutations will be applied on copies of original module
-  llvm::Function &F = *(std::next(M->begin(), address.getFnIndex()));
-  llvm::BasicBlock &B = *(std::next(F.begin(), address.getBBIndex()));
-  llvm::Instruction &I = *(std::next(B.begin(), address.getIIndex()));
+llvm::Value *AndOrReplacementMutator::applyMutation(llvm::Module *module,
+                                                    MutationPointAddress &address) {
+  llvm::Instruction &I = address.findInstruction(module);
 
   BranchInst *branchInst = dyn_cast<BranchInst>(&I);
   assert(branchInst != nullptr);
@@ -82,27 +76,27 @@ llvm::Value *AndOrReplacementMutator::applyMutation(Module *M,
                                  &secondBranch);
 
   if (possibleMutationType == AND_OR_MutationType_AND_to_OR_Pattern1) {
-    return applyMutationANDToOR_Pattern1(M, branchInst, secondBranch);
+    return applyMutationANDToOR_Pattern1(module, branchInst, secondBranch);
   }
 
   if (possibleMutationType == AND_OR_MutationType_AND_to_OR_Pattern2) {
-    return applyMutationANDToOR_Pattern2(M, branchInst, secondBranch);
+    return applyMutationANDToOR_Pattern2(module, branchInst, secondBranch);
   }
 
   if (possibleMutationType == AND_OR_MutationType_AND_to_OR_Pattern3) {
-    return applyMutationANDToOR_Pattern3(M, branchInst, secondBranch);
+    return applyMutationANDToOR_Pattern3(module, branchInst, secondBranch);
   }
 
   if (possibleMutationType == AND_OR_MutationType_OR_to_AND_Pattern1) {
-    return applyMutationORToAND_Pattern1(M, branchInst, secondBranch);
+    return applyMutationORToAND_Pattern1(module, branchInst, secondBranch);
   }
 
   if (possibleMutationType == AND_OR_MutationType_OR_to_AND_Pattern2) {
-    return applyMutationORToAND_Pattern2(M, branchInst, secondBranch);
+    return applyMutationORToAND_Pattern2(module, branchInst, secondBranch);
   }
 
   if (possibleMutationType == AND_OR_MutationType_OR_to_AND_Pattern3) {
-    return applyMutationORToAND_Pattern3(M, branchInst, secondBranch);
+    return applyMutationORToAND_Pattern3(module, branchInst, secondBranch);
   }
 
   return nullptr;

@@ -2,9 +2,11 @@
 #include "Config.h"
 
 #include <llvm/Support/YAMLTraits.h>
+#include <llvm/Support/FileSystem.h>
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 int MullDefaultTimeoutMilliseconds = 3000;
@@ -12,7 +14,7 @@ int MullDefaultTimeoutMilliseconds = 3000;
 using namespace mull;
 
 
-CustomTestDefinition::CustomTestDefinition() {}
+CustomTestDefinition::CustomTestDefinition() = default;
 
 CustomTestDefinition::CustomTestDefinition(const std::string &name,
                                            const std::string &method,
@@ -190,7 +192,7 @@ diagnostics(diagnostics),
 timeout(timeout),
 maxDistance(distance),
 cacheDirectory(cacheDir),
-junkDetection(junkDetection)
+junkDetection(std::move(junkDetection))
 {
 }
 
@@ -346,26 +348,26 @@ void Config::dump() const {
   << "\t" << "diagnostics: " << diagnosticsToString(diagnostics) << '\n'
   << "\t" << "emit_debug_info: " << emitDebugInfoToString(emitDebugInfo) << '\n';
 
-  if (mutators.empty() == false) {
+  if (!mutators.empty()) {
     Logger::debug() << "\t" << "mutators: " << '\n';
 
-    for (auto mutator : mutators) {
+    for (const auto &mutator : mutators) {
       Logger::debug() << "\t- " << mutator << '\n';
     }
   }
 
-  if (getTests().empty() == false) {
+  if (!getTests().empty()) {
     Logger::debug() << "\t" << "tests: " << '\n';
 
-    for (auto test : getTests()) {
+    for (const auto &test : getTests()) {
       Logger::debug() << "\t- " << test << '\n';
     }
   }
 
-  if (getExcludeLocations().empty() == false) {
+  if (!getExcludeLocations().empty()) {
     Logger::debug() << "\t" << "exclude_locations: " << '\n';
 
-    for (auto excludeLocation : getExcludeLocations()) {
+    for (const auto &excludeLocation : getExcludeLocations()) {
       Logger::debug() << "\t- " << excludeLocation << '\n';
     }
   }
@@ -374,44 +376,39 @@ void Config::dump() const {
 std::vector<std::string> Config::validate() {
   std::vector<std::string> errors;
 
-  if (bitcodeFileList.size() == 0) {
+  if (bitcodeFileList.empty()) {
     std::string error = "bitcode_file_list parameter is not specified.";
     errors.push_back(error);
     return errors;
   }
 
-  std::ifstream bitcodeFile(bitcodeFileList.c_str());
-
-  if (bitcodeFile.good() == false) {
+  if (!llvm::sys::fs::exists(bitcodeFileList)) {
     std::stringstream error;
 
     error << "bitcode_file_list parameter points to a non-existing file: "
-    << bitcodeFileList;
+          << bitcodeFileList;
 
     errors.push_back(error.str());
+
   }
 
-  if (dynamicLibraryFileList.empty() == false) {
-    std::ifstream dynamicLibraryFile(dynamicLibraryFileList.c_str());
-
-    if (dynamicLibraryFile.good() == false) {
+  if (!dynamicLibraryFileList.empty()) {
+    if (!llvm::sys::fs::exists(dynamicLibraryFileList)) {
       std::stringstream error;
 
       error << "dynamic_library_file_list parameter points to a non-existing file: "
-      << dynamicLibraryFileList;
+            << dynamicLibraryFileList;
 
       errors.push_back(error.str());
     }
   }
 
-  if (objectFileList.empty() == false) {
-    std::ifstream objectFiles(objectFileList.c_str());
-
-    if (objectFiles.good() == false) {
+  if (!objectFileList.empty()) {
+    if (!llvm::sys::fs::exists(objectFileList)) {
       std::stringstream error;
 
       error << "object_file_list parameter points to a non-existing file: "
-      << objectFileList;
+            << objectFileList;
 
       errors.push_back(error.str());
     }

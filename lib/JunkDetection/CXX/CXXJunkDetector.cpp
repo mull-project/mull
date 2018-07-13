@@ -12,6 +12,7 @@
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/Instruction.h>
 #include <llvm/Support/Path.h>
+#include <llvm/Support/FileSystem.h>
 #include <clang/Tooling/CompilationDatabase.h>
 #include <unistd.h>
 #include <sys/param.h>
@@ -80,14 +81,15 @@ void dump_cursor(CXCursor cursor, CXSourceLocation location, MutationPoint *poin
 class CHDir {
 public:
   CHDir() {
-    char cwd[MAXPATHLEN];
-    if (getcwd(cwd, sizeof(cwd)) == nullptr) {
-      perror("getcwd");
-    } else {
-      prevWorkDir = std::string(cwd);
+    SmallString<MAXPATHLEN> currentPath;
+    auto error = llvm::sys::fs::current_path(currentPath);
+    if (error) {
+      Logger::error() << error.message() << "\n";
     }
+    prevWorkDir = currentPath.str();
   }
   void enter(const std::string &wd) {
+    /// TODO: LLVM-5 and higher has llvm::sys::fs::set_current_path
     if (chdir(wd.c_str()) == -1) {
       perror("chdir");
     }
@@ -291,7 +293,7 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     default:
       Logger::warn()
         << "CXXJunkDetector does not support '"
-        << point->getMutator()->uniqueID()
+        << point->getMutator()->getUniqueIdentifier()
         << "'\n";
       break;
   }

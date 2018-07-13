@@ -6,28 +6,11 @@
 #include <llvm/IR/Module.h>
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/SourceMgr.h>
+#include <llvm/Support/Path.h>
 
 using namespace mull;
 using namespace llvm;
 using namespace std;
-
-/// FIXME: put into some proper place
-static string fileNameFromPath(const string &path) {
-  std::string filename;
-  auto lastSeparatorPos = path.rfind("/");
-  if (lastSeparatorPos == string::npos) {
-    filename = path;
-  } else {
-    filename = path.substr(lastSeparatorPos + 1);
-  }
-
-  auto dotPos = filename.find(".");
-  if (dotPos != string::npos) {
-    filename = filename.substr(0, dotPos);
-  }
-
-  return filename;
-}
 
 MullModule::MullModule(std::unique_ptr<llvm::Module> llvmModule)
   : module(std::move(llvmModule)),
@@ -40,7 +23,8 @@ MullModule::MullModule(std::unique_ptr<llvm::Module> llvmModule,
                        const std::string &path)
 : module(std::move(llvmModule)), modulePath(path)
 {
-  uniqueIdentifier = fileNameFromPath(module->getModuleIdentifier()) + "_" + md5;
+  uniqueIdentifier =
+    llvm::sys::path::stem(module->getModuleIdentifier()).str() + "_" + md5;
 }
 
 std::unique_ptr<MullModule> MullModule::clone(LLVMContext &context) {

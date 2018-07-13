@@ -21,6 +21,7 @@
 #include <string>
 #include <sys/param.h>
 #include <unistd.h>
+#include <llvm/Support/FileSystem.h>
 
 using namespace mull;
 using namespace llvm;
@@ -64,9 +65,11 @@ void sqlite_step(sqlite3 *database, sqlite3_stmt *stmt) {
 }
 
 SQLiteReporter::SQLiteReporter(const std::string &projectName) {
-  char wd[MAXPATHLEN] = { 0 };
-  getwd(wd);
-  std::string currentDirectory(wd);
+  SmallString<MAXPATHLEN> databasePath;
+  auto error = llvm::sys::fs::current_path(databasePath);
+  if (error) {
+    Logger::error() << error.message() << "\n";
+  }
 
   time_t ct;
   time(&ct);
@@ -76,9 +79,9 @@ SQLiteReporter::SQLiteReporter(const std::string &projectName) {
     projectNameComponent += "_";
   }
 
-  std::string databasePath = currentDirectory + "/" + projectNameComponent + currentTime + ".sqlite";
+  llvm::sys::path::append(databasePath, projectNameComponent + currentTime + ".sqlite");
 
-  this->databasePath = databasePath;
+  this->databasePath = databasePath.str();
 }
 
 std::string mull::SQLiteReporter::getDatabasePath() {
@@ -183,7 +186,8 @@ void mull::SQLiteReporter::reportResults(const Result &result,
     SourceLocation location = SourceLocation::sourceLocationFromInstruction(instruction);
 
     int index = 1;
-    sqlite3_bind_text(insertMutationPointStmt, index++, mutationPoint->getMutator()->uniqueID().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(insertMutationPointStmt, index++,
+                      mutationPoint->getMutator()->getUniqueIdentifier().c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(insertMutationPointStmt, index++, instruction->getParent()->getParent()->getParent()->getModuleIdentifier().c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(insertMutationPointStmt, index++, instruction->getParent()->getParent()->getName().str().c_str(), -1, SQLITE_TRANSIENT);
 

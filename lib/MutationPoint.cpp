@@ -65,7 +65,7 @@ MutationPoint::MutationPoint(Mutator *mutator,
 {
   string moduleID = module->getUniqueIdentifier();
   string addressID = Address.getIdentifier();
-  string mutatorID = mutator->uniqueID();
+  string mutatorID = mutator->getUniqueIdentifier();
 
   uniqueIdentifier = moduleID + "_" + addressID + "_" + mutatorID;
 }
@@ -109,7 +109,7 @@ void MutationPoint::addReachableTest(Test *test, int distance) {
 }
 
 void MutationPoint::applyMutation(MullModule &module) {
-  mutator->applyMutation(module.getModule(), Address, *OriginalValue);
+  mutator->applyMutation(module.getModule(), Address);
 }
 
 const std::vector<std::pair<Test *, int>> &MutationPoint::getReachableTests() const {
