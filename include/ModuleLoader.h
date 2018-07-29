@@ -6,20 +6,20 @@
 #include <vector>
 
 namespace llvm {
-  class LLVMContext;
-  class Module;
+class LLVMContext;
+class Module;
 }
 
 namespace mull {
 
 class ModuleLoader {
-  llvm::LLVMContext &Ctx;
-
+  std::vector<std::unique_ptr<llvm::LLVMContext>> contexts;
 public:
-  ModuleLoader(llvm::LLVMContext &C) : Ctx(C) {}
-  virtual ~ModuleLoader() {}
+  ModuleLoader() = default;
+  virtual ~ModuleLoader() = default;
 
-  virtual std::unique_ptr<MullModule> loadModuleAtPath(const std::string &path);
+  virtual std::unique_ptr<MullModule> loadModuleAtPath(const std::string &path,
+                                                       llvm::LLVMContext &context);
 
   virtual std::vector<std::unique_ptr<MullModule>>
     loadModulesFromBitcodeFileList(const std::vector<std::string> &path);

@@ -13,8 +13,11 @@
 #include "Metrics/Metrics.h"
 #include "JunkDetection/JunkDetector.h"
 #include "Toolchain/JITEngine.h"
+#include "Parallelization/Parallelization.h"
 
+#include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/Support/DynamicLibrary.h>
+#include <llvm/Support/TargetSelect.h>
 
 #include <algorithm>
 #include <fstream>
@@ -27,6 +30,39 @@ using namespace llvm;
 using namespace llvm::object;
 using namespace mull;
 using namespace std;
+
+class CompilerTask {
+public:
+  using In = std::vector<std::unique_ptr<MullModule>>;
+  using Out = std::vector<object::OwningBinary<object::ObjectFile>>;
+  using iterator = In::const_iterator;
+
+  CompilerTask(Instrumentation &instrumentation, Toolchain &toolchain)
+    : instrumentation(instrumentation), toolchain(toolchain) {}
+
+  void operator() (iterator begin, iterator end, Out &storage) {
+    EngineBuilder builder;
+    auto target = builder.selectTarget(llvm::Triple(), "", "",
+                                       llvm::SmallVector<std::string, 1>());
+    std::unique_ptr<TargetMachine> localMachine(target);
+
+    for (auto it = begin; it != end; it++) {
+      auto &module = *it->get();
+      auto objectFile = toolchain.cache().getInstrumentedObject(module);
+      if (objectFile.getBinary() == nullptr) {
+        LLVMContext instrumentationContext;
+        auto clonedModule = module.clone(instrumentationContext);
+
+        instrumentation.insertCallbacks(clonedModule->getModule());
+        objectFile = toolchain.compiler().compileModule(*clonedModule, *localMachine);
+        toolchain.cache().putInstrumentedObject(objectFile, module);
+      }
+      storage.push_back(std::move(objectFile));
+    }
+  }
+  Instrumentation &instrumentation;
+  Toolchain &toolchain;
+};
 
 Driver::~Driver() {
   delete this->sandbox;
@@ -80,27 +116,25 @@ void Driver::loadBitcodeFilesIntoMemory() {
 }
 
 void Driver::compileInstrumentedBitcodeFiles() {
+  metrics.beginInstrumentedCompilation();
+
   for (auto &ownedModule : context.getModules()) {
-    MullModule &module = *ownedModule.get();
-
+    MullModule &module = *ownedModule;
     instrumentation.recordFunctions(module.getModule());
-
-    metrics.beginCompileInstrumentedModule(module.getModule());
-
-    auto objectFile = toolchain.cache().getInstrumentedObject(module);
-    if (objectFile.getBinary() == nullptr) {
-      LLVMContext instrumentationContext;
-      auto clonedModule = module.clone(instrumentationContext);
-
-      instrumentation.insertCallbacks(clonedModule->getModule());
-      objectFile = toolchain.compiler().compileModule(*clonedModule, toolchain.targetMachine());
-      toolchain.cache().putInstrumentedObject(objectFile, module);
-    }
-
-    instrumentedObjectFiles.push_back(std::move(objectFile));
-
-    metrics.endCompileInstrumentedModule(module.getModule());
   }
+
+  int workers = 8;
+  std::vector<CompilerTask> tasks;
+  for (int i = 0; i < workers; i++) {
+    tasks.emplace_back(instrumentation, toolchain);
+  }
+
+  TaskExecutor<CompilerTask> compiler(context.getModules(),
+                                      instrumentedObjectFiles,
+                                      tasks);
+  compiler.execute();
+
+  metrics.endInstrumentedCompilation();
 }
 
 void Driver::loadPrecompiledObjectFiles() {
