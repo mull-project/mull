@@ -64,6 +64,54 @@ public:
   Toolchain &toolchain;
 };
 
+class OriginalTestExecutionTask {
+public:
+  using In = std::vector<std::unique_ptr<Test>>;
+  using Out = std::vector<std::unique_ptr<Testee>>;
+  using iterator = In::const_iterator;
+
+  OriginalTestExecutionTask(Instrumentation &instrumentation,
+                            ProcessSandbox &sandbox,
+                            TestRunner &runner,
+                            Config &config,
+                            Filter &filter)
+    : instrumentation(instrumentation), sandbox(sandbox), runner(runner), config(config), filter(filter) {}
+
+  void operator() (iterator begin, iterator end, Out &storage) {
+    for (auto it = begin; it != end; ++it) {
+      auto &test = *it;
+
+      instrumentation.setupInstrumentationInfo(test.get());
+
+      ExecutionResult testExecutionResult = sandbox.run([&]() {
+        return runner.runTest(test.get());
+      }, config.getTimeout());
+
+      test->setExecutionResult(testExecutionResult);
+
+      std::vector<std::unique_ptr<Testee>> testees;
+
+      if (testExecutionResult.status == Passed) {
+        testees = instrumentation.getTestees(test.get(), filter, config.getMaxDistance());
+      }
+      instrumentation.cleanupInstrumentationInfo(test.get());
+
+      if (testees.empty()) {
+        continue;
+      }
+
+      for (auto it = std::next(testees.begin()); it != testees.end(); ++it) {
+        storage.push_back(std::move(*it));
+      }
+    }
+  }
+  Instrumentation &instrumentation;
+  ProcessSandbox &sandbox;
+  TestRunner &runner;
+  Config &config;
+  Filter &filter;
+};
+
 Driver::~Driver() {
   delete this->sandbox;
   delete this->diagnostics;
@@ -123,7 +171,7 @@ void Driver::compileInstrumentedBitcodeFiles() {
     instrumentation.recordFunctions(module.getModule());
   }
 
-  int workers = 8;
+  int workers = 1;
   std::vector<CompilerTask> tasks;
   for (int i = 0; i < workers; i++) {
     tasks.emplace_back(instrumentation, toolchain);
@@ -141,7 +189,7 @@ void Driver::loadPrecompiledObjectFiles() {
   metrics.beginLoadPrecompiledObjectFiles();
   for (std::string &objectFilePath: config.getObjectFilesPaths()) {
     ErrorOr<std::unique_ptr<MemoryBuffer>> buffer =
-    MemoryBuffer::getFile(objectFilePath.c_str());
+    MemoryBuffer::getFile(objectFilePath);
 
     if (!buffer) {
       Logger::error() << "Cannot load object file: " << objectFilePath << "\n";
@@ -198,43 +246,21 @@ Driver::findMutationPoints(std::vector<std::unique_ptr<Test>> &tests) {
   runner.loadInstrumentedProgram(objectFiles, instrumentation, jit);
   metrics.endLoadOriginalProgram();
 
-  auto testIndex = 1;
-  auto testsCount = tests.size();
-  std::vector<std::unique_ptr<Testee>> allTestees;
+  int workers = 4;
+  std::vector<OriginalTestExecutionTask> tasks;
+  for (int i = 0; i < workers; i++) {
+    tasks.emplace_back(instrumentation, *sandbox, runner, config, filter);
+  }
 
-  for (auto &test : tests) {
-    Logger::debug().indent(2) << "[" << testIndex++ << "/" << testsCount << "] " << test->getTestDisplayName() << ": ";
+  metrics.beginOriginalTestExecution();
+  std::vector<std::unique_ptr<Testee>> testees;
+  TaskExecutor<OriginalTestExecutionTask> testRunner(tests, testees, tasks);
+  testRunner.execute();
+  metrics.endOriginalTestExecution();
 
-    instrumentation.setupInstrumentationInfo(test.get());
-
-    metrics.beginRunOriginalTest(test.get());
-    ExecutionResult testExecutionResult = sandbox->run([&]() {
-      return runner.runTest(test.get(), jit);
-    }, config.getTimeout());
-    metrics.endRunOriginalTest(test.get());
-
-    Logger::debug() << testExecutionResult.getStatusAsString() << "\n";
-
-    test->setExecutionResult(testExecutionResult);
-
-    std::vector<std::unique_ptr<Testee>> testees;
-
-    metrics.beginFindMutationsForTest(test.get());
-    if (testExecutionResult.status == Passed) {
-      testees = instrumentation.getTestees(test.get(), filter, config.getMaxDistance());
-    }
-    instrumentation.cleanupInstrumentationInfo(test.get());
-
-    if (testees.empty()) {
-      metrics.endFindMutationsForTest(test.get());
-      continue;
-    }
-
-    for (auto it = std::next(testees.begin()); it != testees.end(); ++it) {
-      allTestees.push_back(std::move(*it));
-    }
-
-    metrics.endFindMutationsForTest(test.get());
+  for (auto &testee : testees) {
+    auto points = mutationsFinder.getMutationPoints(context, *testee, filter);
+    std::copy(points.begin(), points.end(), std::back_inserter(mutationPoints));
   }
 
   auto mergedTestees = mergeTestees(allTestees);
