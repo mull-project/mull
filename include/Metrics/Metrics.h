@@ -14,7 +14,7 @@ class MutationPoint;
 
 struct MetricsMeasure {
   using Precision = std::chrono::milliseconds;
-  using Duration = std::chrono::milliseconds::rep;
+  using Duration = Precision::rep;
 
   Precision begin;
   Precision end;
@@ -36,6 +36,9 @@ public:
 
   void beginCompileOriginalModule(const llvm::Module *module);
   void endCompileOriginalModule(const llvm::Module *module);
+
+  void beginInstrumentedCompilation();
+  void endInstrumentedCompilation();
 
   void beginCompileInstrumentedModule(const llvm::Module *module);
   void endCompileInstrumentedModule(const llvm::Module *module);
@@ -91,6 +94,7 @@ private:
   MetricsMeasure findTests;
   MetricsMeasure runTime;
   MetricsMeasure reportResult;
+  MetricsMeasure instrumentedCompilation;
 
   std::map<const llvm::Module *, MetricsMeasure> originalModuleCompilation;
   std::map<const llvm::Module *, MetricsMeasure> instrumentedModuleCompilation;
