@@ -135,9 +135,14 @@ public:
       config(config), toolchain(toolchain), filter(filter), driver(driver) {}
 
   void operator() (iterator begin, iterator end, Out &storage) {
+    EngineBuilder builder;
+    auto target = builder.selectTarget(llvm::Triple(), "", "",
+                                       llvm::SmallVector<std::string, 1>());
+    std::unique_ptr<TargetMachine> localMachine(target);
+
     for (auto it = begin; it != end; ++it) {
       auto mutationPoint = *it;
-      errs() << mutationPoint->getUniqueIdentifier() << "\n";
+//      errs() << mutationPoint->getUniqueIdentifier() << "\n";
       auto objectFilesWithMutant = driver.AllButOne(mutationPoint->getOriginalModule()->getModule());
 
       auto mutant = toolchain.cache().getObject(*mutationPoint);
@@ -145,7 +150,7 @@ public:
         LLVMContext localContext;
         auto clonedModule = mutationPoint->getOriginalModule()->clone(localContext);
         mutationPoint->applyMutation(*clonedModule.get());
-        mutant = toolchain.compiler().compileModule(*clonedModule.get());
+        mutant = toolchain.compiler().compileModule(*clonedModule.get(), *localMachine);
         toolchain.cache().putObject(mutant, *mutationPoint);
       }
 

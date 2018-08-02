@@ -18,13 +18,14 @@
 using namespace std::chrono;
 
 static pid_t mullFork(const char *processName) {
-  static int childrenCount = 0;
-  childrenCount++;
+//  static int childrenCount = 0;
+//  childrenCount++;
   const pid_t pid = fork();
   if (pid == -1) {
     mull::Logger::error() << "Failed to create " << processName
-                            << " after creating " << childrenCount
-                            << " child processes\n";
+//                            << " after creating " << childrenCount
+//                            << " child processes\n";
+                          << "\n";
     mull::Logger::error() << strerror(errno) << "\n";
     mull::Logger::error() << "Shutting down\n";
     exit(1);
