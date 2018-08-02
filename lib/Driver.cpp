@@ -74,8 +74,14 @@ public:
                             ProcessSandbox &sandbox,
                             TestRunner &runner,
                             Config &config,
-                            Filter &filter)
-    : instrumentation(instrumentation), sandbox(sandbox), runner(runner), config(config), filter(filter) {}
+                            Filter &filter,
+                            JITEngine &jit)
+    : instrumentation(instrumentation),
+      sandbox(sandbox),
+      runner(runner),
+      config(config),
+      filter(filter),
+      jit(jit) {}
 
   void operator() (iterator begin, iterator end, Out &storage) {
     for (auto it = begin; it != end; ++it) {
@@ -84,7 +90,7 @@ public:
       instrumentation.setupInstrumentationInfo(test.get());
 
       ExecutionResult testExecutionResult = sandbox.run([&]() {
-        return runner.runTest(test.get());
+        return runner.runTest(test.get(), jit);
       }, config.getTimeout());
 
       test->setExecutionResult(testExecutionResult);
@@ -110,6 +116,82 @@ public:
   TestRunner &runner;
   Config &config;
   Filter &filter;
+  JITEngine &jit;
+};
+
+class MutantExecutionTask {
+public:
+  using In = const std::vector<MutationPoint *>;
+  using Out = std::vector<std::unique_ptr<MutationResult>>;
+  using iterator = In::const_iterator;
+
+  MutantExecutionTask(Driver &driver,
+                      ProcessSandbox &sandbox,
+                      TestRunner &runner,
+                      Config &config,
+                      Toolchain &toolchain,
+                      Filter &filter)
+    : sandbox(sandbox), runner(runner),
+      config(config), toolchain(toolchain), filter(filter), driver(driver) {}
+
+  void operator() (iterator begin, iterator end, Out &storage) {
+    for (auto it = begin; it != end; ++it) {
+      auto mutationPoint = *it;
+      errs() << mutationPoint->getUniqueIdentifier() << "\n";
+      auto objectFilesWithMutant = driver.AllButOne(mutationPoint->getOriginalModule()->getModule());
+
+      auto mutant = toolchain.cache().getObject(*mutationPoint);
+      if (mutant.getBinary() == nullptr) {
+        LLVMContext localContext;
+        auto clonedModule = mutationPoint->getOriginalModule()->clone(localContext);
+        mutationPoint->applyMutation(*clonedModule.get());
+        mutant = toolchain.compiler().compileModule(*clonedModule.get());
+        toolchain.cache().putObject(mutant, *mutationPoint);
+      }
+
+      objectFilesWithMutant.push_back(mutant.getBinary());
+
+      runner.loadProgram(objectFilesWithMutant, jit);
+
+      auto atLeastOneTestFailed = false;
+      for (auto &reachableTest : mutationPoint->getReachableTests()) {
+        auto test = reachableTest.first;
+        auto distance = reachableTest.second;
+
+        ExecutionResult result;
+        if (config.failFastModeEnabled() && atLeastOneTestFailed) {
+          result.status = ExecutionStatus::FailFast;
+        } else {
+          const auto timeout = test->getExecutionResult().runningTime * 10;
+          const auto sandboxTimeout = std::max(30LL, timeout);
+
+          result = sandbox.run([&]() {
+            ExecutionStatus status = runner.runTest(test, jit);
+            assert(status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
+            return status;
+          }, sandboxTimeout);
+
+          assert(result.status != ExecutionStatus::Invalid &&
+                 "Expect to see valid TestResult");
+
+          if (result.status != ExecutionStatus::Passed) {
+            atLeastOneTestFailed = true;
+          }
+        }
+
+        storage.push_back(make_unique<MutationResult>(result, mutationPoint, distance, test));
+      }
+
+      objectFilesWithMutant.pop_back();
+    }
+  }
+  JITEngine jit;
+  ProcessSandbox &sandbox;
+  TestRunner &runner;
+  Config &config;
+  Toolchain &toolchain;
+  Filter &filter;
+  Driver &driver;
 };
 
 Driver::~Driver() {
@@ -242,14 +324,16 @@ Driver::findMutationPoints(std::vector<std::unique_ptr<Test>> &tests) {
   auto objectFiles = AllInstrumentedObjectFiles();
   JITEngine jit;
 
+  JITEngine jit;
+
   metrics.beginLoadOriginalProgram();
   runner.loadInstrumentedProgram(objectFiles, instrumentation, jit);
   metrics.endLoadOriginalProgram();
 
-  int workers = 4;
+  int workers = 8;
   std::vector<OriginalTestExecutionTask> tasks;
   for (int i = 0; i < workers; i++) {
-    tasks.emplace_back(instrumentation, *sandbox, runner, config, filter);
+    tasks.emplace_back(instrumentation, *sandbox, runner, config, filter, jit);
   }
 
   metrics.beginOriginalTestExecution();
@@ -361,76 +445,15 @@ std::vector<std::unique_ptr<MutationResult>> Driver::normalRunMutations(const st
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
 
-  const auto mutationsCount = mutationPoints.size();
-  auto mutantIndex = 1;
-
-  JITEngine jit;
-
-  for (auto mutationPoint : mutationPoints) {
-    auto objectFilesWithMutant = AllButOne(mutationPoint->getOriginalModule()->getModule());
-
-    Logger::debug() << "[" << mutantIndex++ << "/" << mutationsCount << "]: "  << mutationPoint->getUniqueIdentifier() << "\n";
-
-    metrics.beginCompileMutant(mutationPoint);
-    auto mutant = toolchain.cache().getObject(*mutationPoint);
-    if (mutant.getBinary() == nullptr) {
-      LLVMContext localContext;
-      auto clonedModule = mutationPoint->getOriginalModule()->clone(localContext);
-      mutationPoint->applyMutation(*clonedModule.get());
-      mutant = toolchain.compiler().compileModule(*clonedModule, toolchain.targetMachine());
-      toolchain.cache().putObject(mutant, *mutationPoint);
-    }
-    metrics.endCompileMutant(mutationPoint);
-
-    objectFilesWithMutant.push_back(mutant.getBinary());
-
-    metrics.beginLoadMutatedProgram(mutationPoint);
-    runner.loadProgram(objectFilesWithMutant, jit);
-    metrics.endLoadMutatedProgram(mutationPoint);
-
-    auto testsCount = mutationPoint->getReachableTests().size();
-    auto testIndex = 1;
-
-    auto atLeastOneTestFailed = false;
-    for (auto &reachableTest : mutationPoint->getReachableTests()) {
-      auto test = reachableTest.first;
-      auto distance = reachableTest.second;
-
-      Logger::debug().indent(2) << "[" << testIndex++ << "/" << testsCount << "] " << test->getTestDisplayName() << ": ";
-
-      metrics.beginRunMutant(mutationPoint, test);
-
-      ExecutionResult result;
-      if (config.failFastModeEnabled() && atLeastOneTestFailed) {
-        result.status = ExecutionStatus::FailFast;
-      } else {
-        const auto timeout = test->getExecutionResult().runningTime * 10;
-        const auto sandboxTimeout = std::max(30LL, timeout);
-
-        result = sandbox->run([&]() {
-          ExecutionStatus status = runner.runTest(test, jit);
-          assert(status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
-          return status;
-        }, sandboxTimeout);
-
-        assert(result.status != ExecutionStatus::Invalid &&
-               "Expect to see valid TestResult");
-
-        if (result.status != ExecutionStatus::Passed) {
-          atLeastOneTestFailed = true;
-        }
-      }
-      metrics.endRunMutant(mutationPoint, test);
-
-      Logger::debug() << result.getStatusAsString() << "\n";
-
-      mutationResults.push_back(make_unique<MutationResult>(result, mutationPoint, distance, test));
-    }
-
-    diagnostics->report(mutationPoint, atLeastOneTestFailed);
-
-    objectFilesWithMutant.pop_back();
+  std::vector<MutantExecutionTask> tasks;
+  int workers = 4;
+  for (int i = 0; i < workers; i++) {
+    tasks.emplace_back(*this, *sandbox, runner, config, toolchain, filter);
   }
+  metrics.beginMutantsExecution();
+  TaskExecutor<MutantExecutionTask> mutantRunner(mutationPoints, mutationResults, std::move(tasks));
+  mutantRunner.execute();
+  metrics.endMutantsExecution();
 
   return mutationResults;
 }

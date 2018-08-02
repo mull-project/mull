@@ -33,8 +33,11 @@ public:
   GoogleTestRunner(llvm::TargetMachine &machine);
   ~GoogleTestRunner();
 
+  void loadInstrumentedProgram(ObjectFiles &objectFiles, Instrumentation &instrumentation) override;
   void loadInstrumentedProgram(ObjectFiles &objectFiles, Instrumentation &instrumentation, JITEngine &jit) override;
+  void loadProgram(ObjectFiles &objectFiles) override;
   void loadProgram(ObjectFiles &objectFiles, JITEngine &jit) override;
+  ExecutionStatus runTest(Test *test) override;
   ExecutionStatus runTest(Test *test, JITEngine &jit) override;
 
 private:
