@@ -258,7 +258,7 @@ void Driver::compileInstrumentedBitcodeFiles() {
     instrumentation.recordFunctions(module.getModule());
   }
 
-  int workers = 1;
+  int workers = std::thread::hardware_concurrency();
   std::vector<CompilerTask> tasks;
   for (int i = 0; i < workers; i++) {
     tasks.emplace_back(instrumentation, toolchain);
@@ -335,7 +335,7 @@ Driver::findMutationPoints(std::vector<std::unique_ptr<Test>> &tests) {
   runner.loadInstrumentedProgram(objectFiles, instrumentation, jit);
   metrics.endLoadOriginalProgram();
 
-  int workers = 8;
+  int workers = std::thread::hardware_concurrency();
   std::vector<OriginalTestExecutionTask> tasks;
   for (int i = 0; i < workers; i++) {
     tasks.emplace_back(instrumentation, *sandbox, runner, config, filter, jit);
@@ -451,7 +451,7 @@ std::vector<std::unique_ptr<MutationResult>> Driver::normalRunMutations(const st
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
 
   std::vector<MutantExecutionTask> tasks;
-  int workers = 4;
+  int workers = std::thread::hardware_concurrency();
   for (int i = 0; i < workers; i++) {
     tasks.emplace_back(*this, *sandbox, runner, config, toolchain, filter);
   }

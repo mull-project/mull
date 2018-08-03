@@ -72,7 +72,7 @@ std::vector<std::unique_ptr<MullModule>>
 ModuleLoader::loadModulesFromBitcodeFileList(const std::vector<std::string> &bitcodeFileList) {
   std::vector<std::unique_ptr<MullModule>> modules;
 
-  int workers = 8;
+  int workers = std::thread::hardware_concurrency();
   std::vector<ModuleLoaderTask> tasks;
   for (int i = 0; i < workers; i++) {
     auto context = llvm::make_unique<LLVMContext>();
