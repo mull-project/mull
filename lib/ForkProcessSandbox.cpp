@@ -64,7 +64,7 @@ void handle_alarm_signal(int signal, siginfo_t *info, void *context) {
 }
 
 void handle_timeout(long long timeoutMilliseconds) {
-  struct sigaction action{};
+  struct sigaction action;
   memset(&action, 0, sizeof(action));
   action.sa_sigaction = &handle_alarm_signal;
   if (sigaction(SIGALRM, &action, nullptr) != 0) {
@@ -72,7 +72,7 @@ void handle_timeout(long long timeoutMilliseconds) {
     abort();
   }
 
-  struct itimerval timer{};
+  struct itimerval timer;
   timer.it_value.tv_sec = timeoutMilliseconds / 1000;
   /// Cut off seconds, and convert what's left into microseconds
   timer.it_value.tv_usec = (timeoutMilliseconds % 1000) * 1000;

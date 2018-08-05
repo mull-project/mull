@@ -3,6 +3,7 @@
 #include "MullModule.h"
 
 #include <string>
+#include <utility>
 
 using namespace llvm;
 using namespace mull;
@@ -71,7 +72,8 @@ class FakeModuleLoader : public mull::ModuleLoader {
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules;
 
 public:
-  FakeModuleLoader(LLVMContext &context, std::function<std::vector<std::unique_ptr<MullModule>> ()> modules) : ModuleLoader(context), modules(modules) {}
+  FakeModuleLoader(LLVMContext &context, std::function<std::vector<std::unique_ptr<MullModule>> ()> modules) : ModuleLoader(), modules(
+    std::move(modules)) {}
 
   std::vector<std::unique_ptr<MullModule>>
   loadModulesFromBitcodeFileList(const std::vector<std::string> &paths) override {

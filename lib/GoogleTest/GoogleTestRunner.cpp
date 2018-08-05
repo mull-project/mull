@@ -67,11 +67,6 @@ void GoogleTestRunner::runStaticConstructor(llvm::Function *constructor,
 }
 
 void GoogleTestRunner::loadInstrumentedProgram(ObjectFiles &objectFiles,
-                                               Instrumentation &instrumentation) {
-  loadInstrumentedProgram(objectFiles, instrumentation, jit);
-}
-
-void GoogleTestRunner::loadInstrumentedProgram(ObjectFiles &objectFiles,
                                                Instrumentation &instrumentation,
                                                JITEngine &jit) {
   InstrumentationResolver resolver(overrides, instrumentation, mangler, trampoline);
@@ -81,10 +76,6 @@ void GoogleTestRunner::loadInstrumentedProgram(ObjectFiles &objectFiles,
 void GoogleTestRunner::loadProgram(ObjectFiles &objectFiles, JITEngine &jit) {
   NativeResolver resolver(overrides);
   jit.addObjectFiles(objectFiles, resolver, make_unique<SectionMemoryManager>());
-}
-
-void GoogleTestRunner::loadProgram(ObjectFiles &objectFiles) {
-  loadProgram(objectFiles, jit);
 }
 
 ExecutionStatus GoogleTestRunner::runTest(Test *test, JITEngine &jit) {
@@ -137,8 +128,4 @@ ExecutionStatus GoogleTestRunner::runTest(Test *test, JITEngine &jit) {
     return ExecutionStatus::Passed;
   }
   return ExecutionStatus::Failed;
-}
-
-ExecutionStatus GoogleTestRunner::runTest(Test *test) {
-  return runTest(test, jit);
 }

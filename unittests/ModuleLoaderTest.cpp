@@ -16,7 +16,7 @@ static TestModuleFactory testModuleFactory;
 TEST(ModuleLoaderTest, loadModuleFromBitcodeListFile) {
   llvm::LLVMContext context;
 
-  ModuleLoader loader(context);
+  ModuleLoader loader;
 
   std::string bitcodeFile = testModuleFactory.testerModulePath_Bitcode();
 

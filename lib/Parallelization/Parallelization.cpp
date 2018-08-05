@@ -2,6 +2,8 @@
 
 namespace mull {
 std::vector<int> taskBatches(size_t itemsCount, size_t tasks) {
+  assert(itemsCount >= tasks);
+
   std::vector<int> result;
 
   int n = itemsCount;

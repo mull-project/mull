@@ -119,6 +119,12 @@ public:
   JITEngine &jit;
 };
 
+static MetricsMeasure::Precision currentTimestamp() {
+  using namespace std::chrono;
+  using clock = system_clock;
+  return duration_cast<MetricsMeasure::Precision>(clock::now().time_since_epoch());
+}
+
 class MutantExecutionTask {
 public:
   using In = const std::vector<MutationPoint *>;
@@ -135,6 +141,12 @@ public:
       config(config), toolchain(toolchain), filter(filter), driver(driver) {}
 
   void operator() (iterator begin, iterator end, Out &storage) {
+    MetricsMeasure measure;
+    measure.begin = currentTimestamp();
+
+    std::vector<MetricsMeasure> compilations;
+
+
     EngineBuilder builder;
     auto target = builder.selectTarget(llvm::Triple(), "", "",
                                        llvm::SmallVector<std::string, 1>());
@@ -142,7 +154,6 @@ public:
 
     for (auto it = begin; it != end; ++it) {
       auto mutationPoint = *it;
-//      errs() << mutationPoint->getUniqueIdentifier() << "\n";
       auto objectFilesWithMutant = driver.AllButOne(mutationPoint->getOriginalModule()->getModule());
 
       auto mutant = toolchain.cache().getObject(*mutationPoint);
@@ -189,6 +200,8 @@ public:
 
       objectFilesWithMutant.pop_back();
     }
+    measure.end = currentTimestamp();
+    errs() << "Thread Finished: " << measure.duration() << MetricsMeasure::precision() << "\n";
   }
   JITEngine jit;
   ProcessSandbox &sandbox;
