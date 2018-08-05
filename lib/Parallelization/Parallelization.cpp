@@ -1,5 +1,7 @@
 #include "Parallelization.h"
 
+#include <assert.h>
+
 namespace mull {
 std::vector<int> taskBatches(size_t itemsCount, size_t tasks) {
   assert(itemsCount >= tasks);
