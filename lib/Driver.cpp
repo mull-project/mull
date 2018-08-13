@@ -31,16 +31,16 @@ using namespace llvm::object;
 using namespace mull;
 using namespace std;
 
-class CompilerTask {
+class InstrumentedCompilationTask {
 public:
   using In = std::vector<std::unique_ptr<MullModule>>;
   using Out = std::vector<object::OwningBinary<object::ObjectFile>>;
   using iterator = In::const_iterator;
 
-  CompilerTask(Instrumentation &instrumentation, Toolchain &toolchain)
+  InstrumentedCompilationTask(Instrumentation &instrumentation, Toolchain &toolchain)
     : instrumentation(instrumentation), toolchain(toolchain) {}
 
-  void operator() (iterator begin, iterator end, Out &storage) {
+  void operator() (iterator begin, iterator end, Out &storage, progress_counter &counter) {
     EngineBuilder builder;
     auto target = builder.selectTarget(llvm::Triple(), "", "",
                                        llvm::SmallVector<std::string, 1>());
@@ -58,9 +58,42 @@ public:
         toolchain.cache().putInstrumentedObject(objectFile, module);
       }
       storage.push_back(std::move(objectFile));
+      counter.increment();
     }
   }
   Instrumentation &instrumentation;
+  Toolchain &toolchain;
+};
+
+class MutantCompilationTask {
+public:
+  using In = std::vector<std::unique_ptr<MullModule>>;
+  using Out = std::vector<object::OwningBinary<object::ObjectFile>>;
+  using iterator = In::const_iterator;
+
+  MutantCompilationTask(Toolchain &toolchain) : toolchain(toolchain) {}
+
+  void operator() (iterator begin, iterator end, Out &storage, progress_counter &counter) {
+    EngineBuilder builder;
+    auto target = builder.selectTarget(llvm::Triple(), "", "",
+                                       llvm::SmallVector<std::string, 1>());
+    std::unique_ptr<TargetMachine> localMachine(target);
+
+    for (auto it = begin; it != end; it++) {
+      auto &module = *it->get();
+
+      auto objectFile = toolchain.cache().getObject(module);
+      if (objectFile.getBinary() == nullptr) {
+        LLVMContext localContext;
+        auto clonedModule = module.clone(localContext);
+        objectFile = toolchain.compiler().compileModule(*clonedModule.get());
+        toolchain.cache().putObject(objectFile, module);
+      }
+
+      storage.push_back(std::move(objectFile));
+      counter.increment();
+    }
+  }
   Toolchain &toolchain;
 };
 
@@ -83,8 +116,8 @@ public:
       filter(filter),
       jit(jit) {}
 
-  void operator() (iterator begin, iterator end, Out &storage) {
-    for (auto it = begin; it != end; ++it) {
+  void operator() (iterator begin, iterator end, Out &storage, progress_counter &counter) {
+    for (auto it = begin; it != end; ++it, counter.increment()) {
       auto &test = *it;
 
       instrumentation.setupInstrumentationInfo(test.get());
@@ -119,12 +152,6 @@ public:
   JITEngine &jit;
 };
 
-static MetricsMeasure::Precision currentTimestamp() {
-  using namespace std::chrono;
-  using clock = system_clock;
-  return duration_cast<MetricsMeasure::Precision>(clock::now().time_since_epoch());
-}
-
 class MutantExecutionTask {
 public:
   using In = const std::vector<MutationPoint *>;
@@ -140,19 +167,13 @@ public:
     : sandbox(sandbox), runner(runner),
       config(config), toolchain(toolchain), filter(filter), driver(driver) {}
 
-  void operator() (iterator begin, iterator end, Out &storage) {
-    MetricsMeasure measure;
-    measure.begin = currentTimestamp();
-
-    std::vector<MetricsMeasure> compilations;
-
-
+  void operator() (iterator begin, iterator end, Out &storage, progress_counter &counter) {
     EngineBuilder builder;
     auto target = builder.selectTarget(llvm::Triple(), "", "",
                                        llvm::SmallVector<std::string, 1>());
     std::unique_ptr<TargetMachine> localMachine(target);
 
-    for (auto it = begin; it != end; ++it) {
+    for (auto it = begin; it != end; ++it, counter.increment()) {
       auto mutationPoint = *it;
       auto objectFilesWithMutant = driver.AllButOne(mutationPoint->getOriginalModule()->getModule());
 
@@ -200,8 +221,7 @@ public:
 
       objectFilesWithMutant.pop_back();
     }
-    measure.end = currentTimestamp();
-    errs() << "Thread Finished: " << measure.duration() << MetricsMeasure::precision() << "\n";
+
   }
   JITEngine jit;
   ProcessSandbox &sandbox;
@@ -272,14 +292,15 @@ void Driver::compileInstrumentedBitcodeFiles() {
   }
 
   int workers = std::thread::hardware_concurrency();
-  std::vector<CompilerTask> tasks;
+  std::vector<InstrumentedCompilationTask> tasks;
   for (int i = 0; i < workers; i++) {
     tasks.emplace_back(instrumentation, toolchain);
   }
 
-  TaskExecutor<CompilerTask> compiler(context.getModules(),
-                                      instrumentedObjectFiles,
-                                      tasks);
+  TaskExecutor<InstrumentedCompilationTask> compiler("Compiling instrumented code",
+                                                     context.getModules(),
+                                                     instrumentedObjectFiles,
+                                                     tasks);
   compiler.execute();
 
   metrics.endInstrumentedCompilation();
@@ -356,7 +377,7 @@ Driver::findMutationPoints(std::vector<std::unique_ptr<Test>> &tests) {
 
   metrics.beginOriginalTestExecution();
   std::vector<std::unique_ptr<Testee>> testees;
-  TaskExecutor<OriginalTestExecutionTask> testRunner(tests, testees, tasks);
+  TaskExecutor<OriginalTestExecutionTask> testRunner("Running original tests", tests, testees, tasks);
   testRunner.execute();
   metrics.endOriginalTestExecution();
 
@@ -446,19 +467,18 @@ Driver::dryRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
 }
 
 std::vector<std::unique_ptr<MutationResult>> Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
-  for (auto &module : context.getModules()) {
-    metrics.beginCompileOriginalModule(module->getModule());
-    auto objectFile = toolchain.cache().getObject(*module);
-    if (objectFile.getBinary() == nullptr) {
-      LLVMContext localContext;
-      auto clonedModule = module->clone(localContext);
-      objectFile = toolchain.compiler().compileModule(*clonedModule, toolchain.targetMachine());
-      toolchain.cache().putObject(objectFile, *module);
-    }
+  std::vector<MutantCompilationTask> compilationTasks;
+  int compilationWorkers = std::thread::hardware_concurrency();
+  for (int i = 0; i < compilationWorkers; i++) {
+    compilationTasks.emplace_back(toolchain);
+  }
+  TaskExecutor<MutantCompilationTask> mutantCompiler("Compiling original code", context.getModules(), ownedObjectFiles, std::move(compilationTasks));
+  mutantCompiler.execute();
 
+  for (size_t i = 0; i < ownedObjectFiles.size(); i++) {
+    auto &module = context.getModules().at(i);
+    auto &objectFile = ownedObjectFiles.at(i);
     innerCache.insert(std::make_pair(module->getModule(), objectFile.getBinary()));
-    ownedObjectFiles.push_back(std::move(objectFile));
-    metrics.endCompileOriginalModule(module->getModule());
   }
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
@@ -469,7 +489,7 @@ std::vector<std::unique_ptr<MutationResult>> Driver::normalRunMutations(const st
     tasks.emplace_back(*this, *sandbox, runner, config, toolchain, filter);
   }
   metrics.beginMutantsExecution();
-  TaskExecutor<MutantExecutionTask> mutantRunner(mutationPoints, mutationResults, std::move(tasks));
+  TaskExecutor<MutantExecutionTask> mutantRunner("Running mutants", mutationPoints, mutationResults, std::move(tasks));
   mutantRunner.execute();
   metrics.endMutantsExecution();
 

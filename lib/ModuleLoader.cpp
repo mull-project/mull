@@ -25,12 +25,13 @@ public:
   using iterator = In::const_iterator;
   ModuleLoaderTask(LLVMContext &context, ModuleLoader &loader)
     : context(context), loader(loader) {}
-  void operator() (iterator begin, iterator end, Out &storage) {
+  void operator() (iterator begin, iterator end, Out &storage, progress_counter &counter) {
     for (auto it = begin; it != end; ++it) {
       auto module = loader.loadModuleAtPath(*it, context);
       if (module != nullptr) {
         storage.push_back(std::move(module));
       }
+      counter.increment();
     }
   }
   LLVMContext &context;
@@ -80,7 +81,7 @@ ModuleLoader::loadModulesFromBitcodeFileList(const std::vector<std::string> &bit
     contexts.push_back(std::move(context));
   }
 
-  TaskExecutor<ModuleLoaderTask> loader(bitcodeFileList, modules, tasks);
+  TaskExecutor<ModuleLoaderTask> loader("Loading bitcode", bitcodeFileList, modules, tasks);
   loader.execute();
 
   return modules;
