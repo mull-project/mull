@@ -70,7 +70,7 @@ public:
   using Out = std::vector<object::OwningBinary<object::ObjectFile>>;
   using iterator = In::const_iterator;
 
-  MutantCompilationTask(Toolchain &toolchain) : toolchain(toolchain) {}
+  explicit MutantCompilationTask(Toolchain &toolchain) : toolchain(toolchain) {}
 
   void operator() (iterator begin, iterator end, Out &storage, progress_counter &counter) {
     EngineBuilder builder;
@@ -85,7 +85,7 @@ public:
       if (objectFile.getBinary() == nullptr) {
         LLVMContext localContext;
         auto clonedModule = module.clone(localContext);
-        objectFile = toolchain.compiler().compileModule(*clonedModule.get());
+        objectFile = toolchain.compiler().compileModule(*clonedModule, *localMachine);
         toolchain.cache().putObject(objectFile, module);
       }
 
