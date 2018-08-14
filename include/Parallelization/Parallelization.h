@@ -9,3 +9,4 @@
 #include "Parallelization/Tasks/OriginalTestExecutionTask.h"
 #include "Parallelization/Tasks/MutantExecutionTask.h"
 #include "Parallelization/Tasks/ModuleLoadingTask.h"
+#include "Parallelization/Tasks/LoadObjectFilesTask.h"

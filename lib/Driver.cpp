@@ -107,29 +107,18 @@ void Driver::compileInstrumentedBitcodeFiles() {
 
 void Driver::loadPrecompiledObjectFiles() {
   metrics.beginLoadPrecompiledObjectFiles();
-  for (std::string &objectFilePath: config.getObjectFilesPaths()) {
-    ErrorOr<std::unique_ptr<MemoryBuffer>> buffer =
-    MemoryBuffer::getFile(objectFilePath);
 
-    if (!buffer) {
-      Logger::error() << "Cannot load object file: " << objectFilePath << "\n";
-      continue;
-    }
-
-    Expected<std::unique_ptr<ObjectFile>> objectOrError =
-    ObjectFile::createObjectFile(buffer.get()->getMemBufferRef());
-
-    if (!objectOrError) {
-      Logger::error() << "Cannot create object file: " << objectFilePath << "\n";
-      continue;
-    }
-
-    std::unique_ptr<ObjectFile> objectFile(std::move(objectOrError.get()));
-
-    auto owningObject = OwningBinary<ObjectFile>(std::move(objectFile),
-                                                 std::move(buffer.get()));
-    precompiledObjectFiles.push_back(std::move(owningObject));
+  int workers = std::thread::hardware_concurrency();
+  std::vector<LoadObjectFilesTask> tasks;
+  for (int i = 0; i < workers; i++) {
+    tasks.emplace_back(LoadObjectFilesTask());
   }
+
+  TaskExecutor<LoadObjectFilesTask> loader("Loading precompiled object files",
+                                           config.getObjectFilesPaths(),
+                                           precompiledObjectFiles,
+                                           tasks);
+  loader.execute();
   metrics.endLoadPrecompiledObjectFiles();
 }
 
