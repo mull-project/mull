@@ -343,12 +343,12 @@ Driver::dryRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
 }
 
 std::vector<std::unique_ptr<MutationResult>> Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
-  std::vector<MutantCompilationTask> compilationTasks;
+  std::vector<OriginalCompilationTask> compilationTasks;
   int compilationWorkers = std::thread::hardware_concurrency();
   for (int i = 0; i < compilationWorkers; i++) {
     compilationTasks.emplace_back(toolchain);
   }
-  TaskExecutor<MutantCompilationTask> mutantCompiler("Compiling original code", context.getModules(), ownedObjectFiles, std::move(compilationTasks));
+  TaskExecutor<OriginalCompilationTask> mutantCompiler("Compiling original code", context.getModules(), ownedObjectFiles, std::move(compilationTasks));
   mutantCompiler.execute();
 
   for (size_t i = 0; i < ownedObjectFiles.size(); i++) {

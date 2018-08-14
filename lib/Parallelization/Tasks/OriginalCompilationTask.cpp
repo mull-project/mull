@@ -8,11 +8,11 @@
 using namespace mull;
 using namespace llvm;
 
-MutantCompilationTask::MutantCompilationTask(Toolchain &toolchain) : toolchain(toolchain) {}
+OriginalCompilationTask::OriginalCompilationTask(Toolchain &toolchain) : toolchain(toolchain) {}
 
-void mull::MutantCompilationTask::operator()(mull::MutantCompilationTask::iterator begin,
-                                             mull::MutantCompilationTask::iterator end,
-                                             mull::MutantCompilationTask::Out &storage,
+void mull::OriginalCompilationTask::operator()(mull::OriginalCompilationTask::iterator begin,
+                                             mull::OriginalCompilationTask::iterator end,
+                                             mull::OriginalCompilationTask::Out &storage,
                                              progress_counter &counter) {
   EngineBuilder builder;
   auto target = builder.selectTarget(llvm::Triple(), "", "",

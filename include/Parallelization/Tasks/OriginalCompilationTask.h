@@ -9,13 +9,13 @@ namespace mull {
 class Toolchain;
 class progress_counter;
 
-class MutantCompilationTask {
+class OriginalCompilationTask {
 public:
   using In = std::vector<std::unique_ptr<MullModule>>;
   using Out = std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>>;
   using iterator = In::const_iterator;
 
-  explicit MutantCompilationTask(Toolchain &toolchain);
+  explicit OriginalCompilationTask(Toolchain &toolchain);
 
   void operator() (iterator begin, iterator end, Out &storage, progress_counter &counter);
   Toolchain &toolchain;
