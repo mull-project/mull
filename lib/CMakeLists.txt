@@ -65,6 +65,7 @@ set(mull_sources
   Parallelization/Progress.cpp
   Parallelization/TaskExecutor.cpp
   Parallelization/Tasks/ModuleLoadingTask.cpp
+  Parallelization/Tasks/InstrumentedCompilationTask.cpp
 )
 
 set(mull_header_dirs

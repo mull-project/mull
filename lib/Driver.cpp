@@ -31,39 +31,6 @@ using namespace llvm::object;
 using namespace mull;
 using namespace std;
 
-class InstrumentedCompilationTask {
-public:
-  using In = std::vector<std::unique_ptr<MullModule>>;
-  using Out = std::vector<object::OwningBinary<object::ObjectFile>>;
-  using iterator = In::const_iterator;
-
-  InstrumentedCompilationTask(Instrumentation &instrumentation, Toolchain &toolchain)
-    : instrumentation(instrumentation), toolchain(toolchain) {}
-
-  void operator() (iterator begin, iterator end, Out &storage, progress_counter &counter) {
-    EngineBuilder builder;
-    auto target = builder.selectTarget(llvm::Triple(), "", "",
-                                       llvm::SmallVector<std::string, 1>());
-    std::unique_ptr<TargetMachine> localMachine(target);
-
-    for (auto it = begin; it != end; it++, counter.increment()) {
-      auto &module = *it->get();
-      auto objectFile = toolchain.cache().getInstrumentedObject(module);
-      if (objectFile.getBinary() == nullptr) {
-        LLVMContext instrumentationContext;
-        auto clonedModule = module.clone(instrumentationContext);
-
-        instrumentation.insertCallbacks(clonedModule->getModule());
-        objectFile = toolchain.compiler().compileModule(*clonedModule, *localMachine);
-        toolchain.cache().putInstrumentedObject(objectFile, module);
-      }
-      storage.push_back(std::move(objectFile));
-    }
-  }
-  Instrumentation &instrumentation;
-  Toolchain &toolchain;
-};
-
 class MutantCompilationTask {
 public:
   using In = std::vector<std::unique_ptr<MullModule>>;
