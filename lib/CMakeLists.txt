@@ -67,6 +67,7 @@ set(mull_sources
   Parallelization/Tasks/ModuleLoadingTask.cpp
   Parallelization/Tasks/InstrumentedCompilationTask.cpp
   Parallelization/Tasks/OriginalCompilationTask.cpp
+  Parallelization/Tasks/OriginalTestExecutionTask.cpp
 )
 
 set(mull_header_dirs

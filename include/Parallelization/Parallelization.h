@@ -6,4 +6,5 @@
 
 #include "Parallelization/Tasks/InstrumentedCompilationTask.h"
 #include "Parallelization/Tasks/OriginalCompilationTask.h"
+#include "Parallelization/Tasks/OriginalTestExecutionTask.h"
 
