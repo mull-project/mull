@@ -46,7 +46,7 @@ public:
                                        llvm::SmallVector<std::string, 1>());
     std::unique_ptr<TargetMachine> localMachine(target);
 
-    for (auto it = begin; it != end; it++) {
+    for (auto it = begin; it != end; it++, counter.increment()) {
       auto &module = *it->get();
       auto objectFile = toolchain.cache().getInstrumentedObject(module);
       if (objectFile.getBinary() == nullptr) {
@@ -58,7 +58,6 @@ public:
         toolchain.cache().putInstrumentedObject(objectFile, module);
       }
       storage.push_back(std::move(objectFile));
-      counter.increment();
     }
   }
   Instrumentation &instrumentation;
@@ -79,7 +78,7 @@ public:
                                        llvm::SmallVector<std::string, 1>());
     std::unique_ptr<TargetMachine> localMachine(target);
 
-    for (auto it = begin; it != end; it++) {
+    for (auto it = begin; it != end; it++, counter.increment()) {
       auto &module = *it->get();
 
       auto objectFile = toolchain.cache().getObject(module);
@@ -91,7 +90,6 @@ public:
       }
 
       storage.push_back(std::move(objectFile));
-      counter.increment();
     }
   }
   Toolchain &toolchain;
@@ -218,10 +216,7 @@ public:
 
         storage.push_back(make_unique<MutationResult>(result, mutationPoint, distance, test));
       }
-
-      objectFilesWithMutant.pop_back();
     }
-
   }
   JITEngine jit;
   ProcessSandbox &sandbox;
