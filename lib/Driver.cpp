@@ -31,37 +31,6 @@ using namespace llvm::object;
 using namespace mull;
 using namespace std;
 
-class MutantCompilationTask {
-public:
-  using In = std::vector<std::unique_ptr<MullModule>>;
-  using Out = std::vector<object::OwningBinary<object::ObjectFile>>;
-  using iterator = In::const_iterator;
-
-  explicit MutantCompilationTask(Toolchain &toolchain) : toolchain(toolchain) {}
-
-  void operator() (iterator begin, iterator end, Out &storage, progress_counter &counter) {
-    EngineBuilder builder;
-    auto target = builder.selectTarget(llvm::Triple(), "", "",
-                                       llvm::SmallVector<std::string, 1>());
-    std::unique_ptr<TargetMachine> localMachine(target);
-
-    for (auto it = begin; it != end; it++, counter.increment()) {
-      auto &module = *it->get();
-
-      auto objectFile = toolchain.cache().getObject(module);
-      if (objectFile.getBinary() == nullptr) {
-        LLVMContext localContext;
-        auto clonedModule = module.clone(localContext);
-        objectFile = toolchain.compiler().compileModule(*clonedModule, *localMachine);
-        toolchain.cache().putObject(objectFile, module);
-      }
-
-      storage.push_back(std::move(objectFile));
-    }
-  }
-  Toolchain &toolchain;
-};
-
 class OriginalTestExecutionTask {
 public:
   using In = std::vector<std::unique_ptr<Test>>;

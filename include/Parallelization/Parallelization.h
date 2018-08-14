@@ -5,4 +5,5 @@
 #include "Parallelization/TaskExecutor.h"
 
 #include "Parallelization/Tasks/InstrumentedCompilationTask.h"
+#include "Parallelization/Tasks/OriginalCompilationTask.h"
 
