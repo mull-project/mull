@@ -70,6 +70,7 @@ set(mull_sources
   Parallelization/Tasks/OriginalTestExecutionTask.cpp
   Parallelization/Tasks/LoadObjectFilesTask.cpp
   Parallelization/Tasks/MutantExecutionTask.cpp
+  Parallelization/Tasks/SearchMutationPointsTask.cpp
 )
 
 set(mull_header_dirs

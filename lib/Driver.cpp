@@ -134,9 +134,6 @@ std::vector<std::unique_ptr<Test>> Driver::findTests() {
   metrics.beginFindTests();
   auto tests = finder.findTests(context, filter);
   metrics.endFindTests();
-
-  Logger::debug() << "Found " << tests.size() << " tests\n";
-
   return tests;
 }
 
@@ -145,8 +142,6 @@ Driver::findMutationPoints(std::vector<std::unique_ptr<Test>> &tests) {
   if (tests.empty()) {
     return std::vector<MutationPoint *>();
   }
-
-  Logger::debug() << "Running tests and searching mutations\n";
 
   auto objectFiles = AllInstrumentedObjectFiles();
   JITEngine jit;
@@ -169,10 +164,14 @@ Driver::findMutationPoints(std::vector<std::unique_ptr<Test>> &tests) {
   testRunner.execute();
   metrics.endOriginalTestExecution();
 
-  for (auto &testee : testees) {
-    auto points = mutationsFinder.getMutationPoints(context, *testee, filter);
-    std::copy(points.begin(), points.end(), std::back_inserter(mutationPoints));
-  }
+  auto mergedTestees = mergeTestees(testees);
+  std::vector<MutationPoint *> mutationPoints = mutationsFinder.getMutationPoints(context, mergedTestees, filter);
+
+//
+//  for (auto &testee : testees) {
+//    auto points = mutationsFinder.getMutationPoints(context, *testee, filter);
+//    std::copy(points.begin(), points.end(), std::back_inserter(mutationPoints));
+//  }
 
   auto mergedTestees = mergeTestees(allTestees);
   std::vector<MutationPoint *> mutationPoints = mutationsFinder.getMutationPoints(context, mergedTestees, filter);
@@ -181,8 +180,6 @@ Driver::findMutationPoints(std::vector<std::unique_ptr<Test>> &tests) {
     /// Cleans up the memory allocated for the vector itself as well
     std::vector<OwningBinary<ObjectFile>>().swap(instrumentedObjectFiles);
   }
-
-  Logger::debug() << "Found " << mutationPoints.size() << " mutations\n";
 
   return mutationPoints;
 }
