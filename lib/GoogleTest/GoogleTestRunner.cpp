@@ -34,53 +34,57 @@ GoogleTestRunner::~GoogleTestRunner() {
   delete trampoline;
 }
 
-void *GoogleTestRunner::GetCtorPointer(const llvm::Function &Function) {
-  return
-    getFunctionPointer(mangler.getNameWithPrefix(Function.getName().str()));
+void *GoogleTestRunner::getConstructorPointer(const llvm::Function &function,
+                                              JITEngine &jit) {
+  auto name = mangler.getNameWithPrefix(function.getName().str());
+  return getFunctionPointer(name, jit);
 }
 
-void *GoogleTestRunner::getFunctionPointer(const std::string &functionName) {
+void *GoogleTestRunner::getFunctionPointer(const std::string &functionName,
+                                           JITEngine &jit) {
   JITSymbol &symbol = jit.getSymbol(functionName);
+  auto address = llvm_compat::JITSymbolAddress(symbol);
 
-  void *fpointer =
-    reinterpret_cast<void *>(static_cast<uintptr_t>(llvm_compat::JITSymbolAddress(symbol)));
+  void *pointer = reinterpret_cast<void *>(static_cast<uintptr_t>(address));
 
-  if (fpointer == nullptr) {
+  if (pointer == nullptr) {
     errs() << "GoogleTestRunner> Can't find pointer to function: "
            << functionName << "\n";
     exit(1);
   }
 
-  return fpointer;
+  return pointer;
 }
 
-void GoogleTestRunner::runStaticCtor(llvm::Function *Ctor) {
+void GoogleTestRunner::runStaticConstructor(llvm::Function *constructor,
+                                            JITEngine &jit) {
 //  printf("Init: %s\n", Ctor->getName().str().c_str());
 
-  void *CtorPointer = GetCtorPointer(*Ctor);
+  void *CtorPointer = getConstructorPointer(*constructor, jit);
 
   auto ctor = ((int (*)())(intptr_t)CtorPointer);
   ctor();
 }
 
 void GoogleTestRunner::loadInstrumentedProgram(ObjectFiles &objectFiles,
-                                               Instrumentation &instrumentation) {
+                                               Instrumentation &instrumentation,
+                                               JITEngine &jit) {
   InstrumentationResolver resolver(overrides, instrumentation, mangler, trampoline);
   jit.addObjectFiles(objectFiles, resolver, make_unique<SectionMemoryManager>());
 }
 
-void GoogleTestRunner::loadProgram(ObjectFiles &objectFiles) {
+void GoogleTestRunner::loadProgram(ObjectFiles &objectFiles, JITEngine &jit) {
   NativeResolver resolver(overrides);
   jit.addObjectFiles(objectFiles, resolver, make_unique<SectionMemoryManager>());
 }
 
-ExecutionStatus GoogleTestRunner::runTest(Test *test) {
+ExecutionStatus GoogleTestRunner::runTest(Test *test, JITEngine &jit) {
   *trampoline = &test->getInstrumentationInfo();
 
   GoogleTest_Test *GTest = dyn_cast<GoogleTest_Test>(test);
 
   for (auto &Ctor: GTest->GetGlobalCtors()) {
-    runStaticCtor(Ctor);
+    runStaticConstructor(Ctor, jit);
   }
 
   std::string filter = "--gtest_filter=" + GTest->getTestName();
@@ -103,17 +107,17 @@ ExecutionStatus GoogleTestRunner::runTest(Test *test) {
   /// version of the driver (LLVM itself has one).
   ///
 
-  void *initGTestPtr = getFunctionPointer(fGoogleTestInit);
+  void *initGTestPtr = getFunctionPointer(fGoogleTestInit, jit);
 
   auto initGTest = ((void (*)(int *, const char**))(intptr_t)initGTestPtr);
   initGTest(&argc, argv);
 
-  void *getInstancePtr = getFunctionPointer(fGoogleTestInstance);
+  void *getInstancePtr = getFunctionPointer(fGoogleTestInstance, jit);
 
   auto getInstance = ((UnitTest *(*)())(intptr_t)getInstancePtr);
   UnitTest *unitTest = getInstance();
 
-  void *runAllTestsPtr = getFunctionPointer(fGoogleTestRun);
+  void *runAllTestsPtr = getFunctionPointer(fGoogleTestRun, jit);
 
   auto runAllTests = ((int (*)(UnitTest *))(intptr_t)runAllTestsPtr);
   uint64_t result = runAllTests(unitTest);

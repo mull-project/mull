@@ -12,6 +12,7 @@
 #include "MutationsFinder.h"
 #include "Metrics/Metrics.h"
 #include "JunkDetection/JunkDetector.h"
+#include "Toolchain/JITEngine.h"
 
 #include <llvm/Support/DynamicLibrary.h>
 
@@ -20,6 +21,7 @@
 #include <vector>
 #include <sys/mman.h>
 #include <sys/types.h>
+
 
 using namespace llvm;
 using namespace llvm::object;
@@ -157,9 +159,10 @@ Driver::findMutationPoints(std::vector<std::unique_ptr<Test>> &tests) {
 
   std::vector<MutationPoint *> mutationPoints;
   auto objectFiles = AllInstrumentedObjectFiles();
+  JITEngine jit;
 
   metrics.beginLoadOriginalProgram();
-  runner.loadInstrumentedProgram(objectFiles, instrumentation);
+  runner.loadInstrumentedProgram(objectFiles, instrumentation, jit);
   metrics.endLoadOriginalProgram();
 
   auto testIndex = 1;
@@ -172,7 +175,7 @@ Driver::findMutationPoints(std::vector<std::unique_ptr<Test>> &tests) {
 
     metrics.beginRunOriginalTest(test.get());
     ExecutionResult testExecutionResult = sandbox->run([&]() {
-      return runner.runTest(test.get());
+      return runner.runTest(test.get(), jit);
     }, config.getTimeout());
     metrics.endRunOriginalTest(test.get());
 
@@ -304,6 +307,8 @@ std::vector<std::unique_ptr<MutationResult>> Driver::normalRunMutations(const st
   const auto mutationsCount = mutationPoints.size();
   auto mutantIndex = 1;
 
+  JITEngine jit;
+
   for (auto mutationPoint : mutationPoints) {
     auto objectFilesWithMutant = AllButOne(mutationPoint->getOriginalModule()->getModule());
 
@@ -323,7 +328,7 @@ std::vector<std::unique_ptr<MutationResult>> Driver::normalRunMutations(const st
     objectFilesWithMutant.push_back(mutant.getBinary());
 
     metrics.beginLoadMutatedProgram(mutationPoint);
-    runner.loadProgram(objectFilesWithMutant);
+    runner.loadProgram(objectFilesWithMutant, jit);
     metrics.endLoadMutatedProgram(mutationPoint);
 
     auto testsCount = mutationPoint->getReachableTests().size();
@@ -346,7 +351,7 @@ std::vector<std::unique_ptr<MutationResult>> Driver::normalRunMutations(const st
         const auto sandboxTimeout = std::max(30LL, timeout);
 
         result = sandbox->run([&]() {
-          ExecutionStatus status = runner.runTest(test);
+          ExecutionStatus status = runner.runTest(test, jit);
           assert(status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
           return status;
         }, sandboxTimeout);

@@ -21,7 +21,6 @@ class Instrumentation;
 struct InstrumentationInfo;
 
 class CustomTestRunner : public TestRunner {
-  JITEngine jit;
   Mangler mangler;
   llvm::orc::LocalCXXRuntimeOverrides overrides;
   InstrumentationInfo **trampoline;
@@ -30,14 +29,16 @@ public:
   CustomTestRunner(llvm::TargetMachine &machine);
   ~CustomTestRunner();
 
-  void loadInstrumentedProgram(ObjectFiles &objectFiles, Instrumentation &instrumentation) override;
-  void loadProgram(ObjectFiles &objectFiles) override;
-  ExecutionStatus runTest(Test *test) override;
+  void loadInstrumentedProgram(ObjectFiles &objectFiles,
+                               Instrumentation &instrumentation,
+                               JITEngine &jit) override;
+  void loadProgram(ObjectFiles &objectFiles, JITEngine &jit) override;
+  ExecutionStatus runTest(Test *test, JITEngine &jit) override;
 
 private:
-  void *GetCtorPointer(const llvm::Function &Function);
-  void *getFunctionPointer(const std::string &functionName);
-  void runStaticCtor(llvm::Function *Ctor);
+  void *getConstructorPointer(const llvm::Function &function, JITEngine &jit);
+  void *getFunctionPointer(const std::string &functionName, JITEngine &jit);
+  void runStaticConstructor(llvm::Function *function, JITEngine &jit);
 };
 
 }

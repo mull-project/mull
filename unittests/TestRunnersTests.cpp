@@ -75,9 +75,11 @@ TEST(SimpleTestRunner, runTest) {
     OwnedObjectFiles.push_back(std::move(Obj));
   }
 
+  JITEngine jit;
+
   /// Here we run test with original testee function
-  Runner.loadProgram(ObjectFiles);
-  ASSERT_EQ(ExecutionStatus::Passed, Runner.runTest(Test.get()));
+  Runner.loadProgram(ObjectFiles, jit);
+  ASSERT_EQ(ExecutionStatus::Passed, Runner.runTest(Test.get(), jit));
 
   ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
 
@@ -108,8 +110,8 @@ TEST(SimpleTestRunner, runTest) {
     OwnedObjectFiles.push_back(std::move(Obj));
   }
 
-  Runner.loadProgram(ObjectFiles);
-  ASSERT_EQ(ExecutionStatus::Failed, Runner.runTest(Test.get()));
+  Runner.loadProgram(ObjectFiles, jit);
+  ASSERT_EQ(ExecutionStatus::Failed, Runner.runTest(Test.get(), jit));
 
   ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
 }
