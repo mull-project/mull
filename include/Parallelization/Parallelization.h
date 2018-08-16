@@ -11,3 +11,4 @@
 #include "Parallelization/Tasks/ModuleLoadingTask.h"
 #include "Parallelization/Tasks/LoadObjectFilesTask.h"
 #include "Parallelization/Tasks/SearchMutationPointsTask.h"
+#include "Parallelization/Tasks/DryRunMutantExecutionTask.h"
