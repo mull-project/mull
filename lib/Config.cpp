@@ -452,3 +452,4 @@ ParallelizationConfig ParallelizationConfig::defaultConfig() {
   config.normalize();
   return config;
 }
+
