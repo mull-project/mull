@@ -86,7 +86,7 @@ TEST(Driver, RunningWithNoTests) {
   FakeModuleLoader loader(context, modules);
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  MutationsFinder finder(std::move(mutators));
+  MutationsFinder finder(std::move(mutators), config);
 
   SimpleTestFinder testFinder;
 
@@ -156,7 +156,7 @@ TEST(Driver, SimpleTest_MathAddMutator) {
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
-  MutationsFinder finder(std::move(mutators));
+  MutationsFinder finder(std::move(mutators), config);
 
   SimpleTestFinder testFinder;
 
@@ -239,7 +239,7 @@ TEST(Driver, SimpleTest_MathSubMutator) {
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathSubMutator>());
-  MutationsFinder finder(std::move(mutators));
+  MutationsFinder finder(std::move(mutators), config);
   SimpleTestFinder testFinder;
 
   Toolchain toolchain(config);
@@ -321,7 +321,7 @@ TEST(Driver, SimpleTest_MathMulMutator) {
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathMulMutator>());
-  MutationsFinder finder(std::move(mutators));
+  MutationsFinder finder(std::move(mutators), config);
   SimpleTestFinder testFinder;
 
   Toolchain toolchain(config);
@@ -402,7 +402,7 @@ TEST(Driver, SimpleTest_MathDivMutator) {
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathDivMutator>());
-  MutationsFinder finder(std::move(mutators));
+  MutationsFinder finder(std::move(mutators), config);
   SimpleTestFinder testFinder;
 
   Toolchain toolchain(config);
@@ -472,7 +472,7 @@ TEST(Driver, SimpleTest_NegateConditionMutator) {
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<NegateConditionMutator>());
-  MutationsFinder finder(std::move(mutators));
+  MutationsFinder finder(std::move(mutators), config);
   SimpleTestFinder testFinder;
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
@@ -546,7 +546,7 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutator) {
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<RemoveVoidFunctionMutator>());
-  MutationsFinder finder(std::move(mutators));
+  MutationsFinder finder(std::move(mutators), config);
   SimpleTestFinder testFinder;
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
@@ -620,7 +620,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<AndOrReplacementMutator>());
-  MutationsFinder finder(std::move(mutators));
+  MutationsFinder finder(std::move(mutators), config);
   SimpleTestFinder testFinder;
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
@@ -768,7 +768,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator_CPP) {
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<AndOrReplacementMutator>());
-  MutationsFinder finder(std::move(mutators));
+  MutationsFinder finder(std::move(mutators), config);
   SimpleTestFinder testFinder;
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
@@ -877,7 +877,7 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutator_CPP) {
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<ReplaceAssignmentMutator>());
-  MutationsFinder finder(std::move(mutators));
+  MutationsFinder finder(std::move(mutators), config);
   SimpleTestFinder testFinder;
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
@@ -953,7 +953,7 @@ TEST(Driver, customTest) {
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
-  MutationsFinder finder(std::move(mutators));
+  MutationsFinder finder(std::move(mutators), config);
   CustomTestFinder testFinder(config.getCustomTests());
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
@@ -1028,7 +1028,7 @@ TEST(Driver, customTest_withDynamicLibraries) {
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
-  MutationsFinder finder(std::move(mutators));
+  MutationsFinder finder(std::move(mutators), config);
   CustomTestFinder testFinder(config.getCustomTests());
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
@@ -1099,7 +1099,7 @@ TEST(Driver, junkDetector_enabled) {
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
-  MutationsFinder finder(std::move(mutators));
+  MutationsFinder finder(std::move(mutators), config);
   CustomTestFinder testFinder(config.getCustomTests());
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
@@ -1165,7 +1165,7 @@ TEST(Driver, junkDetector_disabled) {
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
-  MutationsFinder finder(std::move(mutators));
+  MutationsFinder finder(std::move(mutators), config);
   CustomTestFinder testFinder(config.getCustomTests());
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
@@ -1235,7 +1235,7 @@ TEST(Driver, DISABLED_customTest_withDynamicLibraries_and_ObjectFiles) {
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
-  MutationsFinder finder(std::move(mutators));
+  MutationsFinder finder(std::move(mutators), config);
   CustomTestFinder testFinder(config.getCustomTests());
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){

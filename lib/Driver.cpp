@@ -73,7 +73,7 @@ void Driver::loadBitcodeFilesIntoMemory() {
   metrics.beginLoadModules();
   std::vector<std::string> bitcodePaths = config.getBitcodePaths();
   std::vector<unique_ptr<MullModule>> modules =
-    loader.loadModulesFromBitcodeFileList(bitcodePaths);
+      loader.loadModulesFromBitcodeFileList(bitcodePaths, config);
   metrics.endLoadModules();
 
   for (auto &ownedModule : modules) {
@@ -90,9 +90,8 @@ void Driver::compileInstrumentedBitcodeFiles() {
     instrumentation.recordFunctions(module.getModule());
   }
 
-  int workers = std::thread::hardware_concurrency();
   std::vector<InstrumentedCompilationTask> tasks;
-  for (int i = 0; i < workers; i++) {
+  for (int i = 0; i < config.parallelization().workers; i++) {
     tasks.emplace_back(instrumentation, toolchain);
   }
 
@@ -108,9 +107,8 @@ void Driver::compileInstrumentedBitcodeFiles() {
 void Driver::loadPrecompiledObjectFiles() {
   metrics.beginLoadPrecompiledObjectFiles();
 
-  int workers = std::thread::hardware_concurrency();
   std::vector<LoadObjectFilesTask> tasks;
-  for (int i = 0; i < workers; i++) {
+  for (int i = 0; i < config.parallelization().workers; i++) {
     tasks.emplace_back(LoadObjectFilesTask());
   }
 
@@ -152,9 +150,8 @@ Driver::findMutationPoints(std::vector<std::unique_ptr<Test>> &tests) {
   runner.loadInstrumentedProgram(objectFiles, instrumentation, jit);
   metrics.endLoadOriginalProgram();
 
-  int workers = std::thread::hardware_concurrency();
   std::vector<OriginalTestExecutionTask> tasks;
-  for (int i = 0; i < workers; i++) {
+  for (int i = 0; i < config.parallelization().testExecutionWorkers; i++) {
     tasks.emplace_back(instrumentation, *sandbox, runner, config, filter, jit);
   }
 
@@ -180,8 +177,7 @@ Driver::filterOutJunkMutations(std::vector<MutationPoint *> mutationPoints) {
   std::vector<MutationPoint *> nonJunkMutationPoints;
   if (config.junkDetectionEnabled()) {
     std::vector<JunkDetectionTask> tasks;
-    int workers = std::thread::hardware_concurrency();
-    for (int i = 0; i < workers; i++) {
+    for (int i = 0; i < config.parallelization().workers; i++) {
       tasks.emplace_back(junkDetector);
     }
     TaskExecutor<JunkDetectionTask> mutantRunner("Filtering out junk mutations", mutationPoints, nonJunkMutationPoints, std::move(tasks));
@@ -213,8 +209,7 @@ Driver::dryRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
 
   std::vector<DryRunMutantExecutionTask> tasks;
-  int workers = std::thread::hardware_concurrency();
-  for (int i = 0; i < workers; i++) {
+  for (int i = 0; i < config.parallelization().workers; i++) {
     tasks.emplace_back(DryRunMutantExecutionTask());
   }
   metrics.beginMutantsExecution();
@@ -227,8 +222,7 @@ Driver::dryRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
 
 std::vector<std::unique_ptr<MutationResult>> Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
   std::vector<OriginalCompilationTask> compilationTasks;
-  int compilationWorkers = std::thread::hardware_concurrency();
-  for (int i = 0; i < compilationWorkers; i++) {
+  for (int i = 0; i < config.parallelization().workers; i++) {
     compilationTasks.emplace_back(toolchain);
   }
   TaskExecutor<OriginalCompilationTask> mutantCompiler("Compiling original code", context.getModules(), ownedObjectFiles, std::move(compilationTasks));
@@ -243,8 +237,7 @@ std::vector<std::unique_ptr<MutationResult>> Driver::normalRunMutations(const st
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
 
   std::vector<MutantExecutionTask> tasks;
-  int workers = std::thread::hardware_concurrency();
-  for (int i = 0; i < workers; i++) {
+  for (int i = 0; i < config.parallelization().mutantExecutionWorkers; i++) {
     tasks.emplace_back(*this, *sandbox, runner, config, toolchain, filter);
   }
   metrics.beginMutantsExecution();

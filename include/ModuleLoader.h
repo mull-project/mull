@@ -12,6 +12,8 @@ class Module;
 
 namespace mull {
 
+class Config;
+
 class ModuleLoader {
   std::vector<std::unique_ptr<llvm::LLVMContext>> contexts;
 public:
@@ -22,7 +24,8 @@ public:
                                                        llvm::LLVMContext &context);
 
   virtual std::vector<std::unique_ptr<MullModule>>
-    loadModulesFromBitcodeFileList(const std::vector<std::string> &path);
+  loadModulesFromBitcodeFileList(const std::vector<std::string> &path,
+                                 Config &config);
 };
 
 }

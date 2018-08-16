@@ -30,10 +30,12 @@ TEST(ScalarValueMutator, getMutationPoint) {
   std::vector<std::unique_ptr<Testee>> testees;
   testees.emplace_back(make_unique<Testee>(scalarValueFunction, nullptr, 1));
   auto mergedTestees = mergeTestees(testees);
+  Config config;
+  config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<ScalarValueMutator>());
-  MutationsFinder finder(std::move(mutators));
+  MutationsFinder finder(std::move(mutators), config);
   Filter filter;
 
   std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(mullContext,

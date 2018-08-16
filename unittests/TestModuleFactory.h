@@ -4,6 +4,7 @@
 
 #include <string>
 #include <utility>
+#include <Config.h>
 
 using namespace llvm;
 using namespace mull;
@@ -76,7 +77,8 @@ public:
     std::move(modules)) {}
 
   std::vector<std::unique_ptr<MullModule>>
-  loadModulesFromBitcodeFileList(const std::vector<std::string> &paths) override {
+  loadModulesFromBitcodeFileList(const std::vector<std::string> &paths,
+                                 mull::Config &config) override {
     std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = this->modules;
 
     if (modules) {
