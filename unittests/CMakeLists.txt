@@ -9,6 +9,7 @@ set(mull_unittests_sources
   DynamicCallTreeTests.cpp
   MutatorsFactoryTests.cpp
   TesteesTests.cpp
+  TaskExecutorTests.cpp
 
   TestRunnersTests.cpp
   UniqueIdentifierTests.cpp
