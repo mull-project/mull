@@ -12,3 +12,4 @@
 #include "Parallelization/Tasks/LoadObjectFilesTask.h"
 #include "Parallelization/Tasks/SearchMutationPointsTask.h"
 #include "Parallelization/Tasks/DryRunMutantExecutionTask.h"
+#include "Parallelization/Tasks/JunkDetectionTask.h"

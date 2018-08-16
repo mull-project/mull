@@ -179,13 +179,13 @@ std::vector<MutationPoint *>
 Driver::filterOutJunkMutations(std::vector<MutationPoint *> mutationPoints) {
   std::vector<MutationPoint *> nonJunkMutationPoints;
   if (config.junkDetectionEnabled()) {
-    for (auto point: mutationPoints) {
-      if (!junkDetector.isJunk(point)) {
-        nonJunkMutationPoints.push_back(point);
-      }
+    std::vector<JunkDetectionTask> tasks;
+    int workers = std::thread::hardware_concurrency();
+    for (int i = 0; i < workers; i++) {
+      tasks.emplace_back(junkDetector);
     }
-    auto junkSize = mutationPoints.size() - nonJunkMutationPoints.size();
-    Logger::debug() << "Filtered out " << junkSize << " junk mutations\n";
+    TaskExecutor<JunkDetectionTask> mutantRunner("Filtering out junk mutations", mutationPoints, nonJunkMutationPoints, std::move(tasks));
+    mutantRunner.execute();
   } else {
     mutationPoints.swap(nonJunkMutationPoints);
   }
