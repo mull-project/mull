@@ -71,7 +71,8 @@ TEST(Driver, RunningWithNoTests) {
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory,
-                JunkDetectionConfig::disabled());
+                JunkDetectionConfig::disabled(),
+                ParallelizationConfig::defaultConfig());
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
@@ -138,7 +139,8 @@ TEST(Driver, SimpleTest_MathAddMutator) {
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory,
-                JunkDetectionConfig::disabled());
+                JunkDetectionConfig::disabled(),
+                ParallelizationConfig::defaultConfig());
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
@@ -221,7 +223,8 @@ TEST(Driver, SimpleTest_MathSubMutator) {
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory,
-                JunkDetectionConfig::disabled());
+                JunkDetectionConfig::disabled(),
+                ParallelizationConfig::defaultConfig());
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
@@ -302,7 +305,8 @@ TEST(Driver, SimpleTest_MathMulMutator) {
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory,
-                JunkDetectionConfig::disabled());
+                JunkDetectionConfig::disabled(),
+                ParallelizationConfig::defaultConfig());
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
@@ -382,7 +386,8 @@ TEST(Driver, SimpleTest_MathDivMutator) {
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory,
-                JunkDetectionConfig::disabled());
+                JunkDetectionConfig::disabled(),
+                ParallelizationConfig::defaultConfig());
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
@@ -462,7 +467,8 @@ TEST(Driver, SimpleTest_NegateConditionMutator) {
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory,
-                JunkDetectionConfig::disabled());
+                JunkDetectionConfig::disabled(),
+                ParallelizationConfig::defaultConfig());
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<NegateConditionMutator>());
@@ -535,7 +541,8 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutator) {
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory,
-                JunkDetectionConfig::disabled());
+                JunkDetectionConfig::disabled(),
+                ParallelizationConfig::defaultConfig());
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<RemoveVoidFunctionMutator>());
@@ -599,7 +606,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
                 {},
                 {},
                 {},
-                Config::Fork::Disabled,
+                Config::Fork::Enabled,
                 Config::DryRunMode::Disabled,
                 Config::FailFastMode::Disabled,
                 Config::UseCache::No,
@@ -608,7 +615,8 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory,
-                JunkDetectionConfig::disabled());
+                JunkDetectionConfig::disabled(),
+                ParallelizationConfig::defaultConfig());
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<AndOrReplacementMutator>());
@@ -755,7 +763,8 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator_CPP) {
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory,
-                JunkDetectionConfig::disabled());
+                JunkDetectionConfig::disabled(),
+                ParallelizationConfig::defaultConfig());
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<AndOrReplacementMutator>());
@@ -854,7 +863,7 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutator_CPP) {
                 {},
                 {},
                 {},
-                Config::Fork::Disabled,
+                Config::Fork::Enabled,
                 Config::DryRunMode::Disabled,
                 Config::FailFastMode::Disabled,
                 Config::UseCache::No,
@@ -863,7 +872,8 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutator_CPP) {
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory,
-                JunkDetectionConfig::disabled());
+                JunkDetectionConfig::disabled(),
+                ParallelizationConfig::defaultConfig());
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<ReplaceAssignmentMutator>());
@@ -929,7 +939,7 @@ TEST(Driver, customTest) {
                 {},
                 {},
                 testDefinitions,
-                Config::Fork::Disabled,
+                Config::Fork::Enabled,
                 Config::DryRunMode::Disabled,
                 Config::FailFastMode::Disabled,
                 Config::UseCache::No,
@@ -938,7 +948,8 @@ TEST(Driver, customTest) {
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory,
-                JunkDetectionConfig::disabled());
+                JunkDetectionConfig::disabled(),
+                ParallelizationConfig::defaultConfig());
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
@@ -1012,7 +1023,8 @@ TEST(Driver, customTest_withDynamicLibraries) {
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory,
-                JunkDetectionConfig::disabled());
+                JunkDetectionConfig::disabled(),
+                ParallelizationConfig::defaultConfig());
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
@@ -1082,7 +1094,8 @@ TEST(Driver, junkDetector_enabled) {
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory,
-                JunkDetectionConfig::enabled());
+                JunkDetectionConfig::enabled(),
+                ParallelizationConfig::defaultConfig());
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
@@ -1138,7 +1151,7 @@ TEST(Driver, junkDetector_disabled) {
                 {},
                 {},
                 testDefinitions,
-                Config::Fork::Disabled,
+                Config::Fork::Enabled,
                 Config::DryRunMode::Disabled,
                 Config::FailFastMode::Disabled,
                 Config::UseCache::No,
@@ -1147,7 +1160,8 @@ TEST(Driver, junkDetector_disabled) {
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory,
-                JunkDetectionConfig::disabled());
+                JunkDetectionConfig::disabled(),
+                ParallelizationConfig::defaultConfig());
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
@@ -1216,7 +1230,8 @@ TEST(Driver, DISABLED_customTest_withDynamicLibraries_and_ObjectFiles) {
                 MullDefaultTimeoutMilliseconds,
                 distance,
                 cacheDirectory,
-                JunkDetectionConfig::disabled());
+                JunkDetectionConfig::disabled(),
+                ParallelizationConfig::defaultConfig());
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());

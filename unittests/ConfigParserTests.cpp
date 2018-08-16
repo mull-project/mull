@@ -1,3 +1,4 @@
+#include <thread>
 #include "ConfigParserTestFixture.h"
 
 #include "Mutators/MathAddMutator.h"
@@ -439,4 +440,80 @@ reporters:
   ASSERT_EQ(2U, reporters.size());
   ASSERT_EQ("sqlite", reporters[0]);
   ASSERT_EQ("cli", reporters[1]);
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_parallelization_empty) {
+  const char *configYAML = R"YAML(
+reporters:
+  - time
+)YAML";
+  configWithYamlContent(configYAML);
+
+  int availableThreads = std::thread::hardware_concurrency();
+  auto parallelization = config.parallelization();
+
+  ASSERT_EQ(availableThreads, parallelization.workers);
+  ASSERT_EQ(availableThreads, parallelization.mutantExecutionWorkers);
+  ASSERT_EQ(availableThreads, parallelization.testExecutionWorkers);
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_parallelization_workers_value_propagates) {
+  const char *configYAML = R"YAML(
+parallelization:
+  workers: 33
+  )YAML";
+  configWithYamlContent(configYAML);
+
+  int availableThreads = 33;
+  auto parallelization = config.parallelization();
+
+  ASSERT_EQ(availableThreads, parallelization.workers);
+  ASSERT_EQ(availableThreads, parallelization.mutantExecutionWorkers);
+  ASSERT_EQ(availableThreads, parallelization.testExecutionWorkers);
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_parallelization_local_value_overrides) {
+  const char *configYAML = R"YAML(
+parallelization:
+  workers: 33
+  test_execution_workers: 14
+  )YAML";
+  configWithYamlContent(configYAML);
+
+  int availableThreads = 33;
+  auto parallelization = config.parallelization();
+
+  ASSERT_EQ(availableThreads, parallelization.workers);
+  ASSERT_EQ(availableThreads, parallelization.mutantExecutionWorkers);
+  ASSERT_EQ(14, parallelization.testExecutionWorkers);
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_parallelization_all_local_values_override) {
+  const char *configYAML = R"YAML(
+parallelization:
+  workers: 33
+  test_execution_workers: 14
+  mutant_execution_workers: 12
+  )YAML";
+  configWithYamlContent(configYAML);
+
+  auto parallelization = config.parallelization();
+
+  ASSERT_EQ(33, parallelization.workers);
+  ASSERT_EQ(12, parallelization.mutantExecutionWorkers);
+  ASSERT_EQ(14, parallelization.testExecutionWorkers);
+}
+
+TEST_F(ConfigParserTestFixture, loadConfig_parallelization_local_values_only) {
+  const char *configYAML = R"YAML(
+parallelization:
+  test_execution_workers: 14
+  mutant_execution_workers: 12
+  )YAML";
+  configWithYamlContent(configYAML);
+
+  auto parallelization = config.parallelization();
+
+  ASSERT_EQ(12, parallelization.mutantExecutionWorkers);
+  ASSERT_EQ(14, parallelization.testExecutionWorkers);
 }

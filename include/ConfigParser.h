@@ -119,6 +119,15 @@ struct ScalarEnumerationTraits<mull::Config::Diagnostics> {
   }
 };
 
+template<>
+struct MappingTraits<mull::ParallelizationConfig> {
+  static void mapping(IO &io, mull::ParallelizationConfig &config) {
+    io.mapOptional("workers", config.workers);
+    io.mapOptional("test_execution_workers", config.testExecutionWorkers);
+    io.mapOptional("mutant_execution_workers", config.mutantExecutionWorkers);
+  }
+};
+
 template <>
 struct MappingTraits<mull::Config>
 {
@@ -144,6 +153,7 @@ struct MappingTraits<mull::Config>
     io.mapOptional("max_distance", config.maxDistance);
     io.mapOptional("cache_directory", config.cacheDirectory);
     io.mapOptional("junk_detection", config.junkDetection);
+    io.mapOptional("parallelization", config.parallelizationConfig);
   }
 };
 }
