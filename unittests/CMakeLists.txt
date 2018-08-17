@@ -11,6 +11,7 @@ set(mull_unittests_sources
 
   TestRunnersTests.cpp
   UniqueIdentifierTests.cpp
+  TaskExecutorTests.cpp
 
   Mutators/MutatorsTests.cpp
   Mutators/NegateConditionMutatorTest.cpp
