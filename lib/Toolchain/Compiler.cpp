@@ -9,23 +9,20 @@ using namespace llvm;
 using namespace llvm::object;
 using namespace mull;
 
-Compiler::Compiler(TargetMachine &machine) :
-  targetMachine(machine)
-{
+OwningBinary<ObjectFile> Compiler::compileModule(const MullModule &module,
+                                                 TargetMachine &machine) {
+  return compileModule(module.getModule(), machine);
 }
 
-OwningBinary<ObjectFile> Compiler::compileModule(const MullModule &module) {
-  return compileModule(module.getModule());
-}
-
-OwningBinary<ObjectFile> Compiler::compileModule(Module *module) {
+OwningBinary<ObjectFile> Compiler::compileModule(Module *module,
+                                                 TargetMachine &machine) {
   assert(module);
 
   if (module->getDataLayout().isDefault()) {
-    module->setDataLayout(targetMachine.createDataLayout());
+    module->setDataLayout(machine.createDataLayout());
   }
 
-  orc::SimpleCompiler compiler(targetMachine);
+  orc::SimpleCompiler compiler(machine);
 
   OwningBinary<ObjectFile> objectFile = compiler(*module);
 

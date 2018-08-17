@@ -30,9 +30,10 @@ static vector<unique_ptr<MullModule>> loadTestModules() {
 
     return modules;
   };
-
+  Config config;
+  config.normalizeParallelizationConfig();
   FakeModuleLoader loader(context, modules);
-  return loader.loadModulesFromBitcodeFileList({""});
+  return loader.loadModulesFromBitcodeFileList({""}, config);
 }
 
 TEST(CustomTestRunner, noTestNameSpecified) {
@@ -44,7 +45,7 @@ TEST(CustomTestRunner, noTestNameSpecified) {
   vector<object::ObjectFile *> objects;
   auto loadedModules = loadTestModules();
   for (auto &m : loadedModules) {
-    auto object = toolchain.compiler().compileModule(*m.get());
+    auto object = toolchain.compiler().compileModule(*m, toolchain.targetMachine());
     objects.push_back(object.getBinary());
     ownedObjects.push_back(move(object));
   }
@@ -68,7 +69,7 @@ TEST(CustomTestRunner, tooManyParameters) {
   vector<object::ObjectFile *> objects;
   auto loadedModules = loadTestModules();
   for (auto &m : loadedModules) {
-    auto object = toolchain.compiler().compileModule(*m.get());
+    auto object = toolchain.compiler().compileModule(*m, toolchain.targetMachine());
     objects.push_back(object.getBinary());
     ownedObjects.push_back(move(object));
   }
@@ -92,7 +93,7 @@ TEST(CustomTestRunner, runPassingTest) {
   vector<object::ObjectFile *> objects;
   auto loadedModules = loadTestModules();
   for (auto &m : loadedModules) {
-    auto object = toolchain.compiler().compileModule(*m.get());
+    auto object = toolchain.compiler().compileModule(*m, toolchain.targetMachine());
     objects.push_back(object.getBinary());
     ownedObjects.push_back(move(object));
   }
@@ -121,7 +122,7 @@ TEST(CustomTestRunner, runFailingTest) {
     if (!constructor) {
       constructor = module->getFunction("initGlobalVariable");
     }
-    auto object = toolchain.compiler().compileModule(*m.get());
+    auto object = toolchain.compiler().compileModule(*m, toolchain.targetMachine());
     objects.push_back(object.getBinary());
     ownedObjects.push_back(move(object));
   }
@@ -145,7 +146,7 @@ TEST(CustomTestRunner, attemptToRunUnknownTest) {
   vector<object::ObjectFile *> objects;
   auto loadedModules = loadTestModules();
   for (auto &m : loadedModules) {
-    auto object = toolchain.compiler().compileModule(*m.get());
+    auto object = toolchain.compiler().compileModule(*m, toolchain.targetMachine());
     objects.push_back(object.getBinary());
     ownedObjects.push_back(move(object));
   }

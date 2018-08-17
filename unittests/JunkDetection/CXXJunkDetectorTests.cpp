@@ -27,28 +27,29 @@ TEST(CXXJunkDetector, boundary_mutator) {
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
+  Config config;
+  config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutatorss;
   mutatorss.emplace_back(make_unique<ConditionalsBoundaryMutator>());
-  MutationsFinder finder(std::move(mutatorss));
+  MutationsFinder finder(std::move(mutatorss), config);
   Filter filter;
 
-  std::vector<MutationPoint *> allMutationPoints;
-
+  std::vector<std::unique_ptr<Testee>> testees;
   for (auto &function : *module) {
-    Testee testee(&function, nullptr, 1);
-
-    std::vector<MutationPoint *> points = finder.getMutationPoints(mullContext, testee, filter);
-    std::copy(points.begin(), points.end(), std::back_inserter(allMutationPoints));
+    testees.emplace_back(make_unique<Testee>(&function, nullptr, 1));
   }
+  auto mergedTestees = mergeTestees(testees);
 
-  ASSERT_EQ(allMutationPoints.size(), 7U);
+  std::vector<MutationPoint *> points = finder.getMutationPoints(mullContext, mergedTestees, filter);
 
-  JunkDetectionConfig config;
+  ASSERT_EQ(points.size(), 7U);
 
-  CXXJunkDetector detector(config);
+  JunkDetectionConfig junkConfig;
+
+  CXXJunkDetector detector(junkConfig);
   std::vector<MutationPoint *> nonJunkMutationPoints;
-  for (auto point: allMutationPoints) {
+  for (auto point: points) {
     if (!detector.isJunk(point)) {
       nonJunkMutationPoints.push_back(point);
     }
@@ -63,28 +64,28 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
+  Config config;
+  config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutatorss;
   mutatorss.emplace_back(make_unique<ConditionalsBoundaryMutator>());
-  MutationsFinder finder(std::move(mutatorss));
+  MutationsFinder finder(std::move(mutatorss), config);
   Filter filter;
 
-  std::vector<MutationPoint *> allMutationPoints;
-
+  std::vector<std::unique_ptr<Testee>> testees;
   for (auto &function : *module) {
-    Testee testee(&function, nullptr, 1);
-
-    std::vector<MutationPoint *> points = finder.getMutationPoints(mullContext, testee, filter);
-    std::copy(points.begin(), points.end(), std::back_inserter(allMutationPoints));
+    testees.emplace_back(make_unique<Testee>(&function, nullptr, 1));
   }
+  auto mergedTestees = mergeTestees(testees);
+  std::vector<MutationPoint *> points = finder.getMutationPoints(mullContext, mergedTestees, filter);
 
-  ASSERT_EQ(allMutationPoints.size(), 8U);
+  ASSERT_EQ(points.size(), 8U);
 
-  JunkDetectionConfig config;
-  config.cxxCompDBDirectory = TestModuleFactory.CompilationDatabase_AbsolutePath_Directory();
-  CXXJunkDetector detector(config);
+  JunkDetectionConfig junkConfig;
+  junkConfig.cxxCompDBDirectory = TestModuleFactory.CompilationDatabase_AbsolutePath_Directory();
+  CXXJunkDetector detector(junkConfig);
   std::vector<MutationPoint *> nonJunkMutationPoints;
-  for (auto point: allMutationPoints) {
+  for (auto point: points) {
     if (!detector.isJunk(point)) {
       nonJunkMutationPoints.push_back(point);
     }
@@ -99,28 +100,29 @@ TEST(CXXJunkDetector, compdb_relative_paths) {
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
+  Config config;
+  config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutatorss;
   mutatorss.emplace_back(make_unique<ConditionalsBoundaryMutator>());
-  MutationsFinder finder(std::move(mutatorss));
+  MutationsFinder finder(std::move(mutatorss), config);
   Filter filter;
 
-  std::vector<MutationPoint *> allMutationPoints;
-
+  std::vector<std::unique_ptr<Testee>> testees;
   for (auto &function : *module) {
-    Testee testee(&function, nullptr, 1);
-
-    std::vector<MutationPoint *> points = finder.getMutationPoints(mullContext, testee, filter);
-    std::copy(points.begin(), points.end(), std::back_inserter(allMutationPoints));
+    testees.emplace_back(make_unique<Testee>(&function, nullptr, 1));
   }
+  auto mergedTestees = mergeTestees(testees);
 
-  ASSERT_EQ(allMutationPoints.size(), 8U);
+  std::vector<MutationPoint *> points = finder.getMutationPoints(mullContext, mergedTestees, filter);
 
-  JunkDetectionConfig config;
-  config.cxxCompDBDirectory = TestModuleFactory.CompilationDatabase_RelativePath_Directory();
-  CXXJunkDetector detector(config);
+  ASSERT_EQ(points.size(), 8U);
+
+  JunkDetectionConfig junkConfig;
+  junkConfig.cxxCompDBDirectory = TestModuleFactory.CompilationDatabase_RelativePath_Directory();
+  CXXJunkDetector detector(junkConfig);
   std::vector<MutationPoint *> nonJunkMutationPoints;
-  for (auto point: allMutationPoints) {
+  for (auto point: points) {
     if (!detector.isJunk(point)) {
       nonJunkMutationPoints.push_back(point);
     }
@@ -135,28 +137,29 @@ TEST(CXXJunkDetector, no_compdb) {
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
+  Config config;
+  config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutatorss;
   mutatorss.emplace_back(make_unique<ConditionalsBoundaryMutator>());
-  MutationsFinder finder(std::move(mutatorss));
+  MutationsFinder finder(std::move(mutatorss), config);
   Filter filter;
 
-  std::vector<MutationPoint *> allMutationPoints;
-
+  std::vector<std::unique_ptr<Testee>> testees;
   for (auto &function : *module) {
-    Testee testee(&function, nullptr, 1);
-
-    std::vector<MutationPoint *> points = finder.getMutationPoints(mullContext, testee, filter);
-    std::copy(points.begin(), points.end(), std::back_inserter(allMutationPoints));
+    testees.emplace_back(make_unique<Testee>(&function, nullptr, 1));
   }
+  auto mergedTestees = mergeTestees(testees);
 
-  ASSERT_EQ(allMutationPoints.size(), 8U);
+  std::vector<MutationPoint *> points = finder.getMutationPoints(mullContext, mergedTestees, filter);
 
-  JunkDetectionConfig config;
-  config.cxxCompilationFlags = "-I include";
-  CXXJunkDetector detector(config);
+  ASSERT_EQ(points.size(), 8U);
+
+  JunkDetectionConfig junkConfig;
+  junkConfig.cxxCompilationFlags = "-I include";
+  CXXJunkDetector detector(junkConfig);
   std::vector<MutationPoint *> nonJunkMutationPoints;
-  for (auto point: allMutationPoints) {
+  for (auto point: points) {
     if (!detector.isJunk(point)) {
       nonJunkMutationPoints.push_back(point);
     }

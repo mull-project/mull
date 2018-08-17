@@ -61,6 +61,18 @@ set(mull_sources
   Reporters/SQLiteReporter.cpp
   Reporters/TimeReporter.cpp
   SourceLocation.cpp
+
+  Parallelization/Progress.cpp
+  Parallelization/TaskExecutor.cpp
+  Parallelization/Tasks/ModuleLoadingTask.cpp
+  Parallelization/Tasks/InstrumentedCompilationTask.cpp
+  Parallelization/Tasks/OriginalCompilationTask.cpp
+  Parallelization/Tasks/OriginalTestExecutionTask.cpp
+  Parallelization/Tasks/LoadObjectFilesTask.cpp
+  Parallelization/Tasks/MutantExecutionTask.cpp
+  Parallelization/Tasks/SearchMutationPointsTask.cpp
+  Parallelization/Tasks/DryRunMutantExecutionTask.cpp
+  Parallelization/Tasks/JunkDetectionTask.cpp
 )
 
 set(mull_header_dirs
@@ -71,6 +83,8 @@ set(mull_header_dirs
   ${MULL_INCLUDE_DIR}/SimpleTest
   ${MULL_INCLUDE_DIR}/Toolchain
   ${MULL_INCLUDE_DIR}/Instrumentation
+  ${MULL_INCLUDE_DIR}/Parallelization
+  ${MULL_INCLUDE_DIR}/Parallelization/Tasks
 )
 
 set(mull_additional_libraries

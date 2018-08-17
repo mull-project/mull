@@ -109,8 +109,8 @@ mutators:
   auto moduleWithTestees = TestModuleFactory.create_GoogleTest_Testee_Module();
 
   auto compiledModule_tests =
-    toolchain.compiler().compileModule(moduleWithTests->getModule());
-  auto compiledModule_testees = toolchain.compiler().compileModule(moduleWithTestees->getModule());
+    toolchain.compiler().compileModule(moduleWithTests->getModule(), toolchain.targetMachine());
+  auto compiledModule_testees = toolchain.compiler().compileModule(moduleWithTestees->getModule(), toolchain.targetMachine());
 
   Context Ctx;
   Ctx.addModule(std::move(moduleWithTests));

@@ -37,11 +37,13 @@ TEST(SQLiteReporter, integrationTest) {
   Context context;
   context.addModule(std::move(mullModuleWithTests));
   context.addModule(std::move(mullModuleWithTestees));
+  Config config;
+  config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   std::unique_ptr<MathAddMutator> addMutator = make_unique<MathAddMutator>();
   mutators.emplace_back(std::move(addMutator));
-  MutationsFinder mutationsFinder(std::move(mutators));
+  MutationsFinder mutationsFinder(std::move(mutators), config);
   Filter filter;
 
   SimpleTestFinder testFinder;
@@ -52,9 +54,11 @@ TEST(SQLiteReporter, integrationTest) {
   Function *testeeFunction = context.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(testeeFunction->empty());
 
-  Testee testee(testeeFunction, test.get(), 1);
+  std::vector<std::unique_ptr<Testee>> testees;
+  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
+  auto mergedTestees = mergeTestees(testees);
 
-  std::vector<MutationPoint *> mutationPoints = mutationsFinder.getMutationPoints(context, testee, filter);
+  std::vector<MutationPoint *> mutationPoints = mutationsFinder.getMutationPoints(context, mergedTestees, filter);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -88,7 +92,7 @@ TEST(SQLiteReporter, integrationTest) {
 
   auto mutationResult = make_unique<MutationResult>(mutatedTestExecutionResult,
                                                     mutationPoint,
-                                                    testee.getDistance(),
+                                                    testees.front()->getDistance(),
                                                     test.get());
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
@@ -390,6 +394,46 @@ TEST(SQLiteReporter, integrationTest_Config) {
 TEST(SQLiteReporter, do_emitDebugInfo) {
   TestModuleFactory testModuleFactory;
 
+  std::string projectName("Integration Test Do Emit Debug Info");
+  std::string testFramework = "SimpleTest";
+
+  const std::string bitcodeFileList = "/tmp/bitcode_file_list.txt";
+  const std::string dynamicLibraryFileList = "/tmp/dynamic_library_file_list.txt";
+  const std::string objectFileList = "/tmp/object_file.list";
+
+  std::vector<std::string> operators({
+                                         "add_mutation",
+                                         "negate_condition"
+                                     });
+
+  std::vector<std::string> configTests({
+                                           "test_method1",
+                                           "test_method2"
+                                       });
+
+  int timeout = 42;
+  int distance = 10;
+  std::string cacheDirectory = "/a/cache";
+  Config config(bitcodeFileList,
+                projectName,
+                testFramework,
+                operators,
+                {},
+                dynamicLibraryFileList,
+                objectFileList,
+                configTests,
+                {}, {},
+                Config::Fork::Enabled,
+                Config::DryRunMode::Enabled,
+                Config::FailFastMode::Disabled,
+                Config::UseCache::Yes,
+                Config::EmitDebugInfo::Yes,
+                Config::Diagnostics::None,
+                timeout, distance,
+                cacheDirectory,
+                JunkDetectionConfig::disabled(),
+                ParallelizationConfig::defaultConfig());
+
   auto mullModuleWithTests   = testModuleFactory.create_SimpleTest_CountLettersTest_Module();
   auto mullModuleWithTestees = testModuleFactory.create_SimpleTest_CountLetters_Module();
 
@@ -400,7 +444,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   std::vector<std::unique_ptr<Mutator>> mutators;
   std::unique_ptr<MathAddMutator> addMutator = make_unique<MathAddMutator>();
   mutators.emplace_back(std::move(addMutator));
-  MutationsFinder mutationsFinder(std::move(mutators));
+  MutationsFinder mutationsFinder(std::move(mutators), config);
   Filter filter;
   SimpleTestFinder testFinder;
   auto tests = testFinder.findTests(context, filter);
@@ -410,10 +454,12 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   Function *testeeFunction = context.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(testeeFunction->empty());
 
-  Testee testee(testeeFunction, test.get(), 1);
+  std::vector<std::unique_ptr<Testee>> testees;
+  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
+  auto mergedTestees = mergeTestees(testees);
 
   std::vector<MutationPoint *> mutationPoints =
-    mutationsFinder.getMutationPoints(context, testee, filter);
+    mutationsFinder.getMutationPoints(context, mergedTestees, filter);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -438,7 +484,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
 
   auto mutationResult = make_unique<MutationResult>(mutatedTestExecutionResult,
                                                     mutationPoint,
-                                                    testee.getDistance(),
+                                                    testees.front()->getDistance(),
                                                     test.get());
   mutationResults.push_back(std::move(mutationResult));
 
@@ -447,46 +493,6 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   resultTime.end = MetricsMeasure::Precision(5678);
 
   Result result(std::move(tests), std::move(mutationResults), mutationPoints);
-
-  std::string projectName("Integration Test Do Emit Debug Info");
-  std::string testFramework = "SimpleTest";
-
-  const std::string bitcodeFileList = "/tmp/bitcode_file_list.txt";
-  const std::string dynamicLibraryFileList = "/tmp/dynamic_library_file_list.txt";
-  const std::string objectFileList = "/tmp/object_file.list";
-
-  std::vector<std::string> operators({
-    "add_mutation",
-    "negate_condition"
-  });
-
-  std::vector<std::string> configTests({
-    "test_method1",
-    "test_method2"
-  });
-
-  int timeout = 42;
-  int distance = 10;
-  std::string cacheDirectory = "/a/cache";
-  Config config(bitcodeFileList,
-                projectName,
-                testFramework,
-                operators,
-                {},
-                dynamicLibraryFileList,
-                objectFileList,
-                configTests,
-                {}, {},
-                Config::Fork::Enabled,
-                Config::DryRunMode::Enabled,
-                Config::FailFastMode::Disabled,
-                Config::UseCache::Yes,
-                Config::EmitDebugInfo::Yes,
-                Config::Diagnostics::None,
-                timeout, distance,
-                cacheDirectory,
-                JunkDetectionConfig::disabled(),
-                ParallelizationConfig::defaultConfig());
 
   SQLiteReporter reporter(projectName);
   Metrics metrics;
@@ -538,6 +544,47 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
 TEST(SQLiteReporter, do_not_emitDebugInfo) {
   TestModuleFactory testModuleFactory;
 
+
+  std::string projectName("Integration Test Do Not Emit Debug Info");
+  std::string testFramework = "SimpleTest";
+
+  const std::string bitcodeFileList = "/tmp/bitcode_file_list.txt";
+  const std::string dynamicLibraryFileList = "/tmp/dynamic_library_file_list.txt";
+  const std::string objectFileList = "/tmp/object_file.list";
+
+  std::vector<std::string> operators({
+                                         "add_mutation",
+                                         "negate_condition"
+                                     });
+
+  std::vector<std::string> configTests({
+                                           "test_method1",
+                                           "test_method2"
+                                       });
+
+  int timeout = 42;
+  int distance = 10;
+  std::string cacheDirectory = "/a/cache";
+  Config config(bitcodeFileList,
+                projectName,
+                testFramework,
+                operators,
+                {},
+                dynamicLibraryFileList,
+                objectFileList,
+                configTests,
+                {}, {},
+                Config::Fork::Enabled,
+                Config::DryRunMode::Enabled,
+                Config::FailFastMode::Disabled,
+                Config::UseCache::Yes,
+                Config::EmitDebugInfo::No,
+                Config::Diagnostics::None,
+                timeout, distance,
+                cacheDirectory,
+                JunkDetectionConfig::disabled(),
+                ParallelizationConfig::defaultConfig());
+
   auto mullModuleWithTests   = testModuleFactory.create_SimpleTest_CountLettersTest_Module();
   auto mullModuleWithTestees = testModuleFactory.create_SimpleTest_CountLetters_Module();
 
@@ -548,7 +595,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   std::vector<std::unique_ptr<Mutator>> mutators;
   std::unique_ptr<MathAddMutator> addMutator = make_unique<MathAddMutator>();
   mutators.emplace_back(std::move(addMutator));
-  MutationsFinder mutationsFinder(std::move(mutators));
+  MutationsFinder mutationsFinder(std::move(mutators), config);
   Filter filter;
 
   SimpleTestFinder testFinder;
@@ -558,10 +605,12 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   Function *testeeFunction = context.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(testeeFunction->empty());
 
-  Testee testee(testeeFunction, test.get(), 1);
+  std::vector<std::unique_ptr<Testee>> testees;
+  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
+  auto mergedTestees = mergeTestees(testees);
 
   std::vector<MutationPoint *> mutationPoints =
-    mutationsFinder.getMutationPoints(context, testee, filter);
+    mutationsFinder.getMutationPoints(context, mergedTestees, filter);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -586,7 +635,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
 
   auto mutationResult = make_unique<MutationResult>(mutatedTestExecutionResult,
                                                     mutationPoint,
-                                                    testee.getDistance(),
+                                                    testees.front()->getDistance(),
                                                     test.get());
   mutationResults.push_back(std::move(mutationResult));
 
@@ -595,46 +644,6 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   resultTime.end = MetricsMeasure::Precision(5678);
 
   Result result(std::move(tests), std::move(mutationResults), mutationPoints);
-
-  std::string projectName("Integration Test Do Not Emit Debug Info");
-  std::string testFramework = "SimpleTest";
-
-  const std::string bitcodeFileList = "/tmp/bitcode_file_list.txt";
-  const std::string dynamicLibraryFileList = "/tmp/dynamic_library_file_list.txt";
-  const std::string objectFileList = "/tmp/object_file.list";
-
-  std::vector<std::string> operators({
-    "add_mutation",
-    "negate_condition"
-  });
-
-  std::vector<std::string> configTests({
-    "test_method1",
-    "test_method2"
-  });
-
-  int timeout = 42;
-  int distance = 10;
-  std::string cacheDirectory = "/a/cache";
-  Config config(bitcodeFileList,
-                projectName,
-                testFramework,
-                operators,
-                {},
-                dynamicLibraryFileList,
-                objectFileList,
-                configTests,
-                {}, {},
-                Config::Fork::Enabled,
-                Config::DryRunMode::Enabled,
-                Config::FailFastMode::Disabled,
-                Config::UseCache::Yes,
-                Config::EmitDebugInfo::No,
-                Config::Diagnostics::None,
-                timeout, distance,
-                cacheDirectory,
-                JunkDetectionConfig::disabled(),
-                ParallelizationConfig::defaultConfig());
 
   SQLiteReporter reporter(projectName);
   Metrics metrics;

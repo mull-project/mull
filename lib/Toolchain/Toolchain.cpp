@@ -2,9 +2,9 @@
 
 #include "Config.h"
 
-#include "llvm/ADT/Triple.h"
-#include "llvm/ExecutionEngine/ExecutionEngine.h"
-#include "llvm/Support/TargetSelect.h"
+#include <llvm/ADT/Triple.h>
+#include <llvm/ExecutionEngine/ExecutionEngine.h>
+#include <llvm/Support/TargetSelect.h>
 
 using namespace mull;
 
@@ -22,7 +22,7 @@ Toolchain::Toolchain(Config &config) :
   machine(llvm::EngineBuilder().selectTarget(llvm::Triple(), "", "",
                                          llvm::SmallVector<std::string, 1>())),
   objectCache(config.cachingEnabled(), config.getCacheDirectory()),
-  simpleCompiler(*machine.get())
+  simpleCompiler()
 {
 }
 
