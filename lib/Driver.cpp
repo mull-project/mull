@@ -93,7 +93,7 @@ void Driver::compileInstrumentedBitcodeFiles() {
       auto clonedModule = module.clone(instrumentationContext);
 
       instrumentation.insertCallbacks(clonedModule->getModule());
-      objectFile = toolchain.compiler().compileModule(*clonedModule.get());
+      objectFile = toolchain.compiler().compileModule(*clonedModule, toolchain.targetMachine());
       toolchain.cache().putInstrumentedObject(objectFile, module);
     }
 
@@ -290,7 +290,7 @@ std::vector<std::unique_ptr<MutationResult>> Driver::normalRunMutations(const st
     if (objectFile.getBinary() == nullptr) {
       LLVMContext localContext;
       auto clonedModule = module->clone(localContext);
-      objectFile = toolchain.compiler().compileModule(*clonedModule.get());
+      objectFile = toolchain.compiler().compileModule(*clonedModule, toolchain.targetMachine());
       toolchain.cache().putObject(objectFile, *module);
     }
 
@@ -317,7 +317,7 @@ std::vector<std::unique_ptr<MutationResult>> Driver::normalRunMutations(const st
       LLVMContext localContext;
       auto clonedModule = mutationPoint->getOriginalModule()->clone(localContext);
       mutationPoint->applyMutation(*clonedModule.get());
-      mutant = toolchain.compiler().compileModule(*clonedModule.get());
+      mutant = toolchain.compiler().compileModule(*clonedModule, toolchain.targetMachine());
       toolchain.cache().putObject(mutant, *mutationPoint);
     }
     metrics.endCompileMutant(mutationPoint);

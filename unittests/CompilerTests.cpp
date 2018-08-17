@@ -24,10 +24,10 @@ TEST(Compiler, CompileModule) {
                                   EngineBuilder().selectTarget(Triple(), "", "",
                                   SmallVector<std::string, 1>()));
 
-  Compiler compiler(*targetMachine.get());
+  Compiler compiler;
 
   auto module = TestModuleFactory.create_SimpleTest_CountLettersTest_Module();
-  auto Binary = compiler.compileModule(module->getModule());
+  auto Binary = compiler.compileModule(module->getModule(), *targetMachine);
 
   ASSERT_NE(nullptr, Binary.getBinary());
 }
