@@ -26,31 +26,36 @@ SimpleTestRunner::~SimpleTestRunner() {
   delete trampoline;
 }
 
-void *SimpleTestRunner::TestFunctionPointer(const llvm::Function &Function) {
-  llvm_compat::JITSymbol &symbol = jit.getSymbol(mangler.getNameWithPrefix(Function.getName()));
-  void *FPointer = reinterpret_cast<void *>(static_cast<uintptr_t>(llvm_compat::JITSymbolAddress(symbol)));
+void *SimpleTestRunner::functionPointer(const llvm::Function &function,
+                                        JITEngine &jit) {
+  auto mangledName = mangler.getNameWithPrefix(function.getName());
+  llvm_compat::JITSymbol &symbol = jit.getSymbol(mangledName);
+  auto address = llvm_compat::JITSymbolAddress(symbol);
+  void *FPointer = reinterpret_cast<void *>(static_cast<uintptr_t>(address));
   assert(FPointer && "Can't find pointer to function");
   return FPointer;
 }
 
 void SimpleTestRunner::loadInstrumentedProgram(ObjectFiles &objectFiles,
-                                               Instrumentation &instrumentation) {
+                                               Instrumentation &instrumentation,
+                                               JITEngine &jit) {
   InstrumentationResolver resolver(overrides, instrumentation, mangler, trampoline);
   jit.addObjectFiles(objectFiles, resolver, make_unique<SectionMemoryManager>());
 }
 
-void SimpleTestRunner::loadProgram(ObjectFiles &objectFiles) {
+void SimpleTestRunner::loadProgram(ObjectFiles &objectFiles, JITEngine &jit) {
   NativeResolver resolver(overrides);
   jit.addObjectFiles(objectFiles, resolver, make_unique<SectionMemoryManager>());
 }
 
-ExecutionStatus SimpleTestRunner::runTest(Test *test) {
+ExecutionStatus SimpleTestRunner::runTest(Test *test, JITEngine &jit) {
   *trampoline = &test->getInstrumentationInfo();
   assert(isa<SimpleTest_Test>(test) && "Supposed to work only with");
 
   SimpleTest_Test *SimpleTest = dyn_cast<SimpleTest_Test>(test);
 
-  void *FunctionPointer = TestFunctionPointer(*SimpleTest->GetTestFunction());
+  void *FunctionPointer = functionPointer(*SimpleTest->GetTestFunction(),
+                                          jit);
 
   uint64_t result = ((int (*)())(intptr_t)FunctionPointer)();
 

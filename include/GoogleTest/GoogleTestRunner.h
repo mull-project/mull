@@ -21,7 +21,6 @@ namespace mull {
 struct InstrumentationInfo;
 
 class GoogleTestRunner : public TestRunner {
-  JITEngine jit;
   Mangler mangler;
   llvm::orc::LocalCXXRuntimeOverrides overrides;
 
@@ -34,15 +33,15 @@ public:
   GoogleTestRunner(llvm::TargetMachine &machine);
   ~GoogleTestRunner();
 
-  void loadInstrumentedProgram(ObjectFiles &objectFiles, Instrumentation &instrumentation) override;
-  void loadProgram(ObjectFiles &objectFiles) override;
-  ExecutionStatus runTest(Test *test) override;
+  void loadInstrumentedProgram(ObjectFiles &objectFiles, Instrumentation &instrumentation, JITEngine &jit) override;
+  void loadProgram(ObjectFiles &objectFiles, JITEngine &jit) override;
+  ExecutionStatus runTest(Test *test, JITEngine &jit) override;
 
 private:
-  void *GetCtorPointer(const llvm::Function &Function);
-  void *getFunctionPointer(const std::string &functionName);
+  void *getConstructorPointer(const llvm::Function &function, JITEngine &jit);
+  void *getFunctionPointer(const std::string &functionName, JITEngine &jit);
 
-  void runStaticCtor(llvm::Function *Ctor);
+  void runStaticConstructor(llvm::Function *constructor, JITEngine &jit);
 };
 
 }

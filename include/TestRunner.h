@@ -8,6 +8,7 @@
 
 namespace mull {
 
+class JITEngine;
 class Test;
 class Instrumentation;
 
@@ -17,11 +18,12 @@ protected:
 public:
   typedef std::vector<llvm::object::ObjectFile *> ObjectFiles;
   typedef std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> OwnedObjectFiles;
-  TestRunner(llvm::TargetMachine &targetMachine);
 
-  virtual void loadInstrumentedProgram(ObjectFiles &objectFiles, Instrumentation &instrumentation) = 0;
-  virtual void loadProgram(ObjectFiles &objectFiles) = 0;
-  virtual ExecutionStatus runTest(Test *test) = 0;
+  explicit TestRunner(llvm::TargetMachine &targetMachine);
+
+  virtual void loadInstrumentedProgram(ObjectFiles &objectFiles, Instrumentation &instrumentation, JITEngine &jit) = 0;
+  virtual void loadProgram(ObjectFiles &objectFiles, JITEngine &jit) = 0;
+  virtual ExecutionStatus runTest(Test *test, JITEngine &jit) = 0;
 
   virtual ~TestRunner() = default;
 };

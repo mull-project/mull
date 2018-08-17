@@ -130,11 +130,12 @@ mutators:
   ASSERT_EQ("HelloTest.testSumOfTestee2", Test2->getTestName());
 
   GoogleTestRunner runner(toolchain.targetMachine());
+  JITEngine jit;
 
   std::vector<llvm::object::ObjectFile *> objects({
     compiledModule_tests.getBinary(),
     compiledModule_testees.getBinary()
   });
-  runner.loadProgram(objects);
-  runner.runTest(Test1);
+  runner.loadProgram(objects, jit);
+  runner.runTest(Test1, jit);
 }
