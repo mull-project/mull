@@ -61,6 +61,9 @@ set(mull_sources
   Reporters/SQLiteReporter.cpp
   Reporters/TimeReporter.cpp
   SourceLocation.cpp
+
+  Parallelization/Progress.cpp
+  Parallelization/TaskExecutor.cpp
 )
 
 set(mull_header_dirs
@@ -71,6 +74,7 @@ set(mull_header_dirs
   ${MULL_INCLUDE_DIR}/SimpleTest
   ${MULL_INCLUDE_DIR}/Toolchain
   ${MULL_INCLUDE_DIR}/Instrumentation
+  ${MULL_INCLUDE_DIR}/Parallelization
 )
 
 set(mull_additional_libraries
