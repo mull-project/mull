@@ -5,6 +5,7 @@
 
 #include <map>
 #include <string>
+#include <mutex>
 #include <clang-c/Index.h>
 
 #include <clang/Tooling/CompilationDatabase.h>
@@ -21,6 +22,7 @@ public:
 
   bool isJunk(MutationPoint *point) override;
 private:
+  std::mutex mutex;
   std::pair<CXCursor, CXSourceLocation> cursorAndLocation(MutationPoint *point);
   CXTranslationUnit translationUnit(const SourceLocation &location, const std::string &sourceFile);
 

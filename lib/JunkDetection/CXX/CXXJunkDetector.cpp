@@ -192,6 +192,7 @@ CXXJunkDetector::~CXXJunkDetector() {
 CXTranslationUnit
 CXXJunkDetector::translationUnit(const SourceLocation &location,
                                  const std::string &sourceFile) {
+  std::lock_guard<std::mutex> guard(mutex);
   if (units.count(sourceFile) != 0) {
     return units[sourceFile];
   }
