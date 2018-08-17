@@ -19,14 +19,11 @@ struct MetricsMeasure {
   Precision begin;
   Precision end;
 
-  MetricsMeasure() : begin(0), end(0) {}
-  Duration duration() const {
-    return (end - begin).count();
-  }
-
-  static const char *precision() {
-    return "ms";
-  }
+  MetricsMeasure();
+  void start();
+  void finish();
+  Duration duration() const;
+  static const char *precision();
 };
 
 class Metrics {
@@ -54,6 +51,12 @@ public:
 
   void beginLoadOriginalProgram();
   void endLoadOriginalProgram();
+
+  void beginOriginalTestExecution();
+  void endOriginalTestExecution();
+
+  void beginMutantsExecution();
+  void endMutantsExecution();
 
   void beginRunOriginalTest(const Test *test);
   void endRunOriginalTest(const Test *test);
@@ -95,6 +98,8 @@ private:
   MetricsMeasure runTime;
   MetricsMeasure reportResult;
   MetricsMeasure instrumentedCompilation;
+  MetricsMeasure originalTestsExecution;
+  MetricsMeasure mutantsExecution;
 
   std::map<const llvm::Module *, MetricsMeasure> originalModuleCompilation;
   std::map<const llvm::Module *, MetricsMeasure> instrumentedModuleCompilation;
