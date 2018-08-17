@@ -10,6 +10,7 @@ set(mull_unittests_sources
   MutatorsFactoryTests.cpp
   TesteesTests.cpp
   TaskExecutorTests.cpp
+  TesteesTests.cpp
 
   TestRunnersTests.cpp
   UniqueIdentifierTests.cpp
