@@ -32,16 +32,14 @@ TEST(ConditionalsBoundaryMutator, findMutations) {
   MutationsFinder finder(std::move(mutators));
   Filter filter;
 
-  std::vector<MutationPoint *> allMutationPoints;
-
+  std::vector<std::unique_ptr<Testee>> testees;
   for (auto &function : *module) {
-    Testee testee(&function, nullptr, 1);
-
-    std::vector<MutationPoint *> points = finder.getMutationPoints(mullContext, testee, filter);
-    std::copy(points.begin(), points.end(), std::back_inserter(allMutationPoints));
+    testees.emplace_back(make_unique<Testee>(&function, nullptr, 1));
   }
+  auto mergedTestees = mergeTestees(testees);
+  std::vector<MutationPoint *> points = finder.getMutationPoints(mullContext, mergedTestees, filter);
 
-  ASSERT_EQ(allMutationPoints.size(), 7U);
+  ASSERT_EQ(points.size(), 7U);
 }
 
 TEST(ConditionalsBoundaryMutator, applyMutations) {
@@ -58,18 +56,17 @@ TEST(ConditionalsBoundaryMutator, applyMutations) {
   MutationsFinder finder(std::move(mutators));
   Filter filter;
 
-  std::vector<MutationPoint *> allMutationPoints;
-
+  std::vector<std::unique_ptr<Testee>> testees;
   for (auto &function : *module) {
-    Testee testee(&function, nullptr, 1);
-
-    std::vector<MutationPoint *> points = finder.getMutationPoints(mullContext, testee, filter);
-    std::copy(points.begin(), points.end(), std::back_inserter(allMutationPoints));
+    testees.emplace_back(make_unique<Testee>(&function, nullptr, 1));
   }
+  auto mergedTestees = mergeTestees(testees);
 
-  for (auto point: allMutationPoints) {
+  std::vector<MutationPoint *> points = finder.getMutationPoints(mullContext, mergedTestees, filter);
+
+  for (auto point: points) {
     Instruction *originalInstruction = &point->getAddress().findInstruction(module);
-    point->applyMutation(*mutatedModule.get());
+    point->applyMutation(*mutatedModule);
     Instruction *mutatedInstruction = &point->getAddress().findInstruction(mutatedModule->getModule());
 
     if (ConditionalsBoundaryMutator::isGT(originalInstruction)) {
@@ -86,5 +83,5 @@ TEST(ConditionalsBoundaryMutator, applyMutations) {
     }
   }
 
-  ASSERT_EQ(allMutationPoints.size(), 7U);
+  ASSERT_EQ(points.size(), 7U);
 }

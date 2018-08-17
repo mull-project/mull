@@ -87,16 +87,18 @@ TEST(SimpleTestRunner, runTest) {
   /// expecting it to fail
 
   Function *testeeFunction = Ctx.lookupDefinedFunction("count_letters");
-  Testee testee(testeeFunction, Test.get(), 1);
+  std::vector<std::unique_ptr<Testee>> testees;
+  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
+  auto mergedTestees = mergeTestees(testees);
 
   std::vector<MutationPoint *> MutationPoints =
-    mutationsFinder.getMutationPoints(Ctx, testee, filter);
+    mutationsFinder.getMutationPoints(Ctx, mergedTestees, filter);
 
   MutationPoint *MP = (*(MutationPoints.begin()));
 
   LLVMContext localContext;
   auto ownedMutatedTesteeModule = MP->getOriginalModule()->clone(localContext);
-  MP->applyMutation(*ownedMutatedTesteeModule.get());
+  MP->applyMutation(*ownedMutatedTesteeModule);
 
   {
     auto Obj = compiler.compileModule(ModuleWithTests);
