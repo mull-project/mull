@@ -27,14 +27,17 @@ TEST(ScalarValueMutator, getMutationPoint) {
   mullContext.addModule(std::move(mullModule));
 
   auto scalarValueFunction = mullContext.lookupDefinedFunction("scalar_value");
-  Testee testee(scalarValueFunction, nullptr, 1);
+  std::vector<std::unique_ptr<Testee>> testees;
+  testees.emplace_back(make_unique<Testee>(scalarValueFunction, nullptr, 1));
+  auto mergedTestees = mergeTestees(testees);
+
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<ScalarValueMutator>());
   MutationsFinder finder(std::move(mutators));
   Filter filter;
 
   std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(mullContext,
-                                                                         testee,
+                                                                         mergedTestees,
                                                                          filter);
 
   ASSERT_EQ(mutationPoints.size(), 4U);

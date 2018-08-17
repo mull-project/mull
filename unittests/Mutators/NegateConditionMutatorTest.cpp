@@ -83,7 +83,10 @@ TEST(NegateConditionMutator, getMutationPoints_no_filter) {
 
   Function *function = llvmModule->getFunction("_ZN4llvm5APInt12tcExtractBitEPKyj");
   assert(function);
-  Testee testee(function, nullptr, 1);
+
+  std::vector<std::unique_ptr<Testee>> testees;
+  testees.emplace_back(make_unique<Testee>(function, nullptr, 1));
+  auto mergedTestees = mergeTestees(testees);
 
   Context context;
   context.addModule(std::move(module));
@@ -93,7 +96,7 @@ TEST(NegateConditionMutator, getMutationPoints_no_filter) {
   MutationsFinder finder(std::move(mutators));
   Filter filter;
 
-  auto mutationPoints = finder.getMutationPoints(context, testee, filter);
+  auto mutationPoints = finder.getMutationPoints(context, mergedTestees, filter);
   EXPECT_EQ(1U, mutationPoints.size());
   EXPECT_EQ(0, mutationPoints[0]->getAddress().getFnIndex());
   EXPECT_EQ(0, mutationPoints[0]->getAddress().getBBIndex());
@@ -108,7 +111,8 @@ TEST(NegateConditionMutator, getMutationPoints_filter_to_bool_converion) {
 
   Function *function = llvmModule->getFunction("_ZNK4llvm7APFloat11isSignalingEv");
   assert(function);
-  Testee testee(function, nullptr, 1);
+  std::vector<std::unique_ptr<Testee>> testees;
+  testees.emplace_back(make_unique<Testee>(function, nullptr, 1));
 
   Context context;
   context.addModule(std::move(module));
@@ -118,7 +122,8 @@ TEST(NegateConditionMutator, getMutationPoints_filter_to_bool_converion) {
   MutationsFinder finder(std::move(mutators));
   Filter filter;
 
-  auto mutationPoints = finder.getMutationPoints(context, testee, filter);
+  auto mergedTestees = mergeTestees(testees);
+  auto mutationPoints = finder.getMutationPoints(context, mergedTestees, filter);
   EXPECT_EQ(0U, mutationPoints.size());
 }
 
@@ -130,7 +135,9 @@ TEST(NegateConditionMutator, getMutationPoints_filter_is_null) {
 
   Function *function = llvmModule->getFunction("_ZN4llvm7APFloat15freeSignificandEv");
   assert(function);
-  Testee testee(function, nullptr, 1);
+  std::vector<std::unique_ptr<Testee>> testees;
+  testees.emplace_back(make_unique<Testee>(function, nullptr, 1));
+  auto mergedTestees = mergeTestees(testees);
 
   Context context;
   context.addModule(std::move(module));
@@ -140,6 +147,6 @@ TEST(NegateConditionMutator, getMutationPoints_filter_is_null) {
   MutationsFinder finder(std::move(mutators));
   Filter filter;
 
-  auto mutationPoints = finder.getMutationPoints(context, testee, filter);
+  auto mutationPoints = finder.getMutationPoints(context, mergedTestees, filter);
   EXPECT_EQ(0U, mutationPoints.size());
 }

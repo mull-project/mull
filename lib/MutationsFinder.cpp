@@ -31,55 +31,45 @@ MutationsFinder::MutationsFinder(std::vector<std::unique_ptr<Mutator>> mutators)
 : mutators(std::move(mutators)) {}
 
 std::vector<MutationPoint *> MutationsFinder::getMutationPoints(const Context &context,
-                                                                Testee &testee,
+                                                                std::vector<MergedTestee> &testees,
                                                                 Filter &filter) {
-  std::vector<std::unique_ptr<MutationPoint>> ownedPoints;
-  std::vector<MutationPoint *> mutationPoints;
+  std::vector<MutationPoint *> points;
+  for (auto &testee : testees) {
+    Function *function = testee.getTesteeFunction();
 
-  Function *function = testee.getTesteeFunction();
+    auto moduleID = function->getParent()->getModuleIdentifier();
+    MullModule *module = context.moduleWithIdentifier(moduleID);
 
-  if (cachedPoints.count(function)) {
-    auto &points = cachedPoints.at(function);
-    for (auto &point : points) {
-      point->addReachableTest(testee.getTest(), testee.getDistance());
-    }
+    int functionIndex = GetFunctionIndex(function);
+    for (auto &mutator : mutators) {
 
-    return mutationPoints;
-  }
+      int basicBlockIndex = 0;
+      for (auto &basicBlock : function->getBasicBlockList()) {
 
-  auto moduleID = function->getParent()->getModuleIdentifier();
-  MullModule *module = context.moduleWithIdentifier(moduleID);
+        int instructionIndex = 0;
+        for (auto &instruction : basicBlock.getInstList()) {
+          if (filter.shouldSkipInstruction(&instruction)) {
+            instructionIndex++;
+            continue;
+          }
 
-  int functionIndex = GetFunctionIndex(function);
-  for (auto &mutator : mutators) {
+          auto location = SourceLocation::sourceLocationFromInstruction(&instruction);
 
-    int basicBlockIndex = 0;
-    for (auto &basicBlock : function->getBasicBlockList()) {
-
-      int instructionIndex = 0;
-      for (auto &instruction : basicBlock.getInstList()) {
-        if (filter.shouldSkipInstruction(&instruction)) {
+          MutationPointAddress address(functionIndex, basicBlockIndex, instructionIndex);
+          MutationPoint *point = mutator->getMutationPoint(module, address, &instruction, location);
+          if (point) {
+            for (auto &reachableTest : testee.getReachableTests()) {
+              point->addReachableTest(reachableTest.first, reachableTest.second);
+            }
+            points.push_back(point);
+            ownedPoints.emplace_back(std::unique_ptr<MutationPoint>(point));
+          }
           instructionIndex++;
-          continue;
         }
-
-        auto location = SourceLocation::sourceLocationFromInstruction(&instruction);
-
-        MutationPointAddress address(functionIndex, basicBlockIndex, instructionIndex);
-        MutationPoint *point = mutator->getMutationPoint(module, address, &instruction, location);
-        if (point) {
-          point->addReachableTest(testee.getTest(), testee.getDistance());
-          mutationPoints.push_back(point);
-          ownedPoints.emplace_back(std::unique_ptr<MutationPoint>(point));
-        }
-        instructionIndex++;
+        basicBlockIndex++;
       }
-      basicBlockIndex++;
     }
-
   }
 
-  cachedPoints[function] = std::move(ownedPoints);
-
-  return mutationPoints;
+  return points;
 }
