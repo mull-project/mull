@@ -29,6 +29,24 @@ MetricsMeasure::Duration average_duration(const std::map<Key, MetricsMeasure> &m
   return MetricsMeasure::Duration(avg);
 }
 
+MetricsMeasure::MetricsMeasure() : begin(0), end(0) {}
+
+void MetricsMeasure::start() {
+  begin = currentTimestamp();
+}
+
+void MetricsMeasure::finish() {
+  end = currentTimestamp();
+}
+
+MetricsMeasure::Duration MetricsMeasure::duration() const {
+  return (end - begin).count();
+}
+
+const char *MetricsMeasure::precision() {
+  return "ms";
+}
+
 void Metrics::beginLoadModules() {
   loadModules.begin = currentTimestamp();
 }
@@ -88,6 +106,22 @@ void Metrics::beginLoadOriginalProgram() {
 }
 void Metrics::endLoadOriginalProgram() {
   loadOriginalProgram.end = currentTimestamp();
+}
+
+void Metrics::beginOriginalTestExecution() {
+  originalTestsExecution.begin = currentTimestamp();
+}
+
+void Metrics::endOriginalTestExecution() {
+  originalTestsExecution.end = currentTimestamp();
+}
+
+void Metrics::beginMutantsExecution() {
+  mutantsExecution.begin = currentTimestamp();
+}
+
+void Metrics::endMutantsExecution() {
+  mutantsExecution.end = currentTimestamp();
 }
 
 void Metrics::beginRunOriginalTest(const Test *test) {
@@ -190,9 +224,10 @@ void Metrics::dump() const {
   cout << "Mutant compilation (avg): ......... " << average_duration(compileMutant) << MetricsMeasure::precision() << endl;
   cout << endl;
 
-  cout << "Tests run time (total): ........... " << accumulate_duration(runOriginalTest) << MetricsMeasure::precision() << endl;
-  cout << "Mutants run time (total): ......... " << totalMutantRunTime << MetricsMeasure::precision() << endl;
+  cout << "Tests run time (total): ........... " << originalTestsExecution.duration() << MetricsMeasure::precision() << endl;
+  cout << "Mutants run time (total): ......... " << mutantsExecution.duration() << MetricsMeasure::precision() << endl;
   cout << "Tests run time (avg): ............. " << average_duration(runOriginalTest) << MetricsMeasure::precision() << endl;
   cout << "Mutants run time (avg): ........... " << totalMutantRunTime / (mutantRuns.size() ? mutantRuns.size() : 1) << MetricsMeasure::precision() << endl;
   cout << endl;
 }
+
