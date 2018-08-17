@@ -285,7 +285,8 @@ TEST(SQLiteReporter, integrationTest_Config) {
                 Config::Diagnostics::None,
                 timeout, distance,
                 cacheDirectory,
-                JunkDetectionConfig::disabled());
+                JunkDetectionConfig::disabled(),
+                ParallelizationConfig::defaultConfig());
 
   SQLiteReporter reporter(config.getProjectName());
 
@@ -484,7 +485,8 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
                 Config::Diagnostics::None,
                 timeout, distance,
                 cacheDirectory,
-                JunkDetectionConfig::disabled());
+                JunkDetectionConfig::disabled(),
+                ParallelizationConfig::defaultConfig());
 
   SQLiteReporter reporter(projectName);
   Metrics metrics;
@@ -631,7 +633,8 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
                 Config::Diagnostics::None,
                 timeout, distance,
                 cacheDirectory,
-                JunkDetectionConfig::disabled());
+                JunkDetectionConfig::disabled(),
+                ParallelizationConfig::defaultConfig());
 
   SQLiteReporter reporter(projectName);
   Metrics metrics;

@@ -12,6 +12,19 @@
 using namespace llvm;
 using namespace mull;
 
+static void addDefaultCustomTests(Config &config) {
+  /// FIXME: I could not find a better place for this code.
+  if (config.getCustomTests().empty()) {
+    config.addCustomTest(CustomTestDefinition("main", "main", "mull", {}));
+    config.addCustomTest(CustomTestDefinition("main", "_main", "mull", {}));
+  }
+}
+
+static void fixupConfig(Config &config) {
+  addDefaultCustomTests(config);
+  config.normalizeParallelizationConfig();
+}
+
 Config ConfigParser::loadConfig(const char *filename) {
   auto bufferOrError = MemoryBuffer::getFile(filename);
   Config config;
@@ -29,11 +42,7 @@ Config ConfigParser::loadConfig(const char *filename) {
     }
   }
 
-  /// FIXME: I could not find a better place for this code.
-  if (config.getCustomTests().empty()) {
-    config.addCustomTest(CustomTestDefinition("main", "main", "mull", {}));
-    config.addCustomTest(CustomTestDefinition("main", "_main", "mull", {}));
-  }
+  fixupConfig(config);
 
   return config;
 }
@@ -41,11 +50,6 @@ Config ConfigParser::loadConfig(const char *filename) {
 Config ConfigParser::loadConfig(yaml::Input &input) {
   Config config;
   input >> config;
-
-  /// FIXME: I could not find a better place for this code.
-  if (config.getCustomTests().empty()) {
-    config.addCustomTest(CustomTestDefinition("main", "main", "mull", {}));
-    config.addCustomTest(CustomTestDefinition("main", "_main", "mull", {}));
-  }
+  fixupConfig(config);
   return config;
 }

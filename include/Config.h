@@ -3,6 +3,7 @@
 #include "Logger.h"
 
 #include <llvm/Support/YAMLTraits.h>
+#include <cstddef>
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -22,6 +23,15 @@ struct MappingTraits;
 }
 }
 namespace mull {
+
+struct ParallelizationConfig {
+  int workers;
+  int testExecutionWorkers;
+  int mutantExecutionWorkers;
+  ParallelizationConfig();
+  static ParallelizationConfig defaultConfig();
+  void normalize();
+};
 
 struct CustomTestDefinition {
   std::string testName;
@@ -115,6 +125,7 @@ private:
   std::string cacheDirectory;
 
   JunkDetectionConfig junkDetection;
+  ParallelizationConfig parallelizationConfig;
 
   friend llvm::yaml::MappingTraits<mull::Config>;
 public:
@@ -139,7 +150,8 @@ public:
          int timeout,
          int distance,
          const std::string &cacheDir,
-         JunkDetectionConfig junkDetection);
+         JunkDetectionConfig junkDetection,
+         ParallelizationConfig parallelizationConfig);
 
   const std::string &getProjectName() const;
   const std::string &getTestFramework() const;
@@ -164,6 +176,7 @@ public:
 
   JunkDetectionConfig &junkDetectionConfig();
   Diagnostics getDiagnostics() const;
+  const ParallelizationConfig parallelization() const;
 
   int getTimeout() const;
   int getMaxDistance() const;
@@ -174,6 +187,8 @@ public:
   bool failFastModeEnabled() const;
   bool shouldEmitDebugInfo() const;
   bool junkDetectionEnabled() const;
+
+  void normalizeParallelizationConfig();
 
   std::vector<std::string> validate();
   void dump() const;

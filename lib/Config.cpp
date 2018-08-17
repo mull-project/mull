@@ -8,6 +8,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+#include <thread>
 
 int MullDefaultTimeoutMilliseconds = 3000;
 
@@ -150,7 +151,8 @@ Config::Config() :
   timeout(MullDefaultTimeoutMilliseconds),
   maxDistance(128),
   cacheDirectory("/tmp/mull_cache"),
-  junkDetection()
+  junkDetection(),
+  parallelizationConfig()
 {}
 
 Config::Config(const std::string &bitcodeFileList,
@@ -172,7 +174,8 @@ Config::Config(const std::string &bitcodeFileList,
                int timeout,
                int distance,
                const std::string &cacheDir,
-               JunkDetectionConfig junkDetection) :
+               JunkDetectionConfig junkDetection,
+               ParallelizationConfig parallelizationConfig) :
 bitcodeFileList(bitcodeFileList),
 projectName(project),
 testFramework(testFramework),
@@ -192,7 +195,8 @@ diagnostics(diagnostics),
 timeout(timeout),
 maxDistance(distance),
 cacheDirectory(cacheDir),
-junkDetection(std::move(junkDetection))
+junkDetection(std::move(junkDetection)),
+parallelizationConfig(parallelizationConfig)
 {
 }
 
@@ -417,3 +421,34 @@ std::vector<std::string> Config::validate() {
   return errors;
 }
 
+const ParallelizationConfig Config::parallelization() const {
+  return parallelizationConfig;
+}
+
+void Config::normalizeParallelizationConfig() {
+  parallelizationConfig.normalize();
+}
+
+ParallelizationConfig::ParallelizationConfig()
+    : workers(0), testExecutionWorkers(0), mutantExecutionWorkers(0) {
+}
+
+void ParallelizationConfig::normalize() {
+  int defaultWorkers = std::max(std::thread::hardware_concurrency(), uint(1));
+  if (workers == 0) {
+    workers = defaultWorkers;
+  }
+  if (testExecutionWorkers == 0) {
+    testExecutionWorkers = workers;
+  }
+
+  if (mutantExecutionWorkers == 0) {
+    mutantExecutionWorkers = workers;
+  }
+}
+
+ParallelizationConfig ParallelizationConfig::defaultConfig() {
+  ParallelizationConfig config;
+  config.normalize();
+  return config;
+}
