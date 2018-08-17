@@ -144,8 +144,6 @@ Driver::findMutationPoints(std::vector<std::unique_ptr<Test>> &tests) {
   auto objectFiles = AllInstrumentedObjectFiles();
   JITEngine jit;
 
-  JITEngine jit;
-
   metrics.beginLoadOriginalProgram();
   runner.loadInstrumentedProgram(objectFiles, instrumentation, jit);
   metrics.endLoadOriginalProgram();
