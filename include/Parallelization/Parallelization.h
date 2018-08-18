@@ -10,3 +10,4 @@
 #include "Parallelization/Tasks/DryRunMutantExecutionTask.h"
 #include "Parallelization/Tasks/InstrumentedCompilationTask.h"
 #include "Parallelization/Tasks/OriginalTestExecutionTask.h"
+#include "Parallelization/Tasks/JunkDetectionTask.h"

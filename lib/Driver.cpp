@@ -129,9 +129,6 @@ std::vector<std::unique_ptr<Test>> Driver::findTests() {
   metrics.beginFindTests();
   auto tests = finder.findTests(context, filter);
   metrics.endFindTests();
-
-  Logger::debug() << "Found " << tests.size() << " tests\n";
-
   return tests;
 }
 
@@ -140,8 +137,6 @@ Driver::findMutationPoints(std::vector<std::unique_ptr<Test>> &tests) {
   if (tests.empty()) {
     return std::vector<MutationPoint *>();
   }
-
-  Logger::debug() << "Running tests and searching mutations\n";
 
   auto objectFiles = AllInstrumentedObjectFiles();
   JITEngine jit;
@@ -169,8 +164,6 @@ Driver::findMutationPoints(std::vector<std::unique_ptr<Test>> &tests) {
     std::vector<OwningBinary<ObjectFile>>().swap(instrumentedObjectFiles);
   }
 
-  Logger::debug() << "Found " << mutationPoints.size() << " mutations\n";
-
   return mutationPoints;
 }
 
@@ -178,13 +171,12 @@ std::vector<MutationPoint *>
 Driver::filterOutJunkMutations(std::vector<MutationPoint *> mutationPoints) {
   std::vector<MutationPoint *> nonJunkMutationPoints;
   if (config.junkDetectionEnabled()) {
-    for (auto point: mutationPoints) {
-      if (!junkDetector.isJunk(point)) {
-        nonJunkMutationPoints.push_back(point);
-      }
+    std::vector<JunkDetectionTask> tasks;
+    for (int i = 0; i < config.parallelization().workers; i++) {
+      tasks.emplace_back(junkDetector);
     }
-    auto junkSize = mutationPoints.size() - nonJunkMutationPoints.size();
-    Logger::debug() << "Filtered out " << junkSize << " junk mutations\n";
+    TaskExecutor<JunkDetectionTask> mutantRunner("Filtering out junk mutations", mutationPoints, nonJunkMutationPoints, std::move(tasks));
+    mutantRunner.execute();
   } else {
     mutationPoints.swap(nonJunkMutationPoints);
   }
