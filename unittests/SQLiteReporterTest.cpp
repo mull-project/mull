@@ -52,9 +52,11 @@ TEST(SQLiteReporter, integrationTest) {
   Function *testeeFunction = context.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(testeeFunction->empty());
 
-  Testee testee(testeeFunction, test.get(), 1);
+  std::vector<std::unique_ptr<Testee>> testees;
+  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
+  auto mergedTestees = mergeTestees(testees);
 
-  std::vector<MutationPoint *> mutationPoints = mutationsFinder.getMutationPoints(context, testee, filter);
+  std::vector<MutationPoint *> mutationPoints = mutationsFinder.getMutationPoints(context, mergedTestees, filter);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -88,7 +90,7 @@ TEST(SQLiteReporter, integrationTest) {
 
   auto mutationResult = make_unique<MutationResult>(mutatedTestExecutionResult,
                                                     mutationPoint,
-                                                    testee.getDistance(),
+                                                    testees.front()->getDistance(),
                                                     test.get());
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
@@ -410,10 +412,12 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   Function *testeeFunction = context.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(testeeFunction->empty());
 
-  Testee testee(testeeFunction, test.get(), 1);
+  std::vector<std::unique_ptr<Testee>> testees;
+  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
+  auto mergedTestees = mergeTestees(testees);
 
   std::vector<MutationPoint *> mutationPoints =
-    mutationsFinder.getMutationPoints(context, testee, filter);
+    mutationsFinder.getMutationPoints(context, mergedTestees, filter);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -438,7 +442,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
 
   auto mutationResult = make_unique<MutationResult>(mutatedTestExecutionResult,
                                                     mutationPoint,
-                                                    testee.getDistance(),
+                                                    testees.front()->getDistance(),
                                                     test.get());
   mutationResults.push_back(std::move(mutationResult));
 
@@ -558,10 +562,12 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   Function *testeeFunction = context.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(testeeFunction->empty());
 
-  Testee testee(testeeFunction, test.get(), 1);
+  std::vector<std::unique_ptr<Testee>> testees;
+  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
+  auto mergedTestees = mergeTestees(testees);
 
   std::vector<MutationPoint *> mutationPoints =
-    mutationsFinder.getMutationPoints(context, testee, filter);
+    mutationsFinder.getMutationPoints(context, mergedTestees, filter);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -586,7 +592,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
 
   auto mutationResult = make_unique<MutationResult>(mutatedTestExecutionResult,
                                                     mutationPoint,
-                                                    testee.getDistance(),
+                                                    testees.front()->getDistance(),
                                                     test.get());
   mutationResults.push_back(std::move(mutationResult));
 

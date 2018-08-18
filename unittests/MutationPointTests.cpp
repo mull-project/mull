@@ -55,11 +55,13 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
 
   Function *testeeFunction = Ctx.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(testeeFunction->empty());
-  Testee testee(testeeFunction, nullptr, 0);
+  std::vector<std::unique_ptr<Testee>> testees;
+  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
+  auto mergedTestees = mergeTestees(testees);
 
   Filter filter;
   std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(Ctx,
-                                                                         testee,
+                                                                         mergedTestees,
                                                                          filter);
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -100,10 +102,12 @@ TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
 
   Function *testeeFunction = Ctx.lookupDefinedFunction("math_sub");
   ASSERT_FALSE(testeeFunction->empty());
-  Testee testee(testeeFunction, nullptr, 1);
+  std::vector<std::unique_ptr<Testee>> testees;
+  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
+  auto mergedTestees = mergeTestees(testees);
   Filter filter;
 
-  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(Ctx, testee, filter);
+  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(Ctx, mergedTestees, filter);
   ASSERT_EQ(1U, mutationPoints.size());
 
   MutationPoint *MP = (*(mutationPoints.begin()));
@@ -144,10 +148,12 @@ TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
 
   Function *testeeFunction = Ctx.lookupDefinedFunction("math_mul");
   ASSERT_FALSE(testeeFunction->empty());
-  Testee testee(testeeFunction, nullptr, 1);
+  std::vector<std::unique_ptr<Testee>> testees;
+  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
+  auto mergedTestees = mergeTestees(testees);
   Filter filter;
 
-  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(Ctx, testee, filter);
+  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(Ctx, mergedTestees, filter);
 
   ASSERT_EQ(mutationPoints.size(), 1UL);
 
@@ -190,11 +196,13 @@ TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
 
   Function *testeeFunction = Ctx.lookupDefinedFunction("math_div");
   ASSERT_FALSE(testeeFunction->empty());
-  Testee testee(testeeFunction, nullptr, 1);
+  std::vector<std::unique_ptr<Testee>> testees;
+  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
+  auto mergedTestees = mergeTestees(testees);
   Filter filter;
 
   std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(Ctx,
-                                                                         testee,
+                                                                         mergedTestees,
                                                                          filter);
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -238,10 +246,12 @@ TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
 
   Function *testeeFunction = Ctx.lookupDefinedFunction("max");
   ASSERT_FALSE(testeeFunction->empty());
-  Testee testee(testeeFunction, nullptr, 1);
+  std::vector<std::unique_ptr<Testee>> testees;
+  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
+  auto mergedTestees = mergeTestees(testees);
   Filter filter;
 
-  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(Ctx, testee, filter);
+  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(Ctx, mergedTestees, filter);
   ASSERT_EQ(1U, mutationPoints.size());
 
   MutationPoint *MP = (*(mutationPoints.begin()));
@@ -280,10 +290,12 @@ TEST(MutationPoint, SimpleTest_AndOrMutator_applyMutation) {
 
   {
     Function *testeeFunction = ctx.lookupDefinedFunction("testee_AND_operator_2branches");
-    Testee testee(testeeFunction, nullptr, 1);
+    std::vector<std::unique_ptr<Testee>> testees;
+    testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
+    auto mergedTestees = mergeTestees(testees);
 
     std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(ctx,
-                                                                           testee,
+                                                                           mergedTestees,
                                                                            filter);
 
     ASSERT_EQ(1U, mutationPoints.size());
@@ -326,10 +338,12 @@ TEST(MutationPoint, SimpleTest_ScalarValueMutator_applyMutation) {
 
   Function *testeeFunction = Ctx.lookupDefinedFunction("scalar_value");
   ASSERT_FALSE(testeeFunction->empty());
-  Testee testee(testeeFunction, nullptr, 1);
+  std::vector<std::unique_ptr<Testee>> testees;
+  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
+  auto mergedTestees = mergeTestees(testees);
   Filter filter;
 
-  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(Ctx, testee, filter);
+  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(Ctx, mergedTestees, filter);
   ASSERT_EQ(4U, mutationPoints.size());
 
   MutationPoint *mutationPoint1 = mutationPoints[0];
@@ -350,7 +364,7 @@ TEST(MutationPoint, SimpleTest_ScalarValueMutator_applyMutation) {
 
   LLVMContext localContext;
   auto ownedMutatedModule = mutationPoint1->getOriginalModule()->clone(localContext);
-  mutationPoint1->applyMutation(*ownedMutatedModule.get());
+  mutationPoint1->applyMutation(*ownedMutatedModule);
 
   Function *mutatedTestee = ownedMutatedModule->getModule()->getFunction("scalar_value");
   ASSERT_TRUE(mutatedTestee != nullptr);
@@ -380,10 +394,12 @@ TEST(MutationPoint, SimpleTest_ReplaceCallMutator_applyMutation) {
 
   Function *testeeFunction = Ctx.lookupDefinedFunction("replace_call");
   ASSERT_FALSE(testeeFunction->empty());
-  Testee testee(testeeFunction, nullptr, 1);
+  std::vector<std::unique_ptr<Testee>> testees;
+  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
+  auto mergedTestees = mergeTestees(testees);
   Filter filter;
 
-  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(Ctx, testee, filter);
+  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(Ctx, mergedTestees, filter);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -393,7 +409,7 @@ TEST(MutationPoint, SimpleTest_ReplaceCallMutator_applyMutation) {
 
   LLVMContext localContext;
   auto ownedMutatedModule = mutationPoint1->getOriginalModule()->clone(localContext);
-  mutationPoint1->applyMutation(*ownedMutatedModule.get());
+  mutationPoint1->applyMutation(*ownedMutatedModule);
 
   Function *mutatedTestee = ownedMutatedModule->getModule()->getFunction("replace_call");
   ASSERT_TRUE(mutatedTestee != nullptr);
@@ -417,10 +433,12 @@ TEST(MutationPoint, SimpleTest_ReplaceAssignmentMutator_applyMutation) {
 
     Function *testeeFunction = Ctx.lookupDefinedFunction("replace_assignment");
     ASSERT_FALSE(testeeFunction->empty());
-    Testee testee(testeeFunction, nullptr, 1);
+    std::vector<std::unique_ptr<Testee>> testees;
+    testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
+    auto mergedTestees = mergeTestees(testees);
     Filter filter;
 
-    std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(Ctx, testee, filter);
+    std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(Ctx, mergedTestees, filter);
 
     EXPECT_EQ(2U, mutationPoints.size());
 
