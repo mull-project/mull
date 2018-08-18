@@ -35,9 +35,9 @@ TEST(SimpleTestRunner, runTest) {
                                 EngineBuilder().selectTarget(Triple(), "", "",
                                 SmallVector<std::string, 1>()));
 
-  Compiler compiler(*targetMachine.get());
+  Compiler compiler;
   Context Ctx;
-  SimpleTestRunner Runner(*targetMachine.get());
+  SimpleTestRunner Runner(*targetMachine);
   SimpleTestRunner::ObjectFiles ObjectFiles;
   SimpleTestRunner::OwnedObjectFiles OwnedObjectFiles;
 
@@ -64,13 +64,13 @@ TEST(SimpleTestRunner, runTest) {
   auto &Test = *(Tests.begin());
 
   {
-    auto Obj = compiler.compileModule(ModuleWithTests);
+    auto Obj = compiler.compileModule(ModuleWithTests, *targetMachine);
     ObjectFiles.push_back(Obj.getBinary());
     OwnedObjectFiles.push_back(std::move(Obj));
   }
 
   {
-    auto Obj = compiler.compileModule(ModuleWithTestees);
+    auto Obj = compiler.compileModule(ModuleWithTestees, *targetMachine);
     ObjectFiles.push_back(Obj.getBinary());
     OwnedObjectFiles.push_back(std::move(Obj));
   }
@@ -101,13 +101,13 @@ TEST(SimpleTestRunner, runTest) {
   MP->applyMutation(*ownedMutatedTesteeModule);
 
   {
-    auto Obj = compiler.compileModule(ModuleWithTests);
+    auto Obj = compiler.compileModule(ModuleWithTests, *targetMachine);
     ObjectFiles.push_back(Obj.getBinary());
     OwnedObjectFiles.push_back(std::move(Obj));
   }
 
   {
-    auto Obj = compiler.compileModule(ownedMutatedTesteeModule->getModule());
+    auto Obj = compiler.compileModule(ownedMutatedTesteeModule->getModule(), *targetMachine);
     ObjectFiles.push_back(Obj.getBinary());
     OwnedObjectFiles.push_back(std::move(Obj));
   }
