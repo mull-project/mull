@@ -5,3 +5,4 @@
 #include "Parallelization/TaskExecutor.h"
 
 #include "Parallelization/Tasks/ModuleLoadingTask.h"
+#include "Parallelization/Tasks/SearchMutationPointsTask.h"

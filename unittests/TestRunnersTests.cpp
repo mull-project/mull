@@ -49,10 +49,12 @@ TEST(SimpleTestRunner, runTest) {
 
   Ctx.addModule(std::move(OwnedModuleWithTests));
   Ctx.addModule(std::move(OwnedModuleWithTestees));
+  Config config;
+  config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
-  MutationsFinder mutationsFinder(std::move(mutators));
+  MutationsFinder mutationsFinder(std::move(mutators), config);
   Filter filter;
 
   SimpleTestFinder testFinder;

@@ -26,10 +26,12 @@ TEST(ConditionalsBoundaryMutator, findMutations) {
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
+  Config config;
+  config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<ConditionalsBoundaryMutator>());
-  MutationsFinder finder(std::move(mutators));
+  MutationsFinder finder(std::move(mutators), config);
   Filter filter;
 
   std::vector<std::unique_ptr<Testee>> testees;
@@ -50,10 +52,12 @@ TEST(ConditionalsBoundaryMutator, applyMutations) {
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
+  Config config;
+  config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<ConditionalsBoundaryMutator>());
-  MutationsFinder finder(std::move(mutators));
+  MutationsFinder finder(std::move(mutators), config);
   Filter filter;
 
   std::vector<std::unique_ptr<Testee>> testees;

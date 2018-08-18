@@ -91,9 +91,12 @@ TEST(NegateConditionMutator, getMutationPoints_no_filter) {
   Context context;
   context.addModule(std::move(module));
 
+  Config config;
+  config.normalizeParallelizationConfig();
+
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<NegateConditionMutator>());
-  MutationsFinder finder(std::move(mutators));
+  MutationsFinder finder(std::move(mutators), config);
   Filter filter;
 
   auto mutationPoints = finder.getMutationPoints(context, mergedTestees, filter);
@@ -116,10 +119,12 @@ TEST(NegateConditionMutator, getMutationPoints_filter_to_bool_converion) {
 
   Context context;
   context.addModule(std::move(module));
+  Config config;
+  config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<NegateConditionMutator>());
-  MutationsFinder finder(std::move(mutators));
+  MutationsFinder finder(std::move(mutators), config);
   Filter filter;
 
   auto mergedTestees = mergeTestees(testees);
@@ -141,10 +146,12 @@ TEST(NegateConditionMutator, getMutationPoints_filter_is_null) {
 
   Context context;
   context.addModule(std::move(module));
+  Config config;
+  config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<NegateConditionMutator>());
-  MutationsFinder finder(std::move(mutators));
+  MutationsFinder finder(std::move(mutators), config);
   Filter filter;
 
   auto mutationPoints = finder.getMutationPoints(context, mergedTestees, filter);
