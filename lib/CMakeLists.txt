@@ -71,6 +71,8 @@ set(mull_sources
   Parallelization/Tasks/InstrumentedCompilationTask.cpp
   Parallelization/Tasks/OriginalTestExecutionTask.cpp
   Parallelization/Tasks/JunkDetectionTask.cpp
+  Parallelization/Tasks/MutantExecutionTask.cpp
+  Parallelization/Tasks/OriginalCompilationTask.cpp
 )
 
 set(mull_header_dirs

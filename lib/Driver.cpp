@@ -216,93 +216,29 @@ Driver::dryRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
 }
 
 std::vector<std::unique_ptr<MutationResult>> Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
-  for (auto &module : context.getModules()) {
-    metrics.beginCompileOriginalModule(module->getModule());
-    auto objectFile = toolchain.cache().getObject(*module);
-    if (objectFile.getBinary() == nullptr) {
-      LLVMContext localContext;
-      auto clonedModule = module->clone(localContext);
-      objectFile = toolchain.compiler().compileModule(*clonedModule, toolchain.targetMachine());
-      toolchain.cache().putObject(objectFile, *module);
-    }
+  std::vector<OriginalCompilationTask> compilationTasks;
+  for (int i = 0; i < config.parallelization().workers; i++) {
+    compilationTasks.emplace_back(toolchain);
+  }
+  TaskExecutor<OriginalCompilationTask> mutantCompiler("Compiling original code", context.getModules(), ownedObjectFiles, std::move(compilationTasks));
+  mutantCompiler.execute();
 
+  for (size_t i = 0; i < ownedObjectFiles.size(); i++) {
+    auto &module = context.getModules().at(i);
+    auto &objectFile = ownedObjectFiles.at(i);
     innerCache.insert(std::make_pair(module->getModule(), objectFile.getBinary()));
-    ownedObjectFiles.push_back(std::move(objectFile));
-    metrics.endCompileOriginalModule(module->getModule());
   }
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
 
-  const auto mutationsCount = mutationPoints.size();
-  auto mutantIndex = 1;
-
-  JITEngine jit;
-
-  for (auto mutationPoint : mutationPoints) {
-    auto objectFilesWithMutant = AllButOne(mutationPoint->getOriginalModule()->getModule());
-
-    Logger::debug() << "[" << mutantIndex++ << "/" << mutationsCount << "]: "  << mutationPoint->getUniqueIdentifier() << "\n";
-
-    metrics.beginCompileMutant(mutationPoint);
-    auto mutant = toolchain.cache().getObject(*mutationPoint);
-    if (mutant.getBinary() == nullptr) {
-      LLVMContext localContext;
-      auto clonedModule = mutationPoint->getOriginalModule()->clone(localContext);
-      mutationPoint->applyMutation(*clonedModule.get());
-      mutant = toolchain.compiler().compileModule(*clonedModule, toolchain.targetMachine());
-      toolchain.cache().putObject(mutant, *mutationPoint);
-    }
-    metrics.endCompileMutant(mutationPoint);
-
-    objectFilesWithMutant.push_back(mutant.getBinary());
-
-    metrics.beginLoadMutatedProgram(mutationPoint);
-    runner.loadProgram(objectFilesWithMutant, jit);
-    metrics.endLoadMutatedProgram(mutationPoint);
-
-    auto testsCount = mutationPoint->getReachableTests().size();
-    auto testIndex = 1;
-
-    auto atLeastOneTestFailed = false;
-    for (auto &reachableTest : mutationPoint->getReachableTests()) {
-      auto test = reachableTest.first;
-      auto distance = reachableTest.second;
-
-      Logger::debug().indent(2) << "[" << testIndex++ << "/" << testsCount << "] " << test->getTestDisplayName() << ": ";
-
-      metrics.beginRunMutant(mutationPoint, test);
-
-      ExecutionResult result;
-      if (config.failFastModeEnabled() && atLeastOneTestFailed) {
-        result.status = ExecutionStatus::FailFast;
-      } else {
-        const auto timeout = test->getExecutionResult().runningTime * 10;
-        const auto sandboxTimeout = std::max(30LL, timeout);
-
-        result = sandbox->run([&]() {
-          ExecutionStatus status = runner.runTest(test, jit);
-          assert(status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
-          return status;
-        }, sandboxTimeout);
-
-        assert(result.status != ExecutionStatus::Invalid &&
-               "Expect to see valid TestResult");
-
-        if (result.status != ExecutionStatus::Passed) {
-          atLeastOneTestFailed = true;
-        }
-      }
-      metrics.endRunMutant(mutationPoint, test);
-
-      Logger::debug() << result.getStatusAsString() << "\n";
-
-      mutationResults.push_back(make_unique<MutationResult>(result, mutationPoint, distance, test));
-    }
-
-    diagnostics->report(mutationPoint, atLeastOneTestFailed);
-
-    objectFilesWithMutant.pop_back();
+  std::vector<MutantExecutionTask> tasks;
+  for (int i = 0; i < config.parallelization().mutantExecutionWorkers; i++) {
+    tasks.emplace_back(*this, *sandbox, runner, config, toolchain, filter);
   }
+  metrics.beginMutantsExecution();
+  TaskExecutor<MutantExecutionTask> mutantRunner("Running mutants", mutationPoints, mutationResults, std::move(tasks));
+  mutantRunner.execute();
+  metrics.endMutantsExecution();
 
   return mutationResults;
 }

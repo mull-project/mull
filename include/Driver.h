@@ -75,6 +75,8 @@ public:
 
   std::unique_ptr<Result> Run();
 
+  /// Returns cached object files for all modules excerpt one provided
+  std::vector<llvm::object::ObjectFile *> AllButOne(llvm::Module *One);
 private:
   void loadBitcodeFilesIntoMemory();
   void compileInstrumentedBitcodeFiles();
@@ -86,9 +88,6 @@ private:
   std::vector<MutationPoint *> filterOutJunkMutations(std::vector<MutationPoint *> mutationPoints);
 
   std::vector<std::unique_ptr<MutationResult>> runMutations(std::vector<MutationPoint *> &mutationPoints);
-
-  /// Returns cached object files for all modules excerpt one provided
-  std::vector<llvm::object::ObjectFile *> AllButOne(llvm::Module *One);
 
   std::vector<llvm::object::ObjectFile *> AllInstrumentedObjectFiles();
 
