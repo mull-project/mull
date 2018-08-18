@@ -81,27 +81,25 @@ void Driver::loadBitcodeFilesIntoMemory() {
 }
 
 void Driver::compileInstrumentedBitcodeFiles() {
+  metrics.beginInstrumentedCompilation();
+
   for (auto &ownedModule : context.getModules()) {
-    MullModule &module = *ownedModule.get();
-
+    MullModule &module = *ownedModule;
     instrumentation.recordFunctions(module.getModule());
-
-    metrics.beginCompileInstrumentedModule(module.getModule());
-
-    auto objectFile = toolchain.cache().getInstrumentedObject(module);
-    if (objectFile.getBinary() == nullptr) {
-      LLVMContext instrumentationContext;
-      auto clonedModule = module.clone(instrumentationContext);
-
-      instrumentation.insertCallbacks(clonedModule->getModule());
-      objectFile = toolchain.compiler().compileModule(*clonedModule, toolchain.targetMachine());
-      toolchain.cache().putInstrumentedObject(objectFile, module);
-    }
-
-    instrumentedObjectFiles.push_back(std::move(objectFile));
-
-    metrics.endCompileInstrumentedModule(module.getModule());
   }
+
+  std::vector<InstrumentedCompilationTask> tasks;
+  for (int i = 0; i < config.parallelization().workers; i++) {
+    tasks.emplace_back(instrumentation, toolchain);
+  }
+
+  TaskExecutor<InstrumentedCompilationTask> compiler("Compiling instrumented code",
+                                                     context.getModules(),
+                                                     instrumentedObjectFiles,
+                                                     tasks);
+  compiler.execute();
+
+  metrics.endInstrumentedCompilation();
 }
 
 void Driver::loadPrecompiledObjectFiles() {
