@@ -114,8 +114,6 @@ void Driver::loadPrecompiledObjectFiles() {
                                            precompiledObjectFiles,
                                            tasks);
   loader.execute();
-
-
   metrics.endLoadPrecompiledObjectFiles();
 }
 
@@ -152,46 +150,18 @@ Driver::findMutationPoints(std::vector<std::unique_ptr<Test>> &tests) {
   runner.loadInstrumentedProgram(objectFiles, instrumentation, jit);
   metrics.endLoadOriginalProgram();
 
-  auto testIndex = 1;
-  auto testsCount = tests.size();
-  std::vector<std::unique_ptr<Testee>> allTestees;
-
-  for (auto &test : tests) {
-    Logger::debug().indent(2) << "[" << testIndex++ << "/" << testsCount << "] " << test->getTestDisplayName() << ": ";
-
-    instrumentation.setupInstrumentationInfo(test.get());
-
-    metrics.beginRunOriginalTest(test.get());
-    ExecutionResult testExecutionResult = sandbox->run([&]() {
-      return runner.runTest(test.get(), jit);
-    }, config.getTimeout());
-    metrics.endRunOriginalTest(test.get());
-
-    Logger::debug() << testExecutionResult.getStatusAsString() << "\n";
-
-    test->setExecutionResult(testExecutionResult);
-
-    std::vector<std::unique_ptr<Testee>> testees;
-
-    metrics.beginFindMutationsForTest(test.get());
-    if (testExecutionResult.status == Passed) {
-      testees = instrumentation.getTestees(test.get(), filter, config.getMaxDistance());
-    }
-    instrumentation.cleanupInstrumentationInfo(test.get());
-
-    if (testees.empty()) {
-      metrics.endFindMutationsForTest(test.get());
-      continue;
-    }
-
-    for (auto it = std::next(testees.begin()); it != testees.end(); ++it) {
-      allTestees.push_back(std::move(*it));
-    }
-
-    metrics.endFindMutationsForTest(test.get());
+  std::vector<OriginalTestExecutionTask> tasks;
+  for (int i = 0; i < config.parallelization().testExecutionWorkers; i++) {
+    tasks.emplace_back(instrumentation, *sandbox, runner, config, filter, jit);
   }
 
-  auto mergedTestees = mergeTestees(allTestees);
+  metrics.beginOriginalTestExecution();
+  std::vector<std::unique_ptr<Testee>> testees;
+  TaskExecutor<OriginalTestExecutionTask> testRunner("Running original tests", tests, testees, tasks);
+  testRunner.execute();
+  metrics.endOriginalTestExecution();
+
+  auto mergedTestees = mergeTestees(testees);
   std::vector<MutationPoint *> mutationPoints = mutationsFinder.getMutationPoints(context, mergedTestees, filter);
 
   {

@@ -9,3 +9,4 @@
 #include "Parallelization/Tasks/LoadObjectFilesTask.h"
 #include "Parallelization/Tasks/DryRunMutantExecutionTask.h"
 #include "Parallelization/Tasks/InstrumentedCompilationTask.h"
+#include "Parallelization/Tasks/OriginalTestExecutionTask.h"
