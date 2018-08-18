@@ -243,32 +243,14 @@ std::vector<std::unique_ptr<MutationResult>>
 Driver::dryRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
 
-  const auto mutationsCount = mutationPoints.size();
-  auto mutantIndex = 1;
-
-  for (auto mutationPoint : mutationPoints) {
-    Logger::debug() << "[" << mutantIndex++ << "/" << mutationsCount << "]: "  << mutationPoint->getUniqueIdentifier() << "\n";
-
-    auto testsCount = mutationPoint->getReachableTests().size();
-    auto testIndex = 1;
-
-    for (auto &reachableTest : mutationPoint->getReachableTests()) {
-      auto test = reachableTest.first;
-      auto distance = reachableTest.second;
-
-      Logger::debug().indent(2) << "[" << testIndex++ << "/" << testsCount << "] " << test->getTestDisplayName() << ": ";
-
-      auto timeout = test->getExecutionResult().runningTime * 10;
-
-      ExecutionResult result;
-      result.status = DryRun;
-      result.runningTime = timeout;
-
-      Logger::debug() << result.getStatusAsString() << "\n";
-
-      mutationResults.push_back(make_unique<MutationResult>(result, mutationPoint, distance, test));
-    }
+  std::vector<DryRunMutantExecutionTask> tasks;
+  for (int i = 0; i < config.parallelization().workers; i++) {
+    tasks.emplace_back(DryRunMutantExecutionTask());
   }
+  metrics.beginMutantsExecution();
+  TaskExecutor<DryRunMutantExecutionTask> mutantRunner("Running mutants (dry run)", mutationPoints, mutationResults, std::move(tasks));
+  mutantRunner.execute();
+  metrics.endMutantsExecution();
 
   return mutationResults;
 }
