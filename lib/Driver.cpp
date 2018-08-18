@@ -70,7 +70,7 @@ void Driver::loadBitcodeFilesIntoMemory() {
   metrics.beginLoadModules();
   std::vector<std::string> bitcodePaths = config.getBitcodePaths();
   std::vector<unique_ptr<MullModule>> modules =
-    loader.loadModulesFromBitcodeFileList(bitcodePaths);
+      loader.loadModulesFromBitcodeFileList(bitcodePaths, config);
   metrics.endLoadModules();
 
   for (auto &ownedModule : modules) {

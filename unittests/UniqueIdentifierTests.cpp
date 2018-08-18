@@ -16,8 +16,8 @@ static TestModuleFactory testModuleFactory;
 
 TEST(MullModule, uniqueIdentifier) {
   LLVMContext context;
-  ModuleLoader loader(context);
-  auto module = loader.loadModuleAtPath(testModuleFactory.testerModulePath_Bitcode());
+  ModuleLoader loader;
+  auto module = loader.loadModuleAtPath(testModuleFactory.testerModulePath_Bitcode(), context);
 
   string moduleName = "fixture_simple_test_tester_module";
   string moduleMD5  = "de5070f8606cc2a8ee794b2ab56b31f2";
@@ -28,8 +28,8 @@ TEST(MullModule, uniqueIdentifier) {
 
 TEST(MutationPoint, uniqueIdentifier) {
   LLVMContext context;
-  ModuleLoader loader(context);
-  auto module = loader.loadModuleAtPath(testModuleFactory.testerModulePath_Bitcode());
+  ModuleLoader loader;
+  auto module = loader.loadModuleAtPath(testModuleFactory.testerModulePath_Bitcode(), context);
 
   MutationPointAddress address(2, 3, 5);
   MathAddMutator mutator;

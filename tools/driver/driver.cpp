@@ -77,8 +77,7 @@ int main(int argc, char *argv[]) {
   InitializeNativeTargetAsmPrinter();
   InitializeNativeTargetAsmParser();
 
-  LLVMContext Ctx;
-  ModuleLoader Loader(Ctx);
+  ModuleLoader Loader;
   Toolchain toolchain(config);
   Filter filter;
 

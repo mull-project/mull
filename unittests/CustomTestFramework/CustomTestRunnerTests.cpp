@@ -30,9 +30,10 @@ static vector<unique_ptr<MullModule>> loadTestModules() {
 
     return modules;
   };
-
+  Config config;
+  config.normalizeParallelizationConfig();
   FakeModuleLoader loader(context, modules);
-  return loader.loadModulesFromBitcodeFileList({""});
+  return loader.loadModulesFromBitcodeFileList({""}, config);
 }
 
 TEST(CustomTestRunner, noTestNameSpecified) {
