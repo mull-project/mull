@@ -4,7 +4,6 @@
 #include "gtest/gtest.h"
 
 using namespace mull;
-//using namespace llvm;
 
 /// The timeout should be long enough to overlive the unit test suite running
 /// on a cold start (fresh start without a "warmup").

@@ -27,10 +27,12 @@ TEST(CXXJunkDetector, boundary_mutator) {
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
+  Config config;
+  config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutatorss;
   mutatorss.emplace_back(make_unique<ConditionalsBoundaryMutator>());
-  MutationsFinder finder(std::move(mutatorss));
+  MutationsFinder finder(std::move(mutatorss), config);
   Filter filter;
 
   std::vector<std::unique_ptr<Testee>> testees;
@@ -62,10 +64,12 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
+  Config config;
+  config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutatorss;
   mutatorss.emplace_back(make_unique<ConditionalsBoundaryMutator>());
-  MutationsFinder finder(std::move(mutatorss));
+  MutationsFinder finder(std::move(mutatorss), config);
   Filter filter;
 
   std::vector<std::unique_ptr<Testee>> testees;
@@ -96,10 +100,12 @@ TEST(CXXJunkDetector, compdb_relative_paths) {
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
+  Config config;
+  config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutatorss;
   mutatorss.emplace_back(make_unique<ConditionalsBoundaryMutator>());
-  MutationsFinder finder(std::move(mutatorss));
+  MutationsFinder finder(std::move(mutatorss), config);
   Filter filter;
 
   std::vector<std::unique_ptr<Testee>> testees;
@@ -131,10 +137,12 @@ TEST(CXXJunkDetector, no_compdb) {
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
+  Config config;
+  config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutatorss;
   mutatorss.emplace_back(make_unique<ConditionalsBoundaryMutator>());
-  MutationsFinder finder(std::move(mutatorss));
+  MutationsFinder finder(std::move(mutatorss), config);
   Filter filter;
 
   std::vector<std::unique_ptr<Testee>> testees;

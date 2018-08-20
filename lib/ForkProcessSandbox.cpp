@@ -18,13 +18,14 @@
 using namespace std::chrono;
 
 static pid_t mullFork(const char *processName) {
-  static int childrenCount = 0;
-  childrenCount++;
+//  static int childrenCount = 0;
+//  childrenCount++;
   const pid_t pid = fork();
   if (pid == -1) {
     mull::Logger::error() << "Failed to create " << processName
-                            << " after creating " << childrenCount
-                            << " child processes\n";
+//                            << " after creating " << childrenCount
+//                            << " child processes\n";
+                          << "\n";
     mull::Logger::error() << strerror(errno) << "\n";
     mull::Logger::error() << "Shutting down\n";
     exit(1);
@@ -63,7 +64,7 @@ void handle_alarm_signal(int signal, siginfo_t *info, void *context) {
 }
 
 void handle_timeout(long long timeoutMilliseconds) {
-  struct sigaction action{};
+  struct sigaction action;
   memset(&action, 0, sizeof(action));
   action.sa_sigaction = &handle_alarm_signal;
   if (sigaction(SIGALRM, &action, nullptr) != 0) {
@@ -71,7 +72,7 @@ void handle_timeout(long long timeoutMilliseconds) {
     abort();
   }
 
-  struct itimerval timer{};
+  struct itimerval timer;
   timer.it_value.tv_sec = timeoutMilliseconds / 1000;
   /// Cut off seconds, and convert what's left into microseconds
   timer.it_value.tv_usec = (timeoutMilliseconds % 1000) * 1000;

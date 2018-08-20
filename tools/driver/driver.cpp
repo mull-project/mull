@@ -77,8 +77,7 @@ int main(int argc, char *argv[]) {
   InitializeNativeTargetAsmPrinter();
   InitializeNativeTargetAsmParser();
 
-  LLVMContext Ctx;
-  ModuleLoader Loader(Ctx);
+  ModuleLoader Loader;
   Toolchain toolchain(config);
   Filter filter;
 
@@ -97,7 +96,7 @@ int main(int argc, char *argv[]) {
 
   auto mutatorsFactory = MutatorsFactory();
   auto mutators = mutatorsFactory.mutators(config.getMutators());
-  MutationsFinder mutationsFinder(std::move(mutators));
+  MutationsFinder mutationsFinder(std::move(mutators), config);
 
   if (testFramework == "GoogleTest") {
     filter.skipByName("testing8internal");

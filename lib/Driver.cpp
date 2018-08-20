@@ -13,6 +13,7 @@
 #include "Metrics/Metrics.h"
 #include "JunkDetection/JunkDetector.h"
 #include "Toolchain/JITEngine.h"
+#include "Parallelization/Parallelization.h"
 
 #include <llvm/Support/DynamicLibrary.h>
 
@@ -70,7 +71,7 @@ void Driver::loadBitcodeFilesIntoMemory() {
   metrics.beginLoadModules();
   std::vector<std::string> bitcodePaths = config.getBitcodePaths();
   std::vector<unique_ptr<MullModule>> modules =
-    loader.loadModulesFromBitcodeFileList(bitcodePaths);
+      loader.loadModulesFromBitcodeFileList(bitcodePaths, config);
   metrics.endLoadModules();
 
   for (auto &ownedModule : modules) {
@@ -80,54 +81,39 @@ void Driver::loadBitcodeFilesIntoMemory() {
 }
 
 void Driver::compileInstrumentedBitcodeFiles() {
+  metrics.beginInstrumentedCompilation();
+
   for (auto &ownedModule : context.getModules()) {
-    MullModule &module = *ownedModule.get();
-
+    MullModule &module = *ownedModule;
     instrumentation.recordFunctions(module.getModule());
-
-    metrics.beginCompileInstrumentedModule(module.getModule());
-
-    auto objectFile = toolchain.cache().getInstrumentedObject(module);
-    if (objectFile.getBinary() == nullptr) {
-      LLVMContext instrumentationContext;
-      auto clonedModule = module.clone(instrumentationContext);
-
-      instrumentation.insertCallbacks(clonedModule->getModule());
-      objectFile = toolchain.compiler().compileModule(*clonedModule, toolchain.targetMachine());
-      toolchain.cache().putInstrumentedObject(objectFile, module);
-    }
-
-    instrumentedObjectFiles.push_back(std::move(objectFile));
-
-    metrics.endCompileInstrumentedModule(module.getModule());
   }
+
+  std::vector<InstrumentedCompilationTask> tasks;
+  for (int i = 0; i < config.parallelization().workers; i++) {
+    tasks.emplace_back(instrumentation, toolchain);
+  }
+
+  TaskExecutor<InstrumentedCompilationTask> compiler("Compiling instrumented code",
+                                                     context.getModules(),
+                                                     instrumentedObjectFiles,
+                                                     tasks);
+  compiler.execute();
+
+  metrics.endInstrumentedCompilation();
 }
 
 void Driver::loadPrecompiledObjectFiles() {
   metrics.beginLoadPrecompiledObjectFiles();
-  for (std::string &objectFilePath: config.getObjectFilesPaths()) {
-    ErrorOr<std::unique_ptr<MemoryBuffer>> buffer =
-    MemoryBuffer::getFile(objectFilePath.c_str());
-
-    if (!buffer) {
-      Logger::error() << "Cannot load object file: " << objectFilePath << "\n";
-      continue;
-    }
-
-    Expected<std::unique_ptr<ObjectFile>> objectOrError =
-    ObjectFile::createObjectFile(buffer.get()->getMemBufferRef());
-
-    if (!objectOrError) {
-      Logger::error() << "Cannot create object file: " << objectFilePath << "\n";
-      continue;
-    }
-
-    std::unique_ptr<ObjectFile> objectFile(std::move(objectOrError.get()));
-
-    auto owningObject = OwningBinary<ObjectFile>(std::move(objectFile),
-                                                 std::move(buffer.get()));
-    precompiledObjectFiles.push_back(std::move(owningObject));
+  std::vector<LoadObjectFilesTask> tasks;
+  for (int i = 0; i < config.parallelization().workers; i++) {
+    tasks.emplace_back(LoadObjectFilesTask());
   }
+
+  TaskExecutor<LoadObjectFilesTask> loader("Loading precompiled object files",
+                                           config.getObjectFilesPaths(),
+                                           precompiledObjectFiles,
+                                           tasks);
+  loader.execute();
   metrics.endLoadPrecompiledObjectFiles();
 }
 
@@ -143,9 +129,6 @@ std::vector<std::unique_ptr<Test>> Driver::findTests() {
   metrics.beginFindTests();
   auto tests = finder.findTests(context, filter);
   metrics.endFindTests();
-
-  Logger::debug() << "Found " << tests.size() << " tests\n";
-
   return tests;
 }
 
@@ -155,8 +138,6 @@ Driver::findMutationPoints(std::vector<std::unique_ptr<Test>> &tests) {
     return std::vector<MutationPoint *>();
   }
 
-  Logger::debug() << "Running tests and searching mutations\n";
-
   auto objectFiles = AllInstrumentedObjectFiles();
   JITEngine jit;
 
@@ -164,54 +145,24 @@ Driver::findMutationPoints(std::vector<std::unique_ptr<Test>> &tests) {
   runner.loadInstrumentedProgram(objectFiles, instrumentation, jit);
   metrics.endLoadOriginalProgram();
 
-  auto testIndex = 1;
-  auto testsCount = tests.size();
-  std::vector<std::unique_ptr<Testee>> allTestees;
-
-  for (auto &test : tests) {
-    Logger::debug().indent(2) << "[" << testIndex++ << "/" << testsCount << "] " << test->getTestDisplayName() << ": ";
-
-    instrumentation.setupInstrumentationInfo(test.get());
-
-    metrics.beginRunOriginalTest(test.get());
-    ExecutionResult testExecutionResult = sandbox->run([&]() {
-      return runner.runTest(test.get(), jit);
-    }, config.getTimeout());
-    metrics.endRunOriginalTest(test.get());
-
-    Logger::debug() << testExecutionResult.getStatusAsString() << "\n";
-
-    test->setExecutionResult(testExecutionResult);
-
-    std::vector<std::unique_ptr<Testee>> testees;
-
-    metrics.beginFindMutationsForTest(test.get());
-    if (testExecutionResult.status == Passed) {
-      testees = instrumentation.getTestees(test.get(), filter, config.getMaxDistance());
-    }
-    instrumentation.cleanupInstrumentationInfo(test.get());
-
-    if (testees.empty()) {
-      metrics.endFindMutationsForTest(test.get());
-      continue;
-    }
-
-    for (auto it = std::next(testees.begin()); it != testees.end(); ++it) {
-      allTestees.push_back(std::move(*it));
-    }
-
-    metrics.endFindMutationsForTest(test.get());
+  std::vector<OriginalTestExecutionTask> tasks;
+  for (int i = 0; i < config.parallelization().testExecutionWorkers; i++) {
+    tasks.emplace_back(instrumentation, *sandbox, runner, config, filter, jit);
   }
 
-  auto mergedTestees = mergeTestees(allTestees);
+  metrics.beginOriginalTestExecution();
+  std::vector<std::unique_ptr<Testee>> testees;
+  TaskExecutor<OriginalTestExecutionTask> testRunner("Running original tests", tests, testees, tasks);
+  testRunner.execute();
+  metrics.endOriginalTestExecution();
+
+  auto mergedTestees = mergeTestees(testees);
   std::vector<MutationPoint *> mutationPoints = mutationsFinder.getMutationPoints(context, mergedTestees, filter);
 
   {
     /// Cleans up the memory allocated for the vector itself as well
     std::vector<OwningBinary<ObjectFile>>().swap(instrumentedObjectFiles);
   }
-
-  Logger::debug() << "Found " << mutationPoints.size() << " mutations\n";
 
   return mutationPoints;
 }
@@ -220,13 +171,12 @@ std::vector<MutationPoint *>
 Driver::filterOutJunkMutations(std::vector<MutationPoint *> mutationPoints) {
   std::vector<MutationPoint *> nonJunkMutationPoints;
   if (config.junkDetectionEnabled()) {
-    for (auto point: mutationPoints) {
-      if (!junkDetector.isJunk(point)) {
-        nonJunkMutationPoints.push_back(point);
-      }
+    std::vector<JunkDetectionTask> tasks;
+    for (int i = 0; i < config.parallelization().workers; i++) {
+      tasks.emplace_back(junkDetector);
     }
-    auto junkSize = mutationPoints.size() - nonJunkMutationPoints.size();
-    Logger::debug() << "Filtered out " << junkSize << " junk mutations\n";
+    TaskExecutor<JunkDetectionTask> mutantRunner("Filtering out junk mutations", mutationPoints, nonJunkMutationPoints, std::move(tasks));
+    mutantRunner.execute();
   } else {
     mutationPoints.swap(nonJunkMutationPoints);
   }
@@ -253,124 +203,42 @@ std::vector<std::unique_ptr<MutationResult>>
 Driver::dryRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
 
-  const auto mutationsCount = mutationPoints.size();
-  auto mutantIndex = 1;
-
-  for (auto mutationPoint : mutationPoints) {
-    Logger::debug() << "[" << mutantIndex++ << "/" << mutationsCount << "]: "  << mutationPoint->getUniqueIdentifier() << "\n";
-
-    auto testsCount = mutationPoint->getReachableTests().size();
-    auto testIndex = 1;
-
-    for (auto &reachableTest : mutationPoint->getReachableTests()) {
-      auto test = reachableTest.first;
-      auto distance = reachableTest.second;
-
-      Logger::debug().indent(2) << "[" << testIndex++ << "/" << testsCount << "] " << test->getTestDisplayName() << ": ";
-
-      auto timeout = test->getExecutionResult().runningTime * 10;
-
-      ExecutionResult result;
-      result.status = DryRun;
-      result.runningTime = timeout;
-
-      Logger::debug() << result.getStatusAsString() << "\n";
-
-      mutationResults.push_back(make_unique<MutationResult>(result, mutationPoint, distance, test));
-    }
+  std::vector<DryRunMutantExecutionTask> tasks;
+  for (int i = 0; i < config.parallelization().workers; i++) {
+    tasks.emplace_back(DryRunMutantExecutionTask());
   }
+  metrics.beginMutantsExecution();
+  TaskExecutor<DryRunMutantExecutionTask> mutantRunner("Running mutants (dry run)", mutationPoints, mutationResults, std::move(tasks));
+  mutantRunner.execute();
+  metrics.endMutantsExecution();
 
   return mutationResults;
 }
 
 std::vector<std::unique_ptr<MutationResult>> Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
-  for (auto &module : context.getModules()) {
-    metrics.beginCompileOriginalModule(module->getModule());
-    auto objectFile = toolchain.cache().getObject(*module);
-    if (objectFile.getBinary() == nullptr) {
-      LLVMContext localContext;
-      auto clonedModule = module->clone(localContext);
-      objectFile = toolchain.compiler().compileModule(*clonedModule, toolchain.targetMachine());
-      toolchain.cache().putObject(objectFile, *module);
-    }
+  std::vector<OriginalCompilationTask> compilationTasks;
+  for (int i = 0; i < config.parallelization().workers; i++) {
+    compilationTasks.emplace_back(toolchain);
+  }
+  TaskExecutor<OriginalCompilationTask> mutantCompiler("Compiling original code", context.getModules(), ownedObjectFiles, std::move(compilationTasks));
+  mutantCompiler.execute();
 
+  for (size_t i = 0; i < ownedObjectFiles.size(); i++) {
+    auto &module = context.getModules().at(i);
+    auto &objectFile = ownedObjectFiles.at(i);
     innerCache.insert(std::make_pair(module->getModule(), objectFile.getBinary()));
-    ownedObjectFiles.push_back(std::move(objectFile));
-    metrics.endCompileOriginalModule(module->getModule());
   }
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
 
-  const auto mutationsCount = mutationPoints.size();
-  auto mutantIndex = 1;
-
-  JITEngine jit;
-
-  for (auto mutationPoint : mutationPoints) {
-    auto objectFilesWithMutant = AllButOne(mutationPoint->getOriginalModule()->getModule());
-
-    Logger::debug() << "[" << mutantIndex++ << "/" << mutationsCount << "]: "  << mutationPoint->getUniqueIdentifier() << "\n";
-
-    metrics.beginCompileMutant(mutationPoint);
-    auto mutant = toolchain.cache().getObject(*mutationPoint);
-    if (mutant.getBinary() == nullptr) {
-      LLVMContext localContext;
-      auto clonedModule = mutationPoint->getOriginalModule()->clone(localContext);
-      mutationPoint->applyMutation(*clonedModule.get());
-      mutant = toolchain.compiler().compileModule(*clonedModule, toolchain.targetMachine());
-      toolchain.cache().putObject(mutant, *mutationPoint);
-    }
-    metrics.endCompileMutant(mutationPoint);
-
-    objectFilesWithMutant.push_back(mutant.getBinary());
-
-    metrics.beginLoadMutatedProgram(mutationPoint);
-    runner.loadProgram(objectFilesWithMutant, jit);
-    metrics.endLoadMutatedProgram(mutationPoint);
-
-    auto testsCount = mutationPoint->getReachableTests().size();
-    auto testIndex = 1;
-
-    auto atLeastOneTestFailed = false;
-    for (auto &reachableTest : mutationPoint->getReachableTests()) {
-      auto test = reachableTest.first;
-      auto distance = reachableTest.second;
-
-      Logger::debug().indent(2) << "[" << testIndex++ << "/" << testsCount << "] " << test->getTestDisplayName() << ": ";
-
-      metrics.beginRunMutant(mutationPoint, test);
-
-      ExecutionResult result;
-      if (config.failFastModeEnabled() && atLeastOneTestFailed) {
-        result.status = ExecutionStatus::FailFast;
-      } else {
-        const auto timeout = test->getExecutionResult().runningTime * 10;
-        const auto sandboxTimeout = std::max(30LL, timeout);
-
-        result = sandbox->run([&]() {
-          ExecutionStatus status = runner.runTest(test, jit);
-          assert(status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
-          return status;
-        }, sandboxTimeout);
-
-        assert(result.status != ExecutionStatus::Invalid &&
-               "Expect to see valid TestResult");
-
-        if (result.status != ExecutionStatus::Passed) {
-          atLeastOneTestFailed = true;
-        }
-      }
-      metrics.endRunMutant(mutationPoint, test);
-
-      Logger::debug() << result.getStatusAsString() << "\n";
-
-      mutationResults.push_back(make_unique<MutationResult>(result, mutationPoint, distance, test));
-    }
-
-    diagnostics->report(mutationPoint, atLeastOneTestFailed);
-
-    objectFilesWithMutant.pop_back();
+  std::vector<MutantExecutionTask> tasks;
+  for (int i = 0; i < config.parallelization().mutantExecutionWorkers; i++) {
+    tasks.emplace_back(*this, *sandbox, runner, config, toolchain, filter);
   }
+  metrics.beginMutantsExecution();
+  TaskExecutor<MutantExecutionTask> mutantRunner("Running mutants", mutationPoints, mutationResults, std::move(tasks));
+  mutantRunner.execute();
+  metrics.endMutantsExecution();
 
   return mutationResults;
 }
