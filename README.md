@@ -82,6 +82,23 @@ The authors and developers of Mull are Alex Denisov 1101.debian@gmail.com and St
 
 Feel free to contact us if you have any questions about Mull and mutation testing or any other topics related to software reliability and software in general.
 
+## Citation
+
+```
+@INPROCEEDINGS{8411727, 
+author={A. Denisov and S. Pankevich}, 
+booktitle={2018 IEEE International Conference on Software Testing, Verification and Validation Workshops (ICSTW)}, 
+title={Mull It Over: Mutation Testing Based on LLVM}, 
+year={2018}, 
+volume={}, 
+number={}, 
+pages={25-31}, 
+keywords={just-in-time;program compilers;program testing;program verification;mutations;Mull;LLVM IR;mutated programs;compiled programming languages;LLVM framework;LLVM JIT;tested program;mutation testing tool;Testing;Tools;Computer languages;Instruments;Runtime;Computer crashes;Open source software;mutation testing;llvm}, 
+doi={10.1109/ICSTW.2018.00024}, 
+ISSN={}, 
+month={April},}
+```
+
 ## Copyright
 
 Copyright (c) 2018 Alex Denisov and Stanislav Pankevich. See LICENSE for details.
