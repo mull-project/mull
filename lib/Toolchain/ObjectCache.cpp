@@ -55,22 +55,15 @@ OwningBinary<ObjectFile> ObjectCache::getObjectFromDisk(const std::string &ident
 }
 
 OwningBinary<ObjectFile> ObjectCache::getInstrumentedObject(const MullModule &module) {
-  std::string filename("instrumented_");
-  filename += module.getUniqueIdentifier();
-  return getObjectFromDisk(filename);
+  return getObjectFromDisk(module.getInstrumentedUniqueIdentifier());
 }
 
 OwningBinary<ObjectFile> ObjectCache::getObject(const MullModule &module) {
-  return getObjectFromDisk(module.getUniqueIdentifier());
+  return getObjectFromDisk(module.getMutatedUniqueIdentifier());
 }
 
-OwningBinary<ObjectFile> ObjectCache::getObject(const MutationPoint &mutationPoint) {
-  return getObjectFromDisk(mutationPoint.getUniqueIdentifier());
-}
-
-void ObjectCache::putObjectOnDisk(
-                  OwningBinary<ObjectFile> &object,
-                  const std::string &identifier) {
+void ObjectCache::putObjectOnDisk(OwningBinary<ObjectFile> &object,
+                                  const std::string &identifier) {
   if (!useOnDiskCache) {
     return;
   }
@@ -85,17 +78,10 @@ void ObjectCache::putObjectOnDisk(
 
 void ObjectCache::putInstrumentedObject(OwningBinary<ObjectFile> &object,
                                         const MullModule &module) {
-  std::string filename("instrumented_");
-  filename += module.getUniqueIdentifier();
-  putObjectOnDisk(object, filename);
+  putObjectOnDisk(object, module.getInstrumentedUniqueIdentifier());
 }
 
 void ObjectCache::putObject(OwningBinary<ObjectFile> &object,
                             const MullModule &module) {
-  putObjectOnDisk(object, module.getUniqueIdentifier());
-}
-
-void ObjectCache::putObject(OwningBinary<ObjectFile> &object,
-                            const MutationPoint &mutationPoint) {
-  putObjectOnDisk(object, mutationPoint.getUniqueIdentifier());
+  putObjectOnDisk(object, module.getMutatedUniqueIdentifier());
 }

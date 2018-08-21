@@ -20,12 +20,13 @@ const std::string MathMulMutator::ID = "math_mul_mutator";
 
 MutationPoint *
 MathMulMutator::getMutationPoint(MullModule *module,
-                                 MutationPointAddress &address,
+                                 llvm::Function *function,
                                  llvm::Instruction *instruction,
-                                 SourceLocation &sourceLocation) {
+                                 SourceLocation &sourceLocation,
+                                 MutationPointAddress &address) {
   if (canBeApplied(*instruction)) {
     std::string diagnostics = "Math Mul: replaced * with /";
-    return new MutationPoint(this, address, instruction, module, diagnostics, sourceLocation);
+    return new MutationPoint(this, address, instruction, function, diagnostics, sourceLocation, module);
   }
   return nullptr;
 }
@@ -42,9 +43,9 @@ bool MathMulMutator::canBeApplied(Value &V) {
   return false;
 }
 
-llvm::Value *MathMulMutator::applyMutation(llvm::Module *module,
+llvm::Value *MathMulMutator::applyMutation(Function *function,
                                            MutationPointAddress &address) {
-  llvm::Instruction &I = address.findInstruction(module);
+  llvm::Instruction &I = address.findInstruction(function);
 
   /// TODO: Take care of NUW/NSW
   BinaryOperator *binaryOperator = cast<BinaryOperator>(&I);

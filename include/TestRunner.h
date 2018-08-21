@@ -11,6 +11,7 @@ namespace mull {
 class JITEngine;
 class Test;
 class Instrumentation;
+class Trampolines;
 
 class TestRunner {
 public:
@@ -20,7 +21,7 @@ public:
   TestRunner();
 
   virtual void loadInstrumentedProgram(ObjectFiles &objectFiles, Instrumentation &instrumentation, JITEngine &jit) = 0;
-  virtual void loadProgram(ObjectFiles &objectFiles, JITEngine &jit) = 0;
+  virtual void loadMutatedProgram(ObjectFiles &objectFiles, Trampolines &trampolines, JITEngine &jit) = 0;
   virtual ExecutionStatus runTest(Test *test, JITEngine &jit) = 0;
 
   virtual ~TestRunner() = default;

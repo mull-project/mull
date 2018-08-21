@@ -184,13 +184,13 @@ void mull::SQLiteReporter::reportResults(const Result &result,
   for (auto mutationPoint : result.getMutationPoints()) {
     Instruction *instruction = dyn_cast<Instruction>(mutationPoint->getOriginalValue());
 
-    SourceLocation location = SourceLocation::sourceLocationFromInstruction(instruction);
+    SourceLocation location = mutationPoint->getSourceLocation();// SourceLocation::sourceLocationFromInstruction(instruction);
 
     int index = 1;
     sqlite3_bind_text(insertMutationPointStmt, index++,
                       mutationPoint->getMutator()->getUniqueIdentifier().c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(insertMutationPointStmt, index++, instruction->getParent()->getParent()->getParent()->getModuleIdentifier().c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(insertMutationPointStmt, index++, instruction->getParent()->getParent()->getName().str().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(insertMutationPointStmt, index++, mutationPoint->getOriginalModule()->getModule()->getModuleIdentifier().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(insertMutationPointStmt, index++, mutationPoint->getOriginalFunction()->getName().str().c_str(), -1, SQLITE_TRANSIENT);
 
     sqlite3_bind_int(insertMutationPointStmt, index++, mutationPoint->getAddress().getFnIndex());
     sqlite3_bind_int(insertMutationPointStmt, index++, mutationPoint->getAddress().getBBIndex());

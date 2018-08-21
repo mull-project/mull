@@ -37,6 +37,7 @@ Driver::~Driver() {
   delete this->diagnostics;
 }
 
+/// TODO: Remove the following comments as they are irrelevant
 /// Populate mull::Context with modules using
 /// ModulePaths from mull::Config.
 /// mull::Context should be populated using ModuleLoader
@@ -220,6 +221,23 @@ Driver::dryRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
 }
 
 std::vector<std::unique_ptr<MutationResult>> Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
+  std::vector<std::string> mutatedFunctions;
+
+  for (auto &module : context.getModules()) {
+    auto functions = module->prepareMutations();
+    for (auto &name : functions) {
+      mutatedFunctions.push_back(name);
+    }
+  }
+
+  std::vector<ApplyMutationTask> applyMutationTasks;
+  for (int i = 0; i < config.parallelization().workers; i++) {
+    applyMutationTasks.emplace_back();
+  }
+  std::vector<int> empty;
+  TaskExecutor<ApplyMutationTask> applyMutations("Applying mutations", mutationPoints, empty, std::move(applyMutationTasks));
+  applyMutations.execute();
+
   std::vector<OriginalCompilationTask> compilationTasks;
   for (int i = 0; i < config.parallelization().workers; i++) {
     compilationTasks.emplace_back(toolchain);
@@ -227,17 +245,16 @@ std::vector<std::unique_ptr<MutationResult>> Driver::normalRunMutations(const st
   TaskExecutor<OriginalCompilationTask> mutantCompiler("Compiling original code", context.getModules(), ownedObjectFiles, std::move(compilationTasks));
   mutantCompiler.execute();
 
-  for (size_t i = 0; i < ownedObjectFiles.size(); i++) {
-    auto &module = context.getModules().at(i);
-    auto &objectFile = ownedObjectFiles.at(i);
-    innerCache.insert(std::make_pair(module->getModule(), objectFile.getBinary()));
+  std::vector<object::ObjectFile *> objectFiles;
+  for (auto &object : ownedObjectFiles) {
+    objectFiles.push_back(object.getBinary());
   }
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
 
   std::vector<MutantExecutionTask> tasks;
   for (int i = 0; i < config.parallelization().mutantExecutionWorkers; i++) {
-    tasks.emplace_back(*this, *sandbox, runner, config, toolchain, filter);
+    tasks.emplace_back(*sandbox, runner, config, filter, toolchain.mangler(), objectFiles, mutatedFunctions);
   }
   metrics.beginMutantsExecution();
   TaskExecutor<MutantExecutionTask> mutantRunner("Running mutants", mutationPoints, mutationResults, std::move(tasks));

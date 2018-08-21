@@ -37,12 +37,13 @@ std::string getDiagnostics(Instruction &instruction) {
 
 MutationPoint *
 RemoveVoidFunctionMutator::getMutationPoint(MullModule *module,
-                                            MutationPointAddress &address,
+                                            llvm::Function *function,
                                             llvm::Instruction *instruction,
-                                            SourceLocation &sourceLocation) {
+                                            SourceLocation &sourceLocation,
+                                            MutationPointAddress &address) {
   if (canBeApplied(*instruction)) {
     std::string diagnostics = getDiagnostics(*instruction);
-    return new MutationPoint(this, address, instruction, module, diagnostics, sourceLocation);
+    return new MutationPoint(this, address, instruction, function, diagnostics, sourceLocation, module);
   }
 
   return nullptr;
@@ -91,9 +92,9 @@ bool RemoveVoidFunctionMutator::canBeApplied(Value &V) {
   return false;
 }
 
-llvm::Value *RemoveVoidFunctionMutator::applyMutation(llvm::Module *module,
+llvm::Value *RemoveVoidFunctionMutator::applyMutation(Function *function,
                                                       MutationPointAddress &address) {
-  llvm::Instruction &I = address.findInstruction(module);
+  llvm::Instruction &I = address.findInstruction(function);
 
   CallInst *callInst = dyn_cast<CallInst>(&I);
   callInst->eraseFromParent();
