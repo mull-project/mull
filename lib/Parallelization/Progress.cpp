@@ -42,7 +42,6 @@ void progress_reporter::operator()() {
       continue;
     }
 
-    backspace();
     bool forceReport = false;
     printProgress(current, total, forceReport);
 
@@ -60,6 +59,7 @@ void progress_reporter::printProgress(progress_counter::CounterType current,
   }
 
   if (hasTerminal) {
+    if (!force) backspace();
     char buf[128];
     char buf2[128];
     auto width = (backspaces.size() - 1) / 2;
@@ -76,9 +76,6 @@ void progress_reporter::printProgress(progress_counter::CounterType current,
 }
 
 void progress_reporter::backspace() {
-  if (!hasTerminal) {
-    return;
-  }
   stream << backspaces;
   stream.flush();
 }
