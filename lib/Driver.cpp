@@ -273,3 +273,29 @@ std::vector<llvm::object::ObjectFile *> Driver::AllInstrumentedObjectFiles() {
 
   return objects;
 }
+
+Driver::Driver(Config &C,
+               ModuleLoader &ML,
+               TestFinder &TF,
+               TestRunner &TR,
+               Toolchain &t,
+               Filter &f,
+               MutationsFinder &mutationsFinder,
+               Metrics &metrics,
+               JunkDetector &junkDetector)
+    : config(C), loader(ML), finder(TF), runner(TR), toolchain(t), filter(f), mutationsFinder(mutationsFinder),
+      precompiledObjectFiles(), instrumentation(), metrics(metrics), junkDetector(junkDetector) {
+
+  if (C.forkEnabled()) {
+    this->sandbox = new ForkProcessSandbox();
+  } else {
+    this->sandbox = new NullProcessSandbox();
+  }
+
+  Config::Diagnostics diagnostics = C.getDiagnostics();
+  if (diagnostics != Config::Diagnostics::None) {
+    this->diagnostics = new NormalIDEDiagnostics(diagnostics);
+  } else {
+    this->diagnostics = new NullIDEDiagnostics();
+  }
+}
