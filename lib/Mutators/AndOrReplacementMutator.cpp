@@ -76,27 +76,27 @@ llvm::Value *AndOrReplacementMutator::applyMutation(llvm::Module *module,
                                  &secondBranch);
 
   if (possibleMutationType == AND_OR_MutationType_AND_to_OR_Pattern1) {
-    return applyMutationANDToOR_Pattern1(module, branchInst, secondBranch);
+    return applyMutationANDToOR_Pattern1(branchInst, secondBranch);
   }
 
   if (possibleMutationType == AND_OR_MutationType_AND_to_OR_Pattern2) {
-    return applyMutationANDToOR_Pattern2(module, branchInst, secondBranch);
+    return applyMutationANDToOR_Pattern2(branchInst, secondBranch);
   }
 
   if (possibleMutationType == AND_OR_MutationType_AND_to_OR_Pattern3) {
-    return applyMutationANDToOR_Pattern3(module, branchInst, secondBranch);
+    return applyMutationANDToOR_Pattern3(branchInst, secondBranch);
   }
 
   if (possibleMutationType == AND_OR_MutationType_OR_to_AND_Pattern1) {
-    return applyMutationORToAND_Pattern1(module, branchInst, secondBranch);
+    return applyMutationORToAND_Pattern1(branchInst, secondBranch);
   }
 
   if (possibleMutationType == AND_OR_MutationType_OR_to_AND_Pattern2) {
-    return applyMutationORToAND_Pattern2(module, branchInst, secondBranch);
+    return applyMutationORToAND_Pattern2(branchInst, secondBranch);
   }
 
   if (possibleMutationType == AND_OR_MutationType_OR_to_AND_Pattern3) {
-    return applyMutationORToAND_Pattern3(module, branchInst, secondBranch);
+    return applyMutationORToAND_Pattern3(branchInst, secondBranch);
   }
 
   return nullptr;
@@ -105,9 +105,7 @@ llvm::Value *AndOrReplacementMutator::applyMutation(llvm::Module *module,
 #pragma mark - Private: Apply mutations: AND -> OR
 
 llvm::Value *
-AndOrReplacementMutator::applyMutationANDToOR_Pattern1(Module *M,
-                                                                BranchInst *firstBranch,
-                                                                BranchInst *secondBranch) {
+AndOrReplacementMutator::applyMutationANDToOR_Pattern1(BranchInst *firstBranch, BranchInst *secondBranch) {
 
   assert(firstBranch != nullptr);
   assert(firstBranch->isConditional());
@@ -173,9 +171,7 @@ AndOrReplacementMutator::applyMutationANDToOR_Pattern1(Module *M,
 }
 
 llvm::Value *
-AndOrReplacementMutator::applyMutationANDToOR_Pattern2(Module *M,
-                                                                BranchInst *firstBranch,
-                                                                BranchInst *secondBranch) {
+AndOrReplacementMutator::applyMutationANDToOR_Pattern2(BranchInst *firstBranch, BranchInst *secondBranch) {
 
   assert(firstBranch != nullptr);
   assert(firstBranch->isConditional());
@@ -241,9 +237,8 @@ AndOrReplacementMutator::applyMutationANDToOR_Pattern2(Module *M,
 }
 
 llvm::Value *
-AndOrReplacementMutator::applyMutationANDToOR_Pattern3(Module *M,
-                                                                BranchInst *firstBranch,
-                                                                BranchInst *secondBranch) {
+AndOrReplacementMutator::applyMutationANDToOR_Pattern3(BranchInst *firstBranch, BranchInst *secondBranch) {
+  Module *module = firstBranch->getParent()->getParent()->getParent();
 
   PHINode *phiNode;
   for (auto &instruction: *secondBranch->getParent()) {
@@ -266,8 +261,8 @@ AndOrReplacementMutator::applyMutationANDToOR_Pattern3(Module *M,
   intValueForIncomingBlock0->getValue().getBoolValue();
 
   ConstantInt *newValue = boolValueOfIncomingBlock ?
-                            ConstantInt::getFalse(M->getContext()) :
-                            ConstantInt::getTrue(M->getContext());
+                            ConstantInt::getFalse(module->getContext()) :
+                            ConstantInt::getTrue(module->getContext());
 
   phiNode->setOperand(0, newValue);
 
@@ -295,9 +290,7 @@ AndOrReplacementMutator::applyMutationANDToOR_Pattern3(Module *M,
 #pragma mark - Private: Apply mutations: OR -> AND
 
 llvm::Value *
-AndOrReplacementMutator::applyMutationORToAND_Pattern1(Module *M,
-                                                                BranchInst *firstBranch,
-                                                                BranchInst *secondBranch) {
+AndOrReplacementMutator::applyMutationORToAND_Pattern1(BranchInst *firstBranch, BranchInst *secondBranch) {
 
   assert(firstBranch != nullptr);
   assert(firstBranch->isConditional());
@@ -364,9 +357,7 @@ AndOrReplacementMutator::applyMutationORToAND_Pattern1(Module *M,
 }
 
 llvm::Value *
-AndOrReplacementMutator::applyMutationORToAND_Pattern2(Module *M,
-                                                                BranchInst *firstBranch,
-                                                                BranchInst *secondBranch) {
+AndOrReplacementMutator::applyMutationORToAND_Pattern2(BranchInst *firstBranch, BranchInst *secondBranch) {
 
   assert(firstBranch != nullptr);
   assert(firstBranch->isConditional());
@@ -433,9 +424,8 @@ AndOrReplacementMutator::applyMutationORToAND_Pattern2(Module *M,
 }
 
 llvm::Value *
-AndOrReplacementMutator::applyMutationORToAND_Pattern3(Module *M,
-                                                                BranchInst *firstBranch,
-                                                                BranchInst *secondBranch) {
+AndOrReplacementMutator::applyMutationORToAND_Pattern3(BranchInst *firstBranch, BranchInst *secondBranch) {
+  Module *module = firstBranch->getParent()->getParent()->getParent();
 
   PHINode *phiNode;
   for (auto &instruction: *secondBranch->getParent()) {
@@ -457,8 +447,8 @@ AndOrReplacementMutator::applyMutationORToAND_Pattern3(Module *M,
     intValueForIncomingBlock0->getValue().getBoolValue();
 
   ConstantInt *newValue = boolValueOfIncomingBlock ?
-                            ConstantInt::getFalse(M->getContext()) :
-                            ConstantInt::getTrue(M->getContext());
+                            ConstantInt::getFalse(module->getContext()) :
+                            ConstantInt::getTrue(module->getContext());
 
   phiNode->setOperand(0, newValue);
 
