@@ -2,6 +2,7 @@
 
 #include "gtest/gtest.h"
 
+#include <functional>
 #include <vector>
 
 using namespace mull;
