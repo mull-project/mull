@@ -186,13 +186,7 @@ int main(int argc, char *argv[]) {
     reporter->reportResults(*result, config, metrics);
   }
 
-#ifdef __APPLE__
   llvm_shutdown();
-#else
-  /// Ignoring llvm_shutdown() on Linux, temporarily
-  /// See https://github.com/mull-project/mull/issues/341 for more details
-  /// We should try it again when updated to LLVM 4.0
-#endif
 
   return EXIT_SUCCESS;
 }
