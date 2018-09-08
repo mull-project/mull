@@ -44,9 +44,7 @@ See [Hello World example](#example-hello-world) below.
 
 ## Step 3: Creating config.yml file
 
-See [example of config.yml](/Docs/config.example.yml).
-
-TODO
+See examples or pick up the features you need from [this document](/Docs/Config.md).
 
 ## Step 4: Running Mull
 
