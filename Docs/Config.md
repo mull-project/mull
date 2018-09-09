@@ -3,7 +3,7 @@
 Mull uses [yaml](http://yaml.org) format to control its behavior.
 
 Below you can find configuration options and their explanation along with
-real-life examples at the end of the document.
+the real-world examples at the end of the document.
 
 ### Configuration options
 
@@ -11,8 +11,7 @@ real-life examples at the end of the document.
 ```
 project_name: string
 ```
-Project name parameter is used by `SQLiteReporter` to compose a name of an
-outputting SQLite file.
+Project name parameter is used by `SQLiteReporter` to compose a name of an output SQLite file.
 
 ---
 ```
@@ -23,7 +22,7 @@ Tells Mull which test framework adapter to use.
 Supported test frameworks:
 
  - `GoogleTest`: default value. Works out of the box except for typed tests (see #15).
- - `CustomTest`: used for project with custom test framework. See `custom_tests` below.
+ - `CustomTest`: used for a project with a custom test framework. See `custom_tests` below.
  - `SimpleTest`: used for testing only.
 
 ---
@@ -31,7 +30,7 @@ Supported test frameworks:
 bitcode_file_list: path (string)
 ```
 This is the most important part of the configuration. It points to a plain text
-file that contains new-line separated list of bitcode files which Mull has to process.
+file that contains newline separated list of bitcode files which Mull has to process.
 
 ---
 ```
@@ -39,20 +38,19 @@ dynamic_library_file_list: path (string)
 ```
 
 Similar to the `bitcode_file_list`, but the file contains new-line separated
-list of dynamic libraries(`*.dylib`, `*.so`) required for execution of a
-program under test.
+list of dynamic libraries(`*.dylib`, `*.so`) required for execution of a program under test.
 
 ---
 ```
 object_file_list: path (string)
 ```
 
-Similar to the `bitcode_file_list`, but the file contains new-line separated
+Similar to the `bitcode_file_list`, but the file contains a newline separated
 list of object files(`*.o`) required for execution of a program under test.
 
 ---
 ```
-mutators: array of strings
+mutators: an array of strings
 ```
 
 Mutators can be specified either by their names or by groups.
@@ -67,10 +65,10 @@ Mutators can be specified either by their names or by groups.
  - `negate_mutator`: negates all conditions, e.g.: `!=` -> `=`, `<` -> `>=`
  - `conditionals_boundary_mutator`: mutates boundaries, e.g.: `<` -> `<=`, `<=` -> `<`
  - `functions`: group, includes 2 next mutators
- - `replace_call_mutator`: replaces call to a function returning integer with `42`
- - `remove_void_function_mutator`: removes call to a function returning `void`
+ - `replace_call_mutator`: replaces a call to a function returning integer with `42`
+ - `remove_void_function_mutator`: removes a call to a function returning `void`
  - `constant`: group, includes only 1 next mutator
- - `scalar_value_mutator`: replaces constants with other values: zero -> 1,
+ - `scalar_value_mutator`: replaces the constants with other values: zero -> 1,
    non-zero -> zero
  - `default`: group, includes `math_add_mutator`, `negate_mutator`, and
    `remove_void_function_mutator`
@@ -79,15 +77,14 @@ Mutators can be specified either by their names or by groups.
 
 ---
 ```
-tests: array of strings
+tests: an array of strings
 ```
 
-Lists names of tests that should be taken into account. All the tests that are
-not in this list will be ignored.
+Lists names of tests that should be taken into account. All the tests that are not in this list are ignored.
 
 ---
 ```
-exclude_locations: array of strings
+exclude_locations: an array of strings
 ```
 Skips mutation based on its on-disk location.
 
@@ -98,7 +95,7 @@ dry_run: boolean
 
 Possible values: `true`/`enabled`, `false`/`disabled`. Defaults to `false`.
 
-When enabled Mull will find mutations, but won't execute them.
+When enabled Mull finds mutations, but does not execute them.
 
 ---
 ```
@@ -107,7 +104,7 @@ fail_fast: boolean
 Possible values: `true`/`enabled`, `false`/`disabled`. Defaults to `false`.
 
 A mutant may be accessible from many tests. Normally, Mull executes a mutant
-against each test separately. When `fail_fast` option is enabled Mull stops
+against each test separately. When `fail_fast` option is enabled, Mull stops
 running tests against a mutant as soon as on the tests fail.
 
 ---
@@ -116,14 +113,14 @@ use_cache: boolean
 ```
 Possible values: `true`/`yes`, `false`/`no`. Defaults to `false`.
 
-Saves compiled object files on-disk to reuse on next runs.
+Saves compiled object files on disk to reuse on next runs.
 
 ---
 ```
 cache_directory: path (string)
 ```
-Path to a directory where Mull will store cached object files. Defaults to `/tmp/mull_cache`.
-The directory will be created if it does not exist. If a directory cannot be
+A path to a directory where Mull stores cached object files. Defaults to `/tmp/mull_cache`.
+The directory is created if it does not exist. If a directory cannot be
 created, then Mull disables on-disk caching.
 
 ---
@@ -137,7 +134,7 @@ Tells Mull to terminate test execution after the given timeout.
 max_distance: integer
 ```
 If a function `A` calls function `B`, and the function `B` calls function `C`,
-then the distance between `A` and `C` is two. The `max_distance` option tells
+Then the distance between `A` and `C` is two. The `max_distance` option tells
 Mull to ignore all mutants that are too far away from a test function. Defaults
 to `128`.
 
@@ -154,7 +151,7 @@ Some mutations found at the Bitcode level cannot be reproduced by a programmer
 at the source code level. Mull comes with `CXXJunkDetector` that filters out
 some junk mutations.
 
-`CXXJunkDetector` is based on `libclang`, in order to parse source files
+`CXXJunkDetector` is based on `libclang`, to parse source files
 correctly `libclang` needs either compilation database, or set of flags used
 for a compilation.
 
@@ -171,9 +168,8 @@ parallelization:
 Mull can run most of the tasks in parallel. It does so by default.
 Tests can be run sequentially if they are not designed to be run in parallel.
 
-When running tests Mull reuses one JIT stack across several threads. Though,
-when executing mutants it creates a JIT stack per-thread, which may consume
-significant amount of RAM. In this case, it may make sense to use less threads
+When running tests, Mull reuses one JIT stack across several threads. Though,
+when executing mutants, it creates a JIT stack per-thread, which may consume a significant amount of RAM. In this case, it may make sense to use fewer threads
 for mutant execution to prevent slowdown because of memory swapping.
 
 By default Mull uses [`std::thread::hardware_concurrency()`](https://en.cppreference.com/w/cpp/thread/thread/hardware_concurrency) 
@@ -188,14 +184,13 @@ custom_tests:
     arguments: string
 ```
 
-This option is used with `CustomTest`. If a project uses custom test suite,
-then one can provide list of tests manually. Each test entry should have
-a unique name, name of a program (`argv[0]`), arguments (`argv`) required to
+This option is used with `CustomTest`. If a project uses a custom test suite,
+then one can provide a list of tests manually. Each test entry should have
+a unique name, a name of a program (`argv[0]`), arguments (`argv`) required to
 run the test program, and the name of a test method. The method name should
 contain a mangled name of a test function.
 
-If `CustomTest` used and no `custom_tests` specified, then Mull picks the whole
-program as a single test, i.e. the custom test definition looks like the
+If `CustomTest` used and no `custom_tests` specified, then Mull picks the whole program as a single test, i.e., the custom test definition looks like the
 following:
 
 ```
@@ -283,3 +278,4 @@ junk_detection:
   enabled: yes
   cxx_compilation_flags: -DDSO_DLFCN -DHAVE_DLFCN_H -DNDEBUG -DOPENSSL_THREADS -DOPENSSL_NO_STATIC_ENGINE -DOPENSSL_PIC -DOPENSSLDIR="/usr/local/ssl" -DENGINESDIR="/usr/local/lib/engines-1.1" -D_REENTRANT -arch x86_64 -DL_ENDIAN -Wall  -flto -g -O0 -I include -I /opt/examples/openssl -I /opt/examples/openssl/crypto/include -I /opt/examples/openssl/crypto/modes
 ```
+
