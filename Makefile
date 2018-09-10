@@ -8,7 +8,7 @@ MULL_UNIT_TESTS=$(MULL_UNIT_TESTS_DIR)/MullUnitTests
 
 INSTALL_DIR?=/usr/local
 
-CMAKE_COMMAND_LINE_DEBUG_FLAGS=# --trace # --debug-output # --debug-output --trace --trace-expand # --trace # --debug-output #
+CMAKE_COMMAND_LINE_DEBUG_FLAGS=# --debug-output # --debug-output --trace --trace-expand # --trace # --debug-output #
 
 OS?=$(shell uname -s)
 
@@ -63,7 +63,7 @@ ninja.build.mull-driver: ## Build mull-driver on macOS
 	@echo "Resulting binary:\n"$(BUILD_DIR_NINJA)/tools/driver/mull-driver
 
 ninja.build.unit-tests: fixtures.generate ## Build unit-tests on macOS
-	cd $(BUILD_DIR_NINJA) && ninja MullUnitTests
+	cd $(BUILD_DIR_NINJA) && ninja MullUnitTests -v
 
 ninja.install.mull-driver: ninja.build.mull-driver ## Install mull driver
 	cd $(BUILD_DIR_NINJA) && ninja install
@@ -120,21 +120,21 @@ travis.install.macos:
 	brew install sqlite
 	brew install ninja
 	cd /tmp && \
-     wget $(MACOS_URL) && \
-     tar xf $(MACOS_ARCHIVE).tar.xz && \
-     sudo mv $(MACOS_ARCHIVE) /opt/llvm-$(LLVM_VERSION)
+    wget $(MACOS_URL) && \
+    tar xf $(MACOS_ARCHIVE).tar.xz && \
+    sudo mv $(MACOS_ARCHIVE) /opt/llvm-$(LLVM_VERSION)
 
 travis.install.ubuntu:
 	sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 	sudo apt-get update
 	sudo apt-get -y install wget git cmake make ninja-build \
-     libz-dev sqlite3 libsqlite3-dev ncurses-dev \
-     binutils-2.26 tree libstdc++6
+    libz-dev sqlite3 libsqlite3-dev ncurses-dev \
+    binutils-2.26 tree libstdc++6
 	sudo update-alternatives --install /usr/bin/ld ld /usr/bin/ld-2.26 1
 	cd /tmp && \
-     wget $(UBUNTU_URL) && \
-     tar xf $(UBUNTU_ARCHIVE).tar.xz && \
-     sudo mv $(UBUNTU_ARCHIVE) /opt/llvm-$(LLVM_VERSION)
+    wget $(UBUNTU_URL) && \
+    tar xf $(UBUNTU_ARCHIVE).tar.xz && \
+    sudo mv $(UBUNTU_ARCHIVE) /opt/llvm-$(LLVM_VERSION)
 
 ###
 ###  Xcode
