@@ -282,10 +282,3 @@ std::string TestModuleFactory::CompilationDatabase_RelativePath_Directory() {
   const char *directory = "junk_detection/compdb_relative_paths/";
   return fixturePath(directory);
 }
-
-#pragma mark - Rust
-
-std::unique_ptr<MullModule> TestModuleFactory::rustModule() {
-  const char *fixture = "fixture_rust.ll";
-  return createModule(fixture, "rust");
-}

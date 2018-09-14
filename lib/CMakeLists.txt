@@ -113,42 +113,6 @@ set(mull_additional_libraries
 set(mull_link_flags "") # to be filled later
 set(mull_rpath "")      # to be filled later
 
-if(MULL_SUPPORT_RUST)
-  message(STATUS "Mull> MULL_SUPPORT_RUST detected.")
-
-  set(mull_sources
-    ${mull_sources}
-    Rust/RustTest.cpp
-    Rust/RustTestFinder.cpp
-    Rust/RustTestRunner.cpp
-    Rust/RustSymbolDemangling.cpp)
-
-  set(mull_header_dirs
-    ${mull_header_dirs}
-    ${MULL_INCLUDE_DIR}/Rust)
-
-  IF(NOT EXISTS ${MULL_RUST_LIB_PATH})
-    message(FATAL_ERROR
-      "MULL_RUST_LIB_PATH variable should be set to a valid \
-      existing path in .mull.rust.cmake")
-  endif()
-
-  foreach(library ${MULL_DEPENDENCY_RUST_ADDITIONAL_LIBRARIES})
-    IF(NOT EXISTS "${library}")
-      message(FATAL_ERROR "Mull.Rust> path declared in \
-        MULL_DEPENDENCY_RUST_ADDITIONAL_LIBRARIES does not exist: \
-        ${library}")
-    endif()
-  endforeach()
-
-  set(mull_additional_libraries
-    ${mull_additional_libraries}
-    ${MULL_DEPENDENCY_RUST_ADDITIONAL_LIBRARIES})
-
-  set(mull_rpath ${mull_rpath} ${MULL_RUST_LIB_PATH})
-  set(mull_link_flags ${mull_link_flags} -L${MULL_RUST_LIB_PATH})
-endif()
-
 # Globbing is not recommended by CMake so maybe consider listing headers
 # explicitly in include/CMakeLists.txt file. However LLVM goes find(GLOB) under
 # the hood so probably we are also good for now.

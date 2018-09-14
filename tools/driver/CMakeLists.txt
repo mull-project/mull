@@ -7,12 +7,6 @@ target_link_libraries(mull-driver
 
 set(mulldriver_rpath "") # to be filled later.
 
-if(MULL_SUPPORT_RUST)
-  set(mulldriver_rpath
-    ${mulldriver_rpath} ${MULL_RUST_LIB_PATH}
-  )
-endif()
-
 # compile flags
 get_target_property(default_compile_flags mull-driver COMPILE_FLAGS)
 if(NOT default_compile_flags)
