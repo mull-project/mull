@@ -39,20 +39,6 @@ set(mull_unittests_sources
 
 set(mull_unittests_rpath "") # to be filled later
 
-if(MULL_SUPPORT_RUST)
-  set(mull_unittests_sources
-    ${mull_unittests_sources}
-
-    Rust/RustTestFinderTest.cpp
-    Rust/RustTestRunnerTest.cpp
-    Rust/Driver_Rust_Test.cpp
-  )
-
-  set(mull_unittests_rpath
-    ${mull_unittests_rpath} ${MULL_RUST_LIB_PATH}
-  )
-endif()
-
 add_executable(MullUnitTests ${mull_unittests_sources})
 include_directories("${CMAKE_CURRENT_SOURCE_DIR}")
 include_directories("${MULL_SOURCE_DIR}/googletest/include")

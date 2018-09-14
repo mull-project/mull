@@ -96,21 +96,6 @@ find_library(MULL_DEPENDENCY_LIBCLANG_EDIT clangEdit HINTS ${LLVM_LIB_PATH})
 
 include_directories(${MULL_INCLUDE_DIR})
 
-if(MULL_SUPPORT_RUST)
-  set(rust_cmake_path "${CMAKE_CURRENT_SOURCE_DIR}/.mull.rust.cmake")
-  IF(NOT EXISTS ${rust_cmake_path})
-    message(FATAL_ERROR "MULL_SUPPORT_RUST is enabled but .mull.rust.cmake \
-      file was not found at path: \
-      ${rust_cmake_path}. Please take \
-      .mull.rust.cmake.example and modify according to your system")
-  endif()
-
-  include(${rust_cmake_path})
-
-  message(STATUS "Mull.Rust> Rust lib path: ${mull_rust_libpath}")
-  add_definitions(-DMULL_SUPPORT_RUST=1)
-endif()
-
 add_subdirectory(lab)
 
 llvm_get_version(LLVM_VERSION)

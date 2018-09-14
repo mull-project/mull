@@ -64,9 +64,6 @@ public:
   std::unique_ptr<MullModule> create_CompilationDatabase_RelativePath_Module();
   std::string CompilationDatabase_RelativePath_Directory();
 
-#pragma mark - Rust
-  std::unique_ptr<MullModule> rustModule();
-
 };
 
 class FakeModuleLoader : public mull::ModuleLoader {

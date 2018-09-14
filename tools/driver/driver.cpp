@@ -23,11 +23,6 @@
 #include "CustomTestFramework/CustomTestFinder.h"
 #include "CustomTestFramework/CustomTestRunner.h"
 
-#if defined(MULL_SUPPORT_RUST)
-#include "Rust/RustTestFinder.h"
-#include "Rust/RustTestRunner.h"
-#endif
-
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/SourceMgr.h>
@@ -122,20 +117,10 @@ int main(int argc, char *argv[]) {
     testRunner = make_unique<CustomTestRunner>(toolchain.targetMachine());
   }
 
-  #if defined(MULL_SUPPORT_RUST)
-  else if (testFramework == "Rust") {
-    testFinder = make_unique<RustTestFinder>(std::move(mutationOperators),
-                                             config.getTests());
-
-    testRunner = make_unique<RustTestRunner>(toolchain.targetMachine());
-  }
-  #endif
-
   else {
     Logger::error() << "mull-driver> Unknown test framework provided: "
                     << "`" << testFramework << "`. "
-                    << "Choose one between: GoogleTest, SimpleTest or Rust "
-                    << "(Rust support must be enabled)."
+                    << "Choose one between: GoogleTest, SimpleTest or CustomTest "
                     << "\n";
     exit(1);
   }
