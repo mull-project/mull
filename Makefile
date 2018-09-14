@@ -56,7 +56,6 @@ ninja.init: $(BUILD_DIR_NINJA) ## Prepare Ninja project on macOS
     -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) \
     $(CMAKE_COMMAND_LINE_DEBUG_FLAGS) \
     -DLLVM_ROOT=$(LLVM_ROOT) \
-    -DMULL_SUPPORT_RUST=0 \
     ../
 
 ninja.build.mull-driver: ## Build mull-driver on macOS
@@ -99,6 +98,20 @@ $(BUILD_DIR_NINJA):
 
 travis.test: ninja.init ninja.run.unit-tests ninja.run.example
 
+UBUNTU_URL_3.9=http://releases.llvm.org/3.9.0/clang+llvm-3.9.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz
+UBUNTU_URL_4.0=http://releases.llvm.org/4.0.0/clang+llvm-4.0.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz
+UBUNTU_URL_5.0=http://releases.llvm.org/5.0.0/clang+llvm-5.0.0-linux-x86_64-ubuntu14.04.tar.xz
+UBUNTU_URL_6.0=http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz
+UBUNTU_URL=$(shell echo $(UBUNTU_URL_$(LLVM_VERSION)))
+UBUNTU_ARCHIVE=$(shell echo $(UBUNTU_URL) | awk -F/ ' { print $$NF } ' | sed 's/.tar.xz//')
+
+MACOS_URL_3.9=http://releases.llvm.org/3.9.0/clang+llvm-3.9.0-x86_64-apple-darwin.tar.xz
+MACOS_URL_4.0=http://releases.llvm.org/4.0.0/clang+llvm-4.0.0-x86_64-apple-darwin.tar.xz
+MACOS_URL_5.0=http://releases.llvm.org/5.0.0/clang+llvm-5.0.0-x86_64-apple-darwin.tar.xz
+MACOS_URL_6.0=http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-apple-darwin.tar.xz
+MACOS_URL=$(shell echo $(MACOS_URL_$(LLVM_VERSION)))
+MACOS_ARCHIVE=$(shell echo $(MACOS_URL) | awk -F/ ' { print $$NF } ' | sed 's/.tar.xz//')
+
 travis.install.macos:
 	brew update
 	brew upgrade cmake
@@ -106,25 +119,22 @@ travis.install.macos:
 	brew install ncurses
 	brew install sqlite
 	brew install ninja
-	cd /opt && \
-    sudo wget http://releases.llvm.org/$$LLVM_VERSION.0/clang+llvm-$$LLVM_VERSION.0-x86_64-apple-darwin.tar.xz && \
-    sudo tar xf clang+llvm-$$LLVM_VERSION.0-x86_64-apple-darwin.tar.xz && \
-    sudo mv clang+llvm-$$LLVM_VERSION.0-x86_64-apple-darwin /opt/llvm-$$LLVM_VERSION
+	cd /tmp && \
+     wget $(MACOS_URL) && \
+     tar xf $(MACOS_ARCHIVE).tar.xz && \
+     sudo mv $(MACOS_ARCHIVE) /opt/llvm-$(LLVM_VERSION)
 
 travis.install.ubuntu:
 	sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
 	sudo apt-get update
-	sudo apt-get -y install wget
-	echo "deb http://apt.llvm.org/trusty/ llvm-toolchain-trusty-$$LLVM_VERSION main" | sudo tee /etc/apt/sources.list.d/llvm.list > /dev/null
-	sudo wget -O - http://apt.llvm.org/llvm-snapshot.gpg.key | sudo apt-key add -
-	sudo apt-get update
-	sudo apt-get -y install git cmake make vim ninja-build wget \
-                     libz-dev sqlite3 libsqlite3-dev ncurses-dev \
-                     llvm-$$LLVM_VERSION clang-$$LLVM_VERSION llvm-$$LLVM_VERSION-dev libclang-$$LLVM_VERSION-dev \
-                     binutils-2.26
-	ld --version
+	sudo apt-get -y install wget git cmake make ninja-build \
+     libz-dev sqlite3 libsqlite3-dev ncurses-dev \
+     binutils-2.26 tree libstdc++6
 	sudo update-alternatives --install /usr/bin/ld ld /usr/bin/ld-2.26 1
-	ld --version
+	cd /tmp && \
+     wget $(UBUNTU_URL) && \
+     tar xf $(UBUNTU_ARCHIVE).tar.xz && \
+     sudo mv $(UBUNTU_ARCHIVE) /opt/llvm-$(LLVM_VERSION)
 
 ###
 ###  Xcode
@@ -134,7 +144,6 @@ xcode.init: $(BUILD_DIR_XCODE) ## Build Xcode project with CMake.
 	cd $(BUILD_DIR_XCODE) && cmake ../ -G Xcode \
     $(CMAKE_COMMAND_LINE_DEBUG_FLAGS) \
     -DLLVM_ROOT=$(LLVM_ROOT) \
-    -DMULL_SUPPORT_RUST=0
 
 xcode.kill-and-rebuild: xcode.kill-and-reopen ## Build Xcode project with CMake, kill Xcode, reopen the project in Xcode
 
