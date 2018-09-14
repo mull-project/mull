@@ -1,6 +1,6 @@
-#include "MutatorsFactory.h"
+#include "Mutators/MutatorsFactory.h"
 
-#include "Mutator.h"
+#include "Mutators/Mutator.h"
 #include "Mutators/AndOrReplacementMutator.h"
 #include "Mutators/MathAddMutator.h"
 #include "Mutators/MathDivMutator.h"
