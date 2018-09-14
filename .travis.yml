@@ -22,5 +22,5 @@ before_install:
 # Build steps
 script:
 - if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then make ninja.init travis.test LLVM_ROOT=/opt/llvm-$LLVM_VERSION INSTALL_DIR=/tmp/mull; fi
-- if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then make ninja.init travis.test LLVM_ROOT=/usr/lib/llvm-$LLVM_VERSION INSTALL_DIR=/tmp/mull; fi
+- if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then make ninja.init travis.test LLVM_ROOT=/opt/llvm-$LLVM_VERSION INSTALL_DIR=/tmp/mull; fi
 

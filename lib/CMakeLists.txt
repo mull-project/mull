@@ -75,6 +75,8 @@ set(mull_sources
   Parallelization/Tasks/OriginalCompilationTask.cpp
 )
 
+set (MULL_INCLUDE_DIR ${MULL_SOURCE_DIR}/include)
+
 set(mull_header_dirs
   ${MULL_INCLUDE_DIR}
   ${MULL_INCLUDE_DIR}/Mutators
@@ -86,32 +88,6 @@ set(mull_header_dirs
   ${MULL_INCLUDE_DIR}/Parallelization
   ${MULL_INCLUDE_DIR}/Parallelization/Tasks
 )
-
-set(mull_additional_libraries
-  ${MULL_DEPENDENCY_LIBZ}
-  ${MULL_DEPENDENCY_NCURSES}
-  ${MULL_DEPENDENCY_SQLITE}
-
-  ${LD_START_GROUP}
-  ${MULL_DEPENDENCY_LLVM_LIBRARIES}
-
-  ${MULL_DEPENDENCY_LIBCLANG}
-  ${MULL_DEPENDENCY_LIBCLANG_TOOLING}
-  ${MULL_DEPENDENCY_LIBCLANG_BASIC}
-  ${MULL_DEPENDENCY_LIBCLANG_FRONTEND}
-  ${MULL_DEPENDENCY_LIBCLANG_AST}
-  ${MULL_DEPENDENCY_LIBCLANG_DRIVER}
-  ${MULL_DEPENDENCY_LIBCLANG_LEX}
-  ${MULL_DEPENDENCY_LIBCLANG_SEMA}
-  ${MULL_DEPENDENCY_LIBCLANG_SERIALIZATION}
-  ${MULL_DEPENDENCY_LIBCLANG_ANALYSIS}
-  ${MULL_DEPENDENCY_LIBCLANG_PARSE}
-  ${MULL_DEPENDENCY_LIBCLANG_EDIT}
-  ${LD_END_GROUP}
-)
-
-set(mull_link_flags "") # to be filled later
-set(mull_rpath "")      # to be filled later
 
 # Globbing is not recommended by CMake so maybe consider listing headers
 # explicitly in include/CMakeLists.txt file. However LLVM goes find(GLOB) under
@@ -129,36 +105,24 @@ add_library(mull
 )
 
 set_source_files_properties(${mull_header_dirs} PROPERTIES HEADER_FILE_ONLY ON)
-include_directories(${mull_header_dirs})
 
-target_link_libraries(mull ${mull_additional_libraries})
-
-## Once we have mull target added, we can start querying and patching it.
-# rpath
-get_target_property(default_rpath mull INSTALL_RPATH)
-set(mull_rpath ${default_rpath} ${mull_rpath})
-set_target_properties(mull PROPERTIES INSTALL_RPATH "${mull_rpath}")
-
-# compile flags
-get_target_property(default_compile_flags mull COMPILE_FLAGS)
-if(NOT default_compile_flags)
-  set(default_compile_flags "")
-endif()
-set(mull_compileflags ${default_compile_flags} ${LLVM_CXX_FLAGS})
-set_target_properties(mull
-  PROPERTIES COMPILE_FLAGS
-  "${mull_compileflags}"
+target_link_libraries(mull
+  LLVMAsmParser
+  LLVMOrcJIT
+  LLVMSupport
+  LLVMOption
+  LLVMX86CodeGen
+  LLVMX86AsmParser
+  libclang
+  clangTooling
+  sqlite3
 )
+target_include_directories(mull PUBLIC ${MULL_INCLUDE_DIRS})
 
-# Link flags
-get_target_property(default_link_flags mull LINK_FLAGS)
-if(NOT ${default_link_flags})
-set(default_link_flags "")
-endif()
-set(mull_link_flags
-  "${default_link_flags} ${LLVM_LINK_FLAGS}"
+set_target_properties(mull PROPERTIES
+  COMPILE_FLAGS ${MULL_CXX_FLAGS}
+  LINK_FLAGS ${MULL_LINK_FLAGS}
 )
-set_target_properties(mull PROPERTIES LINK_FLAGS "${mull_link_flags}")
 
 # The following is needed to make CMake to generate a folder structure in Xcode
 # that corresponds to a physical folder structure.

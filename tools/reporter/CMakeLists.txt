@@ -1,6 +1,3 @@
-set(llvm_components "support")
-llvm_get_libs(llvm_libraries ${llvm_components})
-string(REPLACE ";" " " llvm_libraries "${llvm_libraries}")
 add_executable(mull-reporter
   WeakTestsReporter.h
   WeakTestsReporter.cpp
@@ -8,8 +5,15 @@ add_executable(mull-reporter
   reporter.cpp
 )
 set_target_properties(mull-reporter PROPERTIES
-  LINK_FLAGS "${LLVM_LINK_FLAGS} ${llvm_libraries} -lsqlite3"
-  COMPILE_FLAGS "-fno-rtti"
+  LINK_FLAGS ${MULL_LINK_FLAGS}
+  COMPILE_FLAGS ${MULL_CXX_FLAGS}
+)
+target_link_libraries(mull-reporter
+  LLVMSupport
+  sqlite3
+)
+target_include_directories(mull-reporter PUBLIC
+  ${MULL_INCLUDE_DIRS}
 )
 
 INSTALL(TARGETS mull-reporter
