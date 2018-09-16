@@ -2,6 +2,7 @@
 #include "Parallelization/Progress.h"
 
 #include "Logger.h"
+#include "LLVMCompatibility.h"
 
 using namespace mull;
 using namespace llvm;
@@ -20,7 +21,7 @@ void mull::LoadObjectFilesTask::operator()(mull::LoadObjectFilesTask::iterator b
       continue;
     }
 
-    Expected<std::unique_ptr<object::ObjectFile>> objectOrError =
+    llvm_compat::Expected<std::unique_ptr<object::ObjectFile>> objectOrError =
         object::ObjectFile::createObjectFile(buffer.get()->getMemBufferRef());
 
     if (!objectOrError) {

@@ -29,6 +29,7 @@
 #include <llvm/Support/TargetSelect.h>
 #include <llvm/Support/CommandLine.h>
 #include <llvm/Support/YAMLParser.h>
+#include <llvm/Support/ManagedStatic.h>
 
 #include <string>
 #include <Parallelization/TaskExecutor.h>

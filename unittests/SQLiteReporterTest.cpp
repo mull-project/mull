@@ -17,6 +17,7 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Type.h>
+#include <llvm/ADT/STLExtras.h>
 #include <sqlite3.h>
 
 using namespace mull;

@@ -7,6 +7,7 @@
 #include <llvm/IR/Module.h>
 
 #include <vector>
+#include <llvm/ADT/STLExtras.h>
 
 using namespace mull;
 using namespace llvm;

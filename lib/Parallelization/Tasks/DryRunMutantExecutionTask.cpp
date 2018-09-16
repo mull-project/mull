@@ -1,6 +1,8 @@
 #include "Parallelization/Tasks/DryRunMutantExecutionTask.h"
 #include "Parallelization/Progress.h"
 
+#include <llvm/ADT/STLExtras.h>
+
 using namespace mull;
 using namespace llvm;
 

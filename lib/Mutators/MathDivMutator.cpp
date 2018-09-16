@@ -62,10 +62,10 @@ llvm::Value *MathDivMutator::applyMutation(Function *function,
   }
 
   /// NOTE: Create a new BinaryOperator with the same name as existing one
-  Instruction *replacement = BinaryOperator::Create(type,
-                                                    binaryOperator->getOperand(0),
-                                                    binaryOperator->getOperand(1),
-                                                    binaryOperator->getName());
+  BinaryOperator *replacement = BinaryOperator::Create(type,
+                                                       binaryOperator->getOperand(0),
+                                                       binaryOperator->getOperand(1),
+                                                       binaryOperator->getName());
   assert(replacement);
   if (binaryOperator->hasNoUnsignedWrap()) {
     replacement->setHasNoUnsignedWrap();

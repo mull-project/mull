@@ -18,5 +18,9 @@ uint64_t JITSymbolAddress(JITSymbol &symbol) {
   return addressOrError.get();
 }
 
+std::string moduleSourceFile(llvm::Module &module) {
+  return module.getSourceFileName();
+}
+
 }
 

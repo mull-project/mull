@@ -21,9 +21,9 @@ void JITEngine::addObjectFiles(std::vector<object::ObjectFile *> &files,
         continue;
       }
 
-      Expected<StringRef> name = symbol.getName();
+      llvm_compat::Expected<StringRef> name = symbol.getName();
       if (!name) {
-        consumeError(name.takeError());
+        llvm_compat::ignoreError(name);
         continue;
       }
 

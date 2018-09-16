@@ -179,8 +179,15 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &context,
       ///   "Hello"
       ///   "world"
 
-      std::string testSuiteName = testSuiteNameConstArray->getRawDataValues().rtrim('\0').str();
-      std::string testCaseName = testCaseNameConstArray->getRawDataValues().rtrim('\0').str();
+      std::string testSuiteName = testSuiteNameConstArray->getRawDataValues().str();
+      std::string testCaseName = testCaseNameConstArray->getRawDataValues().str();
+
+      if (testSuiteName.back() == '\0') {
+        testSuiteName.erase(testSuiteName.end() - 1);
+      }
+      if (testCaseName.back() == '\0') {
+        testCaseName.erase(testCaseName.end() - 1);
+      }
 
       /// Once we've got the Name of a Test Suite and the name of a Test Case
       /// We can construct the name of a Test

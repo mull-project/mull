@@ -33,7 +33,7 @@ void *CustomTestRunner::getConstructorPointer(const llvm::Function &function,
 }
 
 void *CustomTestRunner::getFunctionPointer(const std::string &functionName, JITEngine &jit) {
-  JITSymbol &symbol = jit.getSymbol(functionName);
+  llvm_compat::JITSymbol &symbol = jit.getSymbol(functionName);
   auto address = llvm_compat::JITSymbolAddress(symbol);
 
   void *fpointer = reinterpret_cast<void *>(static_cast<uintptr_t>(address));

@@ -12,5 +12,9 @@ JITSymbolFlags JITSymbolFlagsFromObjectSymbol(const object::BasicSymbolRef &symb
   return JITSymbolFlags::fromObjectSymbol(symbol);
 }
 
+std::string moduleSourceFile(llvm::Module &module) {
+  return module.getSourceFileName();
+}
+
 }
 

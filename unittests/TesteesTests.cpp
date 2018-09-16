@@ -2,6 +2,8 @@
 #include "TestModuleFactory.h"
 #include "Testee.h"
 
+#include <llvm/ADT/STLExtras.h>
+
 TEST(Testees, mergeTestees) {
   TestModuleFactory factory;
   auto module = factory.create_SimpleTest_ANDORReplacement_Module();

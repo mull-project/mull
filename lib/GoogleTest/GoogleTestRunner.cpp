@@ -43,7 +43,7 @@ void *GoogleTestRunner::getConstructorPointer(const llvm::Function &function,
 
 void *GoogleTestRunner::getFunctionPointer(const std::string &functionName,
                                            JITEngine &jit) {
-  JITSymbol &symbol = jit.getSymbol(functionName);
+  llvm_compat::JITSymbol &symbol = jit.getSymbol(functionName);
   auto address = llvm_compat::JITSymbolAddress(symbol);
 
   void *pointer = reinterpret_cast<void *>(static_cast<uintptr_t>(address));

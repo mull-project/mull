@@ -11,6 +11,7 @@
 #include <vector>
 #include <string>
 #include <map>
+#include <llvm/ADT/STLExtras.h>
 
 using namespace mull;
 using namespace llvm;

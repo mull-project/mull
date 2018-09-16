@@ -5,6 +5,8 @@
 #include "Logger.h"
 #include "Config.h"
 
+#include "LLVMCompatibility.h"
+
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/DebugLoc.h>
 #include <llvm/IR/Module.h>
@@ -222,7 +224,7 @@ CXXJunkDetector::translationUnit(const SourceLocation &location,
                                                  sourceFile.c_str(),
                                                  args.argv, args.argc,
                                                  nullptr, 0,
-                                                 CXTranslationUnit_KeepGoing,
+                                                 CXTranslationUnit_None,
                                                  &unit);
 
   if (unit == nullptr) {
@@ -242,7 +244,7 @@ CXXJunkDetector::cursorAndLocation(MutationPoint *point) {
     return std::make_pair(clang_getNullCursor(), clang_getNullLocation());
   }
 
-  std::string sourceFile = instruction->getModule()->getSourceFileName();
+  std::string sourceFile(llvm_compat::moduleSourceFile(*instruction->getModule()));
 
   CXTranslationUnit unit = translationUnit(sourceLocation, sourceFile);
 
