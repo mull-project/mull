@@ -1,12 +1,17 @@
 # Mull
 
-![Screenshot](/screenshot.png)
+## What is Mutation Testing
 
+Mutation Testing, a fault-based software testing technique, serves as a way to evaluate and improve quality of software tests.
+
+> A tool for mutation testing creates many slightly modified versions of original program and then runs a test suite against each version, which is called a _mutant_. A mutant is said to be _killed_ if the test suite detects a change to the program introduced by this mutant, or _survived_ otherwise. Each mutation of original program is created based on one of the predefined rules for program modification called _mutation operators_. Each mutant is represented by a _mutation point_: a combination of mutation operator and location of a mutation in the program’s source code. To assess the quality of a test suite mutation testing uses a metric called _mutation score_, or _mutation coverage_.
 
 See [LLVM-based Mutation Testing System. Request For
 Comments](http://lowlevelbits.org/llvm-based-mutation-testing-system/) and [FOSDEM 2017: Mutation Testing, Leaving the Stone Age by Alex Denisov](https://www.youtube.com/watch?v=YEgiyiICkpQ).
 
 [![Slack Status](https://mutation-testing-slack.herokuapp.com/badge.svg)](https://mutation-testing.slack.com/messages/mull)
+
+![Screenshot](/screenshot.png)
 
 ## Getting started
 
