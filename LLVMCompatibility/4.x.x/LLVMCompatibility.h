@@ -1,3 +1,5 @@
+#pragma once
+
 #include <llvm/ExecutionEngine/RuntimeDyld.h>
 #include <llvm/Bitcode/BitcodeReader.h>
 
