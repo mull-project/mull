@@ -1,8 +1,6 @@
 #pragma once
 
 #include "TestRunner.h"
-
-#include "Mangler.h"
 #include "Toolchain/JITEngine.h"
 
 #include <llvm/ExecutionEngine/Orc/ExecutionUtils.h>
@@ -19,9 +17,10 @@ class Function;
 namespace mull {
 
 struct InstrumentationInfo;
+class Mangler;
 
 class GoogleTestRunner : public TestRunner {
-  Mangler mangler;
+  Mangler &mangler;
   llvm::orc::LocalCXXRuntimeOverrides overrides;
 
   std::string fGoogleTestInit;
@@ -30,7 +29,7 @@ class GoogleTestRunner : public TestRunner {
   InstrumentationInfo **trampoline;
 public:
 
-  GoogleTestRunner(llvm::TargetMachine &machine);
+  GoogleTestRunner(Mangler &mangler);
   ~GoogleTestRunner();
 
   void loadInstrumentedProgram(ObjectFiles &objectFiles, Instrumentation &instrumentation, JITEngine &jit) override;

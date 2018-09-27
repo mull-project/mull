@@ -13,13 +13,11 @@ class Test;
 class Instrumentation;
 
 class TestRunner {
-protected:
-  llvm::TargetMachine &machine;
 public:
   typedef std::vector<llvm::object::ObjectFile *> ObjectFiles;
   typedef std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> OwnedObjectFiles;
 
-  explicit TestRunner(llvm::TargetMachine &targetMachine);
+  TestRunner();
 
   virtual void loadInstrumentedProgram(ObjectFiles &objectFiles, Instrumentation &instrumentation, JITEngine &jit) = 0;
   virtual void loadProgram(ObjectFiles &objectFiles, JITEngine &jit) = 0;

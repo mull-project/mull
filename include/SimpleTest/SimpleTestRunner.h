@@ -1,7 +1,6 @@
 #pragma once
 
 #include "TestRunner.h"
-#include "Mangler.h"
 #include "Toolchain/JITEngine.h"
 
 #include <llvm/ExecutionEngine/Orc/ExecutionUtils.h>
@@ -16,14 +15,15 @@ class TargetMachine;
 namespace mull {
 
 class Test;
+class Mangler;
 struct InstrumentationInfo;
 
 class SimpleTestRunner : public TestRunner {
-  Mangler mangler;
+  Mangler &mangler;
   llvm::orc::LocalCXXRuntimeOverrides overrides;
   InstrumentationInfo **trampoline;
 public:
-  explicit SimpleTestRunner(llvm::TargetMachine &targetMachine);
+  SimpleTestRunner(Mangler &mangler);
   ~SimpleTestRunner() override;
 
   void loadInstrumentedProgram(ObjectFiles &objectFiles,

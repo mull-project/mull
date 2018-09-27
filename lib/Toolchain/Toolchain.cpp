@@ -1,5 +1,4 @@
 #include "Toolchain/Toolchain.h"
-
 #include "Config.h"
 
 #include <llvm/ADT/Triple.h>
@@ -20,9 +19,10 @@ Toolchain::NativeTarget::NativeTarget() {
 Toolchain::Toolchain(Config &config) :
   nativeTarget(),
   machine(llvm::EngineBuilder().selectTarget(llvm::Triple(), "", "",
-                                         llvm::SmallVector<std::string, 1>())),
+                                             llvm::SmallVector<std::string, 1>())),
   objectCache(config.cachingEnabled(), config.getCacheDirectory()),
-  simpleCompiler()
+  simpleCompiler(),
+  nameMangler(machine->createDataLayout())
 {
 }
 
@@ -35,5 +35,9 @@ Compiler &Toolchain::compiler() {
 }
 
 llvm::TargetMachine &Toolchain::targetMachine() {
-  return *machine.get();
+  return *machine;
+}
+
+Mangler &Toolchain::mangler() {
+  return nameMangler;
 }

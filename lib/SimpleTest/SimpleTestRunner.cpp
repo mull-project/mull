@@ -13,9 +13,8 @@
 using namespace mull;
 using namespace llvm;
 
-SimpleTestRunner::SimpleTestRunner(TargetMachine &machine)
-  : TestRunner(machine),
-    mangler(Mangler(machine.createDataLayout())),
+SimpleTestRunner::SimpleTestRunner(Mangler &mangler)
+  : mangler(mangler),
     overrides([this](const char *name) {
       return this->mangler.getNameWithPrefix(name);
     }),

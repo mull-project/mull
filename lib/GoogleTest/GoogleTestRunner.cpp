@@ -17,9 +17,8 @@ namespace {
   class UnitTest;
 }
 
-GoogleTestRunner::GoogleTestRunner(llvm::TargetMachine &machine) :
-  TestRunner(machine),
-  mangler(Mangler(machine.createDataLayout())),
+GoogleTestRunner::GoogleTestRunner(Mangler &mangler) :
+  mangler(mangler),
   overrides([this](const char *name) {
     return this->mangler.getNameWithPrefix(name);
   }),
