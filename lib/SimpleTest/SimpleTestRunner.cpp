@@ -3,7 +3,7 @@
 
 #include "Toolchain/Resolvers/InstrumentationResolver.h"
 #include "Toolchain/Resolvers/NativeResolver.h"
-#include "Mangler.h"
+#include "Toolchain/Mangler.h"
 
 #include <llvm/ExecutionEngine/SectionMemoryManager.h>
 #include <llvm/IR/Function.h>

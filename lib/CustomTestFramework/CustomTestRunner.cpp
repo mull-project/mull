@@ -1,7 +1,7 @@
 #include "CustomTestFramework/CustomTestRunner.h"
 #include "CustomTestFramework/CustomTest_Test.h"
 
-#include "Mangler.h"
+#include "Toolchain/Mangler.h"
 
 #include "Toolchain/Resolvers/InstrumentationResolver.h"
 #include "Toolchain/Resolvers/NativeResolver.h"
