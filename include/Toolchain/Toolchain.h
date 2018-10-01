@@ -2,8 +2,9 @@
 
 #include "Toolchain/ObjectCache.h"
 #include "Toolchain/Compiler.h"
+#include "Mangler.h"
 
-#include "llvm/Target/TargetMachine.h" 
+#include <llvm/Target/TargetMachine.h>
 
 namespace mull {
   class Config;
@@ -19,11 +20,13 @@ namespace mull {
     std::unique_ptr<llvm::TargetMachine> machine;
     ObjectCache objectCache;
     Compiler simpleCompiler;
+    Mangler nameMangler;
   public:
-    Toolchain(Config &config);
+    explicit Toolchain(Config &config);
 
     ObjectCache &cache();
     Compiler &compiler();
     llvm::TargetMachine &targetMachine();
+    Mangler &mangler();
   };
 }

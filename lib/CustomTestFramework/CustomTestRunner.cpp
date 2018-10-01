@@ -1,6 +1,8 @@
 #include "CustomTestFramework/CustomTestRunner.h"
 #include "CustomTestFramework/CustomTest_Test.h"
 
+#include "Toolchain/Mangler.h"
+
 #include "Toolchain/Resolvers/InstrumentationResolver.h"
 #include "Toolchain/Resolvers/NativeResolver.h"
 
@@ -10,9 +12,8 @@ using namespace mull;
 using namespace llvm;
 using namespace llvm::orc;
 
-CustomTestRunner::CustomTestRunner(llvm::TargetMachine &machine) :
-  TestRunner(machine),
-  mangler(Mangler(machine.createDataLayout())),
+CustomTestRunner::CustomTestRunner(Mangler &mangler) :
+  mangler(mangler),
   overrides([this](const char *name) {
     return this->mangler.getNameWithPrefix(name);
   }),

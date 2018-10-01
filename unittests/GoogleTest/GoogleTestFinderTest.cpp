@@ -129,7 +129,7 @@ mutators:
   GoogleTest_Test *Test2 = dyn_cast<GoogleTest_Test>(tests[1].get());
   ASSERT_EQ("HelloTest.testSumOfTestee2", Test2->getTestName());
 
-  GoogleTestRunner runner(toolchain.targetMachine());
+  GoogleTestRunner runner(toolchain.mangler());
   JITEngine jit;
 
   std::vector<llvm::object::ObjectFile *> objects({

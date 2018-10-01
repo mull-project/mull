@@ -1,7 +1,7 @@
 #include "GoogleTest/GoogleTestRunner.h"
 
 #include "GoogleTest/GoogleTest_Test.h"
-#include "Mangler.h"
+#include "Toolchain/Mangler.h"
 
 #include "Toolchain/Resolvers/InstrumentationResolver.h"
 #include "Toolchain/Resolvers/NativeResolver.h"
@@ -17,9 +17,8 @@ namespace {
   class UnitTest;
 }
 
-GoogleTestRunner::GoogleTestRunner(llvm::TargetMachine &machine) :
-  TestRunner(machine),
-  mangler(Mangler(machine.createDataLayout())),
+GoogleTestRunner::GoogleTestRunner(Mangler &mangler) :
+  mangler(mangler),
   overrides([this](const char *name) {
     return this->mangler.getNameWithPrefix(name);
   }),

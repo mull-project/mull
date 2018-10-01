@@ -91,8 +91,7 @@ TEST(Driver, RunningWithNoTests) {
   SimpleTestFinder testFinder;
 
   Toolchain toolchain(config);
-  llvm::TargetMachine &machine = toolchain.targetMachine();
-  SimpleTestRunner runner(machine);
+  SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
@@ -161,8 +160,7 @@ TEST(Driver, SimpleTest_MathAddMutator) {
   SimpleTestFinder testFinder;
 
   Toolchain toolchain(config);
-  llvm::TargetMachine &machine = toolchain.targetMachine();
-  SimpleTestRunner runner(machine);
+  SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
@@ -243,8 +241,7 @@ TEST(Driver, SimpleTest_MathSubMutator) {
   SimpleTestFinder testFinder;
 
   Toolchain toolchain(config);
-  llvm::TargetMachine &machine = toolchain.targetMachine();
-  SimpleTestRunner runner(machine);
+  SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
@@ -325,8 +322,7 @@ TEST(Driver, SimpleTest_MathMulMutator) {
   SimpleTestFinder testFinder;
 
   Toolchain toolchain(config);
-  llvm::TargetMachine &machine = toolchain.targetMachine();
-  SimpleTestRunner runner(machine);
+  SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
@@ -406,8 +402,7 @@ TEST(Driver, SimpleTest_MathDivMutator) {
   SimpleTestFinder testFinder;
 
   Toolchain toolchain(config);
-  llvm::TargetMachine &machine = toolchain.targetMachine();
-  SimpleTestRunner runner(machine);
+  SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
@@ -488,7 +483,7 @@ TEST(Driver, SimpleTest_NegateConditionMutator) {
   FakeModuleLoader loader(context, modules);
 
   Toolchain toolchain(config);
-  SimpleTestRunner runner(toolchain.targetMachine());
+  SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
@@ -562,7 +557,7 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutator) {
   FakeModuleLoader loader(context, modules);
 
   Toolchain toolchain(config);
-  SimpleTestRunner runner(toolchain.targetMachine());
+  SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
@@ -635,7 +630,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
   FakeModuleLoader loader(context, modules);
 
   Toolchain toolchain(config);
-  SimpleTestRunner runner(toolchain.targetMachine());
+  SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
@@ -783,7 +778,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator_CPP) {
   FakeModuleLoader loader(context, modules);
 
   Toolchain toolchain(config);
-  SimpleTestRunner runner(toolchain.targetMachine());
+  SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
@@ -892,7 +887,7 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutator_CPP) {
   FakeModuleLoader loader(context, modules);
 
   Toolchain toolchain(config);
-  SimpleTestRunner runner(toolchain.targetMachine());
+  SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
@@ -970,7 +965,7 @@ TEST(Driver, customTest) {
   FakeModuleLoader loader(context, modules);
 
   Toolchain toolchain(config);
-  CustomTestRunner runner(toolchain.targetMachine());
+  CustomTestRunner runner(toolchain.mangler());
   Filter filter;
   filter.includeTest("passing");
   Metrics metrics;
@@ -1044,7 +1039,7 @@ TEST(Driver, customTest_withDynamicLibraries) {
   FakeModuleLoader loader(context, modules);
 
   Toolchain toolchain(config);
-  CustomTestRunner runner(toolchain.targetMachine());
+  CustomTestRunner runner(toolchain.mangler());
   Filter filter;
   filter.includeTest("passing");
   Metrics metrics;
@@ -1116,7 +1111,7 @@ TEST(Driver, junkDetector_enabled) {
   FakeModuleLoader loader(context, modules);
 
   Toolchain toolchain(config);
-  CustomTestRunner runner(toolchain.targetMachine());
+  CustomTestRunner runner(toolchain.mangler());
   Filter filter;
   filter.includeTest("passing");
   Metrics metrics;
@@ -1182,7 +1177,7 @@ TEST(Driver, junkDetector_disabled) {
   FakeModuleLoader loader(context, modules);
 
   Toolchain toolchain(config);
-  CustomTestRunner runner(toolchain.targetMachine());
+  CustomTestRunner runner(toolchain.mangler());
   Filter filter;
   filter.includeTest("passing");
   Metrics metrics;
@@ -1250,7 +1245,7 @@ TEST(Driver, DISABLED_customTest_withDynamicLibraries_and_ObjectFiles) {
   FakeModuleLoader loader(context, modules);
 
   Toolchain toolchain(config);
-  CustomTestRunner runner(toolchain.targetMachine());
+  CustomTestRunner runner(toolchain.mangler());
   Filter filter;
   filter.includeTest("passing");
   Metrics metrics;

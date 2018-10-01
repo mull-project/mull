@@ -3,7 +3,7 @@
 
 #include "Toolchain/Resolvers/InstrumentationResolver.h"
 #include "Toolchain/Resolvers/NativeResolver.h"
-#include "Mangler.h"
+#include "Toolchain/Mangler.h"
 
 #include <llvm/ExecutionEngine/SectionMemoryManager.h>
 #include <llvm/IR/Function.h>
@@ -13,9 +13,8 @@
 using namespace mull;
 using namespace llvm;
 
-SimpleTestRunner::SimpleTestRunner(TargetMachine &machine)
-  : TestRunner(machine),
-    mangler(Mangler(machine.createDataLayout())),
+SimpleTestRunner::SimpleTestRunner(Mangler &mangler)
+  : mangler(mangler),
     overrides([this](const char *name) {
       return this->mangler.getNameWithPrefix(name);
     }),

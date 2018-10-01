@@ -104,17 +104,17 @@ int main(int argc, char *argv[]) {
     filter.skipByLocation("gmock");
 
     testFinder = make_unique<GoogleTestFinder>();
-    testRunner = make_unique<GoogleTestRunner>(toolchain.targetMachine());
+    testRunner = make_unique<GoogleTestRunner>(toolchain.mangler());
   }
 
   else if (testFramework == "SimpleTest") {
     testFinder = make_unique<SimpleTestFinder>();
-    testRunner = make_unique<SimpleTestRunner>(toolchain.targetMachine());
+    testRunner = make_unique<SimpleTestRunner>(toolchain.mangler());
   }
 
   else if (testFramework == "CustomTest") {
     testFinder = make_unique<CustomTestFinder>(config.getCustomTests());
-    testRunner = make_unique<CustomTestRunner>(toolchain.targetMachine());
+    testRunner = make_unique<CustomTestRunner>(toolchain.mangler());
   }
 
   else {

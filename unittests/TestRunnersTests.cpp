@@ -8,6 +8,7 @@
 #include "MutationsFinder.h"
 #include "Filter.h"
 #include "Testee.h"
+#include "Toolchain/Toolchain.h"
 
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/IR/InstrTypes.h>
@@ -27,30 +28,24 @@ using namespace llvm;
 static TestModuleFactory TestModuleFactory;
 
 TEST(SimpleTestRunner, runTest) {
-  InitializeNativeTarget();
-  InitializeNativeTargetAsmPrinter();
-  InitializeNativeTargetAsmParser();
-
-  std::unique_ptr<TargetMachine> targetMachine(
-                                EngineBuilder().selectTarget(Triple(), "", "",
-                                SmallVector<std::string, 1>()));
-
-  Compiler compiler;
-  Context Ctx;
-  SimpleTestRunner Runner(*targetMachine);
-  SimpleTestRunner::ObjectFiles ObjectFiles;
-  SimpleTestRunner::OwnedObjectFiles OwnedObjectFiles;
-
-  auto OwnedModuleWithTests   = TestModuleFactory.create_SimpleTest_CountLettersTest_Module();
-  auto OwnedModuleWithTestees = TestModuleFactory.create_SimpleTest_CountLetters_Module();
-
-  Module *ModuleWithTests   = OwnedModuleWithTests->getModule();
-  Module *ModuleWithTestees = OwnedModuleWithTestees->getModule();
-
-  Ctx.addModule(std::move(OwnedModuleWithTests));
-  Ctx.addModule(std::move(OwnedModuleWithTestees));
   Config config;
   config.normalizeParallelizationConfig();
+
+  Toolchain toolchain(config);
+
+  Context context;
+  SimpleTestRunner runner(toolchain.mangler());
+  SimpleTestRunner::ObjectFiles objectFiles;
+  SimpleTestRunner::OwnedObjectFiles ownedObjectFiles;
+
+  auto ownedModuleWithTests   = TestModuleFactory.create_SimpleTest_CountLettersTest_Module();
+  auto ownedModuleWithTestees = TestModuleFactory.create_SimpleTest_CountLetters_Module();
+
+  Module *moduleWithTests   = ownedModuleWithTests->getModule();
+  Module *moduleWithTestees = ownedModuleWithTestees->getModule();
+
+  context.addModule(std::move(ownedModuleWithTests));
+  context.addModule(std::move(ownedModuleWithTestees));
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
@@ -59,42 +54,42 @@ TEST(SimpleTestRunner, runTest) {
 
   SimpleTestFinder testFinder;
 
-  auto Tests = testFinder.findTests(Ctx, filter);
+  auto Tests = testFinder.findTests(context, filter);
 
   ASSERT_NE(0U, Tests.size());
 
   auto &Test = *(Tests.begin());
 
   {
-    auto Obj = compiler.compileModule(ModuleWithTests, *targetMachine);
-    ObjectFiles.push_back(Obj.getBinary());
-    OwnedObjectFiles.push_back(std::move(Obj));
+    auto object = toolchain.compiler().compileModule(moduleWithTests, toolchain.targetMachine());
+    objectFiles.push_back(object.getBinary());
+    ownedObjectFiles.push_back(std::move(object));
   }
 
   {
-    auto Obj = compiler.compileModule(ModuleWithTestees, *targetMachine);
-    ObjectFiles.push_back(Obj.getBinary());
-    OwnedObjectFiles.push_back(std::move(Obj));
+    auto object = toolchain.compiler().compileModule(moduleWithTestees, toolchain.targetMachine());
+    objectFiles.push_back(object.getBinary());
+    ownedObjectFiles.push_back(std::move(object));
   }
 
   JITEngine jit;
 
   /// Here we run test with original testee function
-  Runner.loadProgram(ObjectFiles, jit);
-  ASSERT_EQ(ExecutionStatus::Passed, Runner.runTest(Test.get(), jit));
+  runner.loadProgram(objectFiles, jit);
+  ASSERT_EQ(ExecutionStatus::Passed, runner.runTest(Test.get(), jit));
 
-  ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
+  objectFiles.erase(objectFiles.begin(), objectFiles.end());
 
   /// afterwards we apply single mutation and run test again
   /// expecting it to fail
 
-  Function *testeeFunction = Ctx.lookupDefinedFunction("count_letters");
+  Function *testeeFunction = context.lookupDefinedFunction("count_letters");
   std::vector<std::unique_ptr<Testee>> testees;
   testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
   auto mergedTestees = mergeTestees(testees);
 
   std::vector<MutationPoint *> MutationPoints =
-    mutationsFinder.getMutationPoints(Ctx, mergedTestees, filter);
+    mutationsFinder.getMutationPoints(context, mergedTestees, filter);
 
   MutationPoint *MP = (*(MutationPoints.begin()));
 
@@ -103,19 +98,19 @@ TEST(SimpleTestRunner, runTest) {
   MP->applyMutation(*ownedMutatedTesteeModule);
 
   {
-    auto Obj = compiler.compileModule(ModuleWithTests, *targetMachine);
-    ObjectFiles.push_back(Obj.getBinary());
-    OwnedObjectFiles.push_back(std::move(Obj));
+    auto object = toolchain.compiler().compileModule(moduleWithTests, toolchain.targetMachine());
+    objectFiles.push_back(object.getBinary());
+    ownedObjectFiles.push_back(std::move(object));
   }
 
   {
-    auto Obj = compiler.compileModule(ownedMutatedTesteeModule->getModule(), *targetMachine);
-    ObjectFiles.push_back(Obj.getBinary());
-    OwnedObjectFiles.push_back(std::move(Obj));
+    auto object = toolchain.compiler().compileModule(ownedMutatedTesteeModule->getModule(), toolchain.targetMachine());
+    objectFiles.push_back(object.getBinary());
+    ownedObjectFiles.push_back(std::move(object));
   }
 
-  Runner.loadProgram(ObjectFiles, jit);
-  ASSERT_EQ(ExecutionStatus::Failed, Runner.runTest(Test.get(), jit));
+  runner.loadProgram(objectFiles, jit);
+  ASSERT_EQ(ExecutionStatus::Failed, runner.runTest(Test.get(), jit));
 
-  ObjectFiles.erase(ObjectFiles.begin(), ObjectFiles.end());
+  objectFiles.erase(objectFiles.begin(), objectFiles.end());
 }

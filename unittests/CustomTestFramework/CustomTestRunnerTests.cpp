@@ -39,7 +39,7 @@ static vector<unique_ptr<MullModule>> loadTestModules() {
 TEST(CustomTestRunner, noTestNameSpecified) {
   Config config;
   Toolchain toolchain(config);
-  CustomTestRunner runner(toolchain.targetMachine());
+  CustomTestRunner runner(toolchain.mangler());
 
   vector<object::OwningBinary<object::ObjectFile>> ownedObjects;
   vector<object::ObjectFile *> objects;
@@ -63,7 +63,7 @@ TEST(CustomTestRunner, noTestNameSpecified) {
 TEST(CustomTestRunner, tooManyParameters) {
   Config config;
   Toolchain toolchain(config);
-  CustomTestRunner runner(toolchain.targetMachine());
+  CustomTestRunner runner(toolchain.mangler());
 
   vector<object::OwningBinary<object::ObjectFile>> ownedObjects;
   vector<object::ObjectFile *> objects;
@@ -87,7 +87,7 @@ TEST(CustomTestRunner, tooManyParameters) {
 TEST(CustomTestRunner, runPassingTest) {
   Config config;
   Toolchain toolchain(config);
-  CustomTestRunner runner(toolchain.targetMachine());
+  CustomTestRunner runner(toolchain.mangler());
 
   vector<object::OwningBinary<object::ObjectFile>> ownedObjects;
   vector<object::ObjectFile *> objects;
@@ -111,7 +111,7 @@ TEST(CustomTestRunner, runPassingTest) {
 TEST(CustomTestRunner, runFailingTest) {
   Config config;
   Toolchain toolchain(config);
-  CustomTestRunner runner(toolchain.targetMachine());
+  CustomTestRunner runner(toolchain.mangler());
 
   Function *constructor = nullptr;
   vector<object::OwningBinary<object::ObjectFile>> ownedObjects;
@@ -140,7 +140,7 @@ TEST(CustomTestRunner, runFailingTest) {
 TEST(CustomTestRunner, attemptToRunUnknownTest) {
   Config config;
   Toolchain toolchain(config);
-  CustomTestRunner runner(toolchain.targetMachine());
+  CustomTestRunner runner(toolchain.mangler());
 
   vector<object::OwningBinary<object::ObjectFile>> ownedObjects;
   vector<object::ObjectFile *> objects;

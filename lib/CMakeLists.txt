@@ -5,7 +5,6 @@ set(mull_sources
   Driver.cpp
   ForkProcessSandbox.cpp
   Logger.cpp
-  Mangler.cpp
   ModuleLoader.cpp
   Filter.cpp
   MutationsFinder.cpp
@@ -32,6 +31,7 @@ set(mull_sources
   Toolchain/ObjectCache.cpp
   Toolchain/Toolchain.cpp
   Toolchain/JITEngine.cpp
+  Toolchain/Mangler.cpp
   Toolchain/Resolvers/InstrumentationResolver.cpp
   Toolchain/Resolvers/NativeResolver.cpp
 

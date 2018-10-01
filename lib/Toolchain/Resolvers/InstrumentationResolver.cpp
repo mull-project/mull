@@ -1,7 +1,7 @@
 #include "Toolchain/Resolvers/InstrumentationResolver.h"
 
 #include "Instrumentation/Instrumentation.h"
-#include "Mangler.h"
+#include "Toolchain/Mangler.h"
 
 #include <llvm/ExecutionEngine/Orc/ExecutionUtils.h>
 #include <llvm/ExecutionEngine/RTDyldMemoryManager.h>
