@@ -3,6 +3,8 @@
 #include "MutationResult.h"
 #include "Toolchain/JITEngine.h"
 
+#include <llvm/Object/ObjectFile.h>
+
 namespace mull {
 
 class MutationPoint;
@@ -12,6 +14,7 @@ class TestRunner;
 class Config;
 class Toolchain;
 class Filter;
+class Mangler;
 class progress_counter;
 
 class MutantExecutionTask {

@@ -3,6 +3,7 @@
 #include "Logger.h"
 #include "MullModule.h"
 #include "MutationPoint.h"
+#include "LLVMCompatibility.h"
 
 using namespace mull;
 using namespace llvm;
@@ -39,7 +40,7 @@ OwningBinary<ObjectFile> ObjectCache::getObjectFromDisk(const std::string &ident
     return OwningBinary<ObjectFile>();
   }
 
-  Expected<std::unique_ptr<ObjectFile>> objectOrError =
+  llvm_compat::Expected<std::unique_ptr<ObjectFile>> objectOrError =
     ObjectFile::createObjectFile(buffer.get()->getMemBufferRef());
 
   if (!objectOrError) {

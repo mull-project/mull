@@ -1,5 +1,6 @@
 #include "SimpleTest/SimpleTestRunner.h"
 #include "SimpleTest/SimpleTest_Test.h"
+#include "Toolchain/JITEngine.h"
 
 #include "Toolchain/Resolvers/InstrumentationResolver.h"
 #include "Toolchain/Resolvers/NativeResolver.h"
@@ -65,3 +66,4 @@ ExecutionStatus SimpleTestRunner::runTest(Test *test, JITEngine &jit) {
   }
   return ExecutionStatus::Failed;
 }
+

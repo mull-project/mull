@@ -7,6 +7,7 @@
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/Path.h>
+#include <MullModule.h>
 
 using namespace mull;
 using namespace llvm;
@@ -42,4 +43,20 @@ std::unique_ptr<MullModule> MullModule::clone(LLVMContext &context) {
 
   auto module = make_unique<MullModule>(std::move(llvmModule.get()), "", modulePath);
   return module;
+}
+
+llvm::Module *MullModule::getModule() {
+  return module.get();
+}
+
+llvm::Module *MullModule::getModule() const {
+  return module.get();
+}
+
+std::string MullModule::getUniqueIdentifier() {
+  return uniqueIdentifier;
+}
+
+std::string MullModule::getUniqueIdentifier() const {
+  return uniqueIdentifier;
 }

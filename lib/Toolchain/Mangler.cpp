@@ -18,4 +18,6 @@ std::string Mangler::getNameWithPrefix(const std::string &name) {
   return mangledName;
 }
 
+Mangler::Mangler(llvm::DataLayout dataLayout) : dataLayout(dataLayout) {}
+
 }

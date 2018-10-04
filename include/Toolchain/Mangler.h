@@ -7,13 +7,8 @@
 namespace mull {
 
 class Mangler {
-
-const llvm::DataLayout dataLayout;
-
 public:
-
-  Mangler(llvm::DataLayout dataLayout) : dataLayout(dataLayout) {}
-
+  explicit Mangler(llvm::DataLayout dataLayout);
   /// We use LLVM Mangler class for low-level mangling: '_' prefixing.
   /// Examples:
   /// Mac OS:
@@ -21,7 +16,8 @@ public:
   /// On Linux it has no effect:
   /// _ZN7testing14InitGoogleTestEPiPPc -> _ZN7testing14InitGoogleTestEPiPPc
   std::string getNameWithPrefix(const std::string &name);
-  
+private:
+  const llvm::DataLayout dataLayout;
 };
 
 }

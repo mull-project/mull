@@ -11,6 +11,7 @@
 #include "Filter.h"
 #include "MutationsFinder.h"
 #include "Toolchain/Toolchain.h"
+#include "Toolchain/JITEngine.h"
 
 #include <llvm/IR/CallSite.h>
 #include <llvm/IR/InstrTypes.h>

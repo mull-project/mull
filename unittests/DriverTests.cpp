@@ -20,6 +20,7 @@
 #include "MutationsFinder.h"
 #include "CustomTestFramework/CustomTestFinder.h"
 #include "CustomTestFramework/CustomTestRunner.h"
+#include "Toolchain/Mangler.h"
 
 #include "JunkDetection/JunkDetector.h"
 #include "Toolchain/Toolchain.h"
@@ -979,10 +980,10 @@ TEST(Driver, customTest) {
 
   auto mutants = result->getMutationResults().begin();
 
-  auto mutant1 = (mutants++)->get();
-  ASSERT_EQ(ExecutionStatus::Passed, mutant1->getTest()->getExecutionResult().status);
-  ASSERT_EQ("passing", mutant1->getTest()->getTestName());
-  ASSERT_EQ(ExecutionStatus::Failed, mutant1->getExecutionResult().status);
+  auto mutant = (mutants++)->get();
+  ASSERT_EQ(ExecutionStatus::Passed, mutant->getTest()->getExecutionResult().status);
+  ASSERT_EQ("passing", mutant->getTest()->getTestName());
+  ASSERT_EQ(ExecutionStatus::Failed, mutant->getExecutionResult().status);
 }
 
 TEST(Driver, customTest_withDynamicLibraries) {

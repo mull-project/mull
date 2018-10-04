@@ -13,11 +13,11 @@ InstrumentationResolver::InstrumentationResolver(orc::LocalCXXRuntimeOverrides &
                                                  Instrumentation &instrumentation,
                                                  Mangler &mangler,
                                                  InstrumentationInfo **trampoline)
-: overrides(overrides),
-instrumentation(instrumentation),
-instrumentationInfoName(mangler.getNameWithPrefix(instrumentation.instrumentationInfoVariableName())),
-functionOffsetPrefix(mangler.getNameWithPrefix(instrumentation.functionIndexOffsetPrefix())),
-trampoline(trampoline) {}
+    : overrides(overrides),
+      instrumentation(instrumentation),
+      instrumentationInfoName(mangler.getNameWithPrefix(instrumentation.instrumentationInfoVariableName())),
+      functionOffsetPrefix(mangler.getNameWithPrefix(instrumentation.functionIndexOffsetPrefix())),
+      trampoline(trampoline) {}
 
 llvm_compat::JITSymbolInfo InstrumentationResolver::findSymbol(const std::string &name) {
   /// Overrides should go first, otherwise functions of the host process

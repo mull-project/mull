@@ -6,3 +6,4 @@ mull::TestRunner::TestRunner()
 {
   llvm::sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
 }
+

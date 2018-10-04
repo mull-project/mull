@@ -1,10 +1,10 @@
 #pragma once
 
 #include "ExecutionResult.h"
+#include "LLVMCompatibility.h"
 
 #include <llvm/Object/Binary.h>
 #include <llvm/Object/ObjectFile.h>
-#include <llvm/Target/TargetMachine.h>
 
 namespace mull {
 
