@@ -18,6 +18,7 @@ public:
   explicit OriginalCompilationTask(Toolchain &toolchain);
 
   void operator() (iterator begin, iterator end, Out &storage, progress_counter &counter);
+private:
   Toolchain &toolchain;
 };
 }

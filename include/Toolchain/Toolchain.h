@@ -2,7 +2,7 @@
 
 #include "Toolchain/ObjectCache.h"
 #include "Toolchain/Compiler.h"
-#include "Mangler.h"
+#include "Toolchain/Mangler.h"
 
 #include <llvm/Target/TargetMachine.h>
 
@@ -27,6 +27,6 @@ namespace mull {
     ObjectCache &cache();
     Compiler &compiler();
     llvm::TargetMachine &targetMachine();
-    Mangler &mangler();
+    mull::Mangler &mangler();
   };
 }

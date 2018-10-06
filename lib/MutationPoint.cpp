@@ -19,6 +19,11 @@ Instruction &MutationPointAddress::findInstruction(Module *module) {
   return instruction;
 }
 
+Function &MutationPointAddress::findFunction(Module *module) {
+  llvm::Function &function = *(std::next(module->begin(), getFnIndex()));
+  return function;
+}
+
 int MutationPointAddress::getFunctionIndex(Function *function) {
   auto PM = function->getParent();
 
@@ -50,6 +55,35 @@ MutationPointAddress::enumerateInstructions(
     }
     basicBlockIndex++;
   }
+}
+
+llvm::Instruction &MutationPointAddress::findInstruction(llvm::Function *function) {
+  llvm::BasicBlock &bb = *(std::next(function->begin(), getBBIndex()));
+  llvm::Instruction &instruction = *(std::next(bb.begin(), getIIndex()));
+
+  return instruction;
+}
+
+MutationPointAddress::MutationPointAddress(int FnIndex, int BBIndex, int IIndex) :
+    FnIndex(FnIndex), BBIndex(BBIndex), IIndex(IIndex) {
+
+  identifier = std::to_string(FnIndex) + "_" +
+      std::to_string(BBIndex) + "_" +
+      std::to_string(IIndex);
+}
+
+int MutationPointAddress::getFnIndex() { return FnIndex; }
+
+int MutationPointAddress::getBBIndex() { return BBIndex; }
+
+int MutationPointAddress::getIIndex() { return IIndex; }
+
+std::string MutationPointAddress::getIdentifier() {
+  return identifier;
+}
+
+std::string MutationPointAddress::getIdentifier() const {
+  return identifier;
 }
 
 #pragma mark - MutationPoint

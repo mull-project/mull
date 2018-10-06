@@ -16,6 +16,7 @@
 #include "Parallelization/Parallelization.h"
 
 #include <llvm/Support/DynamicLibrary.h>
+#include <llvm/Transforms/Utils/Cloning.h>
 
 #include <algorithm>
 #include <fstream>
@@ -23,6 +24,8 @@
 #include <sys/mman.h>
 #include <sys/types.h>
 
+#include <map>
+#include <llvm/Support/Path.h>
 
 using namespace llvm;
 using namespace llvm::object;

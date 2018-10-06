@@ -5,6 +5,7 @@
 #include "Logger.h"
 #include "Result.h"
 #include "MutationResult.h"
+#include "MullModule.h"
 
 #include "Mutators/Mutator.h"
 #include "Metrics/Metrics.h"

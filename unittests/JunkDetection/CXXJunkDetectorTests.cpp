@@ -67,9 +67,9 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
   Config config;
   config.normalizeParallelizationConfig();
 
-  std::vector<std::unique_ptr<Mutator>> mutatorss;
-  mutatorss.emplace_back(make_unique<ConditionalsBoundaryMutator>());
-  MutationsFinder finder(std::move(mutatorss), config);
+  std::vector<std::unique_ptr<Mutator>> mutators;
+  mutators.emplace_back(make_unique<ConditionalsBoundaryMutator>());
+  MutationsFinder finder(std::move(mutators), config);
   Filter filter;
 
   std::vector<std::unique_ptr<Testee>> testees;

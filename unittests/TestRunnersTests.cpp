@@ -9,6 +9,7 @@
 #include "Filter.h"
 #include "Testee.h"
 #include "Toolchain/Toolchain.h"
+#include "Toolchain/JITEngine.h"
 
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/IR/InstrTypes.h>
@@ -34,7 +35,7 @@ TEST(SimpleTestRunner, runTest) {
   Toolchain toolchain(config);
 
   Context context;
-  SimpleTestRunner runner(toolchain.mangler());
+  SimpleTestRunner testRunner(toolchain.mangler());
   SimpleTestRunner::ObjectFiles objectFiles;
   SimpleTestRunner::OwnedObjectFiles ownedObjectFiles;
 
@@ -75,8 +76,8 @@ TEST(SimpleTestRunner, runTest) {
   JITEngine jit;
 
   /// Here we run test with original testee function
-  runner.loadProgram(objectFiles, jit);
-  ASSERT_EQ(ExecutionStatus::Passed, runner.runTest(Test.get(), jit));
+  testRunner.loadProgram(objectFiles, jit);
+  ASSERT_EQ(ExecutionStatus::Passed, testRunner.runTest(Test.get(), jit));
 
   objectFiles.erase(objectFiles.begin(), objectFiles.end());
 
@@ -109,8 +110,8 @@ TEST(SimpleTestRunner, runTest) {
     ownedObjectFiles.push_back(std::move(object));
   }
 
-  runner.loadProgram(objectFiles, jit);
-  ASSERT_EQ(ExecutionStatus::Failed, runner.runTest(Test.get(), jit));
+  testRunner.loadProgram(objectFiles, jit);
+  ASSERT_EQ(ExecutionStatus::Failed, testRunner.runTest(Test.get(), jit));
 
   objectFiles.erase(objectFiles.begin(), objectFiles.end());
 }

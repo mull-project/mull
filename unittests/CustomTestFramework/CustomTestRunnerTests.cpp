@@ -4,6 +4,7 @@
 
 #include "Toolchain/Toolchain.h"
 #include "Config.h"
+#include "Toolchain/Mangler.h"
 
 #include "CustomTestFramework/CustomTest_Test.h"
 #include "CustomTestFramework/CustomTestRunner.h"
@@ -15,6 +16,8 @@
 using namespace mull;
 using namespace llvm;
 using namespace std;
+
+using Mangler = mull::Mangler;
 
 static TestModuleFactory SharedTestModuleFactory;
 static LLVMContext context;
@@ -118,7 +121,7 @@ TEST(CustomTestRunner, runFailingTest) {
   vector<object::ObjectFile *> objects;
   auto loadedModules = loadTestModules();
   for (auto &m : loadedModules) {
-    Module *module = m.get()->getModule();
+    Module *module = m->getModule();
     if (!constructor) {
       constructor = module->getFunction("initGlobalVariable");
     }

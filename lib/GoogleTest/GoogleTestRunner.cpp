@@ -2,6 +2,7 @@
 
 #include "GoogleTest/GoogleTest_Test.h"
 #include "Toolchain/Mangler.h"
+#include "Toolchain/JITEngine.h"
 
 #include "Toolchain/Resolvers/InstrumentationResolver.h"
 #include "Toolchain/Resolvers/NativeResolver.h"

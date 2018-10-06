@@ -27,7 +27,7 @@ class CustomTestRunner : public TestRunner {
   InstrumentationInfo **trampoline;
 public:
 
-  CustomTestRunner(Mangler &mangler);
+  explicit CustomTestRunner(Mangler &mangler);
   ~CustomTestRunner() override;
 
   void loadInstrumentedProgram(ObjectFiles &objectFiles,

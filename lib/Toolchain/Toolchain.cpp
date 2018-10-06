@@ -38,6 +38,7 @@ llvm::TargetMachine &Toolchain::targetMachine() {
   return *machine;
 }
 
-Mangler &Toolchain::mangler() {
+mull::Mangler &Toolchain::mangler() {
   return nameMangler;
 }
+

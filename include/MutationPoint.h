@@ -34,34 +34,26 @@ class MutationPointAddress {
 
   std::string identifier;
 public:
-  MutationPointAddress(int FnIndex, int BBIndex, int IIndex) :
-    FnIndex(FnIndex), BBIndex(BBIndex), IIndex(IIndex) {
+  MutationPointAddress(int FnIndex, int BBIndex, int IIndex);
 
-    identifier = std::to_string(FnIndex) + "_" +
-      std::to_string(BBIndex) + "_" +
-      std::to_string(IIndex);
-  }
+  int getFnIndex();
+  int getBBIndex();
+  int getIIndex();
 
-  int getFnIndex() { return FnIndex; }
-  int getBBIndex() { return BBIndex; }
-  int getIIndex() { return IIndex; }
+  std::string getIdentifier();
 
-  std::string getIdentifier() {
-    return identifier;
-  }
-
-  std::string getIdentifier() const {
-    return identifier;
-  }
+  std::string getIdentifier() const;
 
   llvm::Instruction &findInstruction(llvm::Module *module);
+  llvm::Instruction &findInstruction(llvm::Function *function);
+  llvm::Function &findFunction(llvm::Module *module);
 
   static int getFunctionIndex(llvm::Function *function);
   static
   void enumerateInstructions(llvm::Function &function,
-                             const std::function <void (llvm::Instruction &,
-                                                        int,
-                                                        int)>& block);
+                             const std::function<void(llvm::Instruction &,
+                                                      int,
+                                                      int)> &block);
 };
 
 class MutationPoint {
