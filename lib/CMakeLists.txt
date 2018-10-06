@@ -106,16 +106,29 @@ add_library(mull
 
 set_source_files_properties(${mull_header_dirs} PROPERTIES HEADER_FILE_ONLY ON)
 
+if ("LLVM" IN_LIST LLVM_AVAILABLE_LIBS)
+  set (MULL_LLVM_LIBRARIES
+    LLVM
+  )
+else()
+  set (MULL_LLVM_LIBRARIES
+    LLVMAsmParser
+    LLVMOrcJIT
+    LLVMSupport
+    LLVMOption
+    LLVMX86CodeGen
+    LLVMX86AsmParser
+  )
+endif()
+
+find_package(Threads REQUIRED)
+
 target_link_libraries(mull
-  LLVMAsmParser
-  LLVMOrcJIT
-  LLVMSupport
-  LLVMOption
-  LLVMX86CodeGen
-  LLVMX86AsmParser
+  ${MULL_LLVM_LIBRARIES}
   libclang
   clangTooling
   sqlite3
+  Threads::Threads
 )
 target_include_directories(mull PUBLIC ${MULL_INCLUDE_DIRS})
 
