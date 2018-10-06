@@ -121,11 +121,14 @@ else()
   )
 endif()
 
+find_package(Threads REQUIRED)
+
 target_link_libraries(mull
   ${MULL_LLVM_LIBRARIES}
   libclang
   clangTooling
   sqlite3
+  Threads::Threads
 )
 target_include_directories(mull PUBLIC ${MULL_INCLUDE_DIRS})
 
