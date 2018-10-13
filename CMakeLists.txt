@@ -13,6 +13,18 @@ endif()
 # https://stackoverflow.com/questions/22140520/how-to-enable-assert-in-cmake-release-mode
 string(REPLACE "-DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 
+# Using system's SQLite version by default
+# But also trying to find it using PkgConfig
+# See https://github.com/mull-project/mull/issues/401 for details
+set (SQLITE_DEPENDENCY sqlite3)
+find_package(PkgConfig)
+if (PkgConfig_FOUND)
+  pkg_check_modules(SQLITE3 sqlite3 IMPORTED_TARGET)
+  if (SQLITE3_FOUND)
+    set (SQLITE_DEPENDENCY PkgConfig::SQLITE3)
+  endif()
+endif()
+
 set (search_paths
   ${LLVM_ROOT}
   ${LLVM_ROOT}/lib/cmake
@@ -54,6 +66,8 @@ set (MULL_INCLUDE_DIRS
   ${MULL_SOURCE_DIR}/include
   ${LLVM_INCLUDE_DIRS}
   ${CMAKE_CURRENT_LIST_DIR}/LLVMCompatibility/${LLVM_COMPATIBILITY_DIR}
+  ${SQLITE3_INCLUDE_DIRS}
+  ${SQLITE3_INCLUDEDIR}
 )
 
 # https://cmake.org/Wiki/CMake_RPATH_handling#Always_full_RPATH

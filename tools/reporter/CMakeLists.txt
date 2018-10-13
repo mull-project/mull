@@ -21,7 +21,7 @@ endif()
 
 target_link_libraries(mull-reporter
   ${MULL_LLVM_LIBRARIES}
-  sqlite3
+  ${SQLITE_DEPENDENCY}
 )
 target_include_directories(mull-reporter PUBLIC
   ${MULL_INCLUDE_DIRS}
