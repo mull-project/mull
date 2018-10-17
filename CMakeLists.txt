@@ -46,7 +46,34 @@ if (PRECOMPILED_LLVM_DIR)
 endif()
 
 if(SOURCE_LLVM_DIR)
-  # TBD
+  macro(get_llvm_version_component input component)
+    string(REGEX MATCH "${component} ([0-9]+)" match ${input})
+    if (NOT match)
+      message(FATAL_ERROR "Cannot find LLVM version component '${component}'")
+    endif()
+    set (${component} ${CMAKE_MATCH_1})
+  endmacro()
+
+  file(READ ${SOURCE_LLVM_DIR}/CMakeLists.txt LLVM_CMAKELISTS)
+  get_llvm_version_component("${LLVM_CMAKELISTS}" LLVM_VERSION_MAJOR)
+  get_llvm_version_component("${LLVM_CMAKELISTS}" LLVM_VERSION_MINOR)
+  get_llvm_version_component("${LLVM_CMAKELISTS}" LLVM_VERSION_PATCH)
+
+  add_subdirectory(${SOURCE_LLVM_DIR})
+
+  if (NOT TARGET clangTooling)
+    message(FATAL_ERROR " 
+ Cannot find clangTooling target. Did you forget to clone clang sources?
+ Clean CMake cache and make sure they are available at:
+ ${SOURCE_LLVM_DIR}/tools/clang")
+  endif()
+
+  # Normally, include paths provided by LLVMConfig.cmake
+  # In this case we can 'steal' them from real targets
+  get_target_property(llvm_support_includes LLVMSupport INCLUDE_DIRECTORIES)
+  get_target_property(clang_tooling_includes clangTooling INCLUDE_DIRECTORIES)
+  set(LLVM_INCLUDE_DIRS ${llvm_support_includes} ${clang_tooling_includes})
+  list(REMOVE_DUPLICATES LLVM_INCLUDE_DIRS)
 endif()
 
 set (llvm_patch_version "${LLVM_VERSION_MAJOR}.${LLVM_VERSION_MINOR}.${LLVM_VERSION_PATCH}")
@@ -63,6 +90,7 @@ elseif(EXISTS ${CMAKE_CURRENT_LIST_DIR}/LLVMCompatibility/${llvm_minor_version})
 
 elseif(EXISTS ${CMAKE_CURRENT_LIST_DIR}/LLVMCompatibility/${llvm_major_version})
   set (LLVM_COMPATIBILITY_DIR ${llvm_major_version})
+
 else()
   message(FATAL_ERROR "LLVM-${full_llvm_version} is not supported")
 endif()
