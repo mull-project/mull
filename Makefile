@@ -12,20 +12,6 @@ CMAKE_COMMAND_LINE_DEBUG_FLAGS=# --debug-output # --debug-output --trace --trace
 
 OS?=$(shell uname -s)
 
-ifeq ($(LLVM_ROOT),)
-	ifeq ($(OS), Darwin)
-		LLVM_ROOT=/opt/llvm-3.9
-	else
-		ifneq ($(wildcard /etc/debian_version),)
-			LLVM_ROOT=/usr/lib/llvm-3.9
-		endif
-	endif
-endif
-
-ifeq ($(LLVM_ROOT),)
-$(error Could not find/identify LLVM_ROOT)
-endif
-
 # Self-Documented Makefile
 # http://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
 .PHONY: help
@@ -55,7 +41,7 @@ ninja.init: $(BUILD_DIR_NINJA) ## Prepare Ninja project on macOS
 	cd $(BUILD_DIR_NINJA) && cmake -G Ninja \
     -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) \
     $(CMAKE_COMMAND_LINE_DEBUG_FLAGS) \
-    -DLLVM_ROOT=$(LLVM_ROOT) \
+    -DPRECOMPILED_LLVM_DIR=$(PRECOMPILED_LLVM_DIR) \
     ../
 
 ninja.build.mull-driver: ## Build mull-driver on macOS
@@ -73,7 +59,7 @@ ninja.build.example: ninja.install.mull-driver ## Build example on macOS
     export PATH=$(INSTALL_DIR)/bin:$(PATH) && \
     make example \
       MULL=mull-driver \
-      MULL_CC=$(LLVM_ROOT)/bin/clang
+      MULL_CC=$(PRECOMPILED_LLVM_DIR)/bin/clang
 
 ninja.run.unit-tests: ninja.build.unit-tests ## Run unit-tests on macOS
 	cd $(MULL_UNIT_TESTS_DIR) && $(MULL_UNIT_TESTS)
@@ -83,7 +69,7 @@ ninja.run.example: ninja.build.example ## Run example on macOS
     export PATH=$(INSTALL_DIR)/bin:$(PATH) && \
     make run \
       MULL=mull-driver \
-      MULL_CC=$(LLVM_ROOT)/bin/clang
+      MULL_CC=$(PRECOMPILED_LLVM_DIR)/bin/clang
 
 
 ninja.clean:
@@ -143,7 +129,7 @@ travis.install.ubuntu:
 xcode.init: $(BUILD_DIR_XCODE) ## Build Xcode project with CMake.
 	cd $(BUILD_DIR_XCODE) && cmake ../ -G Xcode \
     $(CMAKE_COMMAND_LINE_DEBUG_FLAGS) \
-    -DLLVM_ROOT=$(LLVM_ROOT) \
+    -DPRECOMPILED_LLVM_DIR=$(PRECOMPILED_LLVM_DIR) \
 
 xcode.kill-and-rebuild: xcode.kill-and-reopen ## Build Xcode project with CMake, kill Xcode, reopen the project in Xcode
 
