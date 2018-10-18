@@ -37,7 +37,7 @@ set(mull_unittests_sources
   ConfigParserTestFixture.h
 )
 
-add_executable(MullUnitTests ${mull_unittests_sources})
+add_executable(MullUnitTests EXCLUDE_FROM_ALL ${mull_unittests_sources})
 target_link_libraries(MullUnitTests
   mull
   google-test
