@@ -18,14 +18,105 @@
 
 ## Step 1: Building Mull
 
-You need to have a `mull-driver` binary on your machine. We don't distribute
-Mull as binary yet so you have to build it yourself.
+We don't distribute Mull as binary yet so you have to build it yourself.
 
-See:
+### Dependencies: sqlite3 & cmake
 
-- [Getting started on Mac OS](/Docs/GettingStartedMacOS.md)
-- [Getting started on Ubuntu](/Docs/GettingStartedUbuntu.md)
-- [Getting started on CentOS](/Docs/GettingStartedCentOS7.md)
+Mull works on Linux, macOS and FreeBSD. It directly depends on `sqlite3`,
+`clang` and `LLVM`. Also, you need `cmake` to build it.
+
+You can install `sqlite3` and `cmake` using your default package manager.
+Some examples:
+
+#### Ubuntu/Debian
+
+```
+apt-get install -y sqlite3 libsqlite3-dev cmake
+```
+
+#### CentOS
+
+```
+yum install -y libsq3-devel
+```
+
+CentOS uses very old CMake version, install one based on [How to install latest cmake version in Linux/Ubuntu from command line?](https://askubuntu.com/a/595441/306213):
+
+```bash
+cd /opt
+mkdir cmake
+wget https://cmake.org/files/v3.8/cmake-3.8.2-Linux-x86_64.sh
+sh cmake-3.8.2-Linux-x86_64.sh --prefix=/opt/cmake # Yes to license, No to include
+ln -s /opt/cmake/bin/cmake /usr/local/bin/cmake
+```
+
+#### FreeBSD
+
+```
+cd /usr/ports/databases/sqlite3/ && make install clean
+cd /usr/ports/devel/cmake/ && make install clean
+# or
+pkg install sqlite3 cmake
+```
+
+#### macOS
+
+```
+brew install sqlite3 cmake
+```
+
+### Dependencies: LLVM & clang
+
+As of LLVM and Clang: Mull can be built against the following versions:
+
+  - 3.9
+  - 4.0
+  - 5.0
+  - 6.0
+
+It is recommended to use precompiled binaries from LLVM website: http://releases.llvm.org.
+
+An example installation that will be used across this howto follows. Please,
+pick the appropriate version for your OS.
+
+```
+cd /opt
+wget http://releases.llvm.org/3.9.0/clang+llvm-3.9.0-x86_64-apple-darwin.tar.xz
+tar xvf clang+llvm-3.9.0-x86_64-apple-darwin.tar.xz
+mv clang+llvm-3.9.0-x86_64-apple-darwin llvm-3.9
+```
+
+For Ubuntu/Debian it is recommended to use official LLVM repositories: https://apt.llvm.org
+
+### Build Mull
+
+In order to build Mull you need to provide a full path to the LLVM
+installation.
+
+```
+git clone https://github.com/mull-project/mull.git
+mkdir build
+cd build
+cmake -DPRECOMPILED_LLVM_DIR=/opt/llvm-3.9 ../mull
+make mull-driver mull-reporter
+sudo make install
+```
+
+By default, it will be installed into `/usr/local/bin`.
+
+### Known build issues
+
+If you see errors such as:
+
+```
+Toolchain.cpp:(.text._ZN4mull9ToolchainC2ERNS_6ConfigE+0x16c): undefined reference to `llvm::EngineBuilder::selectTarget(llvm::Triple const&, llvm::StringRef, llvm::StringRef, llvm::SmallVectorImpl<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > > const&)'
+```
+
+then you need to clean the build folder and re-run CMake with an additional option:
+
+```
+cmake -DPRECOMPILED_LLVM_DIR=/opt/llvm-3.9 -DCMAKE_CXX_FLAGS=-D_GLIBCXX_USE_CXX11_ABI=0 ../mull
+```
 
 ## Step 2: Getting LLVM bitcode
 
