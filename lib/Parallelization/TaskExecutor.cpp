@@ -30,4 +30,10 @@ std::vector<int> taskBatches(size_t itemsCount, size_t tasks) {
   assert(s == n);
   return result;
 }
+
+void printTimeSummary(MetricsMeasure measure) {
+  Logger::info() << ". Finished in " << measure.duration()
+                 << MetricsMeasure::precision() << ".\n";
+}
+
 }

@@ -1,3 +1,5 @@
+#include <utility>
+
 #pragma once
 
 #include <vector>
@@ -11,14 +13,15 @@
 namespace mull {
 
 std::vector<int> taskBatches(size_t itemsCount, size_t tasks);
+void printTimeSummary(MetricsMeasure measure);
 
 template <typename Task>
 class TaskExecutor {
 public:
   using In = typename Task::In;
   using Out = typename Task::Out;
-  TaskExecutor(const std::string &name, In &in, Out &out, std::vector<Task> tasks)
-      : in(in), out(out), tasks(std::move(tasks)), name(name) {}
+  TaskExecutor(std::string name, In &in, Out &out, std::vector<Task> tasks)
+      : in(in), out(out), tasks(std::move(tasks)), name(std::move(name)) {}
 
   void execute() {
     if (tasks.empty() || in.empty()) {
@@ -32,14 +35,10 @@ public:
       executeInParallel();
     }
     measure.finish();
-    printTimeSummary();
+    printTimeSummary(measure);
   }
 
 private:
-  void printTimeSummary() {
-    Logger::info() << ". Finished in " << measure.duration() << MetricsMeasure::precision() << ".\n";
-  }
-
   void executeInParallel() {
     assert(tasks.size() != 1);
     assert(in.size() != 1);
@@ -98,4 +97,34 @@ private:
   MetricsMeasure measure;
   std::string name;
 };
+
+class SingleTaskTag {};
+
+template <>
+class TaskExecutor<SingleTaskTag> {
+public:
+  TaskExecutor(std::string name, std::function<void(void)> task)
+      : name(std::move(name)), task(std::move(task)) {}
+
+  void execute() {
+    MetricsMeasure measure;
+    measure.start();
+    std::vector<progress_counter> unusedCounters{};
+    progress_counter::CounterType total(1);
+    size_t workers = 1;
+    progress_reporter reporter{name, unusedCounters, total, workers, Logger::info() };
+    task();
+    bool forceReport(true);
+    reporter.printProgress(total, total, forceReport);
+    measure.finish();
+    printTimeSummary(measure);
+  }
+
+private:
+  std::function<void(void)> task;
+  std::string name;
+};
+
+typedef TaskExecutor<SingleTaskTag> SingleTaskExecutor;
+
 }

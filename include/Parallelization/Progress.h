@@ -31,11 +31,10 @@ public:
                     llvm::raw_ostream &stream);
 
   void operator()();
-private:
   void printProgress(progress_counter::CounterType current,
                      progress_counter::CounterType total,
                      bool force);
-
+private:
   std::vector<progress_counter> &counters;
   llvm::raw_ostream &stream;
   progress_counter::CounterType total;
