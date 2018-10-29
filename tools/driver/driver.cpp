@@ -31,6 +31,7 @@
 #include <llvm/Support/YAMLParser.h>
 
 #include <string>
+#include <Parallelization/TaskExecutor.h>
 
 using namespace mull;
 using namespace llvm;
@@ -48,6 +49,9 @@ int main(int argc, char *argv[]) {
     Logger::error() << "Usage: mull-driver path-to-config-file.yml" << "\n";
     exit(1);
   }
+
+  MetricsMeasure totalExecutionTime;
+  totalExecutionTime.start();
 
   // Parse command line options
   cl::HideUnrelatedOptions(MullOptionCategory);
@@ -172,7 +176,14 @@ int main(int argc, char *argv[]) {
     reporter->reportResults(*result, config, metrics);
   }
 
-  llvm_shutdown();
+  SingleTaskExecutor shutdownTask("Shutting down", [&] () {
+    llvm_shutdown();
+  });
+  shutdownTask.execute();
+
+  totalExecutionTime.finish();
+  Logger::info() << "Total execution time: " << totalExecutionTime.duration()
+                 << MetricsMeasure::precision() << "\n";
 
   return EXIT_SUCCESS;
 }

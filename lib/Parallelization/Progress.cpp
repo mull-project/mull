@@ -21,18 +21,17 @@ progress_reporter::progress_reporter(std::string &name,
       stream(stream),
       total(total),
       previousValue(0),
-      backspaces(std::to_string(total).size() * 2 + 1,'\b')
+      name(name),
+      workers(workers)
 {
-  std::string message = name + " (threads: " + std::to_string(workers) + "): ";
-  stream << message;
-  stream.flush();
   hasTerminal = getenv("TERM") != nullptr;
   bool forceReport = true;
   printProgress(0, total, forceReport);
 }
 
 void progress_reporter::operator()() {
-  for (;;usleep(1000)) {
+  useconds_t microseconds(10000);
+  for (;;usleep(microseconds)) {
     progress_counter::CounterType current(0);
     for (auto &counter : counters) {
       current += counter.get();
@@ -58,24 +57,16 @@ void progress_reporter::printProgress(progress_counter::CounterType current,
     return;
   }
 
+  char terminator = '\n';
   if (hasTerminal) {
-    if (!force) backspace();
-    char buf[128];
-    char buf2[128];
-    auto width = (backspaces.size() - 1) / 2;
-    std::string backspaces(width * 2 + 1, '\b');
-    sprintf(buf, "%%%zud/%%%zud", width, width);
-    sprintf(buf2, buf, current, total);
-    stream << buf2;
-  } else {
-    auto diff = current - previousValue;
-    std::string dots(diff, '.');
-    stream << dots;
+    terminator = '\r';
   }
-  previousValue = current;
-}
 
-void progress_reporter::backspace() {
-  stream << backspaces;
+  const char *format = "%c%s (threads: %d): %zu/%zu";
+  const size_t bufferSize(128);
+  char message[bufferSize];
+  snprintf(message, bufferSize, format, terminator, name.c_str(), workers, current, total);
+  stream << message;
   stream.flush();
+  previousValue = current;
 }
