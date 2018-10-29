@@ -61,6 +61,8 @@ class MutationPoint {
   MutationPointAddress Address;
   llvm::Value *OriginalValue;
   MullModule *module;
+  llvm::Function *originalFunction;
+  llvm::Function *mutatedFunction;
   std::string uniqueIdentifier;
   std::string diagnostics;
   const SourceLocation sourceLocation;
@@ -69,9 +71,10 @@ public:
   MutationPoint(Mutator *mutator,
                 MutationPointAddress Address,
                 llvm::Value *Val,
-                MullModule *m,
+                llvm::Function *function,
                 std::string diagnostics,
-                const SourceLocation &location);
+                const SourceLocation &location,
+                MullModule *m);
 
   ~MutationPoint();
 
@@ -80,6 +83,9 @@ public:
   llvm::Value *getOriginalValue();
   MullModule *getOriginalModule();
 
+  llvm::Function *getOriginalFunction();
+  void setMutatedFunction(llvm::Function *function);
+
   Mutator *getMutator() const;
   MutationPointAddress getAddress() const;
   llvm::Value *getOriginalValue() const;
@@ -87,7 +93,7 @@ public:
   const SourceLocation &getSourceLocation() const;
 
   void addReachableTest(Test *test, int distance);
-  void applyMutation(MullModule &module);
+  void applyMutation();
 
   const std::vector<std::pair<Test *, int>> &getReachableTests() const;
 
@@ -96,6 +102,10 @@ public:
 
   const std::string &getDiagnostics();
   const std::string &getDiagnostics() const;
+
+  std::string getTrampolineName();
+  std::string getMutatedFunctionName();
+  std::string getOriginalFunctionName();
 };
 
 }

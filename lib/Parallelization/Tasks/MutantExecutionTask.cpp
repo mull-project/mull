@@ -3,6 +3,7 @@
 #include "Driver.h"
 #include "Config.h"
 #include "TestRunner.h"
+#include "Toolchain/Trampolines.h"
 
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/Support/TargetSelect.h>
@@ -10,40 +11,30 @@
 using namespace mull;
 using namespace llvm;
 
-mull::MutantExecutionTask::MutantExecutionTask(Driver &driver,
-                                               ProcessSandbox &sandbox,
-                                               TestRunner &runner,
-                                               Config &config,
-                                               Toolchain &toolchain,
-                                               Filter &filter)
-    : sandbox(sandbox), runner(runner),
-      config(config), toolchain(toolchain), filter(filter), driver(driver) {}
+MutantExecutionTask::MutantExecutionTask(ProcessSandbox &sandbox,
+                                         TestRunner &runner,
+                                         Config &config,
+                                         Filter &filter,
+                                         Mangler &mangler,
+                                         std::vector<llvm::object::ObjectFile *> &objectFiles,
+                                         std::vector<std::string> &mutatedFunctionNames)
+    : sandbox(sandbox), runner(runner), config(config), filter(filter),
+      mangler(mangler), objectFiles(objectFiles), mutatedFunctionNames(mutatedFunctionNames) {}
 
-void MutantExecutionTask::operator()(MutantExecutionTask::iterator begin,
-                                     MutantExecutionTask::iterator end,
-                                     MutantExecutionTask::Out &storage,
-                                     progress_counter &counter) {
-  EngineBuilder builder;
-  auto target = builder.selectTarget(llvm::Triple(), "", "",
-                                     llvm::SmallVector<std::string, 1>());
-  std::unique_ptr<TargetMachine> localMachine(target);
+void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage, progress_counter &counter) {
+  Trampolines trampolines(mutatedFunctionNames);
+  runner.loadMutatedProgram(objectFiles, trampolines, jit);
+  trampolines.fixupOriginalFunctions(jit);
 
   for (auto it = begin; it != end; ++it, counter.increment()) {
     auto mutationPoint = *it;
-    auto objectFilesWithMutant = driver.AllButOne(mutationPoint->getOriginalModule()->getModule());
 
-    auto mutant = toolchain.cache().getObject(*mutationPoint);
-    if (mutant.getBinary() == nullptr) {
-      LLVMContext localContext;
-      auto clonedModule = mutationPoint->getOriginalModule()->clone(localContext);
-      mutationPoint->applyMutation(*clonedModule.get());
-      mutant = toolchain.compiler().compileModule(*clonedModule.get(), *localMachine);
-      toolchain.cache().putObject(mutant, *mutationPoint);
-    }
-
-    objectFilesWithMutant.push_back(mutant.getBinary());
-
-    runner.loadProgram(objectFilesWithMutant, jit);
+    auto trampolineName = mangler.getNameWithPrefix(mutationPoint->getTrampolineName());
+    auto mutatedFunctionName = mangler.getNameWithPrefix(mutationPoint->getMutatedFunctionName());
+    uint64_t *trampoline = trampolines.findTrampoline(trampolineName);
+    uint64_t address = llvm_compat::JITSymbolAddress(jit.getSymbol(mutatedFunctionName));
+    uint64_t originalAddress = *trampoline;
+    *trampoline = address;
 
     auto atLeastOneTestFailed = false;
     for (auto &reachableTest : mutationPoint->getReachableTests()) {
@@ -73,5 +64,7 @@ void MutantExecutionTask::operator()(MutantExecutionTask::iterator begin,
 
       storage.push_back(make_unique<MutationResult>(result, mutationPoint, distance, test));
     }
+
+    *trampoline = originalAddress;
   }
 }

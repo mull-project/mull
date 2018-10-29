@@ -20,12 +20,13 @@ const std::string MathDivMutator::ID = "math_div_mutator";
 
 MutationPoint *
 MathDivMutator::getMutationPoint(MullModule *module,
-                                 MutationPointAddress &address,
+                                 llvm::Function *function,
                                  llvm::Instruction *instruction,
-                                 SourceLocation &sourceLocation) {
+                                 SourceLocation &sourceLocation,
+                                 MutationPointAddress &address) {
   if (canBeApplied(*instruction)) {
     std::string diagnostics = "Math Div: replaced / with *";
-    return new MutationPoint(this, address, instruction, module, diagnostics, sourceLocation);
+    return new MutationPoint(this, address, instruction, function, diagnostics, sourceLocation, module);
   }
 
   return nullptr;
@@ -45,9 +46,9 @@ bool MathDivMutator::canBeApplied(Value &V) {
   return false;
 }
 
-llvm::Value *MathDivMutator::applyMutation(llvm::Module *module,
+llvm::Value *MathDivMutator::applyMutation(Function *function,
                                            MutationPointAddress &address) {
-  llvm::Instruction &I = address.findInstruction(module);
+  llvm::Instruction &I = address.findInstruction(function);
 
   /// TODO: Take care of NUW/NSW
   BinaryOperator *binaryOperator = cast<BinaryOperator>(&I);

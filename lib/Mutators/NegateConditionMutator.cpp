@@ -279,9 +279,10 @@ static std::string getDiagnostics(CmpInst::Predicate originalPredicate,
 
 MutationPoint *
 NegateConditionMutator::getMutationPoint(MullModule *module,
-                                         MutationPointAddress &address,
+                                         llvm::Function *function,
                                          llvm::Instruction *instruction,
-                                         SourceLocation &sourceLocation) {
+                                         SourceLocation &sourceLocation,
+                                         MutationPointAddress &address) {
   if (canBeApplied(*instruction)) {
     CmpInst *cmpOp = dyn_cast<CmpInst>(instruction);
     assert(cmpOp);
@@ -294,7 +295,7 @@ NegateConditionMutator::getMutationPoint(MullModule *module,
       getDiagnostics(cmpOp->getPredicate(),
                      negatedCmpInstPredicate(cmpOp->getPredicate()));
 
-    return new MutationPoint(this, address, instruction, module, diagnostics, sourceLocation);
+    return new MutationPoint(this, address, instruction, function, diagnostics, sourceLocation, module);
   }
   return nullptr;
 }
@@ -316,9 +317,9 @@ bool NegateConditionMutator::canBeApplied(Value &V) {
   return false;
 }
 
-llvm::Value *NegateConditionMutator::applyMutation(llvm::Module *module,
+llvm::Value *NegateConditionMutator::applyMutation(Function *function,
                                                    MutationPointAddress &address) {
-  llvm::Instruction &I = address.findInstruction(module);
+  llvm::Instruction &I = address.findInstruction(function);
 
   CmpInst *cmpInstruction = cast<CmpInst>(&I);
 

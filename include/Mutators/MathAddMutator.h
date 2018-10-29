@@ -22,9 +22,10 @@ public:
   static const std::string ID;
 
   MutationPoint *getMutationPoint(MullModule *module,
-                                    MutationPointAddress &address,
+                                    llvm::Function *function,
                                     llvm::Instruction *instruction,
-                                    SourceLocation &sourceLocation) override;
+                                    SourceLocation &sourceLocation,
+                                    MutationPointAddress &address) override;
   MutatorKind mutatorKind() override { return MutatorKind::MathAddMutator; }
 
   std::string getUniqueIdentifier() override {
@@ -36,7 +37,7 @@ public:
 
   bool canBeApplied(llvm::Value &V) override;
   llvm::Value *
-  applyMutation(llvm::Module *module, MutationPointAddress &address) override;
+  applyMutation(llvm::Function *function, MutationPointAddress &address) override;
 };
 
 }

@@ -58,8 +58,9 @@ void SearchMutationPointsTask::operator()(iterator begin,
           auto location = SourceLocation::sourceLocationFromInstruction(&instruction);
 
           MutationPointAddress address(functionIndex, basicBlockIndex, instructionIndex);
-          MutationPoint *point = mutator->getMutationPoint(module, address, &instruction, location);
+          MutationPoint *point = mutator->getMutationPoint(module, function, &instruction, location, address);
           if (point) {
+            module->addMutation(point);
             for (auto &reachableTest : testee.getReachableTests()) {
               point->addReachableTest(reachableTest.first, reachableTest.second);
             }

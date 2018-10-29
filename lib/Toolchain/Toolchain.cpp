@@ -4,6 +4,7 @@
 #include <llvm/ADT/Triple.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/Support/TargetSelect.h>
+#include <Toolchain/Toolchain.h>
 
 using namespace mull;
 

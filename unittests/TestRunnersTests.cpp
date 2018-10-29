@@ -10,6 +10,7 @@
 #include "Testee.h"
 #include "Toolchain/Toolchain.h"
 #include "Toolchain/JITEngine.h"
+#include "Toolchain/Trampolines.h"
 
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/IR/InstrTypes.h>
@@ -53,65 +54,58 @@ TEST(SimpleTestRunner, runTest) {
   MutationsFinder mutationsFinder(std::move(mutators), config);
   Filter filter;
 
-  SimpleTestFinder testFinder;
-
-  auto Tests = testFinder.findTests(context, filter);
-
-  ASSERT_NE(0U, Tests.size());
-
-  auto &Test = *(Tests.begin());
-
-  {
-    auto object = toolchain.compiler().compileModule(moduleWithTests, toolchain.targetMachine());
-    objectFiles.push_back(object.getBinary());
-    ownedObjectFiles.push_back(std::move(object));
-  }
-
-  {
-    auto object = toolchain.compiler().compileModule(moduleWithTestees, toolchain.targetMachine());
-    objectFiles.push_back(object.getBinary());
-    ownedObjectFiles.push_back(std::move(object));
-  }
-
-  JITEngine jit;
-
-  /// Here we run test with original testee function
-  testRunner.loadProgram(objectFiles, jit);
-  ASSERT_EQ(ExecutionStatus::Passed, testRunner.runTest(Test.get(), jit));
-
-  objectFiles.erase(objectFiles.begin(), objectFiles.end());
-
-  /// afterwards we apply single mutation and run test again
-  /// expecting it to fail
-
   Function *testeeFunction = context.lookupDefinedFunction("count_letters");
   std::vector<std::unique_ptr<Testee>> testees;
   testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
   auto mergedTestees = mergeTestees(testees);
 
-  std::vector<MutationPoint *> MutationPoints =
-    mutationsFinder.getMutationPoints(context, mergedTestees, filter);
+  std::vector<MutationPoint *> mutationPoints =
+      mutationsFinder.getMutationPoints(context, mergedTestees, filter);
 
-  MutationPoint *MP = (*(MutationPoints.begin()));
+  MutationPoint *mutationPoint = mutationPoints.front();
 
-  LLVMContext localContext;
-  auto ownedMutatedTesteeModule = MP->getOriginalModule()->clone(localContext);
-  MP->applyMutation(*ownedMutatedTesteeModule);
+  SimpleTestFinder testFinder;
+
+  auto tests = testFinder.findTests(context, filter);
+
+  ASSERT_NE(0U, tests.size());
+
+  auto &test = tests.front();
+
+  JITEngine jit;
+
+  auto mutatedFunctions = mutationPoint->getOriginalModule()->prepareMutations();
+  mutationPoint->applyMutation();
 
   {
-    auto object = toolchain.compiler().compileModule(moduleWithTests, toolchain.targetMachine());
-    objectFiles.push_back(object.getBinary());
-    ownedObjectFiles.push_back(std::move(object));
+    auto owningBinary = toolchain.compiler().compileModule(moduleWithTests, toolchain.targetMachine());
+    objectFiles.push_back(owningBinary.getBinary());
+    ownedObjectFiles.push_back(std::move(owningBinary));
   }
 
   {
-    auto object = toolchain.compiler().compileModule(ownedMutatedTesteeModule->getModule(), toolchain.targetMachine());
-    objectFiles.push_back(object.getBinary());
-    ownedObjectFiles.push_back(std::move(object));
+    auto owningBinary = toolchain.compiler().compileModule(moduleWithTestees, toolchain.targetMachine());
+    objectFiles.push_back(owningBinary.getBinary());
+    ownedObjectFiles.push_back(std::move(owningBinary));
   }
 
-  testRunner.loadProgram(objectFiles, jit);
-  ASSERT_EQ(ExecutionStatus::Failed, testRunner.runTest(Test.get(), jit));
+  Trampolines trampolines(mutatedFunctions);
 
-  objectFiles.erase(objectFiles.begin(), objectFiles.end());
+  testRunner.loadMutatedProgram(objectFiles, trampolines, jit);
+  trampolines.fixupOriginalFunctions(jit);
+  ASSERT_EQ(ExecutionStatus::Passed, testRunner.runTest(test.get(), jit));
+
+  auto &mangler = toolchain.mangler();
+
+  auto name = mutationPoint->getOriginalFunction()->getName().str();
+  auto moduleId = mutationPoint->getOriginalModule()->getUniqueIdentifier();
+  auto trampolineName = mangler.getNameWithPrefix(mutationPoint->getTrampolineName());
+  auto mutatedFunctionName = mangler.getNameWithPrefix(mutationPoint->getMutatedFunctionName());
+  uint64_t *trampoline = trampolines.findTrampoline(trampolineName);
+  uint64_t address = llvm_compat::JITSymbolAddress(jit.getSymbol(mutatedFunctionName));
+  assert(address);
+  *trampoline = address;
+
+  ASSERT_EQ(ExecutionStatus::Failed, testRunner.runTest(test.get(), jit));
 }
+

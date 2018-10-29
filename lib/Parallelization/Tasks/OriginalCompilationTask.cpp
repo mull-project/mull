@@ -24,9 +24,7 @@ void mull::OriginalCompilationTask::operator()(mull::OriginalCompilationTask::it
 
     auto objectFile = toolchain.cache().getObject(module);
     if (objectFile.getBinary() == nullptr) {
-      LLVMContext localContext;
-      auto clonedModule = module.clone(localContext);
-      objectFile = toolchain.compiler().compileModule(*clonedModule, *localMachine);
+      objectFile = toolchain.compiler().compileModule(module, *localMachine);
       toolchain.cache().putObject(objectFile, module);
     }
 

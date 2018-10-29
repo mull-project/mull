@@ -12,6 +12,7 @@
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
+#include <llvm/Transforms/Utils/Cloning.h>
 
 #include "gtest/gtest.h"
 
@@ -69,9 +70,13 @@ TEST(ConditionalsBoundaryMutator, applyMutations) {
   std::vector<MutationPoint *> points = finder.getMutationPoints(mullContext, mergedTestees, filter);
 
   for (auto point: points) {
-    Instruction *originalInstruction = &point->getAddress().findInstruction(module);
-    point->applyMutation(*mutatedModule);
-    Instruction *mutatedInstruction = &point->getAddress().findInstruction(mutatedModule->getModule());
+    ValueToValueMapTy map;
+    auto mutatedFunction = CloneFunction(point->getOriginalFunction(), map);
+
+    Instruction *originalInstruction = &point->getAddress().findInstruction(point->getOriginalFunction());
+    point->setMutatedFunction(mutatedFunction);
+    point->applyMutation();
+    Instruction *mutatedInstruction = &point->getAddress().findInstruction(mutatedFunction);
 
     if (ConditionalsBoundaryMutator::isGT(originalInstruction)) {
       ASSERT_TRUE(ConditionalsBoundaryMutator::isGTE(mutatedInstruction));

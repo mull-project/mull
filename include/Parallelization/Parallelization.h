@@ -13,3 +13,4 @@
 #include "Parallelization/Tasks/JunkDetectionTask.h"
 #include "Parallelization/Tasks/OriginalCompilationTask.h"
 #include "Parallelization/Tasks/MutantExecutionTask.h"
+#include "Parallelization/Tasks/ApplyMutationTask.h"

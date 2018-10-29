@@ -49,9 +49,10 @@ namespace mull {
     static const std::string ID;
 
     MutationPoint *getMutationPoint(MullModule *module,
-                                    MutationPointAddress &address,
+                                    llvm::Function *function,
                                     llvm::Instruction *instruction,
-                                    SourceLocation &sourceLocation) override;
+                                    SourceLocation &sourceLocation,
+                                    MutationPointAddress &address) override;
 
     std::string getUniqueIdentifier() override {
       return ID;
@@ -62,6 +63,6 @@ namespace mull {
 
     bool canBeApplied(llvm::Value &V) override;
     llvm::Value *
-    applyMutation(llvm::Module *module, MutationPointAddress &address) override;
+    applyMutation(Function *function, MutationPointAddress &address) override;
   };
 }

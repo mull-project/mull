@@ -137,6 +137,7 @@ mutators:
     compiledModule_tests.getBinary(),
     compiledModule_testees.getBinary()
   });
-  runner.loadProgram(objects, jit);
+  /// TODO: enable eventually
+//  runner.loadProgram(objects, jit);
   runner.runTest(Test1, jit);
 }

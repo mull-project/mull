@@ -33,7 +33,8 @@ set(mull_sources
   Toolchain/JITEngine.cpp
   Toolchain/Mangler.cpp
   Toolchain/Resolvers/InstrumentationResolver.cpp
-  Toolchain/Resolvers/NativeResolver.cpp
+  Toolchain/Resolvers/MutationResolver.cpp
+  Toolchain/Trampolines.cpp
 
   MullModule.cpp
   MutationPoint.cpp
@@ -73,6 +74,7 @@ set(mull_sources
   Parallelization/Tasks/JunkDetectionTask.cpp
   Parallelization/Tasks/MutantExecutionTask.cpp
   Parallelization/Tasks/OriginalCompilationTask.cpp
+  Parallelization/Tasks/ApplyMutationTask.cpp
 )
 
 set (MULL_INCLUDE_DIR ${MULL_SOURCE_DIR}/include)

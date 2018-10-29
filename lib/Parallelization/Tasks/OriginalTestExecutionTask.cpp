@@ -39,6 +39,9 @@ void OriginalTestExecutionTask::operator()(iterator begin, iterator end, Out &st
 
     if (testExecutionResult.status == Passed) {
       testees = instrumentation.getTestees(test.get(), filter, config.getMaxDistance());
+    } else {
+      auto ssss = test->getTestName() + " failed: " + testExecutionResult.getStatusAsString() + "\n";
+      errs() << ssss;
     }
     instrumentation.cleanupInstrumentationInfo(test.get());
 
