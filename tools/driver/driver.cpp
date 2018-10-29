@@ -176,13 +176,10 @@ int main(int argc, char *argv[]) {
     reporter->reportResults(*result, config, metrics);
   }
 
-  SingleTaskExecutor shutdownTask("Shutting down", [&] () {
-    llvm_shutdown();
-  });
-  shutdownTask.execute();
+  llvm_shutdown();
 
   totalExecutionTime.finish();
-  Logger::info() << "Total execution time: " << totalExecutionTime.duration()
+  Logger::info() << "\nTotal execution time: " << totalExecutionTime.duration()
                  << MetricsMeasure::precision() << "\n";
 
   return EXIT_SUCCESS;
