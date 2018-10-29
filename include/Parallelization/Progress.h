@@ -35,13 +35,13 @@ private:
   void printProgress(progress_counter::CounterType current,
                      progress_counter::CounterType total,
                      bool force);
-  void backspace();
 
   std::vector<progress_counter> &counters;
   llvm::raw_ostream &stream;
   progress_counter::CounterType total;
   progress_counter::CounterType previousValue;
-  std::string backspaces;
+  std::string name;
+  size_t workers;
   bool hasTerminal;
 };
 }
