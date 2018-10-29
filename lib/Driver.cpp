@@ -123,17 +123,20 @@ void Driver::loadPrecompiledObjectFiles() {
 }
 
 void Driver::loadDynamicLibraries() {
-  metrics.beginLoadDynamicLibraries();
-  for (std::string &dylibPath: config.getDynamicLibrariesPaths()) {
-    sys::DynamicLibrary::LoadLibraryPermanently(dylibPath.c_str());
-  }
-  metrics.endLoadDynamicLibraries();
+  SingleTaskExecutor task("Loading dynamic libraries", [&] () {
+    for (std::string &dylibPath: config.getDynamicLibrariesPaths()) {
+      sys::DynamicLibrary::LoadLibraryPermanently(dylibPath.c_str());
+    }
+  });
+  task.execute();
 }
 
 std::vector<std::unique_ptr<Test>> Driver::findTests() {
-  metrics.beginFindTests();
-  auto tests = finder.findTests(context, filter);
-  metrics.endFindTests();
+  std::vector<std::unique_ptr<Test>> tests;
+  SingleTaskExecutor task("Searching tests", [&] () {
+    tests = finder.findTests(context, filter);
+  });
+  task.execute();
   return tests;
 }
 
@@ -146,20 +149,19 @@ Driver::findMutationPoints(std::vector<std::unique_ptr<Test>> &tests) {
   auto objectFiles = AllInstrumentedObjectFiles();
   JITEngine jit;
 
-  metrics.beginLoadOriginalProgram();
-  runner.loadInstrumentedProgram(objectFiles, instrumentation, jit);
-  metrics.endLoadOriginalProgram();
+  SingleTaskExecutor prepareOriginalTestRunTask("Preparing original test run", [&] () {
+    runner.loadInstrumentedProgram(objectFiles, instrumentation, jit);
+  });
+  prepareOriginalTestRunTask.execute();
 
   std::vector<OriginalTestExecutionTask> tasks;
   for (int i = 0; i < config.parallelization().testExecutionWorkers; i++) {
     tasks.emplace_back(instrumentation, *sandbox, runner, config, filter, jit);
   }
 
-  metrics.beginOriginalTestExecution();
   std::vector<std::unique_ptr<Testee>> testees;
   TaskExecutor<OriginalTestExecutionTask> testRunner("Running original tests", tests, testees, tasks);
   testRunner.execute();
-  metrics.endOriginalTestExecution();
 
   auto mergedTestees = mergeTestees(testees);
   std::vector<MutationPoint *> mutationPoints = mutationsFinder.getMutationPoints(context, mergedTestees, filter);
@@ -223,12 +225,15 @@ Driver::dryRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
 std::vector<std::unique_ptr<MutationResult>> Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
   std::vector<std::string> mutatedFunctions;
 
-  for (auto &module : context.getModules()) {
-    auto functions = module->prepareMutations();
-    for (auto &name : functions) {
-      mutatedFunctions.push_back(name);
+  SingleTaskExecutor prepareMutationsTask("Preparing mutations", [&] () {
+    for (auto &module : context.getModules()) {
+      auto functions = module->prepareMutations();
+      for (auto &name : functions) {
+        mutatedFunctions.push_back(name);
+      }
     }
-  }
+  });
+  prepareMutationsTask.execute();
 
   std::vector<ApplyMutationTask> applyMutationTasks;
   for (int i = 0; i < config.parallelization().workers; i++) {
