@@ -1,5 +1,7 @@
 #include "LLVMCompatibility.h"
 #include <llvm/IR/DebugInfoMetadata.h>
+#include <llvm/Transforms/Utils/Cloning.h>
+#include <llvm/IR/Function.h>
 
 using namespace llvm;
 
@@ -7,6 +9,12 @@ namespace llvm_compat {
 
 uint64_t JITSymbolAddress(JITSymbol &symbol) {
   return symbol.getAddress();
+}
+
+Function *cloneFunction(const Function *function) {
+  ValueToValueMapTy map;
+  /// Newer versions of LLVM do not have the third boolean argument
+  return CloneFunction(function, map, true);
 }
 
 JITSymbolFlags JITSymbolFlagsFromObjectSymbol(const object::BasicSymbolRef &symbol) {

@@ -9,6 +9,8 @@
 #include "Testee.h"
 #include "MutationsFinder.h"
 
+#include "LLVMCompatibility.h"
+
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
@@ -70,8 +72,7 @@ TEST(ConditionalsBoundaryMutator, applyMutations) {
   std::vector<MutationPoint *> points = finder.getMutationPoints(mullContext, mergedTestees, filter);
 
   for (auto point: points) {
-    ValueToValueMapTy map;
-    auto mutatedFunction = CloneFunction(point->getOriginalFunction(), map);
+    auto mutatedFunction = llvm_compat::cloneFunction(point->getOriginalFunction());
 
     Instruction *originalInstruction = &point->getAddress().findInstruction(point->getOriginalFunction());
     point->setMutatedFunction(mutatedFunction);

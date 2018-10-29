@@ -3,6 +3,11 @@
 #include <llvm/ExecutionEngine/RuntimeDyld.h>
 #include <llvm/Bitcode/BitcodeReader.h>
 
+namespace llvm {
+class Module;
+class Function;
+}
+
 namespace llvm_compat {
 using namespace llvm;
 
@@ -20,5 +25,6 @@ std::string moduleSourceFile(llvm::Module &module);
 
 uint64_t JITSymbolAddress(JITSymbol &symbol);
 JITSymbolFlags JITSymbolFlagsFromObjectSymbol(const object::BasicSymbolRef &symbol);
+llvm::Function *cloneFunction(llvm::Function *function);
 }
 

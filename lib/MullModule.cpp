@@ -73,12 +73,10 @@ std::vector<std::string> MullModule::prepareMutations() {
     auto anyPoint = pair.second.front();
     mutatedFunctionNames.push_back(anyPoint->getTrampolineName());
     for (auto point : pair.second) {
-      ValueToValueMapTy map;
-      auto mutatedFunction = CloneFunction(original, map);
+      auto mutatedFunction = llvm_compat::cloneFunction(original);
       point->setMutatedFunction(mutatedFunction);
     }
-    ValueToValueMapTy map;
-    auto originalCopy = CloneFunction(original, map);
+    auto originalCopy = llvm_compat::cloneFunction(original);
     originalCopy->setName(anyPoint->getOriginalFunctionName());
     original->deleteBody();
 
