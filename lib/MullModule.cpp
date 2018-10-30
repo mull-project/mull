@@ -91,7 +91,8 @@ std::vector<std::string> MullModule::prepareMutations() {
     auto trampoline = module->getOrInsertGlobal(anyPoint->getTrampolineName(), original->getFunctionType()->getPointerTo());
     BasicBlock *block = BasicBlock::Create(module->getContext(), "indirect_call", original);
     auto loadValue = new LoadInst(trampoline, "indirect_function_pointer", block);
-    auto callInst = CallInst::Create(loadValue, args, "indirect_function_call", block);
+    // name has to be empty for void functions: http://lists.llvm.org/pipermail/llvm-dev/2016-March/096242.html
+    auto callInst = CallInst::Create(loadValue, args, "", block);
     ReturnInst::Create(module->getContext(), callInst, block);
   }
 
