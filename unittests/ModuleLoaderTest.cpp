@@ -1,26 +1,16 @@
 #include "gtest/gtest.h"
 
 #include "ModuleLoader.h"
-#include "TestModuleFactory.h"
+#include "FixturePaths.h"
 #include "Config/Configuration.h"
-
-#include <fstream>
-#include <iostream>
 
 using namespace mull;
 using namespace llvm;
-using namespace std;
-
-static TestModuleFactory testModuleFactory;
 
 TEST(ModuleLoaderTest, loadModuleFromBitcodeListFile) {
-  llvm::LLVMContext context;
-
   Configuration configuration;
-
   ModuleLoader loader;
-
-  std::string bitcodeFile = testModuleFactory.testerModulePath_Bitcode();
+  std::string bitcodeFile = fixtures::hardcode_fixture_simple_test_tester_module_bc_path();
 
   std::vector<std::string> bitcodePaths = { bitcodeFile };
   std::vector<std::unique_ptr<MullModule>> modules =

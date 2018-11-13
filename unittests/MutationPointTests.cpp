@@ -13,6 +13,7 @@
 #include "MutationsFinder.h"
 #include "Filter.h"
 #include "Config/Configuration.h"
+#include "FixturePaths.h"
 
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/IR/InstrTypes.h>
@@ -28,11 +29,11 @@
 using namespace mull;
 using namespace llvm;
 
-static TestModuleFactory TestModuleFactory;
-
 TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
-  auto ModuleWithTests   = TestModuleFactory.create_SimpleTest_CountLettersTest_Module();
-  auto ModuleWithTestees = TestModuleFactory.create_SimpleTest_CountLetters_Module();
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto ModuleWithTests = loader.loadModuleAtPath(fixtures::simple_test_count_letters_test_count_letters_bc_path(), llvmContext);
+  auto ModuleWithTestees = loader.loadModuleAtPath(fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
 
   Context Ctx;
   Ctx.addModule(std::move(ModuleWithTests));
@@ -70,7 +71,9 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
-  auto module = TestModuleFactory.create_SimpleTest_MathSub_Module();
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto module = loader.loadModuleAtPath(fixtures::mutators_math_sub_module_bc_path(), llvmContext);
 
   Context context;
   context.addModule(std::move(module));
@@ -105,7 +108,9 @@ TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
-  auto module = TestModuleFactory.create_SimpleTest_MathMul_Module();
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto module = loader.loadModuleAtPath(fixtures::mutators_math_mul_module_bc_path(), llvmContext);
 
   Context context;
   context.addModule(std::move(module));
@@ -140,7 +145,9 @@ TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
-  auto module = TestModuleFactory.create_SimpleTest_MathDiv_Module();
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto module = loader.loadModuleAtPath(fixtures::mutators_math_div_module_bc_path(), llvmContext);
 
   Context context;
   context.addModule(std::move(module));
@@ -177,8 +184,11 @@ TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
-  auto ModuleWithTests   = TestModuleFactory.create_SimpleTest_NegateCondition_Tester_Module();
-  auto ModuleWithTestees = TestModuleFactory.create_SimpleTest_NegateCondition_Testee_Module();
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+
+  auto ModuleWithTests   = loader.loadModuleAtPath(fixtures::mutators_negate_condition_tester_bc_path(), llvmContext);
+  auto ModuleWithTestees = loader.loadModuleAtPath(fixtures::mutators_negate_condition_testee_bc_path(), llvmContext);
 
   Context context;
   context.addModule(std::move(ModuleWithTests));
@@ -210,7 +220,9 @@ TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_AndOrMutator_applyMutation) {
-  auto module = TestModuleFactory.create_SimpleTest_ANDORReplacement_Module();
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto module = loader.loadModuleAtPath(fixtures::mutators_and_or_replacement_module_bc_path(), llvmContext);
 
   Context context;
   context.addModule(std::move(module));
@@ -241,7 +253,9 @@ TEST(MutationPoint, SimpleTest_AndOrMutator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_ScalarValueMutator_applyMutation) {
-  auto module = TestModuleFactory.create_SimpleTest_ScalarValue_Module();
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto module = loader.loadModuleAtPath(fixtures::mutators_scalar_value_module_bc_path(), llvmContext);
 
   Context context;
   context.addModule(std::move(module));
@@ -285,7 +299,9 @@ TEST(MutationPoint, SimpleTest_ScalarValueMutator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_ReplaceCallMutator_applyMutation) {
-  auto module = TestModuleFactory.create_SimpleTest_ReplaceCall_Module();
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto module = loader.loadModuleAtPath(fixtures::mutators_replace_call_module_bc_path(), llvmContext);
 
   Context context;
   context.addModule(std::move(module));
@@ -319,7 +335,9 @@ TEST(MutationPoint, SimpleTest_ReplaceCallMutator_applyMutation) {
 }
 
 TEST(MutationPoint, SimpleTest_ReplaceAssignmentMutator_applyMutation) {
-  auto module = TestModuleFactory.create_SimpleTest_ReplaceAssignment_Module();
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto module = loader.loadModuleAtPath(fixtures::mutators_replace_assignment_module_bc_path(), llvmContext);
 
   Context context;
   context.addModule(std::move(module));

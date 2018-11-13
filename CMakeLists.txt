@@ -3,6 +3,9 @@ cmake_minimum_required(VERSION 3.5.1)
 project(Mull)
 enable_language(C CXX)
 
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/properties.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/fixtures.cmake)
+
 if (NOT PRECOMPILED_LLVM_DIR AND NOT SOURCE_LLVM_DIR)
   message(FATAL_ERROR " 
  The cmake is supposed to be called with either of the following options:
@@ -43,6 +46,12 @@ if (PRECOMPILED_LLVM_DIR)
 
   find_package(LLVM REQUIRED CONFIG PATHS ${search_paths} NO_DEFAULT_PATH)
   find_package(Clang REQUIRED CONFIG PATHS ${search_paths} NO_DEFAULT_PATH)
+
+  if (TARGET clang)
+    get_target_property(MULL_CC clang LOCATION)
+  else()
+    set(MULL_CC ${PRECOMPILED_LLVM_DIR}/bin/clang)
+  endif()
 endif()
 
 if(SOURCE_LLVM_DIR)
@@ -59,7 +68,7 @@ if(SOURCE_LLVM_DIR)
   get_llvm_version_component("${LLVM_CMAKELISTS}" LLVM_VERSION_MINOR)
   get_llvm_version_component("${LLVM_CMAKELISTS}" LLVM_VERSION_PATCH)
 
-  add_subdirectory(${SOURCE_LLVM_DIR})
+  add_subdirectory(${SOURCE_LLVM_DIR} llllllxc)
 
   if (NOT TARGET clangTooling)
     message(FATAL_ERROR " 
@@ -74,6 +83,9 @@ if(SOURCE_LLVM_DIR)
   get_target_property(clang_tooling_includes clangTooling INCLUDE_DIRECTORIES)
   set(LLVM_INCLUDE_DIRS ${llvm_support_includes} ${clang_tooling_includes})
   list(REMOVE_DUPLICATES LLVM_INCLUDE_DIRS)
+
+  get_target_property(clang_build_dir clang BUILD_DIR)
+  message("${clang_build_dir}")
 endif()
 
 set (llvm_patch_version "${LLVM_VERSION_MAJOR}.${LLVM_VERSION_MINOR}.${LLVM_VERSION_PATCH}")

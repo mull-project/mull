@@ -1,7 +1,7 @@
 [
 {
-  "directory": "DIR",
-  "command": "-I INC/include",
+  "directory": "@DIR@",
+  "command": "-I @INC@/include",
   "file": "main.cpp"
 }
 ]

@@ -1,6 +1,6 @@
 #include "Toolchain/Toolchain.h"
 #include "ModuleLoader.h"
-#include "TestModuleFactory.h"
+#include "FixturePaths.h"
 
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/IR/LLVMContext.h>
@@ -13,8 +13,6 @@
 using namespace llvm;
 using namespace mull;
 
-static TestModuleFactory TestModuleFactory;
-
 TEST(Compiler, CompileModule) {
   InitializeNativeTarget();
   InitializeNativeTargetAsmPrinter();
@@ -26,8 +24,10 @@ TEST(Compiler, CompileModule) {
 
   Compiler compiler;
 
-  auto module = TestModuleFactory.create_SimpleTest_CountLettersTest_Module();
-  auto Binary = compiler.compileModule(module->getModule(), *targetMachine);
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto module = loader.loadModuleAtPath(fixtures::simple_test_count_letters_test_count_letters_bc_path(), llvmContext);
+  auto binary = compiler.compileModule(module->getModule(), *targetMachine);
 
-  ASSERT_NE(nullptr, Binary.getBinary());
+  ASSERT_NE(nullptr, binary.getBinary());
 }

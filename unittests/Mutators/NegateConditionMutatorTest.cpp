@@ -21,6 +21,7 @@
 #include <llvm/IR/Value.h>
 
 #include "TestModuleFactory.h"
+#include "FixturePaths.h"
 
 #include "gtest/gtest.h"
 
@@ -75,8 +76,8 @@ TEST(NegateConditionMutator, negatedCmpInstPredicate) {
 }
 
 TEST(NegateConditionMutator, getMutationPoints_no_filter) {
-  TestModuleFactory factory;
-  auto module = factory.APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutatorModule();
+  LLVMContext llvmContext;
+  auto module =  loadModuleFromIR(fixtures::hardcode_APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutator_ll_path(), llvmContext);
   auto llvmModule = module->getModule();
   assert(llvmModule);
 
@@ -105,8 +106,8 @@ TEST(NegateConditionMutator, getMutationPoints_no_filter) {
 }
 
 TEST(NegateConditionMutator, getMutationPoints_filter_to_bool_converion) {
-  TestModuleFactory factory;
-  auto module = factory.APFloat_019fc57b8bd190d33389137abbe7145e_214_2_7_negate_mutatorModule();
+  LLVMContext llvmContext;
+  auto module = loadModuleFromIR(fixtures::hardcode_APFloat_019fc57b8bd190d33389137abbe7145e_214_2_7_negate_mutator_ll_path(), llvmContext);
   auto llvmModule = module->getModule();
   assert(llvmModule);
 
@@ -130,8 +131,8 @@ TEST(NegateConditionMutator, getMutationPoints_filter_to_bool_converion) {
 }
 
 TEST(NegateConditionMutator, getMutationPoints_filter_is_null) {
-  TestModuleFactory factory;
-  auto module = factory.APFloat_019fc57b8bd190d33389137abbe7145e_5_1_3_negate_mutatorModule();
+  LLVMContext llvmContext;
+  auto module = loadModuleFromIR(fixtures::hardcode_APFloat_019fc57b8bd190d33389137abbe7145e_5_1_3_negate_mutator_ll_path(), llvmContext);
   auto llvmModule = module->getModule();
   assert(llvmModule);
 

@@ -1,3 +1,5 @@
+generate_fixture_factory(FACTORY_HEADER)
+
 set(mull_unittests_sources
   CompilerTests.cpp
   ConfigParserTests.cpp
@@ -35,7 +37,10 @@ set(mull_unittests_sources
   TestModuleFactory.h
 
   ConfigParserTestFixture.h
+  ${FACTORY_HEADER}
 )
+
+get_filename_component(factory_include_dir ${FACTORY_HEADER} DIRECTORY)
 
 add_executable(MullUnitTests EXCLUDE_FROM_ALL ${mull_unittests_sources})
 target_link_libraries(MullUnitTests
@@ -46,11 +51,14 @@ target_include_directories(MullUnitTests PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${MULL_SOURCE_DIR}/googletest/include
   ${MULL_INCLUDE_DIRS}
+  ${factory_include_dir}
 )
 set_target_properties(MullUnitTests PROPERTIES
   COMPILE_FLAGS ${MULL_CXX_FLAGS}
   LINK_FLAGS ${MULL_LINK_FLAGS}
 )
+get_property(dependencies GLOBAL PROPERTY TEST_FIXTURES_DEPENDENCIES)
+add_dependencies(MullUnitTests ${dependencies})
 
 # This copies (symlinks) fixtures/*.bc files that used by unit tests.
 add_custom_command(TARGET MullUnitTests POST_BUILD

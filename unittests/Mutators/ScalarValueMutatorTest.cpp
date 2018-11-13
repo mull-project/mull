@@ -14,14 +14,15 @@
 #include <llvm/IR/Module.h>
 
 #include "gtest/gtest.h"
+#include "FixturePaths.h"
 
 using namespace mull;
 using namespace llvm;
 
-static TestModuleFactory TestModuleFactory;
-
 TEST(ScalarValueMutator, getMutationPoint) {
-  auto mullModule = TestModuleFactory.create_SimpleTest_ScalarValue_Module();
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto mullModule = loader.loadModuleAtPath(fixtures::mutators_scalar_value_module_bc_path(), llvmContext);
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
@@ -66,7 +67,9 @@ TEST(ScalarValueMutator, getMutationPoint) {
 }
 
 TEST(DISABLED_ScalarValueMutator, failingMutationPoint) {
-  auto mullModule = TestModuleFactory.create_CustomTest_OpenSSL_bio_enc_test_Module();
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto mullModule = loader.loadModuleAtPath(fixtures::hardcode_openssl_bio_enc_test_oll_path(), llvmContext);
 
   MutationPointAddress address(15, 10, 7);
   ScalarValueMutator mutator;

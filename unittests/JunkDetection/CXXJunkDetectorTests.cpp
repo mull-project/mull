@@ -1,14 +1,15 @@
 #include "Config/Configuration.h"
+#include "Config/RawConfig.h"
 #include "Context.h"
 #include "Mutators/ConditionalsBoundaryMutator.h"
 #include "MutationPoint.h"
-#include "TestModuleFactory.h"
 #include "Toolchain/Compiler.h"
 #include "Toolchain/Toolchain.h"
 #include "Filter.h"
 #include "Testee.h"
 #include "MutationsFinder.h"
 #include "JunkDetection/CXX/CXXJunkDetector.h"
+#include "FixturePaths.h"
 
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/LLVMContext.h>
@@ -19,10 +20,10 @@
 using namespace mull;
 using namespace llvm;
 
-static TestModuleFactory TestModuleFactory;
-
 TEST(CXXJunkDetector, boundary_mutator) {
-  auto mullModule = TestModuleFactory.create_ConditionalsBoundaryMutator_Module();
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto mullModule = loader.loadModuleAtPath(fixtures::mutators_boundary_module_bc_path(), llvmContext);
   auto module = mullModule->getModule();
 
   Context mullContext;
@@ -58,7 +59,9 @@ TEST(CXXJunkDetector, boundary_mutator) {
 }
 
 TEST(CXXJunkDetector, compdb_absolute_paths) {
-  auto mullModule = TestModuleFactory.create_CompilationDatabase_AbsolutePath_Module();
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto mullModule = loader.loadModuleAtPath(fixtures::junk_detection_compdb_main_bc_path(), llvmContext);
   auto module = mullModule->getModule();
 
   Context mullContext;
@@ -80,7 +83,7 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
   ASSERT_EQ(points.size(), 8U);
 
   JunkDetectionConfig junkConfig;
-  junkConfig.cxxCompDBDirectory = TestModuleFactory.CompilationDatabase_AbsolutePath_Directory();
+  junkConfig.cxxCompDBDirectory = fixtures::junk_detection_compdb_absolute_dir_path();
   CXXJunkDetector detector(junkConfig);
   std::vector<MutationPoint *> nonJunkMutationPoints;
   for (auto point: points) {
@@ -93,7 +96,9 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
 }
 
 TEST(CXXJunkDetector, compdb_relative_paths) {
-  auto mullModule = TestModuleFactory.create_CompilationDatabase_RelativePath_Module();
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto mullModule = loader.loadModuleAtPath(fixtures::junk_detection_compdb_main_bc_path(), llvmContext);
   auto module = mullModule->getModule();
 
   Context mullContext;
@@ -116,7 +121,7 @@ TEST(CXXJunkDetector, compdb_relative_paths) {
   ASSERT_EQ(points.size(), 8U);
 
   JunkDetectionConfig junkConfig;
-  junkConfig.cxxCompDBDirectory = TestModuleFactory.CompilationDatabase_RelativePath_Directory();
+  junkConfig.cxxCompDBDirectory = fixtures::junk_detection_compdb_relative_dir_path();
   CXXJunkDetector detector(junkConfig);
   std::vector<MutationPoint *> nonJunkMutationPoints;
   for (auto point: points) {
@@ -129,7 +134,9 @@ TEST(CXXJunkDetector, compdb_relative_paths) {
 }
 
 TEST(CXXJunkDetector, no_compdb) {
-  auto mullModule = TestModuleFactory.create_CompilationDatabase_RelativePath_Module();
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto mullModule = loader.loadModuleAtPath(fixtures::junk_detection_compdb_main_bc_path(), llvmContext);
   auto module = mullModule->getModule();
 
   Context mullContext;
@@ -152,7 +159,8 @@ TEST(CXXJunkDetector, no_compdb) {
   ASSERT_EQ(points.size(), 8U);
 
   JunkDetectionConfig junkConfig;
-  junkConfig.cxxCompilationFlags = "-I include";
+  junkConfig.cxxCompilationFlags = std::string("-I ") + fixtures::junk_detection_compdb_include__path();
+
   CXXJunkDetector detector(junkConfig);
   std::vector<MutationPoint *> nonJunkMutationPoints;
   for (auto point: points) {

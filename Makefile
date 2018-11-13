@@ -18,12 +18,6 @@ OS?=$(shell uname -s)
 help: ## Show this help message.
 	@grep -E '^[a-zA-Z_\.-]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-27s\033[0m %s\n", $$1, $$2}'
 
-fixtures.generate: ## Generates fixtures for tests
-	cd lab && make synchronize_fixtures
-
-fixtures.clean: ## Clean fixtures
-	find $(PWD)/lab | grep \.bc | xargs rm -v
-
 clean: xcode.clean ninja.clean ## Remove all the build artefacts
 	@true
 
@@ -48,7 +42,7 @@ ninja.build.mull-driver: ## Build mull-driver on macOS
 	cd $(BUILD_DIR_NINJA) && ninja mull-driver
 	@echo "Resulting binary:\n"$(BUILD_DIR_NINJA)/tools/driver/mull-driver
 
-ninja.build.unit-tests: fixtures.generate ## Build unit-tests on macOS
+ninja.build.unit-tests: ## Build unit-tests on macOS
 	cd $(BUILD_DIR_NINJA) && ninja MullUnitTests -v
 
 ninja.install.mull-driver: ninja.build.mull-driver ## Install mull driver

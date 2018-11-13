@@ -4,6 +4,8 @@
 #include "SourceLocation.h"
 
 #include "TestModuleFactory.h"
+#include "FixturePaths.h"
+
 #include <llvm/IR/Module.h>
 
 #include "gtest/gtest.h"
@@ -12,12 +14,10 @@ using namespace mull;
 using namespace llvm;
 using namespace std;
 
-static TestModuleFactory testModuleFactory;
-
 TEST(MullModule, uniqueIdentifier) {
   LLVMContext context;
   ModuleLoader loader;
-  auto module = loader.loadModuleAtPath(testModuleFactory.testerModulePath_Bitcode(), context);
+  auto module = loader.loadModuleAtPath(fixtures::hardcode_fixture_simple_test_tester_module_bc_path(), context);
 
   string moduleName = "fixture_simple_test_tester_module";
   string moduleMD5  = "de5070f8606cc2a8ee794b2ab56b31f2";
@@ -29,7 +29,7 @@ TEST(MullModule, uniqueIdentifier) {
 TEST(MutationPoint, uniqueIdentifier) {
   LLVMContext context;
   ModuleLoader loader;
-  auto module = loader.loadModuleAtPath(testModuleFactory.testerModulePath_Bitcode(), context);
+  auto module = loader.loadModuleAtPath(fixtures::hardcode_fixture_simple_test_tester_module_bc_path(), context);
 
   MutationPointAddress address(2, 3, 5);
   MathAddMutator mutator;
