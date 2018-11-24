@@ -1,4 +1,4 @@
-#include "Config.h"
+#include "Config/RawConfig.h"
 #include "Context.h"
 #include "Reporters/SQLiteReporter.h"
 #include "Result.h"
@@ -37,7 +37,7 @@ TEST(SQLiteReporter, integrationTest) {
   Context context;
   context.addModule(std::move(mullModuleWithTests));
   context.addModule(std::move(mullModuleWithTestees));
-  Config config;
+  RawConfig config;
   config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -106,7 +106,7 @@ TEST(SQLiteReporter, integrationTest) {
   SQLiteReporter reporter("integration test");
   Metrics metrics;
   metrics.setDriverRunTime(resultTime);
-  reporter.reportResults(result, Config(), metrics);
+  reporter.reportResults(result, RawConfig(), metrics);
 
   /// STEP3. Making assertions.
   std::vector<ExecutionResult> executionResults {
@@ -221,7 +221,7 @@ TEST(SQLiteReporter, integrationTest) {
 }
 
 TEST(SQLiteReporter, integrationTest_Config) {
-  std::string projectName("Integration Test Config");
+  std::string projectName("Integration Test RawConfig");
   std::string testFramework = "SimpleTest";
 
   const std::string bitcodeFileList = "/tmp/bitcode_file_list.txt";
@@ -272,7 +272,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
   int timeout = 42;
   int distance = 10;
   std::string cacheDirectory = "/a/cache";
-  Config config(bitcodeFileList,
+  RawConfig config(bitcodeFileList,
                 projectName,
                 testFramework,
                 operators,
@@ -281,12 +281,12 @@ TEST(SQLiteReporter, integrationTest_Config) {
                 objectFileList,
                 selectedTests,
                 {}, {},
-                Config::Fork::Enabled,
-                Config::DryRunMode::Enabled,
-                Config::FailFastMode::Enabled,
-                Config::UseCache::Yes,
-                Config::EmitDebugInfo::No,
-                Config::Diagnostics::None,
+                RawConfig::Fork::Enabled,
+                RawConfig::DryRunMode::Enabled,
+                RawConfig::FailFastMode::Enabled,
+                RawConfig::UseCache::Yes,
+                RawConfig::EmitDebugInfo::No,
+                RawConfig::Diagnostics::None,
                 timeout, distance,
                 cacheDirectory,
                 JunkDetectionConfig::disabled(),
@@ -414,7 +414,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   int timeout = 42;
   int distance = 10;
   std::string cacheDirectory = "/a/cache";
-  Config config(bitcodeFileList,
+  RawConfig config(bitcodeFileList,
                 projectName,
                 testFramework,
                 operators,
@@ -423,12 +423,12 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
                 objectFileList,
                 configTests,
                 {}, {},
-                Config::Fork::Enabled,
-                Config::DryRunMode::Enabled,
-                Config::FailFastMode::Disabled,
-                Config::UseCache::Yes,
-                Config::EmitDebugInfo::Yes,
-                Config::Diagnostics::None,
+                RawConfig::Fork::Enabled,
+                RawConfig::DryRunMode::Enabled,
+                RawConfig::FailFastMode::Disabled,
+                RawConfig::UseCache::Yes,
+                RawConfig::EmitDebugInfo::Yes,
+                RawConfig::Diagnostics::None,
                 timeout, distance,
                 cacheDirectory,
                 JunkDetectionConfig::disabled(),
@@ -565,7 +565,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   int timeout = 42;
   int distance = 10;
   std::string cacheDirectory = "/a/cache";
-  Config config(bitcodeFileList,
+  RawConfig config(bitcodeFileList,
                 projectName,
                 testFramework,
                 operators,
@@ -574,12 +574,12 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
                 objectFileList,
                 configTests,
                 {}, {},
-                Config::Fork::Enabled,
-                Config::DryRunMode::Enabled,
-                Config::FailFastMode::Disabled,
-                Config::UseCache::Yes,
-                Config::EmitDebugInfo::No,
-                Config::Diagnostics::None,
+                RawConfig::Fork::Enabled,
+                RawConfig::DryRunMode::Enabled,
+                RawConfig::FailFastMode::Disabled,
+                RawConfig::UseCache::Yes,
+                RawConfig::EmitDebugInfo::No,
+                RawConfig::Diagnostics::None,
                 timeout, distance,
                 cacheDirectory,
                 JunkDetectionConfig::disabled(),

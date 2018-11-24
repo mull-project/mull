@@ -1,4 +1,4 @@
-#include "Config.h"
+#include "Config/RawConfig.h"
 #include "Context.h"
 #include "Mutators/ConditionalsBoundaryMutator.h"
 #include "MutationPoint.h"
@@ -27,7 +27,7 @@ TEST(CXXJunkDetector, boundary_mutator) {
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
-  Config config;
+  RawConfig config;
   config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutatorss;
@@ -64,7 +64,7 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
-  Config config;
+  RawConfig config;
   config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -100,7 +100,7 @@ TEST(CXXJunkDetector, compdb_relative_paths) {
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
-  Config config;
+  RawConfig config;
   config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutatorss;
@@ -137,7 +137,7 @@ TEST(CXXJunkDetector, no_compdb) {
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
-  Config config;
+  RawConfig config;
   config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutatorss;

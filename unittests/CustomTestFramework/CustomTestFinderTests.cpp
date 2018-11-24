@@ -1,7 +1,7 @@
 #include "CustomTestFramework/CustomTestFinder.h"
 
-#include "Config.h"
-#include "ConfigParser.h"
+#include "Config/RawConfig.h"
+#include "Config/ConfigParser.h"
 #include "Context.h"
 #include "CustomTestFramework/CustomTest_Test.h"
 #include "TestModuleFactory.h"
@@ -29,7 +29,7 @@ static vector<unique_ptr<MullModule>> loadTestModules() {
     return modules;
   };
 
-  Config config;
+  RawConfig config;
   config.normalizeParallelizationConfig();
   FakeModuleLoader loader(context, modules);
   return loader.loadModulesFromBitcodeFileList({""}, config);

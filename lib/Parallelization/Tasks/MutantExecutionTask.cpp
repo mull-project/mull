@@ -1,7 +1,7 @@
 #include "Parallelization/Tasks/MutantExecutionTask.h"
 #include "Parallelization/Progress.h"
 #include "Driver.h"
-#include "Config.h"
+#include "Config/RawConfig.h"
 #include "TestRunner.h"
 #include "Toolchain/Trampolines.h"
 
@@ -13,7 +13,7 @@ using namespace llvm;
 
 MutantExecutionTask::MutantExecutionTask(ProcessSandbox &sandbox,
                                          TestRunner &runner,
-                                         Config &config,
+                                         RawConfig &config,
                                          Filter &filter,
                                          Mangler &mangler,
                                          std::vector<llvm::object::ObjectFile *> &objectFiles,

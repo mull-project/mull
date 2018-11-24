@@ -3,7 +3,7 @@
 #include "MutationPoint.h"
 #include "Mutators/Mutator.h"
 #include "Logger.h"
-#include "Config.h"
+#include "Config/RawConfig.h"
 
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/DebugLoc.h>

@@ -1,5 +1,5 @@
 #include "Logger.h"
-#include "Config.h"
+#include "Config/RawConfig.h"
 
 #include <llvm/Support/YAMLTraits.h>
 #include <llvm/Support/FileSystem.h>
@@ -45,7 +45,7 @@ bool JunkDetectionConfig::isEnabled() const {
   return toggle == JunkDetectionToggle::Enabled;
 }
 
-std::string Config::forkToString(Fork fork) {
+std::string RawConfig::forkToString(Fork fork) {
   switch (fork) {
     case Fork::Enabled:
       return "enabled";
@@ -58,7 +58,7 @@ std::string Config::forkToString(Fork fork) {
 }
 
 
-std::string Config::dryRunToString(DryRunMode dryRun) {
+std::string RawConfig::dryRunToString(DryRunMode dryRun) {
   switch (dryRun) {
     case DryRunMode::Enabled:
       return "enabled";
@@ -70,7 +70,7 @@ std::string Config::dryRunToString(DryRunMode dryRun) {
   }
 }
 
-std::string Config::failFastToString(FailFastMode failFast) {
+std::string RawConfig::failFastToString(FailFastMode failFast) {
   switch (failFast) {
     case FailFastMode::Enabled:
       return "enabled";
@@ -82,7 +82,7 @@ std::string Config::failFastToString(FailFastMode failFast) {
   }
 }
 
-std::string Config::cachingToString(UseCache caching) {
+std::string RawConfig::cachingToString(UseCache caching) {
   switch (caching) {
     case UseCache::Yes:
       return "yes";
@@ -93,7 +93,7 @@ std::string Config::cachingToString(UseCache caching) {
       break;
   }
 }
-std::string Config::emitDebugInfoToString(EmitDebugInfo emitDebugInfo) {
+std::string RawConfig::emitDebugInfoToString(EmitDebugInfo emitDebugInfo) {
   switch (emitDebugInfo) {
     case EmitDebugInfo::Yes:
       return "yes";
@@ -104,7 +104,7 @@ std::string Config::emitDebugInfoToString(EmitDebugInfo emitDebugInfo) {
       break;
   }
 }
-std::string Config::diagnosticsToString(Diagnostics diagnostics) {
+std::string RawConfig::diagnosticsToString(Diagnostics diagnostics) {
   switch (diagnostics) {
     case Diagnostics::None: {
       return "none";
@@ -122,7 +122,7 @@ std::string Config::diagnosticsToString(Diagnostics diagnostics) {
 }
 // Constructor initializes defaults.
 // TODO: Refactoring into constants.
-Config::Config() :
+RawConfig::RawConfig() :
   bitcodeFileList(""),
   projectName(""),
   testFramework("GoogleTest"),
@@ -155,7 +155,7 @@ Config::Config() :
   parallelizationConfig()
 {}
 
-Config::Config(const std::string &bitcodeFileList,
+RawConfig::RawConfig(const std::string &bitcodeFileList,
                const std::string &project,
                const std::string &testFramework,
                const std::vector<std::string> mutators,
@@ -200,11 +200,11 @@ parallelizationConfig(parallelizationConfig)
 {
 }
 
-const std::string &Config::getBitcodeFileList() const {
+const std::string &RawConfig::getBitcodeFileList() const {
   return bitcodeFileList;
 }
 
-std::vector<std::string> Config::getBitcodePaths() const {
+std::vector<std::string> RawConfig::getBitcodePaths() const {
   std::vector<std::string> bitcodePaths;
 
   std::ifstream ifs(bitcodeFileList);
@@ -220,19 +220,19 @@ std::vector<std::string> Config::getBitcodePaths() const {
   return bitcodePaths;
 }
 
-const std::string &Config::getProjectName() const {
+const std::string &RawConfig::getProjectName() const {
   return projectName;
 }
 
-const std::string &Config::getTestFramework() const {
+const std::string &RawConfig::getTestFramework() const {
   return testFramework;
 }
 
-const std::string &Config::getDynamicLibraries() const {
+const std::string &RawConfig::getDynamicLibraries() const {
   return dynamicLibraryFileList;
 }
 
-std::vector<std::string> Config::getDynamicLibrariesPaths() const {
+std::vector<std::string> RawConfig::getDynamicLibrariesPaths() const {
   std::vector<std::string> dynamicLibrariesPaths;
 
   std::ifstream ifs(dynamicLibraryFileList);
@@ -248,11 +248,11 @@ std::vector<std::string> Config::getDynamicLibrariesPaths() const {
   return dynamicLibrariesPaths;
 }
 
-const std::string &Config::getObjectFileList() const {
+const std::string &RawConfig::getObjectFileList() const {
   return objectFileList;
 }
 
-std::vector<std::string> Config::getObjectFilesPaths() const {
+std::vector<std::string> RawConfig::getObjectFilesPaths() const {
   std::vector<std::string> objectFilesPaths;
 
   std::ifstream ifs(objectFileList);
@@ -268,76 +268,76 @@ std::vector<std::string> Config::getObjectFilesPaths() const {
   return objectFilesPaths;
 }
 
-const std::vector<std::string> &Config::getMutators() const {
+const std::vector<std::string> &RawConfig::getMutators() const {
   return mutators;
 }
 
-const std::vector<std::string> &Config::getReporters() const {
+const std::vector<std::string> &RawConfig::getReporters() const {
   return reporters;
 }
 
-const std::vector<std::string> &Config::getTests() const {
+const std::vector<std::string> &RawConfig::getTests() const {
   return tests;
 }
 
-const std::vector<std::string> &Config::getExcludeLocations() const {
+const std::vector<std::string> &RawConfig::getExcludeLocations() const {
   return excludeLocations;
 }
 
-const std::vector<CustomTestDefinition> &Config::getCustomTests() const {
+const std::vector<CustomTestDefinition> &RawConfig::getCustomTests() const {
   return customTests;
 }
 
-void Config::addCustomTest(CustomTestDefinition customTest) {
+void RawConfig::addCustomTest(CustomTestDefinition customTest) {
   customTests.push_back(customTest);
 }
 
-bool Config::forkEnabled() const {
+bool RawConfig::forkEnabled() const {
   return fork == Fork::Enabled;
 }
 
-int Config::getTimeout() const {
+int RawConfig::getTimeout() const {
   return timeout;
 }
 
-bool Config::cachingEnabled() const {
+bool RawConfig::cachingEnabled() const {
   return caching == UseCache::Yes;
 }
 
-bool Config::dryRunModeEnabled() const {
+bool RawConfig::dryRunModeEnabled() const {
   return dryRun == DryRunMode::Enabled;
 }
 
-bool Config::failFastModeEnabled() const {
+bool RawConfig::failFastModeEnabled() const {
   return failFast == FailFastMode::Enabled;
 }
 
-bool Config::shouldEmitDebugInfo() const {
+bool RawConfig::shouldEmitDebugInfo() const {
   return emitDebugInfo == EmitDebugInfo::Yes;
 }
 
-bool Config::junkDetectionEnabled() const {
+bool RawConfig::junkDetectionEnabled() const {
   return junkDetection.isEnabled();
 }
 
-JunkDetectionConfig &Config::junkDetectionConfig() {
+JunkDetectionConfig &RawConfig::junkDetectionConfig() {
   return junkDetection;
 }
 
-Config::Diagnostics Config::getDiagnostics() const {
+RawConfig::Diagnostics RawConfig::getDiagnostics() const {
   return diagnostics;
 }
 
-int Config::getMaxDistance() const {
+int RawConfig::getMaxDistance() const {
   return maxDistance;
 }
 
-std::string Config::getCacheDirectory() const {
+std::string RawConfig::getCacheDirectory() const {
   return cacheDirectory;
 }
 
-void Config::dump() const {
-  Logger::debug() << "Config>\n"
+void RawConfig::dump() const {
+  Logger::debug() << "RawConfig>\n"
   << "\t" << "bitcode_file_list: " << bitcodeFileList << '\n'
   << "\t" << "dynamic_library_file_list: " << dynamicLibraryFileList << '\n'
   << "\t" << "object_file_list: " << objectFileList << '\n'
@@ -377,7 +377,7 @@ void Config::dump() const {
   }
 }
 
-std::vector<std::string> Config::validate() {
+std::vector<std::string> RawConfig::validate() {
   std::vector<std::string> errors;
 
   if (bitcodeFileList.empty()) {
@@ -421,11 +421,11 @@ std::vector<std::string> Config::validate() {
   return errors;
 }
 
-const ParallelizationConfig Config::parallelization() const {
+const ParallelizationConfig RawConfig::parallelization() const {
   return parallelizationConfig;
 }
 
-void Config::normalizeParallelizationConfig() {
+void RawConfig::normalizeParallelizationConfig() {
   parallelizationConfig.normalize();
 }
 

@@ -11,7 +11,7 @@ class MutationPoint;
 class Driver;
 class ProcessSandbox;
 class TestRunner;
-class Config;
+class RawConfig;
 class Toolchain;
 class Filter;
 class Mangler;
@@ -25,7 +25,7 @@ public:
 
   MutantExecutionTask(ProcessSandbox &sandbox,
                       TestRunner &runner,
-                      Config &config,
+                      RawConfig &config,
                       Filter &filter,
                       Mangler &mangler,
                       std::vector<llvm::object::ObjectFile *> &objectFiles,
@@ -36,7 +36,7 @@ private:
   JITEngine jit;
   ProcessSandbox &sandbox;
   TestRunner &runner;
-  Config &config;
+  RawConfig &config;
   Filter &filter;
   Mangler &mangler;
   std::vector<llvm::object::ObjectFile *> &objectFiles;

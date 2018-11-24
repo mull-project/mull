@@ -4,7 +4,7 @@
 
 #include <string>
 #include <utility>
-#include <Config.h>
+#include <Config/RawConfig.h>
 
 using namespace llvm;
 using namespace mull;
@@ -75,7 +75,7 @@ public:
 
   std::vector<std::unique_ptr<MullModule>>
   loadModulesFromBitcodeFileList(const std::vector<std::string> &paths,
-                                 mull::Config &config) override {
+                                 mull::RawConfig &config) override {
     std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = this->modules;
 
     if (modules) {

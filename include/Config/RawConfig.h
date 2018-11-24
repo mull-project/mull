@@ -14,7 +14,7 @@ extern int MullDefaultTimeoutMilliseconds;
 // We need these forward declarations to make our config friends with the
 // mapping traits.
 namespace mull {
-class Config;
+class RawConfig;
 }
 namespace llvm {
 namespace yaml {
@@ -64,7 +64,7 @@ struct JunkDetectionConfig {
   static JunkDetectionConfig disabled();
 };
 
-class Config {
+class RawConfig {
 public:
   enum class Fork {
     Disabled,
@@ -127,11 +127,11 @@ private:
   JunkDetectionConfig junkDetection;
   ParallelizationConfig parallelizationConfig;
 
-  friend llvm::yaml::MappingTraits<mull::Config>;
+  friend llvm::yaml::MappingTraits<mull::RawConfig>;
 public:
-  Config();
+  RawConfig();
 
-  Config(const std::string &bitcodeFileList,
+  RawConfig(const std::string &bitcodeFileList,
          const std::string &project,
          const std::string &testFramework,
          const std::vector<std::string> mutators,

@@ -1,7 +1,7 @@
 #include "Driver.h"
 
-#include "Config.h"
-#include "ConfigParser.h"
+#include "Config/RawConfig.h"
+#include "Config/ConfigParser.h"
 #include "Filter.h"
 #include "Logger.h"
 #include "ModuleLoader.h"

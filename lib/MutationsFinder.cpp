@@ -1,12 +1,12 @@
 #include "MutationsFinder.h"
 #include "Testee.h"
-#include "Config.h"
+#include "Config/RawConfig.h"
 #include "Parallelization/Parallelization.h"
 
 using namespace mull;
 using namespace llvm;
 
-MutationsFinder::MutationsFinder(std::vector<std::unique_ptr<Mutator>> mutators, Config &config)
+MutationsFinder::MutationsFinder(std::vector<std::unique_ptr<Mutator>> mutators, RawConfig &config)
 : mutators(std::move(mutators)), config(config) {}
 
 std::vector<MutationPoint *> MutationsFinder::getMutationPoints(const Context &context,

@@ -1,6 +1,6 @@
 #include "Driver.h"
 
-#include "Config.h"
+#include "Config/RawConfig.h"
 #include "Context.h"
 #include "Logger.h"
 #include "ModuleLoader.h"
@@ -299,7 +299,7 @@ std::vector<llvm::object::ObjectFile *> Driver::AllInstrumentedObjectFiles() {
   return objects;
 }
 
-Driver::Driver(Config &C,
+Driver::Driver(RawConfig &C,
                ModuleLoader &ML,
                TestFinder &TF,
                TestRunner &TR,
@@ -317,8 +317,8 @@ Driver::Driver(Config &C,
     this->sandbox = new NullProcessSandbox();
   }
 
-  Config::Diagnostics diagnostics = C.getDiagnostics();
-  if (diagnostics != Config::Diagnostics::None) {
+  RawConfig::Diagnostics diagnostics = C.getDiagnostics();
+  if (diagnostics != RawConfig::Diagnostics::None) {
     this->diagnostics = new NormalIDEDiagnostics(diagnostics);
   } else {
     this->diagnostics = new NullIDEDiagnostics();

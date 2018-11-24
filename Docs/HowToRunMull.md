@@ -135,7 +135,7 @@ See [Hello World example](#example-hello-world) below.
 
 ## Step 3: Creating config.yml file
 
-See examples or pick up the features you need from [this document](/Docs/Config.md).
+See examples or pick up the features you need from [this document](/Docs/RawConfig.md).
 
 ## Step 4: Running Mull
 

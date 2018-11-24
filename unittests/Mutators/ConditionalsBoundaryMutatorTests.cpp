@@ -1,4 +1,4 @@
-#include "Config.h"
+#include "Config/RawConfig.h"
 #include "Context.h"
 #include "Mutators/ConditionalsBoundaryMutator.h"
 #include "MutationPoint.h"
@@ -27,7 +27,7 @@ TEST(ConditionalsBoundaryMutator, findMutations) {
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
-  Config config;
+  RawConfig config;
   config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -53,7 +53,7 @@ TEST(ConditionalsBoundaryMutator, applyMutations) {
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
-  Config config;
+  RawConfig config;
   config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutators;

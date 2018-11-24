@@ -30,7 +30,7 @@ using namespace llvm;
 static TestModuleFactory TestModuleFactory;
 
 TEST(SimpleTestRunner, runTest) {
-  Config config;
+  RawConfig config;
   config.normalizeParallelizationConfig();
 
   Toolchain toolchain(config);

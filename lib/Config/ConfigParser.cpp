@@ -1,6 +1,6 @@
-#include "ConfigParser.h"
+#include "Config/ConfigParser.h"
 
-#include "Config.h"
+#include "Config/RawConfig.h"
 #include "Logger.h"
 
 #include <llvm/ADT/STLExtras.h>
@@ -12,7 +12,7 @@
 using namespace llvm;
 using namespace mull;
 
-static void addDefaultCustomTests(Config &config) {
+static void addDefaultCustomTests(RawConfig &config) {
   /// FIXME: I could not find a better place for this code.
   if (config.getCustomTests().empty()) {
     config.addCustomTest(CustomTestDefinition("main", "main", "mull", {}));
@@ -20,14 +20,14 @@ static void addDefaultCustomTests(Config &config) {
   }
 }
 
-static void fixupConfig(Config &config) {
+static void fixupConfig(RawConfig &config) {
   addDefaultCustomTests(config);
   config.normalizeParallelizationConfig();
 }
 
-Config ConfigParser::loadConfig(const char *filename) {
+RawConfig ConfigParser::loadConfig(const char *filename) {
   auto bufferOrError = MemoryBuffer::getFile(filename);
-  Config config;
+  RawConfig config;
 
   if (!bufferOrError) {
     Logger::error() << "Can't read config file: " << filename << '\n';
@@ -47,8 +47,8 @@ Config ConfigParser::loadConfig(const char *filename) {
   return config;
 }
 
-Config ConfigParser::loadConfig(yaml::Input &input) {
-  Config config;
+RawConfig ConfigParser::loadConfig(yaml::Input &input) {
+  RawConfig config;
   input >> config;
   fixupConfig(config);
   return config;

@@ -1,5 +1,5 @@
 #include "Toolchain/Toolchain.h"
-#include "Config.h"
+#include "Config/RawConfig.h"
 
 #include <llvm/ADT/Triple.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
@@ -17,7 +17,7 @@ Toolchain::NativeTarget::NativeTarget() {
   llvm::InitializeNativeTargetAsmParser();
 }
 
-Toolchain::Toolchain(Config &config) :
+Toolchain::Toolchain(RawConfig &config) :
   nativeTarget(),
   machine(llvm::EngineBuilder().selectTarget(llvm::Triple(), "", "",
                                              llvm::SmallVector<std::string, 1>())),

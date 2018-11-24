@@ -1,6 +1,6 @@
 #include "CustomTestFramework/CustomTestFinder.h"
 
-#include "Config.h"
+#include "Config/RawConfig.h"
 #include "Context.h"
 #include "Filter.h"
 #include "Logger.h"

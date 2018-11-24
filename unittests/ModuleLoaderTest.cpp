@@ -17,7 +17,7 @@ TEST(ModuleLoaderTest, loadModuleFromBitcodeListFile) {
   llvm::LLVMContext context;
 
   ModuleLoader loader;
-  Config config;
+  RawConfig config;
   config.normalizeParallelizationConfig();
 
   std::string bitcodeFile = testModuleFactory.testerModulePath_Bitcode();

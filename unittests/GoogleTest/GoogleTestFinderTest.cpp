@@ -2,8 +2,8 @@
 
 #include "Driver.h"
 #include "Context.h"
-#include "Config.h"
-#include "ConfigParser.h"
+#include "Config/RawConfig.h"
+#include "Config/ConfigParser.h"
 #include "Mutators/MutatorsFactory.h"
 #include "TestModuleFactory.h"
 #include "GoogleTest/GoogleTest_Test.h"

@@ -4,7 +4,7 @@
 #include "Toolchain/Toolchain.h"
 #include "ForkProcessSandbox.h"
 #include "TestRunner.h"
-#include "Config.h"
+#include "Config/RawConfig.h"
 
 using namespace mull;
 using namespace llvm;
@@ -12,7 +12,7 @@ using namespace llvm;
 OriginalTestExecutionTask::OriginalTestExecutionTask(Instrumentation &instrumentation,
                                                      ProcessSandbox &sandbox,
                                                      TestRunner &runner,
-                                                     Config &config,
+                                                     RawConfig &config,
                                                      Filter &filter,
                                                      JITEngine &jit)
     : instrumentation(instrumentation),

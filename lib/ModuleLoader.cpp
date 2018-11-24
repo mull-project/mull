@@ -3,7 +3,7 @@
 #include "Logger.h"
 #include "LLVMCompatibility.h"
 #include "Parallelization/Parallelization.h"
-#include "Config.h"
+#include "Config/RawConfig.h"
 
 #include <llvm/AsmParser/Parser.h>
 #include <llvm/IR/LLVMContext.h>
@@ -51,7 +51,7 @@ ModuleLoader::loadModuleAtPath(const std::string &path,
 
 std::vector<std::unique_ptr<MullModule>>
 ModuleLoader::loadModulesFromBitcodeFileList(const std::vector<std::string> &bitcodeFileList,
-                                             Config &config) {
+                                             RawConfig &config) {
   std::vector<std::unique_ptr<MullModule>> modules;
 
   std::vector<ModuleLoadingTask> tasks;

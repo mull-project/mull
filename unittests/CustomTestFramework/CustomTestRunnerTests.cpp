@@ -4,7 +4,7 @@
 
 #include "Toolchain/Toolchain.h"
 #include "Toolchain/Trampolines.h"
-#include "Config.h"
+#include "Config/RawConfig.h"
 #include "Toolchain/Mangler.h"
 
 #include "CustomTestFramework/CustomTest_Test.h"
@@ -34,14 +34,14 @@ static vector<unique_ptr<MullModule>> loadTestModules() {
 
     return modules;
   };
-  Config config;
+  RawConfig config;
   config.normalizeParallelizationConfig();
   FakeModuleLoader loader(context, modules);
   return loader.loadModulesFromBitcodeFileList({""}, config);
 }
 
 TEST(CustomTestRunner, noTestNameSpecified) {
-  Config config;
+  RawConfig config;
   Toolchain toolchain(config);
   CustomTestRunner runner(toolchain.mangler());
 
@@ -66,7 +66,7 @@ TEST(CustomTestRunner, noTestNameSpecified) {
 }
 
 TEST(CustomTestRunner, tooManyParameters) {
-  Config config;
+  RawConfig config;
   Toolchain toolchain(config);
   CustomTestRunner runner(toolchain.mangler());
 
@@ -91,7 +91,7 @@ TEST(CustomTestRunner, tooManyParameters) {
 }
 
 TEST(CustomTestRunner, runPassingTest) {
-  Config config;
+  RawConfig config;
   Toolchain toolchain(config);
   CustomTestRunner runner(toolchain.mangler());
 
@@ -116,7 +116,7 @@ TEST(CustomTestRunner, runPassingTest) {
 }
 
 TEST(CustomTestRunner, runFailingTest) {
-  Config config;
+  RawConfig config;
   Toolchain toolchain(config);
   CustomTestRunner runner(toolchain.mangler());
 
@@ -146,7 +146,7 @@ TEST(CustomTestRunner, runFailingTest) {
 }
 
 TEST(CustomTestRunner, attemptToRunUnknownTest) {
-  Config config;
+  RawConfig config;
   Toolchain toolchain(config);
   CustomTestRunner runner(toolchain.mangler());
 

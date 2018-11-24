@@ -91,7 +91,7 @@ TEST(NegateConditionMutator, getMutationPoints_no_filter) {
   Context context;
   context.addModule(std::move(module));
 
-  Config config;
+  RawConfig config;
   config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -119,7 +119,7 @@ TEST(NegateConditionMutator, getMutationPoints_filter_to_bool_converion) {
 
   Context context;
   context.addModule(std::move(module));
-  Config config;
+  RawConfig config;
   config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -146,7 +146,7 @@ TEST(NegateConditionMutator, getMutationPoints_filter_is_null) {
 
   Context context;
   context.addModule(std::move(module));
-  Config config;
+  RawConfig config;
   config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutators;

@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Config.h"
+#include "Config/RawConfig.h"
 #include "ExecutionResult.h"
 
 namespace mull {
@@ -14,9 +14,9 @@ public:
 };
 
 class NormalIDEDiagnostics: public IDEDiagnostics {
-  Config::Diagnostics diagnostics;
+  RawConfig::Diagnostics diagnostics;
 public:
-  NormalIDEDiagnostics(Config::Diagnostics diagnostics) :
+  NormalIDEDiagnostics(RawConfig::Diagnostics diagnostics) :
     diagnostics(diagnostics) {}
 
   void report(MutationPoint *mutationPoint, bool killed);

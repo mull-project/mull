@@ -244,27 +244,27 @@ TEST_F(ConfigParserTestFixture, loadConfig_FailFast_Disabled) {
 
 TEST_F(ConfigParserTestFixture, loadConfig_Diagnostics_Unspecified) {
   configWithYamlContent("");
-  ASSERT_EQ(config.getDiagnostics(), Config::Diagnostics::None);
+  ASSERT_EQ(config.getDiagnostics(), RawConfig::Diagnostics::None);
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_Diagnostics_Survived) {
   configWithYamlContent("diagnostics: survived\n");
-  ASSERT_EQ(config.getDiagnostics(), Config::Diagnostics::Survived);
+  ASSERT_EQ(config.getDiagnostics(), RawConfig::Diagnostics::Survived);
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_Diagnostics_Killed) {
   configWithYamlContent("diagnostics: killed\n");
-  ASSERT_EQ(config.getDiagnostics(), Config::Diagnostics::Killed);
+  ASSERT_EQ(config.getDiagnostics(), RawConfig::Diagnostics::Killed);
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_Diagnostics_All) {
   configWithYamlContent("diagnostics: all\n");
-  ASSERT_EQ(config.getDiagnostics(), Config::Diagnostics::All);
+  ASSERT_EQ(config.getDiagnostics(), RawConfig::Diagnostics::All);
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_Diagnostics_None) {
   configWithYamlContent("diagnostics: none\n");
-  ASSERT_EQ(config.getDiagnostics(), Config::Diagnostics::None);
+  ASSERT_EQ(config.getDiagnostics(), RawConfig::Diagnostics::None);
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_UseCache_Unspecified) {

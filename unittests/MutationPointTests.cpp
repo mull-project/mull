@@ -36,7 +36,7 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
   Context Ctx;
   Ctx.addModule(std::move(ModuleWithTests));
   Ctx.addModule(std::move(ModuleWithTestees));
-  Config config;
+  RawConfig config;
   config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -74,7 +74,7 @@ TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
   Context context;
   context.addModule(std::move(module));
 
-  Config config;
+  RawConfig config;
   config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -109,7 +109,7 @@ TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
 
   Context context;
   context.addModule(std::move(module));
-  Config config;
+  RawConfig config;
   config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -145,7 +145,7 @@ TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
 
   Context context;
   context.addModule(std::move(module));
-  Config config;
+  RawConfig config;
   config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -185,7 +185,7 @@ TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
   Context context;
   context.addModule(std::move(ModuleWithTests));
   context.addModule(std::move(ModuleWithTestees));
-  Config config;
+  RawConfig config;
   config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -217,7 +217,7 @@ TEST(MutationPoint, SimpleTest_AndOrMutator_applyMutation) {
 
   Context context;
   context.addModule(std::move(module));
-  Config config;
+  RawConfig config;
   config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -249,7 +249,7 @@ TEST(MutationPoint, SimpleTest_ScalarValueMutator_applyMutation) {
 
   Context context;
   context.addModule(std::move(module));
-  Config config;
+  RawConfig config;
   config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -294,7 +294,7 @@ TEST(MutationPoint, SimpleTest_ReplaceCallMutator_applyMutation) {
 
   Context context;
   context.addModule(std::move(module));
-  Config config;
+  RawConfig config;
   config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -329,7 +329,7 @@ TEST(MutationPoint, SimpleTest_ReplaceAssignmentMutator_applyMutation) {
 
   Context context;
   context.addModule(std::move(module));
-  Config config;
+  RawConfig config;
   config.normalizeParallelizationConfig();
 
   std::vector<std::unique_ptr<Mutator>> mutators;
