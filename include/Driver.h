@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Config/RawConfig.h"
 #include "ExecutionResult.h"
 #include "MutationResult.h"
 #include "ForkProcessSandbox.h"
@@ -24,7 +23,8 @@ class Function;
 
 namespace mull {
 
-class RawConfig;
+struct Configuration;
+
 class Filter;
 class ModuleLoader;
 class Result;
@@ -35,7 +35,7 @@ class Metrics;
 class JunkDetector;
 
 class Driver {
-  RawConfig &config;
+  const Configuration &config;
   ModuleLoader &loader;
   TestFinder &finder;
   TestRunner &runner;
@@ -54,7 +54,7 @@ class Driver {
   Metrics &metrics;
   JunkDetector &junkDetector;
 public:
-  Driver(RawConfig &C,
+  Driver(const Configuration &config,
          ModuleLoader &ML,
          TestFinder &TF,
          TestRunner &TR,

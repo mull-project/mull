@@ -1,7 +1,7 @@
 #include "Parallelization/Tasks/MutantExecutionTask.h"
 #include "Parallelization/Progress.h"
 #include "Driver.h"
-#include "Config/RawConfig.h"
+#include "Config/Configuration.h"
 #include "TestRunner.h"
 #include "Toolchain/Trampolines.h"
 
@@ -13,7 +13,7 @@ using namespace llvm;
 
 MutantExecutionTask::MutantExecutionTask(ProcessSandbox &sandbox,
                                          TestRunner &runner,
-                                         RawConfig &config,
+                                         const Configuration &config,
                                          Filter &filter,
                                          Mangler &mangler,
                                          std::vector<llvm::object::ObjectFile *> &objectFiles,
@@ -42,7 +42,7 @@ void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
       auto distance = reachableTest.second;
 
       ExecutionResult result;
-      if (config.failFastModeEnabled() && atLeastOneTestFailed) {
+      if (config.failFastEnabled && atLeastOneTestFailed) {
         result.status = ExecutionStatus::FailFast;
       } else {
         const auto timeout = test->getExecutionResult().runningTime * 10;

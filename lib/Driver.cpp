@@ -1,6 +1,6 @@
 #include "Driver.h"
 
-#include "Config/RawConfig.h"
+#include "Config/Configuration.h"
 #include "Context.h"
 #include "Logger.h"
 #include "ModuleLoader.h"
@@ -17,15 +17,14 @@
 
 #include <llvm/Support/DynamicLibrary.h>
 #include <llvm/Transforms/Utils/Cloning.h>
+#include <llvm/Support/Path.h>
 
 #include <algorithm>
 #include <fstream>
 #include <vector>
 #include <sys/mman.h>
 #include <sys/types.h>
-
 #include <map>
-#include <llvm/Support/Path.h>
 
 using namespace llvm;
 using namespace llvm::object;
@@ -73,9 +72,8 @@ std::unique_ptr<Result> Driver::Run() {
 
 void Driver::loadBitcodeFilesIntoMemory() {
   metrics.beginLoadModules();
-  std::vector<std::string> bitcodePaths = config.getBitcodePaths();
   std::vector<unique_ptr<MullModule>> modules =
-      loader.loadModulesFromBitcodeFileList(bitcodePaths, config);
+      loader.loadModulesFromBitcodeFileList(config.bitcodePaths, config);
   metrics.endLoadModules();
 
   for (auto &ownedModule : modules) {
@@ -93,7 +91,7 @@ void Driver::compileInstrumentedBitcodeFiles() {
   }
 
   std::vector<InstrumentedCompilationTask> tasks;
-  for (int i = 0; i < config.parallelization().workers; i++) {
+  for (int i = 0; i < config.parallelization.workers; i++) {
     tasks.emplace_back(instrumentation, toolchain);
   }
 
@@ -109,13 +107,12 @@ void Driver::compileInstrumentedBitcodeFiles() {
 void Driver::loadPrecompiledObjectFiles() {
   metrics.beginLoadPrecompiledObjectFiles();
   std::vector<LoadObjectFilesTask> tasks;
-  for (int i = 0; i < config.parallelization().workers; i++) {
+  for (int i = 0; i < config.parallelization.workers; i++) {
     tasks.emplace_back(LoadObjectFilesTask());
   }
 
-  auto paths = config.getObjectFilesPaths();
   TaskExecutor<LoadObjectFilesTask> loader("Loading precompiled object files",
-                                           paths,
+                                           config.objectFilePaths,
                                            precompiledObjectFiles,
                                            tasks);
   loader.execute();
@@ -124,7 +121,7 @@ void Driver::loadPrecompiledObjectFiles() {
 
 void Driver::loadDynamicLibraries() {
   SingleTaskExecutor task("Loading dynamic libraries", [&] () {
-    for (std::string &dylibPath: config.getDynamicLibrariesPaths()) {
+    for (const std::string &dylibPath: config.dynamicLibraryPaths) {
       sys::DynamicLibrary::LoadLibraryPermanently(dylibPath.c_str());
     }
   });
@@ -155,7 +152,7 @@ Driver::findMutationPoints(std::vector<std::unique_ptr<Test>> &tests) {
   prepareOriginalTestRunTask.execute();
 
   std::vector<OriginalTestExecutionTask> tasks;
-  for (int i = 0; i < config.parallelization().testExecutionWorkers; i++) {
+  for (int i = 0; i < config.parallelization.testExecutionWorkers; i++) {
     tasks.emplace_back(instrumentation, *sandbox, runner, config, filter, jit);
   }
 
@@ -177,9 +174,9 @@ Driver::findMutationPoints(std::vector<std::unique_ptr<Test>> &tests) {
 std::vector<MutationPoint *>
 Driver::filterOutJunkMutations(std::vector<MutationPoint *> mutationPoints) {
   std::vector<MutationPoint *> nonJunkMutationPoints;
-  if (config.junkDetectionEnabled()) {
+  if (config.junkDetectionEnabled) {
     std::vector<JunkDetectionTask> tasks;
-    for (int i = 0; i < config.parallelization().workers; i++) {
+    for (int i = 0; i < config.parallelization.workers; i++) {
       tasks.emplace_back(junkDetector);
     }
     TaskExecutor<JunkDetectionTask> mutantRunner("Filtering out junk mutations", mutationPoints, nonJunkMutationPoints, std::move(tasks));
@@ -197,7 +194,7 @@ Driver::runMutations(std::vector<MutationPoint *> &mutationPoints) {
     return std::vector<std::unique_ptr<MutationResult>>();
   }
 
-  if (config.dryRunModeEnabled()) {
+  if (config.dryRunEnabled) {
     return dryRunMutations(mutationPoints);
   }
 
@@ -211,7 +208,7 @@ Driver::dryRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
 
   std::vector<DryRunMutantExecutionTask> tasks;
-  for (int i = 0; i < config.parallelization().workers; i++) {
+  for (int i = 0; i < config.parallelization.workers; i++) {
     tasks.emplace_back(DryRunMutantExecutionTask());
   }
   metrics.beginMutantsExecution();
@@ -236,7 +233,7 @@ std::vector<std::unique_ptr<MutationResult>> Driver::normalRunMutations(const st
   prepareMutationsTask.execute();
 
   std::vector<ApplyMutationTask> applyMutationTasks;
-  for (int i = 0; i < config.parallelization().workers; i++) {
+  for (int i = 0; i < config.parallelization.workers; i++) {
     applyMutationTasks.emplace_back();
   }
   std::vector<int> empty;
@@ -244,7 +241,7 @@ std::vector<std::unique_ptr<MutationResult>> Driver::normalRunMutations(const st
   applyMutations.execute();
 
   std::vector<OriginalCompilationTask> compilationTasks;
-  for (int i = 0; i < config.parallelization().workers; i++) {
+  for (int i = 0; i < config.parallelization.workers; i++) {
     compilationTasks.emplace_back(toolchain);
   }
   TaskExecutor<OriginalCompilationTask> mutantCompiler("Compiling original code", context.getModules(), ownedObjectFiles, std::move(compilationTasks));
@@ -258,7 +255,7 @@ std::vector<std::unique_ptr<MutationResult>> Driver::normalRunMutations(const st
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
 
   std::vector<MutantExecutionTask> tasks;
-  for (int i = 0; i < config.parallelization().mutantExecutionWorkers; i++) {
+  for (int i = 0; i < config.parallelization.mutantExecutionWorkers; i++) {
     tasks.emplace_back(*sandbox, runner, config, filter, toolchain.mangler(), objectFiles, mutatedFunctions);
   }
   metrics.beginMutantsExecution();
@@ -299,7 +296,7 @@ std::vector<llvm::object::ObjectFile *> Driver::AllInstrumentedObjectFiles() {
   return objects;
 }
 
-Driver::Driver(RawConfig &C,
+Driver::Driver(const Configuration &config,
                ModuleLoader &ML,
                TestFinder &TF,
                TestRunner &TR,
@@ -308,18 +305,18 @@ Driver::Driver(RawConfig &C,
                MutationsFinder &mutationsFinder,
                Metrics &metrics,
                JunkDetector &junkDetector)
-    : config(C), loader(ML), finder(TF), runner(TR), toolchain(t), filter(f), mutationsFinder(mutationsFinder),
+    : config(config), loader(ML), finder(TF), runner(TR), toolchain(t), filter(f), mutationsFinder(mutationsFinder),
       precompiledObjectFiles(), instrumentation(), metrics(metrics), junkDetector(junkDetector) {
 
-  if (C.forkEnabled()) {
+  if (config.forkEnabled) {
     this->sandbox = new ForkProcessSandbox();
   } else {
     this->sandbox = new NullProcessSandbox();
   }
 
-  RawConfig::Diagnostics diagnostics = C.getDiagnostics();
-  if (diagnostics != RawConfig::Diagnostics::None) {
-    this->diagnostics = new NormalIDEDiagnostics(diagnostics);
+
+  if (config.diagnostics != Diagnostics::None) {
+    this->diagnostics = new NormalIDEDiagnostics(config.diagnostics);
   } else {
     this->diagnostics = new NullIDEDiagnostics();
   }

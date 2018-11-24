@@ -2,6 +2,7 @@
 
 #include "Config/RawConfig.h"
 #include "Config/ConfigParser.h"
+#include "Config/Configuration.h"
 #include "Filter.h"
 #include "Logger.h"
 #include "ModuleLoader.h"
@@ -10,7 +11,7 @@
 #include "Reporters/TimeReporter.h"
 #include "Result.h"
 #include "MutationsFinder.h"
-
+#include "Parallelization/TaskExecutor.h"
 #include "Toolchain/Toolchain.h"
 #include "Metrics/Metrics.h"
 #include "JunkDetection/JunkDetector.h"
@@ -31,7 +32,6 @@
 #include <llvm/Support/YAMLParser.h>
 
 #include <string>
-#include <Parallelization/TaskExecutor.h>
 
 using namespace mull;
 using namespace llvm;
@@ -58,9 +58,9 @@ int main(int argc, char *argv[]) {
   cl::ParseCommandLineOptions(argc, argv, "Mull");
 
   ConfigParser Parser;
-  auto config = Parser.loadConfig(ConfigFile.c_str());
+  auto rawConfig = Parser.loadConfig(ConfigFile.c_str());
 
-  std::vector <std::string> configErrors = config.validate();
+  std::vector <std::string> configErrors = rawConfig.validate();
   if (configErrors.size() > 0) {
     Logger::error() << "Provided config file is not valid:" << "\n";
     for (const std::string &configError : configErrors) {
@@ -70,32 +70,33 @@ int main(int argc, char *argv[]) {
     exit(1);
   }
 
-  config.dump();
+  rawConfig.dump();
+  Configuration configuration(rawConfig);
 
   InitializeNativeTarget();
   InitializeNativeTargetAsmPrinter();
   InitializeNativeTargetAsmParser();
 
   ModuleLoader Loader;
-  Toolchain toolchain(config);
+  Toolchain toolchain(configuration);
   Filter filter;
 
-  for (const std::string &location: config.getExcludeLocations()) {
+  for (const std::string &location: rawConfig.getExcludeLocations()) {
     filter.skipByLocation(location);
   }
 
-  for (const std::string &test: config.getTests()) {
+  for (const std::string &test: rawConfig.getTests()) {
     filter.includeTest(test);
   }
 
-  const std::string &testFramework = config.getTestFramework();
+  const std::string &testFramework = rawConfig.getTestFramework();
 
   std::unique_ptr<TestFinder> testFinder;
   std::unique_ptr<TestRunner> testRunner;
 
   auto mutatorsFactory = MutatorsFactory();
-  auto mutators = mutatorsFactory.mutators(config.getMutators());
-  MutationsFinder mutationsFinder(std::move(mutators), config);
+  auto mutators = mutatorsFactory.mutators(rawConfig.getMutators());
+  MutationsFinder mutationsFinder(std::move(mutators), configuration);
 
   if (testFramework == "GoogleTest") {
     filter.skipByName("testing8internal");
@@ -117,8 +118,7 @@ int main(int argc, char *argv[]) {
   }
 
   else if (testFramework == "CustomTest") {
-//    filter.skipByName("dopr");
-    testFinder = make_unique<CustomTestFinder>(config.getCustomTests());
+    testFinder = make_unique<CustomTestFinder>(configuration.customTests);
     testRunner = make_unique<CustomTestRunner>(toolchain.mangler());
   }
 
@@ -131,14 +131,14 @@ int main(int argc, char *argv[]) {
   }
 
   std::unique_ptr<JunkDetector> junkDetector(make_unique<NullJunkDetector>());
-  if (config.junkDetectionEnabled()) {
-    std::string detector = config.junkDetectionConfig().detectorName;
+  if (configuration.junkDetectionEnabled) {
+    std::string detector = rawConfig.junkDetectionConfig().detectorName;
     if (detector == "all") {
       junkDetector = make_unique<AllJunkDetector>();
     } else if (detector == "none") {
       junkDetector = make_unique<NullJunkDetector>();
     } else if (detector == "cxx") {
-      junkDetector = make_unique<CXXJunkDetector>(config.junkDetectionConfig());
+      junkDetector = make_unique<CXXJunkDetector>(rawConfig.junkDetectionConfig());
     } else {
       Logger::error() << "mull-driver> Unknown junk detector provided: "
         << "`" << detector << "`. ";
@@ -146,13 +146,13 @@ int main(int argc, char *argv[]) {
   }
 
   std::vector<std::unique_ptr<Reporter>> reporters;
-  if (config.getReporters().empty()) {
-    reporters.push_back(make_unique<SQLiteReporter>(config.getProjectName()));
+  if (rawConfig.getReporters().empty()) {
+    reporters.push_back(make_unique<SQLiteReporter>(rawConfig.getProjectName()));
   }
 
-  for (auto &reporter: config.getReporters()) {
+  for (auto &reporter: rawConfig.getReporters()) {
     if (reporter == "sqlite") {
-      reporters.push_back(make_unique<SQLiteReporter>(config.getProjectName()));
+      reporters.push_back(make_unique<SQLiteReporter>(rawConfig.getProjectName()));
     }
 
     else if (reporter == "time") {
@@ -166,14 +166,14 @@ int main(int argc, char *argv[]) {
   }
 
   Metrics metrics;
-  Driver driver(config, Loader, *testFinder, *testRunner, toolchain, filter, mutationsFinder, metrics, *junkDetector);
+  Driver driver(configuration, Loader, *testFinder, *testRunner, toolchain, filter, mutationsFinder, metrics, *junkDetector);
 
   metrics.beginRun();
   auto result = driver.Run();
   metrics.endRun();
 
   for (auto &reporter: reporters) {
-    reporter->reportResults(*result, config, metrics);
+    reporter->reportResults(*result, rawConfig, metrics);
   }
 
   llvm_shutdown();

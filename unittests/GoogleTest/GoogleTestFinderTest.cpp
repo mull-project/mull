@@ -2,7 +2,7 @@
 
 #include "Driver.h"
 #include "Context.h"
-#include "Config/RawConfig.h"
+#include "Config/Configuration.h"
 #include "Config/ConfigParser.h"
 #include "Mutators/MutatorsFactory.h"
 #include "TestModuleFactory.h"
@@ -102,9 +102,10 @@ mutators:
   yaml::Input Input(configYAML);
 
   ConfigParser Parser;
-  auto config = Parser.loadConfig(Input);
+  auto rawConfig = Parser.loadConfig(Input);
+  Configuration configuration(rawConfig);
 
-  Toolchain toolchain(config);
+  Toolchain toolchain(configuration);
 
   auto moduleWithTests = TestModuleFactory.create_GoogleTest_Tester_Module();
   auto moduleWithTestees = TestModuleFactory.create_GoogleTest_Testee_Module();

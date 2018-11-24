@@ -11,15 +11,15 @@ using namespace llvm;
 
 void NormalIDEDiagnostics::report(mull::MutationPoint *mutationPoint,
                                   bool killed) {
-  if (diagnostics == RawConfig::Diagnostics::None) {
+  if (diagnostics == Diagnostics::None) {
     return;
   }
 
-  if (diagnostics == RawConfig::Diagnostics::Survived && killed) {
+  if (diagnostics == Diagnostics::Survived && killed) {
     return;
   }
 
-  if (diagnostics == RawConfig::Diagnostics::Killed && killed == false) {
+  if (diagnostics == Diagnostics::Killed && !killed) {
     return;
   }
 

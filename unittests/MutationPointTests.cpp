@@ -12,6 +12,7 @@
 #include "Testee.h"
 #include "MutationsFinder.h"
 #include "Filter.h"
+#include "Config/Configuration.h"
 
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/IR/InstrTypes.h>
@@ -36,12 +37,12 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
   Context Ctx;
   Ctx.addModule(std::move(ModuleWithTests));
   Ctx.addModule(std::move(ModuleWithTestees));
-  RawConfig config;
-  config.normalizeParallelizationConfig();
+
+  Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
-  MutationsFinder finder(std::move(mutators), config);
+  MutationsFinder finder(std::move(mutators), configuration);
 
   Function *testeeFunction = Ctx.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(testeeFunction->empty());
@@ -74,12 +75,11 @@ TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
   Context context;
   context.addModule(std::move(module));
 
-  RawConfig config;
-  config.normalizeParallelizationConfig();
+  Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathSubMutator>());
-  MutationsFinder finder(std::move(mutators), config);
+  MutationsFinder finder(std::move(mutators), configuration);
 
   Function *testeeFunction = context.lookupDefinedFunction("math_sub");
   ASSERT_FALSE(testeeFunction->empty());
@@ -109,12 +109,11 @@ TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
 
   Context context;
   context.addModule(std::move(module));
-  RawConfig config;
-  config.normalizeParallelizationConfig();
+  Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathMulMutator>());
-  MutationsFinder finder(std::move(mutators), config);
+  MutationsFinder finder(std::move(mutators), configuration);
 
   Function *testeeFunction = context.lookupDefinedFunction("math_mul");
   ASSERT_FALSE(testeeFunction->empty());
@@ -145,13 +144,12 @@ TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
 
   Context context;
   context.addModule(std::move(module));
-  RawConfig config;
-  config.normalizeParallelizationConfig();
+  Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathDivMutator>());
 
-  MutationsFinder finder(std::move(mutators), config);
+  MutationsFinder finder(std::move(mutators), configuration);
 
   Function *testeeFunction = context.lookupDefinedFunction("math_div");
   ASSERT_FALSE(testeeFunction->empty());
@@ -185,12 +183,11 @@ TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
   Context context;
   context.addModule(std::move(ModuleWithTests));
   context.addModule(std::move(ModuleWithTestees));
-  RawConfig config;
-  config.normalizeParallelizationConfig();
+  Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<NegateConditionMutator>());
-  MutationsFinder finder(std::move(mutators), config);
+  MutationsFinder finder(std::move(mutators), configuration);
 
   Function *testeeFunction = context.lookupDefinedFunction("max");
   ASSERT_FALSE(testeeFunction->empty());
@@ -217,12 +214,11 @@ TEST(MutationPoint, SimpleTest_AndOrMutator_applyMutation) {
 
   Context context;
   context.addModule(std::move(module));
-  RawConfig config;
-  config.normalizeParallelizationConfig();
+  Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<AndOrReplacementMutator>());
-  MutationsFinder finder(std::move(mutators), config);
+  MutationsFinder finder(std::move(mutators), configuration);
   Filter filter;
 
   Function *testeeFunction = context.lookupDefinedFunction("testee_AND_operator_2branches");
@@ -249,12 +245,11 @@ TEST(MutationPoint, SimpleTest_ScalarValueMutator_applyMutation) {
 
   Context context;
   context.addModule(std::move(module));
-  RawConfig config;
-  config.normalizeParallelizationConfig();
+  Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<ScalarValueMutator>());
-  MutationsFinder finder(std::move(mutators), config);
+  MutationsFinder finder(std::move(mutators), configuration);
 
   Function *testeeFunction = context.lookupDefinedFunction("scalar_value");
   ASSERT_FALSE(testeeFunction->empty());
@@ -294,13 +289,12 @@ TEST(MutationPoint, SimpleTest_ReplaceCallMutator_applyMutation) {
 
   Context context;
   context.addModule(std::move(module));
-  RawConfig config;
-  config.normalizeParallelizationConfig();
+  Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<ReplaceCallMutator>());
 
-  MutationsFinder finder(std::move(mutators), config);
+  MutationsFinder finder(std::move(mutators), configuration);
 
   Function *testeeFunction = context.lookupDefinedFunction("replace_call");
   ASSERT_FALSE(testeeFunction->empty());
@@ -329,13 +323,12 @@ TEST(MutationPoint, SimpleTest_ReplaceAssignmentMutator_applyMutation) {
 
   Context context;
   context.addModule(std::move(module));
-  RawConfig config;
-  config.normalizeParallelizationConfig();
+  Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<ReplaceAssignmentMutator>());
 
-  MutationsFinder finder(std::move(mutators), config);
+  MutationsFinder finder(std::move(mutators), configuration);
 
   Function *testeeFunction = context.lookupDefinedFunction("replace_assignment");
   ASSERT_FALSE(testeeFunction->empty());

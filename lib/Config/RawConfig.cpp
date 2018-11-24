@@ -1,5 +1,6 @@
 #include "Logger.h"
 #include "Config/RawConfig.h"
+#include "Config/Configuration.h"
 
 #include <llvm/Support/YAMLTraits.h>
 #include <llvm/Support/FileSystem.h>
@@ -8,20 +9,10 @@
 #include <string>
 #include <utility>
 #include <vector>
-#include <thread>
 
 int MullDefaultTimeoutMilliseconds = 3000;
 
 using namespace mull;
-
-
-CustomTestDefinition::CustomTestDefinition() = default;
-
-CustomTestDefinition::CustomTestDefinition(const std::string &name,
-                                           const std::string &method,
-                                           const std::string &program,
-                                           const std::vector<std::string> arguments)
-: testName(name), methodName(method), programName(program), callArguments(arguments) {}
 
 JunkDetectionConfig::JunkDetectionConfig()
 : toggle(JunkDetectionToggle::Disabled),
@@ -104,22 +95,7 @@ std::string RawConfig::emitDebugInfoToString(EmitDebugInfo emitDebugInfo) {
       break;
   }
 }
-std::string RawConfig::diagnosticsToString(Diagnostics diagnostics) {
-  switch (diagnostics) {
-    case Diagnostics::None: {
-      return "none";
-    }
-    case Diagnostics::Survived: {
-      return "survived";
-    }
-    case Diagnostics::Killed: {
-      return "killed";
-    }
-    case Diagnostics::All: {
-      return "all";
-    }
-  }
-}
+
 // Constructor initializes defaults.
 // TODO: Refactoring into constants.
 RawConfig::RawConfig() :
@@ -324,7 +300,7 @@ JunkDetectionConfig &RawConfig::junkDetectionConfig() {
   return junkDetection;
 }
 
-RawConfig::Diagnostics RawConfig::getDiagnostics() const {
+Diagnostics RawConfig::getDiagnostics() const {
   return diagnostics;
 }
 
@@ -429,26 +405,3 @@ void RawConfig::normalizeParallelizationConfig() {
   parallelizationConfig.normalize();
 }
 
-ParallelizationConfig::ParallelizationConfig()
-    : workers(0), testExecutionWorkers(0), mutantExecutionWorkers(0) {
-}
-
-void ParallelizationConfig::normalize() {
-  int defaultWorkers = std::max(std::thread::hardware_concurrency(), uint(1));
-  if (workers == 0) {
-    workers = defaultWorkers;
-  }
-  if (testExecutionWorkers == 0) {
-    testExecutionWorkers = workers;
-  }
-
-  if (mutantExecutionWorkers == 0) {
-    mutantExecutionWorkers = workers;
-  }
-}
-
-ParallelizationConfig ParallelizationConfig::defaultConfig() {
-  ParallelizationConfig config;
-  config.normalize();
-  return config;
-}

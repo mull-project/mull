@@ -75,7 +75,7 @@ public:
 
   std::vector<std::unique_ptr<MullModule>>
   loadModulesFromBitcodeFileList(const std::vector<std::string> &paths,
-                                 mull::RawConfig &config) override {
+                                 const Configuration &config) override {
     std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = this->modules;
 
     if (modules) {

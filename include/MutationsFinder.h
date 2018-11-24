@@ -12,20 +12,20 @@ class Function;
 }
 
 namespace mull {
-class RawConfig;
+struct Configuration;
 class Context;
 class Filter;
 class Testee;
 
 class MutationsFinder {
 public:
-  explicit MutationsFinder(std::vector<std::unique_ptr<Mutator>> mutators, RawConfig &config);
+  explicit MutationsFinder(std::vector<std::unique_ptr<Mutator>> mutators, const Configuration &config);
   std::vector<MutationPoint *> getMutationPoints(const Context &context,
                                                  std::vector<MergedTestee> &testees,
                                                  Filter &filter);
 private:
   std::vector<std::unique_ptr<Mutator>> mutators;
   std::vector<std::unique_ptr<MutationPoint>> ownedPoints;
-  RawConfig &config;
+  const Configuration &config;
 };
 }

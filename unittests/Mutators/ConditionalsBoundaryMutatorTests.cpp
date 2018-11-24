@@ -1,4 +1,4 @@
-#include "Config/RawConfig.h"
+#include "Config/Configuration.h"
 #include "Context.h"
 #include "Mutators/ConditionalsBoundaryMutator.h"
 #include "MutationPoint.h"
@@ -27,12 +27,11 @@ TEST(ConditionalsBoundaryMutator, findMutations) {
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
-  RawConfig config;
-  config.normalizeParallelizationConfig();
+  Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<ConditionalsBoundaryMutator>());
-  MutationsFinder finder(std::move(mutators), config);
+  MutationsFinder finder(std::move(mutators), configuration);
   Filter filter;
 
   std::vector<std::unique_ptr<Testee>> testees;
@@ -53,12 +52,11 @@ TEST(ConditionalsBoundaryMutator, applyMutations) {
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
-  RawConfig config;
-  config.normalizeParallelizationConfig();
+  Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<ConditionalsBoundaryMutator>());
-  MutationsFinder finder(std::move(mutators), config);
+  MutationsFinder finder(std::move(mutators), configuration);
   Filter filter;
 
   std::vector<std::unique_ptr<Testee>> testees;

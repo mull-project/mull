@@ -1,4 +1,4 @@
-#include "Config/RawConfig.h"
+#include "Config/Configuration.h"
 #include "Context.h"
 #include "Reporters/SQLiteReporter.h"
 #include "Result.h"
@@ -37,13 +37,12 @@ TEST(SQLiteReporter, integrationTest) {
   Context context;
   context.addModule(std::move(mullModuleWithTests));
   context.addModule(std::move(mullModuleWithTestees));
-  RawConfig config;
-  config.normalizeParallelizationConfig();
+  Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   std::unique_ptr<MathAddMutator> addMutator = make_unique<MathAddMutator>();
   mutators.emplace_back(std::move(addMutator));
-  MutationsFinder mutationsFinder(std::move(mutators), config);
+  MutationsFinder mutationsFinder(std::move(mutators), configuration);
   Filter filter;
 
   SimpleTestFinder testFinder;
@@ -286,7 +285,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
                 RawConfig::FailFastMode::Enabled,
                 RawConfig::UseCache::Yes,
                 RawConfig::EmitDebugInfo::No,
-                RawConfig::Diagnostics::None,
+                Diagnostics::None,
                 timeout, distance,
                 cacheDirectory,
                 JunkDetectionConfig::disabled(),
@@ -414,7 +413,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   int timeout = 42;
   int distance = 10;
   std::string cacheDirectory = "/a/cache";
-  RawConfig config(bitcodeFileList,
+  RawConfig rawConfig(bitcodeFileList,
                 projectName,
                 testFramework,
                 operators,
@@ -428,11 +427,13 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
                 RawConfig::FailFastMode::Disabled,
                 RawConfig::UseCache::Yes,
                 RawConfig::EmitDebugInfo::Yes,
-                RawConfig::Diagnostics::None,
+                Diagnostics::None,
                 timeout, distance,
                 cacheDirectory,
                 JunkDetectionConfig::disabled(),
                 ParallelizationConfig::defaultConfig());
+
+  Configuration configuration(rawConfig);
 
   auto mullModuleWithTests   = testModuleFactory.create_SimpleTest_CountLettersTest_Module();
   auto mullModuleWithTestees = testModuleFactory.create_SimpleTest_CountLetters_Module();
@@ -444,7 +445,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   std::vector<std::unique_ptr<Mutator>> mutators;
   std::unique_ptr<MathAddMutator> addMutator = make_unique<MathAddMutator>();
   mutators.emplace_back(std::move(addMutator));
-  MutationsFinder mutationsFinder(std::move(mutators), config);
+  MutationsFinder mutationsFinder(std::move(mutators), configuration);
   Filter filter;
   SimpleTestFinder testFinder;
   auto tests = testFinder.findTests(context, filter);
@@ -497,7 +498,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   SQLiteReporter reporter(projectName);
   Metrics metrics;
   metrics.setDriverRunTime(resultTime);
-  reporter.reportResults(result, config, metrics);
+  reporter.reportResults(result, rawConfig, metrics);
 
   std::vector<ExecutionResult> executionResults {
     testExecutionResult,
@@ -565,7 +566,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   int timeout = 42;
   int distance = 10;
   std::string cacheDirectory = "/a/cache";
-  RawConfig config(bitcodeFileList,
+  RawConfig rawConfig(bitcodeFileList,
                 projectName,
                 testFramework,
                 operators,
@@ -579,11 +580,13 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
                 RawConfig::FailFastMode::Disabled,
                 RawConfig::UseCache::Yes,
                 RawConfig::EmitDebugInfo::No,
-                RawConfig::Diagnostics::None,
+                Diagnostics::None,
                 timeout, distance,
                 cacheDirectory,
                 JunkDetectionConfig::disabled(),
                 ParallelizationConfig::defaultConfig());
+
+  Configuration configuration(rawConfig);
 
   auto mullModuleWithTests   = testModuleFactory.create_SimpleTest_CountLettersTest_Module();
   auto mullModuleWithTestees = testModuleFactory.create_SimpleTest_CountLetters_Module();
@@ -595,7 +598,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   std::vector<std::unique_ptr<Mutator>> mutators;
   std::unique_ptr<MathAddMutator> addMutator = make_unique<MathAddMutator>();
   mutators.emplace_back(std::move(addMutator));
-  MutationsFinder mutationsFinder(std::move(mutators), config);
+  MutationsFinder mutationsFinder(std::move(mutators), configuration);
   Filter filter;
 
   SimpleTestFinder testFinder;
@@ -648,7 +651,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   SQLiteReporter reporter(projectName);
   Metrics metrics;
   metrics.setDriverRunTime(resultTime);
-  reporter.reportResults(result, config, metrics);
+  reporter.reportResults(result, rawConfig, metrics);
 
   std::vector<ExecutionResult> executionResults {
     testExecutionResult,

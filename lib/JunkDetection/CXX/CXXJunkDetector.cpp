@@ -14,8 +14,10 @@
 #include <llvm/Support/Path.h>
 #include <llvm/Support/FileSystem.h>
 #include <clang/Tooling/CompilationDatabase.h>
+
 #include <unistd.h>
 #include <sys/param.h>
+#include <sstream>
 
 using namespace mull;
 using namespace llvm;

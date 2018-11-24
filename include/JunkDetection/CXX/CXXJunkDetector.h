@@ -6,8 +6,8 @@
 #include <map>
 #include <string>
 #include <mutex>
-#include <clang-c/Index.h>
 
+#include <clang-c/Index.h>
 #include <clang/Tooling/CompilationDatabase.h>
 
 namespace mull {
@@ -17,7 +17,7 @@ struct JunkDetectionConfig;
 
 class CXXJunkDetector : public JunkDetector {
 public:
-  CXXJunkDetector(JunkDetectionConfig &config);
+  explicit CXXJunkDetector(JunkDetectionConfig &config);
   ~CXXJunkDetector();
 
   bool isJunk(MutationPoint *point) override;

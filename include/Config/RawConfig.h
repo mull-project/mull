@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Logger.h"
+#include "Config/ConfigurationOptions.h"
 
 #include <llvm/Support/YAMLTraits.h>
 #include <cstddef>
@@ -23,28 +24,6 @@ struct MappingTraits;
 }
 }
 namespace mull {
-
-struct ParallelizationConfig {
-  int workers;
-  int testExecutionWorkers;
-  int mutantExecutionWorkers;
-  ParallelizationConfig();
-  static ParallelizationConfig defaultConfig();
-  void normalize();
-};
-
-struct CustomTestDefinition {
-  std::string testName;
-  std::string methodName;
-  std::string programName;
-  std::vector<std::string> callArguments;
-
-  CustomTestDefinition();
-  CustomTestDefinition(const std::string &name,
-                       const std::string &method,
-                       const std::string &program,
-                       const std::vector<std::string> arguments);
-};
 
 struct JunkDetectionConfig {
   enum class JunkDetectionToggle {
@@ -86,19 +65,12 @@ public:
     No,
     Yes
   };
-  enum class Diagnostics {
-    None,
-    Survived,
-    Killed,
-    All
-  };
 
   static std::string forkToString(Fork fork);
   static std::string dryRunToString(DryRunMode dryRun);
   static std::string failFastToString(FailFastMode failFast);
   static std::string cachingToString(UseCache caching);
   static std::string emitDebugInfoToString(EmitDebugInfo emitDebugInfo);
-  static std::string diagnosticsToString(Diagnostics diagnostics);
 private:
   std::string bitcodeFileList;
 

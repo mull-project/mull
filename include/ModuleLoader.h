@@ -12,7 +12,7 @@ class Module;
 
 namespace mull {
 
-class RawConfig;
+struct Configuration;
 
 class ModuleLoader {
   std::vector<std::unique_ptr<llvm::LLVMContext>> contexts;
@@ -25,7 +25,7 @@ public:
 
   virtual std::vector<std::unique_ptr<MullModule>>
   loadModulesFromBitcodeFileList(const std::vector<std::string> &path,
-                                 RawConfig &config);
+                                 const Configuration &config);
 };
 
 }

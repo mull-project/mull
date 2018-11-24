@@ -1,4 +1,4 @@
-#include "Config/RawConfig.h"
+#include "Config/Configuration.h"
 #include "Context.h"
 #include "Driver.h"
 #include "Filter.h"
@@ -47,57 +47,23 @@ static TestModuleFactory SharedTestModuleFactory;
 #pragma mark - Running Driver with no tests
 
 TEST(Driver, RunningWithNoTests) {
-  std::string projectName = "some_project";
-  std::string testFramework = "SimpleTest";
-
-  int distance = 10;
-  std::string cacheDirectory = "/tmp/mull_cache";
-
-  RawConfig config("",
-                projectName,
-                testFramework,
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                RawConfig::Fork::Disabled,
-                RawConfig::DryRunMode::Disabled,
-                RawConfig::FailFastMode::Disabled,
-                RawConfig::UseCache::No,
-                RawConfig::EmitDebugInfo::No,
-                RawConfig::Diagnostics::None,
-                MullDefaultTimeoutMilliseconds,
-                distance,
-                cacheDirectory,
-                JunkDetectionConfig::disabled(),
-                ParallelizationConfig::defaultConfig());
-
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
-
-    // No tests loaded!
-
-    return modules;
-  };
+  Configuration configuration;
 
   LLVMContext context;
-  FakeModuleLoader loader(context, modules);
+  ModuleLoader loader;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  MutationsFinder finder(std::move(mutators), config);
+  MutationsFinder finder(std::move(mutators), configuration);
 
   SimpleTestFinder testFinder;
 
-  Toolchain toolchain(config);
+  Toolchain toolchain(configuration);
   SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  Driver Driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
   auto result = Driver.Run();
   ASSERT_EQ(0u, result->getTests().size());
@@ -114,33 +80,7 @@ TEST(Driver, SimpleTest_MathAddMutator) {
   /// TestRunner and TestFinder based on the Config
   /// Then Run all the tests using driver
 
-  std::string projectName = "some_project";
-  std::string testFramework = "SimpleTest";
-
-  int distance = 10;
-  std::string cacheDirectory = "/tmp/mull_cache";
-
-  RawConfig config("",
-                projectName,
-                testFramework,
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                RawConfig::Fork::Disabled,
-                RawConfig::DryRunMode::Disabled,
-                RawConfig::FailFastMode::Disabled,
-                RawConfig::UseCache::No,
-                RawConfig::EmitDebugInfo::No,
-                RawConfig::Diagnostics::None,
-                MullDefaultTimeoutMilliseconds,
-                distance,
-                cacheDirectory,
-                JunkDetectionConfig::disabled(),
-                ParallelizationConfig::defaultConfig());
+  Configuration configuration;
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
@@ -156,17 +96,17 @@ TEST(Driver, SimpleTest_MathAddMutator) {
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
-  MutationsFinder finder(std::move(mutators), config);
+  MutationsFinder finder(std::move(mutators), configuration);
 
   SimpleTestFinder testFinder;
 
-  Toolchain toolchain(config);
+  Toolchain toolchain(configuration);
   SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  Driver Driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
   /// Given the modules we use here we expect:
   ///
@@ -197,34 +137,6 @@ TEST(Driver, SimpleTest_MathSubMutator) {
     /// TestRunner and TestFinder based on the Config
     /// Then Run all the tests using driver
 
-  std::string projectName = "some_project";
-  std::string testFramework = "SimpleTest";
-
-  int distance = 10;
-  std::string cacheDirectory = "/tmp/mull_cache";
-
-  RawConfig config("",
-                projectName,
-                testFramework,
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                RawConfig::Fork::Disabled,
-                RawConfig::DryRunMode::Disabled,
-                RawConfig::FailFastMode::Disabled,
-                RawConfig::UseCache::No,
-                RawConfig::EmitDebugInfo::No,
-                RawConfig::Diagnostics::None,
-                MullDefaultTimeoutMilliseconds,
-                distance,
-                cacheDirectory,
-                JunkDetectionConfig::disabled(),
-                ParallelizationConfig::defaultConfig());
-
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
 
@@ -233,21 +145,23 @@ TEST(Driver, SimpleTest_MathSubMutator) {
     return modules;
   };
 
+  Configuration configuration;
+
   LLVMContext context;
   FakeModuleLoader loader(context, modules);
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathSubMutator>());
-  MutationsFinder finder(std::move(mutators), config);
+  MutationsFinder finder(std::move(mutators), configuration);
   SimpleTestFinder testFinder;
 
-  Toolchain toolchain(config);
+  Toolchain toolchain(configuration);
   SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  Driver Driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
     /// Given the modules we use here we expect:
     ///
@@ -278,34 +192,6 @@ TEST(Driver, SimpleTest_MathMulMutator) {
     /// TestRunner and TestFinder based on the Config
     /// Then Run all the tests using driver
 
-  std::string projectName = "some_project";
-  std::string testFramework = "SimpleTest";
-
-  int distance = 10;
-  std::string cacheDirectory = "/tmp/mull_cache";
-
-  RawConfig config("",
-                projectName,
-                testFramework,
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                RawConfig::Fork::Disabled,
-                RawConfig::DryRunMode::Disabled,
-                RawConfig::FailFastMode::Disabled,
-                RawConfig::UseCache::No,
-                RawConfig::EmitDebugInfo::No,
-                RawConfig::Diagnostics::None,
-                MullDefaultTimeoutMilliseconds,
-                distance,
-                cacheDirectory,
-                JunkDetectionConfig::disabled(),
-                ParallelizationConfig::defaultConfig());
-
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
 
@@ -314,21 +200,23 @@ TEST(Driver, SimpleTest_MathMulMutator) {
     return modules;
   };
 
+  Configuration configuration;
+
   LLVMContext context;
   FakeModuleLoader loader(context, modules);
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathMulMutator>());
-  MutationsFinder finder(std::move(mutators), config);
+  MutationsFinder finder(std::move(mutators), configuration);
   SimpleTestFinder testFinder;
 
-  Toolchain toolchain(config);
+  Toolchain toolchain(configuration);
   SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  Driver Driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
     /// Given the modules we use here we expect:
     ///
@@ -358,34 +246,6 @@ TEST(Driver, SimpleTest_MathDivMutator) {
     /// TestRunner and TestFinder based on the Config
     /// Then Run all the tests using driver
 
-  std::string projectName = "some_project";
-  std::string testFramework = "SimpleTest";
-
-  int distance = 10;
-  std::string cacheDirectory = "/tmp/mull_cache";
-
-  RawConfig config("",
-                projectName,
-                testFramework,
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                RawConfig::Fork::Disabled,
-                RawConfig::DryRunMode::Disabled,
-                RawConfig::FailFastMode::Disabled,
-                RawConfig::UseCache::No,
-                RawConfig::EmitDebugInfo::No,
-                RawConfig::Diagnostics::None,
-                MullDefaultTimeoutMilliseconds,
-                distance,
-                cacheDirectory,
-                JunkDetectionConfig::disabled(),
-                ParallelizationConfig::defaultConfig());
-
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
 
@@ -394,21 +254,23 @@ TEST(Driver, SimpleTest_MathDivMutator) {
     return modules;
   };
 
+  Configuration configuration;
+
   LLVMContext context;
   FakeModuleLoader loader(context, modules);
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathDivMutator>());
-  MutationsFinder finder(std::move(mutators), config);
+  MutationsFinder finder(std::move(mutators), configuration);
   SimpleTestFinder testFinder;
 
-  Toolchain toolchain(config);
+  Toolchain toolchain(configuration);
   SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  Driver Driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
     /// Given the modules we use here we expect:
     ///
@@ -438,37 +300,11 @@ TEST(Driver, SimpleTest_NegateConditionMutator) {
   /// TestRunner and TestFinder based on the Config
   /// Then Run all the tests using driver
 
-  std::string projectName = "some_project";
-  std::string testFramework = "SimpleTest";
-
-  int distance = 10;
-  std::string cacheDirectory = "/tmp/mull_cache";
-
-  RawConfig config("",
-                projectName,
-                testFramework,
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                RawConfig::Fork::Disabled,
-                RawConfig::DryRunMode::Disabled,
-                RawConfig::FailFastMode::Disabled,
-                RawConfig::UseCache::No,
-                RawConfig::EmitDebugInfo::No,
-                RawConfig::Diagnostics::None,
-                MullDefaultTimeoutMilliseconds,
-                distance,
-                cacheDirectory,
-                JunkDetectionConfig::disabled(),
-                ParallelizationConfig::defaultConfig());
+  Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<NegateConditionMutator>());
-  MutationsFinder finder(std::move(mutators), config);
+  MutationsFinder finder(std::move(mutators), configuration);
   SimpleTestFinder testFinder;
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
@@ -483,13 +319,13 @@ TEST(Driver, SimpleTest_NegateConditionMutator) {
   LLVMContext context;
   FakeModuleLoader loader(context, modules);
 
-  Toolchain toolchain(config);
+  Toolchain toolchain(configuration);
   SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  Driver Driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
   /// Given the modules we use here we expect:
   ///
@@ -512,37 +348,11 @@ TEST(Driver, SimpleTest_NegateConditionMutator) {
 }
 
 TEST(Driver, SimpleTest_RemoveVoidFunctionMutator) {
-  std::string projectName = "some_project";
-  std::string testFramework = "SimpleTest";
-
-  int distance = 10;
-  std::string cacheDirectory = "/tmp/mull_cache";
-
-  RawConfig config("",
-                projectName,
-                testFramework,
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                RawConfig::Fork::Disabled,
-                RawConfig::DryRunMode::Disabled,
-                RawConfig::FailFastMode::Disabled,
-                RawConfig::UseCache::No,
-                RawConfig::EmitDebugInfo::No,
-                RawConfig::Diagnostics::None,
-                MullDefaultTimeoutMilliseconds,
-                distance,
-                cacheDirectory,
-                JunkDetectionConfig::disabled(),
-                ParallelizationConfig::defaultConfig());
+  Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<RemoveVoidFunctionMutator>());
-  MutationsFinder finder(std::move(mutators), config);
+  MutationsFinder finder(std::move(mutators), configuration);
   SimpleTestFinder testFinder;
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
@@ -557,13 +367,13 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutator) {
   LLVMContext context;
   FakeModuleLoader loader(context, modules);
 
-  Toolchain toolchain(config);
+  Toolchain toolchain(configuration);
   SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  Driver Driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
   /// Given the modules we use here we expect:
   ///
@@ -586,37 +396,11 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutator) {
 }
 
 TEST(Driver, SimpleTest_ANDORReplacementMutator) {
-  std::string projectName = "some_project";
-  std::string testFramework = "SimpleTest";
-
-  int distance = 10;
-  std::string cacheDirectory = "/tmp/mull_cache";
-
-  RawConfig config("",
-                projectName,
-                testFramework,
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                RawConfig::Fork::Enabled,
-                RawConfig::DryRunMode::Disabled,
-                RawConfig::FailFastMode::Disabled,
-                RawConfig::UseCache::No,
-                RawConfig::EmitDebugInfo::No,
-                RawConfig::Diagnostics::None,
-                MullDefaultTimeoutMilliseconds,
-                distance,
-                cacheDirectory,
-                JunkDetectionConfig::disabled(),
-                ParallelizationConfig::defaultConfig());
+  Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<AndOrReplacementMutator>());
-  MutationsFinder finder(std::move(mutators), config);
+  MutationsFinder finder(std::move(mutators), configuration);
   SimpleTestFinder testFinder;
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
@@ -630,13 +414,13 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
   LLVMContext context;
   FakeModuleLoader loader(context, modules);
 
-  Toolchain toolchain(config);
+  Toolchain toolchain(configuration);
   SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  Driver Driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
   auto result = Driver.Run();
   ASSERT_EQ(8U, result->getTests().size());
@@ -733,38 +517,11 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
 }
 
 TEST(Driver, SimpleTest_ANDORReplacementMutator_CPP) {
-  std::string projectName = "some_project";
-  std::string testFramework = "SimpleTest";
-
-  int distance = 10;
-  std::string cacheDirectory = "/tmp/mull_cache";
-
-  RawConfig config("",
-                projectName,
-                testFramework,
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                // this test crashes in 2 tests, so we want a sandbox.
-                RawConfig::Fork::Enabled,
-                RawConfig::DryRunMode::Disabled,
-                RawConfig::FailFastMode::Disabled,
-                RawConfig::UseCache::No,
-                RawConfig::EmitDebugInfo::No,
-                RawConfig::Diagnostics::None,
-                MullDefaultTimeoutMilliseconds,
-                distance,
-                cacheDirectory,
-                JunkDetectionConfig::disabled(),
-                ParallelizationConfig::defaultConfig());
+  Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<AndOrReplacementMutator>());
-  MutationsFinder finder(std::move(mutators), config);
+  MutationsFinder finder(std::move(mutators), configuration);
   SimpleTestFinder testFinder;
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
@@ -778,13 +535,13 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator_CPP) {
   LLVMContext context;
   FakeModuleLoader loader(context, modules);
 
-  Toolchain toolchain(config);
+  Toolchain toolchain(configuration);
   SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  Driver Driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
   auto result = Driver.Run();
   ASSERT_EQ(6U, result->getTests().size());
@@ -843,37 +600,11 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator_CPP) {
 }
 
 TEST(Driver, SimpleTest_ReplaceAssignmentMutator_CPP) {
-  std::string projectName = "some_project";
-  std::string testFramework = "SimpleTest";
-
-  int distance = 10;
-  std::string cacheDirectory = "/tmp/mull_cache";
-
-  RawConfig config("",
-                projectName,
-                testFramework,
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                RawConfig::Fork::Enabled,
-                RawConfig::DryRunMode::Disabled,
-                RawConfig::FailFastMode::Disabled,
-                RawConfig::UseCache::No,
-                RawConfig::EmitDebugInfo::No,
-                RawConfig::Diagnostics::None,
-                MullDefaultTimeoutMilliseconds,
-                distance,
-                cacheDirectory,
-                JunkDetectionConfig::disabled(),
-                ParallelizationConfig::defaultConfig());
+  Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<ReplaceAssignmentMutator>());
-  MutationsFinder finder(std::move(mutators), config);
+  MutationsFinder finder(std::move(mutators), configuration);
   SimpleTestFinder testFinder;
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
@@ -887,13 +618,13 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutator_CPP) {
   LLVMContext context;
   FakeModuleLoader loader(context, modules);
 
-  Toolchain toolchain(config);
+  Toolchain toolchain(configuration);
   SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  Driver Driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  Driver Driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
   auto result = Driver.Run();
   EXPECT_EQ(1U, result->getTests().size());
@@ -914,43 +645,16 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutator_CPP) {
 }
 
 TEST(Driver, customTest) {
-  std::string projectName = "some_custom_project";
-  std::string testFramework = "CustomTest";
-
-  int distance = 10;
-  std::string cacheDirectory = "/tmp/mull_cache";
-
-  std::vector<CustomTestDefinition> testDefinitions({
-    CustomTestDefinition("failing", "failing_test", "mull", { "failing_test" }),
-    CustomTestDefinition("passing", "passing_test", "mull", { "passing_test" })
-  });
-
-  RawConfig config("",
-                projectName,
-                testFramework,
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                testDefinitions,
-                RawConfig::Fork::Enabled,
-                RawConfig::DryRunMode::Disabled,
-                RawConfig::FailFastMode::Disabled,
-                RawConfig::UseCache::No,
-                RawConfig::EmitDebugInfo::No,
-                RawConfig::Diagnostics::None,
-                MullDefaultTimeoutMilliseconds,
-                distance,
-                cacheDirectory,
-                JunkDetectionConfig::disabled(),
-                ParallelizationConfig::defaultConfig());
+  Configuration configuration;
+  configuration.customTests = {
+      CustomTestDefinition("failing", "failing_test", "mull", {"failing_test"}),
+      CustomTestDefinition("passing", "passing_test", "mull", {"passing_test"})
+  };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
-  MutationsFinder finder(std::move(mutators), config);
-  CustomTestFinder testFinder(config.getCustomTests());
+  MutationsFinder finder(std::move(mutators), configuration);
+  CustomTestFinder testFinder(configuration.customTests);
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
@@ -965,14 +669,14 @@ TEST(Driver, customTest) {
   LLVMContext context;
   FakeModuleLoader loader(context, modules);
 
-  Toolchain toolchain(config);
+  Toolchain toolchain(configuration);
   CustomTestRunner runner(toolchain.mangler());
   Filter filter;
   filter.includeTest("passing");
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  Driver driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  Driver driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
@@ -987,45 +691,18 @@ TEST(Driver, customTest) {
 }
 
 TEST(Driver, customTest_withDynamicLibraries) {
-  std::string projectName = "some_custom_project_with_dylibs";
-  std::string testFramework = "CustomTest";
-
-  int distance = 10;
-  std::string cacheDirectory = "/tmp/mull_cache";
-
-  std::vector<CustomTestDefinition> testDefinitions({
-    CustomTestDefinition("passing", "passing_test", "mull", { "passing_test" })
-  });
-
-  std::string dynamicLibrariesPath =
-    TestModuleFactory::fixturePath("custom_test/dylibs_and_objects/dynamic_libraries.list");
-
-  RawConfig config("",
-                projectName,
-                testFramework,
-                {},
-                {},
-                dynamicLibrariesPath,
-                "",
-                {},
-                {},
-                testDefinitions,
-                RawConfig::Fork::Disabled,
-                RawConfig::DryRunMode::Disabled,
-                RawConfig::FailFastMode::Disabled,
-                RawConfig::UseCache::No,
-                RawConfig::EmitDebugInfo::No,
-                RawConfig::Diagnostics::None,
-                MullDefaultTimeoutMilliseconds,
-                distance,
-                cacheDirectory,
-                JunkDetectionConfig::disabled(),
-                ParallelizationConfig::defaultConfig());
+  Configuration configuration;
+  configuration.customTests = {
+      CustomTestDefinition("passing", "passing_test", "mull", { "passing_test" })
+  };
+  configuration.dynamicLibraryPaths = {
+      TestModuleFactory::fixturePath("custom_test/dylibs_and_objects/libdistance.dylib")
+  };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
-  MutationsFinder finder(std::move(mutators), config);
-  CustomTestFinder testFinder(config.getCustomTests());
+  MutationsFinder finder(std::move(mutators), configuration);
+  CustomTestFinder testFinder(configuration.customTests);
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
@@ -1039,14 +716,14 @@ TEST(Driver, customTest_withDynamicLibraries) {
   LLVMContext context;
   FakeModuleLoader loader(context, modules);
 
-  Toolchain toolchain(config);
+  Toolchain toolchain(configuration);
   CustomTestRunner runner(toolchain.mangler());
   Filter filter;
   filter.includeTest("passing");
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  Driver driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  Driver driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
@@ -1060,43 +737,17 @@ TEST(Driver, customTest_withDynamicLibraries) {
 }
 
 TEST(Driver, junkDetector_enabled) {
-  std::string projectName = "some_custom_project_junkDetectorAllJunk";
-  std::string testFramework = "CustomTest";
-
-  int distance = 10;
-  std::string cacheDirectory = "/tmp/mull_cache";
-
-  std::vector<CustomTestDefinition> testDefinitions({
-    CustomTestDefinition("failing", "failing_test", "mull", { "failing_test" }),
-    CustomTestDefinition("passing", "passing_test", "mull", { "passing_test" })
-  });
-
-  RawConfig config("",
-                projectName,
-                testFramework,
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                testDefinitions,
-                RawConfig::Fork::Disabled,
-                RawConfig::DryRunMode::Disabled,
-                RawConfig::FailFastMode::Disabled,
-                RawConfig::UseCache::No,
-                RawConfig::EmitDebugInfo::No,
-                RawConfig::Diagnostics::None,
-                MullDefaultTimeoutMilliseconds,
-                distance,
-                cacheDirectory,
-                JunkDetectionConfig::enabled(),
-                ParallelizationConfig::defaultConfig());
+  Configuration configuration;
+  configuration.junkDetectionEnabled = true;
+  configuration.customTests = {
+      CustomTestDefinition("failing", "failing_test", "mull", { "failing_test" }),
+      CustomTestDefinition("passing", "passing_test", "mull", { "passing_test" })
+  };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
-  MutationsFinder finder(std::move(mutators), config);
-  CustomTestFinder testFinder(config.getCustomTests());
+  MutationsFinder finder(std::move(mutators), configuration);
+  CustomTestFinder testFinder(configuration.customTests);
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
@@ -1111,14 +762,14 @@ TEST(Driver, junkDetector_enabled) {
   LLVMContext context;
   FakeModuleLoader loader(context, modules);
 
-  Toolchain toolchain(config);
+  Toolchain toolchain(configuration);
   CustomTestRunner runner(toolchain.mangler());
   Filter filter;
   filter.includeTest("passing");
   Metrics metrics;
   AllJunkDetector junkDetector;
 
-  Driver driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  Driver driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
@@ -1126,43 +777,16 @@ TEST(Driver, junkDetector_enabled) {
 }
 
 TEST(Driver, junkDetector_disabled) {
-  std::string projectName = "some_custom_project_junkDetectorAllJunk";
-  std::string testFramework = "CustomTest";
-
-  int distance = 10;
-  std::string cacheDirectory = "/tmp/mull_cache";
-
-  std::vector<CustomTestDefinition> testDefinitions({
-    CustomTestDefinition("failing", "failing_test", "mull", { "failing_test" }),
-    CustomTestDefinition("passing", "passing_test", "mull", { "passing_test" })
-  });
-
-  RawConfig config("",
-                projectName,
-                testFramework,
-                {},
-                {},
-                {},
-                {},
-                {},
-                {},
-                testDefinitions,
-                RawConfig::Fork::Enabled,
-                RawConfig::DryRunMode::Disabled,
-                RawConfig::FailFastMode::Disabled,
-                RawConfig::UseCache::No,
-                RawConfig::EmitDebugInfo::No,
-                RawConfig::Diagnostics::None,
-                MullDefaultTimeoutMilliseconds,
-                distance,
-                cacheDirectory,
-                JunkDetectionConfig::disabled(),
-                ParallelizationConfig::defaultConfig());
+  Configuration configuration;
+  configuration.customTests = {
+      CustomTestDefinition("failing", "failing_test", "mull", { "failing_test" }),
+      CustomTestDefinition("passing", "passing_test", "mull", { "passing_test" })
+  };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
-  MutationsFinder finder(std::move(mutators), config);
-  CustomTestFinder testFinder(config.getCustomTests());
+  MutationsFinder finder(std::move(mutators), configuration);
+  CustomTestFinder testFinder(configuration.customTests);
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
@@ -1177,14 +801,14 @@ TEST(Driver, junkDetector_disabled) {
   LLVMContext context;
   FakeModuleLoader loader(context, modules);
 
-  Toolchain toolchain(config);
+  Toolchain toolchain(configuration);
   CustomTestRunner runner(toolchain.mangler());
   Filter filter;
   filter.includeTest("passing");
   Metrics metrics;
   AllJunkDetector junkDetector;
 
-  Driver driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  Driver driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
@@ -1192,47 +816,21 @@ TEST(Driver, junkDetector_disabled) {
 }
 
 TEST(Driver, DISABLED_customTest_withDynamicLibraries_and_ObjectFiles) {
-  std::string projectName = "some_custom_project_with_dylibs_and_object_files";
-  std::string testFramework = "CustomTest";
-
-  int distance = 10;
-  std::string cacheDirectory = "/tmp/mull_cache";
-
-  std::vector<CustomTestDefinition> testDefinitions({
-    CustomTestDefinition("passing", "passing_test", "mull", { "passing_test" })
-  });
-
-  std::string dynamicLibrariesPath =
-    TestModuleFactory::fixturePath("custom_test/dylibs_and_objects/dynamic_libraries.list");
-  std::string objectFilesListPath =
-    TestModuleFactory::fixturePath("custom_test/dylibs_and_objects/object_files.list");
-
-  RawConfig config("",
-                projectName,
-                testFramework,
-                {},
-                {},
-                dynamicLibrariesPath,
-                objectFilesListPath,
-                {},
-                {},
-                testDefinitions,
-                RawConfig::Fork::Disabled,
-                RawConfig::DryRunMode::Disabled,
-                RawConfig::FailFastMode::Disabled,
-                RawConfig::UseCache::No,
-                RawConfig::EmitDebugInfo::No,
-                RawConfig::Diagnostics::None,
-                MullDefaultTimeoutMilliseconds,
-                distance,
-                cacheDirectory,
-                JunkDetectionConfig::disabled(),
-                ParallelizationConfig::defaultConfig());
+  Configuration configuration;
+  configuration.customTests = {
+      CustomTestDefinition("passing", "passing_test", "mull", { "passing_test" })
+  };
+  configuration.dynamicLibraryPaths = {
+      TestModuleFactory::fixturePath("custom_test/dylibs_and_objects/libdistance.dylib")
+  };
+  configuration.objectFilePaths = {
+      TestModuleFactory::fixturePath("custom_test/dylibs_and_objects/main.o")
+  };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
-  MutationsFinder finder(std::move(mutators), config);
-  CustomTestFinder testFinder(config.getCustomTests());
+  MutationsFinder finder(std::move(mutators), configuration);
+  CustomTestFinder testFinder(configuration.customTests);
 
   std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
     std::vector<std::unique_ptr<MullModule>> modules;
@@ -1245,14 +843,14 @@ TEST(Driver, DISABLED_customTest_withDynamicLibraries_and_ObjectFiles) {
   LLVMContext context;
   FakeModuleLoader loader(context, modules);
 
-  Toolchain toolchain(config);
+  Toolchain toolchain(configuration);
   CustomTestRunner runner(toolchain.mangler());
   Filter filter;
   filter.includeTest("passing");
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  Driver driver(config, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  Driver driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());

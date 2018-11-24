@@ -1,4 +1,4 @@
-#include "Config/RawConfig.h"
+#include "Config/Configuration.h"
 #include "Context.h"
 #include "Mutators/ConditionalsBoundaryMutator.h"
 #include "MutationPoint.h"
@@ -27,12 +27,11 @@ TEST(CXXJunkDetector, boundary_mutator) {
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
-  RawConfig config;
-  config.normalizeParallelizationConfig();
+  Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutatorss;
   mutatorss.emplace_back(make_unique<ConditionalsBoundaryMutator>());
-  MutationsFinder finder(std::move(mutatorss), config);
+  MutationsFinder finder(std::move(mutatorss), configuration);
   Filter filter;
 
   std::vector<std::unique_ptr<Testee>> testees;
@@ -64,12 +63,11 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
-  RawConfig config;
-  config.normalizeParallelizationConfig();
+  Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<ConditionalsBoundaryMutator>());
-  MutationsFinder finder(std::move(mutators), config);
+  MutationsFinder finder(std::move(mutators), configuration);
   Filter filter;
 
   std::vector<std::unique_ptr<Testee>> testees;
@@ -100,12 +98,11 @@ TEST(CXXJunkDetector, compdb_relative_paths) {
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
-  RawConfig config;
-  config.normalizeParallelizationConfig();
+  Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutatorss;
   mutatorss.emplace_back(make_unique<ConditionalsBoundaryMutator>());
-  MutationsFinder finder(std::move(mutatorss), config);
+  MutationsFinder finder(std::move(mutatorss), configuration);
   Filter filter;
 
   std::vector<std::unique_ptr<Testee>> testees;
@@ -137,12 +134,11 @@ TEST(CXXJunkDetector, no_compdb) {
 
   Context mullContext;
   mullContext.addModule(std::move(mullModule));
-  RawConfig config;
-  config.normalizeParallelizationConfig();
+  Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutatorss;
   mutatorss.emplace_back(make_unique<ConditionalsBoundaryMutator>());
-  MutationsFinder finder(std::move(mutatorss), config);
+  MutationsFinder finder(std::move(mutatorss), configuration);
   Filter filter;
 
   std::vector<std::unique_ptr<Testee>> testees;
