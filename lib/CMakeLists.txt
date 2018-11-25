@@ -1,6 +1,6 @@
 set(mull_sources
-  ConfigParser.cpp
-  Config.cpp
+  Config/ConfigParser.cpp
+  Config/RawConfig.cpp
   Context.cpp
   Driver.cpp
   ForkProcessSandbox.cpp
@@ -75,6 +75,8 @@ set(mull_sources
   Parallelization/Tasks/MutantExecutionTask.cpp
   Parallelization/Tasks/OriginalCompilationTask.cpp
   Parallelization/Tasks/ApplyMutationTask.cpp
+  Config/ConfigurationOptions.cpp
+  Config/Configuration.cpp
 )
 
 set (MULL_INCLUDE_DIR ${MULL_SOURCE_DIR}/include)

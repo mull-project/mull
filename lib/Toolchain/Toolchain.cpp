@@ -1,10 +1,9 @@
 #include "Toolchain/Toolchain.h"
-#include "Config.h"
+#include "Config/Configuration.h"
 
 #include <llvm/ADT/Triple.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/Support/TargetSelect.h>
-#include <Toolchain/Toolchain.h>
 
 using namespace mull;
 
@@ -17,11 +16,11 @@ Toolchain::NativeTarget::NativeTarget() {
   llvm::InitializeNativeTargetAsmParser();
 }
 
-Toolchain::Toolchain(Config &config) :
+Toolchain::Toolchain(const Configuration &config) :
   nativeTarget(),
   machine(llvm::EngineBuilder().selectTarget(llvm::Triple(), "", "",
                                              llvm::SmallVector<std::string, 1>())),
-  objectCache(config.cachingEnabled(), config.getCacheDirectory()),
+  objectCache(config.cacheEnabled, config.cacheDirectory),
   simpleCompiler(),
   nameMangler(machine->createDataLayout())
 {

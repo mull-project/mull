@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Config.h"
+#include "Config/ConfigurationOptions.h"
 #include "ExecutionResult.h"
 
 namespace mull {
@@ -10,21 +10,20 @@ class MutationPoint;
 class IDEDiagnostics {
 public:
   virtual void report(MutationPoint *mutationPoint, bool killed) = 0;
-  virtual ~IDEDiagnostics() {};
+  virtual ~IDEDiagnostics() = default;;
 };
 
 class NormalIDEDiagnostics: public IDEDiagnostics {
-  Config::Diagnostics diagnostics;
+  Diagnostics diagnostics;
 public:
-  NormalIDEDiagnostics(Config::Diagnostics diagnostics) :
-    diagnostics(diagnostics) {}
+  explicit NormalIDEDiagnostics(Diagnostics diagnostics) : diagnostics(diagnostics) {}
 
-  void report(MutationPoint *mutationPoint, bool killed);
+  void report(MutationPoint *mutationPoint, bool killed) override;
 };
 
 class NullIDEDiagnostics: public IDEDiagnostics {
 public:
-  void report(MutationPoint *mutationPoint, bool killed) {}
+  void report(MutationPoint *mutationPoint, bool killed) override {}
 };
 
 }

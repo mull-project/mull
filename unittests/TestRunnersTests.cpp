@@ -11,6 +11,7 @@
 #include "Toolchain/Toolchain.h"
 #include "Toolchain/JITEngine.h"
 #include "Toolchain/Trampolines.h"
+#include "Config/Configuration.h"
 
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/IR/InstrTypes.h>
@@ -30,10 +31,9 @@ using namespace llvm;
 static TestModuleFactory TestModuleFactory;
 
 TEST(SimpleTestRunner, runTest) {
-  Config config;
-  config.normalizeParallelizationConfig();
+  Configuration configuration;
 
-  Toolchain toolchain(config);
+  Toolchain toolchain(configuration);
 
   Context context;
   SimpleTestRunner testRunner(toolchain.mangler());
@@ -51,7 +51,7 @@ TEST(SimpleTestRunner, runTest) {
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
-  MutationsFinder mutationsFinder(std::move(mutators), config);
+  MutationsFinder mutationsFinder(std::move(mutators), configuration);
   Filter filter;
 
   Function *testeeFunction = context.lookupDefinedFunction("count_letters");

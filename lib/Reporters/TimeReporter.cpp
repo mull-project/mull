@@ -4,7 +4,7 @@
 using namespace mull;
 
 void TimeReporter::reportResults(const Result &result,
-                                 const Config &config,
+                                 const RawConfig &config,
                                  const Metrics &metrics) {
   metrics.dump();
 }

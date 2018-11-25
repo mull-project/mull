@@ -7,7 +7,7 @@
 #include <llvm/Target/TargetMachine.h>
 
 namespace mull {
-  class Config;
+  struct Configuration;
 
   class Toolchain {
 
@@ -22,7 +22,7 @@ namespace mull {
     Compiler simpleCompiler;
     Mangler nameMangler;
   public:
-    explicit Toolchain(Config &config);
+    explicit Toolchain(const Configuration &config);
 
     ObjectCache &cache();
     Compiler &compiler();

@@ -5,7 +5,7 @@ namespace mull {
 class TimeReporter : public Reporter {
 public:
   void reportResults(const Result &result,
-                     const Config &config,
+                     const RawConfig &config,
                      const Metrics &metrics) override;
 };
 

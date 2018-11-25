@@ -1,4 +1,4 @@
-#include "ConfigParser.h"
+#include "Config/ConfigParser.h"
 
 #include "gtest/gtest.h"
 
@@ -8,7 +8,7 @@ using namespace mull;
 class ConfigParserTestFixture : public ::testing::Test {
 protected:
   
-  Config config;
+  RawConfig config;
   
   void configWithYamlContent(const char *content) {
     yaml::Input Input(content);

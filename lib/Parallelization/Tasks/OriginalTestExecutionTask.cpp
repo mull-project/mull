@@ -4,7 +4,7 @@
 #include "Toolchain/Toolchain.h"
 #include "ForkProcessSandbox.h"
 #include "TestRunner.h"
-#include "Config.h"
+#include "Config/Configuration.h"
 
 using namespace mull;
 using namespace llvm;
@@ -12,7 +12,7 @@ using namespace llvm;
 OriginalTestExecutionTask::OriginalTestExecutionTask(Instrumentation &instrumentation,
                                                      ProcessSandbox &sandbox,
                                                      TestRunner &runner,
-                                                     Config &config,
+                                                     const Configuration &config,
                                                      Filter &filter,
                                                      JITEngine &jit)
     : instrumentation(instrumentation),
@@ -31,14 +31,14 @@ void OriginalTestExecutionTask::operator()(iterator begin, iterator end, Out &st
 
     ExecutionResult testExecutionResult = sandbox.run([&]() {
       return runner.runTest(test.get(), jit);
-    }, config.getTimeout());
+    }, config.timeout);
 
     test->setExecutionResult(testExecutionResult);
 
     std::vector<std::unique_ptr<Testee>> testees;
 
     if (testExecutionResult.status == Passed) {
-      testees = instrumentation.getTestees(test.get(), filter, config.getMaxDistance());
+      testees = instrumentation.getTestees(test.get(), filter, config.maxDistance);
     } else {
       auto ssss = test->getTestName() + " failed: " + testExecutionResult.getStatusAsString() + "\n";
       errs() << ssss;

@@ -8,10 +8,11 @@ namespace mull {
 class Instrumentation;
 class ProcessSandbox;
 class TestRunner;
-class Config;
 class Filter;
 class JITEngine;
 class progress_counter;
+
+struct Configuration;
 
 class OriginalTestExecutionTask {
 public:
@@ -22,7 +23,7 @@ public:
   OriginalTestExecutionTask(Instrumentation &instrumentation,
                             ProcessSandbox &sandbox,
                             TestRunner &runner,
-                            Config &config,
+                            const Configuration &config,
                             Filter &filter,
                             JITEngine &jit);
 
@@ -30,7 +31,7 @@ public:
   Instrumentation &instrumentation;
   ProcessSandbox &sandbox;
   TestRunner &runner;
-  Config &config;
+  const Configuration &config;
   Filter &filter;
   JITEngine &jit;
 };

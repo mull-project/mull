@@ -4,7 +4,7 @@
 
 #include "Toolchain/Toolchain.h"
 #include "Toolchain/Trampolines.h"
-#include "Config.h"
+#include "Config/Configuration.h"
 #include "Toolchain/Mangler.h"
 
 #include "CustomTestFramework/CustomTest_Test.h"
@@ -34,15 +34,14 @@ static vector<unique_ptr<MullModule>> loadTestModules() {
 
     return modules;
   };
-  Config config;
-  config.normalizeParallelizationConfig();
+  Configuration configuration;
   FakeModuleLoader loader(context, modules);
-  return loader.loadModulesFromBitcodeFileList({""}, config);
+  return loader.loadModulesFromBitcodeFileList({""}, configuration);
 }
 
 TEST(CustomTestRunner, noTestNameSpecified) {
-  Config config;
-  Toolchain toolchain(config);
+  Configuration configuration;
+  Toolchain toolchain(configuration);
   CustomTestRunner runner(toolchain.mangler());
 
   vector<object::OwningBinary<object::ObjectFile>> ownedObjects;
@@ -66,8 +65,8 @@ TEST(CustomTestRunner, noTestNameSpecified) {
 }
 
 TEST(CustomTestRunner, tooManyParameters) {
-  Config config;
-  Toolchain toolchain(config);
+  Configuration configuration;
+  Toolchain toolchain(configuration);
   CustomTestRunner runner(toolchain.mangler());
 
   vector<object::OwningBinary<object::ObjectFile>> ownedObjects;
@@ -91,8 +90,8 @@ TEST(CustomTestRunner, tooManyParameters) {
 }
 
 TEST(CustomTestRunner, runPassingTest) {
-  Config config;
-  Toolchain toolchain(config);
+  Configuration configuration;
+  Toolchain toolchain(configuration);
   CustomTestRunner runner(toolchain.mangler());
 
   vector<object::OwningBinary<object::ObjectFile>> ownedObjects;
@@ -116,8 +115,8 @@ TEST(CustomTestRunner, runPassingTest) {
 }
 
 TEST(CustomTestRunner, runFailingTest) {
-  Config config;
-  Toolchain toolchain(config);
+  Configuration configuration;
+  Toolchain toolchain(configuration);
   CustomTestRunner runner(toolchain.mangler());
 
   Function *constructor = nullptr;
@@ -146,8 +145,8 @@ TEST(CustomTestRunner, runFailingTest) {
 }
 
 TEST(CustomTestRunner, attemptToRunUnknownTest) {
-  Config config;
-  Toolchain toolchain(config);
+  Configuration configuration;
+  Toolchain toolchain(configuration);
   CustomTestRunner runner(toolchain.mangler());
 
   vector<object::OwningBinary<object::ObjectFile>> ownedObjects;

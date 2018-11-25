@@ -1,7 +1,7 @@
 #include "Reporters/SQLiteReporter.h"
 
 #include "ExecutionResult.h"
-#include "Config.h"
+#include "Config/RawConfig.h"
 #include "Logger.h"
 #include "Result.h"
 #include "MutationResult.h"
@@ -90,7 +90,7 @@ std::string mull::SQLiteReporter::getDatabasePath() {
 }
 
 void mull::SQLiteReporter::reportResults(const Result &result,
-                                         const Config &config,
+                                         const RawConfig &config,
                                          const Metrics &metrics) {
 
   std::string databasePath = getDatabasePath();

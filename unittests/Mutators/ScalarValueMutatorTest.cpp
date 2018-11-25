@@ -1,4 +1,4 @@
-#include "Config.h"
+#include "Config/Configuration.h"
 #include "Context.h"
 #include "Mutators/ScalarValueMutator.h"
 #include "MutationPoint.h"
@@ -30,12 +30,11 @@ TEST(ScalarValueMutator, getMutationPoint) {
   std::vector<std::unique_ptr<Testee>> testees;
   testees.emplace_back(make_unique<Testee>(scalarValueFunction, nullptr, 1));
   auto mergedTestees = mergeTestees(testees);
-  Config config;
-  config.normalizeParallelizationConfig();
+  Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<ScalarValueMutator>());
-  MutationsFinder finder(std::move(mutators), config);
+  MutationsFinder finder(std::move(mutators), configuration);
   Filter filter;
 
   std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(mullContext,
@@ -74,8 +73,8 @@ TEST(DISABLED_ScalarValueMutator, failingMutationPoint) {
   MutationPoint
       point(&mutator, address, nullptr, nullptr, "diagnostics", SourceLocation::nullSourceLocation(), mullModule.get());
 
-  Config config;
-  Toolchain toolchain(config);
+  Configuration configuration;
+  Toolchain toolchain(configuration);
 //  auto mutant = point.cloneModuleAndApplyMutation();
 //  toolchain.compiler().compileModule(mutant.get());
 }

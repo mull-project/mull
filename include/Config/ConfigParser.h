@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Config.h"
+#include "RawConfig.h"
 
 #include <llvm/Support/YAMLTraits.h>
 
@@ -62,60 +62,60 @@ struct ScalarEnumerationTraits<mull::JunkDetectionConfig::JunkDetectionToggle> {
 };
 
 template <>
-struct ScalarEnumerationTraits<mull::Config::Fork> {
-  static void enumeration(IO &io, mull::Config::Fork &fork) {
-    io.enumCase(fork, "true",  mull::Config::Fork::Enabled);
-    io.enumCase(fork, "enabled",  mull::Config::Fork::Enabled);
-    io.enumCase(fork, "false",  mull::Config::Fork::Disabled);
-    io.enumCase(fork, "disabled",  mull::Config::Fork::Disabled);
+struct ScalarEnumerationTraits<mull::RawConfig::Fork> {
+  static void enumeration(IO &io, mull::RawConfig::Fork &fork) {
+    io.enumCase(fork, "true",  mull::RawConfig::Fork::Enabled);
+    io.enumCase(fork, "enabled",  mull::RawConfig::Fork::Enabled);
+    io.enumCase(fork, "false",  mull::RawConfig::Fork::Disabled);
+    io.enumCase(fork, "disabled",  mull::RawConfig::Fork::Disabled);
   }
 };
 
 template <>
-struct ScalarEnumerationTraits<mull::Config::DryRunMode> {
-  static void enumeration(IO &io, mull::Config::DryRunMode &value) {
-    io.enumCase(value, "true",  mull::Config::DryRunMode::Enabled);
-    io.enumCase(value, "enabled",  mull::Config::DryRunMode::Enabled);
-    io.enumCase(value, "false",  mull::Config::DryRunMode::Disabled);
-    io.enumCase(value, "disabled",  mull::Config::DryRunMode::Disabled);
+struct ScalarEnumerationTraits<mull::RawConfig::DryRunMode> {
+  static void enumeration(IO &io, mull::RawConfig::DryRunMode &value) {
+    io.enumCase(value, "true",  mull::RawConfig::DryRunMode::Enabled);
+    io.enumCase(value, "enabled",  mull::RawConfig::DryRunMode::Enabled);
+    io.enumCase(value, "false",  mull::RawConfig::DryRunMode::Disabled);
+    io.enumCase(value, "disabled",  mull::RawConfig::DryRunMode::Disabled);
   }
 };
 
 template <>
-struct ScalarEnumerationTraits<mull::Config::FailFastMode> {
-  static void enumeration(IO &io, mull::Config::FailFastMode &value) {
-    io.enumCase(value, "enabled",  mull::Config::FailFastMode::Enabled);
-    io.enumCase(value, "disabled",  mull::Config::FailFastMode::Disabled);
+struct ScalarEnumerationTraits<mull::RawConfig::FailFastMode> {
+  static void enumeration(IO &io, mull::RawConfig::FailFastMode &value) {
+    io.enumCase(value, "enabled",  mull::RawConfig::FailFastMode::Enabled);
+    io.enumCase(value, "disabled",  mull::RawConfig::FailFastMode::Disabled);
   }
 };
 
 template <>
-struct ScalarEnumerationTraits<mull::Config::UseCache> {
-  static void enumeration(IO &io, mull::Config::UseCache &value) {
-    io.enumCase(value, "true",  mull::Config::UseCache::Yes);
-    io.enumCase(value, "yes",  mull::Config::UseCache::Yes);
-    io.enumCase(value, "false",  mull::Config::UseCache::No);
-    io.enumCase(value, "no",  mull::Config::UseCache::No);
+struct ScalarEnumerationTraits<mull::RawConfig::UseCache> {
+  static void enumeration(IO &io, mull::RawConfig::UseCache &value) {
+    io.enumCase(value, "true",  mull::RawConfig::UseCache::Yes);
+    io.enumCase(value, "yes",  mull::RawConfig::UseCache::Yes);
+    io.enumCase(value, "false",  mull::RawConfig::UseCache::No);
+    io.enumCase(value, "no",  mull::RawConfig::UseCache::No);
   }
 };
 
 template <>
-struct ScalarEnumerationTraits<mull::Config::EmitDebugInfo> {
-  static void enumeration(IO &io, mull::Config::EmitDebugInfo &value) {
-    io.enumCase(value, "true",  mull::Config::EmitDebugInfo::Yes);
-    io.enumCase(value, "yes",  mull::Config::EmitDebugInfo::Yes);
-    io.enumCase(value, "false",  mull::Config::EmitDebugInfo::No);
-    io.enumCase(value, "no",  mull::Config::EmitDebugInfo::No);
+struct ScalarEnumerationTraits<mull::RawConfig::EmitDebugInfo> {
+  static void enumeration(IO &io, mull::RawConfig::EmitDebugInfo &value) {
+    io.enumCase(value, "true",  mull::RawConfig::EmitDebugInfo::Yes);
+    io.enumCase(value, "yes",  mull::RawConfig::EmitDebugInfo::Yes);
+    io.enumCase(value, "false",  mull::RawConfig::EmitDebugInfo::No);
+    io.enumCase(value, "no",  mull::RawConfig::EmitDebugInfo::No);
   }
 };
 
 template <>
-struct ScalarEnumerationTraits<mull::Config::Diagnostics> {
-  static void enumeration(IO &io, mull::Config::Diagnostics &value) {
-    io.enumCase(value, "none",     mull::Config::Diagnostics::None);
-    io.enumCase(value, "survived", mull::Config::Diagnostics::Survived);
-    io.enumCase(value, "killed",   mull::Config::Diagnostics::Killed);
-    io.enumCase(value, "all",      mull::Config::Diagnostics::All);
+struct ScalarEnumerationTraits<mull::Diagnostics> {
+  static void enumeration(IO &io, mull::Diagnostics &value) {
+    io.enumCase(value, "none",     mull::Diagnostics::None);
+    io.enumCase(value, "survived", mull::Diagnostics::Survived);
+    io.enumCase(value, "killed",   mull::Diagnostics::Killed);
+    io.enumCase(value, "all",      mull::Diagnostics::All);
   }
 };
 
@@ -129,9 +129,9 @@ struct MappingTraits<mull::ParallelizationConfig> {
 };
 
 template <>
-struct MappingTraits<mull::Config>
+struct MappingTraits<mull::RawConfig>
 {
-  static void mapping(IO& io, mull::Config& config)
+  static void mapping(IO& io, mull::RawConfig& config)
   {
     io.mapOptional("bitcode_file_list", config.bitcodeFileList);
     io.mapOptional("project_name", config.projectName);
@@ -163,7 +163,7 @@ namespace mull {
 
 class ConfigParser {
 public:
-  Config loadConfig(llvm::yaml::Input &input);
-  Config loadConfig(const char *filename);
+  RawConfig loadConfig(llvm::yaml::Input &input);
+  RawConfig loadConfig(const char *filename);
 };
 }
