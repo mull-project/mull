@@ -16,8 +16,6 @@ if (SOURCE_LLVM_DIR)
   set(PATH_TO_LLVM ${SOURCE_LLVM_DIR})
 endif()
 
-message("${PATH_TO_LLVM}")
-
 if (NOT PATH_TO_LLVM)
   message(FATAL_ERROR " 
   The cmake is supposed to be called with PATH_TO_LLVM pointing to
@@ -33,7 +31,6 @@ if (NOT IS_ABSOLUTE ${PATH_TO_LLVM})
   get_filename_component(PATH_TO_LLVM
     "${PATH_TO_LLVM}" REALPATH BASE_DIR "${CMAKE_BINARY_DIR}")
 endif()
-message("${PATH_TO_LLVM}")
 
 set (BUILD_AGAINST_PRECOMPILED_LLVM TRUE)
 if (EXISTS ${PATH_TO_LLVM}/CMakeLists.txt)
@@ -74,8 +71,6 @@ if (${BUILD_AGAINST_PRECOMPILED_LLVM})
   else()
     set(MULL_CC ${PRECOMPILED_LLVM_DIR}/bin/clang)
   endif()
-endif()
-
 else()
   macro(get_llvm_version_component input component)
     string(REGEX MATCH "${component} ([0-9]+)" match ${input})
@@ -106,8 +101,8 @@ else()
   set(LLVM_INCLUDE_DIRS ${llvm_support_includes} ${clang_tooling_includes})
   list(REMOVE_DUPLICATES LLVM_INCLUDE_DIRS)
 
-  get_target_property(clang_build_dir clang BUILD_DIR)
-  message("${clang_build_dir}")
+  get_target_property(clang_bin_directory clang RUNTIME_OUTPUT_DIRECTORY)
+  set (MULL_CC ${clang_bin_directory}/clang)
 endif()
 
 set (llvm_patch_version "${LLVM_VERSION_MAJOR}.${LLVM_VERSION_MINOR}.${LLVM_VERSION_PATCH}")
