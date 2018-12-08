@@ -4,8 +4,8 @@
 #include "Config/ConfigParser.h"
 #include "Context.h"
 #include "CustomTestFramework/CustomTest_Test.h"
-#include "TestModuleFactory.h"
 #include "Filter.h"
+#include "FixturePaths.h"
 
 #include <llvm/IR/LLVMContext.h>
 
@@ -15,27 +15,18 @@ using namespace mull;
 using namespace llvm;
 using namespace std;
 
-static TestModuleFactory SharedTestModuleFactory;
-static LLVMContext context;
-
-static vector<unique_ptr<MullModule>> loadTestModules() {
-  function<vector<unique_ptr<MullModule>> ()> modules = [](){
-    vector<unique_ptr<MullModule>> modules;
-
-    modules.push_back(SharedTestModuleFactory.create_CustomTest_Distance_Distance_Module());
-    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Main_Module());
-    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Test_Module());
-
-    return modules;
-  };
-
-  Configuration configuration;
-  FakeModuleLoader loader(context, modules);
-  return loader.loadModulesFromBitcodeFileList({""}, configuration);
-}
-
 TEST(CustomTestFinder, findTests) {
-  auto loadedModules = loadTestModules();
+  Configuration configuration;
+
+  std::vector<std::string> bitcodeList({
+    mull::fixtures::custom_test_distance_bc_path(),
+    mull::fixtures::custom_test_main_bc_path(),
+    mull::fixtures::custom_test_test_bc_path()
+  });
+
+  ModuleLoader loader;
+
+  auto loadedModules = loader.loadModulesFromBitcodeFileList(bitcodeList, configuration);
   Context context;
   for (auto &module: loadedModules) {
     context.addModule(move(module));
@@ -87,12 +78,6 @@ TEST(CustomTestFinder, findTests) {
 }
 
 TEST(CustomTestFinder, findTests_viaConfig) {
-  auto loadedModules = loadTestModules();
-  Context context;
-  for (auto &module: loadedModules) {
-    context.addModule(move(module));
-  }
-
   const char *rawConfig = R"YAML(
 custom_tests:
   - name:   failing
@@ -108,6 +93,21 @@ custom_tests:
 
   ConfigParser parser;
   auto config = parser.loadConfig(input);
+  Configuration configuration(config);
+
+  std::vector<std::string> bitcodeList({
+                                           mull::fixtures::custom_test_distance_bc_path(),
+                                           mull::fixtures::custom_test_main_bc_path(),
+                                           mull::fixtures::custom_test_test_bc_path()
+                                       });
+
+  ModuleLoader loader;
+  auto loadedModules = loader.loadModulesFromBitcodeFileList(bitcodeList, configuration);
+
+  Context context;
+  for (auto &module: loadedModules) {
+    context.addModule(move(module));
+  }
 
   Filter filter;
   CustomTestFinder testFinder(config.getCustomTests());
@@ -150,12 +150,6 @@ custom_tests:
 }
 
 TEST(CustomTestFinder, findTests_withFilter) {
-  auto loadedModules = loadTestModules();
-  Context context;
-  for (auto &module: loadedModules) {
-    context.addModule(move(module));
-  }
-
   const char *rawConfig = R"YAML(
 custom_tests:
   - name:   failing
@@ -171,10 +165,25 @@ custom_tests:
 
   ConfigParser parser;
   auto config = parser.loadConfig(input);
+  Configuration configuration(config);
+
+  std::vector<std::string> bitcodeList({
+                                           mull::fixtures::custom_test_distance_bc_path(),
+                                           mull::fixtures::custom_test_main_bc_path(),
+                                           mull::fixtures::custom_test_test_bc_path()
+                                       });
+
+  ModuleLoader loader;
+  auto loadedModules = loader.loadModulesFromBitcodeFileList(bitcodeList, configuration);
 
   Filter filter;
   filter.includeTest("passing");
   CustomTestFinder testFinder(config.getCustomTests());
+
+  Context context;
+  for (auto &module: loadedModules) {
+    context.addModule(move(module));
+  }
 
   vector<unique_ptr<mull::Test>> tests = testFinder.findTests(context, filter);
   ASSERT_EQ(1U, tests.size());
@@ -199,21 +208,30 @@ custom_tests:
 }
 
 TEST(CustomTestFinder, findTests_withEmptyConfig) {
-  auto loadedModules = loadTestModules();
-  Context context;
-  for (auto &module: loadedModules) {
-    context.addModule(move(module));
-  }
-
   const char *rawConfig = "";
 
   yaml::Input input(rawConfig);
 
   ConfigParser parser;
   auto config = parser.loadConfig(input);
+  Configuration configuration(config);
+
+  std::vector<std::string> bitcodeList({
+                                           mull::fixtures::custom_test_distance_bc_path(),
+                                           mull::fixtures::custom_test_main_bc_path(),
+                                           mull::fixtures::custom_test_test_bc_path()
+                                       });
+
+  ModuleLoader loader;
+  auto loadedModules = loader.loadModulesFromBitcodeFileList(bitcodeList, configuration);
 
   Filter filter;
   CustomTestFinder testFinder(config.getCustomTests());
+
+  Context context;
+  for (auto &module: loadedModules) {
+    context.addModule(move(module));
+  }
 
   vector<unique_ptr<mull::Test>> tests = testFinder.findTests(context, filter);
   ASSERT_EQ(1U, tests.size());

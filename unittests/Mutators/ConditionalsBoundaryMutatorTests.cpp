@@ -2,12 +2,12 @@
 #include "Context.h"
 #include "Mutators/ConditionalsBoundaryMutator.h"
 #include "MutationPoint.h"
-#include "TestModuleFactory.h"
 #include "Toolchain/Compiler.h"
 #include "Toolchain/Toolchain.h"
 #include "Filter.h"
 #include "Testee.h"
 #include "MutationsFinder.h"
+#include "FixturePaths.h"
 
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/LLVMContext.h>
@@ -19,10 +19,10 @@
 using namespace mull;
 using namespace llvm;
 
-static TestModuleFactory TestModuleFactory;
-
 TEST(ConditionalsBoundaryMutator, findMutations) {
-  auto mullModule = TestModuleFactory.create_ConditionalsBoundaryMutator_Module();
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto mullModule = loader.loadModuleAtPath(fixtures::mutators_boundary_module_bc_path(), llvmContext);
   auto module = mullModule->getModule();
 
   Context mullContext;
@@ -45,8 +45,9 @@ TEST(ConditionalsBoundaryMutator, findMutations) {
 }
 
 TEST(ConditionalsBoundaryMutator, applyMutations) {
-  auto mullModule = TestModuleFactory.create_ConditionalsBoundaryMutator_Module();
-  auto mutatedModule = TestModuleFactory.create_ConditionalsBoundaryMutator_Module();
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto mullModule = loader.loadModuleAtPath(fixtures::mutators_boundary_module_bc_path(), llvmContext);
   auto borrowedModule = mullModule.get();
   auto module = borrowedModule->getModule();
 

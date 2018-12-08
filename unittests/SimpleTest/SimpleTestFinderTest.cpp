@@ -12,14 +12,15 @@
 #include <llvm/Support/SourceMgr.h>
 
 #include "gtest/gtest.h"
+#include "FixturePaths.h"
 
 using namespace mull;
 using namespace llvm;
 
-static TestModuleFactory TestModuleFactory;
-
 TEST(SimpleTestFinder, findTest) {
-  auto module = TestModuleFactory.create_SimpleTest_CountLettersTest_Module();
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto module = loader.loadModuleAtPath(fixtures::simple_test_count_letters_test_count_letters_bc_path(), llvmContext);
 
   Context context;
   context.addModule(std::move(module));

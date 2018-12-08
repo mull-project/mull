@@ -1,4 +1,3 @@
-
 #include "Context.h"
 #include "Mutators/MathAddMutator.h"
 #include "SimpleTest/SimpleTestFinder.h"
@@ -12,6 +11,7 @@
 #include "Toolchain/JITEngine.h"
 #include "Toolchain/Trampolines.h"
 #include "Config/Configuration.h"
+#include "FixturePaths.h"
 
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/IR/InstrTypes.h>
@@ -28,23 +28,23 @@
 using namespace mull;
 using namespace llvm;
 
-static TestModuleFactory TestModuleFactory;
-
 TEST(SimpleTestRunner, runTest) {
   Configuration configuration;
 
   Toolchain toolchain(configuration);
 
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto ownedModuleWithTests = loader.loadModuleAtPath(fixtures::simple_test_count_letters_test_count_letters_bc_path(), llvmContext);
+  auto ownedModuleWithTestees = loader.loadModuleAtPath(fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
+
+  Module *moduleWithTests   = ownedModuleWithTests->getModule();
+  Module *moduleWithTestees = ownedModuleWithTestees->getModule();
+
   Context context;
   SimpleTestRunner testRunner(toolchain.mangler());
   SimpleTestRunner::ObjectFiles objectFiles;
   SimpleTestRunner::OwnedObjectFiles ownedObjectFiles;
-
-  auto ownedModuleWithTests   = TestModuleFactory.create_SimpleTest_CountLettersTest_Module();
-  auto ownedModuleWithTestees = TestModuleFactory.create_SimpleTest_CountLetters_Module();
-
-  Module *moduleWithTests   = ownedModuleWithTests->getModule();
-  Module *moduleWithTestees = ownedModuleWithTestees->getModule();
 
   context.addModule(std::move(ownedModuleWithTests));
   context.addModule(std::move(ownedModuleWithTestees));

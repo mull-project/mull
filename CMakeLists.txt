@@ -3,16 +3,38 @@ cmake_minimum_required(VERSION 3.5.1)
 project(Mull)
 enable_language(C CXX)
 
-if (NOT PRECOMPILED_LLVM_DIR AND NOT SOURCE_LLVM_DIR)
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/properties.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/fixtures.cmake)
+
+if (PRECOMPILED_LLVM_DIR)
+  message(WARNING "PRECOMPILED_LLVM_DIR is deprecated. Please, use PATH_TO_LLVM instead")
+  set(PATH_TO_LLVM ${PRECOMPILED_LLVM_DIR})
+endif()
+
+if (SOURCE_LLVM_DIR)
+  message(WARNING "SOURCE_LLVM_DIR is deprecated. Please, use PATH_TO_LLVM instead")
+  set(PATH_TO_LLVM ${SOURCE_LLVM_DIR})
+endif()
+
+if (NOT PATH_TO_LLVM)
   message(FATAL_ERROR " 
- The cmake is supposed to be called with either of the following options:
- PRECOMPILED_LLVM_DIR: path to a precompiled version of LLVM
- SOURCE_LLVM_DIR: path to a source code of LLVM
- 
+  The cmake is supposed to be called with PATH_TO_LLVM pointing to
+ a precompiled version of LLVM or to to the source code of LLVM
  Examples:
- cmake -G \"${CMAKE_GENERATOR}\" -DPRECOMPILED_LLVM_DIR=/opt/llvm-3.9.0 ${CMAKE_SOURCE_DIR}
- cmake -G \"${CMAKE_GENERATOR}\" -DSOURCE_LLVM_DIR=${CMAKE_SOURCE_DIR}/llvm_source/3.9.0 ${CMAKE_SOURCE_DIR}
+ cmake -G \"${CMAKE_GENERATOR}\" -DPATH_TO_LLVM=/opt/llvm-3.9.0 ${CMAKE_SOURCE_DIR}
+ cmake -G \"${CMAKE_GENERATOR}\" -DPATH_TO_LLVM=/opt/llvm/source ${CMAKE_SOURCE_DIR}
 ")
+endif()
+
+if (NOT IS_ABSOLUTE ${PATH_TO_LLVM})
+  # Convert relative path to absolute path
+  get_filename_component(PATH_TO_LLVM
+    "${PATH_TO_LLVM}" REALPATH BASE_DIR "${CMAKE_BINARY_DIR}")
+endif()
+
+set (BUILD_AGAINST_PRECOMPILED_LLVM TRUE)
+if (EXISTS ${PATH_TO_LLVM}/CMakeLists.txt)
+  set (BUILD_AGAINST_PRECOMPILED_LLVM FALSE)
 endif()
 
 # This enables assertions for Release builds.
@@ -31,21 +53,25 @@ if (PkgConfig_FOUND)
   endif()
 endif()
 
-if (PRECOMPILED_LLVM_DIR)
+if (${BUILD_AGAINST_PRECOMPILED_LLVM})
   set (search_paths
-    ${PRECOMPILED_LLVM_DIR}
-    ${PRECOMPILED_LLVM_DIR}/lib/cmake
-    ${PRECOMPILED_LLVM_DIR}/lib/cmake/llvm
-    ${PRECOMPILED_LLVM_DIR}/lib/cmake/clang
-    ${PRECOMPILED_LLVM_DIR}/share/clang/cmake/
-    ${PRECOMPILED_LLVM_DIR}/share/llvm/cmake/
+    ${PATH_TO_LLVM}
+    ${PATH_TO_LLVM}/lib/cmake
+    ${PATH_TO_LLVM}/lib/cmake/llvm
+    ${PATH_TO_LLVM}/lib/cmake/clang
+    ${PATH_TO_LLVM}/share/clang/cmake/
+    ${PATH_TO_LLVM}/share/llvm/cmake/
   )
 
   find_package(LLVM REQUIRED CONFIG PATHS ${search_paths} NO_DEFAULT_PATH)
   find_package(Clang REQUIRED CONFIG PATHS ${search_paths} NO_DEFAULT_PATH)
-endif()
 
-if(SOURCE_LLVM_DIR)
+  if (TARGET clang)
+    get_target_property(MULL_CC clang LOCATION)
+  else()
+    set(MULL_CC ${PRECOMPILED_LLVM_DIR}/bin/clang)
+  endif()
+else()
   macro(get_llvm_version_component input component)
     string(REGEX MATCH "${component} ([0-9]+)" match ${input})
     if (NOT match)
@@ -54,18 +80,18 @@ if(SOURCE_LLVM_DIR)
     set (${component} ${CMAKE_MATCH_1})
   endmacro()
 
-  file(READ ${SOURCE_LLVM_DIR}/CMakeLists.txt LLVM_CMAKELISTS)
+  file(READ ${PATH_TO_LLVM}/CMakeLists.txt LLVM_CMAKELISTS)
   get_llvm_version_component("${LLVM_CMAKELISTS}" LLVM_VERSION_MAJOR)
   get_llvm_version_component("${LLVM_CMAKELISTS}" LLVM_VERSION_MINOR)
   get_llvm_version_component("${LLVM_CMAKELISTS}" LLVM_VERSION_PATCH)
 
-  add_subdirectory(${SOURCE_LLVM_DIR})
+  add_subdirectory(${PATH_TO_LLVM} llvm-build-dir)
 
   if (NOT TARGET clangTooling)
     message(FATAL_ERROR " 
  Cannot find clangTooling target. Did you forget to clone clang sources?
  Clean CMake cache and make sure they are available at:
- ${SOURCE_LLVM_DIR}/tools/clang")
+ ${PATH_TO_LLVM}/tools/clang")
   endif()
 
   # Normally, include paths provided by LLVMConfig.cmake
@@ -74,6 +100,9 @@ if(SOURCE_LLVM_DIR)
   get_target_property(clang_tooling_includes clangTooling INCLUDE_DIRECTORIES)
   set(LLVM_INCLUDE_DIRS ${llvm_support_includes} ${clang_tooling_includes})
   list(REMOVE_DUPLICATES LLVM_INCLUDE_DIRS)
+
+  get_target_property(clang_bin_directory clang RUNTIME_OUTPUT_DIRECTORY)
+  set (MULL_CC ${clang_bin_directory}/clang)
 endif()
 
 set (llvm_patch_version "${LLVM_VERSION_MAJOR}.${LLVM_VERSION_MINOR}.${LLVM_VERSION_PATCH}")

@@ -34,6 +34,7 @@ void dump_cursor(CXCursor cursor, CXSourceLocation location, MutationPoint *poin
   auto sourceLocation = point->getSourceLocation();
   errs() << point->getUniqueIdentifier() << "\n";
   point->getOriginalValue()->print(llvm::errs());
+  errs() << "\n";
   Instruction *in = dyn_cast<Instruction>(point->getOriginalValue());
   errs() << in->getParent()->getParent()->getParent()->getModuleIdentifier() << "\n";
 
@@ -308,7 +309,6 @@ bool CXXJunkDetector::isJunkBoundary(CXCursor cursor,
                                      CXSourceLocation location,
                                      MutationPoint *point) {
   CXCursorKind kind = clang_getCursorKind(cursor);
-
   if (kind != CXCursor_BinaryOperator &&
       kind != CXCursor_OverloadedDeclRef) {
     return true;

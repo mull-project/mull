@@ -121,8 +121,8 @@ public:
   }
 
 private:
-  std::function<void(void)> task;
   std::string name;
+  std::function<void(void)> task;
 };
 
 typedef TaskExecutor<SingleTaskTag> SingleTaskExecutor;

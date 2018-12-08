@@ -10,10 +10,15 @@
 #include "Filter.h"
 #include "Testee.h"
 #include "Metrics/Metrics.h"
+#include "Config/RawConfig.h"
+
+#include "FixturePaths.h"
 
 #include "gtest/gtest.h"
 
 #include <cstring>
+#include <ostream>
+
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Type.h>
@@ -28,11 +33,10 @@ TEST(SQLiteReporter, integrationTest) {
   /// - 1 test with 1 testee with 1 mutation point.
   /// - 1 test execution result which includes 1 normal test execution and 1
   /// mutated test execution.
-
-  TestModuleFactory testModuleFactory;
-
-  auto mullModuleWithTests   = testModuleFactory.create_SimpleTest_CountLettersTest_Module();
-  auto mullModuleWithTestees = testModuleFactory.create_SimpleTest_CountLetters_Module();
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto mullModuleWithTests = loader.loadModuleAtPath(fixtures::simple_test_count_letters_test_count_letters_bc_path(), llvmContext);
+  auto mullModuleWithTestees = loader.loadModuleAtPath(fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
 
   Context context;
   context.addModule(std::move(mullModuleWithTests));
@@ -391,8 +395,6 @@ TEST(SQLiteReporter, integrationTest_Config) {
 }
 
 TEST(SQLiteReporter, do_emitDebugInfo) {
-  TestModuleFactory testModuleFactory;
-
   std::string projectName("Integration Test Do Emit Debug Info");
   std::string testFramework = "SimpleTest";
 
@@ -435,8 +437,10 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
 
   Configuration configuration(rawConfig);
 
-  auto mullModuleWithTests   = testModuleFactory.create_SimpleTest_CountLettersTest_Module();
-  auto mullModuleWithTestees = testModuleFactory.create_SimpleTest_CountLetters_Module();
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto mullModuleWithTests = loader.loadModuleAtPath(fixtures::simple_test_count_letters_test_count_letters_bc_path(), llvmContext);
+  auto mullModuleWithTestees = loader.loadModuleAtPath(fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
 
   Context context;
   context.addModule(std::move(mullModuleWithTests));
@@ -543,9 +547,6 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
 }
 
 TEST(SQLiteReporter, do_not_emitDebugInfo) {
-  TestModuleFactory testModuleFactory;
-
-
   std::string projectName("Integration Test Do Not Emit Debug Info");
   std::string testFramework = "SimpleTest";
 
@@ -588,8 +589,10 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
 
   Configuration configuration(rawConfig);
 
-  auto mullModuleWithTests   = testModuleFactory.create_SimpleTest_CountLettersTest_Module();
-  auto mullModuleWithTestees = testModuleFactory.create_SimpleTest_CountLetters_Module();
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto mullModuleWithTests = loader.loadModuleAtPath(fixtures::simple_test_count_letters_test_count_letters_bc_path(), llvmContext);
+  auto mullModuleWithTestees = loader.loadModuleAtPath(fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
 
   Context context;
   context.addModule(std::move(mullModuleWithTests));

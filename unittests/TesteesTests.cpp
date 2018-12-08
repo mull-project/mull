@@ -1,10 +1,15 @@
 #include "gtest/gtest.h"
-#include "TestModuleFactory.h"
 #include "Testee.h"
+#include "FixturePaths.h"
+#include "ModuleLoader.h"
+
+using namespace mull;
 
 TEST(Testees, mergeTestees) {
-  TestModuleFactory factory;
-  auto module = factory.create_SimpleTest_ANDORReplacement_Module();
+  llvm::LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto module = loader.loadModuleAtPath(fixtures::mutators_and_or_replacement_module_bc_path(), llvmContext);
+
   auto &allFunctions = module->getModule()->getFunctionList();
 
   std::vector<std::unique_ptr<Testee>> allTestees;

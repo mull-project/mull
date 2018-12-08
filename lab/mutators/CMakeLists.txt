@@ -1,0 +1,12 @@
+add_subdirectory(and_or_replacement)
+add_subdirectory(and_or_replacement_cpp)
+add_subdirectory(boundary)
+add_subdirectory(math_div)
+add_subdirectory(math_mul)
+add_subdirectory(math_sub)
+add_subdirectory(negate_condition)
+add_subdirectory(remove_void_function)
+add_subdirectory(replace_assignment)
+add_subdirectory(replace_call)
+add_subdirectory(scalar_value)
+

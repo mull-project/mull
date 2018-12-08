@@ -1,6 +1,6 @@
 #include "Context.h"
 
-#include "TestModuleFactory.h"
+#include "FixturePaths.h"
 
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
@@ -11,13 +11,13 @@
 using namespace mull;
 using namespace llvm;
 
-static TestModuleFactory TestModuleFactory;
-
 TEST(Context, AddModule) {
-  auto moduleWithTests = TestModuleFactory.create_SimpleTest_CountLettersTest_Module();
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto module = loader.loadModuleAtPath(fixtures::simple_test_count_letters_test_count_letters_bc_path(), llvmContext);
 
   Context Ctx;
-  Ctx.addModule(std::move(moduleWithTests));
+  Ctx.addModule(std::move(module));
 
   ASSERT_EQ(1U, Ctx.getModules().size());
 }

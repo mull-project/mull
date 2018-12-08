@@ -25,6 +25,7 @@
 #include "JunkDetection/JunkDetector.h"
 #include "Toolchain/Toolchain.h"
 #include "Metrics/Metrics.h"
+#include "FixturePaths.h"
 
 #include <functional>
 #include <llvm/ADT/SmallString.h>
@@ -37,12 +38,11 @@
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/YAMLParser.h>
 
+
 #include "gtest/gtest.h"
 
 using namespace mull;
 using namespace llvm;
-
-static TestModuleFactory SharedTestModuleFactory;
 
 #pragma mark - Running Driver with no tests
 
@@ -81,18 +81,13 @@ TEST(Driver, SimpleTest_MathAddMutator) {
   /// Then Run all the tests using driver
 
   Configuration configuration;
-
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
-
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_CountLettersTest_Module());
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_CountLetters_Module());
-
-    return modules;
+  configuration.bitcodePaths = {
+      fixtures::simple_test_count_letters_test_count_letters_bc_path(),
+      fixtures::simple_test_count_letters_count_letters_bc_path()
   };
 
   LLVMContext context;
-  FakeModuleLoader loader(context, modules);
+  ModuleLoader loader;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
@@ -130,25 +125,19 @@ TEST(Driver, SimpleTest_MathAddMutator) {
 }
 
 TEST(Driver, SimpleTest_MathSubMutator) {
-    /// Create Config with fake BitcodePaths
-    /// Create Fake Module Loader
-    /// Initialize Driver using ModuleLoader and Config
-    /// Driver should initialize (make them injectable? DI?)
-    /// TestRunner and TestFinder based on the Config
-    /// Then Run all the tests using driver
-
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
-
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_MathSub_Module());
-
-    return modules;
-  };
+  /// Create Config with fake BitcodePaths
+  /// Create Fake Module Loader
+  /// Initialize Driver using ModuleLoader and Config
+  /// Driver should initialize (make them injectable? DI?)
+  /// TestRunner and TestFinder based on the Config
+  /// Then Run all the tests using driver
 
   Configuration configuration;
+  configuration.bitcodePaths = {
+      fixtures::mutators_math_sub_module_bc_path()
+  };
 
-  LLVMContext context;
-  FakeModuleLoader loader(context, modules);
+  ModuleLoader loader;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathSubMutator>());
@@ -185,25 +174,19 @@ TEST(Driver, SimpleTest_MathSubMutator) {
 }
 
 TEST(Driver, SimpleTest_MathMulMutator) {
-    /// Create Config with fake BitcodePaths
-    /// Create Fake Module Loader
-    /// Initialize Driver using ModuleLoader and Config
-    /// Driver should initialize (make them injectable? DI?)
-    /// TestRunner and TestFinder based on the Config
-    /// Then Run all the tests using driver
-
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
-
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_MathMul_Module());
-
-    return modules;
-  };
+  /// Create Config with fake BitcodePaths
+  /// Create Fake Module Loader
+  /// Initialize Driver using ModuleLoader and Config
+  /// Driver should initialize (make them injectable? DI?)
+  /// TestRunner and TestFinder based on the Config
+  /// Then Run all the tests using driver
 
   Configuration configuration;
+  configuration.bitcodePaths = {
+      fixtures::mutators_math_mul_module_bc_path()
+  };
 
-  LLVMContext context;
-  FakeModuleLoader loader(context, modules);
+  ModuleLoader loader;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathMulMutator>());
@@ -218,10 +201,10 @@ TEST(Driver, SimpleTest_MathMulMutator) {
 
   Driver Driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
-    /// Given the modules we use here we expect:
-    ///
-    /// 1 original test, which has Passed state
-    /// 1 mutant test, which has Failed state
+  /// Given the modules we use here we expect:
+  ///
+  /// 1 original test, which has Passed state
+  /// 1 mutant test, which has Failed state
   auto result = Driver.Run();
   ASSERT_EQ(1u, result->getTests().size());
 
@@ -239,25 +222,19 @@ TEST(Driver, SimpleTest_MathMulMutator) {
 }
 
 TEST(Driver, SimpleTest_MathDivMutator) {
-    /// Create Config with fake BitcodePaths
-    /// Create Fake Module Loader
-    /// Initialize Driver using ModuleLoader and Config
-    /// Driver should initialize (make them injectable? DI?)
-    /// TestRunner and TestFinder based on the Config
-    /// Then Run all the tests using driver
-
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
-
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_MathDiv_Module());
-
-    return modules;
-  };
+  /// Create Config with fake BitcodePaths
+  /// Create Fake Module Loader
+  /// Initialize Driver using ModuleLoader and Config
+  /// Driver should initialize (make them injectable? DI?)
+  /// TestRunner and TestFinder based on the Config
+  /// Then Run all the tests using driver
 
   Configuration configuration;
+  configuration.bitcodePaths = {
+      fixtures::mutators_math_div_module_bc_path()
+  };
 
-  LLVMContext context;
-  FakeModuleLoader loader(context, modules);
+  ModuleLoader loader;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathDivMutator>());
@@ -272,10 +249,10 @@ TEST(Driver, SimpleTest_MathDivMutator) {
 
   Driver Driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
 
-    /// Given the modules we use here we expect:
-    ///
-    /// 1 original test, which has Passed state
-    /// 1 mutant test, which has Failed state
+  /// Given the modules we use here we expect:
+  ///
+  /// 1 original test, which has Passed state
+  /// 1 mutant test, which has Failed state
   auto result = Driver.Run();
   ASSERT_EQ(1u, result->getTests().size());
 
@@ -301,23 +278,17 @@ TEST(Driver, SimpleTest_NegateConditionMutator) {
   /// Then Run all the tests using driver
 
   Configuration configuration;
+  configuration.bitcodePaths = {
+      fixtures::mutators_negate_condition_testee_bc_path(),
+      fixtures::mutators_negate_condition_tester_bc_path()
+  };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<NegateConditionMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
   SimpleTestFinder testFinder;
 
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
-
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_NegateCondition_Tester_Module());
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_NegateCondition_Testee_Module());
-
-    return modules;
-  };
-
-  LLVMContext context;
-  FakeModuleLoader loader(context, modules);
+  ModuleLoader loader;
 
   Toolchain toolchain(configuration);
   SimpleTestRunner runner(toolchain.mangler());
@@ -349,23 +320,17 @@ TEST(Driver, SimpleTest_NegateConditionMutator) {
 
 TEST(Driver, SimpleTest_RemoveVoidFunctionMutator) {
   Configuration configuration;
+  configuration.bitcodePaths = {
+      fixtures::mutators_remove_void_function_testee_bc_path(),
+      fixtures::mutators_remove_void_function_tester_bc_path()
+  };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<RemoveVoidFunctionMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
   SimpleTestFinder testFinder;
 
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
-
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_RemoveVoidFunction_Tester_Module());
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_RemoveVoidFunction_Testee_Module());
-
-    return modules;
-  };
-
-  LLVMContext context;
-  FakeModuleLoader loader(context, modules);
+  ModuleLoader loader;
 
   Toolchain toolchain(configuration);
   SimpleTestRunner runner(toolchain.mangler());
@@ -397,22 +362,17 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutator) {
 
 TEST(Driver, SimpleTest_ANDORReplacementMutator) {
   Configuration configuration;
+  configuration.bitcodePaths = {
+      fixtures::mutators_and_or_replacement_module_bc_path()
+  };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<AndOrReplacementMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
   SimpleTestFinder testFinder;
 
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
-
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_ANDORReplacement_Module());
-
-    return modules;
-  };
-
   LLVMContext context;
-  FakeModuleLoader loader(context, modules);
+  ModuleLoader loader;
 
   Toolchain toolchain(configuration);
   SimpleTestRunner runner(toolchain.mangler());
@@ -518,22 +478,17 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
 
 TEST(Driver, SimpleTest_ANDORReplacementMutator_CPP) {
   Configuration configuration;
+  configuration.bitcodePaths = {
+      fixtures::mutators_and_or_replacement_cpp_module_bc_path()
+  };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<AndOrReplacementMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
   SimpleTestFinder testFinder;
 
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
-
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_ANDORReplacement_CPPContent_Module());
-
-    return modules;
-  };
-
   LLVMContext context;
-  FakeModuleLoader loader(context, modules);
+  ModuleLoader loader;
 
   Toolchain toolchain(configuration);
   SimpleTestRunner runner(toolchain.mangler());
@@ -601,22 +556,16 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator_CPP) {
 
 TEST(Driver, SimpleTest_ReplaceAssignmentMutator_CPP) {
   Configuration configuration;
+  configuration.bitcodePaths = {
+      fixtures::mutators_replace_assignment_module_bc_path()
+  };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<ReplaceAssignmentMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
   SimpleTestFinder testFinder;
 
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
-
-    modules.push_back(SharedTestModuleFactory.create_SimpleTest_ReplaceAssignment_Module());
-
-    return modules;
-  };
-
-  LLVMContext context;
-  FakeModuleLoader loader(context, modules);
+  ModuleLoader loader;
 
   Toolchain toolchain(configuration);
   SimpleTestRunner runner(toolchain.mangler());
@@ -650,24 +599,18 @@ TEST(Driver, customTest) {
       CustomTestDefinition("failing", "failing_test", "mull", {"failing_test"}),
       CustomTestDefinition("passing", "passing_test", "mull", {"passing_test"})
   };
+  configuration.bitcodePaths = {
+      mull::fixtures::custom_test_distance_bc_path(),
+      mull::fixtures::custom_test_main_bc_path(),
+      mull::fixtures::custom_test_test_bc_path()
+  };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
   CustomTestFinder testFinder(configuration.customTests);
 
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
-
-    modules.push_back(SharedTestModuleFactory.create_CustomTest_Distance_Distance_Module());
-    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Main_Module());
-    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Test_Module());
-
-    return modules;
-  };
-
-  LLVMContext context;
-  FakeModuleLoader loader(context, modules);
+  ModuleLoader loader;
 
   Toolchain toolchain(configuration);
   CustomTestRunner runner(toolchain.mangler());
@@ -696,7 +639,11 @@ TEST(Driver, customTest_withDynamicLibraries) {
       CustomTestDefinition("passing", "passing_test", "mull", { "passing_test" })
   };
   configuration.dynamicLibraryPaths = {
-      TestModuleFactory::fixturePath("custom_test/dylibs_and_objects/libdistance.dylib")
+      fixtures::dylibs_and_objects_distance_dylib_path()
+  };
+  configuration.bitcodePaths = {
+      fixtures::dylibs_and_objects_test_bc_path(),
+      fixtures::dylibs_and_objects_main_bc_path()
   };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -704,17 +651,8 @@ TEST(Driver, customTest_withDynamicLibraries) {
   MutationsFinder finder(std::move(mutators), configuration);
   CustomTestFinder testFinder(configuration.customTests);
 
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
-
-    modules.push_back(SharedTestModuleFactory.createCustomTest_DylibsAndObjects_Test_Module());
-    modules.push_back(SharedTestModuleFactory.createCustomTest_DylibsAndObjects_Main_Module());
-
-    return modules;
-  };
-
   LLVMContext context;
-  FakeModuleLoader loader(context, modules);
+  ModuleLoader loader;
 
   Toolchain toolchain(configuration);
   CustomTestRunner runner(toolchain.mangler());
@@ -743,24 +681,19 @@ TEST(Driver, junkDetector_enabled) {
       CustomTestDefinition("failing", "failing_test", "mull", { "failing_test" }),
       CustomTestDefinition("passing", "passing_test", "mull", { "passing_test" })
   };
+  configuration.bitcodePaths = {
+      fixtures::custom_test_distance_bc_path(),
+      fixtures::custom_test_main_bc_path(),
+      fixtures::custom_test_test_bc_path()
+  };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
   CustomTestFinder testFinder(configuration.customTests);
 
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
-
-    modules.push_back(SharedTestModuleFactory.create_CustomTest_Distance_Distance_Module());
-    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Main_Module());
-    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Test_Module());
-
-    return modules;
-  };
-
   LLVMContext context;
-  FakeModuleLoader loader(context, modules);
+  ModuleLoader loader;
 
   Toolchain toolchain(configuration);
   CustomTestRunner runner(toolchain.mangler());
@@ -782,24 +715,19 @@ TEST(Driver, junkDetector_disabled) {
       CustomTestDefinition("failing", "failing_test", "mull", { "failing_test" }),
       CustomTestDefinition("passing", "passing_test", "mull", { "passing_test" })
   };
+  configuration.bitcodePaths = {
+      fixtures::custom_test_distance_bc_path(),
+      fixtures::custom_test_main_bc_path(),
+      fixtures::custom_test_test_bc_path()
+  };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
   CustomTestFinder testFinder(configuration.customTests);
 
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
-
-    modules.push_back(SharedTestModuleFactory.create_CustomTest_Distance_Distance_Module());
-    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Main_Module());
-    modules.push_back(SharedTestModuleFactory.createCustomTest_Distance_Test_Module());
-
-    return modules;
-  };
-
   LLVMContext context;
-  FakeModuleLoader loader(context, modules);
+  ModuleLoader loader;
 
   Toolchain toolchain(configuration);
   CustomTestRunner runner(toolchain.mangler());
@@ -821,10 +749,13 @@ TEST(Driver, DISABLED_customTest_withDynamicLibraries_and_ObjectFiles) {
       CustomTestDefinition("passing", "passing_test", "mull", { "passing_test" })
   };
   configuration.dynamicLibraryPaths = {
-      TestModuleFactory::fixturePath("custom_test/dylibs_and_objects/libdistance.dylib")
+      fixtures::dylibs_and_objects_distance_dylib_path()
   };
   configuration.objectFilePaths = {
-      TestModuleFactory::fixturePath("custom_test/dylibs_and_objects/main.o")
+      fixtures::dylibs_and_objects_main_o_path()
+  };
+  configuration.bitcodePaths = {
+      fixtures::dylibs_and_objects_test_bc_path()
   };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -832,16 +763,8 @@ TEST(Driver, DISABLED_customTest_withDynamicLibraries_and_ObjectFiles) {
   MutationsFinder finder(std::move(mutators), configuration);
   CustomTestFinder testFinder(configuration.customTests);
 
-  std::function<std::vector<std::unique_ptr<MullModule>> ()> modules = [](){
-    std::vector<std::unique_ptr<MullModule>> modules;
-
-    modules.push_back(SharedTestModuleFactory.createCustomTest_DylibsAndObjects_Test_Module());
-
-    return modules;
-  };
-
   LLVMContext context;
-  FakeModuleLoader loader(context, modules);
+  ModuleLoader loader;
 
   Toolchain toolchain(configuration);
   CustomTestRunner runner(toolchain.mangler());

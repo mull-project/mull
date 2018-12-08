@@ -1,6 +1,7 @@
-set (CURRENT_CC ${PRECOMPILED_LLVM_DIR}/bin/clang)
-set (CURRENT_CXX ${PRECOMPILED_LLVM_DIR}/bin/clang++)
-configure_file(
-  ${CMAKE_CURRENT_SOURCE_DIR}/Makefile.common.in
-  ${CMAKE_CURRENT_SOURCE_DIR}/Makefile.common
-)
+add_subdirectory(custom_test)
+add_subdirectory(dylibs_and_objects)
+add_subdirectory(google_test)
+add_subdirectory(junk_detection)
+add_subdirectory(mutators)
+add_subdirectory(simple_test)
+add_subdirectory(hardcode)

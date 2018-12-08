@@ -12,6 +12,7 @@
 #include "MutationsFinder.h"
 #include "Toolchain/Toolchain.h"
 #include "Toolchain/JITEngine.h"
+#include "FixturePaths.h"
 
 #include <llvm/IR/CallSite.h>
 #include <llvm/IR/InstrTypes.h>
@@ -26,12 +27,12 @@
 using namespace mull;
 using namespace llvm;
 
-static TestModuleFactory TestModuleFactory;
-
 #pragma mark - Finding Tests
 
 TEST(GoogleTestFinder, FindTest) {
-  auto ModuleWithTests = TestModuleFactory.create_GoogleTest_Tester_Module();
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto ModuleWithTests = loader.loadModuleAtPath(fixtures::google_test_google_test_Test_bc_path(), llvmContext);
 
   Context Ctx;
   Ctx.addModule(std::move(ModuleWithTests));
@@ -63,7 +64,9 @@ mutators:
 }
 
 TEST(GoogleTestFinder, findTests_filter) {
-  auto ModuleWithTests     = TestModuleFactory.create_GoogleTest_Tester_Module();
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto ModuleWithTests = loader.loadModuleAtPath(fixtures::google_test_google_test_Test_bc_path(), llvmContext);
 
   Context Ctx;
   Ctx.addModule(std::move(ModuleWithTests));
@@ -107,8 +110,10 @@ mutators:
 
   Toolchain toolchain(configuration);
 
-  auto moduleWithTests = TestModuleFactory.create_GoogleTest_Tester_Module();
-  auto moduleWithTestees = TestModuleFactory.create_GoogleTest_Testee_Module();
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto moduleWithTests = loader.loadModuleAtPath(fixtures::google_test_google_test_Test_bc_path(), llvmContext);
+  auto moduleWithTestees = loader.loadModuleAtPath(fixtures::google_test_google_test_Testee_bc_path(), llvmContext);
 
   auto compiledModule_tests =
     toolchain.compiler().compileModule(moduleWithTests->getModule(), toolchain.targetMachine());
