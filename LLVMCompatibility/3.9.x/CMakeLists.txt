@@ -10,3 +10,5 @@ set_target_properties(LLVMCompatibility PROPERTIES
 target_include_directories(LLVMCompatibility PUBLIC
   ${LLVM_INCLUDE_DIRS}
 )
+add_dependencies(LLVMCompatibility ${MULL_LLVM_COMPATIBILITY_LIBRARIES})
+
