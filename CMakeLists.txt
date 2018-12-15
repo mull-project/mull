@@ -53,6 +53,8 @@ if (PkgConfig_FOUND)
   endif()
 endif()
 
+option(MULL_BUILD_32_BITS "Enable 32 bits build" OFF)
+
 if (${BUILD_AGAINST_PRECOMPILED_LLVM})
   set (search_paths
     ${PATH_TO_LLVM}
@@ -84,6 +86,10 @@ else()
   get_llvm_version_component("${LLVM_CMAKELISTS}" LLVM_VERSION_MAJOR)
   get_llvm_version_component("${LLVM_CMAKELISTS}" LLVM_VERSION_MINOR)
   get_llvm_version_component("${LLVM_CMAKELISTS}" LLVM_VERSION_PATCH)
+
+if (MULL_BUILD_32_BITS)
+  set (LLVM_BUILD_32_BITS ON CACHE BOOL "Forcing LLVM to be built for 32 bits as well" FORCE)
+endif()
 
   add_subdirectory(${PATH_TO_LLVM} llvm-build-dir)
 
@@ -130,8 +136,15 @@ set (MULL_CXX_FLAGS "-std=c++11 -fPIC -fvisibility-inlines-hidden -fno-exception
 if (NOT LLVM_ENABLE_RTTI)
   set(MULL_CXX_FLAGS "${MULL_CXX_FLAGS} -fno-rtti")
 endif()
+if (MULL_BUILD_32_BITS)
+  set(MULL_CXX_FLAGS "${MULL_CXX_FLAGS} -m32")
+endif()
 
 set (MULL_LINK_FLAGS "-rdynamic")
+if (MULL_BUILD_32_BITS)
+  set(MULL_LINK_FLAGS "${MULL_LINK_FLAGS} -m32")
+endif()
+
 set (MULL_DEFINITIONS ${LLVM_DEFINITIONS})
 set (MULL_INCLUDE_DIRS
   ${MULL_SOURCE_DIR}/include
