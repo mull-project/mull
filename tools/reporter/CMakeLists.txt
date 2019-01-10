@@ -1,33 +1,18 @@
-add_executable(mull-reporter
-  WeakTestsReporter.h
-  WeakTestsReporter.cpp
-
-  reporter.cpp
-)
-set_target_properties(mull-reporter PROPERTIES
-  LINK_FLAGS ${MULL_LINK_FLAGS}
-  COMPILE_FLAGS ${MULL_CXX_FLAGS}
+set (SOURCES
+  ${CMAKE_CURRENT_LIST_DIR}/WeakTestsReporter.h
+  ${CMAKE_CURRENT_LIST_DIR}/WeakTestsReporter.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/reporter.cpp
 )
 
 if ("LLVM" IN_LIST LLVM_AVAILABLE_LIBS)
-  set (MULL_LLVM_LIBRARIES
-    LLVM
-  )
+  set (LINK_WITH ${SQLITE_DEPENDENCY} LLVM)
 else()
-  set (MULL_LLVM_LIBRARIES
-    LLVMSupport
-  )
+  set (LINK_WITH ${SQLITE_DEPENDENCY} LLVMSupport)
 endif()
 
-target_link_libraries(mull-reporter
-  ${MULL_LLVM_LIBRARIES}
-  ${SQLITE_DEPENDENCY}
-)
-target_include_directories(mull-reporter PUBLIC
-  ${MULL_INCLUDE_DIRS}
-)
-
-INSTALL(TARGETS mull-reporter
-  RUNTIME DESTINATION bin
+add_mull_executable(
+  SOURCES ${SOURCES}
+  NAME mull-reporter
+  LINK_WITH ${LINK_WITH}
 )
 

@@ -5,6 +5,7 @@ enable_language(C CXX)
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/properties.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/fixtures.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/functions.cmake)
 
 if (PRECOMPILED_LLVM_DIR)
   message(WARNING "PRECOMPILED_LLVM_DIR is deprecated. Please, use PATH_TO_LLVM instead")
