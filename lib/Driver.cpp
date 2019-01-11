@@ -232,12 +232,8 @@ std::vector<std::unique_ptr<MutationResult>> Driver::normalRunMutations(const st
   });
   prepareMutationsTask.execute();
 
-  std::vector<ApplyMutationTask> applyMutationTasks;
-  for (int i = 0; i < config.parallelization.workers; i++) {
-    applyMutationTasks.emplace_back();
-  }
   std::vector<int> empty;
-  TaskExecutor<ApplyMutationTask> applyMutations("Applying mutations", mutationPoints, empty, std::move(applyMutationTasks));
+  TaskExecutor<ApplyMutationTask> applyMutations("Applying mutations", mutationPoints, empty, {ApplyMutationTask()});
   applyMutations.execute();
 
   std::vector<OriginalCompilationTask> compilationTasks;
