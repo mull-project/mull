@@ -4,6 +4,7 @@
 #include <thread>
 
 #include <llvm/IR/Module.h>
+#include <llvm/Support/MemoryBuffer.h>
 
 namespace llvm {
 class LLVMContext;
@@ -16,8 +17,8 @@ class JITEngine;
 
   class MullModule {
     std::unique_ptr<llvm::Module> module;
+    std::unique_ptr<llvm::MemoryBuffer> buffer;
     std::string uniqueIdentifier;
-    std::string modulePath;
 
     std::map<llvm::Function *, std::vector<MutationPoint *>> mutationPoints;
     std::mutex mutex;
@@ -25,8 +26,8 @@ class JITEngine;
     explicit MullModule(std::unique_ptr<llvm::Module> llvmModule);
   public:
     MullModule(std::unique_ptr<llvm::Module> llvmModule,
-               const std::string &md5,
-               const std::string &path);
+               std::unique_ptr<llvm::MemoryBuffer> buffer,
+               const std::string &md5);
 
     std::unique_ptr<MullModule> clone(llvm::LLVMContext &context);
 

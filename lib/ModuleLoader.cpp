@@ -31,22 +31,21 @@ static std::string MD5HashFromBuffer(StringRef buffer) {
 std::unique_ptr<MullModule>
 ModuleLoader::loadModuleAtPath(const std::string &path,
                                llvm::LLVMContext &context) {
-  auto BufferOrError = MemoryBuffer::getFile(path);
-  if (!BufferOrError) {
-    Logger::error() << "ModuleLoader> Can't load module " << path << '\n';
+  auto buffer = MemoryBuffer::getFile(path);
+  if (!buffer) {
+    Logger::error() << "Cannot load module " << path << '\n';
     return nullptr;
   }
 
-  std::string hash = MD5HashFromBuffer(BufferOrError->get()->getBuffer());
+  std::string hash = MD5HashFromBuffer(buffer->get()->getBuffer());
 
-  auto llvmModule = parseBitcodeFile(BufferOrError->get()->getMemBufferRef(), context);
-  if (!llvmModule) {
-    Logger::error() << "ModuleLoader> Can't load module " << path << '\n';
+  auto module = parseBitcodeFile(buffer->get()->getMemBufferRef(), context);
+  if (!module) {
+    Logger::error() << "Cannot parse bitcode " << path << '\n';
     return nullptr;
   }
 
-  auto module = make_unique<MullModule>(std::move(llvmModule.get()), hash, path);
-  return module;
+  return make_unique<MullModule>(std::move(module.get()), std::move(buffer.get()), hash);
 }
 
 std::vector<std::unique_ptr<MullModule>>

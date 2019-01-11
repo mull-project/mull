@@ -43,7 +43,7 @@ std::unique_ptr<MullModule> loadModuleFromIR(const char *path, LLVMContext &cont
 
   assert(!llvm::verifyModule(*module, &dbgs()));
 
-  return make_unique<MullModule>(std::move(module), "fake_hash", "fake_path");
+  return make_unique<MullModule>(std::move(module), std::unique_ptr<llvm::MemoryBuffer>(), "fake_path");
 }
 
 }
