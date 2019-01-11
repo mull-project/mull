@@ -22,29 +22,23 @@ MullModule::MullModule(std::unique_ptr<llvm::Module> llvmModule)
 }
 
 MullModule::MullModule(std::unique_ptr<llvm::Module> llvmModule,
-                       const std::string &md5,
-                       const std::string &path)
-: module(std::move(llvmModule)), modulePath(path)
+                       std::unique_ptr<llvm::MemoryBuffer> buffer,
+                       const std::string &md5)
+: module(std::move(llvmModule)), buffer(std::move(buffer))
 {
   uniqueIdentifier =
     llvm::sys::path::stem(module->getModuleIdentifier()).str() + "_" + md5;
 }
 
 std::unique_ptr<MullModule> MullModule::clone(LLVMContext &context) {
-  auto bufferOrError = MemoryBuffer::getFile(modulePath);
-  if (!bufferOrError) {
-    Logger::error() << "MullModule::clone> Can't load module " << modulePath << '\n';
+  assert(buffer.get() && "Cannot clone non-original module");
+  auto module = parseBitcodeFile(buffer->getMemBufferRef(), context);
+  if (!module) {
+    Logger::error() << "Cannot clone module \n";
     return nullptr;
   }
 
-  auto llvmModule = parseBitcodeFile(bufferOrError->get()->getMemBufferRef(), context);
-  if (!llvmModule) {
-    Logger::error() << "MullModule::clone> Can't load module " << modulePath << '\n';
-    return nullptr;
-  }
-
-  auto module = make_unique<MullModule>(std::move(llvmModule.get()), "", modulePath);
-  return module;
+  return make_unique<MullModule>(std::move(module.get()), std::unique_ptr<MemoryBuffer>(), "");
 }
 
 llvm::Module *MullModule::getModule() {
