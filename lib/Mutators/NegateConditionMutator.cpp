@@ -15,8 +15,8 @@
 using namespace llvm;
 using namespace mull;
 
-const std::string NegateConditionMutator::ID =
-  "negate_mutator";
+const std::string NegateConditionMutator::ID = "negate_mutator";
+const std::string NegateConditionMutator::description = "Negates conditionals, e.g.: != to ==, > to <=";
 
 ///
 /// Comparison instructions emitted for explicit and implicit comparisons

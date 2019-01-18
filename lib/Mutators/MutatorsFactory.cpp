@@ -119,7 +119,7 @@ void MutatorsFactory::init() {
 }
 
 vector<unique_ptr<Mutator>>
-MutatorsFactory::mutators(const vector<string> groups) {
+MutatorsFactory::mutators(const vector<string> &groups) {
   /// We need to recreate all mutators in case this method called
   /// more than once. It does not happen during normal program execution,
   /// but happens a lot during testing
@@ -128,9 +128,7 @@ MutatorsFactory::mutators(const vector<string> groups) {
   set<string> expandedGroups;
 
   if (groups.size() == 0) {
-    Logger::info()
-      << "No mutators specified in a config file.\n"
-      << "Switching to default mutators.\n";
+    Logger::info() << "No mutators specified. Switching to default mutators.\n";
 
     expandGroups({ DefaultMutatorsGroup }, groupsMapping, expandedGroups);
   } else {
@@ -155,3 +153,4 @@ MutatorsFactory::mutators(const vector<string> groups) {
 
   return mutators;
 }
+

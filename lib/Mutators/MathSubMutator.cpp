@@ -16,6 +16,7 @@ using namespace llvm;
 using namespace mull;
 
 const std::string MathSubMutator::ID = "math_sub_mutator";
+const std::string MathSubMutator::description = "Replaces - with +";
 
 bool MathSubMutator::isSubWithOverflow(llvm::Value &V) {
   if (CallInst *callInst = dyn_cast<CallInst>(&V)) {

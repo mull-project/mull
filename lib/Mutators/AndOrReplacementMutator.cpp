@@ -18,6 +18,7 @@ using namespace llvm;
 using namespace mull;
 
 const std::string AndOrReplacementMutator::ID = "and_or_replacement_mutator";
+const std::string AndOrReplacementMutator::description = "Replaces && with ||, || with &&";
 
 MutationPoint *
 AndOrReplacementMutator::getMutationPoint(MullModule *module,

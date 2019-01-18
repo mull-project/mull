@@ -24,6 +24,7 @@ enum ScalarValueMutationType {
 };
 
 const std::string ScalarValueMutator::ID = "scalar_value_mutator";
+const std::string ScalarValueMutator::description = "Replaces zeros with 1, and non-zeros with 0";
 
 #pragma mark - Prototypes
 

@@ -20,6 +20,7 @@ namespace mull {
     
   public:
     static const std::string ID;
+    static const std::string description;
 
     static llvm::CmpInst::Predicate negatedCmpInstPredicate(llvm::CmpInst::Predicate predicate);
 
@@ -34,6 +35,9 @@ namespace mull {
     }
     std::string getUniqueIdentifier() const override {
       return ID;
+    }
+    std::string getDescription() const override {
+      return description;
     }
 
     bool canBeApplied(llvm::Value &V) override;

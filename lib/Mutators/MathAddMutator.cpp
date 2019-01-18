@@ -16,6 +16,7 @@ using namespace llvm;
 using namespace mull;
 
 const std::string MathAddMutator::ID = "math_add_mutator";
+const std::string MathAddMutator::description = "Replaces + with -";
 
 bool MathAddMutator::isAddWithOverflow(llvm::Value &V) {
   if (CallInst *callInst = dyn_cast<CallInst>(&V)) {

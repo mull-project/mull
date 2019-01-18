@@ -16,6 +16,7 @@ using namespace llvm;
 using namespace mull;
 
 const std::string MathDivMutator::ID = "math_div_mutator";
+const std::string MathDivMutator::description = "Replaces / with *";
 
 MutationPoint *
 MathDivMutator::getMutationPoint(MullModule *module,
