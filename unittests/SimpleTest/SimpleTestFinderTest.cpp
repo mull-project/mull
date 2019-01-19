@@ -1,10 +1,10 @@
-#include "SimpleTest/SimpleTestFinder.h"
+#include "TestFrameworks/SimpleTest/SimpleTestFinder.h"
+#include "TestFrameworks/SimpleTest/SimpleTest_Test.h"
 
 #include "Context.h"
 #include "Filter.h"
 #include "TestModuleFactory.h"
-#include "Test.h"
-#include "SimpleTest/SimpleTest_Test.h"
+#include "TestFrameworks/Test.h"
 
 #include <llvm/IR/InstrTypes.h>
 #include <llvm/IR/LLVMContext.h>

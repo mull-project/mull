@@ -1,4 +1,4 @@
-#include "GoogleTest/GoogleTestFinder.h"
+#include "TestFrameworks/GoogleTest/GoogleTestFinder.h"
 
 #include "Driver.h"
 #include "Context.h"
@@ -6,8 +6,8 @@
 #include "Config/ConfigParser.h"
 #include "Mutators/MutatorsFactory.h"
 #include "TestModuleFactory.h"
-#include "GoogleTest/GoogleTest_Test.h"
-#include "GoogleTest/GoogleTestRunner.h"
+#include "TestFrameworks/GoogleTest/GoogleTest_Test.h"
+#include "TestFrameworks/GoogleTest/GoogleTestRunner.h"
 #include "Filter.h"
 #include "MutationsFinder.h"
 #include "Toolchain/Toolchain.h"

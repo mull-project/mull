@@ -6,8 +6,8 @@
 #include "Config/Configuration.h"
 #include "Toolchain/Mangler.h"
 
-#include "CustomTestFramework/CustomTest_Test.h"
-#include "CustomTestFramework/CustomTestRunner.h"
+#include "TestFrameworks/CustomTestFramework/CustomTest_Test.h"
+#include "TestFrameworks/CustomTestFramework/CustomTestRunner.h"
 
 #include <llvm/IR/Module.h>
 

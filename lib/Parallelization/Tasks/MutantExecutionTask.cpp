@@ -2,7 +2,7 @@
 #include "Parallelization/Progress.h"
 #include "Driver.h"
 #include "Config/Configuration.h"
-#include "TestRunner.h"
+#include "TestFrameworks/TestRunner.h"
 #include "Toolchain/Trampolines.h"
 
 #include <llvm/ExecutionEngine/ExecutionEngine.h>

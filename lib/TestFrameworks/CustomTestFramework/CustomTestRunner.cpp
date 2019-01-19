@@ -1,5 +1,5 @@
-#include "CustomTestFramework/CustomTestRunner.h"
-#include "CustomTestFramework/CustomTest_Test.h"
+#include "TestFrameworks/CustomTestFramework/CustomTestRunner.h"
+#include "TestFrameworks/CustomTestFramework/CustomTest_Test.h"
 
 #include "Toolchain/Mangler.h"
 

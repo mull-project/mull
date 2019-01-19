@@ -13,14 +13,12 @@
 #include "Mutators/RemoveVoidFunctionMutator.h"
 #include "Mutators/ReplaceAssignmentMutator.h"
 #include "Result.h"
-#include "SimpleTest/SimpleTestFinder.h"
-#include "SimpleTest/SimpleTestRunner.h"
 #include "TestModuleFactory.h"
 #include "ExecutionResult.h"
 #include "MutationsFinder.h"
-#include "CustomTestFramework/CustomTestFinder.h"
-#include "CustomTestFramework/CustomTestRunner.h"
 #include "Toolchain/Mangler.h"
+
+#include "TestFrameworks/TestFrameworkFactory.h"
 
 #include "JunkDetection/JunkDetector.h"
 #include "Toolchain/Toolchain.h"
@@ -55,15 +53,15 @@ TEST(Driver, RunningWithNoTests) {
   std::vector<std::unique_ptr<Mutator>> mutators;
   MutationsFinder finder(std::move(mutators), configuration);
 
-  SimpleTestFinder testFinder;
-
   Toolchain toolchain(configuration);
-  SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  Driver Driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
+
+  Driver Driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
   auto result = Driver.Run();
   ASSERT_EQ(0u, result->getTests().size());
@@ -85,6 +83,7 @@ TEST(Driver, SimpleTest_MathAddMutator) {
       fixtures::simple_test_count_letters_test_count_letters_bc_path(),
       fixtures::simple_test_count_letters_count_letters_bc_path()
   };
+  configuration.forkEnabled = false;
 
   LLVMContext context;
   ModuleLoader loader;
@@ -93,15 +92,15 @@ TEST(Driver, SimpleTest_MathAddMutator) {
   mutators.emplace_back(make_unique<MathAddMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
 
-  SimpleTestFinder testFinder;
-
   Toolchain toolchain(configuration);
-  SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  Driver Driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
+
+  Driver Driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
   /// Given the modules we use here we expect:
   ///
@@ -142,20 +141,21 @@ TEST(Driver, SimpleTest_MathSubMutator) {
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathSubMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
-  SimpleTestFinder testFinder;
 
   Toolchain toolchain(configuration);
-  SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  Driver Driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
 
-    /// Given the modules we use here we expect:
-    ///
-    /// 1 original test, which has Passed state
-    /// 1 mutant test, which has Failed state
+  Driver Driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
+
+  /// Given the modules we use here we expect:
+  ///
+  /// 1 original test, which has Passed state
+  /// 1 mutant test, which has Failed state
   auto result = Driver.Run();
   ASSERT_EQ(1u, result->getTests().size());
 
@@ -191,15 +191,16 @@ TEST(Driver, SimpleTest_MathMulMutator) {
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathMulMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
-  SimpleTestFinder testFinder;
 
   Toolchain toolchain(configuration);
-  SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  Driver Driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
+
+  Driver Driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
   /// Given the modules we use here we expect:
   ///
@@ -239,15 +240,16 @@ TEST(Driver, SimpleTest_MathDivMutator) {
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathDivMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
-  SimpleTestFinder testFinder;
 
   Toolchain toolchain(configuration);
-  SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  Driver Driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
+
+  Driver Driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
   /// Given the modules we use here we expect:
   ///
@@ -286,17 +288,18 @@ TEST(Driver, SimpleTest_NegateConditionMutator) {
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<NegateConditionMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
-  SimpleTestFinder testFinder;
 
   ModuleLoader loader;
 
   Toolchain toolchain(configuration);
-  SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  Driver Driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
+
+  Driver Driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
   /// Given the modules we use here we expect:
   ///
@@ -328,17 +331,18 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutator) {
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<RemoveVoidFunctionMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
-  SimpleTestFinder testFinder;
 
   ModuleLoader loader;
 
   Toolchain toolchain(configuration);
-  SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  Driver Driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
+
+  Driver Driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
   /// Given the modules we use here we expect:
   ///
@@ -369,18 +373,19 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<AndOrReplacementMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
-  SimpleTestFinder testFinder;
 
   LLVMContext context;
   ModuleLoader loader;
 
   Toolchain toolchain(configuration);
-  SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  Driver Driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
+
+  Driver Driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
   auto result = Driver.Run();
   ASSERT_EQ(8U, result->getTests().size());
@@ -485,18 +490,19 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator_CPP) {
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<AndOrReplacementMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
-  SimpleTestFinder testFinder;
 
   LLVMContext context;
   ModuleLoader loader;
 
   Toolchain toolchain(configuration);
-  SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  Driver Driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
+
+  Driver Driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
   auto result = Driver.Run();
   ASSERT_EQ(6U, result->getTests().size());
@@ -563,17 +569,18 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutator_CPP) {
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<ReplaceAssignmentMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
-  SimpleTestFinder testFinder;
 
   ModuleLoader loader;
 
   Toolchain toolchain(configuration);
-  SimpleTestRunner runner(toolchain.mangler());
   Filter filter;
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  Driver Driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
+
+  Driver Driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
   auto result = Driver.Run();
   EXPECT_EQ(1U, result->getTests().size());
@@ -608,18 +615,19 @@ TEST(Driver, customTest) {
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
-  CustomTestFinder testFinder(configuration.customTests);
 
   ModuleLoader loader;
 
   Toolchain toolchain(configuration);
-  CustomTestRunner runner(toolchain.mangler());
   Filter filter;
   filter.includeTest("passing");
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  Driver driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.customTestFramework());
+
+  Driver driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
@@ -649,19 +657,20 @@ TEST(Driver, customTest_withDynamicLibraries) {
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
-  CustomTestFinder testFinder(configuration.customTests);
 
   LLVMContext context;
   ModuleLoader loader;
 
   Toolchain toolchain(configuration);
-  CustomTestRunner runner(toolchain.mangler());
   Filter filter;
   filter.includeTest("passing");
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  Driver driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.customTestFramework());
+
+  Driver driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
@@ -690,19 +699,20 @@ TEST(Driver, junkDetector_enabled) {
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
-  CustomTestFinder testFinder(configuration.customTests);
 
   LLVMContext context;
   ModuleLoader loader;
 
   Toolchain toolchain(configuration);
-  CustomTestRunner runner(toolchain.mangler());
   Filter filter;
   filter.includeTest("passing");
   Metrics metrics;
   AllJunkDetector junkDetector;
 
-  Driver driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.customTestFramework());
+
+  Driver driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
@@ -724,19 +734,20 @@ TEST(Driver, junkDetector_disabled) {
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
-  CustomTestFinder testFinder(configuration.customTests);
 
   LLVMContext context;
   ModuleLoader loader;
 
   Toolchain toolchain(configuration);
-  CustomTestRunner runner(toolchain.mangler());
   Filter filter;
   filter.includeTest("passing");
   Metrics metrics;
   AllJunkDetector junkDetector;
 
-  Driver driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.customTestFramework());
+
+  Driver driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
@@ -761,19 +772,20 @@ TEST(Driver, DISABLED_customTest_withDynamicLibraries_and_ObjectFiles) {
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
-  CustomTestFinder testFinder(configuration.customTests);
 
   LLVMContext context;
   ModuleLoader loader;
 
   Toolchain toolchain(configuration);
-  CustomTestRunner runner(toolchain.mangler());
   Filter filter;
   filter.includeTest("passing");
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  Driver driver(configuration, loader, testFinder, runner, toolchain, filter, finder, metrics, junkDetector);
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.customTestFramework());
+
+  Driver driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());

@@ -1,4 +1,4 @@
-#include "TestRunner.h"
+#include "TestFrameworks/TestRunner.h"
 
 #include <llvm/Support/DynamicLibrary.h>
 

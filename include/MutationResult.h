@@ -1,7 +1,7 @@
 #pragma once
 
 #include "MutationPoint.h"
-#include "Test.h"
+#include "TestFrameworks/Test.h"
 #include "ExecutionResult.h"
 
 namespace mull {

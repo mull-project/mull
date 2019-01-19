@@ -7,8 +7,7 @@
 #include "Result.h"
 #include "Testee.h"
 #include "MutationResult.h"
-#include "TestFinder.h"
-#include "TestRunner.h"
+#include "TestFrameworks/TestFramework.h"
 #include "MutationsFinder.h"
 #include "Metrics/Metrics.h"
 #include "JunkDetection/JunkDetector.h"
@@ -131,7 +130,7 @@ void Driver::loadDynamicLibraries() {
 std::vector<std::unique_ptr<Test>> Driver::findTests() {
   std::vector<std::unique_ptr<Test>> tests;
   SingleTaskExecutor task("Searching tests", [&] () {
-    tests = finder.findTests(context, filter);
+    tests = testFramework.finder().findTests(context, filter);
   });
   task.execute();
   return tests;
@@ -147,13 +146,13 @@ Driver::findMutationPoints(std::vector<std::unique_ptr<Test>> &tests) {
   JITEngine jit;
 
   SingleTaskExecutor prepareOriginalTestRunTask("Preparing original test run", [&] () {
-    runner.loadInstrumentedProgram(objectFiles, instrumentation, jit);
+    testFramework.runner().loadInstrumentedProgram(objectFiles, instrumentation, jit);
   });
   prepareOriginalTestRunTask.execute();
 
   std::vector<OriginalTestExecutionTask> tasks;
   for (int i = 0; i < config.parallelization.testExecutionWorkers; i++) {
-    tasks.emplace_back(instrumentation, *sandbox, runner, config, filter, jit);
+    tasks.emplace_back(instrumentation, *sandbox, testFramework.runner(), config, filter, jit);
   }
 
   std::vector<std::unique_ptr<Testee>> testees;
@@ -252,7 +251,7 @@ std::vector<std::unique_ptr<MutationResult>> Driver::normalRunMutations(const st
 
   std::vector<MutantExecutionTask> tasks;
   for (int i = 0; i < config.parallelization.mutantExecutionWorkers; i++) {
-    tasks.emplace_back(*sandbox, runner, config, filter, toolchain.mangler(), objectFiles, mutatedFunctions);
+    tasks.emplace_back(*sandbox, testFramework.runner(), config, filter, toolchain.mangler(), objectFiles, mutatedFunctions);
   }
   metrics.beginMutantsExecution();
   TaskExecutor<MutantExecutionTask> mutantRunner("Running mutants", mutationPoints, mutationResults, std::move(tasks));
@@ -294,14 +293,13 @@ std::vector<llvm::object::ObjectFile *> Driver::AllInstrumentedObjectFiles() {
 
 Driver::Driver(const Configuration &config,
                ModuleLoader &ML,
-               TestFinder &TF,
-               TestRunner &TR,
+               TestFramework &testFramework,
                Toolchain &t,
                Filter &f,
                MutationsFinder &mutationsFinder,
                Metrics &metrics,
                JunkDetector &junkDetector)
-    : config(config), loader(ML), finder(TF), runner(TR), toolchain(t), filter(f), mutationsFinder(mutationsFinder),
+    : config(config), loader(ML), testFramework(testFramework), toolchain(t), filter(f), mutationsFinder(mutationsFinder),
       precompiledObjectFiles(), instrumentation(), metrics(metrics), junkDetector(junkDetector) {
 
   if (config.forkEnabled) {

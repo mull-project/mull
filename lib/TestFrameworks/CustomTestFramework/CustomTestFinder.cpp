@@ -1,10 +1,10 @@
-#include "CustomTestFramework/CustomTestFinder.h"
+#include "TestFrameworks/CustomTestFramework/CustomTestFinder.h"
 
 #include "Config/Configuration.h"
 #include "Context.h"
 #include "Filter.h"
 #include "Logger.h"
-#include "CustomTestFramework/CustomTest_Test.h"
+#include "TestFrameworks/CustomTestFramework/CustomTest_Test.h"
 
 #include <llvm/IR/Module.h>
 

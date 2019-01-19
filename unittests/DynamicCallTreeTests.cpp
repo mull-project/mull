@@ -5,7 +5,7 @@
 
 #include "Instrumentation/DynamicCallTree.h"
 #include "Testee.h"
-#include "SimpleTest/SimpleTest_Test.h"
+#include "TestFrameworks/SimpleTest/SimpleTest_Test.h"
 
 using namespace mull;
 using namespace llvm;

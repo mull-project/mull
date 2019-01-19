@@ -17,12 +17,7 @@
 #include "JunkDetection/JunkDetector.h"
 #include "JunkDetection/CXX/CXXJunkDetector.h"
 
-#include "GoogleTest/GoogleTestFinder.h"
-#include "GoogleTest/GoogleTestRunner.h"
-#include "SimpleTest/SimpleTestFinder.h"
-#include "SimpleTest/SimpleTestRunner.h"
-#include "CustomTestFramework/CustomTestFinder.h"
-#include "CustomTestFramework/CustomTestRunner.h"
+#include "TestFrameworks/TestFrameworkFactory.h"
 
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/Support/MemoryBuffer.h>
@@ -89,16 +84,13 @@ int main(int argc, char *argv[]) {
     filter.includeTest(test);
   }
 
-  const std::string &testFramework = rawConfig.getTestFramework();
-
-  std::unique_ptr<TestFinder> testFinder;
-  std::unique_ptr<TestRunner> testRunner;
+  const std::string &testFrameworkName = rawConfig.getTestFramework();
 
   auto mutatorsFactory = MutatorsFactory();
   auto mutators = mutatorsFactory.mutators(rawConfig.getMutators());
   MutationsFinder mutationsFinder(std::move(mutators), configuration);
 
-  if (testFramework == "GoogleTest") {
+  if (testFrameworkName == "GoogleTest") {
     filter.skipByName("testing8internal");
     filter.skipByName("testing15AssertionResult");
     filter.skipByName("testing7Message");
@@ -107,28 +99,10 @@ int main(int argc, char *argv[]) {
     filter.skipByLocation("include/c++/v1");
     filter.skipByLocation("gtest");
     filter.skipByLocation("gmock");
-
-    testFinder = make_unique<GoogleTestFinder>();
-    testRunner = make_unique<GoogleTestRunner>(toolchain.mangler());
   }
 
-  else if (testFramework == "SimpleTest") {
-    testFinder = make_unique<SimpleTestFinder>();
-    testRunner = make_unique<SimpleTestRunner>(toolchain.mangler());
-  }
-
-  else if (testFramework == "CustomTest") {
-    testFinder = make_unique<CustomTestFinder>(configuration.customTests);
-    testRunner = make_unique<CustomTestRunner>(toolchain.mangler());
-  }
-
-  else {
-    Logger::error() << "mull-driver> Unknown test framework provided: "
-                    << "`" << testFramework << "`. "
-                    << "Choose one between: GoogleTest, SimpleTest or CustomTest "
-                    << "\n";
-    exit(1);
-  }
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.createTestFramework(testFrameworkName));
 
   std::unique_ptr<JunkDetector> junkDetector(make_unique<NullJunkDetector>());
   if (configuration.junkDetectionEnabled) {
@@ -166,7 +140,7 @@ int main(int argc, char *argv[]) {
   }
 
   Metrics metrics;
-  Driver driver(configuration, Loader, *testFinder, *testRunner, toolchain, filter, mutationsFinder, metrics, *junkDetector);
+  Driver driver(configuration, Loader, testFramework, toolchain, filter, mutationsFinder, metrics, *junkDetector);
 
   metrics.beginRun();
   auto result = driver.Run();

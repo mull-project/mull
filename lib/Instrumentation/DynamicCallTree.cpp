@@ -1,5 +1,5 @@
 #include "Instrumentation/DynamicCallTree.h"
-#include "Test.h"
+#include "TestFrameworks/Test.h"
 #include "Testee.h"
 
 #include <queue>

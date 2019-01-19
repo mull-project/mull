@@ -1,4 +1,4 @@
-#include "GoogleTest/GoogleTestFinder.h"
+#include "TestFrameworks/GoogleTest/GoogleTestFinder.h"
 
 #include "Context.h"
 #include "Filter.h"
@@ -14,7 +14,7 @@
 #include <llvm/Support/Debug.h>
 #include <llvm/Support/raw_ostream.h>
 
-#include "GoogleTest/GoogleTest_Test.h"
+#include "TestFrameworks/GoogleTest/GoogleTest_Test.h"
 
 #include <vector>
 

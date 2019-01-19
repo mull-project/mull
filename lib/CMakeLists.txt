@@ -38,20 +38,20 @@ set(mull_sources
 
   MullModule.cpp
   MutationPoint.cpp
-  TestRunner.cpp
+  TestFrameworks/TestRunner.cpp
   Testee.cpp
 
-  SimpleTest/SimpleTest_Test.cpp
-  SimpleTest/SimpleTestFinder.cpp
-  SimpleTest/SimpleTestRunner.cpp
+  TestFrameworks/SimpleTest/SimpleTest_Test.cpp
+  TestFrameworks/SimpleTest/SimpleTestFinder.cpp
+  TestFrameworks/SimpleTest/SimpleTestRunner.cpp
 
-  GoogleTest/GoogleTest_Test.cpp
-  GoogleTest/GoogleTestFinder.cpp
-  GoogleTest/GoogleTestRunner.cpp
+  TestFrameworks/GoogleTest/GoogleTest_Test.cpp
+  TestFrameworks/GoogleTest/GoogleTestFinder.cpp
+  TestFrameworks/GoogleTest/GoogleTestRunner.cpp
 
-  CustomTestFramework/CustomTest_Test.cpp
-  CustomTestFramework/CustomTestRunner.cpp
-  CustomTestFramework/CustomTestFinder.cpp
+  TestFrameworks/CustomTestFramework/CustomTest_Test.cpp
+  TestFrameworks/CustomTestFramework/CustomTestRunner.cpp
+  TestFrameworks/CustomTestFramework/CustomTestFinder.cpp
 
   IDEDiagnostics.cpp
 
@@ -77,7 +77,8 @@ set(mull_sources
   Parallelization/Tasks/ApplyMutationTask.cpp
   Config/ConfigurationOptions.cpp
   Config/Configuration.cpp
-)
+  TestFrameworks/TestFramework.cpp
+  TestFrameworks/TestFrameworkFactory.cpp)
 
 set (MULL_INCLUDE_DIR ${MULL_SOURCE_DIR}/include)
 
@@ -91,6 +92,10 @@ set(mull_header_dirs
   ${MULL_INCLUDE_DIR}/Instrumentation
   ${MULL_INCLUDE_DIR}/Parallelization
   ${MULL_INCLUDE_DIR}/Parallelization/Tasks
+  ${MULL_INCLUDE_DIR}/TestFrameworks
+  ${MULL_INCLUDE_DIR}/TestFrameworks/CustomTestFramework
+  ${MULL_INCLUDE_DIR}/TestFrameworks/GoogleTest
+  ${MULL_INCLUDE_DIR}/TestFrameworks/SimpleTest
 )
 
 # Globbing is not recommended by CMake so maybe consider listing headers
@@ -141,19 +146,19 @@ set_target_properties(mull PROPERTIES
   LINK_FLAGS ${MULL_LINK_FLAGS}
 )
 
-# The following is needed to make CMake to generate a folder structure in Xcode
-# that corresponds to a physical folder structure.
-get_target_property(HERE_TARGET_SOURCES mull SOURCES)
-foreach(source_file ${HERE_TARGET_SOURCES})
-  if (source_file MATCHES "(.*)\.h$")
-    file(RELATIVE_PATH relative_source_file ${MULL_INCLUDE_DIR} ${source_file})
-    get_filename_component(relative_path ${relative_source_file} DIRECTORY)
-    source_group("Header Files\\${relative_path}" FILES ${source_file})
-  else()
-    get_filename_component(relative_path ${source_file} DIRECTORY)
-    source_group("Source Files\\${relative_path}" FILES ${source_file})
-  endif()
-endforeach()
+## The following is needed to make CMake to generate a folder structure in Xcode
+## that corresponds to a physical folder structure.
+#get_target_property(HERE_TARGET_SOURCES mull SOURCES)
+#foreach(source_file ${HERE_TARGET_SOURCES})
+#  if (source_file MATCHES "(.*)\.h$")
+#    file(RELATIVE_PATH relative_source_file ${MULL_INCLUDE_DIR} ${source_file})
+#    get_filename_component(relative_path ${relative_source_file} DIRECTORY)
+#    source_group("Header Files\\${relative_path}" FILES ${source_file})
+#  else()
+#    get_filename_component(relative_path ${source_file} DIRECTORY)
+#    source_group("Source Files\\${relative_path}" FILES ${source_file})
+#  endif()
+#endforeach()
 
 INSTALL(TARGETS mull
   LIBRARY DESTINATION lib

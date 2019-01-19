@@ -1,9 +1,9 @@
-#include "CustomTestFramework/CustomTestFinder.h"
+#include "TestFrameworks/CustomTestFramework/CustomTestFinder.h"
+#include "TestFrameworks/CustomTestFramework/CustomTest_Test.h"
 
 #include "Config/Configuration.h"
 #include "Config/ConfigParser.h"
 #include "Context.h"
-#include "CustomTestFramework/CustomTest_Test.h"
 #include "Filter.h"
 #include "FixturePaths.h"
 

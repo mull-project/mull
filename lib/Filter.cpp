@@ -1,5 +1,5 @@
 #include "Filter.h"
-#include "Test.h"
+#include "TestFrameworks/Test.h"
 
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/Function.h>
