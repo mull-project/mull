@@ -35,7 +35,7 @@ ninja.init: $(BUILD_DIR_NINJA) ## Prepare Ninja project on macOS
 	cd $(BUILD_DIR_NINJA) && cmake -G Ninja \
     -DCMAKE_INSTALL_PREFIX=$(INSTALL_DIR) \
     $(CMAKE_COMMAND_LINE_DEBUG_FLAGS) \
-    -DPRECOMPILED_LLVM_DIR=$(PRECOMPILED_LLVM_DIR) \
+    -DPATH_TO_LLVM=$(PATH_TO_LLVM) \
     ../
 
 ninja.build.mull-driver: ## Build mull-driver on macOS
@@ -53,7 +53,7 @@ ninja.build.example: ninja.install.mull-driver ## Build example on macOS
     export PATH=$(INSTALL_DIR)/bin:$(PATH) && \
     make example \
       MULL=mull-driver \
-      MULL_CC=$(PRECOMPILED_LLVM_DIR)/bin/clang
+      MULL_CC=$(PATH_TO_LLVM)/bin/clang
 
 ninja.run.unit-tests: ninja.build.unit-tests ## Run unit-tests on macOS
 	cd $(MULL_UNIT_TESTS_DIR) && $(MULL_UNIT_TESTS)
@@ -63,7 +63,7 @@ ninja.run.example: ninja.build.example ## Run example on macOS
     export PATH=$(INSTALL_DIR)/bin:$(PATH) && \
     make run \
       MULL=mull-driver \
-      MULL_CC=$(PRECOMPILED_LLVM_DIR)/bin/clang
+      MULL_CC=$(PATH_TO_LLVM)/bin/clang
 
 
 ninja.clean:
@@ -123,7 +123,7 @@ travis.install.ubuntu:
 xcode.init: $(BUILD_DIR_XCODE) ## Build Xcode project with CMake.
 	cd $(BUILD_DIR_XCODE) && cmake ../ -G Xcode \
     $(CMAKE_COMMAND_LINE_DEBUG_FLAGS) \
-    -DPRECOMPILED_LLVM_DIR=$(PRECOMPILED_LLVM_DIR) \
+    -DPATH_TO_LLVM=$(PATH_TO_LLVM) \
 
 xcode.kill-and-rebuild: xcode.kill-and-reopen ## Build Xcode project with CMake, kill Xcode, reopen the project in Xcode
 
