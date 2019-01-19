@@ -1,5 +1,5 @@
 #include "Config/Configuration.h"
-#include "Context.h"
+#include "Program/Program.h"
 #include "Mutators/ScalarValueMutator.h"
 #include "MutationPoint.h"
 #include "TestModuleFactory.h"
@@ -8,6 +8,7 @@
 #include "Filter.h"
 #include "Testee.h"
 #include "MutationsFinder.h"
+#include "ModuleLoader.h"
 
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/LLVMContext.h>
@@ -24,10 +25,11 @@ TEST(ScalarValueMutator, getMutationPoint) {
   ModuleLoader loader;
   auto mullModule = loader.loadModuleAtPath(fixtures::mutators_scalar_value_module_bc_path(), llvmContext);
 
-  Context mullContext;
-  mullContext.addModule(std::move(mullModule));
+  std::vector<std::unique_ptr<MullModule>> modules;
+  modules.push_back(std::move(mullModule));
+  Program program({}, {}, std::move(modules));
 
-  auto scalarValueFunction = mullContext.lookupDefinedFunction("scalar_value");
+  auto scalarValueFunction = program.lookupDefinedFunction("scalar_value");
   std::vector<std::unique_ptr<Testee>> testees;
   testees.emplace_back(make_unique<Testee>(scalarValueFunction, nullptr, 1));
   auto mergedTestees = mergeTestees(testees);
@@ -38,7 +40,7 @@ TEST(ScalarValueMutator, getMutationPoint) {
   MutationsFinder finder(std::move(mutators), configuration);
   Filter filter;
 
-  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(mullContext,
+  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(program,
                                                                          mergedTestees,
                                                                          filter);
 

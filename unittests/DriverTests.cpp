@@ -1,5 +1,4 @@
 #include "Config/Configuration.h"
-#include "Context.h"
 #include "Driver.h"
 #include "Filter.h"
 #include "ModuleLoader.h"

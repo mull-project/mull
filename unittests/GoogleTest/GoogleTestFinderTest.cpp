@@ -1,7 +1,7 @@
 #include "TestFrameworks/GoogleTest/GoogleTestFinder.h"
 
 #include "Driver.h"
-#include "Context.h"
+#include "Program/Program.h"
 #include "Config/Configuration.h"
 #include "Config/ConfigParser.h"
 #include "Mutators/MutatorsFactory.h"
@@ -13,6 +13,7 @@
 #include "Toolchain/Toolchain.h"
 #include "Toolchain/JITEngine.h"
 #include "FixturePaths.h"
+#include "ModuleLoader.h"
 
 #include <llvm/IR/CallSite.h>
 #include <llvm/IR/InstrTypes.h>
@@ -34,8 +35,9 @@ TEST(GoogleTestFinder, FindTest) {
   ModuleLoader loader;
   auto ModuleWithTests = loader.loadModuleAtPath(fixtures::google_test_google_test_Test_bc_path(), llvmContext);
 
-  Context Ctx;
-  Ctx.addModule(std::move(ModuleWithTests));
+  std::vector<std::unique_ptr<MullModule>> modules;
+  modules.push_back(std::move(ModuleWithTests));
+  Program program({}, {}, std::move(modules));
 
   const char *configYAML = R"YAML(
 mutators:
@@ -52,7 +54,7 @@ mutators:
   Filter filter;
   GoogleTestFinder Finder;
 
-  auto tests = Finder.findTests(Ctx, filter);
+  auto tests = Finder.findTests(program, filter);
 
   ASSERT_EQ(2U, tests.size());
 
@@ -68,8 +70,9 @@ TEST(GoogleTestFinder, findTests_filter) {
   ModuleLoader loader;
   auto ModuleWithTests = loader.loadModuleAtPath(fixtures::google_test_google_test_Test_bc_path(), llvmContext);
 
-  Context Ctx;
-  Ctx.addModule(std::move(ModuleWithTests));
+  std::vector<std::unique_ptr<MullModule>> modules;
+  modules.push_back(std::move(ModuleWithTests));
+  Program program({}, {}, std::move(modules));
 
   const char *configYAML = R"YAML(
 mutators:
@@ -87,7 +90,7 @@ mutators:
   filter.includeTest("HelloTest.testSumOfTestee");
   GoogleTestFinder Finder;
 
-  auto tests = Finder.findTests(Ctx, filter);
+  auto tests = Finder.findTests(program, filter);
 
   ASSERT_EQ(1U, tests.size());
   GoogleTest_Test *Test1 = dyn_cast<GoogleTest_Test>(tests[0].get());
@@ -119,14 +122,15 @@ mutators:
     toolchain.compiler().compileModule(moduleWithTests->getModule(), toolchain.targetMachine());
   auto compiledModule_testees = toolchain.compiler().compileModule(moduleWithTestees->getModule(), toolchain.targetMachine());
 
-  Context Ctx;
-  Ctx.addModule(std::move(moduleWithTests));
-  Ctx.addModule(std::move(moduleWithTestees));
+  std::vector<std::unique_ptr<MullModule>> modules;
+  modules.push_back(std::move(moduleWithTests));
+  modules.push_back(std::move(moduleWithTestees));
+  Program program({}, {}, std::move(modules));
 
   Filter filter;
   GoogleTestFinder Finder;
 
-  auto tests = Finder.findTests(Ctx, filter);
+  auto tests = Finder.findTests(program, filter);
 
   ASSERT_EQ(2U, tests.size());
 

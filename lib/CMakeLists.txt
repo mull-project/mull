@@ -1,7 +1,6 @@
 set(mull_sources
   Config/ConfigParser.cpp
   Config/RawConfig.cpp
-  Context.cpp
   Driver.cpp
   ForkProcessSandbox.cpp
   Logger.cpp

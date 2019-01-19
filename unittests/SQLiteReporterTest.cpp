@@ -1,5 +1,5 @@
 #include "Config/Configuration.h"
-#include "Context.h"
+#include "Program/Program.h"
 #include "Reporters/SQLiteReporter.h"
 #include "Result.h"
 #include "Mutators/MathAddMutator.h"
@@ -11,7 +11,7 @@
 #include "Testee.h"
 #include "Metrics/Metrics.h"
 #include "Config/RawConfig.h"
-
+#include "ModuleLoader.h"
 #include "FixturePaths.h"
 
 #include "gtest/gtest.h"
@@ -38,9 +38,10 @@ TEST(SQLiteReporter, integrationTest) {
   auto mullModuleWithTests = loader.loadModuleAtPath(fixtures::simple_test_count_letters_test_count_letters_bc_path(), llvmContext);
   auto mullModuleWithTestees = loader.loadModuleAtPath(fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
 
-  Context context;
-  context.addModule(std::move(mullModuleWithTests));
-  context.addModule(std::move(mullModuleWithTestees));
+  std::vector<std::unique_ptr<MullModule>> modules;
+  modules.push_back(std::move(mullModuleWithTests));
+  modules.push_back(std::move(mullModuleWithTestees));
+  Program program({}, {}, std::move(modules));
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -50,18 +51,18 @@ TEST(SQLiteReporter, integrationTest) {
   Filter filter;
 
   SimpleTestFinder testFinder;
-  auto tests = testFinder.findTests(context, filter);
+  auto tests = testFinder.findTests(program, filter);
 
   auto &test = *tests.begin();
 
-  Function *testeeFunction = context.lookupDefinedFunction("count_letters");
+  Function *testeeFunction = program.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(testeeFunction->empty());
 
   std::vector<std::unique_ptr<Testee>> testees;
   testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
   auto mergedTestees = mergeTestees(testees);
 
-  std::vector<MutationPoint *> mutationPoints = mutationsFinder.getMutationPoints(context, mergedTestees, filter);
+  std::vector<MutationPoint *> mutationPoints = mutationsFinder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -442,9 +443,10 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   auto mullModuleWithTests = loader.loadModuleAtPath(fixtures::simple_test_count_letters_test_count_letters_bc_path(), llvmContext);
   auto mullModuleWithTestees = loader.loadModuleAtPath(fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
 
-  Context context;
-  context.addModule(std::move(mullModuleWithTests));
-  context.addModule(std::move(mullModuleWithTestees));
+  std::vector<std::unique_ptr<MullModule>> modules;
+  modules.push_back(std::move(mullModuleWithTests));
+  modules.push_back(std::move(mullModuleWithTestees));
+  Program program({}, {}, std::move(modules));
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   std::unique_ptr<MathAddMutator> addMutator = make_unique<MathAddMutator>();
@@ -452,11 +454,11 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   MutationsFinder mutationsFinder(std::move(mutators), configuration);
   Filter filter;
   SimpleTestFinder testFinder;
-  auto tests = testFinder.findTests(context, filter);
+  auto tests = testFinder.findTests(program, filter);
 
   auto &test = *tests.begin();
 
-  Function *testeeFunction = context.lookupDefinedFunction("count_letters");
+  Function *testeeFunction = program.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(testeeFunction->empty());
 
   std::vector<std::unique_ptr<Testee>> testees;
@@ -464,7 +466,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   auto mergedTestees = mergeTestees(testees);
 
   std::vector<MutationPoint *> mutationPoints =
-    mutationsFinder.getMutationPoints(context, mergedTestees, filter);
+    mutationsFinder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -594,9 +596,10 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   auto mullModuleWithTests = loader.loadModuleAtPath(fixtures::simple_test_count_letters_test_count_letters_bc_path(), llvmContext);
   auto mullModuleWithTestees = loader.loadModuleAtPath(fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
 
-  Context context;
-  context.addModule(std::move(mullModuleWithTests));
-  context.addModule(std::move(mullModuleWithTestees));
+  std::vector<std::unique_ptr<MullModule>> modules;
+  modules.push_back(std::move(mullModuleWithTests));
+  modules.push_back(std::move(mullModuleWithTestees));
+  Program program({}, {}, std::move(modules));
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   std::unique_ptr<MathAddMutator> addMutator = make_unique<MathAddMutator>();
@@ -605,10 +608,10 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   Filter filter;
 
   SimpleTestFinder testFinder;
-  auto tests = testFinder.findTests(context, filter);
+  auto tests = testFinder.findTests(program, filter);
   auto &test = *tests.begin();
 
-  Function *testeeFunction = context.lookupDefinedFunction("count_letters");
+  Function *testeeFunction = program.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(testeeFunction->empty());
 
   std::vector<std::unique_ptr<Testee>> testees;
@@ -616,7 +619,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   auto mergedTestees = mergeTestees(testees);
 
   std::vector<MutationPoint *> mutationPoints =
-    mutationsFinder.getMutationPoints(context, mergedTestees, filter);
+    mutationsFinder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_EQ(1U, mutationPoints.size());
 

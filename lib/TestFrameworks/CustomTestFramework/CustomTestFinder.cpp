@@ -1,24 +1,25 @@
 #include "TestFrameworks/CustomTestFramework/CustomTestFinder.h"
 
 #include "Config/Configuration.h"
-#include "Context.h"
 #include "Filter.h"
 #include "Logger.h"
+#include "Program/Program.h"
 #include "TestFrameworks/CustomTestFramework/CustomTest_Test.h"
 
 #include <llvm/IR/Module.h>
 
-#include <vector>
-#include <string>
 #include <map>
+#include <string>
+#include <vector>
 
 using namespace mull;
 using namespace llvm;
 
-CustomTestFinder::CustomTestFinder(const std::vector<CustomTestDefinition> &definitions)
-: testDefinitions(definitions) {}
+CustomTestFinder::CustomTestFinder(
+    const std::vector<CustomTestDefinition> &definitions)
+    : testDefinitions(definitions) {}
 
-std::vector<std::unique_ptr<Test>> CustomTestFinder::findTests(Context &context,
+std::vector<std::unique_ptr<Test>> CustomTestFinder::findTests(Program &program,
                                                                Filter &filter) {
   std::map<std::string, size_t> testMapping;
   for (size_t i = 0; i < testDefinitions.size(); i++) {
@@ -28,8 +29,8 @@ std::vector<std::unique_ptr<Test>> CustomTestFinder::findTests(Context &context,
 
   std::vector<std::unique_ptr<Test>> tests;
 
-  for (auto &currentModule : context.getModules()) {
-    for (auto &function: currentModule->getModule()->getFunctionList()) {
+  for (auto &currentModule : program.modules()) {
+    for (auto &function : currentModule->getModule()->getFunctionList()) {
       if (function.isDeclaration()) {
         continue;
       }
@@ -39,7 +40,8 @@ std::vector<std::unique_ptr<Test>> CustomTestFinder::findTests(Context &context,
         continue;
       }
 
-      const CustomTestDefinition &definition = testDefinitions[testMapping.at(functionName)];
+      const CustomTestDefinition &definition =
+          testDefinitions[testMapping.at(functionName)];
       if (filter.shouldSkipTest(definition.testName)) {
         continue;
       }
@@ -49,11 +51,9 @@ std::vector<std::unique_ptr<Test>> CustomTestFinder::findTests(Context &context,
         programName = "mull";
       }
 
-      tests.emplace_back(make_unique<CustomTest_Test>(definition.testName,
-                                                      programName,
-                                                      definition.callArguments,
-                                                      &function,
-                                                      context.getStaticConstructors()));
+      tests.emplace_back(make_unique<CustomTest_Test>(
+          definition.testName, programName, definition.callArguments, &function,
+          program.getStaticConstructors()));
     }
   }
 

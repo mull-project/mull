@@ -1,7 +1,6 @@
 #include "Mutators/RemoveVoidFunctionMutator.h"
 
 #include "MutationPoint.h"
-#include "Context.h"
 
 #include <llvm/IR/CallSite.h>
 #include <llvm/IR/InstIterator.h>

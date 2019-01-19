@@ -1,6 +1,6 @@
 #include "TestFrameworks/GoogleTest/GoogleTestFinder.h"
 
-#include "Context.h"
+#include "Program/Program.h"
 #include "Filter.h"
 #include "Logger.h"
 
@@ -54,13 +54,13 @@ using namespace llvm;
 /// Note: except of Typed and Value Prametrized Tests
 ///
 
-std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &context,
+std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Program &program,
                                                                Filter &filter) {
   std::vector<std::unique_ptr<Test>> tests;
 
   auto testInfoTypeName = StringRef("class.testing::TestInfo");
 
-  for (auto &currentModule : context.getModules()) {
+  for (auto &currentModule : program.modules()) {
     for (auto &globalValue : currentModule->getModule()->getGlobalList()) {
       Type *globalValueType = globalValue.getValueType();
       if (globalValueType->getTypeID() != Type::PointerTyID) {
@@ -209,7 +209,7 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Context &context,
 
       tests.emplace_back(make_unique<GoogleTest_Test>(testName,
                                                       testBodyFunction,
-                                                      context.getStaticConstructors()));
+                                                      program.getStaticConstructors()));
     }
 
   }

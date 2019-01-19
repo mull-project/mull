@@ -1,11 +1,11 @@
 #include "TestFrameworks/CustomTestFramework/CustomTestFinder.h"
 #include "TestFrameworks/CustomTestFramework/CustomTest_Test.h"
-
 #include "Config/Configuration.h"
 #include "Config/ConfigParser.h"
-#include "Context.h"
+#include "Program/Program.h"
 #include "Filter.h"
 #include "FixturePaths.h"
+#include "ModuleLoader.h"
 
 #include <llvm/IR/LLVMContext.h>
 
@@ -25,10 +25,7 @@ TEST(CustomTestFinder, findTests) {
 
   ModuleLoader loader;
   auto loadedModules = loader.loadModules(configuration);
-  Context context;
-  for (auto &module: loadedModules) {
-    context.addModule(move(module));
-  }
+  Program program({}, {}, std::move(loadedModules));
 
   vector<CustomTestDefinition> testDefinitions({
     CustomTestDefinition("failing", "failing_test", "mull", { "failing_test" }),
@@ -38,7 +35,7 @@ TEST(CustomTestFinder, findTests) {
   Filter filter;
   CustomTestFinder testFinder(testDefinitions);
 
-  vector<unique_ptr<mull::Test>> tests = testFinder.findTests(context, filter);
+  vector<unique_ptr<mull::Test>> tests = testFinder.findTests(program, filter);
   ASSERT_EQ(2U, tests.size());
 
   vector<unique_ptr<mull::Test>>::iterator searchResult;
@@ -100,16 +97,12 @@ custom_tests:
 
   ModuleLoader loader;
   auto loadedModules = loader.loadModules(configuration);
-
-  Context context;
-  for (auto &module: loadedModules) {
-    context.addModule(move(module));
-  }
+  Program program({}, {}, std::move(loadedModules));
 
   Filter filter;
   CustomTestFinder testFinder(config.getCustomTests());
 
-  vector<unique_ptr<mull::Test>> tests = testFinder.findTests(context, filter);
+  vector<unique_ptr<mull::Test>> tests = testFinder.findTests(program, filter);
   ASSERT_EQ(2U, tests.size());
 
   vector<unique_ptr<mull::Test>>::iterator searchResult;
@@ -171,17 +164,13 @@ custom_tests:
 
   ModuleLoader loader;
   auto loadedModules = loader.loadModules(configuration);
+  Program program({}, {}, std::move(loadedModules));
 
   Filter filter;
   filter.includeTest("passing");
   CustomTestFinder testFinder(config.getCustomTests());
 
-  Context context;
-  for (auto &module: loadedModules) {
-    context.addModule(move(module));
-  }
-
-  vector<unique_ptr<mull::Test>> tests = testFinder.findTests(context, filter);
+  vector<unique_ptr<mull::Test>> tests = testFinder.findTests(program, filter);
   ASSERT_EQ(1U, tests.size());
 
   vector<unique_ptr<mull::Test>>::iterator searchResult;
@@ -219,16 +208,12 @@ TEST(CustomTestFinder, findTests_withEmptyConfig) {
 
   ModuleLoader loader;
   auto loadedModules = loader.loadModules(configuration);
+  Program program({}, {}, std::move(loadedModules));
 
   Filter filter;
   CustomTestFinder testFinder(config.getCustomTests());
 
-  Context context;
-  for (auto &module: loadedModules) {
-    context.addModule(move(module));
-  }
-
-  vector<unique_ptr<mull::Test>> tests = testFinder.findTests(context, filter);
+  vector<unique_ptr<mull::Test>> tests = testFinder.findTests(program, filter);
   ASSERT_EQ(1U, tests.size());
 
   CustomTest_Test *test = dyn_cast<CustomTest_Test>(tests.begin()->get());

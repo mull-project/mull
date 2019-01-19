@@ -1,7 +1,6 @@
 #include "Driver.h"
 
 #include "Config/Configuration.h"
-#include "Context.h"
 #include "Logger.h"
 #include "ModuleLoader.h"
 #include "Result.h"
@@ -102,7 +101,7 @@ void Driver::loadDynamicLibraries() {
 std::vector<std::unique_ptr<Test>> Driver::findTests() {
   std::vector<std::unique_ptr<Test>> tests;
   SingleTaskExecutor task("Searching tests", [&] () {
-    tests = testFramework.finder().findTests(program.context(), filter);
+    tests = testFramework.finder().findTests(program, filter);
   });
   task.execute();
   return tests;
@@ -132,7 +131,7 @@ Driver::findMutationPoints(std::vector<std::unique_ptr<Test>> &tests) {
   testRunner.execute();
 
   auto mergedTestees = mergeTestees(testees);
-  std::vector<MutationPoint *> mutationPoints = mutationsFinder.getMutationPoints(program.context(), mergedTestees, filter);
+  std::vector<MutationPoint *> mutationPoints = mutationsFinder.getMutationPoints(program, mergedTestees, filter);
 
   {
     /// Cleans up the memory allocated for the vector itself as well

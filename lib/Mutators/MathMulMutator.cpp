@@ -1,6 +1,5 @@
 #include "Mutators/MathMulMutator.h"
 
-#include "Context.h"
 #include "Logger.h"
 #include "MutationPoint.h"
 

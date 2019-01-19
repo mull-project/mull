@@ -1,11 +1,12 @@
 #include "Parallelization/Progress.h"
 #include "Parallelization/Tasks/SearchMutationPointsTask.h"
 #include "Filter.h"
-#include "Context.h"
+#include "Program/Program.h"
 
-#include <vector>
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Module.h>
+
+#include <vector>
 
 using namespace mull;
 using namespace llvm;
@@ -26,8 +27,8 @@ static int GetFunctionIndex(llvm::Function *function) {
   return index;
 }
 
-SearchMutationPointsTask::SearchMutationPointsTask(Filter &filter, const Context &context, std::vector<std::unique_ptr<Mutator>> &mutators)
-    : filter(filter), context(context), mutators(mutators) {
+SearchMutationPointsTask::SearchMutationPointsTask(Filter &filter, const Program &program, std::vector<std::unique_ptr<Mutator>> &mutators)
+    : filter(filter), program(program), mutators(mutators) {
 
 }
 
@@ -40,7 +41,7 @@ void SearchMutationPointsTask::operator()(iterator begin,
     Function *function = testee.getTesteeFunction();
 
     auto moduleID = function->getParent()->getModuleIdentifier();
-    MullModule *module = context.moduleWithIdentifier(moduleID);
+    MullModule *module = program.moduleWithIdentifier(moduleID);
 
     int functionIndex = GetFunctionIndex(function);
     for (auto &mutator : mutators) {

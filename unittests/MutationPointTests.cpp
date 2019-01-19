@@ -1,4 +1,4 @@
-#include "Context.h"
+#include "Program/Program.h"
 #include "Mutators/MathAddMutator.h"
 #include "Mutators/MathDivMutator.h"
 #include "Mutators/MathMulMutator.h"
@@ -14,6 +14,7 @@
 #include "Filter.h"
 #include "Config/Configuration.h"
 #include "FixturePaths.h"
+#include "ModuleLoader.h"
 
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/IR/InstrTypes.h>
@@ -35,9 +36,10 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
   auto ModuleWithTests = loader.loadModuleAtPath(fixtures::simple_test_count_letters_test_count_letters_bc_path(), llvmContext);
   auto ModuleWithTestees = loader.loadModuleAtPath(fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
 
-  Context Ctx;
-  Ctx.addModule(std::move(ModuleWithTests));
-  Ctx.addModule(std::move(ModuleWithTestees));
+  std::vector<std::unique_ptr<MullModule>> modules;
+  modules.push_back(std::move(ModuleWithTestees));
+  modules.push_back(std::move(ModuleWithTests));
+  Program program({}, {}, std::move(modules));
 
   Configuration configuration;
 
@@ -45,14 +47,14 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
   mutators.emplace_back(make_unique<MathAddMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
 
-  Function *testeeFunction = Ctx.lookupDefinedFunction("count_letters");
+  Function *testeeFunction = program.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(testeeFunction->empty());
   std::vector<std::unique_ptr<Testee>> testees;
   testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
   auto mergedTestees = mergeTestees(testees);
 
   Filter filter;
-  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(Ctx,
+  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(program,
                                                                          mergedTestees,
                                                                          filter);
   ASSERT_EQ(1U, mutationPoints.size());
@@ -75,8 +77,9 @@ TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
   ModuleLoader loader;
   auto module = loader.loadModuleAtPath(fixtures::mutators_math_sub_module_bc_path(), llvmContext);
 
-  Context context;
-  context.addModule(std::move(module));
+  std::vector<std::unique_ptr<MullModule>> modules;
+  modules.push_back(std::move(module));
+  Program program({}, {}, std::move(modules));
 
   Configuration configuration;
 
@@ -84,14 +87,14 @@ TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
   mutators.emplace_back(make_unique<MathSubMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
 
-  Function *testeeFunction = context.lookupDefinedFunction("math_sub");
+  Function *testeeFunction = program.lookupDefinedFunction("math_sub");
   ASSERT_FALSE(testeeFunction->empty());
   std::vector<std::unique_ptr<Testee>> testees;
   testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
   auto mergedTestees = mergeTestees(testees);
   Filter filter;
 
-  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(context, mergedTestees, filter);
+  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(program, mergedTestees, filter);
   ASSERT_EQ(1U, mutationPoints.size());
 
   MutationPoint *mutationPoint = mutationPoints.front();
@@ -112,22 +115,24 @@ TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
   ModuleLoader loader;
   auto module = loader.loadModuleAtPath(fixtures::mutators_math_mul_module_bc_path(), llvmContext);
 
-  Context context;
-  context.addModule(std::move(module));
+  std::vector<std::unique_ptr<MullModule>> modules;
+  modules.push_back(std::move(module));
+  Program program({}, {}, std::move(modules));
+
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathMulMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
 
-  Function *testeeFunction = context.lookupDefinedFunction("math_mul");
+  Function *testeeFunction = program.lookupDefinedFunction("math_mul");
   ASSERT_FALSE(testeeFunction->empty());
   std::vector<std::unique_ptr<Testee>> testees;
   testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
   auto mergedTestees = mergeTestees(testees);
   Filter filter;
 
-  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(context, mergedTestees, filter);
+  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_EQ(mutationPoints.size(), 1UL);
 
@@ -149,8 +154,10 @@ TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
   ModuleLoader loader;
   auto module = loader.loadModuleAtPath(fixtures::mutators_math_div_module_bc_path(), llvmContext);
 
-  Context context;
-  context.addModule(std::move(module));
+  std::vector<std::unique_ptr<MullModule>> modules;
+  modules.push_back(std::move(module));
+  Program program({}, {}, std::move(modules));
+
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -158,14 +165,14 @@ TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
 
   MutationsFinder finder(std::move(mutators), configuration);
 
-  Function *testeeFunction = context.lookupDefinedFunction("math_div");
+  Function *testeeFunction = program.lookupDefinedFunction("math_div");
   ASSERT_FALSE(testeeFunction->empty());
   std::vector<std::unique_ptr<Testee>> testees;
   testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
   auto mergedTestees = mergeTestees(testees);
   Filter filter;
 
-  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(context,
+  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(program,
                                                                          mergedTestees,
                                                                          filter);
   ASSERT_EQ(1U, mutationPoints.size());
@@ -190,23 +197,25 @@ TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
   auto ModuleWithTests   = loader.loadModuleAtPath(fixtures::mutators_negate_condition_tester_bc_path(), llvmContext);
   auto ModuleWithTestees = loader.loadModuleAtPath(fixtures::mutators_negate_condition_testee_bc_path(), llvmContext);
 
-  Context context;
-  context.addModule(std::move(ModuleWithTests));
-  context.addModule(std::move(ModuleWithTestees));
+  std::vector<std::unique_ptr<MullModule>> modules;
+  modules.push_back(std::move(ModuleWithTests));
+  modules.push_back(std::move(ModuleWithTestees));
+  Program program({}, {}, std::move(modules));
+
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<NegateConditionMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
 
-  Function *testeeFunction = context.lookupDefinedFunction("max");
+  Function *testeeFunction = program.lookupDefinedFunction("max");
   ASSERT_FALSE(testeeFunction->empty());
   std::vector<std::unique_ptr<Testee>> testees;
   testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
   auto mergedTestees = mergeTestees(testees);
   Filter filter;
 
-  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(context, mergedTestees, filter);
+  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(program, mergedTestees, filter);
   ASSERT_EQ(1U, mutationPoints.size());
 
   MutationPoint *mutationPoint = mutationPoints.front();
@@ -224,8 +233,9 @@ TEST(MutationPoint, SimpleTest_AndOrMutator_applyMutation) {
   ModuleLoader loader;
   auto module = loader.loadModuleAtPath(fixtures::mutators_and_or_replacement_module_bc_path(), llvmContext);
 
-  Context context;
-  context.addModule(std::move(module));
+  std::vector<std::unique_ptr<MullModule>> modules;
+  modules.push_back(std::move(module));
+  Program program({}, {}, std::move(modules));
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -233,12 +243,12 @@ TEST(MutationPoint, SimpleTest_AndOrMutator_applyMutation) {
   MutationsFinder finder(std::move(mutators), configuration);
   Filter filter;
 
-  Function *testeeFunction = context.lookupDefinedFunction("testee_AND_operator_2branches");
+  Function *testeeFunction = program.lookupDefinedFunction("testee_AND_operator_2branches");
   std::vector<std::unique_ptr<Testee>> testees;
   testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
   auto mergedTestees = mergeTestees(testees);
 
-  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(context,
+  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(program,
                                                                          mergedTestees,
                                                                          filter);
 
@@ -257,22 +267,23 @@ TEST(MutationPoint, SimpleTest_ScalarValueMutator_applyMutation) {
   ModuleLoader loader;
   auto module = loader.loadModuleAtPath(fixtures::mutators_scalar_value_module_bc_path(), llvmContext);
 
-  Context context;
-  context.addModule(std::move(module));
+  std::vector<std::unique_ptr<MullModule>> modules;
+  modules.push_back(std::move(module));
+  Program program({}, {}, std::move(modules));
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<ScalarValueMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
 
-  Function *testeeFunction = context.lookupDefinedFunction("scalar_value");
+  Function *testeeFunction = program.lookupDefinedFunction("scalar_value");
   ASSERT_FALSE(testeeFunction->empty());
   std::vector<std::unique_ptr<Testee>> testees;
   testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
   auto mergedTestees = mergeTestees(testees);
   Filter filter;
 
-  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(context, mergedTestees, filter);
+  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(program, mergedTestees, filter);
   ASSERT_EQ(4U, mutationPoints.size());
 
   MutationPoint *mutationPoint1 = mutationPoints[0];
@@ -303,8 +314,9 @@ TEST(MutationPoint, SimpleTest_ReplaceCallMutator_applyMutation) {
   ModuleLoader loader;
   auto module = loader.loadModuleAtPath(fixtures::mutators_replace_call_module_bc_path(), llvmContext);
 
-  Context context;
-  context.addModule(std::move(module));
+  std::vector<std::unique_ptr<MullModule>> modules;
+  modules.push_back(std::move(module));
+  Program program({}, {}, std::move(modules));
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -312,14 +324,14 @@ TEST(MutationPoint, SimpleTest_ReplaceCallMutator_applyMutation) {
 
   MutationsFinder finder(std::move(mutators), configuration);
 
-  Function *testeeFunction = context.lookupDefinedFunction("replace_call");
+  Function *testeeFunction = program.lookupDefinedFunction("replace_call");
   ASSERT_FALSE(testeeFunction->empty());
   std::vector<std::unique_ptr<Testee>> testees;
   testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
   auto mergedTestees = mergeTestees(testees);
   Filter filter;
 
-  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(context, mergedTestees, filter);
+  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -339,8 +351,9 @@ TEST(MutationPoint, SimpleTest_ReplaceAssignmentMutator_applyMutation) {
   ModuleLoader loader;
   auto module = loader.loadModuleAtPath(fixtures::mutators_replace_assignment_module_bc_path(), llvmContext);
 
-  Context context;
-  context.addModule(std::move(module));
+  std::vector<std::unique_ptr<MullModule>> modules;
+  modules.push_back(std::move(module));
+  Program program({}, {}, std::move(modules));
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -348,14 +361,14 @@ TEST(MutationPoint, SimpleTest_ReplaceAssignmentMutator_applyMutation) {
 
   MutationsFinder finder(std::move(mutators), configuration);
 
-  Function *testeeFunction = context.lookupDefinedFunction("replace_assignment");
+  Function *testeeFunction = program.lookupDefinedFunction("replace_assignment");
   ASSERT_FALSE(testeeFunction->empty());
   std::vector<std::unique_ptr<Testee>> testees;
   testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
   auto mergedTestees = mergeTestees(testees);
   Filter filter;
 
-  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(context, mergedTestees, filter);
+  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(program, mergedTestees, filter);
 
   EXPECT_EQ(2U, mutationPoints.size());
 
