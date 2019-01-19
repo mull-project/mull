@@ -9,6 +9,7 @@ class TestFramework {
 public:
   TestFramework(std::unique_ptr<TestFinder> finder,
                 std::unique_ptr<TestRunner> runner);
+  TestFramework(TestFramework &&);
   ~TestFramework() = default;
 
   TestFinder &finder();

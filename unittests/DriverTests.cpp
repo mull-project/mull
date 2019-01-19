@@ -13,16 +13,12 @@
 #include "Mutators/RemoveVoidFunctionMutator.h"
 #include "Mutators/ReplaceAssignmentMutator.h"
 #include "Result.h"
-#include "TestFrameworks/SimpleTest/SimpleTestFinder.h"
-#include "TestFrameworks/SimpleTest/SimpleTestRunner.h"
 #include "TestModuleFactory.h"
 #include "ExecutionResult.h"
 #include "MutationsFinder.h"
-#include "TestFrameworks/CustomTestFramework/CustomTestFinder.h"
-#include "TestFrameworks/CustomTestFramework/CustomTestRunner.h"
 #include "Toolchain/Mangler.h"
 
-#include "TestFrameworks/TestFramework.h"
+#include "TestFrameworks/TestFrameworkFactory.h"
 
 #include "JunkDetection/JunkDetector.h"
 #include "Toolchain/Toolchain.h"
@@ -62,9 +58,8 @@ TEST(Driver, RunningWithNoTests) {
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  TestFramework testFramework(
-      llvm::make_unique<SimpleTestFinder>(),
-      llvm::make_unique<SimpleTestRunner>(toolchain.mangler()));
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
 
   Driver Driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -102,9 +97,8 @@ TEST(Driver, SimpleTest_MathAddMutator) {
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  TestFramework testFramework(
-      llvm::make_unique<SimpleTestFinder>(),
-      llvm::make_unique<SimpleTestRunner>(toolchain.mangler()));
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
 
   Driver Driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -153,9 +147,8 @@ TEST(Driver, SimpleTest_MathSubMutator) {
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  TestFramework testFramework(
-      llvm::make_unique<SimpleTestFinder>(),
-      llvm::make_unique<SimpleTestRunner>(toolchain.mangler()));
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
 
   Driver Driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -204,9 +197,8 @@ TEST(Driver, SimpleTest_MathMulMutator) {
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  TestFramework testFramework(
-      llvm::make_unique<SimpleTestFinder>(),
-      llvm::make_unique<SimpleTestRunner>(toolchain.mangler()));
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
 
   Driver Driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -254,9 +246,8 @@ TEST(Driver, SimpleTest_MathDivMutator) {
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  TestFramework testFramework(
-      llvm::make_unique<SimpleTestFinder>(),
-      llvm::make_unique<SimpleTestRunner>(toolchain.mangler()));
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
 
   Driver Driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -305,9 +296,8 @@ TEST(Driver, SimpleTest_NegateConditionMutator) {
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  TestFramework testFramework(
-      llvm::make_unique<SimpleTestFinder>(),
-      llvm::make_unique<SimpleTestRunner>(toolchain.mangler()));
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
 
   Driver Driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -349,9 +339,8 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutator) {
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  TestFramework testFramework(
-      llvm::make_unique<SimpleTestFinder>(),
-      llvm::make_unique<SimpleTestRunner>(toolchain.mangler()));
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
 
   Driver Driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -393,9 +382,8 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  TestFramework testFramework(
-      llvm::make_unique<SimpleTestFinder>(),
-      llvm::make_unique<SimpleTestRunner>(toolchain.mangler()));
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
 
   Driver Driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -511,9 +499,8 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator_CPP) {
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  TestFramework testFramework(
-      llvm::make_unique<SimpleTestFinder>(),
-      llvm::make_unique<SimpleTestRunner>(toolchain.mangler()));
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
 
   Driver Driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -590,9 +577,8 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutator_CPP) {
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  TestFramework testFramework(
-      llvm::make_unique<SimpleTestFinder>(),
-      llvm::make_unique<SimpleTestRunner>(toolchain.mangler()));
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
 
   Driver Driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -638,9 +624,8 @@ TEST(Driver, customTest) {
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  TestFramework testFramework(
-      llvm::make_unique<CustomTestFinder>(configuration.customTests),
-      llvm::make_unique<CustomTestRunner>(toolchain.mangler()));
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.customTestFramework());
 
   Driver driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -682,9 +667,8 @@ TEST(Driver, customTest_withDynamicLibraries) {
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  TestFramework testFramework(
-      llvm::make_unique<CustomTestFinder>(configuration.customTests),
-      llvm::make_unique<CustomTestRunner>(toolchain.mangler()));
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.customTestFramework());
 
   Driver driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -725,9 +709,8 @@ TEST(Driver, junkDetector_enabled) {
   Metrics metrics;
   AllJunkDetector junkDetector;
 
-  TestFramework testFramework(
-      llvm::make_unique<CustomTestFinder>(configuration.customTests),
-      llvm::make_unique<CustomTestRunner>(toolchain.mangler()));
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.customTestFramework());
 
   Driver driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -761,9 +744,8 @@ TEST(Driver, junkDetector_disabled) {
   Metrics metrics;
   AllJunkDetector junkDetector;
 
-  TestFramework testFramework(
-      llvm::make_unique<CustomTestFinder>(configuration.customTests),
-      llvm::make_unique<CustomTestRunner>(toolchain.mangler()));
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.customTestFramework());
 
   Driver driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -800,9 +782,8 @@ TEST(Driver, DISABLED_customTest_withDynamicLibraries_and_ObjectFiles) {
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  TestFramework testFramework(
-      llvm::make_unique<CustomTestFinder>(configuration.customTests),
-      llvm::make_unique<CustomTestRunner>(toolchain.mangler()));
+  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
+  TestFramework testFramework(testFrameworkFactory.customTestFramework());
 
   Driver driver(configuration, loader, testFramework, toolchain, filter, finder, metrics, junkDetector);
 

@@ -77,7 +77,8 @@ set(mull_sources
   Parallelization/Tasks/ApplyMutationTask.cpp
   Config/ConfigurationOptions.cpp
   Config/Configuration.cpp
-  ../include/TestFrameworks/TestFramework.h TestFrameworks/TestFramework.cpp)
+  TestFrameworks/TestFramework.cpp
+  TestFrameworks/TestFrameworkFactory.cpp)
 
 set (MULL_INCLUDE_DIR ${MULL_SOURCE_DIR}/include)
 
@@ -91,6 +92,10 @@ set(mull_header_dirs
   ${MULL_INCLUDE_DIR}/Instrumentation
   ${MULL_INCLUDE_DIR}/Parallelization
   ${MULL_INCLUDE_DIR}/Parallelization/Tasks
+  ${MULL_INCLUDE_DIR}/TestFrameworks
+  ${MULL_INCLUDE_DIR}/TestFrameworks/CustomTestFramework
+  ${MULL_INCLUDE_DIR}/TestFrameworks/GoogleTest
+  ${MULL_INCLUDE_DIR}/TestFrameworks/SimpleTest
 )
 
 # Globbing is not recommended by CMake so maybe consider listing headers
