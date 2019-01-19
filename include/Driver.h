@@ -7,7 +7,7 @@
 #include "Context.h"
 #include "Mutators/Mutator.h"
 #include "Instrumentation/Instrumentation.h"
-#include "Test.h"
+#include "TestFrameworks/Test.h"
 #include "Toolchain/Toolchain.h"
 
 #include <llvm/Object/ObjectFile.h>
@@ -28,8 +28,7 @@ struct Configuration;
 class Filter;
 class ModuleLoader;
 class Result;
-class TestFinder;
-class TestRunner;
+class TestFramework;
 class MutationsFinder;
 class Metrics;
 class JunkDetector;
@@ -37,8 +36,7 @@ class JunkDetector;
 class Driver {
   const Configuration &config;
   ModuleLoader &loader;
-  TestFinder &finder;
-  TestRunner &runner;
+  TestFramework &testFramework;
   Toolchain &toolchain;
   Filter &filter;
   MutationsFinder &mutationsFinder;
@@ -56,8 +54,7 @@ class Driver {
 public:
   Driver(const Configuration &config,
          ModuleLoader &ML,
-         TestFinder &TF,
-         TestRunner &TR,
+         TestFramework &testFramework,
          Toolchain &t,
          Filter &f,
          MutationsFinder &mutationsFinder,

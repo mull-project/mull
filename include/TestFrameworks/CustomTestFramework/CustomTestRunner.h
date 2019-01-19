@@ -1,28 +1,34 @@
 #pragma once
 
-#include "TestRunner.h"
+#include "TestFrameworks/TestRunner.h"
+#include "Toolchain/JITEngine.h"
 
 #include <llvm/ExecutionEngine/Orc/ExecutionUtils.h>
+#include <llvm/Object/Binary.h>
+#include <llvm/Object/ObjectFile.h>
+#include <llvm/Target/TargetMachine.h>
 
 namespace llvm {
 
 class Function;
+class Module;
 
 }
 
 namespace mull {
+
+class Instrumentation;
 class Mangler;
-class Test;
-class JITEngine;
 struct InstrumentationInfo;
 
-class SimpleTestRunner : public TestRunner {
+class CustomTestRunner : public TestRunner {
   Mangler &mangler;
   llvm::orc::LocalCXXRuntimeOverrides overrides;
   InstrumentationInfo **trampoline;
 public:
-  explicit SimpleTestRunner(Mangler &mangler);
-  ~SimpleTestRunner() override;
+
+  explicit CustomTestRunner(Mangler &mangler);
+  ~CustomTestRunner() override;
 
   void loadInstrumentedProgram(ObjectFiles &objectFiles,
                                Instrumentation &instrumentation,
@@ -31,7 +37,9 @@ public:
   ExecutionStatus runTest(Test *test, JITEngine &jit) override;
 
 private:
-  void *functionPointer(const llvm::Function &function, JITEngine &jit);
+  void *getConstructorPointer(const llvm::Function &function, JITEngine &jit);
+  void *getFunctionPointer(const std::string &functionName, JITEngine &jit);
+  void runStaticConstructor(llvm::Function *function, JITEngine &jit);
 };
 
 }

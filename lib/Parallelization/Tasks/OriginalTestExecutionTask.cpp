@@ -3,7 +3,7 @@
 #include "Instrumentation/Instrumentation.h"
 #include "Toolchain/Toolchain.h"
 #include "ForkProcessSandbox.h"
-#include "TestRunner.h"
+#include "TestFrameworks/TestRunner.h"
 #include "Config/Configuration.h"
 
 using namespace mull;

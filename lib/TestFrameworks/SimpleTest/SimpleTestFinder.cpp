@@ -1,5 +1,5 @@
-#include "SimpleTest/SimpleTestFinder.h"
-#include "SimpleTest/SimpleTest_Test.h"
+#include "TestFrameworks/SimpleTest/SimpleTestFinder.h"
+#include "TestFrameworks/SimpleTest/SimpleTest_Test.h"
 #include "Context.h"
 #include "Logger.h"
 #include "Filter.h"

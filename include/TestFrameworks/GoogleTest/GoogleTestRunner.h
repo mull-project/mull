@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TestRunner.h"
+#include "TestFrameworks/TestRunner.h"
 
 #include <llvm/ExecutionEngine/Orc/ExecutionUtils.h>
 #include <llvm/Object/Binary.h>

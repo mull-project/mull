@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Test.h"
+#include "TestFrameworks/Test.h"
 
 namespace llvm {
 

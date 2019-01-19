@@ -1,6 +1,6 @@
 #include "Instrumentation/Instrumentation.h"
 #include "Instrumentation/DynamicCallTree.h"
-#include "Test.h"
+#include "TestFrameworks/Test.h"
 
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Module.h>

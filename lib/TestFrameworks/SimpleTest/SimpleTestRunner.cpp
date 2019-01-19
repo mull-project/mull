@@ -1,5 +1,5 @@
-#include "SimpleTest/SimpleTestRunner.h"
-#include "SimpleTest/SimpleTest_Test.h"
+#include "TestFrameworks/SimpleTest/SimpleTestRunner.h"
+#include "TestFrameworks/SimpleTest/SimpleTest_Test.h"
 #include "Toolchain/JITEngine.h"
 
 #include "Toolchain/Resolvers/InstrumentationResolver.h"

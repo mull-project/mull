@@ -1,6 +1,6 @@
-#include "GoogleTest/GoogleTestRunner.h"
+#include "TestFrameworks/GoogleTest/GoogleTestRunner.h"
 
-#include "GoogleTest/GoogleTest_Test.h"
+#include "TestFrameworks/GoogleTest/GoogleTest_Test.h"
 #include "Toolchain/Mangler.h"
 #include "Toolchain/JITEngine.h"
 #include "Toolchain/Trampolines.h"

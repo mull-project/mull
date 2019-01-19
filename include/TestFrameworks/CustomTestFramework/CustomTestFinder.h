@@ -1,6 +1,6 @@
 #pragma once
 
-#include "TestFinder.h"
+#include "TestFrameworks/TestFinder.h"
 
 #include <vector>
 
