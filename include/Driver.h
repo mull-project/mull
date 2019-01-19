@@ -4,7 +4,6 @@
 #include "MutationResult.h"
 #include "ForkProcessSandbox.h"
 #include "IDEDiagnostics.h"
-#include "Context.h"
 #include "Mutators/Mutator.h"
 #include "Instrumentation/Instrumentation.h"
 #include "TestFrameworks/Test.h"
@@ -25,8 +24,8 @@ namespace mull {
 
 struct Configuration;
 
+class Program;
 class Filter;
-class ModuleLoader;
 class Result;
 class TestFramework;
 class MutationsFinder;
@@ -35,17 +34,14 @@ class JunkDetector;
 
 class Driver {
   const Configuration &config;
-  ModuleLoader &loader;
+  Program &program;
   TestFramework &testFramework;
   Toolchain &toolchain;
   Filter &filter;
   MutationsFinder &mutationsFinder;
-  Context context;
   ProcessSandbox *sandbox;
   IDEDiagnostics *diagnostics;
 
-  std::map<llvm::Module *, llvm::object::ObjectFile *> innerCache;
-  std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> precompiledObjectFiles;
   std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> instrumentedObjectFiles;
   std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> ownedObjectFiles;
   Instrumentation instrumentation;
@@ -53,7 +49,7 @@ class Driver {
   JunkDetector &junkDetector;
 public:
   Driver(const Configuration &config,
-         ModuleLoader &ML,
+         Program &program,
          TestFramework &testFramework,
          Toolchain &t,
          Filter &f,
@@ -65,12 +61,8 @@ public:
 
   std::unique_ptr<Result> Run();
 
-  /// Returns cached object files for all modules excerpt one provided
-  std::vector<llvm::object::ObjectFile *> AllButOne(llvm::Module *One);
 private:
-  void loadBitcodeFilesIntoMemory();
   void compileInstrumentedBitcodeFiles();
-  void loadPrecompiledObjectFiles();
   void loadDynamicLibraries();
 
   std::vector<std::unique_ptr<Test>> findTests();

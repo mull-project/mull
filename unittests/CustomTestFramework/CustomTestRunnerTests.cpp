@@ -24,18 +24,16 @@ const static int TestTimeout = 1000;
 
 TEST(CustomTestRunner, noTestNameSpecified) {
   Configuration configuration;
+  configuration.bitcodePaths = {
+      mull::fixtures::custom_test_distance_bc_path(),
+      mull::fixtures::custom_test_main_bc_path(),
+      mull::fixtures::custom_test_test_bc_path()
+  };
   Toolchain toolchain(configuration);
   CustomTestRunner runner(toolchain.mangler());
 
-  std::vector<std::string> bitcodeList({
-                                           mull::fixtures::custom_test_distance_bc_path(),
-                                           mull::fixtures::custom_test_main_bc_path(),
-                                           mull::fixtures::custom_test_test_bc_path()
-                                       });
-
   ModuleLoader loader;
-
-  auto loadedModules = loader.loadModulesFromBitcodeFileList(bitcodeList, configuration);
+  auto loadedModules = loader.loadModules(configuration);
 
   vector<object::OwningBinary<object::ObjectFile>> ownedObjects;
   vector<object::ObjectFile *> objects;
@@ -58,18 +56,16 @@ TEST(CustomTestRunner, noTestNameSpecified) {
 
 TEST(CustomTestRunner, tooManyParameters) {
   Configuration configuration;
+  configuration.bitcodePaths = {
+      mull::fixtures::custom_test_distance_bc_path(),
+      mull::fixtures::custom_test_main_bc_path(),
+      mull::fixtures::custom_test_test_bc_path()
+  };
   Toolchain toolchain(configuration);
   CustomTestRunner runner(toolchain.mangler());
 
-  std::vector<std::string> bitcodeList({
-                                           mull::fixtures::custom_test_distance_bc_path(),
-                                           mull::fixtures::custom_test_main_bc_path(),
-                                           mull::fixtures::custom_test_test_bc_path()
-                                       });
-
   ModuleLoader loader;
-
-  auto loadedModules = loader.loadModulesFromBitcodeFileList(bitcodeList, configuration);
+  auto loadedModules = loader.loadModules(configuration);
 
   vector<object::OwningBinary<object::ObjectFile>> ownedObjects;
   vector<object::ObjectFile *> objects;
@@ -93,18 +89,16 @@ TEST(CustomTestRunner, tooManyParameters) {
 
 TEST(CustomTestRunner, runPassingTest) {
   Configuration configuration;
+  configuration.bitcodePaths = {
+      mull::fixtures::custom_test_distance_bc_path(),
+      mull::fixtures::custom_test_main_bc_path(),
+      mull::fixtures::custom_test_test_bc_path()
+  };
   Toolchain toolchain(configuration);
   CustomTestRunner runner(toolchain.mangler());
 
-  std::vector<std::string> bitcodeList({
-                                           mull::fixtures::custom_test_distance_bc_path(),
-                                           mull::fixtures::custom_test_main_bc_path(),
-                                           mull::fixtures::custom_test_test_bc_path()
-                                       });
-
   ModuleLoader loader;
-
-  auto loadedModules = loader.loadModulesFromBitcodeFileList(bitcodeList, configuration);
+  auto loadedModules = loader.loadModules(configuration);
 
   vector<object::OwningBinary<object::ObjectFile>> ownedObjects;
   vector<object::ObjectFile *> objects;
@@ -128,18 +122,16 @@ TEST(CustomTestRunner, runPassingTest) {
 
 TEST(CustomTestRunner, runFailingTest) {
   Configuration configuration;
+  configuration.bitcodePaths = {
+      mull::fixtures::custom_test_distance_bc_path(),
+      mull::fixtures::custom_test_main_bc_path(),
+      mull::fixtures::custom_test_test_bc_path()
+  };
   Toolchain toolchain(configuration);
   CustomTestRunner runner(toolchain.mangler());
 
-  std::vector<std::string> bitcodeList({
-                                           mull::fixtures::custom_test_distance_bc_path(),
-                                           mull::fixtures::custom_test_main_bc_path(),
-                                           mull::fixtures::custom_test_test_bc_path()
-                                       });
-
   ModuleLoader loader;
-
-  auto loadedModules = loader.loadModulesFromBitcodeFileList(bitcodeList, configuration);
+  auto loadedModules = loader.loadModules(configuration);
 
   Function *constructor = nullptr;
   vector<object::OwningBinary<object::ObjectFile>> ownedObjects;
@@ -167,18 +159,16 @@ TEST(CustomTestRunner, runFailingTest) {
 
 TEST(CustomTestRunner, attemptToRunUnknownTest) {
   Configuration configuration;
+  configuration.bitcodePaths = {
+      mull::fixtures::custom_test_distance_bc_path(),
+      mull::fixtures::custom_test_main_bc_path(),
+      mull::fixtures::custom_test_test_bc_path()
+  };
   Toolchain toolchain(configuration);
   CustomTestRunner runner(toolchain.mangler());
 
-  std::vector<std::string> bitcodeList({
-                                           mull::fixtures::custom_test_distance_bc_path(),
-                                           mull::fixtures::custom_test_main_bc_path(),
-                                           mull::fixtures::custom_test_test_bc_path()
-                                       });
-
   ModuleLoader loader;
-
-  auto loadedModules = loader.loadModulesFromBitcodeFileList(bitcodeList, configuration);
+  auto loadedModules = loader.loadModules(configuration);
 
   vector<object::OwningBinary<object::ObjectFile>> ownedObjects;
   vector<object::ObjectFile *> objects;
