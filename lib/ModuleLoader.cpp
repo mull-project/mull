@@ -49,8 +49,7 @@ ModuleLoader::loadModuleAtPath(const std::string &path,
 }
 
 std::vector<std::unique_ptr<MullModule>>
-ModuleLoader::loadModulesFromBitcodeFileList(const std::vector<std::string> &bitcodeFileList,
-                                             const Configuration &config) {
+ModuleLoader::loadModules(const Configuration &config) {
   std::vector<std::unique_ptr<MullModule>> modules;
 
   std::vector<ModuleLoadingTask> tasks;
@@ -60,7 +59,8 @@ ModuleLoader::loadModulesFromBitcodeFileList(const std::vector<std::string> &bit
     contexts.push_back(std::move(context));
   }
 
-  TaskExecutor<ModuleLoadingTask> loader("Loading bitcode", bitcodeFileList, modules, tasks);
+  TaskExecutor<ModuleLoadingTask> loader("Loading bitcode", config.bitcodePaths,
+                                         modules, tasks);
   loader.execute();
 
   return modules;

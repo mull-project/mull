@@ -6,13 +6,13 @@
 
 namespace mull {
 
-class Context;
+class Program;
 class Filter;
 
 class GoogleTestFinder : public TestFinder {
 public:
-  std::vector<std::unique_ptr<Test>> findTests(Context &context,
+  std::vector<std::unique_ptr<Test>> findTests(Program &program,
                                                Filter &filter) override;
 };
 
-}
+} // namespace mull

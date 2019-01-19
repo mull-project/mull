@@ -1,6 +1,5 @@
 #include "Mutators/NegateConditionMutator.h"
 
-#include "Context.h"
 #include "Logger.h"
 #include "MutationPoint.h"
 

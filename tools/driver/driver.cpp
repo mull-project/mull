@@ -12,12 +12,13 @@
 #include "Result.h"
 #include "MutationsFinder.h"
 #include "Parallelization/TaskExecutor.h"
+#include "Parallelization/Tasks/LoadObjectFilesTask.h"
 #include "Toolchain/Toolchain.h"
 #include "Metrics/Metrics.h"
 #include "JunkDetection/JunkDetector.h"
 #include "JunkDetection/CXX/CXXJunkDetector.h"
-
 #include "TestFrameworks/TestFrameworkFactory.h"
+#include "Program/Program.h"
 
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/Support/MemoryBuffer.h>
@@ -72,7 +73,6 @@ int main(int argc, char *argv[]) {
   InitializeNativeTargetAsmPrinter();
   InitializeNativeTargetAsmParser();
 
-  ModuleLoader Loader;
   Toolchain toolchain(configuration);
   Filter filter;
 
@@ -139,8 +139,22 @@ int main(int argc, char *argv[]) {
     }
   }
 
+  ObjectFiles objectFiles;
+  std::vector<LoadObjectFilesTask> tasks;
+  for (int i = 0; i < configuration.parallelization.workers; i++) {
+    tasks.emplace_back(LoadObjectFilesTask());
+  }
+  TaskExecutor<LoadObjectFilesTask> objectsLoader(
+      "Loading precompiled object files", configuration.objectFilePaths,
+      objectFiles, tasks);
+  objectsLoader.execute();
+
+  ModuleLoader moduleLoader;
+  Program program(configuration.dynamicLibraryPaths, std::move(objectFiles),
+                  moduleLoader.loadModules(configuration));
+
   Metrics metrics;
-  Driver driver(configuration, Loader, testFramework, toolchain, filter, mutationsFinder, metrics, *junkDetector);
+  Driver driver(configuration, program, testFramework, toolchain, filter, mutationsFinder, metrics, *junkDetector);
 
   metrics.beginRun();
   auto result = driver.Run();

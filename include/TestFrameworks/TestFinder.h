@@ -6,14 +6,14 @@
 
 namespace mull {
 
-class Context;
+class Program;
 class Filter;
 
 class TestFinder {
 public:
-  virtual std::vector<std::unique_ptr<Test>> findTests(Context &context,
+  virtual std::vector<std::unique_ptr<Test>> findTests(Program &program,
                                                        Filter &filter) = 0;
-  virtual ~TestFinder() {}
+  virtual ~TestFinder() = default;
 };
 
-}
+} // namespace mull

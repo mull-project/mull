@@ -1,7 +1,6 @@
 #include "Driver.h"
 
 #include "Config/Configuration.h"
-#include "Context.h"
 #include "Logger.h"
 #include "ModuleLoader.h"
 #include "Result.h"
@@ -13,6 +12,7 @@
 #include "JunkDetection/JunkDetector.h"
 #include "Toolchain/JITEngine.h"
 #include "Parallelization/Parallelization.h"
+#include "Program/Program.h"
 
 #include <llvm/Support/DynamicLibrary.h>
 #include <llvm/Transforms/Utils/Cloning.h>
@@ -54,9 +54,7 @@ Driver::~Driver() {
 /// all the results of each mutant within corresponding MutationPoint
 
 std::unique_ptr<Result> Driver::Run() {
-  loadBitcodeFilesIntoMemory();
   compileInstrumentedBitcodeFiles();
-  loadPrecompiledObjectFiles();
   loadDynamicLibraries();
 
   auto tests = findTests();
@@ -69,22 +67,10 @@ std::unique_ptr<Result> Driver::Run() {
                              std::move(nonJunkMutationPoints));
 }
 
-void Driver::loadBitcodeFilesIntoMemory() {
-  metrics.beginLoadModules();
-  std::vector<unique_ptr<MullModule>> modules =
-      loader.loadModulesFromBitcodeFileList(config.bitcodePaths, config);
-  metrics.endLoadModules();
-
-  for (auto &ownedModule : modules) {
-    assert(ownedModule && "Can't load module");
-    context.addModule(std::move(ownedModule));
-  }
-}
-
 void Driver::compileInstrumentedBitcodeFiles() {
   metrics.beginInstrumentedCompilation();
 
-  for (auto &ownedModule : context.getModules()) {
+  for (auto &ownedModule : program.modules()) {
     MullModule &module = *ownedModule;
     instrumentation.recordFunctions(module.getModule());
   }
@@ -95,27 +81,12 @@ void Driver::compileInstrumentedBitcodeFiles() {
   }
 
   TaskExecutor<InstrumentedCompilationTask> compiler("Compiling instrumented code",
-                                                     context.getModules(),
+                                                     program.modules(),
                                                      instrumentedObjectFiles,
                                                      tasks);
   compiler.execute();
 
   metrics.endInstrumentedCompilation();
-}
-
-void Driver::loadPrecompiledObjectFiles() {
-  metrics.beginLoadPrecompiledObjectFiles();
-  std::vector<LoadObjectFilesTask> tasks;
-  for (int i = 0; i < config.parallelization.workers; i++) {
-    tasks.emplace_back(LoadObjectFilesTask());
-  }
-
-  TaskExecutor<LoadObjectFilesTask> loader("Loading precompiled object files",
-                                           config.objectFilePaths,
-                                           precompiledObjectFiles,
-                                           tasks);
-  loader.execute();
-  metrics.endLoadPrecompiledObjectFiles();
 }
 
 void Driver::loadDynamicLibraries() {
@@ -130,7 +101,7 @@ void Driver::loadDynamicLibraries() {
 std::vector<std::unique_ptr<Test>> Driver::findTests() {
   std::vector<std::unique_ptr<Test>> tests;
   SingleTaskExecutor task("Searching tests", [&] () {
-    tests = testFramework.finder().findTests(context, filter);
+    tests = testFramework.finder().findTests(program, filter);
   });
   task.execute();
   return tests;
@@ -160,7 +131,7 @@ Driver::findMutationPoints(std::vector<std::unique_ptr<Test>> &tests) {
   testRunner.execute();
 
   auto mergedTestees = mergeTestees(testees);
-  std::vector<MutationPoint *> mutationPoints = mutationsFinder.getMutationPoints(context, mergedTestees, filter);
+  std::vector<MutationPoint *> mutationPoints = mutationsFinder.getMutationPoints(program, mergedTestees, filter);
 
   {
     /// Cleans up the memory allocated for the vector itself as well
@@ -222,7 +193,7 @@ std::vector<std::unique_ptr<MutationResult>> Driver::normalRunMutations(const st
   std::vector<std::string> mutatedFunctions;
 
   SingleTaskExecutor prepareMutationsTask("Preparing mutations", [&] () {
-    for (auto &module : context.getModules()) {
+    for (auto &module : program.modules()) {
       auto functions = module->prepareMutations();
       for (auto &name : functions) {
         mutatedFunctions.push_back(name);
@@ -239,11 +210,14 @@ std::vector<std::unique_ptr<MutationResult>> Driver::normalRunMutations(const st
   for (int i = 0; i < config.parallelization.workers; i++) {
     compilationTasks.emplace_back(toolchain);
   }
-  TaskExecutor<OriginalCompilationTask> mutantCompiler("Compiling original code", context.getModules(), ownedObjectFiles, std::move(compilationTasks));
+  TaskExecutor<OriginalCompilationTask> mutantCompiler("Compiling original code", program.modules(), ownedObjectFiles, std::move(compilationTasks));
   mutantCompiler.execute();
 
   std::vector<object::ObjectFile *> objectFiles;
   for (auto &object : ownedObjectFiles) {
+    objectFiles.push_back(object.getBinary());
+  }
+  for (auto &object : program.precompiledObjectFiles()) {
     objectFiles.push_back(object.getBinary());
   }
 
@@ -261,22 +235,6 @@ std::vector<std::unique_ptr<MutationResult>> Driver::normalRunMutations(const st
   return mutationResults;
 }
 
-std::vector<llvm::object::ObjectFile *> Driver::AllButOne(llvm::Module *One) {
-  std::vector<llvm::object::ObjectFile *> Objects;
-
-  for (auto &CachedEntry : innerCache) {
-    if (One != CachedEntry.first) {
-      Objects.push_back(CachedEntry.second);
-    }
-  }
-
-  for (OwningBinary<ObjectFile> &object: precompiledObjectFiles) {
-    Objects.push_back(object.getBinary());
-  }
-
-  return Objects;
-}
-
 std::vector<llvm::object::ObjectFile *> Driver::AllInstrumentedObjectFiles() {
   std::vector<llvm::object::ObjectFile *> objects;
 
@@ -284,7 +242,7 @@ std::vector<llvm::object::ObjectFile *> Driver::AllInstrumentedObjectFiles() {
     objects.push_back(ownedObject.getBinary());
   }
 
-  for (auto &ownedObject : precompiledObjectFiles) {
+  for (auto &ownedObject : program.precompiledObjectFiles()) {
     objects.push_back(ownedObject.getBinary());
   }
 
@@ -292,15 +250,15 @@ std::vector<llvm::object::ObjectFile *> Driver::AllInstrumentedObjectFiles() {
 }
 
 Driver::Driver(const Configuration &config,
-               ModuleLoader &ML,
+               Program &program,
                TestFramework &testFramework,
                Toolchain &t,
                Filter &f,
                MutationsFinder &mutationsFinder,
                Metrics &metrics,
                JunkDetector &junkDetector)
-    : config(config), loader(ML), testFramework(testFramework), toolchain(t), filter(f), mutationsFinder(mutationsFinder),
-      precompiledObjectFiles(), instrumentation(), metrics(metrics), junkDetector(junkDetector) {
+    : config(config), program(program), testFramework(testFramework), toolchain(t), filter(f), mutationsFinder(mutationsFinder),
+      instrumentation(), metrics(metrics), junkDetector(junkDetector) {
 
   if (config.forkEnabled) {
     this->sandbox = new ForkProcessSandbox();

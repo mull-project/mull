@@ -1,6 +1,5 @@
 #include "Mutators/AndOrReplacementMutator.h"
 
-#include "Context.h"
 #include "Logger.h"
 #include "MutationPoint.h"
 #include "SourceLocation.h"

@@ -1,6 +1,6 @@
 #include "Config/Configuration.h"
 #include "Config/RawConfig.h"
-#include "Context.h"
+#include "Program/Program.h"
 #include "Mutators/ConditionalsBoundaryMutator.h"
 #include "MutationPoint.h"
 #include "Toolchain/Compiler.h"
@@ -10,6 +10,7 @@
 #include "MutationsFinder.h"
 #include "JunkDetection/CXX/CXXJunkDetector.h"
 #include "FixturePaths.h"
+#include "ModuleLoader.h"
 
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/LLVMContext.h>
@@ -26,8 +27,9 @@ TEST(CXXJunkDetector, boundary_mutator) {
   auto mullModule = loader.loadModuleAtPath(fixtures::mutators_boundary_module_bc_path(), llvmContext);
   auto module = mullModule->getModule();
 
-  Context mullContext;
-  mullContext.addModule(std::move(mullModule));
+  std::vector<std::unique_ptr<MullModule>> modules;
+  modules.push_back(std::move(mullModule));
+  Program program({}, {}, std::move(modules));
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutatorss;
@@ -41,7 +43,7 @@ TEST(CXXJunkDetector, boundary_mutator) {
   }
   auto mergedTestees = mergeTestees(testees);
 
-  std::vector<MutationPoint *> points = finder.getMutationPoints(mullContext, mergedTestees, filter);
+  std::vector<MutationPoint *> points = finder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_EQ(points.size(), 7U);
 
@@ -64,8 +66,9 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
   auto mullModule = loader.loadModuleAtPath(fixtures::junk_detection_compdb_main_bc_path(), llvmContext);
   auto module = mullModule->getModule();
 
-  Context mullContext;
-  mullContext.addModule(std::move(mullModule));
+  std::vector<std::unique_ptr<MullModule>> modules;
+  modules.push_back(std::move(mullModule));
+  Program program({}, {}, std::move(modules));
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -78,7 +81,7 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
     testees.emplace_back(make_unique<Testee>(&function, nullptr, 1));
   }
   auto mergedTestees = mergeTestees(testees);
-  std::vector<MutationPoint *> points = finder.getMutationPoints(mullContext, mergedTestees, filter);
+  std::vector<MutationPoint *> points = finder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_EQ(points.size(), 8U);
 
@@ -101,8 +104,9 @@ TEST(CXXJunkDetector, compdb_relative_paths) {
   auto mullModule = loader.loadModuleAtPath(fixtures::junk_detection_compdb_main_bc_path(), llvmContext);
   auto module = mullModule->getModule();
 
-  Context mullContext;
-  mullContext.addModule(std::move(mullModule));
+  std::vector<std::unique_ptr<MullModule>> modules;
+  modules.push_back(std::move(mullModule));
+  Program program({}, {}, std::move(modules));
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutatorss;
@@ -116,7 +120,7 @@ TEST(CXXJunkDetector, compdb_relative_paths) {
   }
   auto mergedTestees = mergeTestees(testees);
 
-  std::vector<MutationPoint *> points = finder.getMutationPoints(mullContext, mergedTestees, filter);
+  std::vector<MutationPoint *> points = finder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_EQ(points.size(), 8U);
 
@@ -139,8 +143,9 @@ TEST(CXXJunkDetector, no_compdb) {
   auto mullModule = loader.loadModuleAtPath(fixtures::junk_detection_compdb_main_bc_path(), llvmContext);
   auto module = mullModule->getModule();
 
-  Context mullContext;
-  mullContext.addModule(std::move(mullModule));
+  std::vector<std::unique_ptr<MullModule>> modules;
+  modules.push_back(std::move(mullModule));
+  Program program({}, {}, std::move(modules));
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutatorss;
@@ -154,7 +159,7 @@ TEST(CXXJunkDetector, no_compdb) {
   }
   auto mergedTestees = mergeTestees(testees);
 
-  std::vector<MutationPoint *> points = finder.getMutationPoints(mullContext, mergedTestees, filter);
+  std::vector<MutationPoint *> points = finder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_EQ(points.size(), 8U);
 

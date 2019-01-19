@@ -1,8 +1,8 @@
 #include "TestFrameworks/SimpleTest/SimpleTestFinder.h"
-#include "TestFrameworks/SimpleTest/SimpleTest_Test.h"
-#include "Context.h"
-#include "Logger.h"
 #include "Filter.h"
+#include "Logger.h"
+#include "Program/Program.h"
+#include "TestFrameworks/SimpleTest/SimpleTest_Test.h"
 
 #include <llvm/IR/Module.h>
 
@@ -11,11 +11,11 @@
 using namespace mull;
 using namespace llvm;
 
-std::vector<std::unique_ptr<Test>> SimpleTestFinder::findTests(Context &context,
+std::vector<std::unique_ptr<Test>> SimpleTestFinder::findTests(Program &program,
                                                                Filter &filter) {
   std::vector<std::unique_ptr<Test>> tests;
 
-  for (auto &module : context.getModules()) {
+  for (auto &module : program.modules()) {
     auto &x = module->getModule()->getFunctionList();
     for (auto &Fn : x) {
 

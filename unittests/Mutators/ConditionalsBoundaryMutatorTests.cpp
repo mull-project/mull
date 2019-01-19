@@ -1,5 +1,5 @@
 #include "Config/Configuration.h"
-#include "Context.h"
+#include "Program/Program.h"
 #include "Mutators/ConditionalsBoundaryMutator.h"
 #include "MutationPoint.h"
 #include "Toolchain/Compiler.h"
@@ -8,6 +8,7 @@
 #include "Testee.h"
 #include "MutationsFinder.h"
 #include "FixturePaths.h"
+#include "ModuleLoader.h"
 
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/LLVMContext.h>
@@ -25,8 +26,9 @@ TEST(ConditionalsBoundaryMutator, findMutations) {
   auto mullModule = loader.loadModuleAtPath(fixtures::mutators_boundary_module_bc_path(), llvmContext);
   auto module = mullModule->getModule();
 
-  Context mullContext;
-  mullContext.addModule(std::move(mullModule));
+  std::vector<std::unique_ptr<MullModule>> modules;
+  modules.push_back(std::move(mullModule));
+  Program program({}, {}, std::move(modules));
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -39,7 +41,7 @@ TEST(ConditionalsBoundaryMutator, findMutations) {
     testees.emplace_back(make_unique<Testee>(&function, nullptr, 1));
   }
   auto mergedTestees = mergeTestees(testees);
-  std::vector<MutationPoint *> points = finder.getMutationPoints(mullContext, mergedTestees, filter);
+  std::vector<MutationPoint *> points = finder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_EQ(points.size(), 7U);
 }
@@ -51,8 +53,9 @@ TEST(ConditionalsBoundaryMutator, applyMutations) {
   auto borrowedModule = mullModule.get();
   auto module = borrowedModule->getModule();
 
-  Context mullContext;
-  mullContext.addModule(std::move(mullModule));
+  std::vector<std::unique_ptr<MullModule>> modules;
+  modules.push_back(std::move(mullModule));
+  Program program({}, {}, std::move(modules));
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -66,7 +69,7 @@ TEST(ConditionalsBoundaryMutator, applyMutations) {
   }
   auto mergedTestees = mergeTestees(testees);
 
-  std::vector<MutationPoint *> points = finder.getMutationPoints(mullContext, mergedTestees, filter);
+  std::vector<MutationPoint *> points = finder.getMutationPoints(program, mergedTestees, filter);
 
   for (auto point: points) {
     ValueToValueMapTy map;

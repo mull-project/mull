@@ -1,7 +1,6 @@
 set(mull_sources
   Config/ConfigParser.cpp
   Config/RawConfig.cpp
-  Context.cpp
   Driver.cpp
   ForkProcessSandbox.cpp
   Logger.cpp
@@ -78,7 +77,7 @@ set(mull_sources
   Config/ConfigurationOptions.cpp
   Config/Configuration.cpp
   TestFrameworks/TestFramework.cpp
-  TestFrameworks/TestFrameworkFactory.cpp)
+  TestFrameworks/TestFrameworkFactory.cpp Program/Program.cpp)
 
 set (MULL_INCLUDE_DIR ${MULL_SOURCE_DIR}/include)
 

@@ -8,7 +8,7 @@
 namespace llvm {
 class LLVMContext;
 class Module;
-}
+} // namespace llvm
 
 namespace mull {
 
@@ -16,16 +16,16 @@ struct Configuration;
 
 class ModuleLoader {
   std::vector<std::unique_ptr<llvm::LLVMContext>> contexts;
+
 public:
   ModuleLoader() = default;
-  virtual ~ModuleLoader() = default;
+  ~ModuleLoader() = default;
 
-  virtual std::unique_ptr<MullModule> loadModuleAtPath(const std::string &path,
-                                                       llvm::LLVMContext &context);
+  std::unique_ptr<MullModule> loadModuleAtPath(const std::string &path,
+                                               llvm::LLVMContext &context);
 
-  virtual std::vector<std::unique_ptr<MullModule>>
-  loadModulesFromBitcodeFileList(const std::vector<std::string> &path,
-                                 const Configuration &config);
+  std::vector<std::unique_ptr<MullModule>>
+  loadModules(const Configuration &config);
 };
 
-}
+} // namespace mull

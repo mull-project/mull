@@ -1,6 +1,5 @@
 #include "Mutators/ScalarValueMutator.h"
 
-#include "Context.h"
 #include "Logger.h"
 #include "MutationPoint.h"
 

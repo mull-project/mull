@@ -3,7 +3,6 @@ generate_fixture_factory(FACTORY_HEADER)
 set(mull_unittests_sources
   CompilerTests.cpp
   ConfigParserTests.cpp
-  ContextTest.cpp
   DriverTests.cpp
   ForkProcessSandboxTest.cpp
   MutationPointTests.cpp
