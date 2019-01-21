@@ -17,6 +17,7 @@ using namespace llvm;
 using namespace mull;
 
 const std::string ReplaceAssignmentMutator::ID = "replace_assignment_mutator";
+const std::string ReplaceAssignmentMutator::description = "Replaces assignment with 42";
 
 static bool findPossibleApplication(Value &V, std::string &outDiagnostics);
 static

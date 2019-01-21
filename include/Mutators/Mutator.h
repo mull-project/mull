@@ -38,6 +38,8 @@ public:
   virtual std::string getUniqueIdentifier() const = 0;
   virtual MutatorKind mutatorKind()  { return MutatorKind::Unknown; }
 
+  virtual std::string getDescription() const = 0;
+
   virtual bool canBeApplied(llvm::Value &V) = 0;
   virtual llvm::Value *
   applyMutation(llvm::Function *function, MutationPointAddress &address) = 0;

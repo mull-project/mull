@@ -16,6 +16,7 @@ using namespace llvm;
 using namespace mull;
 
 const std::string ConditionalsBoundaryMutator::ID = "conditionals_boundary_mutator";
+const std::string ConditionalsBoundaryMutator::description = "Replaces > with >=, >= with >, < with <=, <= with <";
 
 ///
 /// This mutator changes boundaries of conditionals:
@@ -205,6 +206,10 @@ std::string ConditionalsBoundaryMutator::getUniqueIdentifier() {
 
 std::string ConditionalsBoundaryMutator::getUniqueIdentifier() const {
   return ID;
+}
+
+std::string ConditionalsBoundaryMutator::getDescription() const {
+  return description;
 }
 
 MutatorKind ConditionalsBoundaryMutator::mutatorKind() {

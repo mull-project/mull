@@ -18,6 +18,7 @@ class MathDivMutator : public Mutator {
 
 public:
   static const std::string ID;
+  static const std::string description;
 
   MutationPoint *getMutationPoint(MullModule *module,
                                     llvm::Function *function,
@@ -30,6 +31,9 @@ public:
   }
   std::string getUniqueIdentifier() const override {
     return ID;
+  }
+  std::string getDescription() const override {
+    return description;
   }
 
   bool canBeApplied(llvm::Value &V) override;

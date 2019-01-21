@@ -15,8 +15,8 @@
 using namespace llvm;
 using namespace mull;
 
-const std::string RemoveVoidFunctionMutator::ID =
-  "remove_void_function_mutator";
+const std::string RemoveVoidFunctionMutator::ID = "remove_void_function_mutator";
+const std::string RemoveVoidFunctionMutator::description = "Removes calls to a function returning void";
 
 std::string getDiagnostics(Instruction &instruction) {
   assert(isa<CallInst>(instruction));

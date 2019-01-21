@@ -17,7 +17,7 @@ class MutatorsFactory {
 public:
   MutatorsFactory();
   std::vector<std::unique_ptr<Mutator>>
-    mutators(const std::vector<std::string> groups);
+    mutators(const std::vector<std::string> &groups);
 };
 
 } // namespace mull
