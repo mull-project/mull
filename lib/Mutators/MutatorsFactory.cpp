@@ -18,6 +18,7 @@
 #include <llvm/ADT/STLExtras.h>
 
 #include <set>
+#include <sstream>
 
 using namespace mull;
 using namespace std;
@@ -152,5 +153,45 @@ MutatorsFactory::mutators(const vector<string> &groups) {
   }
 
   return mutators;
+}
+
+/// Command Line Options
+
+std::string descriptionForGroup(const std::vector<std::string> &groupMembers) {
+  if (groupMembers.empty()) {
+    return std::string("empty group?");
+  }
+
+  std::stringstream members;
+  std::copy(groupMembers.begin(),
+            groupMembers.end() - 1,
+            std::ostream_iterator<std::string>(members, ", "));
+  members << *(groupMembers.end() - 1);
+
+  return members.str();
+}
+
+#include <iostream>
+
+std::vector<std::pair<std::string, std::string>>
+MutatorsFactory::commandLineOptions() {
+  std::vector<std::pair<std::string, std::string>> options;
+  for (auto &group : groupsMapping) {
+    options.push_back(std::make_pair(group.first,
+                                     descriptionForGroup(group.second)));
+  }
+
+  std::set<std::string> mutatorsSet;
+  std::vector<std::string> groups({ AllMutatorsGroup });
+  expandGroups({ AllMutatorsGroup }, groupsMapping, mutatorsSet);
+
+  auto allMutators = mutators({ AllMutatorsGroup });
+
+  for (auto &mutator : allMutators) {
+    options.push_back(std::make_pair(mutator->getUniqueIdentifier(),
+                                     mutator->getDescription()));
+  }
+
+  return options;
 }
 

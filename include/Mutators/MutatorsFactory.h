@@ -18,6 +18,8 @@ public:
   MutatorsFactory();
   std::vector<std::unique_ptr<Mutator>>
     mutators(const std::vector<std::string> &groups);
+
+  std::vector<std::pair<std::string, std::string>> commandLineOptions();
 };
 
 } // namespace mull
