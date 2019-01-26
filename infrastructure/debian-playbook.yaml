@@ -1,0 +1,43 @@
+- name: Setup Debian Machine
+  hosts: "{{ host | default('all') }}"
+
+  vars:
+    llvm_version: 6.0.0
+    platform: debian
+
+    mull_cxx_flags: -D_GLIBCXX_USE_CXX11_ABI=0
+
+    packages:
+      - fish
+      - vim
+      - wget
+      - git
+      - cmake
+      - ninja-build
+      - libz-dev
+      - libsqlite3-dev
+      - ncurses-dev
+      - libstdc++-6-dev
+      - pkg-config
+      - libxml2-dev
+      - uuid-dev
+
+  tasks:
+    - name: Prepare Working Directory
+      include: helpers/working-directory.yaml
+
+    - name: Install Required Packages
+      apt:
+        name: "{{ packages }}"
+        state: present
+      become: true
+
+    - name: Install LLVM
+      include: helpers/download-llvm.yaml
+
+    - name: Build Mull
+      include: helpers/build-mull.yaml
+
+    - name: Integration Tests
+      include: helpers/integration-tests.yaml
+

@@ -12,3 +12,6 @@ tmp/
 *.sqlite
 
 cmake-build*
+.vagrant
+*.log
+*.retry

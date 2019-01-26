@@ -1,0 +1,47 @@
+---
+- name: Run Mull examples
+  command: make {{ item }}
+  args:
+    chdir: "{{ source_dir }}/Examples/HelloWorld"
+  environment:
+    CXX: "{{ llvm_dir }}/bin/clang++"
+    LD_LIBRARY_PATH: "{{ llvm_dir }}/lib"
+  loop:
+    - run_driver
+    - run_cxx
+
+- name: Prepare integration tests
+  file:
+    path: "{{ working_dir }}/integration"
+    state: directory
+
+- name: Clone fmt
+  git:
+    repo: https://github.com/fmtlib/fmt.git
+    dest: "{{ working_dir }}/integration/fmt"
+    version: 9e554999ce02cf86fcdfe74fe740c4fe3f5a56d5
+
+- name: Create build directory for fmt
+  file:
+    path: "{{ working_dir }}/integration/fmt.build.dir"
+    state: directory
+
+- name: Prepare build system for fmt
+  command: cmake -G Ninja -DCMAKE_CXX_FLAGS=-fembed-bitcode "{{ working_dir }}/integration/fmt"
+  args:
+    chdir: "{{ working_dir }}/integration/fmt.build.dir"
+    creates: "{{ working_dir }}/integration/fmt.build.dir/CMakeCache.txt"
+  environment:
+    CC: "{{ llvm_dir }}/bin/clang"
+    CXX: "{{ llvm_dir }}/bin/clang++"
+
+- name: Build fmt
+  command: ninja core-test
+  args:
+    chdir: "{{ working_dir }}/integration/fmt.build.dir"
+
+- name: Run Mull against fmt
+  command: mull-cxx "{{ working_dir }}/integration/fmt.build.dir/bin/core-test"
+  environment:
+    LD_LIBRARY_PATH: "{{ llvm_dir }}/lib"
+

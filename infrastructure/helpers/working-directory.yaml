@@ -1,0 +1,14 @@
+---
+- name: Prepare Working Directory ({{ working_dir }})
+  file:
+    path: "{{ working_dir }}"
+    state: directory
+  become: true
+
+- name: Change ownership of working directory ({{ working_dir }})
+  file:
+    path: "{{ working_dir }}"
+    owner: "{{ ansible_user_id }}"
+    recurse: true
+  become: true
+
