@@ -42,29 +42,24 @@ ninja.build.mull-driver: ## Build mull-driver on macOS
 	cd $(BUILD_DIR_NINJA) && ninja mull-driver
 	@echo "Resulting binary:\n"$(BUILD_DIR_NINJA)/tools/driver/mull-driver
 
+ninja.build.mull-cxx: ## Build mull-driver on macOS
+	cd $(BUILD_DIR_NINJA) && ninja mull-cxx
+	@echo "Resulting binary:\n"$(BUILD_DIR_NINJA)/tools/driver/mull-cxx
+
 ninja.build.unit-tests: ## Build unit-tests on macOS
 	cd $(BUILD_DIR_NINJA) && ninja MullUnitTests -v
 
-ninja.install.mull-driver: ninja.build.mull-driver ## Install mull driver
+ninja.install.mull: ninja.build.mull-driver ninja.build.mull-cxx ## Install mull drivers
 	cd $(BUILD_DIR_NINJA) && ninja install
-
-ninja.build.example: ninja.install.mull-driver ## Build example on macOS
-	cd Examples/HelloWorld && \
-    export PATH=$(INSTALL_DIR)/bin:$(PATH) && \
-    make example \
-      MULL=mull-driver \
-      MULL_CC=$(PATH_TO_LLVM)/bin/clang
 
 ninja.run.unit-tests: ninja.build.unit-tests ## Run unit-tests on macOS
 	cd $(MULL_UNIT_TESTS_DIR) && $(MULL_UNIT_TESTS)
 
-ninja.run.example: ninja.build.example ## Run example on macOS
+ninja.run.example: ninja.install.mull ## Run example
 	cd Examples/HelloWorld && \
     export PATH=$(INSTALL_DIR)/bin:$(PATH) && \
-    make run \
-      MULL=mull-driver \
-      MULL_CC=$(PATH_TO_LLVM)/bin/clang
-
+    make run_driver run_cxx \
+      CXX=$(PATH_TO_LLVM)/bin/clang++
 
 ninja.clean:
 	rm -rfv $(BUILD_DIR_NINJA)
