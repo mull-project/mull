@@ -2,6 +2,7 @@
 #include "Instrumentation/DynamicCallTree.h"
 #include "Instrumentation/Instrumentation.h"
 #include "Driver.h"
+#include "MullModule.h"
 
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Constants.h>

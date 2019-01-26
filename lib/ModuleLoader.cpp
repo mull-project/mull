@@ -19,13 +19,23 @@ using namespace llvm;
 using namespace mull;
 
 static std::string MD5HashFromBuffer(StringRef buffer) {
-  MD5 Hasher;
-  Hasher.update(buffer);
-  MD5::MD5Result Hash;
-  Hasher.final(Hash);
-  SmallString<32> Result;
-  MD5::stringifyResult(Hash, Result);
-  return Result.str();
+  MD5 hasher;
+  hasher.update(buffer);
+  MD5::MD5Result hash;
+  hasher.final(hash);
+  SmallString<32> result;
+  MD5::stringifyResult(hash, result);
+  return result.str();
+}
+
+std::pair<std::string, std::unique_ptr<Module>>
+mull::loadModuleFromBuffer(LLVMContext &context, MemoryBuffer &buffer) {
+  auto module = parseBitcodeFile(buffer.getMemBufferRef(), context);
+  if (!module) {
+    return std::make_pair(std::string(), std::unique_ptr<Module>());
+  }
+  std::string md5 = MD5HashFromBuffer(buffer.getBuffer());
+  return std::make_pair(md5, std::move(module.get()));
 }
 
 std::unique_ptr<MullModule>
@@ -37,15 +47,18 @@ ModuleLoader::loadModuleAtPath(const std::string &path,
     return nullptr;
   }
 
-  std::string hash = MD5HashFromBuffer(buffer->get()->getBuffer());
+  MemoryBuffer *b = buffer.get().get();
+  auto modulePair = loadModuleFromBuffer(context, *b);
 
-  auto module = parseBitcodeFile(buffer->get()->getMemBufferRef(), context);
-  if (!module) {
+  std::string hash = modulePair.first;
+  std::unique_ptr<llvm::Module> module(std::move(modulePair.second));
+
+  if (module.get() == nullptr) {
     Logger::error() << "Cannot parse bitcode " << path << '\n';
     return nullptr;
   }
 
-  return make_unique<MullModule>(std::move(module.get()), std::move(buffer.get()), hash);
+  return make_unique<MullModule>(std::move(module), std::move(buffer.get()), hash);
 }
 
 std::vector<std::unique_ptr<MullModule>>
