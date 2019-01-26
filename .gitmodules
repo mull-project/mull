@@ -1,0 +1,4 @@
+[submodule "vendor/LibEBC"]
+	path = vendor/LibEBC
+	url = https://github.com/AlexDenisov/LibEBC.git
+	branch = fix_macos_freebsd_builds
