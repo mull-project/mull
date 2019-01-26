@@ -11,7 +11,7 @@ using namespace llvm;
 void DynamicCallTree::enterFunction(const uint32_t functionIndex,
                                     uint32_t *mapping,
                                     std::stack<uint32_t> &stack) {
-
+  assert(functionIndex != 0);
   if (stack.empty()) {
     /// This is the first function in a chain
     /// The root of a tree
@@ -28,6 +28,7 @@ void DynamicCallTree::enterFunction(const uint32_t functionIndex,
 void DynamicCallTree::leaveFunction(const uint32_t functionIndex,
                                     uint32_t *mapping,
                                     std::stack<uint32_t> &stack) {
+  assert(functionIndex != 0);
   stack.pop();
 }
 
