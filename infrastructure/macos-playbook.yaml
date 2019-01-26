@@ -1,0 +1,38 @@
+- name: Setup MacOS Machine
+  hosts: "{{ host | default('all') }}"
+
+  vars:
+    llvm_version: 6.0.0
+    platform: macos
+
+    mull_cxx_flags: ""
+
+    packages:
+      - cmake
+      - zlib
+      - ncurses
+      - sqlite
+      - ninja
+      - gnu-tar
+
+  vars_files:
+    - helpers/variables.yaml
+
+  tasks:
+    - name: Prepare Working Directory
+      include: helpers/working-directory.yaml
+
+    - name: Install Required Packages
+      homebrew:
+        name: "{{ packages }}"
+        state: present
+
+    - name: Install LLVM
+      include: helpers/download-llvm.yaml
+
+    - name: Build Mull
+      include: helpers/build-mull.yaml
+
+    - name: Integration Tests
+      include: helpers/integration-tests.yaml
+

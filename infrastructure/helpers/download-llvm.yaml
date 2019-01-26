@@ -1,0 +1,19 @@
+---
+- name: Download LLVM ({{ llvm_version }})
+  get_url:
+    url: "{{ llvm_url }}"
+    dest: "{{ working_dir }}/{{ llvm_version }}.tar.gz"
+  register: download_llvm
+
+- name: Extract LLVM ({{ llvm_version }})
+  unarchive:
+    src: "{{ working_dir }}/{{ llvm_version }}.tar.gz"
+    dest: "{{ working_dir }}"
+    remote_src: yes
+  when: download_llvm.changed
+
+- name: Move LLVM ({{ llvm_version }})
+  command: mv {{ working_dir }}/{{ llvm_path }} {{ llvm_dir }}
+  args:
+    creates: "{{ llvm_dir }}"
+

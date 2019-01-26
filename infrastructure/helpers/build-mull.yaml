@@ -1,0 +1,42 @@
+---
+- name: Clone Mull's sources
+  git:
+    repo: "{{ repo_url }}"
+    dest: "{{ source_dir }}"
+    version: "{{ gitref }}"
+
+- name: Create Build Directory
+  file:
+    path: "{{ build_dir }}"
+    state: directory
+
+- name: Prepare Build System
+  command: cmake -G Ninja -DPATH_TO_LLVM={{ llvm_dir }} -DCMAKE_CXX_FLAGS="{{ mull_cxx_flags }}" {{ source_dir }}
+  args:
+    chdir: "{{ build_dir }}"
+    creates: "{{ build_dir }}/CMakeCache.txt"
+  environment:
+    CC: "{{ llvm_dir }}/bin/clang"
+    CXX: "{{ llvm_dir }}/bin/clang++"
+
+- name: Build Mull
+  command: ninja all
+  args:
+    chdir: "{{ build_dir }}"
+
+- name: Install Mull
+  command: ninja install
+  args:
+    chdir: "{{ build_dir }}"
+  become: true
+
+- name: Build Unit Tests
+  command: ninja MullUnitTests
+  args:
+    chdir: "{{ build_dir }}"
+
+- name: Run Unit Tests
+  command: "{{ build_dir}}/unittests/MullUnitTests"
+  environment:
+    LD_LIBRARY_PATH: "{{ llvm_dir }}/lib"
+
