@@ -1,9 +1,10 @@
 #include "Toolchain/Compiler.h"
 
 #include "MullModule.h"
+#include "LLVMCompatibility.h"
 
-#include "llvm/ExecutionEngine/Orc/CompileUtils.h"
-#include "llvm/IR/Module.h"
+#include <llvm/ExecutionEngine/Orc/CompileUtils.h>
+#include <llvm/IR/Module.h>
 
 using namespace llvm;
 using namespace llvm::object;
@@ -24,7 +25,8 @@ OwningBinary<ObjectFile> Compiler::compileModule(Module *module,
 
   orc::SimpleCompiler compiler(machine);
 
-  OwningBinary<ObjectFile> objectFile = compiler(*module);
+  OwningBinary<ObjectFile> objectFile =
+      llvm_compat::compileModule(compiler, *module);
 
   return objectFile;
 }

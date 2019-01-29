@@ -18,12 +18,18 @@ uint64_t JITSymbolAddress(JITSymbol &symbol) {
   return addressOrError.get();
 }
 
-
 object::OwningBinary<object::ObjectFile>
 compileModule(orc::SimpleCompiler &compiler, llvm::Module &module) {
-  auto objectFile = compiler(module);
-  return std::move(objectFile);
-}
+  auto buffer = compiler(module);
+  auto bufferRef = buffer->getMemBufferRef();
+  auto objectOrError = object::ObjectFile::createObjectFile(bufferRef);
+  if (!objectOrError) {
+    consumeError(objectOrError.takeError());
+    return object::OwningBinary<object::ObjectFile>();
+  }
 
+  return object::OwningBinary<object::ObjectFile>(
+      std::move(objectOrError.get()), std::move(buffer));
+}
 }
 

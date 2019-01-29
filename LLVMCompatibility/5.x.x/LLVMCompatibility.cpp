@@ -18,5 +18,11 @@ uint64_t JITSymbolAddress(JITSymbol &symbol) {
   return addressOrError.get();
 }
 
+object::OwningBinary<object::ObjectFile>
+compileModule(orc::SimpleCompiler &compiler, llvm::Module &module) {
+  auto objectFile = compiler(module);
+  return std::move(objectFile);
+}
+
 }
 

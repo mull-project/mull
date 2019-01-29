@@ -11,6 +11,7 @@ env:
 - LLVM_VERSION=4.0
 - LLVM_VERSION=5.0
 - LLVM_VERSION=6.0
+- LLVM_VERSION=7.0
 
 before_install:
 - if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then make travis.install.macos; fi

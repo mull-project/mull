@@ -77,6 +77,7 @@ UBUNTU_URL_3.9=http://releases.llvm.org/3.9.0/clang+llvm-3.9.0-x86_64-linux-gnu-
 UBUNTU_URL_4.0=http://releases.llvm.org/4.0.0/clang+llvm-4.0.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz
 UBUNTU_URL_5.0=http://releases.llvm.org/5.0.0/clang+llvm-5.0.0-linux-x86_64-ubuntu14.04.tar.xz
 UBUNTU_URL_6.0=http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz
+UBUNTU_URL_7.0=http://releases.llvm.org/7.0.0/clang+llvm-7.0.0-x86_64-linux-gnu-ubuntu-14.04.tar.xz
 UBUNTU_URL=$(shell echo $(UBUNTU_URL_$(LLVM_VERSION)))
 UBUNTU_ARCHIVE=$(shell echo $(UBUNTU_URL) | awk -F/ ' { print $$NF } ' | sed 's/.tar.xz//')
 
@@ -84,6 +85,7 @@ MACOS_URL_3.9=http://releases.llvm.org/3.9.0/clang+llvm-3.9.0-x86_64-apple-darwi
 MACOS_URL_4.0=http://releases.llvm.org/4.0.0/clang+llvm-4.0.0-x86_64-apple-darwin.tar.xz
 MACOS_URL_5.0=http://releases.llvm.org/5.0.0/clang+llvm-5.0.0-x86_64-apple-darwin.tar.xz
 MACOS_URL_6.0=http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-apple-darwin.tar.xz
+MACOS_URL_7.0=http://releases.llvm.org/7.0.0/clang+llvm-7.0.0-x86_64-apple-darwin.tar.xz
 MACOS_URL=$(shell echo $(MACOS_URL_$(LLVM_VERSION)))
 MACOS_ARCHIVE=$(shell echo $(MACOS_URL) | awk -F/ ' { print $$NF } ' | sed 's/.tar.xz//')
 

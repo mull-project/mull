@@ -6,7 +6,6 @@
 #include "LLVMCompatibility.h"
 
 using namespace mull;
-using namespace llvm;
 using namespace llvm::object;
 
 ObjectCache::ObjectCache(bool useCache, const std::string &cacheDir)
@@ -33,8 +32,7 @@ OwningBinary<ObjectFile> ObjectCache::getObjectFromDisk(const std::string &ident
 
   std::string cacheName(cacheDirectory + "/" + identifier + ".o");
 
-  ErrorOr<std::unique_ptr<MemoryBuffer>> buffer =
-    MemoryBuffer::getFile(cacheName.c_str());
+  auto buffer = llvm::MemoryBuffer::getFile(cacheName.c_str());
 
   if (!buffer) {
     return OwningBinary<ObjectFile>();
@@ -70,7 +68,7 @@ void ObjectCache::putObjectOnDisk(OwningBinary<ObjectFile> &object,
 
   std::string cacheName(cacheDirectory + "/" + identifier + ".o");
   std::error_code EC;
-  raw_fd_ostream outfile(cacheName, EC, sys::fs::F_None);
+  llvm::raw_fd_ostream outfile(cacheName, EC, llvm::sys::fs::F_None);
   outfile.write(object.getBinary()->getMemoryBufferRef().getBufferStart(),
                 object.getBinary()->getMemoryBufferRef().getBufferSize());
   outfile.close();
