@@ -73,6 +73,10 @@ llvm::cl::opt<std::string> InputFile(llvm::cl::Positional,
                                      llvm::cl::desc("<input files>"),
                                      llvm::cl::Required);
 
+llvm::cl::opt<unsigned> Workers("workers", llvm::cl::Optional,
+                                llvm::cl::desc("How many threads to use"),
+                                llvm::cl::cat(MullCXXCategory));
+
 enum MutatorsOptionIndex : int {
   _mutatorsOptionIndex_unused
 };
@@ -122,8 +126,16 @@ int main(int argc, char **argv) {
   llvm::InitializeNativeTargetAsmParser();
 
   mull::Configuration configuration;
-  configuration.parallelization = mull::ParallelizationConfig::defaultConfig();
   configuration.failFastEnabled = true;
+
+  if (Workers) {
+    mull::ParallelizationConfig parallelizationConfig;
+    parallelizationConfig.workers = Workers;
+    parallelizationConfig.normalize();
+    configuration.parallelization = parallelizationConfig;
+  } else {
+    configuration.parallelization = mull::ParallelizationConfig::defaultConfig();
+  }
 
   std::vector<std::unique_ptr<ebc::EmbeddedFile>> embeddedFiles;
   mull::SingleTaskExecutor extractBitcodeBuffers(
