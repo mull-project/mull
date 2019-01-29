@@ -1,13 +1,13 @@
 #pragma once
 
 #include <llvm/ExecutionEngine/RuntimeDyld.h>
-#include <llvm/ExecutionEngine/Orc/CompileUtils.h>
 #include <llvm/Bitcode/BitcodeReader.h>
+#include <llvm/ExecutionEngine/Orc/CompileUtils.h>
 
 namespace llvm_compat {
   using namespace llvm;
 
-  typedef JITSymbolResolver SymbolResolver;
+  typedef LegacyJITSymbolResolver SymbolResolver;
   typedef JITSymbol JITSymbolInfo;
   typedef JITSymbol JITSymbol;
 

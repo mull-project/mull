@@ -2,6 +2,7 @@
 
 #include <llvm/ExecutionEngine/RuntimeDyld.h>
 #include <llvm/ExecutionEngine/Orc/JITSymbol.h>
+#include <llvm/ExecutionEngine/Orc/CompileUtils.h>
 #include <llvm/Bitcode/ReaderWriter.h>
 
 namespace llvm_compat {
@@ -13,5 +14,7 @@ namespace llvm_compat {
 
   uint64_t JITSymbolAddress(JITSymbol &symbol);
   JITSymbolFlags JITSymbolFlagsFromObjectSymbol(const object::BasicSymbolRef &symbol);
+  object::OwningBinary<object::ObjectFile>
+  compileModule(orc::SimpleCompiler &compiler, llvm::Module &module);
 }
 
