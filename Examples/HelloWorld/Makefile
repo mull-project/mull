@@ -22,7 +22,7 @@ run_driver: prepare_driver
 	mull-driver $(BUILD_DIR)/config.yml
 
 run_cxx: prepare_cxx
-	mull-cxx $(BUILD_DIR)/HelloWorldTests
+	mull-cxx -test-framework=GoogleTest $(BUILD_DIR)/HelloWorldTests
 
 prepare_driver: $(BUILD_DIR) config
 	$(CXX) -emit-llvm -c \

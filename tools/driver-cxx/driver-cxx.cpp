@@ -5,8 +5,8 @@
 #include <ebc/EmbeddedBitcode.h>
 #include <ebc/EmbeddedFile.h>
 
-#include <llvm/Support/MemoryBuffer.h>
 #include <llvm/IR/Module.h>
+#include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/TargetSelect.h>
 
 #include <iostream>
@@ -25,9 +25,9 @@
 
 /// Temp includes to make it running
 
-#include "Reporters/SQLiteReporter.h"
 #include "Config/RawConfig.h"
 #include "Metrics/Metrics.h"
+#include "Reporters/SQLiteReporter.h"
 
 class LoadModuleFromBitcodeTask {
 public:
@@ -82,27 +82,23 @@ llvm::cl::opt<std::string> CacheDir(
     llvm::cl::desc("Where to store cache (defaults to /tmp/mull-cache)"),
     llvm::cl::cat(MullCXXCategory), llvm::cl::init("/tmp/mull-cache"));
 
-llvm::cl::opt<bool> DisableCache(
-    "disable-cache", llvm::cl::Optional,
-    llvm::cl::desc("Disables cache (enabled by default)"),
-    llvm::cl::cat(MullCXXCategory), llvm::cl::init(false));
+llvm::cl::opt<bool>
+    DisableCache("disable-cache", llvm::cl::Optional,
+                 llvm::cl::desc("Disables cache (enabled by default)"),
+                 llvm::cl::cat(MullCXXCategory), llvm::cl::init(false));
 
-enum MutatorsOptionIndex : int {
-  _mutatorsOptionIndex_unused
-};
-llvm::cl::list<MutatorsOptionIndex> Mutators("mutators",
-                                             llvm::cl::ZeroOrMore,
+enum MutatorsOptionIndex : int { _mutatorsOptionIndex_unused };
+llvm::cl::list<MutatorsOptionIndex> Mutators("mutators", llvm::cl::ZeroOrMore,
                                              llvm::cl::desc("Choose mutators:"),
                                              llvm::cl::cat(MullCXXCategory));
 
 class MutatorsCLIOptions {
 public:
   explicit MutatorsCLIOptions(llvm::cl::list<MutatorsOptionIndex> &parameter)
-  : options(factory.commandLineOptions()), parameter(parameter) {
+      : options(factory.commandLineOptions()), parameter(parameter) {
     int index = 0;
     for (auto &option : options) {
-      parameter.getParser().addLiteralOption(option.first.c_str(),
-                                             index++,
+      parameter.getParser().addLiteralOption(option.first.c_str(), index++,
                                              option.second.c_str());
     }
   }
@@ -116,14 +112,46 @@ public:
 
     return factory.mutators(selectedGroups);
   }
+
 private:
   mull::MutatorsFactory factory;
   std::vector<std::pair<std::string, std::string>> options;
   llvm::cl::list<MutatorsOptionIndex> &parameter;
 };
 
+enum TestFrameworkOptionIndex : int { _testFrameworkOptionIndex_unused };
+llvm::cl::opt<TestFrameworkOptionIndex>
+    TestFrameworks("test-framework", llvm::cl::Required,
+                   llvm::cl::desc("Choose test framework:"),
+                   llvm::cl::cat(MullCXXCategory));
+
+class TestFrameworkCLIOptions {
+public:
+  explicit TestFrameworkCLIOptions(
+      llvm::cl::opt<TestFrameworkOptionIndex> &parameter)
+      : options(factory.commandLineOptions()), parameter(parameter) {
+    int index = 0;
+    for (auto &option : options) {
+      parameter.getParser().addLiteralOption(option.first.c_str(), index++,
+                                             option.second.c_str());
+    }
+  }
+
+  mull::TestFramework testFramework(mull::Toolchain &toolchain,
+                                    mull::Configuration &configuration) {
+    auto &name = options[parameter.getValue()].first;
+    return factory.createTestFramework(name, toolchain, configuration);
+  }
+
+private:
+  mull::TestFrameworkFactory factory;
+  std::vector<std::pair<std::string, std::string>> options;
+  llvm::cl::opt<TestFrameworkOptionIndex> &parameter;
+};
+
 int main(int argc, char **argv) {
   MutatorsCLIOptions mutatorsOptions(Mutators);
+  TestFrameworkCLIOptions testFrameworkOption(TestFrameworks);
 
   llvm::cl::HideUnrelatedOptions(MullCXXCategory);
   llvm::cl::ParseCommandLineOptions(argc, argv);
@@ -144,7 +172,8 @@ int main(int argc, char **argv) {
     parallelizationConfig.normalize();
     configuration.parallelization = parallelizationConfig;
   } else {
-    configuration.parallelization = mull::ParallelizationConfig::defaultConfig();
+    configuration.parallelization =
+        mull::ParallelizationConfig::defaultConfig();
   }
 
   if (!DisableCache.getValue()) {
@@ -185,8 +214,8 @@ int main(int argc, char **argv) {
 
   mull::Toolchain toolchain(configuration);
 
-  mull::TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
-  mull::TestFramework testFramework(testFrameworkFactory.googleTestFramework());
+  mull::TestFramework testFramework(
+      testFrameworkOption.testFramework(toolchain, configuration));
 
   mull::Filter filter;
   mull::NullJunkDetector junkDetector;
