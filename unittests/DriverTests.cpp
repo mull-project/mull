@@ -51,8 +51,9 @@ TEST(Driver, RunningWithNoTests) {
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
-  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
+  TestFrameworkFactory testFrameworkFactory;
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework(toolchain,
+                                                                       configuration));
   Program program({}, {}, {});
 
   Driver Driver(configuration, program, testFramework, toolchain, filter, finder, metrics, junkDetector);
@@ -91,8 +92,9 @@ TEST(Driver, SimpleTest_MathAddMutator) {
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
-  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
+  TestFrameworkFactory testFrameworkFactory;
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework(toolchain,
+                                                                       configuration));
 
   Driver Driver(configuration, program, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -142,8 +144,9 @@ TEST(Driver, SimpleTest_MathSubMutator) {
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
-  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
+  TestFrameworkFactory testFrameworkFactory;
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework(toolchain,
+                                                                       configuration));
 
   Driver Driver(configuration, program, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -193,8 +196,9 @@ TEST(Driver, SimpleTest_MathMulMutator) {
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
-  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
+  TestFrameworkFactory testFrameworkFactory;
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework(toolchain,
+                                                                       configuration));
 
   Driver Driver(configuration, program, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -243,8 +247,9 @@ TEST(Driver, SimpleTest_MathDivMutator) {
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
-  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
+  TestFrameworkFactory testFrameworkFactory;
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework(toolchain,
+                                                                       configuration));
 
   Driver Driver(configuration, program, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -294,8 +299,9 @@ TEST(Driver, SimpleTest_NegateConditionMutator) {
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
-  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
+  TestFrameworkFactory testFrameworkFactory;
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework(toolchain,
+                                                                       configuration));
 
   Driver Driver(configuration, program, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -338,8 +344,9 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutator) {
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
-  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
+  TestFrameworkFactory testFrameworkFactory;
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework(toolchain,
+                                                                       configuration));
 
   Driver Driver(configuration, program, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -381,8 +388,9 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
-  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
+  TestFrameworkFactory testFrameworkFactory;
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework(toolchain,
+                                                                       configuration));
 
   Driver Driver(configuration, program, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -498,8 +506,9 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator_CPP) {
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
-  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
+  TestFrameworkFactory testFrameworkFactory;
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework(toolchain,
+                                                                       configuration));
 
   Driver Driver(configuration, program, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -577,8 +586,9 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutator_CPP) {
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
-  TestFramework testFramework(testFrameworkFactory.simpleTestFramework());
+  TestFrameworkFactory testFrameworkFactory;
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework(toolchain,
+                                                                       configuration));
 
   Driver Driver(configuration, program, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -625,8 +635,9 @@ TEST(Driver, customTest) {
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
-  TestFramework testFramework(testFrameworkFactory.customTestFramework());
+  TestFrameworkFactory testFrameworkFactory;
+  TestFramework testFramework(testFrameworkFactory.customTestFramework(toolchain,
+                                                                       configuration));
 
   Driver driver(configuration, program, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -668,8 +679,9 @@ TEST(Driver, customTest_withDynamicLibraries) {
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
-  TestFramework testFramework(testFrameworkFactory.customTestFramework());
+  TestFrameworkFactory testFrameworkFactory;
+  TestFramework testFramework(testFrameworkFactory.customTestFramework(toolchain,
+                                                                       configuration));
 
   Driver driver(configuration, program, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -710,8 +722,9 @@ TEST(Driver, junkDetector_enabled) {
   Metrics metrics;
   AllJunkDetector junkDetector;
 
-  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
-  TestFramework testFramework(testFrameworkFactory.customTestFramework());
+  TestFrameworkFactory testFrameworkFactory;
+  TestFramework testFramework(testFrameworkFactory.customTestFramework(toolchain,
+                                                                       configuration));
 
   Driver driver(configuration, program, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -745,8 +758,9 @@ TEST(Driver, junkDetector_disabled) {
   Metrics metrics;
   AllJunkDetector junkDetector;
 
-  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
-  TestFramework testFramework(testFrameworkFactory.customTestFramework());
+  TestFrameworkFactory testFrameworkFactory;
+  TestFramework testFramework(testFrameworkFactory.customTestFramework(toolchain,
+                                                                       configuration));
 
   Driver driver(configuration, program, testFramework, toolchain, filter, finder, metrics, junkDetector);
 
@@ -784,8 +798,9 @@ TEST(Driver, DISABLED_customTest_withDynamicLibraries_and_ObjectFiles) {
   Metrics metrics;
   NullJunkDetector junkDetector;
 
-  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
-  TestFramework testFramework(testFrameworkFactory.customTestFramework());
+  TestFrameworkFactory testFrameworkFactory;
+  TestFramework testFramework(testFrameworkFactory.customTestFramework(toolchain,
+                                                                       configuration));
 
   Driver driver(configuration, program, testFramework, toolchain, filter, finder, metrics, junkDetector);
 

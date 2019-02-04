@@ -9,16 +9,18 @@ class Toolchain;
 
 class TestFrameworkFactory {
 public:
-  TestFrameworkFactory(Configuration &configuration, Toolchain &toolchain);
-  TestFramework createTestFramework(const std::string &name);
+  TestFramework createTestFramework(const std::string &name,
+                                    Toolchain &toolchain,
+                                    Configuration &configuration);
 
-  TestFramework simpleTestFramework();
-  TestFramework googleTestFramework();
-  TestFramework customTestFramework();
+  TestFramework simpleTestFramework(Toolchain &toolchain,
+                                    Configuration &configuration);
+  TestFramework googleTestFramework(Toolchain &toolchain,
+                                    Configuration &configuration);
+  TestFramework customTestFramework(Toolchain &toolchain,
+                                    Configuration &configuration);
 
-private:
-  Configuration &configuration;
-  Toolchain &toolchain;
+  std::vector<std::pair<std::string, std::string>> commandLineOptions();
 };
 
 } // namespace mull

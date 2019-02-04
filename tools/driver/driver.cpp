@@ -101,8 +101,9 @@ int main(int argc, char *argv[]) {
     filter.skipByLocation("gmock");
   }
 
-  TestFrameworkFactory testFrameworkFactory(configuration, toolchain);
-  TestFramework testFramework(testFrameworkFactory.createTestFramework(testFrameworkName));
+  TestFrameworkFactory testFrameworkFactory;
+  TestFramework testFramework(testFrameworkFactory.createTestFramework(
+      testFrameworkName, toolchain, configuration));
 
   std::unique_ptr<JunkDetector> junkDetector(make_unique<NullJunkDetector>());
   if (configuration.junkDetectionEnabled) {
