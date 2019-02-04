@@ -77,6 +77,16 @@ llvm::cl::opt<unsigned> Workers("workers", llvm::cl::Optional,
                                 llvm::cl::desc("How many threads to use"),
                                 llvm::cl::cat(MullCXXCategory));
 
+llvm::cl::opt<std::string> CacheDir(
+    "cache-dir", llvm::cl::Optional,
+    llvm::cl::desc("Where to store cache (defaults to /tmp/mull-cache)"),
+    llvm::cl::cat(MullCXXCategory), llvm::cl::init("/tmp/mull-cache"));
+
+llvm::cl::opt<bool> DisableCache(
+    "disable-cache", llvm::cl::Optional,
+    llvm::cl::desc("Disables cache (enabled by default)"),
+    llvm::cl::cat(MullCXXCategory), llvm::cl::init(false));
+
 enum MutatorsOptionIndex : int {
   _mutatorsOptionIndex_unused
 };
@@ -135,6 +145,11 @@ int main(int argc, char **argv) {
     configuration.parallelization = parallelizationConfig;
   } else {
     configuration.parallelization = mull::ParallelizationConfig::defaultConfig();
+  }
+
+  if (!DisableCache.getValue()) {
+    configuration.cacheEnabled = true;
+    configuration.cacheDirectory = CacheDir.getValue();
   }
 
   std::vector<std::unique_ptr<ebc::EmbeddedFile>> embeddedFiles;
