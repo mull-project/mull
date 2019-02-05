@@ -3,8 +3,10 @@ compiler: clang
 sudo: required
 
 os:
-- osx
 - linux
+- osx
+
+dist: xenial
 
 env:
 - LLVM_VERSION=3.9
@@ -14,14 +16,13 @@ env:
 - LLVM_VERSION=7.0
 
 before_install:
-- if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then make travis.install.macos; fi
-- if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then make travis.install.ubuntu; fi
-
-# Uncomment this line when support Rust
-# - if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then curl -sf https://static.rust-lang.org/rustup.sh | sudo sh; fi
+- echo $PLAYBOOK
+- if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then HOMEBREW_NO_AUTO_UPDATE=1 brew install ansible; fi
+- if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then sudo pip install ansible; fi
+- if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test && sudo apt-get update; fi
 
 # Build steps
 script:
-- if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then make ninja.init travis.test PATH_TO_LLVM=/opt/llvm-$LLVM_VERSION INSTALL_DIR=/tmp/mull; fi
-- if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then make ninja.init travis.test PATH_TO_LLVM=/opt/llvm-$LLVM_VERSION INSTALL_DIR=/tmp/mull; fi
+- if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then cd infrastructure && ansible-playbook macos-playbook.yaml -e llvm_version=$LLVM_VERSION.0 -e source_dir=$PWD/.. -e gitref=$TRAVIS_COMMIT -e host=localhost --verbose; fi
+- if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then cd infrastructure && ansible-playbook ubuntu-playbook.yaml -e llvm_version=$LLVM_VERSION.0 -e source_dir=$PWD/.. -e gitref=$TRAVIS_COMMIT -e host=localhost --verbose; fi
 

@@ -26,6 +26,8 @@
       homebrew:
         name: "{{ packages }}"
         state: present
+      environment:
+        HOMEBREW_NO_AUTO_UPDATE: 1
 
     - name: Install LLVM
       include: helpers/download-llvm.yaml

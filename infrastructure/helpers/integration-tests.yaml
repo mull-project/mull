@@ -41,7 +41,7 @@
     chdir: "{{ working_dir }}/integration/fmt.build.dir"
 
 - name: Run Mull against fmt
-  command: mull-cxx "{{ working_dir }}/integration/fmt.build.dir/bin/core-test"
+  command: mull-cxx -test-framework=GoogleTest "{{ working_dir }}/integration/fmt.build.dir/bin/core-test"
   environment:
     LD_LIBRARY_PATH: "{{ llvm_dir }}/lib"
 
