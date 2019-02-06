@@ -8,7 +8,6 @@
     mull_cxx_flags: -D_GLIBCXX_USE_CXX11_ABI=1
 
     packages:
-      - fish
       - vim
       - wget
       - git
