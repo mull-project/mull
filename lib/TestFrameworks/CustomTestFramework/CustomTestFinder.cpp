@@ -21,10 +21,9 @@ CustomTestFinder::CustomTestFinder(
 
 std::vector<std::unique_ptr<Test>> CustomTestFinder::findTests(Program &program,
                                                                Filter &filter) {
-  std::map<std::string, size_t> testMapping;
-  for (size_t i = 0; i < testDefinitions.size(); i++) {
-    const CustomTestDefinition &definition = testDefinitions[i];
-    testMapping[definition.methodName] = i;
+  std::map<std::string, std::vector<CustomTestDefinition>> testMapping;
+  for (const auto &definition : testDefinitions) {
+    testMapping[definition.methodName].push_back(definition);
   }
 
   std::vector<std::unique_ptr<Test>> tests;
@@ -40,20 +39,20 @@ std::vector<std::unique_ptr<Test>> CustomTestFinder::findTests(Program &program,
         continue;
       }
 
-      const CustomTestDefinition &definition =
-          testDefinitions[testMapping.at(functionName)];
-      if (filter.shouldSkipTest(definition.testName)) {
-        continue;
-      }
+      for (auto &definition : testMapping.at(functionName)) {
+        if (filter.shouldSkipTest(definition.testName)) {
+          continue;
+        }
 
-      std::string programName = definition.programName;
-      if (programName.empty()) {
-        programName = "mull";
-      }
+        std::string programName = definition.programName;
+        if (programName.empty()) {
+          programName = "mull";
+        }
 
-      tests.emplace_back(make_unique<CustomTest_Test>(
-          definition.testName, programName, definition.callArguments, &function,
-          program.getStaticConstructors()));
+        tests.emplace_back(make_unique<CustomTest_Test>(
+            definition.testName, programName, definition.callArguments,
+            &function, program.getStaticConstructors()));
+      }
     }
   }
 
