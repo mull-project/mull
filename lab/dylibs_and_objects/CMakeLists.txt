@@ -23,6 +23,6 @@ compile_fixture(
 compile_fixture(
   INPUT ${main_c}
   OUTPUT_EXTENSION o
-  FLAGS -c
+  FLAGS -c -mcmodel=large
 )
 
