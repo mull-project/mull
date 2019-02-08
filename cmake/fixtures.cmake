@@ -47,7 +47,7 @@ if (TARGET cxxabi)
   set (clang_dependencies ${clang_dependencies} cxxabi)
 endif()
 
-  add_custom_target(${dependency} DEPENDS ${fixture} ${clang_dependencies})
+  add_custom_target(${dependency} DEPENDS ${fixture} ${clang_dependencies} ${local_INPUT})
   add_fixture(${fixture})
   add_fixture_dependency(${dependency})
 endfunction()
