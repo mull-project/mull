@@ -18,6 +18,7 @@
 #include "Toolchain/Mangler.h"
 #include "Program/Program.h"
 #include "TestFrameworks/TestFrameworkFactory.h"
+#include "ObjectLoader.h"
 
 #include "JunkDetection/JunkDetector.h"
 #include "Toolchain/Toolchain.h"
@@ -769,7 +770,7 @@ TEST(Driver, junkDetector_disabled) {
   ASSERT_EQ(3UL, result->getMutationResults().size());
 }
 
-TEST(Driver, DISABLED_customTest_withDynamicLibraries_and_ObjectFiles) {
+TEST(Driver, customTest_withDynamicLibraries_and_ObjectFiles) {
   Configuration configuration;
   configuration.customTests = {
       CustomTestDefinition("passing", "passing_test", "mull", { "passing_test" })
@@ -788,9 +789,11 @@ TEST(Driver, DISABLED_customTest_withDynamicLibraries_and_ObjectFiles) {
   mutators.emplace_back(make_unique<MathAddMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
 
-  ModuleLoader loader;
-  Program program(configuration.dynamicLibraryPaths, {},
-                  loader.loadModules(configuration));
+  ModuleLoader moduleLoader;
+  ObjectLoader objectLoader;
+  Program program(configuration.dynamicLibraryPaths,
+                  objectLoader.loadObjectFiles(configuration),
+                  moduleLoader.loadModules(configuration));
 
   Toolchain toolchain(configuration);
   Filter filter;
