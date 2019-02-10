@@ -1,5 +1,5 @@
 ---
-gitref: mull_cxx_driver
+gitref: master
 repo_url: https://github.com/mull-project/mull.git
 working_dir: /opt
 

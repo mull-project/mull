@@ -22,6 +22,9 @@
       - libxml2-dev
       - uuid-dev
 
+  vars_files:
+    - helpers/variables.yaml
+
   tasks:
     - name: Prepare Working Directory
       include: helpers/working-directory.yaml
