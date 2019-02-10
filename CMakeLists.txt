@@ -1,7 +1,11 @@
 cmake_minimum_required(VERSION 3.7.0)
 
-project(Mull)
-enable_language(C CXX)
+project(Mull
+  VERSION 0.0.1
+  DESCRIPTION "LLVM-based mutation testing"
+  HOMEPAGE_URL "https://github.com/mull-project/mull"
+  LANGUAGES C CXX
+)
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/properties.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/fixtures.cmake)
@@ -181,4 +185,6 @@ add_subdirectory(lib)
 add_subdirectory(googletest)
 add_subdirectory(tools)
 add_subdirectory(unittests)
+
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/cpack.cmake)
 

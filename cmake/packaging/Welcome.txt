@@ -1,0 +1,5 @@
+Welcome!
+
+Mull is a tool for mutation testing based on LLVM.
+
+You can find more information here: https://github.com/mull-project/mull
