@@ -134,7 +134,6 @@ find_package(Threads REQUIRED)
 target_link_libraries(mull
   ${MULL_LLVM_LIBRARIES}
   ${SQLITE_DEPENDENCY}
-  libclang
   clangTooling
   Threads::Threads
 )

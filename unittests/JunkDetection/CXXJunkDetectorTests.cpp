@@ -98,7 +98,7 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
   ASSERT_EQ(nonJunkMutationPoints.size(), 7U);
 }
 
-TEST(CXXJunkDetector, compdb_relative_paths) {
+TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
   LLVMContext llvmContext;
   ModuleLoader loader;
   auto mullModule = loader.loadModuleAtPath(fixtures::junk_detection_compdb_main_bc_path(), llvmContext);

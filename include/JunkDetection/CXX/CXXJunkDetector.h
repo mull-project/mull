@@ -7,8 +7,8 @@
 #include <string>
 #include <mutex>
 
-#include <clang-c/Index.h>
 #include <clang/Tooling/CompilationDatabase.h>
+#include <clang/Frontend/ASTUnit.h>
 
 namespace mull {
 
@@ -18,23 +18,22 @@ struct JunkDetectionConfig;
 class CXXJunkDetector : public JunkDetector {
 public:
   explicit CXXJunkDetector(JunkDetectionConfig &config);
-  ~CXXJunkDetector();
+  ~CXXJunkDetector() = default;
 
   bool isJunk(MutationPoint *point) override;
 private:
   std::mutex mutex;
-  std::pair<CXCursor, CXSourceLocation> cursorAndLocation(MutationPoint *point);
-  CXTranslationUnit translationUnit(const SourceLocation &location, const std::string &sourceFile);
 
-  bool isJunkBoundary(CXCursor cursor, CXSourceLocation location, MutationPoint *point);
-  bool isJunkMathAdd(CXCursor cursor, CXSourceLocation location, MutationPoint *point);
-  bool isJunkNegate(CXCursor cursor, CXSourceLocation location, MutationPoint *point);
-  bool isJunkRemoveVoid(CXCursor cursor, CXSourceLocation location, MutationPoint *point);
+  const clang::ASTUnit *findAST(const MutationPoint *point);
+  const clang::FileEntry *findFileEntry(const clang::ASTUnit *ast,
+                                        const MutationPoint *point);
+  std::vector<std::string> commandLineArguments(const std::string &sourceFile);
 
-  CXIndex index;
-  std::map<std::string, CXTranslationUnit> units;
+  bool isJunkBoundaryConditional(MutationPoint *point, SourceLocation &location);
+
   std::unique_ptr<clang::tooling::CompilationDatabase> compdb;
   std::vector<std::string> compilationFlags;
+  std::map<std::string, std::unique_ptr<clang::ASTUnit>> astUnits;
 };
 
 }
