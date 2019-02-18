@@ -2,6 +2,7 @@
 #include "Config/RawConfig.h"
 #include "Program/Program.h"
 #include "Mutators/ConditionalsBoundaryMutator.h"
+#include "Mutators/MathAddMutator.h"
 #include "MutationPoint.h"
 #include "Toolchain/Compiler.h"
 #include "Toolchain/Toolchain.h"
@@ -21,10 +22,29 @@
 using namespace mull;
 using namespace llvm;
 
-TEST(CXXJunkDetector, boundary_mutator) {
+using ::testing::TestWithParam;
+using ::testing::Values;
+
+struct CXXJunkDetectorTestParameter {
+  const char *modulePath;
+  Mutator *mutator;
+  uint8_t totalMutants;
+  uint8_t nonJunkMutants;
+  CXXJunkDetectorTestParameter(const char *modulePath,
+                               Mutator *mutator,
+                               uint8_t totalMutants, uint8_t nonJunkMutants)
+      : modulePath(modulePath), mutator(mutator),
+        totalMutants(totalMutants), nonJunkMutants(nonJunkMutants) {}
+};
+
+class CXXJunkDetectorTest : public TestWithParam<CXXJunkDetectorTestParameter> {
+};
+
+TEST_P(CXXJunkDetectorTest, detectJunk) {
+  auto &parameter = GetParam();
   LLVMContext llvmContext;
   ModuleLoader loader;
-  auto mullModule = loader.loadModuleAtPath(fixtures::mutators_boundary_module_bc_path(), llvmContext);
+  auto mullModule = loader.loadModuleAtPath(parameter.modulePath, llvmContext);
   auto module = mullModule->getModule();
 
   std::vector<std::unique_ptr<MullModule>> modules;
@@ -32,9 +52,9 @@ TEST(CXXJunkDetector, boundary_mutator) {
   Program program({}, {}, std::move(modules));
   Configuration configuration;
 
-  std::vector<std::unique_ptr<Mutator>> mutatorss;
-  mutatorss.emplace_back(make_unique<ConditionalsBoundaryMutator>());
-  MutationsFinder finder(std::move(mutatorss), configuration);
+  std::vector<std::unique_ptr<Mutator>> mutators;
+  mutators.emplace_back(std::move(std::unique_ptr<Mutator>(parameter.mutator)));
+  MutationsFinder finder(std::move(mutators), configuration);
   Filter filter;
 
   std::vector<std::unique_ptr<Testee>> testees;
@@ -43,22 +63,29 @@ TEST(CXXJunkDetector, boundary_mutator) {
   }
   auto mergedTestees = mergeTestees(testees);
 
-  std::vector<MutationPoint *> points = finder.getMutationPoints(program, mergedTestees, filter);
+  std::vector<MutationPoint *> points =
+      finder.getMutationPoints(program, mergedTestees, filter);
 
-  ASSERT_EQ(points.size(), 7U);
+  ASSERT_EQ(points.size(), parameter.totalMutants);
 
   JunkDetectionConfig junkConfig;
 
   CXXJunkDetector detector(junkConfig);
   std::vector<MutationPoint *> nonJunkMutationPoints;
-  for (auto point: points) {
+  for (auto point : points) {
     if (!detector.isJunk(point)) {
       nonJunkMutationPoints.push_back(point);
     }
   }
 
-  ASSERT_EQ(nonJunkMutationPoints.size(), 6U);
+  ASSERT_EQ(nonJunkMutationPoints.size(), parameter.nonJunkMutants);
 }
+
+INSTANTIATE_TEST_CASE_P(CXXJunkDetection, CXXJunkDetectorTest,
+                        Values(
+                          CXXJunkDetectorTestParameter(fixtures::mutators_boundary_module_bc_path(), new ConditionalsBoundaryMutator, 7, 6),
+                          CXXJunkDetectorTestParameter(fixtures::mutators_boundary_module_bc_path(), new MathAddMutator, 7, 6)
+                        ));
 
 TEST(CXXJunkDetector, compdb_absolute_paths) {
   LLVMContext llvmContext;
