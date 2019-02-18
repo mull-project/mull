@@ -151,8 +151,8 @@ Some mutations found at the Bitcode level cannot be reproduced by a programmer
 at the source code level. Mull comes with `CXXJunkDetector` that filters out
 some junk mutations.
 
-`CXXJunkDetector` is based on `libclang`, to parse source files
-correctly `libclang` needs either compilation database, or set of flags used
+`CXXJunkDetector` is based on `clangTooling`, to parse source files
+correctly `clangTooling` needs either compilation database, or set of flags used
 for a compilation.
 
 By default junk detection is disabled. See examples below.
