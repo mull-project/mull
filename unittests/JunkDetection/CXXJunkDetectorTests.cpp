@@ -30,11 +30,19 @@ struct CXXJunkDetectorTestParameter {
   Mutator *mutator;
   uint8_t totalMutants;
   uint8_t nonJunkMutants;
-  CXXJunkDetectorTestParameter(const char *modulePath,
-                               Mutator *mutator,
+  CXXJunkDetectorTestParameter(const char *modulePath, Mutator *mutator,
                                uint8_t totalMutants, uint8_t nonJunkMutants)
-      : modulePath(modulePath), mutator(mutator),
-        totalMutants(totalMutants), nonJunkMutants(nonJunkMutants) {}
+      : modulePath(modulePath), mutator(mutator), totalMutants(totalMutants),
+        nonJunkMutants(nonJunkMutants) {}
+
+  friend std::ostream &operator<<(std::ostream &os,
+                                  const CXXJunkDetectorTestParameter &bar) {
+    os << "path(" << bar.modulePath << ") mutator("
+       << bar.mutator->getUniqueIdentifier() << ") mutants("
+       << std::to_string(bar.nonJunkMutants) << "/"
+       << std::to_string(bar.totalMutants) << ")";
+    return os;
+  }
 };
 
 class CXXJunkDetectorTest : public TestWithParam<CXXJunkDetectorTestParameter> {
@@ -81,11 +89,14 @@ TEST_P(CXXJunkDetectorTest, detectJunk) {
   ASSERT_EQ(nonJunkMutationPoints.size(), parameter.nonJunkMutants);
 }
 
+static const CXXJunkDetectorTestParameter parameters[] = {
+    CXXJunkDetectorTestParameter(fixtures::mutators_boundary_module_bc_path(),
+                                 new ConditionalsBoundaryMutator, 7, 6),
+    CXXJunkDetectorTestParameter(fixtures::mutators_boundary_module_bc_path(),
+                                 new MathAddMutator, 7, 6)};
+
 INSTANTIATE_TEST_CASE_P(CXXJunkDetection, CXXJunkDetectorTest,
-                        Values(
-                          CXXJunkDetectorTestParameter(fixtures::mutators_boundary_module_bc_path(), new ConditionalsBoundaryMutator, 7, 6),
-                          CXXJunkDetectorTestParameter(fixtures::mutators_boundary_module_bc_path(), new MathAddMutator, 7, 6)
-                        ));
+                        testing::ValuesIn(parameters));
 
 TEST(CXXJunkDetector, compdb_absolute_paths) {
   LLVMContext llvmContext;
