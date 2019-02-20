@@ -41,6 +41,7 @@ public:
   std::string getDescription() const override {
     return description;
   }
+  MutatorKind mutatorKind() override { return MutatorKind::MathSubMutator; }
 
   bool canBeApplied(llvm::Value &V) override;
   llvm::Value *

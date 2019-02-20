@@ -3,6 +3,7 @@
 #include "Program/Program.h"
 #include "Mutators/ConditionalsBoundaryMutator.h"
 #include "Mutators/MathAddMutator.h"
+#include "Mutators/MathSubMutator.h"
 #include "MutationPoint.h"
 #include "Toolchain/Compiler.h"
 #include "Toolchain/Toolchain.h"
@@ -93,7 +94,24 @@ static const CXXJunkDetectorTestParameter parameters[] = {
     CXXJunkDetectorTestParameter(fixtures::mutators_boundary_module_bc_path(),
                                  new ConditionalsBoundaryMutator, 7, 6),
     CXXJunkDetectorTestParameter(fixtures::mutators_math_add_module_bc_path(),
-                                 new MathAddMutator, 17, 16)};
+                                 new MathAddMutator, 17, 16),
+
+    /// FIXME: Here MathSub should produce 14 mutants, but only 9 found because
+    /// some of the '--/-= 1' instructions converted into 'add -1'
+    /// There are three possible solutions:
+    ///   1. Consider 'add' and 'sub' instruction as MathSub and filter out junk
+    ///      later. This way we must rely on JunkDetector, otherwise we get lots
+    ///      of duplicates
+    ///   2. Add an extra check to the MathSub, i.e. an instruction is MathSub
+    ///      if it is 'add' and one of the operands is '-1'. Then, to apply a
+    ///      mutation we would need to replace -1 with 1.
+    ///   3. Merge MathAdd and MathSub into one mutator. Less granulation, but
+    ///      higher quality of mutants
+    ///
+    /// At the moment of writing the second option more.
+    ///
+    CXXJunkDetectorTestParameter(fixtures::mutators_math_sub_junk_bc_path(),
+                                 new MathSubMutator, 9, 8)};
 
 INSTANTIATE_TEST_CASE_P(CXXJunkDetection, CXXJunkDetectorTest,
                         testing::ValuesIn(parameters));

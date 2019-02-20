@@ -22,6 +22,7 @@ enum class MutatorKind {
   Unknown,
   ConditionalsBoundaryMutator,
   MathAddMutator,
+  MathSubMutator,
   NegateMutator,
   RemoveVoidFunctionMutator
 };

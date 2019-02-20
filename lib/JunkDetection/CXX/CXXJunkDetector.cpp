@@ -67,6 +67,8 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     return isJunkBoundaryConditional(point, sourceLocation);
   case MutatorKind::MathAddMutator:
     return isJunkMathAdd(point, sourceLocation);
+  case MutatorKind::MathSubMutator:
+    return isJunkMathSub(point, sourceLocation);
   default:
     return false;
   }
@@ -223,6 +225,55 @@ bool CXXJunkDetector::isJunkMathAdd(mull::MutationPoint *point,
       ast->getLocation(file, mutantLocation.line, mutantLocation.column);
   assert(location.isValid());
   MathAddVisitor visitor(ast->getSourceManager(), location);
+  visitor.TraverseDecl(ast->getASTContext().getTranslationUnitDecl());
+
+  return !visitor.foundMutant();
+}
+
+class MathSubVisitor : public clang::RecursiveASTVisitor<MathSubVisitor> {
+public:
+  MathSubVisitor(const clang::SourceManager &sourceManager,
+                 const clang::SourceLocation &sourceLocation)
+      : visitor(sourceManager, sourceLocation) {}
+
+  bool VisitBinaryOperator(clang::BinaryOperator *binaryOperator) {
+    auto range = binaryOperator->getSourceRange();
+    if (binaryOperator->getOpcode() == clang::BinaryOperatorKind::BO_Sub) {
+      visitor.visitRangeWithLocation(range);
+    }
+    if (binaryOperator->getOpcode() ==
+        clang::BinaryOperatorKind::BO_SubAssign) {
+      visitor.visitRangeWithLocation(range);
+    }
+
+    return true;
+  }
+
+  bool VisitUnaryOperator(clang::UnaryOperator *unaryOperator) {
+    if (unaryOperator->isDecrementOp()) {
+      visitor.visitRangeWithLocation(unaryOperator->getSourceRange());
+    }
+
+    return true;
+  }
+
+  bool foundMutant() { return visitor.foundRange(); }
+
+private:
+  SearchInstructionVisitor visitor;
+};
+
+bool CXXJunkDetector::isJunkMathSub(mull::MutationPoint *point,
+                                    mull::SourceLocation &mutantLocation) {
+  auto ast = findAST(point);
+  auto file = findFileEntry(ast, point);
+
+  assert(file);
+  assert(file->isValid());
+  auto location =
+      ast->getLocation(file, mutantLocation.line, mutantLocation.column);
+  assert(location.isValid());
+  MathSubVisitor visitor(ast->getSourceManager(), location);
   visitor.TraverseDecl(ast->getASTContext().getTranslationUnitDecl());
 
   return !visitor.foundMutant();
