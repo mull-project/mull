@@ -29,7 +29,9 @@ private:
                                         const MutationPoint *point);
   std::vector<std::string> commandLineArguments(const std::string &sourceFile);
 
-  bool isJunkBoundaryConditional(MutationPoint *point, SourceLocation &location);
+  bool isJunkBoundaryConditional(MutationPoint *point,
+                                 SourceLocation &mutantLocation);
+  bool isJunkMathAdd(MutationPoint *point, SourceLocation &mutantLocation);
 
   std::unique_ptr<clang::tooling::CompilationDatabase> compdb;
   std::vector<std::string> compilationFlags;

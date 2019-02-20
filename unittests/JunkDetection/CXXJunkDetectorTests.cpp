@@ -92,8 +92,8 @@ TEST_P(CXXJunkDetectorTest, detectJunk) {
 static const CXXJunkDetectorTestParameter parameters[] = {
     CXXJunkDetectorTestParameter(fixtures::mutators_boundary_module_bc_path(),
                                  new ConditionalsBoundaryMutator, 7, 6),
-    CXXJunkDetectorTestParameter(fixtures::mutators_boundary_module_bc_path(),
-                                 new MathAddMutator, 7, 6)};
+    CXXJunkDetectorTestParameter(fixtures::mutators_math_add_module_bc_path(),
+                                 new MathAddMutator, 17, 16)};
 
 INSTANTIATE_TEST_CASE_P(CXXJunkDetection, CXXJunkDetectorTest,
                         testing::ValuesIn(parameters));
