@@ -18,7 +18,7 @@ set (CPACK_RESOURCE_FILE_WELCOME "${CMAKE_SOURCE_DIR}/cmake/packaging/Welcome.tx
 if (APPLE)
   include(cmake/packaging/cpack.PackageMaker.cmake)
 else()
-
+  include(cmake/packaging/cpack.DEB.cmake)
 endif()
 
 include(CPack)

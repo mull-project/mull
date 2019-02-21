@@ -2,10 +2,11 @@ cmake_minimum_required(VERSION 3.7.0)
 
 project(Mull
   VERSION 0.0.1
-  DESCRIPTION "LLVM-based mutation testing"
-  HOMEPAGE_URL "https://github.com/mull-project/mull"
   LANGUAGES C CXX
 )
+
+set (PROJECT_DESCRIPTION "LLVM-based mutation testing")
+set (PROJECT_HOMEPAGE_URL "https://github.com/mull-project/mull")
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/properties.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/fixtures.cmake)
