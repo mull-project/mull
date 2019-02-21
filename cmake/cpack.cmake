@@ -18,7 +18,25 @@ set (CPACK_RESOURCE_FILE_WELCOME "${CMAKE_SOURCE_DIR}/cmake/packaging/Welcome.tx
 if (APPLE)
   include(cmake/packaging/cpack.PackageMaker.cmake)
 else()
-  include(cmake/packaging/cpack.DEB.cmake)
+  if(EXISTS /etc/os-release)
+    file(READ /etc/os-release OS_RELEASE)
+    string(REGEX MATCH "ID=([A-Za-z]+)" match ${OS_RELEASE}})
+    if (NOT match)
+      message(WARNING "Cannot find distro ID in the /etc/os-release")
+      return()
+    endif()
+
+    set (CPACK_SYSTEM_NAME ${CMAKE_MATCH_1})
+
+    if (${CPACK_SYSTEM_NAME} STREQUAL "debian")
+      include(cmake/packaging/cpack.DEB-debian.cmake)
+    elseif(${CPACK_SYSTEM_NAME} STREQUAL "ubuntu")
+      include(cmake/packaging/cpack.DEB-ubuntu.cmake)
+    else()
+	    message(WARNING "Mull cannot generate package for ${CPACK_SYSTEM_NAME} yet.")
+    endif()
+
+  endif()
 endif()
 
 include(CPack)
