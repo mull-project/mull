@@ -4,6 +4,7 @@
 #include "Mutators/ConditionalsBoundaryMutator.h"
 #include "Mutators/MathAddMutator.h"
 #include "Mutators/MathSubMutator.h"
+#include "Mutators/RemoveVoidFunctionMutator.h"
 #include "MutationPoint.h"
 #include "Toolchain/Compiler.h"
 #include "Toolchain/Toolchain.h"
@@ -111,7 +112,9 @@ static const CXXJunkDetectorTestParameter parameters[] = {
     /// At the moment of writing the second option more.
     ///
     CXXJunkDetectorTestParameter(fixtures::mutators_math_sub_junk_bc_path(),
-                                 new MathSubMutator, 9, 8)};
+                                 new MathSubMutator, 9, 8),
+    CXXJunkDetectorTestParameter(fixtures::mutators_remove_void_function_junk_bc_path(),
+                                 new RemoveVoidFunctionMutator, 9, 6)};
 
 INSTANTIATE_TEST_CASE_P(CXXJunkDetection, CXXJunkDetectorTest,
                         testing::ValuesIn(parameters));

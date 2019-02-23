@@ -33,6 +33,8 @@ private:
                                  SourceLocation &mutantLocation);
   bool isJunkMathAdd(MutationPoint *point, SourceLocation &mutantLocation);
   bool isJunkMathSub(MutationPoint *point, SourceLocation &mutantLocation);
+  bool isJunkRemoveVoidFunction(MutationPoint *point,
+                                SourceLocation &mutantLocation);
 
   std::unique_ptr<clang::tooling::CompilationDatabase> compdb;
   std::vector<std::string> compilationFlags;

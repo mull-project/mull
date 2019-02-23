@@ -69,6 +69,8 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     return isJunkMathAdd(point, sourceLocation);
   case MutatorKind::MathSubMutator:
     return isJunkMathSub(point, sourceLocation);
+  case MutatorKind::RemoveVoidFunctionMutator:
+    return isJunkRemoveVoidFunction(point, sourceLocation);
   default:
     return false;
   }
@@ -274,6 +276,61 @@ bool CXXJunkDetector::isJunkMathSub(mull::MutationPoint *point,
       ast->getLocation(file, mutantLocation.line, mutantLocation.column);
   assert(location.isValid());
   MathSubVisitor visitor(ast->getSourceManager(), location);
+  visitor.TraverseDecl(ast->getASTContext().getTranslationUnitDecl());
+
+  return !visitor.foundMutant();
+}
+
+class RemoveVoidFunctionVisitor
+    : public clang::RecursiveASTVisitor<RemoveVoidFunctionVisitor> {
+public:
+  RemoveVoidFunctionVisitor(const clang::SourceManager &sourceManager,
+                            const clang::SourceLocation &sourceLocation,
+                            const clang::ASTContext &astContext)
+      : visitor(sourceManager, sourceLocation), astContext(astContext) {}
+
+  bool VisitCallExpr(clang::CallExpr *callExpression) {
+    handleCallExpr(callExpression);
+    return true;
+  }
+
+  bool VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *callExpression) {
+    handleCallExpr(callExpression);
+    return true;
+  }
+
+  bool VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *callExpression) {
+    handleCallExpr(callExpression);
+    return true;
+  }
+
+  void handleCallExpr(clang::CallExpr *callExpression) {
+    auto *type =
+        callExpression->getCallReturnType(astContext).getTypePtrOrNull();
+    if (type && type->isVoidType()) {
+      visitor.visitRangeWithLocation(callExpression->getSourceRange());
+    }
+  }
+
+  bool foundMutant() { return visitor.foundRange(); }
+
+private:
+  SearchInstructionVisitor visitor;
+  const clang::ASTContext &astContext;
+};
+
+bool CXXJunkDetector::isJunkRemoveVoidFunction(
+    mull::MutationPoint *point, mull::SourceLocation &mutantLocation) {
+  auto ast = findAST(point);
+  auto file = findFileEntry(ast, point);
+
+  assert(file);
+  assert(file->isValid());
+  auto location =
+      ast->getLocation(file, mutantLocation.line, mutantLocation.column);
+  assert(location.isValid());
+  RemoveVoidFunctionVisitor visitor(ast->getSourceManager(), location,
+                                    ast->getASTContext());
   visitor.TraverseDecl(ast->getASTContext().getTranslationUnitDecl());
 
   return !visitor.foundMutant();
