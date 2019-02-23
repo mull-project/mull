@@ -71,6 +71,8 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     return isJunkMathSub(point, sourceLocation);
   case MutatorKind::RemoveVoidFunctionMutator:
     return isJunkRemoveVoidFunction(point, sourceLocation);
+  case MutatorKind::NegateMutator:
+    return isJunkNegateCondition(point, sourceLocation);
   default:
     return false;
   }
@@ -333,6 +335,48 @@ bool CXXJunkDetector::isJunkRemoveVoidFunction(
                                     ast->getASTContext());
   visitor.TraverseDecl(ast->getASTContext().getTranslationUnitDecl());
 
+  return !visitor.foundMutant();
+}
+
+class NegateConditionVisitor
+    : public clang::RecursiveASTVisitor<NegateConditionVisitor> {
+public:
+  NegateConditionVisitor(const clang::SourceManager &sourceManager,
+                         const clang::SourceLocation &sourceLocation)
+      : visitor(sourceManager, sourceLocation) {}
+
+  bool VisitBinaryOperator(clang::BinaryOperator *binaryOperator) {
+    if (binaryOperator->isRelationalOp() || binaryOperator->isEqualityOp()) {
+      visitor.visitRangeWithLocation(binaryOperator->getSourceRange());
+    }
+    return true;
+  }
+
+  bool VisitUnaryOperator(clang::UnaryOperator *unaryOperator) {
+    if (unaryOperator->getOpcode() == clang::UnaryOperatorKind::UO_LNot) {
+      visitor.visitRangeWithLocation(unaryOperator->getSourceRange());
+    }
+    return true;
+  }
+
+  bool foundMutant() { return visitor.foundRange(); }
+
+private:
+  SearchInstructionVisitor visitor;
+};
+
+bool CXXJunkDetector::isJunkNegateCondition(
+    mull::MutationPoint *point, mull::SourceLocation &mutantLocation) {
+  auto ast = findAST(point);
+  auto file = findFileEntry(ast, point);
+
+  assert(file);
+  assert(file->isValid());
+  auto location =
+      ast->getLocation(file, mutantLocation.line, mutantLocation.column);
+  assert(location.isValid());
+  NegateConditionVisitor visitor(ast->getSourceManager(), location);
+  visitor.TraverseDecl(ast->getASTContext().getTranslationUnitDecl());
   return !visitor.foundMutant();
 }
 

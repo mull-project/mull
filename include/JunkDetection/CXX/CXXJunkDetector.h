@@ -35,7 +35,8 @@ private:
   bool isJunkMathSub(MutationPoint *point, SourceLocation &mutantLocation);
   bool isJunkRemoveVoidFunction(MutationPoint *point,
                                 SourceLocation &mutantLocation);
-
+  bool isJunkNegateCondition(MutationPoint *point,
+                             SourceLocation &mutantLocation);
   std::unique_ptr<clang::tooling::CompilationDatabase> compdb;
   std::vector<std::string> compilationFlags;
   std::map<std::string, std::unique_ptr<clang::ASTUnit>> astUnits;
