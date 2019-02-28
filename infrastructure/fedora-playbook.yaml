@@ -1,0 +1,52 @@
+- name: Setup Fedora Machine
+  hosts: "{{ host | default('all') }}"
+
+  vars:
+    llvm_version: 6.0.0
+    platform: fedora
+
+    mull_cxx_flags:
+
+    packages:
+      - vim
+      - wget
+      - git
+      - ninja-build
+      - cmake
+      - libstdc++-devel
+      - libstdc++-static
+      - ncurses-devel
+      - libsqlite3x-devel
+      - zlib-devel
+      - pkgconf
+      - libxml2-devel
+      - libuuid
+      - libuuid-devel
+      - libselinux-python
+      - binutils
+      - glibc-devel
+      - gcc
+      - rpm-build
+
+  vars_files:
+    - helpers/variables.yaml
+
+  tasks:
+    - name: Prepare Working Directory
+      include: helpers/working-directory.yaml
+
+    - name: Install Required Packages
+      yum:
+        name: "{{ packages }}"
+        state: present
+      become: true
+
+    - name: Install LLVM
+      include: helpers/download-llvm.yaml
+
+    - name: Build Mull
+      include: helpers/build-mull.yaml
+
+    - name: Integration Tests
+      include: helpers/integration-tests.yaml
+
