@@ -818,7 +818,7 @@ TEST(Driver, customTest_withDynamicLibraries_and_ObjectFiles) {
   ASSERT_EQ(0UL, result->getMutationResults().size());
 }
 
-TEST(Driver, customTest_withExceptions) {
+TEST(Driver, DISABLED_customTest_withExceptions) {
   Configuration configuration;
   configuration.customTests = {
       CustomTestDefinition("passing", "_main", "mull", {}),
