@@ -1,6 +1,7 @@
 #pragma once
 
 #include "JunkDetection/CXX/Visitors/InstructionRangeVisitor.h"
+#include "JunkDetection/CXX/Visitors/VisitorParameters.h"
 
 #include <clang/AST/RecursiveASTVisitor.h>
 
@@ -9,9 +10,7 @@ namespace mull {
 class RemoveVoidFunctionVisitor
     : public clang::RecursiveASTVisitor<RemoveVoidFunctionVisitor> {
 public:
-  RemoveVoidFunctionVisitor(const clang::SourceManager &sourceManager,
-                            const clang::SourceLocation &sourceLocation,
-                            const clang::ASTContext &astContext);
+  RemoveVoidFunctionVisitor(const VisitorParameters &parameters);
 
   bool VisitCallExpr(clang::CallExpr *callExpression);
   bool VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *callExpression);

@@ -34,9 +34,9 @@ smallestSourceRange(const clang::SourceManager &sourceManager,
   }
 
   auto firstLength = sourceManager.getFileOffset(first.getEnd()) -
-      sourceManager.getFileOffset(first.getBegin());
+                     sourceManager.getFileOffset(first.getBegin());
   auto secondLength = sourceManager.getFileOffset(second.getEnd()) -
-      sourceManager.getFileOffset(second.getBegin());
+                      sourceManager.getFileOffset(second.getBegin());
 
   if (firstLength < secondLength) {
     return first;
@@ -49,10 +49,9 @@ smallestSourceRange(const clang::SourceManager &sourceManager,
 }
 
 mull::InstructionRangeVisitor::InstructionRangeVisitor(
-    const clang::SourceManager &sourceManager,
-    const clang::SourceLocation &sourceLocation)
-    : sourceManager(sourceManager), sourceLocation(sourceLocation),
-      sourceRange() {}
+    const VisitorParameters &parameters)
+    : sourceManager(parameters.sourceManager),
+      sourceLocation(parameters.sourceLocation), sourceRange() {}
 
 void mull::InstructionRangeVisitor::visitRangeWithLocation(
     const clang::SourceRange &range) {

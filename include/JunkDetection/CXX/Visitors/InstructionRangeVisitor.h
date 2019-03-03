@@ -1,5 +1,7 @@
 #pragma once
 
+#include "JunkDetection/CXX/Visitors/VisitorParameters.h"
+
 #include <clang/Basic/SourceLocation.h>
 
 namespace clang {
@@ -10,11 +12,8 @@ namespace mull {
 
 class InstructionRangeVisitor {
 public:
-  InstructionRangeVisitor(const clang::SourceManager &sourceManager,
-                          const clang::SourceLocation &sourceLocation);
-
+  InstructionRangeVisitor(const VisitorParameters &parameters);
   void visitRangeWithLocation(const clang::SourceRange &range);
-
   bool foundRange();
 
 private:

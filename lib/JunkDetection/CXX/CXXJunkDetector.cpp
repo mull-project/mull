@@ -11,111 +11,53 @@
 #include "JunkDetection/CXX/Visitors/RemoveVoidFunctionVisitor.h"
 
 using namespace mull;
-using namespace llvm;
+
+template <typename Visitor>
+static bool isJunkMutation(ASTStorage &storage, MutationPoint *point,
+                           SourceLocation &mutantLocation) {
+  auto ast = storage.findAST(point);
+  auto file = storage.findFileEntry(ast, point);
+
+  assert(file);
+  assert(file->isValid());
+  auto location =
+      ast->getLocation(file, mutantLocation.line, mutantLocation.column);
+  assert(location.isValid());
+  VisitorParameters parameters = {.sourceManager = ast->getSourceManager(),
+                                  .sourceLocation = location,
+                                  .astContext = ast->getASTContext()};
+  Visitor visitor(parameters);
+  visitor.TraverseDecl(ast->getASTContext().getTranslationUnitDecl());
+
+  return !visitor.foundMutant();
+}
 
 CXXJunkDetector::CXXJunkDetector(JunkDetectionConfig &config)
     : astStorage(config.cxxCompDBDirectory, config.cxxCompilationFlags) {}
 
 bool CXXJunkDetector::isJunk(MutationPoint *point) {
-  auto sourceLocation = point->getSourceLocation();
-  if (sourceLocation.isNull()) {
+  auto mutantLocation = point->getSourceLocation();
+  if (mutantLocation.isNull()) {
     return true;
   }
 
   switch (point->getMutator()->mutatorKind()) {
   case MutatorKind::ConditionalsBoundaryMutator:
-    return isJunkBoundaryConditional(point, sourceLocation);
+    return isJunkMutation<ConditionalsBoundaryVisitor>(astStorage, point,
+                                                       mutantLocation);
   case MutatorKind::MathAddMutator:
-    return isJunkMathAdd(point, sourceLocation);
+    return isJunkMutation<MathAddVisitor>(astStorage, point, mutantLocation);
   case MutatorKind::MathSubMutator:
-    return isJunkMathSub(point, sourceLocation);
+    return isJunkMutation<MathSubVisitor>(astStorage, point, mutantLocation);
   case MutatorKind::RemoveVoidFunctionMutator:
-    return isJunkRemoveVoidFunction(point, sourceLocation);
+    return isJunkMutation<RemoveVoidFunctionVisitor>(astStorage, point,
+                                                     mutantLocation);
   case MutatorKind::NegateMutator:
-    return isJunkNegateCondition(point, sourceLocation);
+    return isJunkMutation<NegateConditionVisitor>(astStorage, point,
+                                                  mutantLocation);
   default:
     return false;
   }
 
   return false;
-}
-
-bool CXXJunkDetector::isJunkBoundaryConditional(
-    mull::MutationPoint *point, mull::SourceLocation &mutantLocation) {
-  auto ast = astStorage.findAST(point);
-  auto file = astStorage.findFileEntry(ast, point);
-
-  assert(file);
-  assert(file->isValid());
-  auto location =
-      ast->getLocation(file, mutantLocation.line, mutantLocation.column);
-  assert(location.isValid());
-  ConditionalsBoundaryVisitor visitor(ast->getSourceManager(), location);
-  visitor.TraverseDecl(ast->getASTContext().getTranslationUnitDecl());
-
-  return !visitor.foundMutant();
-}
-
-bool CXXJunkDetector::isJunkMathAdd(mull::MutationPoint *point,
-                                    mull::SourceLocation &mutantLocation) {
-  auto ast = astStorage.findAST(point);
-  auto file = astStorage.findFileEntry(ast, point);
-
-  assert(file);
-  assert(file->isValid());
-  auto location =
-      ast->getLocation(file, mutantLocation.line, mutantLocation.column);
-  assert(location.isValid());
-  MathAddVisitor visitor(ast->getSourceManager(), location);
-  visitor.TraverseDecl(ast->getASTContext().getTranslationUnitDecl());
-
-  return !visitor.foundMutant();
-}
-
-bool CXXJunkDetector::isJunkMathSub(mull::MutationPoint *point,
-                                    mull::SourceLocation &mutantLocation) {
-  auto ast = astStorage.findAST(point);
-  auto file = astStorage.findFileEntry(ast, point);
-
-  assert(file);
-  assert(file->isValid());
-  auto location =
-      ast->getLocation(file, mutantLocation.line, mutantLocation.column);
-  assert(location.isValid());
-  MathSubVisitor visitor(ast->getSourceManager(), location);
-  visitor.TraverseDecl(ast->getASTContext().getTranslationUnitDecl());
-
-  return !visitor.foundMutant();
-}
-
-bool CXXJunkDetector::isJunkRemoveVoidFunction(
-    mull::MutationPoint *point, mull::SourceLocation &mutantLocation) {
-  auto ast = astStorage.findAST(point);
-  auto file = astStorage.findFileEntry(ast, point);
-
-  assert(file);
-  assert(file->isValid());
-  auto location =
-      ast->getLocation(file, mutantLocation.line, mutantLocation.column);
-  assert(location.isValid());
-  RemoveVoidFunctionVisitor visitor(ast->getSourceManager(), location,
-                                    ast->getASTContext());
-  visitor.TraverseDecl(ast->getASTContext().getTranslationUnitDecl());
-
-  return !visitor.foundMutant();
-}
-
-bool CXXJunkDetector::isJunkNegateCondition(
-    mull::MutationPoint *point, mull::SourceLocation &mutantLocation) {
-  auto ast = astStorage.findAST(point);
-  auto file = astStorage.findFileEntry(ast, point);
-
-  assert(file);
-  assert(file->isValid());
-  auto location =
-      ast->getLocation(file, mutantLocation.line, mutantLocation.column);
-  assert(location.isValid());
-  NegateConditionVisitor visitor(ast->getSourceManager(), location);
-  visitor.TraverseDecl(ast->getASTContext().getTranslationUnitDecl());
-  return !visitor.foundMutant();
 }

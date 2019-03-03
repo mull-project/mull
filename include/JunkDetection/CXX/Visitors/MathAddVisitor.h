@@ -1,6 +1,7 @@
 #pragma once
 
 #include "JunkDetection/CXX/Visitors/InstructionRangeVisitor.h"
+#include "JunkDetection/CXX/Visitors/VisitorParameters.h"
 
 #include <clang/AST/RecursiveASTVisitor.h>
 
@@ -8,8 +9,7 @@ namespace mull {
 
 class MathAddVisitor : public clang::RecursiveASTVisitor<MathAddVisitor> {
 public:
-  MathAddVisitor(const clang::SourceManager &sourceManager,
-                 const clang::SourceLocation &sourceLocation);
+  MathAddVisitor(const VisitorParameters &parameters);
 
   bool VisitBinaryOperator(clang::BinaryOperator *binaryOperator);
   bool VisitUnaryOperator(clang::UnaryOperator *unaryOperator);

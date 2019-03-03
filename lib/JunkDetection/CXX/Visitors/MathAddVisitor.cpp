@@ -2,9 +2,8 @@
 
 using namespace mull;
 
-MathAddVisitor::MathAddVisitor(const clang::SourceManager &sourceManager,
-                               const clang::SourceLocation &sourceLocation)
-    : visitor(sourceManager, sourceLocation) {}
+MathAddVisitor::MathAddVisitor(const VisitorParameters &parameters)
+    : visitor(parameters) {}
 
 bool MathAddVisitor::VisitBinaryOperator(
     clang::BinaryOperator *binaryOperator) {

@@ -3,10 +3,8 @@
 using namespace mull;
 
 RemoveVoidFunctionVisitor::RemoveVoidFunctionVisitor(
-    const clang::SourceManager &sourceManager,
-    const clang::SourceLocation &sourceLocation,
-    const clang::ASTContext &astContext)
-    : visitor(sourceManager, sourceLocation), astContext(astContext) {}
+    const VisitorParameters &parameters)
+    : visitor(parameters), astContext(parameters.astContext) {}
 
 bool RemoveVoidFunctionVisitor::VisitCallExpr(clang::CallExpr *callExpression) {
   handleCallExpr(callExpression);

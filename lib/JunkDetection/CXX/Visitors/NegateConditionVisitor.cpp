@@ -3,9 +3,8 @@
 using namespace mull;
 
 NegateConditionVisitor::NegateConditionVisitor(
-    const clang::SourceManager &sourceManager,
-    const clang::SourceLocation &sourceLocation)
-    : visitor(sourceManager, sourceLocation) {}
+    const VisitorParameters &parameters)
+    : visitor(parameters) {}
 
 bool NegateConditionVisitor::VisitBinaryOperator(
     clang::BinaryOperator *binaryOperator) {

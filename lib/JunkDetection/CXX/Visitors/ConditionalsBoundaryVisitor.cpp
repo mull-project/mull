@@ -3,9 +3,8 @@
 using namespace mull;
 
 ConditionalsBoundaryVisitor::ConditionalsBoundaryVisitor(
-    const clang::SourceManager &sourceManager,
-    const clang::SourceLocation &sourceLocation)
-    : visitor(sourceManager, sourceLocation) {}
+    const VisitorParameters &parameters)
+    : visitor(parameters) {}
 
 bool ConditionalsBoundaryVisitor::VisitBinaryOperator(
     clang::BinaryOperator *binaryOperator) {
