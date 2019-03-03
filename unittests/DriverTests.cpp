@@ -817,3 +817,42 @@ TEST(Driver, customTest_withDynamicLibraries_and_ObjectFiles) {
   /// Could not find any mutations because there was no bitcode for testees
   ASSERT_EQ(0UL, result->getMutationResults().size());
 }
+
+TEST(Driver, DISABLED_customTest_withExceptions) {
+  Configuration configuration;
+  configuration.customTests = {
+      CustomTestDefinition("passing", "_main", "mull", {}),
+      CustomTestDefinition("passing", "main", "mull", {})};
+  configuration.bitcodePaths = {fixtures::exceptions_main_bc_path()};
+
+  MutationsFinder finder({}, configuration);
+
+  ModuleLoader moduleLoader;
+  ObjectLoader objectLoader;
+  Program program(configuration.dynamicLibraryPaths,
+                  objectLoader.loadObjectFiles(configuration),
+                  moduleLoader.loadModules(configuration));
+
+  Toolchain toolchain(configuration);
+  Filter filter;
+  filter.includeTest("passing");
+  Metrics metrics;
+  NullJunkDetector junkDetector;
+
+  TestFrameworkFactory testFrameworkFactory;
+  TestFramework testFramework(
+      testFrameworkFactory.customTestFramework(toolchain, configuration));
+
+  Driver driver(configuration, program, testFramework, toolchain, filter,
+                finder, metrics, junkDetector);
+
+  auto result = driver.Run();
+  ASSERT_EQ(1U, result->getTests().size());
+
+  auto test = result->getTests().begin()->get();
+  ASSERT_NE(test, nullptr);
+  ASSERT_EQ(ExecutionStatus::Passed, test->getExecutionResult().status);
+  ASSERT_EQ("passing", test->getTestName());
+  /// Could not find any mutations because there was no bitcode for testees
+  ASSERT_EQ(0UL, result->getMutationResults().size());
+}
