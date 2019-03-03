@@ -1,245 +1,63 @@
 #include "JunkDetection/CXX/CXXJunkDetector.h"
 
 #include "Config/RawConfig.h"
-#include "Logger.h"
 #include "MutationPoint.h"
 #include "Mutators/Mutator.h"
 
-#include <llvm/IR/BasicBlock.h>
-#include <llvm/IR/DebugInfoMetadata.h>
-#include <llvm/IR/DebugLoc.h>
-#include <llvm/IR/Function.h>
-#include <llvm/IR/Instruction.h>
-#include <llvm/IR/Module.h>
-#include <llvm/Support/FileSystem.h>
-#include <llvm/Support/Path.h>
-
-#include <clang/AST/RecursiveASTVisitor.h>
-#include <clang/Frontend/CompilerInstance.h>
-#include <clang/Tooling/CompilationDatabase.h>
-#include <clang/Tooling/Tooling.h>
-
-#include <sstream>
-#include <sys/param.h>
-#include <unistd.h>
+#include "JunkDetection/CXX/Visitors/ConditionalsBoundaryVisitor.h"
+#include "JunkDetection/CXX/Visitors/MathAddVisitor.h"
+#include "JunkDetection/CXX/Visitors/MathSubVisitor.h"
+#include "JunkDetection/CXX/Visitors/NegateConditionVisitor.h"
+#include "JunkDetection/CXX/Visitors/RemoveVoidFunctionVisitor.h"
 
 using namespace mull;
-using namespace llvm;
 
-static std::unique_ptr<clang::tooling::CompilationDatabase>
-getCompilationDatabase(const std::string &compdbDirectory) {
-  if (compdbDirectory.empty()) {
-    return nullptr;
-  }
-  std::string error;
-  auto compdb = clang::tooling::CompilationDatabase::loadFromDirectory(
-      compdbDirectory, error);
-  if (compdb == nullptr) {
-    Logger::error() << error << ": " << compdbDirectory << "\n";
-  }
-  return compdb;
-}
-
-static std::vector<std::string> getCompilationFlags(const std::string &flags) {
-  if (flags.empty()) {
-    return std::vector<std::string>();
-  }
-
-  std::istringstream iss(flags);
-  std::vector<std::string> results((std::istream_iterator<std::string>(iss)),
-                                   std::istream_iterator<std::string>());
-  return results;
-}
-
-CXXJunkDetector::CXXJunkDetector(JunkDetectionConfig &config) {
-  compdb = getCompilationDatabase(config.cxxCompDBDirectory);
-  compilationFlags = getCompilationFlags(config.cxxCompilationFlags);
-}
-
-bool CXXJunkDetector::isJunk(MutationPoint *point) {
-  auto sourceLocation = point->getSourceLocation();
-  if (sourceLocation.isNull()) {
-    return true;
-  }
-
-  if (point->getMutator()->mutatorKind() ==
-      MutatorKind::ConditionalsBoundaryMutator) {
-    return isJunkBoundaryConditional(point, sourceLocation);
-  }
-
-  return false;
-}
-
-static bool locationInRange(const clang::SourceManager &sourceManager,
-                            const clang::SourceRange &range,
-                            const clang::SourceLocation &location) {
-  if (location.isFileID()) {
-    clang::FullSourceLoc mutantLocation(location, sourceManager);
-    assert(mutantLocation.isValid());
-    clang::FullSourceLoc begin(range.getBegin(), sourceManager);
-    assert(begin.isValid());
-    bool sameSourceFile = mutantLocation.getFileID() == begin.getFileID();
-
-    auto mutantOffset = sourceManager.getFileOffset(location);
-    auto beginOffset = sourceManager.getFileOffset(range.getBegin());
-    auto endOffset = sourceManager.getFileOffset(range.getEnd());
-
-    bool inRange = (mutantOffset >= beginOffset) && (mutantOffset <= endOffset);
-    return sameSourceFile && inRange;
-  }
-  return false;
-}
-
-static clang::SourceRange
-smallestSourceRange(const clang::SourceManager &sourceManager,
-                    const clang::SourceRange &first,
-                    const clang::SourceRange &second) {
-  if (first.isInvalid()) {
-    return second;
-  }
-  if (second.isInvalid()) {
-    return first;
-  }
-
-  auto firstLength = sourceManager.getFileOffset(first.getEnd()) -
-                     sourceManager.getFileOffset(first.getBegin());
-  auto secondLength = sourceManager.getFileOffset(second.getEnd()) -
-                      sourceManager.getFileOffset(second.getBegin());
-
-  if (firstLength < secondLength) {
-    return first;
-  }
-  if (secondLength < firstLength) {
-    return second;
-  }
-
-  return first;
-}
-
-class ConditionalsBoundaryVisitor
-    : public clang::RecursiveASTVisitor<ConditionalsBoundaryVisitor> {
-public:
-  ConditionalsBoundaryVisitor(const clang::SourceManager &sourceManager,
-                              const clang::SourceLocation &sourceLocation)
-      : sourceManager(sourceManager), sourceLocation(sourceLocation),
-        nodeSourceRange() {}
-
-  bool VisitBinaryOperator(clang::BinaryOperator *binaryOperator) {
-    if (!binaryOperator->isRelationalOp()) {
-      return true;
-    }
-
-    auto range = binaryOperator->getSourceRange();
-    if (!locationInRange(sourceManager, range, sourceLocation)) {
-      return true;
-    }
-    nodeSourceRange =
-        smallestSourceRange(sourceManager, nodeSourceRange, range);
-    return true;
-  }
-
-  bool foundMutant() { return nodeSourceRange.isValid(); }
-
-private:
-  const clang::SourceManager &sourceManager;
-  const clang::SourceLocation &sourceLocation;
-  clang::SourceRange nodeSourceRange;
-};
-
-bool CXXJunkDetector::isJunkBoundaryConditional(
-    mull::MutationPoint *point, mull::SourceLocation &mutantLocation) {
-  auto ast = findAST(point);
-  auto file = findFileEntry(ast, point);
+template <typename Visitor>
+static bool isJunkMutation(ASTStorage &storage, MutationPoint *point,
+                           SourceLocation &mutantLocation) {
+  auto ast = storage.findAST(point);
+  auto file = storage.findFileEntry(ast, point);
 
   assert(file);
   assert(file->isValid());
   auto location =
       ast->getLocation(file, mutantLocation.line, mutantLocation.column);
   assert(location.isValid());
-  ConditionalsBoundaryVisitor visitor(ast->getSourceManager(), location);
+  VisitorParameters parameters = {.sourceManager = ast->getSourceManager(),
+                                  .sourceLocation = location,
+                                  .astContext = ast->getASTContext()};
+  Visitor visitor(parameters);
   visitor.TraverseDecl(ast->getASTContext().getTranslationUnitDecl());
 
   return !visitor.foundMutant();
 }
 
-const clang::ASTUnit *CXXJunkDetector::findAST(const MutationPoint *point) {
-  assert(point);
-  assert(!point->getSourceLocation().isNull());
+CXXJunkDetector::CXXJunkDetector(JunkDetectionConfig &config)
+    : astStorage(config.cxxCompDBDirectory, config.cxxCompilationFlags) {}
 
-  auto instruction = dyn_cast<Instruction>(point->getOriginalValue());
-  if (instruction == nullptr) {
-    return nullptr;
+bool CXXJunkDetector::isJunk(MutationPoint *point) {
+  auto mutantLocation = point->getSourceLocation();
+  if (mutantLocation.isNull()) {
+    return true;
   }
 
-  const std::string &sourceFile = instruction->getModule()->getSourceFileName();
-  std::lock_guard<std::mutex> guard(mutex);
-  if (astUnits.count(sourceFile)) {
-    return astUnits.at(sourceFile).get();
+  switch (point->getMutator()->mutatorKind()) {
+  case MutatorKind::ConditionalsBoundaryMutator:
+    return isJunkMutation<ConditionalsBoundaryVisitor>(astStorage, point,
+                                                       mutantLocation);
+  case MutatorKind::MathAddMutator:
+    return isJunkMutation<MathAddVisitor>(astStorage, point, mutantLocation);
+  case MutatorKind::MathSubMutator:
+    return isJunkMutation<MathSubVisitor>(astStorage, point, mutantLocation);
+  case MutatorKind::RemoveVoidFunctionMutator:
+    return isJunkMutation<RemoveVoidFunctionVisitor>(astStorage, point,
+                                                     mutantLocation);
+  case MutatorKind::NegateMutator:
+    return isJunkMutation<NegateConditionVisitor>(astStorage, point,
+                                                  mutantLocation);
+  default:
+    return false;
   }
 
-  std::vector<const char *> args({"mull-cxx"});
-  auto argsForFile = commandLineArguments(sourceFile);
-  for (auto it = argsForFile.begin(); it != argsForFile.end(); it++) {
-    if (*it == "-c") {
-      /// Cutting off '-c foo.cpp' part
-      it++;
-      if (it != argsForFile.end()) {
-        it++;
-      }
-      continue;
-    }
-    args.push_back(it->c_str());
-  }
-  args.push_back(sourceFile.c_str());
-
-  clang::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diagnosticsEngine(
-      clang::CompilerInstance::createDiagnostics(new clang::DiagnosticOptions));
-
-  auto ast = clang::ASTUnit::LoadFromCommandLine(
-      args.data(), args.data() + args.size(),
-      std::make_shared<clang::PCHContainerOperations>(), diagnosticsEngine, "");
-  astUnits[sourceFile] = std::move(std::unique_ptr<clang::ASTUnit>(ast));
-  return ast;
-}
-
-const clang::FileEntry *
-CXXJunkDetector::findFileEntry(const clang::ASTUnit *ast,
-                               const MutationPoint *point) {
-  assert(ast);
-  assert(point);
-  assert(!point->getSourceLocation().isNull());
-
-  auto &sourceManager = ast->getSourceManager();
-  auto filePath = point->getSourceLocation().filePath;
-  auto begin = sourceManager.fileinfo_begin();
-  auto end = sourceManager.fileinfo_end();
-  const clang::FileEntry *file = nullptr;
-  for (auto it = begin; it != end; it++) {
-    StringRef name(it->first->getName());
-    if (name.equals(filePath)) {
-      file = it->first;
-      break;
-    }
-  }
-
-  return file;
-}
-
-std::vector<std::string>
-CXXJunkDetector::commandLineArguments(const std::string &sourceFile) {
-  if (compdb == nullptr) {
-    return compilationFlags;
-  }
-
-  auto commands = compdb->getCompileCommands(sourceFile);
-  if (commands.empty()) {
-    auto filename = llvm::sys::path::filename(sourceFile);
-    commands = compdb->getCompileCommands(filename);
-    if (commands.empty()) {
-      return compilationFlags;
-    }
-  }
-
-  assert(commands.size() == 1);
-  return commands.front().CommandLine;
+  return false;
 }
