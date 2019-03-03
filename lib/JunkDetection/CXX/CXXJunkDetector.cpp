@@ -8,6 +8,7 @@
 #include "JunkDetection/CXX/Visitors/MathAddVisitor.h"
 #include "JunkDetection/CXX/Visitors/MathSubVisitor.h"
 #include "JunkDetection/CXX/Visitors/ConditionalsBoundaryVisitor.h"
+#include "JunkDetection/CXX/Visitors/RemoveVoidFunctionVisitor.h"
 
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/DebugInfoMetadata.h>
@@ -131,44 +132,6 @@ bool CXXJunkDetector::isJunkMathSub(mull::MutationPoint *point,
 
   return !visitor.foundMutant();
 }
-
-class RemoveVoidFunctionVisitor
-    : public clang::RecursiveASTVisitor<RemoveVoidFunctionVisitor> {
-public:
-  RemoveVoidFunctionVisitor(const clang::SourceManager &sourceManager,
-                            const clang::SourceLocation &sourceLocation,
-                            const clang::ASTContext &astContext)
-      : visitor(sourceManager, sourceLocation), astContext(astContext) {}
-
-  bool VisitCallExpr(clang::CallExpr *callExpression) {
-    handleCallExpr(callExpression);
-    return true;
-  }
-
-  bool VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *callExpression) {
-    handleCallExpr(callExpression);
-    return true;
-  }
-
-  bool VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *callExpression) {
-    handleCallExpr(callExpression);
-    return true;
-  }
-
-  void handleCallExpr(clang::CallExpr *callExpression) {
-    auto *type =
-        callExpression->getCallReturnType(astContext).getTypePtrOrNull();
-    if (type && type->isVoidType()) {
-      visitor.visitRangeWithLocation(callExpression->getSourceRange());
-    }
-  }
-
-  bool foundMutant() { return visitor.foundRange(); }
-
-private:
-  InstructionRangeVisitor visitor;
-  const clang::ASTContext &astContext;
-};
 
 bool CXXJunkDetector::isJunkRemoveVoidFunction(
     mull::MutationPoint *point, mull::SourceLocation &mutantLocation) {
