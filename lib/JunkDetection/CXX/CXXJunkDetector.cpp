@@ -5,6 +5,8 @@
 #include "MutationPoint.h"
 #include "Mutators/Mutator.h"
 
+#include "JunkDetection/CXX/Visitors/ConditionalsBoundaryVisitor.h"
+
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/DebugLoc.h>
@@ -80,95 +82,6 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
   return false;
 }
 
-static bool locationInRange(const clang::SourceManager &sourceManager,
-                            const clang::SourceRange &range,
-                            const clang::SourceLocation &location) {
-  if (location.isFileID()) {
-    clang::FullSourceLoc mutantLocation(location, sourceManager);
-    assert(mutantLocation.isValid());
-    clang::FullSourceLoc begin(range.getBegin(), sourceManager);
-    assert(begin.isValid());
-    bool sameSourceFile = mutantLocation.getFileID() == begin.getFileID();
-
-    auto mutantOffset = sourceManager.getFileOffset(location);
-    auto beginOffset = sourceManager.getFileOffset(range.getBegin());
-    auto endOffset = sourceManager.getFileOffset(range.getEnd());
-
-    bool inRange = (mutantOffset >= beginOffset) && (mutantOffset <= endOffset);
-    return sameSourceFile && inRange;
-  }
-  return false;
-}
-
-static clang::SourceRange
-smallestSourceRange(const clang::SourceManager &sourceManager,
-                    const clang::SourceRange &first,
-                    const clang::SourceRange &second) {
-  if (first.isInvalid()) {
-    return second;
-  }
-  if (second.isInvalid()) {
-    return first;
-  }
-
-  auto firstLength = sourceManager.getFileOffset(first.getEnd()) -
-                     sourceManager.getFileOffset(first.getBegin());
-  auto secondLength = sourceManager.getFileOffset(second.getEnd()) -
-                      sourceManager.getFileOffset(second.getBegin());
-
-  if (firstLength < secondLength) {
-    return first;
-  }
-  if (secondLength < firstLength) {
-    return second;
-  }
-
-  return first;
-}
-
-class SearchInstructionVisitor {
-public:
-  SearchInstructionVisitor(const clang::SourceManager &sourceManager,
-                           const clang::SourceLocation &sourceLocation)
-      : sourceManager(sourceManager), sourceLocation(sourceLocation),
-        sourceRange() {}
-
-  void visitRangeWithLocation(const clang::SourceRange &range) {
-    if (locationInRange(sourceManager, range, sourceLocation)) {
-      sourceRange = smallestSourceRange(sourceManager, sourceRange, range);
-    }
-  }
-
-  bool foundRange() { return sourceRange.isValid(); }
-
-private:
-  const clang::SourceManager &sourceManager;
-  const clang::SourceLocation &sourceLocation;
-  clang::SourceRange sourceRange;
-};
-
-class ConditionalsBoundaryVisitor
-    : public clang::RecursiveASTVisitor<ConditionalsBoundaryVisitor> {
-public:
-  ConditionalsBoundaryVisitor(const clang::SourceManager &sourceManager,
-                              const clang::SourceLocation &sourceLocation)
-      : visitor(sourceManager, sourceLocation) {}
-
-  bool VisitBinaryOperator(clang::BinaryOperator *binaryOperator) {
-    if (!binaryOperator->isRelationalOp()) {
-      return true;
-    }
-
-    visitor.visitRangeWithLocation(binaryOperator->getSourceRange());
-    return true;
-  }
-
-  bool foundMutant() { return visitor.foundRange(); }
-
-private:
-  SearchInstructionVisitor visitor;
-};
-
 bool CXXJunkDetector::isJunkBoundaryConditional(
     mull::MutationPoint *point, mull::SourceLocation &mutantLocation) {
   auto ast = findAST(point);
@@ -215,7 +128,7 @@ public:
   bool foundMutant() { return visitor.foundRange(); }
 
 private:
-  SearchInstructionVisitor visitor;
+  InstructionRangeVisitor visitor;
 };
 
 bool CXXJunkDetector::isJunkMathAdd(mull::MutationPoint *point,
@@ -264,7 +177,7 @@ public:
   bool foundMutant() { return visitor.foundRange(); }
 
 private:
-  SearchInstructionVisitor visitor;
+  InstructionRangeVisitor visitor;
 };
 
 bool CXXJunkDetector::isJunkMathSub(mull::MutationPoint *point,
@@ -317,7 +230,7 @@ public:
   bool foundMutant() { return visitor.foundRange(); }
 
 private:
-  SearchInstructionVisitor visitor;
+  InstructionRangeVisitor visitor;
   const clang::ASTContext &astContext;
 };
 
@@ -362,7 +275,7 @@ public:
   bool foundMutant() { return visitor.foundRange(); }
 
 private:
-  SearchInstructionVisitor visitor;
+  InstructionRangeVisitor visitor;
 };
 
 bool CXXJunkDetector::isJunkNegateCondition(
