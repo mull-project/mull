@@ -6,6 +6,7 @@
 #include "Mutators/Mutator.h"
 
 #include "JunkDetection/CXX/Visitors/MathAddVisitor.h"
+#include "JunkDetection/CXX/Visitors/MathSubVisitor.h"
 #include "JunkDetection/CXX/Visitors/ConditionalsBoundaryVisitor.h"
 
 #include <llvm/IR/BasicBlock.h>
@@ -114,39 +115,6 @@ bool CXXJunkDetector::isJunkMathAdd(mull::MutationPoint *point,
 
   return !visitor.foundMutant();
 }
-
-class MathSubVisitor : public clang::RecursiveASTVisitor<MathSubVisitor> {
-public:
-  MathSubVisitor(const clang::SourceManager &sourceManager,
-                 const clang::SourceLocation &sourceLocation)
-      : visitor(sourceManager, sourceLocation) {}
-
-  bool VisitBinaryOperator(clang::BinaryOperator *binaryOperator) {
-    auto range = binaryOperator->getSourceRange();
-    if (binaryOperator->getOpcode() == clang::BinaryOperatorKind::BO_Sub) {
-      visitor.visitRangeWithLocation(range);
-    }
-    if (binaryOperator->getOpcode() ==
-        clang::BinaryOperatorKind::BO_SubAssign) {
-      visitor.visitRangeWithLocation(range);
-    }
-
-    return true;
-  }
-
-  bool VisitUnaryOperator(clang::UnaryOperator *unaryOperator) {
-    if (unaryOperator->isDecrementOp()) {
-      visitor.visitRangeWithLocation(unaryOperator->getSourceRange());
-    }
-
-    return true;
-  }
-
-  bool foundMutant() { return visitor.foundRange(); }
-
-private:
-  InstructionRangeVisitor visitor;
-};
 
 bool CXXJunkDetector::isJunkMathSub(mull::MutationPoint *point,
                                     mull::SourceLocation &mutantLocation) {
