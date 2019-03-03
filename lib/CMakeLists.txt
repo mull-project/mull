@@ -77,7 +77,7 @@ set(mull_sources
   Config/ConfigurationOptions.cpp
   Config/Configuration.cpp
   TestFrameworks/TestFramework.cpp
-  TestFrameworks/TestFrameworkFactory.cpp Program/Program.cpp ObjectLoader.cpp JunkDetection/CXX/Visitors/InstructionRangeVisitor.cpp JunkDetection/CXX/Visitors/ConditionalsBoundaryVisitor.cpp JunkDetection/CXX/Visitors/MathAddVisitor.cpp JunkDetection/CXX/Visitors/MathSubVisitor.cpp JunkDetection/CXX/Visitors/RemoveVoidFunctionVisitor.cpp JunkDetection/CXX/Visitors/NegateConditionVisitor.cpp)
+  TestFrameworks/TestFrameworkFactory.cpp Program/Program.cpp ObjectLoader.cpp JunkDetection/CXX/Visitors/InstructionRangeVisitor.cpp JunkDetection/CXX/Visitors/ConditionalsBoundaryVisitor.cpp JunkDetection/CXX/Visitors/MathAddVisitor.cpp JunkDetection/CXX/Visitors/MathSubVisitor.cpp JunkDetection/CXX/Visitors/RemoveVoidFunctionVisitor.cpp JunkDetection/CXX/Visitors/NegateConditionVisitor.cpp JunkDetection/CXX/ASTStorage.cpp)
 
 set (MULL_INCLUDE_DIR ${MULL_SOURCE_DIR}/include)
 
