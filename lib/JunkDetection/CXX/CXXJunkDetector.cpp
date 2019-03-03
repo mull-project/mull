@@ -9,6 +9,7 @@
 #include "JunkDetection/CXX/Visitors/MathSubVisitor.h"
 #include "JunkDetection/CXX/Visitors/ConditionalsBoundaryVisitor.h"
 #include "JunkDetection/CXX/Visitors/RemoveVoidFunctionVisitor.h"
+#include "JunkDetection/CXX/Visitors/NegateConditionVisitor.h"
 
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/DebugInfoMetadata.h>
@@ -149,33 +150,6 @@ bool CXXJunkDetector::isJunkRemoveVoidFunction(
 
   return !visitor.foundMutant();
 }
-
-class NegateConditionVisitor
-    : public clang::RecursiveASTVisitor<NegateConditionVisitor> {
-public:
-  NegateConditionVisitor(const clang::SourceManager &sourceManager,
-                         const clang::SourceLocation &sourceLocation)
-      : visitor(sourceManager, sourceLocation) {}
-
-  bool VisitBinaryOperator(clang::BinaryOperator *binaryOperator) {
-    if (binaryOperator->isRelationalOp() || binaryOperator->isEqualityOp()) {
-      visitor.visitRangeWithLocation(binaryOperator->getSourceRange());
-    }
-    return true;
-  }
-
-  bool VisitUnaryOperator(clang::UnaryOperator *unaryOperator) {
-    if (unaryOperator->getOpcode() == clang::UnaryOperatorKind::UO_LNot) {
-      visitor.visitRangeWithLocation(unaryOperator->getSourceRange());
-    }
-    return true;
-  }
-
-  bool foundMutant() { return visitor.foundRange(); }
-
-private:
-  InstructionRangeVisitor visitor;
-};
 
 bool CXXJunkDetector::isJunkNegateCondition(
     mull::MutationPoint *point, mull::SourceLocation &mutantLocation) {
