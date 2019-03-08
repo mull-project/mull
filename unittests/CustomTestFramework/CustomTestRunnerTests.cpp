@@ -46,7 +46,8 @@ TEST(CustomTestRunner, noTestNameSpecified) {
   CustomTest_Test test("test", "mull", {}, nullptr, {});
   ForkProcessSandbox sandbox;
   JITEngine jit;
-  Trampolines trampolines({});
+  std::vector<std::string> trampolineNames;
+  Trampolines trampolines(trampolineNames);
   runner.loadMutatedProgram(objects, trampolines, jit);
   ExecutionResult result = sandbox.run([&]() {
     return runner.runTest(&test, jit);
@@ -79,7 +80,8 @@ TEST(CustomTestRunner, tooManyParameters) {
   CustomTest_Test test("test", "mull", { "arg1", "arg2" }, nullptr, {});
   ForkProcessSandbox sandbox;
   JITEngine jit;
-  Trampolines trampolines({});
+  std::vector<std::string> trampolineNames;
+  Trampolines trampolines(trampolineNames);
   runner.loadMutatedProgram(objects, trampolines, jit);
   ExecutionResult result = sandbox.run([&]() {
     return runner.runTest(&test, jit);
@@ -112,7 +114,8 @@ TEST(CustomTestRunner, runPassingTest) {
   CustomTest_Test test("test", "mull", { "passing_test" }, nullptr, {});
   ForkProcessSandbox sandbox;
   JITEngine jit;
-  Trampolines trampolines({});
+  std::vector<std::string> trampolineNames;
+  Trampolines trampolines(trampolineNames);
   runner.loadMutatedProgram(objects, trampolines, jit);
   ExecutionResult result = sandbox.run([&]() {
     return runner.runTest(&test, jit);
@@ -149,7 +152,8 @@ TEST(CustomTestRunner, runFailingTest) {
   CustomTest_Test test("test", "mull", { "failing_test" }, nullptr, { constructor });
   ForkProcessSandbox sandbox;
   JITEngine jit;
-  Trampolines trampolines({});
+  std::vector<std::string> trampolineNames;
+  Trampolines trampolines(trampolineNames);
   runner.loadMutatedProgram(objects, trampolines, jit);
   ExecutionResult result = sandbox.run([&]() {
     return runner.runTest(&test, jit);
@@ -181,7 +185,8 @@ TEST(CustomTestRunner, attemptToRunUnknownTest) {
   CustomTest_Test test("test", "mull", { "foobar" }, nullptr, {});
   ForkProcessSandbox sandbox;
   JITEngine jit;
-  Trampolines trampolines({});
+  std::vector<std::string> trampolineNames;
+  Trampolines trampolines(trampolineNames);
   runner.loadMutatedProgram(objects, trampolines, jit);
   ExecutionResult result = sandbox.run([&]() {
     return runner.runTest(&test, jit);
