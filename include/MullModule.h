@@ -1,4 +1,4 @@
-#pragma once 
+#pragma once
 
 #include <string>
 #include <thread>
@@ -15,32 +15,34 @@ namespace mull {
 class MutationPoint;
 class JITEngine;
 
-  class MullModule {
-    std::unique_ptr<llvm::Module> module;
-    std::unique_ptr<llvm::MemoryBuffer> buffer;
-    std::string uniqueIdentifier;
+class MullModule {
+public:
+  MullModule(std::unique_ptr<llvm::Module> llvmModule,
+             std::unique_ptr<llvm::MemoryBuffer> buffer,
+             const std::string &md5);
 
-    std::map<llvm::Function *, std::vector<MutationPoint *>> mutationPoints;
-    std::mutex mutex;
+  std::unique_ptr<MullModule> clone(llvm::LLVMContext &context);
 
-    explicit MullModule(std::unique_ptr<llvm::Module> llvmModule);
-  public:
-    MullModule(std::unique_ptr<llvm::Module> llvmModule,
-               std::unique_ptr<llvm::MemoryBuffer> buffer,
-               const std::string &md5);
+  llvm::Module *getModule();
+  llvm::Module *getModule() const;
+  std::string getUniqueIdentifier();
+  std::string getUniqueIdentifier() const;
 
-    std::unique_ptr<MullModule> clone(llvm::LLVMContext &context);
+  std::string getInstrumentedUniqueIdentifier() const;
+  std::string getMutatedUniqueIdentifier() const;
 
-    llvm::Module *getModule();
-    llvm::Module *getModule() const;
-    std::string getUniqueIdentifier();
-    std::string getUniqueIdentifier() const;
+  std::vector<std::string> prepareMutations();
+  void addMutation(MutationPoint *point);
 
-    std::string getInstrumentedUniqueIdentifier() const;
-    std::string getMutatedUniqueIdentifier() const;
+private:
+  std::unique_ptr<llvm::Module> module;
+  std::unique_ptr<llvm::MemoryBuffer> buffer;
+  std::string uniqueIdentifier;
 
-    std::vector<std::string> prepareMutations();
-    void addMutation(MutationPoint *point);
-  };
+  std::map<llvm::Function *, std::vector<MutationPoint *>> mutationPoints;
+  std::mutex mutex;
 
-}
+  explicit MullModule(std::unique_ptr<llvm::Module> llvmModule);
+};
+
+} // namespace mull

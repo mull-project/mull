@@ -1,33 +1,29 @@
 #include "MullModule.h"
-#include "Logger.h"
 #include "LLVMCompatibility.h"
+#include "Logger.h"
 #include "MutationPoint.h"
 
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
-#include <llvm/Support/MemoryBuffer.h>
-#include <llvm/Support/SourceMgr.h>
-#include <llvm/Support/Path.h>
-#include <llvm/Transforms/Utils/Cloning.h>
 #include <llvm/Support/MD5.h>
+#include <llvm/Support/MemoryBuffer.h>
+#include <llvm/Support/Path.h>
+#include <llvm/Support/SourceMgr.h>
+#include <llvm/Transforms/Utils/Cloning.h>
 
 using namespace mull;
 using namespace llvm;
 using namespace std;
 
 MullModule::MullModule(std::unique_ptr<llvm::Module> llvmModule)
-  : module(std::move(llvmModule)),
-    uniqueIdentifier("")
-{
-}
+    : module(std::move(llvmModule)), uniqueIdentifier("") {}
 
 MullModule::MullModule(std::unique_ptr<llvm::Module> llvmModule,
                        std::unique_ptr<llvm::MemoryBuffer> buffer,
                        const std::string &md5)
-: module(std::move(llvmModule)), buffer(std::move(buffer))
-{
+    : module(std::move(llvmModule)), buffer(std::move(buffer)) {
   uniqueIdentifier =
-    llvm::sys::path::stem(module->getModuleIdentifier()).str() + "_" + md5;
+      llvm::sys::path::stem(module->getModuleIdentifier()).str() + "_" + md5;
 }
 
 std::unique_ptr<MullModule> MullModule::clone(LLVMContext &context) {
@@ -40,7 +36,8 @@ std::unique_ptr<MullModule> MullModule::clone(LLVMContext &context) {
 
   clone->get()->setModuleIdentifier(module->getModuleIdentifier());
 
-  return make_unique<MullModule>(std::move(clone.get()), std::unique_ptr<MemoryBuffer>(), "");
+  return make_unique<MullModule>(std::move(clone.get()),
+                                 std::unique_ptr<MemoryBuffer>(), "");
 }
 
 llvm::Module *MullModule::getModule() {
@@ -53,13 +50,9 @@ llvm::Module *MullModule::getModule() const {
   return module.get();
 }
 
-std::string MullModule::getUniqueIdentifier() {
-  return uniqueIdentifier;
-}
+std::string MullModule::getUniqueIdentifier() { return uniqueIdentifier; }
 
-std::string MullModule::getUniqueIdentifier() const {
-  return uniqueIdentifier;
-}
+std::string MullModule::getUniqueIdentifier() const { return uniqueIdentifier; }
 
 std::vector<std::string> MullModule::prepareMutations() {
   std::vector<std::string> mutatedFunctionNames;
@@ -84,10 +77,15 @@ std::vector<std::string> MullModule::prepareMutations() {
       args.push_back(&arg);
     }
 
-    auto trampoline = module->getOrInsertGlobal(anyPoint->getTrampolineName(), original->getFunctionType()->getPointerTo());
-    BasicBlock *block = BasicBlock::Create(module->getContext(), "indirect_call", original);
-    auto loadValue = new LoadInst(trampoline, "indirect_function_pointer", block);
-    // name has to be empty for void functions: http://lists.llvm.org/pipermail/llvm-dev/2016-March/096242.html
+    auto trampoline =
+        module->getOrInsertGlobal(anyPoint->getTrampolineName(),
+                                  original->getFunctionType()->getPointerTo());
+    BasicBlock *block =
+        BasicBlock::Create(module->getContext(), "indirect_call", original);
+    auto loadValue =
+        new LoadInst(trampoline, "indirect_function_pointer", block);
+    // name has to be empty for void functions:
+    // http://lists.llvm.org/pipermail/llvm-dev/2016-March/096242.html
     auto callInst = CallInst::Create(loadValue, args, "", block);
     ReturnInst::Create(module->getContext(), callInst, block);
   }
@@ -111,7 +109,7 @@ std::string MullModule::getMutatedUniqueIdentifier() const {
   }
 
   std::vector<std::string> mutationPointsIds;
-  for (auto mutationPair: mutationPoints) {
+  for (auto mutationPair : mutationPoints) {
     for (auto point : mutationPair.second) {
       mutationPointsIds.push_back(point->getUniqueIdentifier());
     }
@@ -131,4 +129,3 @@ std::string MullModule::getMutatedUniqueIdentifier() const {
 
   return (getUniqueIdentifier() + "_" + result + "_mutated").str();
 }
-
