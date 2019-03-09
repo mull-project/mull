@@ -68,12 +68,17 @@ const clang::ASTUnit *ASTStorage::findAST(const MutationPoint *point) {
 
   std::vector<const char *> args({"mull-cxx"});
   auto argsForFile = commandLineArguments(sourceFile);
-  for (auto it = argsForFile.begin(); it != argsForFile.end(); it++) {
+  auto begin = argsForFile.begin();
+  auto end = argsForFile.end();
+  for (auto it = begin; it != end; it++) {
     if (*it == "-c") {
       /// Cutting off '-c foo.cpp' part
       it++;
-      if (it != argsForFile.end()) {
+      if (it != end) {
         it++;
+      }
+      if (it == end) {
+        break;
       }
       continue;
     }
