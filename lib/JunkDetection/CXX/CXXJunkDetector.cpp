@@ -23,6 +23,10 @@ static bool isJunkMutation(ASTStorage &storage, MutationPoint *point,
   auto location =
       ast->getLocation(file, mutantLocation.line, mutantLocation.column);
   assert(location.isValid());
+  if (ast->getSourceManager().isInSystemHeader(location)) {
+    return true;
+  }
+
   VisitorParameters parameters = {.sourceManager = ast->getSourceManager(),
                                   .sourceLocation = location,
                                   .astContext = ast->getASTContext()};

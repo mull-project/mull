@@ -107,9 +107,9 @@ TEST(CompilationDatabaseFromFile, includesInternalHeaderSearchPaths) {
   ASSERT_EQ(compilationFlags.at(1), std::string("foo"));
   ASSERT_EQ(compilationFlags.at(2), std::string("-I"));
   ASSERT_EQ(compilationFlags.at(3), std::string("bar"));
-  ASSERT_EQ(compilationFlags.at(4), std::string("-I"));
+  ASSERT_EQ(compilationFlags.at(4), std::string("-isystem"));
   ASSERT_EQ(compilationFlags.at(5), std::string("/opt/include/c++/v1"));
-  ASSERT_EQ(compilationFlags.at(6), std::string("-I"));
+  ASSERT_EQ(compilationFlags.at(6), std::string("-isystem"));
   ASSERT_EQ(compilationFlags.at(7),
             std::string("/opt/lib/clang/" CLANG_VERSION_STRING "/include"));
 }
