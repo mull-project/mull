@@ -23,6 +23,10 @@ static bool isJunkMutation(ASTStorage &storage, MutationPoint *point,
   auto location =
       ast->getLocation(file, mutantLocation.line, mutantLocation.column);
   assert(location.isValid());
+  if (ast->getSourceManager().isInSystemHeader(location)) {
+    return true;
+  }
+
   VisitorParameters parameters = {.sourceManager = ast->getSourceManager(),
                                   .sourceLocation = location,
                                   .astContext = ast->getASTContext()};
@@ -33,7 +37,7 @@ static bool isJunkMutation(ASTStorage &storage, MutationPoint *point,
 }
 
 CXXJunkDetector::CXXJunkDetector(JunkDetectionConfig &config)
-    : astStorage(config.cxxCompDBDirectory, config.cxxCompilationFlags) {}
+    : astStorage(config.cxxCompilationDatabasePath, config.cxxCompilationFlags) {}
 
 bool CXXJunkDetector::isJunk(MutationPoint *point) {
   auto mutantLocation = point->getSourceLocation();

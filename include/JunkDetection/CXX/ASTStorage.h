@@ -1,7 +1,8 @@
 #pragma once
 
+#include "JunkDetection/CXX/CompilationDatabase.h"
+
 #include <clang/Frontend/ASTUnit.h>
-#include <clang/Tooling/CompilationDatabase.h>
 
 #include <map>
 #include <string>
@@ -13,7 +14,7 @@ class MutationPoint;
 
 class ASTStorage {
 public:
-  ASTStorage(const std::string &cxxCompDBDirectory,
+  ASTStorage(const std::string &cxxCompilationDatabasePath,
              const std::string &cxxCompilationFlags);
 
   const clang::ASTUnit *findAST(const MutationPoint *point);
@@ -25,8 +26,7 @@ private:
 
   std::mutex mutex;
 
-  std::unique_ptr<clang::tooling::CompilationDatabase> compdb;
-  std::vector<std::string> compilationFlags;
+  CompilationDatabase compilationDatabase;
   std::map<std::string, std::unique_ptr<clang::ASTUnit>> astUnits;
 };
 

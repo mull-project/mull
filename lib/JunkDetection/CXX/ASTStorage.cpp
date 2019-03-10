@@ -12,44 +12,14 @@
 #include <llvm/Support/Path.h>
 
 #include <clang/Frontend/CompilerInstance.h>
-#include <clang/Tooling/CompilationDatabase.h>
-#include <JunkDetection/CXX/ASTStorage.h>
-
-#include <sstream>
 
 using namespace mull;
 using namespace llvm;
 
-static std::unique_ptr<clang::tooling::CompilationDatabase>
-getCompilationDatabase(const std::string &compdbDirectory) {
-  if (compdbDirectory.empty()) {
-    return nullptr;
-  }
-  std::string error;
-  auto compdb = clang::tooling::CompilationDatabase::loadFromDirectory(
-      compdbDirectory, error);
-  if (compdb == nullptr) {
-    Logger::error() << error << ": " << compdbDirectory << "\n";
-  }
-  return compdb;
-}
-
-static std::vector<std::string> getCompilationFlags(const std::string &flags) {
-  if (flags.empty()) {
-    return std::vector<std::string>();
-  }
-
-  std::istringstream iss(flags);
-  std::vector<std::string> results((std::istream_iterator<std::string>(iss)),
-                                   std::istream_iterator<std::string>());
-  return results;
-}
-
-ASTStorage::ASTStorage(const std::string &cxxCompDBDirectory,
-                       const std::string &cxxCompilationFlags) {
-  compdb = getCompilationDatabase(cxxCompDBDirectory);
-  compilationFlags = getCompilationFlags(cxxCompilationFlags);
-}
+ASTStorage::ASTStorage(const std::string &cxxCompilationDatabasePath,
+                       const std::string &cxxCompilationFlags)
+    : compilationDatabase(CompilationDatabase::Path(cxxCompilationDatabasePath),
+                          CompilationDatabase::Flags(cxxCompilationFlags)) {}
 
 const clang::ASTUnit *ASTStorage::findAST(const MutationPoint *point) {
   assert(point);
@@ -66,23 +36,10 @@ const clang::ASTUnit *ASTStorage::findAST(const MutationPoint *point) {
     return astUnits.at(sourceFile).get();
   }
 
+  auto compilationFlags = compilationDatabase.compilationFlagsForFile(sourceFile);
   std::vector<const char *> args({"mull-cxx"});
-  auto argsForFile = commandLineArguments(sourceFile);
-  auto begin = argsForFile.begin();
-  auto end = argsForFile.end();
-  for (auto it = begin; it != end; it++) {
-    if (*it == "-c") {
-      /// Cutting off '-c foo.cpp' part
-      it++;
-      if (it != end) {
-        it++;
-      }
-      if (it == end) {
-        break;
-      }
-      continue;
-    }
-    args.push_back(it->c_str());
+  for (auto &flag : compilationFlags) {
+    args.push_back(flag.c_str());
   }
   args.push_back(sourceFile.c_str());
 
@@ -117,23 +74,4 @@ ASTStorage::findFileEntry(const clang::ASTUnit *ast,
   }
 
   return file;
-}
-
-std::vector<std::string>
-ASTStorage::commandLineArguments(const std::string &sourceFile) {
-  if (compdb == nullptr) {
-    return compilationFlags;
-  }
-
-  auto commands = compdb->getCompileCommands(sourceFile);
-  if (commands.empty()) {
-    auto filename = llvm::sys::path::filename(sourceFile);
-    commands = compdb->getCompileCommands(filename);
-    if (commands.empty()) {
-      return compilationFlags;
-    }
-  }
-
-  assert(commands.size() == 1);
-  return commands.front().CommandLine;
 }

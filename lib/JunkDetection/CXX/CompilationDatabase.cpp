@@ -78,9 +78,9 @@ void addHeaderSearchPathsFromCompiler(std::vector<std::string> &flags,
                           CLANG_VERSION_STRING);
   llvm::sys::path::append(cIncludeDir, "include");
 
-  flags.emplace_back("-I");
+  flags.emplace_back("-isystem");
   flags.emplace_back(cppIncludeDir.c_str());
-  flags.emplace_back("-I");
+  flags.emplace_back("-isystem");
   flags.emplace_back(cIncludeDir.c_str());
 }
 
@@ -142,9 +142,14 @@ const std::vector<std::string> &CompilationDatabase::compilationFlagsForFile(
   }
 
   auto it = database.find(filepath);
-  if (it == database.end()) {
-    return flags;
+  if (it != database.end()) {
+    return it->second;
+  }
+  auto filename = llvm::sys::path::filename(filepath);
+  it = database.find(filename);
+  if (it != database.end()) {
+    return it->second;
   }
 
-  return it->second;
+  return flags;
 }

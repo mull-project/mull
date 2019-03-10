@@ -14,6 +14,7 @@
 #include "Config/Configuration.h"
 #include "Driver.h"
 #include "JunkDetection/JunkDetector.h"
+#include "JunkDetection/CXX/CXXJunkDetector.h"
 #include "Metrics/Metrics.h"
 #include "ModuleLoader.h"
 #include "MutationsFinder.h"
@@ -76,6 +77,17 @@ llvm::cl::opt<std::string> InputFile(llvm::cl::Positional,
 llvm::cl::opt<unsigned> Workers("workers", llvm::cl::Optional,
                                 llvm::cl::desc("How many threads to use"),
                                 llvm::cl::cat(MullCXXCategory));
+
+llvm::cl::opt<std::string> CompilationDatabasePath(
+    "compdb-path", llvm::cl::Optional,
+    llvm::cl::desc("Path to a compilation database (compile_commands.json) for "
+                   "junk detection"),
+    llvm::cl::cat(MullCXXCategory), llvm::cl::init(""));
+
+llvm::cl::opt<std::string> CompilationFlags(
+    "compilation-flags", llvm::cl::Optional,
+    llvm::cl::desc("Compilation flags for junk detection"),
+    llvm::cl::cat(MullCXXCategory), llvm::cl::init(""));
 
 llvm::cl::opt<std::string> CacheDir(
     "cache-dir", llvm::cl::Optional,
@@ -217,8 +229,19 @@ int main(int argc, char **argv) {
   mull::TestFramework testFramework(
       testFrameworkOption.testFramework(toolchain, configuration));
 
+  mull::JunkDetectionConfig junkDetectionConfig;
+  if (!CompilationFlags.empty()) {
+    junkDetectionConfig.cxxCompilationFlags = CompilationFlags.getValue();
+    configuration.junkDetectionEnabled = true;
+  }
+  if (!CompilationDatabasePath.empty()) {
+    junkDetectionConfig.cxxCompilationDatabasePath =
+        CompilationDatabasePath.getValue();
+    configuration.junkDetectionEnabled = true;
+  }
+  mull::CXXJunkDetector junkDetector(junkDetectionConfig);
+
   mull::Filter filter;
-  mull::NullJunkDetector junkDetector;
   mull::MutatorsFactory factory;
   mull::MutationsFinder mutationsFinder(mutatorsOptions.mutators(),
                                         configuration);

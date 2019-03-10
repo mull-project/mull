@@ -9,17 +9,17 @@ set (DIR ${CMAKE_CURRENT_LIST_DIR})
 set (INC ${CMAKE_CURRENT_LIST_DIR})
 configure_file(
   ${CMAKE_CURRENT_LIST_DIR}/compile_commands.json.in
-  ${CMAKE_CURRENT_BINARY_DIR}/absolute.dir/compile_commands.json
+  ${CMAKE_CURRENT_BINARY_DIR}/absolute_compile_commands.json
 )
 
-add_fixture(${CMAKE_CURRENT_BINARY_DIR}/absolute.dir)
+add_fixture(${CMAKE_CURRENT_BINARY_DIR}/absolute_compile_commands.json)
 
 set (INC .)
 configure_file(
   ${CMAKE_CURRENT_LIST_DIR}/compile_commands.json.in
-  ${CMAKE_CURRENT_BINARY_DIR}/relative.dir/compile_commands.json
+  ${CMAKE_CURRENT_BINARY_DIR}/relative_compile_commands.json
 )
-add_fixture(${CMAKE_CURRENT_BINARY_DIR}/relative.dir)
+add_fixture(${CMAKE_CURRENT_BINARY_DIR}/relative_compile_commands.json)
 
 configure_file(
   ${CMAKE_CURRENT_LIST_DIR}/include/header.h
