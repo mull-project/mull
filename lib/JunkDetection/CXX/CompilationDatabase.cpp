@@ -142,9 +142,14 @@ const std::vector<std::string> &CompilationDatabase::compilationFlagsForFile(
   }
 
   auto it = database.find(filepath);
-  if (it == database.end()) {
-    return flags;
+  if (it != database.end()) {
+    return it->second;
+  }
+  auto filename = llvm::sys::path::filename(filepath);
+  it = database.find(filename);
+  if (it != database.end()) {
+    return it->second;
   }
 
-  return it->second;
+  return flags;
 }

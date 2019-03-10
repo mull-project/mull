@@ -33,7 +33,7 @@ struct JunkDetectionConfig {
 
   JunkDetectionToggle toggle;
   std::string detectorName;
-  std::string cxxCompDBDirectory;
+  std::string cxxCompilationDatabasePath;
   std::string cxxCompilationFlags;
 
   JunkDetectionConfig();

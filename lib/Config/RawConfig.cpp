@@ -17,7 +17,7 @@ using namespace mull;
 JunkDetectionConfig::JunkDetectionConfig()
 : toggle(JunkDetectionToggle::Disabled),
   detectorName(""),
-  cxxCompDBDirectory(""),
+  cxxCompilationDatabasePath(""),
   cxxCompilationFlags("") {}
 
 JunkDetectionConfig JunkDetectionConfig::enabled() {

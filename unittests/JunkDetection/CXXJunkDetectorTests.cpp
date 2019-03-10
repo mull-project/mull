@@ -148,7 +148,7 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
   ASSERT_EQ(points.size(), 8U);
 
   JunkDetectionConfig junkConfig;
-  junkConfig.cxxCompDBDirectory = fixtures::junk_detection_compdb_absolute_dir_path();
+  junkConfig.cxxCompilationDatabasePath = fixtures::junk_detection_compdb_absolute_compile_commands_json_path();
   CXXJunkDetector detector(junkConfig);
   std::vector<MutationPoint *> nonJunkMutationPoints;
   for (auto point: points) {
@@ -187,7 +187,7 @@ TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
   ASSERT_EQ(points.size(), 8U);
 
   JunkDetectionConfig junkConfig;
-  junkConfig.cxxCompDBDirectory = fixtures::junk_detection_compdb_relative_dir_path();
+  junkConfig.cxxCompilationDatabasePath = fixtures::junk_detection_compdb_relative_compile_commands_json_path();
   CXXJunkDetector detector(junkConfig);
   std::vector<MutationPoint *> nonJunkMutationPoints;
   for (auto point: points) {
