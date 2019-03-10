@@ -37,7 +37,7 @@ set(mull_unittests_sources
 
   ConfigParserTestFixture.h
   ${FACTORY_HEADER}
-)
+  JunkDetection/CompilationDatabaseTests.cpp)
 
 get_filename_component(factory_include_dir ${FACTORY_HEADER} DIRECTORY)
 

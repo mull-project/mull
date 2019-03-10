@@ -29,3 +29,14 @@ configure_file(
 
 add_fixture(${CMAKE_CURRENT_LIST_DIR}/include)
 
+set (databases
+  ${CMAKE_CURRENT_LIST_DIR}/db_with_arguments.json
+  ${CMAKE_CURRENT_LIST_DIR}/db_with_commands.json
+  ${CMAKE_CURRENT_LIST_DIR}/db_with_output.json
+  ${CMAKE_CURRENT_LIST_DIR}/db_with_fullpath_compiler.json
+)
+
+foreach(database ${databases})
+  add_fixture(${database})
+endforeach()
+
