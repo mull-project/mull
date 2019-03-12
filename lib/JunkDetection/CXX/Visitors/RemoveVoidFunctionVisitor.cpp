@@ -25,7 +25,7 @@ bool RemoveVoidFunctionVisitor::VisitCXXOperatorCallExpr(
 
 void RemoveVoidFunctionVisitor::handleCallExpr(
     clang::CallExpr *callExpression) {
-  auto *type = callExpression->getCallReturnType(astContext).getTypePtrOrNull();
+  auto *type = callExpression->getType().getTypePtrOrNull();
   if (type && type->isVoidType()) {
     visitor.visitRangeWithLocation(callExpression->getSourceRange());
   }
