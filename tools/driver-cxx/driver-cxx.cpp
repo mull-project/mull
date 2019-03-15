@@ -10,6 +10,7 @@
 #include <llvm/Support/TargetSelect.h>
 
 #include <iostream>
+#include <unistd.h>
 
 #include "Config/Configuration.h"
 #include "Driver.h"
@@ -161,12 +162,21 @@ private:
   llvm::cl::opt<TestFrameworkOptionIndex> &parameter;
 };
 
+static void validateInputFile() {
+  if (access(InputFile.getValue().c_str(), R_OK) != 0) {
+    perror(InputFile.getValue().c_str());
+    exit(1);
+  }
+}
+
 int main(int argc, char **argv) {
   MutatorsCLIOptions mutatorsOptions(Mutators);
   TestFrameworkCLIOptions testFrameworkOption(TestFrameworks);
 
   llvm::cl::HideUnrelatedOptions(MullCXXCategory);
   llvm::cl::ParseCommandLineOptions(argc, argv);
+
+  validateInputFile();
 
   mull::MetricsMeasure totalExecutionTime;
   totalExecutionTime.start();
