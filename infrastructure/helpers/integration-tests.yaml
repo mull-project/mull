@@ -45,3 +45,33 @@
   environment:
     LD_LIBRARY_PATH: "{{ llvm_dir }}/lib"
 
+- name: Clone OpenSSL (no-shared)
+  git:
+    repo: https://github.com/openssl/openssl.git
+    dest: "{{ working_dir }}/integration/openssl-no-shared"
+    version: d4e4bd2a8163f355fa8a3884077eaec7adc75ff7
+
+- name: Create build directory for OpenSSL (no-shared)
+  file:
+    path: "{{ working_dir }}/integration/openssl-no-shared.build.dir"
+    state: directory
+
+- name: Prepare build system for OpenSSL (no-shared)
+  command: ./config -no-asm -no-shared -g -O0 -fembed-bitcode
+  args:
+    chdir: "{{ working_dir }}/integration/openssl-no-shared"
+    creates: "{{ working_dir }}/integration/openssl-no-shared/Makefile"
+  environment:
+    CC: "{{ llvm_dir }}/bin/clang"
+    CXX: "{{ llvm_dir }}/bin/clang++"
+
+- name: Build OpenSSL (no-shared)
+  command: make all
+  args:
+    chdir: "{{ working_dir }}/integration/openssl-no-shared"
+
+- name: Run Mull against OpenSSL (no-shared)
+  command: mull-cxx -test-framework=CustomTest "{{ working_dir }}/integration/openssl-no-shared/test/bio_enc_test"
+  environment:
+    LD_LIBRARY_PATH: "{{ llvm_dir }}/lib"
+
