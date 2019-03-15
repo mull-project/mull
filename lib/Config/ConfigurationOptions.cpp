@@ -1,7 +1,7 @@
 #include "Config/ConfigurationOptions.h"
 
-#include <thread>
 #include <sys/types.h>
+#include <thread>
 
 namespace mull {
 
@@ -23,8 +23,7 @@ std::string diagnosticsToString(Diagnostics diagnostics) {
 }
 
 ParallelizationConfig::ParallelizationConfig()
-    : workers(0), testExecutionWorkers(0), mutantExecutionWorkers(0) {
-}
+    : workers(0), testExecutionWorkers(0), mutantExecutionWorkers(0) {}
 
 void ParallelizationConfig::normalize() {
   int defaultWorkers = std::max(std::thread::hardware_concurrency(), uint(1));
@@ -48,10 +47,10 @@ ParallelizationConfig ParallelizationConfig::defaultConfig() {
 
 CustomTestDefinition::CustomTestDefinition() = default;
 
-CustomTestDefinition::CustomTestDefinition(const std::string &name,
-                                           const std::string &method,
-                                           const std::string &program,
-                                           const std::vector<std::string> arguments)
-    : testName(name), methodName(method), programName(program), callArguments(arguments) {}
+CustomTestDefinition::CustomTestDefinition(
+    const std::string &name, const std::string &method,
+    const std::string &program, const std::vector<std::string> arguments)
+    : testName(name), methodName(method), programName(program),
+      callArguments(arguments) {}
 
-}
+} // namespace mull
