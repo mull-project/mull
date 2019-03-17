@@ -10,6 +10,7 @@
 #include <llvm/Support/TargetSelect.h>
 
 #include <iostream>
+#include <unistd.h>
 
 #include "Config/Configuration.h"
 #include "Driver.h"
@@ -27,6 +28,7 @@
 /// Temp includes to make it running
 
 #include "Config/RawConfig.h"
+#include "Config/ConfigurationOptions.h"
 #include "Metrics/Metrics.h"
 #include "Reporters/SQLiteReporter.h"
 
@@ -161,12 +163,21 @@ private:
   llvm::cl::opt<TestFrameworkOptionIndex> &parameter;
 };
 
+static void validateInputFile() {
+  if (access(InputFile.getValue().c_str(), R_OK) != 0) {
+    perror(InputFile.getValue().c_str());
+    exit(1);
+  }
+}
+
 int main(int argc, char **argv) {
   MutatorsCLIOptions mutatorsOptions(Mutators);
   TestFrameworkCLIOptions testFrameworkOption(TestFrameworks);
 
   llvm::cl::HideUnrelatedOptions(MullCXXCategory);
   llvm::cl::ParseCommandLineOptions(argc, argv);
+
+  validateInputFile();
 
   mull::MetricsMeasure totalExecutionTime;
   totalExecutionTime.start();
@@ -176,6 +187,10 @@ int main(int argc, char **argv) {
   llvm::InitializeNativeTargetAsmParser();
 
   mull::Configuration configuration;
+  configuration.customTests.push_back(
+      mull::CustomTestDefinition("main", "main", "mull", {}));
+  configuration.customTests.push_back(
+      mull::CustomTestDefinition("main", "_main", "mull", {}));
   configuration.failFastEnabled = true;
 
   if (Workers) {

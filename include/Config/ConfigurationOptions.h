@@ -5,12 +5,7 @@
 
 namespace mull {
 
-enum class Diagnostics {
-  None,
-  Survived,
-  Killed,
-  All
-};
+enum class Diagnostics { None, Survived, Killed, All };
 
 std::string diagnosticsToString(Diagnostics diagnostics);
 
@@ -30,10 +25,9 @@ struct CustomTestDefinition {
   std::vector<std::string> callArguments;
 
   CustomTestDefinition();
-  CustomTestDefinition(const std::string &name,
-                       const std::string &method,
+  CustomTestDefinition(const std::string &name, const std::string &method,
                        const std::string &program,
-                       const std::vector<std::string> arguments);
+                       std::vector<std::string> arguments);
 };
 
-}
+} // namespace mull
