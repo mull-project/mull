@@ -88,7 +88,7 @@ llvm::cl::opt<std::string> CompilationDatabasePath(
 
 llvm::cl::opt<std::string> CompilationFlags(
     "compilation-flags", llvm::cl::Optional,
-    llvm::cl::desc("Compilation flags for junk detection"),
+    llvm::cl::desc("Extra compilation flags for junk detection"),
     llvm::cl::cat(MullCXXCategory), llvm::cl::init(""));
 
 llvm::cl::opt<std::string> CacheDir(
