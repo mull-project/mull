@@ -57,35 +57,9 @@ const std::string &commandOrArguments(const CompileCommand &command) {
   return command.arguments;
 }
 
-void addHeaderSearchPathsFromCompiler(std::vector<std::string> &flags,
-                                      const std::string &compiler) {
-  if (compiler.empty()) {
-    return;
-  }
-
-  auto binDirectory = llvm::sys::path::parent_path(compiler);
-  if (binDirectory.empty()) {
-    return;
-  }
-
-  auto installDirectory = llvm::sys::path::parent_path(binDirectory);
-  llvm::SmallString<128> cppIncludeDir;
-  llvm::sys::path::append(cppIncludeDir, installDirectory, "include", "c++",
-                          "v1");
-
-  llvm::SmallString<128> cIncludeDir;
-  llvm::sys::path::append(cIncludeDir, installDirectory, "lib", "clang",
-                          CLANG_VERSION_STRING);
-  llvm::sys::path::append(cIncludeDir, "include");
-
-  flags.emplace_back("-isystem");
-  flags.emplace_back(cppIncludeDir.c_str());
-  flags.emplace_back("-isystem");
-  flags.emplace_back(cIncludeDir.c_str());
-}
-
 static std::vector<std::string>
-flagsFromCommand(const CompileCommand &command) {
+flagsFromCommand(const CompileCommand &command,
+                 const std::vector<std::string> &extraFlags) {
   const std::string &input = commandOrArguments(command);
 
   std::istringstream stream(input);
@@ -96,12 +70,15 @@ flagsFromCommand(const CompileCommand &command) {
   std::getline(stream, rest);
 
   std::vector<std::string> flags = flagsFromString(rest);
-  addHeaderSearchPathsFromCompiler(flags, compiler);
+  for (auto &extra : extraFlags) {
+    flags.push_back(extra);
+  }
   return flags;
 }
 
 static std::map<std::string, std::vector<std::string>>
-loadDatabaseFromFile(const std::string &path) {
+loadDatabaseFromFile(const std::string &path,
+                     const std::vector<std::string> &extraFlags) {
   std::map<std::string, std::vector<std::string>> database;
   if (path.empty()) {
     return database;
@@ -124,7 +101,7 @@ loadDatabaseFromFile(const std::string &path) {
   }
 
   for (auto &command : commands) {
-    database[command.file] = flagsFromCommand(command);
+    database[command.file] = flagsFromCommand(command, extraFlags);
   }
 
   return database;
@@ -132,13 +109,13 @@ loadDatabaseFromFile(const std::string &path) {
 
 CompilationDatabase::CompilationDatabase(CompilationDatabase::Path path,
                                          CompilationDatabase::Flags flags)
-    : flags(flagsFromString(flags.getFlags())),
-      database(loadDatabaseFromFile(path.getPath())) {}
+    : extraFlags(flagsFromString(flags.getFlags())),
+      database(loadDatabaseFromFile(path.getPath(), extraFlags)) {}
 
 const std::vector<std::string> &CompilationDatabase::compilationFlagsForFile(
     const std::string &filepath) const {
   if (database.empty()) {
-    return flags;
+    return extraFlags;
   }
 
   auto it = database.find(filepath);
@@ -151,5 +128,5 @@ const std::vector<std::string> &CompilationDatabase::compilationFlagsForFile(
     return it->second;
   }
 
-  return flags;
+  return extraFlags;
 }

@@ -33,7 +33,7 @@ public:
   compilationFlagsForFile(const std::string &filepath) const;
 
 private:
-  const std::vector<std::string> flags;
+  const std::vector<std::string> extraFlags;
   const std::map<std::string, std::vector<std::string>> database;
 };
 
