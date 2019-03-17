@@ -4,11 +4,10 @@ using namespace llvm;
 
 namespace llvm_compat {
 
-uint64_t JITSymbolAddress(JITSymbol &symbol) {
-  return symbol.getAddress();
-}
+uint64_t JITSymbolAddress(JITSymbol &symbol) { return symbol.getAddress(); }
 
-JITSymbolFlags JITSymbolFlagsFromObjectSymbol(const object::BasicSymbolRef &symbol) {
+JITSymbolFlags
+JITSymbolFlagsFromObjectSymbol(const object::BasicSymbolRef &symbol) {
   return orc::JITSymbol::flagsFromObjectSymbol(symbol);
 }
 
@@ -18,5 +17,4 @@ compileModule(orc::SimpleCompiler &compiler, llvm::Module &module) {
   return std::move(objectFile);
 }
 
-}
-
+} // namespace llvm_compat

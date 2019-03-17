@@ -4,7 +4,8 @@ using namespace llvm;
 
 namespace llvm_compat {
 
-JITSymbolFlags JITSymbolFlagsFromObjectSymbol(const object::BasicSymbolRef &symbol) {
+JITSymbolFlags
+JITSymbolFlagsFromObjectSymbol(const object::BasicSymbolRef &symbol) {
   return JITSymbolFlags::fromObjectSymbol(symbol);
 }
 
@@ -24,5 +25,4 @@ compileModule(orc::SimpleCompiler &compiler, llvm::Module &module) {
   return std::move(objectFile);
 }
 
-}
-
+} // namespace llvm_compat
