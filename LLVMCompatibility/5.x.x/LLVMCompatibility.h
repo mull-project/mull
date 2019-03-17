@@ -1,6 +1,5 @@
 #pragma once
 
-#include <llvm/Bitcode/BitcodeReader.h>
 #include <llvm/ExecutionEngine/Orc/CompileUtils.h>
 #include <llvm/ExecutionEngine/RuntimeDyld.h>
 
@@ -12,9 +11,14 @@ typedef JITSymbol JITSymbolInfo;
 typedef JITSymbol JITSymbol;
 
 uint64_t JITSymbolAddress(JITSymbol &symbol);
+
 JITSymbolFlags
 JITSymbolFlagsFromObjectSymbol(const object::BasicSymbolRef &symbol);
+
 object::OwningBinary<object::ObjectFile>
 compileModule(orc::SimpleCompiler &compiler, llvm::Module &module);
+
+std::unique_ptr<Module> parseBitcode(MemoryBufferRef bufferRef,
+                                     LLVMContext &context);
 
 } // namespace llvm_compat

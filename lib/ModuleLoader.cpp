@@ -1,9 +1,9 @@
 #include "ModuleLoader.h"
 
-#include "Logger.h"
-#include "LLVMCompatibility.h"
-#include "Parallelization/Parallelization.h"
 #include "Config/Configuration.h"
+#include "LLVMCompatibility.h"
+#include "Logger.h"
+#include "Parallelization/Parallelization.h"
 
 #include <llvm/AsmParser/Parser.h>
 #include <llvm/IR/LLVMContext.h>
@@ -30,12 +30,9 @@ static std::string MD5HashFromBuffer(StringRef buffer) {
 
 std::pair<std::string, std::unique_ptr<Module>>
 mull::loadModuleFromBuffer(LLVMContext &context, MemoryBuffer &buffer) {
-  auto module = parseBitcodeFile(buffer.getMemBufferRef(), context);
-  if (!module) {
-    return std::make_pair(std::string(), std::unique_ptr<Module>());
-  }
+  auto module = llvm_compat::parseBitcode(buffer.getMemBufferRef(), context);
   std::string md5 = MD5HashFromBuffer(buffer.getBuffer());
-  return std::make_pair(md5, std::move(module.get()));
+  return std::make_pair(md5, std::move(module));
 }
 
 std::unique_ptr<MullModule>
@@ -58,7 +55,8 @@ ModuleLoader::loadModuleAtPath(const std::string &path,
     return nullptr;
   }
 
-  return make_unique<MullModule>(std::move(module), std::move(buffer.get()), hash);
+  return make_unique<MullModule>(std::move(module), std::move(buffer.get()),
+                                 hash);
 }
 
 std::vector<std::unique_ptr<MullModule>>

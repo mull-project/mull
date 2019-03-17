@@ -9,6 +9,7 @@
 #include "Toolchain/Trampolines.h"
 
 #include <llvm/ExecutionEngine/SectionMemoryManager.h>
+#include <llvm/IR/Function.h>
 
 using namespace mull;
 using namespace llvm;
