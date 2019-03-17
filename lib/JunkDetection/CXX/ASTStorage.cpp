@@ -1,6 +1,6 @@
 #include "JunkDetection/CXX/ASTStorage.h"
-#include "MutationPoint.h"
 #include "Logger.h"
+#include "MutationPoint.h"
 
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/DebugInfoMetadata.h>
@@ -16,47 +16,23 @@
 using namespace mull;
 using namespace llvm;
 
-ASTStorage::ASTStorage(const std::string &cxxCompilationDatabasePath,
-                       const std::string &cxxCompilationFlags)
-    : compilationDatabase(CompilationDatabase::Path(cxxCompilationDatabasePath),
-                          CompilationDatabase::Flags(cxxCompilationFlags)) {}
+ThreadSafeASTUnit::ThreadSafeASTUnit(clang::ASTUnit *ast)
+    : ast(std::unique_ptr<clang::ASTUnit>(ast)) {}
 
-const clang::ASTUnit *ASTStorage::findAST(const MutationPoint *point) {
-  assert(point);
-  assert(!point->getSourceLocation().isNull());
+clang::SourceManager &ThreadSafeASTUnit::getSourceManager() {
+  return ast->getSourceManager();
+}
 
-  auto instruction = dyn_cast<Instruction>(point->getOriginalValue());
-  if (instruction == nullptr) {
-    return nullptr;
-  }
+clang::ASTContext &ThreadSafeASTUnit::getASTContext() {
+  return ast->getASTContext();
+}
 
-  const std::string &sourceFile = instruction->getModule()->getSourceFileName();
-  std::lock_guard<std::mutex> guard(mutex);
-  if (astUnits.count(sourceFile)) {
-    return astUnits.at(sourceFile).get();
-  }
-
-  auto compilationFlags = compilationDatabase.compilationFlagsForFile(sourceFile);
-  std::vector<const char *> args({"mull-cxx"});
-  for (auto &flag : compilationFlags) {
-    args.push_back(flag.c_str());
-  }
-  args.push_back(sourceFile.c_str());
-
-  clang::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diagnosticsEngine(
-      clang::CompilerInstance::createDiagnostics(new clang::DiagnosticOptions));
-
-  auto ast = clang::ASTUnit::LoadFromCommandLine(
-      args.data(), args.data() + args.size(),
-      std::make_shared<clang::PCHContainerOperations>(), diagnosticsEngine, "");
-  astUnits[sourceFile] = std::move(std::unique_ptr<clang::ASTUnit>(ast));
-  return ast;
+bool ThreadSafeASTUnit::isInSystemHeader(clang::SourceLocation &location) {
+  return ast->getSourceManager().isInSystemHeader(location);
 }
 
 const clang::FileEntry *
-ASTStorage::findFileEntry(const clang::ASTUnit *ast,
-                               const MutationPoint *point) {
-  assert(ast);
+ThreadSafeASTUnit::findFileEntry(const MutationPoint *point) {
   assert(point);
   assert(!point->getSourceLocation().isNull());
 
@@ -74,4 +50,60 @@ ASTStorage::findFileEntry(const clang::ASTUnit *ast,
   }
 
   return file;
+}
+
+clang::SourceLocation ThreadSafeASTUnit::getLocation(MutationPoint *point) {
+  auto file = findFileEntry(point);
+  assert(file);
+  assert(file->isValid());
+
+  auto mutantLocation = point->getSourceLocation();
+  assert(!mutantLocation.isNull());
+
+  /// getLocation from the ASTUnit it not thread safe
+  std::lock_guard<std::mutex> lock(mutex);
+  auto location =
+      ast->getLocation(file, mutantLocation.line, mutantLocation.column);
+  assert(location.isValid());
+  return location;
+}
+
+ASTStorage::ASTStorage(const std::string &cxxCompilationDatabasePath,
+                       const std::string &cxxCompilationFlags)
+    : compilationDatabase(CompilationDatabase::Path(cxxCompilationDatabasePath),
+                          CompilationDatabase::Flags(cxxCompilationFlags)) {}
+
+ThreadSafeASTUnit *ASTStorage::findAST(const MutationPoint *point) {
+  assert(point);
+  assert(!point->getSourceLocation().isNull());
+
+  auto instruction = dyn_cast<Instruction>(point->getOriginalValue());
+  if (instruction == nullptr) {
+    return nullptr;
+  }
+
+  const std::string &sourceFile = instruction->getModule()->getSourceFileName();
+  std::lock_guard<std::mutex> guard(mutex);
+  if (astUnits.count(sourceFile)) {
+    return astUnits.at(sourceFile).get();
+  }
+
+  auto compilationFlags =
+      compilationDatabase.compilationFlagsForFile(sourceFile);
+  std::vector<const char *> args({"mull-cxx"});
+  for (auto &flag : compilationFlags) {
+    args.push_back(flag.c_str());
+  }
+  args.push_back(sourceFile.c_str());
+
+  clang::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diagnosticsEngine(
+      clang::CompilerInstance::createDiagnostics(new clang::DiagnosticOptions));
+
+  auto ast = clang::ASTUnit::LoadFromCommandLine(
+      args.data(), args.data() + args.size(),
+      std::make_shared<clang::PCHContainerOperations>(), diagnosticsEngine, "");
+
+  auto threadSafeAST = new ThreadSafeASTUnit(ast);
+  astUnits[sourceFile] = std::unique_ptr<ThreadSafeASTUnit>(threadSafeAST);
+  return threadSafeAST;
 }
