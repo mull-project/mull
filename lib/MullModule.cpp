@@ -28,15 +28,15 @@ MullModule::MullModule(std::unique_ptr<llvm::Module> llvmModule,
 
 std::unique_ptr<MullModule> MullModule::clone(LLVMContext &context) {
   assert(buffer.get() && "Cannot clone non-original module");
-  auto clone = parseBitcodeFile(buffer->getMemBufferRef(), context);
+  auto clone = llvm_compat::parseBitcode(buffer->getMemBufferRef(), context);
   if (!clone) {
     Logger::error() << "Cannot clone module \n";
     return nullptr;
   }
 
-  clone->get()->setModuleIdentifier(module->getModuleIdentifier());
+  clone->setModuleIdentifier(module->getModuleIdentifier());
 
-  return make_unique<MullModule>(std::move(clone.get()),
+  return make_unique<MullModule>(std::move(clone),
                                  std::unique_ptr<MemoryBuffer>(), "");
 }
 

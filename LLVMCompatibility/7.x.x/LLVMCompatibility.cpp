@@ -1,10 +1,13 @@
 #include "LLVMCompatibility.h"
 
+#include <llvm/Bitcode/BitcodeReader.h>
+
 using namespace llvm;
 
 namespace llvm_compat {
 
-JITSymbolFlags JITSymbolFlagsFromObjectSymbol(const object::BasicSymbolRef &symbol) {
+JITSymbolFlags
+JITSymbolFlagsFromObjectSymbol(const object::BasicSymbolRef &symbol) {
   return JITSymbolFlags::fromObjectSymbol(symbol);
 }
 
@@ -31,5 +34,17 @@ compileModule(orc::SimpleCompiler &compiler, llvm::Module &module) {
   return object::OwningBinary<object::ObjectFile>(
       std::move(objectOrError.get()), std::move(buffer));
 }
+
+std::unique_ptr<Module> parseBitcode(MemoryBufferRef bufferRef,
+                                     LLVMContext &context) {
+  auto module = parseBitcodeFile(bufferRef, context);
+  if (!module) {
+    logAllUnhandledErrors(module.takeError(), errs(),
+                          "\nparseBitcodeFile failed: ");
+    return std::unique_ptr<Module>();
+  }
+
+  return std::move(module.get());
 }
 
+} // namespace llvm_compat
