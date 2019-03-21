@@ -24,6 +24,7 @@
 #include "Program/Program.h"
 #include "Result.h"
 #include "TestFrameworks/TestFrameworkFactory.h"
+#include "DynamicLibraries.h"
 
 /// Temp includes to make it running
 
@@ -182,6 +183,11 @@ int main(int argc, char **argv) {
   mull::MetricsMeasure totalExecutionTime;
   totalExecutionTime.start();
 
+  auto dynamicLibraries = mull::findDynamicLibraries(InputFile.getValue());
+  for (auto &x : dynamicLibraries) {
+    llvm::errs() << x << "\n";
+  }
+
   llvm::InitializeNativeTarget();
   llvm::InitializeNativeTargetAsmPrinter();
   llvm::InitializeNativeTargetAsmParser();
@@ -237,7 +243,7 @@ int main(int argc, char **argv) {
       "Loading bitcode files", embeddedFiles, modules, std::move(tasks));
   executor.execute();
 
-  mull::Program program({}, {}, std::move(modules));
+  mull::Program program(dynamicLibraries, {}, std::move(modules));
 
   mull::Toolchain toolchain(configuration);
 

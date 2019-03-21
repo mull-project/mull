@@ -91,7 +91,7 @@ void Driver::compileInstrumentedBitcodeFiles() {
 
 void Driver::loadDynamicLibraries() {
   SingleTaskExecutor task("Loading dynamic libraries", [&] () {
-    for (const std::string &dylibPath: config.dynamicLibraryPaths) {
+    for (const std::string &dylibPath: program.getDynamicLibraryPaths()) {
       sys::DynamicLibrary::LoadLibraryPermanently(dylibPath.c_str());
     }
   });
