@@ -672,7 +672,8 @@ TEST(Driver, customTest_withDynamicLibraries) {
   MutationsFinder finder(std::move(mutators), configuration);
 
   ModuleLoader loader;
-  Program program({}, {}, loader.loadModules(configuration));
+  Program program(configuration.dynamicLibraryPaths, {},
+                  loader.loadModules(configuration));
 
   Toolchain toolchain(configuration);
   Filter filter;
