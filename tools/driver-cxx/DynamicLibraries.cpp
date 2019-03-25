@@ -1,8 +1,5 @@
 #include "DynamicLibraries.h"
 
-#include <llvm/BinaryFormat/ELF.h>
-#include <llvm/BinaryFormat/MachO.h>
-#include <llvm/BinaryFormat/Magic.h>
 #include <llvm/Object/ELFObjectFile.h>
 #include <llvm/Object/ELFTypes.h>
 #include <llvm/Object/MachO.h>
@@ -84,9 +81,7 @@ resolveLibraryPath(const std::string &library,
   for (auto &searchPath : librarySearchPaths) {
     std::string fullPath = searchPath + "/" + library;
     if (llvm::sys::fs::exists(fullPath)) {
-      llvm::SmallString<128> realPath;
-      llvm::sys::fs::real_path(fullPath, realPath);
-      return std::string(realPath.c_str());
+      return fullPath;
     }
   }
 
@@ -101,8 +96,7 @@ mull::findDynamicLibraries(const std::string &executablePath,
   auto bufferOr = llvm::MemoryBuffer::getFile(executablePath);
   std::unique_ptr<llvm::MemoryBuffer> buffer(std::move(bufferOr.get()));
 
-  auto symbolicOr = SymbolicFile::createSymbolicFile(
-      buffer->getMemBufferRef(), llvm::file_magic::unknown, nullptr);
+  auto symbolicOr = SymbolicFile::createSymbolicFile(buffer->getMemBufferRef());
 
   std::unique_ptr<SymbolicFile> symbolicFile(std::move(symbolicOr.get()));
 
