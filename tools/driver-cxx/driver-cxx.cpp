@@ -74,7 +74,7 @@ private:
 llvm::cl::OptionCategory MullCXXCategory("mull-cxx");
 
 llvm::cl::opt<std::string> InputFile(llvm::cl::Positional,
-                                     llvm::cl::desc("<input files>"),
+                                     llvm::cl::desc("<input file>"),
                                      llvm::cl::Required);
 
 llvm::cl::opt<unsigned> Workers("workers", llvm::cl::Optional,
@@ -164,6 +164,11 @@ private:
   llvm::cl::opt<TestFrameworkOptionIndex> &parameter;
 };
 
+llvm::cl::list<std::string> LDSearchPaths("ld_search_path",
+                                          llvm::cl::ZeroOrMore,
+                                          llvm::cl::desc("Library search path"),
+                                          llvm::cl::cat(MullCXXCategory));
+
 static void validateInputFile() {
   if (access(InputFile.getValue().c_str(), R_OK) != 0) {
     perror(InputFile.getValue().c_str());
@@ -182,11 +187,6 @@ int main(int argc, char **argv) {
 
   mull::MetricsMeasure totalExecutionTime;
   totalExecutionTime.start();
-
-  auto dynamicLibraries = mull::findDynamicLibraries(InputFile.getValue());
-  for (auto &x : dynamicLibraries) {
-    llvm::errs() << x << "\n";
-  }
 
   llvm::InitializeNativeTarget();
   llvm::InitializeNativeTargetAsmPrinter();
@@ -242,6 +242,14 @@ int main(int argc, char **argv) {
   mull::TaskExecutor<LoadModuleFromBitcodeTask> executor(
       "Loading bitcode files", embeddedFiles, modules, std::move(tasks));
   executor.execute();
+
+  std::vector<std::string> librarySearchPaths;
+  for (auto &searchPath : LDSearchPaths) {
+    librarySearchPaths.push_back(searchPath);
+  }
+
+  auto dynamicLibraries =
+      mull::findDynamicLibraries(InputFile.getValue(), librarySearchPaths);
 
   mull::Program program(dynamicLibraries, {}, std::move(modules));
 

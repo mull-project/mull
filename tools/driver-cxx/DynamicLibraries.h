@@ -6,6 +6,6 @@
 namespace mull {
 
 std::vector<std::string>
-findDynamicLibraries(const std::string &executablePath);
-
+findDynamicLibraries(const std::string &executablePath,
+                     std::vector<std::string> &librarySearchPaths);
 }

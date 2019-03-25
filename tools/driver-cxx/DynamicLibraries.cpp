@@ -7,6 +7,10 @@
 #include <llvm/Object/ELFTypes.h>
 #include <llvm/Object/MachO.h>
 #include <llvm/Support/MemoryBuffer.h>
+#include <llvm/Support/Path.h>
+#include <llvm/Support/FileSystem.h>
+#include <unistd.h>
+#include <Logger.h>
 
 using namespace llvm::object;
 
@@ -70,8 +74,28 @@ void librariesFromMachO(const MachOObjectFile &file,
   }
 }
 
+static std::string
+resolveLibraryPath(const std::string &library,
+                   const std::vector<std::string> &librarySearchPaths) {
+  if (llvm::sys::path::is_absolute(library)) {
+    return library;
+  }
+
+  for (auto &searchPath : librarySearchPaths) {
+    std::string fullPath = searchPath + "/" + library;
+    if (llvm::sys::fs::exists(fullPath)) {
+      llvm::SmallString<128> realPath;
+      llvm::sys::fs::real_path(fullPath, realPath);
+      return std::string(realPath.c_str());
+    }
+  }
+
+  return library;
+}
+
 std::vector<std::string>
-mull::findDynamicLibraries(const std::string &executablePath) {
+mull::findDynamicLibraries(const std::string &executablePath,
+                           std::vector<std::string> &librarySearchPaths) {
   std::vector<std::string> libraries;
 
   auto bufferOr = llvm::MemoryBuffer::getFile(executablePath);
@@ -98,5 +122,17 @@ mull::findDynamicLibraries(const std::string &executablePath) {
       librariesFromElf(*elf64BEFile, libraries);
     }
   }
-  return libraries;
+
+  std::vector<std::string> resolvedLibraries;
+  for (auto &library : libraries) {
+    auto libraryPath = resolveLibraryPath(library, librarySearchPaths);
+    if (llvm::sys::fs::exists(libraryPath)) {
+      resolvedLibraries.push_back(libraryPath);
+    } else {
+      mull::Logger::error()
+          << "Could not find dynamic library: " << library << "\n";
+    }
+  }
+
+  return resolvedLibraries;
 }

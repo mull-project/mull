@@ -90,9 +90,15 @@ void Driver::compileInstrumentedBitcodeFiles() {
 }
 
 void Driver::loadDynamicLibraries() {
-  SingleTaskExecutor task("Loading dynamic libraries", [&] () {
-    for (const std::string &dylibPath: program.getDynamicLibraryPaths()) {
-      sys::DynamicLibrary::LoadLibraryPermanently(dylibPath.c_str());
+  SingleTaskExecutor task("Loading dynamic libraries", [&]() {
+    for (const std::string &dylibPath : program.getDynamicLibraryPaths()) {
+      std::string msg;
+      auto error =
+          sys::DynamicLibrary::LoadLibraryPermanently(dylibPath.c_str(), &msg);
+      if (error) {
+        Logger::error() << "Cannot load dynamic library '" << dylibPath
+                        << "': " << msg << "\n";
+      }
     }
   });
   task.execute();
