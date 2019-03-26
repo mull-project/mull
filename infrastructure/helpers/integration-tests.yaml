@@ -27,8 +27,15 @@
     state: directory
 
 - name: Prepare build system for fmt
-  command: cmake -G Ninja -DCMAKE_CXX_FLAGS=-fembed-bitcode "{{ working_dir }}/integration/fmt"
+  command:
   args:
+    argv:
+      - cmake
+      - -G
+      - Ninja
+      - -DCMAKE_CXX_FLAGS=-fembed-bitcode -nostdinc++ -isystem {{ llvm_dir }}/include/c++/v1 -isystem {{ llvm_dir }}/lib/clang/{{ llvm_version }}/include
+      - -DCMAKE_EXE_LINKER_FLAGS=-lc++ -L {{ llvm_dir }}/lib
+      - "{{ working_dir }}/integration/fmt"
     chdir: "{{ working_dir }}/integration/fmt.build.dir"
     creates: "{{ working_dir }}/integration/fmt.build.dir/CMakeCache.txt"
   environment:
@@ -40,8 +47,24 @@
   args:
     chdir: "{{ working_dir }}/integration/fmt.build.dir"
 
+- name: Run fmt
+  command: ./bin/core-test
+  args:
+    chdir: "{{ working_dir }}/integration/fmt.build.dir"
+  environment:
+    LD_LIBRARY_PATH: "{{ llvm_dir }}/lib"
+
 - name: Run Mull against fmt
-  command: mull-cxx -test-framework=GoogleTest "{{ working_dir }}/integration/fmt.build.dir/bin/core-test"
+  command:
+  args:
+    argv:
+      - mull-cxx
+      - -test-framework=GoogleTest
+      - -ld_search_path=/usr/local/lib
+      - -ld_search_path=/lib/x86_64-linux-gnu
+      - -ld_search_path=/usr/lib/x86_64-linux-gnu
+      - -ld_search_path={{ llvm_dir }}/lib
+      - "{{ working_dir }}/integration/fmt.build.dir/bin/core-test"
   environment:
     LD_LIBRARY_PATH: "{{ llvm_dir }}/lib"
 
@@ -63,7 +86,6 @@
     creates: "{{ working_dir }}/integration/openssl-no-shared/Makefile"
   environment:
     CC: "{{ llvm_dir }}/bin/clang"
-    CXX: "{{ llvm_dir }}/bin/clang++"
 
 - name: Build OpenSSL (no-shared)
   command: make all
@@ -71,7 +93,13 @@
     chdir: "{{ working_dir }}/integration/openssl-no-shared"
 
 - name: Run Mull against OpenSSL (no-shared)
-  command: mull-cxx -test-framework=CustomTest "{{ working_dir }}/integration/openssl-no-shared/test/bio_enc_test"
+  command:
+  args:
+    argv:
+      - mull-cxx
+      - -test-framework=CustomTest
+      - -ld_search_path=/lib/x86_64-linux-gnu
+      - "{{ working_dir }}/integration/openssl-no-shared/test/bio_enc_test"
   environment:
     LD_LIBRARY_PATH: "{{ llvm_dir }}/lib"
 
