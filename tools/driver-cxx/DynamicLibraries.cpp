@@ -94,9 +94,17 @@ mull::findDynamicLibraries(const std::string &executablePath,
   std::vector<std::string> libraries;
 
   auto bufferOr = llvm::MemoryBuffer::getFile(executablePath);
+  if (!bufferOr) {
+    mull::Logger::error() << "\nCannot open executable: " << executablePath
+                          << "\n";
+  }
   std::unique_ptr<llvm::MemoryBuffer> buffer(std::move(bufferOr.get()));
 
   auto symbolicOr = SymbolicFile::createSymbolicFile(buffer->getMemBufferRef());
+  if (!symbolicOr) {
+    mull::Logger::error() << "\nCannot create symbolic file from: "
+                          << executablePath << "\n";
+  }
 
   std::unique_ptr<SymbolicFile> symbolicFile(std::move(symbolicOr.get()));
 
