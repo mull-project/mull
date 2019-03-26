@@ -22,18 +22,17 @@ class Mangler;
 class GoogleTestRunner : public TestRunner {
   Mangler &mangler;
   llvm::orc::LocalCXXRuntimeOverrides overrides;
-
-  std::string fGoogleTestInit;
-  std::string fGoogleTestInstance;
-  std::string fGoogleTestRun;
   InstrumentationInfo **trampoline;
-public:
 
+public:
   explicit GoogleTestRunner(Mangler &mangler);
   ~GoogleTestRunner() override;
 
-  void loadInstrumentedProgram(ObjectFiles &objectFiles, Instrumentation &instrumentation, JITEngine &jit) override;
-  void loadMutatedProgram(ObjectFiles &objectFiles, Trampolines &trampolines, JITEngine &jit) override;
+  void loadInstrumentedProgram(ObjectFiles &objectFiles,
+                               Instrumentation &instrumentation,
+                               JITEngine &jit) override;
+  void loadMutatedProgram(ObjectFiles &objectFiles, Trampolines &trampolines,
+                          JITEngine &jit) override;
   ExecutionStatus runTest(Test *test, JITEngine &jit) override;
 
 private:
@@ -43,4 +42,4 @@ private:
   void runStaticConstructor(llvm::Function *constructor, JITEngine &jit);
 };
 
-}
+} // namespace mull
