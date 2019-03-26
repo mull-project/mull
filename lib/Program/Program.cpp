@@ -114,3 +114,7 @@ std::vector<llvm::Function *> Program::getStaticConstructors() const {
 
   return Ctors;
 }
+
+const std::vector<std::string> &Program::getDynamicLibraryPaths() const {
+  return _dynamicLibraries;
+}

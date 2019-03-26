@@ -25,6 +25,8 @@ public:
   llvm::Function *lookupDefinedFunction(llvm::StringRef FunctionName) const;
   std::vector<llvm::Function *> getStaticConstructors() const;
 
+  const std::vector<std::string> &getDynamicLibraryPaths() const;
+
 private:
   void addModule(std::unique_ptr<MullModule> module);
 
