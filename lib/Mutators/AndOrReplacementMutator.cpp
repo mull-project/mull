@@ -144,7 +144,12 @@ AndOrReplacementMutator::applyMutationANDToOR_Pattern1(BranchInst *firstBranch, 
   /// second branch's left basic block jumps to that successor block,
   /// we need to update PHI node to also accept a jump from a replacement
   /// branch instruction.
-  for (BasicBlock *secondBranchSuccessorBlock: secondBranch->getParent()->getTerminator()->successors()) {
+  for (unsigned index = 0;
+       index < secondBranch->getParent()->getTerminator()->getNumSuccessors();
+       index++) {
+    BasicBlock *secondBranchSuccessorBlock =
+        secondBranch->getParent()->getTerminator()->getSuccessor(index);
+
     if (secondBranchLeftBB != secondBranchSuccessorBlock) {
       continue;
     }
@@ -210,7 +215,11 @@ AndOrReplacementMutator::applyMutationANDToOR_Pattern2(BranchInst *firstBranch, 
   /// second branch's left basic block jumps to that successor block,
   /// we need to update PHI node to also accept a jump from a replacement
   /// branch instruction.
-  for (BasicBlock *secondBranchSuccessorBlock: secondBranch->getParent()->getTerminator()->successors()) {
+  for (unsigned index = 0;
+       index < secondBranch->getParent()->getTerminator()->getNumSuccessors();
+       index++) {
+    BasicBlock *secondBranchSuccessorBlock =
+        secondBranch->getParent()->getTerminator()->getSuccessor(index);
     if (secondBranchLeftBB != secondBranchSuccessorBlock) {
       continue;
     }
@@ -330,7 +339,11 @@ AndOrReplacementMutator::applyMutationORToAND_Pattern1(BranchInst *firstBranch, 
   /// second branch's right basic block jumps to that successor block,
   /// we need to update PHI node to also accept a jump from a replacement
   /// branch instruction.
-  for (BasicBlock *secondBranchSuccessorBlock: secondBranch->getParent()->getTerminator()->successors()) {
+  for (unsigned index = 0;
+       index < secondBranch->getParent()->getTerminator()->getNumSuccessors();
+       index++) {
+    BasicBlock *secondBranchSuccessorBlock =
+        secondBranch->getParent()->getTerminator()->getSuccessor(index);
     if (secondBranchRightBB != secondBranchSuccessorBlock) {
       continue;
     }
@@ -397,7 +410,11 @@ AndOrReplacementMutator::applyMutationORToAND_Pattern2(BranchInst *firstBranch, 
   /// second branch's right basic block jumps to that successor block,
   /// we need to update PHI node to also accept a jump from a replacement
   /// branch instruction.
-  for (BasicBlock *secondBranchSuccessorBlock: secondBranch->getParent()->getTerminator()->successors()) {
+  for (unsigned index = 0;
+       index < secondBranch->getParent()->getTerminator()->getNumSuccessors();
+       index++) {
+    BasicBlock *secondBranchSuccessorBlock =
+        secondBranch->getParent()->getTerminator()->getSuccessor(index);
     if (secondBranchRightBB != secondBranchSuccessorBlock) {
       continue;
     }

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TestFrameworks/TestRunner.h"
+#include "LLVMCompatibility.h"
 
 #include <llvm/ExecutionEngine/Orc/ExecutionUtils.h>
 
@@ -18,7 +19,7 @@ struct InstrumentationInfo;
 
 class SimpleTestRunner : public TestRunner {
   Mangler &mangler;
-  llvm::orc::LocalCXXRuntimeOverrides overrides;
+  llvm_compat::CXXRuntimeOverrides overrides;
   InstrumentationInfo **trampoline;
 public:
   explicit SimpleTestRunner(Mangler &mangler);

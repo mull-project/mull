@@ -5,13 +5,12 @@
 using namespace mull;
 using namespace llvm;
 
-MutationResolver::MutationResolver(llvm::orc::LocalCXXRuntimeOverrides &overrides,
-                                   Trampolines &trampolines,
-                                   Mangler &mangler) :
-    overrides(overrides), trampolines(trampolines), mangler(mangler) {
-}
+MutationResolver::MutationResolver(llvm_compat::CXXRuntimeOverrides &overrides,
+                                   Trampolines &trampolines, Mangler &mangler)
+    : overrides(overrides), trampolines(trampolines), mangler(mangler) {}
 
-llvm_compat::JITSymbolInfo MutationResolver::findSymbol(const std::string &name) {
+llvm_compat::JITSymbolInfo
+MutationResolver::findSymbol(const std::string &name) {
   /// Overrides should go first, otherwise functions of the host process
   /// will take over and crash the system later
   if (auto symbol = overrides.searchOverrides(name)) {
@@ -24,12 +23,14 @@ llvm_compat::JITSymbolInfo MutationResolver::findSymbol(const std::string &name)
 
   uint64_t *trampoline = trampolines.findTrampoline(name);
   if (trampoline != nullptr) {
-    return llvm_compat::JITSymbolInfo((uint64_t) trampoline, JITSymbolFlags::Exported);
+    return llvm_compat::JITSymbolInfo((uint64_t)trampoline,
+                                      JITSymbolFlags::Exported);
   }
 
   return llvm_compat::JITSymbolInfo(nullptr);
 }
 
-llvm_compat::JITSymbolInfo MutationResolver::findSymbolInLogicalDylib(const std::string &name) {
+llvm_compat::JITSymbolInfo
+MutationResolver::findSymbolInLogicalDylib(const std::string &name) {
   return llvm_compat::JITSymbolInfo(nullptr);
 }

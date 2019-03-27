@@ -5,6 +5,9 @@ working_dir: /opt
 
 llvm_mapping:
   macos:
+    8.0.0:
+      url: https://releases.llvm.org/8.0.0/clang+llvm-8.0.0-x86_64-apple-darwin.tar.xz
+      path: clang+llvm-8.0.0-x86_64-apple-darwin
     7.0.0:
       url: https://releases.llvm.org/7.0.0/clang+llvm-7.0.0-x86_64-apple-darwin.tar.xz
       path: clang+llvm-7.0.0-x86_64-apple-darwin
@@ -36,6 +39,9 @@ llvm_mapping:
       path: clang+llvm-3.9.0-x86_64-linux-gnu-debian8
 
   ubuntu:
+    8.0.0:
+      url: https://releases.llvm.org/8.0.0/clang+llvm-8.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz
+      path: clang+llvm-8.0.0-x86_64-linux-gnu-ubuntu-16.04
     7.0.0:
       url: https://releases.llvm.org/7.0.0/clang+llvm-7.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz
       path: clang+llvm-7.0.0-x86_64-linux-gnu-ubuntu-16.04
