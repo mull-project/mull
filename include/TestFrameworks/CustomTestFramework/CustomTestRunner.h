@@ -2,6 +2,7 @@
 
 #include "TestFrameworks/TestRunner.h"
 #include "Toolchain/JITEngine.h"
+#include "LLVMCompatibility.h"
 
 #include <llvm/ExecutionEngine/Orc/ExecutionUtils.h>
 #include <llvm/Object/Binary.h>
@@ -23,7 +24,7 @@ struct InstrumentationInfo;
 
 class CustomTestRunner : public TestRunner {
   Mangler &mangler;
-  llvm::orc::LocalCXXRuntimeOverrides overrides;
+  llvm_compat::CXXRuntimeOverrides overrides;
   InstrumentationInfo **trampoline;
 public:
 

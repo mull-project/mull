@@ -5,9 +5,9 @@
 
 namespace llvm {
 namespace orc {
-  class LocalCXXRuntimeOverrides;
+class LocalCXXRuntimeOverrides;
 }
-}
+} // namespace llvm
 
 namespace mull {
 
@@ -16,18 +16,20 @@ class Instrumentation;
 struct InstrumentationInfo;
 
 class InstrumentationResolver : public llvm_compat::SymbolResolver {
-  llvm::orc::LocalCXXRuntimeOverrides &overrides;
+  llvm_compat::CXXRuntimeOverrides &overrides;
   Instrumentation &instrumentation;
   std::string instrumentationInfoName;
   std::string functionOffsetPrefix;
   InstrumentationInfo **trampoline;
+
 public:
-  InstrumentationResolver(llvm::orc::LocalCXXRuntimeOverrides &overrides,
+  InstrumentationResolver(llvm_compat::CXXRuntimeOverrides &overrides,
                           Instrumentation &instrumentation,
                           mull::Mangler &mangler,
                           InstrumentationInfo **trampoline);
 
   llvm_compat::JITSymbolInfo findSymbol(const std::string &name) override;
-  llvm_compat::JITSymbolInfo findSymbolInLogicalDylib(const std::string &name) override;
+  llvm_compat::JITSymbolInfo
+  findSymbolInLogicalDylib(const std::string &name) override;
 };
-}
+} // namespace mull

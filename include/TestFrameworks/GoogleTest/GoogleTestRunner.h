@@ -1,6 +1,7 @@
 #pragma once
 
 #include "TestFrameworks/TestRunner.h"
+#include "LLVMCompatibility.h"
 
 #include <llvm/ExecutionEngine/Orc/ExecutionUtils.h>
 #include <llvm/Object/Binary.h>
@@ -21,7 +22,7 @@ class Mangler;
 
 class GoogleTestRunner : public TestRunner {
   Mangler &mangler;
-  llvm::orc::LocalCXXRuntimeOverrides overrides;
+  llvm_compat::CXXRuntimeOverrides overrides;
   InstrumentationInfo **trampoline;
 
 public:

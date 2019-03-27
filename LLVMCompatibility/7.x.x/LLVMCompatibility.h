@@ -1,6 +1,7 @@
 #pragma once
 
 #include <llvm/ExecutionEngine/Orc/CompileUtils.h>
+#include <llvm/ExecutionEngine/Orc/ExecutionUtils.h>
 #include <llvm/ExecutionEngine/RuntimeDyld.h>
 
 namespace llvm_compat {
@@ -9,6 +10,7 @@ using namespace llvm;
 typedef LegacyJITSymbolResolver SymbolResolver;
 typedef JITSymbol JITSymbolInfo;
 typedef JITSymbol JITSymbol;
+typedef orc::LocalCXXRuntimeOverrides CXXRuntimeOverrides;
 
 uint64_t JITSymbolAddress(JITSymbol &symbol);
 

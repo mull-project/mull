@@ -2,16 +2,15 @@
 
 #include <llvm/ExecutionEngine/Orc/CompileUtils.h>
 #include <llvm/ExecutionEngine/Orc/ExecutionUtils.h>
-#include <llvm/ExecutionEngine/Orc/JITSymbol.h>
 #include <llvm/ExecutionEngine/RuntimeDyld.h>
 
 namespace llvm_compat {
 using namespace llvm;
 
-typedef RuntimeDyld::SymbolResolver SymbolResolver;
-typedef RuntimeDyld::SymbolInfo JITSymbolInfo;
-typedef orc::JITSymbol JITSymbol;
-typedef orc::LocalCXXRuntimeOverrides CXXRuntimeOverrides;
+typedef LegacyJITSymbolResolver SymbolResolver;
+typedef JITSymbol JITSymbolInfo;
+typedef JITSymbol JITSymbol;
+typedef orc::LegacyLocalCXXRuntimeOverrides CXXRuntimeOverrides;
 
 uint64_t JITSymbolAddress(JITSymbol &symbol);
 
