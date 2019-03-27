@@ -92,10 +92,11 @@ else()
   get_llvm_version_component("${LLVM_CMAKELISTS}" LLVM_VERSION_MAJOR)
   get_llvm_version_component("${LLVM_CMAKELISTS}" LLVM_VERSION_MINOR)
   get_llvm_version_component("${LLVM_CMAKELISTS}" LLVM_VERSION_PATCH)
+  set (LLVM_VERSION ${LLVM_VERSION_MAJOR}.${LLVM_VERSION_MINOR}.${LLVM_VERSION_PATCH})
 
-if (MULL_BUILD_32_BITS)
-  set (LLVM_BUILD_32_BITS ON CACHE BOOL "Forcing LLVM to be built for 32 bits as well" FORCE)
-endif()
+  if (MULL_BUILD_32_BITS)
+    set (LLVM_BUILD_32_BITS ON CACHE BOOL "Forcing LLVM to be built for 32 bits as well" FORCE)
+  endif()
 
   add_subdirectory(${PATH_TO_LLVM} llvm-build-dir)
 
@@ -174,6 +175,9 @@ else()
   )
 endif()
 
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/cpack.cmake)
+include(${CMAKE_CURRENT_LIST_DIR}/cmake/version.cmake)
+
 # https://cmake.org/Wiki/CMake_RPATH_handling#Always_full_RPATH
 SET(CMAKE_SKIP_BUILD_RPATH FALSE)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
@@ -186,6 +190,3 @@ add_subdirectory(lib)
 add_subdirectory(googletest)
 add_subdirectory(tools)
 add_subdirectory(unittests)
-
-include(${CMAKE_CURRENT_LIST_DIR}/cmake/cpack.cmake)
-

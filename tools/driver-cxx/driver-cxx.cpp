@@ -25,6 +25,7 @@
 #include "Result.h"
 #include "TestFrameworks/TestFrameworkFactory.h"
 #include "DynamicLibraries.h"
+#include "Version.h"
 
 /// Temp includes to make it running
 
@@ -177,6 +178,8 @@ static void validateInputFile() {
 }
 
 int main(int argc, char **argv) {
+  llvm_compat::setVersionPrinter(mull::printVersionInformation,
+                                 mull::printVersionInformationStream);
   MutatorsCLIOptions mutatorsOptions(Mutators);
   TestFrameworkCLIOptions testFrameworkOption(TestFrameworks);
 
