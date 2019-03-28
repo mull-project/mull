@@ -30,6 +30,11 @@
     chdir: "{{ build_dir }}"
   become: true
 
+- name: Print Mull version
+  command: mull-cxx -version
+  args:
+    chdir: "{{ build_dir }}"
+
 - name: Build Unit Tests
   command: ninja MullUnitTests
   args:

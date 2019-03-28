@@ -19,6 +19,7 @@
 #include "JunkDetection/CXX/CXXJunkDetector.h"
 #include "TestFrameworks/TestFrameworkFactory.h"
 #include "Program/Program.h"
+#include "Version.h"
 
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/Support/MemoryBuffer.h>
@@ -45,6 +46,9 @@ int main(int argc, char *argv[]) {
     Logger::error() << "Usage: mull-driver path-to-config-file.yml" << "\n";
     exit(1);
   }
+
+  llvm_compat::setVersionPrinter(printVersionInformation,
+                                 printVersionInformationStream);
 
   MetricsMeasure totalExecutionTime;
   totalExecutionTime.start();

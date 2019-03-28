@@ -12,7 +12,7 @@ macro(add_mull_executable)
   )
 
   add_executable(${local_NAME} ${local_SOURCES})
-  target_link_libraries(${local_NAME} ${local_LINK_WITH})
+  target_link_libraries(${local_NAME} ${local_LINK_WITH} MullVersion)
 
   set_target_properties(${local_NAME} PROPERTIES
     LINK_FLAGS ${MULL_LINK_FLAGS}

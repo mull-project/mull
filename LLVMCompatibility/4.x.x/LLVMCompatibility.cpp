@@ -19,7 +19,6 @@ compileModule(orc::SimpleCompiler &compiler, llvm::Module &module) {
   return std::move(objectFile);
 }
 
-
 std::unique_ptr<Module> parseBitcode(MemoryBufferRef bufferRef,
                                      LLVMContext &context) {
   auto module = parseBitcodeFile(bufferRef, context);
@@ -30,6 +29,11 @@ std::unique_ptr<Module> parseBitcode(MemoryBufferRef bufferRef,
   }
 
   return std::move(module.get());
+}
+
+void setVersionPrinter(void (*oldPrinter)(),
+                       void (*newPrinter)(raw_ostream &)) {
+  llvm::cl::SetVersionPrinter(oldPrinter);
 }
 
 } // namespace llvm_compat
