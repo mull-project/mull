@@ -128,9 +128,7 @@ MutatorsFactory::mutators(const vector<string> &groups) {
 
   set<string> expandedGroups;
 
-  if (groups.size() == 0) {
-    Logger::info() << "No mutators specified. Switching to default mutators.\n";
-
+  if (groups.empty()) {
     expandGroups({ DefaultMutatorsGroup }, groupsMapping, expandedGroups);
   } else {
     expandGroups(groups, groupsMapping, expandedGroups);
@@ -138,7 +136,7 @@ MutatorsFactory::mutators(const vector<string> &groups) {
 
   vector<unique_ptr<Mutator>> mutators;
 
-  for (string group: expandedGroups) {
+  for (const string &group: expandedGroups) {
     if (mutatorsMapping.count(group) == 0) {
       Logger::error() << "Unknown mutator: '" << group << "'\n";
       continue;
@@ -147,7 +145,7 @@ MutatorsFactory::mutators(const vector<string> &groups) {
     mutatorsMapping.erase(group);
   }
 
-  if (mutators.size() == 0) {
+  if (mutators.empty()) {
     Logger::error()
       << "No valid mutators found in a config file.\n";
   }
@@ -177,8 +175,7 @@ std::vector<std::pair<std::string, std::string>>
 MutatorsFactory::commandLineOptions() {
   std::vector<std::pair<std::string, std::string>> options;
   for (auto &group : groupsMapping) {
-    options.push_back(std::make_pair(group.first,
-                                     descriptionForGroup(group.second)));
+    options.emplace_back(group.first, descriptionForGroup(group.second));
   }
 
   std::set<std::string> mutatorsSet;
@@ -188,8 +185,8 @@ MutatorsFactory::commandLineOptions() {
   auto allMutators = mutators({ AllMutatorsGroup });
 
   for (auto &mutator : allMutators) {
-    options.push_back(std::make_pair(mutator->getUniqueIdentifier(),
-                                     mutator->getDescription()));
+    options.emplace_back(mutator->getUniqueIdentifier(),
+                         mutator->getDescription());
   }
 
   return options;

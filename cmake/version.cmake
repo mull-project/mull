@@ -11,8 +11,6 @@ configure_file (
   @ONLY
 )
 
-message("${PROJECT_DESCRIPTION}")
-
 add_library(MullVersion ${CMAKE_BINARY_DIR}/lib/Version.cpp)
 target_include_directories(MullVersion PRIVATE
   ${MULL_INCLUDE_DIRS}

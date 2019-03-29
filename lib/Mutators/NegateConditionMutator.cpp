@@ -269,8 +269,6 @@ static std::string getDiagnostics(CmpInst::Predicate originalPredicate,
   diagnostics << describePredicate(originalPredicate);
   diagnostics << " with ";
   diagnostics << describePredicate(negatedPredicate);
-  diagnostics << " (" << originalPredicate << "->" << negatedPredicate << ")";
-  diagnostics << "\n";
 
   return diagnostics.str();
 }
