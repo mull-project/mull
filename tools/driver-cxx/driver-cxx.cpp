@@ -14,23 +14,24 @@
 
 #include "Config/Configuration.h"
 #include "Driver.h"
-#include "JunkDetection/JunkDetector.h"
+#include "DynamicLibraries.h"
 #include "JunkDetection/CXX/CXXJunkDetector.h"
+#include "JunkDetection/JunkDetector.h"
 #include "Metrics/Metrics.h"
 #include "ModuleLoader.h"
 #include "MutationsFinder.h"
 #include "Mutators/MutatorsFactory.h"
 #include "Parallelization/Parallelization.h"
 #include "Program/Program.h"
+#include "Reporters/IDEReporter.h"
 #include "Result.h"
 #include "TestFrameworks/TestFrameworkFactory.h"
-#include "DynamicLibraries.h"
 #include "Version.h"
 
 /// Temp includes to make it running
 
-#include "Config/RawConfig.h"
 #include "Config/ConfigurationOptions.h"
+#include "Config/RawConfig.h"
 #include "Metrics/Metrics.h"
 #include "Reporters/SQLiteReporter.h"
 
@@ -287,9 +288,11 @@ int main(int argc, char **argv) {
   metrics.endRun();
 
   mull::RawConfig rawConfig;
-  mull::SQLiteReporter reporter;
-  reporter.reportResults(*result, rawConfig, metrics);
+//  mull::SQLiteReporter reporter;
+//  reporter.reportResults(*result, rawConfig, metrics);
 
+  mull::IDEReporter ideReporter;
+  ideReporter.reportResults(*result, rawConfig, metrics);
   llvm::llvm_shutdown();
 
   totalExecutionTime.finish();
