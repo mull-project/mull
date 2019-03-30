@@ -20,62 +20,29 @@ sources as described here: [Hacking on Mull](/docs/documentation/hacking.md#loca
 
 ## Usage
 
-Here is an example using OpenSSL
+Please, read the intro first, then look at examples.
 
-### Prepare your project
+### Intro
 
-To use Mull you need to build the project using Clang with the `-fembed-bitcode`
-and debug information:
+Mull works on the level of LLVM Bitcode relying on debug information to show
+results, therefore you should build your project with `-fembed-bitcode` and
+debug information enabled.
 
-```
-git clone https://github.com/openssl/openssl.git
-cd openssl
-./config -no-asm -no-shared -g -O0 -fembed-bitcode
-make all
-```
+##### Junk Mutations
 
-**Make sure you don't use clang from Xcode, it is not compatible with open-source
-version of LLVM.**
+Not every mutation found at Bitcode level can be represented at the source
+level, so depending on your project Mull may show lots of Junk Mutations. Mull
+can filter them out by looking at the source code, but for that you need to
+provide [compilation database](https://clang.llvm.org/docs/JSONCompilationDatabase.html),
+or compilation flags, or both.
 
-### Run mull
-
-Once the build is done you can run Mull against OpenSSL's tests:
-
-```
-mull-cxx -test-framework=CustomTest test/bio_enc_test
-```
-
-### Treat results
-
-Mull works on level of LLVM Bitcode, therefore some of mutations may not be
-represented at the source level - these are Junk Mutations. Mull can use debug
-information to look back at the source code and decide whether a mutation is
-junk or not.
-
-For this to work you need to provide a compilation database,
-compilation flags, or both.
-
-It is not trivial to build the compilation database for the OpenSSL, but you
-can pick required compilation flags by observing build logs.
+**Please, note:** Clang adds implicit header search paths, which must be added
+explicitly via `-compilation-flags`. You can get them using the following
+commands, for C and C++ respectively:
 
 ```
-mull-cxx -test-framework=CustomTest \
-  -compilation-flags="-I . -I crypto/modes -I crypto/include -I include -I apps " \
-  test/bio_enc_test
-```
-
-By default, clang adds implicit header search paths, they should be added to
-the `-compilation-flags` explicitly. You can find them using the following
-commands for C and C++ respectively:
-
-```
-clang -x c -c /dev/null -v
-clang++ -x c++ -c /dev/null -v
-```
-
-Example output:
-
-```
+> clang -x c -c /dev/null -v
+... skipped
 #include <...> search starts here:
  /usr/local/include
  /opt/llvm/5.0.0/lib/clang/5.0.0/include
@@ -85,14 +52,61 @@ Example output:
 End of search list.
 ```
 
-Which should be transformed into this form (you don't want to see mutations
-inside of a system header files):
+```
+> clang++ -x c++ -c /dev/null -v
+#include <...> search starts here:
+ /opt/llvm/5.0.0/include/c++/v1
+ /usr/local/include
+ /opt/llvm/5.0.0/lib/clang/5.0.0/include
+ /usr/include
+ /System/Library/Frameworks (framework directory)
+ /Library/Frameworks (framework directory)
+End of search list.
+```
+
+##### Dynamic Libraries
+
+If your project depends on dynamic libraries other than `libc` or `lib[std]c++`,
+then you may need to provide library search paths manually: Mull does not assume
+any library search paths because it is very platform dependent.
+
+On Linux, the library search paths are controlled via this file `/etc/ld.so.conf`,
+on macOS it should just work.
+
+##### Test Frameworks
+
+Currently, Mull supports [Google Test](https://github.com/google/googletest)
+framework and so called Custom Test framework. For Google Test, Mull assesses
+each test individually, giving a better overview. For Custom Test, Mull treats
+the whole program as one test.
+
+##### Mutators
+
+Mull supports several mutators, you can specify which ones to use. See the full
+list here:
 
 ```
--isystem /usr/local/include -isystem /opt/llvm/5.0.0/lib/clang/5.0.0/include -isystem /usr/include
+mull-cxx --help
 ```
 
-So the complete example will like this:
+### Examples: OpenSSL
+
+Build OpenSSL:
+
+```
+git clone https://github.com/openssl/openssl.git
+cd openssl
+./config -no-asm -no-shared -g -O0 -fembed-bitcode
+make all
+```
+
+Run without junk detection:
+
+```
+mull-cxx -test-framework=CustomTest test/bio_enc_test
+```
+
+Run with junk detection:
 
 ```
 mull-cxx -test-framework=CustomTest \
@@ -104,7 +118,11 @@ mull-cxx -test-framework=CustomTest \
   test/bio_enc_test
 ```
 
-Producing the following output:
+Note, the `isystem` header search paths are the implicit paths used by Clang,
+that we should add explicitly. These are platform/version dependent.
+
+
+Upon success you should see similar output:
 
 ```
 Extracting bitcode from executable (threads: 1): 1/1. Finished in 1215ms.
@@ -149,6 +167,119 @@ Survived mutants (569/809):
 Mutation score: 29%
 
 Total execution time: 118987ms
+```
+
+### Examples: fmtlib
+
+Build fmtlib:
+
+```
+git clone https://github.com/fmtlib/fmt.git
+cd fmt
+mkdir build.dir
+cd build.dir
+cmake \
+  -DCMAKE_CXX_FLAGS="-fembed-bitcode -g -O0" \
+  -DCMAKE_BUILD_TYPE=Debug \
+  -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
+make core-test
+```
+
+Run without junk detection and only one mutator:
+
+```
+mull-cxx -test-framework=GoogleTest -mutators=math_add_mutator ./bin/core-test
+```
+
+Run with junk detection:
+
+```
+mull-cxx -test-framework=GoogleTest \
+  -mutators=math_add_mutator \
+  -compdb-path compile_commands.json \
+  -compilation-flags="\
+    -isystem /opt/llvm/5.0.0/include/c++/v1 \
+    -isystem /opt/llvm/5.0.0/lib/clang/5.0.0/include \
+    -isystem /usr/include" \
+    ./bin/core-test
+```
+
+You should get the following output:
+
+```
+Extracting bitcode from executable (threads: 1): 1/1. Finished in 218ms.
+Loading bitcode files (threads: 4): 4/4. Finished in 373ms.
+Compiling instrumented code (threads: 4): 4/4. Finished in 12ms.
+Loading dynamic libraries (threads: 1): 1/1. Finished in 0ms.
+Searching tests (threads: 1): 1/1. Finished in 1ms.
+Preparing original test run (threads: 1): 1/1. Finished in 68ms.
+Running original tests (threads: 8): 29/29. Finished in 71ms.
+Searching mutants across functions (threads: 8): 2630/2630. Finished in 64ms.
+Filtering out junk mutations (threads: 8): 157/157. Finished in 3313ms.
+Preparing mutations (threads: 1): 1/1. Finished in 1076ms.
+Applying mutations (threads: 1): 26/26. Finished in 12ms.
+Compiling original code (threads: 4): 4/4. Finished in 12ms.
+Running mutants (threads: 8): 26/26. Finished in 805ms.
+
+Survived mutants (18/26):
+
+/tmp/1553947865/fmt/test/gmock-gtest-all.cc:9758:53: warning: Math Add: replaced + with -
+    const int actual_to_skip = stack_frames_to_skip + 1;
+                                                    ^
+/tmp/1553947865/fmt/include/fmt/core.h:309:19: warning: Math Add: replaced + with -
+    reserve(size_ + 1);
+                  ^
+/tmp/1553947865/fmt/test/core-test.cc:416:45: warning: Math Add: replaced + with -
+    for (std::size_t j = 0; j < num_inputs; ++j) {
+                                            ^
+/tmp/1553947865/fmt/test/core-test.cc:415:43: warning: Math Add: replaced + with -
+  for (std::size_t i = 0; i < num_inputs; ++i) {
+                                          ^
+/tmp/1553947865/fmt/test/core-test.cc:416:45: warning: Math Add: replaced + with -
+    for (std::size_t j = 0; j < num_inputs; ++j) {
+                                            ^
+/tmp/1553947865/fmt/test/core-test.cc:415:43: warning: Math Add: replaced + with -
+  for (std::size_t i = 0; i < num_inputs; ++i) {
+                                          ^
+/tmp/1553947865/fmt/test/core-test.cc:416:45: warning: Math Add: replaced + with -
+    for (std::size_t j = 0; j < num_inputs; ++j) {
+                                            ^
+/tmp/1553947865/fmt/test/core-test.cc:415:43: warning: Math Add: replaced + with -
+  for (std::size_t i = 0; i < num_inputs; ++i) {
+                                          ^
+/tmp/1553947865/fmt/test/core-test.cc:416:45: warning: Math Add: replaced + with -
+    for (std::size_t j = 0; j < num_inputs; ++j) {
+                                            ^
+/tmp/1553947865/fmt/test/core-test.cc:415:43: warning: Math Add: replaced + with -
+  for (std::size_t i = 0; i < num_inputs; ++i) {
+                                          ^
+/tmp/1553947865/fmt/test/core-test.cc:416:45: warning: Math Add: replaced + with -
+    for (std::size_t j = 0; j < num_inputs; ++j) {
+                                            ^
+/tmp/1553947865/fmt/test/core-test.cc:415:43: warning: Math Add: replaced + with -
+  for (std::size_t i = 0; i < num_inputs; ++i) {
+                                          ^
+/tmp/1553947865/fmt/test/core-test.cc:416:45: warning: Math Add: replaced + with -
+    for (std::size_t j = 0; j < num_inputs; ++j) {
+                                            ^
+/tmp/1553947865/fmt/test/core-test.cc:415:43: warning: Math Add: replaced + with -
+  for (std::size_t i = 0; i < num_inputs; ++i) {
+                                          ^
+/tmp/1553947865/fmt/include/fmt/format.h:1086:67: warning: Math Add: replaced + with -
+  if (next_arg_id_ >= 0) return internal::to_unsigned(next_arg_id_++);
+                                                                  ^
+/tmp/1553947865/fmt/include/fmt/format.h:933:54: warning: Math Add: replaced + with -
+    *--buffer = static_cast<Char>(data::DIGITS[index + 1]);
+                                                     ^
+/tmp/1553947865/fmt/include/fmt/format.h:939:39: warning: Math Add: replaced + with -
+    *--buffer = static_cast<Char>('0' + value);
+                                      ^
+/tmp/1553947865/fmt/include/fmt/format.h:1086:67: warning: Math Add: replaced + with -
+  if (next_arg_id_ >= 0) return internal::to_unsigned(next_arg_id_++);
+                                                                  ^
+Mutation score: 30%
+
+Total execution time: 6072ms
 ```
 
 ## Contributing
