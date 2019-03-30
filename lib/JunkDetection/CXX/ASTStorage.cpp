@@ -36,8 +36,25 @@ ThreadSafeASTUnit::findFileEntry(const MutationPoint *point) {
   assert(point);
   assert(!point->getSourceLocation().isNull());
 
-  auto &sourceManager = ast->getSourceManager();
   auto filePath = point->getSourceLocation().filePath;
+  const clang::FileEntry *file = findFileEntry(filePath);
+  if (file != nullptr) {
+    return file;
+  }
+
+  auto instruction = dyn_cast<Instruction>(point->getOriginalValue());
+  if (instruction == nullptr) {
+    return nullptr;
+  }
+
+  const std::string &sourceFile = instruction->getModule()->getSourceFileName();
+
+  return findFileEntry(sourceFile);
+}
+
+const clang::FileEntry *
+ThreadSafeASTUnit::findFileEntry(const std::string &filePath) {
+  auto &sourceManager = ast->getSourceManager();
   auto begin = sourceManager.fileinfo_begin();
   auto end = sourceManager.fileinfo_end();
   const clang::FileEntry *file = nullptr;
@@ -95,6 +112,11 @@ ThreadSafeASTUnit *ASTStorage::findAST(const MutationPoint *point) {
     args.push_back(flag.c_str());
   }
   args.push_back(sourceFile.c_str());
+
+//  for (auto &x : args) {
+//    printf("%s ", x);
+//  }
+//  printf("\n");
 
   clang::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diagnosticsEngine(
       clang::CompilerInstance::createDiagnostics(new clang::DiagnosticOptions));

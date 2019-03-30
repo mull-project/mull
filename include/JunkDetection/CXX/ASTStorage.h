@@ -24,6 +24,7 @@ public:
 
 private:
   const clang::FileEntry *findFileEntry(const MutationPoint *point);
+  const clang::FileEntry *findFileEntry(const std::string &filePath);
 
   std::unique_ptr<clang::ASTUnit> ast;
   std::mutex mutex;
