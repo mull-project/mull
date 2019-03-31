@@ -2,7 +2,7 @@ MAKEFLAGS=--warn-undefined-variables
 
 BUILD_DIR=build
 
-GTEST_DIR=../../googletest
+GTEST_DIR=../../vendor/googletest
 
 GTEST_HEADER_SEARCH_FLAGS=-I$(GTEST_DIR) -I$(GTEST_DIR)/include
 

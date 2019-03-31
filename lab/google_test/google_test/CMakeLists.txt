@@ -1,4 +1,4 @@
-set (GTEST_DIR ${CMAKE_SOURCE_DIR}/googletest)
+set (GTEST_DIR ${CMAKE_SOURCE_DIR}/vendor/googletest)
 
 set (FLAGS
   -g
