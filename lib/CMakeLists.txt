@@ -90,22 +90,27 @@ set(mull_sources
   JunkDetection/CXX/CompilationDatabase.cpp
   Reporters/IDEReporter.cpp)
 
-set (MULL_INCLUDE_DIR ${MULL_SOURCE_DIR}/include)
+set (MULL_INCLUDE_DIR ${MULL_SOURCE_DIR}/include/mull)
 
 set(mull_header_dirs
   ${MULL_INCLUDE_DIR}
-  ${MULL_INCLUDE_DIR}/Mutators
-  ${MULL_INCLUDE_DIR}/Context
-  ${MULL_INCLUDE_DIR}/GoogleTest
-  ${MULL_INCLUDE_DIR}/SimpleTest
-  ${MULL_INCLUDE_DIR}/Toolchain
+  ${MULL_INCLUDE_DIR}/Config
   ${MULL_INCLUDE_DIR}/Instrumentation
+  ${MULL_INCLUDE_DIR}/JunkDetection
+  ${MULL_INCLUDE_DIR}/JunkDetection/CXX/
+  ${MULL_INCLUDE_DIR}/JunkDetection/CXX/Visitors
+  ${MULL_INCLUDE_DIR}/Metrics
+  ${MULL_INCLUDE_DIR}/Mutators
   ${MULL_INCLUDE_DIR}/Parallelization
   ${MULL_INCLUDE_DIR}/Parallelization/Tasks
+  ${MULL_INCLUDE_DIR}/Program
+  ${MULL_INCLUDE_DIR}/Reporters
   ${MULL_INCLUDE_DIR}/TestFrameworks
   ${MULL_INCLUDE_DIR}/TestFrameworks/CustomTestFramework
   ${MULL_INCLUDE_DIR}/TestFrameworks/GoogleTest
   ${MULL_INCLUDE_DIR}/TestFrameworks/SimpleTest
+  ${MULL_INCLUDE_DIR}/Toolchain
+  ${MULL_INCLUDE_DIR}/Toolchain/Resolvers
 )
 
 # Globbing is not recommended by CMake so maybe consider listing headers

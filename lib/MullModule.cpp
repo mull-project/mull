@@ -1,7 +1,8 @@
-#include "MullModule.h"
+#include "mull/MullModule.h"
+
 #include "LLVMCompatibility.h"
-#include "Logger.h"
-#include "MutationPoint.h"
+#include "mull/Logger.h"
+#include "mull/MutationPoint.h"
 
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>

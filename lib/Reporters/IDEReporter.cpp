@@ -1,8 +1,8 @@
-#include "Reporters/IDEReporter.h"
+#include "mull/Reporters/IDEReporter.h"
 
-#include "Logger.h"
-#include "MutationResult.h"
-#include "Result.h"
+#include "mull/Logger.h"
+#include "mull/MutationResult.h"
+#include "mull/Result.h"
 
 #include <map>
 #include <set>

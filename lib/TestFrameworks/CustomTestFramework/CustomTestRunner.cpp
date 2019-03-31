@@ -1,12 +1,10 @@
-#include "TestFrameworks/CustomTestFramework/CustomTestRunner.h"
-#include "TestFrameworks/CustomTestFramework/CustomTest_Test.h"
+#include "mull/TestFrameworks/CustomTestFramework/CustomTestRunner.h"
 
-#include "Toolchain/Mangler.h"
-
-#include "Toolchain/Resolvers/InstrumentationResolver.h"
-#include "Toolchain/Resolvers/MutationResolver.h"
-#include "Toolchain/Mangler.h"
-#include "Toolchain/Trampolines.h"
+#include "mull/TestFrameworks/CustomTestFramework/CustomTest_Test.h"
+#include "mull/Toolchain/Mangler.h"
+#include "mull/Toolchain/Resolvers/InstrumentationResolver.h"
+#include "mull/Toolchain/Resolvers/MutationResolver.h"
+#include "mull/Toolchain/Trampolines.h"
 
 #include <llvm/ExecutionEngine/SectionMemoryManager.h>
 #include <llvm/IR/Function.h>
@@ -15,25 +13,21 @@ using namespace mull;
 using namespace llvm;
 using namespace llvm::orc;
 
-CustomTestRunner::CustomTestRunner(Mangler &mangler) :
-  mangler(mangler),
-  overrides([this](const char *name) {
-    return this->mangler.getNameWithPrefix(name);
-  }),
-  trampoline(new InstrumentationInfo*)
-{
-}
+CustomTestRunner::CustomTestRunner(Mangler &mangler)
+    : mangler(mangler), overrides([this](const char *name) {
+        return this->mangler.getNameWithPrefix(name);
+      }),
+      trampoline(new InstrumentationInfo *) {}
 
-CustomTestRunner::~CustomTestRunner() {
-  delete trampoline;
-}
+CustomTestRunner::~CustomTestRunner() { delete trampoline; }
 
 void *CustomTestRunner::getConstructorPointer(const llvm::Function &function,
                                               JITEngine &jit) {
   return getFunctionPointer(mangler.getNameWithPrefix(function.getName()), jit);
 }
 
-void *CustomTestRunner::getFunctionPointer(const std::string &functionName, JITEngine &jit) {
+void *CustomTestRunner::getFunctionPointer(const std::string &functionName,
+                                           JITEngine &jit) {
   JITSymbol &symbol = jit.getSymbol(functionName);
   auto address = llvm_compat::JITSymbolAddress(symbol);
 
@@ -41,7 +35,7 @@ void *CustomTestRunner::getFunctionPointer(const std::string &functionName, JITE
 
   if (fpointer == nullptr) {
     errs() << "CustomTestRunner> Can't find pointer to function: "
-    << functionName << "\n";
+           << functionName << "\n";
     exit(1);
   }
 
@@ -50,7 +44,7 @@ void *CustomTestRunner::getFunctionPointer(const std::string &functionName, JITE
 
 void CustomTestRunner::runStaticConstructor(llvm::Function *function,
                                             JITEngine &jit) {
-//  printf("Init: %s\n", Ctor->getName().str().c_str());
+  //  printf("Init: %s\n", Ctor->getName().str().c_str());
 
   void *CtorPointer = getConstructorPointer(*function, jit);
 
@@ -61,8 +55,10 @@ void CustomTestRunner::runStaticConstructor(llvm::Function *function,
 void CustomTestRunner::loadInstrumentedProgram(ObjectFiles &objectFiles,
                                                Instrumentation &instrumentation,
                                                JITEngine &jit) {
-  InstrumentationResolver resolver(overrides, instrumentation, mangler, trampoline);
-  jit.addObjectFiles(objectFiles, resolver, make_unique<SectionMemoryManager>());
+  InstrumentationResolver resolver(overrides, instrumentation, mangler,
+                                   trampoline);
+  jit.addObjectFiles(objectFiles, resolver,
+                     make_unique<SectionMemoryManager>());
 }
 
 void CustomTestRunner::loadMutatedProgram(ObjectFiles &objectFiles,
@@ -70,7 +66,8 @@ void CustomTestRunner::loadMutatedProgram(ObjectFiles &objectFiles,
                                           JITEngine &jit) {
   trampolines.allocateTrampolines(mangler);
   MutationResolver resolver(overrides, trampolines, mangler);
-  jit.addObjectFiles(objectFiles, resolver, make_unique<SectionMemoryManager>());
+  jit.addObjectFiles(objectFiles, resolver,
+                     make_unique<SectionMemoryManager>());
 }
 
 ExecutionStatus CustomTestRunner::runTest(Test *test, JITEngine &jit) {
@@ -78,14 +75,14 @@ ExecutionStatus CustomTestRunner::runTest(Test *test, JITEngine &jit) {
 
   CustomTest_Test *customTest = dyn_cast<CustomTest_Test>(test);
 
-  for (auto &constructor: customTest->getConstructors()) {
+  for (auto &constructor : customTest->getConstructors()) {
     runStaticConstructor(constructor, jit);
   }
 
   std::vector<std::string> arguments = customTest->getArguments();
   arguments.insert(arguments.begin(), customTest->getProgramName());
   int argc = arguments.size();
-  char **argv = new char*[argc + 1];
+  char **argv = new char *[argc + 1];
 
   for (int i = 0; i < argc; i++) {
     std::string &argument = arguments[i];
@@ -94,9 +91,9 @@ ExecutionStatus CustomTestRunner::runTest(Test *test, JITEngine &jit) {
   }
   argv[argc] = nullptr;
 
-  void *mainPointer = getFunctionPointer(mangler.getNameWithPrefix("main"),
-                                         jit);
-  auto main = ((int (*)(int, char**))(intptr_t)mainPointer);
+  void *mainPointer =
+      getFunctionPointer(mangler.getNameWithPrefix("main"), jit);
+  auto main = ((int (*)(int, char **))(intptr_t)mainPointer);
   int exitStatus = main(argc, argv);
 
   for (int i = 0; i < argc; i++) {

@@ -1,5 +1,6 @@
-#include "Toolchain/Toolchain.h"
-#include "Config/Configuration.h"
+#include "mull/Toolchain/Toolchain.h"
+
+#include "mull/Config/Configuration.h"
 
 #include <llvm/ADT/Triple.h>
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
@@ -16,29 +17,17 @@ Toolchain::NativeTarget::NativeTarget() {
   llvm::InitializeNativeTargetAsmParser();
 }
 
-Toolchain::Toolchain(const Configuration &config) :
-  nativeTarget(),
-  machine(llvm::EngineBuilder().selectTarget(llvm::Triple(), "", "",
-                                             llvm::SmallVector<std::string, 1>())),
-  objectCache(config.cacheEnabled, config.cacheDirectory),
-  simpleCompiler(),
-  nameMangler(machine->createDataLayout())
-{
-}
+Toolchain::Toolchain(const Configuration &config)
+    : nativeTarget(),
+      machine(llvm::EngineBuilder().selectTarget(
+          llvm::Triple(), "", "", llvm::SmallVector<std::string, 1>())),
+      objectCache(config.cacheEnabled, config.cacheDirectory), simpleCompiler(),
+      nameMangler(machine->createDataLayout()) {}
 
-ObjectCache &Toolchain::cache() {
-  return objectCache;
-}
+ObjectCache &Toolchain::cache() { return objectCache; }
 
-Compiler &Toolchain::compiler() {
-  return simpleCompiler;
-}
+Compiler &Toolchain::compiler() { return simpleCompiler; }
 
-llvm::TargetMachine &Toolchain::targetMachine() {
-  return *machine;
-}
+llvm::TargetMachine &Toolchain::targetMachine() { return *machine; }
 
-mull::Mangler &Toolchain::mangler() {
-  return nameMangler;
-}
-
+mull::Mangler &Toolchain::mangler() { return nameMangler; }

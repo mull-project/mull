@@ -1,14 +1,15 @@
-#include "Parallelization/Tasks/JunkDetectionTask.h"
-#include "Parallelization/Progress.h"
-#include "JunkDetection/JunkDetector.h"
+#include "mull/Parallelization/Tasks/JunkDetectionTask.h"
+
+#include "mull/JunkDetection/JunkDetector.h"
+#include "mull/Parallelization/Progress.h"
 
 using namespace mull;
 
 JunkDetectionTask::JunkDetectionTask(JunkDetector &detector)
-  : detector(detector) {}
+    : detector(detector) {}
 
-void JunkDetectionTask::operator()(iterator begin, iterator end,
-                                   Out &storage, progress_counter &counter) {
+void JunkDetectionTask::operator()(iterator begin, iterator end, Out &storage,
+                                   progress_counter &counter) {
   for (auto it = begin; it != end; ++it, counter.increment()) {
     auto point = *it;
     if (detector.isJunk(point)) {
@@ -17,5 +18,3 @@ void JunkDetectionTask::operator()(iterator begin, iterator end,
     storage.push_back(point);
   }
 }
-
-

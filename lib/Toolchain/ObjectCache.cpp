@@ -1,17 +1,15 @@
-#include "Toolchain/ObjectCache.h"
+#include "mull/Toolchain/ObjectCache.h"
 
-#include "Logger.h"
-#include "MullModule.h"
-#include "MutationPoint.h"
 #include "LLVMCompatibility.h"
+#include "mull/Logger.h"
+#include "mull/MullModule.h"
+#include "mull/MutationPoint.h"
 
 using namespace mull;
 using namespace llvm::object;
 
 ObjectCache::ObjectCache(bool useCache, const std::string &cacheDir)
-  : useOnDiskCache(useCache),
-    cacheDirectory(cacheDir)
-{
+    : useOnDiskCache(useCache), cacheDirectory(cacheDir) {
   if (useOnDiskCache) {
     auto error = llvm::sys::fs::create_directories(cacheDir);
     if (error) {
@@ -25,7 +23,8 @@ ObjectCache::ObjectCache(bool useCache, const std::string &cacheDir)
   }
 }
 
-OwningBinary<ObjectFile> ObjectCache::getObjectFromDisk(const std::string &identifier) {
+OwningBinary<ObjectFile>
+ObjectCache::getObjectFromDisk(const std::string &identifier) {
   if (!useOnDiskCache) {
     return OwningBinary<ObjectFile>();
   }
@@ -39,7 +38,7 @@ OwningBinary<ObjectFile> ObjectCache::getObjectFromDisk(const std::string &ident
   }
 
   llvm_compat::Expected<std::unique_ptr<ObjectFile>> objectOrError =
-    ObjectFile::createObjectFile(buffer.get()->getMemBufferRef());
+      ObjectFile::createObjectFile(buffer.get()->getMemBufferRef());
 
   if (!objectOrError) {
     return OwningBinary<ObjectFile>();
@@ -47,12 +46,13 @@ OwningBinary<ObjectFile> ObjectCache::getObjectFromDisk(const std::string &ident
 
   std::unique_ptr<ObjectFile> objectFile(std::move(objectOrError.get()));
 
-  auto owningObject = OwningBinary<ObjectFile>(std::move(objectFile),
-                                               std::move(buffer.get()));
+  auto owningObject =
+      OwningBinary<ObjectFile>(std::move(objectFile), std::move(buffer.get()));
   return owningObject;
 }
 
-OwningBinary<ObjectFile> ObjectCache::getInstrumentedObject(const MullModule &module) {
+OwningBinary<ObjectFile>
+ObjectCache::getInstrumentedObject(const MullModule &module) {
   return getObjectFromDisk(module.getInstrumentedUniqueIdentifier());
 }
 

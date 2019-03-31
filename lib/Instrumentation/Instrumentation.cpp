@@ -1,6 +1,7 @@
-#include "Instrumentation/Instrumentation.h"
-#include "Instrumentation/DynamicCallTree.h"
-#include "TestFrameworks/Test.h"
+#include "mull/Instrumentation/Instrumentation.h"
+
+#include "mull/Instrumentation/DynamicCallTree.h"
+#include "mull/TestFrameworks/Test.h"
 
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Module.h>
@@ -11,8 +12,7 @@
 using namespace mull;
 using namespace llvm;
 
-Instrumentation::Instrumentation()
-: callbacks(), functions() {
+Instrumentation::Instrumentation() : callbacks(), functions() {
   CallTreeFunction phonyRoot(nullptr);
   functions.push_back(phonyRoot);
 }
@@ -33,7 +33,7 @@ void Instrumentation::recordFunctions(llvm::Module *originalModule) {
   uint32_t offset = functions.size();
   functionOffsetMapping[originalModule->getModuleIdentifier()] = offset;
 
-  for (auto &function: originalModule->getFunctionList()) {
+  for (auto &function : originalModule->getFunctionList()) {
     if (function.isDeclaration()) {
       continue;
     }
@@ -43,13 +43,13 @@ void Instrumentation::recordFunctions(llvm::Module *originalModule) {
 }
 
 void Instrumentation::insertCallbacks(llvm::Module *instrumentedModule) {
-  auto info = callbacks.injectInstrumentationInfoPointer(instrumentedModule,
-                                                         instrumentationInfoVariableName());
-  auto offset = callbacks.injectFunctionIndexOffset(instrumentedModule,
-                                                    functionIndexOffsetPrefix());
+  auto info = callbacks.injectInstrumentationInfoPointer(
+      instrumentedModule, instrumentationInfoVariableName());
+  auto offset = callbacks.injectFunctionIndexOffset(
+      instrumentedModule, functionIndexOffsetPrefix());
 
   uint32_t index = 0;
-  for (auto &function: instrumentedModule->getFunctionList()) {
+  for (auto &function : instrumentedModule->getFunctionList()) {
     if (function.isDeclaration()) {
       continue;
     }
@@ -64,7 +64,8 @@ Instrumentation::getTestees(Test *test, Filter &filter, int distance) {
 
   auto callTree = DynamicCallTree::createCallTree(mapping, functions);
   auto subtrees = DynamicCallTree::extractTestSubtrees(callTree.get(), test);
-  auto testees = DynamicCallTree::createTestees(subtrees, test, distance, filter);
+  auto testees =
+      DynamicCallTree::createTestees(subtrees, test, distance, filter);
 
   return testees;
 }
@@ -73,14 +74,13 @@ void Instrumentation::setupInstrumentationInfo(Test *test) {
   auto &mapping = test->getInstrumentationInfo().callTreeMapping;
 
   assert(mapping == nullptr && "Called twice?");
-  assert(functions.size() > 1 && "Functions must be filled in before this call");
+  assert(functions.size() > 1 &&
+         "Functions must be filled in before this call");
 
   auto mappingSize = sizeof(mapping[0]) * functions.size();
   /// Creating a memory to be shared between child and parent.
-  auto rawMemory = mmap(NULL, mappingSize,
-                        PROT_READ | PROT_WRITE,
-                        MAP_SHARED | MAP_ANONYMOUS,
-                        -1, 0);
+  auto rawMemory = mmap(NULL, mappingSize, PROT_READ | PROT_WRITE,
+                        MAP_SHARED | MAP_ANONYMOUS, -1, 0);
   mapping = static_cast<uint32_t *>(rawMemory);
   memset(mapping, 0, mappingSize);
 }
@@ -89,4 +89,3 @@ void Instrumentation::cleanupInstrumentationInfo(Test *test) {
   std::stack<uint32_t>().swap(test->getInstrumentationInfo().callstack);
   munmap(test->getInstrumentationInfo().callTreeMapping, functions.size());
 }
-

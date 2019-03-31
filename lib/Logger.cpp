@@ -1,4 +1,4 @@
-#include "Logger.h"
+#include "mull/Logger.h"
 
 namespace mull {
 
@@ -17,4 +17,4 @@ llvm::raw_ostream &Logger::getStream(Logger::Level level) {
 
 // Initialize logger to info.
 Logger::Level Logger::logLevel = Logger::Level::error;
-}
+} // namespace mull

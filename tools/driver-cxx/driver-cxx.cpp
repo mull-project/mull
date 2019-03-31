@@ -12,28 +12,28 @@
 #include <iostream>
 #include <unistd.h>
 
-#include "Config/Configuration.h"
-#include "Driver.h"
 #include "DynamicLibraries.h"
-#include "JunkDetection/CXX/CXXJunkDetector.h"
-#include "JunkDetection/JunkDetector.h"
-#include "Metrics/Metrics.h"
-#include "ModuleLoader.h"
-#include "MutationsFinder.h"
-#include "Mutators/MutatorsFactory.h"
-#include "Parallelization/Parallelization.h"
-#include "Program/Program.h"
-#include "Reporters/IDEReporter.h"
-#include "Result.h"
-#include "TestFrameworks/TestFrameworkFactory.h"
-#include "Version.h"
+#include "mull/Config/Configuration.h"
+#include "mull/Driver.h"
+#include "mull/JunkDetection/CXX/CXXJunkDetector.h"
+#include "mull/JunkDetection/JunkDetector.h"
+#include "mull/Metrics/Metrics.h"
+#include "mull/ModuleLoader.h"
+#include "mull/MutationsFinder.h"
+#include "mull/Mutators/MutatorsFactory.h"
+#include "mull/Parallelization/Parallelization.h"
+#include "mull/Program/Program.h"
+#include "mull/Reporters/IDEReporter.h"
+#include "mull/Result.h"
+#include "mull/TestFrameworks/TestFrameworkFactory.h"
+#include "mull/Version.h"
 
 /// Temp includes to make it running
 
-#include "Config/ConfigurationOptions.h"
-#include "Config/RawConfig.h"
-#include "Metrics/Metrics.h"
-#include "Reporters/SQLiteReporter.h"
+#include "mull/Config/ConfigurationOptions.h"
+#include "mull/Config/RawConfig.h"
+#include "mull/Metrics/Metrics.h"
+#include "mull/Reporters/SQLiteReporter.h"
 
 class LoadModuleFromBitcodeTask {
 public:
@@ -288,8 +288,8 @@ int main(int argc, char **argv) {
   metrics.endRun();
 
   mull::RawConfig rawConfig;
-//  mull::SQLiteReporter reporter;
-//  reporter.reportResults(*result, rawConfig, metrics);
+  //  mull::SQLiteReporter reporter;
+  //  reporter.reportResults(*result, rawConfig, metrics);
 
   mull::IDEReporter ideReporter;
   ideReporter.reportResults(*result, rawConfig, metrics);

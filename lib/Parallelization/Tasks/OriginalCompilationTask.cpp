@@ -1,6 +1,7 @@
-#include "Parallelization/Tasks/OriginalCompilationTask.h"
-#include "Parallelization/Progress.h"
-#include "Toolchain/Toolchain.h"
+#include "mull/Parallelization/Tasks/OriginalCompilationTask.h"
+
+#include "mull/Parallelization/Progress.h"
+#include "mull/Toolchain/Toolchain.h"
 
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/Support/TargetSelect.h>
@@ -8,12 +9,12 @@
 using namespace mull;
 using namespace llvm;
 
-OriginalCompilationTask::OriginalCompilationTask(Toolchain &toolchain) : toolchain(toolchain) {}
+OriginalCompilationTask::OriginalCompilationTask(Toolchain &toolchain)
+    : toolchain(toolchain) {}
 
-void mull::OriginalCompilationTask::operator()(mull::OriginalCompilationTask::iterator begin,
-                                             mull::OriginalCompilationTask::iterator end,
-                                             mull::OriginalCompilationTask::Out &storage,
-                                             progress_counter &counter) {
+void OriginalCompilationTask::operator()(iterator begin, iterator end,
+                                         Out &storage,
+                                         progress_counter &counter) {
   EngineBuilder builder;
   auto target = builder.selectTarget(llvm::Triple(), "", "",
                                      llvm::SmallVector<std::string, 1>());

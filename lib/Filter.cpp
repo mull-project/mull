@@ -1,16 +1,18 @@
-#include "Filter.h"
-#include "TestFrameworks/Test.h"
+#include "mull/Filter.h"
+
+#include "mull/SourceLocation.h"
+#include "mull/TestFrameworks/Test.h"
 
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Instructions.h>
-#include "SourceLocation.h"
 
 using namespace llvm;
 using namespace mull;
 
 bool Filter::shouldSkipInstruction(llvm::Instruction *instruction) {
-  SourceLocation location = SourceLocation::sourceLocationFromInstruction(instruction);
+  SourceLocation location =
+      SourceLocation::sourceLocationFromInstruction(instruction);
   if (location.isNull()) {
     return false;
   }
@@ -31,7 +33,8 @@ bool Filter::shouldSkipFunction(llvm::Function *function) {
     }
   }
 
-  SourceLocation location = SourceLocation::sourceLocationFromFunction(function);
+  SourceLocation location =
+      SourceLocation::sourceLocationFromFunction(function);
   if (location.isNull()) {
     return false;
   }

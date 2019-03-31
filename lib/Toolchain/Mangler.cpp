@@ -1,4 +1,4 @@
-#include "Toolchain/Mangler.h"
+#include "mull/Toolchain/Mangler.h"
 
 #include <llvm/ADT/Twine.h>
 #include <llvm/IR/Mangler.h>
@@ -11,13 +11,11 @@ std::string Mangler::getNameWithPrefix(const std::string &name) {
   std::string mangledName;
 
   llvm::raw_string_ostream stream(mangledName);
-  llvm::Mangler::getNameWithPrefix(stream,
-                                   stringRefName,
-                                   dataLayout);
+  llvm::Mangler::getNameWithPrefix(stream, stringRefName, dataLayout);
 
   return mangledName;
 }
 
-Mangler::Mangler(llvm::DataLayout dataLayout) : dataLayout(dataLayout) {}
+Mangler::Mangler(const llvm::DataLayout &dataLayout) : dataLayout(dataLayout) {}
 
-}
+} // namespace mull

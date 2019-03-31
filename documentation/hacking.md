@@ -90,7 +90,7 @@ mkdir build.dir
 cd build.dir
 cmake -DPATH_TO_LLVM=path/to/llvm ..
 make mull-cxx
-make MullUnitTests
+make mull-tests
 ```
 
 The `PATH_TO_LLVM` depends on which option you picked in previous section:

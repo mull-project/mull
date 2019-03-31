@@ -1,4 +1,5 @@
-#include "Metrics/Metrics.h"
+#include "mull/Metrics/Metrics.h"
+
 #include <iostream>
 #include <numeric>
 
@@ -7,20 +8,23 @@ using namespace mull;
 MetricsMeasure::Precision currentTimestamp() {
   using namespace std::chrono;
   using clock = system_clock;
-  return duration_cast<MetricsMeasure::Precision>(clock::now().time_since_epoch());
+  return duration_cast<MetricsMeasure::Precision>(
+      clock::now().time_since_epoch());
 }
 
 template <class Key>
-MetricsMeasure::Duration accumulate_duration(const std::map<Key, MetricsMeasure> &metrics) {
+MetricsMeasure::Duration
+accumulate_duration(const std::map<Key, MetricsMeasure> &metrics) {
   MetricsMeasure::Duration total(0);
-  for (auto &pair: metrics) {
+  for (auto &pair : metrics) {
     total += pair.second.duration();
   }
   return total;
 }
 
 template <class Key>
-MetricsMeasure::Duration average_duration(const std::map<Key, MetricsMeasure> &metrics) {
+MetricsMeasure::Duration
+average_duration(const std::map<Key, MetricsMeasure> &metrics) {
   if (metrics.empty()) {
     return MetricsMeasure::Duration(0);
   }
@@ -31,28 +35,18 @@ MetricsMeasure::Duration average_duration(const std::map<Key, MetricsMeasure> &m
 
 MetricsMeasure::MetricsMeasure() : begin(0), end(0) {}
 
-void MetricsMeasure::start() {
-  begin = currentTimestamp();
-}
+void MetricsMeasure::start() { begin = currentTimestamp(); }
 
-void MetricsMeasure::finish() {
-  end = currentTimestamp();
-}
+void MetricsMeasure::finish() { end = currentTimestamp(); }
 
 MetricsMeasure::Duration MetricsMeasure::duration() const {
   return (end - begin).count();
 }
 
-const char *MetricsMeasure::precision() {
-  return "ms";
-}
+const char *MetricsMeasure::precision() { return "ms"; }
 
-void Metrics::beginLoadModules() {
-  loadModules.begin = currentTimestamp();
-}
-void Metrics::endLoadModules() {
-  loadModules.end = currentTimestamp();
-}
+void Metrics::beginLoadModules() { loadModules.begin = currentTimestamp(); }
+void Metrics::endLoadModules() { loadModules.end = currentTimestamp(); }
 
 void Metrics::beginCompileOriginalModule(const llvm::Module *module) {
   MetricsMeasure &measure = originalModuleCompilation[module];
@@ -87,12 +81,8 @@ void Metrics::endLoadPrecompiledObjectFiles() {
   loadPrecompiledObjectFiles.end = currentTimestamp();
 }
 
-void Metrics::beginFindTests() {
-  findTests.begin = currentTimestamp();
-}
-void Metrics::endFindTests() {
-  findTests.end = currentTimestamp();
-}
+void Metrics::beginFindTests() { findTests.begin = currentTimestamp(); }
+void Metrics::endFindTests() { findTests.end = currentTimestamp(); }
 
 void Metrics::beginLoadDynamicLibraries() {
   loadDynamicLibraries.begin = currentTimestamp();
@@ -171,63 +161,87 @@ void Metrics::endRunMutant(const MutationPoint *mutant, const Test *test) {
   measure.end = currentTimestamp();
 }
 
-void Metrics::beginRun() {
-  runTime.begin = currentTimestamp();
-}
-void Metrics::endRun() {
-  runTime.end = currentTimestamp();
-}
+void Metrics::beginRun() { runTime.begin = currentTimestamp(); }
+void Metrics::endRun() { runTime.end = currentTimestamp(); }
 
-void Metrics::beginReportResult() {
-  reportResult.begin = currentTimestamp();
-}
-void Metrics::endReportResult() {
-  reportResult.end = currentTimestamp();
-}
+void Metrics::beginReportResult() { reportResult.begin = currentTimestamp(); }
+void Metrics::endReportResult() { reportResult.end = currentTimestamp(); }
 
 void Metrics::dump() const {
   using namespace std;
 
   MetricsMeasure::Duration totalMutantRunTime(0);
-  for (auto &pair: mutantRuns) {
+  for (auto &pair : mutantRuns) {
     totalMutantRunTime += accumulate_duration(pair.second);
   }
 
   cout << "Execution Metrics:" << endl;
   cout << endl;
 
-  cout << "Total run time: ................... " << runTime.duration() << MetricsMeasure::precision() << endl;
-  // cout << "Saving result: .................... " << reportResult.duration() << MetricsMeasure::precision() << endl;
+  cout << "Total run time: ................... " << runTime.duration()
+       << MetricsMeasure::precision() << endl;
+  // cout << "Saving result: .................... " << reportResult.duration()
+  // << MetricsMeasure::precision() << endl;
   cout << endl;
 
-  cout << "Find tests: ....................... " << findTests.duration() << MetricsMeasure::precision() << endl;
-  cout << "Find mutations: ................... " << accumulate_duration(findMutations) << MetricsMeasure::precision() << endl;
+  cout << "Find tests: ....................... " << findTests.duration()
+       << MetricsMeasure::precision() << endl;
+  cout << "Find mutations: ................... "
+       << accumulate_duration(findMutations) << MetricsMeasure::precision()
+       << endl;
   cout << endl;
 
-  cout << "Load modules: ..................... " << loadModules.duration() << MetricsMeasure::precision() << endl;
-  cout << "Load object files: ................ " << loadPrecompiledObjectFiles.duration() << MetricsMeasure::precision() << endl;
-  cout << "Load dylibs: ...................... " << loadDynamicLibraries.duration() << MetricsMeasure::precision() << endl;
+  cout << "Load modules: ..................... " << loadModules.duration()
+       << MetricsMeasure::precision() << endl;
+  cout << "Load object files: ................ "
+       << loadPrecompiledObjectFiles.duration() << MetricsMeasure::precision()
+       << endl;
+  cout << "Load dylibs: ...................... "
+       << loadDynamicLibraries.duration() << MetricsMeasure::precision()
+       << endl;
   cout << endl;
 
-  cout << "Load original program: ............ " << loadOriginalProgram.duration() << MetricsMeasure::precision() << endl;
-  cout << "Load mutant (avg): ................ " << average_duration(loadMutant) << MetricsMeasure::precision() << endl;
-  cout << "Load mutant (total): .............. " << accumulate_duration(loadMutant) << MetricsMeasure::precision() << endl;
+  cout << "Load original program: ............ "
+       << loadOriginalProgram.duration() << MetricsMeasure::precision() << endl;
+  cout << "Load mutant (avg): ................ " << average_duration(loadMutant)
+       << MetricsMeasure::precision() << endl;
+  cout << "Load mutant (total): .............. "
+       << accumulate_duration(loadMutant) << MetricsMeasure::precision()
+       << endl;
   cout << endl;
 
-  cout << "Original compilation (total): ..... " << accumulate_duration(originalModuleCompilation) << MetricsMeasure::precision() << endl;
-  cout << "Instrumented compilation (total): . " << instrumentedCompilation.duration() << MetricsMeasure::precision() << endl;
-  cout << "Mutant compilation (total): ....... " << accumulate_duration(compileMutant) << MetricsMeasure::precision() << endl;
+  cout << "Original compilation (total): ..... "
+       << accumulate_duration(originalModuleCompilation)
+       << MetricsMeasure::precision() << endl;
+  cout << "Instrumented compilation (total): . "
+       << instrumentedCompilation.duration() << MetricsMeasure::precision()
+       << endl;
+  cout << "Mutant compilation (total): ....... "
+       << accumulate_duration(compileMutant) << MetricsMeasure::precision()
+       << endl;
   cout << endl;
 
-  cout << "Original compilation (avg): ....... " << average_duration(originalModuleCompilation) << MetricsMeasure::precision() << endl;
-  cout << "Instrumented compilation (avg): ... " << average_duration(instrumentedModuleCompilation) << MetricsMeasure::precision() << endl;
-  cout << "Mutant compilation (avg): ......... " << average_duration(compileMutant) << MetricsMeasure::precision() << endl;
+  cout << "Original compilation (avg): ....... "
+       << average_duration(originalModuleCompilation)
+       << MetricsMeasure::precision() << endl;
+  cout << "Instrumented compilation (avg): ... "
+       << average_duration(instrumentedModuleCompilation)
+       << MetricsMeasure::precision() << endl;
+  cout << "Mutant compilation (avg): ......... "
+       << average_duration(compileMutant) << MetricsMeasure::precision()
+       << endl;
   cout << endl;
 
-  cout << "Tests run time (total): ........... " << originalTestsExecution.duration() << MetricsMeasure::precision() << endl;
-  cout << "Mutants run time (total): ......... " << mutantsExecution.duration() << MetricsMeasure::precision() << endl;
-  cout << "Tests run time (avg): ............. " << average_duration(runOriginalTest) << MetricsMeasure::precision() << endl;
-  cout << "Mutants run time (avg): ........... " << totalMutantRunTime / (mutantRuns.size() ? mutantRuns.size() : 1) << MetricsMeasure::precision() << endl;
+  cout << "Tests run time (total): ........... "
+       << originalTestsExecution.duration() << MetricsMeasure::precision()
+       << endl;
+  cout << "Mutants run time (total): ......... " << mutantsExecution.duration()
+       << MetricsMeasure::precision() << endl;
+  cout << "Tests run time (avg): ............. "
+       << average_duration(runOriginalTest) << MetricsMeasure::precision()
+       << endl;
+  cout << "Mutants run time (avg): ........... "
+       << totalMutantRunTime / (mutantRuns.size() ? mutantRuns.size() : 1)
+       << MetricsMeasure::precision() << endl;
   cout << endl;
 }
-

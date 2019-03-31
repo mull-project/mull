@@ -1,13 +1,13 @@
-#include "Mutators/MathSubMutator.h"
+#include "mull/Mutators/MathSubMutator.h"
 
-#include "Logger.h"
-#include "MutationPoint.h"
+#include "mull/Logger.h"
+#include "mull/MutationPoint.h"
 
+#include <llvm/IR/DebugInfoMetadata.h>
+#include <llvm/IR/DebugLoc.h>
 #include <llvm/IR/InstIterator.h>
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/Module.h>
-#include <llvm/IR/DebugLoc.h>
-#include <llvm/IR/DebugInfoMetadata.h>
 
 #include <fstream>
 #include <iterator>
@@ -37,7 +37,7 @@ bool MathSubMutator::isSubWithOverflow(llvm::Value &V) {
 
 llvm::Function *
 MathSubMutator::replacementForSubWithOverflow(llvm::Function *testeeFunction,
-                                                       llvm::Module &module) {
+                                              llvm::Module &module) {
 
   std::string name = testeeFunction->getName().str();
 
@@ -85,36 +85,31 @@ MathSubMutator::replacementForSubWithOverflow(llvm::Function *testeeFunction,
   }
 
   else {
-    Logger::debug() << "MathSubMutator> unknown add function: "
-                    << name
+    Logger::debug() << "MathSubMutator> unknown add function: " << name
                     << ".\n";
   }
 
-  std::vector<Type*> twoParameters(2, replacementType);
+  std::vector<Type *> twoParameters(2, replacementType);
 
   FunctionType *replacementFunctionType =
-    FunctionType::get(replacementType,
-                      twoParameters,
-                      false);
+      FunctionType::get(replacementType, twoParameters, false);
 
   Function *replacementFunction =
-    Function::Create(replacementFunctionType,
-                     Function::ExternalLinkage,
-                     replacementName,
-                     &module);
+      Function::Create(replacementFunctionType, Function::ExternalLinkage,
+                       replacementName, &module);
 
   return replacementFunction;
 }
 
-MutationPoint *
-MathSubMutator::getMutationPoint(MullModule *module,
-                                 llvm::Function *function,
-                                 llvm::Instruction *instruction,
-                                 SourceLocation &sourceLocation,
-                                 MutationPointAddress &address) {
+MutationPoint *MathSubMutator::getMutationPoint(MullModule *module,
+                                                llvm::Function *function,
+                                                llvm::Instruction *instruction,
+                                                SourceLocation &sourceLocation,
+                                                MutationPointAddress &address) {
   if (canBeApplied(*instruction)) {
     std::string diagnostics = "Math Sub: replaced - with +";
-    return new MutationPoint(this, address, instruction, function, diagnostics, sourceLocation, module);
+    return new MutationPoint(this, address, instruction, function, diagnostics,
+                             sourceLocation, module);
   }
   return nullptr;
 }
@@ -142,9 +137,8 @@ llvm::Value *MathSubMutator::applyMutation(Function *function,
   if (isSubWithOverflow(I)) {
     CallInst *callInst = dyn_cast<CallInst>(&I);
 
-    Function *replacementFunction =
-      replacementForSubWithOverflow(callInst->getCalledFunction(),
-                                    *I.getModule());
+    Function *replacementFunction = replacementForSubWithOverflow(
+        callInst->getCalledFunction(), *I.getModule());
 
     callInst->setCalledFunction(replacementFunction);
 
@@ -163,10 +157,9 @@ llvm::Value *MathSubMutator::applyMutation(Function *function,
 
   /// NOTE: Create a new BinaryOperator with the same name as existing one
 
-  Instruction *replacement = BinaryOperator::Create(type,
-                                                    binaryOperator->getOperand(0),
-                                                    binaryOperator->getOperand(1),
-                                                    binaryOperator->getName());
+  Instruction *replacement = BinaryOperator::Create(
+      type, binaryOperator->getOperand(0), binaryOperator->getOperand(1),
+      binaryOperator->getName());
   assert(replacement);
   if (binaryOperator->hasNoUnsignedWrap()) {
     replacement->setHasNoUnsignedWrap();

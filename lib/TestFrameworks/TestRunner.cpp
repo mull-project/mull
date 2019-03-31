@@ -1,9 +1,7 @@
-#include "TestFrameworks/TestRunner.h"
+#include "mull/TestFrameworks/TestRunner.h"
 
 #include <llvm/Support/DynamicLibrary.h>
 
-mull::TestRunner::TestRunner()
-{
+mull::TestRunner::TestRunner() {
   llvm::sys::DynamicLibrary::LoadLibraryPermanently(nullptr);
 }
-

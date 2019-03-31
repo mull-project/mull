@@ -1,14 +1,14 @@
-#include "Mutators/MathMulMutator.h"
+#include "mull/Mutators/MathMulMutator.h"
 
-#include "Logger.h"
-#include "MutationPoint.h"
+#include "mull/Logger.h"
+#include "mull/MutationPoint.h"
 
-#include <llvm/IR/Operator.h>
+#include <llvm/IR/DebugInfoMetadata.h>
+#include <llvm/IR/DebugLoc.h>
 #include <llvm/IR/InstIterator.h>
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/Module.h>
-#include <llvm/IR/DebugLoc.h>
-#include <llvm/IR/DebugInfoMetadata.h>
+#include <llvm/IR/Operator.h>
 
 #include <fstream>
 #include <iterator>
@@ -19,15 +19,15 @@ using namespace mull;
 const std::string MathMulMutator::ID = "math_mul_mutator";
 const std::string MathMulMutator::description = "Replaces * with /";
 
-MutationPoint *
-MathMulMutator::getMutationPoint(MullModule *module,
-                                 llvm::Function *function,
-                                 llvm::Instruction *instruction,
-                                 SourceLocation &sourceLocation,
-                                 MutationPointAddress &address) {
+MutationPoint *MathMulMutator::getMutationPoint(MullModule *module,
+                                                llvm::Function *function,
+                                                llvm::Instruction *instruction,
+                                                SourceLocation &sourceLocation,
+                                                MutationPointAddress &address) {
   if (canBeApplied(*instruction)) {
     std::string diagnostics = "Math Mul: replaced * with /";
-    return new MutationPoint(this, address, instruction, function, diagnostics, sourceLocation, module);
+    return new MutationPoint(this, address, instruction, function, diagnostics,
+                             sourceLocation, module);
   }
   return nullptr;
 }
@@ -60,10 +60,9 @@ llvm::Value *MathMulMutator::applyMutation(Function *function,
 
   /// NOTE: Create a new BinaryOperator with the same name as existing one
 
-  Instruction *replacement = BinaryOperator::Create(type,
-                                                    binaryOperator->getOperand(0),
-                                                    binaryOperator->getOperand(1),
-                                                    binaryOperator->getName());
+  Instruction *replacement = BinaryOperator::Create(
+      type, binaryOperator->getOperand(0), binaryOperator->getOperand(1),
+      binaryOperator->getName());
   assert(replacement);
   /// TODO: Take care of NUW/NSW
   /// SDiv and FDiv do not support NUW/NSW for some reason

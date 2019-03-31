@@ -1,6 +1,7 @@
-#include "JunkDetection/CXX/CompilationDatabase.h"
+#include "mull/JunkDetection/CXX/CompilationDatabase.h"
+
 #include "CompilationDatabaseParser.h"
-#include "Logger.h"
+#include "mull/Logger.h"
 
 #include <clang/Basic/Version.h>
 #include <llvm/ADT/STLExtras.h>
