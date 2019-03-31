@@ -35,13 +35,13 @@
   args:
     chdir: "{{ build_dir }}"
 
-- name: Build Unit Tests
-  command: ninja MullUnitTests
+- name: Build Tests
+  command: ninja mull-tests
   args:
     chdir: "{{ build_dir }}"
 
-- name: Run Unit Tests
-  command: "{{ build_dir}}/unittests/MullUnitTests"
+- name: Run Tests
+  command: "{{ build_dir}}/tests/mull-tests"
   environment:
     LD_LIBRARY_PATH: "{{ llvm_dir }}/lib"
 
