@@ -1,4 +1,4 @@
-#include "JunkDetection/CXX/Visitors/RemoveVoidFunctionVisitor.h"
+#include "mull/JunkDetection/CXX/Visitors/RemoveVoidFunctionVisitor.h"
 
 using namespace mull;
 

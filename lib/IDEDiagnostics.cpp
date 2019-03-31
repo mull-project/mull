@@ -1,6 +1,6 @@
-#include "IDEDiagnostics.h"
+#include "mull/IDEDiagnostics.h"
 
-#include "MutationPoint.h"
+#include "mull/MutationPoint.h"
 
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/Instruction.h>
@@ -29,7 +29,7 @@ void NormalIDEDiagnostics::report(mull::MutationPoint *mutationPoint,
   }
 
   Instruction *instruction =
-    dyn_cast<Instruction>(mutationPoint->getOriginalValue());
+      dyn_cast<Instruction>(mutationPoint->getOriginalValue());
   if (instruction->getMetadata(0) == nullptr) {
     return;
   }
@@ -37,8 +37,8 @@ void NormalIDEDiagnostics::report(mull::MutationPoint *mutationPoint,
   const DebugLoc &debugLoc = instruction->getDebugLoc();
 
   std::string fileNameOrNil = debugLoc->getFilename().str();
-  std::string lineOrNil     = std::to_string(debugLoc->getLine());
-  std::string columnOrNil   = std::to_string(debugLoc->getColumn());
+  std::string lineOrNil = std::to_string(debugLoc->getLine());
+  std::string columnOrNil = std::to_string(debugLoc->getColumn());
 
   errs() << "\n";
   errs() << fileNameOrNil << ":" << lineOrNil << ":" << columnOrNil << ": "

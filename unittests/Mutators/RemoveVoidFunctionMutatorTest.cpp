@@ -1,20 +1,18 @@
-
-#include "Mutators/Mutator.h"
-#include "Mutators/RemoveVoidFunctionMutator.h"
-
-#include "llvm/IR/Argument.h"
-#include "llvm/IR/BasicBlock.h"
-#include "llvm/IR/Constants.h"
-#include "llvm/IR/DerivedTypes.h"
-#include "llvm/IR/Function.h"
-#include "llvm/IR/InstrTypes.h"
-#include "llvm/IR/Instructions.h"
-#include "llvm/IR/LLVMContext.h"
-#include "llvm/IR/Module.h"
-#include "llvm/IR/Type.h"
-#include "llvm/IR/Value.h"
-
+#include "mull/Mutators/RemoveVoidFunctionMutator.h"
 #include "TestModuleFactory.h"
+#include "mull/Mutators/Mutator.h"
+
+#include <llvm/IR/Argument.h>
+#include <llvm/IR/BasicBlock.h>
+#include <llvm/IR/Constants.h>
+#include <llvm/IR/DerivedTypes.h>
+#include <llvm/IR/Function.h>
+#include <llvm/IR/InstrTypes.h>
+#include <llvm/IR/Instructions.h>
+#include <llvm/IR/LLVMContext.h>
+#include <llvm/IR/Module.h>
+#include <llvm/IR/Type.h>
+#include <llvm/IR/Value.h>
 
 #include "gtest/gtest.h"
 
@@ -30,15 +28,11 @@ TEST(RemoveVoidFunctionMutator, canBeApplied) {
   std::unique_ptr<Module> moduleOwner(new Module("test", context));
   Module *module = moduleOwner.get();
 
-  Function *voidFunction =
-    cast<Function>(module->getOrInsertFunction("voidFunction", Type::getVoidTy(context),
-                                        Type::VoidTyID,
-                                        nullptr));
+  Function *voidFunction = cast<Function>(module->getOrInsertFunction(
+      "voidFunction", Type::getVoidTy(context), Type::VoidTyID, nullptr));
 
-  Function *callerFunction =
-    cast<Function>(module->getOrInsertFunction("callerFunction", Type::getVoidTy(context),
-                                               Type::VoidTyID,
-                                               nullptr));
+  Function *callerFunction = cast<Function>(module->getOrInsertFunction(
+      "callerFunction", Type::getVoidTy(context), Type::VoidTyID, nullptr));
 
   BasicBlock *bb = BasicBlock::Create(context, "not_relevant", callerFunction);
 

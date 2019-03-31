@@ -1,14 +1,14 @@
 #include <thread>
-#include "ConfigParserTestFixture.h"
 
-#include "Mutators/MathAddMutator.h"
-#include "Mutators/MathDivMutator.h"
-#include "Mutators/MathMulMutator.h"
-#include "Mutators/MathSubMutator.h"
-#include "Mutators/NegateConditionMutator.h"
-#include "Mutators/RemoveVoidFunctionMutator.h"
-#include "Mutators/ReplaceCallMutator.h"
-#include "Mutators/ScalarValueMutator.h"
+#include "ConfigParserTestFixture.h"
+#include "mull/Mutators/MathAddMutator.h"
+#include "mull/Mutators/MathDivMutator.h"
+#include "mull/Mutators/MathMulMutator.h"
+#include "mull/Mutators/MathSubMutator.h"
+#include "mull/Mutators/NegateConditionMutator.h"
+#include "mull/Mutators/RemoveVoidFunctionMutator.h"
+#include "mull/Mutators/ReplaceCallMutator.h"
+#include "mull/Mutators/ScalarValueMutator.h"
 
 TEST_F(ConfigParserTestFixture, loadConfig_bitcodeFileList_unspecified) {
   const char *configYAML = "";
@@ -20,7 +20,8 @@ TEST_F(ConfigParserTestFixture, loadConfig_bitcodeFileList_unspecified) {
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_bitcodeFileList_nonExistingFile) {
-  const char *configYAML = "bitcode_file_list: /tmp/non-existing-file-12345.txt\n";
+  const char *configYAML =
+      "bitcode_file_list: /tmp/non-existing-file-12345.txt\n";
   configWithYamlContent(configYAML);
 
   auto errors = config.validate();
@@ -39,7 +40,7 @@ TEST_F(ConfigParserTestFixture, loadConfig_bitcodeFileList) {
 
   fs << "foo.bc" << std::endl;
   fs << "bar.bc" << std::endl;
-  fs << "# baz.bc"  << std::endl;
+  fs << "# baz.bc" << std::endl;
 
   const char *configYAML = "bitcode_file_list: /tmp/bitcode_file_list.txt\n";
   configWithYamlContent(configYAML);
@@ -52,62 +53,71 @@ TEST_F(ConfigParserTestFixture, loadConfig_bitcodeFileList) {
   ASSERT_EQ(errors.size(), 0U);
 }
 
-TEST_F(ConfigParserTestFixture, loadConfig_dynamicLibraryFileList_nonExistingFile) {
+TEST_F(ConfigParserTestFixture,
+       loadConfig_dynamicLibraryFileList_nonExistingFile) {
   const std::string bitcodeFileList = "/tmp/bitcode_file_list.txt";
-  
+
   std::ofstream bitcodeFile(bitcodeFileList);
-  
+
   if (!bitcodeFile) {
     std::cerr << "Cannot open the output file." << std::endl;
     ASSERT_FALSE(true);
   }
-  
+
   bitcodeFile << "foo.bc" << std::endl;
   bitcodeFile << "bar.bc" << std::endl;
-  bitcodeFile << "# baz.bc"  << std::endl;
-  
-  const char *configYAML = "bitcode_file_list: /tmp/bitcode_file_list.txt\ndynamic_library_file_list: /tmp/non-existing-file-12345.txt\n";
+  bitcodeFile << "# baz.bc" << std::endl;
+
+  const char *configYAML =
+      "bitcode_file_list: "
+      "/tmp/bitcode_file_list.txt\ndynamic_library_file_list: "
+      "/tmp/non-existing-file-12345.txt\n";
   configWithYamlContent(configYAML);
-  
+
   auto errors = config.validate();
   ASSERT_EQ(errors.size(), 1U);
 }
 
-TEST_F(ConfigParserTestFixture, loadConfig_bitcodeFileList_dynamicLibraryFileList) {
+TEST_F(ConfigParserTestFixture,
+       loadConfig_bitcodeFileList_dynamicLibraryFileList) {
   const std::string bitcodeFileList = "/tmp/bitcode_file_list.txt";
-  const std::string dynamicLibraryFileList = "/tmp/dynamic_library_file_list.txt";
-  
+  const std::string dynamicLibraryFileList =
+      "/tmp/dynamic_library_file_list.txt";
+
   std::ofstream bitcodeFile(bitcodeFileList);
   std::ofstream dynamicLibraryFile(dynamicLibraryFileList);
-  
+
   if (!bitcodeFile) {
     std::cerr << "Cannot open bitcode file." << std::endl;
     ASSERT_FALSE(true);
   }
-  
+
   if (!dynamicLibraryFile) {
     std::cerr << "Cannot open dynamic library file." << std::endl;
     ASSERT_FALSE(true);
   }
-  
+
   bitcodeFile << "foo.bc" << std::endl;
   bitcodeFile << "bar.bc" << std::endl;
-  bitcodeFile << "# baz.bc"  << std::endl;
-  
+  bitcodeFile << "# baz.bc" << std::endl;
+
   dynamicLibraryFile << "sqlite3.dylib" << std::endl;
   dynamicLibraryFile << "libz.dylib" << std::endl;
-  
-  const char *configYAML = "bitcode_file_list: /tmp/bitcode_file_list.txt\ndynamic_library_file_list: /tmp/dynamic_library_file_list.txt";
+
+  const char *configYAML =
+      "bitcode_file_list: "
+      "/tmp/bitcode_file_list.txt\ndynamic_library_file_list: "
+      "/tmp/dynamic_library_file_list.txt";
   configWithYamlContent(configYAML);
-  
+
   ASSERT_EQ(2U, config.getBitcodePaths().size());
   ASSERT_EQ("foo.bc", *(config.getBitcodePaths().begin()));
   ASSERT_EQ("bar.bc", *(config.getBitcodePaths().end() - 1));
-  
+
   ASSERT_EQ(2U, config.getDynamicLibrariesPaths().size());
   ASSERT_EQ("sqlite3.dylib", *(config.getDynamicLibrariesPaths().begin()));
   ASSERT_EQ("libz.dylib", *(config.getDynamicLibrariesPaths().end() - 1));
-  
+
   auto errors = config.validate();
   ASSERT_EQ(errors.size(), 0U);
 }
@@ -131,11 +141,10 @@ TEST_F(ConfigParserTestFixture, loadConfig_objectFileList) {
 
   objectFileStream << "foo.o" << std::endl;
   objectFileStream << "bar.o" << std::endl;
-  objectFileStream << "# baz.o"  << std::endl;
+  objectFileStream << "# baz.o" << std::endl;
 
-  const char *configYAML =
-    "bitcode_file_list: /tmp/bitcode_file.list\n"
-    "object_file_list: /tmp/object_files.list";
+  const char *configYAML = "bitcode_file_list: /tmp/bitcode_file.list\n"
+                           "object_file_list: /tmp/object_files.list";
   configWithYamlContent(configYAML);
 
   ASSERT_EQ("/tmp/object_files.list", config.getObjectFileList());
@@ -158,8 +167,8 @@ TEST_F(ConfigParserTestFixture, loadConfig_objectFileList_nonExistingFile) {
   }
 
   const char *configYAML =
-    "bitcode_file_list: /tmp/bitcode_file.list\n"
-    "object_file_list: /tmp/object_files.list.does.not.exist";
+      "bitcode_file_list: /tmp/bitcode_file.list\n"
+      "object_file_list: /tmp/object_files.list.does.not.exist";
 
   configWithYamlContent(configYAML);
 
@@ -357,7 +366,7 @@ mutators:
   - replace_call_mutator
   )YAML";
   configWithYamlContent(configYAML);
-  
+
   auto mutators = config.getMutators();
   ASSERT_EQ(7U, mutators.size());
   ASSERT_EQ(MathAddMutator::ID, mutators[0]);
@@ -457,7 +466,8 @@ reporters:
   ASSERT_EQ(availableThreads, parallelization.testExecutionWorkers);
 }
 
-TEST_F(ConfigParserTestFixture, loadConfig_parallelization_workers_value_propagates) {
+TEST_F(ConfigParserTestFixture,
+       loadConfig_parallelization_workers_value_propagates) {
   const char *configYAML = R"YAML(
 parallelization:
   workers: 33
@@ -472,7 +482,8 @@ parallelization:
   ASSERT_EQ(availableThreads, parallelization.testExecutionWorkers);
 }
 
-TEST_F(ConfigParserTestFixture, loadConfig_parallelization_local_value_overrides) {
+TEST_F(ConfigParserTestFixture,
+       loadConfig_parallelization_local_value_overrides) {
   const char *configYAML = R"YAML(
 parallelization:
   workers: 33
@@ -488,7 +499,8 @@ parallelization:
   ASSERT_EQ(14, parallelization.testExecutionWorkers);
 }
 
-TEST_F(ConfigParserTestFixture, loadConfig_parallelization_all_local_values_override) {
+TEST_F(ConfigParserTestFixture,
+       loadConfig_parallelization_all_local_values_override) {
   const char *configYAML = R"YAML(
 parallelization:
   workers: 33

@@ -1,7 +1,7 @@
-#include "Mutators/ReplaceAssignmentMutator.h"
+#include "mull/Mutators/ReplaceAssignmentMutator.h"
 
-#include "Logger.h"
-#include "MutationPoint.h"
+#include "mull/Logger.h"
+#include "mull/MutationPoint.h"
 
 #include <llvm/IR/CallSite.h>
 #include <llvm/IR/Constants.h>
@@ -17,11 +17,12 @@ using namespace llvm;
 using namespace mull;
 
 const std::string ReplaceAssignmentMutator::ID = "replace_assignment_mutator";
-const std::string ReplaceAssignmentMutator::description = "Replaces assignment with 42";
+const std::string ReplaceAssignmentMutator::description =
+    "Replaces assignment with 42";
 
 static bool findPossibleApplication(Value &V, std::string &outDiagnostics);
-static
-llvm::Value *getReplacement(Type *returnType, llvm::LLVMContext &context);
+static llvm::Value *getReplacement(Type *returnType,
+                                   llvm::LLVMContext &context);
 
 bool ReplaceAssignmentMutator::canBeApplied(Value &V) {
   std::string diagnostics;
@@ -57,12 +58,10 @@ static bool findPossibleApplication(Value &V, std::string &outDiagnostics) {
   return true;
 }
 
-MutationPoint *
-ReplaceAssignmentMutator::getMutationPoint(MullModule *module,
-                                           llvm::Function *function,
-                                           llvm::Instruction *instruction,
-                                           SourceLocation &sourceLocation,
-                                           MutationPointAddress &address) {
+MutationPoint *ReplaceAssignmentMutator::getMutationPoint(
+    MullModule *module, llvm::Function *function,
+    llvm::Instruction *instruction, SourceLocation &sourceLocation,
+    MutationPointAddress &address) {
 
   std::string diagnostics;
 
@@ -70,32 +69,29 @@ ReplaceAssignmentMutator::getMutationPoint(MullModule *module,
     return nullptr;
   }
 
-  auto mutationPoint =
-      new MutationPoint(this, address, instruction, function, diagnostics, sourceLocation, module);
+  auto mutationPoint = new MutationPoint(this, address, instruction, function,
+                                         diagnostics, sourceLocation, module);
 
   return mutationPoint;
 }
 
-static
-llvm::Value *getReplacement(Type *returnType, llvm::LLVMContext &context) {
+static llvm::Value *getReplacement(Type *returnType,
+                                   llvm::LLVMContext &context) {
   static const int MagicValue = 42;
 
   if (returnType->isIntegerTy()) {
-    APInt replacementIntValue = APInt(returnType->getIntegerBitWidth(),
-                                      MagicValue);
+    APInt replacementIntValue =
+        APInt(returnType->getIntegerBitWidth(), MagicValue);
 
-    return ConstantInt::get(context,
-                            replacementIntValue);
+    return ConstantInt::get(context, replacementIntValue);
   }
   if (returnType->isDoubleTy()) {
     APFloat replacementFloatValue = APFloat((double)MagicValue);
-    return ConstantFP::get(context,
-                           replacementFloatValue);
+    return ConstantFP::get(context, replacementFloatValue);
   }
   if (returnType->isFloatTy()) {
     APFloat replacementFloatValue = APFloat((float)MagicValue);
-    return ConstantFP::get(context,
-                           replacementFloatValue);
+    return ConstantFP::get(context, replacementFloatValue);
   }
 
   llvm_unreachable("Unsupported return type!");

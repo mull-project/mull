@@ -1,14 +1,10 @@
+#include "mull/TestFrameworks/TestFrameworkFactory.h"
 
-#include <TestFrameworks/TestFrameworkFactory.h>
-
-#include "TestFrameworks/TestFrameworkFactory.h"
-
-#include "TestFrameworks/CustomTestFramework/CustomTestFramework.h"
-#include "TestFrameworks/GoogleTest/GoogleTest.h"
-#include "TestFrameworks/SimpleTest/SimpleTest.h"
-
-#include "Config/Configuration.h"
-#include "Toolchain/Toolchain.h"
+#include "mull/Config/Configuration.h"
+#include "mull/TestFrameworks/CustomTestFramework/CustomTestFramework.h"
+#include "mull/TestFrameworks/GoogleTest/GoogleTest.h"
+#include "mull/TestFrameworks/SimpleTest/SimpleTest.h"
+#include "mull/Toolchain/Toolchain.h"
 
 using namespace mull;
 using namespace llvm;

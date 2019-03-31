@@ -1,7 +1,6 @@
-
 #include "TestModuleFactory.h"
-#include "Logger.h"
 #include "LLVMCompatibility.h"
+#include "mull/Logger.h"
 
 #include <llvm/AsmParser/Parser.h>
 #include <llvm/IR/LLVMContext.h>
@@ -9,18 +8,19 @@
 #include <llvm/IR/Verifier.h>
 #include <llvm/Support/Debug.h>
 #include <llvm/Support/MemoryBuffer.h>
-#include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/Path.h>
+#include <llvm/Support/SourceMgr.h>
 
-#include <iostream>
 #include <fstream>
+#include <iostream>
 #include <string>
-#include <unistd.h>
 #include <sys/param.h>
+#include <unistd.h>
 
 namespace mull {
 
-std::unique_ptr<MullModule> loadModuleFromIR(const char *path, LLVMContext &context) {
+std::unique_ptr<MullModule> loadModuleFromIR(const char *path,
+                                             LLVMContext &context) {
   ///  I cannot recall why it is implemented the way it is implemented
   ///  Sorry about that
   std::ifstream file(path);
@@ -43,7 +43,8 @@ std::unique_ptr<MullModule> loadModuleFromIR(const char *path, LLVMContext &cont
 
   assert(!llvm::verifyModule(*module, &dbgs()));
 
-  return make_unique<MullModule>(std::move(module), std::unique_ptr<llvm::MemoryBuffer>(), "fake_path");
+  return make_unique<MullModule>(
+      std::move(module), std::unique_ptr<llvm::MemoryBuffer>(), "fake_path");
 }
 
-}
+} // namespace mull

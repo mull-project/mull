@@ -1,8 +1,9 @@
-#include "MutationsFinder.h"
-#include "Config/Configuration.h"
-#include "Parallelization/Parallelization.h"
-#include "Testee.h"
-#include <Program/Program.h>
+#include "mull/MutationsFinder.h"
+
+#include "mull/Config/Configuration.h"
+#include "mull/Parallelization/Parallelization.h"
+#include "mull/Program/Program.h"
+#include "mull/Testee.h"
 
 using namespace mull;
 using namespace llvm;
@@ -16,6 +17,7 @@ MutationsFinder::getMutationPoints(const Program &program,
                                    std::vector<MergedTestee> &testees,
                                    Filter &filter) {
   std::vector<SearchMutationPointsTask> tasks;
+  tasks.reserve(config.parallelization.workers);
   for (int i = 0; i < config.parallelization.workers; i++) {
     tasks.emplace_back(filter, program, mutators);
   }

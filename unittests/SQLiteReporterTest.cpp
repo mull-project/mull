@@ -1,18 +1,18 @@
-#include "Config/Configuration.h"
-#include "Program/Program.h"
-#include "Reporters/SQLiteReporter.h"
-#include "Result.h"
-#include "Mutators/MathAddMutator.h"
-#include "TestFrameworks/SimpleTest/SimpleTestFinder.h"
-#include "TestFrameworks/SimpleTest/SimpleTest_Test.h"
-#include "TestModuleFactory.h"
-#include "MutationsFinder.h"
-#include "Filter.h"
-#include "Testee.h"
-#include "Metrics/Metrics.h"
-#include "Config/RawConfig.h"
-#include "ModuleLoader.h"
+#include "mull/Reporters/SQLiteReporter.h"
 #include "FixturePaths.h"
+#include "TestModuleFactory.h"
+#include "mull/Config/Configuration.h"
+#include "mull/Config/RawConfig.h"
+#include "mull/Filter.h"
+#include "mull/Metrics/Metrics.h"
+#include "mull/ModuleLoader.h"
+#include "mull/MutationsFinder.h"
+#include "mull/Mutators/MathAddMutator.h"
+#include "mull/Program/Program.h"
+#include "mull/Result.h"
+#include "mull/TestFrameworks/SimpleTest/SimpleTestFinder.h"
+#include "mull/TestFrameworks/SimpleTest/SimpleTest_Test.h"
+#include "mull/Testee.h"
 
 #include "gtest/gtest.h"
 
@@ -35,8 +35,11 @@ TEST(SQLiteReporter, integrationTest) {
   /// mutated test execution.
   LLVMContext llvmContext;
   ModuleLoader loader;
-  auto mullModuleWithTests = loader.loadModuleAtPath(fixtures::simple_test_count_letters_test_count_letters_bc_path(), llvmContext);
-  auto mullModuleWithTestees = loader.loadModuleAtPath(fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
+  auto mullModuleWithTests = loader.loadModuleAtPath(
+      fixtures::simple_test_count_letters_test_count_letters_bc_path(),
+      llvmContext);
+  auto mullModuleWithTestees = loader.loadModuleAtPath(
+      fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
 
   std::vector<std::unique_ptr<MullModule>> modules;
   modules.push_back(std::move(mullModuleWithTests));
@@ -62,20 +65,17 @@ TEST(SQLiteReporter, integrationTest) {
   testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
   auto mergedTestees = mergeTestees(testees);
 
-  std::vector<MutationPoint *> mutationPoints = mutationsFinder.getMutationPoints(program, mergedTestees, filter);
+  std::vector<MutationPoint *> mutationPoints =
+      mutationsFinder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
   MutationPoint *mutationPoint = (*(mutationPoints.begin()));
 
-  std::vector<std::string> testIds({
-    test->getUniqueIdentifier(),
-    test->getUniqueIdentifier()
-  });
-  std::vector<std::string> mutationPointIds({
-    "",
-    mutationPoint->getUniqueIdentifier()
-  });
+  std::vector<std::string> testIds(
+      {test->getUniqueIdentifier(), test->getUniqueIdentifier()});
+  std::vector<std::string> mutationPointIds(
+      {"", mutationPoint->getUniqueIdentifier()});
 
   const long long RunningTime_1 = 1;
   const long long RunningTime_2 = 2;
@@ -94,10 +94,9 @@ TEST(SQLiteReporter, integrationTest) {
   mutatedTestExecutionResult.stdoutOutput = "mutatedTestExecutionResult.STDOUT";
   mutatedTestExecutionResult.stderrOutput = "mutatedTestExecutionResult.STDERR";
 
-  auto mutationResult = make_unique<MutationResult>(mutatedTestExecutionResult,
-                                                    mutationPoint,
-                                                    testees.front()->getDistance(),
-                                                    test.get());
+  auto mutationResult =
+      make_unique<MutationResult>(mutatedTestExecutionResult, mutationPoint,
+                                  testees.front()->getDistance(), test.get());
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
   mutationResults.push_back(std::move(mutationResult));
@@ -113,10 +112,8 @@ TEST(SQLiteReporter, integrationTest) {
   reporter.reportResults(result, RawConfig(), metrics);
 
   /// STEP3. Making assertions.
-  std::vector<ExecutionResult> executionResults {
-    testExecutionResult,
-    mutatedTestExecutionResult
-  };
+  std::vector<ExecutionResult> executionResults{testExecutionResult,
+                                                mutatedTestExecutionResult};
 
   std::string databasePath = reporter.getDatabasePath();
 
@@ -126,7 +123,8 @@ TEST(SQLiteReporter, integrationTest) {
   {
     std::string selectQuery = "SELECT * FROM execution_result";
     sqlite3_stmt *selectStmt;
-    sqlite3_prepare(database, selectQuery.c_str(), selectQuery.size(), &selectStmt, NULL);
+    sqlite3_prepare(database, selectQuery.c_str(), selectQuery.size(),
+                    &selectStmt, NULL);
 
     const unsigned char *column_test_id;
     const unsigned char *column_mutation_point_id;
@@ -137,7 +135,7 @@ TEST(SQLiteReporter, integrationTest) {
 
     int numberOfRows = 0;
     while (1) {
-      int stepResult = sqlite3_step (selectStmt);
+      int stepResult = sqlite3_step(selectStmt);
 
       if (stepResult == SQLITE_ROW) {
         column_test_id = sqlite3_column_text(selectStmt, 0);
@@ -146,28 +144,32 @@ TEST(SQLiteReporter, integrationTest) {
         column_status = sqlite3_column_int(selectStmt, 2);
         column_duration = sqlite3_column_int(selectStmt, 3);
 
-        column_stdout  = sqlite3_column_text(selectStmt, 4);
-        column_stderr  = sqlite3_column_text(selectStmt, 5);
+        column_stdout = sqlite3_column_text(selectStmt, 4);
+        column_stderr = sqlite3_column_text(selectStmt, 5);
 
-        ASSERT_EQ(strcmp((const char *)column_test_id,
-                         testIds[numberOfRows].c_str()), 0);
+        ASSERT_EQ(
+            strcmp((const char *)column_test_id, testIds[numberOfRows].c_str()),
+            0);
         ASSERT_EQ(strcmp((const char *)column_mutation_point_id,
-                         mutationPointIds[numberOfRows].c_str()), 0);
+                         mutationPointIds[numberOfRows].c_str()),
+                  0);
 
         ASSERT_EQ(column_status, executionResults[numberOfRows].status);
         ASSERT_EQ(column_duration, executionResults[numberOfRows].runningTime);
 
         ASSERT_EQ(strcmp((const char *)column_stdout,
-                         executionResults[numberOfRows].stdoutOutput.c_str()), 0);
+                         executionResults[numberOfRows].stdoutOutput.c_str()),
+                  0);
         ASSERT_EQ(strcmp((const char *)column_stderr,
-                         executionResults[numberOfRows].stderrOutput.c_str()), 0);
+                         executionResults[numberOfRows].stderrOutput.c_str()),
+                  0);
 
         numberOfRows++;
       } else if (stepResult == SQLITE_DONE) {
         break;
       } else {
-        fprintf (stderr, "Failed.\n");
-        exit (1);
+        fprintf(stderr, "Failed.\n");
+        exit(1);
       }
     }
 
@@ -179,7 +181,8 @@ TEST(SQLiteReporter, integrationTest) {
   {
     std::string selectQuery = "SELECT * FROM test";
     sqlite3_stmt *selectStmt;
-    sqlite3_prepare(database, selectQuery.c_str(), selectQuery.size(), &selectStmt, NULL);
+    sqlite3_prepare(database, selectQuery.c_str(), selectQuery.size(),
+                    &selectStmt, NULL);
 
     const unsigned char *test_name;
     const unsigned char *test_unique_id;
@@ -188,7 +191,7 @@ TEST(SQLiteReporter, integrationTest) {
 
     int numberOfRows = 0;
     while (1) {
-      int stepResult = sqlite3_step (selectStmt);
+      int stepResult = sqlite3_step(selectStmt);
 
       if (stepResult == SQLITE_ROW) {
         int column = 0;
@@ -197,10 +200,9 @@ TEST(SQLiteReporter, integrationTest) {
         test_location_file = sqlite3_column_text(selectStmt, column++);
         test_location_line = sqlite3_column_int(selectStmt, column++);
 
-        ASSERT_EQ(strcmp((const char *)test_name,
-                         "test_count_letters"), 0);
-        ASSERT_EQ(strcmp((const char *)test_unique_id,
-                         "test_count_letters"), 0);
+        ASSERT_EQ(strcmp((const char *)test_name, "test_count_letters"), 0);
+        ASSERT_EQ(strcmp((const char *)test_unique_id, "test_count_letters"),
+                  0);
 
         const char *location = "simple_test/count_letters/test_count_letters.c";
         ASSERT_NE(strstr((const char *)test_location_file, location), nullptr);
@@ -211,8 +213,8 @@ TEST(SQLiteReporter, integrationTest) {
       } else if (stepResult == SQLITE_DONE) {
         break;
       } else {
-        fprintf (stderr, "Failed.\n");
-        exit (1);
+        fprintf(stderr, "Failed.\n");
+        exit(1);
       }
     }
 
@@ -229,7 +231,8 @@ TEST(SQLiteReporter, integrationTest_Config) {
   std::string testFramework = "SimpleTest";
 
   const std::string bitcodeFileList = "/tmp/bitcode_file_list.txt";
-  const std::string dynamicLibraryFileList = "/tmp/dynamic_library_file_list.txt";
+  const std::string dynamicLibraryFileList =
+      "/tmp/dynamic_library_file_list.txt";
   const std::string objectFileList = "/tmp/object_file.list";
 
   std::ofstream bitcodeFile(bitcodeFileList);
@@ -263,38 +266,20 @@ TEST(SQLiteReporter, integrationTest_Config) {
   objectFile << "foo.o" << std::endl;
   objectFile << "bar.o" << std::endl;
 
-  std::vector<std::string> operators({
-    "add_mutation",
-    "negate_condition"
-  });
+  std::vector<std::string> operators({"add_mutation", "negate_condition"});
 
-  std::vector<std::string> selectedTests({
-    "test_method1",
-    "test_method2"
-  });
+  std::vector<std::string> selectedTests({"test_method1", "test_method2"});
 
   int timeout = 42;
   int distance = 10;
   std::string cacheDirectory = "/a/cache";
-  RawConfig config(bitcodeFileList,
-                projectName,
-                testFramework,
-                operators,
-                {},
-                dynamicLibraryFileList,
-                objectFileList,
-                selectedTests,
-                {}, {},
-                RawConfig::Fork::Enabled,
-                RawConfig::DryRunMode::Enabled,
-                RawConfig::FailFastMode::Enabled,
-                RawConfig::UseCache::Yes,
-                RawConfig::EmitDebugInfo::No,
-                Diagnostics::None,
-                timeout, distance,
-                cacheDirectory,
-                JunkDetectionConfig::disabled(),
-                ParallelizationConfig::defaultConfig());
+  RawConfig config(bitcodeFileList, projectName, testFramework, operators, {},
+                   dynamicLibraryFileList, objectFileList, selectedTests, {},
+                   {}, RawConfig::Fork::Enabled, RawConfig::DryRunMode::Enabled,
+                   RawConfig::FailFastMode::Enabled, RawConfig::UseCache::Yes,
+                   RawConfig::EmitDebugInfo::No, Diagnostics::None, timeout,
+                   distance, cacheDirectory, JunkDetectionConfig::disabled(),
+                   ParallelizationConfig::defaultConfig());
 
   SQLiteReporter reporter(config.getProjectName());
 
@@ -318,7 +303,8 @@ TEST(SQLiteReporter, integrationTest_Config) {
 
   std::string selectQuery = "SELECT * FROM config";
   sqlite3_stmt *selectStmt;
-  sqlite3_prepare(database, selectQuery.c_str(), selectQuery.size(), &selectStmt, NULL);
+  sqlite3_prepare(database, selectQuery.c_str(), selectQuery.size(),
+                  &selectStmt, NULL);
 
   const unsigned char *column1_projectName = nullptr;
   const unsigned char *column2_bitcodePaths = nullptr;
@@ -340,7 +326,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
 
   int numberOfRows = 0;
   while (1) {
-    int stepResult = sqlite3_step (selectStmt);
+    int stepResult = sqlite3_step(selectStmt);
 
     if (stepResult == SQLITE_ROW) {
       int row = 0;
@@ -361,12 +347,18 @@ TEST(SQLiteReporter, integrationTest_Config) {
       column14_timeEnd = sqlite3_column_int(selectStmt, row++);
       column15_emitDebugInfo = sqlite3_column_int(selectStmt, row++);
 
-      ASSERT_EQ(strcmp((const char *)column1_projectName, projectName.c_str()), 0);
-      ASSERT_EQ(strcmp((const char *)column2_bitcodePaths, "tester.bc,testee.bc"), 0);
-      ASSERT_EQ(strcmp((const char *)column3_mutators, "add_mutation,negate_condition"), 0);
-      ASSERT_EQ(strcmp((const char *)column4_dylibs, "sqlite3.dylib,libz.dylib"), 0);
+      ASSERT_EQ(strcmp((const char *)column1_projectName, projectName.c_str()),
+                0);
+      ASSERT_EQ(
+          strcmp((const char *)column2_bitcodePaths, "tester.bc,testee.bc"), 0);
+      ASSERT_EQ(strcmp((const char *)column3_mutators,
+                       "add_mutation,negate_condition"),
+                0);
+      ASSERT_EQ(
+          strcmp((const char *)column4_dylibs, "sqlite3.dylib,libz.dylib"), 0);
       ASSERT_EQ(strcmp((const char *)column5_objectFiles, "foo.o,bar.o"), 0);
-      ASSERT_EQ(strcmp((const char *)column6_tests, "test_method1,test_method2"), 0);
+      ASSERT_EQ(
+          strcmp((const char *)column6_tests, "test_method1,test_method2"), 0);
       ASSERT_EQ(column7_fork, true);
       ASSERT_EQ(column8_dryRun, true);
       ASSERT_EQ(column_failFast, true);
@@ -379,13 +371,11 @@ TEST(SQLiteReporter, integrationTest_Config) {
       ASSERT_EQ(column15_emitDebugInfo, 0);
 
       numberOfRows++;
-    }
-    else if (stepResult == SQLITE_DONE) {
+    } else if (stepResult == SQLITE_DONE) {
       break;
-    }
-    else {
-      fprintf (stderr, "Failed.\n");
-      exit (1);
+    } else {
+      fprintf(stderr, "Failed.\n");
+      exit(1);
     }
   }
 
@@ -400,48 +390,35 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   std::string testFramework = "SimpleTest";
 
   const std::string bitcodeFileList = "/tmp/bitcode_file_list.txt";
-  const std::string dynamicLibraryFileList = "/tmp/dynamic_library_file_list.txt";
+  const std::string dynamicLibraryFileList =
+      "/tmp/dynamic_library_file_list.txt";
   const std::string objectFileList = "/tmp/object_file.list";
 
-  std::vector<std::string> operators({
-                                         "add_mutation",
-                                         "negate_condition"
-                                     });
+  std::vector<std::string> operators({"add_mutation", "negate_condition"});
 
-  std::vector<std::string> configTests({
-                                           "test_method1",
-                                           "test_method2"
-                                       });
+  std::vector<std::string> configTests({"test_method1", "test_method2"});
 
   int timeout = 42;
   int distance = 10;
   std::string cacheDirectory = "/a/cache";
-  RawConfig rawConfig(bitcodeFileList,
-                projectName,
-                testFramework,
-                operators,
-                {},
-                dynamicLibraryFileList,
-                objectFileList,
-                configTests,
-                {}, {},
-                RawConfig::Fork::Enabled,
-                RawConfig::DryRunMode::Enabled,
-                RawConfig::FailFastMode::Disabled,
-                RawConfig::UseCache::Yes,
-                RawConfig::EmitDebugInfo::Yes,
-                Diagnostics::None,
-                timeout, distance,
-                cacheDirectory,
-                JunkDetectionConfig::disabled(),
-                ParallelizationConfig::defaultConfig());
+  RawConfig rawConfig(
+      bitcodeFileList, projectName, testFramework, operators, {},
+      dynamicLibraryFileList, objectFileList, configTests, {}, {},
+      RawConfig::Fork::Enabled, RawConfig::DryRunMode::Enabled,
+      RawConfig::FailFastMode::Disabled, RawConfig::UseCache::Yes,
+      RawConfig::EmitDebugInfo::Yes, Diagnostics::None, timeout, distance,
+      cacheDirectory, JunkDetectionConfig::disabled(),
+      ParallelizationConfig::defaultConfig());
 
   Configuration configuration(rawConfig);
 
   LLVMContext llvmContext;
   ModuleLoader loader;
-  auto mullModuleWithTests = loader.loadModuleAtPath(fixtures::simple_test_count_letters_test_count_letters_bc_path(), llvmContext);
-  auto mullModuleWithTestees = loader.loadModuleAtPath(fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
+  auto mullModuleWithTests = loader.loadModuleAtPath(
+      fixtures::simple_test_count_letters_test_count_letters_bc_path(),
+      llvmContext);
+  auto mullModuleWithTestees = loader.loadModuleAtPath(
+      fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
 
   std::vector<std::unique_ptr<MullModule>> modules;
   modules.push_back(std::move(mullModuleWithTests));
@@ -466,7 +443,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   auto mergedTestees = mergeTestees(testees);
 
   std::vector<MutationPoint *> mutationPoints =
-    mutationsFinder.getMutationPoints(program, mergedTestees, filter);
+      mutationsFinder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -489,10 +466,9 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
 
-  auto mutationResult = make_unique<MutationResult>(mutatedTestExecutionResult,
-                                                    mutationPoint,
-                                                    testees.front()->getDistance(),
-                                                    test.get());
+  auto mutationResult =
+      make_unique<MutationResult>(mutatedTestExecutionResult, mutationPoint,
+                                  testees.front()->getDistance(), test.get());
   mutationResults.push_back(std::move(mutationResult));
 
   MetricsMeasure resultTime;
@@ -506,10 +482,8 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   metrics.setDriverRunTime(resultTime);
   reporter.reportResults(result, rawConfig, metrics);
 
-  std::vector<ExecutionResult> executionResults {
-    testExecutionResult,
-    mutatedTestExecutionResult
-  };
+  std::vector<ExecutionResult> executionResults{testExecutionResult,
+                                                mutatedTestExecutionResult};
 
   std::string databasePath = reporter.getDatabasePath();
 
@@ -518,13 +492,14 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
 
   std::string selectQuery = "SELECT count(*) FROM mutation_point_debug";
   sqlite3_stmt *selectStmt;
-  sqlite3_prepare(database, selectQuery.c_str(), selectQuery.size(), &selectStmt, NULL);
+  sqlite3_prepare(database, selectQuery.c_str(), selectQuery.size(),
+                  &selectStmt, NULL);
 
   int count;
 
   int numberOfRows = 0;
   while (1) {
-    int stepResult = sqlite3_step (selectStmt);
+    int stepResult = sqlite3_step(selectStmt);
 
     if (stepResult == SQLITE_ROW) {
       count = sqlite3_column_int(selectStmt, 0);
@@ -532,18 +507,16 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
       ASSERT_EQ(count, 1);
 
       numberOfRows++;
-    }
-    else if (stepResult == SQLITE_DONE) {
+    } else if (stepResult == SQLITE_DONE) {
       break;
-    }
-    else {
-      fprintf (stderr, "Failed.\n");
-      exit (1);
+    } else {
+      fprintf(stderr, "Failed.\n");
+      exit(1);
     }
   }
 
   ASSERT_EQ(numberOfRows, 1);
-  
+
   sqlite3_finalize(selectStmt);
   sqlite3_close(database);
 }
@@ -553,48 +526,35 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   std::string testFramework = "SimpleTest";
 
   const std::string bitcodeFileList = "/tmp/bitcode_file_list.txt";
-  const std::string dynamicLibraryFileList = "/tmp/dynamic_library_file_list.txt";
+  const std::string dynamicLibraryFileList =
+      "/tmp/dynamic_library_file_list.txt";
   const std::string objectFileList = "/tmp/object_file.list";
 
-  std::vector<std::string> operators({
-                                         "add_mutation",
-                                         "negate_condition"
-                                     });
+  std::vector<std::string> operators({"add_mutation", "negate_condition"});
 
-  std::vector<std::string> configTests({
-                                           "test_method1",
-                                           "test_method2"
-                                       });
+  std::vector<std::string> configTests({"test_method1", "test_method2"});
 
   int timeout = 42;
   int distance = 10;
   std::string cacheDirectory = "/a/cache";
-  RawConfig rawConfig(bitcodeFileList,
-                projectName,
-                testFramework,
-                operators,
-                {},
-                dynamicLibraryFileList,
-                objectFileList,
-                configTests,
-                {}, {},
-                RawConfig::Fork::Enabled,
-                RawConfig::DryRunMode::Enabled,
-                RawConfig::FailFastMode::Disabled,
-                RawConfig::UseCache::Yes,
-                RawConfig::EmitDebugInfo::No,
-                Diagnostics::None,
-                timeout, distance,
-                cacheDirectory,
-                JunkDetectionConfig::disabled(),
-                ParallelizationConfig::defaultConfig());
+  RawConfig rawConfig(
+      bitcodeFileList, projectName, testFramework, operators, {},
+      dynamicLibraryFileList, objectFileList, configTests, {}, {},
+      RawConfig::Fork::Enabled, RawConfig::DryRunMode::Enabled,
+      RawConfig::FailFastMode::Disabled, RawConfig::UseCache::Yes,
+      RawConfig::EmitDebugInfo::No, Diagnostics::None, timeout, distance,
+      cacheDirectory, JunkDetectionConfig::disabled(),
+      ParallelizationConfig::defaultConfig());
 
   Configuration configuration(rawConfig);
 
   LLVMContext llvmContext;
   ModuleLoader loader;
-  auto mullModuleWithTests = loader.loadModuleAtPath(fixtures::simple_test_count_letters_test_count_letters_bc_path(), llvmContext);
-  auto mullModuleWithTestees = loader.loadModuleAtPath(fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
+  auto mullModuleWithTests = loader.loadModuleAtPath(
+      fixtures::simple_test_count_letters_test_count_letters_bc_path(),
+      llvmContext);
+  auto mullModuleWithTestees = loader.loadModuleAtPath(
+      fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
 
   std::vector<std::unique_ptr<MullModule>> modules;
   modules.push_back(std::move(mullModuleWithTests));
@@ -619,7 +579,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   auto mergedTestees = mergeTestees(testees);
 
   std::vector<MutationPoint *> mutationPoints =
-    mutationsFinder.getMutationPoints(program, mergedTestees, filter);
+      mutationsFinder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -642,10 +602,9 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
 
-  auto mutationResult = make_unique<MutationResult>(mutatedTestExecutionResult,
-                                                    mutationPoint,
-                                                    testees.front()->getDistance(),
-                                                    test.get());
+  auto mutationResult =
+      make_unique<MutationResult>(mutatedTestExecutionResult, mutationPoint,
+                                  testees.front()->getDistance(), test.get());
   mutationResults.push_back(std::move(mutationResult));
 
   MetricsMeasure resultTime;
@@ -659,10 +618,8 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   metrics.setDriverRunTime(resultTime);
   reporter.reportResults(result, rawConfig, metrics);
 
-  std::vector<ExecutionResult> executionResults {
-    testExecutionResult,
-    mutatedTestExecutionResult
-  };
+  std::vector<ExecutionResult> executionResults{testExecutionResult,
+                                                mutatedTestExecutionResult};
 
   std::string databasePath = reporter.getDatabasePath();
 
@@ -671,13 +628,14 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
 
   std::string selectQuery = "SELECT count(*) FROM mutation_point_debug";
   sqlite3_stmt *selectStmt;
-  sqlite3_prepare(database, selectQuery.c_str(), selectQuery.size(), &selectStmt, NULL);
+  sqlite3_prepare(database, selectQuery.c_str(), selectQuery.size(),
+                  &selectStmt, NULL);
 
   int count;
 
   int numberOfRows = 0;
   while (1) {
-    int stepResult = sqlite3_step (selectStmt);
+    int stepResult = sqlite3_step(selectStmt);
 
     if (stepResult == SQLITE_ROW) {
       count = sqlite3_column_int(selectStmt, 0);
@@ -685,13 +643,11 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
       ASSERT_EQ(count, 0);
 
       numberOfRows++;
-    }
-    else if (stepResult == SQLITE_DONE) {
+    } else if (stepResult == SQLITE_DONE) {
       break;
-    }
-    else {
-      fprintf (stderr, "Failed.\n");
-      exit (1);
+    } else {
+      fprintf(stderr, "Failed.\n");
+      exit(1);
     }
   }
 
@@ -700,4 +656,3 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   sqlite3_finalize(selectStmt);
   sqlite3_close(database);
 }
-

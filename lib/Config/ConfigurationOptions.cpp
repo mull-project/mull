@@ -1,4 +1,10 @@
-#include "Config/ConfigurationOptions.h"
+#include <utility>
+
+#include <utility>
+
+#include <utility>
+
+#include "mull/Config/ConfigurationOptions.h"
 
 #include <sys/types.h>
 #include <thread>
@@ -47,10 +53,10 @@ ParallelizationConfig ParallelizationConfig::defaultConfig() {
 
 CustomTestDefinition::CustomTestDefinition() = default;
 
-CustomTestDefinition::CustomTestDefinition(
-    const std::string &name, const std::string &method,
-    const std::string &program, const std::vector<std::string> arguments)
-    : testName(name), methodName(method), programName(program),
-      callArguments(arguments) {}
+CustomTestDefinition::CustomTestDefinition(std::string name, std::string method,
+                                           std::string program,
+                                           std::vector<std::string> arguments)
+    : testName(std::move(name)), methodName(std::move(method)),
+      programName(std::move(program)), callArguments(std::move(arguments)) {}
 
 } // namespace mull

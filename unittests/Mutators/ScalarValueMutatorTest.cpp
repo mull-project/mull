@@ -1,21 +1,21 @@
-#include "Config/Configuration.h"
-#include "Program/Program.h"
-#include "Mutators/ScalarValueMutator.h"
-#include "MutationPoint.h"
+#include "mull/Mutators/ScalarValueMutator.h"
+#include "FixturePaths.h"
 #include "TestModuleFactory.h"
-#include "Toolchain/Compiler.h"
-#include "Toolchain/Toolchain.h"
-#include "Filter.h"
-#include "Testee.h"
-#include "MutationsFinder.h"
-#include "ModuleLoader.h"
+#include "mull/Config/Configuration.h"
+#include "mull/Filter.h"
+#include "mull/ModuleLoader.h"
+#include "mull/MutationPoint.h"
+#include "mull/MutationsFinder.h"
+#include "mull/Program/Program.h"
+#include "mull/Testee.h"
+#include "mull/Toolchain/Compiler.h"
+#include "mull/Toolchain/Toolchain.h"
 
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 
 #include "gtest/gtest.h"
-#include "FixturePaths.h"
 
 using namespace mull;
 using namespace llvm;
@@ -23,7 +23,8 @@ using namespace llvm;
 TEST(ScalarValueMutator, getMutationPoint) {
   LLVMContext llvmContext;
   ModuleLoader loader;
-  auto mullModule = loader.loadModuleAtPath(fixtures::mutators_scalar_value_module_bc_path(), llvmContext);
+  auto mullModule = loader.loadModuleAtPath(
+      fixtures::mutators_scalar_value_module_bc_path(), llvmContext);
 
   std::vector<std::unique_ptr<MullModule>> modules;
   modules.push_back(std::move(mullModule));
@@ -40,9 +41,8 @@ TEST(ScalarValueMutator, getMutationPoint) {
   MutationsFinder finder(std::move(mutators), configuration);
   Filter filter;
 
-  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(program,
-                                                                         mergedTestees,
-                                                                         filter);
+  std::vector<MutationPoint *> mutationPoints =
+      finder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_EQ(mutationPoints.size(), 4U);
 
@@ -71,15 +71,16 @@ TEST(ScalarValueMutator, getMutationPoint) {
 TEST(DISABLED_ScalarValueMutator, failingMutationPoint) {
   LLVMContext llvmContext;
   ModuleLoader loader;
-  auto mullModule = loader.loadModuleAtPath(fixtures::hardcode_openssl_bio_enc_test_oll_path(), llvmContext);
+  auto mullModule = loader.loadModuleAtPath(
+      fixtures::hardcode_openssl_bio_enc_test_oll_path(), llvmContext);
 
   MutationPointAddress address(15, 10, 7);
   ScalarValueMutator mutator;
-  MutationPoint
-      point(&mutator, address, nullptr, nullptr, "diagnostics", SourceLocation::nullSourceLocation(), mullModule.get());
+  MutationPoint point(&mutator, address, nullptr, nullptr, "diagnostics",
+                      SourceLocation::nullSourceLocation(), mullModule.get());
 
   Configuration configuration;
   Toolchain toolchain(configuration);
-//  auto mutant = point.cloneModuleAndApplyMutation();
-//  toolchain.compiler().compileModule(mutant.get());
+  //  auto mutant = point.cloneModuleAndApplyMutation();
+  //  toolchain.compiler().compileModule(mutant.get());
 }

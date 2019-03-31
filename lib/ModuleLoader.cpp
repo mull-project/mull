@@ -1,9 +1,9 @@
-#include "ModuleLoader.h"
+#include "mull/ModuleLoader.h"
 
-#include "Config/Configuration.h"
 #include "LLVMCompatibility.h"
-#include "Logger.h"
-#include "Parallelization/Parallelization.h"
+#include "mull/Config/Configuration.h"
+#include "mull/Logger.h"
+#include "mull/Parallelization/Parallelization.h"
 
 #include <llvm/AsmParser/Parser.h>
 #include <llvm/IR/LLVMContext.h>

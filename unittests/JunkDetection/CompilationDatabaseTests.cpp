@@ -1,5 +1,5 @@
 #include "FixturePaths.h"
-#include "JunkDetection/CXX/CompilationDatabase.h"
+#include "mull/JunkDetection/CXX/CompilationDatabase.h"
 
 #include <clang/Basic/Version.h>
 

@@ -1,13 +1,15 @@
-#include "Program/Program.h"
+#include <utility>
+
+#include "mull/Program/Program.h"
 
 #include <llvm/IR/Constants.h>
 
 using namespace mull;
 
-Program::Program(const std::vector<std::string> &dynamicLibraryPaths,
+Program::Program(std::vector<std::string> dynamicLibraryPaths,
                  ObjectFiles precompiledObjectFiles,
                  std::vector<std::unique_ptr<MullModule>> modules)
-    : _dynamicLibraries(dynamicLibraryPaths),
+    : _dynamicLibraries(std::move(dynamicLibraryPaths)),
       _precompiledObjectFiles(std::move(precompiledObjectFiles)) {
   for (auto &module : modules) {
     addModule(std::move(module));

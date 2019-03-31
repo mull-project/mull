@@ -1,4 +1,4 @@
-#include "JunkDetection/CXX/Visitors/ConditionalsBoundaryVisitor.h"
+#include "mull/JunkDetection/CXX/Visitors/ConditionalsBoundaryVisitor.h"
 
 using namespace mull;
 

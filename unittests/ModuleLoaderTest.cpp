@@ -1,8 +1,8 @@
 #include "gtest/gtest.h"
 
-#include "Config/Configuration.h"
 #include "FixturePaths.h"
-#include "ModuleLoader.h"
+#include "mull/Config/Configuration.h"
+#include "mull/ModuleLoader.h"
 
 using namespace mull;
 using namespace llvm;
@@ -10,8 +10,7 @@ using namespace llvm;
 TEST(ModuleLoaderTest, loadModuleFromBitcodeListFile) {
   Configuration configuration;
   configuration.bitcodePaths = {
-      fixtures::hardcode_fixture_simple_test_tester_module_bc_path()
-  };
+      fixtures::hardcode_fixture_simple_test_tester_module_bc_path()};
 
   ModuleLoader loader;
   std::vector<std::unique_ptr<MullModule>> modules =

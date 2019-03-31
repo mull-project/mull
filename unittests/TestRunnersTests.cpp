@@ -1,22 +1,22 @@
-#include "Program/Program.h"
-#include "Mutators/MathAddMutator.h"
-#include "TestFrameworks/SimpleTest/SimpleTestFinder.h"
-#include "TestFrameworks/SimpleTest/SimpleTestRunner.h"
-#include "TestModuleFactory.h"
-#include "Toolchain/Compiler.h"
-#include "MutationsFinder.h"
-#include "Filter.h"
-#include "Testee.h"
-#include "Toolchain/Toolchain.h"
-#include "Toolchain/JITEngine.h"
-#include "Toolchain/Trampolines.h"
-#include "Config/Configuration.h"
 #include "FixturePaths.h"
-#include "ModuleLoader.h"
+#include "TestModuleFactory.h"
+#include "mull/Config/Configuration.h"
+#include "mull/Filter.h"
+#include "mull/ModuleLoader.h"
+#include "mull/MutationsFinder.h"
+#include "mull/Mutators/MathAddMutator.h"
+#include "mull/Program/Program.h"
+#include "mull/TestFrameworks/SimpleTest/SimpleTestFinder.h"
+#include "mull/TestFrameworks/SimpleTest/SimpleTestRunner.h"
+#include "mull/Testee.h"
+#include "mull/Toolchain/Compiler.h"
+#include "mull/Toolchain/JITEngine.h"
+#include "mull/Toolchain/Toolchain.h"
+#include "mull/Toolchain/Trampolines.h"
 
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
-#include <llvm/IR/InstrTypes.h>
 #include <llvm/IR/InstIterator.h>
+#include <llvm/IR/InstrTypes.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <llvm/Support/DynamicLibrary.h>
@@ -36,10 +36,13 @@ TEST(SimpleTestRunner, runTest) {
 
   LLVMContext llvmContext;
   ModuleLoader loader;
-  auto ownedModuleWithTests = loader.loadModuleAtPath(fixtures::simple_test_count_letters_test_count_letters_bc_path(), llvmContext);
-  auto ownedModuleWithTestees = loader.loadModuleAtPath(fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
+  auto ownedModuleWithTests = loader.loadModuleAtPath(
+      fixtures::simple_test_count_letters_test_count_letters_bc_path(),
+      llvmContext);
+  auto ownedModuleWithTestees = loader.loadModuleAtPath(
+      fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
 
-  Module *moduleWithTests   = ownedModuleWithTests->getModule();
+  Module *moduleWithTests = ownedModuleWithTests->getModule();
   Module *moduleWithTestees = ownedModuleWithTestees->getModule();
 
   std::vector<std::unique_ptr<MullModule>> modules;
@@ -76,17 +79,20 @@ TEST(SimpleTestRunner, runTest) {
 
   JITEngine jit;
 
-  auto mutatedFunctions = mutationPoint->getOriginalModule()->prepareMutations();
+  auto mutatedFunctions =
+      mutationPoint->getOriginalModule()->prepareMutations();
   mutationPoint->applyMutation();
 
   {
-    auto owningBinary = toolchain.compiler().compileModule(moduleWithTests, toolchain.targetMachine());
+    auto owningBinary = toolchain.compiler().compileModule(
+        moduleWithTests, toolchain.targetMachine());
     objectFiles.push_back(owningBinary.getBinary());
     ownedObjectFiles.push_back(std::move(owningBinary));
   }
 
   {
-    auto owningBinary = toolchain.compiler().compileModule(moduleWithTestees, toolchain.targetMachine());
+    auto owningBinary = toolchain.compiler().compileModule(
+        moduleWithTestees, toolchain.targetMachine());
     objectFiles.push_back(owningBinary.getBinary());
     ownedObjectFiles.push_back(std::move(owningBinary));
   }
@@ -101,13 +107,15 @@ TEST(SimpleTestRunner, runTest) {
 
   auto name = mutationPoint->getOriginalFunction()->getName().str();
   auto moduleId = mutationPoint->getOriginalModule()->getUniqueIdentifier();
-  auto trampolineName = mangler.getNameWithPrefix(mutationPoint->getTrampolineName());
-  auto mutatedFunctionName = mangler.getNameWithPrefix(mutationPoint->getMutatedFunctionName());
+  auto trampolineName =
+      mangler.getNameWithPrefix(mutationPoint->getTrampolineName());
+  auto mutatedFunctionName =
+      mangler.getNameWithPrefix(mutationPoint->getMutatedFunctionName());
   uint64_t *trampoline = trampolines.findTrampoline(trampolineName);
-  uint64_t address = llvm_compat::JITSymbolAddress(jit.getSymbol(mutatedFunctionName));
+  uint64_t address =
+      llvm_compat::JITSymbolAddress(jit.getSymbol(mutatedFunctionName));
   assert(address);
   *trampoline = address;
 
   ASSERT_EQ(ExecutionStatus::Failed, testRunner.runTest(test.get(), jit));
 }
-

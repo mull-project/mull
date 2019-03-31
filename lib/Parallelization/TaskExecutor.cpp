@@ -1,4 +1,4 @@
-#include "Parallelization/TaskExecutor.h"
+#include "mull/Parallelization/TaskExecutor.h"
 
 namespace mull {
 std::vector<int> taskBatches(size_t itemsCount, size_t tasks) {
@@ -36,4 +36,4 @@ void printTimeSummary(MetricsMeasure measure) {
                  << MetricsMeasure::precision() << ".\n";
 }
 
-}
+} // namespace mull

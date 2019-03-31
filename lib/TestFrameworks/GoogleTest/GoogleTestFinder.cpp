@@ -1,8 +1,9 @@
-#include "TestFrameworks/GoogleTest/GoogleTestFinder.h"
+#include "mull/TestFrameworks/GoogleTest/GoogleTestFinder.h"
 
-#include "Program/Program.h"
-#include "Filter.h"
-#include "Logger.h"
+#include "mull/Filter.h"
+#include "mull/Logger.h"
+#include "mull/Program/Program.h"
+#include "mull/TestFrameworks/GoogleTest/GoogleTest_Test.h"
 
 #include <llvm/IR/CallSite.h>
 #include <llvm/IR/Constants.h>
@@ -13,8 +14,6 @@
 #include <llvm/IR/Module.h>
 #include <llvm/Support/Debug.h>
 #include <llvm/Support/raw_ostream.h>
-
-#include "TestFrameworks/GoogleTest/GoogleTest_Test.h"
 
 #include <vector>
 
@@ -83,8 +82,8 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Program &program,
         continue;
       }
 
-      /// If two modules contain the same type, then when second modules is loaded
-      /// the typename is changed a bit, e.g.:
+      /// If two modules contain the same type, then when second modules is
+      /// loaded the typename is changed a bit, e.g.:
       ///
       ///   class.testing::TestInfo     // type from first module
       ///   class.testing::TestInfo.25  // type from second module
@@ -102,13 +101,21 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Program &program,
       /// a part of initialization function
       /// It looks like this:
       ///
-      ///   store %"class.testing::TestInfo"* %call2, %"class.testing::TestInfo"** @_ZN16Hello_world_Test10test_info_E
+      ///   store %"class.testing::TestInfo"* %call2,
+      ///   %"class.testing::TestInfo"** @_ZN16Hello_world_Test10test_info_E
       ///
-      /// From here we need to extract actual user, which is a `store` instruction
-      /// The `store` instruction uses variable `%call2`, which is created
-      /// from the following code:
+      /// From here we need to extract actual user, which is a `store`
+      /// instruction The `store` instruction uses variable `%call2`, which is
+      /// created from the following code:
       ///
-      ///   %call2 = call %"class.testing::TestInfo"* @_ZN7testing8internal23MakeAndRegisterTestInfoEPKcS2_S2_S2_PKvPFvvES6_PNS0_15TestFactoryBaseE(i8* getelementptr inbounds ([6 x i8], [6 x i8]* @.str, i32 0, i32 0), i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str.1, i32 0, i32 0), i8* null, i8* null, i8* %call, void ()* @_ZN7testing4Test13SetUpTestCaseEv, void ()* @_ZN7testing4Test16TearDownTestCaseEv, %"class.testing::internal::TestFactoryBase"* %1)
+      ///   %call2 = call %"class.testing::TestInfo"*
+      ///   @_ZN7testing8internal23MakeAndRegisterTestInfoEPKcS2_S2_S2_PKvPFvvES6_PNS0_15TestFactoryBaseE(i8*
+      ///   getelementptr inbounds ([6 x i8], [6 x i8]* @.str, i32 0, i32 0),
+      ///   i8* getelementptr inbounds ([4 x i8], [4 x i8]* @.str.1, i32 0, i32
+      ///   0), i8* null, i8* null, i8* %call, void ()*
+      ///   @_ZN7testing4Test13SetUpTestCaseEv, void ()*
+      ///   @_ZN7testing4Test16TearDownTestCaseEv,
+      ///   %"class.testing::internal::TestFactoryBase"* %1)
       ///
       /// Which can be roughly simplified to the following pseudo-code:
       ///
@@ -128,8 +135,7 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Program &program,
 
       StoreInst *storeInstruction = nullptr;
       for (auto userIterator = globalValue.user_begin();
-           userIterator != globalValue.user_end();
-           userIterator++) {
+           userIterator != globalValue.user_end(); userIterator++) {
         auto user = *userIterator;
         if (isa<StoreInst>(user)) {
           storeInstruction = dyn_cast<StoreInst>(user);
@@ -150,37 +156,46 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Program &program,
       /// To extract them we need climb to the top, i.e.:
       ///
       ///   i8* getelementptr inbounds ([6 x i8], [6 x i8]* @.str, i32 0, i32 0)
-      ///   i8* getelementptr inbounds ([6 x i8], [6 x i8]* @.str1, i32 0, i32 0)
+      ///   i8* getelementptr inbounds ([6 x i8], [6 x i8]* @.str1, i32 0, i32
+      ///   0)
 
-      auto testSuiteNameConstRef = dyn_cast<ConstantExpr>(callSite->getOperand(0));
+      auto testSuiteNameConstRef =
+          dyn_cast<ConstantExpr>(callSite->getOperand(0));
       assert(testSuiteNameConstRef);
 
-      auto testCaseNameConstRef = dyn_cast<ConstantExpr>(callSite->getOperand(1));
+      auto testCaseNameConstRef =
+          dyn_cast<ConstantExpr>(callSite->getOperand(1));
       assert(testCaseNameConstRef);
 
       ///   @.str = private unnamed_addr constant [6 x i8] c"Hello\00", align 1
       ///   @.str = private unnamed_addr constant [6 x i8] c"world\00", align 1
 
-      auto testSuiteNameConst = dyn_cast<GlobalValue>(testSuiteNameConstRef->getOperand(0));
+      auto testSuiteNameConst =
+          dyn_cast<GlobalValue>(testSuiteNameConstRef->getOperand(0));
       assert(testSuiteNameConst);
 
-      auto testCaseNameConst = dyn_cast<GlobalValue>(testCaseNameConstRef->getOperand(0));
+      auto testCaseNameConst =
+          dyn_cast<GlobalValue>(testCaseNameConstRef->getOperand(0));
       assert(testCaseNameConst);
 
       ///   [6 x i8] c"Hello\00"
       ///   [6 x i8] c"world\00"
 
-      auto testSuiteNameConstArray = dyn_cast<ConstantDataArray>(testSuiteNameConst->getOperand(0));
+      auto testSuiteNameConstArray =
+          dyn_cast<ConstantDataArray>(testSuiteNameConst->getOperand(0));
       assert(testSuiteNameConstArray);
 
-      auto testCaseNameConstArray = dyn_cast<ConstantDataArray>(testCaseNameConst->getOperand(0));
+      auto testCaseNameConstArray =
+          dyn_cast<ConstantDataArray>(testCaseNameConst->getOperand(0));
       assert(testCaseNameConstArray);
 
       ///   "Hello"
       ///   "world"
 
-      std::string testSuiteName = testSuiteNameConstArray->getRawDataValues().rtrim('\0').str();
-      std::string testCaseName = testCaseNameConstArray->getRawDataValues().rtrim('\0').str();
+      std::string testSuiteName =
+          testSuiteNameConstArray->getRawDataValues().rtrim('\0').str();
+      std::string testCaseName =
+          testCaseNameConstArray->getRawDataValues().rtrim('\0').str();
 
       /// Once we've got the Name of a Test Suite and the name of a Test Case
       /// We can construct the name of a Test
@@ -190,7 +205,8 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Program &program,
       }
 
       /// And the part of Test Body function name
-      std::string testBodyFunctionName = testSuiteName + "_" + testCaseName + "_Test8TestBodyEv";
+      std::string testBodyFunctionName =
+          testSuiteName + "_" + testCaseName + "_Test8TestBodyEv";
       StringRef testBodyFunctionNameRef(testBodyFunctionName);
 
       /// Using the TestBodyFunctionName we could find the function
@@ -205,13 +221,12 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Program &program,
         }
       }
 
-      assert(testBodyFunction && "Cannot find the TestBody function for the Test");
+      assert(testBodyFunction &&
+             "Cannot find the TestBody function for the Test");
 
-      tests.emplace_back(make_unique<GoogleTest_Test>(testName,
-                                                      testBodyFunction,
-                                                      program.getStaticConstructors()));
+      tests.emplace_back(make_unique<GoogleTest_Test>(
+          testName, testBodyFunction, program.getStaticConstructors()));
     }
-
   }
 
   return tests;

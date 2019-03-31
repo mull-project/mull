@@ -1,6 +1,6 @@
 #include "gtest/gtest.h"
 
-#include "Parallelization/Parallelization.h"
+#include "mull/Parallelization/Parallelization.h"
 
 #include <vector>
 
@@ -12,7 +12,8 @@ public:
   using Out = std::vector<int>;
   using iterator = In::const_iterator;
 
-  void operator() (iterator begin, iterator end, Out &storage, progress_counter &counter) {
+  void operator()(iterator begin, iterator end, Out &storage,
+                  progress_counter &counter) {
     for (auto it = begin; it != end; ++it, counter.increment()) {
       storage.push_back((*it) + 1);
     }
@@ -25,8 +26,10 @@ public:
   using Out = std::vector<int>;
   using iterator = In::const_iterator;
 
-  void operator() (iterator begin, iterator end, Out &storage, progress_counter &counter) {
-    for (auto it = begin; it != end; ++it, counter.increment()) {}
+  void operator()(iterator begin, iterator end, Out &storage,
+                  progress_counter &counter) {
+    for (auto it = begin; it != end; ++it, counter.increment()) {
+    }
   }
 };
 
@@ -37,11 +40,12 @@ TEST(TaskExecutor, SequentialExecution_AddNumber_MoreTasks) {
     tasks.emplace_back(AddNumberTask());
   }
 
-  std::vector<int> in({ 1, 2, 3 });
+  std::vector<int> in({1, 2, 3});
   std::vector<int> out;
-  std::vector<int> expected({ 2, 3, 4 });
+  std::vector<int> expected({2, 3, 4});
 
-  TaskExecutor<AddNumberTask> executor("increment numbers", in, out, std::move(tasks));
+  TaskExecutor<AddNumberTask> executor("increment numbers", in, out,
+                                       std::move(tasks));
   executor.execute();
 
   ASSERT_EQ(size_t(3), in.size());
@@ -57,11 +61,12 @@ TEST(TaskExecutor, SequentialExecution_AddNumber_MoreWorkers) {
     tasks.emplace_back(AddNumberTask());
   }
 
-  std::vector<int> in({ 1, 2, 3 });
+  std::vector<int> in({1, 2, 3});
   std::vector<int> out;
-  std::vector<int> expected({ 2, 3, 4 });
+  std::vector<int> expected({2, 3, 4});
 
-  TaskExecutor<AddNumberTask> executor("increment numbers", in, out, std::move(tasks));
+  TaskExecutor<AddNumberTask> executor("increment numbers", in, out,
+                                       std::move(tasks));
   executor.execute();
 
   ASSERT_EQ(size_t(3), in.size());
@@ -77,7 +82,7 @@ TEST(TaskExecutor, SequentialExecution_EmptyTask_MoreTasks) {
     tasks.emplace_back(EmptyTask());
   }
 
-  std::vector<int> in({ 1, 2, 3 });
+  std::vector<int> in({1, 2, 3});
   std::vector<int> out;
   std::vector<int> expected;
 
@@ -97,7 +102,7 @@ TEST(TaskExecutor, SequentialExecution_EmptyTask_MoreWorkers) {
     tasks.emplace_back(EmptyTask());
   }
 
-  std::vector<int> in({ 1, 2, 3 });
+  std::vector<int> in({1, 2, 3});
   std::vector<int> out;
   std::vector<int> expected;
 

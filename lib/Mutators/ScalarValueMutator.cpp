@@ -1,14 +1,14 @@
-#include "Mutators/ScalarValueMutator.h"
+#include "mull/Mutators/ScalarValueMutator.h"
 
-#include "Logger.h"
-#include "MutationPoint.h"
+#include "mull/Logger.h"
+#include "mull/MutationPoint.h"
 
 #include <llvm/IR/Constants.h>
+#include <llvm/IR/DebugInfoMetadata.h>
+#include <llvm/IR/DebugLoc.h>
 #include <llvm/IR/InstIterator.h>
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/Module.h>
-#include <llvm/IR/DebugLoc.h>
-#include <llvm/IR/DebugInfoMetadata.h>
 
 #include <fstream>
 #include <iterator>
@@ -17,50 +17,45 @@
 using namespace llvm;
 using namespace mull;
 
-enum ScalarValueMutationType {
-  None = 1,
-  Int,
-  Float
-};
+enum ScalarValueMutationType { None = 1, Int, Float };
 
 const std::string ScalarValueMutator::ID = "scalar_value_mutator";
-const std::string ScalarValueMutator::description = "Replaces zeros with 1, and non-zeros with 0";
+const std::string ScalarValueMutator::description =
+    "Replaces zeros with 1, and non-zeros with 0";
 
 #pragma mark - Prototypes
 
-static
-ScalarValueMutationType findPossibleApplication(Value &V,
-                                                std::string &outDiagnostics);
+static ScalarValueMutationType
+findPossibleApplication(Value &V, std::string &outDiagnostics);
 static ConstantInt *getReplacementInt(ConstantInt *constantInt);
 static ConstantFP *getReplacementFloat(ConstantFP *constantFloat);
 
 #pragma mark - Implementations
 
-MutationPoint *
-ScalarValueMutator::getMutationPoint(MullModule *module,
-                                     llvm::Function *function,
-                                     llvm::Instruction *instruction,
-                                     SourceLocation &sourceLocation,
-                                     MutationPointAddress &address) {
+MutationPoint *ScalarValueMutator::getMutationPoint(
+    MullModule *module, llvm::Function *function,
+    llvm::Instruction *instruction, SourceLocation &sourceLocation,
+    MutationPointAddress &address) {
   std::string diagnostics;
   ScalarValueMutationType mutationType =
-    findPossibleApplication(*instruction, diagnostics);
+      findPossibleApplication(*instruction, diagnostics);
   if (mutationType == ScalarValueMutationType::None) {
     return nullptr;
   }
 
-  return new MutationPoint(this, address, instruction, function, diagnostics, sourceLocation, module);
+  return new MutationPoint(this, address, instruction, function, diagnostics,
+                           sourceLocation, module);
 }
 
 /// Currently only used by SimpleTestFinder.
 bool ScalarValueMutator::canBeApplied(Value &V) {
   std::string diagnostics;
-  return findPossibleApplication(V, diagnostics) != ScalarValueMutationType::None;
+  return findPossibleApplication(V, diagnostics) !=
+         ScalarValueMutationType::None;
 }
 
-static
-ScalarValueMutationType findPossibleApplication(Value &V,
-                                                std::string &outDiagnostics) {
+static ScalarValueMutationType
+findPossibleApplication(Value &V, std::string &outDiagnostics) {
   Instruction *instruction = dyn_cast<Instruction>(&V);
   assert(instruction);
 
@@ -68,22 +63,20 @@ ScalarValueMutationType findPossibleApplication(Value &V,
 
   if ((opcode >= Instruction::BinaryOpsBegin &&
        opcode < Instruction::BinaryOpsEnd) ||
-      opcode == Instruction::Store ||
-      opcode == Instruction::FCmp ||
-      opcode == Instruction::ICmp ||
-      opcode == Instruction::Ret ||
-      opcode == Instruction::Call ||
-      opcode == Instruction::Invoke) {
+      opcode == Instruction::Store || opcode == Instruction::FCmp ||
+      opcode == Instruction::ICmp || opcode == Instruction::Ret ||
+      opcode == Instruction::Call || opcode == Instruction::Invoke) {
 
     if (CallInst *callInstruction = dyn_cast<CallInst>(instruction)) {
-      if (Function *callee = dyn_cast<Function>(callInstruction->getCalledValue())) {
+      if (Function *callee =
+              dyn_cast<Function>(callInstruction->getCalledValue())) {
         if (callee->getName().startswith("mull_")) {
           return ScalarValueMutationType::None;
         }
       }
     }
 
-    for (Value *operand: instruction->operands()) {
+    for (Value *operand : instruction->operands()) {
       if (ConstantInt *constantInt = dyn_cast<ConstantInt>(operand)) {
         auto intValue = constantInt->getValue();
 
@@ -134,11 +127,10 @@ static ConstantInt *getReplacementInt(ConstantInt *constantInt) {
   uint64_t replacementValue = constantInt->isZero() ? 1 : 0;
 
   APInt replacementIntValue =
-    APInt(constantInt->getBitWidth(), replacementValue);
+      APInt(constantInt->getBitWidth(), replacementValue);
 
-  ConstantInt *replacement =
-    dyn_cast<ConstantInt>(ConstantInt::get(constantInt->getType(),
-                                           replacementIntValue));
+  ConstantInt *replacement = dyn_cast<ConstantInt>(
+      ConstantInt::get(constantInt->getType(), replacementIntValue));
 
   return replacement;
 }
@@ -146,22 +138,19 @@ static ConstantInt *getReplacementInt(ConstantInt *constantInt) {
 static ConstantFP *getReplacementFloat(ConstantFP *constantFloat) {
   auto floatValue = constantFloat->getValueAPF();
 
-    // TODO: review the rules for mutation.
+  // TODO: review the rules for mutation.
   if (floatValue.isZero()) {
 
     // TODO: Didn't find a better way of creating APFloat for number 1.
     APFloat replacementFloatValue = APFloat((double)1);
-    ConstantFP *replacement =
-      dyn_cast<ConstantFP>(ConstantFP::get(constantFloat->getContext(),
-                                           replacementFloatValue));
+    ConstantFP *replacement = dyn_cast<ConstantFP>(
+        ConstantFP::get(constantFloat->getContext(), replacementFloatValue));
 
     return replacement;
-  }
-  else {
+  } else {
     APFloat replacementFloatValue = APFloat::getZero(floatValue.getSemantics());
-    ConstantFP *replacement =
-      dyn_cast<ConstantFP>(ConstantFP::get(constantFloat->getContext(),
-                                           replacementFloatValue));
+    ConstantFP *replacement = dyn_cast<ConstantFP>(
+        ConstantFP::get(constantFloat->getContext(), replacementFloatValue));
 
     return replacement;
   }
@@ -169,9 +158,8 @@ static ConstantFP *getReplacementFloat(ConstantFP *constantFloat) {
   return nullptr;
 }
 
-llvm::Value *
-ScalarValueMutator::applyMutation(Function *function,
-                                  MutationPointAddress &address) {
+llvm::Value *ScalarValueMutator::applyMutation(Function *function,
+                                               MutationPointAddress &address) {
   llvm::Instruction &I = address.findInstruction(function);
 
   for (unsigned int i = 0; i < I.getNumOperands(); i++) {

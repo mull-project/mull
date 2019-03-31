@@ -1,14 +1,14 @@
-#include "JunkDetection/CXX/CXXJunkDetector.h"
+#include "mull/JunkDetection/CXX/CXXJunkDetector.h"
 
-#include "Config/RawConfig.h"
-#include "MutationPoint.h"
-#include "Mutators/Mutator.h"
+#include "mull/Config/RawConfig.h"
+#include "mull/MutationPoint.h"
+#include "mull/Mutators/Mutator.h"
 
-#include "JunkDetection/CXX/Visitors/ConditionalsBoundaryVisitor.h"
-#include "JunkDetection/CXX/Visitors/MathAddVisitor.h"
-#include "JunkDetection/CXX/Visitors/MathSubVisitor.h"
-#include "JunkDetection/CXX/Visitors/NegateConditionVisitor.h"
-#include "JunkDetection/CXX/Visitors/RemoveVoidFunctionVisitor.h"
+#include "mull/JunkDetection/CXX/Visitors/ConditionalsBoundaryVisitor.h"
+#include "mull/JunkDetection/CXX/Visitors/MathAddVisitor.h"
+#include "mull/JunkDetection/CXX/Visitors/MathSubVisitor.h"
+#include "mull/JunkDetection/CXX/Visitors/NegateConditionVisitor.h"
+#include "mull/JunkDetection/CXX/Visitors/RemoveVoidFunctionVisitor.h"
 
 using namespace mull;
 

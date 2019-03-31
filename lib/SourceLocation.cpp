@@ -1,23 +1,26 @@
-#include "SourceLocation.h"
+#include "mull/SourceLocation.h"
 
 #include <string>
 
-#include <llvm/IR/Instruction.h>
-#include <llvm/IR/Function.h>
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/DebugLoc.h>
+#include <llvm/IR/Function.h>
+#include <llvm/IR/Instruction.h>
 #include <llvm/Support/Path.h>
 
 namespace mull {
 
-SourceLocation::SourceLocation(const std::string &directory, const std::string &filePath, int line, int column)
-: directory(directory), filePath(filePath), line(line), column(column) {}
+SourceLocation::SourceLocation(const std::string &directory,
+                               const std::string &filePath, int line,
+                               int column)
+    : directory(directory), filePath(filePath), line(line), column(column) {}
 
 const SourceLocation SourceLocation::nullSourceLocation() {
   return SourceLocation(std::string(), std::string(), 0, 0);
 }
 
-const SourceLocation SourceLocation::sourceLocationFromInstruction(llvm::Instruction *instruction) {
+const SourceLocation
+SourceLocation::sourceLocationFromInstruction(llvm::Instruction *instruction) {
   if (instruction->getMetadata(0) == nullptr) {
     return nullSourceLocation();
   }
@@ -36,7 +39,8 @@ const SourceLocation SourceLocation::sourceLocationFromInstruction(llvm::Instruc
   return SourceLocation(directory, filePath, line, column);
 }
 
-const SourceLocation SourceLocation::sourceLocationFromFunction(llvm::Function *function) {
+const SourceLocation
+SourceLocation::sourceLocationFromFunction(llvm::Function *function) {
   if (function->getMetadata(0) == nullptr) {
     return nullSourceLocation();
   }
@@ -56,11 +60,7 @@ const SourceLocation SourceLocation::sourceLocationFromFunction(llvm::Function *
 }
 
 bool SourceLocation::isNull() const {
-  return
-      directory == "" &&
-      filePath == "" &&
-      line == 0 &&
-      column == 0;
+  return directory == "" && filePath == "" && line == 0 && column == 0;
 }
 
-}
+} // namespace mull

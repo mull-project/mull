@@ -1,10 +1,12 @@
-#include "Parallelization/Tasks/DryRunMutantExecutionTask.h"
-#include "Parallelization/Progress.h"
+#include "mull/Parallelization/Tasks/DryRunMutantExecutionTask.h"
+
+#include "mull/Parallelization/Progress.h"
 
 using namespace mull;
 using namespace llvm;
 
-void DryRunMutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
+void DryRunMutantExecutionTask::operator()(iterator begin, iterator end,
+                                           Out &storage,
                                            progress_counter &counter) {
   for (auto it = begin; it != end; it++, counter.increment()) {
     auto mutationPoint = *it;
@@ -15,7 +17,8 @@ void DryRunMutantExecutionTask::operator()(iterator begin, iterator end, Out &st
       ExecutionResult result;
       result.status = DryRun;
       result.runningTime = timeout;
-      storage.push_back(make_unique<MutationResult>(result, mutationPoint, distance, test));
+      storage.push_back(
+          make_unique<MutationResult>(result, mutationPoint, distance, test));
     }
   }
 }

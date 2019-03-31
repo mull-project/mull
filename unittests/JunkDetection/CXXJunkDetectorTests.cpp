@@ -1,20 +1,20 @@
-#include "Config/Configuration.h"
-#include "Config/RawConfig.h"
-#include "Program/Program.h"
-#include "Mutators/ConditionalsBoundaryMutator.h"
-#include "Mutators/MathAddMutator.h"
-#include "Mutators/MathSubMutator.h"
-#include "Mutators/RemoveVoidFunctionMutator.h"
-#include "Mutators/NegateConditionMutator.h"
-#include "MutationPoint.h"
-#include "Toolchain/Compiler.h"
-#include "Toolchain/Toolchain.h"
-#include "Filter.h"
-#include "Testee.h"
-#include "MutationsFinder.h"
-#include "JunkDetection/CXX/CXXJunkDetector.h"
 #include "FixturePaths.h"
-#include "ModuleLoader.h"
+#include "mull/Config/Configuration.h"
+#include "mull/Config/RawConfig.h"
+#include "mull/Filter.h"
+#include "mull/JunkDetection/CXX/CXXJunkDetector.h"
+#include "mull/ModuleLoader.h"
+#include "mull/MutationPoint.h"
+#include "mull/MutationsFinder.h"
+#include "mull/Mutators/ConditionalsBoundaryMutator.h"
+#include "mull/Mutators/MathAddMutator.h"
+#include "mull/Mutators/MathSubMutator.h"
+#include "mull/Mutators/NegateConditionMutator.h"
+#include "mull/Mutators/RemoveVoidFunctionMutator.h"
+#include "mull/Program/Program.h"
+#include "mull/Testee.h"
+#include "mull/Toolchain/Compiler.h"
+#include "mull/Toolchain/Toolchain.h"
 
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/LLVMContext.h>
@@ -114,10 +114,12 @@ static const CXXJunkDetectorTestParameter parameters[] = {
     ///
     CXXJunkDetectorTestParameter(fixtures::mutators_math_sub_junk_bc_path(),
                                  new MathSubMutator, 9, 8),
-    CXXJunkDetectorTestParameter(fixtures::mutators_remove_void_function_junk_bc_path(),
-                                 new RemoveVoidFunctionMutator, 9, 6),
-    CXXJunkDetectorTestParameter(fixtures::mutators_negate_condition_junk_bc_path(),
-                                 new NegateConditionMutator, 42, 30)};
+    CXXJunkDetectorTestParameter(
+        fixtures::mutators_remove_void_function_junk_bc_path(),
+        new RemoveVoidFunctionMutator, 9, 6),
+    CXXJunkDetectorTestParameter(
+        fixtures::mutators_negate_condition_junk_bc_path(),
+        new NegateConditionMutator, 42, 30)};
 
 INSTANTIATE_TEST_CASE_P(CXXJunkDetection, CXXJunkDetectorTest,
                         testing::ValuesIn(parameters));
@@ -125,7 +127,8 @@ INSTANTIATE_TEST_CASE_P(CXXJunkDetection, CXXJunkDetectorTest,
 TEST(CXXJunkDetector, compdb_absolute_paths) {
   LLVMContext llvmContext;
   ModuleLoader loader;
-  auto mullModule = loader.loadModuleAtPath(fixtures::junk_detection_compdb_main_bc_path(), llvmContext);
+  auto mullModule = loader.loadModuleAtPath(
+      fixtures::junk_detection_compdb_main_bc_path(), llvmContext);
   auto module = mullModule->getModule();
 
   std::vector<std::unique_ptr<MullModule>> modules;
@@ -143,15 +146,17 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
     testees.emplace_back(make_unique<Testee>(&function, nullptr, 1));
   }
   auto mergedTestees = mergeTestees(testees);
-  std::vector<MutationPoint *> points = finder.getMutationPoints(program, mergedTestees, filter);
+  std::vector<MutationPoint *> points =
+      finder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_EQ(points.size(), 8U);
 
   JunkDetectionConfig junkConfig;
-  junkConfig.cxxCompilationDatabasePath = fixtures::junk_detection_compdb_absolute_compile_commands_json_path();
+  junkConfig.cxxCompilationDatabasePath =
+      fixtures::junk_detection_compdb_absolute_compile_commands_json_path();
   CXXJunkDetector detector(junkConfig);
   std::vector<MutationPoint *> nonJunkMutationPoints;
-  for (auto point: points) {
+  for (auto point : points) {
     if (!detector.isJunk(point)) {
       nonJunkMutationPoints.push_back(point);
     }
@@ -163,7 +168,8 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
 TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
   LLVMContext llvmContext;
   ModuleLoader loader;
-  auto mullModule = loader.loadModuleAtPath(fixtures::junk_detection_compdb_main_bc_path(), llvmContext);
+  auto mullModule = loader.loadModuleAtPath(
+      fixtures::junk_detection_compdb_main_bc_path(), llvmContext);
   auto module = mullModule->getModule();
 
   std::vector<std::unique_ptr<MullModule>> modules;
@@ -182,15 +188,17 @@ TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
   }
   auto mergedTestees = mergeTestees(testees);
 
-  std::vector<MutationPoint *> points = finder.getMutationPoints(program, mergedTestees, filter);
+  std::vector<MutationPoint *> points =
+      finder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_EQ(points.size(), 8U);
 
   JunkDetectionConfig junkConfig;
-  junkConfig.cxxCompilationDatabasePath = fixtures::junk_detection_compdb_relative_compile_commands_json_path();
+  junkConfig.cxxCompilationDatabasePath =
+      fixtures::junk_detection_compdb_relative_compile_commands_json_path();
   CXXJunkDetector detector(junkConfig);
   std::vector<MutationPoint *> nonJunkMutationPoints;
-  for (auto point: points) {
+  for (auto point : points) {
     if (!detector.isJunk(point)) {
       nonJunkMutationPoints.push_back(point);
     }
@@ -202,7 +210,8 @@ TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
 TEST(CXXJunkDetector, no_compdb) {
   LLVMContext llvmContext;
   ModuleLoader loader;
-  auto mullModule = loader.loadModuleAtPath(fixtures::junk_detection_compdb_main_bc_path(), llvmContext);
+  auto mullModule = loader.loadModuleAtPath(
+      fixtures::junk_detection_compdb_main_bc_path(), llvmContext);
   auto module = mullModule->getModule();
 
   std::vector<std::unique_ptr<MullModule>> modules;
@@ -221,16 +230,18 @@ TEST(CXXJunkDetector, no_compdb) {
   }
   auto mergedTestees = mergeTestees(testees);
 
-  std::vector<MutationPoint *> points = finder.getMutationPoints(program, mergedTestees, filter);
+  std::vector<MutationPoint *> points =
+      finder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_EQ(points.size(), 8U);
 
   JunkDetectionConfig junkConfig;
-  junkConfig.cxxCompilationFlags = std::string("-I ") + fixtures::junk_detection_compdb_include__path();
+  junkConfig.cxxCompilationFlags =
+      std::string("-I ") + fixtures::junk_detection_compdb_include__path();
 
   CXXJunkDetector detector(junkConfig);
   std::vector<MutationPoint *> nonJunkMutationPoints;
-  for (auto point: points) {
+  for (auto point : points) {
     if (!detector.isJunk(point)) {
       nonJunkMutationPoints.push_back(point);
     }

@@ -1,11 +1,11 @@
-#include "TestFrameworks/SimpleTest/SimpleTestRunner.h"
-#include "TestFrameworks/SimpleTest/SimpleTest_Test.h"
-#include "Toolchain/JITEngine.h"
+#include "mull/TestFrameworks/SimpleTest/SimpleTestRunner.h"
 
-#include "Toolchain/Resolvers/InstrumentationResolver.h"
-#include "Toolchain/Mangler.h"
-#include "Toolchain/Resolvers/MutationResolver.h"
-#include "Toolchain/Trampolines.h"
+#include "mull/TestFrameworks/SimpleTest/SimpleTest_Test.h"
+#include "mull/Toolchain/JITEngine.h"
+#include "mull/Toolchain/Mangler.h"
+#include "mull/Toolchain/Resolvers/InstrumentationResolver.h"
+#include "mull/Toolchain/Resolvers/MutationResolver.h"
+#include "mull/Toolchain/Trampolines.h"
 
 #include <llvm/ExecutionEngine/SectionMemoryManager.h>
 #include <llvm/IR/Function.h>
@@ -16,16 +16,12 @@ using namespace mull;
 using namespace llvm;
 
 SimpleTestRunner::SimpleTestRunner(Mangler &mangler)
-  : mangler(mangler),
-    overrides([this](const char *name) {
-      return this->mangler.getNameWithPrefix(name);
-    }),
-    trampoline(new InstrumentationInfo*)
-{}
+    : mangler(mangler), overrides([this](const char *name) {
+        return this->mangler.getNameWithPrefix(name);
+      }),
+      trampoline(new InstrumentationInfo *) {}
 
-SimpleTestRunner::~SimpleTestRunner() {
-  delete trampoline;
-}
+SimpleTestRunner::~SimpleTestRunner() { delete trampoline; }
 
 void *SimpleTestRunner::functionPointer(const llvm::Function &function,
                                         JITEngine &jit) {
@@ -40,15 +36,19 @@ void *SimpleTestRunner::functionPointer(const llvm::Function &function,
 void SimpleTestRunner::loadInstrumentedProgram(ObjectFiles &objectFiles,
                                                Instrumentation &instrumentation,
                                                JITEngine &jit) {
-  InstrumentationResolver resolver(overrides, instrumentation, mangler, trampoline);
-  jit.addObjectFiles(objectFiles, resolver, make_unique<SectionMemoryManager>());
+  InstrumentationResolver resolver(overrides, instrumentation, mangler,
+                                   trampoline);
+  jit.addObjectFiles(objectFiles, resolver,
+                     make_unique<SectionMemoryManager>());
 }
 
-void SimpleTestRunner::loadMutatedProgram(ObjectFiles &objectFiles, Trampolines &trampolines,
+void SimpleTestRunner::loadMutatedProgram(ObjectFiles &objectFiles,
+                                          Trampolines &trampolines,
                                           JITEngine &jit) {
   trampolines.allocateTrampolines(mangler);
   MutationResolver resolver(overrides, trampolines, mangler);
-  jit.addObjectFiles(objectFiles, resolver, make_unique<SectionMemoryManager>());
+  jit.addObjectFiles(objectFiles, resolver,
+                     make_unique<SectionMemoryManager>());
 }
 
 ExecutionStatus SimpleTestRunner::runTest(Test *test, JITEngine &jit) {
@@ -57,8 +57,7 @@ ExecutionStatus SimpleTestRunner::runTest(Test *test, JITEngine &jit) {
 
   SimpleTest_Test *SimpleTest = dyn_cast<SimpleTest_Test>(test);
 
-  void *FunctionPointer = functionPointer(*SimpleTest->GetTestFunction(),
-                                          jit);
+  void *FunctionPointer = functionPointer(*SimpleTest->GetTestFunction(), jit);
 
   uint64_t result = ((int (*)())(intptr_t)FunctionPointer)();
 
@@ -69,4 +68,3 @@ ExecutionStatus SimpleTestRunner::runTest(Test *test, JITEngine &jit) {
   }
   return ExecutionStatus::Failed;
 }
-

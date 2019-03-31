@@ -1,9 +1,11 @@
-#include "Parallelization/Tasks/MutantExecutionTask.h"
-#include "Parallelization/Progress.h"
-#include "Driver.h"
-#include "Config/Configuration.h"
-#include "TestFrameworks/TestRunner.h"
-#include "Toolchain/Trampolines.h"
+#include "mull/Parallelization/Tasks/MutantExecutionTask.h"
+
+#include "mull/Config/Configuration.h"
+#include "mull/ForkProcessSandbox.h"
+#include "mull/Parallelization/Progress.h"
+#include "mull/TestFrameworks/TestRunner.h"
+#include "mull/Toolchain/Mangler.h"
+#include "mull/Toolchain/Trampolines.h"
 
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/Support/TargetSelect.h>
@@ -11,17 +13,17 @@
 using namespace mull;
 using namespace llvm;
 
-MutantExecutionTask::MutantExecutionTask(ProcessSandbox &sandbox,
-                                         TestRunner &runner,
-                                         const Configuration &config,
-                                         Filter &filter,
-                                         Mangler &mangler,
-                                         std::vector<llvm::object::ObjectFile *> &objectFiles,
-                                         std::vector<std::string> &mutatedFunctionNames)
+MutantExecutionTask::MutantExecutionTask(
+    ProcessSandbox &sandbox, TestRunner &runner, const Configuration &config,
+    Filter &filter, Mangler &mangler,
+    std::vector<llvm::object::ObjectFile *> &objectFiles,
+    std::vector<std::string> &mutatedFunctionNames)
     : sandbox(sandbox), runner(runner), config(config), filter(filter),
-      mangler(mangler), objectFiles(objectFiles), mutatedFunctionNames(mutatedFunctionNames) {}
+      mangler(mangler), objectFiles(objectFiles),
+      mutatedFunctionNames(mutatedFunctionNames) {}
 
-void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage, progress_counter &counter) {
+void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
+                                     progress_counter &counter) {
   Trampolines trampolines(mutatedFunctionNames);
   runner.loadMutatedProgram(objectFiles, trampolines, jit);
   trampolines.fixupOriginalFunctions(jit);
@@ -29,10 +31,13 @@ void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
   for (auto it = begin; it != end; ++it, counter.increment()) {
     auto mutationPoint = *it;
 
-    auto trampolineName = mangler.getNameWithPrefix(mutationPoint->getTrampolineName());
-    auto mutatedFunctionName = mangler.getNameWithPrefix(mutationPoint->getMutatedFunctionName());
+    auto trampolineName =
+        mangler.getNameWithPrefix(mutationPoint->getTrampolineName());
+    auto mutatedFunctionName =
+        mangler.getNameWithPrefix(mutationPoint->getMutatedFunctionName());
     uint64_t *trampoline = trampolines.findTrampoline(trampolineName);
-    uint64_t address = llvm_compat::JITSymbolAddress(jit.getSymbol(mutatedFunctionName));
+    uint64_t address =
+        llvm_compat::JITSymbolAddress(jit.getSymbol(mutatedFunctionName));
     uint64_t originalAddress = *trampoline;
     *trampoline = address;
 
@@ -48,21 +53,25 @@ void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
         const auto timeout = test->getExecutionResult().runningTime * 10;
         const auto sandboxTimeout = std::max(30LL, timeout);
 
-        result = sandbox.run([&]() {
-          ExecutionStatus status = runner.runTest(test, jit);
-          assert(status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
-          return status;
-        }, sandboxTimeout);
+        result = sandbox.run(
+            [&]() {
+              ExecutionStatus status = runner.runTest(test, jit);
+              assert(status != ExecutionStatus::Invalid &&
+                     "Expect to see valid TestResult");
+              return status;
+            },
+            sandboxTimeout);
 
         assert(result.status != ExecutionStatus::Invalid &&
-            "Expect to see valid TestResult");
+               "Expect to see valid TestResult");
 
         if (result.status != ExecutionStatus::Passed) {
           atLeastOneTestFailed = true;
         }
       }
 
-      storage.push_back(make_unique<MutationResult>(result, mutationPoint, distance, test));
+      storage.push_back(
+          make_unique<MutationResult>(result, mutationPoint, distance, test));
     }
 
     *trampoline = originalAddress;

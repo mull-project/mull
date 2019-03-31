@@ -1,4 +1,4 @@
-#include "JunkDetection/CXX/Visitors/NegateConditionVisitor.h"
+#include "mull/JunkDetection/CXX/Visitors/NegateConditionVisitor.h"
 
 using namespace mull;
 

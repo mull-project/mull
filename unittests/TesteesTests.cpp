@@ -1,14 +1,15 @@
-#include "gtest/gtest.h"
-#include "Testee.h"
 #include "FixturePaths.h"
-#include "ModuleLoader.h"
+#include "mull/ModuleLoader.h"
+#include "mull/Testee.h"
+#include "gtest/gtest.h"
 
 using namespace mull;
 
 TEST(Testees, mergeTestees) {
   llvm::LLVMContext llvmContext;
   ModuleLoader loader;
-  auto module = loader.loadModuleAtPath(fixtures::mutators_and_or_replacement_module_bc_path(), llvmContext);
+  auto module = loader.loadModuleAtPath(
+      fixtures::mutators_and_or_replacement_module_bc_path(), llvmContext);
 
   auto &allFunctions = module->getModule()->getFunctionList();
 

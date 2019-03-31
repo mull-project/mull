@@ -1,25 +1,25 @@
-#include "Program/Program.h"
-#include "Mutators/MathAddMutator.h"
-#include "Mutators/MathDivMutator.h"
-#include "Mutators/MathMulMutator.h"
-#include "Mutators/MathSubMutator.h"
-#include "Mutators/NegateConditionMutator.h"
-#include "Mutators/AndOrReplacementMutator.h"
-#include "Mutators/ScalarValueMutator.h"
-#include "Mutators/ReplaceAssignmentMutator.h"
-#include "Mutators/ReplaceCallMutator.h"
-#include "TestModuleFactory.h"
-#include "Testee.h"
-#include "MutationsFinder.h"
-#include "Filter.h"
-#include "Config/Configuration.h"
 #include "FixturePaths.h"
-#include "ModuleLoader.h"
+#include "TestModuleFactory.h"
+#include "mull/Config/Configuration.h"
+#include "mull/Filter.h"
+#include "mull/ModuleLoader.h"
+#include "mull/MutationsFinder.h"
+#include "mull/Mutators/AndOrReplacementMutator.h"
+#include "mull/Mutators/MathAddMutator.h"
+#include "mull/Mutators/MathDivMutator.h"
+#include "mull/Mutators/MathMulMutator.h"
+#include "mull/Mutators/MathSubMutator.h"
+#include "mull/Mutators/NegateConditionMutator.h"
+#include "mull/Mutators/ReplaceAssignmentMutator.h"
+#include "mull/Mutators/ReplaceCallMutator.h"
+#include "mull/Mutators/ScalarValueMutator.h"
+#include "mull/Program/Program.h"
+#include "mull/Testee.h"
 
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
+#include <llvm/IR/InstIterator.h>
 #include <llvm/IR/InstrTypes.h>
 #include <llvm/IR/Instructions.h>
-#include <llvm/IR/InstIterator.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <llvm/Support/SourceMgr.h>
@@ -33,8 +33,11 @@ using namespace llvm;
 TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
   LLVMContext llvmContext;
   ModuleLoader loader;
-  auto ModuleWithTests = loader.loadModuleAtPath(fixtures::simple_test_count_letters_test_count_letters_bc_path(), llvmContext);
-  auto ModuleWithTestees = loader.loadModuleAtPath(fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
+  auto ModuleWithTests = loader.loadModuleAtPath(
+      fixtures::simple_test_count_letters_test_count_letters_bc_path(),
+      llvmContext);
+  auto ModuleWithTestees = loader.loadModuleAtPath(
+      fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
 
   std::vector<std::unique_ptr<MullModule>> modules;
   modules.push_back(std::move(ModuleWithTestees));
@@ -54,9 +57,8 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
   auto mergedTestees = mergeTestees(testees);
 
   Filter filter;
-  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(program,
-                                                                         mergedTestees,
-                                                                         filter);
+  std::vector<MutationPoint *> mutationPoints =
+      finder.getMutationPoints(program, mergedTestees, filter);
   ASSERT_EQ(1U, mutationPoints.size());
 
   MutationPoint *mutationPoint = mutationPoints.front();
@@ -66,7 +68,8 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
   mutationPoint->setMutatedFunction(mutationPoint->getOriginalFunction());
   mutationPoint->applyMutation();
 
-  auto &mutatedInstruction = mutationPoint->getAddress().findInstruction(mutationPoint->getOriginalFunction());
+  auto &mutatedInstruction = mutationPoint->getAddress().findInstruction(
+      mutationPoint->getOriginalFunction());
 
   ASSERT_TRUE(isa<BinaryOperator>(mutatedInstruction));
   ASSERT_EQ(Instruction::Sub, mutatedInstruction.getOpcode());
@@ -75,7 +78,8 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
 TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
   LLVMContext llvmContext;
   ModuleLoader loader;
-  auto module = loader.loadModuleAtPath(fixtures::mutators_math_sub_module_bc_path(), llvmContext);
+  auto module = loader.loadModuleAtPath(
+      fixtures::mutators_math_sub_module_bc_path(), llvmContext);
 
   std::vector<std::unique_ptr<MullModule>> modules;
   modules.push_back(std::move(module));
@@ -94,7 +98,8 @@ TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
   auto mergedTestees = mergeTestees(testees);
   Filter filter;
 
-  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(program, mergedTestees, filter);
+  std::vector<MutationPoint *> mutationPoints =
+      finder.getMutationPoints(program, mergedTestees, filter);
   ASSERT_EQ(1U, mutationPoints.size());
 
   MutationPoint *mutationPoint = mutationPoints.front();
@@ -104,7 +109,8 @@ TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
   mutationPoint->setMutatedFunction(mutationPoint->getOriginalFunction());
   mutationPoint->applyMutation();
 
-  auto &mutatedInstruction = mutationPoint->getAddress().findInstruction(mutationPoint->getOriginalFunction());
+  auto &mutatedInstruction = mutationPoint->getAddress().findInstruction(
+      mutationPoint->getOriginalFunction());
 
   ASSERT_TRUE(isa<BinaryOperator>(mutatedInstruction));
   ASSERT_EQ(Instruction::Add, mutatedInstruction.getOpcode());
@@ -113,7 +119,8 @@ TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
 TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
   LLVMContext llvmContext;
   ModuleLoader loader;
-  auto module = loader.loadModuleAtPath(fixtures::mutators_math_mul_module_bc_path(), llvmContext);
+  auto module = loader.loadModuleAtPath(
+      fixtures::mutators_math_mul_module_bc_path(), llvmContext);
 
   std::vector<std::unique_ptr<MullModule>> modules;
   modules.push_back(std::move(module));
@@ -132,7 +139,8 @@ TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
   auto mergedTestees = mergeTestees(testees);
   Filter filter;
 
-  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(program, mergedTestees, filter);
+  std::vector<MutationPoint *> mutationPoints =
+      finder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_EQ(mutationPoints.size(), 1UL);
 
@@ -143,7 +151,8 @@ TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
   mutationPoint->setMutatedFunction(mutationPoint->getOriginalFunction());
   mutationPoint->applyMutation();
 
-  auto &mutatedInstruction = mutationPoint->getAddress().findInstruction(mutationPoint->getOriginalFunction());
+  auto &mutatedInstruction = mutationPoint->getAddress().findInstruction(
+      mutationPoint->getOriginalFunction());
 
   ASSERT_TRUE(isa<BinaryOperator>(mutatedInstruction));
   ASSERT_EQ(Instruction::SDiv, mutatedInstruction.getOpcode());
@@ -152,7 +161,8 @@ TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
 TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
   LLVMContext llvmContext;
   ModuleLoader loader;
-  auto module = loader.loadModuleAtPath(fixtures::mutators_math_div_module_bc_path(), llvmContext);
+  auto module = loader.loadModuleAtPath(
+      fixtures::mutators_math_div_module_bc_path(), llvmContext);
 
   std::vector<std::unique_ptr<MullModule>> modules;
   modules.push_back(std::move(module));
@@ -172,9 +182,8 @@ TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
   auto mergedTestees = mergeTestees(testees);
   Filter filter;
 
-  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(program,
-                                                                         mergedTestees,
-                                                                         filter);
+  std::vector<MutationPoint *> mutationPoints =
+      finder.getMutationPoints(program, mergedTestees, filter);
   ASSERT_EQ(1U, mutationPoints.size());
 
   MutationPoint *mutationPoint = mutationPoints.front();
@@ -184,7 +193,8 @@ TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
   mutationPoint->setMutatedFunction(mutationPoint->getOriginalFunction());
   mutationPoint->applyMutation();
 
-  auto &mutatedInstruction = mutationPoint->getAddress().findInstruction(mutationPoint->getOriginalFunction());
+  auto &mutatedInstruction = mutationPoint->getAddress().findInstruction(
+      mutationPoint->getOriginalFunction());
 
   ASSERT_TRUE(isa<BinaryOperator>(mutatedInstruction));
   ASSERT_EQ(Instruction::Mul, mutatedInstruction.getOpcode());
@@ -194,8 +204,10 @@ TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
   LLVMContext llvmContext;
   ModuleLoader loader;
 
-  auto ModuleWithTests   = loader.loadModuleAtPath(fixtures::mutators_negate_condition_tester_bc_path(), llvmContext);
-  auto ModuleWithTestees = loader.loadModuleAtPath(fixtures::mutators_negate_condition_testee_bc_path(), llvmContext);
+  auto ModuleWithTests = loader.loadModuleAtPath(
+      fixtures::mutators_negate_condition_tester_bc_path(), llvmContext);
+  auto ModuleWithTestees = loader.loadModuleAtPath(
+      fixtures::mutators_negate_condition_testee_bc_path(), llvmContext);
 
   std::vector<std::unique_ptr<MullModule>> modules;
   modules.push_back(std::move(ModuleWithTests));
@@ -215,7 +227,8 @@ TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
   auto mergedTestees = mergeTestees(testees);
   Filter filter;
 
-  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(program, mergedTestees, filter);
+  std::vector<MutationPoint *> mutationPoints =
+      finder.getMutationPoints(program, mergedTestees, filter);
   ASSERT_EQ(1U, mutationPoints.size());
 
   MutationPoint *mutationPoint = mutationPoints.front();
@@ -223,15 +236,18 @@ TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
   mutationPoint->setMutatedFunction(mutationPoint->getOriginalFunction());
   mutationPoint->applyMutation();
 
-  auto &mutatedInstruction = mutationPoint->getAddress().findInstruction(mutationPoint->getOriginalFunction());
+  auto &mutatedInstruction = mutationPoint->getAddress().findInstruction(
+      mutationPoint->getOriginalFunction());
   auto mutatedCmpInstruction = cast<CmpInst>(&mutatedInstruction);
-  ASSERT_EQ(mutatedCmpInstruction->getPredicate(), CmpInst::Predicate::ICMP_SGE);
+  ASSERT_EQ(mutatedCmpInstruction->getPredicate(),
+            CmpInst::Predicate::ICMP_SGE);
 }
 
 TEST(MutationPoint, SimpleTest_AndOrMutator_applyMutation) {
   LLVMContext llvmContext;
   ModuleLoader loader;
-  auto module = loader.loadModuleAtPath(fixtures::mutators_and_or_replacement_module_bc_path(), llvmContext);
+  auto module = loader.loadModuleAtPath(
+      fixtures::mutators_and_or_replacement_module_bc_path(), llvmContext);
 
   std::vector<std::unique_ptr<MullModule>> modules;
   modules.push_back(std::move(module));
@@ -243,14 +259,14 @@ TEST(MutationPoint, SimpleTest_AndOrMutator_applyMutation) {
   MutationsFinder finder(std::move(mutators), configuration);
   Filter filter;
 
-  Function *testeeFunction = program.lookupDefinedFunction("testee_AND_operator_2branches");
+  Function *testeeFunction =
+      program.lookupDefinedFunction("testee_AND_operator_2branches");
   std::vector<std::unique_ptr<Testee>> testees;
   testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
   auto mergedTestees = mergeTestees(testees);
 
-  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(program,
-                                                                         mergedTestees,
-                                                                         filter);
+  std::vector<MutationPoint *> mutationPoints =
+      finder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -258,14 +274,16 @@ TEST(MutationPoint, SimpleTest_AndOrMutator_applyMutation) {
   mutationPoint->setMutatedFunction(mutationPoint->getOriginalFunction());
   mutationPoint->applyMutation();
 
-  auto &mutatedInstruction = mutationPoint->getAddress().findInstruction(mutationPoint->getOriginalFunction());
+  auto &mutatedInstruction = mutationPoint->getAddress().findInstruction(
+      mutationPoint->getOriginalFunction());
   ASSERT_TRUE(isa<BranchInst>(&mutatedInstruction));
 }
 
 TEST(MutationPoint, SimpleTest_ScalarValueMutator_applyMutation) {
   LLVMContext llvmContext;
   ModuleLoader loader;
-  auto module = loader.loadModuleAtPath(fixtures::mutators_scalar_value_module_bc_path(), llvmContext);
+  auto module = loader.loadModuleAtPath(
+      fixtures::mutators_scalar_value_module_bc_path(), llvmContext);
 
   std::vector<std::unique_ptr<MullModule>> modules;
   modules.push_back(std::move(module));
@@ -283,7 +301,8 @@ TEST(MutationPoint, SimpleTest_ScalarValueMutator_applyMutation) {
   auto mergedTestees = mergeTestees(testees);
   Filter filter;
 
-  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(program, mergedTestees, filter);
+  std::vector<MutationPoint *> mutationPoints =
+      finder.getMutationPoints(program, mergedTestees, filter);
   ASSERT_EQ(4U, mutationPoints.size());
 
   MutationPoint *mutationPoint1 = mutationPoints[0];
@@ -305,14 +324,16 @@ TEST(MutationPoint, SimpleTest_ScalarValueMutator_applyMutation) {
   mutationPoint1->setMutatedFunction(mutationPoint1->getOriginalFunction());
   mutationPoint1->applyMutation();
 
-  auto &mutatedInstruction = mutationPoint1->getAddress().findInstruction(mutationPoint1->getOriginalFunction());
+  auto &mutatedInstruction = mutationPoint1->getAddress().findInstruction(
+      mutationPoint1->getOriginalFunction());
   ASSERT_TRUE(isa<StoreInst>(mutatedInstruction));
 }
 
 TEST(MutationPoint, SimpleTest_ReplaceCallMutator_applyMutation) {
   LLVMContext llvmContext;
   ModuleLoader loader;
-  auto module = loader.loadModuleAtPath(fixtures::mutators_replace_call_module_bc_path(), llvmContext);
+  auto module = loader.loadModuleAtPath(
+      fixtures::mutators_replace_call_module_bc_path(), llvmContext);
 
   std::vector<std::unique_ptr<MullModule>> modules;
   modules.push_back(std::move(module));
@@ -331,7 +352,8 @@ TEST(MutationPoint, SimpleTest_ReplaceCallMutator_applyMutation) {
   auto mergedTestees = mergeTestees(testees);
   Filter filter;
 
-  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(program, mergedTestees, filter);
+  std::vector<MutationPoint *> mutationPoints =
+      finder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -342,14 +364,16 @@ TEST(MutationPoint, SimpleTest_ReplaceCallMutator_applyMutation) {
   mutationPoint->setMutatedFunction(mutationPoint->getOriginalFunction());
   mutationPoint->applyMutation();
 
-  auto &mutatedInstruction = mutationPoint->getAddress().findInstruction(mutationPoint->getOriginalFunction());
+  auto &mutatedInstruction = mutationPoint->getAddress().findInstruction(
+      mutationPoint->getOriginalFunction());
   ASSERT_TRUE(isa<BinaryOperator>(mutatedInstruction));
 }
 
 TEST(MutationPoint, SimpleTest_ReplaceAssignmentMutator_applyMutation) {
   LLVMContext llvmContext;
   ModuleLoader loader;
-  auto module = loader.loadModuleAtPath(fixtures::mutators_replace_assignment_module_bc_path(), llvmContext);
+  auto module = loader.loadModuleAtPath(
+      fixtures::mutators_replace_assignment_module_bc_path(), llvmContext);
 
   std::vector<std::unique_ptr<MullModule>> modules;
   modules.push_back(std::move(module));
@@ -361,14 +385,16 @@ TEST(MutationPoint, SimpleTest_ReplaceAssignmentMutator_applyMutation) {
 
   MutationsFinder finder(std::move(mutators), configuration);
 
-  Function *testeeFunction = program.lookupDefinedFunction("replace_assignment");
+  Function *testeeFunction =
+      program.lookupDefinedFunction("replace_assignment");
   ASSERT_FALSE(testeeFunction->empty());
   std::vector<std::unique_ptr<Testee>> testees;
   testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
   auto mergedTestees = mergeTestees(testees);
   Filter filter;
 
-  std::vector<MutationPoint *> mutationPoints = finder.getMutationPoints(program, mergedTestees, filter);
+  std::vector<MutationPoint *> mutationPoints =
+      finder.getMutationPoints(program, mergedTestees, filter);
 
   EXPECT_EQ(2U, mutationPoints.size());
 
@@ -378,7 +404,7 @@ TEST(MutationPoint, SimpleTest_ReplaceAssignmentMutator_applyMutation) {
   mutationPoint->setMutatedFunction(mutationPoint->getOriginalFunction());
   mutationPoint->applyMutation();
 
-  auto &mutatedInstruction = mutationPoint->getAddress().findInstruction(mutationPoint->getOriginalFunction());
+  auto &mutatedInstruction = mutationPoint->getAddress().findInstruction(
+      mutationPoint->getOriginalFunction());
   ASSERT_TRUE(isa<StoreInst>(mutatedInstruction));
 }
-

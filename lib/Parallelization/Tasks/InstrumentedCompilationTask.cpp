@@ -1,7 +1,8 @@
-#include "Parallelization/Tasks/InstrumentedCompilationTask.h"
-#include "Parallelization/Progress.h"
-#include "Toolchain/Toolchain.h"
-#include "Instrumentation/Instrumentation.h"
+#include "mull/Parallelization/Tasks/InstrumentedCompilationTask.h"
+
+#include "mull/Instrumentation/Instrumentation.h"
+#include "mull/Parallelization/Progress.h"
+#include "mull/Toolchain/Toolchain.h"
 
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/Support/TargetSelect.h>
@@ -9,13 +10,13 @@
 using namespace mull;
 using namespace llvm;
 
-InstrumentedCompilationTask::InstrumentedCompilationTask(Instrumentation &instrumentation, Toolchain &toolchain)
+InstrumentedCompilationTask::InstrumentedCompilationTask(
+    Instrumentation &instrumentation, Toolchain &toolchain)
     : instrumentation(instrumentation), toolchain(toolchain) {}
 
-void mull::InstrumentedCompilationTask::operator()(mull::InstrumentedCompilationTask::iterator begin,
-                                                   mull::InstrumentedCompilationTask::iterator end,
-                                                   mull::InstrumentedCompilationTask::Out &storage,
-                                                   mull::progress_counter &counter) {
+void InstrumentedCompilationTask::operator()(iterator begin, iterator end,
+                                             Out &storage,
+                                             progress_counter &counter) {
   EngineBuilder builder;
   auto target = builder.selectTarget(llvm::Triple(), "", "",
                                      llvm::SmallVector<std::string, 1>());
@@ -29,7 +30,8 @@ void mull::InstrumentedCompilationTask::operator()(mull::InstrumentedCompilation
       auto clonedModule = module.clone(instrumentationContext);
 
       instrumentation.insertCallbacks(clonedModule->getModule());
-      objectFile = toolchain.compiler().compileModule(*clonedModule, *localMachine);
+      objectFile =
+          toolchain.compiler().compileModule(*clonedModule, *localMachine);
       toolchain.cache().putInstrumentedObject(objectFile, module);
     }
     storage.push_back(std::move(objectFile));

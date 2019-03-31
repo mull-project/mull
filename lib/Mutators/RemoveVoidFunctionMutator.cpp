@@ -1,12 +1,12 @@
-#include "Mutators/RemoveVoidFunctionMutator.h"
+#include "mull/Mutators/RemoveVoidFunctionMutator.h"
 
-#include "MutationPoint.h"
+#include "mull/MutationPoint.h"
 
 #include <llvm/IR/CallSite.h>
+#include <llvm/IR/DebugInfoMetadata.h>
+#include <llvm/IR/DebugLoc.h>
 #include <llvm/IR/InstIterator.h>
 #include <llvm/IR/Module.h>
-#include <llvm/IR/DebugLoc.h>
-#include <llvm/IR/DebugInfoMetadata.h>
 
 #include <fstream>
 #include <iterator>
@@ -15,12 +15,14 @@
 using namespace llvm;
 using namespace mull;
 
-const std::string RemoveVoidFunctionMutator::ID = "remove_void_function_mutator";
-const std::string RemoveVoidFunctionMutator::description = "Removes calls to a function returning void";
+const std::string RemoveVoidFunctionMutator::ID =
+    "remove_void_function_mutator";
+const std::string RemoveVoidFunctionMutator::description =
+    "Removes calls to a function returning void";
 
 std::string getDiagnostics(Instruction &instruction) {
   assert(isa<CallInst>(instruction));
-  
+
   CallSite callSite = CallSite(&instruction);
 
   std::stringstream diagstream;
@@ -33,16 +35,14 @@ std::string getDiagnostics(Instruction &instruction) {
   return diagnostics;
 }
 
-
-MutationPoint *
-RemoveVoidFunctionMutator::getMutationPoint(MullModule *module,
-                                            llvm::Function *function,
-                                            llvm::Instruction *instruction,
-                                            SourceLocation &sourceLocation,
-                                            MutationPointAddress &address) {
+MutationPoint *RemoveVoidFunctionMutator::getMutationPoint(
+    MullModule *module, llvm::Function *function,
+    llvm::Instruction *instruction, SourceLocation &sourceLocation,
+    MutationPointAddress &address) {
   if (canBeApplied(*instruction)) {
     std::string diagnostics = getDiagnostics(*instruction);
-    return new MutationPoint(this, address, instruction, function, diagnostics, sourceLocation, module);
+    return new MutationPoint(this, address, instruction, function, diagnostics,
+                             sourceLocation, module);
   }
 
   return nullptr;
@@ -65,7 +65,8 @@ bool RemoveVoidFunctionMutator::canBeApplied(Value &V) {
         return false;
       }
 
-      if (calledFunction->getName().str().find("clang_call_terminate") != std::string::npos) {
+      if (calledFunction->getName().str().find("clang_call_terminate") !=
+          std::string::npos) {
         return false;
       }
 
@@ -91,8 +92,9 @@ bool RemoveVoidFunctionMutator::canBeApplied(Value &V) {
   return false;
 }
 
-llvm::Value *RemoveVoidFunctionMutator::applyMutation(Function *function,
-                                                      MutationPointAddress &address) {
+llvm::Value *
+RemoveVoidFunctionMutator::applyMutation(Function *function,
+                                         MutationPointAddress &address) {
   llvm::Instruction &I = address.findInstruction(function);
 
   CallInst *callInst = dyn_cast<CallInst>(&I);

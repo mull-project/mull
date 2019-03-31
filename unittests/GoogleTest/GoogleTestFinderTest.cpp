@@ -1,27 +1,26 @@
-#include "TestFrameworks/GoogleTest/GoogleTestFinder.h"
-
-#include "Driver.h"
-#include "Program/Program.h"
-#include "Config/Configuration.h"
-#include "Config/ConfigParser.h"
-#include "Mutators/MutatorsFactory.h"
-#include "TestModuleFactory.h"
-#include "TestFrameworks/GoogleTest/GoogleTest_Test.h"
-#include "TestFrameworks/GoogleTest/GoogleTestRunner.h"
-#include "Filter.h"
-#include "MutationsFinder.h"
-#include "Toolchain/Toolchain.h"
-#include "Toolchain/JITEngine.h"
+#include "mull/TestFrameworks/GoogleTest/GoogleTestFinder.h"
 #include "FixturePaths.h"
-#include "ModuleLoader.h"
+#include "TestModuleFactory.h"
+#include "mull/Config/ConfigParser.h"
+#include "mull/Config/Configuration.h"
+#include "mull/Driver.h"
+#include "mull/Filter.h"
+#include "mull/ModuleLoader.h"
+#include "mull/MutationsFinder.h"
+#include "mull/Mutators/MutatorsFactory.h"
+#include "mull/Program/Program.h"
+#include "mull/TestFrameworks/GoogleTest/GoogleTestRunner.h"
+#include "mull/TestFrameworks/GoogleTest/GoogleTest_Test.h"
+#include "mull/Toolchain/JITEngine.h"
+#include "mull/Toolchain/Toolchain.h"
 
 #include <llvm/IR/CallSite.h>
 #include <llvm/IR/InstrTypes.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
+#include <llvm/Support/DynamicLibrary.h>
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/YAMLTraits.h>
-#include <llvm/Support/DynamicLibrary.h>
 
 #include "gtest/gtest.h"
 
@@ -33,7 +32,8 @@ using namespace llvm;
 TEST(GoogleTestFinder, FindTest) {
   LLVMContext llvmContext;
   ModuleLoader loader;
-  auto ModuleWithTests = loader.loadModuleAtPath(fixtures::google_test_google_test_Test_bc_path(), llvmContext);
+  auto ModuleWithTests = loader.loadModuleAtPath(
+      fixtures::google_test_google_test_Test_bc_path(), llvmContext);
 
   std::vector<std::unique_ptr<MullModule>> modules;
   modules.push_back(std::move(ModuleWithTests));
@@ -45,9 +45,9 @@ mutators:
 - negate_mutator
 - remove_void_function_mutator
 )YAML";
-  
+
   yaml::Input Input(configYAML);
-  
+
   ConfigParser Parser;
   auto config = Parser.loadConfig(Input);
 
@@ -68,7 +68,8 @@ mutators:
 TEST(GoogleTestFinder, findTests_filter) {
   LLVMContext llvmContext;
   ModuleLoader loader;
-  auto ModuleWithTests = loader.loadModuleAtPath(fixtures::google_test_google_test_Test_bc_path(), llvmContext);
+  auto ModuleWithTests = loader.loadModuleAtPath(
+      fixtures::google_test_google_test_Test_bc_path(), llvmContext);
 
   std::vector<std::unique_ptr<MullModule>> modules;
   modules.push_back(std::move(ModuleWithTests));
@@ -115,12 +116,15 @@ mutators:
 
   LLVMContext llvmContext;
   ModuleLoader loader;
-  auto moduleWithTests = loader.loadModuleAtPath(fixtures::google_test_google_test_Test_bc_path(), llvmContext);
-  auto moduleWithTestees = loader.loadModuleAtPath(fixtures::google_test_google_test_Testee_bc_path(), llvmContext);
+  auto moduleWithTests = loader.loadModuleAtPath(
+      fixtures::google_test_google_test_Test_bc_path(), llvmContext);
+  auto moduleWithTestees = loader.loadModuleAtPath(
+      fixtures::google_test_google_test_Testee_bc_path(), llvmContext);
 
-  auto compiledModule_tests =
-    toolchain.compiler().compileModule(moduleWithTests->getModule(), toolchain.targetMachine());
-  auto compiledModule_testees = toolchain.compiler().compileModule(moduleWithTestees->getModule(), toolchain.targetMachine());
+  auto compiledModule_tests = toolchain.compiler().compileModule(
+      moduleWithTests->getModule(), toolchain.targetMachine());
+  auto compiledModule_testees = toolchain.compiler().compileModule(
+      moduleWithTestees->getModule(), toolchain.targetMachine());
 
   std::vector<std::unique_ptr<MullModule>> modules;
   modules.push_back(std::move(moduleWithTests));
@@ -143,11 +147,9 @@ mutators:
   GoogleTestRunner runner(toolchain.mangler());
   JITEngine jit;
 
-  std::vector<llvm::object::ObjectFile *> objects({
-    compiledModule_tests.getBinary(),
-    compiledModule_testees.getBinary()
-  });
+  std::vector<llvm::object::ObjectFile *> objects(
+      {compiledModule_tests.getBinary(), compiledModule_testees.getBinary()});
   /// TODO: enable eventually
-//  runner.loadProgram(objects, jit);
+  //  runner.loadProgram(objects, jit);
   runner.runTest(Test1, jit);
 }

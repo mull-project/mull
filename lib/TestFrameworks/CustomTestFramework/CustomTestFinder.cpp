@@ -1,10 +1,10 @@
-#include "TestFrameworks/CustomTestFramework/CustomTestFinder.h"
+#include "mull/TestFrameworks/CustomTestFramework/CustomTestFinder.h"
 
-#include "Config/Configuration.h"
-#include "Filter.h"
-#include "Logger.h"
-#include "Program/Program.h"
-#include "TestFrameworks/CustomTestFramework/CustomTest_Test.h"
+#include "mull/Config/Configuration.h"
+#include "mull/Filter.h"
+#include "mull/Logger.h"
+#include "mull/Program/Program.h"
+#include "mull/TestFrameworks/CustomTestFramework/CustomTest_Test.h"
 
 #include <llvm/IR/Module.h>
 

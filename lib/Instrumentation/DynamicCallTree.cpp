@@ -1,6 +1,7 @@
-#include "Instrumentation/DynamicCallTree.h"
-#include "TestFrameworks/Test.h"
-#include "Testee.h"
+#include "mull/Instrumentation/DynamicCallTree.h"
+
+#include "mull/TestFrameworks/Test.h"
+#include "mull/Testee.h"
 
 #include <queue>
 #include <stack>
@@ -59,7 +60,9 @@ void fillInCallTree(std::vector<CallTreeFunction> &functions,
   callTreeMapping[functionIndex] = 0;
 }
 
-std::unique_ptr<CallTree> DynamicCallTree::createCallTree(uint32_t *mapping, std::vector<CallTreeFunction> functions) {
+std::unique_ptr<CallTree>
+DynamicCallTree::createCallTree(uint32_t *mapping,
+                                std::vector<CallTreeFunction> functions) {
   assert(mapping != nullptr);
   assert(mapping[0] == 0);
   assert(!functions.empty());
@@ -81,7 +84,8 @@ std::unique_ptr<CallTree> DynamicCallTree::createCallTree(uint32_t *mapping, std
   ///   2. If a function N was called as a very first function
   ///   (i.e. callstack is empty) then _callTreeMapping[N] == N.
   ///   3. If a function N is called by some other function
-  ///   (i.e. callstack is not empty) then _callTreeMapping[N] == callstack.top()
+  ///   (i.e. callstack is not empty) then _callTreeMapping[N] ==
+  ///   callstack.top()
   ///
   /// When the execution is done we can construct a tree of a  more classic
   /// form.
@@ -109,7 +113,8 @@ std::vector<CallTree *> DynamicCallTree::extractTestSubtrees(CallTree *root,
     CallTree *node = nodes.front();
     nodes.pop();
 
-    if (std::find(entryPoints.begin(), entryPoints.end(), node->function) != entryPoints.end()) {
+    if (std::find(entryPoints.begin(), entryPoints.end(), node->function) !=
+        entryPoints.end()) {
       subtrees.push_back(node);
     }
 
@@ -121,10 +126,8 @@ std::vector<CallTree *> DynamicCallTree::extractTestSubtrees(CallTree *root,
 }
 
 std::vector<std::unique_ptr<Testee>>
-DynamicCallTree::createTestees(std::vector<CallTree *> subtrees,
-                               Test *test,
-                               int maxDistance,
-                               Filter &filter) {
+DynamicCallTree::createTestees(std::vector<CallTree *> subtrees, Test *test,
+                               int maxDistance, Filter &filter) {
   std::vector<std::unique_ptr<Testee>> testees;
 
   for (CallTree *root : subtrees) {
@@ -142,9 +145,8 @@ DynamicCallTree::createTestees(std::vector<CallTree *> subtrees,
       }
 
       int distance = node->level - offset;
-      std::unique_ptr<Testee> testee(make_unique<Testee>(node->function,
-                                                         test,
-                                                         distance));
+      std::unique_ptr<Testee> testee(
+          make_unique<Testee>(node->function, test, distance));
       testees.push_back(std::move(testee));
       if (distance < maxDistance) {
         for (std::unique_ptr<CallTree> &child : node->children) {

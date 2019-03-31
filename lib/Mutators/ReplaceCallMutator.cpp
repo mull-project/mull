@@ -1,7 +1,7 @@
-#include "Mutators/ReplaceCallMutator.h"
+#include "mull/Mutators/ReplaceCallMutator.h"
 
-#include "Logger.h"
-#include "MutationPoint.h"
+#include "mull/Logger.h"
+#include "mull/MutationPoint.h"
 
 #include <llvm/IR/CallSite.h>
 #include <llvm/IR/Constants.h>
@@ -17,7 +17,8 @@ using namespace llvm;
 using namespace mull;
 
 const std::string ReplaceCallMutator::ID = "replace_call_mutator";
-const std::string ReplaceCallMutator::description = "Replaces call to a function with 42";
+const std::string ReplaceCallMutator::description =
+    "Replaces call to a function with 42";
 
 static bool findPossibleApplication(Value &V, std::string &outDiagnostics);
 
@@ -44,8 +45,8 @@ static bool findPossibleApplication(Value &V, std::string &outDiagnostics) {
 
   auto returnedType = callSite.getFunctionType()->getReturnType();
   if (returnedType->isIntegerTy() == false &&
-      returnedType->isFloatTy()   == false &&
-      returnedType->isDoubleTy()  == false) {
+      returnedType->isFloatTy() == false &&
+      returnedType->isDoubleTy() == false) {
     return false;
   }
 
@@ -68,12 +69,10 @@ static bool findPossibleApplication(Value &V, std::string &outDiagnostics) {
   return true;
 }
 
-MutationPoint *
-ReplaceCallMutator::getMutationPoint(MullModule *module,
-                                     llvm::Function *function,
-                                     llvm::Instruction *instruction,
-                                     SourceLocation &sourceLocation,
-                                     MutationPointAddress &address) {
+MutationPoint *ReplaceCallMutator::getMutationPoint(
+    MullModule *module, llvm::Function *function,
+    llvm::Instruction *instruction, SourceLocation &sourceLocation,
+    MutationPointAddress &address) {
 
   std::string diagnostics;
 
@@ -81,40 +80,36 @@ ReplaceCallMutator::getMutationPoint(MullModule *module,
     return nullptr;
   }
 
-  auto mutationPoint =
-      new MutationPoint(this, address, instruction, function, diagnostics, sourceLocation, module);
+  auto mutationPoint = new MutationPoint(this, address, instruction, function,
+                                         diagnostics, sourceLocation, module);
 
   return mutationPoint;
 }
 
-static
-llvm::Value *getReplacement(Type *returnType, llvm::LLVMContext &context) {
+static llvm::Value *getReplacement(Type *returnType,
+                                   llvm::LLVMContext &context) {
   static const int MagicValue = 42;
 
   if (returnType->isIntegerTy()) {
-    APInt replacementIntValue = APInt(returnType->getIntegerBitWidth(),
-                                      MagicValue);
+    APInt replacementIntValue =
+        APInt(returnType->getIntegerBitWidth(), MagicValue);
 
-    return ConstantInt::get(context,
-                            replacementIntValue);
+    return ConstantInt::get(context, replacementIntValue);
   }
   if (returnType->isDoubleTy()) {
     APFloat replacementFloatValue = APFloat((double)MagicValue);
-    return ConstantFP::get(context,
-                           replacementFloatValue);
+    return ConstantFP::get(context, replacementFloatValue);
   }
   if (returnType->isFloatTy()) {
     APFloat replacementFloatValue = APFloat((float)MagicValue);
-    return ConstantFP::get(context,
-                           replacementFloatValue);
+    return ConstantFP::get(context, replacementFloatValue);
   }
 
   llvm_unreachable("Unsupported return type!");
 }
 
-llvm::Value *
-ReplaceCallMutator::applyMutation(Function *function,
-                                  MutationPointAddress &address) {
+llvm::Value *ReplaceCallMutator::applyMutation(Function *function,
+                                               MutationPointAddress &address) {
   llvm::Instruction &instruction = address.findInstruction(function);
 
   CallSite callSite(&instruction);

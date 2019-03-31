@@ -1,14 +1,14 @@
-
-#include "Toolchain/JITEngine.h"
+#include "mull/Toolchain/JITEngine.h"
 
 using namespace mull;
 using namespace llvm;
 
 JITEngine::JITEngine() : symbolNotFound(nullptr) {}
 
-void JITEngine::addObjectFiles(std::vector<object::ObjectFile *> &files,
-                               llvm_compat::SymbolResolver &resolver,
-                               std::unique_ptr<llvm::RuntimeDyld::MemoryManager> memManager) {
+void JITEngine::addObjectFiles(
+    std::vector<object::ObjectFile *> &files,
+    llvm_compat::SymbolResolver &resolver,
+    std::unique_ptr<llvm::RuntimeDyld::MemoryManager> memManager) {
   std::vector<object::ObjectFile *>().swap(objectFiles);
   llvm::StringMap<llvm_compat::JITSymbolInfo>().swap(symbolTable);
   memoryManager = std::move(memManager);
@@ -28,9 +28,9 @@ void JITEngine::addObjectFiles(std::vector<object::ObjectFile *> &files,
       }
 
       auto flags = llvm_compat::JITSymbolFlagsFromObjectSymbol(symbol);
-      symbolTable.insert(std::make_pair(name.get(), llvm_compat::JITSymbol(0, flags)));
+      symbolTable.insert(
+          std::make_pair(name.get(), llvm_compat::JITSymbol(0, flags)));
     }
-
   }
 
   RuntimeDyld dynamicLoader(*memoryManager, resolver);
@@ -55,4 +55,3 @@ llvm_compat::JITSymbol &JITEngine::getSymbol(llvm::StringRef name) {
 
   return symbolIterator->second;
 }
-

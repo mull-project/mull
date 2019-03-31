@@ -1,11 +1,11 @@
-#include "TestFrameworks/CustomTestFramework/CustomTestFinder.h"
-#include "TestFrameworks/CustomTestFramework/CustomTest_Test.h"
-#include "Config/Configuration.h"
-#include "Config/ConfigParser.h"
-#include "Program/Program.h"
-#include "Filter.h"
 #include "FixturePaths.h"
-#include "ModuleLoader.h"
+#include "mull/Config/ConfigParser.h"
+#include "mull/Config/Configuration.h"
+#include "mull/Filter.h"
+#include "mull/ModuleLoader.h"
+#include "mull/Program/Program.h"
+#include "mull/TestFrameworks/CustomTestFramework/CustomTestFinder.h"
+#include "mull/TestFrameworks/CustomTestFramework/CustomTest_Test.h"
 
 #include <llvm/IR/LLVMContext.h>
 
@@ -17,19 +17,17 @@ using namespace std;
 
 TEST(CustomTestFinder, findTests) {
   Configuration configuration;
-  configuration.bitcodePaths = {
-      mull::fixtures::custom_test_distance_bc_path(),
-      mull::fixtures::custom_test_main_bc_path(),
-      mull::fixtures::custom_test_test_bc_path()
-  };
+  configuration.bitcodePaths = {mull::fixtures::custom_test_distance_bc_path(),
+                                mull::fixtures::custom_test_main_bc_path(),
+                                mull::fixtures::custom_test_test_bc_path()};
 
   ModuleLoader loader;
   auto loadedModules = loader.loadModules(configuration);
   Program program({}, {}, std::move(loadedModules));
 
   vector<CustomTestDefinition> testDefinitions({
-    CustomTestDefinition("failing", "failing_test", "mull", { "failing_test" }),
-    CustomTestDefinition("passing", "passing_test", "mull", { "passing_test" }),
+      CustomTestDefinition("failing", "failing_test", "mull", {"failing_test"}),
+      CustomTestDefinition("passing", "passing_test", "mull", {"passing_test"}),
   });
 
   Filter filter;
@@ -41,9 +39,10 @@ TEST(CustomTestFinder, findTests) {
   vector<unique_ptr<mull::Test>>::iterator searchResult;
   Function *constructor = nullptr;
 
-  searchResult = find_if(tests.begin(), tests.end(), [&](unique_ptr<mull::Test> &test) {
-    return test.get()->getTestName() == "failing";
-  });
+  searchResult =
+      find_if(tests.begin(), tests.end(), [&](unique_ptr<mull::Test> &test) {
+        return test.get()->getTestName() == "failing";
+      });
   ASSERT_NE(searchResult, tests.end());
 
   CustomTest_Test *failingTest = dyn_cast<CustomTest_Test>(searchResult->get());
@@ -56,9 +55,10 @@ TEST(CustomTestFinder, findTests) {
   constructor = *(failingTest->getConstructors().begin());
   ASSERT_EQ(constructor->getName(), "initGlobalVariable");
 
-  searchResult = find_if(tests.begin(), tests.end(), [&](unique_ptr<mull::Test> &test) {
-    return test.get()->getTestName() == "passing";
-  });
+  searchResult =
+      find_if(tests.begin(), tests.end(), [&](unique_ptr<mull::Test> &test) {
+        return test.get()->getTestName() == "passing";
+      });
   ASSERT_NE(searchResult, tests.end());
 
   CustomTest_Test *passingTest = dyn_cast<CustomTest_Test>(searchResult->get());
@@ -89,11 +89,9 @@ custom_tests:
   ConfigParser parser;
   auto config = parser.loadConfig(input);
   Configuration configuration(config);
-  configuration.bitcodePaths = {
-      mull::fixtures::custom_test_distance_bc_path(),
-      mull::fixtures::custom_test_main_bc_path(),
-      mull::fixtures::custom_test_test_bc_path()
-  };
+  configuration.bitcodePaths = {mull::fixtures::custom_test_distance_bc_path(),
+                                mull::fixtures::custom_test_main_bc_path(),
+                                mull::fixtures::custom_test_test_bc_path()};
 
   ModuleLoader loader;
   auto loadedModules = loader.loadModules(configuration);
@@ -108,9 +106,10 @@ custom_tests:
   vector<unique_ptr<mull::Test>>::iterator searchResult;
   Function *constructor = nullptr;
 
-  searchResult = find_if(tests.begin(), tests.end(), [&](unique_ptr<mull::Test> &test) {
-    return test.get()->getTestName() == "failing";
-  });
+  searchResult =
+      find_if(tests.begin(), tests.end(), [&](unique_ptr<mull::Test> &test) {
+        return test.get()->getTestName() == "failing";
+      });
   ASSERT_NE(searchResult, tests.end());
 
   CustomTest_Test *failingTest = dyn_cast<CustomTest_Test>(searchResult->get());
@@ -123,9 +122,10 @@ custom_tests:
   constructor = *(failingTest->getConstructors().begin());
   ASSERT_EQ(constructor->getName(), "initGlobalVariable");
 
-  searchResult = find_if(tests.begin(), tests.end(), [&](unique_ptr<mull::Test> &test) {
-    return test.get()->getTestName() == "passing";
-  });
+  searchResult =
+      find_if(tests.begin(), tests.end(), [&](unique_ptr<mull::Test> &test) {
+        return test.get()->getTestName() == "passing";
+      });
   ASSERT_NE(searchResult, tests.end());
 
   CustomTest_Test *passingTest = dyn_cast<CustomTest_Test>(searchResult->get());
@@ -156,11 +156,9 @@ custom_tests:
   ConfigParser parser;
   auto config = parser.loadConfig(input);
   Configuration configuration(config);
-  configuration.bitcodePaths = {
-      mull::fixtures::custom_test_distance_bc_path(),
-      mull::fixtures::custom_test_main_bc_path(),
-      mull::fixtures::custom_test_test_bc_path()
-  };
+  configuration.bitcodePaths = {mull::fixtures::custom_test_distance_bc_path(),
+                                mull::fixtures::custom_test_main_bc_path(),
+                                mull::fixtures::custom_test_test_bc_path()};
 
   ModuleLoader loader;
   auto loadedModules = loader.loadModules(configuration);
@@ -176,9 +174,10 @@ custom_tests:
   vector<unique_ptr<mull::Test>>::iterator searchResult;
   Function *constructor = nullptr;
 
-  searchResult = find_if(tests.begin(), tests.end(), [&](unique_ptr<mull::Test> &test) {
-    return test.get()->getTestName() == "passing";
-  });
+  searchResult =
+      find_if(tests.begin(), tests.end(), [&](unique_ptr<mull::Test> &test) {
+        return test.get()->getTestName() == "passing";
+      });
   ASSERT_NE(searchResult, tests.end());
 
   CustomTest_Test *passingTest = dyn_cast<CustomTest_Test>(searchResult->get());
@@ -200,11 +199,9 @@ TEST(CustomTestFinder, findTests_withEmptyConfig) {
   ConfigParser parser;
   auto config = parser.loadConfig(input);
   Configuration configuration(config);
-  configuration.bitcodePaths = {
-      mull::fixtures::custom_test_distance_bc_path(),
-      mull::fixtures::custom_test_main_bc_path(),
-      mull::fixtures::custom_test_test_bc_path()
-  };
+  configuration.bitcodePaths = {mull::fixtures::custom_test_distance_bc_path(),
+                                mull::fixtures::custom_test_main_bc_path(),
+                                mull::fixtures::custom_test_test_bc_path()};
 
   ModuleLoader loader;
   auto loadedModules = loader.loadModules(configuration);

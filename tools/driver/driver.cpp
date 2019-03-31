@@ -1,31 +1,31 @@
-#include "Driver.h"
+#include "mull/Driver.h"
 
-#include "Config/RawConfig.h"
-#include "Config/ConfigParser.h"
-#include "Config/Configuration.h"
-#include "Filter.h"
-#include "Logger.h"
-#include "ModuleLoader.h"
-#include "Mutators/MutatorsFactory.h"
-#include "Reporters/SQLiteReporter.h"
-#include "Reporters/TimeReporter.h"
-#include "Result.h"
-#include "MutationsFinder.h"
-#include "Parallelization/TaskExecutor.h"
-#include "Parallelization/Tasks/LoadObjectFilesTask.h"
-#include "Toolchain/Toolchain.h"
-#include "Metrics/Metrics.h"
-#include "JunkDetection/JunkDetector.h"
-#include "JunkDetection/CXX/CXXJunkDetector.h"
-#include "TestFrameworks/TestFrameworkFactory.h"
-#include "Program/Program.h"
-#include "Version.h"
+#include "mull/Config/ConfigParser.h"
+#include "mull/Config/Configuration.h"
+#include "mull/Config/RawConfig.h"
+#include "mull/Filter.h"
+#include "mull/JunkDetection/CXX/CXXJunkDetector.h"
+#include "mull/JunkDetection/JunkDetector.h"
+#include "mull/Logger.h"
+#include "mull/Metrics/Metrics.h"
+#include "mull/ModuleLoader.h"
+#include "mull/MutationsFinder.h"
+#include "mull/Mutators/MutatorsFactory.h"
+#include "mull/Parallelization/TaskExecutor.h"
+#include "mull/Parallelization/Tasks/LoadObjectFilesTask.h"
+#include "mull/Program/Program.h"
+#include "mull/Reporters/SQLiteReporter.h"
+#include "mull/Reporters/TimeReporter.h"
+#include "mull/Result.h"
+#include "mull/TestFrameworks/TestFrameworkFactory.h"
+#include "mull/Toolchain/Toolchain.h"
+#include "mull/Version.h"
 
 #include <llvm/IR/LLVMContext.h>
+#include <llvm/Support/CommandLine.h>
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/TargetSelect.h>
-#include <llvm/Support/CommandLine.h>
 #include <llvm/Support/YAMLParser.h>
 
 #include <string>
@@ -35,15 +35,14 @@ using namespace llvm;
 
 cl::OptionCategory MullOptionCategory("Mull");
 
-static cl::opt<std::string> ConfigFile(
-    llvm::cl::desc("<config file>"),
-    llvm::cl::Positional
-);
+static cl::opt<std::string> ConfigFile(llvm::cl::desc("<config file>"),
+                                       llvm::cl::Positional);
 
 int main(int argc, char *argv[]) {
   if (argc == 1) {
     // TODO: print friendlier help message here.
-    Logger::error() << "Usage: mull-driver path-to-config-file.yml" << "\n";
+    Logger::error() << "Usage: mull-driver path-to-config-file.yml"
+                    << "\n";
     exit(1);
   }
 
@@ -60,9 +59,10 @@ int main(int argc, char *argv[]) {
   ConfigParser Parser;
   auto rawConfig = Parser.loadConfig(ConfigFile.c_str());
 
-  std::vector <std::string> configErrors = rawConfig.validate();
+  std::vector<std::string> configErrors = rawConfig.validate();
   if (configErrors.size() > 0) {
-    Logger::error() << "Provided config file is not valid:" << "\n";
+    Logger::error() << "Provided config file is not valid:"
+                    << "\n";
     for (const std::string &configError : configErrors) {
       Logger::error() << "\t" << configError << "\n";
     }
@@ -80,11 +80,11 @@ int main(int argc, char *argv[]) {
   Toolchain toolchain(configuration);
   Filter filter;
 
-  for (const std::string &location: rawConfig.getExcludeLocations()) {
+  for (const std::string &location : rawConfig.getExcludeLocations()) {
     filter.skipByLocation(location);
   }
 
-  for (const std::string &test: rawConfig.getTests()) {
+  for (const std::string &test : rawConfig.getTests()) {
     filter.includeTest(test);
   }
 
@@ -117,21 +117,24 @@ int main(int argc, char *argv[]) {
     } else if (detector == "none") {
       junkDetector = make_unique<NullJunkDetector>();
     } else if (detector == "cxx") {
-      junkDetector = make_unique<CXXJunkDetector>(rawConfig.junkDetectionConfig());
+      junkDetector =
+          make_unique<CXXJunkDetector>(rawConfig.junkDetectionConfig());
     } else {
       Logger::error() << "mull-driver> Unknown junk detector provided: "
-        << "`" << detector << "`. ";
+                      << "`" << detector << "`. ";
     }
   }
 
   std::vector<std::unique_ptr<Reporter>> reporters;
   if (rawConfig.getReporters().empty()) {
-    reporters.push_back(make_unique<SQLiteReporter>(rawConfig.getProjectName()));
+    reporters.push_back(
+        make_unique<SQLiteReporter>(rawConfig.getProjectName()));
   }
 
-  for (auto &reporter: rawConfig.getReporters()) {
+  for (auto &reporter : rawConfig.getReporters()) {
     if (reporter == "sqlite") {
-      reporters.push_back(make_unique<SQLiteReporter>(rawConfig.getProjectName()));
+      reporters.push_back(
+          make_unique<SQLiteReporter>(rawConfig.getProjectName()));
     }
 
     else if (reporter == "time") {
@@ -140,7 +143,7 @@ int main(int argc, char *argv[]) {
 
     else {
       Logger::error() << "mull-driver> Unknown reporter provided: "
-        << "`" << reporter << "`. ";
+                      << "`" << reporter << "`. ";
     }
   }
 
@@ -159,13 +162,14 @@ int main(int argc, char *argv[]) {
                   moduleLoader.loadModules(configuration));
 
   Metrics metrics;
-  Driver driver(configuration, program, testFramework, toolchain, filter, mutationsFinder, metrics, *junkDetector);
+  Driver driver(configuration, program, testFramework, toolchain, filter,
+                mutationsFinder, metrics, *junkDetector);
 
   metrics.beginRun();
   auto result = driver.Run();
   metrics.endRun();
 
-  for (auto &reporter: reporters) {
+  for (auto &reporter : reporters) {
     reporter->reportResults(*result, rawConfig, metrics);
   }
 
