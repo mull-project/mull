@@ -5,43 +5,74 @@
     dest: "{{ source_dir }}"
     version: "{{ gitref }}"
 
-- name: Create Build Directory
+- name: Create Build Directory (Debug)
   file:
-    path: "{{ build_dir }}"
+    path: "{{ debug_build_dir }}"
     state: directory
 
-- name: Prepare Build System
+- name: Prepare Build System (Debug)
   command: cmake -G Ninja -DPATH_TO_LLVM={{ llvm_dir }} -DCMAKE_CXX_FLAGS="{{ mull_cxx_flags }}" {{ source_dir }}
   args:
-    chdir: "{{ build_dir }}"
-    creates: "{{ build_dir }}/CMakeCache.txt"
+    chdir: "{{ debug_build_dir }}"
+    creates: "{{ debug_build_dir }}/CMakeCache.txt"
   environment:
     CC: "{{ llvm_dir }}/bin/clang"
     CXX: "{{ llvm_dir }}/bin/clang++"
 
-- name: Build Mull
+- name: Build Mull (Debug)
   command: ninja all
   args:
-    chdir: "{{ build_dir }}"
+    chdir: "{{ debug_build_dir }}"
 
-- name: Install Mull
+- name: Build Tests (Debug)
+  command: ninja mull-tests
+  args:
+    chdir: "{{ debug_build_dir }}"
+
+- name: Run Tests (Debug)
+  command: "{{ debug_build_dir}}/tests/mull-tests"
+
+- name: Create Build Directory (Release)
+  file:
+    path: "{{ release_build_dir }}"
+    state: directory
+
+- name: Prepare Build System (Release)
+  command: cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DPATH_TO_LLVM={{ llvm_dir }} -DCMAKE_CXX_FLAGS="{{ mull_cxx_flags }}" {{ source_dir }}
+  args:
+    chdir: "{{ release_build_dir }}"
+    creates: "{{ release_build_dir }}/CMakeCache.txt"
+  environment:
+    CC: "{{ llvm_dir }}/bin/clang"
+    CXX: "{{ llvm_dir }}/bin/clang++"
+
+- name: Build Mull (Release)
+  command: ninja all
+  args:
+    chdir: "{{ release_build_dir }}"
+
+- name: Build Tests (Release)
+  command: ninja mull-tests
+  args:
+    chdir: "{{ release_build_dir }}"
+
+- name: Run Tests (Release)
+  command: "{{ release_build_dir}}/tests/mull-tests"
+
+- name: Install Mull (Release)
   command: ninja install
   args:
-    chdir: "{{ build_dir }}"
+    chdir: "{{ release_build_dir }}"
+  become: true
+
+- name: Prepare Package (Release)
+  command: ninja package
+  args:
+    chdir: "{{ release_build_dir }}"
   become: true
 
 - name: Print Mull version
   command: mull-cxx -version
   args:
-    chdir: "{{ build_dir }}"
-
-- name: Build Tests
-  command: ninja mull-tests
-  args:
-    chdir: "{{ build_dir }}"
-
-- name: Run Tests
-  command: "{{ build_dir}}/tests/mull-tests"
-  environment:
-    LD_LIBRARY_PATH: "{{ llvm_dir }}/lib"
+    chdir: "{{ release_build_dir }}"
 
