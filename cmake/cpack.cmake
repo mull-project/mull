@@ -45,7 +45,7 @@ else()
 endif()
 
 if (${CPACK_SYSTEM_NAME} STREQUAL "macOS")
-  include(cmake/packaging/cpack.PackageMaker.cmake)
+  include(cmake/packaging/cpack.PKG-macOS.cmake)
 elseif (${CPACK_SYSTEM_NAME} STREQUAL "debian")
   include(cmake/packaging/cpack.DEB-debian.cmake)
 elseif(${CPACK_SYSTEM_NAME} STREQUAL "ubuntu")
