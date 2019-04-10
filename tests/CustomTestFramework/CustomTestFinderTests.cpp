@@ -5,7 +5,6 @@
 #include "mull/ModuleLoader.h"
 #include "mull/Program/Program.h"
 #include "mull/TestFrameworks/CustomTestFramework/CustomTestFinder.h"
-#include "mull/TestFrameworks/CustomTestFramework/CustomTest_Test.h"
 
 #include <llvm/IR/LLVMContext.h>
 
@@ -36,36 +35,32 @@ TEST(CustomTestFinder, findTests) {
   Filter filter;
   CustomTestFinder testFinder(testDefinitions);
 
-  vector<unique_ptr<mull::Test>> tests = testFinder.findTests(program, filter);
+  vector<mull::Test> tests = testFinder.findTests(program, filter);
   ASSERT_EQ(2U, tests.size());
 
-  vector<unique_ptr<mull::Test>>::iterator searchResult;
+  vector<mull::Test>::iterator searchResult;
 
-  searchResult =
-      find_if(tests.begin(), tests.end(), [&](unique_ptr<mull::Test> &test) {
-        return test.get()->getTestName() == "failing";
-      });
+  searchResult = find_if(tests.begin(), tests.end(), [&](mull::Test &test) {
+    return test.getTestName() == "failing";
+  });
   ASSERT_NE(searchResult, tests.end());
 
-  CustomTest_Test *failingTest = dyn_cast<CustomTest_Test>(searchResult->get());
-  ASSERT_NE(failingTest, nullptr);
-  ASSERT_EQ(failingTest->getTestName(), "failing");
-  ASSERT_EQ(failingTest->getProgramName(), "mull");
-  ASSERT_EQ(failingTest->getArguments().size(), 1UL);
-  ASSERT_EQ(*failingTest->getArguments().begin(), "failing_test");
+  mull::Test &failingTest = *searchResult;
+  ASSERT_EQ(failingTest.getTestName(), "failing");
+  ASSERT_EQ(failingTest.getProgramName(), "mull");
+  ASSERT_EQ(failingTest.getArguments().size(), 1UL);
+  ASSERT_EQ(failingTest.getArguments().front(), "failing_test");
 
-  searchResult =
-      find_if(tests.begin(), tests.end(), [&](unique_ptr<mull::Test> &test) {
-        return test.get()->getTestName() == "passing";
-      });
+  searchResult = find_if(tests.begin(), tests.end(), [&](mull::Test &test) {
+    return test.getTestName() == "passing";
+  });
   ASSERT_NE(searchResult, tests.end());
 
-  CustomTest_Test *passingTest = dyn_cast<CustomTest_Test>(searchResult->get());
-  ASSERT_NE(passingTest, nullptr);
-  ASSERT_EQ(passingTest->getTestName(), "passing");
-  ASSERT_EQ(passingTest->getProgramName(), "mull");
-  ASSERT_EQ(passingTest->getArguments().size(), 1UL);
-  ASSERT_EQ(*passingTest->getArguments().begin(), "passing_test");
+  mull::Test &passingTest = *searchResult;
+  ASSERT_EQ(passingTest.getTestName(), "passing");
+  ASSERT_EQ(passingTest.getProgramName(), "mull");
+  ASSERT_EQ(passingTest.getArguments().size(), 1UL);
+  ASSERT_EQ(passingTest.getArguments().front(), "passing_test");
 }
 
 TEST(CustomTestFinder, findTests_viaConfig) {
@@ -99,36 +94,32 @@ custom_tests:
   Filter filter;
   CustomTestFinder testFinder(config.getCustomTests());
 
-  vector<unique_ptr<mull::Test>> tests = testFinder.findTests(program, filter);
+  vector<mull::Test> tests = testFinder.findTests(program, filter);
   ASSERT_EQ(2U, tests.size());
 
-  vector<unique_ptr<mull::Test>>::iterator searchResult;
+  vector<mull::Test>::iterator searchResult;
 
-  searchResult =
-      find_if(tests.begin(), tests.end(), [&](unique_ptr<mull::Test> &test) {
-        return test.get()->getTestName() == "failing";
-      });
+  searchResult = find_if(tests.begin(), tests.end(), [&](mull::Test &test) {
+    return test.getTestName() == "failing";
+  });
   ASSERT_NE(searchResult, tests.end());
 
-  CustomTest_Test *failingTest = dyn_cast<CustomTest_Test>(searchResult->get());
-  ASSERT_NE(failingTest, nullptr);
-  ASSERT_EQ(failingTest->getTestName(), "failing");
-  ASSERT_EQ(failingTest->getProgramName(), "some_name");
-  ASSERT_EQ(failingTest->getArguments().size(), 1UL);
-  ASSERT_EQ(*failingTest->getArguments().begin(), "failing_test");
+  mull::Test &failingTest = *searchResult;
+  ASSERT_EQ(failingTest.getTestName(), "failing");
+  ASSERT_EQ(failingTest.getProgramName(), "some_name");
+  ASSERT_EQ(failingTest.getArguments().size(), 1UL);
+  ASSERT_EQ(failingTest.getArguments().front(), "failing_test");
 
-  searchResult =
-      find_if(tests.begin(), tests.end(), [&](unique_ptr<mull::Test> &test) {
-        return test.get()->getTestName() == "passing";
-      });
+  searchResult = find_if(tests.begin(), tests.end(), [&](mull::Test &test) {
+    return test.getTestName() == "passing";
+  });
   ASSERT_NE(searchResult, tests.end());
 
-  CustomTest_Test *passingTest = dyn_cast<CustomTest_Test>(searchResult->get());
-  ASSERT_NE(passingTest, nullptr);
-  ASSERT_EQ(passingTest->getTestName(), "passing");
-  ASSERT_EQ(passingTest->getProgramName(), "mull");
-  ASSERT_EQ(passingTest->getArguments().size(), 1UL);
-  ASSERT_EQ(*passingTest->getArguments().begin(), "passing_test");
+  mull::Test &passingTest = *searchResult;
+  ASSERT_EQ(passingTest.getTestName(), "passing");
+  ASSERT_EQ(passingTest.getProgramName(), "mull");
+  ASSERT_EQ(passingTest.getArguments().size(), 1UL);
+  ASSERT_EQ(passingTest.getArguments().front(), "passing_test");
 }
 
 TEST(CustomTestFinder, findTests_withFilter) {
@@ -163,23 +154,21 @@ custom_tests:
   filter.includeTest("passing");
   CustomTestFinder testFinder(config.getCustomTests());
 
-  vector<unique_ptr<mull::Test>> tests = testFinder.findTests(program, filter);
+  vector<mull::Test> tests = testFinder.findTests(program, filter);
   ASSERT_EQ(1U, tests.size());
 
-  vector<unique_ptr<mull::Test>>::iterator searchResult;
+  vector<mull::Test>::iterator searchResult;
 
-  searchResult =
-      find_if(tests.begin(), tests.end(), [&](unique_ptr<mull::Test> &test) {
-        return test.get()->getTestName() == "passing";
-      });
+  searchResult = find_if(tests.begin(), tests.end(), [&](mull::Test &test) {
+    return test.getTestName() == "passing";
+  });
   ASSERT_NE(searchResult, tests.end());
 
-  CustomTest_Test *passingTest = dyn_cast<CustomTest_Test>(searchResult->get());
-  ASSERT_NE(passingTest, nullptr);
-  ASSERT_EQ(passingTest->getTestName(), "passing");
-  ASSERT_EQ(passingTest->getProgramName(), "mull");
-  ASSERT_EQ(passingTest->getArguments().size(), 1UL);
-  ASSERT_EQ(*passingTest->getArguments().begin(), "passing_test");
+  mull::Test &passingTest = *searchResult;
+  ASSERT_EQ(passingTest.getTestName(), "passing");
+  ASSERT_EQ(passingTest.getProgramName(), "mull");
+  ASSERT_EQ(passingTest.getArguments().size(), 1UL);
+  ASSERT_EQ(passingTest.getArguments().front(), "passing_test");
 }
 
 TEST(CustomTestFinder, findTests_withEmptyConfig) {
@@ -201,12 +190,11 @@ TEST(CustomTestFinder, findTests_withEmptyConfig) {
   Filter filter;
   CustomTestFinder testFinder(config.getCustomTests());
 
-  vector<unique_ptr<mull::Test>> tests = testFinder.findTests(program, filter);
+  vector<mull::Test> tests = testFinder.findTests(program, filter);
   ASSERT_EQ(1U, tests.size());
 
-  CustomTest_Test *test = dyn_cast<CustomTest_Test>(tests.begin()->get());
-  ASSERT_NE(test, nullptr);
-  ASSERT_EQ(test->getTestName(), "main");
-  ASSERT_EQ(test->getProgramName(), "mull");
-  ASSERT_EQ(test->getArguments().size(), 0UL);
+  mull::Test &test = tests.front();
+  ASSERT_EQ(test.getTestName(), "main");
+  ASSERT_EQ(test.getProgramName(), "mull");
+  ASSERT_EQ(test.getArguments().size(), 0UL);
 }

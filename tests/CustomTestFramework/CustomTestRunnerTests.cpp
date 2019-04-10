@@ -3,7 +3,7 @@
 #include "mull/ModuleLoader.h"
 #include "mull/Program/Program.h"
 #include "mull/TestFrameworks/CustomTestFramework/CustomTestRunner.h"
-#include "mull/TestFrameworks/CustomTestFramework/CustomTest_Test.h"
+#include "mull/TestFrameworks/Test.h"
 #include "mull/Toolchain/Mangler.h"
 #include "mull/Toolchain/Toolchain.h"
 #include "mull/Toolchain/Trampolines.h"
@@ -42,14 +42,14 @@ TEST(CustomTestRunner, noTestNameSpecified) {
     ownedObjects.push_back(move(object));
   }
 
-  CustomTest_Test test("test", "mull", {}, nullptr);
+  mull::Test test("test", "mull", "main", {}, nullptr);
   ForkProcessSandbox sandbox;
   JITEngine jit;
   std::vector<std::string> trampolineNames;
   Trampolines trampolines(trampolineNames);
   runner.loadMutatedProgram(objects, trampolines, jit);
   ExecutionResult result = sandbox.run(
-      [&]() { return runner.runTest(jit, program, &test); }, TestTimeout);
+      [&]() { return runner.runTest(jit, program, test); }, TestTimeout);
   ASSERT_EQ(result.status, ExecutionStatus::Failed);
 }
 
@@ -75,14 +75,14 @@ TEST(CustomTestRunner, tooManyParameters) {
     ownedObjects.push_back(move(object));
   }
 
-  CustomTest_Test test("test", "mull", {"arg1", "arg2"}, nullptr);
+  mull::Test test("test", "mull", "main", {"arg1", "arg2"}, nullptr);
   ForkProcessSandbox sandbox;
   JITEngine jit;
   std::vector<std::string> trampolineNames;
   Trampolines trampolines(trampolineNames);
   runner.loadMutatedProgram(objects, trampolines, jit);
   ExecutionResult result = sandbox.run(
-      [&]() { return runner.runTest(jit, program, &test); }, TestTimeout);
+      [&]() { return runner.runTest(jit, program, test); }, TestTimeout);
   ASSERT_EQ(result.status, ExecutionStatus::Failed);
 }
 
@@ -108,14 +108,14 @@ TEST(CustomTestRunner, runPassingTest) {
     ownedObjects.push_back(move(object));
   }
 
-  CustomTest_Test test("test", "mull", {"passing_test"}, nullptr);
+  mull::Test test("test", "mull", "main", {"passing_test"}, nullptr);
   ForkProcessSandbox sandbox;
   JITEngine jit;
   std::vector<std::string> trampolineNames;
   Trampolines trampolines(trampolineNames);
   runner.loadMutatedProgram(objects, trampolines, jit);
   ExecutionResult result = sandbox.run(
-      [&]() { return runner.runTest(jit, program, &test); }, TestTimeout);
+      [&]() { return runner.runTest(jit, program, test); }, TestTimeout);
   ASSERT_EQ(result.status, ExecutionStatus::Passed);
 }
 
@@ -145,14 +145,14 @@ TEST(CustomTestRunner, runFailingTest) {
     ownedObjects.push_back(move(object));
   }
 
-  CustomTest_Test test("test", "mull", {"failing_test"}, nullptr);
+  mull::Test test("test", "mull", "main", {"failing_test"}, nullptr);
   ForkProcessSandbox sandbox;
   JITEngine jit;
   std::vector<std::string> trampolineNames;
   Trampolines trampolines(trampolineNames);
   runner.loadMutatedProgram(objects, trampolines, jit);
   ExecutionResult result = sandbox.run(
-      [&]() { return runner.runTest(jit, program, &test); }, TestTimeout);
+      [&]() { return runner.runTest(jit, program, test); }, TestTimeout);
   ASSERT_EQ(result.status, ExecutionStatus::Failed);
 }
 
@@ -177,13 +177,13 @@ TEST(CustomTestRunner, attemptToRunUnknownTest) {
     ownedObjects.push_back(move(object));
   }
 
-  CustomTest_Test test("test", "mull", {"foobar"}, nullptr);
+  mull::Test test("test", "mull", "main", {"foobar"}, nullptr);
   ForkProcessSandbox sandbox;
   JITEngine jit;
   std::vector<std::string> trampolineNames;
   Trampolines trampolines(trampolineNames);
   runner.loadMutatedProgram(objects, trampolines, jit);
   ExecutionResult result = sandbox.run(
-      [&]() { return runner.runTest(jit, program, &test); }, TestTimeout);
+      [&]() { return runner.runTest(jit, program, test); }, TestTimeout);
   ASSERT_EQ(result.status, ExecutionStatus::Failed);
 }

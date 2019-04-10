@@ -103,9 +103,9 @@ DynamicCallTree::createCallTree(uint32_t *mapping,
 }
 
 std::vector<CallTree *> DynamicCallTree::extractTestSubtrees(CallTree *root,
-                                                             Test *test) {
+                                                             Test &test) {
   std::vector<CallTree *> subtrees;
-  std::vector<Function *> entryPoints = test->entryPoints();
+  std::vector<const Function *> entryPoints = {test.getTestBody()};
 
   std::queue<CallTree *> nodes;
   nodes.push(root);
@@ -126,7 +126,7 @@ std::vector<CallTree *> DynamicCallTree::extractTestSubtrees(CallTree *root,
 }
 
 std::vector<std::unique_ptr<Testee>>
-DynamicCallTree::createTestees(std::vector<CallTree *> subtrees, Test *test,
+DynamicCallTree::createTestees(std::vector<CallTree *> subtrees, Test &test,
                                int maxDistance, Filter &filter) {
   std::vector<std::unique_ptr<Testee>> testees;
 
@@ -146,7 +146,7 @@ DynamicCallTree::createTestees(std::vector<CallTree *> subtrees, Test *test,
 
       int distance = node->level - offset;
       std::unique_ptr<Testee> testee(
-          make_unique<Testee>(node->function, test, distance));
+          make_unique<Testee>(node->function, &test, distance));
       testees.push_back(std::move(testee));
       if (distance < maxDistance) {
         for (std::unique_ptr<CallTree> &child : node->children) {

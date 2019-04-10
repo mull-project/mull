@@ -1,7 +1,7 @@
 #include "mull/TestFrameworks/CustomTestFramework/CustomTestRunner.h"
 
 #include "mull/Program/Program.h"
-#include "mull/TestFrameworks/CustomTestFramework/CustomTest_Test.h"
+#include "mull/TestFrameworks/Test.h"
 #include "mull/Toolchain/Mangler.h"
 #include "mull/Toolchain/Resolvers/InstrumentationResolver.h"
 #include "mull/Toolchain/Resolvers/MutationResolver.h"
@@ -72,18 +72,16 @@ void CustomTestRunner::loadMutatedProgram(ObjectFiles &objectFiles,
 }
 
 ExecutionStatus CustomTestRunner::runTest(JITEngine &jit, Program &program,
-                                          Test *test) {
-  *trampoline = &test->getInstrumentationInfo();
-
-  CustomTest_Test *customTest = dyn_cast<CustomTest_Test>(test);
+                                          Test &test) {
+  *trampoline = &test.getInstrumentationInfo();
 
   for (auto &constructor : program.getStaticConstructors()) {
     runStaticConstructor(constructor, jit);
   }
 
-  std::vector<std::string> arguments = customTest->getArguments();
-  arguments.insert(arguments.begin(), customTest->getProgramName());
-  int argc = arguments.size();
+  std::vector<std::string> arguments = test.getArguments();
+  arguments.insert(arguments.begin(), test.getProgramName());
+  size_t argc = arguments.size();
   char **argv = new char *[argc + 1];
 
   for (int i = 0; i < argc; i++) {
@@ -93,10 +91,10 @@ ExecutionStatus CustomTestRunner::runTest(JITEngine &jit, Program &program,
   }
   argv[argc] = nullptr;
 
-  void *mainPointer =
-      getFunctionPointer(mangler.getNameWithPrefix("main"), jit);
+  void *mainPointer = getFunctionPointer(
+      mangler.getNameWithPrefix(test.getDriverFunctionName()), jit);
   auto main = ((int (*)(int, char **))(intptr_t)mainPointer);
-  int exitStatus = main(argc, argv);
+  int exitStatus = main(static_cast<int>(argc), argv);
 
   for (int i = 0; i < argc; i++) {
     delete[] argv[i];

@@ -14,33 +14,30 @@ namespace mull {
 
 class Test {
 public:
-  virtual std::string getTestName() = 0;
-  virtual std::string getTestDisplayName() = 0;
-  virtual std::string getUniqueIdentifier() = 0;
-  virtual ~Test() {}
+  Test(std::string test, std::string program, std::string driverFunctionName,
+       std::vector<std::string> args, llvm::Function *testBody);
 
-  void setExecutionResult(ExecutionResult result) { executionResult = result; }
-  ExecutionResult &getExecutionResult() { return executionResult; }
-  InstrumentationInfo &getInstrumentationInfo() { return instrumentationInfo; }
+  std::string getTestName() const;
+  std::string getProgramName() const;
+  std::string getDriverFunctionName() const;
+  std::string getTestDisplayName() const;
+  std::string getUniqueIdentifier() const;
+  const std::vector<std::string> &getArguments() const;
+  const llvm::Function *getTestBody() const;
 
-  /// Entry points into the test might be the test body, setup/teardown,
-  /// before each/before all functions, and so on.
-  /// TODO: entryPoints is not the best name for teardown/after each methods
-  virtual std::vector<llvm::Function *> entryPoints() {
-    return std::vector<llvm::Function *>();
-  }
-
-  virtual llvm::Function *testBodyFunction() = 0;
-
-  enum TestKind { TK_SimpleTest, TK_GoogleTest, TK_RustTest, TK_CustomTest };
-  TestKind getKind() const { return Kind; }
-  Test(TestKind K) : Kind(K) {}
+  void setExecutionResult(ExecutionResult result);
+  const ExecutionResult &getExecutionResult() const;
+  InstrumentationInfo &getInstrumentationInfo();
 
 private:
+  std::string testName;
+  std::string programName;
+  std::string driverFunctionName;
+  std::vector<std::string> arguments;
+  llvm::Function *testBody;
+
   ExecutionResult executionResult;
   InstrumentationInfo instrumentationInfo;
-
-  const TestKind Kind;
 };
 
 } // namespace mull

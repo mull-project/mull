@@ -17,9 +17,9 @@ struct Configuration;
 
 class OriginalTestExecutionTask {
 public:
-  using In = std::vector<std::unique_ptr<Test>>;
+  using In = std::vector<Test>;
   using Out = std::vector<std::unique_ptr<Testee>>;
-  using iterator = In::const_iterator;
+  using iterator = In::iterator;
 
   OriginalTestExecutionTask(Instrumentation &instrumentation, Program &program,
                             ProcessSandbox &sandbox, TestRunner &runner,

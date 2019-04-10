@@ -3,7 +3,6 @@
 #include "mull/Filter.h"
 #include "mull/Logger.h"
 #include "mull/Program/Program.h"
-#include "mull/TestFrameworks/GoogleTest/GoogleTest_Test.h"
 
 #include <llvm/IR/CallSite.h>
 #include <llvm/IR/Constants.h>
@@ -53,9 +52,9 @@ using namespace llvm;
 /// Note: except of Typed and Value Prametrized Tests
 ///
 
-std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Program &program,
-                                                               Filter &filter) {
-  std::vector<std::unique_ptr<Test>> tests;
+std::vector<Test> GoogleTestFinder::findTests(Program &program,
+                                              Filter &filter) {
+  std::vector<Test> tests;
 
   auto testInfoTypeName = StringRef("class.testing::TestInfo");
 
@@ -77,7 +76,7 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Program &program,
         continue;
       }
 
-      StructType *structType = dyn_cast<StructType>(globalType);
+      auto *structType = dyn_cast<StructType>(globalType);
       if (!structType) {
         continue;
       }
@@ -224,8 +223,9 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Program &program,
       assert(testBodyFunction &&
              "Cannot find the TestBody function for the Test");
 
-      tests.emplace_back(
-          make_unique<GoogleTest_Test>(testName, testBodyFunction));
+      auto arguments = {std::string("--gtest_filter=") + testName};
+      tests.push_back(
+          Test(testName, "mull", "main", arguments, testBodyFunction));
     }
   }
 

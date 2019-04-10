@@ -110,12 +110,12 @@ void mull::SQLiteReporter::reportResults(const Result &result,
   sqlite3_prepare(database, insertTestQuery, -1, &insertTestStmt, NULL);
 
   for (auto &test : result.getTests()) {
-    std::string testName = test->getTestDisplayName();
-    std::string testUniqueId = test->getUniqueIdentifier();
-    ExecutionResult testExecutionResult = test->getExecutionResult();
+    std::string testName = test.getTestDisplayName();
+    std::string testUniqueId = test.getUniqueIdentifier();
+    ExecutionResult testExecutionResult = test.getExecutionResult();
 
     auto testLocation =
-        SourceLocation::sourceLocationFromFunction(test->testBodyFunction());
+        SourceLocation::sourceLocationFromFunction(test.getTestBody());
 
     int executionResultIndex = 1;
     sqlite3_bind_text(insertExecutionResultStmt, executionResultIndex++,

@@ -38,17 +38,16 @@ set(mull_sources
   MullModule.cpp
   MutationPoint.cpp
   TestFrameworks/TestRunner.cpp
+  TestFrameworks/Test.cpp
   Testee.cpp
 
-  TestFrameworks/SimpleTest/SimpleTest_Test.cpp
+
   TestFrameworks/SimpleTest/SimpleTestFinder.cpp
   TestFrameworks/SimpleTest/SimpleTestRunner.cpp
 
-  TestFrameworks/GoogleTest/GoogleTest_Test.cpp
   TestFrameworks/GoogleTest/GoogleTestFinder.cpp
   TestFrameworks/GoogleTest/GoogleTestRunner.cpp
 
-  TestFrameworks/CustomTestFramework/CustomTest_Test.cpp
   TestFrameworks/CustomTestFramework/CustomTestRunner.cpp
   TestFrameworks/CustomTestFramework/CustomTestFinder.cpp
 

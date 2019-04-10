@@ -37,9 +37,9 @@ public:
   static std::unique_ptr<CallTree>
   createCallTree(uint32_t *mapping, std::vector<CallTreeFunction> functions);
   static std::vector<CallTree *> extractTestSubtrees(CallTree *root,
-                                                     Test *test);
+                                                     Test &test);
   static std::vector<std::unique_ptr<Testee>>
-  createTestees(std::vector<CallTree *> subtrees, Test *test, int distance,
+  createTestees(std::vector<CallTree *> subtrees, Test &test, int maxDistance,
                 Filter &filter);
 
   static void enterFunction(const uint32_t functionIndex, uint32_t *mapping,

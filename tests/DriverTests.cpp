@@ -725,10 +725,9 @@ TEST(Driver, customTest_withDynamicLibraries) {
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
 
-  auto test = result->getTests().begin()->get();
-  ASSERT_NE(test, nullptr);
-  ASSERT_EQ(ExecutionStatus::Passed, test->getExecutionResult().status);
-  ASSERT_EQ("passing", test->getTestName());
+  auto &test = result->getTests().front();
+  ASSERT_EQ(ExecutionStatus::Passed, test.getExecutionResult().status);
+  ASSERT_EQ("passing", test.getTestName());
   /// Could not find any mutations because there was no bitcode for testees
   ASSERT_EQ(0UL, result->getMutationResults().size());
 }
@@ -839,10 +838,9 @@ TEST(Driver, customTest_withDynamicLibraries_and_ObjectFiles) {
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
 
-  auto test = result->getTests().begin()->get();
-  ASSERT_NE(test, nullptr);
-  ASSERT_EQ(ExecutionStatus::Passed, test->getExecutionResult().status);
-  ASSERT_EQ("passing", test->getTestName());
+  auto &test = result->getTests().front();
+  ASSERT_EQ(ExecutionStatus::Passed, test.getExecutionResult().status);
+  ASSERT_EQ("passing", test.getTestName());
   /// Could not find any mutations because there was no bitcode for testees
   ASSERT_EQ(0UL, result->getMutationResults().size());
 }
@@ -878,10 +876,9 @@ TEST(Driver, DISABLED_customTest_withExceptions) {
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
 
-  auto test = result->getTests().begin()->get();
-  ASSERT_NE(test, nullptr);
-  ASSERT_EQ(ExecutionStatus::Passed, test->getExecutionResult().status);
-  ASSERT_EQ("passing", test->getTestName());
+  auto &test = result->getTests().front();
+  ASSERT_EQ(ExecutionStatus::Passed, test.getExecutionResult().status);
+  ASSERT_EQ("passing", test.getTestName());
   /// Could not find any mutations because there was no bitcode for testees
   ASSERT_EQ(0UL, result->getMutationResults().size());
 }

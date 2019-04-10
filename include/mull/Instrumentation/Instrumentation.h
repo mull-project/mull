@@ -22,11 +22,11 @@ public:
   void recordFunctions(llvm::Module *originalModule);
   void insertCallbacks(llvm::Module *instrumentedModule);
 
-  std::vector<std::unique_ptr<Testee>> getTestees(Test *test, Filter &filter,
+  std::vector<std::unique_ptr<Testee>> getTestees(Test &test, Filter &filter,
                                                   int distance);
 
-  void setupInstrumentationInfo(Test *test);
-  void cleanupInstrumentationInfo(Test *test);
+  void setupInstrumentationInfo(Test &test);
+  void cleanupInstrumentationInfo(Test &test);
 
   std::map<std::string, uint32_t> &getFunctionOffsetMapping();
 

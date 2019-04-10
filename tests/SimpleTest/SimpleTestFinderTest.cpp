@@ -4,7 +4,6 @@
 #include "mull/Filter.h"
 #include "mull/ModuleLoader.h"
 #include "mull/Program/Program.h"
-#include "mull/TestFrameworks/SimpleTest/SimpleTest_Test.h"
 #include "mull/TestFrameworks/Test.h"
 
 #include <llvm/IR/InstrTypes.h>
