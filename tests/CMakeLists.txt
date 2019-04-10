@@ -1,3 +1,4 @@
+add_subdirectory(fixtures)
 generate_fixture_factory(FACTORY_HEADER)
 
 set(mull_unittests_sources

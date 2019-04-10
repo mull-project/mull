@@ -6,7 +6,7 @@ endif()
 
 # returns 'path' - ${CMAKE_SOURCE_DIR}
 function(_fixture_prefix prefix path out)
-  string(REPLACE "${prefix}/lab/" "" replaced "${path}")
+  string(REPLACE "${prefix}/tests/fixtures/" "" replaced "${path}")
   file(TO_CMAKE_PATH "${replaced}" replaced)
   string(REPLACE "/" "_" replaced ${replaced})
   set(${out} ${replaced} PARENT_SCOPE)
