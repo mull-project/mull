@@ -14,12 +14,12 @@ using namespace mull;
 using namespace llvm;
 
 MutantExecutionTask::MutantExecutionTask(
-    ProcessSandbox &sandbox, TestRunner &runner, const Configuration &config,
-    Filter &filter, Mangler &mangler,
+    ProcessSandbox &sandbox, Program &program, TestRunner &runner,
+    const Configuration &config, Filter &filter, Mangler &mangler,
     std::vector<llvm::object::ObjectFile *> &objectFiles,
     std::vector<std::string> &mutatedFunctionNames)
-    : sandbox(sandbox), runner(runner), config(config), filter(filter),
-      mangler(mangler), objectFiles(objectFiles),
+    : sandbox(sandbox), program(program), runner(runner), config(config),
+      filter(filter), mangler(mangler), objectFiles(objectFiles),
       mutatedFunctionNames(mutatedFunctionNames) {}
 
 void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
@@ -55,7 +55,7 @@ void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
 
         result = sandbox.run(
             [&]() {
-              ExecutionStatus status = runner.runTest(test, jit);
+              ExecutionStatus status = runner.runTest(jit, program, test);
               assert(status != ExecutionStatus::Invalid &&
                      "Expect to see valid TestResult");
               return status;

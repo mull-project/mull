@@ -8,11 +8,10 @@ using namespace std;
 
 CustomTest_Test::CustomTest_Test(std::string test, std::string program,
                                  std::vector<std::string> args,
-                                 llvm::Function *body,
-                                 std::vector<llvm::Function *> constructors)
+                                 llvm::Function *body)
     : Test(TestKind::TK_CustomTest), testName(std::move(test)),
       programName(std::move(program)), arguments(std::move(args)),
-      staticConstructors(std::move(constructors)), testFunction(body) {}
+      testFunction(body) {}
 
 std::string CustomTest_Test::getTestName() { return testName; }
 

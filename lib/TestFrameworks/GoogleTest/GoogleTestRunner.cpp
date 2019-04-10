@@ -1,5 +1,6 @@
 #include "mull/TestFrameworks/GoogleTest/GoogleTestRunner.h"
 
+#include "mull/Program/Program.h"
 #include "mull/TestFrameworks/GoogleTest/GoogleTest_Test.h"
 #include "mull/Toolchain/JITEngine.h"
 #include "mull/Toolchain/Mangler.h"
@@ -63,12 +64,13 @@ void GoogleTestRunner::loadInstrumentedProgram(ObjectFiles &objectFiles,
                      make_unique<SectionMemoryManager>());
 }
 
-ExecutionStatus GoogleTestRunner::runTest(Test *test, JITEngine &jit) {
+ExecutionStatus GoogleTestRunner::runTest(JITEngine &jit, Program &program,
+                                          Test *test) {
   *trampoline = &test->getInstrumentationInfo();
 
   auto *googleTest = dyn_cast<GoogleTest_Test>(test);
 
-  for (auto &constructor : googleTest->GetGlobalCtors()) {
+  for (auto &constructor : program.getStaticConstructors()) {
     runStaticConstructor(constructor, jit);
   }
 

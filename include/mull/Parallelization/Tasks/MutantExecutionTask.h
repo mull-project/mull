@@ -15,6 +15,7 @@ class Toolchain;
 class Filter;
 class Mangler;
 class progress_counter;
+class Program;
 
 struct Configuration;
 
@@ -24,9 +25,9 @@ public:
   using Out = std::vector<std::unique_ptr<MutationResult>>;
   using iterator = In::const_iterator;
 
-  MutantExecutionTask(ProcessSandbox &sandbox, TestRunner &runner,
-                      const Configuration &config, Filter &filter,
-                      Mangler &mangler,
+  MutantExecutionTask(ProcessSandbox &sandbox, Program &program,
+                      TestRunner &runner, const Configuration &config,
+                      Filter &filter, Mangler &mangler,
                       std::vector<llvm::object::ObjectFile *> &objectFiles,
                       std::vector<std::string> &mutatedFunctionNames);
 
@@ -35,6 +36,7 @@ public:
 
 private:
   JITEngine jit;
+  Program &program;
   ProcessSandbox &sandbox;
   TestRunner &runner;
   const Configuration &config;

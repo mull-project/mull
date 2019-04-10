@@ -224,8 +224,8 @@ std::vector<std::unique_ptr<Test>> GoogleTestFinder::findTests(Program &program,
       assert(testBodyFunction &&
              "Cannot find the TestBody function for the Test");
 
-      tests.emplace_back(make_unique<GoogleTest_Test>(
-          testName, testBodyFunction, program.getStaticConstructors()));
+      tests.emplace_back(
+          make_unique<GoogleTest_Test>(testName, testBodyFunction));
     }
   }
 

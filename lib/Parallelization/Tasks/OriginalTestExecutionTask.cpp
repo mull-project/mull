@@ -11,11 +11,11 @@ using namespace mull;
 using namespace llvm;
 
 OriginalTestExecutionTask::OriginalTestExecutionTask(
-    Instrumentation &instrumentation, ProcessSandbox &sandbox,
+    Instrumentation &instrumentation, Program &program, ProcessSandbox &sandbox,
     TestRunner &runner, const Configuration &config, Filter &filter,
     JITEngine &jit)
-    : instrumentation(instrumentation), sandbox(sandbox), runner(runner),
-      config(config), filter(filter), jit(jit) {}
+    : instrumentation(instrumentation), program(program), sandbox(sandbox),
+      runner(runner), config(config), filter(filter), jit(jit) {}
 
 void OriginalTestExecutionTask::operator()(iterator begin, iterator end,
                                            Out &storage,
@@ -25,8 +25,9 @@ void OriginalTestExecutionTask::operator()(iterator begin, iterator end,
 
     instrumentation.setupInstrumentationInfo(test.get());
 
-    ExecutionResult testExecutionResult = sandbox.run(
-        [&]() { return runner.runTest(test.get(), jit); }, config.timeout);
+    ExecutionResult testExecutionResult =
+        sandbox.run([&]() { return runner.runTest(jit, program, test.get()); },
+                    config.timeout);
 
     test->setExecutionResult(testExecutionResult);
 

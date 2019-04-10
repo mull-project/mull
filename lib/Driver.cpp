@@ -131,8 +131,8 @@ Driver::findMutationPoints(std::vector<std::unique_ptr<Test>> &tests) {
   std::vector<OriginalTestExecutionTask> tasks;
   tasks.reserve(config.parallelization.testExecutionWorkers);
   for (int i = 0; i < config.parallelization.testExecutionWorkers; i++) {
-    tasks.emplace_back(instrumentation, *sandbox, testFramework.runner(),
-                       config, filter, jit);
+    tasks.emplace_back(instrumentation, program, *sandbox,
+                       testFramework.runner(), config, filter, jit);
   }
 
   std::vector<std::unique_ptr<Testee>> testees;
@@ -248,8 +248,9 @@ Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
   std::vector<MutantExecutionTask> tasks;
   tasks.reserve(config.parallelization.mutantExecutionWorkers);
   for (int i = 0; i < config.parallelization.mutantExecutionWorkers; i++) {
-    tasks.emplace_back(*sandbox, testFramework.runner(), config, filter,
-                       toolchain.mangler(), objectFiles, mutatedFunctions);
+    tasks.emplace_back(*sandbox, program, testFramework.runner(), config,
+                       filter, toolchain.mangler(), objectFiles,
+                       mutatedFunctions);
   }
   metrics.beginMutantsExecution();
   TaskExecutor<MutantExecutionTask> mutantRunner(

@@ -51,7 +51,8 @@ void SimpleTestRunner::loadMutatedProgram(ObjectFiles &objectFiles,
                      make_unique<SectionMemoryManager>());
 }
 
-ExecutionStatus SimpleTestRunner::runTest(Test *test, JITEngine &jit) {
+ExecutionStatus SimpleTestRunner::runTest(JITEngine &jit, Program &program,
+                                          Test *test) {
   *trampoline = &test->getInstrumentationInfo();
   assert(isa<SimpleTest_Test>(test) && "Supposed to work only with");
 
