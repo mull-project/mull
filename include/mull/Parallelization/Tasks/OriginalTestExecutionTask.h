@@ -11,6 +11,7 @@ class TestRunner;
 class Filter;
 class JITEngine;
 class progress_counter;
+class Program;
 
 struct Configuration;
 
@@ -20,7 +21,7 @@ public:
   using Out = std::vector<std::unique_ptr<Testee>>;
   using iterator = In::const_iterator;
 
-  OriginalTestExecutionTask(Instrumentation &instrumentation,
+  OriginalTestExecutionTask(Instrumentation &instrumentation, Program &program,
                             ProcessSandbox &sandbox, TestRunner &runner,
                             const Configuration &config, Filter &filter,
                             JITEngine &jit);
@@ -28,6 +29,7 @@ public:
   void operator()(iterator begin, iterator end, Out &storage,
                   progress_counter &counter);
   Instrumentation &instrumentation;
+  Program &program;
   ProcessSandbox &sandbox;
   TestRunner &runner;
   const Configuration &config;

@@ -1,5 +1,6 @@
 #include "mull/TestFrameworks/CustomTestFramework/CustomTestRunner.h"
 
+#include "mull/Program/Program.h"
 #include "mull/TestFrameworks/CustomTestFramework/CustomTest_Test.h"
 #include "mull/Toolchain/Mangler.h"
 #include "mull/Toolchain/Resolvers/InstrumentationResolver.h"
@@ -70,12 +71,13 @@ void CustomTestRunner::loadMutatedProgram(ObjectFiles &objectFiles,
                      make_unique<SectionMemoryManager>());
 }
 
-ExecutionStatus CustomTestRunner::runTest(Test *test, JITEngine &jit) {
+ExecutionStatus CustomTestRunner::runTest(JITEngine &jit, Program &program,
+                                          Test *test) {
   *trampoline = &test->getInstrumentationInfo();
 
   CustomTest_Test *customTest = dyn_cast<CustomTest_Test>(test);
 
-  for (auto &constructor : customTest->getConstructors()) {
+  for (auto &constructor : program.getStaticConstructors()) {
     runStaticConstructor(constructor, jit);
   }
 

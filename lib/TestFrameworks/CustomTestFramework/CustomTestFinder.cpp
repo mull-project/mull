@@ -49,9 +49,9 @@ std::vector<std::unique_ptr<Test>> CustomTestFinder::findTests(Program &program,
           programName = "mull";
         }
 
-        tests.emplace_back(make_unique<CustomTest_Test>(
-            definition.testName, programName, definition.callArguments,
-            &function, program.getStaticConstructors()));
+        tests.emplace_back(
+            make_unique<CustomTest_Test>(definition.testName, programName,
+                                         definition.callArguments, &function));
       }
     }
   }

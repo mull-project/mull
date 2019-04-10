@@ -1,6 +1,7 @@
 #include "mull/Config/Configuration.h"
 #include "mull/ForkProcessSandbox.h"
 #include "mull/ModuleLoader.h"
+#include "mull/Program/Program.h"
 #include "mull/TestFrameworks/CustomTestFramework/CustomTestRunner.h"
 #include "mull/TestFrameworks/CustomTestFramework/CustomTest_Test.h"
 #include "mull/Toolchain/Mangler.h"
@@ -30,24 +31,25 @@ TEST(CustomTestRunner, noTestNameSpecified) {
 
   ModuleLoader loader;
   auto loadedModules = loader.loadModules(configuration);
+  Program program({}, {}, std::move(loadedModules));
 
   vector<object::OwningBinary<object::ObjectFile>> ownedObjects;
   vector<object::ObjectFile *> objects;
-  for (auto &m : loadedModules) {
+  for (auto &m : program.modules()) {
     auto object =
         toolchain.compiler().compileModule(*m, toolchain.targetMachine());
     objects.push_back(object.getBinary());
     ownedObjects.push_back(move(object));
   }
 
-  CustomTest_Test test("test", "mull", {}, nullptr, {});
+  CustomTest_Test test("test", "mull", {}, nullptr);
   ForkProcessSandbox sandbox;
   JITEngine jit;
   std::vector<std::string> trampolineNames;
   Trampolines trampolines(trampolineNames);
   runner.loadMutatedProgram(objects, trampolines, jit);
-  ExecutionResult result =
-      sandbox.run([&]() { return runner.runTest(&test, jit); }, TestTimeout);
+  ExecutionResult result = sandbox.run(
+      [&]() { return runner.runTest(jit, program, &test); }, TestTimeout);
   ASSERT_EQ(result.status, ExecutionStatus::Failed);
 }
 
@@ -61,25 +63,26 @@ TEST(CustomTestRunner, tooManyParameters) {
 
   ModuleLoader loader;
   auto loadedModules = loader.loadModules(configuration);
+  Program program({}, {}, std::move(loadedModules));
 
   vector<object::OwningBinary<object::ObjectFile>> ownedObjects;
   vector<object::ObjectFile *> objects;
 
-  for (auto &m : loadedModules) {
+  for (auto &m : program.modules()) {
     auto object =
         toolchain.compiler().compileModule(*m, toolchain.targetMachine());
     objects.push_back(object.getBinary());
     ownedObjects.push_back(move(object));
   }
 
-  CustomTest_Test test("test", "mull", {"arg1", "arg2"}, nullptr, {});
+  CustomTest_Test test("test", "mull", {"arg1", "arg2"}, nullptr);
   ForkProcessSandbox sandbox;
   JITEngine jit;
   std::vector<std::string> trampolineNames;
   Trampolines trampolines(trampolineNames);
   runner.loadMutatedProgram(objects, trampolines, jit);
-  ExecutionResult result =
-      sandbox.run([&]() { return runner.runTest(&test, jit); }, TestTimeout);
+  ExecutionResult result = sandbox.run(
+      [&]() { return runner.runTest(jit, program, &test); }, TestTimeout);
   ASSERT_EQ(result.status, ExecutionStatus::Failed);
 }
 
@@ -93,25 +96,26 @@ TEST(CustomTestRunner, runPassingTest) {
 
   ModuleLoader loader;
   auto loadedModules = loader.loadModules(configuration);
+  Program program({}, {}, std::move(loadedModules));
 
   vector<object::OwningBinary<object::ObjectFile>> ownedObjects;
   vector<object::ObjectFile *> objects;
 
-  for (auto &m : loadedModules) {
+  for (auto &m : program.modules()) {
     auto object =
         toolchain.compiler().compileModule(*m, toolchain.targetMachine());
     objects.push_back(object.getBinary());
     ownedObjects.push_back(move(object));
   }
 
-  CustomTest_Test test("test", "mull", {"passing_test"}, nullptr, {});
+  CustomTest_Test test("test", "mull", {"passing_test"}, nullptr);
   ForkProcessSandbox sandbox;
   JITEngine jit;
   std::vector<std::string> trampolineNames;
   Trampolines trampolines(trampolineNames);
   runner.loadMutatedProgram(objects, trampolines, jit);
-  ExecutionResult result =
-      sandbox.run([&]() { return runner.runTest(&test, jit); }, TestTimeout);
+  ExecutionResult result = sandbox.run(
+      [&]() { return runner.runTest(jit, program, &test); }, TestTimeout);
   ASSERT_EQ(result.status, ExecutionStatus::Passed);
 }
 
@@ -125,11 +129,12 @@ TEST(CustomTestRunner, runFailingTest) {
 
   ModuleLoader loader;
   auto loadedModules = loader.loadModules(configuration);
+  Program program({}, {}, std::move(loadedModules));
 
   Function *constructor = nullptr;
   vector<object::OwningBinary<object::ObjectFile>> ownedObjects;
   vector<object::ObjectFile *> objects;
-  for (auto &m : loadedModules) {
+  for (auto &m : program.modules()) {
     Module *module = m->getModule();
     if (!constructor) {
       constructor = module->getFunction("initGlobalVariable");
@@ -140,15 +145,14 @@ TEST(CustomTestRunner, runFailingTest) {
     ownedObjects.push_back(move(object));
   }
 
-  CustomTest_Test test("test", "mull", {"failing_test"}, nullptr,
-                       {constructor});
+  CustomTest_Test test("test", "mull", {"failing_test"}, nullptr);
   ForkProcessSandbox sandbox;
   JITEngine jit;
   std::vector<std::string> trampolineNames;
   Trampolines trampolines(trampolineNames);
   runner.loadMutatedProgram(objects, trampolines, jit);
-  ExecutionResult result =
-      sandbox.run([&]() { return runner.runTest(&test, jit); }, TestTimeout);
+  ExecutionResult result = sandbox.run(
+      [&]() { return runner.runTest(jit, program, &test); }, TestTimeout);
   ASSERT_EQ(result.status, ExecutionStatus::Failed);
 }
 
@@ -162,23 +166,24 @@ TEST(CustomTestRunner, attemptToRunUnknownTest) {
 
   ModuleLoader loader;
   auto loadedModules = loader.loadModules(configuration);
+  Program program({}, {}, std::move(loadedModules));
 
   vector<object::OwningBinary<object::ObjectFile>> ownedObjects;
   vector<object::ObjectFile *> objects;
-  for (auto &m : loadedModules) {
+  for (auto &m : program.modules()) {
     auto object =
         toolchain.compiler().compileModule(*m, toolchain.targetMachine());
     objects.push_back(object.getBinary());
     ownedObjects.push_back(move(object));
   }
 
-  CustomTest_Test test("test", "mull", {"foobar"}, nullptr, {});
+  CustomTest_Test test("test", "mull", {"foobar"}, nullptr);
   ForkProcessSandbox sandbox;
   JITEngine jit;
   std::vector<std::string> trampolineNames;
   Trampolines trampolines(trampolineNames);
   runner.loadMutatedProgram(objects, trampolines, jit);
-  ExecutionResult result =
-      sandbox.run([&]() { return runner.runTest(&test, jit); }, TestTimeout);
+  ExecutionResult result = sandbox.run(
+      [&]() { return runner.runTest(jit, program, &test); }, TestTimeout);
   ASSERT_EQ(result.status, ExecutionStatus::Failed);
 }

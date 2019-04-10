@@ -151,5 +151,5 @@ mutators:
       {compiledModule_tests.getBinary(), compiledModule_testees.getBinary()});
   /// TODO: enable eventually
   //  runner.loadProgram(objects, jit);
-  runner.runTest(Test1, jit);
+  runner.runTest(jit, program, Test1);
 }

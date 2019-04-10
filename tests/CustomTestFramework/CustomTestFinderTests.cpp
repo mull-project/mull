@@ -24,6 +24,9 @@ TEST(CustomTestFinder, findTests) {
   ModuleLoader loader;
   auto loadedModules = loader.loadModules(configuration);
   Program program({}, {}, std::move(loadedModules));
+  ASSERT_EQ(program.getStaticConstructors().size(), 1UL);
+  ASSERT_EQ(program.getStaticConstructors().front()->getName(),
+            "initGlobalVariable");
 
   vector<CustomTestDefinition> testDefinitions({
       CustomTestDefinition("failing", "failing_test", "mull", {"failing_test"}),
@@ -37,7 +40,6 @@ TEST(CustomTestFinder, findTests) {
   ASSERT_EQ(2U, tests.size());
 
   vector<unique_ptr<mull::Test>>::iterator searchResult;
-  Function *constructor = nullptr;
 
   searchResult =
       find_if(tests.begin(), tests.end(), [&](unique_ptr<mull::Test> &test) {
@@ -51,9 +53,6 @@ TEST(CustomTestFinder, findTests) {
   ASSERT_EQ(failingTest->getProgramName(), "mull");
   ASSERT_EQ(failingTest->getArguments().size(), 1UL);
   ASSERT_EQ(*failingTest->getArguments().begin(), "failing_test");
-  ASSERT_EQ(failingTest->getConstructors().size(), 1UL);
-  constructor = *(failingTest->getConstructors().begin());
-  ASSERT_EQ(constructor->getName(), "initGlobalVariable");
 
   searchResult =
       find_if(tests.begin(), tests.end(), [&](unique_ptr<mull::Test> &test) {
@@ -67,9 +66,6 @@ TEST(CustomTestFinder, findTests) {
   ASSERT_EQ(passingTest->getProgramName(), "mull");
   ASSERT_EQ(passingTest->getArguments().size(), 1UL);
   ASSERT_EQ(*passingTest->getArguments().begin(), "passing_test");
-  ASSERT_EQ(passingTest->getConstructors().size(), 1UL);
-  constructor = *(passingTest->getConstructors().begin());
-  ASSERT_EQ(constructor->getName(), "initGlobalVariable");
 }
 
 TEST(CustomTestFinder, findTests_viaConfig) {
@@ -96,6 +92,9 @@ custom_tests:
   ModuleLoader loader;
   auto loadedModules = loader.loadModules(configuration);
   Program program({}, {}, std::move(loadedModules));
+  ASSERT_EQ(program.getStaticConstructors().size(), 1UL);
+  ASSERT_EQ(program.getStaticConstructors().front()->getName(),
+            "initGlobalVariable");
 
   Filter filter;
   CustomTestFinder testFinder(config.getCustomTests());
@@ -104,7 +103,6 @@ custom_tests:
   ASSERT_EQ(2U, tests.size());
 
   vector<unique_ptr<mull::Test>>::iterator searchResult;
-  Function *constructor = nullptr;
 
   searchResult =
       find_if(tests.begin(), tests.end(), [&](unique_ptr<mull::Test> &test) {
@@ -118,9 +116,6 @@ custom_tests:
   ASSERT_EQ(failingTest->getProgramName(), "some_name");
   ASSERT_EQ(failingTest->getArguments().size(), 1UL);
   ASSERT_EQ(*failingTest->getArguments().begin(), "failing_test");
-  ASSERT_EQ(failingTest->getConstructors().size(), 1UL);
-  constructor = *(failingTest->getConstructors().begin());
-  ASSERT_EQ(constructor->getName(), "initGlobalVariable");
 
   searchResult =
       find_if(tests.begin(), tests.end(), [&](unique_ptr<mull::Test> &test) {
@@ -134,9 +129,6 @@ custom_tests:
   ASSERT_EQ(passingTest->getProgramName(), "mull");
   ASSERT_EQ(passingTest->getArguments().size(), 1UL);
   ASSERT_EQ(*passingTest->getArguments().begin(), "passing_test");
-  ASSERT_EQ(passingTest->getConstructors().size(), 1UL);
-  constructor = *(passingTest->getConstructors().begin());
-  ASSERT_EQ(constructor->getName(), "initGlobalVariable");
 }
 
 TEST(CustomTestFinder, findTests_withFilter) {
@@ -163,6 +155,9 @@ custom_tests:
   ModuleLoader loader;
   auto loadedModules = loader.loadModules(configuration);
   Program program({}, {}, std::move(loadedModules));
+  ASSERT_EQ(program.getStaticConstructors().size(), 1UL);
+  ASSERT_EQ(program.getStaticConstructors().front()->getName(),
+            "initGlobalVariable");
 
   Filter filter;
   filter.includeTest("passing");
@@ -172,7 +167,6 @@ custom_tests:
   ASSERT_EQ(1U, tests.size());
 
   vector<unique_ptr<mull::Test>>::iterator searchResult;
-  Function *constructor = nullptr;
 
   searchResult =
       find_if(tests.begin(), tests.end(), [&](unique_ptr<mull::Test> &test) {
@@ -186,9 +180,6 @@ custom_tests:
   ASSERT_EQ(passingTest->getProgramName(), "mull");
   ASSERT_EQ(passingTest->getArguments().size(), 1UL);
   ASSERT_EQ(*passingTest->getArguments().begin(), "passing_test");
-  ASSERT_EQ(passingTest->getConstructors().size(), 1UL);
-  constructor = *(passingTest->getConstructors().begin());
-  ASSERT_EQ(constructor->getName(), "initGlobalVariable");
 }
 
 TEST(CustomTestFinder, findTests_withEmptyConfig) {

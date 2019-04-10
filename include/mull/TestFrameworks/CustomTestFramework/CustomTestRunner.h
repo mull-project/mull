@@ -36,7 +36,8 @@ public:
                                JITEngine &jit) override;
   void loadMutatedProgram(ObjectFiles &objectFiles, Trampolines &trampolines,
                           JITEngine &jit) override;
-  ExecutionStatus runTest(Test *test, JITEngine &jit) override;
+  ExecutionStatus runTest(JITEngine &jit, Program &program,
+                          Test *test) override;
 
 private:
   void *getConstructorPointer(const llvm::Function &function, JITEngine &jit);
