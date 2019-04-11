@@ -1,10 +1,14 @@
 #include <stdio.h>
 
+enum { SUCCESS = 0, FAILURE = 1 };
+
 int math_div(int a, int b) {
   return a / b;
 }
 
 int test_math_div() {
-  int result = (math_div(6, 3) == 2);
-  return result;
+  if (math_div(6, 3) == 2) {
+    return SUCCESS;
+  }
+  return FAILURE;
 }

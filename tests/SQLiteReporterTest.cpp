@@ -55,7 +55,7 @@ TEST(SQLiteReporter, integrationTest) {
   SimpleTestFinder testFinder;
   auto tests = testFinder.findTests(program, filter);
 
-  auto &test = *tests.begin();
+  auto &test = tests.front();
 
   Function *testeeFunction = program.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(testeeFunction->empty());
@@ -69,7 +69,7 @@ TEST(SQLiteReporter, integrationTest) {
 
   ASSERT_EQ(1U, mutationPoints.size());
 
-  MutationPoint *mutationPoint = (*(mutationPoints.begin()));
+  MutationPoint *mutationPoint = mutationPoints.front();
 
   std::vector<std::string> testIds(
       {test.getUniqueIdentifier(), test.getUniqueIdentifier()});
@@ -123,7 +123,7 @@ TEST(SQLiteReporter, integrationTest) {
     std::string selectQuery = "SELECT * FROM execution_result";
     sqlite3_stmt *selectStmt;
     sqlite3_prepare(database, selectQuery.c_str(), selectQuery.size(),
-                    &selectStmt, NULL);
+                    &selectStmt, nullptr);
 
     const unsigned char *column_test_id;
     const unsigned char *column_mutation_point_id;
@@ -181,7 +181,7 @@ TEST(SQLiteReporter, integrationTest) {
     std::string selectQuery = "SELECT * FROM test";
     sqlite3_stmt *selectStmt;
     sqlite3_prepare(database, selectQuery.c_str(), selectQuery.size(),
-                    &selectStmt, NULL);
+                    &selectStmt, nullptr);
 
     const unsigned char *test_name;
     const unsigned char *test_unique_id;
@@ -206,7 +206,7 @@ TEST(SQLiteReporter, integrationTest) {
         const char *location = "simple_test/count_letters/test_count_letters.c";
         ASSERT_NE(strstr((const char *)test_location_file, location), nullptr);
 
-        ASSERT_EQ(test_location_line, 3);
+        ASSERT_EQ(test_location_line, 5);
 
         numberOfRows++;
       } else if (stepResult == SQLITE_DONE) {
@@ -303,7 +303,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
   std::string selectQuery = "SELECT * FROM config";
   sqlite3_stmt *selectStmt;
   sqlite3_prepare(database, selectQuery.c_str(), selectQuery.size(),
-                  &selectStmt, NULL);
+                  &selectStmt, nullptr);
 
   const unsigned char *column1_projectName = nullptr;
   const unsigned char *column2_bitcodePaths = nullptr;
@@ -432,7 +432,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   SimpleTestFinder testFinder;
   auto tests = testFinder.findTests(program, filter);
 
-  auto &test = *tests.begin();
+  auto &test = tests.front();
 
   Function *testeeFunction = program.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(testeeFunction->empty());

@@ -1,7 +1,12 @@
 extern int count_letters(const char *, char);
 
+enum { SUCCESS = 0, FAILURE = 1 };
+
 int test_count_letters() {
   int count = count_letters("ababa", 'a');
-  return count == 3;
+  if (count == 3) {
+    return SUCCESS;
+  }
+  return FAILURE;
 }
 

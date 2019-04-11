@@ -9,7 +9,7 @@
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/MutatorsFactory.h"
 #include "mull/Program/Program.h"
-#include "mull/TestFrameworks/GoogleTest/GoogleTestRunner.h"
+#include "mull/TestFrameworks/NativeTestRunner.h"
 #include "mull/Toolchain/JITEngine.h"
 #include "mull/Toolchain/Toolchain.h"
 
@@ -136,7 +136,7 @@ mutators:
   ASSERT_EQ("HelloTest.testSumOfTestee", tests[0].getTestName());
   ASSERT_EQ("HelloTest.testSumOfTestee2", tests[1].getTestName());
 
-  GoogleTestRunner runner(toolchain.mangler());
+  NativeTestRunner runner(toolchain.mangler());
   JITEngine jit;
 
   std::vector<llvm::object::ObjectFile *> objects(

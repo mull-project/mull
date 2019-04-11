@@ -1,77 +1,67 @@
-#include "mull/TestFrameworks/CustomTestFramework/CustomTestRunner.h"
+#include "mull/TestFrameworks/NativeTestRunner.h"
 
+#include "LLVMCompatibility.h"
+#include "mull/Logger.h"
 #include "mull/Program/Program.h"
 #include "mull/TestFrameworks/Test.h"
+#include "mull/Toolchain/JITEngine.h"
 #include "mull/Toolchain/Mangler.h"
 #include "mull/Toolchain/Resolvers/InstrumentationResolver.h"
 #include "mull/Toolchain/Resolvers/MutationResolver.h"
 #include "mull/Toolchain/Trampolines.h"
 
 #include <llvm/ExecutionEngine/SectionMemoryManager.h>
-#include <llvm/IR/Function.h>
 
 using namespace mull;
-using namespace llvm;
-using namespace llvm::orc;
 
-CustomTestRunner::CustomTestRunner(Mangler &mangler)
+NativeTestRunner::NativeTestRunner(Mangler &mangler)
     : mangler(mangler), overrides([this](const char *name) {
         return this->mangler.getNameWithPrefix(name);
       }),
       trampoline(new InstrumentationInfo *) {}
 
-CustomTestRunner::~CustomTestRunner() { delete trampoline; }
+NativeTestRunner::~NativeTestRunner() { delete trampoline; }
 
-void *CustomTestRunner::getConstructorPointer(const llvm::Function &function,
+void *NativeTestRunner::getConstructorPointer(const llvm::Function &function,
                                               JITEngine &jit) {
-  return getFunctionPointer(mangler.getNameWithPrefix(function.getName()), jit);
+  auto name = mangler.getNameWithPrefix(function.getName().str());
+  return getFunctionPointer(name, jit);
 }
 
-void *CustomTestRunner::getFunctionPointer(const std::string &functionName,
+void *NativeTestRunner::getFunctionPointer(const std::string &functionName,
                                            JITEngine &jit) {
-  JITSymbol &symbol = jit.getSymbol(functionName);
+  llvm_compat::JITSymbol &symbol = jit.getSymbol(functionName);
   auto address = llvm_compat::JITSymbolAddress(symbol);
 
-  void *fpointer = reinterpret_cast<void *>(static_cast<uintptr_t>(address));
+  void *pointer = reinterpret_cast<void *>(static_cast<uintptr_t>(address));
 
-  if (fpointer == nullptr) {
-    errs() << "CustomTestRunner> Can't find pointer to function: "
-           << functionName << "\n";
+  if (pointer == nullptr) {
+    Logger::error() << "Can not find a pointer to the function '"
+                    << functionName << "'\n";
     exit(1);
   }
 
-  return fpointer;
+  return pointer;
 }
 
-void CustomTestRunner::runStaticConstructor(llvm::Function *function,
+void NativeTestRunner::runStaticConstructor(llvm::Function *constructor,
                                             JITEngine &jit) {
-  //  printf("Init: %s\n", Ctor->getName().str().c_str());
-
-  void *CtorPointer = getConstructorPointer(*function, jit);
+  void *CtorPointer = getConstructorPointer(*constructor, jit);
 
   auto ctor = ((int (*)())(intptr_t)CtorPointer);
   ctor();
 }
 
-void CustomTestRunner::loadInstrumentedProgram(ObjectFiles &objectFiles,
+void NativeTestRunner::loadInstrumentedProgram(ObjectFiles &objectFiles,
                                                Instrumentation &instrumentation,
                                                JITEngine &jit) {
   InstrumentationResolver resolver(overrides, instrumentation, mangler,
                                    trampoline);
   jit.addObjectFiles(objectFiles, resolver,
-                     make_unique<SectionMemoryManager>());
+                     llvm::make_unique<llvm::SectionMemoryManager>());
 }
 
-void CustomTestRunner::loadMutatedProgram(ObjectFiles &objectFiles,
-                                          Trampolines &trampolines,
-                                          JITEngine &jit) {
-  trampolines.allocateTrampolines(mangler);
-  MutationResolver resolver(overrides, trampolines, mangler);
-  jit.addObjectFiles(objectFiles, resolver,
-                     make_unique<SectionMemoryManager>());
-}
-
-ExecutionStatus CustomTestRunner::runTest(JITEngine &jit, Program &program,
+ExecutionStatus NativeTestRunner::runTest(JITEngine &jit, Program &program,
                                           Test &test) {
   *trampoline = &test.getInstrumentationInfo();
 
@@ -106,6 +96,14 @@ ExecutionStatus CustomTestRunner::runTest(JITEngine &jit, Program &program,
   if (exitStatus == 0) {
     return ExecutionStatus::Passed;
   }
-
   return ExecutionStatus::Failed;
+}
+
+void NativeTestRunner::loadMutatedProgram(TestRunner::ObjectFiles &objectFiles,
+                                          Trampolines &trampolines,
+                                          JITEngine &jit) {
+  trampolines.allocateTrampolines(mangler);
+  MutationResolver resolver(overrides, trampolines, mangler);
+  jit.addObjectFiles(objectFiles, resolver,
+                     llvm::make_unique<llvm::SectionMemoryManager>());
 }

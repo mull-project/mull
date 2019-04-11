@@ -43,12 +43,9 @@ set(mull_sources
 
 
   TestFrameworks/SimpleTest/SimpleTestFinder.cpp
-  TestFrameworks/SimpleTest/SimpleTestRunner.cpp
 
   TestFrameworks/GoogleTest/GoogleTestFinder.cpp
-  TestFrameworks/GoogleTest/GoogleTestRunner.cpp
 
-  TestFrameworks/CustomTestFramework/CustomTestRunner.cpp
   TestFrameworks/CustomTestFramework/CustomTestFinder.cpp
 
   IDEDiagnostics.cpp
@@ -87,7 +84,7 @@ set(mull_sources
   JunkDetection/CXX/Visitors/NegateConditionVisitor.cpp
   JunkDetection/CXX/ASTStorage.cpp
   JunkDetection/CXX/CompilationDatabase.cpp
-  Reporters/IDEReporter.cpp)
+  Reporters/IDEReporter.cpp TestFrameworks/NativeTestRunner.cpp)
 
 set (MULL_INCLUDE_DIR ${MULL_SOURCE_DIR}/include/mull)
 

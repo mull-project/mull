@@ -2,6 +2,8 @@
 
 #include <stdio.h>
 
+enum { SUCCESS = 0, FAILURE = 1 };
+
 int testee_AND_operator_2branches(int a, int b, int c) {
   if (a < b && b < c) {
     printf("left branch\n");
@@ -83,41 +85,57 @@ int testee_compound_OR_then_OR_operator(int A, int B, int C) {
 }
 
 int test_AND_operator_2branches() {
-  int result = (testee_AND_operator_2branches(1, 3, 2) == 3);
-  return result;
+  if (testee_AND_operator_2branches(1, 3, 2) == 3) {
+    return SUCCESS;
+  }
+  return FAILURE;
 }
 
 int test_AND_operator_1branch() {
-  int result = (testee_AND_operator_1branch(1, 3, 2) == 3);
-  return result;
+  if (testee_AND_operator_1branch(1, 3, 2) == 3) {
+    return SUCCESS;
+  }
+  return FAILURE;
 }
 
 int test_OR_operator_2branches() {
-  int result = (testee_OR_operator_2branches(1, 3, 2) == 1);
-  return result;
+  if (testee_OR_operator_2branches(1, 3, 2) == 1) {
+    return SUCCESS;
+  }
+  return FAILURE;
 }
 
 int test_OR_operator_1branch() {
-  int result = (testee_OR_operator_1branch(1, 3, 2) == 1);
-  return result;
+  if (testee_OR_operator_1branch(1, 3, 2) == 1) {
+    return SUCCESS;
+  }
+  return FAILURE;
 }
 
 int test_compound_AND_then_OR_operator() {
-  int result = (testee_compound_AND_then_OR_operator(1, 3, 2) == 1);
-  return result;
+  if (testee_compound_AND_then_OR_operator(1, 3, 2) == 1) {
+    return SUCCESS;
+  }
+  return FAILURE;
 }
 
 int test_compound_AND_then_AND_operator() {
-  int result = (testee_compound_AND_then_AND_operator(1, 1, 1) == 0);
-  return result;
+  if (testee_compound_AND_then_AND_operator(1, 1, 1) == 0) {
+    return SUCCESS;
+  }
+  return FAILURE;
 }
 
 int test_compound_OR_then_AND_operator() {
-  int result = (testee_compound_OR_then_AND_operator(1, 3, 2) == 1);
-  return result;
+  if (testee_compound_OR_then_AND_operator(1, 3, 2) == 1) {
+    return SUCCESS;
+  }
+  return FAILURE;
 }
 
 int test_compound_OR_then_OR_operator() {
-  int result = (testee_compound_OR_then_OR_operator(0, 0, 0) == 1);
-  return result;
+  if (testee_compound_OR_then_OR_operator(0, 0, 0) == 1) {
+    return SUCCESS;
+  }
+  return FAILURE;
 }

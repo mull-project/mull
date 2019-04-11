@@ -6,8 +6,8 @@
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/MathAddMutator.h"
 #include "mull/Program/Program.h"
+#include "mull/TestFrameworks/NativeTestRunner.h"
 #include "mull/TestFrameworks/SimpleTest/SimpleTestFinder.h"
-#include "mull/TestFrameworks/SimpleTest/SimpleTestRunner.h"
 #include "mull/Testee.h"
 #include "mull/Toolchain/Compiler.h"
 #include "mull/Toolchain/JITEngine.h"
@@ -29,7 +29,7 @@
 using namespace mull;
 using namespace llvm;
 
-TEST(SimpleTestRunner, runTest) {
+TEST(NativeTestRunner, runTest) {
   Configuration configuration;
 
   Toolchain toolchain(configuration);
@@ -50,9 +50,9 @@ TEST(SimpleTestRunner, runTest) {
   modules.push_back(std::move(ownedModuleWithTests));
   Program program({}, {}, std::move(modules));
 
-  SimpleTestRunner testRunner(toolchain.mangler());
-  SimpleTestRunner::ObjectFiles objectFiles;
-  SimpleTestRunner::OwnedObjectFiles ownedObjectFiles;
+  NativeTestRunner testRunner(toolchain.mangler());
+  NativeTestRunner::ObjectFiles objectFiles;
+  NativeTestRunner::OwnedObjectFiles ownedObjectFiles;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
