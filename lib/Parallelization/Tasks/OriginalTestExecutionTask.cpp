@@ -23,25 +23,23 @@ void OriginalTestExecutionTask::operator()(iterator begin, iterator end,
   for (auto it = begin; it != end; ++it, counter.increment()) {
     auto &test = *it;
 
-    instrumentation.setupInstrumentationInfo(test.get());
+    instrumentation.setupInstrumentationInfo(test);
 
-    ExecutionResult testExecutionResult =
-        sandbox.run([&]() { return runner.runTest(jit, program, test.get()); },
-                    config.timeout);
+    ExecutionResult testExecutionResult = sandbox.run(
+        [&]() { return runner.runTest(jit, program, test); }, config.timeout);
 
-    test->setExecutionResult(testExecutionResult);
+    test.setExecutionResult(testExecutionResult);
 
     std::vector<std::unique_ptr<Testee>> testees;
 
     if (testExecutionResult.status == Passed) {
-      testees =
-          instrumentation.getTestees(test.get(), filter, config.maxDistance);
+      testees = instrumentation.getTestees(test, filter, config.maxDistance);
     } else {
-      auto ssss = test->getTestName() +
+      auto ssss = test.getTestName() +
                   " failed: " + testExecutionResult.getStatusAsString() + "\n";
       errs() << ssss;
     }
-    instrumentation.cleanupInstrumentationInfo(test.get());
+    instrumentation.cleanupInstrumentationInfo(test);
 
     if (testees.empty()) {
       continue;

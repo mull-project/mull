@@ -4,7 +4,7 @@
 #include "mull/Filter.h"
 #include "mull/Logger.h"
 #include "mull/Program/Program.h"
-#include "mull/TestFrameworks/CustomTestFramework/CustomTest_Test.h"
+#include "mull/TestFrameworks/Test.h"
 
 #include <llvm/IR/Module.h>
 
@@ -19,14 +19,14 @@ CustomTestFinder::CustomTestFinder(
     const std::vector<CustomTestDefinition> &definitions)
     : testDefinitions(definitions) {}
 
-std::vector<std::unique_ptr<Test>> CustomTestFinder::findTests(Program &program,
-                                                               Filter &filter) {
+std::vector<Test> CustomTestFinder::findTests(Program &program,
+                                              Filter &filter) {
   std::map<std::string, std::vector<CustomTestDefinition>> testMapping;
   for (const auto &definition : testDefinitions) {
     testMapping[definition.methodName].push_back(definition);
   }
 
-  std::vector<std::unique_ptr<Test>> tests;
+  std::vector<Test> tests;
 
   for (auto &currentModule : program.modules()) {
     for (auto &function : currentModule->getModule()->getFunctionList()) {
@@ -49,9 +49,8 @@ std::vector<std::unique_ptr<Test>> CustomTestFinder::findTests(Program &program,
           programName = "mull";
         }
 
-        tests.emplace_back(
-            make_unique<CustomTest_Test>(definition.testName, programName,
-                                         definition.callArguments, &function));
+        tests.push_back(Test(definition.testName, programName, "main",
+                             definition.callArguments, &function));
       }
     }
   }

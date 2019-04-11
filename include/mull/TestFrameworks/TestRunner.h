@@ -28,7 +28,7 @@ public:
   virtual void loadMutatedProgram(ObjectFiles &objectFiles,
                                   Trampolines &trampolines, JITEngine &jit) = 0;
   virtual ExecutionStatus runTest(JITEngine &jit, Program &program,
-                                  Test *test) = 0;
+                                  Test &test) = 0;
 
   virtual ~TestRunner() = default;
 };

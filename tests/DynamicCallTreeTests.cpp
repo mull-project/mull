@@ -1,5 +1,5 @@
 #include "mull/Instrumentation/DynamicCallTree.h"
-#include "mull/TestFrameworks/SimpleTest/SimpleTest_Test.h"
+#include "mull/TestFrameworks/Test.h"
 #include "mull/Testee.h"
 
 #include "gtest/gtest.h"
@@ -284,12 +284,12 @@ TEST(DynamicCallTree, test_subtrees) {
   mapping[4] = 2;
   mapping[5] = 4;
 
-  SimpleTest_Test test(F2);
+  mull::Test test("", "", "", {}, F2);
 
   std::unique_ptr<CallTree> callTree =
       DynamicCallTree::createCallTree(mapping, functions);
   std::vector<CallTree *> subtrees =
-      DynamicCallTree::extractTestSubtrees(callTree.get(), &test);
+      DynamicCallTree::extractTestSubtrees(callTree.get(), test);
 
   EXPECT_EQ(1UL, subtrees.size());
 
@@ -328,18 +328,18 @@ TEST(DynamicCallTree, testees) {
   mapping[4] = 2;
   mapping[5] = 4;
 
-  SimpleTest_Test test(F2);
+  mull::Test test("", "", "", {}, F2);
 
   std::unique_ptr<CallTree> callTree =
       DynamicCallTree::createCallTree(mapping, functions);
   std::vector<CallTree *> subtrees =
-      DynamicCallTree::extractTestSubtrees(callTree.get(), &test);
+      DynamicCallTree::extractTestSubtrees(callTree.get(), test);
 
   Filter nullFilter;
 
   {
     std::vector<std::unique_ptr<Testee>> testees =
-        DynamicCallTree::createTestees(subtrees, &test, 5, nullFilter);
+        DynamicCallTree::createTestees(subtrees, test, 5, nullFilter);
 
     EXPECT_EQ(4U, testees.size());
 
@@ -362,7 +362,7 @@ TEST(DynamicCallTree, testees) {
 
   {
     std::vector<std::unique_ptr<Testee>> testees =
-        DynamicCallTree::createTestees(subtrees, &test, 1, nullFilter);
+        DynamicCallTree::createTestees(subtrees, test, 1, nullFilter);
     EXPECT_EQ(3U, testees.size());
 
     Testee *testeeF2 = testees.begin()->get();
@@ -382,7 +382,7 @@ TEST(DynamicCallTree, testees) {
     Filter filter;
     filter.skipByName("F5");
     std::vector<std::unique_ptr<Testee>> testees =
-        DynamicCallTree::createTestees(subtrees, &test, 5, filter);
+        DynamicCallTree::createTestees(subtrees, test, 5, filter);
     EXPECT_EQ(3U, testees.size());
 
     Testee *testeeF2 = testees.begin()->get();

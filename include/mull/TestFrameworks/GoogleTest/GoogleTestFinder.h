@@ -11,8 +11,7 @@ class Filter;
 
 class GoogleTestFinder : public TestFinder {
 public:
-  std::vector<std::unique_ptr<Test>> findTests(Program &program,
-                                               Filter &filter) override;
+  std::vector<Test> findTests(Program &program, Filter &filter) override;
 };
 
 } // namespace mull

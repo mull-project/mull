@@ -1,7 +1,7 @@
 #include "mull/TestFrameworks/GoogleTest/GoogleTestRunner.h"
 
 #include "mull/Program/Program.h"
-#include "mull/TestFrameworks/GoogleTest/GoogleTest_Test.h"
+#include "mull/TestFrameworks/Test.h"
 #include "mull/Toolchain/JITEngine.h"
 #include "mull/Toolchain/Mangler.h"
 #include "mull/Toolchain/Resolvers/InstrumentationResolver.h"
@@ -65,23 +65,34 @@ void GoogleTestRunner::loadInstrumentedProgram(ObjectFiles &objectFiles,
 }
 
 ExecutionStatus GoogleTestRunner::runTest(JITEngine &jit, Program &program,
-                                          Test *test) {
-  *trampoline = &test->getInstrumentationInfo();
-
-  auto *googleTest = dyn_cast<GoogleTest_Test>(test);
+                                          Test &test) {
+  *trampoline = &test.getInstrumentationInfo();
 
   for (auto &constructor : program.getStaticConstructors()) {
     runStaticConstructor(constructor, jit);
   }
 
-  std::string filter = "--gtest_filter=" + googleTest->getTestName();
-  const char *argv[] = {"mull", filter.c_str(), nullptr};
-  int argc = 2;
+  std::vector<std::string> arguments = test.getArguments();
+  arguments.insert(arguments.begin(), test.getProgramName());
+  size_t argc = arguments.size();
+  char **argv = new char *[argc + 1];
+
+  for (int i = 0; i < argc; i++) {
+    std::string &argument = arguments[i];
+    argv[i] = new char[argument.length() + 1];
+    strcpy(argv[i], argument.c_str());
+  }
+  argv[argc] = nullptr;
 
   void *mainPointer =
       getFunctionPointer(mangler.getNameWithPrefix("main"), jit);
-  auto main = ((int (*)(int, const char **))(intptr_t)mainPointer);
-  int exitStatus = main(argc, argv);
+  auto main = ((int (*)(int, char **))(intptr_t)mainPointer);
+  int exitStatus = main(static_cast<int>(argc), argv);
+
+  for (int i = 0; i < argc; i++) {
+    delete[] argv[i];
+  }
+  delete[] argv;
 
   overrides.runDestructors();
 

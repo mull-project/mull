@@ -10,7 +10,6 @@
 #include "mull/Mutators/MutatorsFactory.h"
 #include "mull/Program/Program.h"
 #include "mull/TestFrameworks/GoogleTest/GoogleTestRunner.h"
-#include "mull/TestFrameworks/GoogleTest/GoogleTest_Test.h"
 #include "mull/Toolchain/JITEngine.h"
 #include "mull/Toolchain/Toolchain.h"
 
@@ -58,11 +57,8 @@ mutators:
 
   ASSERT_EQ(2U, tests.size());
 
-  GoogleTest_Test *Test1 = dyn_cast<GoogleTest_Test>(tests[0].get());
-  ASSERT_EQ("HelloTest.testSumOfTestee", Test1->getTestName());
-
-  GoogleTest_Test *Test2 = dyn_cast<GoogleTest_Test>(tests[1].get());
-  ASSERT_EQ("HelloTest.testSumOfTestee2", Test2->getTestName());
+  ASSERT_EQ("HelloTest.testSumOfTestee", tests[0].getTestName());
+  ASSERT_EQ("HelloTest.testSumOfTestee2", tests[1].getTestName());
 }
 
 TEST(GoogleTestFinder, findTests_filter) {
@@ -94,8 +90,7 @@ mutators:
   auto tests = Finder.findTests(program, filter);
 
   ASSERT_EQ(1U, tests.size());
-  GoogleTest_Test *Test1 = dyn_cast<GoogleTest_Test>(tests[0].get());
-  ASSERT_EQ("HelloTest.testSumOfTestee", Test1->getTestName());
+  ASSERT_EQ("HelloTest.testSumOfTestee", tests[0].getTestName());
 }
 
 TEST(DISABLED_GoogleTestRunner, runTest) {
@@ -138,11 +133,8 @@ mutators:
 
   ASSERT_EQ(2U, tests.size());
 
-  GoogleTest_Test *Test1 = dyn_cast<GoogleTest_Test>(tests[0].get());
-  ASSERT_EQ("HelloTest.testSumOfTestee", Test1->getTestName());
-
-  GoogleTest_Test *Test2 = dyn_cast<GoogleTest_Test>(tests[1].get());
-  ASSERT_EQ("HelloTest.testSumOfTestee2", Test2->getTestName());
+  ASSERT_EQ("HelloTest.testSumOfTestee", tests[0].getTestName());
+  ASSERT_EQ("HelloTest.testSumOfTestee2", tests[1].getTestName());
 
   GoogleTestRunner runner(toolchain.mangler());
   JITEngine jit;
@@ -151,5 +143,5 @@ mutators:
       {compiledModule_tests.getBinary(), compiledModule_testees.getBinary()});
   /// TODO: enable eventually
   //  runner.loadProgram(objects, jit);
-  runner.runTest(jit, program, Test1);
+  runner.runTest(jit, program, tests[0]);
 }

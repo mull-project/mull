@@ -11,7 +11,6 @@
 #include "mull/Program/Program.h"
 #include "mull/Result.h"
 #include "mull/TestFrameworks/SimpleTest/SimpleTestFinder.h"
-#include "mull/TestFrameworks/SimpleTest/SimpleTest_Test.h"
 #include "mull/Testee.h"
 
 #include "gtest/gtest.h"
@@ -73,7 +72,7 @@ TEST(SQLiteReporter, integrationTest) {
   MutationPoint *mutationPoint = (*(mutationPoints.begin()));
 
   std::vector<std::string> testIds(
-      {test->getUniqueIdentifier(), test->getUniqueIdentifier()});
+      {test.getUniqueIdentifier(), test.getUniqueIdentifier()});
   std::vector<std::string> mutationPointIds(
       {"", mutationPoint->getUniqueIdentifier()});
 
@@ -86,7 +85,7 @@ TEST(SQLiteReporter, integrationTest) {
   testExecutionResult.stdoutOutput = "testExecutionResult.STDOUT";
   testExecutionResult.stderrOutput = "testExecutionResult.STDERR";
 
-  test->setExecutionResult(testExecutionResult);
+  test.setExecutionResult(testExecutionResult);
 
   ExecutionResult mutatedTestExecutionResult;
   mutatedTestExecutionResult.status = Failed;
@@ -96,7 +95,7 @@ TEST(SQLiteReporter, integrationTest) {
 
   auto mutationResult =
       make_unique<MutationResult>(mutatedTestExecutionResult, mutationPoint,
-                                  testees.front()->getDistance(), test.get());
+                                  testees.front()->getDistance(), &test);
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
   mutationResults.push_back(std::move(mutationResult));
@@ -288,7 +287,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
   resultTime.end = MetricsMeasure::Precision(5678);
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
-  std::vector<std::unique_ptr<mull::Test>> tests;
+  std::vector<mull::Test> tests;
   std::vector<MutationPoint *> mutationPoints;
 
   Result result(std::move(tests), std::move(mutationResults), mutationPoints);
@@ -468,7 +467,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
 
   auto mutationResult =
       make_unique<MutationResult>(mutatedTestExecutionResult, mutationPoint,
-                                  testees.front()->getDistance(), test.get());
+                                  testees.front()->getDistance(), &test);
   mutationResults.push_back(std::move(mutationResult));
 
   MetricsMeasure resultTime;
@@ -493,7 +492,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   std::string selectQuery = "SELECT count(*) FROM mutation_point_debug";
   sqlite3_stmt *selectStmt;
   sqlite3_prepare(database, selectQuery.c_str(), selectQuery.size(),
-                  &selectStmt, NULL);
+                  &selectStmt, nullptr);
 
   int count;
 
@@ -604,7 +603,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
 
   auto mutationResult =
       make_unique<MutationResult>(mutatedTestExecutionResult, mutationPoint,
-                                  testees.front()->getDistance(), test.get());
+                                  testees.front()->getDistance(), &test);
   mutationResults.push_back(std::move(mutationResult));
 
   MetricsMeasure resultTime;

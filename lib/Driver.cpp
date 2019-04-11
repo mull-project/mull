@@ -103,8 +103,8 @@ void Driver::loadDynamicLibraries() {
   task.execute();
 }
 
-std::vector<std::unique_ptr<Test>> Driver::findTests() {
-  std::vector<std::unique_ptr<Test>> tests;
+std::vector<Test> Driver::findTests() {
+  std::vector<Test> tests;
   SingleTaskExecutor task("Searching tests", [&]() {
     tests = testFramework.finder().findTests(program, filter);
   });
@@ -112,8 +112,7 @@ std::vector<std::unique_ptr<Test>> Driver::findTests() {
   return tests;
 }
 
-std::vector<MutationPoint *>
-Driver::findMutationPoints(std::vector<std::unique_ptr<Test>> &tests) {
+std::vector<MutationPoint *> Driver::findMutationPoints(vector<Test> &tests) {
   if (tests.empty()) {
     return std::vector<MutationPoint *>();
   }

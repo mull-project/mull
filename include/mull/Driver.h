@@ -64,9 +64,8 @@ private:
   void compileInstrumentedBitcodeFiles();
   void loadDynamicLibraries();
 
-  std::vector<std::unique_ptr<Test>> findTests();
-  std::vector<MutationPoint *>
-  findMutationPoints(std::vector<std::unique_ptr<Test>> &tests);
+  std::vector<Test> findTests();
+  std::vector<MutationPoint *> findMutationPoints(std::vector<Test> &tests);
   std::vector<MutationPoint *>
   filterOutJunkMutations(std::vector<MutationPoint *> mutationPoints);
 

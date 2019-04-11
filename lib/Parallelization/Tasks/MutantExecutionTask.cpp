@@ -55,7 +55,7 @@ void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
 
         result = sandbox.run(
             [&]() {
-              ExecutionStatus status = runner.runTest(jit, program, test);
+              ExecutionStatus status = runner.runTest(jit, program, *test);
               assert(status != ExecutionStatus::Invalid &&
                      "Expect to see valid TestResult");
               return status;

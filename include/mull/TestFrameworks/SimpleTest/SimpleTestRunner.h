@@ -32,10 +32,10 @@ public:
   void loadMutatedProgram(ObjectFiles &objectFiles, Trampolines &trampolines,
                           JITEngine &jit) override;
   ExecutionStatus runTest(JITEngine &jit, Program &program,
-                          Test *test) override;
+                          Test &test) override;
 
 private:
-  void *functionPointer(const llvm::Function &function, JITEngine &jit);
+  void *functionPointer(const std::string &functionName, JITEngine &jit);
 };
 
 } // namespace mull

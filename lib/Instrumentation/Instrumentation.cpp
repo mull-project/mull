@@ -59,8 +59,8 @@ void Instrumentation::insertCallbacks(llvm::Module *instrumentedModule) {
 }
 
 std::vector<std::unique_ptr<Testee>>
-Instrumentation::getTestees(Test *test, Filter &filter, int distance) {
-  auto &mapping = test->getInstrumentationInfo().callTreeMapping;
+Instrumentation::getTestees(Test &test, Filter &filter, int distance) {
+  auto &mapping = test.getInstrumentationInfo().callTreeMapping;
 
   auto callTree = DynamicCallTree::createCallTree(mapping, functions);
   auto subtrees = DynamicCallTree::extractTestSubtrees(callTree.get(), test);
@@ -70,8 +70,8 @@ Instrumentation::getTestees(Test *test, Filter &filter, int distance) {
   return testees;
 }
 
-void Instrumentation::setupInstrumentationInfo(Test *test) {
-  auto &mapping = test->getInstrumentationInfo().callTreeMapping;
+void Instrumentation::setupInstrumentationInfo(Test &test) {
+  auto &mapping = test.getInstrumentationInfo().callTreeMapping;
 
   assert(mapping == nullptr && "Called twice?");
   assert(functions.size() > 1 &&
@@ -79,13 +79,13 @@ void Instrumentation::setupInstrumentationInfo(Test *test) {
 
   auto mappingSize = sizeof(mapping[0]) * functions.size();
   /// Creating a memory to be shared between child and parent.
-  auto rawMemory = mmap(NULL, mappingSize, PROT_READ | PROT_WRITE,
+  auto rawMemory = mmap(nullptr, mappingSize, PROT_READ | PROT_WRITE,
                         MAP_SHARED | MAP_ANONYMOUS, -1, 0);
   mapping = static_cast<uint32_t *>(rawMemory);
   memset(mapping, 0, mappingSize);
 }
 
-void Instrumentation::cleanupInstrumentationInfo(Test *test) {
-  std::stack<uint32_t>().swap(test->getInstrumentationInfo().callstack);
-  munmap(test->getInstrumentationInfo().callTreeMapping, functions.size());
+void Instrumentation::cleanupInstrumentationInfo(Test &test) {
+  std::stack<uint32_t>().swap(test.getInstrumentationInfo().callstack);
+  munmap(test.getInstrumentationInfo().callTreeMapping, functions.size());
 }

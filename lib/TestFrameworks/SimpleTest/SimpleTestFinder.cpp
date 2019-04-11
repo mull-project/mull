@@ -3,7 +3,6 @@
 #include "mull/Filter.h"
 #include "mull/Logger.h"
 #include "mull/Program/Program.h"
-#include "mull/TestFrameworks/SimpleTest/SimpleTest_Test.h"
 
 #include <llvm/IR/Module.h>
 
@@ -12,9 +11,9 @@
 using namespace mull;
 using namespace llvm;
 
-std::vector<std::unique_ptr<Test>> SimpleTestFinder::findTests(Program &program,
-                                                               Filter &filter) {
-  std::vector<std::unique_ptr<Test>> tests;
+std::vector<Test> SimpleTestFinder::findTests(Program &program,
+                                              Filter &filter) {
+  std::vector<Test> tests;
 
   for (auto &module : program.modules()) {
     auto &x = module->getModule()->getFunctionList();
@@ -27,7 +26,7 @@ std::vector<std::unique_ptr<Test>> SimpleTestFinder::findTests(Program &program,
         Logger::info() << "SimpleTestFinder::findTests - found function "
                        << Fn.getName() << '\n';
 
-        tests.emplace_back(make_unique<SimpleTest_Test>(&Fn));
+        tests.push_back(Test(Fn.getName(), "mull", Fn.getName(), {}, &Fn));
       }
     }
   }
