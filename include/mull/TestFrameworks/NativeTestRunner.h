@@ -1,35 +1,18 @@
 #pragma once
 
-#include "LLVMCompatibility.h"
 #include "mull/TestFrameworks/TestRunner.h"
-#include "mull/Toolchain/JITEngine.h"
-
-#include <llvm/ExecutionEngine/Orc/ExecutionUtils.h>
-#include <llvm/Object/Binary.h>
-#include <llvm/Object/ObjectFile.h>
-#include <llvm/Target/TargetMachine.h>
-
-namespace llvm {
-
-class Function;
-class Module;
-
-} // namespace llvm
 
 namespace mull {
 
-class Instrumentation;
+class Mangler;
+class JITEngine;
 class Mangler;
 struct InstrumentationInfo;
 
-class CustomTestRunner : public TestRunner {
-  Mangler &mangler;
-  llvm_compat::CXXRuntimeOverrides overrides;
-  InstrumentationInfo **trampoline;
-
+class NativeTestRunner : public TestRunner {
 public:
-  explicit CustomTestRunner(Mangler &mangler);
-  ~CustomTestRunner() override;
+  explicit NativeTestRunner(Mangler &mangler);
+  ~NativeTestRunner() override;
 
   void loadInstrumentedProgram(ObjectFiles &objectFiles,
                                Instrumentation &instrumentation,
@@ -40,9 +23,14 @@ public:
                           Test &test) override;
 
 private:
+  Mangler &mangler;
+  llvm_compat::CXXRuntimeOverrides overrides;
+  InstrumentationInfo **trampoline;
+
   void *getConstructorPointer(const llvm::Function &function, JITEngine &jit);
   void *getFunctionPointer(const std::string &functionName, JITEngine &jit);
-  void runStaticConstructor(llvm::Function *function, JITEngine &jit);
+
+  void runStaticConstructor(llvm::Function *constructor, JITEngine &jit);
 };
 
 } // namespace mull

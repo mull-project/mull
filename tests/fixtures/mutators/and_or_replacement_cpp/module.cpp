@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <string>
 
+enum { SUCCESS = 0, FAILURE = 1 };
+
 bool testee_OR_operator_with_CPP() {
   std::string string1 = "STR1";
   std::string string2 = "STR2";
@@ -91,32 +93,43 @@ bool testee_AND_operator_with_CPP_and_assert() {
 }
 
 int test_OR_operator_with_CPP() {
-  bool result = testee_OR_operator_with_CPP();
-  return result == true;
+  if (testee_OR_operator_with_CPP()) {
+    return SUCCESS;
+  }
+  return FAILURE;
 }
 
 int test_OR_operator_with_CPP_PHI_case() {
-  bool result = testee_OR_operator_with_CPP_PHI_case();
-  return result == true;
+  if (testee_OR_operator_with_CPP_PHI_case()) {
+    return SUCCESS;
+  }
+  return FAILURE;
 }
 
 int test_OR_operator_with_CPP_and_assert() {
-  bool result = testee_OR_operator_with_CPP_and_assert();
-  return result == true;
+  if (testee_OR_operator_with_CPP_and_assert()) {
+    return SUCCESS;
+  }
+  return FAILURE;
 }
 
 int test_AND_operator_with_CPP() {
-  bool result = testee_AND_operator_with_CPP();
-  return result == false;
+  if (!testee_AND_operator_with_CPP()) {
+    return SUCCESS;
+  }
+  return FAILURE;
 }
 
 int test_AND_operator_with_CPP_PHI_case() {
-  bool result = testee_AND_operator_with_CPP_PHI_case();
-  return result == false;
+  if (!testee_AND_operator_with_CPP_PHI_case()) {
+    return SUCCESS;
+  }
+  return FAILURE;
 }
 
 int test_AND_operator_with_CPP_and_assert() {
-  bool result = testee_AND_operator_with_CPP_and_assert();
-  return result == true;
+  if (testee_AND_operator_with_CPP_and_assert()) {
+    return SUCCESS;
+  }
+  return FAILURE;
 }
-

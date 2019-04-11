@@ -1,9 +1,10 @@
 #include "mull/TestFrameworks/TestFrameworkFactory.h"
 
 #include "mull/Config/Configuration.h"
-#include "mull/TestFrameworks/CustomTestFramework/CustomTestFramework.h"
-#include "mull/TestFrameworks/GoogleTest/GoogleTest.h"
-#include "mull/TestFrameworks/SimpleTest/SimpleTest.h"
+#include "mull/TestFrameworks/CustomTestFramework/CustomTestFinder.h"
+#include "mull/TestFrameworks/GoogleTest/GoogleTestFinder.h"
+#include "mull/TestFrameworks/NativeTestRunner.h"
+#include "mull/TestFrameworks/SimpleTest/SimpleTestFinder.h"
 #include "mull/Toolchain/Toolchain.h"
 
 using namespace mull;
@@ -34,7 +35,7 @@ TestFramework
 TestFrameworkFactory::simpleTestFramework(Toolchain &toolchain,
                                           Configuration &configuration) {
   auto finder = make_unique<SimpleTestFinder>();
-  auto runner = make_unique<SimpleTestRunner>(toolchain.mangler());
+  auto runner = make_unique<NativeTestRunner>(toolchain.mangler());
   return TestFramework(std::move(finder), std::move(runner));
 }
 
@@ -42,7 +43,7 @@ TestFramework
 TestFrameworkFactory::googleTestFramework(Toolchain &toolchain,
                                           Configuration &configuration) {
   auto finder = make_unique<GoogleTestFinder>();
-  auto runner = make_unique<GoogleTestRunner>(toolchain.mangler());
+  auto runner = make_unique<NativeTestRunner>(toolchain.mangler());
   return TestFramework(std::move(finder), std::move(runner));
 }
 
@@ -50,7 +51,7 @@ TestFramework
 TestFrameworkFactory::customTestFramework(Toolchain &toolchain,
                                           Configuration &configuration) {
   auto finder = make_unique<CustomTestFinder>(configuration.customTests);
-  auto runner = make_unique<CustomTestRunner>(toolchain.mangler());
+  auto runner = make_unique<NativeTestRunner>(toolchain.mangler());
   return TestFramework(std::move(finder), std::move(runner));
 }
 
