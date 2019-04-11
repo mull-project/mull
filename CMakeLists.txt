@@ -97,6 +97,7 @@ else()
   if (MULL_BUILD_32_BITS)
     set (LLVM_BUILD_32_BITS ON CACHE BOOL "Forcing LLVM to be built for 32 bits as well" FORCE)
   endif()
+  set (LLVM_ENABLE_PROJECTS "clang" CACHE BOOL "Build only Clang when building against monorepo" FORCE)
 
   add_subdirectory(${PATH_TO_LLVM} llvm-build-dir)
 
