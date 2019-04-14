@@ -41,6 +41,9 @@ else()
       endif()
     endforeach()
 
+  else()
+    set (CPACK_SYSTEM_NAME "unknown")
+
   endif()
 endif()
 
