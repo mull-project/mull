@@ -24,6 +24,14 @@ if (APPLE)
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
 
+elseif(${CMAKE_SYSTEM_NAME} STREQUAL "FreeBSD")
+  set (CPACK_SYSTEM_NAME "FreeBSD")
+  execute_process(
+    COMMAND freebsd-version
+    OUTPUT_VARIABLE CPACK_SYSTEM_VERSION
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+  )
+
 else()
   if(EXISTS /etc/os-release)
     file(READ /etc/os-release OS_RELEASE)
@@ -55,6 +63,8 @@ elseif(${CPACK_SYSTEM_NAME} STREQUAL "ubuntu")
   include(cmake/packaging/cpack.DEB-ubuntu.cmake)
 elseif(${CPACK_SYSTEM_NAME} STREQUAL "fedora")
   include(cmake/packaging/cpack.RPM-fedora.cmake)
+elseif(${CPACK_SYSTEM_NAME} STREQUAL "FreeBSD")
+  include(cmake/packaging/cpack.PKG-freebsd.cmake)
 else()
   message(WARNING "Mull cannot generate package for ${CPACK_SYSTEM_NAME} yet.")
 endif()

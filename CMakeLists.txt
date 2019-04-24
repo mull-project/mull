@@ -179,6 +179,9 @@ endif()
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/cpack.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/version.cmake)
 
+# Needed by FreeBSD
+link_directories(/usr/local/lib)
+
 # https://cmake.org/Wiki/CMake_RPATH_handling#Always_full_RPATH
 SET(CMAKE_SKIP_BUILD_RPATH FALSE)
 SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)

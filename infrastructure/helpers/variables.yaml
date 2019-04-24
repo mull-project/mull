@@ -63,6 +63,11 @@ llvm_mapping:
       url: http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-Fedora27.tar.xz
       path: clang+llvm-6.0.0-x86_64-linux-gnu-Fedora27
 
+  freebsd:
+    8.0.0:
+      url: http://releases.llvm.org/8.0.0/clang+llvm-8.0.0-amd64-unknown-freebsd11.tar.xz
+      path: clang+llvm-8.0.0-amd64-unknown-freebsd11
+
 
 llvm_url: "{{ llvm_mapping[platform][llvm_version].url }}"
 llvm_path: "{{ llvm_mapping[platform][llvm_version].path }}"
@@ -71,4 +76,7 @@ llvm_dir: "{{ working_dir }}/llvm-{{ llvm_version }}"
 source_dir: "{{ working_dir }}/mull"
 debug_build_dir: "{{ working_dir }}/build.mull.debug.dir"
 release_build_dir: "{{ working_dir }}/build.mull.release.dir"
+
+# Overriden by FreeBSD playbook
+make_program: make
 
