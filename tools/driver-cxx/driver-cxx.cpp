@@ -275,7 +275,6 @@ int main(int argc, char **argv) {
   mull::CXXJunkDetector junkDetector(junkDetectionConfig);
 
   mull::Filter filter;
-  mull::MutatorsFactory factory;
   mull::MutationsFinder mutationsFinder(mutatorsOptions.mutators(),
                                         configuration);
 
