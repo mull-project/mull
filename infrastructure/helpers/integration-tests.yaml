@@ -1,6 +1,6 @@
 ---
 - name: Run Mull examples
-  command: make {{ item }}
+  command: "{{ make_program }} {{ item }}"
   args:
     chdir: "{{ source_dir }}/Examples/HelloWorld"
   environment:

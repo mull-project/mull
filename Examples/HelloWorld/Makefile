@@ -9,7 +9,7 @@ GTEST_HEADER_SEARCH_FLAGS=-I$(GTEST_DIR) -I$(GTEST_DIR)/include
 # -pthread is needed for GoogleTest.
 PTHREADS:=""
 UNAME_S := $(shell uname -s)
-ifeq ($(UNAME_S),Linux)
+ifneq ($(UNAME_S),Darwin)
     PTHREADS += -pthread
 endif
 
