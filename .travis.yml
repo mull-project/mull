@@ -23,6 +23,6 @@ before_install:
 
 # Build steps
 script:
-- if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then cd infrastructure && ansible-playbook macos-playbook.yaml -e llvm_version=$LLVM_VERSION.0 -e source_dir=$PWD/.. -e gitref=$TRAVIS_COMMIT -e host=localhost --verbose; fi
+- if [[ "${TRAVIS_OS_NAME}" == "osx" ]]; then cd infrastructure && ansible-playbook macos-playbook.yaml -e llvm_version=$LLVM_VERSION.0 -e source_dir=$PWD/.. -e gitref=$TRAVIS_COMMIT -e host=localhost -e skip_package=true --verbose; fi
 - if [[ "${TRAVIS_OS_NAME}" == "linux" ]]; then cd infrastructure && ansible-playbook ubuntu-playbook.yaml -e llvm_version=$LLVM_VERSION.0 -e source_dir=$PWD/.. -e gitref=$TRAVIS_COMMIT -e host=localhost --verbose; fi
 
