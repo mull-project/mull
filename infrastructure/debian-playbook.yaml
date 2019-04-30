@@ -21,6 +21,7 @@
       - pkg-config
       - libxml2-dev
       - uuid-dev
+      - liblzma-dev
 
   vars_files:
     - helpers/variables.yaml

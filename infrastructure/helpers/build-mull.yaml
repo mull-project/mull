@@ -70,6 +70,7 @@
   args:
     chdir: "{{ release_build_dir }}"
   become: true
+  when: not skip_package
 
 - name: Print Mull version
   command: mull-cxx -version
