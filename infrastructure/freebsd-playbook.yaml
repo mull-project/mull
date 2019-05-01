@@ -5,6 +5,9 @@
     llvm_version: 8.0.0
     platform: freebsd
 
+    package_extensions:
+      - sh
+
     mull_cxx_flags:
 
     packages:

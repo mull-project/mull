@@ -5,6 +5,9 @@
     llvm_version: 6.0.0
     platform: ubuntu
 
+    package_extensions:
+      - deb
+
     mull_cxx_flags: -D_GLIBCXX_USE_CXX11_ABI=1
 
     packages:
