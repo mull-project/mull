@@ -5,6 +5,9 @@
     llvm_version: 6.0.0
     platform: fedora
 
+    package_extensions:
+      - rpm
+
     mull_cxx_flags:
 
     packages:

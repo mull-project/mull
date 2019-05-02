@@ -72,6 +72,21 @@
   become: true
   when: not skip_package
 
+- name: Copy package file name
+  fetch:
+    src: "{{ release_build_dir }}/PACKAGE_FILE_NAME"
+    dest: PACKAGE_FILE_NAME
+    flat: true
+  when: not skip_package
+
+- name: Copy package to the local machine
+  fetch:
+    src: "{{ release_build_dir }}/{{ lookup('file', 'PACKAGE_FILE_NAME') }}.{{ item }}"
+    dest: "packages/{{ lookup('file', 'PACKAGE_FILE_NAME') }}.{{ item }}"
+    flat: true
+  with_items: "{{ package_extensions }}"
+  when: not skip_package
+
 - name: Print Mull version
   command: mull-cxx -version
   args:

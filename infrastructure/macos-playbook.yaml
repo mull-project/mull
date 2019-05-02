@@ -5,6 +5,9 @@
     llvm_version: 6.0.0
     platform: macos
 
+    package_extensions:
+      - dmg
+
     mull_cxx_flags: ""
 
     packages:
