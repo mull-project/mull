@@ -14,6 +14,27 @@ enum ExecutionStatus {
   FailFast = 7
 };
 
+static std::string executionStatusAsString(ExecutionStatus status) {
+  switch (status) {
+  case Invalid:
+    return "Invalid";
+  case Failed:
+    return "Failed";
+  case Passed:
+    return "Passed";
+  case Timedout:
+    return "Timedout";
+  case Crashed:
+    return "Crashed";
+  case AbnormalExit:
+    return "AbnormalExit";
+  case DryRun:
+    return "DryRun";
+  case FailFast:
+    return "FailFast";
+  }
+}
+
 struct ExecutionResult {
   ExecutionStatus status;
   int exitStatus;
@@ -24,24 +45,7 @@ struct ExecutionResult {
       : status(ExecutionStatus::Invalid), exitStatus(0), runningTime(0) {}
 
   std::string getStatusAsString() {
-    switch (this->status) {
-    case Invalid:
-      return "Invalid";
-    case Failed:
-      return "Failed";
-    case Passed:
-      return "Passed";
-    case Timedout:
-      return "Timedout";
-    case Crashed:
-      return "Crashed";
-    case AbnormalExit:
-      return "AbnormalExit";
-    case DryRun:
-      return "DryRun";
-    case FailFast:
-      return "FailFast";
-    }
+    return executionStatusAsString(this->status);
   }
 };
 } // namespace mull
