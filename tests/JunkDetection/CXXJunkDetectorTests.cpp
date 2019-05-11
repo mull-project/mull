@@ -19,6 +19,7 @@
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
+#include <mull/Mutators/AndOrReplacementMutator.h>
 
 #include "gtest/gtest.h"
 
@@ -119,7 +120,10 @@ static const CXXJunkDetectorTestParameter parameters[] = {
         new RemoveVoidFunctionMutator, 9, 6),
     CXXJunkDetectorTestParameter(
         fixtures::mutators_negate_condition_junk_bc_path(),
-        new NegateConditionMutator, 42, 30)};
+        new NegateConditionMutator, 42, 30),
+    CXXJunkDetectorTestParameter(
+        fixtures::mutators_and_or_replacement_cpp_junk_bc_path(),
+        new AndOrReplacementMutator, 6, 4)};
 
 INSTANTIATE_TEST_CASE_P(CXXJunkDetection, CXXJunkDetectorTest,
                         testing::ValuesIn(parameters));

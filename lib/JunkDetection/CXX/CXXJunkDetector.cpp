@@ -4,6 +4,7 @@
 #include "mull/MutationPoint.h"
 #include "mull/Mutators/Mutator.h"
 
+#include "mull/JunkDetection/CXX/Visitors/AndOrReplacementVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/ConditionalsBoundaryVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/MathAddVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/MathSubVisitor.h"
@@ -50,6 +51,8 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     return isJunkMutation<RemoveVoidFunctionVisitor>(astStorage, point);
   case MutatorKind::NegateMutator:
     return isJunkMutation<NegateConditionVisitor>(astStorage, point);
+  case MutatorKind::AndOrReplacementMutator:
+    return isJunkMutation<AndOrReplacementVisitor>(astStorage, point);
   default:
     return false;
   }
