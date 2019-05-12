@@ -400,7 +400,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
                 finder, metrics, junkDetector);
 
   auto result = Driver.Run();
-  ASSERT_EQ(8U, result->getTests().size());
+  ASSERT_EQ(12U, result->getTests().size());
 
   auto mutants = result->getMutationResults().begin();
 
@@ -508,6 +508,68 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
     ASSERT_EQ("test_compound_OR_then_OR_operator",
               mutant8_2->getTest()->getTestName());
     ASSERT_EQ(ExecutionStatus::Passed, mutant8_2->getExecutionResult().status);
+  }
+
+  /// Edge case for Pattern #1: OR expression that always evaluates to a scalar
+  /// value but also contains a dummy function call (presence of a dummy
+  /// function makes the Branch instruction to be generated).
+  {
+    auto mutant1 = (mutants++)->get();
+    ASSERT_EQ(ExecutionStatus::Passed,
+              mutant1->getTest()->getExecutionResult().status);
+    ASSERT_EQ("test_OR_operator_always_scalars_case_with_function_call_pattern1",
+              mutant1->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Passed, mutant1->getExecutionResult().status);
+
+    auto mutant2 = (mutants++)->get();
+    ASSERT_EQ(ExecutionStatus::Passed,
+              mutant2->getTest()->getExecutionResult().status);
+    ASSERT_EQ("test_OR_operator_always_scalars_case_with_function_call_pattern1",
+              mutant2->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Passed, mutant2->getExecutionResult().status);
+  }
+
+  /// Edge case for Pattern #3: OR expression that always evaluates to a scalar
+  /// value but also contains a dummy function call (presence of a dummy
+  /// function makes the Branch instruction to be generated).
+  {
+    auto mutant = (mutants++)->get();
+    ASSERT_EQ(ExecutionStatus::Passed,
+              mutant->getTest()->getExecutionResult().status);
+    ASSERT_EQ("test_OR_operator_always_scalars_case_with_function_call_pattern3",
+              mutant->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Passed, mutant->getExecutionResult().status);
+  }
+
+  /// Edge case for Pattern #1: AND expression that always evaluates to a scalar
+  /// value but also contains a dummy function call (presence of a dummy
+  /// function makes the Branch instruction to be generated).
+  {
+    auto mutant1 = (mutants++)->get();
+    ASSERT_EQ(ExecutionStatus::Passed,
+              mutant1->getTest()->getExecutionResult().status);
+    ASSERT_EQ("test_AND_operator_always_scalars_case_with_function_call_pattern1",
+              mutant1->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Passed, mutant1->getExecutionResult().status);
+
+    auto mutant2 = (mutants++)->get();
+    ASSERT_EQ(ExecutionStatus::Passed,
+              mutant2->getTest()->getExecutionResult().status);
+    ASSERT_EQ("test_AND_operator_always_scalars_case_with_function_call_pattern1",
+              mutant2->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Passed, mutant2->getExecutionResult().status);
+  }
+
+  /// Edge case for Pattern #3: AND expression that always evaluates to a scalar
+  /// value but also contains a dummy function call (presence of a dummy
+  /// function makes the Branch instruction to be generated).
+  {
+    auto mutant = (mutants++)->get();
+    ASSERT_EQ(ExecutionStatus::Passed,
+              mutant->getTest()->getExecutionResult().status);
+    ASSERT_EQ("test_AND_operator_always_scalars_case_with_function_call_pattern3",
+              mutant->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Passed, mutant->getExecutionResult().status);
   }
 
   ASSERT_EQ(mutants, result->getMutationResults().end());
