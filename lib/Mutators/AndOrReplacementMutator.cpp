@@ -115,9 +115,9 @@ llvm::Value *AndOrReplacementMutator::applyMutationANDToOR_Pattern1(
   assert(secondBranch != nullptr);
   assert(secondBranch->isConditional());
 
-  /// Operand #0 is a comparison instruction.
-  Instruction *sourceInst = (dyn_cast<Instruction>(firstBranch->getOperand(0)));
-  assert(sourceInst);
+  /// Operand #0 is a comparison instruction or simply a scalar value.
+  Value *sourceValue = dyn_cast<Value>(firstBranch->getOperand(0));
+  assert(sourceValue);
 
   /// Left branch value is somehow operand #2, right is #1.
   BasicBlock *firstBranchLeftBB =
@@ -131,7 +131,7 @@ llvm::Value *AndOrReplacementMutator::applyMutationANDToOR_Pattern1(
       dyn_cast<BasicBlock>(secondBranch->getOperand(2));
 
   BranchInst *replacement =
-      BranchInst::Create(secondBranchLeftBB, firstBranchLeftBB, sourceInst);
+    BranchInst::Create(secondBranchLeftBB, firstBranchLeftBB, sourceValue);
 
   /// If I add a named instruction, and the name already exist
   /// in a basic block, then LLVM will make another unique name of it
@@ -188,9 +188,9 @@ llvm::Value *AndOrReplacementMutator::applyMutationANDToOR_Pattern2(
   assert(secondBranch != nullptr);
   assert(secondBranch->isConditional());
 
-  /// Operand #0 is a comparison instruction.
-  Instruction *sourceInst = (dyn_cast<Instruction>(firstBranch->getOperand(0)));
-  assert(sourceInst);
+  /// Operand #0 is a comparison instruction or simply a scalar value.
+  Value *sourceValue = (dyn_cast<Value>(firstBranch->getOperand(0)));
+  assert(sourceValue);
 
   /// Left branch value is somehow operand #2, right is #1.
   BasicBlock *firstBranchLeftBB =
@@ -201,10 +201,10 @@ llvm::Value *AndOrReplacementMutator::applyMutationANDToOR_Pattern2(
   assert(firstBranchRightBB);
 
   BasicBlock *secondBranchLeftBB =
-      dyn_cast<BasicBlock>(secondBranch->getOperand(2));
+    dyn_cast<BasicBlock>(secondBranch->getOperand(2));
 
   BranchInst *replacement =
-      BranchInst::Create(firstBranchRightBB, secondBranchLeftBB, sourceInst);
+    BranchInst::Create(firstBranchRightBB, secondBranchLeftBB, sourceValue);
 
   /// If I add a named instruction, and the name already exist
   /// in a basic block, then LLVM will make another unique name of it
@@ -283,11 +283,11 @@ llvm::Value *AndOrReplacementMutator::applyMutationANDToOR_Pattern3(
 
   auto firstBranchLeftBB = dyn_cast<BasicBlock>(firstBranch->getOperand(2));
   auto firstBranchRightBB = dyn_cast<BasicBlock>(firstBranch->getOperand(1));
-  Instruction *firstBranchConditionInst =
-      (dyn_cast<Instruction>(firstBranch->getOperand(0)));
+  Value *firstBranchConditionValue = dyn_cast<Value>(firstBranch->getOperand(0));
+  assert(firstBranchConditionValue);
 
   BranchInst *replacement = BranchInst::Create(
-      firstBranchRightBB, firstBranchLeftBB, firstBranchConditionInst);
+    firstBranchRightBB, firstBranchLeftBB, firstBranchConditionValue);
 
   /// If I add a named instruction, and the name already exist
   /// in a basic block, then LLVM will make another unique name of it
@@ -313,9 +313,9 @@ llvm::Value *AndOrReplacementMutator::applyMutationORToAND_Pattern1(
   assert(secondBranch != nullptr);
   assert(secondBranch->isConditional());
 
-  /// Operand #0 is a comparison instruction.
-  Instruction *sourceInst = (dyn_cast<Instruction>(firstBranch->getOperand(0)));
-  assert(sourceInst);
+  /// Operand #0 is a comparison instruction or simply a scalar value.
+  Value *sourceValue = dyn_cast<Value>(firstBranch->getOperand(0));
+  assert(sourceValue);
 
   /// Left branch value is somehow operand #2, right is #1.
   BasicBlock *firstBranchRightBB =
@@ -330,7 +330,7 @@ llvm::Value *AndOrReplacementMutator::applyMutationORToAND_Pattern1(
   assert(secondBranchRightBB);
 
   BranchInst *replacement =
-      BranchInst::Create(firstBranchRightBB, secondBranchRightBB, sourceInst);
+    BranchInst::Create(firstBranchRightBB, secondBranchRightBB, sourceValue);
 
   /// If I add a named instruction, and the name already exist
   /// in a basic block, then LLVM will make another unique name of it
@@ -386,9 +386,9 @@ llvm::Value *AndOrReplacementMutator::applyMutationORToAND_Pattern2(
   assert(secondBranch != nullptr);
   assert(secondBranch->isConditional());
 
-  /// Operand #0 is a comparison instruction.
-  Instruction *sourceInst = (dyn_cast<Instruction>(firstBranch->getOperand(0)));
-  assert(sourceInst);
+  /// Operand #0 is a comparison instruction or simply a scalar value.
+  Value *sourceValue = (dyn_cast<Value>(firstBranch->getOperand(0)));
+  assert(sourceValue);
 
   /// Left branch value is somehow operand #2, right is #1.
   BasicBlock *firstBranchLeftBB =
@@ -403,7 +403,7 @@ llvm::Value *AndOrReplacementMutator::applyMutationORToAND_Pattern2(
   assert(secondBranchRightBB);
 
   BranchInst *replacement =
-      BranchInst::Create(secondBranchRightBB, firstBranchLeftBB, sourceInst);
+    BranchInst::Create(secondBranchRightBB, firstBranchLeftBB, sourceValue);
 
   /// If I add a named instruction, and the name already exist
   /// in a basic block, then LLVM will make another unique name of it
@@ -481,11 +481,12 @@ llvm::Value *AndOrReplacementMutator::applyMutationORToAND_Pattern3(
 
   auto firstBranchLeftBB = dyn_cast<BasicBlock>(firstBranch->getOperand(2));
   auto firstBranchRightBB = dyn_cast<BasicBlock>(firstBranch->getOperand(1));
-  Instruction *firstBranchConditionInst =
-      (dyn_cast<Instruction>(firstBranch->getOperand(0)));
+
+  Value *firstBranchConditionValue = dyn_cast<Value>(firstBranch->getOperand(0));
+  assert(firstBranchConditionValue);
 
   BranchInst *replacement = BranchInst::Create(
-      firstBranchRightBB, firstBranchLeftBB, firstBranchConditionInst);
+    firstBranchRightBB, firstBranchLeftBB, firstBranchConditionValue);
 
   /// If I add a named instruction, and the name already exist
   /// in a basic block, then LLVM will make another unique name of it
