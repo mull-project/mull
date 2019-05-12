@@ -27,6 +27,7 @@ enum class MutatorKind {
   MathMulMutator,
   NegateMutator,
   RemoveVoidFunctionMutator,
+  ReplaceCallMutator,
   AndOrReplacementMutator,
 };
 

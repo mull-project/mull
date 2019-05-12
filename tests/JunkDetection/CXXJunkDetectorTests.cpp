@@ -13,6 +13,7 @@
 #include "mull/Mutators/MathSubMutator.h"
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "mull/Mutators/RemoveVoidFunctionMutator.h"
+#include "mull/Mutators/ReplaceCallMutator.h"
 #include "mull/Program/Program.h"
 #include "mull/Testee.h"
 #include "mull/Toolchain/Compiler.h"
@@ -124,6 +125,9 @@ static const CXXJunkDetectorTestParameter parameters[] = {
     CXXJunkDetectorTestParameter(
         fixtures::mutators_remove_void_function_junk_bc_path(),
         new RemoveVoidFunctionMutator, 9, 6),
+    CXXJunkDetectorTestParameter(fixtures::mutators_replace_call_junk_bc_path(),
+                                 new ReplaceCallMutator, 12, 11),
+
     CXXJunkDetectorTestParameter(
         fixtures::mutators_negate_condition_junk_bc_path(),
         new NegateConditionMutator, 42, 30),
