@@ -23,9 +23,10 @@ enum class MutatorKind {
   ConditionalsBoundaryMutator,
   MathAddMutator,
   MathSubMutator,
+  MathMulMutator,
   NegateMutator,
   RemoveVoidFunctionMutator,
-  AndOrReplacementMutator
+  AndOrReplacementMutator,
 };
 
 class Mutator {
