@@ -28,6 +28,7 @@ public:
   std::string getUniqueIdentifier() override { return ID; }
   std::string getUniqueIdentifier() const override { return ID; }
   std::string getDescription() const override { return description; }
+  MutatorKind mutatorKind() override { return MutatorKind::MathDivMutator; }
 
   bool canBeApplied(llvm::Value &V) override;
   llvm::Value *applyMutation(llvm::Function *function,

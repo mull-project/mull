@@ -84,7 +84,7 @@ set(mull_sources
   JunkDetection/CXX/Visitors/NegateConditionVisitor.cpp
   JunkDetection/CXX/ASTStorage.cpp
   JunkDetection/CXX/CompilationDatabase.cpp
-  Reporters/IDEReporter.cpp TestFrameworks/NativeTestRunner.cpp JunkDetection/CXX/Visitors/AndOrReplacementVisitor.cpp JunkDetection/CXX/Visitors/MathMulVisitor.cpp)
+  Reporters/IDEReporter.cpp TestFrameworks/NativeTestRunner.cpp JunkDetection/CXX/Visitors/AndOrReplacementVisitor.cpp JunkDetection/CXX/Visitors/MathMulVisitor.cpp JunkDetection/CXX/Visitors/MathDivVisitor.cpp)
 
 set (MULL_INCLUDE_DIR ${MULL_SOURCE_DIR}/include/mull)
 
