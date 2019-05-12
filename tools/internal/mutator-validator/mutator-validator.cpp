@@ -2,6 +2,8 @@
 #include <utility>
 #include <vector>
 
+#include <llvm/IR/Verifier.h>
+
 #include <mull/Config/Configuration.h>
 #include <mull/Filter.h>
 #include <mull/ModuleLoader.h>
@@ -59,6 +61,7 @@ int main(int argc, char **argv) {
   mull::Toolchain toolchain(configuration);
   mull::SingleTaskExecutor compileMutants("Compiling mutants", [&] {
     for (auto &module : program.modules()) {
+      assert(!llvm::verifyModule(*module->getModule(), &llvm::errs()));
       toolchain.compiler().compileModule(module->getModule(),
                                          toolchain.targetMachine());
     }
