@@ -22,10 +22,12 @@ enum class MutatorKind {
   Unknown,
   ConditionalsBoundaryMutator,
   MathAddMutator,
+  MathDivMutator,
   MathSubMutator,
+  MathMulMutator,
   NegateMutator,
   RemoveVoidFunctionMutator,
-  AndOrReplacementMutator
+  AndOrReplacementMutator,
 };
 
 class Mutator {

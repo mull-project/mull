@@ -8,6 +8,8 @@
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/ConditionalsBoundaryMutator.h"
 #include "mull/Mutators/MathAddMutator.h"
+#include "mull/Mutators/MathDivMutator.h"
+#include "mull/Mutators/MathMulMutator.h"
 #include "mull/Mutators/MathSubMutator.h"
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "mull/Mutators/RemoveVoidFunctionMutator.h"
@@ -98,6 +100,10 @@ static const CXXJunkDetectorTestParameter parameters[] = {
                                  new ConditionalsBoundaryMutator, 7, 6),
     CXXJunkDetectorTestParameter(fixtures::mutators_math_add_module_bc_path(),
                                  new MathAddMutator, 17, 16),
+    CXXJunkDetectorTestParameter(fixtures::mutators_math_mul_junk_bc_path(),
+                                 new MathMulMutator, 11, 10),
+    CXXJunkDetectorTestParameter(fixtures::mutators_math_div_junk_bc_path(),
+                                 new MathDivMutator, 11, 10),
 
     /// FIXME: Here MathSub should produce 14 mutants, but only 9 found because
     /// some of the '--/-= 1' instructions converted into 'add -1'
