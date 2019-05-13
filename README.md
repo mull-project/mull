@@ -16,7 +16,7 @@ Mutation Testing, a fault-based software testing technique, serves as a way to e
 ## Installation
 
 You can install Mull using [prebulit packages](https://github.com/mull-project/mull/releases) or build it yourself from
-sources as described here: [Hacking on Mull](/docs/documentation/hacking.md#local-development-setup)
+sources as described here: [Hacking on Mull](documentation/hacking.md#local-development-setup)
 
 ## Usage
 
@@ -284,7 +284,7 @@ Total execution time: 6072ms
 
 ## Contributing
 
-Here is the starting point: [CONTRIBUTING.md](/CONTRIBUTING.md)
+Here is the starting point: [CONTRIBUTING.md](CONTRIBUTING.md)
 
 ## Citation
 
