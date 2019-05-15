@@ -2,9 +2,11 @@
 
 ## Next release
 
- - Add junk detection for AndOrReplacement mutator #509
- - Add junk detection for MathDiv mutator #511
- - Add junk detection for MathMul mutator #511
+ - Add junk detection
+   - AndOrReplacement #509
+   - MathDiv #511
+   - MathMul #511
+   - ReplaceCall #512
  - Handle edge case for AND-OR mutator #501
 
 ## [0.2.0] - 02 May 2019
