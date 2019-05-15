@@ -24,6 +24,7 @@
       - libxml2-dev
       - uuid-dev
       - binutils
+      - liblzma-dev
 
   vars_files:
     - helpers/variables.yaml
