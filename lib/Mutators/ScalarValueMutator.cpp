@@ -25,36 +25,77 @@ const std::string ScalarValueMutator::description =
 
 #pragma mark - Prototypes
 
-static ScalarValueMutationType
-findPossibleApplication(Value &V, std::string &outDiagnostics);
+static std::pair<ScalarValueMutationType, Value *>
+findPossibleApplication(Value &V);
+
 static ConstantInt *getReplacementInt(ConstantInt *constantInt);
 static ConstantFP *getReplacementFloat(ConstantFP *constantFloat);
 
 #pragma mark - Implementations
 
+static std::string getAsString(Value *numericOperandValue) {
+  if (ConstantInt *constantInt = dyn_cast<ConstantInt>(numericOperandValue)) {
+    const auto intValue = constantInt->getValue();
+    return std::to_string(intValue.getSExtValue());
+  }
+  if (ConstantFP *constantFloat = dyn_cast<ConstantFP>(numericOperandValue)) {
+    const auto floatValue = constantFloat->getValueAPF();
+    return std::to_string(floatValue.convertToDouble());
+  }
+  return "";
+}
+
+static std::string getAsReplacementString(Value *numericOperandValue) {
+  if (ConstantInt *constantInt = dyn_cast<ConstantInt>(numericOperandValue)) {
+    const auto replacementInt = getReplacementInt(constantInt);
+    const auto replacementIntValue = replacementInt->getValue();
+    return std::to_string(replacementIntValue.getSExtValue());
+  }
+  if (ConstantFP *constantFloat = dyn_cast<ConstantFP>(numericOperandValue)) {
+    const auto replacementFloat = getReplacementFloat(constantFloat);
+    const auto replacementFloatValue = replacementFloat->getValueAPF();
+    return std::to_string(replacementFloatValue.convertToDouble());
+  }
+  return "";
+}
+
+static std::string createDiagnostics(const std::string &originalString,
+                                     const std::string &replacementString) {
+  std::stringstream diagnostics;
+  diagnostics << "Scalar Value Replacement: ";
+  diagnostics << originalString;
+  diagnostics << " -> ";
+  diagnostics << replacementString;
+  return diagnostics.str();
+}
+
 MutationPoint *ScalarValueMutator::getMutationPoint(
     Bitcode *bitcode, llvm::Function *function, llvm::Instruction *instruction,
     SourceLocation &sourceLocation, MutationPointAddress &address) {
-  std::string diagnostics;
-  ScalarValueMutationType mutationType =
-      findPossibleApplication(*instruction, diagnostics);
-  if (mutationType == ScalarValueMutationType::None) {
+
+  std::pair<ScalarValueMutationType, Value *> possibleApplication =
+      findPossibleApplication(*instruction);
+  if (possibleApplication.first == ScalarValueMutationType::None) {
     return nullptr;
   }
 
-  return new MutationPoint(this, address, function, diagnostics, sourceLocation,
-                           bitcode);
+  std::string originalString = getAsString(possibleApplication.second);
+  std::string replacementString =
+      getAsReplacementString(possibleApplication.second);
+  std::string diagnostics =
+      createDiagnostics(originalString, replacementString);
+
+  return new MutationPoint(this, address, function, diagnostics,
+                           replacementString, sourceLocation, bitcode);
 }
 
 /// Currently only used by SimpleTestFinder.
 bool ScalarValueMutator::canBeApplied(Value &V) {
-  std::string diagnostics;
-  return findPossibleApplication(V, diagnostics) !=
-         ScalarValueMutationType::None;
+  return findPossibleApplication(V).first != ScalarValueMutationType::None;
 }
 
-static ScalarValueMutationType
-findPossibleApplication(Value &V, std::string &outDiagnostics) {
+static std::pair<ScalarValueMutationType, Value *>
+findPossibleApplication(Value &V) {
   Instruction *instruction = dyn_cast<Instruction>(&V);
   assert(instruction);
 
@@ -70,7 +111,7 @@ findPossibleApplication(Value &V, std::string &outDiagnostics) {
       if (Function *callee =
               dyn_cast<Function>(callInstruction->getCalledValue())) {
         if (callee->getName().startswith("mull_")) {
-          return ScalarValueMutationType::None;
+          return std::make_pair(ScalarValueMutationType::None, nullptr);
         }
       }
     }
@@ -79,47 +120,22 @@ findPossibleApplication(Value &V, std::string &outDiagnostics) {
       if (ConstantInt *constantInt = dyn_cast<ConstantInt>(operand)) {
         auto intValue = constantInt->getValue();
 
-        auto replacementInt = getReplacementInt(constantInt);
-        auto replacementIntValue = replacementInt->getValue();
-
         /// Skip big number because getSExtValue throws otherwise.
         /// TODO: consider these edge cases in unit tests.
         if (intValue.getNumWords() > 1) {
           continue;
         }
 
-        std::stringstream diagstream;
-        diagstream << "Scalar Value Replacement: ";
-
-        diagstream << intValue.getSExtValue();
-        diagstream << " -> ";
-        diagstream << replacementIntValue.getSExtValue();
-
-        outDiagnostics.assign(diagstream.str());
-
-        return ScalarValueMutationType::Int;
+        return std::make_pair(ScalarValueMutationType::Int, operand);
       }
 
-      if (ConstantFP *constantFloat = dyn_cast<ConstantFP>(operand)) {
-        auto floatValue = constantFloat->getValueAPF();
-        auto replacementFloat = getReplacementFloat(constantFloat);
-        auto replacementFloatValue = replacementFloat->getValueAPF();
-
-        std::stringstream diagstream;
-        diagstream << "Scalar Value Replacement: ";
-
-        diagstream << floatValue.convertToDouble();
-        diagstream << " -> ";
-        diagstream << replacementFloatValue.convertToDouble();
-
-        outDiagnostics.assign(diagstream.str());
-
-        return ScalarValueMutationType::Float;
+      if (dyn_cast<ConstantFP>(operand)) {
+        return std::make_pair(ScalarValueMutationType::Float, operand);
       }
     }
   }
 
-  return ScalarValueMutationType::None;
+  return std::make_pair(ScalarValueMutationType::None, nullptr);
 }
 
 static ConstantInt *getReplacementInt(ConstantInt *constantInt) {
@@ -153,8 +169,6 @@ static ConstantFP *getReplacementFloat(ConstantFP *constantFloat) {
 
     return replacement;
   }
-
-  return nullptr;
 }
 
 llvm::Value *ScalarValueMutator::applyMutation(Function *function,

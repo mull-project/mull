@@ -87,11 +87,12 @@ std::string MutationPointAddress::getIdentifier() const { return identifier; }
 
 MutationPoint::MutationPoint(Mutator *mutator, MutationPointAddress address,
                              llvm::Function *function, std::string diagnostics,
-                             SourceLocation location, Bitcode *m)
+                             std::string replacement, SourceLocation location,
+                             Bitcode *m)
     : mutator(mutator), address(address), bitcode(m),
       originalFunction(function), mutatedFunction(nullptr),
-      diagnostics(std::move(diagnostics)), sourceLocation(std::move(location)),
-      reachableTests() {
+      diagnostics(std::move(diagnostics)), replacement(replacement),
+      sourceLocation(std::move(location)), reachableTests() {
   string bitcodeID = bitcode->getUniqueIdentifier();
   string addressID = address.getIdentifier();
   string mutatorID = mutator->getUniqueIdentifier();
@@ -138,8 +139,14 @@ const std::string &MutationPoint::getDiagnostics() { return diagnostics; }
 
 const std::string &MutationPoint::getDiagnostics() const { return diagnostics; }
 
+const std::string &MutationPoint::getReplacement() { return replacement; }
+
 const SourceLocation &MutationPoint::getSourceLocation() const {
   return sourceLocation;
+}
+
+const std::string MutationPoint::getSourceFileName() const {
+  return getBitcode()->getModule()->getSourceFileName();
 }
 
 Function *MutationPoint::getOriginalFunction() { return originalFunction; }

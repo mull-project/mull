@@ -108,8 +108,9 @@ MutationPoint *MathAddMutator::getMutationPoint(Bitcode *bitcode,
                                                 MutationPointAddress &address) {
   if (canBeApplied(*instruction)) {
     std::string diagnostics = "Math Add: replaced + with -";
+    std::string replacement = "-";
 
-    return new MutationPoint(this, address, function, diagnostics,
+    return new MutationPoint(this, address, function, diagnostics, replacement,
                              sourceLocation, bitcode);
   }
 

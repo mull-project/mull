@@ -16,5 +16,5 @@ endif()
 add_mull_executable(
   NAME mull-cxx
   SOURCES ${SOURCES}
-  LINK_WITH ebc mull ${MULL_CXX_LLVM_LIBRARIES}
+  LINK_WITH ebc mull ${MULL_CXX_LLVM_LIBRARIES} json11
 )

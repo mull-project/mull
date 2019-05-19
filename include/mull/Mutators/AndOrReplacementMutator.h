@@ -32,7 +32,9 @@ class MutationPointAddress;
 
 class AndOrReplacementMutator : public Mutator {
 
-  AND_OR_MutationType
+  AND_OR_MutationType findPossibleMutation(Value &V);
+
+    AND_OR_MutationType
   findPossibleMutationInBranch(BranchInst *branchInst,
                                BranchInst **secondBranchInst);
 

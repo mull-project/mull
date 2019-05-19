@@ -68,7 +68,9 @@ MutationPoint *ReplaceAssignmentMutator::getMutationPoint(
     return nullptr;
   }
 
+  const std::string replacement = "42";
   auto mutationPoint = new MutationPoint(this, address, function, diagnostics,
+                                         replacement,
                                          sourceLocation, bitcode);
 
   return mutationPoint;

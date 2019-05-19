@@ -7,15 +7,14 @@ MathMulVisitor::MathMulVisitor(const VisitorParameters &parameters)
 
 bool MathMulVisitor::VisitBinaryOperator(
     clang::BinaryOperator *binaryOperator) {
-  auto range = binaryOperator->getSourceRange();
   if (binaryOperator->getOpcode() == clang::BinaryOperatorKind::BO_Mul) {
-    visitor.visitRangeWithLocation(range);
+    visitor.visitRangeWithASTExpr(binaryOperator);
   }
   if (binaryOperator->getOpcode() == clang::BinaryOperatorKind::BO_MulAssign) {
-    visitor.visitRangeWithLocation(range);
+    visitor.visitRangeWithASTExpr(binaryOperator);
   }
 
   return true;
 }
 
-bool MathMulVisitor::foundMutant() { return visitor.foundRange(); }
+clang::Expr *MathMulVisitor::foundMutant() { return visitor.getMatchingASTNode(); }

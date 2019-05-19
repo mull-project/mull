@@ -37,11 +37,17 @@ public:
 
   ThreadSafeASTUnit *findAST(const MutationPoint *point);
 
+  clang::Expr *getMutantASTNode(MutationPoint *mutationPoint);
+  void setMutantASTNode(MutationPoint *mutationPoint,
+                        clang::Expr *mutantExpression);
+
 private:
   std::mutex mutex;
+  std::mutex mutantNodesMutex;
 
   CompilationDatabase compilationDatabase;
   std::map<std::string, std::unique_ptr<ThreadSafeASTUnit>> astUnits;
+  std::map<MutationPoint *, clang::Expr *> mutantASTNodes;
 };
 
 } // namespace mull

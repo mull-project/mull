@@ -91,6 +91,35 @@ list here:
 mull-cxx --help
 ```
 
+### Configuration
+
+#### Generating HTML report (Mutation Testing Elements)
+
+Mull supports 
+[Mutation Testing Elements](https://github.com/stryker-mutator/mutation-testing-elements) 
+which is an HTML reporter for a number of mutation testing tools. 
+
+Mull only generates a JSON file with a mutation testing report. The JSON file
+can then be read by the Mutation Testing Elements's HTML/Javascript code and 
+rendered in a browser. See the mutation-testing-elements's 
+[simple-example](https://github.com/stryker-mutator/mutation-testing-elements/tree/059732743f75ea1abfcc2f093cef7a8db8798739/packages/mutation-testing-elements/testResources/simple-example).
+ 
+The option `-reporter-elements` enables reporting to Mutation Testing Elements,
+the optional option `-elements-output-path` specifies the output path.
+
+**Note:** Reporting to Mutation Testing Elements requires presence of the 
+`-compdb-path` and `-compilation-flags` (see Junk Mutations above) because Mull 
+needs the compilation database/flags information to reason about the source code 
+in which the mutations are found.
+
+```
+mull-cxx --help
+...
+  -elements-output-path=<string>   - Where to store the Mutation Testing Elements JSON report (defaults to /tmp/mull.mutation-testing-elements.json)
+  -reporter-elements               - Enables Mutation Testing Elements Reporter
+...
+``` 
+ 
 ### Examples: OpenSSL
 
 Build OpenSSL:

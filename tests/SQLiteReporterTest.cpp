@@ -278,7 +278,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
                    RawConfig::FailFastMode::Enabled, RawConfig::UseCache::Yes,
                    RawConfig::EmitDebugInfo::No, Diagnostics::None, timeout,
                    distance, cacheDirectory, JunkDetectionConfig::disabled(),
-                   ParallelizationConfig::defaultConfig());
+                   ParallelizationConfig::defaultConfig(), "");
 
   SQLiteReporter reporter(config.getProjectName());
 
@@ -407,7 +407,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
       RawConfig::FailFastMode::Disabled, RawConfig::UseCache::Yes,
       RawConfig::EmitDebugInfo::Yes, Diagnostics::None, timeout, distance,
       cacheDirectory, JunkDetectionConfig::disabled(),
-      ParallelizationConfig::defaultConfig());
+      ParallelizationConfig::defaultConfig(), "");
 
   Configuration configuration(rawConfig);
 
@@ -543,7 +543,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
       RawConfig::FailFastMode::Disabled, RawConfig::UseCache::Yes,
       RawConfig::EmitDebugInfo::No, Diagnostics::None, timeout, distance,
       cacheDirectory, JunkDetectionConfig::disabled(),
-      ParallelizationConfig::defaultConfig());
+      ParallelizationConfig::defaultConfig(), "");
 
   Configuration configuration(rawConfig);
 

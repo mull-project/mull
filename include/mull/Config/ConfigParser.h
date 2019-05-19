@@ -149,6 +149,8 @@ template <> struct MappingTraits<mull::RawConfig> {
     io.mapOptional("cache_directory", config.cacheDirectory);
     io.mapOptional("junk_detection", config.junkDetection);
     io.mapOptional("parallelization", config.parallelizationConfig);
+    io.mapOptional("mutation_testing_elements_report_path",
+                   config.mutationTestingElementsReportPath);
   }
 };
 } // namespace yaml
