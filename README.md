@@ -18,6 +18,8 @@ Mutation Testing, a fault-based software testing technique, serves as a way to e
 You can install Mull using [prebulit packages](https://github.com/mull-project/mull/releases) or build it yourself from
 sources as described here: [Hacking on Mull](documentation/hacking.md#local-development-setup)
 
+**Pleese, note:** If you're installing in MacOS you will need to use a different clang than the one bundled with xcode. It's recommended to use the latest clang version available.
+
 ## Usage
 
 Please, read the intro first, then look at examples.
