@@ -9,6 +9,7 @@
    - ReplaceCall #512
  - Handle edge case for AND-OR mutator #501
  - Add better handling of edge cases when there is no debug information #519, #520, #524
+ - Print more info when Junk Detector fails to parse a file #524
 
 ## [0.2.0] - 02 May 2019
 

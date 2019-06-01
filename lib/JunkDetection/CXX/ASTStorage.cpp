@@ -3,6 +3,7 @@
 #include "mull/Logger.h"
 #include "mull/MutationPoint.h"
 
+#include <clang/Frontend/CompilerInstance.h>
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/DebugLoc.h>
@@ -12,7 +13,7 @@
 #include <llvm/Support/FileSystem.h>
 #include <llvm/Support/Path.h>
 
-#include <clang/Frontend/CompilerInstance.h>
+#include <sstream>
 
 using namespace mull;
 using namespace llvm;
@@ -35,7 +36,7 @@ bool ThreadSafeASTUnit::isInSystemHeader(clang::SourceLocation &location) {
 const clang::FileEntry *
 ThreadSafeASTUnit::findFileEntry(const MutationPoint *point) {
   assert(point);
-  assert(!point->getSourceLocation().isNull());
+  assert(!point->getSourceLocation().isNull() && "Missing debug information?");
 
   auto filePath = point->getSourceLocation().filePath;
   const clang::FileEntry *file = findFileEntry(filePath);
@@ -93,7 +94,7 @@ ASTStorage::ASTStorage(const std::string &cxxCompilationDatabasePath,
 
 ThreadSafeASTUnit *ASTStorage::findAST(const MutationPoint *point) {
   assert(point);
-  assert(!point->getSourceLocation().isNull());
+  assert(!point->getSourceLocation().isNull() && "Missing debug information?");
 
   auto instruction = dyn_cast<Instruction>(point->getOriginalValue());
   if (instruction == nullptr) {
@@ -114,17 +115,22 @@ ThreadSafeASTUnit *ASTStorage::findAST(const MutationPoint *point) {
   }
   args.push_back(sourceFile.c_str());
 
-  //  for (auto &x : args) {
-  //    printf("%s ", x);
-  //  }
-  //  printf("\n");
-
   clang::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diagnosticsEngine(
       clang::CompilerInstance::createDiagnostics(new clang::DiagnosticOptions));
 
   auto ast = clang::ASTUnit::LoadFromCommandLine(
       args.data(), args.data() + args.size(),
       std::make_shared<clang::PCHContainerOperations>(), diagnosticsEngine, "");
+
+  if (ast == nullptr) {
+    std::stringstream message;
+    message << "Cannot parse file '" << sourceFile << "':\n";
+    for (auto &arg : args) {
+      message << arg << " ";
+    }
+    message << "\n";
+    Logger::error() << message.str();
+  }
 
   auto threadSafeAST = new ThreadSafeASTUnit(ast);
   astUnits[sourceFile] = std::unique_ptr<ThreadSafeASTUnit>(threadSafeAST);
