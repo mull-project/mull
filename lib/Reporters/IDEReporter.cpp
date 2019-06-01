@@ -77,6 +77,7 @@ static bool mutantSurvived(const ExecutionStatus &status) {
 static void printSurvivedMutant(SourceManager &sourceManager,
                                 const MutationPoint &mutant) {
   auto &sourceLocation = mutant.getSourceLocation();
+  assert(!sourceLocation.isNull() && "Debug information is missing?");
   Logger::info() << sourceLocation.filePath << ":" << sourceLocation.line << ":"
                  << sourceLocation.column
                  << ": warning: " << mutant.getDiagnostics() << "\n";

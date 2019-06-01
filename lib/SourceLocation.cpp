@@ -60,7 +60,11 @@ SourceLocation::sourceLocationFromFunction(const llvm::Function *function) {
 }
 
 bool SourceLocation::isNull() const {
-  return directory == "" && filePath == "" && line == 0 && column == 0;
+  return (directory == "" && filePath == "" && line == 0 && column == 0) ||
+         // this case happened when compiled with '-Og', please look at:
+         // https://github.com/mull-project/mull/issues/519
+         // https://github.com/mull-project/mull/issues/520
+         (line == 0 && column == 0);
 }
 
 } // namespace mull
