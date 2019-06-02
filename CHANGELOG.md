@@ -2,6 +2,10 @@
 
 ## Next release
 
+ - ?
+
+## [0.3.0] - 02 Jun 2019
+
  - Add junk detection
    - AndOrReplacement #509
    - MathDiv #511
@@ -10,6 +14,7 @@
  - Handle edge case for AND-OR mutator #501
  - Add better handling of edge cases when there is no debug information #519, #520, #524
  - Print more info when Junk Detector fails to parse a file #524
+ - [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2019-05-03..2019-06-02)
 
 ## [0.2.0] - 02 May 2019
 
