@@ -20,7 +20,7 @@ vagrant up debian
 
 This command will:
 
- - setup a vrtual machine
+ - setup a virtual machine
  - install required packages (cmake, sqlite3, pkg-config, ...)
  - download precompiled version of LLVM
  - build Mull against the LLVM
@@ -56,7 +56,7 @@ You can replicate all the steps managed by Vagrant/Ansible manually.
 
 ### Required packages
 
-Please, look at the correspoding Ansible playbook (`debian-playbook.yaml`,
+Please, look at the corresponding Ansible playbook (`debian-playbook.yaml`,
 `macos-playbook.yaml`, etc.) for the list of packages required on your OS.
 
 ### LLVM
