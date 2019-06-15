@@ -2,6 +2,7 @@
 
 #include "mull/Logger.h"
 #include "mull/MutationResult.h"
+#include "mull/Reporters/SourceManager.h"
 #include "mull/Result.h"
 
 #include <map>
@@ -11,64 +12,6 @@
 #include <vector>
 
 using namespace mull;
-
-struct LineOffset {
-  FILE *file;
-  std::vector<uint> offsets;
-  LineOffset(FILE *file, std::vector<uint> offsets)
-      : file(file), offsets(std::move(offsets)) {}
-};
-
-class SourceManager {
-public:
-  std::string getLine(const SourceLocation &location) {
-    LineOffset &lineOffset = getLineOffset(location);
-    assert(location.line < lineOffset.offsets.size());
-
-    uint lineBegin = lineOffset.offsets[location.line - 1];
-    uint lineEnd = lineOffset.offsets[location.line];
-    uint lineLength = lineEnd - lineBegin;
-    fseek(lineOffset.file, lineBegin, SEEK_SET);
-    char *buffer = new char[lineLength + 1];
-    fread(buffer, sizeof(char), lineLength, lineOffset.file);
-    buffer[lineLength] = '\0';
-    auto line = std::string(buffer);
-    free(buffer);
-    return line;
-  }
-  ~SourceManager() {
-    for (auto &pair : lineOffsets) {
-      fclose(pair.second.file);
-    }
-  }
-
-private:
-  std::map<std::string, LineOffset> lineOffsets;
-
-  LineOffset &getLineOffset(const SourceLocation &location) {
-    if (lineOffsets.count(location.filePath)) {
-      return lineOffsets.at(location.filePath);
-    }
-
-    FILE *file = fopen(location.filePath.c_str(), "rb");
-    if (!file) {
-      perror("IDEReporter");
-    }
-    std::vector<uint> offsets;
-    uint offset = 0;
-    char c = '\n';
-    for (; c != EOF; c = fgetc(file), offset++) {
-      if (c == '\n') {
-        offsets.push_back(offset);
-      }
-    }
-
-    LineOffset lineOffset(file, offsets);
-    auto inserted =
-        lineOffsets.insert(std::make_pair(location.filePath, lineOffset));
-    return inserted.first->second;
-  }
-};
 
 static bool mutantSurvived(const ExecutionStatus &status) {
   return status == ExecutionStatus::Passed;
