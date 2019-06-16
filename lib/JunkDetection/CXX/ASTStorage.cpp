@@ -96,7 +96,13 @@ ThreadSafeASTUnit *ASTStorage::findAST(const MutationPoint *point) {
   assert(point);
   assert(!point->getSourceLocation().isNull() && "Missing debug information?");
 
+  errs() << "mutation point: " << point << "\n";
+
   auto instruction = dyn_cast<Instruction>(point->getOriginalValue());
+  assert(
+    instruction &&
+    "Expected instruction to still be available at this point of execution");
+
   if (instruction == nullptr) {
     return nullptr;
   }

@@ -34,9 +34,8 @@ static bool isJunkMutation(ASTStorage &storage, MutationPoint *point) {
   return !visitor.foundMutant();
 }
 
-CXXJunkDetector::CXXJunkDetector(JunkDetectionConfig &config)
-    : astStorage(config.cxxCompilationDatabasePath,
-                 config.cxxCompilationFlags) {}
+CXXJunkDetector::CXXJunkDetector(ASTStorage &astStorage)
+    : astStorage(astStorage) {}
 
 bool CXXJunkDetector::isJunk(MutationPoint *point) {
   if (point->getSourceLocation().isNull()) {

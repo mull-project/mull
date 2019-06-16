@@ -10,13 +10,13 @@ struct JunkDetectionConfig;
 
 class CXXJunkDetector : public JunkDetector {
 public:
-  explicit CXXJunkDetector(JunkDetectionConfig &config);
+  explicit CXXJunkDetector(ASTStorage &astStorage);
   ~CXXJunkDetector() override = default;
 
   bool isJunk(MutationPoint *point) override;
 
 private:
-  ASTStorage astStorage;
+  ASTStorage &astStorage;
 };
 
 } // namespace mull

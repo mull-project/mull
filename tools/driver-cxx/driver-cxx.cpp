@@ -272,7 +272,10 @@ int main(int argc, char **argv) {
         CompilationDatabasePath.getValue();
     configuration.junkDetectionEnabled = true;
   }
-  mull::CXXJunkDetector junkDetector(junkDetectionConfig);
+
+  mull::ASTStorage astStorage(junkDetectionConfig.cxxCompilationDatabasePath,
+                              junkDetectionConfig.cxxCompilationFlags);
+  mull::CXXJunkDetector junkDetector(astStorage);
 
   mull::Filter filter;
   mull::MutationsFinder mutationsFinder(mutatorsOptions.mutators(),
@@ -292,6 +295,12 @@ int main(int argc, char **argv) {
 
   mull::IDEReporter ideReporter;
   ideReporter.reportResults(*result, rawConfig, metrics);
+
+  for (mull::MutationPoint *mutationPoint: result->getMutationPoints()) {
+    mull::ThreadSafeASTUnit *astUnit = astStorage.findAST(mutationPoint);
+    assert(astUnit);
+  }
+
   llvm::llvm_shutdown();
 
   totalExecutionTime.finish();
