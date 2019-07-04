@@ -3,11 +3,21 @@
 # to upgrade instead of disabling the requirement below.
 Vagrant.require_version ">= 1.7.0"
 
+def configure_vm(name, config)
+  config.vm.provider "virtualbox" do |v|
+    v.memory = 4096
+    v.cpus = 2
+    v.name = "mull-#{name}"
+  end
+end
+
 Vagrant.configure(2) do |config|
 
   config.vm.define "debian" do |cfg|
     cfg.vm.box = "debian/stretch64"
     cfg.ssh.insert_key = false
+
+    configure_vm("debian", cfg)
 
     cfg.vm.provision "ansible" do |ansible|
       ansible.verbose = "v"
@@ -21,6 +31,8 @@ Vagrant.configure(2) do |config|
   config.vm.define "ubuntu" do |cfg|
     cfg.vm.box = "ubuntu/xenial64"
     cfg.ssh.insert_key = false
+
+    configure_vm("ubuntu", cfg)
 
     cfg.vm.provision "shell", inline: "apt-get install -y python"
 
@@ -38,10 +50,7 @@ Vagrant.configure(2) do |config|
     cfg.vm.box_version = "29.20181024.1"
     cfg.ssh.insert_key = false
 
-    cfg.vm.provider "virtualbox" do |v|
-      v.memory = 1024
-      v.cpus = 2
-    end
+    configure_vm("fedora", cfg)
 
     cfg.vm.provision "shell", inline: "yum install -y python"
 
@@ -61,6 +70,8 @@ Vagrant.configure(2) do |config|
     cfg.vm.base_mac = "080027D14C66"
     cfg.ssh.shell = "sh"
     cfg.vm.synced_folder ".", "/vagrant", disabled: true
+
+    configure_vm("freebsd", cfg)
 
     cfg.vm.provision "shell", inline: "pkg install -y python"
 
