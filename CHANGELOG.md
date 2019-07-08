@@ -3,6 +3,7 @@
 ## Next release
 
  - Fixed the original value use-after-free issue #532, #536
+ - Automated release process on macOS #537
 
 ## [0.3.0] - 02 Jun 2019
 

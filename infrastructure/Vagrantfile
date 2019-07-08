@@ -86,5 +86,21 @@ Vagrant.configure(2) do |config|
     end
   end
 
+  config.vm.define "macos" do |cfg|
+    cfg.vm.box = "yzgyyang/macOS-10.14"
+    cfg.vm.synced_folder ".", "/vagrant", disabled: true
+
+    configure_vm("macOS", cfg)
+
+    cfg.vm.provision "ansible" do |ansible|
+      ansible.verbose = "v"
+      ansible.playbook = "macos-playbook.yaml"
+      ansible.extra_vars = {
+        llvm_version: ENV['LLVM_VERSION'] || '8.0.0',
+      }
+    end
+
+  end
+
 end
 
