@@ -408,3 +408,58 @@ TEST(MutationPoint, SimpleTest_ReplaceAssignmentMutator_applyMutation) {
       mutationPoint->getOriginalFunction());
   ASSERT_TRUE(isa<StoreInst>(mutatedInstruction));
 }
+
+TEST(MutationPoint, OriginalValuePresent) {
+  LLVMContext llvmContext;
+  ModuleLoader loader;
+  auto module = loader.loadModuleAtPath(
+      fixtures::mutators_replace_assignment_module_bc_path(), llvmContext);
+  auto borrowedModule = module.get();
+
+  std::vector<std::unique_ptr<MullModule>> modules;
+  modules.push_back(std::move(module));
+  Program program({}, {}, std::move(modules));
+  Configuration configuration;
+
+  std::vector<std::unique_ptr<Mutator>> mutators;
+  mutators.emplace_back(make_unique<ReplaceAssignmentMutator>());
+
+  MutationsFinder finder(std::move(mutators), configuration);
+
+  Function *testeeFunction =
+      program.lookupDefinedFunction("replace_assignment");
+  ASSERT_FALSE(testeeFunction->empty());
+  std::vector<std::unique_ptr<Testee>> testees;
+  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
+  auto mergedTestees = mergeTestees(testees);
+  Filter filter;
+
+  std::vector<MutationPoint *> mutationPoints =
+      finder.getMutationPoints(program, mergedTestees, filter);
+
+  ASSERT_EQ(2U, mutationPoints.size());
+
+  std::vector<std::string> mutantRepresentations;
+  for (auto *mutation : mutationPoints) {
+    std::string s;
+    llvm::raw_string_ostream stream(s);
+    mutation->getOriginalValue()->print(stream);
+    mutantRepresentations.push_back(s);
+  }
+
+  for (auto *mutation : mutationPoints) {
+    borrowedModule->addMutation(mutation);
+  }
+  borrowedModule->prepareMutations();
+  for (auto *mutation : mutationPoints) {
+    mutation->applyMutation();
+  }
+
+  for (auto i = 0; i < mutationPoints.size(); i++) {
+    auto mutation = mutationPoints[i];
+    std::string s;
+    llvm::raw_string_ostream stream(s);
+    mutation->getOriginalValue()->print(stream);
+    ASSERT_EQ(s, mutantRepresentations[i]);
+  }
+}

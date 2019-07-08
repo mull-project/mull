@@ -26,7 +26,7 @@ MutationPoint *MathMulMutator::getMutationPoint(MullModule *module,
                                                 MutationPointAddress &address) {
   if (canBeApplied(*instruction)) {
     std::string diagnostics = "Math Mul: replaced * with /";
-    return new MutationPoint(this, address, instruction, function, diagnostics,
+    return new MutationPoint(this, address, function, diagnostics,
                              sourceLocation, module);
   }
   return nullptr;

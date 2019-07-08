@@ -43,8 +43,8 @@ MutationPoint *ScalarValueMutator::getMutationPoint(
     return nullptr;
   }
 
-  return new MutationPoint(this, address, instruction, function, diagnostics,
-                           sourceLocation, module);
+  return new MutationPoint(this, address, function, diagnostics, sourceLocation,
+                           module);
 }
 
 /// Currently only used by SimpleTestFinder.

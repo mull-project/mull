@@ -76,7 +76,7 @@ TEST(DISABLED_ScalarValueMutator, failingMutationPoint) {
 
   MutationPointAddress address(15, 10, 7);
   ScalarValueMutator mutator;
-  MutationPoint point(&mutator, address, nullptr, nullptr, "diagnostics",
+  MutationPoint point(&mutator, address, nullptr, "diagnostics",
                       SourceLocation::nullSourceLocation(), mullModule.get());
 
   Configuration configuration;

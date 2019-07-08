@@ -2,7 +2,7 @@
 
 ## Next release
 
- - ?
+ - Fixed the original value use-after-free issue #532, #536
 
 ## [0.3.0] - 02 Jun 2019
 

@@ -4,7 +4,10 @@
 #include "mull/Mutators/Mutator.h"
 #include "mull/Toolchain/Compiler.h"
 
+#include <llvm/IR/Function.h>
 #include <llvm/Transforms/Utils/Cloning.h>
+
+#include <utility>
 
 using namespace llvm;
 using namespace mull;
@@ -12,7 +15,7 @@ using namespace std;
 
 #pragma mark - MutationPointAddress
 
-Instruction &MutationPointAddress::findInstruction(Module *module) {
+Instruction &MutationPointAddress::findInstruction(Module *module) const {
   llvm::Function &function = *(std::next(module->begin(), getFnIndex()));
   llvm::BasicBlock &bb = *(std::next(function.begin(), getBBIndex()));
   llvm::Instruction &instruction = *(std::next(bb.begin(), getIIndex()));
@@ -20,7 +23,7 @@ Instruction &MutationPointAddress::findInstruction(Module *module) {
   return instruction;
 }
 
-Function &MutationPointAddress::findFunction(Module *module) {
+Function &MutationPointAddress::findFunction(Module *module) const {
   llvm::Function &function = *(std::next(module->begin(), getFnIndex()));
   return function;
 }
@@ -56,7 +59,7 @@ void MutationPointAddress::enumerateInstructions(
 }
 
 llvm::Instruction &
-MutationPointAddress::findInstruction(llvm::Function *function) {
+MutationPointAddress::findInstruction(llvm::Function *function) const {
   llvm::BasicBlock &bb = *(std::next(function->begin(), getBBIndex()));
   llvm::Instruction &instruction = *(std::next(bb.begin(), getIIndex()));
 
@@ -70,11 +73,11 @@ MutationPointAddress::MutationPointAddress(int FnIndex, int BBIndex, int IIndex)
                std::to_string(IIndex);
 }
 
-int MutationPointAddress::getFnIndex() { return FnIndex; }
+int MutationPointAddress::getFnIndex() const { return FnIndex; }
 
-int MutationPointAddress::getBBIndex() { return BBIndex; }
+int MutationPointAddress::getBBIndex() const { return BBIndex; }
 
-int MutationPointAddress::getIIndex() { return IIndex; }
+int MutationPointAddress::getIIndex() const { return IIndex; }
 
 std::string MutationPointAddress::getIdentifier() { return identifier; }
 
@@ -82,35 +85,31 @@ std::string MutationPointAddress::getIdentifier() const { return identifier; }
 
 #pragma mark - MutationPoint
 
-MutationPoint::MutationPoint(Mutator *mutator, MutationPointAddress Address,
-                             llvm::Value *Val, llvm::Function *function,
-                             std::string diagnostics,
-                             const SourceLocation &location, MullModule *m)
-    : mutator(mutator), Address(Address), OriginalValue(Val), module(m),
-      originalFunction(function), mutatedFunction(nullptr),
-      diagnostics(diagnostics), sourceLocation(location), reachableTests() {
+MutationPoint::MutationPoint(Mutator *mutator, MutationPointAddress address,
+                             llvm::Function *function, std::string diagnostics,
+                             SourceLocation location, MullModule *m)
+    : mutator(mutator), address(address), module(m), originalFunction(function),
+      mutatedFunction(nullptr), diagnostics(std::move(diagnostics)),
+      sourceLocation(std::move(location)), reachableTests() {
   string moduleID = module->getUniqueIdentifier();
-  string addressID = Address.getIdentifier();
+  string addressID = address.getIdentifier();
   string mutatorID = mutator->getUniqueIdentifier();
 
   uniqueIdentifier = moduleID + "_" + addressID + "_" + mutatorID;
 }
 
-MutationPoint::~MutationPoint() {}
-
 Mutator *MutationPoint::getMutator() { return mutator; }
 
-MutationPointAddress MutationPoint::getAddress() { return Address; }
+MutationPointAddress MutationPoint::getAddress() { return address; }
 
-Value *MutationPoint::getOriginalValue() { return OriginalValue; }
-
-MullModule *MutationPoint::getOriginalModule() { return module; }
-
-Mutator *MutationPoint::getMutator() const { return mutator; }
-
-MutationPointAddress MutationPoint::getAddress() const { return Address; }
-
-Value *MutationPoint::getOriginalValue() const { return OriginalValue; }
+Value *MutationPoint::getOriginalValue() const {
+  auto *function = originalFunction;
+  if (mutatedFunction != nullptr) {
+    function = function->getParent()->getFunction(getOriginalFunctionName());
+  }
+  assert(function && "The original function should be present");
+  return &(address.findInstruction(function));
+}
 
 MullModule *MutationPoint::getOriginalModule() const { return module; }
 
@@ -120,7 +119,7 @@ void MutationPoint::addReachableTest(Test *test, int distance) {
 
 void MutationPoint::applyMutation() {
   assert(mutatedFunction != nullptr);
-  mutator->applyMutation(mutatedFunction, Address);
+  mutator->applyMutation(mutatedFunction, address);
 }
 
 const std::vector<std::pair<Test *, int>> &
@@ -158,7 +157,7 @@ std::string MutationPoint::getMutatedFunctionName() {
   return getUniqueIdentifier();
 }
 
-std::string MutationPoint::getOriginalFunctionName() {
+std::string MutationPoint::getOriginalFunctionName() const {
   return originalFunction->getName().str() + "_" +
          module->getUniqueIdentifier() + "_original";
 }

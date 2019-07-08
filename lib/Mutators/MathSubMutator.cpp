@@ -108,7 +108,7 @@ MutationPoint *MathSubMutator::getMutationPoint(MullModule *module,
                                                 MutationPointAddress &address) {
   if (canBeApplied(*instruction)) {
     std::string diagnostics = "Math Sub: replaced - with +";
-    return new MutationPoint(this, address, instruction, function, diagnostics,
+    return new MutationPoint(this, address, function, diagnostics,
                              sourceLocation, module);
   }
   return nullptr;
