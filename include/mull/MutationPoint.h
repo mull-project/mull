@@ -37,17 +37,17 @@ class MutationPointAddress {
 public:
   MutationPointAddress(int FnIndex, int BBIndex, int IIndex);
 
-  int getFnIndex();
-  int getBBIndex();
-  int getIIndex();
+  int getFnIndex() const;
+  int getBBIndex() const;
+  int getIIndex() const;
 
   std::string getIdentifier();
 
   std::string getIdentifier() const;
 
-  llvm::Instruction &findInstruction(llvm::Module *module);
-  llvm::Instruction &findInstruction(llvm::Function *function);
-  llvm::Function &findFunction(llvm::Module *module);
+  llvm::Instruction &findInstruction(llvm::Module *module) const;
+  llvm::Instruction &findInstruction(llvm::Function *function) const;
+  llvm::Function &findFunction(llvm::Module *module) const;
 
   static int getFunctionIndex(llvm::Function *function);
   static void enumerateInstructions(
@@ -57,8 +57,7 @@ public:
 
 class MutationPoint {
   Mutator *mutator;
-  MutationPointAddress Address;
-  llvm::Value *OriginalValue;
+  MutationPointAddress address;
   MullModule *module;
   llvm::Function *originalFunction;
   llvm::Function *mutatedFunction;
@@ -68,25 +67,20 @@ class MutationPoint {
   std::vector<std::pair<Test *, int>> reachableTests;
 
 public:
-  MutationPoint(Mutator *mutator, MutationPointAddress Address,
-                llvm::Value *Val, llvm::Function *function,
-                std::string diagnostics, const SourceLocation &location,
-                MullModule *m);
+  MutationPoint(Mutator *mutator, MutationPointAddress address,
+                llvm::Function *function, std::string diagnostics,
+                SourceLocation location, MullModule *m);
 
-  ~MutationPoint();
+  ~MutationPoint() = default;
 
   Mutator *getMutator();
   MutationPointAddress getAddress();
-  llvm::Value *getOriginalValue();
-  MullModule *getOriginalModule();
+  llvm::Value *getOriginalValue() const;
+  MullModule *getOriginalModule() const;
 
   llvm::Function *getOriginalFunction();
   void setMutatedFunction(llvm::Function *function);
 
-  Mutator *getMutator() const;
-  MutationPointAddress getAddress() const;
-  llvm::Value *getOriginalValue() const;
-  MullModule *getOriginalModule() const;
   const SourceLocation &getSourceLocation() const;
 
   void addReachableTest(Test *test, int distance);
@@ -102,7 +96,7 @@ public:
 
   std::string getTrampolineName();
   std::string getMutatedFunctionName();
-  std::string getOriginalFunctionName();
+  std::string getOriginalFunctionName() const;
 };
 
 } // namespace mull

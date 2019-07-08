@@ -251,8 +251,8 @@ MutationPoint *ConditionalsBoundaryMutator::getMutationPoint(
   std::string diagnostics =
       getDiagnostics(originalPredicate, mutatedPredicate.getValue());
 
-  return new MutationPoint(this, address, instruction, function, diagnostics,
-                           sourceLocation, module);
+  return new MutationPoint(this, address, function, diagnostics, sourceLocation,
+                           module);
 }
 
 bool ConditionalsBoundaryMutator::canBeApplied(Value &V) {

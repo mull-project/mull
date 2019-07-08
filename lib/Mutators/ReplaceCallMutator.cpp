@@ -80,8 +80,8 @@ MutationPoint *ReplaceCallMutator::getMutationPoint(
     return nullptr;
   }
 
-  auto mutationPoint = new MutationPoint(this, address, instruction, function,
-                                         diagnostics, sourceLocation, module);
+  auto mutationPoint = new MutationPoint(this, address, function, diagnostics,
+                                         sourceLocation, module);
 
   return mutationPoint;
 }

@@ -35,7 +35,7 @@ TEST(MutationPoint, uniqueIdentifier) {
   MutationPointAddress address(2, 3, 5);
   MathAddMutator mutator;
 
-  MutationPoint point(&mutator, address, nullptr, nullptr, "diagnostics",
+  MutationPoint point(&mutator, address, nullptr, "diagnostics",
                       SourceLocation::nullSourceLocation(), module.get());
 
   string moduleName = "fixture_simple_test_tester_module";

@@ -109,7 +109,7 @@ MutationPoint *MathAddMutator::getMutationPoint(MullModule *module,
   if (canBeApplied(*instruction)) {
     std::string diagnostics = "Math Add: replaced + with -";
 
-    return new MutationPoint(this, address, instruction, function, diagnostics,
+    return new MutationPoint(this, address, function, diagnostics,
                              sourceLocation, module);
   }
 
