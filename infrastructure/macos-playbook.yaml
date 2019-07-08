@@ -1,9 +1,14 @@
 - name: Setup MacOS Machine
   hosts: "{{ host | default('all') }}"
 
+  environment:
+    PATH: /usr/local/bin/:{{ ansible_env.PATH }}
+
   vars:
     llvm_version: 6.0.0
     platform: macos
+
+    package_maker_path: PackageMaker.app
 
     package_extensions:
       - dmg
@@ -17,6 +22,7 @@
       - sqlite
       - ninja
       - gnu-tar
+      - pkg-config
 
   vars_files:
     - helpers/variables.yaml
@@ -25,12 +31,33 @@
     - name: Prepare Working Directory
       include: helpers/working-directory.yaml
 
+    - name: Install headers into /usr/include
+      command: installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
+      args:
+        creates: /usr/include
+      become: true
+
     - name: Install Required Packages
       homebrew:
         name: "{{ packages }}"
         state: present
       environment:
         HOMEBREW_NO_AUTO_UPDATE: 1
+
+    # PackageMaker.app
+    - name: Copy PackageMaker to the VM
+      copy:
+        src: "{{ package_maker_path }}"
+        dest: /Applications
+        mode: preserve
+      when: package_maker_path is directory
+      become: true
+
+    - name: Create a symbolic link for gnu-tar
+      file:
+        src: /usr/local/bin/gtar
+        dest: /usr/local/bin/tar
+        state: link
 
     - name: Install LLVM
       include: helpers/download-llvm.yaml
