@@ -84,7 +84,7 @@ There are several options:
 Create a build folder and initialize build system:
 
 ```
-git clone https://github.com/mull-project/mull.git
+git clone https://github.com/mull-project/mull.git --recursive
 cd mull
 mkdir build.dir
 cd build.dir
