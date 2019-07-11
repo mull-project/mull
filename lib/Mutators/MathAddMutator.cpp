@@ -147,7 +147,6 @@ llvm::Value *MathAddMutator::applyMutation(Function *function,
     return callInst;
   }
 
-  /// TODO: Take care of NUW/NSW
   BinaryOperator *binaryOperator = cast<BinaryOperator>(&I);
 
   assert(binaryOperator->getOpcode() == Instruction::Add ||
@@ -164,12 +163,16 @@ llvm::Value *MathAddMutator::applyMutation(Function *function,
       type, binaryOperator->getOperand(0), binaryOperator->getOperand(1),
       binaryOperator->getName());
   assert(replacement);
-  if (binaryOperator->hasNoUnsignedWrap()) {
-    replacement->setHasNoUnsignedWrap();
-  }
 
-  if (binaryOperator->hasNoSignedWrap()) {
-    replacement->setHasNoSignedWrap();
+  /// FAdd does not support NUW/NSW
+  if (binaryOperator->getOpcode() != Instruction::FAdd) {
+    if (binaryOperator->hasNoUnsignedWrap()) {
+      replacement->setHasNoUnsignedWrap();
+    }
+
+    if (binaryOperator->hasNoSignedWrap()) {
+      replacement->setHasNoSignedWrap();
+    }
   }
 
   /// NOTE: If I add a named instruction, and the name already exist
