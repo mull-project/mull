@@ -1,22 +1,22 @@
 #include <utility>
 
+#include "FixturePaths.h"
 #include "mull/Config/Configuration.h"
-#include "mull/ForkProcessSandbox.h"
 #include "mull/ModuleLoader.h"
 #include "mull/Program/Program.h"
+#include "mull/Sandbox/ProcessSandbox.h"
 #include "mull/TestFrameworks/NativeTestRunner.h"
 #include "mull/TestFrameworks/Test.h"
 #include "mull/Toolchain/JITEngine.h"
 #include "mull/Toolchain/Mangler.h"
 #include "mull/Toolchain/Toolchain.h"
 #include "mull/Toolchain/Trampolines.h"
-#include "FixturePaths.h"
 
 #include "gtest/gtest.h"
 
 #include <llvm/IR/Module.h>
-#include <vector>
 #include <string>
+#include <vector>
 
 using namespace mull;
 using namespace llvm;
@@ -46,11 +46,10 @@ struct CustomTestRunnerTestParameter {
     os << "expected status: " << executionStatusAsString(bar.status) << "\n";
     return os;
   }
-
 };
 
-class CustomTestRunnerTest : public TestWithParam<CustomTestRunnerTestParameter> {
-};
+class CustomTestRunnerTest
+    : public TestWithParam<CustomTestRunnerTestParameter> {};
 
 TEST_P(CustomTestRunnerTest, all) {
   auto &parameter = GetParam();

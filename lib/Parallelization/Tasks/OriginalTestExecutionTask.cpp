@@ -1,9 +1,9 @@
 #include "mull/Parallelization/Tasks/OriginalTestExecutionTask.h"
 
 #include "mull/Config/Configuration.h"
-#include "mull/ForkProcessSandbox.h"
 #include "mull/Instrumentation/Instrumentation.h"
 #include "mull/Parallelization/Progress.h"
+#include "mull/Sandbox/ProcessSandbox.h"
 #include "mull/TestFrameworks/TestRunner.h"
 #include "mull/Toolchain/Toolchain.h"
 
