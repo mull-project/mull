@@ -145,7 +145,6 @@ llvm::Value *MathSubMutator::applyMutation(Function *function,
     return callInst;
   }
 
-  /// TODO: Take care of NUW/NSW
   BinaryOperator *binaryOperator = cast<BinaryOperator>(&I);
   assert(binaryOperator->getOpcode() == Instruction::Sub ||
          binaryOperator->getOpcode() == Instruction::FSub);
@@ -156,17 +155,20 @@ llvm::Value *MathSubMutator::applyMutation(Function *function,
   }
 
   /// NOTE: Create a new BinaryOperator with the same name as existing one
-
   Instruction *replacement = BinaryOperator::Create(
       type, binaryOperator->getOperand(0), binaryOperator->getOperand(1),
       binaryOperator->getName());
   assert(replacement);
-  if (binaryOperator->hasNoUnsignedWrap()) {
-    replacement->setHasNoUnsignedWrap();
-  }
 
-  if (binaryOperator->hasNoSignedWrap()) {
-    replacement->setHasNoSignedWrap();
+  /// FSub does not support NUW/NSW
+  if (binaryOperator->getOpcode() != Instruction::FSub) {
+    if (binaryOperator->hasNoUnsignedWrap()) {
+      replacement->setHasNoUnsignedWrap();
+    }
+
+    if (binaryOperator->hasNoSignedWrap()) {
+      replacement->setHasNoSignedWrap();
+    }
   }
 
   /// NOTE: If I add a named instruction, and the name already exist
