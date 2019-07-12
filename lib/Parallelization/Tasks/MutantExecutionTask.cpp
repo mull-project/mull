@@ -14,7 +14,7 @@ using namespace mull;
 using namespace llvm;
 
 MutantExecutionTask::MutantExecutionTask(
-    ProcessSandbox &sandbox, Program &program, TestRunner &runner,
+    const ProcessSandbox &sandbox, Program &program, TestRunner &runner,
     const Configuration &config, Filter &filter, Mangler &mangler,
     std::vector<llvm::object::ObjectFile *> &objectFiles,
     std::vector<std::string> &mutatedFunctionNames)

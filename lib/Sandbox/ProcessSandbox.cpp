@@ -65,7 +65,7 @@ static std::string readFileAndUnlink(const char *filename) {
 }
 
 void handle_alarm_signal(int signal, siginfo_t *info, void *context) {
-  _exit(mull::ForkProcessSandbox::MullTimeoutCode);
+  _exit(mull::ForkTimerSandbox::MullTimeoutCode);
 }
 
 void handle_timeout(long long timeoutMilliseconds) {
@@ -93,8 +93,8 @@ void handle_timeout(long long timeoutMilliseconds) {
 }
 
 mull::ExecutionResult
-mull::ForkProcessSandbox::run(std::function<ExecutionStatus(void)> function,
-                              long long timeoutMilliseconds) const {
+mull::ForkTimerSandbox::run(std::function<ExecutionStatus(void)> function,
+                            long long timeoutMilliseconds) const {
   llvm::SmallString<32> stderrFilename;
   llvm::sys::fs::createUniqueFile("/tmp/mull.stderr.%%%%%%", stderrFilename);
 

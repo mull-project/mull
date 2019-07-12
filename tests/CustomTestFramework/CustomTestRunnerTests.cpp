@@ -75,7 +75,7 @@ TEST_P(CustomTestRunnerTest, all) {
   }
 
   mull::Test test("test", "mull", "main", parameter.arguments, nullptr);
-  ForkProcessSandbox sandbox;
+  ForkTimerSandbox sandbox;
   JITEngine jit;
   std::vector<std::string> trampolineNames;
   Trampolines trampolines(trampolineNames);

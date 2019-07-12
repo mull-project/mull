@@ -15,7 +15,7 @@ public:
                               long long timeoutMilliseconds) const = 0;
 };
 
-class ForkProcessSandbox : public ProcessSandbox {
+class ForkTimerSandbox : public ProcessSandbox {
 public:
   ExecutionResult run(std::function<ExecutionStatus()> function,
                       long long timeoutMilliseconds) const override;

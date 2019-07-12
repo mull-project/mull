@@ -39,7 +39,7 @@ class Driver {
   Toolchain &toolchain;
   Filter &filter;
   MutationsFinder &mutationsFinder;
-  ProcessSandbox *sandbox;
+  const ProcessSandbox &sandbox;
   IDEDiagnostics *diagnostics;
 
   std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>>
@@ -51,10 +51,10 @@ class Driver {
   JunkDetector &junkDetector;
 
 public:
-  Driver(const Configuration &config, Program &program,
-         TestFramework &testFramework, Toolchain &t, Filter &f,
+  Driver(const Configuration &config, const ProcessSandbox &sandbox,
+         Program &program, Toolchain &t, Filter &f,
          MutationsFinder &mutationsFinder, Metrics &metrics,
-         JunkDetector &junkDetector);
+         JunkDetector &junkDetector, TestFramework &testFramework);
 
   ~Driver();
 

@@ -25,6 +25,7 @@
 #include "mull/Program/Program.h"
 #include "mull/Reporters/IDEReporter.h"
 #include "mull/Result.h"
+#include "mull/Sandbox/ProcessSandbox.h"
 #include "mull/TestFrameworks/TestFrameworkFactory.h"
 #include "mull/Version.h"
 
@@ -171,6 +172,33 @@ llvm::cl::list<std::string> LDSearchPaths("ld_search_path",
                                           llvm::cl::desc("Library search path"),
                                           llvm::cl::cat(MullCXXCategory));
 
+enum SandboxType { None, Watchdog, Timer };
+
+#if LLVM_VERSION_MAJOR == 3
+#define TRAILING_NULL , nullptr
+#else
+#define TRAILING_NULL
+#endif
+
+llvm::cl::opt<SandboxType> SandboxOption(
+    "sandbox", llvm::cl::desc("Choose sandbox level:"),
+    llvm::cl::values(clEnumVal(None, "No sandboxing"),
+                     clEnumVal(Watchdog, "Uses 4 processes, not recommended"),
+                     clEnumVal(Timer, "Fastest, Recommended") TRAILING_NULL),
+    llvm::cl::cat(MullCXXCategory), llvm::cl::init(Timer));
+
+std::unique_ptr<mull::ProcessSandbox>
+GetProcessSandbox(llvm::cl::opt<SandboxType> &option) {
+  if (option == SandboxType::None) {
+    return llvm::make_unique<mull::NullProcessSandbox>();
+  }
+  if (option == SandboxType::Watchdog) {
+    return llvm::make_unique<mull::ForkWatchdogSandbox>();
+  }
+
+  return llvm::make_unique<mull::ForkTimerSandbox>();
+}
+
 static void validateInputFile() {
   if (access(InputFile.getValue().c_str(), R_OK) != 0) {
     perror(InputFile.getValue().c_str());
@@ -280,8 +308,10 @@ int main(int argc, char **argv) {
 
   mull::Metrics metrics;
 
-  mull::Driver driver(configuration, program, testFramework, toolchain, filter,
-                      mutationsFinder, metrics, junkDetector);
+  auto sandbox = GetProcessSandbox(SandboxOption);
+
+  mull::Driver driver(configuration, *sandbox, program, toolchain, filter,
+                      mutationsFinder, metrics, junkDetector, testFramework);
   metrics.beginRun();
   auto result = driver.Run();
   metrics.endRun();
