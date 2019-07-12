@@ -1,8 +1,8 @@
 #include "mull/Parallelization/Tasks/MutantExecutionTask.h"
 
 #include "mull/Config/Configuration.h"
-#include "mull/ForkProcessSandbox.h"
 #include "mull/Parallelization/Progress.h"
+#include "mull/Sandbox/ProcessSandbox.h"
 #include "mull/TestFrameworks/TestRunner.h"
 #include "mull/Toolchain/Mangler.h"
 #include "mull/Toolchain/Trampolines.h"

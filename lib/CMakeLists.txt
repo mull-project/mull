@@ -2,7 +2,7 @@ set(mull_sources
   Config/ConfigParser.cpp
   Config/RawConfig.cpp
   Driver.cpp
-  ForkProcessSandbox.cpp
+  Sandbox/ProcessSandbox.cpp
   Logger.cpp
   ModuleLoader.cpp
   Filter.cpp
@@ -85,7 +85,13 @@ set(mull_sources
   JunkDetection/CXX/Visitors/NegateConditionVisitor.cpp
   JunkDetection/CXX/ASTStorage.cpp
   JunkDetection/CXX/CompilationDatabase.cpp
-  Reporters/IDEReporter.cpp TestFrameworks/NativeTestRunner.cpp JunkDetection/CXX/Visitors/AndOrReplacementVisitor.cpp JunkDetection/CXX/Visitors/MathMulVisitor.cpp JunkDetection/CXX/Visitors/MathDivVisitor.cpp JunkDetection/CXX/Visitors/ReplaceCallVisitor.cpp)
+  Reporters/IDEReporter.cpp
+  TestFrameworks/NativeTestRunner.cpp
+  JunkDetection/CXX/Visitors/AndOrReplacementVisitor.cpp
+  JunkDetection/CXX/Visitors/MathMulVisitor.cpp
+  JunkDetection/CXX/Visitors/MathDivVisitor.cpp
+  JunkDetection/CXX/Visitors/ReplaceCallVisitor.cpp
+)
 
 set (MULL_INCLUDE_DIR ${MULL_SOURCE_DIR}/include/mull)
 

@@ -1,22 +1,27 @@
-#include "mull/ForkProcessSandbox.h"
 #include "mull/ExecutionResult.h"
+#include "mull/Sandbox/ProcessSandbox.h"
 
 #include "gtest/gtest.h"
 
 using namespace mull;
 
+using ::testing::TestWithParam;
+using ::testing::Values;
+
 /// The timeout should be long enough to overlive the unit test suite running
 /// on a cold start (fresh start without a "warmup").
 static const long long Timeout = 1100;
 
-TEST(ForkProcessSandbox, captureOutputFromChildProcess) {
+template <typename T> class ProcessSandboxTest : public ::testing::Test {};
+TYPED_TEST_CASE_P(ProcessSandboxTest);
+
+TYPED_TEST_P(ProcessSandboxTest, captureOutputFromChildProcess) {
+  TypeParam sandbox;
 
   static const char stdoutMessage[] =
       "Printing to stdout from a sandboxed child\n";
   static const char stderrMessage[] =
       "Printing to stderr from a sandboxed child\n";
-
-  ForkProcessSandbox sandbox;
 
   ExecutionResult result = sandbox.run(
       [&]() {
@@ -29,14 +34,12 @@ TEST(ForkProcessSandbox, captureOutputFromChildProcess) {
 
   ASSERT_EQ(result.status, Passed);
 
-  ASSERT_EQ(strcmp(result.stdoutOutput.c_str(), stdoutMessage), 0);
-  ASSERT_EQ(strcmp(result.stderrOutput.c_str(), stderrMessage), 0);
+  ASSERT_STREQ(result.stdoutOutput.c_str(), stdoutMessage);
+  ASSERT_STREQ(result.stderrOutput.c_str(), stderrMessage);
 }
 
-#pragma mark - Possible execution scenarios
-
-TEST(ForkProcessSandbox, statusPassedIfExitingWithZeroAndResultWasSet) {
-  ForkProcessSandbox sandbox;
+TYPED_TEST_P(ProcessSandboxTest, statusPassedIfExitingWithZeroAndResultWasSet) {
+  TypeParam sandbox;
 
   ExecutionResult result =
       sandbox.run([&]() { return ExecutionStatus::Passed; }, Timeout);
@@ -44,8 +47,8 @@ TEST(ForkProcessSandbox, statusPassedIfExitingWithZeroAndResultWasSet) {
   ASSERT_EQ(result.status, Passed);
 }
 
-TEST(ForkProcessSandbox, statusAbnormalExit_IfExitingWithNonZero) {
-  ForkProcessSandbox sandbox;
+TYPED_TEST_P(ProcessSandboxTest, statusAbnormalExit_IfExitingWithNonZero) {
+  TypeParam sandbox;
 
   ExecutionResult result = sandbox.run(
       [&]() {
@@ -57,9 +60,8 @@ TEST(ForkProcessSandbox, statusAbnormalExit_IfExitingWithNonZero) {
   ASSERT_EQ(result.status, AbnormalExit);
 }
 
-TEST(ForkProcessSandbox,
-     statusAbnormalExit_IfExitingWithZeroButResultWasNotSet) {
-  ForkProcessSandbox sandbox;
+TYPED_TEST_P(ProcessSandboxTest, statusPassedIfExitedWithZero) {
+  TypeParam sandbox;
 
   ExecutionResult result = sandbox.run(
       [&]() {
@@ -68,11 +70,11 @@ TEST(ForkProcessSandbox,
       },
       Timeout);
 
-  ASSERT_EQ(result.status, AbnormalExit);
+  ASSERT_EQ(result.status, Passed);
 }
 
-TEST(ForkProcessSandbox, statusTimeout) {
-  ForkProcessSandbox sandbox;
+TYPED_TEST_P(ProcessSandboxTest, statusTimeout) {
+  TypeParam sandbox;
 
   ExecutionResult result = sandbox.run(
       [&]() {
@@ -84,8 +86,8 @@ TEST(ForkProcessSandbox, statusTimeout) {
   ASSERT_EQ(result.status, Timedout);
 }
 
-TEST(ForkProcessSandbox, statusCrashed) {
-  ForkProcessSandbox sandbox;
+TYPED_TEST_P(ProcessSandboxTest, statusCrashed) {
+  TypeParam sandbox;
 
   ExecutionResult result = sandbox.run(
       [&]() {
@@ -96,3 +98,12 @@ TEST(ForkProcessSandbox, statusCrashed) {
 
   ASSERT_EQ(result.status, Crashed);
 }
+
+REGISTER_TYPED_TEST_CASE_P(ProcessSandboxTest, captureOutputFromChildProcess,
+                           statusPassedIfExitingWithZeroAndResultWasSet,
+                           statusAbnormalExit_IfExitingWithNonZero,
+                           statusPassedIfExitedWithZero, statusTimeout,
+                           statusCrashed);
+
+typedef ::testing::Types<ForkWatchdogSandbox, ForkProcessSandbox> SandboxTypes;
+INSTANTIATE_TYPED_TEST_CASE_P(Mull, ProcessSandboxTest, SandboxTypes);

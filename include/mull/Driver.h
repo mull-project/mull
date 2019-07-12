@@ -1,11 +1,11 @@
 #pragma once
 
 #include "mull/ExecutionResult.h"
-#include "mull/ForkProcessSandbox.h"
 #include "mull/IDEDiagnostics.h"
 #include "mull/Instrumentation/Instrumentation.h"
 #include "mull/MutationResult.h"
 #include "mull/Mutators/Mutator.h"
+#include "mull/Sandbox/ProcessSandbox.h"
 #include "mull/TestFrameworks/Test.h"
 #include "mull/Toolchain/Toolchain.h"
 
