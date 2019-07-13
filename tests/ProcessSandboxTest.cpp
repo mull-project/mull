@@ -105,5 +105,5 @@ REGISTER_TYPED_TEST_CASE_P(ProcessSandboxTest, captureOutputFromChildProcess,
                            statusPassedIfExitedWithZero, statusTimeout,
                            statusCrashed);
 
-typedef ::testing::Types<ForkWatchdogSandbox, ForkProcessSandbox> SandboxTypes;
+typedef ::testing::Types<ForkWatchdogSandbox, ForkTimerSandbox> SandboxTypes;
 INSTANTIATE_TYPED_TEST_CASE_P(Mull, ProcessSandboxTest, SandboxTypes);

@@ -22,7 +22,7 @@ public:
   using iterator = In::iterator;
 
   OriginalTestExecutionTask(Instrumentation &instrumentation, Program &program,
-                            ProcessSandbox &sandbox, TestRunner &runner,
+                            const ProcessSandbox &sandbox, TestRunner &runner,
                             const Configuration &config, Filter &filter,
                             JITEngine &jit);
 
@@ -30,7 +30,7 @@ public:
                   progress_counter &counter);
   Instrumentation &instrumentation;
   Program &program;
-  ProcessSandbox &sandbox;
+  const ProcessSandbox &sandbox;
   TestRunner &runner;
   const Configuration &config;
   Filter &filter;

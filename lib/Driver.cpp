@@ -31,7 +31,6 @@ using namespace mull;
 using namespace std;
 
 Driver::~Driver() {
-  delete this->sandbox;
   delete this->diagnostics;
 }
 
@@ -130,7 +129,7 @@ std::vector<MutationPoint *> Driver::findMutationPoints(vector<Test> &tests) {
   std::vector<OriginalTestExecutionTask> tasks;
   tasks.reserve(config.parallelization.testExecutionWorkers);
   for (int i = 0; i < config.parallelization.testExecutionWorkers; i++) {
-    tasks.emplace_back(instrumentation, program, *sandbox,
+    tasks.emplace_back(instrumentation, program, sandbox,
                        testFramework.runner(), config, filter, jit);
   }
 
@@ -247,9 +246,8 @@ Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
   std::vector<MutantExecutionTask> tasks;
   tasks.reserve(config.parallelization.mutantExecutionWorkers);
   for (int i = 0; i < config.parallelization.mutantExecutionWorkers; i++) {
-    tasks.emplace_back(*sandbox, program, testFramework.runner(), config,
-                       filter, toolchain.mangler(), objectFiles,
-                       mutatedFunctions);
+    tasks.emplace_back(sandbox, program, testFramework.runner(), config, filter,
+                       toolchain.mangler(), objectFiles, mutatedFunctions);
   }
   metrics.beginMutantsExecution();
   TaskExecutor<MutantExecutionTask> mutantRunner(
@@ -274,19 +272,14 @@ std::vector<llvm::object::ObjectFile *> Driver::AllInstrumentedObjectFiles() {
   return objects;
 }
 
-Driver::Driver(const Configuration &config, Program &program,
-               TestFramework &testFramework, Toolchain &t, Filter &f,
+Driver::Driver(const Configuration &config, const ProcessSandbox &sandbox,
+               Program &program, Toolchain &t, Filter &f,
                MutationsFinder &mutationsFinder, Metrics &metrics,
-               JunkDetector &junkDetector)
-    : config(config), program(program), testFramework(testFramework),
-      toolchain(t), filter(f), mutationsFinder(mutationsFinder),
-      instrumentation(), metrics(metrics), junkDetector(junkDetector) {
-
-  if (config.forkEnabled) {
-    this->sandbox = new ForkProcessSandbox();
-  } else {
-    this->sandbox = new NullProcessSandbox();
-  }
+               JunkDetector &junkDetector, TestFramework &testFramework)
+    : config(config), sandbox(sandbox), program(program),
+      testFramework(testFramework), toolchain(t), filter(f),
+      mutationsFinder(mutationsFinder), instrumentation(), metrics(metrics),
+      junkDetector(junkDetector) {
 
   if (config.diagnostics != Diagnostics::None) {
     this->diagnostics = new NormalIDEDiagnostics(config.diagnostics);

@@ -161,9 +161,16 @@ int main(int argc, char *argv[]) {
   Program program(configuration.dynamicLibraryPaths, std::move(objectFiles),
                   moduleLoader.loadModules(configuration));
 
+  std::unique_ptr<ProcessSandbox> sandbox(nullptr);
+  if (rawConfig.forkEnabled()) {
+    sandbox = llvm::make_unique<ForkTimerSandbox>();
+  } else {
+    sandbox = llvm::make_unique<NullProcessSandbox>();
+  }
+
   Metrics metrics;
-  Driver driver(configuration, program, testFramework, toolchain, filter,
-                mutationsFinder, metrics, *junkDetector);
+  Driver driver(configuration, *sandbox, program, toolchain, filter,
+                mutationsFinder, metrics, *junkDetector, testFramework);
 
   metrics.beginRun();
   auto result = driver.Run();

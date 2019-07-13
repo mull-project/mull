@@ -11,9 +11,9 @@ using namespace mull;
 using namespace llvm;
 
 OriginalTestExecutionTask::OriginalTestExecutionTask(
-    Instrumentation &instrumentation, Program &program, ProcessSandbox &sandbox,
-    TestRunner &runner, const Configuration &config, Filter &filter,
-    JITEngine &jit)
+    Instrumentation &instrumentation, Program &program,
+    const ProcessSandbox &sandbox, TestRunner &runner,
+    const Configuration &config, Filter &filter, JITEngine &jit)
     : instrumentation(instrumentation), program(program), sandbox(sandbox),
       runner(runner), config(config), filter(filter), jit(jit) {}
 

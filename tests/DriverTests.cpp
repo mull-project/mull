@@ -55,9 +55,10 @@ TEST(Driver, RunningWithNoTests) {
   TestFramework testFramework(
       testFrameworkFactory.simpleTestFramework(toolchain, configuration));
   Program program({}, {}, {});
+  ForkTimerSandbox sandbox;
 
-  Driver Driver(configuration, program, testFramework, toolchain, filter,
-                finder, metrics, junkDetector);
+  Driver Driver(configuration, sandbox, program, toolchain, filter, finder,
+                metrics, junkDetector, testFramework);
 
   auto result = Driver.Run();
   ASSERT_EQ(0u, result->getTests().size());
@@ -95,9 +96,10 @@ TEST(Driver, SimpleTest_MathAddMutator) {
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.simpleTestFramework(toolchain, configuration));
+  ForkTimerSandbox sandbox;
 
-  Driver Driver(configuration, program, testFramework, toolchain, filter,
-                finder, metrics, junkDetector);
+  Driver Driver(configuration, sandbox, program, toolchain, filter, finder,
+                metrics, junkDetector, testFramework);
 
   /// Given the modules we use here we expect:
   ///
@@ -147,9 +149,10 @@ TEST(Driver, SimpleTest_MathSubMutator) {
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.simpleTestFramework(toolchain, configuration));
+  ForkTimerSandbox sandbox;
 
-  Driver Driver(configuration, program, testFramework, toolchain, filter,
-                finder, metrics, junkDetector);
+  Driver Driver(configuration, sandbox, program, toolchain, filter, finder,
+                metrics, junkDetector, testFramework);
 
   /// Given the modules we use here we expect:
   ///
@@ -199,9 +202,10 @@ TEST(Driver, SimpleTest_MathMulMutator) {
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.simpleTestFramework(toolchain, configuration));
+  ForkTimerSandbox sandbox;
 
-  Driver Driver(configuration, program, testFramework, toolchain, filter,
-                finder, metrics, junkDetector);
+  Driver Driver(configuration, sandbox, program, toolchain, filter, finder,
+                metrics, junkDetector, testFramework);
 
   /// Given the modules we use here we expect:
   ///
@@ -250,9 +254,10 @@ TEST(Driver, SimpleTest_MathDivMutator) {
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.simpleTestFramework(toolchain, configuration));
+  ForkTimerSandbox sandbox;
 
-  Driver Driver(configuration, program, testFramework, toolchain, filter,
-                finder, metrics, junkDetector);
+  Driver Driver(configuration, sandbox, program, toolchain, filter, finder,
+                metrics, junkDetector, testFramework);
 
   /// Given the modules we use here we expect:
   ///
@@ -303,9 +308,10 @@ TEST(Driver, SimpleTest_NegateConditionMutator) {
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.simpleTestFramework(toolchain, configuration));
+  ForkTimerSandbox sandbox;
 
-  Driver Driver(configuration, program, testFramework, toolchain, filter,
-                finder, metrics, junkDetector);
+  Driver Driver(configuration, sandbox, program, toolchain, filter, finder,
+                metrics, junkDetector, testFramework);
 
   /// Given the modules we use here we expect:
   ///
@@ -349,9 +355,10 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutator) {
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.simpleTestFramework(toolchain, configuration));
+  ForkTimerSandbox sandbox;
 
-  Driver Driver(configuration, program, testFramework, toolchain, filter,
-                finder, metrics, junkDetector);
+  Driver Driver(configuration, sandbox, program, toolchain, filter, finder,
+                metrics, junkDetector, testFramework);
 
   /// Given the modules we use here we expect:
   ///
@@ -395,9 +402,10 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.simpleTestFramework(toolchain, configuration));
+  ForkTimerSandbox sandbox;
 
-  Driver Driver(configuration, program, testFramework, toolchain, filter,
-                finder, metrics, junkDetector);
+  Driver Driver(configuration, sandbox, program, toolchain, filter, finder,
+                metrics, junkDetector, testFramework);
 
   auto result = Driver.Run();
   ASSERT_EQ(12U, result->getTests().size());
@@ -517,15 +525,17 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
     auto mutant1 = (mutants++)->get();
     ASSERT_EQ(ExecutionStatus::Passed,
               mutant1->getTest()->getExecutionResult().status);
-    ASSERT_EQ("test_OR_operator_always_scalars_case_with_function_call_pattern1",
-              mutant1->getTest()->getTestName());
+    ASSERT_EQ(
+        "test_OR_operator_always_scalars_case_with_function_call_pattern1",
+        mutant1->getTest()->getTestName());
     ASSERT_EQ(ExecutionStatus::Passed, mutant1->getExecutionResult().status);
 
     auto mutant2 = (mutants++)->get();
     ASSERT_EQ(ExecutionStatus::Passed,
               mutant2->getTest()->getExecutionResult().status);
-    ASSERT_EQ("test_OR_operator_always_scalars_case_with_function_call_pattern1",
-              mutant2->getTest()->getTestName());
+    ASSERT_EQ(
+        "test_OR_operator_always_scalars_case_with_function_call_pattern1",
+        mutant2->getTest()->getTestName());
     ASSERT_EQ(ExecutionStatus::Passed, mutant2->getExecutionResult().status);
   }
 
@@ -536,8 +546,9 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
     auto mutant = (mutants++)->get();
     ASSERT_EQ(ExecutionStatus::Passed,
               mutant->getTest()->getExecutionResult().status);
-    ASSERT_EQ("test_OR_operator_always_scalars_case_with_function_call_pattern3",
-              mutant->getTest()->getTestName());
+    ASSERT_EQ(
+        "test_OR_operator_always_scalars_case_with_function_call_pattern3",
+        mutant->getTest()->getTestName());
     ASSERT_EQ(ExecutionStatus::Passed, mutant->getExecutionResult().status);
   }
 
@@ -548,15 +559,17 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
     auto mutant1 = (mutants++)->get();
     ASSERT_EQ(ExecutionStatus::Passed,
               mutant1->getTest()->getExecutionResult().status);
-    ASSERT_EQ("test_AND_operator_always_scalars_case_with_function_call_pattern1",
-              mutant1->getTest()->getTestName());
+    ASSERT_EQ(
+        "test_AND_operator_always_scalars_case_with_function_call_pattern1",
+        mutant1->getTest()->getTestName());
     ASSERT_EQ(ExecutionStatus::Passed, mutant1->getExecutionResult().status);
 
     auto mutant2 = (mutants++)->get();
     ASSERT_EQ(ExecutionStatus::Passed,
               mutant2->getTest()->getExecutionResult().status);
-    ASSERT_EQ("test_AND_operator_always_scalars_case_with_function_call_pattern1",
-              mutant2->getTest()->getTestName());
+    ASSERT_EQ(
+        "test_AND_operator_always_scalars_case_with_function_call_pattern1",
+        mutant2->getTest()->getTestName());
     ASSERT_EQ(ExecutionStatus::Passed, mutant2->getExecutionResult().status);
   }
 
@@ -567,8 +580,9 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
     auto mutant = (mutants++)->get();
     ASSERT_EQ(ExecutionStatus::Passed,
               mutant->getTest()->getExecutionResult().status);
-    ASSERT_EQ("test_AND_operator_always_scalars_case_with_function_call_pattern3",
-              mutant->getTest()->getTestName());
+    ASSERT_EQ(
+        "test_AND_operator_always_scalars_case_with_function_call_pattern3",
+        mutant->getTest()->getTestName());
     ASSERT_EQ(ExecutionStatus::Passed, mutant->getExecutionResult().status);
   }
 
@@ -595,9 +609,10 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator_CPP) {
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.simpleTestFramework(toolchain, configuration));
+  ForkTimerSandbox sandbox;
 
-  Driver Driver(configuration, program, testFramework, toolchain, filter,
-                finder, metrics, junkDetector);
+  Driver Driver(configuration, sandbox, program, toolchain, filter, finder,
+                metrics, junkDetector, testFramework);
 
   auto result = Driver.Run();
   ASSERT_EQ(6U, result->getTests().size());
@@ -687,9 +702,10 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutator_CPP) {
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.simpleTestFramework(toolchain, configuration));
+  ForkTimerSandbox sandbox;
 
-  Driver Driver(configuration, program, testFramework, toolchain, filter,
-                finder, metrics, junkDetector);
+  Driver Driver(configuration, sandbox, program, toolchain, filter, finder,
+                metrics, junkDetector, testFramework);
 
   auto result = Driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
@@ -737,9 +753,10 @@ TEST(Driver, customTest) {
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.customTestFramework(toolchain, configuration));
+  ForkTimerSandbox sandbox;
 
-  Driver driver(configuration, program, testFramework, toolchain, filter,
-                finder, metrics, junkDetector);
+  Driver driver(configuration, sandbox, program, toolchain, filter, finder,
+                metrics, junkDetector, testFramework);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
@@ -780,9 +797,10 @@ TEST(Driver, customTest_withDynamicLibraries) {
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.customTestFramework(toolchain, configuration));
+  ForkTimerSandbox sandbox;
 
-  Driver driver(configuration, program, testFramework, toolchain, filter,
-                finder, metrics, junkDetector);
+  Driver driver(configuration, sandbox, program, toolchain, filter, finder,
+                metrics, junkDetector, testFramework);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
@@ -821,9 +839,10 @@ TEST(Driver, junkDetector_enabled) {
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.customTestFramework(toolchain, configuration));
+  ForkTimerSandbox sandbox;
 
-  Driver driver(configuration, program, testFramework, toolchain, filter,
-                finder, metrics, junkDetector);
+  Driver driver(configuration, sandbox, program, toolchain, filter, finder,
+                metrics, junkDetector, testFramework);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
@@ -856,9 +875,10 @@ TEST(Driver, junkDetector_disabled) {
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.customTestFramework(toolchain, configuration));
+  ForkTimerSandbox sandbox;
 
-  Driver driver(configuration, program, testFramework, toolchain, filter,
-                finder, metrics, junkDetector);
+  Driver driver(configuration, sandbox, program, toolchain, filter, finder,
+                metrics, junkDetector, testFramework);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
@@ -893,9 +913,10 @@ TEST(Driver, customTest_withDynamicLibraries_and_ObjectFiles) {
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.customTestFramework(toolchain, configuration));
+  ForkTimerSandbox sandbox;
 
-  Driver driver(configuration, program, testFramework, toolchain, filter,
-                finder, metrics, junkDetector);
+  Driver driver(configuration, sandbox, program, toolchain, filter, finder,
+                metrics, junkDetector, testFramework);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
@@ -931,9 +952,10 @@ TEST(Driver, DISABLED_customTest_withExceptions) {
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.customTestFramework(toolchain, configuration));
+  ForkTimerSandbox sandbox;
 
-  Driver driver(configuration, program, testFramework, toolchain, filter,
-                finder, metrics, junkDetector);
+  Driver driver(configuration, sandbox, program, toolchain, filter, finder,
+                metrics, junkDetector, testFramework);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
