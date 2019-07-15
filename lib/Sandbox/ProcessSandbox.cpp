@@ -224,9 +224,6 @@ mull::ForkWatchdogSandbox::run(std::function<ExecutionStatus(void)> function,
       sharedResult->status = Timedout;
 
       sharedResult->runningTime = runningTime;
-      sharedResult->stderrOutput = readFileAndUnlink(stderrFilename.c_str());
-      sharedResult->stdoutOutput = readFileAndUnlink(stdoutFilename.c_str());
-
     } else if (exitedPID == workerPID) {
       kill(timerPID, SIGKILL);
 
