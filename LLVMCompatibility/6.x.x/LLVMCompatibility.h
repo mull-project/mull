@@ -14,7 +14,7 @@ using namespace llvm;
 typedef JITSymbolResolver SymbolResolver;
 typedef JITSymbol JITSymbolInfo;
 typedef JITSymbol JITSymbol;
-typedef orc::LocalCXXRuntimeOverrides CXXRuntimeOverrides;
+typedef JITTargetAddress JITTargetAddress;
 
 uint64_t JITSymbolAddress(JITSymbol &symbol);
 
@@ -29,4 +29,6 @@ std::unique_ptr<Module> parseBitcode(MemoryBufferRef bufferRef,
 
 void setVersionPrinter(void (*oldPrinter)(), void (*newPrinter)(raw_ostream &));
 
+Function *GetOrInsertFunction(Module &module, const std::string &name,
+                              FunctionType *functionType);
 } // namespace llvm_compat

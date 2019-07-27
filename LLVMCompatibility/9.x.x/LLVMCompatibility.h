@@ -31,4 +31,5 @@ void setVersionPrinter(void (*oldPrinter)(), void (*newPrinter)(raw_ostream &));
 
 Function *GetOrInsertFunction(Module &module, const std::string &name,
                               FunctionType *functionType);
+
 } // namespace llvm_compat

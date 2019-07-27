@@ -6,6 +6,7 @@
  - Automated release process on macOS #537
  - Fix incorrect handling of the NSW/NUW flags #540
  - Bring back abandoned sandbox approach #541, #542
+ - Add LLVM 9 support #544
 
 ## [0.3.0] - 02 Jun 2019
 

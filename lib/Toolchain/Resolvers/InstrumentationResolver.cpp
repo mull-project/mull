@@ -1,6 +1,7 @@
 #include "mull/Toolchain/Resolvers/InstrumentationResolver.h"
 
 #include "mull/Instrumentation/Instrumentation.h"
+#include "mull/Toolchain/CXXRuntimeOverrides.h"
 #include "mull/Toolchain/Mangler.h"
 
 #include <llvm/ExecutionEngine/Orc/ExecutionUtils.h>
@@ -10,9 +11,8 @@ using namespace mull;
 using namespace llvm;
 
 InstrumentationResolver::InstrumentationResolver(
-    llvm_compat::CXXRuntimeOverrides &overrides,
-    Instrumentation &instrumentation, Mangler &mangler,
-    InstrumentationInfo **trampoline)
+    CXXRuntimeOverrides &overrides, Instrumentation &instrumentation,
+    Mangler &mangler, InstrumentationInfo **trampoline)
     : overrides(overrides), instrumentation(instrumentation),
       instrumentationInfoName(mangler.getNameWithPrefix(
           instrumentation.instrumentationInfoVariableName())),

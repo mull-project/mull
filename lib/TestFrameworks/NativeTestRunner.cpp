@@ -15,9 +15,7 @@
 using namespace mull;
 
 NativeTestRunner::NativeTestRunner(Mangler &mangler)
-    : mangler(mangler), overrides([this](const char *name) {
-        return this->mangler.getNameWithPrefix(name);
-      }),
+    : mangler(mangler), overrides(mangler),
       trampoline(new InstrumentationInfo *) {}
 
 NativeTestRunner::~NativeTestRunner() { delete trampoline; }

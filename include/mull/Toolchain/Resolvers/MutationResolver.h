@@ -6,15 +6,16 @@
 namespace mull {
 class Trampolines;
 class Mangler;
+class CXXRuntimeOverrides;
 
 class MutationResolver : public llvm_compat::SymbolResolver {
-  llvm_compat::CXXRuntimeOverrides &overrides;
+  CXXRuntimeOverrides &overrides;
   Trampolines &trampolines;
   Mangler &mangler;
 
 public:
-  MutationResolver(llvm_compat::CXXRuntimeOverrides &overrides,
-                   Trampolines &trampolines, Mangler &mangler);
+  MutationResolver(CXXRuntimeOverrides &overrides, Trampolines &trampolines,
+                   Mangler &mangler);
   llvm_compat::JITSymbolInfo findSymbol(const std::string &name) override;
   llvm_compat::JITSymbolInfo
   findSymbolInLogicalDylib(const std::string &name) override;
