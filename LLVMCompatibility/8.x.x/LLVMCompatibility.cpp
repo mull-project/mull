@@ -56,4 +56,9 @@ void setVersionPrinter(void (*oldPrinter)(),
   llvm::cl::SetVersionPrinter(newPrinter);
 }
 
+Function *GetOrInsertFunction(Module &module, const std::string &name,
+                              FunctionType *functionType) {
+  return cast<Function>(module.getOrInsertFunction(name, functionType));
+}
+
 } // namespace llvm_compat

@@ -1,4 +1,5 @@
 #include "mull/Mutators/RemoveVoidFunctionMutator.h"
+#include "LLVMCompatibility.h"
 #include "TestModuleFactory.h"
 #include "mull/Mutators/Mutator.h"
 
@@ -28,11 +29,13 @@ TEST(RemoveVoidFunctionMutator, canBeApplied) {
   std::unique_ptr<Module> moduleOwner(new Module("test", context));
   Module *module = moduleOwner.get();
 
-  Function *voidFunction = cast<Function>(module->getOrInsertFunction(
-      "voidFunction", Type::getVoidTy(context), Type::VoidTyID, nullptr));
+  Type *voidType = Type::getVoidTy(context);
+  FunctionType *functionType = FunctionType::get(voidType, voidType);
 
-  Function *callerFunction = cast<Function>(module->getOrInsertFunction(
-      "callerFunction", Type::getVoidTy(context), Type::VoidTyID, nullptr));
+  Function *voidFunction =
+      llvm_compat::GetOrInsertFunction(*module, "voidFunction", functionType);
+  Function *callerFunction =
+      llvm_compat::GetOrInsertFunction(*module, "callerFunction", functionType);
 
   BasicBlock *bb = BasicBlock::Create(context, "not_relevant", callerFunction);
 

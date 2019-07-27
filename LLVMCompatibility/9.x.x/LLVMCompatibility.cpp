@@ -8,7 +8,11 @@ namespace llvm_compat {
 
 JITSymbolFlags
 JITSymbolFlagsFromObjectSymbol(const object::BasicSymbolRef &symbol) {
-  return JITSymbolFlags::fromObjectSymbol(symbol);
+  auto symbolOrError = JITSymbolFlags::fromObjectSymbol(symbol);
+  if (symbolOrError) {
+    return symbolOrError.get();
+  }
+  return JITSymbolFlags();
 }
 
 uint64_t JITSymbolAddress(JITSymbol &symbol) {
@@ -23,8 +27,16 @@ uint64_t JITSymbolAddress(JITSymbol &symbol) {
 
 object::OwningBinary<object::ObjectFile>
 compileModule(orc::SimpleCompiler &compiler, llvm::Module &module) {
-  auto objectFile = compiler(module);
-  return std::move(objectFile);
+  auto buffer = compiler(module);
+  auto bufferRef = buffer->getMemBufferRef();
+  auto objectOrError = object::ObjectFile::createObjectFile(bufferRef);
+  if (!objectOrError) {
+    consumeError(objectOrError.takeError());
+    return object::OwningBinary<object::ObjectFile>();
+  }
+
+  return object::OwningBinary<object::ObjectFile>(
+      std::move(objectOrError.get()), std::move(buffer));
 }
 
 std::unique_ptr<Module> parseBitcode(MemoryBufferRef bufferRef,
@@ -46,7 +58,8 @@ void setVersionPrinter(void (*oldPrinter)(),
 
 Function *GetOrInsertFunction(Module &module, const std::string &name,
                               FunctionType *functionType) {
-  return cast<Function>(module.getOrInsertFunction(name, functionType));
+  return cast<Function>(
+      module.getOrInsertFunction(name, functionType).getCallee());
 }
 
 } // namespace llvm_compat

@@ -3,27 +3,22 @@
 #include "LLVMCompatibility.h"
 #include <string>
 
-namespace llvm {
-namespace orc {
-class LocalCXXRuntimeOverrides;
-}
-} // namespace llvm
-
 namespace mull {
 
 class Mangler;
 class Instrumentation;
+class CXXRuntimeOverrides;
 struct InstrumentationInfo;
 
 class InstrumentationResolver : public llvm_compat::SymbolResolver {
-  llvm_compat::CXXRuntimeOverrides &overrides;
+  CXXRuntimeOverrides &overrides;
   Instrumentation &instrumentation;
   std::string instrumentationInfoName;
   std::string functionOffsetPrefix;
   InstrumentationInfo **trampoline;
 
 public:
-  InstrumentationResolver(llvm_compat::CXXRuntimeOverrides &overrides,
+  InstrumentationResolver(CXXRuntimeOverrides &overrides,
                           Instrumentation &instrumentation,
                           mull::Mangler &mangler,
                           InstrumentationInfo **trampoline);

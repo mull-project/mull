@@ -1,5 +1,6 @@
 #include "mull/Toolchain/Resolvers/MutationResolver.h"
 
+#include "mull/Toolchain/CXXRuntimeOverrides.h"
 #include "mull/Toolchain/Trampolines.h"
 
 #include <llvm/ExecutionEngine/RTDyldMemoryManager.h>
@@ -7,7 +8,7 @@
 using namespace mull;
 using namespace llvm;
 
-MutationResolver::MutationResolver(llvm_compat::CXXRuntimeOverrides &overrides,
+MutationResolver::MutationResolver(CXXRuntimeOverrides &overrides,
                                    Trampolines &trampolines, Mangler &mangler)
     : overrides(overrides), trampolines(trampolines), mangler(mangler) {}
 

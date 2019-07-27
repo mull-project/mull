@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mull/TestFrameworks/TestRunner.h"
+#include "mull/Toolchain/CXXRuntimeOverrides.h"
 
 namespace mull {
 
@@ -24,7 +25,7 @@ public:
 
 private:
   Mangler &mangler;
-  llvm_compat::CXXRuntimeOverrides overrides;
+  CXXRuntimeOverrides overrides;
   InstrumentationInfo **trampoline;
 
   void *getConstructorPointer(const llvm::Function &function, JITEngine &jit);
