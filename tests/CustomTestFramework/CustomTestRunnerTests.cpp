@@ -1,8 +1,8 @@
 #include <utility>
 
 #include "FixturePaths.h"
+#include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
-#include "mull/ModuleLoader.h"
 #include "mull/Program/Program.h"
 #include "mull/Sandbox/ProcessSandbox.h"
 #include "mull/TestFrameworks/NativeTestRunner.h"
@@ -61,15 +61,15 @@ TEST_P(CustomTestRunnerTest, all) {
   Toolchain toolchain(configuration);
   NativeTestRunner runner(toolchain.mangler());
 
-  ModuleLoader loader;
-  auto loadedModules = loader.loadModules(configuration);
-  Program program({}, {}, std::move(loadedModules));
+  BitcodeLoader loader;
+  auto bitcode = loader.loadBitcode(configuration);
+  Program program({}, {}, std::move(bitcode));
 
   vector<object::OwningBinary<object::ObjectFile>> ownedObjects;
   vector<object::ObjectFile *> objects;
-  for (auto &m : program.modules()) {
+  for (auto &m : program.bitcode()) {
     auto object =
-        toolchain.compiler().compileModule(*m, toolchain.targetMachine());
+        toolchain.compiler().compileBitcode(*m, toolchain.targetMachine());
     objects.push_back(object.getBinary());
     ownedObjects.push_back(move(object));
   }

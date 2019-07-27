@@ -12,7 +12,7 @@ class Instruction;
 
 namespace mull {
 
-class MullModule;
+class Bitcode;
 class MutationPoint;
 class MutationPointAddress;
 
@@ -25,7 +25,7 @@ public:
   static llvm::CmpInst::Predicate
   negatedCmpInstPredicate(llvm::CmpInst::Predicate predicate);
 
-  MutationPoint *getMutationPoint(MullModule *module, llvm::Function *function,
+  MutationPoint *getMutationPoint(Bitcode *bitcode, llvm::Function *function,
                                   llvm::Instruction *instruction,
                                   SourceLocation &sourceLocation,
                                   MutationPointAddress &address) override;

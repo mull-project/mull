@@ -1,11 +1,11 @@
 #include "mull/Reporters/SQLiteReporter.h"
 #include "FixturePaths.h"
 #include "TestModuleFactory.h"
+#include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Config/RawConfig.h"
 #include "mull/Filter.h"
 #include "mull/Metrics/Metrics.h"
-#include "mull/ModuleLoader.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/MathAddMutator.h"
 #include "mull/Program/Program.h"
@@ -33,17 +33,17 @@ TEST(SQLiteReporter, integrationTest) {
   /// - 1 test execution result which includes 1 normal test execution and 1
   /// mutated test execution.
   LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto mullModuleWithTests = loader.loadModuleAtPath(
+  BitcodeLoader loader;
+  auto bitcodeWithTests = loader.loadBitcodeAtPath(
       fixtures::simple_test_count_letters_test_count_letters_bc_path(),
       llvmContext);
-  auto mullModuleWithTestees = loader.loadModuleAtPath(
+  auto bitcodeWithTestees = loader.loadBitcodeAtPath(
       fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
 
-  std::vector<std::unique_ptr<MullModule>> modules;
-  modules.push_back(std::move(mullModuleWithTests));
-  modules.push_back(std::move(mullModuleWithTestees));
-  Program program({}, {}, std::move(modules));
+  std::vector<std::unique_ptr<Bitcode>> bitcode;
+  bitcode.push_back(std::move(bitcodeWithTests));
+  bitcode.push_back(std::move(bitcodeWithTestees));
+  Program program({}, {}, std::move(bitcode));
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -412,17 +412,17 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   Configuration configuration(rawConfig);
 
   LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto mullModuleWithTests = loader.loadModuleAtPath(
+  BitcodeLoader loader;
+  auto bitcodeWithTests = loader.loadBitcodeAtPath(
       fixtures::simple_test_count_letters_test_count_letters_bc_path(),
       llvmContext);
-  auto mullModuleWithTestees = loader.loadModuleAtPath(
+  auto bitcodeWithTestees = loader.loadBitcodeAtPath(
       fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
 
-  std::vector<std::unique_ptr<MullModule>> modules;
-  modules.push_back(std::move(mullModuleWithTests));
-  modules.push_back(std::move(mullModuleWithTestees));
-  Program program({}, {}, std::move(modules));
+  std::vector<std::unique_ptr<Bitcode>> bitcode;
+  bitcode.push_back(std::move(bitcodeWithTests));
+  bitcode.push_back(std::move(bitcodeWithTestees));
+  Program program({}, {}, std::move(bitcode));
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   std::unique_ptr<MathAddMutator> addMutator = make_unique<MathAddMutator>();
@@ -548,17 +548,17 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   Configuration configuration(rawConfig);
 
   LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto mullModuleWithTests = loader.loadModuleAtPath(
+  BitcodeLoader loader;
+  auto bitcodeWithTests = loader.loadBitcodeAtPath(
       fixtures::simple_test_count_letters_test_count_letters_bc_path(),
       llvmContext);
-  auto mullModuleWithTestees = loader.loadModuleAtPath(
+  auto bitcodeWithTestees = loader.loadBitcodeAtPath(
       fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
 
-  std::vector<std::unique_ptr<MullModule>> modules;
-  modules.push_back(std::move(mullModuleWithTests));
-  modules.push_back(std::move(mullModuleWithTestees));
-  Program program({}, {}, std::move(modules));
+  std::vector<std::unique_ptr<Bitcode>> bitcode;
+  bitcode.push_back(std::move(bitcodeWithTests));
+  bitcode.push_back(std::move(bitcodeWithTestees));
+  Program program({}, {}, std::move(bitcode));
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   std::unique_ptr<MathAddMutator> addMutator = make_unique<MathAddMutator>();

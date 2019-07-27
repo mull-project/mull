@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mull/MullModule.h"
+#include "mull/Bitcode.h"
 
 #include <vector>
 

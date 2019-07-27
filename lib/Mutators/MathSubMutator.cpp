@@ -41,7 +41,7 @@ MathSubMutator::replacementForSubWithOverflow(llvm::Function *testeeFunction,
 
   std::string name = testeeFunction->getName().str();
 
-  std::string replacementName = "";
+  std::string replacementName;
   Type *replacementType = nullptr;
 
   if (name == "llvm.ssub.with.overflow.i8") {
@@ -101,7 +101,7 @@ MathSubMutator::replacementForSubWithOverflow(llvm::Function *testeeFunction,
   return replacementFunction;
 }
 
-MutationPoint *MathSubMutator::getMutationPoint(MullModule *module,
+MutationPoint *MathSubMutator::getMutationPoint(Bitcode *bitcode,
                                                 llvm::Function *function,
                                                 llvm::Instruction *instruction,
                                                 SourceLocation &sourceLocation,
@@ -109,7 +109,7 @@ MutationPoint *MathSubMutator::getMutationPoint(MullModule *module,
   if (canBeApplied(*instruction)) {
     std::string diagnostics = "Math Sub: replaced - with +";
     return new MutationPoint(this, address, function, diagnostics,
-                             sourceLocation, module);
+                             sourceLocation, bitcode);
   }
   return nullptr;
 }

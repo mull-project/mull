@@ -15,13 +15,12 @@ namespace mull {
 class MutationPoint;
 class JITEngine;
 
-class MullModule {
+class Bitcode {
 public:
-  MullModule(std::unique_ptr<llvm::Module> llvmModule,
-             std::unique_ptr<llvm::MemoryBuffer> buffer,
-             const std::string &md5);
+  Bitcode(std::unique_ptr<llvm::Module> module,
+          std::unique_ptr<llvm::MemoryBuffer> buffer, const std::string &md5);
 
-  std::unique_ptr<MullModule> clone(llvm::LLVMContext &context);
+  std::unique_ptr<Bitcode> clone(llvm::LLVMContext &context);
 
   llvm::Module *getModule();
   llvm::Module *getModule() const;
@@ -42,7 +41,7 @@ private:
   std::map<llvm::Function *, std::vector<MutationPoint *>> mutationPoints;
   std::mutex mutex;
 
-  explicit MullModule(std::unique_ptr<llvm::Module> llvmModule);
+  explicit Bitcode(std::unique_ptr<llvm::Module> module);
 };
 
 } // namespace mull

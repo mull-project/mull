@@ -1,9 +1,9 @@
 #include "FixturePaths.h"
+#include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Config/RawConfig.h"
 #include "mull/Filter.h"
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
-#include "mull/ModuleLoader.h"
 #include "mull/MutationPoint.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/ConditionalsBoundaryMutator.h"
@@ -33,18 +33,18 @@ using ::testing::TestWithParam;
 using ::testing::Values;
 
 struct CXXJunkDetectorTestParameter {
-  const char *modulePath;
+  const char *bitcodePath;
   Mutator *mutator;
   uint8_t totalMutants;
   uint8_t nonJunkMutants;
-  CXXJunkDetectorTestParameter(const char *modulePath, Mutator *mutator,
+  CXXJunkDetectorTestParameter(const char *bitcodePath, Mutator *mutator,
                                uint8_t totalMutants, uint8_t nonJunkMutants)
-      : modulePath(modulePath), mutator(mutator), totalMutants(totalMutants),
+      : bitcodePath(bitcodePath), mutator(mutator), totalMutants(totalMutants),
         nonJunkMutants(nonJunkMutants) {}
 
   friend std::ostream &operator<<(std::ostream &os,
                                   const CXXJunkDetectorTestParameter &bar) {
-    os << "path(" << bar.modulePath << ") mutator("
+    os << "path(" << bar.bitcodePath << ") mutator("
        << bar.mutator->getUniqueIdentifier() << ") mutants("
        << std::to_string(bar.nonJunkMutants) << "/"
        << std::to_string(bar.totalMutants) << ")";
@@ -58,13 +58,14 @@ class CXXJunkDetectorTest : public TestWithParam<CXXJunkDetectorTestParameter> {
 TEST_P(CXXJunkDetectorTest, detectJunk) {
   auto &parameter = GetParam();
   LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto mullModule = loader.loadModuleAtPath(parameter.modulePath, llvmContext);
-  auto module = mullModule->getModule();
+  BitcodeLoader loader;
+  auto bitcodeFile =
+      loader.loadBitcodeAtPath(parameter.bitcodePath, llvmContext);
+  auto module = bitcodeFile->getModule();
 
-  std::vector<std::unique_ptr<MullModule>> modules;
-  modules.push_back(std::move(mullModule));
-  Program program({}, {}, std::move(modules));
+  std::vector<std::unique_ptr<Bitcode>> bitcode;
+  bitcode.push_back(std::move(bitcodeFile));
+  Program program({}, {}, std::move(bitcode));
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -140,14 +141,14 @@ INSTANTIATE_TEST_CASE_P(CXXJunkDetection, CXXJunkDetectorTest,
 
 TEST(CXXJunkDetector, compdb_absolute_paths) {
   LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto mullModule = loader.loadModuleAtPath(
+  BitcodeLoader loader;
+  auto bitcodeFile = loader.loadBitcodeAtPath(
       fixtures::junk_detection_compdb_main_bc_path(), llvmContext);
-  auto module = mullModule->getModule();
+  auto module = bitcodeFile->getModule();
 
-  std::vector<std::unique_ptr<MullModule>> modules;
-  modules.push_back(std::move(mullModule));
-  Program program({}, {}, std::move(modules));
+  std::vector<std::unique_ptr<Bitcode>> bitcode;
+  bitcode.push_back(std::move(bitcodeFile));
+  Program program({}, {}, std::move(bitcode));
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -181,19 +182,19 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
 
 TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
   LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto mullModule = loader.loadModuleAtPath(
+  BitcodeLoader loader;
+  auto bitcodeFile = loader.loadBitcodeAtPath(
       fixtures::junk_detection_compdb_main_bc_path(), llvmContext);
-  auto module = mullModule->getModule();
+  auto module = bitcodeFile->getModule();
 
-  std::vector<std::unique_ptr<MullModule>> modules;
-  modules.push_back(std::move(mullModule));
-  Program program({}, {}, std::move(modules));
+  std::vector<std::unique_ptr<Bitcode>> bitcode;
+  bitcode.push_back(std::move(bitcodeFile));
+  Program program({}, {}, std::move(bitcode));
   Configuration configuration;
 
-  std::vector<std::unique_ptr<Mutator>> mutatorss;
-  mutatorss.emplace_back(make_unique<ConditionalsBoundaryMutator>());
-  MutationsFinder finder(std::move(mutatorss), configuration);
+  std::vector<std::unique_ptr<Mutator>> mutators;
+  mutators.emplace_back(make_unique<ConditionalsBoundaryMutator>());
+  MutationsFinder finder(std::move(mutators), configuration);
   Filter filter;
 
   std::vector<std::unique_ptr<Testee>> testees;
@@ -223,14 +224,14 @@ TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
 
 TEST(CXXJunkDetector, no_compdb) {
   LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto mullModule = loader.loadModuleAtPath(
+  BitcodeLoader loader;
+  auto bitcodeFile = loader.loadBitcodeAtPath(
       fixtures::junk_detection_compdb_main_bc_path(), llvmContext);
-  auto module = mullModule->getModule();
+  auto module = bitcodeFile->getModule();
 
-  std::vector<std::unique_ptr<MullModule>> modules;
-  modules.push_back(std::move(mullModule));
-  Program program({}, {}, std::move(modules));
+  std::vector<std::unique_ptr<Bitcode>> bitcode;
+  bitcode.push_back(std::move(bitcodeFile));
+  Program program({}, {}, std::move(bitcode));
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutatorss;

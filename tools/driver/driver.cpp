@@ -1,5 +1,6 @@
 #include "mull/Driver.h"
 
+#include "mull/BitcodeLoader.h"
 #include "mull/Config/ConfigParser.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Config/RawConfig.h"
@@ -8,7 +9,6 @@
 #include "mull/JunkDetection/JunkDetector.h"
 #include "mull/Logger.h"
 #include "mull/Metrics/Metrics.h"
-#include "mull/ModuleLoader.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/MutatorsFactory.h"
 #include "mull/Parallelization/TaskExecutor.h"
@@ -157,9 +157,9 @@ int main(int argc, char *argv[]) {
       objectFiles, tasks);
   objectsLoader.execute();
 
-  ModuleLoader moduleLoader;
+  BitcodeLoader bitcodeLoader;
   Program program(configuration.dynamicLibraryPaths, std::move(objectFiles),
-                  moduleLoader.loadModules(configuration));
+                  bitcodeLoader.loadBitcode(configuration));
 
   std::unique_ptr<ProcessSandbox> sandbox(nullptr);
   if (rawConfig.forkEnabled()) {

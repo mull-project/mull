@@ -41,7 +41,7 @@ operator()(iterator begin, iterator end,
     Function *function = testee.getTesteeFunction();
 
     auto moduleID = function->getParent()->getModuleIdentifier();
-    MullModule *module = program.moduleWithIdentifier(moduleID);
+    Bitcode *bitcode = program.bitcodeWithIdentifier(moduleID);
 
     int functionIndex = GetFunctionIndex(function);
     for (auto &mutator : mutators) {
@@ -62,9 +62,9 @@ operator()(iterator begin, iterator end,
           MutationPointAddress address(functionIndex, basicBlockIndex,
                                        instructionIndex);
           MutationPoint *point = mutator->getMutationPoint(
-              module, function, &instruction, location, address);
+              bitcode, function, &instruction, location, address);
           if (point) {
-            module->addMutation(point);
+            bitcode->addMutation(point);
             for (auto &reachableTest : testee.getReachableTests()) {
               point->addReachableTest(reachableTest.first,
                                       reachableTest.second);

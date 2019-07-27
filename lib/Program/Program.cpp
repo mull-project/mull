@@ -8,11 +8,11 @@ using namespace mull;
 
 Program::Program(std::vector<std::string> dynamicLibraryPaths,
                  ObjectFiles precompiledObjectFiles,
-                 std::vector<std::unique_ptr<MullModule>> modules)
+                 std::vector<std::unique_ptr<Bitcode>> bitcode)
     : _dynamicLibraries(std::move(dynamicLibraryPaths)),
       _precompiledObjectFiles(std::move(precompiledObjectFiles)) {
-  for (auto &module : modules) {
-    addModule(std::move(module));
+  for (auto &bc : bitcode) {
+    addBitcode(std::move(bc));
   }
 }
 
@@ -20,12 +20,10 @@ ObjectFiles &Program::precompiledObjectFiles() {
   return _precompiledObjectFiles;
 }
 
-std::vector<std::unique_ptr<MullModule>> &Program::modules() {
-  return _modules;
-}
+std::vector<std::unique_ptr<Bitcode>> &Program::bitcode() { return _bitcode; }
 
-void Program::addModule(std::unique_ptr<MullModule> module) {
-  for (auto &function : module->getModule()->getFunctionList()) {
+void Program::addBitcode(std::unique_ptr<Bitcode> bitcode) {
+  for (auto &function : bitcode->getModule()->getFunctionList()) {
     if (function.getName().equals("mull_enterFunction") ||
         function.getName().equals("mull_leaveFunction")) {
       function.deleteBody();
@@ -36,24 +34,24 @@ void Program::addModule(std::unique_ptr<MullModule> module) {
     }
   }
 
-  for (auto &alias : module->getModule()->getAliasList()) {
+  for (auto &alias : bitcode->getModule()->getAliasList()) {
     if (auto function = llvm::dyn_cast<llvm::Function>(alias.getAliasee())) {
       functionsRegistry.insert(std::make_pair(alias.getName(), function));
     }
   }
 
-  std::string identifier = module->getModule()->getModuleIdentifier();
+  std::string identifier = bitcode->getModule()->getModuleIdentifier();
 
-  assert(moduleWithIdentifier(identifier) == nullptr &&
+  assert(bitcodeWithIdentifier(identifier) == nullptr &&
          "Attempt to add a module which has been added already!");
 
-  moduleRegistry.insert(std::make_pair(identifier, module.get()));
-  _modules.emplace_back(std::move(module));
+  bitcodeRegistry.insert(std::make_pair(identifier, bitcode.get()));
+  _bitcode.emplace_back(std::move(bitcode));
 }
 
-MullModule *Program::moduleWithIdentifier(const std::string &identifier) const {
-  auto it = moduleRegistry.find(identifier);
-  if (it == moduleRegistry.end()) {
+Bitcode *Program::bitcodeWithIdentifier(const std::string &identifier) const {
+  auto it = bitcodeRegistry.find(identifier);
+  if (it == bitcodeRegistry.end()) {
     return nullptr;
   }
   return it->second;
@@ -73,10 +71,10 @@ std::vector<llvm::Function *> Program::getStaticConstructors() const {
   /// NOTE: Just Copied the whole logic from ExecutionEngine
   std::vector<Function *> Ctors;
 
-  for (auto &module : _modules) {
+  for (auto &bitcode : _bitcode) {
 
     GlobalVariable *GV =
-        module->getModule()->getNamedGlobal("llvm.global_ctors");
+        bitcode->getModule()->getNamedGlobal("llvm.global_ctors");
 
     // If this global has internal linkage, or if it has a use, then it must be
     // an old-style (llvmgcc3) static ctor with __main linked in and in use.  If

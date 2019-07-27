@@ -19,7 +19,7 @@ using namespace mull;
 const std::string MathMulMutator::ID = "math_mul_mutator";
 const std::string MathMulMutator::description = "Replaces * with /";
 
-MutationPoint *MathMulMutator::getMutationPoint(MullModule *module,
+MutationPoint *MathMulMutator::getMutationPoint(Bitcode *bitcode,
                                                 llvm::Function *function,
                                                 llvm::Instruction *instruction,
                                                 SourceLocation &sourceLocation,
@@ -27,7 +27,7 @@ MutationPoint *MathMulMutator::getMutationPoint(MullModule *module,
   if (canBeApplied(*instruction)) {
     std::string diagnostics = "Math Mul: replaced * with /";
     return new MutationPoint(this, address, function, diagnostics,
-                             sourceLocation, module);
+                             sourceLocation, bitcode);
   }
   return nullptr;
 }

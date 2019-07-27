@@ -15,8 +15,8 @@ std::vector<Test> SimpleTestFinder::findTests(Program &program,
                                               Filter &filter) {
   std::vector<Test> tests;
 
-  for (auto &module : program.modules()) {
-    auto &x = module->getModule()->getFunctionList();
+  for (auto &bitcode : program.bitcode()) {
+    auto &x = bitcode->getModule()->getFunctionList();
     for (auto &Fn : x) {
 
       /// We find C functions having test_ and the same functions if they are

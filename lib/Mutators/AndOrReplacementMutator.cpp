@@ -22,13 +22,12 @@ const std::string AndOrReplacementMutator::description =
     "Replaces && with ||, || with &&";
 
 MutationPoint *AndOrReplacementMutator::getMutationPoint(
-    MullModule *module, llvm::Function *function,
-    llvm::Instruction *instruction, SourceLocation &sourceLocation,
-    MutationPointAddress &address) {
+    Bitcode *bitcode, llvm::Function *function, llvm::Instruction *instruction,
+    SourceLocation &sourceLocation, MutationPointAddress &address) {
   if (canBeApplied(*instruction)) {
     std::string diagnostics = "AND-OR Replacement";
     return new MutationPoint(this, address, function, diagnostics,
-                             sourceLocation, module);
+                             sourceLocation, bitcode);
   }
   return nullptr;
 }

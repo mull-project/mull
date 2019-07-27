@@ -22,7 +22,7 @@ public:
   static const std::string ID;
   static const std::string description;
 
-  MutationPoint *getMutationPoint(MullModule *module, llvm::Function *function,
+  MutationPoint *getMutationPoint(Bitcode *bitcode, llvm::Function *function,
                                   llvm::Instruction *instruction,
                                   SourceLocation &sourceLocation,
                                   MutationPointAddress &address) override;

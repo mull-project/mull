@@ -1,5 +1,5 @@
 #include "FixturePaths.h"
-#include "mull/ModuleLoader.h"
+#include "mull/BitcodeLoader.h"
 #include "mull/Testee.h"
 #include "gtest/gtest.h"
 
@@ -7,11 +7,11 @@ using namespace mull;
 
 TEST(Testees, mergeTestees) {
   llvm::LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto module = loader.loadModuleAtPath(
+  BitcodeLoader loader;
+  auto bitcode = loader.loadBitcodeAtPath(
       fixtures::mutators_and_or_replacement_module_bc_path(), llvmContext);
 
-  auto &allFunctions = module->getModule()->getFunctionList();
+  auto &allFunctions = bitcode->getModule()->getFunctionList();
 
   std::vector<std::unique_ptr<Testee>> allTestees;
   for (auto &func : allFunctions) {

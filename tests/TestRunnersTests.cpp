@@ -1,8 +1,8 @@
 #include "FixturePaths.h"
 #include "TestModuleFactory.h"
+#include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Filter.h"
-#include "mull/ModuleLoader.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/MathAddMutator.h"
 #include "mull/Program/Program.h"
@@ -35,20 +35,20 @@ TEST(NativeTestRunner, runTest) {
   Toolchain toolchain(configuration);
 
   LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto ownedModuleWithTests = loader.loadModuleAtPath(
+  BitcodeLoader loader;
+  auto bitcodeWithTests = loader.loadBitcodeAtPath(
       fixtures::simple_test_count_letters_test_count_letters_bc_path(),
       llvmContext);
-  auto ownedModuleWithTestees = loader.loadModuleAtPath(
+  auto bitcodeWithTestees = loader.loadBitcodeAtPath(
       fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
 
-  Module *moduleWithTests = ownedModuleWithTests->getModule();
-  Module *moduleWithTestees = ownedModuleWithTestees->getModule();
+  Module *moduleWithTests = bitcodeWithTests->getModule();
+  Module *moduleWithTestees = bitcodeWithTestees->getModule();
 
-  std::vector<std::unique_ptr<MullModule>> modules;
-  modules.push_back(std::move(ownedModuleWithTestees));
-  modules.push_back(std::move(ownedModuleWithTests));
-  Program program({}, {}, std::move(modules));
+  std::vector<std::unique_ptr<Bitcode>> bitcode;
+  bitcode.push_back(std::move(bitcodeWithTestees));
+  bitcode.push_back(std::move(bitcodeWithTests));
+  Program program({}, {}, std::move(bitcode));
 
   NativeTestRunner testRunner(toolchain.mangler());
   NativeTestRunner::ObjectFiles objectFiles;
@@ -79,8 +79,7 @@ TEST(NativeTestRunner, runTest) {
 
   JITEngine jit;
 
-  auto mutatedFunctions =
-      mutationPoint->getOriginalModule()->prepareMutations();
+  auto mutatedFunctions = mutationPoint->getBitcode()->prepareMutations();
   mutationPoint->applyMutation();
 
   {
@@ -106,7 +105,7 @@ TEST(NativeTestRunner, runTest) {
   auto &mangler = toolchain.mangler();
 
   auto name = mutationPoint->getOriginalFunction()->getName().str();
-  auto moduleId = mutationPoint->getOriginalModule()->getUniqueIdentifier();
+  auto bitcodeId = mutationPoint->getBitcode()->getUniqueIdentifier();
   auto trampolineName =
       mangler.getNameWithPrefix(mutationPoint->getTrampolineName());
   auto mutatedFunctionName =

@@ -13,12 +13,12 @@
 #include <unistd.h>
 
 #include "DynamicLibraries.h"
+#include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Driver.h"
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
 #include "mull/JunkDetection/JunkDetector.h"
 #include "mull/Metrics/Metrics.h"
-#include "mull/ModuleLoader.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/MutatorsFactory.h"
 #include "mull/Parallelization/Parallelization.h"
@@ -36,13 +36,13 @@
 #include "mull/Metrics/Metrics.h"
 #include "mull/Reporters/SQLiteReporter.h"
 
-class LoadModuleFromBitcodeTask {
+class LoadBitcodeFromBinaryTask {
 public:
   using In = std::vector<std::unique_ptr<ebc::EmbeddedFile>>;
-  using Out = std::vector<std::unique_ptr<mull::MullModule>>;
+  using Out = std::vector<std::unique_ptr<mull::Bitcode>>;
   using iterator = In::iterator;
 
-  explicit LoadModuleFromBitcodeTask(llvm::LLVMContext &context)
+  explicit LoadBitcodeFromBinaryTask(llvm::LLVMContext &context)
       : context(context) {}
 
   void operator()(iterator begin, iterator end, Out &storage,
@@ -64,9 +64,9 @@ public:
       assert(module && "Could not load module");
       module->setModuleIdentifier(hash);
 
-      auto mullModule = llvm::make_unique<mull::MullModule>(
+      auto bitcode = llvm::make_unique<mull::Bitcode>(
           std::move(module), std::move(ownedBuffer), hash);
-      storage.push_back(std::move(mullModule));
+      storage.push_back(std::move(bitcode));
     }
   }
 
@@ -264,15 +264,15 @@ int main(int argc, char **argv) {
   extractBitcodeBuffers.execute();
 
   std::vector<std::unique_ptr<llvm::LLVMContext>> contexts;
-  std::vector<LoadModuleFromBitcodeTask> tasks;
+  std::vector<LoadBitcodeFromBinaryTask> tasks;
   for (int i = 0; i < configuration.parallelization.workers; i++) {
     auto context = llvm::make_unique<llvm::LLVMContext>();
-    tasks.emplace_back(LoadModuleFromBitcodeTask(*context));
+    tasks.emplace_back(LoadBitcodeFromBinaryTask(*context));
     contexts.push_back(std::move(context));
   }
-  std::vector<std::unique_ptr<mull::MullModule>> modules;
-  mull::TaskExecutor<LoadModuleFromBitcodeTask> executor(
-      "Loading bitcode files", embeddedFiles, modules, std::move(tasks));
+  std::vector<std::unique_ptr<mull::Bitcode>> bitcode;
+  mull::TaskExecutor<LoadBitcodeFromBinaryTask> executor(
+      "Loading bitcode files", embeddedFiles, bitcode, std::move(tasks));
   executor.execute();
 
   std::vector<std::string> librarySearchPaths;
@@ -283,7 +283,7 @@ int main(int argc, char **argv) {
   auto dynamicLibraries =
       mull::findDynamicLibraries(InputFile.getValue(), librarySearchPaths);
 
-  mull::Program program(dynamicLibraries, {}, std::move(modules));
+  mull::Program program(dynamicLibraries, {}, std::move(bitcode));
 
   mull::Toolchain toolchain(configuration);
 

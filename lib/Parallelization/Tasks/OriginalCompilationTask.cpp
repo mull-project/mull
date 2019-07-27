@@ -21,12 +21,12 @@ void OriginalCompilationTask::operator()(iterator begin, iterator end,
   std::unique_ptr<TargetMachine> localMachine(target);
 
   for (auto it = begin; it != end; it++, counter.increment()) {
-    auto &module = *it->get();
+    auto &bitcode = *it->get();
 
-    auto objectFile = toolchain.cache().getObject(module);
+    auto objectFile = toolchain.cache().getObject(bitcode);
     if (objectFile.getBinary() == nullptr) {
-      objectFile = toolchain.compiler().compileModule(module, *localMachine);
-      toolchain.cache().putObject(objectFile, module);
+      objectFile = toolchain.compiler().compileBitcode(bitcode, *localMachine);
+      toolchain.cache().putObject(objectFile, bitcode);
     }
 
     storage.push_back(std::move(objectFile));

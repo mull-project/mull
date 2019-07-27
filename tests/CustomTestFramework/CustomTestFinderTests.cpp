@@ -1,8 +1,8 @@
 #include "FixturePaths.h"
+#include "mull/BitcodeLoader.h"
 #include "mull/Config/ConfigParser.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Filter.h"
-#include "mull/ModuleLoader.h"
 #include "mull/Program/Program.h"
 #include "mull/TestFrameworks/CustomTestFramework/CustomTestFinder.h"
 
@@ -20,9 +20,9 @@ TEST(CustomTestFinder, findTests) {
                                 mull::fixtures::custom_test_main_bc_path(),
                                 mull::fixtures::custom_test_test_bc_path()};
 
-  ModuleLoader loader;
-  auto loadedModules = loader.loadModules(configuration);
-  Program program({}, {}, std::move(loadedModules));
+  BitcodeLoader loader;
+  auto bitcode = loader.loadBitcode(configuration);
+  Program program({}, {}, std::move(bitcode));
   ASSERT_EQ(program.getStaticConstructors().size(), 1UL);
   ASSERT_EQ(program.getStaticConstructors().front()->getName(),
             "initGlobalVariable");
@@ -84,9 +84,9 @@ custom_tests:
                                 mull::fixtures::custom_test_main_bc_path(),
                                 mull::fixtures::custom_test_test_bc_path()};
 
-  ModuleLoader loader;
-  auto loadedModules = loader.loadModules(configuration);
-  Program program({}, {}, std::move(loadedModules));
+  BitcodeLoader loader;
+  auto bitcode = loader.loadBitcode(configuration);
+  Program program({}, {}, std::move(bitcode));
   ASSERT_EQ(program.getStaticConstructors().size(), 1UL);
   ASSERT_EQ(program.getStaticConstructors().front()->getName(),
             "initGlobalVariable");
@@ -143,9 +143,9 @@ custom_tests:
                                 mull::fixtures::custom_test_main_bc_path(),
                                 mull::fixtures::custom_test_test_bc_path()};
 
-  ModuleLoader loader;
-  auto loadedModules = loader.loadModules(configuration);
-  Program program({}, {}, std::move(loadedModules));
+  BitcodeLoader loader;
+  auto bitcode = loader.loadBitcode(configuration);
+  Program program({}, {}, std::move(bitcode));
   ASSERT_EQ(program.getStaticConstructors().size(), 1UL);
   ASSERT_EQ(program.getStaticConstructors().front()->getName(),
             "initGlobalVariable");
@@ -183,9 +183,9 @@ TEST(CustomTestFinder, findTests_withEmptyConfig) {
                                 mull::fixtures::custom_test_main_bc_path(),
                                 mull::fixtures::custom_test_test_bc_path()};
 
-  ModuleLoader loader;
-  auto loadedModules = loader.loadModules(configuration);
-  Program program({}, {}, std::move(loadedModules));
+  BitcodeLoader loader;
+  auto bitcode = loader.loadBitcode(configuration);
+  Program program({}, {}, std::move(bitcode));
 
   Filter filter;
   CustomTestFinder testFinder(config.getCustomTests());

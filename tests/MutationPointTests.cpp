@@ -1,8 +1,8 @@
 #include "FixturePaths.h"
 #include "TestModuleFactory.h"
+#include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Filter.h"
-#include "mull/ModuleLoader.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/AndOrReplacementMutator.h"
 #include "mull/Mutators/MathAddMutator.h"
@@ -32,17 +32,17 @@ using namespace llvm;
 
 TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
   LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto ModuleWithTests = loader.loadModuleAtPath(
+  BitcodeLoader loader;
+  auto bitcodeWithTests = loader.loadBitcodeAtPath(
       fixtures::simple_test_count_letters_test_count_letters_bc_path(),
       llvmContext);
-  auto ModuleWithTestees = loader.loadModuleAtPath(
+  auto bitcodeWithTestees = loader.loadBitcodeAtPath(
       fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
 
-  std::vector<std::unique_ptr<MullModule>> modules;
-  modules.push_back(std::move(ModuleWithTestees));
-  modules.push_back(std::move(ModuleWithTests));
-  Program program({}, {}, std::move(modules));
+  std::vector<std::unique_ptr<Bitcode>> bitcode;
+  bitcode.push_back(std::move(bitcodeWithTestees));
+  bitcode.push_back(std::move(bitcodeWithTests));
+  Program program({}, {}, std::move(bitcode));
 
   Configuration configuration;
 
@@ -77,13 +77,13 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
 
 TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
   LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto module = loader.loadModuleAtPath(
+  BitcodeLoader loader;
+  auto bitcodeFile = loader.loadBitcodeAtPath(
       fixtures::mutators_math_sub_module_bc_path(), llvmContext);
 
-  std::vector<std::unique_ptr<MullModule>> modules;
-  modules.push_back(std::move(module));
-  Program program({}, {}, std::move(modules));
+  std::vector<std::unique_ptr<Bitcode>> bitcode;
+  bitcode.push_back(std::move(bitcodeFile));
+  Program program({}, {}, std::move(bitcode));
 
   Configuration configuration;
 
@@ -118,13 +118,13 @@ TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
 
 TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
   LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto module = loader.loadModuleAtPath(
+  BitcodeLoader loader;
+  auto bitcodeFile = loader.loadBitcodeAtPath(
       fixtures::mutators_math_mul_module_bc_path(), llvmContext);
 
-  std::vector<std::unique_ptr<MullModule>> modules;
-  modules.push_back(std::move(module));
-  Program program({}, {}, std::move(modules));
+  std::vector<std::unique_ptr<Bitcode>> bitcode;
+  bitcode.push_back(std::move(bitcodeFile));
+  Program program({}, {}, std::move(bitcode));
 
   Configuration configuration;
 
@@ -160,13 +160,13 @@ TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
 
 TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
   LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto module = loader.loadModuleAtPath(
+  BitcodeLoader loader;
+  auto bitcodeFile = loader.loadBitcodeAtPath(
       fixtures::mutators_math_div_module_bc_path(), llvmContext);
 
-  std::vector<std::unique_ptr<MullModule>> modules;
-  modules.push_back(std::move(module));
-  Program program({}, {}, std::move(modules));
+  std::vector<std::unique_ptr<Bitcode>> bitcode;
+  bitcode.push_back(std::move(bitcodeFile));
+  Program program({}, {}, std::move(bitcode));
 
   Configuration configuration;
 
@@ -202,17 +202,17 @@ TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
 
 TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
   LLVMContext llvmContext;
-  ModuleLoader loader;
+  BitcodeLoader loader;
 
-  auto ModuleWithTests = loader.loadModuleAtPath(
+  auto bitcodeWithTests = loader.loadBitcodeAtPath(
       fixtures::mutators_negate_condition_tester_bc_path(), llvmContext);
-  auto ModuleWithTestees = loader.loadModuleAtPath(
+  auto bitcodeWithTestees = loader.loadBitcodeAtPath(
       fixtures::mutators_negate_condition_testee_bc_path(), llvmContext);
 
-  std::vector<std::unique_ptr<MullModule>> modules;
-  modules.push_back(std::move(ModuleWithTests));
-  modules.push_back(std::move(ModuleWithTestees));
-  Program program({}, {}, std::move(modules));
+  std::vector<std::unique_ptr<Bitcode>> bitcode;
+  bitcode.push_back(std::move(bitcodeWithTests));
+  bitcode.push_back(std::move(bitcodeWithTestees));
+  Program program({}, {}, std::move(bitcode));
 
   Configuration configuration;
 
@@ -245,13 +245,13 @@ TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
 
 TEST(MutationPoint, SimpleTest_AndOrMutator_applyMutation) {
   LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto module = loader.loadModuleAtPath(
+  BitcodeLoader loader;
+  auto bitcodeFile = loader.loadBitcodeAtPath(
       fixtures::mutators_and_or_replacement_module_bc_path(), llvmContext);
 
-  std::vector<std::unique_ptr<MullModule>> modules;
-  modules.push_back(std::move(module));
-  Program program({}, {}, std::move(modules));
+  std::vector<std::unique_ptr<Bitcode>> bitcode;
+  bitcode.push_back(std::move(bitcodeFile));
+  Program program({}, {}, std::move(bitcode));
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -281,13 +281,13 @@ TEST(MutationPoint, SimpleTest_AndOrMutator_applyMutation) {
 
 TEST(MutationPoint, SimpleTest_ScalarValueMutator_applyMutation) {
   LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto module = loader.loadModuleAtPath(
+  BitcodeLoader loader;
+  auto bitcodeFile = loader.loadBitcodeAtPath(
       fixtures::mutators_scalar_value_module_bc_path(), llvmContext);
 
-  std::vector<std::unique_ptr<MullModule>> modules;
-  modules.push_back(std::move(module));
-  Program program({}, {}, std::move(modules));
+  std::vector<std::unique_ptr<Bitcode>> bitcode;
+  bitcode.push_back(std::move(bitcodeFile));
+  Program program({}, {}, std::move(bitcode));
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -331,13 +331,13 @@ TEST(MutationPoint, SimpleTest_ScalarValueMutator_applyMutation) {
 
 TEST(MutationPoint, SimpleTest_ReplaceCallMutator_applyMutation) {
   LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto module = loader.loadModuleAtPath(
+  BitcodeLoader loader;
+  auto bitcodeFile = loader.loadBitcodeAtPath(
       fixtures::mutators_replace_call_module_bc_path(), llvmContext);
 
-  std::vector<std::unique_ptr<MullModule>> modules;
-  modules.push_back(std::move(module));
-  Program program({}, {}, std::move(modules));
+  std::vector<std::unique_ptr<Bitcode>> bitcode;
+  bitcode.push_back(std::move(bitcodeFile));
+  Program program({}, {}, std::move(bitcode));
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -371,13 +371,13 @@ TEST(MutationPoint, SimpleTest_ReplaceCallMutator_applyMutation) {
 
 TEST(MutationPoint, SimpleTest_ReplaceAssignmentMutator_applyMutation) {
   LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto module = loader.loadModuleAtPath(
+  BitcodeLoader loader;
+  auto bitcodeFile = loader.loadBitcodeAtPath(
       fixtures::mutators_replace_assignment_module_bc_path(), llvmContext);
 
-  std::vector<std::unique_ptr<MullModule>> modules;
-  modules.push_back(std::move(module));
-  Program program({}, {}, std::move(modules));
+  std::vector<std::unique_ptr<Bitcode>> bitcode;
+  bitcode.push_back(std::move(bitcodeFile));
+  Program program({}, {}, std::move(bitcode));
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -411,14 +411,14 @@ TEST(MutationPoint, SimpleTest_ReplaceAssignmentMutator_applyMutation) {
 
 TEST(MutationPoint, OriginalValuePresent) {
   LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto module = loader.loadModuleAtPath(
+  BitcodeLoader loader;
+  auto bitcodeFile = loader.loadBitcodeAtPath(
       fixtures::mutators_replace_assignment_module_bc_path(), llvmContext);
-  auto borrowedModule = module.get();
+  auto borrowedBitcode = bitcodeFile.get();
 
-  std::vector<std::unique_ptr<MullModule>> modules;
-  modules.push_back(std::move(module));
-  Program program({}, {}, std::move(modules));
+  std::vector<std::unique_ptr<Bitcode>> bitcode;
+  bitcode.push_back(std::move(bitcodeFile));
+  Program program({}, {}, std::move(bitcode));
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -448,9 +448,9 @@ TEST(MutationPoint, OriginalValuePresent) {
   }
 
   for (auto *mutation : mutationPoints) {
-    borrowedModule->addMutation(mutation);
+    borrowedBitcode->addMutation(mutation);
   }
-  borrowedModule->prepareMutations();
+  borrowedBitcode->prepareMutations();
   for (auto *mutation : mutationPoints) {
     mutation->applyMutation();
   }

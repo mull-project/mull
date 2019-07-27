@@ -5,7 +5,7 @@
 #include <string>
 
 namespace mull {
-class MullModule;
+class Bitcode;
 class MutationPoint;
 
 class ObjectCache {
@@ -16,15 +16,15 @@ public:
   ObjectCache(bool useCache, const std::string &cacheDir);
 
   llvm::object::OwningBinary<llvm::object::ObjectFile>
-  getInstrumentedObject(const MullModule &module);
+  getInstrumentedObject(const Bitcode &bitcode);
   llvm::object::OwningBinary<llvm::object::ObjectFile>
-  getObject(const MullModule &module);
+  getObject(const Bitcode &bitcode);
 
   void putInstrumentedObject(
       llvm::object::OwningBinary<llvm::object::ObjectFile> &object,
-      const MullModule &module);
+      const Bitcode &bitcode);
   void putObject(llvm::object::OwningBinary<llvm::object::ObjectFile> &object,
-                 const MullModule &module);
+                 const Bitcode &bitcode);
 
 private:
   llvm::object::OwningBinary<llvm::object::ObjectFile>
