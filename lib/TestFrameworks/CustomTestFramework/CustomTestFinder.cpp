@@ -28,8 +28,8 @@ std::vector<Test> CustomTestFinder::findTests(Program &program,
 
   std::vector<Test> tests;
 
-  for (auto &currentModule : program.modules()) {
-    for (auto &function : currentModule->getModule()->getFunctionList()) {
+  for (auto &bitcode : program.bitcode()) {
+    for (auto &function : bitcode->getModule()->getFunctionList()) {
       if (function.isDeclaration()) {
         continue;
       }
@@ -49,8 +49,8 @@ std::vector<Test> CustomTestFinder::findTests(Program &program,
           programName = "mull";
         }
 
-        tests.push_back(Test(definition.testName, programName, "main",
-                             definition.callArguments, &function));
+        tests.emplace_back(definition.testName, programName, "main",
+                           definition.callArguments, &function);
       }
     }
   }

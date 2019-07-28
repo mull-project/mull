@@ -41,7 +41,7 @@ MathAddMutator::replacementForAddWithOverflow(llvm::Function *addFunction,
 
   std::string name = addFunction->getName().str();
 
-  std::string replacementName = "";
+  std::string replacementName;
   Type *replacementType = nullptr;
 
   if (name == "llvm.sadd.with.overflow.i8") {
@@ -101,7 +101,7 @@ MathAddMutator::replacementForAddWithOverflow(llvm::Function *addFunction,
   return replacementFunction;
 }
 
-MutationPoint *MathAddMutator::getMutationPoint(MullModule *module,
+MutationPoint *MathAddMutator::getMutationPoint(Bitcode *bitcode,
                                                 llvm::Function *function,
                                                 llvm::Instruction *instruction,
                                                 SourceLocation &sourceLocation,
@@ -110,7 +110,7 @@ MutationPoint *MathAddMutator::getMutationPoint(MullModule *module,
     std::string diagnostics = "Math Add: replaced + with -";
 
     return new MutationPoint(this, address, function, diagnostics,
-                             sourceLocation, module);
+                             sourceLocation, bitcode);
   }
 
   return nullptr;

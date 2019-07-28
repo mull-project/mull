@@ -1,9 +1,9 @@
 #include "mull/Reporters/SQLiteReporter.h"
 
+#include "mull/Bitcode.h"
 #include "mull/Config/RawConfig.h"
 #include "mull/ExecutionResult.h"
 #include "mull/Logger.h"
-#include "mull/MullModule.h"
 #include "mull/MutationResult.h"
 #include "mull/Result.h"
 
@@ -225,12 +225,10 @@ void mull::SQLiteReporter::reportResults(const Result &result,
         insertMutationPointStmt, index++,
         mutationPoint->getMutator()->getUniqueIdentifier().c_str(), -1,
         SQLITE_TRANSIENT);
-    sqlite3_bind_text(insertMutationPointStmt, index++,
-                      mutationPoint->getOriginalModule()
-                          ->getModule()
-                          ->getModuleIdentifier()
-                          .c_str(),
-                      -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(
+        insertMutationPointStmt, index++,
+        mutationPoint->getBitcode()->getModule()->getModuleIdentifier().c_str(),
+        -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(
         insertMutationPointStmt, index++,
         mutationPoint->getOriginalFunction()->getName().str().c_str(), -1,

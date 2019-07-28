@@ -1,10 +1,10 @@
 #include "mull/Driver.h"
 
+#include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
 #include "mull/JunkDetection/JunkDetector.h"
 #include "mull/Logger.h"
 #include "mull/Metrics/Metrics.h"
-#include "mull/ModuleLoader.h"
 #include "mull/MutationResult.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Parallelization/Parallelization.h"
@@ -69,18 +69,18 @@ std::unique_ptr<Result> Driver::Run() {
 void Driver::compileInstrumentedBitcodeFiles() {
   metrics.beginInstrumentedCompilation();
 
-  for (auto &ownedModule : program.modules()) {
-    MullModule &module = *ownedModule;
-    instrumentation.recordFunctions(module.getModule());
+  for (auto &bitcode : program.bitcode()) {
+    instrumentation.recordFunctions(bitcode->getModule());
   }
 
   std::vector<InstrumentedCompilationTask> tasks;
+  tasks.reserve(config.parallelization.workers);
   for (int i = 0; i < config.parallelization.workers; i++) {
     tasks.emplace_back(instrumentation, toolchain);
   }
 
   TaskExecutor<InstrumentedCompilationTask> compiler(
-      "Compiling instrumented code", program.modules(), instrumentedObjectFiles,
+      "Compiling instrumented code", program.bitcode(), instrumentedObjectFiles,
       tasks);
   compiler.execute();
 
@@ -209,8 +209,8 @@ Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
   std::vector<std::string> mutatedFunctions;
 
   SingleTaskExecutor prepareMutationsTask("Preparing mutations", [&]() {
-    for (auto &module : program.modules()) {
-      auto functions = module->prepareMutations();
+    for (auto &bitcode : program.bitcode()) {
+      auto functions = bitcode->prepareMutations();
       for (auto &name : functions) {
         mutatedFunctions.push_back(name);
       }
@@ -229,7 +229,7 @@ Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
     compilationTasks.emplace_back(toolchain);
   }
   TaskExecutor<OriginalCompilationTask> mutantCompiler(
-      "Compiling original code", program.modules(), ownedObjectFiles,
+      "Compiling original code", program.bitcode(), ownedObjectFiles,
       std::move(compilationTasks));
   mutantCompiler.execute();
 

@@ -4,7 +4,7 @@ set(mull_sources
   Driver.cpp
   Sandbox/ProcessSandbox.cpp
   Logger.cpp
-  ModuleLoader.cpp
+  BitcodeLoader.cpp
   Filter.cpp
   MutationsFinder.cpp
 
@@ -36,7 +36,7 @@ set(mull_sources
   Toolchain/Trampolines.cpp
   Toolchain/CXXRuntimeOverrides.cpp
 
-  MullModule.cpp
+  Bitcode.cpp
   MutationPoint.cpp
   TestFrameworks/TestRunner.cpp
   TestFrameworks/Test.cpp
@@ -62,7 +62,7 @@ set(mull_sources
 
   Parallelization/Progress.cpp
   Parallelization/TaskExecutor.cpp
-  Parallelization/Tasks/ModuleLoadingTask.cpp
+  Parallelization/Tasks/BitcodeLoadingTask.cpp
   Parallelization/Tasks/SearchMutationPointsTask.cpp
   Parallelization/Tasks/LoadObjectFilesTask.cpp
   Parallelization/Tasks/DryRunMutantExecutionTask.cpp

@@ -1,4 +1,4 @@
-#include "mull/MullModule.h"
+#include "mull/Bitcode.h"
 
 #include "LLVMCompatibility.h"
 #include "mull/Logger.h"
@@ -16,18 +16,19 @@ using namespace mull;
 using namespace llvm;
 using namespace std;
 
-MullModule::MullModule(std::unique_ptr<llvm::Module> llvmModule)
-    : module(std::move(llvmModule)), uniqueIdentifier("") {}
+Bitcode::Bitcode(std::unique_ptr<llvm::Module> module)
+    : module(std::move(module)), uniqueIdentifier("") {}
 
-MullModule::MullModule(std::unique_ptr<llvm::Module> llvmModule,
-                       std::unique_ptr<llvm::MemoryBuffer> buffer,
-                       const std::string &md5)
-    : module(std::move(llvmModule)), buffer(std::move(buffer)) {
+Bitcode::Bitcode(std::unique_ptr<llvm::Module> module,
+                 std::unique_ptr<llvm::MemoryBuffer> buffer,
+                 const std::string &md5)
+    : module(std::move(module)), buffer(std::move(buffer)) {
   uniqueIdentifier =
-      llvm::sys::path::stem(module->getModuleIdentifier()).str() + "_" + md5;
+      llvm::sys::path::stem(this->module->getModuleIdentifier()).str() + "_" +
+      md5;
 }
 
-std::unique_ptr<MullModule> MullModule::clone(LLVMContext &context) {
+std::unique_ptr<Bitcode> Bitcode::clone(LLVMContext &context) {
   assert(buffer.get() && "Cannot clone non-original module");
   auto clone = llvm_compat::parseBitcode(buffer->getMemBufferRef(), context);
   if (!clone) {
@@ -37,25 +38,25 @@ std::unique_ptr<MullModule> MullModule::clone(LLVMContext &context) {
 
   clone->setModuleIdentifier(module->getModuleIdentifier());
 
-  return make_unique<MullModule>(std::move(clone),
-                                 std::unique_ptr<MemoryBuffer>(), "");
+  return make_unique<Bitcode>(std::move(clone), std::unique_ptr<MemoryBuffer>(),
+                              "");
 }
 
-llvm::Module *MullModule::getModule() {
+llvm::Module *Bitcode::getModule() {
   assert(module);
   return module.get();
 }
 
-llvm::Module *MullModule::getModule() const {
+llvm::Module *Bitcode::getModule() const {
   assert(module);
   return module.get();
 }
 
-std::string MullModule::getUniqueIdentifier() { return uniqueIdentifier; }
+std::string Bitcode::getUniqueIdentifier() { return uniqueIdentifier; }
 
-std::string MullModule::getUniqueIdentifier() const { return uniqueIdentifier; }
+std::string Bitcode::getUniqueIdentifier() const { return uniqueIdentifier; }
 
-std::vector<std::string> MullModule::prepareMutations() {
+std::vector<std::string> Bitcode::prepareMutations() {
   std::vector<std::string> mutatedFunctionNames;
 
   for (auto pair : mutationPoints) {
@@ -94,17 +95,17 @@ std::vector<std::string> MullModule::prepareMutations() {
   return mutatedFunctionNames;
 }
 
-void MullModule::addMutation(MutationPoint *point) {
+void Bitcode::addMutation(MutationPoint *point) {
   std::lock_guard<std::mutex> guard(mutex);
   auto function = point->getOriginalFunction();
   mutationPoints[function].push_back(point);
 }
 
-std::string MullModule::getInstrumentedUniqueIdentifier() const {
+std::string Bitcode::getInstrumentedUniqueIdentifier() const {
   return getUniqueIdentifier() + "_instrumented";
 }
 
-std::string MullModule::getMutatedUniqueIdentifier() const {
+std::string Bitcode::getMutatedUniqueIdentifier() const {
   if (mutationPoints.empty()) {
     return getUniqueIdentifier();
   }

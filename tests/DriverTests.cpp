@@ -1,12 +1,12 @@
 #include "FixturePaths.h"
 #include "TestModuleFactory.h"
+#include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Driver.h"
 #include "mull/ExecutionResult.h"
 #include "mull/Filter.h"
 #include "mull/JunkDetection/JunkDetector.h"
 #include "mull/Metrics/Metrics.h"
-#include "mull/ModuleLoader.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/AndOrReplacementMutator.h"
 #include "mull/Mutators/MathAddMutator.h"
@@ -81,8 +81,8 @@ TEST(Driver, SimpleTest_MathAddMutator) {
       fixtures::simple_test_count_letters_count_letters_bc_path()};
   configuration.forkEnabled = false;
 
-  ModuleLoader loader;
-  Program program({}, {}, loader.loadModules(configuration));
+  BitcodeLoader loader;
+  Program program({}, {}, loader.loadBitcode(configuration));
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathAddMutator>());
@@ -134,8 +134,8 @@ TEST(Driver, SimpleTest_MathSubMutator) {
   Configuration configuration;
   configuration.bitcodePaths = {fixtures::mutators_math_sub_module_bc_path()};
 
-  ModuleLoader loader;
-  Program program({}, {}, loader.loadModules(configuration));
+  BitcodeLoader loader;
+  Program program({}, {}, loader.loadBitcode(configuration));
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathSubMutator>());
@@ -187,8 +187,8 @@ TEST(Driver, SimpleTest_MathMulMutator) {
   Configuration configuration;
   configuration.bitcodePaths = {fixtures::mutators_math_mul_module_bc_path()};
 
-  ModuleLoader loader;
-  Program program({}, {}, loader.loadModules(configuration));
+  BitcodeLoader loader;
+  Program program({}, {}, loader.loadBitcode(configuration));
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathMulMutator>());
@@ -239,8 +239,8 @@ TEST(Driver, SimpleTest_MathDivMutator) {
   Configuration configuration;
   configuration.bitcodePaths = {fixtures::mutators_math_div_module_bc_path()};
 
-  ModuleLoader loader;
-  Program program({}, {}, loader.loadModules(configuration));
+  BitcodeLoader loader;
+  Program program({}, {}, loader.loadBitcode(configuration));
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<MathDivMutator>());
@@ -297,8 +297,8 @@ TEST(Driver, SimpleTest_NegateConditionMutator) {
   mutators.emplace_back(make_unique<NegateConditionMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
 
-  ModuleLoader loader;
-  Program program({}, {}, loader.loadModules(configuration));
+  BitcodeLoader loader;
+  Program program({}, {}, loader.loadBitcode(configuration));
 
   Toolchain toolchain(configuration);
   Filter filter;
@@ -344,8 +344,8 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutator) {
   mutators.emplace_back(make_unique<RemoveVoidFunctionMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
 
-  ModuleLoader loader;
-  Program program({}, {}, loader.loadModules(configuration));
+  BitcodeLoader loader;
+  Program program({}, {}, loader.loadBitcode(configuration));
 
   Toolchain toolchain(configuration);
   Filter filter;
@@ -391,8 +391,8 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
   mutators.emplace_back(make_unique<AndOrReplacementMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
 
-  ModuleLoader loader;
-  Program program({}, {}, loader.loadModules(configuration));
+  BitcodeLoader loader;
+  Program program({}, {}, loader.loadBitcode(configuration));
 
   Toolchain toolchain(configuration);
   Filter filter;
@@ -598,8 +598,8 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator_CPP) {
   mutators.emplace_back(make_unique<AndOrReplacementMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
 
-  ModuleLoader loader;
-  Program program({}, {}, loader.loadModules(configuration));
+  BitcodeLoader loader;
+  Program program({}, {}, loader.loadBitcode(configuration));
 
   Toolchain toolchain(configuration);
   Filter filter;
@@ -691,8 +691,8 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutator_CPP) {
   mutators.emplace_back(make_unique<ReplaceAssignmentMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
 
-  ModuleLoader loader;
-  Program program({}, {}, loader.loadModules(configuration));
+  BitcodeLoader loader;
+  Program program({}, {}, loader.loadBitcode(configuration));
 
   Toolchain toolchain(configuration);
   Filter filter;
@@ -741,8 +741,8 @@ TEST(Driver, customTest) {
   mutators.emplace_back(make_unique<MathAddMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
 
-  ModuleLoader loader;
-  Program program({}, {}, loader.loadModules(configuration));
+  BitcodeLoader loader;
+  Program program({}, {}, loader.loadBitcode(configuration));
 
   Toolchain toolchain(configuration);
   Filter filter;
@@ -784,9 +784,9 @@ TEST(Driver, customTest_withDynamicLibraries) {
   mutators.emplace_back(make_unique<MathAddMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
 
-  ModuleLoader loader;
+  BitcodeLoader loader;
   Program program(configuration.dynamicLibraryPaths, {},
-                  loader.loadModules(configuration));
+                  loader.loadBitcode(configuration));
 
   Toolchain toolchain(configuration);
   Filter filter;
@@ -827,8 +827,8 @@ TEST(Driver, junkDetector_enabled) {
   mutators.emplace_back(make_unique<MathAddMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
 
-  ModuleLoader loader;
-  Program program({}, {}, loader.loadModules(configuration));
+  BitcodeLoader loader;
+  Program program({}, {}, loader.loadBitcode(configuration));
 
   Toolchain toolchain(configuration);
   Filter filter;
@@ -863,8 +863,8 @@ TEST(Driver, junkDetector_disabled) {
   mutators.emplace_back(make_unique<MathAddMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
 
-  ModuleLoader loader;
-  Program program({}, {}, loader.loadModules(configuration));
+  BitcodeLoader loader;
+  Program program({}, {}, loader.loadBitcode(configuration));
 
   Toolchain toolchain(configuration);
   Filter filter;
@@ -898,11 +898,11 @@ TEST(Driver, customTest_withDynamicLibraries_and_ObjectFiles) {
   mutators.emplace_back(make_unique<MathAddMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
 
-  ModuleLoader moduleLoader;
+  BitcodeLoader bitcodeLoader;
   ObjectLoader objectLoader;
   Program program(configuration.dynamicLibraryPaths,
                   objectLoader.loadObjectFiles(configuration),
-                  moduleLoader.loadModules(configuration));
+                  bitcodeLoader.loadBitcode(configuration));
 
   Toolchain toolchain(configuration);
   Filter filter;
@@ -937,11 +937,11 @@ TEST(Driver, DISABLED_customTest_withExceptions) {
 
   MutationsFinder finder({}, configuration);
 
-  ModuleLoader moduleLoader;
+  BitcodeLoader bitcodeLoader;
   ObjectLoader objectLoader;
   Program program(configuration.dynamicLibraryPaths,
                   objectLoader.loadObjectFiles(configuration),
-                  moduleLoader.loadModules(configuration));
+                  bitcodeLoader.loadBitcode(configuration));
 
   Toolchain toolchain(configuration);
   Filter filter;

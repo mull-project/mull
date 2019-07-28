@@ -18,7 +18,7 @@ using namespace mull;
 const std::string MathDivMutator::ID = "math_div_mutator";
 const std::string MathDivMutator::description = "Replaces / with *";
 
-MutationPoint *MathDivMutator::getMutationPoint(MullModule *module,
+MutationPoint *MathDivMutator::getMutationPoint(Bitcode *bitcode,
                                                 llvm::Function *function,
                                                 llvm::Instruction *instruction,
                                                 SourceLocation &sourceLocation,
@@ -26,7 +26,7 @@ MutationPoint *MathDivMutator::getMutationPoint(MullModule *module,
   if (canBeApplied(*instruction)) {
     std::string diagnostics = "Math Div: replaced / with *";
     return new MutationPoint(this, address, function, diagnostics,
-                             sourceLocation, module);
+                             sourceLocation, bitcode);
   }
 
   return nullptr;

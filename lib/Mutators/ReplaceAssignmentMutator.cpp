@@ -59,9 +59,8 @@ static bool findPossibleApplication(Value &V, std::string &outDiagnostics) {
 }
 
 MutationPoint *ReplaceAssignmentMutator::getMutationPoint(
-    MullModule *module, llvm::Function *function,
-    llvm::Instruction *instruction, SourceLocation &sourceLocation,
-    MutationPointAddress &address) {
+    Bitcode *bitcode, llvm::Function *function, llvm::Instruction *instruction,
+    SourceLocation &sourceLocation, MutationPointAddress &address) {
 
   std::string diagnostics;
 
@@ -70,7 +69,7 @@ MutationPoint *ReplaceAssignmentMutator::getMutationPoint(
   }
 
   auto mutationPoint = new MutationPoint(this, address, function, diagnostics,
-                                         sourceLocation, module);
+                                         sourceLocation, bitcode);
 
   return mutationPoint;
 }

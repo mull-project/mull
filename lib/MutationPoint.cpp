@@ -1,6 +1,6 @@
 #include "mull/MutationPoint.h"
 
-#include "mull/ModuleLoader.h"
+#include "mull/BitcodeLoader.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Toolchain/Compiler.h"
 
@@ -87,15 +87,16 @@ std::string MutationPointAddress::getIdentifier() const { return identifier; }
 
 MutationPoint::MutationPoint(Mutator *mutator, MutationPointAddress address,
                              llvm::Function *function, std::string diagnostics,
-                             SourceLocation location, MullModule *m)
-    : mutator(mutator), address(address), module(m), originalFunction(function),
-      mutatedFunction(nullptr), diagnostics(std::move(diagnostics)),
-      sourceLocation(std::move(location)), reachableTests() {
-  string moduleID = module->getUniqueIdentifier();
+                             SourceLocation location, Bitcode *m)
+    : mutator(mutator), address(address), bitcode(m),
+      originalFunction(function), mutatedFunction(nullptr),
+      diagnostics(std::move(diagnostics)), sourceLocation(std::move(location)),
+      reachableTests() {
+  string bitcodeID = bitcode->getUniqueIdentifier();
   string addressID = address.getIdentifier();
   string mutatorID = mutator->getUniqueIdentifier();
 
-  uniqueIdentifier = moduleID + "_" + addressID + "_" + mutatorID;
+  uniqueIdentifier = bitcodeID + "_" + addressID + "_" + mutatorID;
 }
 
 Mutator *MutationPoint::getMutator() { return mutator; }
@@ -111,7 +112,7 @@ Value *MutationPoint::getOriginalValue() const {
   return &(address.findInstruction(function));
 }
 
-MullModule *MutationPoint::getOriginalModule() const { return module; }
+Bitcode *MutationPoint::getBitcode() const { return bitcode; }
 
 void MutationPoint::addReachableTest(Test *test, int distance) {
   reachableTests.emplace_back(test, distance);
@@ -150,7 +151,7 @@ void MutationPoint::setMutatedFunction(llvm::Function *function) {
 
 std::string MutationPoint::getTrampolineName() {
   return originalFunction->getName().str() + "_" +
-         module->getUniqueIdentifier() + "_trampoline";
+         bitcode->getUniqueIdentifier() + "_trampoline";
 }
 
 std::string MutationPoint::getMutatedFunctionName() {
@@ -159,5 +160,5 @@ std::string MutationPoint::getMutatedFunctionName() {
 
 std::string MutationPoint::getOriginalFunctionName() const {
   return originalFunction->getName().str() + "_" +
-         module->getUniqueIdentifier() + "_original";
+         bitcode->getUniqueIdentifier() + "_original";
 }

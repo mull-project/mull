@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mull/MullModule.h"
+#include "mull/Bitcode.h"
 
 #include <llvm/Object/ObjectFile.h>
 #include <vector>
@@ -13,7 +13,7 @@ class progress_counter;
 
 class InstrumentedCompilationTask {
 public:
-  using In = std::vector<std::unique_ptr<MullModule>>;
+  using In = std::vector<std::unique_ptr<Bitcode>>;
   using Out = std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>>;
   using iterator = In::const_iterator;
 

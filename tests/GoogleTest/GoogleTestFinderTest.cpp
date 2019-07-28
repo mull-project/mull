@@ -1,11 +1,11 @@
 #include "mull/TestFrameworks/GoogleTest/GoogleTestFinder.h"
 #include "FixturePaths.h"
 #include "TestModuleFactory.h"
+#include "mull/BitcodeLoader.h"
 #include "mull/Config/ConfigParser.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Driver.h"
 #include "mull/Filter.h"
-#include "mull/ModuleLoader.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/MutatorsFactory.h"
 #include "mull/Program/Program.h"
@@ -30,13 +30,13 @@ using namespace llvm;
 
 TEST(GoogleTestFinder, FindTest) {
   LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto ModuleWithTests = loader.loadModuleAtPath(
+  BitcodeLoader loader;
+  auto bitcodeWithTests = loader.loadBitcodeAtPath(
       fixtures::google_test_google_test_Test_bc_path(), llvmContext);
 
-  std::vector<std::unique_ptr<MullModule>> modules;
-  modules.push_back(std::move(ModuleWithTests));
-  Program program({}, {}, std::move(modules));
+  std::vector<std::unique_ptr<Bitcode>> bitcode;
+  bitcode.push_back(std::move(bitcodeWithTests));
+  Program program({}, {}, std::move(bitcode));
 
   const char *configYAML = R"YAML(
 mutators:
@@ -63,13 +63,13 @@ mutators:
 
 TEST(GoogleTestFinder, findTests_filter) {
   LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto ModuleWithTests = loader.loadModuleAtPath(
+  BitcodeLoader loader;
+  auto bitcodeWithTests = loader.loadBitcodeAtPath(
       fixtures::google_test_google_test_Test_bc_path(), llvmContext);
 
-  std::vector<std::unique_ptr<MullModule>> modules;
-  modules.push_back(std::move(ModuleWithTests));
-  Program program({}, {}, std::move(modules));
+  std::vector<std::unique_ptr<Bitcode>> bitcode;
+  bitcode.push_back(std::move(bitcodeWithTests));
+  Program program({}, {}, std::move(bitcode));
 
   const char *configYAML = R"YAML(
 mutators:
@@ -110,21 +110,21 @@ mutators:
   Toolchain toolchain(configuration);
 
   LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto moduleWithTests = loader.loadModuleAtPath(
+  BitcodeLoader loader;
+  auto bitcodeWithTests = loader.loadBitcodeAtPath(
       fixtures::google_test_google_test_Test_bc_path(), llvmContext);
-  auto moduleWithTestees = loader.loadModuleAtPath(
+  auto bitcodeWithTestees = loader.loadBitcodeAtPath(
       fixtures::google_test_google_test_Testee_bc_path(), llvmContext);
 
-  auto compiledModule_tests = toolchain.compiler().compileModule(
-      moduleWithTests->getModule(), toolchain.targetMachine());
-  auto compiledModule_testees = toolchain.compiler().compileModule(
-      moduleWithTestees->getModule(), toolchain.targetMachine());
+  auto binaryWithTests = toolchain.compiler().compileModule(
+      bitcodeWithTests->getModule(), toolchain.targetMachine());
+  auto binaryWithTestees = toolchain.compiler().compileModule(
+      bitcodeWithTestees->getModule(), toolchain.targetMachine());
 
-  std::vector<std::unique_ptr<MullModule>> modules;
-  modules.push_back(std::move(moduleWithTests));
-  modules.push_back(std::move(moduleWithTestees));
-  Program program({}, {}, std::move(modules));
+  std::vector<std::unique_ptr<Bitcode>> bitcode;
+  bitcode.push_back(std::move(bitcodeWithTests));
+  bitcode.push_back(std::move(bitcodeWithTestees));
+  Program program({}, {}, std::move(bitcode));
 
   Filter filter;
   GoogleTestFinder Finder;
@@ -140,7 +140,7 @@ mutators:
   JITEngine jit;
 
   std::vector<llvm::object::ObjectFile *> objects(
-      {compiledModule_tests.getBinary(), compiledModule_testees.getBinary()});
+      {binaryWithTests.getBinary(), binaryWithTestees.getBinary()});
   /// TODO: enable eventually
   //  runner.loadProgram(objects, jit);
   runner.runTest(jit, program, tests[0]);

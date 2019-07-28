@@ -20,7 +20,7 @@ namespace mull {
 
 class Compiler;
 class Mutator;
-class MullModule;
+class Bitcode;
 class Test;
 
 /// \brief Container class that stores information needed to find
@@ -58,7 +58,7 @@ public:
 class MutationPoint {
   Mutator *mutator;
   MutationPointAddress address;
-  MullModule *module;
+  Bitcode *bitcode;
   llvm::Function *originalFunction;
   llvm::Function *mutatedFunction;
   std::string uniqueIdentifier;
@@ -69,14 +69,14 @@ class MutationPoint {
 public:
   MutationPoint(Mutator *mutator, MutationPointAddress address,
                 llvm::Function *function, std::string diagnostics,
-                SourceLocation location, MullModule *m);
+                SourceLocation location, Bitcode *m);
 
   ~MutationPoint() = default;
 
   Mutator *getMutator();
   MutationPointAddress getAddress();
   llvm::Value *getOriginalValue() const;
-  MullModule *getOriginalModule() const;
+  Bitcode *getBitcode() const;
 
   llvm::Function *getOriginalFunction();
   void setMutatedFunction(llvm::Function *function);

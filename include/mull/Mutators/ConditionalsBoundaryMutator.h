@@ -12,7 +12,7 @@ class Instruction;
 
 namespace mull {
 
-class MullModule;
+class Bitcode;
 class MutationPoint;
 class MutationPointAddress;
 
@@ -31,7 +31,7 @@ public:
   static bool isLT(llvm::Instruction *instruction);
   static bool isLTE(llvm::Instruction *instruction);
 
-  MutationPoint *getMutationPoint(MullModule *module, llvm::Function *function,
+  MutationPoint *getMutationPoint(Bitcode *bitcode, llvm::Function *function,
                                   llvm::Instruction *instruction,
                                   SourceLocation &sourceLocation,
                                   MutationPointAddress &address) override;

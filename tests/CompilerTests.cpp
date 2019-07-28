@@ -1,5 +1,5 @@
 #include "FixturePaths.h"
-#include "mull/ModuleLoader.h"
+#include "mull/BitcodeLoader.h"
 #include "mull/Toolchain/Toolchain.h"
 
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
@@ -24,11 +24,11 @@ TEST(Compiler, CompileModule) {
   Compiler compiler;
 
   LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto module = loader.loadModuleAtPath(
+  BitcodeLoader loader;
+  auto bitcode = loader.loadBitcodeAtPath(
       fixtures::simple_test_count_letters_test_count_letters_bc_path(),
       llvmContext);
-  auto binary = compiler.compileModule(module->getModule(), *targetMachine);
+  auto binary = compiler.compileModule(bitcode->getModule(), *targetMachine);
 
   ASSERT_NE(nullptr, binary.getBinary());
 }

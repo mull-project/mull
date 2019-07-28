@@ -1,9 +1,9 @@
 #include "mull/Mutators/ScalarValueMutator.h"
 #include "FixturePaths.h"
 #include "TestModuleFactory.h"
+#include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Filter.h"
-#include "mull/ModuleLoader.h"
 #include "mull/MutationPoint.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Program/Program.h"
@@ -22,13 +22,13 @@ using namespace llvm;
 
 TEST(ScalarValueMutator, getMutationPoint) {
   LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto mullModule = loader.loadModuleAtPath(
+  BitcodeLoader loader;
+  auto bitcodeFile = loader.loadBitcodeAtPath(
       fixtures::mutators_scalar_value_module_bc_path(), llvmContext);
 
-  std::vector<std::unique_ptr<MullModule>> modules;
-  modules.push_back(std::move(mullModule));
-  Program program({}, {}, std::move(modules));
+  std::vector<std::unique_ptr<Bitcode>> bitcode;
+  bitcode.push_back(std::move(bitcodeFile));
+  Program program({}, {}, std::move(bitcode));
 
   auto scalarValueFunction = program.lookupDefinedFunction("scalar_value");
   std::vector<std::unique_ptr<Testee>> testees;
@@ -70,14 +70,14 @@ TEST(ScalarValueMutator, getMutationPoint) {
 
 TEST(DISABLED_ScalarValueMutator, failingMutationPoint) {
   LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto mullModule = loader.loadModuleAtPath(
+  BitcodeLoader loader;
+  auto bitcode = loader.loadBitcodeAtPath(
       fixtures::hardcode_openssl_bio_enc_test_oll_path(), llvmContext);
 
   MutationPointAddress address(15, 10, 7);
   ScalarValueMutator mutator;
   MutationPoint point(&mutator, address, nullptr, "diagnostics",
-                      SourceLocation::nullSourceLocation(), mullModule.get());
+                      SourceLocation::nullSourceLocation(), bitcode.get());
 
   Configuration configuration;
   Toolchain toolchain(configuration);

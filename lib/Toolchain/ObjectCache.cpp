@@ -1,8 +1,8 @@
 #include "mull/Toolchain/ObjectCache.h"
 
 #include "LLVMCompatibility.h"
+#include "mull/Bitcode.h"
 #include "mull/Logger.h"
-#include "mull/MullModule.h"
 #include "mull/MutationPoint.h"
 
 using namespace mull;
@@ -52,12 +52,12 @@ ObjectCache::getObjectFromDisk(const std::string &identifier) {
 }
 
 OwningBinary<ObjectFile>
-ObjectCache::getInstrumentedObject(const MullModule &module) {
-  return getObjectFromDisk(module.getInstrumentedUniqueIdentifier());
+ObjectCache::getInstrumentedObject(const Bitcode &bitcode) {
+  return getObjectFromDisk(bitcode.getInstrumentedUniqueIdentifier());
 }
 
-OwningBinary<ObjectFile> ObjectCache::getObject(const MullModule &module) {
-  return getObjectFromDisk(module.getMutatedUniqueIdentifier());
+OwningBinary<ObjectFile> ObjectCache::getObject(const Bitcode &bitcode) {
+  return getObjectFromDisk(bitcode.getMutatedUniqueIdentifier());
 }
 
 void ObjectCache::putObjectOnDisk(OwningBinary<ObjectFile> &object,
@@ -75,11 +75,11 @@ void ObjectCache::putObjectOnDisk(OwningBinary<ObjectFile> &object,
 }
 
 void ObjectCache::putInstrumentedObject(OwningBinary<ObjectFile> &object,
-                                        const MullModule &module) {
-  putObjectOnDisk(object, module.getInstrumentedUniqueIdentifier());
+                                        const Bitcode &bitcode) {
+  putObjectOnDisk(object, bitcode.getInstrumentedUniqueIdentifier());
 }
 
 void ObjectCache::putObject(OwningBinary<ObjectFile> &object,
-                            const MullModule &module) {
-  putObjectOnDisk(object, module.getMutatedUniqueIdentifier());
+                            const Bitcode &bitcode) {
+  putObjectOnDisk(object, bitcode.getMutatedUniqueIdentifier());
 }

@@ -1,4 +1,4 @@
-#include "mull/ModuleLoader.h"
+#include "mull/BitcodeLoader.h"
 
 #include "LLVMCompatibility.h"
 #include "mull/Config/Configuration.h"
@@ -35,9 +35,9 @@ mull::loadModuleFromBuffer(LLVMContext &context, MemoryBuffer &buffer) {
   return std::make_pair(md5, std::move(module));
 }
 
-std::unique_ptr<MullModule>
-ModuleLoader::loadModuleAtPath(const std::string &path,
-                               llvm::LLVMContext &context) {
+std::unique_ptr<Bitcode>
+BitcodeLoader::loadBitcodeAtPath(const std::string &path,
+                                 llvm::LLVMContext &context) {
   auto buffer = MemoryBuffer::getFile(path);
   if (!buffer) {
     Logger::error() << "Cannot load module " << path << '\n';
@@ -50,29 +50,28 @@ ModuleLoader::loadModuleAtPath(const std::string &path,
   std::string hash = modulePair.first;
   std::unique_ptr<llvm::Module> module(std::move(modulePair.second));
 
-  if (module.get() == nullptr) {
+  if (module == nullptr) {
     Logger::error() << "Cannot parse bitcode " << path << '\n';
     return nullptr;
   }
 
-  return make_unique<MullModule>(std::move(module), std::move(buffer.get()),
-                                 hash);
+  return make_unique<Bitcode>(std::move(module), std::move(buffer.get()), hash);
 }
 
-std::vector<std::unique_ptr<MullModule>>
-ModuleLoader::loadModules(const Configuration &config) {
-  std::vector<std::unique_ptr<MullModule>> modules;
+std::vector<std::unique_ptr<Bitcode>>
+BitcodeLoader::loadBitcode(const Configuration &config) {
+  std::vector<std::unique_ptr<Bitcode>> bitcode;
 
-  std::vector<ModuleLoadingTask> tasks;
+  std::vector<BitcodeLoadingTask> tasks;
   for (int i = 0; i < config.parallelization.workers; i++) {
     auto context = llvm::make_unique<LLVMContext>();
     tasks.emplace_back(*context, *this);
     contexts.push_back(std::move(context));
   }
 
-  TaskExecutor<ModuleLoadingTask> loader("Loading bitcode", config.bitcodePaths,
-                                         modules, tasks);
+  TaskExecutor<BitcodeLoadingTask> loader("Loading bitcode",
+                                          config.bitcodePaths, bitcode, tasks);
   loader.execute();
 
-  return modules;
+  return bitcode;
 }

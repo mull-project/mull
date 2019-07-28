@@ -1,6 +1,6 @@
 #pragma once
 
-#include "MullModule.h"
+#include "Bitcode.h"
 
 #include <string>
 #include <vector>
@@ -18,18 +18,18 @@ struct Configuration;
 std::pair<std::string, std::unique_ptr<llvm::Module>>
 loadModuleFromBuffer(llvm::LLVMContext &context, llvm::MemoryBuffer &buffer);
 
-class ModuleLoader {
+class BitcodeLoader {
   std::vector<std::unique_ptr<llvm::LLVMContext>> contexts;
 
 public:
-  ModuleLoader() = default;
-  ~ModuleLoader() = default;
+  BitcodeLoader() = default;
+  ~BitcodeLoader() = default;
 
-  std::unique_ptr<MullModule> loadModuleAtPath(const std::string &path,
-                                               llvm::LLVMContext &context);
+  std::unique_ptr<Bitcode> loadBitcodeAtPath(const std::string &path,
+                                             llvm::LLVMContext &context);
 
-  std::vector<std::unique_ptr<MullModule>>
-  loadModules(const Configuration &config);
+  std::vector<std::unique_ptr<Bitcode>>
+  loadBitcode(const Configuration &config);
 };
 
 } // namespace mull

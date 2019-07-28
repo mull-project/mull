@@ -23,16 +23,16 @@ void InstrumentedCompilationTask::operator()(iterator begin, iterator end,
   std::unique_ptr<TargetMachine> localMachine(target);
 
   for (auto it = begin; it != end; it++, counter.increment()) {
-    auto &module = *it->get();
-    auto objectFile = toolchain.cache().getInstrumentedObject(module);
+    auto &bitcode = *it->get();
+    auto objectFile = toolchain.cache().getInstrumentedObject(bitcode);
     if (objectFile.getBinary() == nullptr) {
       LLVMContext instrumentationContext;
-      auto clonedModule = module.clone(instrumentationContext);
+      auto clonedBitcode = bitcode.clone(instrumentationContext);
 
-      instrumentation.insertCallbacks(clonedModule->getModule());
+      instrumentation.insertCallbacks(clonedBitcode->getModule());
       objectFile =
-          toolchain.compiler().compileModule(*clonedModule, *localMachine);
-      toolchain.cache().putInstrumentedObject(objectFile, module);
+          toolchain.compiler().compileBitcode(*clonedBitcode, *localMachine);
+      toolchain.cache().putInstrumentedObject(objectFile, bitcode);
     }
     storage.push_back(std::move(objectFile));
   }

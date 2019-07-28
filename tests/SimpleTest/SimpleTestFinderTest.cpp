@@ -1,8 +1,8 @@
 #include "mull/TestFrameworks/SimpleTest/SimpleTestFinder.h"
 #include "FixturePaths.h"
 #include "TestModuleFactory.h"
+#include "mull/BitcodeLoader.h"
 #include "mull/Filter.h"
-#include "mull/ModuleLoader.h"
 #include "mull/Program/Program.h"
 #include "mull/TestFrameworks/Test.h"
 
@@ -18,14 +18,14 @@ using namespace llvm;
 
 TEST(SimpleTestFinder, findTest) {
   LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto module = loader.loadModuleAtPath(
+  BitcodeLoader loader;
+  auto bitcodeFile = loader.loadBitcodeAtPath(
       fixtures::simple_test_count_letters_test_count_letters_bc_path(),
       llvmContext);
 
-  std::vector<std::unique_ptr<MullModule>> modules;
-  modules.push_back(std::move(module));
-  Program program({}, {}, std::move(modules));
+  std::vector<std::unique_ptr<Bitcode>> bitcode;
+  bitcode.push_back(std::move(bitcodeFile));
+  Program program({}, {}, std::move(bitcode));
 
   Filter filter;
   SimpleTestFinder finder;

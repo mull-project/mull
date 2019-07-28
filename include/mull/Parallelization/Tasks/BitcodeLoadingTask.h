@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mull/MullModule.h"
+#include "mull/Bitcode.h"
 
 namespace llvm {
 class LLVMContext;
@@ -8,22 +8,22 @@ class LLVMContext;
 
 namespace mull {
 
-class ModuleLoader;
+class BitcodeLoader;
 class progress_counter;
 
-class ModuleLoadingTask {
+class BitcodeLoadingTask {
 public:
   using In = const std::vector<std::string>;
-  using Out = std::vector<std::unique_ptr<MullModule>>;
+  using Out = std::vector<std::unique_ptr<Bitcode>>;
   using iterator = In::const_iterator;
 
-  ModuleLoadingTask(llvm::LLVMContext &context, ModuleLoader &loader);
+  BitcodeLoadingTask(llvm::LLVMContext &context, BitcodeLoader &loader);
   void operator()(iterator begin, iterator end, Out &storage,
                   progress_counter &counter);
 
 private:
   llvm::LLVMContext &context;
-  ModuleLoader &loader;
+  BitcodeLoader &loader;
 };
 
 } // namespace mull

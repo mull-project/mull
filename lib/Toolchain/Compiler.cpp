@@ -1,7 +1,7 @@
 #include "mull/Toolchain/Compiler.h"
 
 #include "LLVMCompatibility.h"
-#include "mull/MullModule.h"
+#include "mull/Bitcode.h"
 
 #include <llvm/ExecutionEngine/Orc/CompileUtils.h>
 #include <llvm/IR/Module.h>
@@ -10,9 +10,9 @@ using namespace llvm;
 using namespace llvm::object;
 using namespace mull;
 
-OwningBinary<ObjectFile> Compiler::compileModule(const MullModule &module,
-                                                 TargetMachine &machine) {
-  return compileModule(module.getModule(), machine);
+OwningBinary<ObjectFile> Compiler::compileBitcode(const Bitcode &bitcode,
+                                                  TargetMachine &machine) {
+  return compileModule(bitcode.getModule(), machine);
 }
 
 OwningBinary<ObjectFile> Compiler::compileModule(Module *module,

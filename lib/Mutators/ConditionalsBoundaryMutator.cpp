@@ -233,9 +233,8 @@ MutatorKind ConditionalsBoundaryMutator::mutatorKind() {
 }
 
 MutationPoint *ConditionalsBoundaryMutator::getMutationPoint(
-    MullModule *module, llvm::Function *function,
-    llvm::Instruction *instruction, SourceLocation &sourceLocation,
-    MutationPointAddress &address) {
+    Bitcode *bitcode, llvm::Function *function, llvm::Instruction *instruction,
+    SourceLocation &sourceLocation, MutationPointAddress &address) {
   CmpInst *cmpOp = dyn_cast<CmpInst>(instruction);
   if (cmpOp == nullptr) {
     return nullptr;
@@ -252,7 +251,7 @@ MutationPoint *ConditionalsBoundaryMutator::getMutationPoint(
       getDiagnostics(originalPredicate, mutatedPredicate.getValue());
 
   return new MutationPoint(this, address, function, diagnostics, sourceLocation,
-                           module);
+                           bitcode);
 }
 
 bool ConditionalsBoundaryMutator::canBeApplied(Value &V) {

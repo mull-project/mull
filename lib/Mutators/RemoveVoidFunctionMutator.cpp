@@ -36,13 +36,12 @@ std::string getDiagnostics(Instruction &instruction) {
 }
 
 MutationPoint *RemoveVoidFunctionMutator::getMutationPoint(
-    MullModule *module, llvm::Function *function,
-    llvm::Instruction *instruction, SourceLocation &sourceLocation,
-    MutationPointAddress &address) {
+    Bitcode *bitcode, llvm::Function *function, llvm::Instruction *instruction,
+    SourceLocation &sourceLocation, MutationPointAddress &address) {
   if (canBeApplied(*instruction)) {
     std::string diagnostics = getDiagnostics(*instruction);
     return new MutationPoint(this, address, function, diagnostics,
-                             sourceLocation, module);
+                             sourceLocation, bitcode);
   }
 
   return nullptr;

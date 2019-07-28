@@ -4,9 +4,9 @@
 
 #include <llvm/IR/Verifier.h>
 
+#include <mull/BitcodeLoader.h>
 #include <mull/Config/Configuration.h>
 #include <mull/Filter.h>
-#include <mull/ModuleLoader.h>
 #include <mull/MutationsFinder.h>
 #include <mull/Mutators/MutatorsFactory.h>
 #include <mull/Parallelization/TaskExecutor.h>
@@ -19,11 +19,11 @@ int main(int argc, char **argv) {
   std::vector<std::string> mutatorGroups({argv[1]});
   const char *bitcodePath = argv[2];
 
-  mull::ModuleLoader loader;
+  mull::BitcodeLoader loader;
   llvm::LLVMContext context;
-  std::vector<std::unique_ptr<mull::MullModule>> modules;
-  modules.push_back(std::move(loader.loadModuleAtPath(bitcodePath, context)));
-  mull::Program program({}, {}, std::move(modules));
+  std::vector<std::unique_ptr<mull::Bitcode>> bitcode;
+  bitcode.push_back(std::move(loader.loadBitcodeAtPath(bitcodePath, context)));
+  mull::Program program({}, {}, std::move(bitcode));
 
   mull::MutatorsFactory factory;
   auto mutators = factory.mutators(mutatorGroups);
@@ -32,8 +32,8 @@ int main(int argc, char **argv) {
   mull::MutationsFinder finder(std::move(mutators), configuration);
 
   std::vector<mull::MergedTestee> testees;
-  for (auto &module : program.modules()) {
-    for (auto &function : module->getModule()->functions()) {
+  for (auto &bc : program.bitcode()) {
+    for (auto &function : bc->getModule()->functions()) {
       testees.emplace_back(&function, nullptr, 1);
     }
   }
@@ -45,8 +45,8 @@ int main(int argc, char **argv) {
   printf("Found %lu mutants\n", mutants.size());
 
   mull::SingleTaskExecutor prepareMutants("Preparing mutants", [&] {
-    for (auto &module : program.modules()) {
-      module->prepareMutations();
+    for (auto &bc : program.bitcode()) {
+      bc->prepareMutations();
     }
   });
   prepareMutants.execute();
@@ -60,9 +60,9 @@ int main(int argc, char **argv) {
 
   mull::Toolchain toolchain(configuration);
   mull::SingleTaskExecutor compileMutants("Compiling mutants", [&] {
-    for (auto &module : program.modules()) {
-      assert(!llvm::verifyModule(*module->getModule(), &llvm::errs()));
-      toolchain.compiler().compileModule(module->getModule(),
+    for (auto &bc : program.bitcode()) {
+      assert(!llvm::verifyModule(*bc->getModule(), &llvm::errs()));
+      toolchain.compiler().compileModule(bc->getModule(),
                                          toolchain.targetMachine());
     }
   });

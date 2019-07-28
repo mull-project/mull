@@ -12,12 +12,12 @@ class TargetMachine;
 
 namespace mull {
 
-class MullModule;
+class Bitcode;
 
 class Compiler {
 public:
   llvm::object::OwningBinary<llvm::object::ObjectFile>
-  compileModule(const MullModule &module, llvm::TargetMachine &machine);
+  compileBitcode(const Bitcode &bitcode, llvm::TargetMachine &machine);
   llvm::object::OwningBinary<llvm::object::ObjectFile>
   compileModule(llvm::Module *module, llvm::TargetMachine &machine);
 };

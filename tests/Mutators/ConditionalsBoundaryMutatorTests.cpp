@@ -1,7 +1,7 @@
 #include "FixturePaths.h"
+#include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Filter.h"
-#include "mull/ModuleLoader.h"
 #include "mull/MutationPoint.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/ConditionalsBoundaryMutator.h"
@@ -22,14 +22,14 @@ using namespace llvm;
 
 TEST(ConditionalsBoundaryMutator, findMutations) {
   LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto mullModule = loader.loadModuleAtPath(
+  BitcodeLoader loader;
+  auto bitcodeFile = loader.loadBitcodeAtPath(
       fixtures::mutators_boundary_module_bc_path(), llvmContext);
-  auto module = mullModule->getModule();
+  auto module = bitcodeFile->getModule();
 
-  std::vector<std::unique_ptr<MullModule>> modules;
-  modules.push_back(std::move(mullModule));
-  Program program({}, {}, std::move(modules));
+  std::vector<std::unique_ptr<Bitcode>> bitcode;
+  bitcode.push_back(std::move(bitcodeFile));
+  Program program({}, {}, std::move(bitcode));
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -50,15 +50,15 @@ TEST(ConditionalsBoundaryMutator, findMutations) {
 
 TEST(ConditionalsBoundaryMutator, applyMutations) {
   LLVMContext llvmContext;
-  ModuleLoader loader;
-  auto mullModule = loader.loadModuleAtPath(
+  BitcodeLoader loader;
+  auto bitcodeFile = loader.loadBitcodeAtPath(
       fixtures::mutators_boundary_module_bc_path(), llvmContext);
-  auto borrowedModule = mullModule.get();
-  auto module = borrowedModule->getModule();
+  auto borrowedBitcode = bitcodeFile.get();
+  auto module = borrowedBitcode->getModule();
 
-  std::vector<std::unique_ptr<MullModule>> modules;
-  modules.push_back(std::move(mullModule));
-  Program program({}, {}, std::move(modules));
+  std::vector<std::unique_ptr<Bitcode>> bitcode;
+  bitcode.push_back(std::move(bitcodeFile));
+  Program program({}, {}, std::move(bitcode));
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;

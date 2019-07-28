@@ -13,7 +13,7 @@ class Instruction;
 namespace mull {
 
 class Context;
-class MullModule;
+class Bitcode;
 class MutationPoint;
 class MutationPointAddress;
 struct SourceLocation;
@@ -33,7 +33,7 @@ enum class MutatorKind {
 
 class Mutator {
 public:
-  virtual MutationPoint *getMutationPoint(MullModule *module,
+  virtual MutationPoint *getMutationPoint(Bitcode *bitcode,
                                           llvm::Function *function,
                                           llvm::Instruction *instruction,
                                           SourceLocation &sourceLocation,
