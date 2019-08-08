@@ -10,6 +10,7 @@ const char *mullVersionString();
 const char *mullCommitString();
 const char *mullDescriptionString();
 const char *mullHomepageString();
+const char *mullBuildDateString();
 
 const char *llvmVersionString();
 
