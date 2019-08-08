@@ -7,6 +7,7 @@
  - Fix incorrect handling of the NSW/NUW flags #540
  - Bring back abandoned sandbox approach #541, #542
  - Add LLVM 9 support #544
+ - Include build date into the version info #546
 
 ## [0.3.0] - 02 Jun 2019
 

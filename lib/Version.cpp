@@ -6,6 +6,7 @@ namespace mull {
 
 const char *mullVersionString() { return "@PROJECT_VERSION@"; }
 const char *mullCommitString() { return "@GIT_COMMIT@"; }
+const char *mullBuildDateString() { return "@BUILD_DATE@"; }
 const char *mullDescriptionString() { return "@PROJECT_DESCRIPTION@"; }
 const char *mullHomepageString() { return "@PROJECT_HOMEPAGE_URL@"; }
 
@@ -18,6 +19,7 @@ void printVersionInformationStream(llvm::raw_ostream &out) {
   out << mullHomepageString() << "\n";
   out << "Version: " << mullVersionString() << "\n";
   out << "Commit: " << mullCommitString() << "\n";
+  out << "Date: " << mullBuildDateString() << "\n";
   out << "LLVM: " << llvmVersionString() << "\n";
 }
 
