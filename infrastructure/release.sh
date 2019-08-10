@@ -12,6 +12,7 @@ printf "Preparing package for $1... "
 
 prepare_package debian 6.0.0
 prepare_package freebsd 8.0.0
-prepare_package ubuntu 8.0.0
+prepare_package ubuntu16 8.0.0
+prepare_package ubuntu18 8.0.0
 prepare_package macos 8.0.0
 
