@@ -1,6 +1,10 @@
 # Changelog
 
-## Next release
+## Next Release
+
+ - ?
+
+## [0.4.0] - 11 Aug 2019
 
  - Fixed the original value use-after-free issue #532, #536
  - Automated release process on macOS #537
@@ -8,6 +12,8 @@
  - Bring back abandoned sandbox approach #541, #542
  - Add LLVM 9 support #544
  - Include build date into the version info #546
+ - Include Ubuntu 18.04 into release process #547
+ - [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2019-06-03..2019-08-11)
 
 ## [0.3.0] - 02 Jun 2019
 
