@@ -2,10 +2,13 @@
 
 #include "mull/Config/Configuration.h"
 #include "mull/Instrumentation/Instrumentation.h"
+#include "mull/Logger.h"
 #include "mull/Parallelization/Progress.h"
 #include "mull/Sandbox/ProcessSandbox.h"
 #include "mull/TestFrameworks/TestRunner.h"
 #include "mull/Toolchain/Toolchain.h"
+
+#include <sstream>
 
 using namespace mull;
 using namespace llvm;
@@ -35,9 +38,17 @@ void OriginalTestExecutionTask::operator()(iterator begin, iterator end,
     if (testExecutionResult.status == Passed) {
       testees = instrumentation.getTestees(test, filter, config.maxDistance);
     } else {
-      auto ssss = test.getTestName() +
-                  " failed: " + testExecutionResult.getStatusAsString() + "\n";
-      errs() << ssss;
+      std::stringstream failureMessage;
+      failureMessage << "\n";
+      failureMessage << "test: ";
+      failureMessage << test.getTestName() << "\n";
+      failureMessage << "status: ";
+      failureMessage << testExecutionResult.getStatusAsString() << "\n";
+      failureMessage << "stdout: '";
+      failureMessage << testExecutionResult.stdoutOutput << "'\n";
+      failureMessage << "stderr: '";
+      failureMessage << testExecutionResult.stderrOutput << "'\n";
+      Logger::error() << failureMessage.str();
     }
     instrumentation.cleanupInstrumentationInfo(test);
 

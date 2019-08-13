@@ -2,7 +2,7 @@
 
 ## Next Release
 
- - ?
+ - Print more info when original test fails #549
 
 ## [0.4.0] - 11 Aug 2019
 
