@@ -25,4 +25,6 @@ bool MathSubVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOperator) {
   return true;
 }
 
-clang::Expr *MathSubVisitor::foundMutant() { return visitor.getMatchingASTNode(); }
+clang::Expr *MathSubVisitor::foundMutant() {
+  return visitor.getMatchingASTNode();
+}

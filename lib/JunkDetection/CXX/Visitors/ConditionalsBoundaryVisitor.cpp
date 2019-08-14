@@ -16,4 +16,6 @@ bool ConditionalsBoundaryVisitor::VisitBinaryOperator(
   return true;
 }
 
-clang::Expr *ConditionalsBoundaryVisitor::foundMutant() { return visitor.getMatchingASTNode(); }
+clang::Expr *ConditionalsBoundaryVisitor::foundMutant() {
+  return visitor.getMatchingASTNode();
+}

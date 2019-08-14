@@ -4,6 +4,7 @@
 #include "mull/Logger.h"
 
 #include <clang/AST/Expr.h>
+#include <clang/Lex/Lexer.h>
 
 using namespace mull;
 
@@ -19,11 +20,13 @@ ASTSourceInfoProvider::getSourceInfo(MutationPoint *mutationPoint) {
   ThreadSafeASTUnit *astUnit = astStorage.findAST(mutationPoint);
 
   if (mutantASTNode == nullptr) {
-    mull::Logger::warn() << "error: cannot find an AST node for mutation point\n";
+    mull::Logger::warn()
+        << "error: cannot find an AST node for mutation point\n";
     return info;
   }
   if (astUnit == nullptr) {
-    mull::Logger::warn() << "error: cannot find an AST unit for mutation point\n";
+    mull::Logger::warn()
+        << "error: cannot find an AST unit for mutation point\n";
     return info;
   }
 

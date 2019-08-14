@@ -22,4 +22,6 @@ bool NegateConditionVisitor::VisitUnaryOperator(
   return true;
 }
 
-clang::Expr *NegateConditionVisitor::foundMutant() { return visitor.getMatchingASTNode(); }
+clang::Expr *NegateConditionVisitor::foundMutant() {
+  return visitor.getMatchingASTNode();
+}

@@ -30,4 +30,6 @@ void ReplaceCallVisitor::handleCallExpr(clang::CallExpr *callExpression) {
   }
 }
 
-clang::Expr *ReplaceCallVisitor::foundMutant() { return visitor.getMatchingASTNode(); }
+clang::Expr *ReplaceCallVisitor::foundMutant() {
+  return visitor.getMatchingASTNode();
+}

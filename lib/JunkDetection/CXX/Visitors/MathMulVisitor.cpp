@@ -17,4 +17,6 @@ bool MathMulVisitor::VisitBinaryOperator(
   return true;
 }
 
-clang::Expr *MathMulVisitor::foundMutant() { return visitor.getMatchingASTNode(); }
+clang::Expr *MathMulVisitor::foundMutant() {
+  return visitor.getMatchingASTNode();
+}

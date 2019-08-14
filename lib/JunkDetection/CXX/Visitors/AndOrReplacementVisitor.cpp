@@ -16,4 +16,6 @@ bool AndOrReplacementVisitor::VisitBinaryOperator(
   return true;
 }
 
-clang::Expr *AndOrReplacementVisitor::foundMutant() { return visitor.getMatchingASTNode(); }
+clang::Expr *AndOrReplacementVisitor::foundMutant() {
+  return visitor.getMatchingASTNode();
+}
