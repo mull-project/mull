@@ -21,7 +21,7 @@ public:
 class ASTSourceInfoProvider : public SourceInfoProvider {
 public:
   ~ASTSourceInfoProvider() = default;
-  ASTSourceInfoProvider(ASTStorage &astStorage);
+  explicit ASTSourceInfoProvider(ASTStorage &astStorage);
   MutationPointSourceInfo getSourceInfo(MutationPoint *mutationPoint) override;
 
 private:
