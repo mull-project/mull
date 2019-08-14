@@ -117,8 +117,10 @@ int main(int argc, char *argv[]) {
     } else if (detector == "none") {
       junkDetector = make_unique<NullJunkDetector>();
     } else if (detector == "cxx") {
-      junkDetector =
-          make_unique<CXXJunkDetector>(rawConfig.junkDetectionConfig());
+      mull::JunkDetectionConfig junkDetectionConfig;
+      mull::ASTStorage astStorage(junkDetectionConfig.cxxCompilationDatabasePath,
+                                  junkDetectionConfig.cxxCompilationFlags);
+      junkDetector = make_unique<mull::CXXJunkDetector>(astStorage);
     } else {
       Logger::error() << "mull-driver> Unknown junk detector provided: "
                       << "`" << detector << "`. ";
