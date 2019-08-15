@@ -377,10 +377,8 @@ std::vector<std::string> RawConfig::validate() {
   if (!mutationTestingElementsReportPath.empty()) {
     std::string reportPathDir = getFileDir(mutationTestingElementsReportPath);
 
-    std::error_condition success;
-    std::error_code errorCode =
-        llvm::sys::fs::create_directories(reportPathDir, true);
-    if (errorCode != success) {
+    if (std::error_code errorCode =
+            llvm::sys::fs::create_directories(reportPathDir, true)) {
       std::stringstream error;
 
       error << "error: could not create a directory for "
