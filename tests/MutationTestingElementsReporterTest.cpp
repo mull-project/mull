@@ -3,13 +3,13 @@
 #include "FixturePaths.h"
 #include "TestModuleFactory.h"
 
+#include "mull/Bitcode.h"
+#include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Config/RawConfig.h"
 #include "mull/Filter.h"
 #include "mull/JunkDetection/CXX/ASTStorage.h"
 #include "mull/Metrics/Metrics.h"
-#include "mull/Bitcode.h"
-#include "mull/BitcodeLoader.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/MathAddMutator.h"
 #include "mull/Program/Program.h"
@@ -18,8 +18,8 @@
 #include "mull/TestFrameworks/SimpleTest/SimpleTestFinder.h"
 #include "mull/Testee.h"
 
-#include <json11/json11.hpp>
 #include <gtest/gtest.h>
+#include <json11/json11.hpp>
 
 #include <cstring>
 #include <ostream>
@@ -37,7 +37,7 @@ static const int beginLineStub = 2;
 static const int endColumnStub = 3;
 static const int endLineStub = 4;
 
-class MockASTSourceInfoProvider: public SourceInfoProvider {
+class MockASTSourceInfoProvider : public SourceInfoProvider {
 public:
   virtual ~MockASTSourceInfoProvider() {}
 
