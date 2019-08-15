@@ -12,8 +12,10 @@ bool AndOrReplacementVisitor::VisitBinaryOperator(
     return true;
   }
 
-  visitor.visitRangeWithLocation(binaryOperator->getSourceRange());
+  visitor.visitRangeWithASTExpr(binaryOperator);
   return true;
 }
 
-bool AndOrReplacementVisitor::foundMutant() { return visitor.foundRange(); }
+clang::Expr *AndOrReplacementVisitor::foundMutant() {
+  return visitor.getMatchingASTNode();
+}

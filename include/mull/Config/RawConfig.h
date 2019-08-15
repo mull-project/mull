@@ -81,6 +81,8 @@ private:
   JunkDetectionConfig junkDetection;
   ParallelizationConfig parallelizationConfig;
 
+  std::string mutationTestingElementsReportPath;
+
   friend llvm::yaml::MappingTraits<mull::RawConfig>;
 
 public:
@@ -99,7 +101,8 @@ public:
             EmitDebugInfo debugInfo, Diagnostics diagnostics, int timeout,
             int distance, const std::string &cacheDir,
             JunkDetectionConfig junkDetection,
-            ParallelizationConfig parallelizationConfig);
+            ParallelizationConfig parallelizationConfig,
+            const std::string &mutationTestingElementsReportPath);
 
   const std::string &getProjectName() const;
   const std::string &getTestFramework() const;
@@ -135,6 +138,8 @@ public:
   bool failFastModeEnabled() const;
   bool shouldEmitDebugInfo() const;
   bool junkDetectionEnabled() const;
+
+  const std::string &getMutationTestingElementsReportPath() const;
 
   void normalizeParallelizationConfig();
 

@@ -26,8 +26,10 @@ void ReplaceCallVisitor::handleCallExpr(clang::CallExpr *callExpression) {
   auto *type = callExpression->getType().getTypePtrOrNull();
   /// Real Type = float, double, long double, integer
   if (type && type->isRealType()) {
-    visitor.visitRangeWithLocation(callExpression->getSourceRange());
+    visitor.visitRangeWithASTExpr(callExpression);
   }
 }
 
-bool ReplaceCallVisitor::foundMutant() { return visitor.foundRange(); }
+clang::Expr *ReplaceCallVisitor::foundMutant() {
+  return visitor.getMatchingASTNode();
+}

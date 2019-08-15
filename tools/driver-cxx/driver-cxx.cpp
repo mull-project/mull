@@ -23,6 +23,7 @@
 #include "mull/Mutators/MutatorsFactory.h"
 #include "mull/Parallelization/Parallelization.h"
 #include "mull/Program/Program.h"
+#include "mull/Reporters/ASTSourceInfoProvider.h"
 #include "mull/Reporters/IDEReporter.h"
 #include "mull/Result.h"
 #include "mull/Sandbox/ProcessSandbox.h"
@@ -34,6 +35,7 @@
 #include "mull/Config/ConfigurationOptions.h"
 #include "mull/Config/RawConfig.h"
 #include "mull/Metrics/Metrics.h"
+#include "mull/Reporters/MutationTestingElementsReporter.h"
 #include "mull/Reporters/SQLiteReporter.h"
 
 class LoadBitcodeFromBinaryTask {
@@ -99,6 +101,18 @@ llvm::cl::opt<std::string> CacheDir(
     "cache-dir", llvm::cl::Optional,
     llvm::cl::desc("Where to store cache (defaults to /tmp/mull-cache)"),
     llvm::cl::cat(MullCXXCategory), llvm::cl::init("/tmp/mull-cache"));
+
+llvm::cl::opt<bool> ElementsReporterEnabled(
+    "reporter-elements", llvm::cl::Optional,
+    llvm::cl::desc("Enables Mutation Testing Elements Reporter"),
+    llvm::cl::cat(MullCXXCategory), llvm::cl::init(false));
+
+llvm::cl::opt<std::string> ElementsOutputDir(
+    "elements-output-path", llvm::cl::Optional,
+    llvm::cl::desc("Where to store the Mutation Testing Elements JSON report "
+                   "(defaults to /tmp/mull.mutation-testing-elements.json)"),
+    llvm::cl::cat(MullCXXCategory),
+    llvm::cl::init("/tmp/mull.mutation-testing-elements.json"));
 
 llvm::cl::opt<bool>
     DisableCache("disable-cache", llvm::cl::Optional,
@@ -300,7 +314,9 @@ int main(int argc, char **argv) {
         CompilationDatabasePath.getValue();
     configuration.junkDetectionEnabled = true;
   }
-  mull::CXXJunkDetector junkDetector(junkDetectionConfig);
+  mull::ASTStorage astStorage(junkDetectionConfig.cxxCompilationDatabasePath,
+                              junkDetectionConfig.cxxCompilationFlags);
+  mull::CXXJunkDetector junkDetector(astStorage);
 
   mull::Filter filter;
   mull::MutationsFinder mutationsFinder(mutatorsOptions.mutators(),
@@ -322,6 +338,18 @@ int main(int argc, char **argv) {
 
   mull::IDEReporter ideReporter;
   ideReporter.reportResults(*result, rawConfig, metrics);
+
+  if (ElementsReporterEnabled) {
+    if (configuration.junkDetectionEnabled) {
+      mull::ASTSourceInfoProvider sourceInfoProvider(astStorage);
+      mull::MutationTestingElementsReporter mutationTestingElementsReporter(
+        ElementsOutputDir, sourceInfoProvider);
+      mutationTestingElementsReporter.reportResults(*result, rawConfig, metrics);
+    } else {
+      mull::Logger::warn() << "The Mutation Testing Elements Reporter requires the compilation database to be provided";
+    }
+  }
+
   llvm::llvm_shutdown();
 
   totalExecutionTime.finish();

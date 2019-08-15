@@ -108,7 +108,8 @@ MutationPoint *MathSubMutator::getMutationPoint(Bitcode *bitcode,
                                                 MutationPointAddress &address) {
   if (canBeApplied(*instruction)) {
     std::string diagnostics = "Math Sub: replaced - with +";
-    return new MutationPoint(this, address, function, diagnostics,
+
+    return new MutationPoint(this, address, function, diagnostics, "+",
                              sourceLocation, bitcode);
   }
   return nullptr;

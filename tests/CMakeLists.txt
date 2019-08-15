@@ -32,6 +32,7 @@ set(mull_unittests_sources
   CustomTestFramework/CustomTestFinderTests.cpp
 
   SQLiteReporterTest.cpp
+  MutationTestingElementsReporterTest.cpp
 
   TestModuleFactory.cpp
   TestModuleFactory.h
@@ -46,6 +47,7 @@ add_executable(mull-tests EXCLUDE_FROM_ALL ${mull_unittests_sources})
 target_link_libraries(mull-tests
   mull
   google-test
+  json11
 )
 target_include_directories(mull-tests PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}

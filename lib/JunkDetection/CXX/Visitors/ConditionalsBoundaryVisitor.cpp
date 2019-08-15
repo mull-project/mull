@@ -12,8 +12,10 @@ bool ConditionalsBoundaryVisitor::VisitBinaryOperator(
     return true;
   }
 
-  visitor.visitRangeWithLocation(binaryOperator->getSourceRange());
+  visitor.visitRangeWithASTExpr(binaryOperator);
   return true;
 }
 
-bool ConditionalsBoundaryVisitor::foundMutant() { return visitor.foundRange(); }
+clang::Expr *ConditionalsBoundaryVisitor::foundMutant() {
+  return visitor.getMatchingASTNode();
+}

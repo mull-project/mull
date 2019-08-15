@@ -7,12 +7,11 @@ MathSubVisitor::MathSubVisitor(const VisitorParameters &parameters)
 
 bool MathSubVisitor::VisitBinaryOperator(
     clang::BinaryOperator *binaryOperator) {
-  auto range = binaryOperator->getSourceRange();
   if (binaryOperator->getOpcode() == clang::BinaryOperatorKind::BO_Sub) {
-    visitor.visitRangeWithLocation(range);
+    visitor.visitRangeWithASTExpr(binaryOperator);
   }
   if (binaryOperator->getOpcode() == clang::BinaryOperatorKind::BO_SubAssign) {
-    visitor.visitRangeWithLocation(range);
+    visitor.visitRangeWithASTExpr(binaryOperator);
   }
 
   return true;
@@ -20,10 +19,12 @@ bool MathSubVisitor::VisitBinaryOperator(
 
 bool MathSubVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOperator) {
   if (unaryOperator->isDecrementOp()) {
-    visitor.visitRangeWithLocation(unaryOperator->getSourceRange());
+    visitor.visitRangeWithASTExpr(unaryOperator);
   }
 
   return true;
 }
 
-bool MathSubVisitor::foundMutant() { return visitor.foundRange(); }
+clang::Expr *MathSubVisitor::foundMutant() {
+  return visitor.getMatchingASTNode();
+}

@@ -1,5 +1,6 @@
 #include "mull/JunkDetection/CXX/Visitors/InstructionRangeVisitor.h"
 
+#include <clang/AST/Expr.h>
 #include <clang/Basic/SourceManager.h>
 
 static bool locationInRange(const clang::SourceManager &sourceManager,
@@ -22,16 +23,11 @@ static bool locationInRange(const clang::SourceManager &sourceManager,
   return false;
 }
 
-static clang::SourceRange
-smallestSourceRange(const clang::SourceManager &sourceManager,
-                    const clang::SourceRange &first,
-                    const clang::SourceRange &second) {
-  if (first.isInvalid()) {
-    return second;
-  }
-  if (second.isInvalid()) {
-    return first;
-  }
+bool isRangeSmallerThanRange(const clang::SourceManager &sourceManager,
+                             const clang::SourceRange &first,
+                             const clang::SourceRange &second) {
+  assert(first.isValid());
+  assert(second.isValid());
 
   auto firstLength = sourceManager.getFileOffset(first.getEnd()) -
                      sourceManager.getFileOffset(first.getBegin());
@@ -39,27 +35,42 @@ smallestSourceRange(const clang::SourceManager &sourceManager,
                       sourceManager.getFileOffset(second.getBegin());
 
   if (firstLength < secondLength) {
-    return first;
+    return true;
   }
   if (secondLength < firstLength) {
-    return second;
+    return false;
   }
 
-  return first;
+  return true;
 }
 
 mull::InstructionRangeVisitor::InstructionRangeVisitor(
     const VisitorParameters &parameters)
     : sourceManager(parameters.sourceManager),
-      sourceLocation(parameters.sourceLocation), sourceRange() {}
+      sourceLocation(parameters.sourceLocation), bestMatchingASTNode(nullptr) {}
 
-void mull::InstructionRangeVisitor::visitRangeWithLocation(
-    const clang::SourceRange &range) {
+void mull::InstructionRangeVisitor::visitRangeWithASTExpr(
+    clang::Expr *expression) {
+  assert(expression);
+
+  clang::SourceRange range = expression->getSourceRange();
+  if (range.isInvalid()) {
+    return;
+  }
+
   if (locationInRange(sourceManager, range, sourceLocation)) {
-    sourceRange = smallestSourceRange(sourceManager, sourceRange, range);
+    if (bestMatchingASTNode == nullptr) {
+      bestMatchingASTNode = expression;
+      return;
+    }
+
+    clang::SourceRange bestSourceRange = bestMatchingASTNode->getSourceRange();
+    if (isRangeSmallerThanRange(sourceManager, range, bestSourceRange)) {
+      bestMatchingASTNode = expression;
+    }
   }
 }
 
-bool mull::InstructionRangeVisitor::foundRange() {
-  return sourceRange.isValid();
+clang::Expr *mull::InstructionRangeVisitor::getMatchingASTNode() {
+  return bestMatchingASTNode;
 }

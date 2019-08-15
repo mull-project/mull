@@ -14,7 +14,7 @@ public:
 
   bool VisitBinaryOperator(clang::BinaryOperator *binaryOperator);
   bool VisitUnaryOperator(clang::UnaryOperator *unaryOperator);
-  bool foundMutant();
+  clang::Expr *foundMutant();
 
 private:
   InstructionRangeVisitor visitor;

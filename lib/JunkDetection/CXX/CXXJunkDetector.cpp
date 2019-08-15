@@ -31,12 +31,16 @@ static bool isJunkMutation(ASTStorage &storage, MutationPoint *point) {
   Visitor visitor(parameters);
   visitor.TraverseDecl(ast->getASTContext().getTranslationUnitDecl());
 
-  return !visitor.foundMutant();
+  if (clang::Expr *mutantExpression = visitor.foundMutant()) {
+    storage.setMutantASTNode(point, mutantExpression);
+    return false;
+  }
+
+  return true;
 }
 
-CXXJunkDetector::CXXJunkDetector(JunkDetectionConfig &config)
-    : astStorage(config.cxxCompilationDatabasePath,
-                 config.cxxCompilationFlags) {}
+CXXJunkDetector::CXXJunkDetector(ASTStorage &astStorage)
+    : astStorage(astStorage) {}
 
 bool CXXJunkDetector::isJunk(MutationPoint *point) {
   if (point->getSourceLocation().isNull()) {
@@ -65,6 +69,4 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
   default:
     return false;
   }
-
-  return false;
 }

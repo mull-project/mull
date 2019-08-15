@@ -9,7 +9,7 @@ NegateConditionVisitor::NegateConditionVisitor(
 bool NegateConditionVisitor::VisitBinaryOperator(
     clang::BinaryOperator *binaryOperator) {
   if (binaryOperator->isRelationalOp() || binaryOperator->isEqualityOp()) {
-    visitor.visitRangeWithLocation(binaryOperator->getSourceRange());
+    visitor.visitRangeWithASTExpr(binaryOperator);
   }
   return true;
 }
@@ -17,9 +17,11 @@ bool NegateConditionVisitor::VisitBinaryOperator(
 bool NegateConditionVisitor::VisitUnaryOperator(
     clang::UnaryOperator *unaryOperator) {
   if (unaryOperator->getOpcode() == clang::UnaryOperatorKind::UO_LNot) {
-    visitor.visitRangeWithLocation(unaryOperator->getSourceRange());
+    visitor.visitRangeWithASTExpr(unaryOperator);
   }
   return true;
 }
 
-bool NegateConditionVisitor::foundMutant() { return visitor.foundRange(); }
+clang::Expr *NegateConditionVisitor::foundMutant() {
+  return visitor.getMatchingASTNode();
+}

@@ -529,3 +529,45 @@ parallelization:
   ASSERT_EQ(12, parallelization.mutantExecutionWorkers);
   ASSERT_EQ(14, parallelization.testExecutionWorkers);
 }
+
+TEST_F(ConfigParserTestFixture,
+       loadConfig_getMutationTestingElementsReportPath_Unspecified) {
+  configWithAMinimalValidYamlContent("");
+  ASSERT_EQ("", config.getMutationTestingElementsReportPath());
+
+  auto errors = config.validate();
+  ASSERT_EQ(errors.size(), 0U);
+}
+
+TEST_F(ConfigParserTestFixture,
+       loadConfig_getMutationTestingElementsReportPath_SpecificValue_ValidDir) {
+  configWithAMinimalValidYamlContent(
+      "mutation_testing_elements_report_path: "
+      "/tmp/mull.mutation_testing_elements.json\n");
+  ASSERT_EQ("/tmp/mull.mutation_testing_elements.json",
+            config.getMutationTestingElementsReportPath());
+
+  auto errors = config.validate();
+  for (auto &error : errors) {
+    errs() << error << "\n";
+  }
+
+  ASSERT_EQ(errors.size(), 0U);
+}
+
+TEST_F(
+    ConfigParserTestFixture,
+    loadConfig_getMutationTestingElementsReportPath_SpecificValue_InvalidDir) {
+  configWithAMinimalValidYamlContent(
+      "mutation_testing_elements_report_path: "
+      "/invalid-dir/mull.mutation_testing_elements.json\n");
+
+  auto errors = config.validate();
+  ASSERT_EQ(errors.size(), 1U);
+
+  std::string expectedError =
+      "error: could not create a directory for "
+      "mutation_testing_elements_reporter_path:\n/invalid-dir"
+      "\nerror: Permission denied";
+  ASSERT_EQ(errors[0], expectedError);
+}

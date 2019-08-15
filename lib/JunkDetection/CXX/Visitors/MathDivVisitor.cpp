@@ -7,15 +7,16 @@ MathDivVisitor::MathDivVisitor(const VisitorParameters &parameters)
 
 bool MathDivVisitor::VisitBinaryOperator(
     clang::BinaryOperator *binaryOperator) {
-  auto range = binaryOperator->getSourceRange();
   if (binaryOperator->getOpcode() == clang::BinaryOperatorKind::BO_Div) {
-    visitor.visitRangeWithLocation(range);
+    visitor.visitRangeWithASTExpr(binaryOperator);
   }
   if (binaryOperator->getOpcode() == clang::BinaryOperatorKind::BO_DivAssign) {
-    visitor.visitRangeWithLocation(range);
+    visitor.visitRangeWithASTExpr(binaryOperator);
   }
 
   return true;
 }
 
-bool MathDivVisitor::foundMutant() { return visitor.foundRange(); }
+clang::Expr *MathDivVisitor::foundMutant() {
+  return visitor.getMatchingASTNode();
+}

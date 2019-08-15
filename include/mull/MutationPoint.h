@@ -63,13 +63,14 @@ class MutationPoint {
   llvm::Function *mutatedFunction;
   std::string uniqueIdentifier;
   std::string diagnostics;
+  std::string replacement;
   const SourceLocation sourceLocation;
   std::vector<std::pair<Test *, int>> reachableTests;
 
 public:
   MutationPoint(Mutator *mutator, MutationPointAddress address,
                 llvm::Function *function, std::string diagnostics,
-                SourceLocation location, Bitcode *m);
+                std::string replacement, SourceLocation location, Bitcode *m);
 
   ~MutationPoint() = default;
 
@@ -82,6 +83,7 @@ public:
   void setMutatedFunction(llvm::Function *function);
 
   const SourceLocation &getSourceLocation() const;
+  const std::string getSourceFileName() const;
 
   void addReachableTest(Test *test, int distance);
   void applyMutation();
@@ -93,6 +95,8 @@ public:
 
   const std::string &getDiagnostics();
   const std::string &getDiagnostics() const;
+
+  const std::string &getReplacement();
 
   std::string getTrampolineName();
   std::string getMutatedFunctionName();

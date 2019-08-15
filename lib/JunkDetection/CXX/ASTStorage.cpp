@@ -4,12 +4,6 @@
 #include "mull/MutationPoint.h"
 
 #include <clang/Frontend/CompilerInstance.h>
-#include <llvm/IR/BasicBlock.h>
-#include <llvm/IR/DebugInfoMetadata.h>
-#include <llvm/IR/DebugLoc.h>
-#include <llvm/IR/Function.h>
-#include <llvm/IR/Instruction.h>
-#include <llvm/IR/Module.h>
 #include <llvm/Support/FileSystem.h>
 #include <llvm/Support/Path.h>
 
@@ -44,12 +38,7 @@ ThreadSafeASTUnit::findFileEntry(const MutationPoint *point) {
     return file;
   }
 
-  auto instruction = dyn_cast<Instruction>(point->getOriginalValue());
-  if (instruction == nullptr) {
-    return nullptr;
-  }
-
-  const std::string &sourceFile = instruction->getModule()->getSourceFileName();
+  const std::string &sourceFile = point->getSourceFileName();
 
   return findFileEntry(sourceFile);
 }
@@ -96,12 +85,8 @@ ThreadSafeASTUnit *ASTStorage::findAST(const MutationPoint *point) {
   assert(point);
   assert(!point->getSourceLocation().isNull() && "Missing debug information?");
 
-  auto instruction = dyn_cast<Instruction>(point->getOriginalValue());
-  if (instruction == nullptr) {
-    return nullptr;
-  }
+  const std::string &sourceFile = point->getSourceFileName();
 
-  const std::string &sourceFile = instruction->getModule()->getSourceFileName();
   std::lock_guard<std::mutex> guard(mutex);
   if (astUnits.count(sourceFile)) {
     return astUnits.at(sourceFile).get();
@@ -135,4 +120,20 @@ ThreadSafeASTUnit *ASTStorage::findAST(const MutationPoint *point) {
   auto threadSafeAST = new ThreadSafeASTUnit(ast);
   astUnits[sourceFile] = std::unique_ptr<ThreadSafeASTUnit>(threadSafeAST);
   return threadSafeAST;
+}
+
+clang::Expr *ASTStorage::getMutantASTNode(MutationPoint *mutationPoint) {
+  std::lock_guard<std::mutex> lockGuard(mutantNodesMutex);
+  if (mutantASTNodes.count(mutationPoint) == 0) {
+    return nullptr;
+  }
+
+  clang::Expr *mutantASTNode = mutantASTNodes[mutationPoint];
+  return mutantASTNode;
+}
+
+void ASTStorage::setMutantASTNode(MutationPoint *mutationPoint,
+                                  clang::Expr *mutantExpression) {
+  std::lock_guard<std::mutex> lockGuard(mutantNodesMutex);
+  mutantASTNodes[mutationPoint] = mutantExpression;
 }

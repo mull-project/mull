@@ -2,3 +2,7 @@
 	path = vendor/LibEBC
 	url = https://github.com/AlexDenisov/LibEBC.git
 	branch = fix_macos_freebsd_builds
+[submodule "vendor/json11"]
+	path = vendor/json11
+	url = https://github.com/dropbox/json11
+	branch = master

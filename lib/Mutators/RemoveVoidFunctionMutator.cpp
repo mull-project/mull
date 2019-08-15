@@ -40,7 +40,8 @@ MutationPoint *RemoveVoidFunctionMutator::getMutationPoint(
     SourceLocation &sourceLocation, MutationPointAddress &address) {
   if (canBeApplied(*instruction)) {
     std::string diagnostics = getDiagnostics(*instruction);
-    return new MutationPoint(this, address, function, diagnostics,
+    std::string replacement = "🚫";
+    return new MutationPoint(this, address, function, diagnostics, replacement,
                              sourceLocation, bitcode);
   }
 

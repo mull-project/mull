@@ -27,8 +27,10 @@ void RemoveVoidFunctionVisitor::handleCallExpr(
     clang::CallExpr *callExpression) {
   auto *type = callExpression->getType().getTypePtrOrNull();
   if (type && type->isVoidType()) {
-    visitor.visitRangeWithLocation(callExpression->getSourceRange());
+    visitor.visitRangeWithASTExpr(callExpression);
   }
 }
 
-bool RemoveVoidFunctionVisitor::foundMutant() { return visitor.foundRange(); }
+clang::Expr *RemoveVoidFunctionVisitor::foundMutant() {
+  return visitor.getMatchingASTNode();
+}

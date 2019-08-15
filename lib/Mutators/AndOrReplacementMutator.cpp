@@ -21,26 +21,52 @@ const std::string AndOrReplacementMutator::ID = "and_or_replacement_mutator";
 const std::string AndOrReplacementMutator::description =
     "Replaces && with ||, || with &&";
 
+static std::string getMutationTypeToString(AND_OR_MutationType mutationType) {
+  switch (mutationType) {
+  case AND_OR_MutationType_AND_to_OR_Pattern1:
+  case AND_OR_MutationType_AND_to_OR_Pattern2:
+  case AND_OR_MutationType_AND_to_OR_Pattern3:
+    return std::string("||");
+  case AND_OR_MutationType_OR_to_AND_Pattern1:
+  case AND_OR_MutationType_OR_to_AND_Pattern2:
+  case AND_OR_MutationType_OR_to_AND_Pattern3:
+    return std::string("&&");
+  default:
+    assert(0 && "should not reach here");
+  }
+}
+
 MutationPoint *AndOrReplacementMutator::getMutationPoint(
     Bitcode *bitcode, llvm::Function *function, llvm::Instruction *instruction,
     SourceLocation &sourceLocation, MutationPointAddress &address) {
-  if (canBeApplied(*instruction)) {
+
+  AND_OR_MutationType mutationType = findPossibleMutation(*instruction);
+  if (mutationType != AND_OR_MutationType_None) {
     std::string diagnostics = "AND-OR Replacement";
-    return new MutationPoint(this, address, function, diagnostics,
+    std::string replacement = getMutationTypeToString(mutationType);
+
+    return new MutationPoint(this, address, function, diagnostics, replacement,
                              sourceLocation, bitcode);
   }
   return nullptr;
 }
 
+// TODO: remove this method at least from the public interface because it is
+// not used?
 bool AndOrReplacementMutator::canBeApplied(Value &V) {
+  assert(0 && "this method is no longer actual");
+  return false;
+}
+
+AND_OR_MutationType AndOrReplacementMutator::findPossibleMutation(Value &V) {
   BranchInst *branchInst = dyn_cast<BranchInst>(&V);
 
   if (branchInst == nullptr) {
-    return false;
+    return AND_OR_MutationType_None;
   }
 
   if (branchInst->isConditional() == false) {
-    return false;
+    return AND_OR_MutationType_None;
   }
 
   /// TODO: Discuss how to filter out irrelevant branch instructions.
@@ -48,7 +74,7 @@ bool AndOrReplacementMutator::canBeApplied(Value &V) {
       SourceLocation::sourceLocationFromInstruction(branchInst);
   if (!location.isNull()) {
     if (location.filePath.find("include/c++/v1") != std::string::npos) {
-      return false;
+      return AND_OR_MutationType_None;
     }
   }
 
@@ -56,11 +82,7 @@ bool AndOrReplacementMutator::canBeApplied(Value &V) {
   AND_OR_MutationType possibleMutationType =
       findPossibleMutationInBranch(branchInst, &secondBranch);
 
-  if (possibleMutationType != AND_OR_MutationType_None) {
-    return true;
-  }
-
-  return false;
+  return possibleMutationType;
 }
 
 llvm::Value *
@@ -130,7 +152,7 @@ llvm::Value *AndOrReplacementMutator::applyMutationANDToOR_Pattern1(
       dyn_cast<BasicBlock>(secondBranch->getOperand(2));
 
   BranchInst *replacement =
-    BranchInst::Create(secondBranchLeftBB, firstBranchLeftBB, sourceValue);
+      BranchInst::Create(secondBranchLeftBB, firstBranchLeftBB, sourceValue);
 
   /// If I add a named instruction, and the name already exist
   /// in a basic block, then LLVM will make another unique name of it
@@ -200,10 +222,10 @@ llvm::Value *AndOrReplacementMutator::applyMutationANDToOR_Pattern2(
   assert(firstBranchRightBB);
 
   BasicBlock *secondBranchLeftBB =
-    dyn_cast<BasicBlock>(secondBranch->getOperand(2));
+      dyn_cast<BasicBlock>(secondBranch->getOperand(2));
 
   BranchInst *replacement =
-    BranchInst::Create(firstBranchRightBB, secondBranchLeftBB, sourceValue);
+      BranchInst::Create(firstBranchRightBB, secondBranchLeftBB, sourceValue);
 
   /// If I add a named instruction, and the name already exist
   /// in a basic block, then LLVM will make another unique name of it
@@ -282,11 +304,12 @@ llvm::Value *AndOrReplacementMutator::applyMutationANDToOR_Pattern3(
 
   auto firstBranchLeftBB = dyn_cast<BasicBlock>(firstBranch->getOperand(2));
   auto firstBranchRightBB = dyn_cast<BasicBlock>(firstBranch->getOperand(1));
-  Value *firstBranchConditionValue = dyn_cast<Value>(firstBranch->getOperand(0));
+  Value *firstBranchConditionValue =
+      dyn_cast<Value>(firstBranch->getOperand(0));
   assert(firstBranchConditionValue);
 
   BranchInst *replacement = BranchInst::Create(
-    firstBranchRightBB, firstBranchLeftBB, firstBranchConditionValue);
+      firstBranchRightBB, firstBranchLeftBB, firstBranchConditionValue);
 
   /// If I add a named instruction, and the name already exist
   /// in a basic block, then LLVM will make another unique name of it
@@ -329,7 +352,7 @@ llvm::Value *AndOrReplacementMutator::applyMutationORToAND_Pattern1(
   assert(secondBranchRightBB);
 
   BranchInst *replacement =
-    BranchInst::Create(firstBranchRightBB, secondBranchRightBB, sourceValue);
+      BranchInst::Create(firstBranchRightBB, secondBranchRightBB, sourceValue);
 
   /// If I add a named instruction, and the name already exist
   /// in a basic block, then LLVM will make another unique name of it
@@ -402,7 +425,7 @@ llvm::Value *AndOrReplacementMutator::applyMutationORToAND_Pattern2(
   assert(secondBranchRightBB);
 
   BranchInst *replacement =
-    BranchInst::Create(secondBranchRightBB, firstBranchLeftBB, sourceValue);
+      BranchInst::Create(secondBranchRightBB, firstBranchLeftBB, sourceValue);
 
   /// If I add a named instruction, and the name already exist
   /// in a basic block, then LLVM will make another unique name of it
@@ -481,11 +504,12 @@ llvm::Value *AndOrReplacementMutator::applyMutationORToAND_Pattern3(
   auto firstBranchLeftBB = dyn_cast<BasicBlock>(firstBranch->getOperand(2));
   auto firstBranchRightBB = dyn_cast<BasicBlock>(firstBranch->getOperand(1));
 
-  Value *firstBranchConditionValue = dyn_cast<Value>(firstBranch->getOperand(0));
+  Value *firstBranchConditionValue =
+      dyn_cast<Value>(firstBranch->getOperand(0));
   assert(firstBranchConditionValue);
 
   BranchInst *replacement = BranchInst::Create(
-    firstBranchRightBB, firstBranchLeftBB, firstBranchConditionValue);
+      firstBranchRightBB, firstBranchLeftBB, firstBranchConditionValue);
 
   /// If I add a named instruction, and the name already exist
   /// in a basic block, then LLVM will make another unique name of it

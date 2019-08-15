@@ -285,10 +285,13 @@ MutationPoint *NegateConditionMutator::getMutationPoint(
       return nullptr;
     }
 
-    std::string diagnostics = getDiagnostics(
-        cmpOp->getPredicate(), negatedCmpInstPredicate(cmpOp->getPredicate()));
+    llvm::CmpInst::Predicate negatedPredicate =
+        negatedCmpInstPredicate(cmpOp->getPredicate());
+    std::string diagnostics =
+        getDiagnostics(cmpOp->getPredicate(), negatedPredicate);
 
-    return new MutationPoint(this, address, function, diagnostics,
+    std::string replacement = describePredicate(negatedPredicate);
+    return new MutationPoint(this, address, function, diagnostics, replacement,
                              sourceLocation, bitcode);
   }
   return nullptr;

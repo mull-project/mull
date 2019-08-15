@@ -9,10 +9,10 @@ bool MathAddVisitor::VisitBinaryOperator(
     clang::BinaryOperator *binaryOperator) {
   auto range = binaryOperator->getSourceRange();
   if (binaryOperator->getOpcode() == clang::BinaryOperatorKind::BO_Add) {
-    visitor.visitRangeWithLocation(range);
+    visitor.visitRangeWithASTExpr(binaryOperator);
   }
   if (binaryOperator->getOpcode() == clang::BinaryOperatorKind::BO_AddAssign) {
-    visitor.visitRangeWithLocation(range);
+    visitor.visitRangeWithASTExpr(binaryOperator);
   }
 
   return true;
@@ -20,10 +20,12 @@ bool MathAddVisitor::VisitBinaryOperator(
 
 bool MathAddVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOperator) {
   if (unaryOperator->isIncrementOp()) {
-    visitor.visitRangeWithLocation(unaryOperator->getSourceRange());
+    visitor.visitRangeWithASTExpr(unaryOperator);
   }
 
   return true;
 }
 
-bool MathAddVisitor::foundMutant() { return visitor.foundRange(); }
+clang::Expr *MathAddVisitor::foundMutant() {
+  return visitor.getMatchingASTNode();
+}

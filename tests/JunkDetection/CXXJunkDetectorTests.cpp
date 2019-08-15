@@ -86,7 +86,10 @@ TEST_P(CXXJunkDetectorTest, detectJunk) {
 
   JunkDetectionConfig junkConfig;
 
-  CXXJunkDetector detector(junkConfig);
+  ASTStorage astStorage(junkConfig.cxxCompilationDatabasePath,
+                        junkConfig.cxxCompilationFlags);
+  CXXJunkDetector detector(astStorage);
+
   std::vector<MutationPoint *> nonJunkMutationPoints;
   for (auto point : points) {
     if (!detector.isJunk(point)) {
@@ -169,7 +172,11 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
   JunkDetectionConfig junkConfig;
   junkConfig.cxxCompilationDatabasePath =
       fixtures::junk_detection_compdb_absolute_compile_commands_json_path();
-  CXXJunkDetector detector(junkConfig);
+
+  ASTStorage astStorage(junkConfig.cxxCompilationDatabasePath,
+                        junkConfig.cxxCompilationFlags);
+  CXXJunkDetector detector(astStorage);
+
   std::vector<MutationPoint *> nonJunkMutationPoints;
   for (auto point : points) {
     if (!detector.isJunk(point)) {
@@ -211,7 +218,11 @@ TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
   JunkDetectionConfig junkConfig;
   junkConfig.cxxCompilationDatabasePath =
       fixtures::junk_detection_compdb_relative_compile_commands_json_path();
-  CXXJunkDetector detector(junkConfig);
+
+  ASTStorage astStorage(junkConfig.cxxCompilationDatabasePath,
+                        junkConfig.cxxCompilationFlags);
+  CXXJunkDetector detector(astStorage);
+
   std::vector<MutationPoint *> nonJunkMutationPoints;
   for (auto point : points) {
     if (!detector.isJunk(point)) {
@@ -254,7 +265,10 @@ TEST(CXXJunkDetector, no_compdb) {
   junkConfig.cxxCompilationFlags =
       std::string("-I ") + fixtures::junk_detection_compdb_include__path();
 
-  CXXJunkDetector detector(junkConfig);
+  ASTStorage astStorage(junkConfig.cxxCompilationDatabasePath,
+                        junkConfig.cxxCompilationFlags);
+  CXXJunkDetector detector(astStorage);
+
   std::vector<MutationPoint *> nonJunkMutationPoints;
   for (auto point : points) {
     if (!detector.isJunk(point)) {
