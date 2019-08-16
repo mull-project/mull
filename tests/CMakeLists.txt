@@ -39,7 +39,10 @@ set(mull_unittests_sources
 
   ConfigParserTestFixture.h
   ${FACTORY_HEADER}
-  JunkDetection/CompilationDatabaseTests.cpp)
+
+  JunkDetection/CompilationDatabaseTests.cpp
+  MutationFilters/MutationFilterTests.cpp
+  )
 
 get_filename_component(factory_include_dir ${FACTORY_HEADER} DIRECTORY)
 
@@ -48,17 +51,17 @@ target_link_libraries(mull-tests
   mull
   google-test
   json11
-)
+  )
 target_include_directories(mull-tests PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${MULL_SOURCE_DIR}/vendor/googletest/include
   ${MULL_INCLUDE_DIRS}
   ${factory_include_dir}
-)
+  )
 set_target_properties(mull-tests PROPERTIES
   COMPILE_FLAGS ${MULL_CXX_FLAGS}
   LINK_FLAGS ${MULL_LINK_FLAGS}
-)
+  )
 get_property(dependencies GLOBAL PROPERTY TEST_FIXTURES_DEPENDENCIES)
 add_dependencies(mull-tests ${dependencies})
 
