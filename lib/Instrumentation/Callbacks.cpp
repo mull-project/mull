@@ -1,9 +1,9 @@
 #include "mull/Instrumentation/Callbacks.h"
 
 #include "mull/Bitcode.h"
-#include "mull/Driver.h"
 #include "mull/Instrumentation/DynamicCallTree.h"
 #include "mull/Instrumentation/Instrumentation.h"
+#include "mull/Instrumentation/InstrumentationInfo.h"
 
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/GlobalVariable.h>

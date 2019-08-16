@@ -3,22 +3,24 @@
 #include <vector>
 
 namespace mull {
-class MutationPoint;
-class progress_counter;
-class JunkDetector;
 
-class JunkDetectionTask {
+class MutationPoint;
+class MutationFilter;
+class progress_counter;
+
+class MutationFilterTask {
 public:
   using In = std::vector<MutationPoint *>;
   using Out = std::vector<MutationPoint *>;
   using iterator = In::const_iterator;
 
-  JunkDetectionTask(JunkDetector &detector);
+  MutationFilterTask(MutationFilter &filter);
 
   void operator()(iterator begin, iterator end, Out &storage,
                   progress_counter &counter);
 
 private:
-  JunkDetector &detector;
+  MutationFilter &filter;
 };
+
 } // namespace mull

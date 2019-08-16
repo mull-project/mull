@@ -7,6 +7,7 @@
 #include "mull/Filter.h"
 #include "mull/JunkDetection/JunkDetector.h"
 #include "mull/Metrics/Metrics.h"
+#include "mull/MutationFilters/JunkMutationFilter.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/AndOrReplacementMutator.h"
 #include "mull/Mutators/MathAddMutator.h"
@@ -26,6 +27,7 @@
 
 #include <functional>
 
+#include <gtest/gtest.h>
 #include <llvm/ADT/SmallString.h>
 #include <llvm/ADT/Twine.h>
 #include <llvm/IR/LLVMContext.h>
@@ -35,8 +37,6 @@
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/YAMLParser.h>
-
-#include "gtest/gtest.h"
 
 using namespace mull;
 using namespace llvm;
@@ -49,16 +49,16 @@ TEST(Driver, RunningWithNoTests) {
   Toolchain toolchain(configuration);
   Filter filter;
   Metrics metrics;
-  NullJunkDetector junkDetector;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.simpleTestFramework(toolchain, configuration));
   Program program({}, {}, {});
   ForkTimerSandbox sandbox;
+  std::vector<MutationFilter *> filters;
 
-  Driver Driver(configuration, sandbox, program, toolchain, filter, finder,
-                metrics, junkDetector, testFramework);
+  Driver Driver(configuration, sandbox, program, toolchain, filters, filter,
+                finder, metrics, testFramework);
 
   auto result = Driver.Run();
   ASSERT_EQ(0u, result->getTests().size());
@@ -91,15 +91,15 @@ TEST(Driver, SimpleTest_MathAddMutator) {
   Toolchain toolchain(configuration);
   Filter filter;
   Metrics metrics;
-  NullJunkDetector junkDetector;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.simpleTestFramework(toolchain, configuration));
   ForkTimerSandbox sandbox;
+  std::vector<MutationFilter *> filters;
 
-  Driver Driver(configuration, sandbox, program, toolchain, filter, finder,
-                metrics, junkDetector, testFramework);
+  Driver Driver(configuration, sandbox, program, toolchain, filters, filter,
+                finder, metrics, testFramework);
 
   /// Given the modules we use here we expect:
   ///
@@ -144,15 +144,15 @@ TEST(Driver, SimpleTest_MathSubMutator) {
   Toolchain toolchain(configuration);
   Filter filter;
   Metrics metrics;
-  NullJunkDetector junkDetector;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.simpleTestFramework(toolchain, configuration));
   ForkTimerSandbox sandbox;
+  std::vector<MutationFilter *> filters;
 
-  Driver Driver(configuration, sandbox, program, toolchain, filter, finder,
-                metrics, junkDetector, testFramework);
+  Driver Driver(configuration, sandbox, program, toolchain, filters, filter,
+                finder, metrics, testFramework);
 
   /// Given the modules we use here we expect:
   ///
@@ -197,15 +197,15 @@ TEST(Driver, SimpleTest_MathMulMutator) {
   Toolchain toolchain(configuration);
   Filter filter;
   Metrics metrics;
-  NullJunkDetector junkDetector;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.simpleTestFramework(toolchain, configuration));
   ForkTimerSandbox sandbox;
+  std::vector<MutationFilter *> filters;
 
-  Driver Driver(configuration, sandbox, program, toolchain, filter, finder,
-                metrics, junkDetector, testFramework);
+  Driver Driver(configuration, sandbox, program, toolchain, filters, filter,
+                finder, metrics, testFramework);
 
   /// Given the modules we use here we expect:
   ///
@@ -249,15 +249,15 @@ TEST(Driver, SimpleTest_MathDivMutator) {
   Toolchain toolchain(configuration);
   Filter filter;
   Metrics metrics;
-  NullJunkDetector junkDetector;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.simpleTestFramework(toolchain, configuration));
   ForkTimerSandbox sandbox;
+  std::vector<MutationFilter *> filters;
 
-  Driver Driver(configuration, sandbox, program, toolchain, filter, finder,
-                metrics, junkDetector, testFramework);
+  Driver Driver(configuration, sandbox, program, toolchain, filters, filter,
+                finder, metrics, testFramework);
 
   /// Given the modules we use here we expect:
   ///
@@ -303,15 +303,15 @@ TEST(Driver, SimpleTest_NegateConditionMutator) {
   Toolchain toolchain(configuration);
   Filter filter;
   Metrics metrics;
-  NullJunkDetector junkDetector;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.simpleTestFramework(toolchain, configuration));
   ForkTimerSandbox sandbox;
+  std::vector<MutationFilter *> filters;
 
-  Driver Driver(configuration, sandbox, program, toolchain, filter, finder,
-                metrics, junkDetector, testFramework);
+  Driver Driver(configuration, sandbox, program, toolchain, filters, filter,
+                finder, metrics, testFramework);
 
   /// Given the modules we use here we expect:
   ///
@@ -350,15 +350,15 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutator) {
   Toolchain toolchain(configuration);
   Filter filter;
   Metrics metrics;
-  NullJunkDetector junkDetector;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.simpleTestFramework(toolchain, configuration));
   ForkTimerSandbox sandbox;
+  std::vector<MutationFilter *> filters;
 
-  Driver Driver(configuration, sandbox, program, toolchain, filter, finder,
-                metrics, junkDetector, testFramework);
+  Driver Driver(configuration, sandbox, program, toolchain, filters, filter,
+                finder, metrics, testFramework);
 
   /// Given the modules we use here we expect:
   ///
@@ -397,15 +397,15 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
   Toolchain toolchain(configuration);
   Filter filter;
   Metrics metrics;
-  NullJunkDetector junkDetector;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.simpleTestFramework(toolchain, configuration));
   ForkTimerSandbox sandbox;
+  std::vector<MutationFilter *> filters;
 
-  Driver Driver(configuration, sandbox, program, toolchain, filter, finder,
-                metrics, junkDetector, testFramework);
+  Driver Driver(configuration, sandbox, program, toolchain, filters, filter,
+                finder, metrics, testFramework);
 
   auto result = Driver.Run();
   ASSERT_EQ(12U, result->getTests().size());
@@ -604,15 +604,15 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator_CPP) {
   Toolchain toolchain(configuration);
   Filter filter;
   Metrics metrics;
-  NullJunkDetector junkDetector;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.simpleTestFramework(toolchain, configuration));
   ForkTimerSandbox sandbox;
+  std::vector<MutationFilter *> filters;
 
-  Driver Driver(configuration, sandbox, program, toolchain, filter, finder,
-                metrics, junkDetector, testFramework);
+  Driver Driver(configuration, sandbox, program, toolchain, filters, filter,
+                finder, metrics, testFramework);
 
   auto result = Driver.Run();
   ASSERT_EQ(6U, result->getTests().size());
@@ -697,15 +697,15 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutator_CPP) {
   Toolchain toolchain(configuration);
   Filter filter;
   Metrics metrics;
-  NullJunkDetector junkDetector;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.simpleTestFramework(toolchain, configuration));
   ForkTimerSandbox sandbox;
+  std::vector<MutationFilter *> filters;
 
-  Driver Driver(configuration, sandbox, program, toolchain, filter, finder,
-                metrics, junkDetector, testFramework);
+  Driver Driver(configuration, sandbox, program, toolchain, filters, filter,
+                finder, metrics, testFramework);
 
   auto result = Driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
@@ -748,15 +748,15 @@ TEST(Driver, customTest) {
   Filter filter;
   filter.includeTest("passing");
   Metrics metrics;
-  NullJunkDetector junkDetector;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.customTestFramework(toolchain, configuration));
   ForkTimerSandbox sandbox;
+  std::vector<MutationFilter *> filters;
 
-  Driver driver(configuration, sandbox, program, toolchain, filter, finder,
-                metrics, junkDetector, testFramework);
+  Driver driver(configuration, sandbox, program, toolchain, filters, filter,
+                finder, metrics, testFramework);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
@@ -798,9 +798,10 @@ TEST(Driver, customTest_withDynamicLibraries) {
   TestFramework testFramework(
       testFrameworkFactory.customTestFramework(toolchain, configuration));
   ForkTimerSandbox sandbox;
+  std::vector<MutationFilter *> filters;
 
-  Driver driver(configuration, sandbox, program, toolchain, filter, finder,
-                metrics, junkDetector, testFramework);
+  Driver driver(configuration, sandbox, program, toolchain, filters, filter,
+                finder, metrics, testFramework);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
@@ -812,9 +813,8 @@ TEST(Driver, customTest_withDynamicLibraries) {
   ASSERT_EQ(0UL, result->getMutationResults().size());
 }
 
-TEST(Driver, junkDetector_enabled) {
+TEST(Driver, junkDetector_included) {
   Configuration configuration;
-  configuration.junkDetectionEnabled = true;
   configuration.customTests = {
       CustomTestDefinition("failing", "failing_test", "mull", {"failing_test"}),
       CustomTestDefinition("passing", "passing_test", "mull",
@@ -834,22 +834,25 @@ TEST(Driver, junkDetector_enabled) {
   Filter filter;
   filter.includeTest("passing");
   Metrics metrics;
-  AllJunkDetector junkDetector;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.customTestFramework(toolchain, configuration));
   ForkTimerSandbox sandbox;
 
-  Driver driver(configuration, sandbox, program, toolchain, filter, finder,
-                metrics, junkDetector, testFramework);
+  AllJunkDetector junkDetector;
+  JunkMutationFilter junkFilter(junkDetector);
+  std::vector<MutationFilter *> filters({&junkFilter});
+
+  Driver driver(configuration, sandbox, program, toolchain, filters, filter,
+                finder, metrics, testFramework);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
   ASSERT_EQ(0UL, result->getMutationResults().size());
 }
 
-TEST(Driver, junkDetector_disabled) {
+TEST(Driver, junkDetector_excluded) {
   Configuration configuration;
   configuration.customTests = {
       CustomTestDefinition("failing", "failing_test", "mull", {"failing_test"}),
@@ -870,15 +873,15 @@ TEST(Driver, junkDetector_disabled) {
   Filter filter;
   filter.includeTest("passing");
   Metrics metrics;
-  AllJunkDetector junkDetector;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.customTestFramework(toolchain, configuration));
   ForkTimerSandbox sandbox;
+  std::vector<MutationFilter *> filters;
 
-  Driver driver(configuration, sandbox, program, toolchain, filter, finder,
-                metrics, junkDetector, testFramework);
+  Driver driver(configuration, sandbox, program, toolchain, filters, filter,
+                finder, metrics, testFramework);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
@@ -914,9 +917,10 @@ TEST(Driver, customTest_withDynamicLibraries_and_ObjectFiles) {
   TestFramework testFramework(
       testFrameworkFactory.customTestFramework(toolchain, configuration));
   ForkTimerSandbox sandbox;
+  std::vector<MutationFilter *> filters;
 
-  Driver driver(configuration, sandbox, program, toolchain, filter, finder,
-                metrics, junkDetector, testFramework);
+  Driver driver(configuration, sandbox, program, toolchain, filters, filter,
+                finder, metrics, testFramework);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
@@ -953,9 +957,10 @@ TEST(Driver, DISABLED_customTest_withExceptions) {
   TestFramework testFramework(
       testFrameworkFactory.customTestFramework(toolchain, configuration));
   ForkTimerSandbox sandbox;
+  std::vector<MutationFilter *> filters;
 
-  Driver driver(configuration, sandbox, program, toolchain, filter, finder,
-                metrics, junkDetector, testFramework);
+  Driver driver(configuration, sandbox, program, toolchain, filters, filter,
+                finder, metrics, testFramework);
 
   auto result = driver.Run();
   ASSERT_EQ(1U, result->getTests().size());
