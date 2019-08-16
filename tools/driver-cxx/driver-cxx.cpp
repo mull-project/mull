@@ -19,6 +19,7 @@
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
 #include "mull/JunkDetection/JunkDetector.h"
 #include "mull/Metrics/Metrics.h"
+#include "mull/MutationFilters/FilePathFilter.h"
 #include "mull/MutationFilters/JunkMutationFilter.h"
 #include "mull/MutationFilters/NoDebugInfoFilter.h"
 #include "mull/MutationsFinder.h"
@@ -188,6 +189,11 @@ llvm::cl::list<std::string> LDSearchPaths("ld_search_path",
                                           llvm::cl::desc("Library search path"),
                                           llvm::cl::cat(MullCXXCategory));
 
+llvm::cl::list<std::string> ExcludePaths(
+    "exclude-path", llvm::cl::ZeroOrMore,
+    llvm::cl::desc("File/directory paths to ignore (supports regex)"),
+    llvm::cl::cat(MullCXXCategory));
+
 enum SandboxType { None, Watchdog, Timer };
 
 #if LLVM_VERSION_MAJOR == 3
@@ -330,9 +336,17 @@ int main(int argc, char **argv) {
 
   auto sandbox = GetProcessSandbox(SandboxOption);
 
-  mull::NoDebugInfoFilter noDebugInfoFilter;
   std::vector<mull::MutationFilter *> mutationFilters;
+
+  mull::NoDebugInfoFilter noDebugInfoFilter;
   mutationFilters.push_back(&noDebugInfoFilter);
+
+  mull::FilePathFilter filePathFilter;
+  mutationFilters.push_back(&filePathFilter);
+
+  for (const auto &regex : ExcludePaths) {
+    filePathFilter.exclude(regex);
+  }
 
   if (junkDetectionEnabled) {
     mutationFilters.push_back(&junkFilter);
