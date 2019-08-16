@@ -9,6 +9,7 @@
 #include "mull/JunkDetection/JunkDetector.h"
 #include "mull/Logger.h"
 #include "mull/Metrics/Metrics.h"
+#include "mull/MutationFilters/JunkMutationFilter.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/MutatorsFactory.h"
 #include "mull/Parallelization/TaskExecutor.h"
@@ -110,7 +111,7 @@ int main(int argc, char *argv[]) {
       testFrameworkName, toolchain, configuration));
 
   std::unique_ptr<JunkDetector> junkDetector(make_unique<NullJunkDetector>());
-  if (configuration.junkDetectionEnabled) {
+  if (rawConfig.junkDetectionEnabled()) {
     std::string detector = rawConfig.junkDetectionConfig().detectorName;
     if (detector == "all") {
       junkDetector = make_unique<AllJunkDetector>();
@@ -118,14 +119,16 @@ int main(int argc, char *argv[]) {
       junkDetector = make_unique<NullJunkDetector>();
     } else if (detector == "cxx") {
       mull::JunkDetectionConfig junkDetectionConfig;
-      mull::ASTStorage astStorage(junkDetectionConfig.cxxCompilationDatabasePath,
-                                  junkDetectionConfig.cxxCompilationFlags);
+      mull::ASTStorage astStorage(
+          junkDetectionConfig.cxxCompilationDatabasePath,
+          junkDetectionConfig.cxxCompilationFlags);
       junkDetector = make_unique<mull::CXXJunkDetector>(astStorage);
     } else {
       Logger::error() << "mull-driver> Unknown junk detector provided: "
                       << "`" << detector << "`. ";
     }
   }
+  JunkMutationFilter junkMutationFilter(*junkDetector.get());
 
   std::vector<std::unique_ptr<Reporter>> reporters;
   if (rawConfig.getReporters().empty()) {
@@ -170,9 +173,12 @@ int main(int argc, char *argv[]) {
     sandbox = llvm::make_unique<NullProcessSandbox>();
   }
 
+  std::vector<MutationFilter *> mutationFilters;
+  mutationFilters.push_back(&junkMutationFilter);
+
   Metrics metrics;
-  Driver driver(configuration, *sandbox, program, toolchain, filter,
-                mutationsFinder, metrics, *junkDetector, testFramework);
+  Driver driver(configuration, *sandbox, program, toolchain, mutationFilters,
+                filter, mutationsFinder, metrics, testFramework);
 
   metrics.beginRun();
   auto result = driver.Run();

@@ -19,6 +19,7 @@
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
 #include "mull/JunkDetection/JunkDetector.h"
 #include "mull/Metrics/Metrics.h"
+#include "mull/MutationFilters/JunkMutationFilter.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/MutatorsFactory.h"
 #include "mull/Parallelization/Parallelization.h"
@@ -304,19 +305,21 @@ int main(int argc, char **argv) {
   mull::TestFramework testFramework(
       testFrameworkOption.testFramework(toolchain, configuration));
 
+  bool junkDetectionEnabled = false;
   mull::JunkDetectionConfig junkDetectionConfig;
   if (!CompilationFlags.empty()) {
     junkDetectionConfig.cxxCompilationFlags = CompilationFlags.getValue();
-    configuration.junkDetectionEnabled = true;
+    junkDetectionEnabled = true;
   }
   if (!CompilationDatabasePath.empty()) {
     junkDetectionConfig.cxxCompilationDatabasePath =
         CompilationDatabasePath.getValue();
-    configuration.junkDetectionEnabled = true;
+    junkDetectionEnabled = true;
   }
   mull::ASTStorage astStorage(junkDetectionConfig.cxxCompilationDatabasePath,
                               junkDetectionConfig.cxxCompilationFlags);
   mull::CXXJunkDetector junkDetector(astStorage);
+  mull::JunkMutationFilter junkFilter(junkDetector);
 
   mull::Filter filter;
   mull::MutationsFinder mutationsFinder(mutatorsOptions.mutators(),
@@ -326,8 +329,14 @@ int main(int argc, char **argv) {
 
   auto sandbox = GetProcessSandbox(SandboxOption);
 
-  mull::Driver driver(configuration, *sandbox, program, toolchain, filter,
-                      mutationsFinder, metrics, junkDetector, testFramework);
+  std::vector<mull::MutationFilter *> mutationFilters;
+  if (junkDetectionEnabled) {
+    mutationFilters.push_back(&junkFilter);
+  }
+
+  mull::Driver driver(configuration, *sandbox, program, toolchain,
+                      mutationFilters, filter, mutationsFinder, metrics,
+                      testFramework);
   metrics.beginRun();
   auto result = driver.Run();
   metrics.endRun();
@@ -340,13 +349,15 @@ int main(int argc, char **argv) {
   ideReporter.reportResults(*result, rawConfig, metrics);
 
   if (ElementsReporterEnabled) {
-    if (configuration.junkDetectionEnabled) {
+    if (junkDetectionEnabled) {
       mull::ASTSourceInfoProvider sourceInfoProvider(astStorage);
       mull::MutationTestingElementsReporter mutationTestingElementsReporter(
-        ElementsOutputDir, sourceInfoProvider);
-      mutationTestingElementsReporter.reportResults(*result, rawConfig, metrics);
+          ElementsOutputDir, sourceInfoProvider);
+      mutationTestingElementsReporter.reportResults(*result, rawConfig,
+                                                    metrics);
     } else {
-      mull::Logger::warn() << "The Mutation Testing Elements Reporter requires the compilation database to be provided";
+      mull::Logger::warn() << "The Mutation Testing Elements Reporter requires "
+                              "the compilation database to be provided";
     }
   }
 

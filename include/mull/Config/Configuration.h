@@ -11,7 +11,6 @@ class RawConfig;
 
 struct Configuration {
   bool forkEnabled;
-  bool junkDetectionEnabled;
   bool dryRunEnabled;
   bool failFastEnabled;
   bool cacheEnabled;

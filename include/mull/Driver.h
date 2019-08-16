@@ -3,6 +3,7 @@
 #include "mull/ExecutionResult.h"
 #include "mull/IDEDiagnostics.h"
 #include "mull/Instrumentation/Instrumentation.h"
+#include "mull/MutationFilters/MutationFilter.h"
 #include "mull/MutationResult.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Sandbox/ProcessSandbox.h"
@@ -48,13 +49,14 @@ class Driver {
       ownedObjectFiles;
   Instrumentation instrumentation;
   Metrics &metrics;
-  JunkDetector &junkDetector;
+  std::vector<MutationFilter *> &mutationFilters;
 
 public:
   Driver(const Configuration &config, const ProcessSandbox &sandbox,
-         Program &program, Toolchain &t, Filter &f,
+         Program &program, Toolchain &t,
+         std::vector<MutationFilter *> &mutationFilters, Filter &f,
          MutationsFinder &mutationsFinder, Metrics &metrics,
-         JunkDetector &junkDetector, TestFramework &testFramework);
+         TestFramework &testFramework);
 
   ~Driver();
 
@@ -67,7 +69,7 @@ private:
   std::vector<Test> findTests();
   std::vector<MutationPoint *> findMutationPoints(std::vector<Test> &tests);
   std::vector<MutationPoint *>
-  filterOutJunkMutations(std::vector<MutationPoint *> mutationPoints);
+  filterMutations(std::vector<MutationPoint *> mutationPoints);
 
   std::vector<std::unique_ptr<MutationResult>>
   runMutations(std::vector<MutationPoint *> &mutationPoints);

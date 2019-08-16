@@ -69,8 +69,8 @@ set(mull_sources
   Parallelization/Tasks/DryRunMutantExecutionTask.cpp
   Parallelization/Tasks/InstrumentedCompilationTask.cpp
   Parallelization/Tasks/OriginalTestExecutionTask.cpp
-  Parallelization/Tasks/JunkDetectionTask.cpp
   Parallelization/Tasks/MutantExecutionTask.cpp
+  Parallelization/Tasks/MutationFilterTask.cpp
   Parallelization/Tasks/OriginalCompilationTask.cpp
   Parallelization/Tasks/ApplyMutationTask.cpp
   Config/ConfigurationOptions.cpp
@@ -97,9 +97,10 @@ set(mull_sources
   Reporters/SourceManager.cpp
 
   TestFrameworks/NativeTestRunner.cpp
-)
 
-set (MULL_INCLUDE_DIR ${MULL_SOURCE_DIR}/include/mull)
+  MutationFilters/JunkMutationFilter.cpp)
+
+set(MULL_INCLUDE_DIR ${MULL_SOURCE_DIR}/include/mull)
 
 set(mull_header_dirs
   ${MULL_INCLUDE_DIR}
@@ -110,6 +111,7 @@ set(mull_header_dirs
   ${MULL_INCLUDE_DIR}/JunkDetection/CXX/Visitors
   ${MULL_INCLUDE_DIR}/Metrics
   ${MULL_INCLUDE_DIR}/Mutators
+  ${MULL_INCLUDE_DIR}/MutationFilters
   ${MULL_INCLUDE_DIR}/Parallelization
   ${MULL_INCLUDE_DIR}/Parallelization/Tasks
   ${MULL_INCLUDE_DIR}/Program
@@ -120,7 +122,7 @@ set(mull_header_dirs
   ${MULL_INCLUDE_DIR}/TestFrameworks/SimpleTest
   ${MULL_INCLUDE_DIR}/Toolchain
   ${MULL_INCLUDE_DIR}/Toolchain/Resolvers
-)
+  )
 
 # Globbing is not recommended by CMake so maybe consider listing headers
 # explicitly in include/CMakeLists.txt file. However LLVM goes find(GLOB) under
@@ -135,24 +137,24 @@ add_library(mull
   ${mull_sources}
   ${mull_header_files}
   $<TARGET_OBJECTS:LLVMCompatibility>
-)
+  )
 
 set_source_files_properties(${mull_header_dirs} PROPERTIES HEADER_FILE_ONLY ON)
 
 if ("LLVM" IN_LIST LLVM_AVAILABLE_LIBS)
-  set (MULL_LLVM_LIBRARIES
+  set(MULL_LLVM_LIBRARIES
     LLVM
-  )
-else()
-  set (MULL_LLVM_LIBRARIES
+    )
+else ()
+  set(MULL_LLVM_LIBRARIES
     LLVMAsmParser
     LLVMOrcJIT
     LLVMSupport
     LLVMOption
     LLVMX86CodeGen
     LLVMX86AsmParser
-  )
-endif()
+    )
+endif ()
 
 find_package(Threads REQUIRED)
 
@@ -161,13 +163,13 @@ target_link_libraries(mull
   ${SQLITE_DEPENDENCY}
   clangTooling
   Threads::Threads
-)
+  )
 target_include_directories(mull PUBLIC ${MULL_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/vendor)
 
 set_target_properties(mull PROPERTIES
   COMPILE_FLAGS ${MULL_CXX_FLAGS}
   LINK_FLAGS ${MULL_LINK_FLAGS}
-)
+  )
 
 ## The following is needed to make CMake to generate a folder structure in Xcode
 ## that corresponds to a physical folder structure.
@@ -186,5 +188,5 @@ set_target_properties(mull PROPERTIES
 INSTALL(TARGETS mull
   LIBRARY DESTINATION lib
   ARCHIVE DESTINATION lib
-)
+  )
 

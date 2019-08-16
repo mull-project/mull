@@ -15,16 +15,13 @@ ParallelizationConfig singleThreadParallelization() {
 }
 
 Configuration::Configuration()
-    : forkEnabled(true), junkDetectionEnabled(false), dryRunEnabled(false),
-      failFastEnabled(false), cacheEnabled(false),
-      timeout(MullDefaultTimeoutMilliseconds), maxDistance(128),
-      diagnostics(Diagnostics::None),
+    : forkEnabled(true), dryRunEnabled(false), failFastEnabled(false),
+      cacheEnabled(false), timeout(MullDefaultTimeoutMilliseconds),
+      maxDistance(128), diagnostics(Diagnostics::None),
       parallelization(singleThreadParallelization()) {}
 
 Configuration::Configuration(RawConfig &raw)
-    : forkEnabled(raw.forkEnabled()),
-      junkDetectionEnabled(raw.junkDetectionEnabled()),
-      dryRunEnabled(raw.dryRunModeEnabled()),
+    : forkEnabled(raw.forkEnabled()), dryRunEnabled(raw.dryRunModeEnabled()),
       failFastEnabled(raw.failFastModeEnabled()),
       cacheEnabled(raw.cachingEnabled()), timeout(raw.getTimeout()),
       maxDistance(raw.getMaxDistance()), diagnostics(raw.getDiagnostics()),

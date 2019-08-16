@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "mull/Driver.h"
 
 #include "mull/BitcodeLoader.h"
@@ -30,9 +32,7 @@ using namespace llvm::object;
 using namespace mull;
 using namespace std;
 
-Driver::~Driver() {
-  delete this->diagnostics;
-}
+Driver::~Driver() { delete this->diagnostics; }
 
 /// TODO: Remove the following comments as they are irrelevant
 /// Populate mull::Context with modules using
@@ -58,12 +58,11 @@ std::unique_ptr<Result> Driver::Run() {
 
   auto tests = findTests();
   auto mutationPoints = findMutationPoints(tests);
-  auto nonJunkMutationPoints =
-      filterOutJunkMutations(std::move(mutationPoints));
-  auto mutationResults = runMutations(nonJunkMutationPoints);
+  auto filteredMutations = filterMutations(std::move(mutationPoints));
+  auto mutationResults = runMutations(filteredMutations);
 
   return make_unique<Result>(std::move(tests), std::move(mutationResults),
-                             std::move(nonJunkMutationPoints));
+                             std::move(filteredMutations));
 }
 
 void Driver::compileInstrumentedBitcodeFiles() {
@@ -151,23 +150,25 @@ std::vector<MutationPoint *> Driver::findMutationPoints(vector<Test> &tests) {
 }
 
 std::vector<MutationPoint *>
-Driver::filterOutJunkMutations(std::vector<MutationPoint *> mutationPoints) {
-  std::vector<MutationPoint *> nonJunkMutationPoints;
-  if (config.junkDetectionEnabled) {
-    std::vector<JunkDetectionTask> tasks;
+Driver::filterMutations(std::vector<MutationPoint *> mutationPoints) {
+  std::vector<MutationPoint *> mutations = std::move(mutationPoints);
+
+  for (auto filter : mutationFilters) {
+    std::vector<MutationFilterTask> tasks;
     tasks.reserve(config.parallelization.workers);
     for (int i = 0; i < config.parallelization.workers; i++) {
-      tasks.emplace_back(junkDetector);
+      tasks.emplace_back(*filter);
     }
-    TaskExecutor<JunkDetectionTask> mutantRunner(
-        "Filtering out junk mutations", mutationPoints, nonJunkMutationPoints,
-        std::move(tasks));
-    mutantRunner.execute();
-  } else {
-    mutationPoints.swap(nonJunkMutationPoints);
+
+    std::string label = std::string("Applying filter: ") + filter->name();
+    std::vector<MutationPoint *> tmp;
+    TaskExecutor<MutationFilterTask> filterRunner(label, mutations, tmp,
+                                                  std::move(tasks));
+    filterRunner.execute();
+    mutations = std::move(tmp);
   }
 
-  return nonJunkMutationPoints;
+  return mutations;
 }
 
 std::vector<std::unique_ptr<MutationResult>>
@@ -273,13 +274,14 @@ std::vector<llvm::object::ObjectFile *> Driver::AllInstrumentedObjectFiles() {
 }
 
 Driver::Driver(const Configuration &config, const ProcessSandbox &sandbox,
-               Program &program, Toolchain &t, Filter &f,
+               Program &program, Toolchain &t,
+               std::vector<MutationFilter *> &mutationFilters, Filter &f,
                MutationsFinder &mutationsFinder, Metrics &metrics,
-               JunkDetector &junkDetector, TestFramework &testFramework)
+               TestFramework &testFramework)
     : config(config), sandbox(sandbox), program(program),
-      testFramework(testFramework), toolchain(t), filter(f),
-      mutationsFinder(mutationsFinder), instrumentation(), metrics(metrics),
-      junkDetector(junkDetector) {
+      testFramework(testFramework), toolchain(t),
+      mutationFilters(mutationFilters), filter(f),
+      mutationsFinder(mutationsFinder), instrumentation(), metrics(metrics) {
 
   if (config.diagnostics != Diagnostics::None) {
     this->diagnostics = new NormalIDEDiagnostics(config.diagnostics);
