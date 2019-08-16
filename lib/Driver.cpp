@@ -1,5 +1,3 @@
-#include <utility>
-
 #include "mull/Driver.h"
 
 #include "mull/BitcodeLoader.h"

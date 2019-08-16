@@ -20,6 +20,7 @@
 #include "mull/JunkDetection/JunkDetector.h"
 #include "mull/Metrics/Metrics.h"
 #include "mull/MutationFilters/JunkMutationFilter.h"
+#include "mull/MutationFilters/NoDebugInfoFilter.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/MutatorsFactory.h"
 #include "mull/Parallelization/Parallelization.h"
@@ -329,7 +330,10 @@ int main(int argc, char **argv) {
 
   auto sandbox = GetProcessSandbox(SandboxOption);
 
+  mull::NoDebugInfoFilter noDebugInfoFilter;
   std::vector<mull::MutationFilter *> mutationFilters;
+  mutationFilters.push_back(&noDebugInfoFilter);
+
   if (junkDetectionEnabled) {
     mutationFilters.push_back(&junkFilter);
   }
