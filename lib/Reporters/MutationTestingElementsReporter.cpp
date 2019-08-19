@@ -36,30 +36,17 @@ json11::Json createFiles(const Result &result,
   // on their source file.
   // Step 1: we create a map: "file => all of its mutation points".
   std::map<std::string, std::vector<MutationPoint *>> mutationPointsPerFile;
-  for (auto &mutationResult : result.getMutationResults()) {
-    MutationPoint *mutant = mutationResult->getMutationPoint();
-
+  for (auto mutant : result.getMutationPoints()) {
     auto &sourceLocation = mutant->getSourceLocation();
     auto sourceCodeLine = sourceManager.getLine(sourceLocation);
     assert(sourceLocation.column < sourceCodeLine.size());
 
-    if (filesJSON.count(sourceLocation.filePath) == 0) {
-      std::pair<std::string, std::vector<MutationPoint *>> pair =
-          std::make_pair(sourceLocation.filePath,
-                         std::vector<MutationPoint *>());
-
-      mutationPointsPerFile.insert(pair);
-    }
-
-    std::vector<MutationPoint *> &currentFileMutationPoints =
-        mutationPointsPerFile.at(sourceLocation.filePath);
-    currentFileMutationPoints.push_back(mutant);
+    mutationPointsPerFile[sourceLocation.filePath].push_back(mutant);
   }
 
   // Step 2: Iterate through each file and dump the information about each
   // mutation points to its file's JSON entry.
-  for (const std::pair<std::string, std::vector<MutationPoint *>>
-           &fileMutationPoints : mutationPointsPerFile) {
+  for (auto &fileMutationPoints : mutationPointsPerFile) {
     Json::object fileJSON;
     fileJSON["language"] = "cpp";
 
@@ -76,9 +63,7 @@ json11::Json createFiles(const Result &result,
           sourceInfoProvider.getSourceInfo(mutationPoint);
 
       std::string status =
-          (killedMutants.find(mutationPoint) == killedMutants.end())
-              ? "Survived"
-              : "Killed";
+          (killedMutants.count(mutationPoint) == 0) ? "Survived" : "Killed";
 
       Json mpJson = Json::object{
           {"id", mutationPoint->getMutator()->getUniqueIdentifier()},
