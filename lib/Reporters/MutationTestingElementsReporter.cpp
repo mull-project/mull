@@ -135,6 +135,7 @@ void MutationTestingElementsReporter::reportResults(const Result &result,
     Logger::info() << "No mutants found. Mutation score: infinitely high\n";
     return;
   }
+  generateHTMLFile();
 
   std::set<MutationPoint *> killedMutants;
   for (auto &mutationResult : result.getMutationResults()) {
@@ -166,4 +167,22 @@ void MutationTestingElementsReporter::reportResults(const Result &result,
 }
 const std::string &MutationTestingElementsReporter::getJSONPath() {
   return jsonPath;
+}
+
+void MutationTestingElementsReporter::generateHTMLFile() {
+  const char *url = "https://www.unpkg.com/mutation-testing-elements";
+
+  std::ofstream out(htmlPath);
+  out << "<!DOCTYPE html>\n";
+  out << "<head>\n";
+  out << "  <title>Mutation Testing Elements</title>\n";
+  out << "  <script defer src=\"" << url << "\"></script>";
+  out << "</head>\n";
+  out << "<body>\n";
+  out << "  <mutation-test-report-app src=\"" << filename << ".json\""
+      << "</mutation-test-report-app>\n";
+  out << "</body>\n";
+  out << "</html>";
+
+  out.close();
 }

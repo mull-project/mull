@@ -20,6 +20,8 @@ public:
   const std::string &getJSONPath();
 
 private:
+  void generateHTMLFile();
+
   std::string filename;
   std::string htmlPath;
   std::string jsonPath;
