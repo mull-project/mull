@@ -79,7 +79,6 @@ TEST(Driver, SimpleTest_MathAddMutator) {
   configuration.bitcodePaths = {
       fixtures::simple_test_count_letters_test_count_letters_bc_path(),
       fixtures::simple_test_count_letters_count_letters_bc_path()};
-  configuration.forkEnabled = false;
 
   BitcodeLoader loader;
   Program program({}, {}, loader.loadBitcode(configuration));
@@ -95,7 +94,7 @@ TEST(Driver, SimpleTest_MathAddMutator) {
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.simpleTestFramework(toolchain, configuration));
-  ForkTimerSandbox sandbox;
+  NullProcessSandbox sandbox;
   std::vector<MutationFilter *> filters;
 
   Driver Driver(configuration, sandbox, program, toolchain, filters, filter,

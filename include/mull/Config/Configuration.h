@@ -10,7 +10,6 @@ namespace mull {
 class RawConfig;
 
 struct Configuration {
-  bool forkEnabled;
   bool dryRunEnabled;
   bool failFastEnabled;
   bool cacheEnabled;
