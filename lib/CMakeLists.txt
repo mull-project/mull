@@ -99,7 +99,9 @@ set(mull_sources
   TestFrameworks/NativeTestRunner.cpp
 
   MutationFilters/JunkMutationFilter.cpp
-  MutationFilters/NoDebugInfoFilter.cpp)
+  MutationFilters/NoDebugInfoFilter.cpp
+  MutationFilters/FilePathFilter.cpp
+  )
 
 set(MULL_INCLUDE_DIR ${MULL_SOURCE_DIR}/include/mull)
 
