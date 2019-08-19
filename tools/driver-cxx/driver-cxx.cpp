@@ -105,17 +105,16 @@ llvm::cl::opt<std::string> CacheDir(
     llvm::cl::desc("Where to store cache (defaults to /tmp/mull-cache)"),
     llvm::cl::cat(MullCXXCategory), llvm::cl::init("/tmp/mull-cache"));
 
-llvm::cl::opt<bool> ElementsReporterEnabled(
-    "reporter-elements", llvm::cl::Optional,
-    llvm::cl::desc("Enables Mutation Testing Elements Reporter"),
-    llvm::cl::cat(MullCXXCategory), llvm::cl::init(false));
+llvm::cl::opt<std::string>
+    ReportDirectory("report-dir", llvm::cl::Optional,
+                    llvm::cl::desc("Where to store report (defaults to '.')"),
+                    llvm::cl::cat(MullCXXCategory), llvm::cl::init("."));
 
-llvm::cl::opt<std::string> ElementsOutputDir(
-    "elements-output-path", llvm::cl::Optional,
-    llvm::cl::desc("Where to store the Mutation Testing Elements JSON report "
-                   "(defaults to /tmp/mull.mutation-testing-elements.json)"),
-    llvm::cl::cat(MullCXXCategory),
-    llvm::cl::init("/tmp/mull.mutation-testing-elements.json"));
+llvm::cl::opt<std::string> ReportName(
+    "report-name", llvm::cl::Optional,
+    llvm::cl::desc("Filename for the report (only for supported reporters). "
+                   "Defaults to <timestamp>.<extension>"),
+    llvm::cl::cat(MullCXXCategory), llvm::cl::init("."));
 
 llvm::cl::opt<bool>
     DisableCache("disable-cache", llvm::cl::Optional,
@@ -194,20 +193,30 @@ llvm::cl::list<std::string> ExcludePaths(
     llvm::cl::desc("File/directory paths to ignore (supports regex)"),
     llvm::cl::cat(MullCXXCategory));
 
-enum SandboxType { None, Watchdog, Timer };
-
 #if LLVM_VERSION_MAJOR == 3
 #define TRAILING_NULL , nullptr
 #else
 #define TRAILING_NULL
 #endif
 
+enum SandboxType { None, Watchdog, Timer };
 llvm::cl::opt<SandboxType> SandboxOption(
     "sandbox", llvm::cl::desc("Choose sandbox level:"),
     llvm::cl::values(clEnumVal(None, "No sandboxing"),
                      clEnumVal(Watchdog, "Uses 4 processes, not recommended"),
                      clEnumVal(Timer, "Fastest, Recommended") TRAILING_NULL),
     llvm::cl::cat(MullCXXCategory), llvm::cl::init(Timer));
+
+enum ReporterType { IDE, SQLite, Elements };
+llvm::cl::list<ReporterType> ReporterOption(
+    "reporters", llvm::cl::ZeroOrMore, llvm::cl::desc("Choose reporters:"),
+    llvm::cl::values(
+        clEnumVal(IDE, "Prints compiler-like warnings into stdout"),
+        clEnumVal(SQLite, "Saves results into an SQLite database"),
+        clEnumVal(Elements,
+                  "Generates mutation-testing-elements compatible JSON file")
+            TRAILING_NULL),
+    llvm::cl::cat(MullCXXCategory));
 
 std::unique_ptr<mull::ProcessSandbox>
 GetProcessSandbox(llvm::cl::opt<SandboxType> &option) {
@@ -325,6 +334,7 @@ int main(int argc, char **argv) {
   }
   mull::ASTStorage astStorage(junkDetectionConfig.cxxCompilationDatabasePath,
                               junkDetectionConfig.cxxCompilationFlags);
+  mull::ASTSourceInfoProvider sourceInfoProvider(astStorage);
   mull::CXXJunkDetector junkDetector(astStorage);
   mull::JunkMutationFilter junkFilter(junkDetector);
 
@@ -359,24 +369,36 @@ int main(int argc, char **argv) {
   auto result = driver.Run();
   metrics.endRun();
 
-  mull::RawConfig rawConfig;
-  //  mull::SQLiteReporter reporter;
-  //  reporter.reportResults(*result, rawConfig, metrics);
-
-  mull::IDEReporter ideReporter;
-  ideReporter.reportResults(*result, rawConfig, metrics);
-
-  if (ElementsReporterEnabled) {
-    if (junkDetectionEnabled) {
-      mull::ASTSourceInfoProvider sourceInfoProvider(astStorage);
-      mull::MutationTestingElementsReporter mutationTestingElementsReporter(
-          ElementsOutputDir, sourceInfoProvider);
-      mutationTestingElementsReporter.reportResults(*result, rawConfig,
-                                                    metrics);
-    } else {
-      mull::Logger::warn() << "The Mutation Testing Elements Reporter requires "
-                              "the compilation database to be provided";
+  std::vector<std::unique_ptr<mull::Reporter>> reporters;
+  for (auto i = 0; i < ReporterOption.getNumOccurrences(); i++) {
+    switch (ReporterOption[i]) {
+    case IDE: {
+      reporters.push_back(llvm::make_unique<mull::IDEReporter>());
+    } break;
+    case SQLite: {
+      reporters.push_back(
+          llvm::make_unique<mull::SQLiteReporter>(ReportDirectory, ReportName));
+    } break;
+    case Elements: {
+      if (junkDetectionEnabled) {
+        reporters.push_back(
+            llvm::make_unique<mull::MutationTestingElementsReporter>(
+                ReportDirectory, ReportName, sourceInfoProvider));
+      } else {
+        mull::Logger::warn()
+            << "The Mutation Testing Elements Reporter requires "
+               "the compilation database to be provided";
+      }
+    } break;
     }
+  }
+  if (reporters.empty()) {
+    reporters.push_back(llvm::make_unique<mull::IDEReporter>());
+  }
+
+  mull::RawConfig rawConfig;
+  for (auto &reporter : reporters) {
+    reporter->reportResults(*result, rawConfig, metrics);
   }
 
   llvm::llvm_shutdown();

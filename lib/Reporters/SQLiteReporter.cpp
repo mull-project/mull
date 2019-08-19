@@ -4,11 +4,10 @@
 #include "mull/Config/RawConfig.h"
 #include "mull/ExecutionResult.h"
 #include "mull/Logger.h"
-#include "mull/MutationResult.h"
-#include "mull/Result.h"
-
 #include "mull/Metrics/Metrics.h"
+#include "mull/MutationResult.h"
 #include "mull/Mutators/Mutator.h"
+#include "mull/Result.h"
 
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/Function.h>
@@ -63,25 +62,33 @@ void sqlite_step(sqlite3 *database, sqlite3_stmt *stmt) {
   }
 }
 
-SQLiteReporter::SQLiteReporter(const std::string &projectName) {
-  SmallString<MAXPATHLEN> databasePath;
-  auto error = llvm::sys::fs::current_path(databasePath);
-  if (error) {
-    Logger::error() << error.message() << "\n";
+static std::string currentTimestamp() {
+  time_t t;
+  time(&t);
+  return std::to_string(t);
+}
+
+static std::string getReportName(const std::string &name) {
+  std::string reportName = name;
+  if (reportName.empty()) {
+    time_t t;
+    time(&t);
+    reportName = std::to_string(t);
   }
+  return reportName + ".sqlite";
+}
 
-  time_t ct;
-  time(&ct);
-  std::string currentTime = std::to_string(ct);
-  std::string projectNameComponent = projectName;
-  if (!projectNameComponent.empty()) {
-    projectNameComponent += "_";
+static std::string getReportDir(const std::string &reportDir) {
+  if (reportDir.empty()) {
+    return std::string(".");
   }
+  return reportDir;
+}
 
-  llvm::sys::path::append(databasePath,
-                          projectNameComponent + currentTime + ".sqlite");
-
-  this->databasePath = databasePath.str();
+SQLiteReporter::SQLiteReporter(const std::string &reportDir,
+                               const std::string &reportName)
+    : databasePath(getReportDir(reportDir) + "/" + getReportName(reportName)) {
+  llvm::sys::fs::create_directories(reportDir, true);
 }
 
 std::string mull::SQLiteReporter::getDatabasePath() { return databasePath; }
@@ -89,9 +96,6 @@ std::string mull::SQLiteReporter::getDatabasePath() { return databasePath; }
 void mull::SQLiteReporter::reportResults(const Result &result,
                                          const RawConfig &config,
                                          const Metrics &metrics) {
-
-  std::string databasePath = getDatabasePath();
-
   sqlite3 *database;
   sqlite3_open(databasePath.c_str(), &database);
 
@@ -103,11 +107,11 @@ void mull::SQLiteReporter::reportResults(const Result &result,
       "INSERT INTO execution_result VALUES (?1, ?2, ?3, ?4, ?5, ?6)";
   sqlite3_stmt *insertExecutionResultStmt;
   sqlite3_prepare(database, insertExecutionResultQuery, -1,
-                  &insertExecutionResultStmt, NULL);
+                  &insertExecutionResultStmt, nullptr);
 
   const char *insertTestQuery = "INSERT INTO test VALUES (?1, ?2, ?3, ?4)";
   sqlite3_stmt *insertTestStmt;
-  sqlite3_prepare(database, insertTestQuery, -1, &insertTestStmt, NULL);
+  sqlite3_prepare(database, insertTestQuery, -1, &insertTestStmt, nullptr);
 
   for (auto &test : result.getTests()) {
     std::string testName = test.getTestDisplayName();
@@ -203,22 +207,20 @@ void mull::SQLiteReporter::reportResults(const Result &result,
       "?7, ?8, ?9, ?10, ?11, ?12)";
   sqlite3_stmt *insertMutationPointStmt;
   sqlite3_prepare(database, insertMutationPointQuery, -1,
-                  &insertMutationPointStmt, NULL);
+                  &insertMutationPointStmt, nullptr);
 
   const char *insertMutationPointDebugQuery =
       "INSERT OR IGNORE INTO mutation_point_debug VALUES (?1, ?2, ?3, ?4, ?5, "
       "?6, ?7, ?8)";
   sqlite3_stmt *insertMutationPointDebugStmt;
   sqlite3_prepare(database, insertMutationPointDebugQuery, -1,
-                  &insertMutationPointDebugStmt, NULL);
+                  &insertMutationPointDebugStmt, nullptr);
 
   for (auto mutationPoint : result.getMutationPoints()) {
     Instruction *instruction =
         dyn_cast<Instruction>(mutationPoint->getOriginalValue());
 
-    SourceLocation location =
-        mutationPoint
-            ->getSourceLocation(); // SourceLocation::sourceLocationFromInstruction(instruction);
+    SourceLocation location = mutationPoint->getSourceLocation();
 
     int index = 1;
     sqlite3_bind_text(
@@ -307,7 +309,8 @@ void mull::SQLiteReporter::reportResults(const Result &result,
         "INSERT INTO config VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, "
         "?11, ?12, ?13, ?14, ?15)";
     sqlite3_stmt *insertConfigStmt;
-    sqlite3_prepare(database, insertConfigQuery, -1, &insertConfigStmt, NULL);
+    sqlite3_prepare(database, insertConfigQuery, -1, &insertConfigStmt,
+                    nullptr);
 
     // Start and end times are not part of a config however we are
     // mixing them in to make them into a final report.

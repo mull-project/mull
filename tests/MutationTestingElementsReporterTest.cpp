@@ -39,9 +39,9 @@ static const int endLineStub = 4;
 
 class MockASTSourceInfoProvider : public SourceInfoProvider {
 public:
-  virtual ~MockASTSourceInfoProvider() {}
+  virtual ~MockASTSourceInfoProvider() = default;
 
-  MutationPointSourceInfo getSourceInfo(MutationPoint *mutationPoint) {
+  MutationPointSourceInfo getSourceInfo(MutationPoint *mutationPoint) override {
     MutationPointSourceInfo info;
     info.beginColumn = beginColumnStub;
     info.beginLine = beginLineStub;
@@ -130,9 +130,8 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   Result result(std::move(tests), std::move(mutationResults), mutationPoints);
 
   /// STEP2. Reporting results to JSON
-  std::string outputPath = "/tmp/mull.mutation-testing-elements.json";
   MockASTSourceInfoProvider sourceInfoProvider;
-  MutationTestingElementsReporter reporter(outputPath, sourceInfoProvider);
+  MutationTestingElementsReporter reporter("", "", sourceInfoProvider);
   Metrics metrics;
   metrics.setDriverRunTime(resultTime);
   reporter.reportResults(result, RawConfig(), metrics);
@@ -141,7 +140,7 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   std::vector<ExecutionResult> executionResults{testExecutionResult,
                                                 mutatedTestExecutionResult};
 
-  std::ifstream t(outputPath);
+  std::ifstream t(reporter.getJSONPath());
   std::string str((std::istreambuf_iterator<char>(t)),
                   std::istreambuf_iterator<char>());
   std::string err;
