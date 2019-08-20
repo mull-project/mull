@@ -104,8 +104,8 @@ can then be read by the Mutation Testing Elements's HTML/Javascript code and
 rendered in a browser. See the mutation-testing-elements's 
 [simple-example](https://github.com/stryker-mutator/mutation-testing-elements/tree/059732743f75ea1abfcc2f093cef7a8db8798739/packages/mutation-testing-elements/testResources/simple-example).
  
-The option `-reporter-elements` enables reporting to Mutation Testing Elements,
-the optional option `-elements-output-path` specifies the output path.
+The option `-reporters=Elements` enables reporting to Mutation Testing Elements,
+the optional option `-report-dir` and `-report-name` specifies the output path.
 
 **Note:** Reporting to Mutation Testing Elements requires presence of the 
 `-compdb-path` and `-compilation-flags` (see Junk Mutations above) because Mull 

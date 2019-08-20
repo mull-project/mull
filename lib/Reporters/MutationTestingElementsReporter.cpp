@@ -9,6 +9,7 @@
 #include "mull/Result.h"
 
 #include <json11/json11.hpp>
+#include <llvm/Support/FileSystem.h>
 
 #include <fstream>
 #include <map>
@@ -101,9 +102,31 @@ json11::Json createFiles(const Result &result,
   return filesJSON;
 }
 
+static std::string getFilename(const std::string &name) {
+  if (name.empty()) {
+    time_t t;
+    time(&t);
+    return std::to_string(t);
+  }
+  return name;
+}
+
+static std::string getReportDir(const std::string &dir) {
+  if (dir.empty()) {
+    return std::string(".");
+  }
+  return dir;
+}
+
 MutationTestingElementsReporter::MutationTestingElementsReporter(
-    std::string outputPath, SourceInfoProvider &sourceInfoProvider)
-    : outputPath(outputPath), sourceInfoProvider(sourceInfoProvider) {}
+    const std::string &reportDir, const std::string &reportName,
+    SourceInfoProvider &sourceInfoProvider)
+    : filename(getFilename(reportName)),
+      htmlPath(getReportDir(reportDir) + "/" + filename + ".html"),
+      jsonPath(getReportDir(reportDir) + "/" + filename + ".json"),
+      sourceInfoProvider(sourceInfoProvider) {
+  llvm::sys::fs::create_directories(reportDir);
+}
 
 void MutationTestingElementsReporter::reportResults(const Result &result,
                                                     const RawConfig &config,
@@ -112,6 +135,7 @@ void MutationTestingElementsReporter::reportResults(const Result &result,
     Logger::info() << "No mutants found. Mutation score: infinitely high\n";
     return;
   }
+  generateHTMLFile();
 
   std::set<MutationPoint *> killedMutants;
   for (auto &mutationResult : result.getMutationResults()) {
@@ -127,25 +151,38 @@ void MutationTestingElementsReporter::reportResults(const Result &result,
       double(killedMutants.size()) / double(result.getMutationPoints().size());
   auto score = uint(rawScore * 100);
 
-  Json my_json = Json::object{
+  Json json = Json::object{
       {"mutationScore", (int)score},
       {"thresholds", Json::object{{"high", 80}, {"low", 60}}},
       {"files", createFiles(result, killedMutants, sourceInfoProvider)},
   };
-  std::string json_str = my_json.dump();
-
-  if (outputPath.empty()) {
-    Logger::info()
-        << "MutationTestingElementsReporter: the output path is not provided, "
-        << "using default output path: "
-        << "\n"
-        << outputPath << "\n";
-  }
+  std::string json_str = json.dump();
 
   Logger::info() << "Mutation Testing Elements reporter: generating report to "
-                 << outputPath << "\n";
+                 << jsonPath << "\n";
 
-  std::ofstream out(outputPath);
+  std::ofstream out(jsonPath);
   out << json_str;
+  out.close();
+}
+const std::string &MutationTestingElementsReporter::getJSONPath() {
+  return jsonPath;
+}
+
+void MutationTestingElementsReporter::generateHTMLFile() {
+  const char *url = "https://www.unpkg.com/mutation-testing-elements";
+
+  std::ofstream out(htmlPath);
+  out << "<!DOCTYPE html>\n";
+  out << "<head>\n";
+  out << "  <title>Mutation Testing Elements</title>\n";
+  out << "  <script defer src=\"" << url << "\"></script>";
+  out << "</head>\n";
+  out << "<body>\n";
+  out << "  <mutation-test-report-app src=\"" << filename << ".json\""
+      << "</mutation-test-report-app>\n";
+  out << "</body>\n";
+  out << "</html>";
+
   out.close();
 }

@@ -105,7 +105,7 @@ TEST(SQLiteReporter, integrationTest) {
   Result result(std::move(tests), std::move(mutationResults), mutationPoints);
 
   /// STEP2. Reporting results to SQLite
-  SQLiteReporter reporter("integration test");
+  SQLiteReporter reporter("integration test", "");
   Metrics metrics;
   metrics.setDriverRunTime(resultTime);
   reporter.reportResults(result, RawConfig(), metrics);
@@ -280,7 +280,7 @@ TEST(SQLiteReporter, integrationTest_Config) {
                    distance, cacheDirectory, JunkDetectionConfig::disabled(),
                    ParallelizationConfig::defaultConfig(), "");
 
-  SQLiteReporter reporter(config.getProjectName());
+  SQLiteReporter reporter(projectName, "");
 
   MetricsMeasure resultTime;
   resultTime.begin = MetricsMeasure::Precision(1234);
@@ -476,7 +476,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
 
   Result result(std::move(tests), std::move(mutationResults), mutationPoints);
 
-  SQLiteReporter reporter(projectName);
+  SQLiteReporter reporter(projectName, "");
   Metrics metrics;
   metrics.setDriverRunTime(resultTime);
   reporter.reportResults(result, rawConfig, metrics);
@@ -612,7 +612,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
 
   Result result(std::move(tests), std::move(mutationResults), mutationPoints);
 
-  SQLiteReporter reporter(projectName);
+  SQLiteReporter reporter(projectName, "");
   Metrics metrics;
   metrics.setDriverRunTime(resultTime);
   reporter.reportResults(result, rawConfig, metrics);
