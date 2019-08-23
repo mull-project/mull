@@ -101,7 +101,7 @@ set(mull_sources
   MutationFilters/JunkMutationFilter.cpp
   MutationFilters/NoDebugInfoFilter.cpp
   MutationFilters/FilePathFilter.cpp
-  )
+  JunkDetection/CXX/Visitors/ScalarValueVisitor.cpp)
 
 set(MULL_INCLUDE_DIR ${MULL_SOURCE_DIR}/include/mull)
 

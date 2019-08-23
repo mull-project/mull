@@ -6,6 +6,7 @@
  - Reporting JSON to Mutation Testing Elements (initial support) #517, #507
  - Introduce `-exclude-path` option to filter mutations #553
  - Enable reporters configuration via `-reporters` option #555
+ - Junk detection for the Scalar Value mutator #557
 
 ## [0.4.0] - 11 Aug 2019
 
