@@ -14,6 +14,7 @@
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "mull/Mutators/RemoveVoidFunctionMutator.h"
 #include "mull/Mutators/ReplaceCallMutator.h"
+#include "mull/Mutators/ScalarValueMutator.h"
 #include "mull/Program/Program.h"
 #include "mull/Testee.h"
 #include "mull/Toolchain/Compiler.h"
@@ -137,7 +138,10 @@ static const CXXJunkDetectorTestParameter parameters[] = {
         new NegateConditionMutator, 42, 30),
     CXXJunkDetectorTestParameter(
         fixtures::mutators_and_or_replacement_cpp_junk_bc_path(),
-        new AndOrReplacementMutator, 6, 4)};
+        new AndOrReplacementMutator, 6, 4),
+    CXXJunkDetectorTestParameter(fixtures::mutators_scalar_value_junk_bc_path(),
+                                 new ScalarValueMutator, 12, 5),
+};
 
 INSTANTIATE_TEST_CASE_P(CXXJunkDetection, CXXJunkDetectorTest,
                         testing::ValuesIn(parameters));

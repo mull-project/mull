@@ -29,6 +29,7 @@ enum class MutatorKind {
   RemoveVoidFunctionMutator,
   ReplaceCallMutator,
   AndOrReplacementMutator,
+  ScalarValueMutator,
 };
 
 class Mutator {
