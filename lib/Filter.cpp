@@ -12,7 +12,7 @@ using namespace mull;
 
 bool Filter::shouldSkipInstruction(llvm::Instruction *instruction) {
   SourceLocation location =
-      SourceLocation::sourceLocationFromInstruction(instruction);
+      SourceLocation::locationFromInstruction(instruction);
   if (location.isNull()) {
     return false;
   }
@@ -33,8 +33,7 @@ bool Filter::shouldSkipFunction(llvm::Function *function) {
     }
   }
 
-  SourceLocation location =
-      SourceLocation::sourceLocationFromFunction(function);
+  SourceLocation location = SourceLocation::locationFromFunction(function);
   if (location.isNull()) {
     return false;
   }

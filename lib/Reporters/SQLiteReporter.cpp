@@ -119,7 +119,7 @@ void mull::SQLiteReporter::reportResults(const Result &result,
     ExecutionResult testExecutionResult = test.getExecutionResult();
 
     auto testLocation =
-        SourceLocation::sourceLocationFromFunction(test.getTestBody());
+        SourceLocation::locationFromFunction(test.getTestBody());
 
     int executionResultIndex = 1;
     sqlite3_bind_text(insertExecutionResultStmt, executionResultIndex++,

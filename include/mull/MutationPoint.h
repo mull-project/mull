@@ -28,9 +28,9 @@ class Test;
 /// to find the mutation point in the clone of original module, when mutator is
 /// to apply mutation in that clone.
 class MutationPointAddress {
-  int FnIndex;
-  int BBIndex;
-  int IIndex;
+  int functionIndex;
+  int basicBlockIndex;
+  int instructionIndex;
 
   std::string identifier;
 
@@ -41,23 +41,18 @@ public:
   int getBBIndex() const;
   int getIIndex() const;
 
-  std::string getIdentifier();
-
   std::string getIdentifier() const;
 
   llvm::Instruction &findInstruction(llvm::Module *module) const;
   llvm::Instruction &findInstruction(llvm::Function *function) const;
-  llvm::Function &findFunction(llvm::Module *module) const;
 
-  static int getFunctionIndex(llvm::Function *function);
-  static void enumerateInstructions(
-      llvm::Function &function,
-      const std::function<void(llvm::Instruction &, int, int)> &block);
+  const static MutationPointAddress
+  addressFromInstruction(const llvm::Instruction *instruction);
 };
 
 class MutationPoint {
   Mutator *mutator;
-  MutationPointAddress address;
+  const MutationPointAddress address;
   Bitcode *bitcode;
   llvm::Function *originalFunction;
   llvm::Function *mutatedFunction;
@@ -68,14 +63,13 @@ class MutationPoint {
   std::vector<std::pair<Test *, int>> reachableTests;
 
 public:
-  MutationPoint(Mutator *mutator, MutationPointAddress address,
-                llvm::Function *function, std::string diagnostics,
-                std::string replacement, SourceLocation location, Bitcode *m);
+  MutationPoint(Mutator *mutator, llvm::Instruction *instruction,
+                std::string diagnostics, std::string replacement, Bitcode *m);
 
   ~MutationPoint() = default;
 
   Mutator *getMutator();
-  MutationPointAddress getAddress();
+  const MutationPointAddress &getAddress() const;
   llvm::Value *getOriginalValue() const;
   Bitcode *getBitcode() const;
 

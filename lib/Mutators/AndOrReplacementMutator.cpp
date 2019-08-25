@@ -36,28 +36,6 @@ static std::string getMutationTypeToString(AND_OR_MutationType mutationType) {
   }
 }
 
-MutationPoint *AndOrReplacementMutator::getMutationPoint(
-    Bitcode *bitcode, llvm::Function *function, llvm::Instruction *instruction,
-    SourceLocation &sourceLocation, MutationPointAddress &address) {
-
-  AND_OR_MutationType mutationType = findPossibleMutation(*instruction);
-  if (mutationType != AND_OR_MutationType_None) {
-    std::string diagnostics = "AND-OR Replacement";
-    std::string replacement = getMutationTypeToString(mutationType);
-
-    return new MutationPoint(this, address, function, diagnostics, replacement,
-                             sourceLocation, bitcode);
-  }
-  return nullptr;
-}
-
-// TODO: remove this method at least from the public interface because it is
-// not used?
-bool AndOrReplacementMutator::canBeApplied(Value &V) {
-  assert(0 && "this method is no longer actual");
-  return false;
-}
-
 AND_OR_MutationType AndOrReplacementMutator::findPossibleMutation(Value &V) {
   BranchInst *branchInst = dyn_cast<BranchInst>(&V);
 
@@ -70,8 +48,7 @@ AND_OR_MutationType AndOrReplacementMutator::findPossibleMutation(Value &V) {
   }
 
   /// TODO: Discuss how to filter out irrelevant branch instructions.
-  SourceLocation location =
-      SourceLocation::sourceLocationFromInstruction(branchInst);
+  SourceLocation location = SourceLocation::locationFromInstruction(branchInst);
   if (!location.isNull()) {
     if (location.filePath.find("include/c++/v1") != std::string::npos) {
       return AND_OR_MutationType_None;
@@ -85,9 +62,8 @@ AND_OR_MutationType AndOrReplacementMutator::findPossibleMutation(Value &V) {
   return possibleMutationType;
 }
 
-llvm::Value *
-AndOrReplacementMutator::applyMutation(Function *function,
-                                       MutationPointAddress &address) {
+void AndOrReplacementMutator::applyMutation(
+    Function *function, const MutationPointAddress &address) {
   llvm::Instruction &I = address.findInstruction(function);
 
   BranchInst *branchInst = dyn_cast<BranchInst>(&I);
@@ -121,13 +97,11 @@ AndOrReplacementMutator::applyMutation(Function *function,
   if (possibleMutationType == AND_OR_MutationType_OR_to_AND_Pattern3) {
     return applyMutationORToAND_Pattern3(branchInst, secondBranch);
   }
-
-  return nullptr;
 }
 
 #pragma mark - Private: Apply mutations: AND -> OR
 
-llvm::Value *AndOrReplacementMutator::applyMutationANDToOR_Pattern1(
+void AndOrReplacementMutator::applyMutationANDToOR_Pattern1(
     BranchInst *firstBranch, BranchInst *secondBranch) {
 
   assert(firstBranch != nullptr);
@@ -196,11 +170,9 @@ llvm::Value *AndOrReplacementMutator::applyMutationANDToOR_Pattern1(
       PN->addIncoming(operand, replacement->getParent());
     }
   }
-
-  return replacement;
 }
 
-llvm::Value *AndOrReplacementMutator::applyMutationANDToOR_Pattern2(
+void AndOrReplacementMutator::applyMutationANDToOR_Pattern2(
     BranchInst *firstBranch, BranchInst *secondBranch) {
 
   assert(firstBranch != nullptr);
@@ -268,11 +240,9 @@ llvm::Value *AndOrReplacementMutator::applyMutationANDToOR_Pattern2(
       PN->addIncoming(operand, replacement->getParent());
     }
   }
-
-  return replacement;
 }
 
-llvm::Value *AndOrReplacementMutator::applyMutationANDToOR_Pattern3(
+void AndOrReplacementMutator::applyMutationANDToOR_Pattern3(
     BranchInst *firstBranch, BranchInst *secondBranch) {
   Module *module = firstBranch->getParent()->getParent()->getParent();
 
@@ -320,13 +290,11 @@ llvm::Value *AndOrReplacementMutator::applyMutationANDToOR_Pattern3(
   firstBranch->replaceAllUsesWith(replacement);
 
   firstBranch->eraseFromParent();
-
-  return nullptr;
 }
 
 #pragma mark - Private: Apply mutations: OR -> AND
 
-llvm::Value *AndOrReplacementMutator::applyMutationORToAND_Pattern1(
+void AndOrReplacementMutator::applyMutationORToAND_Pattern1(
     BranchInst *firstBranch, BranchInst *secondBranch) {
 
   assert(firstBranch != nullptr);
@@ -395,11 +363,9 @@ llvm::Value *AndOrReplacementMutator::applyMutationORToAND_Pattern1(
       PN->addIncoming(operand, replacement->getParent());
     }
   }
-
-  return replacement;
 }
 
-llvm::Value *AndOrReplacementMutator::applyMutationORToAND_Pattern2(
+void AndOrReplacementMutator::applyMutationORToAND_Pattern2(
     BranchInst *firstBranch, BranchInst *secondBranch) {
 
   assert(firstBranch != nullptr);
@@ -468,11 +434,9 @@ llvm::Value *AndOrReplacementMutator::applyMutationORToAND_Pattern2(
       PN->addIncoming(operand, replacement->getParent());
     }
   }
-
-  return replacement;
 }
 
-llvm::Value *AndOrReplacementMutator::applyMutationORToAND_Pattern3(
+void AndOrReplacementMutator::applyMutationORToAND_Pattern3(
     BranchInst *firstBranch, BranchInst *secondBranch) {
   Module *module = firstBranch->getParent()->getParent()->getParent();
 
@@ -520,8 +484,6 @@ llvm::Value *AndOrReplacementMutator::applyMutationORToAND_Pattern3(
   firstBranch->replaceAllUsesWith(replacement);
 
   firstBranch->eraseFromParent();
-
-  return nullptr;
 }
 
 #pragma mark - Private: Finding possible mutations
@@ -623,4 +585,29 @@ AND_OR_MutationType AndOrReplacementMutator::findPossibleMutationInBranch(
   }
 
   return AND_OR_MutationType_None;
+}
+
+std::vector<MutationPoint *>
+AndOrReplacementMutator::getMutations(Bitcode *bitcode,
+                                      llvm::Function *function) {
+  assert(bitcode);
+  assert(function);
+
+  std::vector<MutationPoint *> mutations;
+
+  for (auto &instruction : instructions(function)) {
+    AND_OR_MutationType mutationType = findPossibleMutation(instruction);
+    if (mutationType == AND_OR_MutationType_None) {
+      continue;
+    }
+
+    std::string diagnostics = "AND-OR Replacement";
+    std::string replacement = getMutationTypeToString(mutationType);
+
+    auto point = new MutationPoint(this, &instruction, diagnostics, replacement,
+                                   bitcode);
+    mutations.push_back(point);
+  }
+
+  return mutations;
 }

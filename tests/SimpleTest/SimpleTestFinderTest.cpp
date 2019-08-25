@@ -17,11 +17,11 @@ using namespace mull;
 using namespace llvm;
 
 TEST(SimpleTestFinder, findTest) {
-  LLVMContext llvmContext;
+  LLVMContext context;
   BitcodeLoader loader;
   auto bitcodeFile = loader.loadBitcodeAtPath(
       fixtures::simple_test_count_letters_test_count_letters_bc_path(),
-      llvmContext);
+      context);
 
   std::vector<std::unique_ptr<Bitcode>> bitcode;
   bitcode.push_back(std::move(bitcodeFile));

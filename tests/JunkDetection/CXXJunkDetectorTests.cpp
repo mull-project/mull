@@ -36,19 +36,17 @@ using ::testing::Values;
 struct CXXJunkDetectorTestParameter {
   const char *bitcodePath;
   Mutator *mutator;
-  uint8_t totalMutants;
   uint8_t nonJunkMutants;
   CXXJunkDetectorTestParameter(const char *bitcodePath, Mutator *mutator,
-                               uint8_t totalMutants, uint8_t nonJunkMutants)
-      : bitcodePath(bitcodePath), mutator(mutator), totalMutants(totalMutants),
+                               uint8_t nonJunkMutants)
+      : bitcodePath(bitcodePath), mutator(mutator),
         nonJunkMutants(nonJunkMutants) {}
 
   friend std::ostream &operator<<(std::ostream &os,
                                   const CXXJunkDetectorTestParameter &bar) {
     os << "path(" << bar.bitcodePath << ") mutator("
-       << bar.mutator->getUniqueIdentifier() << ") mutants("
-       << std::to_string(bar.nonJunkMutants) << "/"
-       << std::to_string(bar.totalMutants) << ")";
+       << bar.mutator->getUniqueIdentifier() << ") non-junk-mutants("
+       << std::to_string(bar.nonJunkMutants) << ")";
     return os;
   }
 };
@@ -58,32 +56,15 @@ class CXXJunkDetectorTest : public TestWithParam<CXXJunkDetectorTestParameter> {
 
 TEST_P(CXXJunkDetectorTest, detectJunk) {
   auto &parameter = GetParam();
-  LLVMContext llvmContext;
+  LLVMContext context;
   BitcodeLoader loader;
-  auto bitcodeFile =
-      loader.loadBitcodeAtPath(parameter.bitcodePath, llvmContext);
-  auto module = bitcodeFile->getModule();
+  auto bitcode = loader.loadBitcodeAtPath(parameter.bitcodePath, context);
 
-  std::vector<std::unique_ptr<Bitcode>> bitcode;
-  bitcode.push_back(std::move(bitcodeFile));
-  Program program({}, {}, std::move(bitcode));
-  Configuration configuration;
-
-  std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(std::move(std::unique_ptr<Mutator>(parameter.mutator)));
-  MutationsFinder finder(std::move(mutators), configuration);
-  Filter filter;
-
-  std::vector<std::unique_ptr<Testee>> testees;
-  for (auto &function : *module) {
-    testees.emplace_back(make_unique<Testee>(&function, nullptr, 1));
+  std::vector<MutationPoint *> points;
+  for (auto &function : bitcode->getModule()->functions()) {
+    auto mutants = parameter.mutator->getMutations(bitcode.get(), &function);
+    std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
   }
-  auto mergedTestees = mergeTestees(testees);
-
-  std::vector<MutationPoint *> points =
-      finder.getMutationPoints(program, mergedTestees, filter);
-
-  ASSERT_EQ(points.size(), parameter.totalMutants);
 
   JunkDetectionConfig junkConfig;
 
@@ -103,13 +84,13 @@ TEST_P(CXXJunkDetectorTest, detectJunk) {
 
 static const CXXJunkDetectorTestParameter parameters[] = {
     CXXJunkDetectorTestParameter(fixtures::mutators_boundary_module_bc_path(),
-                                 new ConditionalsBoundaryMutator, 7, 6),
+                                 new ConditionalsBoundaryMutator, 6),
     CXXJunkDetectorTestParameter(fixtures::mutators_math_add_module_bc_path(),
-                                 new MathAddMutator, 17, 16),
+                                 new MathAddMutator, 16),
     CXXJunkDetectorTestParameter(fixtures::mutators_math_mul_junk_bc_path(),
-                                 new MathMulMutator, 11, 10),
+                                 new MathMulMutator, 10),
     CXXJunkDetectorTestParameter(fixtures::mutators_math_div_junk_bc_path(),
-                                 new MathDivMutator, 11, 10),
+                                 new MathDivMutator, 10),
 
     /// FIXME: Here MathSub should produce 14 mutants, but only 9 found because
     /// some of the '--/-= 1' instructions converted into 'add -1'
@@ -126,50 +107,38 @@ static const CXXJunkDetectorTestParameter parameters[] = {
     /// At the moment of writing the second option more.
     ///
     CXXJunkDetectorTestParameter(fixtures::mutators_math_sub_junk_bc_path(),
-                                 new MathSubMutator, 9, 8),
+                                 new MathSubMutator, 8),
     CXXJunkDetectorTestParameter(
         fixtures::mutators_remove_void_function_junk_bc_path(),
-        new RemoveVoidFunctionMutator, 9, 6),
+        new RemoveVoidFunctionMutator, 6),
     CXXJunkDetectorTestParameter(fixtures::mutators_replace_call_junk_bc_path(),
-                                 new ReplaceCallMutator, 12, 11),
+                                 new ReplaceCallMutator, 11),
 
     CXXJunkDetectorTestParameter(
         fixtures::mutators_negate_condition_junk_bc_path(),
-        new NegateConditionMutator, 42, 30),
+        new NegateConditionMutator, 30),
     CXXJunkDetectorTestParameter(
         fixtures::mutators_and_or_replacement_cpp_junk_bc_path(),
-        new AndOrReplacementMutator, 6, 4),
+        new AndOrReplacementMutator, 4),
     CXXJunkDetectorTestParameter(fixtures::mutators_scalar_value_junk_bc_path(),
-                                 new ScalarValueMutator, 12, 5),
+                                 new ScalarValueMutator, 5),
 };
 
 INSTANTIATE_TEST_CASE_P(CXXJunkDetection, CXXJunkDetectorTest,
                         testing::ValuesIn(parameters));
 
 TEST(CXXJunkDetector, compdb_absolute_paths) {
-  LLVMContext llvmContext;
+  LLVMContext context;
   BitcodeLoader loader;
-  auto bitcodeFile = loader.loadBitcodeAtPath(
-      fixtures::junk_detection_compdb_main_bc_path(), llvmContext);
-  auto module = bitcodeFile->getModule();
+  auto path = fixtures::junk_detection_compdb_main_bc_path();
+  auto bitcode = loader.loadBitcodeAtPath(path, context);
 
-  std::vector<std::unique_ptr<Bitcode>> bitcode;
-  bitcode.push_back(std::move(bitcodeFile));
-  Program program({}, {}, std::move(bitcode));
-  Configuration configuration;
-
-  std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<ConditionalsBoundaryMutator>());
-  MutationsFinder finder(std::move(mutators), configuration);
-  Filter filter;
-
-  std::vector<std::unique_ptr<Testee>> testees;
-  for (auto &function : *module) {
-    testees.emplace_back(make_unique<Testee>(&function, nullptr, 1));
+  std::vector<MutationPoint *> points;
+  ConditionalsBoundaryMutator mutator;
+  for (auto &function : bitcode->getModule()->functions()) {
+    auto mutants = mutator.getMutations(bitcode.get(), &function);
+    std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
   }
-  auto mergedTestees = mergeTestees(testees);
-  std::vector<MutationPoint *> points =
-      finder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_EQ(points.size(), 8U);
 
@@ -238,30 +207,18 @@ TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
 }
 
 TEST(CXXJunkDetector, no_compdb) {
-  LLVMContext llvmContext;
+  LLVMContext context;
   BitcodeLoader loader;
-  auto bitcodeFile = loader.loadBitcodeAtPath(
-      fixtures::junk_detection_compdb_main_bc_path(), llvmContext);
-  auto module = bitcodeFile->getModule();
+  auto path = fixtures::junk_detection_compdb_main_bc_path();
+  auto bitcode = loader.loadBitcodeAtPath(path, context);
 
-  std::vector<std::unique_ptr<Bitcode>> bitcode;
-  bitcode.push_back(std::move(bitcodeFile));
-  Program program({}, {}, std::move(bitcode));
-  Configuration configuration;
+  std::vector<MutationPoint *> points;
 
-  std::vector<std::unique_ptr<Mutator>> mutatorss;
-  mutatorss.emplace_back(make_unique<ConditionalsBoundaryMutator>());
-  MutationsFinder finder(std::move(mutatorss), configuration);
-  Filter filter;
-
-  std::vector<std::unique_ptr<Testee>> testees;
-  for (auto &function : *module) {
-    testees.emplace_back(make_unique<Testee>(&function, nullptr, 1));
+  ConditionalsBoundaryMutator mutator;
+  for (auto &function : bitcode->getModule()->functions()) {
+    auto mutants = mutator.getMutations(bitcode.get(), &function);
+    std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
   }
-  auto mergedTestees = mergeTestees(testees);
-
-  std::vector<MutationPoint *> points =
-      finder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_EQ(points.size(), 8U);
 

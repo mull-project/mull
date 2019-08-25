@@ -21,66 +21,35 @@ using namespace mull;
 using namespace llvm;
 
 TEST(ScalarValueMutator, getMutationPoint) {
-  LLVMContext llvmContext;
-  BitcodeLoader loader;
-  auto bitcodeFile = loader.loadBitcodeAtPath(
-      fixtures::mutators_scalar_value_module_bc_path(), llvmContext);
-
-  std::vector<std::unique_ptr<Bitcode>> bitcode;
-  bitcode.push_back(std::move(bitcodeFile));
-  Program program({}, {}, std::move(bitcode));
-
-  auto scalarValueFunction = program.lookupDefinedFunction("scalar_value");
-  std::vector<std::unique_ptr<Testee>> testees;
-  testees.emplace_back(make_unique<Testee>(scalarValueFunction, nullptr, 1));
-  auto mergedTestees = mergeTestees(testees);
-  Configuration configuration;
-
-  std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<ScalarValueMutator>());
-  MutationsFinder finder(std::move(mutators), configuration);
-  Filter filter;
-
-  std::vector<MutationPoint *> mutationPoints =
-      finder.getMutationPoints(program, mergedTestees, filter);
-
-  ASSERT_EQ(mutationPoints.size(), 4U);
-
-  ASSERT_TRUE(isa<StoreInst>(mutationPoints[0]->getOriginalValue()));
-  ASSERT_TRUE(isa<StoreInst>(mutationPoints[1]->getOriginalValue()));
-  ASSERT_TRUE(isa<BinaryOperator>(mutationPoints[2]->getOriginalValue()));
-  ASSERT_TRUE(isa<BinaryOperator>(mutationPoints[3]->getOriginalValue()));
-
-  ASSERT_EQ(mutationPoints[0]->getAddress().getFnIndex(), 0);
-  ASSERT_EQ(mutationPoints[0]->getAddress().getBBIndex(), 0);
-  ASSERT_EQ(mutationPoints[0]->getAddress().getIIndex(), 4);
-
-  ASSERT_EQ(mutationPoints[1]->getAddress().getFnIndex(), 0);
-  ASSERT_EQ(mutationPoints[1]->getAddress().getBBIndex(), 0);
-  ASSERT_EQ(mutationPoints[1]->getAddress().getIIndex(), 5);
-
-  ASSERT_EQ(mutationPoints[2]->getAddress().getFnIndex(), 0);
-  ASSERT_EQ(mutationPoints[2]->getAddress().getBBIndex(), 0);
-  ASSERT_EQ(mutationPoints[2]->getAddress().getIIndex(), 9);
-
-  ASSERT_EQ(mutationPoints[3]->getAddress().getFnIndex(), 0);
-  ASSERT_EQ(mutationPoints[3]->getAddress().getBBIndex(), 0);
-  ASSERT_EQ(mutationPoints[3]->getAddress().getIIndex(), 12);
-}
-
-TEST(DISABLED_ScalarValueMutator, failingMutationPoint) {
-  LLVMContext llvmContext;
+  LLVMContext context;
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
-      fixtures::hardcode_openssl_bio_enc_test_oll_path(), llvmContext);
+      fixtures::mutators_scalar_value_module_bc_path(), context);
 
-  MutationPointAddress address(15, 10, 7);
   ScalarValueMutator mutator;
-  MutationPoint point(&mutator, address, nullptr, "diagnostics", "replacement",
-                      SourceLocation::nullSourceLocation(), bitcode.get());
+  auto mutants = mutator.getMutations(
+      bitcode.get(), bitcode->getModule()->getFunction("scalar_value"));
 
-  Configuration configuration;
-  Toolchain toolchain(configuration);
-  //  auto mutant = point.cloneModuleAndApplyMutation();
-  //  toolchain.compiler().compileModule(mutant.get());
+  ASSERT_EQ(mutants.size(), 4U);
+
+  ASSERT_TRUE(isa<StoreInst>(mutants[0]->getOriginalValue()));
+  ASSERT_TRUE(isa<StoreInst>(mutants[1]->getOriginalValue()));
+  ASSERT_TRUE(isa<BinaryOperator>(mutants[2]->getOriginalValue()));
+  ASSERT_TRUE(isa<BinaryOperator>(mutants[3]->getOriginalValue()));
+
+  ASSERT_EQ(mutants[0]->getAddress().getFnIndex(), 0);
+  ASSERT_EQ(mutants[0]->getAddress().getBBIndex(), 0);
+  ASSERT_EQ(mutants[0]->getAddress().getIIndex(), 4);
+
+  ASSERT_EQ(mutants[1]->getAddress().getFnIndex(), 0);
+  ASSERT_EQ(mutants[1]->getAddress().getBBIndex(), 0);
+  ASSERT_EQ(mutants[1]->getAddress().getIIndex(), 5);
+
+  ASSERT_EQ(mutants[2]->getAddress().getFnIndex(), 0);
+  ASSERT_EQ(mutants[2]->getAddress().getBBIndex(), 0);
+  ASSERT_EQ(mutants[2]->getAddress().getIIndex(), 9);
+
+  ASSERT_EQ(mutants[3]->getAddress().getFnIndex(), 0);
+  ASSERT_EQ(mutants[3]->getAddress().getBBIndex(), 0);
+  ASSERT_EQ(mutants[3]->getAddress().getIIndex(), 12);
 }

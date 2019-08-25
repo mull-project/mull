@@ -18,20 +18,6 @@ using namespace mull;
 const std::string MathDivMutator::ID = "math_div_mutator";
 const std::string MathDivMutator::description = "Replaces / with *";
 
-MutationPoint *MathDivMutator::getMutationPoint(Bitcode *bitcode,
-                                                llvm::Function *function,
-                                                llvm::Instruction *instruction,
-                                                SourceLocation &sourceLocation,
-                                                MutationPointAddress &address) {
-  if (canBeApplied(*instruction)) {
-    std::string diagnostics = "Math Div: replaced / with *";
-    return new MutationPoint(this, address, function, diagnostics, "*",
-                             sourceLocation, bitcode);
-  }
-
-  return nullptr;
-}
-
 bool MathDivMutator::canBeApplied(Value &V) {
   if (BinaryOperator *BinOp = dyn_cast<BinaryOperator>(&V)) {
     BinaryOperator::BinaryOps Opcode = BinOp->getOpcode();
@@ -45,8 +31,8 @@ bool MathDivMutator::canBeApplied(Value &V) {
   return false;
 }
 
-llvm::Value *MathDivMutator::applyMutation(Function *function,
-                                           MutationPointAddress &address) {
+void MathDivMutator::applyMutation(Function *function,
+                                   const MutationPointAddress &address) {
   llvm::Instruction &I = address.findInstruction(function);
 
   BinaryOperator *binaryOperator = cast<BinaryOperator>(&I);
@@ -77,6 +63,24 @@ llvm::Value *MathDivMutator::applyMutation(Function *function,
   replacement->insertAfter(binaryOperator);
   binaryOperator->replaceAllUsesWith(replacement);
   binaryOperator->eraseFromParent();
+}
+std::vector<MutationPoint *>
+MathDivMutator::getMutations(Bitcode *bitcode, llvm::Function *function) {
+  assert(bitcode);
+  assert(function);
 
-  return replacement;
+  std::vector<MutationPoint *> mutations;
+
+  for (auto &instruction : instructions(function)) {
+    if (!canBeApplied(instruction)) {
+      continue;
+    }
+
+    std::string diagnostics = "Math Div: replaced / with *";
+    auto point =
+        new MutationPoint(this, &instruction, diagnostics, "*", bitcode);
+    mutations.push_back(point);
+  }
+
+  return mutations;
 }

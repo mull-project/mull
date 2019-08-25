@@ -19,8 +19,8 @@ const SourceLocation SourceLocation::nullSourceLocation() {
   return SourceLocation(std::string(), std::string(), 0, 0);
 }
 
-const SourceLocation SourceLocation::sourceLocationFromInstruction(
-    const llvm::Instruction *instruction) {
+const SourceLocation
+SourceLocation::locationFromInstruction(const llvm::Instruction *instruction) {
   if (instruction->getMetadata(0) == nullptr) {
     return nullSourceLocation();
   }
@@ -40,7 +40,7 @@ const SourceLocation SourceLocation::sourceLocationFromInstruction(
 }
 
 const SourceLocation
-SourceLocation::sourceLocationFromFunction(const llvm::Function *function) {
+SourceLocation::locationFromFunction(const llvm::Function *function) {
   if (function->getMetadata(0) == nullptr) {
     return nullSourceLocation();
   }

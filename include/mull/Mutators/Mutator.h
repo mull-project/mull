@@ -12,7 +12,6 @@ class Instruction;
 
 namespace mull {
 
-class Context;
 class Bitcode;
 class MutationPoint;
 class MutationPointAddress;
@@ -34,21 +33,17 @@ enum class MutatorKind {
 
 class Mutator {
 public:
-  virtual MutationPoint *getMutationPoint(Bitcode *bitcode,
-                                          llvm::Function *function,
-                                          llvm::Instruction *instruction,
-                                          SourceLocation &sourceLocation,
-                                          MutationPointAddress &address) = 0;
-
   virtual std::string getUniqueIdentifier() = 0;
   virtual std::string getUniqueIdentifier() const = 0;
   virtual MutatorKind mutatorKind() { return MutatorKind::Unknown; }
 
   virtual std::string getDescription() const = 0;
 
-  virtual bool canBeApplied(llvm::Value &V) = 0;
-  virtual llvm::Value *applyMutation(llvm::Function *function,
-                                     MutationPointAddress &address) = 0;
+  virtual void applyMutation(llvm::Function *function,
+                             const MutationPointAddress &address) = 0;
+  virtual std::vector<MutationPoint *>
+  getMutations(Bitcode *bitcode, llvm::Function *function) = 0;
+
   virtual ~Mutator() = default;
 };
 
