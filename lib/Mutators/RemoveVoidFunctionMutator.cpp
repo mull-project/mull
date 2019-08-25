@@ -35,70 +35,40 @@ std::string getDiagnostics(Instruction &instruction) {
   return diagnostics;
 }
 
-MutationPoint *RemoveVoidFunctionMutator::getMutationPoint(
-    Bitcode *bitcode, llvm::Function *function, llvm::Instruction *instruction,
-    SourceLocation &sourceLocation, MutationPointAddress &address) {
-  if (canBeApplied(*instruction)) {
-    std::string diagnostics = getDiagnostics(*instruction);
-    std::string replacement = "🚫";
-    return new MutationPoint(this, address, function, diagnostics, replacement,
-                             sourceLocation, bitcode);
-  }
-
-  return nullptr;
-}
-
-bool RemoveVoidFunctionMutator::canBeApplied(Value &V) {
-  if (CallInst *callInst = dyn_cast<CallInst>(&V)) {
-
-    /// How it can be that there is no a called function?
-    if (Function *calledFunction = callInst->getCalledFunction()) {
-      if (calledFunction->getName().startswith("llvm.dbg.declare")) {
-        return false;
-      }
-
-      if (calledFunction->getName().startswith("llvm.dbg.value")) {
-        return false;
-      }
-
-      if (calledFunction->getName().startswith("mull_")) {
-        return false;
-      }
-
-      if (calledFunction->getName().str().find("clang_call_terminate") !=
-          std::string::npos) {
-        return false;
-      }
-
-      /// Do not remove 'void operator delete(void *)'
-      if (calledFunction->getName().endswith("ZdlPv")) {
-        return false;
-      }
-
-      /// TODO: This might also filter out important code. Review this later.
-      if (calledFunction->getName().endswith("D1Ev") ||
-          calledFunction->getName().endswith("D2Ev") ||
-          calledFunction->getName().str().find("C1E") != std::string::npos ||
-          calledFunction->getName().str().find("C2E") != std::string::npos) {
-        return false;
-      }
-
-      if (calledFunction->getReturnType()->getTypeID() == Type::VoidTyID) {
-        return true;
-      }
-    }
-  }
-
-  return false;
-}
-
-llvm::Value *
-RemoveVoidFunctionMutator::applyMutation(Function *function,
-                                         MutationPointAddress &address) {
+void RemoveVoidFunctionMutator::applyMutation(
+    Function *function, const MutationPointAddress &address) {
   llvm::Instruction &I = address.findInstruction(function);
 
   CallInst *callInst = dyn_cast<CallInst>(&I);
   callInst->eraseFromParent();
+}
 
-  return nullptr;
+std::vector<MutationPoint *>
+RemoveVoidFunctionMutator::getMutations(Bitcode *bitcode,
+                                        llvm::Function *function) {
+  assert(bitcode);
+  assert(function);
+
+  std::vector<MutationPoint *> mutations;
+
+  for (auto &instruction : instructions(function)) {
+    auto callInstruction = dyn_cast<CallInst>(&instruction);
+    if (!callInstruction) {
+      continue;
+    }
+    auto calledFunction = callInstruction->getCalledFunction();
+    if (!calledFunction ||
+        calledFunction->getReturnType()->getTypeID() != Type::VoidTyID) {
+      continue;
+    }
+
+    std::string diagnostics = getDiagnostics(instruction);
+    std::string replacement = "🚫";
+
+    auto point = new MutationPoint(this, &instruction, diagnostics, replacement,
+                                   bitcode);
+    mutations.push_back(point);
+  }
+
+  return mutations;
 }

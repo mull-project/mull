@@ -17,27 +17,15 @@ using namespace mull;
 TEST(NoDebugInfoFilter, withDebugInfo) {
   llvm::LLVMContext context;
   BitcodeLoader loader;
-  auto bitcodeFile = loader.loadBitcodeAtPath(
-      fixtures::mutation_filters_no_debug_filter_with_debug_bc_path(), context);
-  auto module = bitcodeFile->getModule();
+  auto path = fixtures::mutation_filters_no_debug_filter_with_debug_bc_path();
+  auto bitcode = loader.loadBitcodeAtPath(path, context);
+  std::vector<MutationPoint *> points;
 
-  std::vector<std::unique_ptr<Bitcode>> bitcode;
-  bitcode.push_back(std::move(bitcodeFile));
-  Program program({}, {}, std::move(bitcode));
-  Configuration configuration;
-
-  std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(llvm::make_unique<MathAddMutator>());
-  MutationsFinder finder(std::move(mutators), configuration);
-  Filter filter;
-
-  std::vector<std::unique_ptr<Testee>> testees;
-  for (auto &function : *module) {
-    testees.emplace_back(llvm::make_unique<Testee>(&function, nullptr, 1));
+  MathAddMutator mutator;
+  for (auto &function : bitcode->getModule()->functions()) {
+    auto mutants = mutator.getMutations(bitcode.get(), &function);
+    std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
   }
-  auto mergedTestees = mergeTestees(testees);
-  std::vector<MutationPoint *> points =
-      finder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_NE(points.size(), size_t(0));
 
@@ -55,28 +43,16 @@ TEST(NoDebugInfoFilter, withDebugInfo) {
 TEST(NoDebugInfoFilter, withouDebugInfo) {
   llvm::LLVMContext context;
   BitcodeLoader loader;
-  auto bitcodeFile = loader.loadBitcodeAtPath(
-      fixtures::mutation_filters_no_debug_filter_without_debug_bc_path(),
-      context);
-  auto module = bitcodeFile->getModule();
+  auto path =
+      fixtures::mutation_filters_no_debug_filter_without_debug_bc_path();
+  auto bitcode = loader.loadBitcodeAtPath(path, context);
 
-  std::vector<std::unique_ptr<Bitcode>> bitcode;
-  bitcode.push_back(std::move(bitcodeFile));
-  Program program({}, {}, std::move(bitcode));
-  Configuration configuration;
-
-  std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(llvm::make_unique<MathAddMutator>());
-  MutationsFinder finder(std::move(mutators), configuration);
-  Filter filter;
-
-  std::vector<std::unique_ptr<Testee>> testees;
-  for (auto &function : *module) {
-    testees.emplace_back(llvm::make_unique<Testee>(&function, nullptr, 1));
+  std::vector<MutationPoint *> points;
+  MathAddMutator mutator;
+  for (auto &function : bitcode->getModule()->functions()) {
+    auto mutants = mutator.getMutations(bitcode.get(), &function);
+    std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
   }
-  auto mergedTestees = mergeTestees(testees);
-  std::vector<MutationPoint *> points =
-      finder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_NE(points.size(), size_t(0));
 
@@ -94,28 +70,16 @@ TEST(NoDebugInfoFilter, withouDebugInfo) {
 TEST(FilePathFilter, doesNotFilterEmpty) {
   llvm::LLVMContext context;
   BitcodeLoader loader;
-  auto bitcodeFile = loader.loadBitcodeAtPath(
-      fixtures::mutation_filters_file_path_some_test_file_name_bc_path(),
-      context);
-  auto module = bitcodeFile->getModule();
+  auto path =
+      fixtures::mutation_filters_file_path_some_test_file_name_bc_path();
+  auto bitcode = loader.loadBitcodeAtPath(path, context);
 
-  std::vector<std::unique_ptr<Bitcode>> bitcode;
-  bitcode.push_back(std::move(bitcodeFile));
-  Program program({}, {}, std::move(bitcode));
-  Configuration configuration;
-
-  std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(llvm::make_unique<MathAddMutator>());
-  MutationsFinder finder(std::move(mutators), configuration);
-  Filter filter;
-
-  std::vector<std::unique_ptr<Testee>> testees;
-  for (auto &function : *module) {
-    testees.emplace_back(llvm::make_unique<Testee>(&function, nullptr, 1));
+  std::vector<MutationPoint *> points;
+  MathAddMutator mutator;
+  for (auto &function : bitcode->getModule()->functions()) {
+    auto mutants = mutator.getMutations(bitcode.get(), &function);
+    std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
   }
-  auto mergedTestees = mergeTestees(testees);
-  std::vector<MutationPoint *> points =
-      finder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_NE(points.size(), size_t(0));
 
@@ -133,28 +97,16 @@ TEST(FilePathFilter, doesNotFilterEmpty) {
 TEST(FilePathFilter, doesNotFilterMismatch) {
   llvm::LLVMContext context;
   BitcodeLoader loader;
-  auto bitcodeFile = loader.loadBitcodeAtPath(
-      fixtures::mutation_filters_file_path_some_test_file_name_bc_path(),
-      context);
-  auto module = bitcodeFile->getModule();
+  auto path =
+      fixtures::mutation_filters_file_path_some_test_file_name_bc_path();
+  auto bitcode = loader.loadBitcodeAtPath(path, context);
 
-  std::vector<std::unique_ptr<Bitcode>> bitcode;
-  bitcode.push_back(std::move(bitcodeFile));
-  Program program({}, {}, std::move(bitcode));
-  Configuration configuration;
-
-  std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(llvm::make_unique<MathAddMutator>());
-  MutationsFinder finder(std::move(mutators), configuration);
-  Filter filter;
-
-  std::vector<std::unique_ptr<Testee>> testees;
-  for (auto &function : *module) {
-    testees.emplace_back(llvm::make_unique<Testee>(&function, nullptr, 1));
+  std::vector<MutationPoint *> points;
+  MathAddMutator mutator;
+  for (auto &function : bitcode->getModule()->functions()) {
+    auto mutants = mutator.getMutations(bitcode.get(), &function);
+    std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
   }
-  auto mergedTestees = mergeTestees(testees);
-  std::vector<MutationPoint *> points =
-      finder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_NE(points.size(), size_t(0));
 
@@ -173,28 +125,16 @@ TEST(FilePathFilter, doesNotFilterMismatch) {
 TEST(FilePathFilter, filtersPlainString) {
   llvm::LLVMContext context;
   BitcodeLoader loader;
-  auto bitcodeFile = loader.loadBitcodeAtPath(
-      fixtures::mutation_filters_file_path_some_test_file_name_bc_path(),
-      context);
-  auto module = bitcodeFile->getModule();
+  auto path =
+      fixtures::mutation_filters_file_path_some_test_file_name_bc_path();
+  auto bitcode = loader.loadBitcodeAtPath(path, context);
 
-  std::vector<std::unique_ptr<Bitcode>> bitcode;
-  bitcode.push_back(std::move(bitcodeFile));
-  Program program({}, {}, std::move(bitcode));
-  Configuration configuration;
-
-  std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(llvm::make_unique<MathAddMutator>());
-  MutationsFinder finder(std::move(mutators), configuration);
-  Filter filter;
-
-  std::vector<std::unique_ptr<Testee>> testees;
-  for (auto &function : *module) {
-    testees.emplace_back(llvm::make_unique<Testee>(&function, nullptr, 1));
+  std::vector<MutationPoint *> points;
+  MathAddMutator mutator;
+  for (auto &function : bitcode->getModule()->functions()) {
+    auto mutants = mutator.getMutations(bitcode.get(), &function);
+    std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
   }
-  auto mergedTestees = mergeTestees(testees);
-  std::vector<MutationPoint *> points =
-      finder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_NE(points.size(), size_t(0));
 
@@ -213,28 +153,16 @@ TEST(FilePathFilter, filtersPlainString) {
 TEST(FilePathFilter, filtersWithRegex) {
   llvm::LLVMContext context;
   BitcodeLoader loader;
-  auto bitcodeFile = loader.loadBitcodeAtPath(
-      fixtures::mutation_filters_file_path_some_test_file_name_bc_path(),
-      context);
-  auto module = bitcodeFile->getModule();
+  auto path =
+      fixtures::mutation_filters_file_path_some_test_file_name_bc_path();
+  auto bitcode = loader.loadBitcodeAtPath(path, context);
 
-  std::vector<std::unique_ptr<Bitcode>> bitcode;
-  bitcode.push_back(std::move(bitcodeFile));
-  Program program({}, {}, std::move(bitcode));
-  Configuration configuration;
-
-  std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(llvm::make_unique<MathAddMutator>());
-  MutationsFinder finder(std::move(mutators), configuration);
-  Filter filter;
-
-  std::vector<std::unique_ptr<Testee>> testees;
-  for (auto &function : *module) {
-    testees.emplace_back(llvm::make_unique<Testee>(&function, nullptr, 1));
+  std::vector<MutationPoint *> points;
+  MathAddMutator mutator;
+  for (auto &function : bitcode->getModule()->functions()) {
+    auto mutants = mutator.getMutations(bitcode.get(), &function);
+    std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
   }
-  auto mergedTestees = mergeTestees(testees);
-  std::vector<MutationPoint *> points =
-      finder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_NE(points.size(), size_t(0));
 

@@ -22,12 +22,6 @@ const std::string ReplaceCallMutator::description =
 
 static bool findPossibleApplication(Value &V, std::string &outDiagnostics);
 
-bool ReplaceCallMutator::canBeApplied(Value &V) {
-  std::string diagnostics;
-
-  return findPossibleApplication(V, diagnostics);
-}
-
 static bool findPossibleApplication(Value &V, std::string &outDiagnostics) {
 
   std::string diagnostics;
@@ -69,23 +63,6 @@ static bool findPossibleApplication(Value &V, std::string &outDiagnostics) {
   return true;
 }
 
-MutationPoint *ReplaceCallMutator::getMutationPoint(
-    Bitcode *bitcode, llvm::Function *function, llvm::Instruction *instruction,
-    SourceLocation &sourceLocation, MutationPointAddress &address) {
-
-  std::string diagnostics;
-
-  if (findPossibleApplication(*instruction, diagnostics) == false) {
-    return nullptr;
-  }
-
-  const std::string replacement = "42";
-  auto mutationPoint = new MutationPoint(this, address, function, diagnostics,
-                                         replacement, sourceLocation, bitcode);
-
-  return mutationPoint;
-}
-
 static llvm::Value *getReplacement(Type *returnType,
                                    llvm::LLVMContext &context) {
   static const int MagicValue = 42;
@@ -108,8 +85,8 @@ static llvm::Value *getReplacement(Type *returnType,
   llvm_unreachable("Unsupported return type!");
 }
 
-llvm::Value *ReplaceCallMutator::applyMutation(Function *function,
-                                               MutationPointAddress &address) {
+void ReplaceCallMutator::applyMutation(Function *function,
+                                       const MutationPointAddress &address) {
   llvm::Instruction &instruction = address.findInstruction(function);
 
   CallSite callSite(&instruction);
@@ -120,6 +97,26 @@ llvm::Value *ReplaceCallMutator::applyMutation(Function *function,
 
   instruction.replaceAllUsesWith(replacement);
   instruction.eraseFromParent();
+}
+std::vector<MutationPoint *>
+ReplaceCallMutator::getMutations(Bitcode *bitcode, llvm::Function *function) {
+  assert(bitcode);
+  assert(function);
 
-  return nullptr;
+  std::vector<MutationPoint *> mutations;
+
+  for (auto &instruction : instructions(function)) {
+    std::string diagnostics;
+
+    if (!findPossibleApplication(instruction, diagnostics)) {
+      continue;
+    }
+
+    const std::string replacement = "42";
+    auto point = new MutationPoint(this, &instruction, diagnostics, replacement,
+                                   bitcode);
+    mutations.push_back(point);
+  }
+
+  return mutations;
 }

@@ -232,37 +232,8 @@ MutatorKind ConditionalsBoundaryMutator::mutatorKind() {
   return MutatorKind::ConditionalsBoundaryMutator;
 }
 
-MutationPoint *ConditionalsBoundaryMutator::getMutationPoint(
-    Bitcode *bitcode, llvm::Function *function, llvm::Instruction *instruction,
-    SourceLocation &sourceLocation, MutationPointAddress &address) {
-  CmpInst *cmpOp = dyn_cast<CmpInst>(instruction);
-  if (cmpOp == nullptr) {
-    return nullptr;
-  }
-
-  CmpInst::Predicate originalPredicate = cmpOp->getPredicate();
-  Optional<CmpInst::Predicate> mutatedPredicate =
-      getMutatedPredicate(originalPredicate);
-  if (!mutatedPredicate.hasValue()) {
-    return nullptr;
-  }
-
-  std::string diagnostics =
-      getDiagnostics(originalPredicate, mutatedPredicate.getValue());
-
-  std::string replacement = describePredicate(mutatedPredicate.getValue());
-  return new MutationPoint(this, address, function, diagnostics, replacement,
-                           sourceLocation, bitcode);
-}
-
-bool ConditionalsBoundaryMutator::canBeApplied(Value &V) {
-  llvm_unreachable("not used here anymore");
-  return false;
-}
-
-llvm::Value *
-ConditionalsBoundaryMutator::applyMutation(Function *function,
-                                           MutationPointAddress &address) {
+void ConditionalsBoundaryMutator::applyMutation(
+    Function *function, const MutationPointAddress &address) {
   llvm::Instruction &I = address.findInstruction(function);
 
   CmpInst *cmp = cast<CmpInst>(&I);
@@ -283,6 +254,37 @@ ConditionalsBoundaryMutator::applyMutation(Function *function,
   replacement->insertAfter(cmp);
   cmp->replaceAllUsesWith(replacement);
   cmp->eraseFromParent();
+}
 
-  return replacement;
+std::vector<MutationPoint *>
+ConditionalsBoundaryMutator::getMutations(Bitcode *bitcode,
+                                          llvm::Function *function) {
+  assert(bitcode);
+  assert(function);
+
+  std::vector<MutationPoint *> mutations;
+
+  for (auto &instruction : instructions(function)) {
+    auto comparison = dyn_cast<CmpInst>(&instruction);
+    if (comparison == nullptr) {
+      continue;
+    }
+
+    CmpInst::Predicate originalPredicate = comparison->getPredicate();
+    Optional<CmpInst::Predicate> mutatedPredicate =
+        getMutatedPredicate(originalPredicate);
+    if (!mutatedPredicate.hasValue()) {
+      continue;
+    }
+
+    std::string diagnostics =
+        getDiagnostics(originalPredicate, mutatedPredicate.getValue());
+
+    std::string replacement = describePredicate(mutatedPredicate.getValue());
+    auto point = new MutationPoint(this, &instruction, diagnostics, replacement,
+                                   bitcode);
+    mutations.push_back(point);
+  }
+
+  return mutations;
 }

@@ -19,19 +19,6 @@ using namespace mull;
 const std::string MathMulMutator::ID = "math_mul_mutator";
 const std::string MathMulMutator::description = "Replaces * with /";
 
-MutationPoint *MathMulMutator::getMutationPoint(Bitcode *bitcode,
-                                                llvm::Function *function,
-                                                llvm::Instruction *instruction,
-                                                SourceLocation &sourceLocation,
-                                                MutationPointAddress &address) {
-  if (canBeApplied(*instruction)) {
-    std::string diagnostics = "Math Mul: replaced * with /";
-    return new MutationPoint(this, address, function, diagnostics, "/",
-                             sourceLocation, bitcode);
-  }
-  return nullptr;
-}
-
 bool MathMulMutator::canBeApplied(Value &V) {
   if (BinaryOperator *BinOp = dyn_cast<BinaryOperator>(&V)) {
     BinaryOperator::BinaryOps Opcode = BinOp->getOpcode();
@@ -44,8 +31,8 @@ bool MathMulMutator::canBeApplied(Value &V) {
   return false;
 }
 
-llvm::Value *MathMulMutator::applyMutation(Function *function,
-                                           MutationPointAddress &address) {
+void MathMulMutator::applyMutation(Function *function,
+                                   const MutationPointAddress &address) {
   llvm::Instruction &I = address.findInstruction(function);
 
   auto *binaryOperator = cast<BinaryOperator>(&I);
@@ -77,6 +64,23 @@ llvm::Value *MathMulMutator::applyMutation(Function *function,
   replacement->insertAfter(binaryOperator);
   binaryOperator->replaceAllUsesWith(replacement);
   binaryOperator->eraseFromParent();
+}
 
-  return replacement;
+std::vector<MutationPoint *>
+MathMulMutator::getMutations(Bitcode *bitcode, llvm::Function *function) {
+  assert(bitcode);
+  assert(function);
+
+  std::vector<MutationPoint *> mutations;
+  for (auto &instruction : instructions(function)) {
+    if (!canBeApplied(instruction)) {
+      continue;
+    }
+
+    std::string diagnostics = "Math Mul: replaced * with /";
+    auto point =
+        new MutationPoint(this, &instruction, diagnostics, "/", bitcode);
+    mutations.push_back(point);
+  }
+  return mutations;
 }

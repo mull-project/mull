@@ -1,8 +1,10 @@
 #include "mull/Mutators/RemoveVoidFunctionMutator.h"
-#include "LLVMCompatibility.h"
-#include "TestModuleFactory.h"
+
+#include "FixturePaths.h"
+#include "mull/BitcodeLoader.h"
 #include "mull/Mutators/Mutator.h"
 
+#include <gtest/gtest.h>
 #include <llvm/IR/Argument.h>
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/Constants.h>
@@ -15,33 +17,21 @@
 #include <llvm/IR/Type.h>
 #include <llvm/IR/Value.h>
 
-#include "gtest/gtest.h"
-
 using namespace mull;
 using namespace llvm;
 
-static LLVMContext Ctx;
-
-TEST(RemoveVoidFunctionMutator, canBeApplied) {
-  /// Does this test make sense at all?
+TEST(RemoveVoidFunctionMutator, getMutationPoints) {
   LLVMContext context;
-
-  std::unique_ptr<Module> moduleOwner(new Module("test", context));
-  Module *module = moduleOwner.get();
-
-  Type *voidType = Type::getVoidTy(context);
-  FunctionType *functionType = FunctionType::get(voidType, voidType);
-
-  Function *voidFunction =
-      llvm_compat::GetOrInsertFunction(*module, "voidFunction", functionType);
-  Function *callerFunction =
-      llvm_compat::GetOrInsertFunction(*module, "callerFunction", functionType);
-
-  BasicBlock *bb = BasicBlock::Create(context, "not_relevant", callerFunction);
+  BitcodeLoader loader;
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::mutators_remove_void_function_testee_bc_path(), context);
 
   RemoveVoidFunctionMutator mutator;
+  std::vector<MutationPoint *> mutants;
+  for (auto &function : bitcode->getModule()->functions()) {
+    auto points = mutator.getMutations(bitcode.get(), &function);
+    std::copy(points.begin(), points.end(), std::back_inserter(mutants));
+  }
 
-  CallInst *callInst = CallInst::Create(voidFunction, "", bb);
-
-  EXPECT_EQ(true, mutator.canBeApplied(*callInst));
+  ASSERT_EQ(mutants.size(), size_t(1));
 }

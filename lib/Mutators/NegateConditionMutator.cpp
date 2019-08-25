@@ -274,49 +274,8 @@ static std::string getDiagnostics(CmpInst::Predicate originalPredicate,
   return diagnostics.str();
 }
 
-MutationPoint *NegateConditionMutator::getMutationPoint(
-    Bitcode *bitcode, llvm::Function *function, llvm::Instruction *instruction,
-    SourceLocation &sourceLocation, MutationPointAddress &address) {
-  if (canBeApplied(*instruction)) {
-    CmpInst *cmpOp = dyn_cast<CmpInst>(instruction);
-    assert(cmpOp);
-
-    if (cmpOp->getPredicate() == CmpInst::FCMP_UNO) {
-      return nullptr;
-    }
-
-    llvm::CmpInst::Predicate negatedPredicate =
-        negatedCmpInstPredicate(cmpOp->getPredicate());
-    std::string diagnostics =
-        getDiagnostics(cmpOp->getPredicate(), negatedPredicate);
-
-    std::string replacement = describePredicate(negatedPredicate);
-    return new MutationPoint(this, address, function, diagnostics, replacement,
-                             sourceLocation, bitcode);
-  }
-  return nullptr;
-}
-
-bool NegateConditionMutator::canBeApplied(Value &V) {
-
-  if (CmpInst *cmpOp = dyn_cast<CmpInst>(&V)) {
-    if (cmpOp->getName().startswith("tobool")) {
-      return false;
-    }
-
-    if (cmpOp->getName().startswith("isnull")) {
-      return false;
-    }
-
-    return true;
-  }
-
-  return false;
-}
-
-llvm::Value *
-NegateConditionMutator::applyMutation(Function *function,
-                                      MutationPointAddress &address) {
+void NegateConditionMutator::applyMutation(
+    Function *function, const MutationPointAddress &address) {
   llvm::Instruction &I = address.findInstruction(function);
 
   CmpInst *cmpInstruction = cast<CmpInst>(&I);
@@ -339,6 +298,37 @@ NegateConditionMutator::applyMutation(Function *function,
   replacement->insertAfter(cmpInstruction);
   cmpInstruction->replaceAllUsesWith(replacement);
   cmpInstruction->eraseFromParent();
+}
 
-  return replacement;
+std::vector<MutationPoint *>
+NegateConditionMutator::getMutations(Bitcode *bitcode,
+                                     llvm::Function *function) {
+  assert(bitcode);
+  assert(function);
+
+  std::vector<MutationPoint *> mutations;
+
+  for (auto &instruction : instructions(function)) {
+    auto comparison = dyn_cast<CmpInst>(&instruction);
+    if (!comparison) {
+      continue;
+    }
+
+    if (comparison->getPredicate() == CmpInst::FCMP_UNO) {
+      continue;
+    }
+
+    llvm::CmpInst::Predicate negatedPredicate =
+        negatedCmpInstPredicate(comparison->getPredicate());
+    std::string diagnostics =
+        getDiagnostics(comparison->getPredicate(), negatedPredicate);
+
+    std::string replacement = describePredicate(negatedPredicate);
+
+    auto point = new MutationPoint(this, &instruction, diagnostics, replacement,
+                                   bitcode);
+    mutations.push_back(point);
+  }
+
+  return mutations;
 }

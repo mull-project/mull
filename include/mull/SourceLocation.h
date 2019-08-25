@@ -19,9 +19,9 @@ struct SourceLocation {
   bool isNull() const;
 
   const static SourceLocation
-  sourceLocationFromInstruction(const llvm::Instruction *instruction);
+  locationFromInstruction(const llvm::Instruction *instruction);
   const static SourceLocation
-  sourceLocationFromFunction(const llvm::Function *function);
+  locationFromFunction(const llvm::Function *function);
   const static SourceLocation nullSourceLocation();
 };
 

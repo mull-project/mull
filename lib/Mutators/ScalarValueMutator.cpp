@@ -69,31 +69,6 @@ static std::string createDiagnostics(const std::string &originalString,
   return diagnostics.str();
 }
 
-MutationPoint *ScalarValueMutator::getMutationPoint(
-    Bitcode *bitcode, llvm::Function *function, llvm::Instruction *instruction,
-    SourceLocation &sourceLocation, MutationPointAddress &address) {
-
-  std::pair<ScalarValueMutationType, Value *> possibleApplication =
-      findPossibleApplication(*instruction);
-  if (possibleApplication.first == ScalarValueMutationType::None) {
-    return nullptr;
-  }
-
-  std::string originalString = getAsString(possibleApplication.second);
-  std::string replacementString =
-      getAsReplacementString(possibleApplication.second);
-  std::string diagnostics =
-      createDiagnostics(originalString, replacementString);
-
-  return new MutationPoint(this, address, function, diagnostics,
-                           replacementString, sourceLocation, bitcode);
-}
-
-/// Currently only used by SimpleTestFinder.
-bool ScalarValueMutator::canBeApplied(Value &V) {
-  return findPossibleApplication(V).first != ScalarValueMutationType::None;
-}
-
 static std::pair<ScalarValueMutationType, Value *>
 findPossibleApplication(Value &V) {
   Instruction *instruction = dyn_cast<Instruction>(&V);
@@ -171,8 +146,8 @@ static ConstantFP *getReplacementFloat(ConstantFP *constantFloat) {
   }
 }
 
-llvm::Value *ScalarValueMutator::applyMutation(Function *function,
-                                               MutationPointAddress &address) {
+void ScalarValueMutator::applyMutation(Function *function,
+                                       const MutationPointAddress &address) {
   llvm::Instruction &I = address.findInstruction(function);
 
   for (unsigned int i = 0; i < I.getNumOperands(); i++) {
@@ -183,18 +158,44 @@ llvm::Value *ScalarValueMutator::applyMutation(Function *function,
 
       I.setOperand(i, replacement);
 
-      return &I;
+      return;
     }
     if (ConstantFP *constantFloat = dyn_cast<ConstantFP>(operand)) {
       ConstantFP *replacement = getReplacementFloat(constantFloat);
 
       I.setOperand(i, replacement);
 
-      return &I;
+      return;
     }
   }
 
   llvm_unreachable("Must not reach here!");
+}
 
-  return nullptr;
+std::vector<MutationPoint *>
+ScalarValueMutator::getMutations(Bitcode *bitcode, llvm::Function *function) {
+  assert(bitcode);
+  assert(function);
+
+  std::vector<MutationPoint *> mutations;
+
+  for (auto &instruction : instructions(function)) {
+    std::pair<ScalarValueMutationType, Value *> possibleApplication =
+        findPossibleApplication(instruction);
+    if (possibleApplication.first == ScalarValueMutationType::None) {
+      continue;
+    }
+
+    std::string originalString = getAsString(possibleApplication.second);
+    std::string replacementString =
+        getAsReplacementString(possibleApplication.second);
+    std::string diagnostics =
+        createDiagnostics(originalString, replacementString);
+
+    auto point = new MutationPoint(this, &instruction, diagnostics,
+                                   replacementString, bitcode);
+    mutations.push_back(point);
+  }
+
+  return mutations;
 }

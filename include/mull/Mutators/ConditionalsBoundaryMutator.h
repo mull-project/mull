@@ -31,14 +31,11 @@ public:
   static bool isLT(llvm::Instruction *instruction);
   static bool isLTE(llvm::Instruction *instruction);
 
-  MutationPoint *getMutationPoint(Bitcode *bitcode, llvm::Function *function,
-                                  llvm::Instruction *instruction,
-                                  SourceLocation &sourceLocation,
-                                  MutationPointAddress &address) override;
+  void applyMutation(llvm::Function *function,
+                     const MutationPointAddress &address) override;
 
-  bool canBeApplied(llvm::Value &V) override;
-  llvm::Value *applyMutation(llvm::Function *function,
-                             MutationPointAddress &address) override;
+  std::vector<MutationPoint *> getMutations(Bitcode *bitcode,
+                                            llvm::Function *function) override;
 };
 
 } // namespace mull

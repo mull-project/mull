@@ -39,41 +39,17 @@ operator()(iterator begin, iterator end,
   for (auto it = begin; it != end; it++, counter.increment()) {
     auto &testee = *it;
     Function *function = testee.getTesteeFunction();
-
     auto moduleID = function->getParent()->getModuleIdentifier();
     Bitcode *bitcode = program.bitcodeWithIdentifier(moduleID);
 
-    int functionIndex = GetFunctionIndex(function);
     for (auto &mutator : mutators) {
-
-      int basicBlockIndex = 0;
-      for (auto &basicBlock : function->getBasicBlockList()) {
-
-        int instructionIndex = 0;
-        for (auto &instruction : basicBlock.getInstList()) {
-          if (filter.shouldSkipInstruction(&instruction)) {
-            instructionIndex++;
-            continue;
-          }
-
-          auto location =
-              SourceLocation::sourceLocationFromInstruction(&instruction);
-
-          MutationPointAddress address(functionIndex, basicBlockIndex,
-                                       instructionIndex);
-          MutationPoint *point = mutator->getMutationPoint(
-              bitcode, function, &instruction, location, address);
-          if (point) {
-            bitcode->addMutation(point);
-            for (auto &reachableTest : testee.getReachableTests()) {
-              point->addReachableTest(reachableTest.first,
-                                      reachableTest.second);
-            }
-            storage.emplace_back(std::unique_ptr<MutationPoint>(point));
-          }
-          instructionIndex++;
+      auto mutants = mutator->getMutations(bitcode, function);
+      for (auto mutant : mutants) {
+        bitcode->addMutation(mutant);
+        for (auto &reachableTest : testee.getReachableTests()) {
+          mutant->addReachableTest(reachableTest.first, reachableTest.second);
         }
-        basicBlockIndex++;
+        storage.push_back(std::unique_ptr<MutationPoint>(mutant));
       }
     }
   }

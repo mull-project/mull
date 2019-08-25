@@ -101,22 +101,6 @@ MathAddMutator::replacementForAddWithOverflow(llvm::Function *addFunction,
   return replacementFunction;
 }
 
-MutationPoint *MathAddMutator::getMutationPoint(Bitcode *bitcode,
-                                                llvm::Function *function,
-                                                llvm::Instruction *instruction,
-                                                SourceLocation &sourceLocation,
-                                                MutationPointAddress &address) {
-  if (canBeApplied(*instruction)) {
-    std::string diagnostics = "Math Add: replaced + with -";
-    std::string replacement = "-";
-
-    return new MutationPoint(this, address, function, diagnostics, replacement,
-                             sourceLocation, bitcode);
-  }
-
-  return nullptr;
-}
-
 bool MathAddMutator::canBeApplied(Value &V) {
   if (BinaryOperator *BinOp = dyn_cast<BinaryOperator>(&V)) {
     BinaryOperator::BinaryOps Opcode = BinOp->getOpcode();
@@ -133,8 +117,8 @@ bool MathAddMutator::canBeApplied(Value &V) {
   return false;
 }
 
-llvm::Value *MathAddMutator::applyMutation(Function *function,
-                                           MutationPointAddress &address) {
+void MathAddMutator::applyMutation(Function *function,
+                                   const MutationPointAddress &address) {
   llvm::Instruction &I = address.findInstruction(function);
 
   if (isAddWithOverflow(I)) {
@@ -145,7 +129,7 @@ llvm::Value *MathAddMutator::applyMutation(Function *function,
 
     callInst->setCalledFunction(replacementFunction);
 
-    return callInst;
+    return;
   }
 
   BinaryOperator *binaryOperator = cast<BinaryOperator>(&I);
@@ -186,5 +170,27 @@ llvm::Value *MathAddMutator::applyMutation(Function *function,
   binaryOperator->replaceAllUsesWith(replacement);
   binaryOperator->eraseFromParent();
 
-  return replacement;
+  return;
+}
+
+std::vector<MutationPoint *>
+MathAddMutator::getMutations(Bitcode *bitcode, llvm::Function *function) {
+  assert(bitcode);
+  assert(function);
+
+  std::vector<MutationPoint *> mutations;
+
+  for (auto &instruction : instructions(function)) {
+    if (!canBeApplied(instruction)) {
+      continue;
+    }
+
+    std::string diagnostics = "Math Add: replaced + with -";
+    std::string replacement = "-";
+    auto point = new MutationPoint(this, &instruction, diagnostics, replacement,
+                                   bitcode);
+    mutations.push_back(point);
+  }
+
+  return mutations;
 }

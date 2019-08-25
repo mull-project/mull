@@ -21,70 +21,44 @@ using namespace mull;
 using namespace llvm;
 
 TEST(ConditionalsBoundaryMutator, findMutations) {
-  LLVMContext llvmContext;
+  LLVMContext context;
   BitcodeLoader loader;
-  auto bitcodeFile = loader.loadBitcodeAtPath(
-      fixtures::mutators_boundary_module_bc_path(), llvmContext);
-  auto module = bitcodeFile->getModule();
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::mutators_boundary_module_bc_path(), context);
 
-  std::vector<std::unique_ptr<Bitcode>> bitcode;
-  bitcode.push_back(std::move(bitcodeFile));
-  Program program({}, {}, std::move(bitcode));
-  Configuration configuration;
-
-  std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<ConditionalsBoundaryMutator>());
-  MutationsFinder finder(std::move(mutators), configuration);
-  Filter filter;
-
-  std::vector<std::unique_ptr<Testee>> testees;
-  for (auto &function : *module) {
-    testees.emplace_back(make_unique<Testee>(&function, nullptr, 1));
+  ConditionalsBoundaryMutator mutator;
+  std::vector<MutationPoint *> mutants;
+  for (auto &function : bitcode->getModule()->functions()) {
+    auto m = mutator.getMutations(bitcode.get(), &function);
+    std::copy(m.begin(), m.end(), std::back_inserter(mutants));
   }
-  auto mergedTestees = mergeTestees(testees);
-  std::vector<MutationPoint *> points =
-      finder.getMutationPoints(program, mergedTestees, filter);
 
-  ASSERT_EQ(points.size(), 7U);
+  ASSERT_EQ(mutants.size(), 7U);
 }
 
 TEST(ConditionalsBoundaryMutator, applyMutations) {
-  LLVMContext llvmContext;
+  LLVMContext context;
   BitcodeLoader loader;
-  auto bitcodeFile = loader.loadBitcodeAtPath(
-      fixtures::mutators_boundary_module_bc_path(), llvmContext);
-  auto borrowedBitcode = bitcodeFile.get();
-  auto module = borrowedBitcode->getModule();
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::mutators_boundary_module_bc_path(), context);
 
-  std::vector<std::unique_ptr<Bitcode>> bitcode;
-  bitcode.push_back(std::move(bitcodeFile));
-  Program program({}, {}, std::move(bitcode));
-  Configuration configuration;
-
-  std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<ConditionalsBoundaryMutator>());
-  MutationsFinder finder(std::move(mutators), configuration);
-  Filter filter;
-
-  std::vector<std::unique_ptr<Testee>> testees;
-  for (auto &function : *module) {
-    testees.emplace_back(make_unique<Testee>(&function, nullptr, 1));
+  ConditionalsBoundaryMutator mutator;
+  std::vector<MutationPoint *> mutants;
+  for (auto &function : bitcode->getModule()->functions()) {
+    auto m = mutator.getMutations(bitcode.get(), &function);
+    std::copy(m.begin(), m.end(), std::back_inserter(mutants));
   }
-  auto mergedTestees = mergeTestees(testees);
 
-  std::vector<MutationPoint *> points =
-      finder.getMutationPoints(program, mergedTestees, filter);
-
-  for (auto point : points) {
+  for (auto mutant : mutants) {
     ValueToValueMapTy map;
-    auto mutatedFunction = CloneFunction(point->getOriginalFunction(), map);
+    auto mutatedFunction = CloneFunction(mutant->getOriginalFunction(), map);
 
     Instruction *originalInstruction =
-        &point->getAddress().findInstruction(point->getOriginalFunction());
-    point->setMutatedFunction(mutatedFunction);
-    point->applyMutation();
+        &mutant->getAddress().findInstruction(mutant->getOriginalFunction());
+    mutant->setMutatedFunction(mutatedFunction);
+    mutant->applyMutation();
     Instruction *mutatedInstruction =
-        &point->getAddress().findInstruction(mutatedFunction);
+        &mutant->getAddress().findInstruction(mutatedFunction);
 
     if (ConditionalsBoundaryMutator::isGT(originalInstruction)) {
       ASSERT_TRUE(ConditionalsBoundaryMutator::isGTE(mutatedInstruction));
@@ -97,5 +71,5 @@ TEST(ConditionalsBoundaryMutator, applyMutations) {
     }
   }
 
-  ASSERT_EQ(points.size(), 7U);
+  ASSERT_EQ(mutants.size(), 7U);
 }

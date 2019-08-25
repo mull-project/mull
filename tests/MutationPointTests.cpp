@@ -30,35 +30,16 @@
 using namespace mull;
 using namespace llvm;
 
-TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
-  LLVMContext llvmContext;
+TEST(MutationPoint, MathAddMutator_applyMutation) {
+  LLVMContext context;
   BitcodeLoader loader;
-  auto bitcodeWithTests = loader.loadBitcodeAtPath(
-      fixtures::simple_test_count_letters_test_count_letters_bc_path(),
-      llvmContext);
-  auto bitcodeWithTestees = loader.loadBitcodeAtPath(
-      fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::simple_test_count_letters_count_letters_bc_path(), context);
 
-  std::vector<std::unique_ptr<Bitcode>> bitcode;
-  bitcode.push_back(std::move(bitcodeWithTestees));
-  bitcode.push_back(std::move(bitcodeWithTests));
-  Program program({}, {}, std::move(bitcode));
+  MathAddMutator mutator;
+  auto mutationPoints = mutator.getMutations(
+      bitcode.get(), bitcode->getModule()->getFunction("count_letters"));
 
-  Configuration configuration;
-
-  std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<MathAddMutator>());
-  MutationsFinder finder(std::move(mutators), configuration);
-
-  Function *testeeFunction = program.lookupDefinedFunction("count_letters");
-  ASSERT_FALSE(testeeFunction->empty());
-  std::vector<std::unique_ptr<Testee>> testees;
-  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
-  auto mergedTestees = mergeTestees(testees);
-
-  Filter filter;
-  std::vector<MutationPoint *> mutationPoints =
-      finder.getMutationPoints(program, mergedTestees, filter);
   ASSERT_EQ(1U, mutationPoints.size());
 
   MutationPoint *mutationPoint = mutationPoints.front();
@@ -75,31 +56,16 @@ TEST(MutationPoint, SimpleTest_AddOperator_applyMutation) {
   ASSERT_EQ(Instruction::Sub, mutatedInstruction.getOpcode());
 }
 
-TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
-  LLVMContext llvmContext;
+TEST(MutationPoint, MathSubMutator_applyMutation) {
+  LLVMContext context;
   BitcodeLoader loader;
-  auto bitcodeFile = loader.loadBitcodeAtPath(
-      fixtures::mutators_math_sub_module_bc_path(), llvmContext);
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::mutators_math_sub_module_bc_path(), context);
 
-  std::vector<std::unique_ptr<Bitcode>> bitcode;
-  bitcode.push_back(std::move(bitcodeFile));
-  Program program({}, {}, std::move(bitcode));
+  MathSubMutator mutator;
+  auto mutationPoints = mutator.getMutations(
+      bitcode.get(), bitcode->getModule()->getFunction("math_sub"));
 
-  Configuration configuration;
-
-  std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<MathSubMutator>());
-  MutationsFinder finder(std::move(mutators), configuration);
-
-  Function *testeeFunction = program.lookupDefinedFunction("math_sub");
-  ASSERT_FALSE(testeeFunction->empty());
-  std::vector<std::unique_ptr<Testee>> testees;
-  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
-  auto mergedTestees = mergeTestees(testees);
-  Filter filter;
-
-  std::vector<MutationPoint *> mutationPoints =
-      finder.getMutationPoints(program, mergedTestees, filter);
   ASSERT_EQ(1U, mutationPoints.size());
 
   MutationPoint *mutationPoint = mutationPoints.front();
@@ -116,31 +82,15 @@ TEST(MutationPoint, SimpleTest_MathSubOperator_applyMutation) {
   ASSERT_EQ(Instruction::Add, mutatedInstruction.getOpcode());
 }
 
-TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
-  LLVMContext llvmContext;
+TEST(MutationPoint, MathMulMutator_applyMutation) {
+  LLVMContext context;
   BitcodeLoader loader;
-  auto bitcodeFile = loader.loadBitcodeAtPath(
-      fixtures::mutators_math_mul_module_bc_path(), llvmContext);
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::mutators_math_mul_module_bc_path(), context);
 
-  std::vector<std::unique_ptr<Bitcode>> bitcode;
-  bitcode.push_back(std::move(bitcodeFile));
-  Program program({}, {}, std::move(bitcode));
-
-  Configuration configuration;
-
-  std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<MathMulMutator>());
-  MutationsFinder finder(std::move(mutators), configuration);
-
-  Function *testeeFunction = program.lookupDefinedFunction("math_mul");
-  ASSERT_FALSE(testeeFunction->empty());
-  std::vector<std::unique_ptr<Testee>> testees;
-  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
-  auto mergedTestees = mergeTestees(testees);
-  Filter filter;
-
-  std::vector<MutationPoint *> mutationPoints =
-      finder.getMutationPoints(program, mergedTestees, filter);
+  MathMulMutator mutator;
+  auto mutationPoints = mutator.getMutations(
+      bitcode.get(), bitcode->getModule()->getFunction("math_mul"));
 
   ASSERT_EQ(mutationPoints.size(), 1UL);
 
@@ -158,32 +108,16 @@ TEST(MutationPoint, SimpleTest_MathMulOperator_applyMutation) {
   ASSERT_EQ(Instruction::SDiv, mutatedInstruction.getOpcode());
 }
 
-TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
-  LLVMContext llvmContext;
+TEST(MutationPoint, MathDivMutator_applyMutation) {
+  LLVMContext context;
   BitcodeLoader loader;
-  auto bitcodeFile = loader.loadBitcodeAtPath(
-      fixtures::mutators_math_div_module_bc_path(), llvmContext);
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::mutators_math_div_module_bc_path(), context);
 
-  std::vector<std::unique_ptr<Bitcode>> bitcode;
-  bitcode.push_back(std::move(bitcodeFile));
-  Program program({}, {}, std::move(bitcode));
+  MathDivMutator mutator;
+  auto mutationPoints = mutator.getMutations(
+      bitcode.get(), bitcode->getModule()->getFunction("math_div"));
 
-  Configuration configuration;
-
-  std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<MathDivMutator>());
-
-  MutationsFinder finder(std::move(mutators), configuration);
-
-  Function *testeeFunction = program.lookupDefinedFunction("math_div");
-  ASSERT_FALSE(testeeFunction->empty());
-  std::vector<std::unique_ptr<Testee>> testees;
-  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
-  auto mergedTestees = mergeTestees(testees);
-  Filter filter;
-
-  std::vector<MutationPoint *> mutationPoints =
-      finder.getMutationPoints(program, mergedTestees, filter);
   ASSERT_EQ(1U, mutationPoints.size());
 
   MutationPoint *mutationPoint = mutationPoints.front();
@@ -200,35 +134,17 @@ TEST(MutationPoint, SimpleTest_MathDivOperator_applyMutation) {
   ASSERT_EQ(Instruction::Mul, mutatedInstruction.getOpcode());
 }
 
-TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
-  LLVMContext llvmContext;
+TEST(MutationPoint, NegateConditionMutator_applyMutation) {
+  LLVMContext context;
   BitcodeLoader loader;
 
-  auto bitcodeWithTests = loader.loadBitcodeAtPath(
-      fixtures::mutators_negate_condition_tester_bc_path(), llvmContext);
-  auto bitcodeWithTestees = loader.loadBitcodeAtPath(
-      fixtures::mutators_negate_condition_testee_bc_path(), llvmContext);
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::mutators_negate_condition_testee_bc_path(), context);
 
-  std::vector<std::unique_ptr<Bitcode>> bitcode;
-  bitcode.push_back(std::move(bitcodeWithTests));
-  bitcode.push_back(std::move(bitcodeWithTestees));
-  Program program({}, {}, std::move(bitcode));
+  NegateConditionMutator mutator;
+  auto mutationPoints = mutator.getMutations(
+      bitcode.get(), bitcode->getModule()->getFunction("max"));
 
-  Configuration configuration;
-
-  std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<NegateConditionMutator>());
-  MutationsFinder finder(std::move(mutators), configuration);
-
-  Function *testeeFunction = program.lookupDefinedFunction("max");
-  ASSERT_FALSE(testeeFunction->empty());
-  std::vector<std::unique_ptr<Testee>> testees;
-  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
-  auto mergedTestees = mergeTestees(testees);
-  Filter filter;
-
-  std::vector<MutationPoint *> mutationPoints =
-      finder.getMutationPoints(program, mergedTestees, filter);
   ASSERT_EQ(1U, mutationPoints.size());
 
   MutationPoint *mutationPoint = mutationPoints.front();
@@ -243,30 +159,16 @@ TEST(MutationPoint, SimpleTest_NegateConditionOperator_applyMutation) {
             CmpInst::Predicate::ICMP_SGE);
 }
 
-TEST(MutationPoint, SimpleTest_AndOrMutator_applyMutation) {
-  LLVMContext llvmContext;
+TEST(MutationPoint, AndOrReplacementMutator_applyMutation) {
+  LLVMContext context;
   BitcodeLoader loader;
-  auto bitcodeFile = loader.loadBitcodeAtPath(
-      fixtures::mutators_and_or_replacement_module_bc_path(), llvmContext);
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::mutators_and_or_replacement_module_bc_path(), context);
 
-  std::vector<std::unique_ptr<Bitcode>> bitcode;
-  bitcode.push_back(std::move(bitcodeFile));
-  Program program({}, {}, std::move(bitcode));
-  Configuration configuration;
-
-  std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<AndOrReplacementMutator>());
-  MutationsFinder finder(std::move(mutators), configuration);
-  Filter filter;
-
-  Function *testeeFunction =
-      program.lookupDefinedFunction("testee_AND_operator_2branches");
-  std::vector<std::unique_ptr<Testee>> testees;
-  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
-  auto mergedTestees = mergeTestees(testees);
-
-  std::vector<MutationPoint *> mutationPoints =
-      finder.getMutationPoints(program, mergedTestees, filter);
+  AndOrReplacementMutator mutator;
+  auto mutationPoints = mutator.getMutations(
+      bitcode.get(),
+      bitcode->getModule()->getFunction("testee_AND_operator_2branches"));
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -279,30 +181,16 @@ TEST(MutationPoint, SimpleTest_AndOrMutator_applyMutation) {
   ASSERT_TRUE(isa<BranchInst>(&mutatedInstruction));
 }
 
-TEST(MutationPoint, SimpleTest_ScalarValueMutator_applyMutation) {
-  LLVMContext llvmContext;
+TEST(MutationPoint, ScalarValueMutator_applyMutation) {
+  LLVMContext context;
   BitcodeLoader loader;
-  auto bitcodeFile = loader.loadBitcodeAtPath(
-      fixtures::mutators_scalar_value_module_bc_path(), llvmContext);
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::mutators_scalar_value_module_bc_path(), context);
 
-  std::vector<std::unique_ptr<Bitcode>> bitcode;
-  bitcode.push_back(std::move(bitcodeFile));
-  Program program({}, {}, std::move(bitcode));
-  Configuration configuration;
+  ScalarValueMutator mutator;
+  auto mutationPoints = mutator.getMutations(
+      bitcode.get(), bitcode->getModule()->getFunction("scalar_value"));
 
-  std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<ScalarValueMutator>());
-  MutationsFinder finder(std::move(mutators), configuration);
-
-  Function *testeeFunction = program.lookupDefinedFunction("scalar_value");
-  ASSERT_FALSE(testeeFunction->empty());
-  std::vector<std::unique_ptr<Testee>> testees;
-  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
-  auto mergedTestees = mergeTestees(testees);
-  Filter filter;
-
-  std::vector<MutationPoint *> mutationPoints =
-      finder.getMutationPoints(program, mergedTestees, filter);
   ASSERT_EQ(4U, mutationPoints.size());
 
   MutationPoint *mutationPoint1 = mutationPoints[0];
@@ -329,31 +217,15 @@ TEST(MutationPoint, SimpleTest_ScalarValueMutator_applyMutation) {
   ASSERT_TRUE(isa<StoreInst>(mutatedInstruction));
 }
 
-TEST(MutationPoint, SimpleTest_ReplaceCallMutator_applyMutation) {
-  LLVMContext llvmContext;
+TEST(MutationPoint, ReplaceCallMutator_applyMutation) {
+  LLVMContext context;
   BitcodeLoader loader;
-  auto bitcodeFile = loader.loadBitcodeAtPath(
-      fixtures::mutators_replace_call_module_bc_path(), llvmContext);
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::mutators_replace_call_module_bc_path(), context);
 
-  std::vector<std::unique_ptr<Bitcode>> bitcode;
-  bitcode.push_back(std::move(bitcodeFile));
-  Program program({}, {}, std::move(bitcode));
-  Configuration configuration;
-
-  std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<ReplaceCallMutator>());
-
-  MutationsFinder finder(std::move(mutators), configuration);
-
-  Function *testeeFunction = program.lookupDefinedFunction("replace_call");
-  ASSERT_FALSE(testeeFunction->empty());
-  std::vector<std::unique_ptr<Testee>> testees;
-  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
-  auto mergedTestees = mergeTestees(testees);
-  Filter filter;
-
-  std::vector<MutationPoint *> mutationPoints =
-      finder.getMutationPoints(program, mergedTestees, filter);
+  ReplaceCallMutator mutator;
+  auto mutationPoints = mutator.getMutations(
+      bitcode.get(), bitcode->getModule()->getFunction("replace_call"));
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -369,32 +241,15 @@ TEST(MutationPoint, SimpleTest_ReplaceCallMutator_applyMutation) {
   ASSERT_TRUE(isa<BinaryOperator>(mutatedInstruction));
 }
 
-TEST(MutationPoint, SimpleTest_ReplaceAssignmentMutator_applyMutation) {
-  LLVMContext llvmContext;
+TEST(MutationPoint, ReplaceAssignmentMutator_applyMutation) {
+  LLVMContext context;
   BitcodeLoader loader;
-  auto bitcodeFile = loader.loadBitcodeAtPath(
-      fixtures::mutators_replace_assignment_module_bc_path(), llvmContext);
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::mutators_replace_assignment_module_bc_path(), context);
 
-  std::vector<std::unique_ptr<Bitcode>> bitcode;
-  bitcode.push_back(std::move(bitcodeFile));
-  Program program({}, {}, std::move(bitcode));
-  Configuration configuration;
-
-  std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<ReplaceAssignmentMutator>());
-
-  MutationsFinder finder(std::move(mutators), configuration);
-
-  Function *testeeFunction =
-      program.lookupDefinedFunction("replace_assignment");
-  ASSERT_FALSE(testeeFunction->empty());
-  std::vector<std::unique_ptr<Testee>> testees;
-  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
-  auto mergedTestees = mergeTestees(testees);
-  Filter filter;
-
-  std::vector<MutationPoint *> mutationPoints =
-      finder.getMutationPoints(program, mergedTestees, filter);
+  ReplaceAssignmentMutator mutator;
+  auto mutationPoints = mutator.getMutations(
+      bitcode.get(), bitcode->getModule()->getFunction("replace_assignment"));
 
   EXPECT_EQ(2U, mutationPoints.size());
 
@@ -410,32 +265,14 @@ TEST(MutationPoint, SimpleTest_ReplaceAssignmentMutator_applyMutation) {
 }
 
 TEST(MutationPoint, OriginalValuePresent) {
-  LLVMContext llvmContext;
+  LLVMContext context;
   BitcodeLoader loader;
-  auto bitcodeFile = loader.loadBitcodeAtPath(
-      fixtures::mutators_replace_assignment_module_bc_path(), llvmContext);
-  auto borrowedBitcode = bitcodeFile.get();
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::mutators_replace_assignment_module_bc_path(), context);
 
-  std::vector<std::unique_ptr<Bitcode>> bitcode;
-  bitcode.push_back(std::move(bitcodeFile));
-  Program program({}, {}, std::move(bitcode));
-  Configuration configuration;
-
-  std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<ReplaceAssignmentMutator>());
-
-  MutationsFinder finder(std::move(mutators), configuration);
-
-  Function *testeeFunction =
-      program.lookupDefinedFunction("replace_assignment");
-  ASSERT_FALSE(testeeFunction->empty());
-  std::vector<std::unique_ptr<Testee>> testees;
-  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
-  auto mergedTestees = mergeTestees(testees);
-  Filter filter;
-
-  std::vector<MutationPoint *> mutationPoints =
-      finder.getMutationPoints(program, mergedTestees, filter);
+  ReplaceAssignmentMutator mutator;
+  auto mutationPoints = mutator.getMutations(
+      bitcode.get(), bitcode->getModule()->getFunction("replace_assignment"));
 
   ASSERT_EQ(2U, mutationPoints.size());
 
@@ -448,9 +285,9 @@ TEST(MutationPoint, OriginalValuePresent) {
   }
 
   for (auto *mutation : mutationPoints) {
-    borrowedBitcode->addMutation(mutation);
+    bitcode->addMutation(mutation);
   }
-  borrowedBitcode->prepareMutations();
+  bitcode->prepareMutations();
   for (auto *mutation : mutationPoints) {
     mutation->applyMutation();
   }

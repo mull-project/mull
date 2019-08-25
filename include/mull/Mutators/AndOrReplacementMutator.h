@@ -39,29 +39,24 @@ class AndOrReplacementMutator : public Mutator {
                                BranchInst **secondBranchInst);
 
   // AND -> OR
-  llvm::Value *applyMutationANDToOR_Pattern1(BranchInst *firstBranch,
-                                             BranchInst *secondBranch);
-  llvm::Value *applyMutationANDToOR_Pattern2(BranchInst *firstBranch,
-                                             BranchInst *secondBranch);
-  llvm::Value *applyMutationANDToOR_Pattern3(BranchInst *firstBranch,
-                                             BranchInst *secondBranch);
+  void applyMutationANDToOR_Pattern1(BranchInst *firstBranch,
+                                     BranchInst *secondBranch);
+  void applyMutationANDToOR_Pattern2(BranchInst *firstBranch,
+                                     BranchInst *secondBranch);
+  void applyMutationANDToOR_Pattern3(BranchInst *firstBranch,
+                                     BranchInst *secondBranch);
 
   // OR -> AND
-  llvm::Value *applyMutationORToAND_Pattern1(BranchInst *firstBranch,
-                                             BranchInst *secondBranch);
-  llvm::Value *applyMutationORToAND_Pattern2(BranchInst *firstBranch,
-                                             BranchInst *secondBranch);
-  llvm::Value *applyMutationORToAND_Pattern3(BranchInst *firstBranch,
-                                             BranchInst *secondBranch);
+  void applyMutationORToAND_Pattern1(BranchInst *firstBranch,
+                                     BranchInst *secondBranch);
+  void applyMutationORToAND_Pattern2(BranchInst *firstBranch,
+                                     BranchInst *secondBranch);
+  void applyMutationORToAND_Pattern3(BranchInst *firstBranch,
+                                     BranchInst *secondBranch);
 
 public:
   static const std::string ID;
   static const std::string description;
-
-  MutationPoint *getMutationPoint(Bitcode *bitcode, llvm::Function *function,
-                                  llvm::Instruction *instruction,
-                                  SourceLocation &sourceLocation,
-                                  MutationPointAddress &address) override;
 
   std::string getUniqueIdentifier() override { return ID; }
   std::string getUniqueIdentifier() const override { return ID; }
@@ -70,8 +65,10 @@ public:
     return MutatorKind::AndOrReplacementMutator;
   }
 
-  bool canBeApplied(llvm::Value &V) override;
-  llvm::Value *applyMutation(Function *function,
-                             MutationPointAddress &address) override;
+  void applyMutation(Function *function,
+                     const MutationPointAddress &address) override;
+
+  std::vector<MutationPoint *> getMutations(Bitcode *bitcode,
+                                            llvm::Function *function) override;
 };
 } // namespace mull

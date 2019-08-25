@@ -5,6 +5,7 @@
 #include "mull/Toolchain/Compiler.h"
 
 #include <llvm/IR/Function.h>
+#include <llvm/IR/Instructions.h>
 #include <llvm/Transforms/Utils/Cloning.h>
 
 #include <utility>
@@ -23,41 +24,6 @@ Instruction &MutationPointAddress::findInstruction(Module *module) const {
   return instruction;
 }
 
-Function &MutationPointAddress::findFunction(Module *module) const {
-  llvm::Function &function = *(std::next(module->begin(), getFnIndex()));
-  return function;
-}
-
-int MutationPointAddress::getFunctionIndex(Function *function) {
-  auto PM = function->getParent();
-
-  auto FII =
-      std::find_if(PM->begin(), PM->end(),
-                   [function](llvm::Function &f) { return &f == function; });
-
-  assert(FII != PM->end() && "Expected function to be found in module");
-  int FIndex = std::distance(PM->begin(), FII);
-
-  return FIndex;
-}
-
-void MutationPointAddress::enumerateInstructions(
-    Function &function,
-    const std::function<void(Instruction &, int, int)> &block) {
-
-  int basicBlockIndex = 0;
-  for (auto &basicBlock : function.getBasicBlockList()) {
-    int instructionIndex = 0;
-
-    for (auto &instruction : basicBlock.getInstList()) {
-      block(instruction, basicBlockIndex, instructionIndex);
-
-      instructionIndex++;
-    }
-    basicBlockIndex++;
-  }
-}
-
 llvm::Instruction &
 MutationPointAddress::findInstruction(llvm::Function *function) const {
   llvm::BasicBlock &bb = *(std::next(function->begin(), getBBIndex()));
@@ -67,42 +33,63 @@ MutationPointAddress::findInstruction(llvm::Function *function) const {
 }
 
 MutationPointAddress::MutationPointAddress(int FnIndex, int BBIndex, int IIndex)
-    : FnIndex(FnIndex), BBIndex(BBIndex), IIndex(IIndex) {
+    : functionIndex(FnIndex), basicBlockIndex(BBIndex),
+      instructionIndex(IIndex),
+      identifier(std::to_string(functionIndex) + "_" +
+                 std::to_string(basicBlockIndex) + "_" +
+                 std::to_string(instructionIndex)) {}
 
-  identifier = std::to_string(FnIndex) + "_" + std::to_string(BBIndex) + "_" +
-               std::to_string(IIndex);
-}
+int MutationPointAddress::getFnIndex() const { return functionIndex; }
 
-int MutationPointAddress::getFnIndex() const { return FnIndex; }
+int MutationPointAddress::getBBIndex() const { return basicBlockIndex; }
 
-int MutationPointAddress::getBBIndex() const { return BBIndex; }
-
-int MutationPointAddress::getIIndex() const { return IIndex; }
-
-std::string MutationPointAddress::getIdentifier() { return identifier; }
+int MutationPointAddress::getIIndex() const { return instructionIndex; }
 
 std::string MutationPointAddress::getIdentifier() const { return identifier; }
 
+template <typename Container, typename Value>
+static size_t getIndex(Container &container, Value *value) {
+  size_t index = 0;
+  auto begin = container.begin();
+  auto end = container.end();
+  for (; begin != end; begin++, index++) {
+    if (&*begin == value) {
+      break;
+    }
+  }
+  return index;
+}
+
+const MutationPointAddress MutationPointAddress::addressFromInstruction(
+    const llvm::Instruction *instruction) {
+  return MutationPointAddress(
+      getIndex(instruction->getModule()->getFunctionList(),
+               instruction->getFunction()),
+      getIndex(instruction->getFunction()->getBasicBlockList(),
+               instruction->getParent()),
+      getIndex(instruction->getParent()->getInstList(), instruction));
+}
+
 #pragma mark - MutationPoint
 
-MutationPoint::MutationPoint(Mutator *mutator, MutationPointAddress address,
-                             llvm::Function *function, std::string diagnostics,
-                             std::string replacement, SourceLocation location,
+MutationPoint::MutationPoint(Mutator *mutator, llvm::Instruction *instruction,
+                             std::string diagnostics, std::string replacement,
                              Bitcode *m)
-    : mutator(mutator), address(address), bitcode(m),
-      originalFunction(function), mutatedFunction(nullptr),
-      diagnostics(std::move(diagnostics)), replacement(replacement),
-      sourceLocation(std::move(location)), reachableTests() {
-  string bitcodeID = bitcode->getUniqueIdentifier();
-  string addressID = address.getIdentifier();
-  string mutatorID = mutator->getUniqueIdentifier();
-
-  uniqueIdentifier = bitcodeID + "_" + addressID + "_" + mutatorID;
-}
+    : mutator(mutator),
+      address(MutationPointAddress::addressFromInstruction(instruction)),
+      bitcode(m), originalFunction(instruction->getFunction()),
+      mutatedFunction(nullptr), diagnostics(std::move(diagnostics)),
+      replacement(replacement),
+      sourceLocation(SourceLocation::locationFromInstruction(instruction)),
+      reachableTests(), uniqueIdentifier(bitcode->getUniqueIdentifier() + "_" +
+                                         address.getIdentifier() + "_" +
+                                         mutator->getUniqueIdentifier()) {}
 
 Mutator *MutationPoint::getMutator() { return mutator; }
 
-MutationPointAddress MutationPoint::getAddress() { return address; }
+const MutationPointAddress &MutationPoint::getAddress() const {
+  return address;
+}
 
 Value *MutationPoint::getOriginalValue() const {
   auto *function = originalFunction;
