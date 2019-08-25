@@ -7,6 +7,7 @@
  - Introduce `-exclude-path` option to filter mutations #553
  - Enable reporters configuration via `-reporters` option #555
  - Junk detection for the Scalar Value mutator #557
+ - Junk detection for the Replace Assignment mutator #559
 
 ## [0.4.0] - 11 Aug 2019
 
