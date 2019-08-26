@@ -1,11 +1,9 @@
 #include "FixturePaths.h"
 #include "mull/BitcodeLoader.h"
-#include "mull/Config/Configuration.h"
 #include "mull/Config/RawConfig.h"
-#include "mull/Filter.h"
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
 #include "mull/MutationPoint.h"
-#include "mull/MutationsFinder.h"
+#include "mull/Mutators/AndOrReplacementMutator.h"
 #include "mull/Mutators/ConditionalsBoundaryMutator.h"
 #include "mull/Mutators/MathAddMutator.h"
 #include "mull/Mutators/MathDivMutator.h"
@@ -13,19 +11,14 @@
 #include "mull/Mutators/MathSubMutator.h"
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "mull/Mutators/RemoveVoidFunctionMutator.h"
+#include "mull/Mutators/ReplaceAssignmentMutator.h"
 #include "mull/Mutators/ReplaceCallMutator.h"
 #include "mull/Mutators/ScalarValueMutator.h"
-#include "mull/Program/Program.h"
-#include "mull/Testee.h"
-#include "mull/Toolchain/Compiler.h"
-#include "mull/Toolchain/Toolchain.h"
 
+#include <gtest/gtest.h>
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
-#include <mull/Mutators/AndOrReplacementMutator.h>
-
-#include "gtest/gtest.h"
 
 using namespace mull;
 using namespace llvm;
@@ -122,6 +115,9 @@ static const CXXJunkDetectorTestParameter parameters[] = {
         new AndOrReplacementMutator, 4),
     CXXJunkDetectorTestParameter(fixtures::mutators_scalar_value_junk_bc_path(),
                                  new ScalarValueMutator, 5),
+    CXXJunkDetectorTestParameter(
+        fixtures::mutators_replace_assignment_junk_bc_path(),
+        new ReplaceAssignmentMutator, 5),
 };
 
 INSTANTIATE_TEST_CASE_P(CXXJunkDetection, CXXJunkDetectorTest,
@@ -161,30 +157,17 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
 }
 
 TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
-  LLVMContext llvmContext;
+  LLVMContext context;
   BitcodeLoader loader;
-  auto bitcodeFile = loader.loadBitcodeAtPath(
-      fixtures::junk_detection_compdb_main_bc_path(), llvmContext);
-  auto module = bitcodeFile->getModule();
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::junk_detection_compdb_main_bc_path(), context);
 
-  std::vector<std::unique_ptr<Bitcode>> bitcode;
-  bitcode.push_back(std::move(bitcodeFile));
-  Program program({}, {}, std::move(bitcode));
-  Configuration configuration;
-
-  std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<ConditionalsBoundaryMutator>());
-  MutationsFinder finder(std::move(mutators), configuration);
-  Filter filter;
-
-  std::vector<std::unique_ptr<Testee>> testees;
-  for (auto &function : *module) {
-    testees.emplace_back(make_unique<Testee>(&function, nullptr, 1));
+  ConditionalsBoundaryMutator mutator;
+  std::vector<MutationPoint *> points;
+  for (auto &function : bitcode->getModule()->functions()) {
+    auto mutants = mutator.getMutations(bitcode.get(), &function);
+    std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
   }
-  auto mergedTestees = mergeTestees(testees);
-
-  std::vector<MutationPoint *> points =
-      finder.getMutationPoints(program, mergedTestees, filter);
 
   ASSERT_EQ(points.size(), 8U);
 
