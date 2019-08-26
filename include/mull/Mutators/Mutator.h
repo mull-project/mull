@@ -18,7 +18,6 @@ class MutationPointAddress;
 struct SourceLocation;
 
 enum class MutatorKind {
-  Unknown,
   ConditionalsBoundaryMutator,
   MathAddMutator,
   MathDivMutator,
@@ -36,7 +35,7 @@ class Mutator {
 public:
   virtual std::string getUniqueIdentifier() = 0;
   virtual std::string getUniqueIdentifier() const = 0;
-  virtual MutatorKind mutatorKind() { return MutatorKind::Unknown; }
+  virtual MutatorKind mutatorKind() = 0;
 
   virtual std::string getDescription() const = 0;
 
