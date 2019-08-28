@@ -2,12 +2,17 @@
 
 ## Next Release
 
+ - ...
+
+## [0.5.0] - 28 Aug 2019
+
  - Print more info when original test fails #549
  - Reporting JSON to Mutation Testing Elements (initial support) #517, #507
  - Introduce `-exclude-path` option to filter mutations #553
  - Enable reporters configuration via `-reporters` option #555
  - Junk detection for the Scalar Value mutator #557
  - Junk detection for the Replace Assignment mutator #559
+ - [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2019-08-11..2019-08-28)
 
 ## [0.4.0] - 11 Aug 2019
 
