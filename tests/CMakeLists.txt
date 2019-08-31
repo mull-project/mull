@@ -16,7 +16,6 @@ set(mull_unittests_sources
   UniqueIdentifierTests.cpp
   TaskExecutorTests.cpp
 
-  Mutators/MutatorsTests.cpp
   Mutators/NegateConditionMutatorTest.cpp
   Mutators/RemoveVoidFunctionMutatorTest.cpp
   Mutators/ScalarValueMutatorTest.cpp

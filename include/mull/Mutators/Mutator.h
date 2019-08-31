@@ -10,6 +10,12 @@ class Module;
 class Instruction;
 } // namespace llvm
 
+namespace irm {
+
+class IRMutation;
+
+}
+
 namespace mull {
 
 class Bitcode;
@@ -40,7 +46,8 @@ public:
   virtual std::string getDescription() const = 0;
 
   virtual void applyMutation(llvm::Function *function,
-                             const MutationPointAddress &address) = 0;
+                             const MutationPointAddress &address,
+                             irm::IRMutation *lowLevelMutation) = 0;
   virtual std::vector<MutationPoint *>
   getMutations(Bitcode *bitcode, llvm::Function *function) = 0;
 

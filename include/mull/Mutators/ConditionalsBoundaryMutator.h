@@ -1,9 +1,8 @@
 #pragma once
 
 #include "Mutator.h"
-
-#include <llvm/IR/Instructions.h>
-
+#include <irm/irm.h>
+#include <memory>
 #include <vector>
 
 namespace llvm {
@@ -21,21 +20,23 @@ class ConditionalsBoundaryMutator : public Mutator {
 public:
   static const std::string ID;
   static const std::string description;
+
+  ConditionalsBoundaryMutator();
+
   std::string getUniqueIdentifier() override;
   std::string getUniqueIdentifier() const override;
   std::string getDescription() const override;
   MutatorKind mutatorKind() override;
 
-  static bool isGT(llvm::Instruction *instruction);
-  static bool isGTE(llvm::Instruction *instruction);
-  static bool isLT(llvm::Instruction *instruction);
-  static bool isLTE(llvm::Instruction *instruction);
-
   void applyMutation(llvm::Function *function,
-                     const MutationPointAddress &address) override;
+                     const MutationPointAddress &address,
+                     irm::IRMutation *lowLevelMutation) override;
 
   std::vector<MutationPoint *> getMutations(Bitcode *bitcode,
                                             llvm::Function *function) override;
+
+private:
+  std::vector<std::unique_ptr<irm::IRMutation>> lowLevelMutators;
 };
 
 } // namespace mull

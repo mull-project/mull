@@ -72,10 +72,11 @@ const MutationPointAddress MutationPointAddress::addressFromInstruction(
 
 #pragma mark - MutationPoint
 
-MutationPoint::MutationPoint(Mutator *mutator, llvm::Instruction *instruction,
-                             std::string diagnostics, std::string replacement,
-                             Bitcode *m)
-    : mutator(mutator),
+MutationPoint::MutationPoint(Mutator *mutator, irm::IRMutation *irMutator,
+                             llvm::Instruction *instruction,
+                             std::string replacement, Bitcode *m,
+                             std::string diagnostics)
+    : mutator(mutator), irMutator(irMutator),
       address(MutationPointAddress::addressFromInstruction(instruction)),
       bitcode(m), originalFunction(instruction->getFunction()),
       mutatedFunction(nullptr), diagnostics(std::move(diagnostics)),
@@ -108,7 +109,7 @@ void MutationPoint::addReachableTest(Test *test, int distance) {
 
 void MutationPoint::applyMutation() {
   assert(mutatedFunction != nullptr);
-  mutator->applyMutation(mutatedFunction, address);
+  mutator->applyMutation(mutatedFunction, address, irMutator);
 }
 
 const std::vector<std::pair<Test *, int>> &

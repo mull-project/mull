@@ -164,6 +164,7 @@ set (MULL_INCLUDE_DIRS
   ${SQLITE3_INCLUDE_DIRS}
   ${SQLITE3_INCLUDEDIR}
   ${CMAKE_CURRENT_LIST_DIR}/vendor/LibEBC/lib/include
+  ${CMAKE_CURRENT_LIST_DIR}/vendor/libirm/include
 )
 
 if ("LLVM" IN_LIST LLVM_AVAILABLE_LIBS)
@@ -191,6 +192,7 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 add_subdirectory(LLVMCompatibility/${LLVM_COMPATIBILITY_DIR})
 add_subdirectory(lib)
-add_subdirectory(vendor/googletest)
 add_subdirectory(tools)
 add_subdirectory(tests)
+add_subdirectory(vendor/googletest)
+add_subdirectory(vendor/libirm)

@@ -1,7 +1,8 @@
 #pragma once
 
 #include "Mutator.h"
-
+#include <irm/irm.h>
+#include <memory>
 #include <vector>
 
 namespace mull {
@@ -9,18 +10,12 @@ namespace mull {
 class MutationPoint;
 class MutationPointAddress;
 
-/// TODO: Move Add With Overflow Mutation to a separate mutator.
-/// Arithmetic with Overflow Intrinsics
-/// http://llvm.org/docs/LangRef.html#id1468
 class MathAddMutator : public Mutator {
-
-  bool isAddWithOverflow(llvm::Value &V);
-  llvm::Function *replacementForAddWithOverflow(llvm::Function *addFunction,
-                                                llvm::Module &module);
-
 public:
   static const std::string ID;
   static const std::string description;
+
+  MathAddMutator();
 
   MutatorKind mutatorKind() override { return MutatorKind::MathAddMutator; }
 
@@ -28,12 +23,15 @@ public:
   std::string getUniqueIdentifier() const override { return ID; }
   std::string getDescription() const override { return description; }
 
-  bool canBeApplied(llvm::Value &V);
   void applyMutation(llvm::Function *function,
-                     const MutationPointAddress &address) override;
+                     const MutationPointAddress &address,
+                     irm::IRMutation *lowLevelMutation) override;
 
   std::vector<MutationPoint *> getMutations(Bitcode *bitcode,
                                             llvm::Function *function) override;
+
+private:
+  std::vector<std::unique_ptr<irm::IRMutation>> lowLevelMutators;
 };
 
 } // namespace mull
