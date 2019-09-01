@@ -53,8 +53,22 @@ ScalarValueVisitor::ScalarValueVisitor(const VisitorParameters &parameters)
     : visitor(parameters) {}
 
 bool ScalarValueVisitor::VisitExpr(clang::Expr *expr) {
+
+  /// In case of PredefinedExpr, the expression expr->children() yields
+  /// children which are nullptr. These nodes should be junk anyway, so we
+  /// ignore them early.
+  if (llvm::isa<clang::PredefinedExpr>(expr)) {
+    return true;
+  }
+
   expr = expr->IgnoreImplicit();
   for (auto child : expr->children()) {
+    if (!child) {
+      llvm::errs() << "Ignoring expression with a nullptr child:" << "\n";
+      expr->dump(llvm::errs());
+      continue;
+    }
+
     child = child->IgnoreImplicit();
     if (isConstant(child)) {
       visitor.visitRangeWithASTExpr(expr);
