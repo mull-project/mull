@@ -107,13 +107,19 @@ ThreadSafeASTUnit *ASTStorage::findAST(const MutationPoint *point) {
       args.data(), args.data() + args.size(),
       std::make_shared<clang::PCHContainerOperations>(), diagnosticsEngine, "");
 
-  if (ast == nullptr) {
+  bool hasErrors = (ast == nullptr) || diagnosticsEngine->hasErrorOccurred() ||
+                   diagnosticsEngine->hasUnrecoverableErrorOccurred() ||
+                   diagnosticsEngine->hasUncompilableErrorOccurred() ||
+                   diagnosticsEngine->hasFatalErrorOccurred();
+  if (hasErrors) {
     std::stringstream message;
-    message << "Cannot parse file '" << sourceFile << "':\n";
+    message << "Cannot parse file: '" << sourceFile << "':\n";
     for (auto &arg : args) {
       message << arg << " ";
     }
     message << "\n";
+    message << "Make sure that the flags provided to Mull are the same flags "
+               "that are used for normal compilation.\n";
     Logger::error() << message.str();
   }
 
