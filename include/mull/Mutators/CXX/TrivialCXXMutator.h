@@ -1,27 +1,19 @@
 #pragma once
 
-#include "Mutator.h"
+#include "mull/Mutators/Mutator.h"
 #include <irm/irm.h>
 #include <memory>
 #include <vector>
 
-namespace llvm {
-class Instruction;
-}
-
 namespace mull {
 
-class Bitcode;
-class MutationPoint;
-class MutationPointAddress;
+namespace cxx {
 
-class ConditionalsBoundaryMutator : public Mutator {
-
+class TrivialCXXMutator : public Mutator {
 public:
-  static const std::string ID;
-  static const std::string description;
-
-  ConditionalsBoundaryMutator();
+  TrivialCXXMutator(std::vector<std::unique_ptr<irm::IRMutation>> mutators,
+                   MutatorKind kind, std::string id, std::string description,
+                   std::string replacement, std::string diagnostics);
 
   std::string getUniqueIdentifier() override;
   std::string getUniqueIdentifier() const override;
@@ -37,6 +29,14 @@ public:
 
 private:
   std::vector<std::unique_ptr<irm::IRMutation>> lowLevelMutators;
+  MutatorKind kind;
+
+  std::string ID;
+  std::string description;
+  std::string replacement;
+  std::string diagnostics;
 };
+
+} // namespace cxx
 
 } // namespace mull

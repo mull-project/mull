@@ -1,3 +1,5 @@
+add_subdirectory(Mutators/CXX)
+
 set(mull_sources
   Config/ConfigParser.cpp
   Config/RawConfig.cpp
@@ -23,8 +25,6 @@ set(mull_sources
   Mutators/MathMulMutator.cpp
   Mutators/MathSubMutator.cpp
   Mutators/ScalarValueMutator.cpp
-
-  Mutators/ConditionalsBoundaryMutator.cpp
 
   Toolchain/Compiler.cpp
   Toolchain/ObjectCache.cpp
@@ -81,7 +81,6 @@ set(mull_sources
   ObjectLoader.cpp
   JunkDetection/CXX/Visitors/AndOrReplacementVisitor.cpp
   JunkDetection/CXX/Visitors/InstructionRangeVisitor.cpp
-  JunkDetection/CXX/Visitors/ConditionalsBoundaryVisitor.cpp
   JunkDetection/CXX/Visitors/MathAddVisitor.cpp
   JunkDetection/CXX/Visitors/MathDivVisitor.cpp
   JunkDetection/CXX/Visitors/MathMulVisitor.cpp
@@ -168,6 +167,7 @@ target_link_libraries(mull
   clangTooling
   Threads::Threads
   irm
+  mull-cxx-mutators
   )
 target_include_directories(mull PUBLIC ${MULL_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/vendor)
 

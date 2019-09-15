@@ -2,7 +2,8 @@
 
 ## Next Release
 
- - ...
+ - Switch to [libirm](https://github.com/mull-project/libirm) - generic library for LLVM mutations #566
+ - Make Conditionals Boundary more granular (split into 4 mutators) #569
 
 ## [0.5.0] - 28 Aug 2019
 

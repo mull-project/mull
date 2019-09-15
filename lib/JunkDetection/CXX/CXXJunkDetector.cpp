@@ -5,12 +5,12 @@
 #include "mull/Mutators/Mutator.h"
 
 #include "mull/JunkDetection/CXX/Visitors/AndOrReplacementVisitor.h"
-#include "mull/JunkDetection/CXX/Visitors/ConditionalsBoundaryVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/MathAddVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/MathDivVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/MathMulVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/MathSubVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/NegateConditionVisitor.h"
+#include "mull/JunkDetection/CXX/Visitors/RelationalVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/RemoveVoidFunctionVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/ReplaceAssignmentVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/ReplaceCallVisitor.h"
@@ -50,8 +50,6 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
   }
 
   switch (point->getMutator()->mutatorKind()) {
-  case MutatorKind::ConditionalsBoundaryMutator:
-    return isJunkMutation<ConditionalsBoundaryVisitor>(astStorage, point);
   case MutatorKind::MathAddMutator:
     return isJunkMutation<MathAddVisitor>(astStorage, point);
   case MutatorKind::MathSubMutator:
@@ -72,6 +70,17 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     return isJunkMutation<ScalarValueVisitor>(astStorage, point);
   case MutatorKind::ReplaceAssignmentMutator:
     return isJunkMutation<ReplaceAssignmentVisitor>(astStorage, point);
+
+  case MutatorKind::CXX_Relation_LessThanToLessOrEqual:
+    return isJunkMutation<cxx::LessThanToLessOrEqualVisitor>(astStorage, point);
+  case MutatorKind::CXX_Relation_LessOrEqualToLessThan:
+    return isJunkMutation<cxx::LessOrEqualToLessThanVisitor>(astStorage, point);
+  case MutatorKind::CXX_Relation_GreaterThanToGreaterOrEqual:
+    return isJunkMutation<cxx::GreaterThanToGreaterOrEqualVisitor>(astStorage,
+                                                                   point);
+  case MutatorKind::CXX_Relation_GreaterOrEqualToGreaterThan:
+    return isJunkMutation<cxx::GreaterOrEqualToGreaterThanVisitor>(astStorage,
+                                                                   point);
   default:
     return false;
   }

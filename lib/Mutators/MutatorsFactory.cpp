@@ -1,7 +1,7 @@
 #include "mull/Mutators/MutatorsFactory.h"
 
 #include "mull/Mutators/AndOrReplacementMutator.h"
-#include "mull/Mutators/ConditionalsBoundaryMutator.h"
+#include "mull/Mutators/CXX/RelationalMutators.h"
 #include "mull/Mutators/MathAddMutator.h"
 #include "mull/Mutators/MathDivMutator.h"
 #include "mull/Mutators/MathMulMutator.h"
@@ -28,6 +28,9 @@ static const string ConditionalMutatorsGroup = "conditional";
 static const string FunctionsMutatorsGroup = "functions";
 static const string ConstantMutatorsGroup = "constant";
 
+static const string ConditionalBoundaryMutatorsGroup =
+    "conditionals_boundary_mutator";
+
 static const string DefaultMutatorsGroup = "default";
 static const string ExperimentalMutatorsGroup = "experimental";
 
@@ -50,7 +53,7 @@ static void expandGroups(const vector<string> &groups,
 MutatorsFactory::MutatorsFactory() {
   groupsMapping[ConditionalMutatorsGroup] = {AndOrReplacementMutator::ID,
                                              NegateConditionMutator::ID,
-                                             ConditionalsBoundaryMutator::ID};
+                                             ConditionalBoundaryMutatorsGroup};
   groupsMapping[MathMutatorsGroup] = {MathAddMutator::ID, MathSubMutator::ID,
                                       MathMulMutator::ID, MathDivMutator::ID};
   groupsMapping[FunctionsMutatorsGroup] = {ReplaceCallMutator::ID,
@@ -63,33 +66,42 @@ MutatorsFactory::MutatorsFactory() {
       MathSubMutator::ID,           MathMulMutator::ID,
       MathDivMutator::ID,           AndOrReplacementMutator::ID,
       ReplaceAssignmentMutator::ID, ReplaceCallMutator::ID,
-      ScalarValueMutator::ID,       ConditionalsBoundaryMutator::ID};
-  groupsMapping[CXXMutatorsGroup] = {ConditionalsBoundaryMutator::ID};
+      ScalarValueMutator::ID,       ConditionalBoundaryMutatorsGroup};
+  groupsMapping[CXXMutatorsGroup] = {ConditionalBoundaryMutatorsGroup};
   groupsMapping[AllMutatorsGroup] = {DefaultMutatorsGroup,
                                      ExperimentalMutatorsGroup};
+
+  groupsMapping[ConditionalBoundaryMutatorsGroup] = {
+      cxx::LessOrEqualToLessThan::ID,
+      cxx::LessThanToLessOrEqual::ID,
+      cxx::GreaterOrEqualToGreaterThan::ID,
+      cxx::GreaterThanToGreaterOrEqual::ID,
+  };
+}
+
+template <typename MutatorClass>
+void addMutator(std::map<std::string, std::unique_ptr<Mutator>> &mapping) {
+  mapping[MutatorClass::ID] = make_unique<MutatorClass>();
 }
 
 void MutatorsFactory::init() {
-  mutatorsMapping[MathAddMutator::ID] = make_unique<MathAddMutator>();
-  mutatorsMapping[MathSubMutator::ID] = make_unique<MathSubMutator>();
-  mutatorsMapping[MathDivMutator::ID] = make_unique<MathDivMutator>();
-  mutatorsMapping[MathMulMutator::ID] = make_unique<MathMulMutator>();
+  addMutator<MathAddMutator>(mutatorsMapping);
+  addMutator<MathSubMutator>(mutatorsMapping);
+  addMutator<MathDivMutator>(mutatorsMapping);
+  addMutator<MathMulMutator>(mutatorsMapping);
 
-  mutatorsMapping[NegateConditionMutator::ID] =
-      make_unique<NegateConditionMutator>();
-  mutatorsMapping[AndOrReplacementMutator::ID] =
-      make_unique<AndOrReplacementMutator>();
+  addMutator<NegateConditionMutator>(mutatorsMapping);
+  addMutator<AndOrReplacementMutator>(mutatorsMapping);
 
-  mutatorsMapping[ReplaceAssignmentMutator::ID] =
-      make_unique<ReplaceAssignmentMutator>();
-  mutatorsMapping[ReplaceCallMutator::ID] = make_unique<ReplaceCallMutator>();
-  mutatorsMapping[RemoveVoidFunctionMutator::ID] =
-      make_unique<RemoveVoidFunctionMutator>();
+  addMutator<ReplaceAssignmentMutator>(mutatorsMapping);
+  addMutator<ReplaceCallMutator>(mutatorsMapping);
+  addMutator<RemoveVoidFunctionMutator>(mutatorsMapping);
+  addMutator<ScalarValueMutator>(mutatorsMapping);
 
-  mutatorsMapping[ScalarValueMutator::ID] = make_unique<ScalarValueMutator>();
-
-  mutatorsMapping[ConditionalsBoundaryMutator::ID] =
-      make_unique<ConditionalsBoundaryMutator>();
+  addMutator<cxx::LessOrEqualToLessThan>(mutatorsMapping);
+  addMutator<cxx::LessThanToLessOrEqual>(mutatorsMapping);
+  addMutator<cxx::GreaterOrEqualToGreaterThan>(mutatorsMapping);
+  addMutator<cxx::GreaterThanToGreaterOrEqual>(mutatorsMapping);
 }
 
 vector<unique_ptr<Mutator>>
