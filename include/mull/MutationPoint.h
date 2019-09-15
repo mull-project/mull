@@ -16,6 +16,12 @@ class Module;
 
 } // namespace llvm
 
+namespace irm {
+
+class IRMutation;
+
+}
+
 namespace mull {
 
 class Compiler;
@@ -61,10 +67,12 @@ class MutationPoint {
   std::string replacement;
   const SourceLocation sourceLocation;
   std::vector<std::pair<Test *, int>> reachableTests;
+  irm::IRMutation *irMutator;
 
 public:
-  MutationPoint(Mutator *mutator, llvm::Instruction *instruction,
-                std::string diagnostics, std::string replacement, Bitcode *m);
+  MutationPoint(Mutator *mutator, irm::IRMutation *irMutator,
+                llvm::Instruction *instruction, std::string replacement,
+                Bitcode *m, std::string diagnostics);
 
   ~MutationPoint() = default;
 

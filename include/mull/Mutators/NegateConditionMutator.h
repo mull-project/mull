@@ -1,9 +1,8 @@
 #pragma once
 
 #include "Mutator.h"
-
-#include <llvm/IR/Instructions.h>
-
+#include <irm/irm.h>
+#include <memory>
 #include <vector>
 
 namespace llvm {
@@ -22,8 +21,7 @@ public:
   static const std::string ID;
   static const std::string description;
 
-  static llvm::CmpInst::Predicate
-  negatedCmpInstPredicate(llvm::CmpInst::Predicate predicate);
+  NegateConditionMutator();
 
   MutatorKind mutatorKind() override { return MutatorKind::NegateMutator; }
   std::string getUniqueIdentifier() override { return ID; }
@@ -31,9 +29,13 @@ public:
   std::string getDescription() const override { return description; }
 
   void applyMutation(llvm::Function *function,
-                     const MutationPointAddress &address) override;
+                     const MutationPointAddress &address,
+                     irm::IRMutation *lowLevelMutation) override;
 
   std::vector<MutationPoint *> getMutations(Bitcode *bitcode,
                                             llvm::Function *function) override;
+
+private:
+  std::vector<std::unique_ptr<irm::IRMutation>> lowLevelMutators;
 };
 } // namespace mull

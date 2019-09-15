@@ -6,3 +6,6 @@
 	path = vendor/json11
 	url = https://github.com/dropbox/json11
 	branch = master
+[submodule "vendor/libirm"]
+	path = vendor/libirm
+	url = https://github.com/mull-project/libirm.git

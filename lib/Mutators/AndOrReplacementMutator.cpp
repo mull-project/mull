@@ -62,8 +62,9 @@ AND_OR_MutationType AndOrReplacementMutator::findPossibleMutation(Value &V) {
   return possibleMutationType;
 }
 
-void AndOrReplacementMutator::applyMutation(
-    Function *function, const MutationPointAddress &address) {
+void AndOrReplacementMutator::applyMutation(llvm::Function *function,
+                                            const MutationPointAddress &address,
+                                            irm::IRMutation *lowLevelMutation) {
   llvm::Instruction &I = address.findInstruction(function);
 
   BranchInst *branchInst = dyn_cast<BranchInst>(&I);
@@ -604,8 +605,8 @@ AndOrReplacementMutator::getMutations(Bitcode *bitcode,
     std::string diagnostics = "AND-OR Replacement";
     std::string replacement = getMutationTypeToString(mutationType);
 
-    auto point = new MutationPoint(this, &instruction, diagnostics, replacement,
-                                   bitcode);
+    auto point = new MutationPoint(this, nullptr, &instruction, replacement,
+                                   bitcode, diagnostics);
     mutations.push_back(point);
   }
 

@@ -65,8 +65,9 @@ public:
     return MutatorKind::AndOrReplacementMutator;
   }
 
-  void applyMutation(Function *function,
-                     const MutationPointAddress &address) override;
+  void applyMutation(llvm::Function *function,
+                     const MutationPointAddress &address,
+                     irm::IRMutation *lowLevelMutation) override;
 
   std::vector<MutationPoint *> getMutations(Bitcode *bitcode,
                                             llvm::Function *function) override;

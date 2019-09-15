@@ -26,13 +26,6 @@
 using namespace mull;
 using namespace llvm;
 
-TEST(NegateConditionMutator, negatedCmpInstPredicate) {
-  // llvm::CmpInst::Predicate::
-
-  EXPECT_EQ(NegateConditionMutator::negatedCmpInstPredicate(CmpInst::ICMP_SLT),
-            CmpInst::ICMP_SGE);
-}
-
 TEST(NegateConditionMutator, getMutationPoints_no_filter) {
   LLVMContext context;
   auto bitcode = loadBitcodeFromIR(

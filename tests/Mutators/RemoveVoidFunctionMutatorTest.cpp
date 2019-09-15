@@ -5,6 +5,7 @@
 #include "mull/Mutators/Mutator.h"
 
 #include <gtest/gtest.h>
+#include <irm/irm.h>
 #include <llvm/IR/Argument.h>
 #include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/Constants.h>

@@ -167,6 +167,7 @@ target_link_libraries(mull
   ${SQLITE_DEPENDENCY}
   clangTooling
   Threads::Threads
+  irm
   )
 target_include_directories(mull PUBLIC ${MULL_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/vendor)
 

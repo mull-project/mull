@@ -15,6 +15,7 @@
 #include "mull/Mutators/ScalarValueMutator.h"
 #include "mull/Program/Program.h"
 #include "mull/Testee.h"
+#include "mull/MutationPoint.h"
 
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/IR/InstIterator.h>
