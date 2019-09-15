@@ -24,7 +24,6 @@ class MutationPointAddress;
 struct SourceLocation;
 
 enum class MutatorKind {
-  ConditionalsBoundaryMutator,
   MathAddMutator,
   MathDivMutator,
   MathSubMutator,
@@ -35,6 +34,11 @@ enum class MutatorKind {
   AndOrReplacementMutator,
   ScalarValueMutator,
   ReplaceAssignmentMutator,
+
+  CXX_Relation_LessThanToLessOrEqual,
+  CXX_Relation_LessOrEqualToLessThan,
+  CXX_Relation_GreaterThanToGreaterOrEqual,
+  CXX_Relation_GreaterOrEqualToGreaterThan,
 };
 
 class Mutator {

@@ -4,7 +4,6 @@
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
 #include "mull/MutationPoint.h"
 #include "mull/Mutators/AndOrReplacementMutator.h"
-#include "mull/Mutators/ConditionalsBoundaryMutator.h"
 #include "mull/Mutators/MathAddMutator.h"
 #include "mull/Mutators/MathDivMutator.h"
 #include "mull/Mutators/MathMulMutator.h"
@@ -14,6 +13,7 @@
 #include "mull/Mutators/ReplaceAssignmentMutator.h"
 #include "mull/Mutators/ReplaceCallMutator.h"
 #include "mull/Mutators/ScalarValueMutator.h"
+#include <mull/Mutators/CXX/RelationalMutators.h>
 
 #include <gtest/gtest.h>
 #include <llvm/IR/Instructions.h>
@@ -77,7 +77,13 @@ TEST_P(CXXJunkDetectorTest, detectJunk) {
 
 static const CXXJunkDetectorTestParameter parameters[] = {
     CXXJunkDetectorTestParameter(fixtures::mutators_boundary_module_bc_path(),
-                                 new ConditionalsBoundaryMutator, 6),
+                                 new cxx::LessThanToLessOrEqual, 3),
+    CXXJunkDetectorTestParameter(fixtures::mutators_boundary_module_bc_path(),
+                                 new cxx::LessOrEqualToLessThan, 1),
+    CXXJunkDetectorTestParameter(fixtures::mutators_boundary_module_bc_path(),
+                                 new cxx::GreaterThanToGreaterOrEqual, 1),
+    CXXJunkDetectorTestParameter(fixtures::mutators_boundary_module_bc_path(),
+                                 new cxx::GreaterOrEqualToGreaterThan, 1),
     CXXJunkDetectorTestParameter(fixtures::mutators_math_add_module_bc_path(),
                                  new MathAddMutator, 16),
     CXXJunkDetectorTestParameter(fixtures::mutators_math_mul_junk_bc_path(),
@@ -130,10 +136,16 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
   auto bitcode = loader.loadBitcodeAtPath(path, context);
 
   std::vector<MutationPoint *> points;
-  ConditionalsBoundaryMutator mutator;
-  for (auto &function : bitcode->getModule()->functions()) {
-    auto mutants = mutator.getMutations(bitcode.get(), &function);
-    std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
+  std::vector<std::unique_ptr<Mutator>> mutators;
+  mutators.emplace_back(new cxx::LessOrEqualToLessThan);
+  mutators.emplace_back(new cxx::LessThanToLessOrEqual);
+  mutators.emplace_back(new cxx::GreaterOrEqualToGreaterThan);
+  mutators.emplace_back(new cxx::GreaterThanToGreaterOrEqual);
+  for (auto &mutator : mutators) {
+    for (auto &function : bitcode->getModule()->functions()) {
+      auto mutants = mutator->getMutations(bitcode.get(), &function);
+      std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
+    }
   }
 
   ASSERT_EQ(points.size(), 8U);
@@ -162,11 +174,18 @@ TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
   auto bitcode = loader.loadBitcodeAtPath(
       fixtures::junk_detection_compdb_main_bc_path(), context);
 
-  ConditionalsBoundaryMutator mutator;
   std::vector<MutationPoint *> points;
-  for (auto &function : bitcode->getModule()->functions()) {
-    auto mutants = mutator.getMutations(bitcode.get(), &function);
-    std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
+  std::vector<std::unique_ptr<Mutator>> mutators;
+  mutators.emplace_back(new cxx::LessOrEqualToLessThan);
+  mutators.emplace_back(new cxx::LessThanToLessOrEqual);
+  mutators.emplace_back(new cxx::GreaterOrEqualToGreaterThan);
+  mutators.emplace_back(new cxx::GreaterThanToGreaterOrEqual);
+
+  for (auto &mutator : mutators) {
+    for (auto &function : bitcode->getModule()->functions()) {
+      auto mutants = mutator->getMutations(bitcode.get(), &function);
+      std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
+    }
   }
 
   ASSERT_EQ(points.size(), 8U);
@@ -196,11 +215,17 @@ TEST(CXXJunkDetector, no_compdb) {
   auto bitcode = loader.loadBitcodeAtPath(path, context);
 
   std::vector<MutationPoint *> points;
+  std::vector<std::unique_ptr<Mutator>> mutators;
+  mutators.emplace_back(new cxx::LessOrEqualToLessThan);
+  mutators.emplace_back(new cxx::LessThanToLessOrEqual);
+  mutators.emplace_back(new cxx::GreaterOrEqualToGreaterThan);
+  mutators.emplace_back(new cxx::GreaterThanToGreaterOrEqual);
 
-  ConditionalsBoundaryMutator mutator;
-  for (auto &function : bitcode->getModule()->functions()) {
-    auto mutants = mutator.getMutations(bitcode.get(), &function);
-    std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
+  for (auto &mutator : mutators) {
+    for (auto &function : bitcode->getModule()->functions()) {
+      auto mutants = mutator->getMutations(bitcode.get(), &function);
+      std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
+    }
   }
 
   ASSERT_EQ(points.size(), 8U);

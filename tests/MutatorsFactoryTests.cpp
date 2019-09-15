@@ -108,21 +108,6 @@ TEST(MutatorsFactory, CompositeMutators) {
   }
 
   {
-    mutators = factory.mutators({"conditional"});
-    ASSERT_EQ(mutators.size(), 3UL);
-
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("and_or_replacement_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult =
-        find_if(mutators.begin(), mutators.end(), predicate("negate_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("conditionals_boundary_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
-  }
-
-  {
     mutators = factory.mutators({"functions"});
     ASSERT_EQ(mutators.size(), 2UL);
 
@@ -160,7 +145,7 @@ TEST(MutatorsFactory, CompositeMutators) {
 
   {
     mutators = factory.mutators({"experimental"});
-    ASSERT_EQ(mutators.size(), 8UL);
+    ASSERT_EQ(mutators.size(), 11UL);
 
     searchResult = find_if(mutators.begin(), mutators.end(),
                            predicate("math_div_mutator"));
@@ -183,14 +168,11 @@ TEST(MutatorsFactory, CompositeMutators) {
     searchResult = find_if(mutators.begin(), mutators.end(),
                            predicate("scalar_value_mutator"));
     ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("conditionals_boundary_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
   }
 
   {
     mutators = factory.mutators({"all"});
-    ASSERT_EQ(mutators.size(), 11UL);
+    ASSERT_EQ(mutators.size(), 14UL);
 
     searchResult = find_if(mutators.begin(), mutators.end(),
                            predicate("math_add_mutator"));
@@ -222,14 +204,11 @@ TEST(MutatorsFactory, CompositeMutators) {
     searchResult = find_if(mutators.begin(), mutators.end(),
                            predicate("scalar_value_mutator"));
     ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("conditionals_boundary_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
   }
 
   {
     mutators = factory.mutators({"default", "experimental"});
-    ASSERT_EQ(mutators.size(), 11UL);
+    ASSERT_EQ(mutators.size(), 14UL);
 
     searchResult = find_if(mutators.begin(), mutators.end(),
                            predicate("math_add_mutator"));
