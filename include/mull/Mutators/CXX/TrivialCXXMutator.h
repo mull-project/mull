@@ -12,8 +12,8 @@ namespace cxx {
 class TrivialCXXMutator : public Mutator {
 public:
   TrivialCXXMutator(std::vector<std::unique_ptr<irm::IRMutation>> mutators,
-                   MutatorKind kind, std::string id, std::string description,
-                   std::string replacement, std::string diagnostics);
+                    MutatorKind kind, std::string id, std::string description,
+                    std::string replacement, std::string diagnostics);
 
   std::string getUniqueIdentifier() override;
   std::string getUniqueIdentifier() const override;

@@ -115,7 +115,28 @@ static const CXXJunkDetectorTestParameter parameters[] = {
 
     CXXJunkDetectorTestParameter(
         fixtures::mutators_negate_condition_junk_bc_path(),
-        new NegateConditionMutator, 30),
+        new NegateConditionMutator, 6),
+
+    CXXJunkDetectorTestParameter(
+        fixtures::mutators_negate_condition_junk_bc_path(),
+        new cxx::EqualToNotEqual, 3),
+    CXXJunkDetectorTestParameter(
+        fixtures::mutators_negate_condition_junk_bc_path(),
+        new cxx::NotEqualToEqual, 6),
+
+    CXXJunkDetectorTestParameter(
+        fixtures::mutators_negate_condition_junk_bc_path(),
+        new cxx::GreaterThanToLessOrEqual, 6),
+    CXXJunkDetectorTestParameter(
+        fixtures::mutators_negate_condition_junk_bc_path(),
+        new cxx::GreaterOrEqualToLessThan, 3),
+    CXXJunkDetectorTestParameter(
+        fixtures::mutators_negate_condition_junk_bc_path(),
+        new cxx::LessThanToGreaterOrEqual, 3),
+    CXXJunkDetectorTestParameter(
+        fixtures::mutators_negate_condition_junk_bc_path(),
+        new cxx::LessOrEqualToGreaterThan, 3),
+
     CXXJunkDetectorTestParameter(
         fixtures::mutators_and_or_replacement_cpp_junk_bc_path(),
         new AndOrReplacementMutator, 4),

@@ -72,15 +72,25 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     return isJunkMutation<ReplaceAssignmentVisitor>(astStorage, point);
 
   case MutatorKind::CXX_Relation_LessThanToLessOrEqual:
-    return isJunkMutation<cxx::LessThanToLessOrEqualVisitor>(astStorage, point);
+    return isJunkMutation<cxx::LessThanVisitor>(astStorage, point);
   case MutatorKind::CXX_Relation_LessOrEqualToLessThan:
-    return isJunkMutation<cxx::LessOrEqualToLessThanVisitor>(astStorage, point);
+    return isJunkMutation<cxx::LessOrEqualVisitor>(astStorage, point);
   case MutatorKind::CXX_Relation_GreaterThanToGreaterOrEqual:
-    return isJunkMutation<cxx::GreaterThanToGreaterOrEqualVisitor>(astStorage,
-                                                                   point);
+    return isJunkMutation<cxx::GreaterThanVisitor>(astStorage, point);
   case MutatorKind::CXX_Relation_GreaterOrEqualToGreaterThan:
-    return isJunkMutation<cxx::GreaterOrEqualToGreaterThanVisitor>(astStorage,
-                                                                   point);
+    return isJunkMutation<cxx::GreaterOrEqualVisitor>(astStorage, point);
+  case MutatorKind::CXX_Relation_EqualToNotEqual:
+    return isJunkMutation<cxx::EqualVisitor>(astStorage, point);
+  case MutatorKind::CXX_Relation_NotEqualToEqual:
+    return isJunkMutation<cxx::NotEqualVisitor>(astStorage, point);
+  case MutatorKind::CXX_Relation_GreaterThanToLessOrEqual:
+    return isJunkMutation<cxx::GreaterThanVisitor>(astStorage, point);
+  case MutatorKind::CXX_Relation_GreaterOrEqualToLessThan:
+    return isJunkMutation<cxx::GreaterOrEqualVisitor>(astStorage, point);
+  case MutatorKind::CXX_Relation_LessThanToGreaterOrEqual:
+    return isJunkMutation<cxx::LessThanVisitor>(astStorage, point);
+  case MutatorKind::CXX_Relation_LessOrEqualToGreaterThan:
+    return isJunkMutation<cxx::LessOrEqualVisitor>(astStorage, point);
   default:
     return false;
   }

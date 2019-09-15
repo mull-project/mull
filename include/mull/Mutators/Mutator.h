@@ -39,6 +39,14 @@ enum class MutatorKind {
   CXX_Relation_LessOrEqualToLessThan,
   CXX_Relation_GreaterThanToGreaterOrEqual,
   CXX_Relation_GreaterOrEqualToGreaterThan,
+
+  CXX_Relation_GreaterThanToLessOrEqual,
+  CXX_Relation_GreaterOrEqualToLessThan,
+  CXX_Relation_LessThanToGreaterOrEqual,
+  CXX_Relation_LessOrEqualToGreaterThan,
+
+  CXX_Relation_EqualToNotEqual,
+  CXX_Relation_NotEqualToEqual,
 };
 
 class Mutator {

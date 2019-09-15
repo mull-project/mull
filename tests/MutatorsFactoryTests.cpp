@@ -145,7 +145,7 @@ TEST(MutatorsFactory, CompositeMutators) {
 
   {
     mutators = factory.mutators({"experimental"});
-    ASSERT_EQ(mutators.size(), 11UL);
+    ASSERT_EQ(mutators.size(), 17UL);
 
     searchResult = find_if(mutators.begin(), mutators.end(),
                            predicate("math_div_mutator"));
@@ -172,7 +172,7 @@ TEST(MutatorsFactory, CompositeMutators) {
 
   {
     mutators = factory.mutators({"all"});
-    ASSERT_EQ(mutators.size(), 14UL);
+    ASSERT_EQ(mutators.size(), 20UL);
 
     searchResult = find_if(mutators.begin(), mutators.end(),
                            predicate("math_add_mutator"));
@@ -208,7 +208,7 @@ TEST(MutatorsFactory, CompositeMutators) {
 
   {
     mutators = factory.mutators({"default", "experimental"});
-    ASSERT_EQ(mutators.size(), 14UL);
+    ASSERT_EQ(mutators.size(), 20UL);
 
     searchResult = find_if(mutators.begin(), mutators.end(),
                            predicate("math_add_mutator"));
