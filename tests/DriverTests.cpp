@@ -10,7 +10,6 @@
 #include "mull/MutationFilters/JunkMutationFilter.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/AndOrReplacementMutator.h"
-#include "mull/Mutators/MathAddMutator.h"
 #include "mull/Mutators/MathDivMutator.h"
 #include "mull/Mutators/MathMulMutator.h"
 #include "mull/Mutators/MathSubMutator.h"
@@ -24,6 +23,8 @@
 #include "mull/TestFrameworks/TestFrameworkFactory.h"
 #include "mull/Toolchain/Mangler.h"
 #include "mull/Toolchain/Toolchain.h"
+#include <mull/Mutators/CXX/ArithmeticMutators.h>
+#include <mull/Mutators/CXX/RelationalMutators.h>
 
 #include <functional>
 
@@ -37,7 +38,6 @@
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/YAMLParser.h>
-#include <mull/Mutators/CXX/RelationalMutators.h>
 
 using namespace mull;
 using namespace llvm;
@@ -85,7 +85,7 @@ TEST(Driver, SimpleTest_MathAddMutator) {
   Program program({}, {}, loader.loadBitcode(configuration));
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<MathAddMutator>());
+  mutators.emplace_back(make_unique<cxx::AddToSub>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   Toolchain toolchain(configuration);
@@ -739,7 +739,7 @@ TEST(Driver, customTest) {
                                 mull::fixtures::custom_test_test_bc_path()};
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<MathAddMutator>());
+  mutators.emplace_back(make_unique<cxx::AddToSub>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;
@@ -782,7 +782,7 @@ TEST(Driver, customTest_withDynamicLibraries) {
                                 fixtures::dylibs_and_objects_main_bc_path()};
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<MathAddMutator>());
+  mutators.emplace_back(make_unique<cxx::AddToSub>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;
@@ -825,7 +825,7 @@ TEST(Driver, junkDetector_included) {
                                 fixtures::custom_test_test_bc_path()};
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<MathAddMutator>());
+  mutators.emplace_back(make_unique<cxx::AddToSub>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;
@@ -864,7 +864,7 @@ TEST(Driver, junkDetector_excluded) {
                                 fixtures::custom_test_test_bc_path()};
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<MathAddMutator>());
+  mutators.emplace_back(make_unique<cxx::AddToSub>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;
@@ -899,7 +899,7 @@ TEST(Driver, customTest_withDynamicLibraries_and_ObjectFiles) {
   configuration.bitcodePaths = {fixtures::dylibs_and_objects_test_bc_path()};
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<MathAddMutator>());
+  mutators.emplace_back(make_unique<cxx::AddToSub>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader bitcodeLoader;

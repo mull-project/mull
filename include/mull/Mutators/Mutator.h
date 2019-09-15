@@ -24,7 +24,6 @@ class MutationPointAddress;
 struct SourceLocation;
 
 enum class MutatorKind {
-  MathAddMutator,
   MathDivMutator,
   MathSubMutator,
   MathMulMutator,
@@ -34,6 +33,11 @@ enum class MutatorKind {
   AndOrReplacementMutator,
   ScalarValueMutator,
   ReplaceAssignmentMutator,
+
+  CXX_Arithmetic_AddToSub,
+  CXX_Arithmetic_AddAssignToSubAssign,
+  CXX_Arithmetic_PreIncToPreDec,
+  CXX_Arithmetic_PostIncToPostDec,
 
   CXX_Relation_LessThanToLessOrEqual,
   CXX_Relation_LessOrEqualToLessThan,

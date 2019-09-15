@@ -11,22 +11,20 @@
 #include "mull/JunkDetection/CXX/ASTStorage.h"
 #include "mull/Metrics/Metrics.h"
 #include "mull/MutationsFinder.h"
-#include "mull/Mutators/MathAddMutator.h"
 #include "mull/Program/Program.h"
 #include "mull/Reporters/ASTSourceInfoProvider.h"
 #include "mull/Result.h"
 #include "mull/TestFrameworks/SimpleTest/SimpleTestFinder.h"
 #include "mull/Testee.h"
-
-#include <gtest/gtest.h>
-#include <json11/json11.hpp>
+#include <mull/Mutators/CXX/ArithmeticMutators.h>
 
 #include <cstring>
-#include <ostream>
-
+#include <gtest/gtest.h>
+#include <json11/json11.hpp>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Type.h>
+#include <ostream>
 
 using namespace mull;
 using namespace llvm;
@@ -72,8 +70,7 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  std::unique_ptr<MathAddMutator> addMutator = make_unique<MathAddMutator>();
-  mutators.emplace_back(std::move(addMutator));
+  mutators.emplace_back(make_unique<cxx::AddToSub>());
   MutationsFinder mutationsFinder(std::move(mutators), configuration);
   Filter filter;
 
@@ -160,7 +157,7 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   const Json &mutationJSON = mutantsJSON.at(0);
 
   const std::string &mutationId = mutationJSON["id"].string_value();
-  ASSERT_EQ("math_add_mutator", mutationId);
+  ASSERT_EQ("cxx_arithmetic_add_to_sub", mutationId);
 
   const std::string &mutationStatus = mutationJSON["status"].string_value();
   ASSERT_EQ("Killed", mutationStatus);

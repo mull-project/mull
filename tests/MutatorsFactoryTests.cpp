@@ -15,13 +15,6 @@ TEST(MutatorsFactory, SingleMutators) {
   Mutator *mutator = nullptr;
 
   {
-    mutators = factory.mutators({"math_add_mutator"});
-    ASSERT_EQ(mutators.size(), 1UL);
-    mutator = mutators[0].get();
-    ASSERT_EQ(mutator->getUniqueIdentifier(), "math_add_mutator");
-  }
-
-  {
     mutators = factory.mutators({"math_div_mutator"});
     ASSERT_EQ(mutators.size(), 1UL);
     mutator = mutators[0].get();
@@ -94,9 +87,6 @@ TEST(MutatorsFactory, CompositeMutators) {
     ASSERT_EQ(mutators.size(), 4UL);
 
     searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("math_add_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
                            predicate("math_div_mutator"));
     ASSERT_NE(searchResult, mutators.end());
     searchResult = find_if(mutators.begin(), mutators.end(),
@@ -132,9 +122,6 @@ TEST(MutatorsFactory, CompositeMutators) {
     mutators = factory.mutators({"default"});
     ASSERT_EQ(mutators.size(), 3UL);
 
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("math_add_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
     searchResult =
         find_if(mutators.begin(), mutators.end(), predicate("negate_mutator"));
     ASSERT_NE(searchResult, mutators.end());
@@ -145,7 +132,7 @@ TEST(MutatorsFactory, CompositeMutators) {
 
   {
     mutators = factory.mutators({"experimental"});
-    ASSERT_EQ(mutators.size(), 17UL);
+    ASSERT_EQ(mutators.size(), 21UL);
 
     searchResult = find_if(mutators.begin(), mutators.end(),
                            predicate("math_div_mutator"));
@@ -172,11 +159,8 @@ TEST(MutatorsFactory, CompositeMutators) {
 
   {
     mutators = factory.mutators({"all"});
-    ASSERT_EQ(mutators.size(), 20UL);
+    ASSERT_EQ(mutators.size(), 23UL);
 
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("math_add_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
     searchResult = find_if(mutators.begin(), mutators.end(),
                            predicate("math_div_mutator"));
     ASSERT_NE(searchResult, mutators.end());
@@ -208,11 +192,8 @@ TEST(MutatorsFactory, CompositeMutators) {
 
   {
     mutators = factory.mutators({"default", "experimental"});
-    ASSERT_EQ(mutators.size(), 20UL);
+    ASSERT_EQ(mutators.size(), 23UL);
 
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("math_add_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
     searchResult = find_if(mutators.begin(), mutators.end(),
                            predicate("math_div_mutator"));
     ASSERT_NE(searchResult, mutators.end());
@@ -250,18 +231,19 @@ TEST(MutatorsFactory, UniqueMutators) {
   Mutator *mutator = nullptr;
 
   {
-    mutators = factory.mutators({"math_add_mutator", "math_add_mutator"});
+    mutators = factory.mutators(
+        {"cxx_arithmetic_add_to_sub", "cxx_arithmetic_add_to_sub"});
     ASSERT_EQ(mutators.size(), 1UL);
     mutator = mutators[0].get();
-    ASSERT_EQ(mutator->getUniqueIdentifier(), "math_add_mutator");
+    ASSERT_EQ(mutator->getUniqueIdentifier(), "cxx_arithmetic_add_to_sub");
   }
 
   {
-    mutators = factory.mutators({"math", "math_add_mutator"});
+    mutators = factory.mutators({"math", "cxx_arithmetic_add_to_sub"});
     ASSERT_EQ(mutators.size(), 4UL);
 
     searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("math_add_mutator"));
+                           predicate("cxx_arithmetic_add_to_sub"));
     ASSERT_NE(searchResult, mutators.end());
     searchResult = find_if(mutators.begin(), mutators.end(),
                            predicate("math_div_mutator"));

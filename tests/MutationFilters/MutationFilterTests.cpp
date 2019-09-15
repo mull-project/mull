@@ -1,5 +1,3 @@
-#include <gtest/gtest.h>
-
 #include "FixturePaths.h"
 #include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
@@ -7,9 +5,10 @@
 #include "mull/MutationFilters/FilePathFilter.h"
 #include "mull/MutationFilters/NoDebugInfoFilter.h"
 #include "mull/MutationsFinder.h"
-#include "mull/Mutators/MathAddMutator.h"
 #include "mull/Program/Program.h"
+#include <mull/Mutators/CXX/ArithmeticMutators.h>
 
+#include <gtest/gtest.h>
 #include <llvm/IR/LLVMContext.h>
 
 using namespace mull;
@@ -21,7 +20,7 @@ TEST(NoDebugInfoFilter, withDebugInfo) {
   auto bitcode = loader.loadBitcodeAtPath(path, context);
   std::vector<MutationPoint *> points;
 
-  MathAddMutator mutator;
+  cxx::AddToSub mutator;
   for (auto &function : bitcode->getModule()->functions()) {
     auto mutants = mutator.getMutations(bitcode.get(), &function);
     std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
@@ -48,7 +47,7 @@ TEST(NoDebugInfoFilter, withouDebugInfo) {
   auto bitcode = loader.loadBitcodeAtPath(path, context);
 
   std::vector<MutationPoint *> points;
-  MathAddMutator mutator;
+  cxx::AddToSub mutator;
   for (auto &function : bitcode->getModule()->functions()) {
     auto mutants = mutator.getMutations(bitcode.get(), &function);
     std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
@@ -75,7 +74,7 @@ TEST(FilePathFilter, doesNotFilterEmpty) {
   auto bitcode = loader.loadBitcodeAtPath(path, context);
 
   std::vector<MutationPoint *> points;
-  MathAddMutator mutator;
+  cxx::AddToSub mutator;
   for (auto &function : bitcode->getModule()->functions()) {
     auto mutants = mutator.getMutations(bitcode.get(), &function);
     std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
@@ -102,7 +101,7 @@ TEST(FilePathFilter, doesNotFilterMismatch) {
   auto bitcode = loader.loadBitcodeAtPath(path, context);
 
   std::vector<MutationPoint *> points;
-  MathAddMutator mutator;
+  cxx::AddToSub mutator;
   for (auto &function : bitcode->getModule()->functions()) {
     auto mutants = mutator.getMutations(bitcode.get(), &function);
     std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
@@ -130,7 +129,7 @@ TEST(FilePathFilter, filtersPlainString) {
   auto bitcode = loader.loadBitcodeAtPath(path, context);
 
   std::vector<MutationPoint *> points;
-  MathAddMutator mutator;
+  cxx::AddToSub mutator;
   for (auto &function : bitcode->getModule()->functions()) {
     auto mutants = mutator.getMutations(bitcode.get(), &function);
     std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
@@ -158,7 +157,7 @@ TEST(FilePathFilter, filtersWithRegex) {
   auto bitcode = loader.loadBitcodeAtPath(path, context);
 
   std::vector<MutationPoint *> points;
-  MathAddMutator mutator;
+  cxx::AddToSub mutator;
   for (auto &function : bitcode->getModule()->functions()) {
     auto mutants = mutator.getMutations(bitcode.get(), &function);
     std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));

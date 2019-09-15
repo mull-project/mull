@@ -4,7 +4,6 @@
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
 #include "mull/MutationPoint.h"
 #include "mull/Mutators/AndOrReplacementMutator.h"
-#include "mull/Mutators/MathAddMutator.h"
 #include "mull/Mutators/MathDivMutator.h"
 #include "mull/Mutators/MathMulMutator.h"
 #include "mull/Mutators/MathSubMutator.h"
@@ -13,6 +12,7 @@
 #include "mull/Mutators/ReplaceAssignmentMutator.h"
 #include "mull/Mutators/ReplaceCallMutator.h"
 #include "mull/Mutators/ScalarValueMutator.h"
+#include <mull/Mutators/CXX/ArithmeticMutators.h>
 #include <mull/Mutators/CXX/RelationalMutators.h>
 
 #include <gtest/gtest.h>
@@ -69,6 +69,7 @@ TEST_P(CXXJunkDetectorTest, detectJunk) {
   for (auto point : points) {
     if (!detector.isJunk(point)) {
       nonJunkMutationPoints.push_back(point);
+      //      astStorage.getMutantASTNode(point)->dump();
     }
   }
 
@@ -84,8 +85,16 @@ static const CXXJunkDetectorTestParameter parameters[] = {
                                  new cxx::GreaterThanToGreaterOrEqual, 1),
     CXXJunkDetectorTestParameter(fixtures::mutators_boundary_module_bc_path(),
                                  new cxx::GreaterOrEqualToGreaterThan, 1),
+
     CXXJunkDetectorTestParameter(fixtures::mutators_math_add_module_bc_path(),
-                                 new MathAddMutator, 16),
+                                 new cxx::AddToSub, 6),
+    CXXJunkDetectorTestParameter(fixtures::mutators_math_add_module_bc_path(),
+                                 new cxx::AddAssignToSubAssign, 6),
+    CXXJunkDetectorTestParameter(fixtures::mutators_math_add_module_bc_path(),
+                                 new cxx::PreIncToPreDec, 1),
+    CXXJunkDetectorTestParameter(fixtures::mutators_math_add_module_bc_path(),
+                                 new cxx::PostIncToPostDec, 3),
+
     CXXJunkDetectorTestParameter(fixtures::mutators_math_mul_junk_bc_path(),
                                  new MathMulMutator, 10),
     CXXJunkDetectorTestParameter(fixtures::mutators_math_div_junk_bc_path(),

@@ -56,7 +56,7 @@ int ff(int x, int g) {
   }
 
   int sumX = 0;
-  for (int i = 0; i < 18; i++) {
+  for (int i = 0; i < 18; ++i) {
     sumX += classes[i]->get_X();
   }
 
