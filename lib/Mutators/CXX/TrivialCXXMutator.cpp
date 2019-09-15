@@ -23,8 +23,8 @@ std::string TrivialCXXMutator::getDescription() const { return description; }
 MutatorKind TrivialCXXMutator::mutatorKind() { return kind; }
 
 void TrivialCXXMutator::applyMutation(llvm::Function *function,
-                                     const MutationPointAddress &address,
-                                     irm::IRMutation *lowLevelMutation) {
+                                      const MutationPointAddress &address,
+                                      irm::IRMutation *lowLevelMutation) {
   llvm::Instruction &instruction = address.findInstruction(function);
   lowLevelMutation->mutate(&instruction);
 }

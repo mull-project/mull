@@ -37,6 +37,7 @@
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/YAMLParser.h>
+#include <mull/Mutators/CXX/RelationalMutators.h>
 
 using namespace mull;
 using namespace llvm;
@@ -279,7 +280,7 @@ TEST(Driver, SimpleTest_MathDivMutator) {
   ASSERT_NE(nullptr, firstMutant->getMutationPoint());
 }
 
-TEST(Driver, SimpleTest_NegateConditionMutator) {
+TEST(Driver, SimpleTest_CXXLessThanToGreaterOrEqual) {
   /// Create Config with fake BitcodePaths
   /// Create Fake Module Loader
   /// Initialize Driver using ModuleLoader and Config
@@ -293,7 +294,7 @@ TEST(Driver, SimpleTest_NegateConditionMutator) {
       fixtures::mutators_negate_condition_tester_bc_path()};
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<NegateConditionMutator>());
+  mutators.emplace_back(make_unique<cxx::LessThanToGreaterOrEqual>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;

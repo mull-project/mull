@@ -30,6 +30,42 @@ public:
   GreaterOrEqualToGreaterThan();
 };
 
+class EqualToNotEqual : public TrivialCXXMutator {
+public:
+  static const std::string ID;
+  EqualToNotEqual();
+};
+
+class NotEqualToEqual : public TrivialCXXMutator {
+public:
+  static const std::string ID;
+  NotEqualToEqual();
+};
+
+class GreaterThanToLessOrEqual : public TrivialCXXMutator {
+public:
+  static const std::string ID;
+  GreaterThanToLessOrEqual();
+};
+
+class GreaterOrEqualToLessThan : public TrivialCXXMutator {
+public:
+  static const std::string ID;
+  GreaterOrEqualToLessThan();
+};
+
+class LessThanToGreaterOrEqual : public TrivialCXXMutator {
+public:
+  static const std::string ID;
+  LessThanToGreaterOrEqual();
+};
+
+class LessOrEqualToGreaterThan : public TrivialCXXMutator {
+public:
+  static const std::string ID;
+  LessOrEqualToGreaterThan();
+};
+
 } // namespace cxx
 
 } // namespace mull

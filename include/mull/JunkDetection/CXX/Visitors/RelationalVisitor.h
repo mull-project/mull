@@ -31,14 +31,15 @@ private:
   InstructionRangeVisitor visitor;
 };
 
-typedef RelationalVisitor<clang::BinaryOperator::Opcode::BO_LT>
-    LessThanToLessOrEqualVisitor;
+typedef RelationalVisitor<clang::BinaryOperator::Opcode::BO_LT> LessThanVisitor;
 typedef RelationalVisitor<clang::BinaryOperator::Opcode::BO_LE>
-    LessOrEqualToLessThanVisitor;
+    LessOrEqualVisitor;
 typedef RelationalVisitor<clang::BinaryOperator::Opcode::BO_GT>
-    GreaterThanToGreaterOrEqualVisitor;
+    GreaterThanVisitor;
 typedef RelationalVisitor<clang::BinaryOperator::Opcode::BO_GE>
-    GreaterOrEqualToGreaterThanVisitor;
+    GreaterOrEqualVisitor;
+typedef RelationalVisitor<clang::BinaryOperator::Opcode::BO_EQ> EqualVisitor;
+typedef RelationalVisitor<clang::BinaryOperator::Opcode::BO_NE> NotEqualVisitor;
 
 } // namespace cxx
 

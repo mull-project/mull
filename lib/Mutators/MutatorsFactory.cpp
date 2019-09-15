@@ -30,6 +30,7 @@ static const string ConstantMutatorsGroup = "constant";
 
 static const string ConditionalBoundaryMutatorsGroup =
     "conditionals_boundary_mutator";
+static const string NegateRelationalMutatorsGroup = "negate_relational";
 
 static const string DefaultMutatorsGroup = "default";
 static const string ExperimentalMutatorsGroup = "experimental";
@@ -51,9 +52,9 @@ static void expandGroups(const vector<string> &groups,
 }
 
 MutatorsFactory::MutatorsFactory() {
-  groupsMapping[ConditionalMutatorsGroup] = {AndOrReplacementMutator::ID,
-                                             NegateConditionMutator::ID,
-                                             ConditionalBoundaryMutatorsGroup};
+  groupsMapping[ConditionalMutatorsGroup] = {
+      AndOrReplacementMutator::ID, NegateConditionMutator::ID,
+      ConditionalBoundaryMutatorsGroup, NegateRelationalMutatorsGroup};
   groupsMapping[MathMutatorsGroup] = {MathAddMutator::ID, MathSubMutator::ID,
                                       MathMulMutator::ID, MathDivMutator::ID};
   groupsMapping[FunctionsMutatorsGroup] = {ReplaceCallMutator::ID,
@@ -66,8 +67,10 @@ MutatorsFactory::MutatorsFactory() {
       MathSubMutator::ID,           MathMulMutator::ID,
       MathDivMutator::ID,           AndOrReplacementMutator::ID,
       ReplaceAssignmentMutator::ID, ReplaceCallMutator::ID,
-      ScalarValueMutator::ID,       ConditionalBoundaryMutatorsGroup};
-  groupsMapping[CXXMutatorsGroup] = {ConditionalBoundaryMutatorsGroup};
+      ScalarValueMutator::ID,       ConditionalBoundaryMutatorsGroup,
+      NegateRelationalMutatorsGroup};
+  groupsMapping[CXXMutatorsGroup] = {ConditionalBoundaryMutatorsGroup,
+                                     NegateRelationalMutatorsGroup};
   groupsMapping[AllMutatorsGroup] = {DefaultMutatorsGroup,
                                      ExperimentalMutatorsGroup};
 
@@ -76,6 +79,12 @@ MutatorsFactory::MutatorsFactory() {
       cxx::LessThanToLessOrEqual::ID,
       cxx::GreaterOrEqualToGreaterThan::ID,
       cxx::GreaterThanToGreaterOrEqual::ID,
+  };
+
+  groupsMapping[NegateRelationalMutatorsGroup] = {
+      cxx::GreaterThanToLessOrEqual::ID, cxx::GreaterOrEqualToLessThan::ID,
+      cxx::LessThanToGreaterOrEqual::ID, cxx::LessOrEqualToGreaterThan::ID,
+      cxx::EqualToNotEqual::ID,          cxx::NotEqualToEqual::ID,
   };
 }
 
@@ -102,6 +111,14 @@ void MutatorsFactory::init() {
   addMutator<cxx::LessThanToLessOrEqual>(mutatorsMapping);
   addMutator<cxx::GreaterOrEqualToGreaterThan>(mutatorsMapping);
   addMutator<cxx::GreaterThanToGreaterOrEqual>(mutatorsMapping);
+
+  addMutator<cxx::EqualToNotEqual>(mutatorsMapping);
+  addMutator<cxx::NotEqualToEqual>(mutatorsMapping);
+
+  addMutator<cxx::LessOrEqualToGreaterThan>(mutatorsMapping);
+  addMutator<cxx::LessThanToGreaterOrEqual>(mutatorsMapping);
+  addMutator<cxx::GreaterOrEqualToLessThan>(mutatorsMapping);
+  addMutator<cxx::GreaterThanToLessOrEqual>(mutatorsMapping);
 }
 
 vector<unique_ptr<Mutator>>

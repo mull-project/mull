@@ -25,6 +25,7 @@
 #include <llvm/IR/Module.h>
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Transforms/Utils/Cloning.h>
+#include <mull/Mutators/CXX/RelationalMutators.h>
 
 #include "gtest/gtest.h"
 
@@ -142,7 +143,7 @@ TEST(MutationPoint, NegateConditionMutator_applyMutation) {
   auto bitcode = loader.loadBitcodeAtPath(
       fixtures::mutators_negate_condition_testee_bc_path(), context);
 
-  NegateConditionMutator mutator;
+  cxx::LessThanToGreaterOrEqual mutator;
   auto mutationPoints = mutator.getMutations(
       bitcode.get(), bitcode->getModule()->getFunction("max"));
 
