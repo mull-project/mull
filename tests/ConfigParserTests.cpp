@@ -1,9 +1,9 @@
 #include <thread>
 
 #include "ConfigParserTestFixture.h"
+#include "mull/Mutators/CXX/ArithmeticMutators.h"
 #include "mull/Mutators/MathDivMutator.h"
 #include "mull/Mutators/MathMulMutator.h"
-#include "mull/Mutators/MathSubMutator.h"
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "mull/Mutators/RemoveVoidFunctionMutator.h"
 #include "mull/Mutators/ReplaceCallMutator.h"
@@ -357,7 +357,7 @@ TEST_F(ConfigParserTestFixture, loadConfig_Mutators_SpecificValue) {
   const char *configYAML = R"YAML(
 mutators:
   - negate_mutator
-  - math_sub_mutator
+  - cxx_arithmetic_sub_to_add
   - math_mul_mutator
   - math_div_mutator
   - scalar_value_mutator
@@ -369,7 +369,7 @@ mutators:
   ASSERT_EQ(6U, mutators.size());
   size_t index = 0;
   ASSERT_EQ(NegateConditionMutator::ID, mutators[index++]);
-  ASSERT_EQ(MathSubMutator::ID, mutators[index++]);
+  ASSERT_EQ(cxx::SubToAdd::ID, mutators[index++]);
   ASSERT_EQ(MathMulMutator::ID, mutators[index++]);
   ASSERT_EQ(MathDivMutator::ID, mutators[index++]);
   ASSERT_EQ(ScalarValueMutator::ID, mutators[index++]);

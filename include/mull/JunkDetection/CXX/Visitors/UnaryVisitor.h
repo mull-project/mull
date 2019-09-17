@@ -31,6 +31,8 @@ private:
 
 typedef UnaryVisitor<clang::UnaryOperator::Opcode::UO_PreInc> PreIncVisitor;
 typedef UnaryVisitor<clang::UnaryOperator::Opcode::UO_PostInc> PostIncVisitor;
+typedef UnaryVisitor<clang::UnaryOperator::Opcode::UO_PreDec> PreDecVisitor;
+typedef UnaryVisitor<clang::UnaryOperator::Opcode::UO_PostDec> PostDecVisitor;
 
 } // namespace cxx
 

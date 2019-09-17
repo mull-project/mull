@@ -8,7 +8,6 @@
 #include "mull/JunkDetection/CXX/Visitors/BinaryVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/MathDivVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/MathMulVisitor.h"
-#include "mull/JunkDetection/CXX/Visitors/MathSubVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/NegateConditionVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/RemoveVoidFunctionVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/ReplaceAssignmentVisitor.h"
@@ -50,8 +49,6 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
   }
 
   switch (point->getMutator()->mutatorKind()) {
-  case MutatorKind::MathSubMutator:
-    return isJunkMutation<MathSubVisitor>(astStorage, point);
   case MutatorKind::MathMulMutator:
     return isJunkMutation<MathMulVisitor>(astStorage, point);
   case MutatorKind::MathDivMutator:
@@ -98,6 +95,15 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     return isJunkMutation<cxx::PreIncVisitor>(astStorage, point);
   case MutatorKind::CXX_Arithmetic_PostIncToPostDec:
     return isJunkMutation<cxx::PostIncVisitor>(astStorage, point);
+
+  case MutatorKind::CXX_Arithmetic_SubToAdd:
+    return isJunkMutation<cxx::SubVisitor>(astStorage, point);
+  case MutatorKind::CXX_Arithmetic_SubAssignToAddAssign:
+    return isJunkMutation<cxx::SubAssignVisitor>(astStorage, point);
+  case MutatorKind::CXX_Arithmetic_PreDecToPreInc:
+    return isJunkMutation<cxx::PreDecVisitor>(astStorage, point);
+  case MutatorKind::CXX_Arithmetic_PostDecToPostInc:
+    return isJunkMutation<cxx::PostDecVisitor>(astStorage, point);
   default:
     return false;
   }
