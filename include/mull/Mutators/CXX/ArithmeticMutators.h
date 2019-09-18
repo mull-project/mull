@@ -66,6 +66,18 @@ public:
   MulAssignToDivAssign();
 };
 
+class DivToMul : public TrivialCXXMutator {
+public:
+  static const std::string ID;
+  DivToMul();
+};
+
+class DivAssignToMulAssign : public TrivialCXXMutator {
+public:
+  static const std::string ID;
+  DivAssignToMulAssign();
+};
+
 } // namespace cxx
 
 } // namespace mull
