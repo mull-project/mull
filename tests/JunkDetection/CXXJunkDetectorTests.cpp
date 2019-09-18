@@ -5,7 +5,6 @@
 #include "mull/MutationPoint.h"
 #include "mull/Mutators/AndOrReplacementMutator.h"
 #include "mull/Mutators/MathDivMutator.h"
-#include "mull/Mutators/MathMulMutator.h"
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "mull/Mutators/RemoveVoidFunctionMutator.h"
 #include "mull/Mutators/ReplaceAssignmentMutator.h"
@@ -94,7 +93,10 @@ static const CXXJunkDetectorTestParameter parameters[] = {
                                  new cxx::PostIncToPostDec, 3),
 
     CXXJunkDetectorTestParameter(fixtures::mutators_math_mul_junk_bc_path(),
-                                 new MathMulMutator, 10),
+                                 new cxx::MulToDiv, 8),
+    CXXJunkDetectorTestParameter(fixtures::mutators_math_mul_junk_bc_path(),
+                                 new cxx::MulAssignToDivAssign, 2),
+
     CXXJunkDetectorTestParameter(fixtures::mutators_math_div_junk_bc_path(),
                                  new MathDivMutator, 10),
 

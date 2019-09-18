@@ -6,7 +6,6 @@
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/AndOrReplacementMutator.h"
 #include "mull/Mutators/MathDivMutator.h"
-#include "mull/Mutators/MathMulMutator.h"
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "mull/Mutators/ReplaceAssignmentMutator.h"
 #include "mull/Mutators/ReplaceCallMutator.h"
@@ -29,32 +28,6 @@
 
 using namespace mull;
 using namespace llvm;
-
-TEST(MutationPoint, MathMulMutator_applyMutation) {
-  LLVMContext context;
-  BitcodeLoader loader;
-  auto bitcode = loader.loadBitcodeAtPath(
-      fixtures::mutators_math_mul_module_bc_path(), context);
-
-  MathMulMutator mutator;
-  auto mutationPoints = mutator.getMutations(
-      bitcode.get(), bitcode->getModule()->getFunction("math_mul"));
-
-  ASSERT_EQ(mutationPoints.size(), 1UL);
-
-  MutationPoint *mutationPoint = mutationPoints.front();
-  MutationPointAddress address = mutationPoint->getAddress();
-  ASSERT_TRUE(isa<BinaryOperator>(mutationPoint->getOriginalValue()));
-
-  mutationPoint->setMutatedFunction(mutationPoint->getOriginalFunction());
-  mutationPoint->applyMutation();
-
-  auto &mutatedInstruction = mutationPoint->getAddress().findInstruction(
-      mutationPoint->getOriginalFunction());
-
-  ASSERT_TRUE(isa<BinaryOperator>(mutatedInstruction));
-  ASSERT_EQ(Instruction::SDiv, mutatedInstruction.getOpcode());
-}
 
 TEST(MutationPoint, MathDivMutator_applyMutation) {
   LLVMContext context;

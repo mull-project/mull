@@ -11,7 +11,6 @@
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/AndOrReplacementMutator.h"
 #include "mull/Mutators/MathDivMutator.h"
-#include "mull/Mutators/MathMulMutator.h"
 #include "mull/Mutators/MutatorsFactory.h"
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "mull/Mutators/RemoveVoidFunctionMutator.h"
@@ -190,7 +189,7 @@ TEST(Driver, SimpleTest_MathMulMutator) {
   Program program({}, {}, loader.loadBitcode(configuration));
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<MathMulMutator>());
+  mutators.emplace_back(make_unique<cxx::MulToDiv>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   Toolchain toolchain(configuration);

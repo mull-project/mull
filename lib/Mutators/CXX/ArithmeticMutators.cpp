@@ -104,3 +104,28 @@ PreDecToPreInc::PreDecToPreInc()
                         MutatorKind::CXX_Arithmetic_PreDecToPreInc,
                         PreDecToPreInc::ID, "Replaces --x with ++x", "++",
                         "Replaced --x with ++x") {}
+
+#pragma mark - Mul to div
+
+static std::vector<std::unique_ptr<irm::IRMutation>> getMulToDiv() {
+  std::vector<std::unique_ptr<irm::IRMutation>> mutators;
+  mutators.emplace_back(new irm::MulToSDiv());
+  mutators.emplace_back(new irm::FMulToFDiv());
+  return mutators;
+}
+
+const std::string MulToDiv::ID = "cxx_arithmetic_mul_to_div";
+
+MulToDiv::MulToDiv()
+    : TrivialCXXMutator(std::move(getMulToDiv()),
+                        MutatorKind::CXX_Arithmetic_MulToDiv, MulToDiv::ID,
+                        "Replaces * with /", "/", "Replaced * with /") {}
+
+const std::string MulAssignToDivAssign::ID =
+    "cxx_arithmetic_mul_assign_to_div_assign";
+
+MulAssignToDivAssign::MulAssignToDivAssign()
+    : TrivialCXXMutator(std::move(getMulToDiv()),
+                        MutatorKind::CXX_Arithmetic_MulAssignToDivAssign,
+                        MulAssignToDivAssign::ID,
+                        "Replaces *= with /=", "/=", "Replaced *= with /=") {}

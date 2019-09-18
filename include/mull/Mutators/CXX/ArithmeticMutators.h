@@ -54,6 +54,18 @@ public:
   PreDecToPreInc();
 };
 
+class MulToDiv : public TrivialCXXMutator {
+public:
+  static const std::string ID;
+  MulToDiv();
+};
+
+class MulAssignToDivAssign : public TrivialCXXMutator {
+public:
+  static const std::string ID;
+  MulAssignToDivAssign();
+};
+
 } // namespace cxx
 
 } // namespace mull

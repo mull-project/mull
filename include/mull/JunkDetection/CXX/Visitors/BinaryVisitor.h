@@ -1,8 +1,6 @@
 #pragma once
 
-#include "InstructionRangeVisitor.h"
 #include "VisitorParameters.h"
-
 #include <clang/AST/RecursiveASTVisitor.h>
 
 namespace mull {
@@ -12,21 +10,27 @@ namespace cxx {
 template <clang::BinaryOperator::Opcode opcode>
 class BinaryVisitor : public clang::RecursiveASTVisitor<BinaryVisitor<opcode>> {
 public:
-  BinaryVisitor(const VisitorParameters &parameters) : visitor(parameters) {}
+  explicit BinaryVisitor(const VisitorParameters &parameters)
+      : parameters(parameters), matchingExpression(nullptr) {}
 
   bool VisitBinaryOperator(clang::BinaryOperator *binaryOperator) {
     if (binaryOperator->getOpcode() != opcode) {
       return true;
     }
 
-    visitor.visitRangeWithASTExpr(binaryOperator);
+    if (binaryOperator->getOperatorLoc() == parameters.sourceLocation) {
+      assert(!matchingExpression && "Already found");
+      matchingExpression = binaryOperator;
+      return false;
+    }
     return true;
   }
 
-  clang::Expr *foundMutant() { return visitor.getMatchingASTNode(); }
+  clang::Expr *foundMutant() { return matchingExpression; }
 
 private:
-  InstructionRangeVisitor visitor;
+  const VisitorParameters &parameters;
+  clang::Expr *matchingExpression;
 };
 
 typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_LT> LessThanVisitor;
@@ -44,6 +48,10 @@ typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_AddAssign>
 typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_Sub> SubVisitor;
 typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_SubAssign>
     SubAssignVisitor;
+
+typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_Mul> MulVisitor;
+typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_MulAssign>
+    MulAssignVisitor;
 
 } // namespace cxx
 
