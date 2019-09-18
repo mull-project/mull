@@ -30,6 +30,30 @@ public:
   PreIncToPreDec();
 };
 
+class SubToAdd : public TrivialCXXMutator {
+public:
+  static const std::string ID;
+  SubToAdd();
+};
+
+class SubAssignToAddAssign : public TrivialCXXMutator {
+public:
+  static const std::string ID;
+  SubAssignToAddAssign();
+};
+
+class PostDecToPostInc : public TrivialCXXMutator {
+public:
+  static const std::string ID;
+  PostDecToPostInc();
+};
+
+class PreDecToPreInc : public TrivialCXXMutator {
+public:
+  static const std::string ID;
+  PreDecToPreInc();
+};
+
 } // namespace cxx
 
 } // namespace mull

@@ -25,7 +25,6 @@ struct SourceLocation;
 
 enum class MutatorKind {
   MathDivMutator,
-  MathSubMutator,
   MathMulMutator,
   NegateMutator,
   RemoveVoidFunctionMutator,
@@ -38,6 +37,11 @@ enum class MutatorKind {
   CXX_Arithmetic_AddAssignToSubAssign,
   CXX_Arithmetic_PreIncToPreDec,
   CXX_Arithmetic_PostIncToPostDec,
+
+  CXX_Arithmetic_SubToAdd,
+  CXX_Arithmetic_SubAssignToAddAssign,
+  CXX_Arithmetic_PreDecToPreInc,
+  CXX_Arithmetic_PostDecToPostInc,
 
   CXX_Relation_LessThanToLessOrEqual,
   CXX_Relation_LessOrEqualToLessThan,

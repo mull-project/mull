@@ -22,7 +22,6 @@ set(mull_sources
   Mutators/ReplaceCallMutator.cpp
   Mutators/MathDivMutator.cpp
   Mutators/MathMulMutator.cpp
-  Mutators/MathSubMutator.cpp
   Mutators/ScalarValueMutator.cpp
 
   Toolchain/Compiler.cpp
@@ -82,7 +81,6 @@ set(mull_sources
   JunkDetection/CXX/Visitors/InstructionRangeVisitor.cpp
   JunkDetection/CXX/Visitors/MathDivVisitor.cpp
   JunkDetection/CXX/Visitors/MathMulVisitor.cpp
-  JunkDetection/CXX/Visitors/MathSubVisitor.cpp
   JunkDetection/CXX/Visitors/NegateConditionVisitor.cpp
   JunkDetection/CXX/Visitors/RemoveVoidFunctionVisitor.cpp
   JunkDetection/CXX/Visitors/ReplaceCallVisitor.cpp

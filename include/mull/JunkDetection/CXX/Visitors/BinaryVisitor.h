@@ -41,6 +41,10 @@ typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_Add> AddVisitor;
 typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_AddAssign>
     AddAssignVisitor;
 
+typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_Sub> SubVisitor;
+typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_SubAssign>
+    SubAssignVisitor;
+
 } // namespace cxx
 
 } // namespace mull

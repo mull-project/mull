@@ -6,7 +6,6 @@
 #include "mull/Mutators/AndOrReplacementMutator.h"
 #include "mull/Mutators/MathDivMutator.h"
 #include "mull/Mutators/MathMulMutator.h"
-#include "mull/Mutators/MathSubMutator.h"
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "mull/Mutators/RemoveVoidFunctionMutator.h"
 #include "mull/Mutators/ReplaceAssignmentMutator.h"
@@ -69,7 +68,6 @@ TEST_P(CXXJunkDetectorTest, detectJunk) {
   for (auto point : points) {
     if (!detector.isJunk(point)) {
       nonJunkMutationPoints.push_back(point);
-      //      astStorage.getMutantASTNode(point)->dump();
     }
   }
 
@@ -100,22 +98,15 @@ static const CXXJunkDetectorTestParameter parameters[] = {
     CXXJunkDetectorTestParameter(fixtures::mutators_math_div_junk_bc_path(),
                                  new MathDivMutator, 10),
 
-    /// FIXME: Here MathSub should produce 14 mutants, but only 9 found because
-    /// some of the '--/-= 1' instructions converted into 'add -1'
-    /// There are three possible solutions:
-    ///   1. Consider 'add' and 'sub' instruction as MathSub and filter out junk
-    ///      later. This way we must rely on JunkDetector, otherwise we get lots
-    ///      of duplicates
-    ///   2. Add an extra check to the MathSub, i.e. an instruction is MathSub
-    ///      if it is 'add' and one of the operands is '-1'. Then, to apply a
-    ///      mutation we would need to replace -1 with 1.
-    ///   3. Merge MathAdd and MathSub into one mutator. Less granulation, but
-    ///      higher quality of mutants
-    ///
-    /// At the moment of writing the second option more.
-    ///
     CXXJunkDetectorTestParameter(fixtures::mutators_math_sub_junk_bc_path(),
-                                 new MathSubMutator, 8),
+                                 new cxx::SubToAdd, 5),
+    CXXJunkDetectorTestParameter(fixtures::mutators_math_sub_junk_bc_path(),
+                                 new cxx::SubAssignToAddAssign, 3),
+    CXXJunkDetectorTestParameter(fixtures::mutators_math_sub_junk_bc_path(),
+                                 new cxx::PreDecToPreInc, 1),
+    CXXJunkDetectorTestParameter(fixtures::mutators_math_sub_junk_bc_path(),
+                                 new cxx::PostDecToPostInc, 3),
+
     CXXJunkDetectorTestParameter(
         fixtures::mutators_remove_void_function_junk_bc_path(),
         new RemoveVoidFunctionMutator, 6),
