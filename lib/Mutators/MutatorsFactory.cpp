@@ -4,7 +4,6 @@
 #include "mull/Mutators/CXX/ArithmeticMutators.h"
 #include "mull/Mutators/CXX/RelationalMutators.h"
 #include "mull/Mutators/MathDivMutator.h"
-#include "mull/Mutators/MathMulMutator.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "mull/Mutators/RemoveVoidFunctionMutator.h"
@@ -56,15 +55,14 @@ MutatorsFactory::MutatorsFactory() {
       AndOrReplacementMutator::ID, NegateConditionMutator::ID,
       ConditionalBoundaryMutatorsGroup, NegateRelationalMutatorsGroup};
   groupsMapping[MathMutatorsGroup] = {cxx::AddToSub::ID, cxx::SubToAdd::ID,
-                                      MathMulMutator::ID, MathDivMutator::ID};
+                                      cxx::MulToDiv::ID, MathDivMutator::ID};
   groupsMapping[FunctionsMutatorsGroup] = {ReplaceCallMutator::ID,
                                            RemoveVoidFunctionMutator::ID};
   groupsMapping[ConstantMutatorsGroup] = {ScalarValueMutator::ID};
   groupsMapping[DefaultMutatorsGroup] = {cxx::AddToSub::ID,
                                          NegateConditionMutator::ID,
                                          RemoveVoidFunctionMutator::ID};
-  groupsMapping[ExperimentalMutatorsGroup] = {MathMulMutator::ID,
-                                              MathDivMutator::ID,
+  groupsMapping[ExperimentalMutatorsGroup] = {MathDivMutator::ID,
                                               AndOrReplacementMutator::ID,
                                               ReplaceAssignmentMutator::ID,
                                               ReplaceCallMutator::ID,
@@ -98,7 +96,8 @@ MutatorsFactory::MutatorsFactory() {
 
       cxx::SubToAdd::ID,         cxx::SubAssignToAddAssign::ID,
       cxx::PostDecToPostInc::ID, cxx::PreDecToPreInc::ID,
-  };
+
+      cxx::MulToDiv::ID,         cxx::MulAssignToDivAssign::ID};
 }
 
 template <typename MutatorClass>
@@ -108,7 +107,6 @@ void addMutator(std::map<std::string, std::unique_ptr<Mutator>> &mapping) {
 
 void MutatorsFactory::init() {
   addMutator<MathDivMutator>(mutatorsMapping);
-  addMutator<MathMulMutator>(mutatorsMapping);
 
   addMutator<NegateConditionMutator>(mutatorsMapping);
   addMutator<AndOrReplacementMutator>(mutatorsMapping);
@@ -140,6 +138,9 @@ void MutatorsFactory::init() {
   addMutator<cxx::SubAssignToAddAssign>(mutatorsMapping);
   addMutator<cxx::PreDecToPreInc>(mutatorsMapping);
   addMutator<cxx::PostDecToPostInc>(mutatorsMapping);
+
+  addMutator<cxx::MulToDiv>(mutatorsMapping);
+  addMutator<cxx::MulAssignToDivAssign>(mutatorsMapping);
 }
 
 vector<unique_ptr<Mutator>>

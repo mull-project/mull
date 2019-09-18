@@ -1,8 +1,6 @@
 #pragma once
 
-#include "InstructionRangeVisitor.h"
 #include "VisitorParameters.h"
-
 #include <clang/AST/RecursiveASTVisitor.h>
 
 namespace mull {
@@ -12,21 +10,27 @@ namespace cxx {
 template <clang::UnaryOperator::Opcode opcode>
 class UnaryVisitor : public clang::RecursiveASTVisitor<UnaryVisitor<opcode>> {
 public:
-  UnaryVisitor(const VisitorParameters &parameters) : visitor(parameters) {}
+  explicit UnaryVisitor(const VisitorParameters &parameters)
+      : parameters(parameters), matchingExpression(nullptr) {}
 
   bool VisitUnaryOperator(clang::UnaryOperator *unaryOperator) {
     if (unaryOperator->getOpcode() != opcode) {
       return true;
     }
 
-    visitor.visitRangeWithASTExpr(unaryOperator);
+    if (unaryOperator->getOperatorLoc() == parameters.sourceLocation) {
+      assert(!matchingExpression && "Already found");
+      matchingExpression = unaryOperator;
+      return false;
+    }
     return true;
   }
 
-  clang::Expr *foundMutant() { return visitor.getMatchingASTNode(); }
+  clang::Expr *foundMutant() { return matchingExpression; }
 
 private:
-  InstructionRangeVisitor visitor;
+  const VisitorParameters &parameters;
+  clang::Expr *matchingExpression;
 };
 
 typedef UnaryVisitor<clang::UnaryOperator::Opcode::UO_PreInc> PreIncVisitor;
