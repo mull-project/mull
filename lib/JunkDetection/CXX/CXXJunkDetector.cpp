@@ -5,16 +5,16 @@
 #include "mull/Mutators/Mutator.h"
 
 #include "mull/JunkDetection/CXX/Visitors/AndOrReplacementVisitor.h"
-#include "mull/JunkDetection/CXX/Visitors/MathAddVisitor.h"
+#include "mull/JunkDetection/CXX/Visitors/BinaryVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/MathDivVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/MathMulVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/MathSubVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/NegateConditionVisitor.h"
-#include "mull/JunkDetection/CXX/Visitors/RelationalVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/RemoveVoidFunctionVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/ReplaceAssignmentVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/ReplaceCallVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/ScalarValueVisitor.h"
+#include "mull/JunkDetection/CXX/Visitors/UnaryVisitor.h"
 
 using namespace mull;
 
@@ -50,8 +50,6 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
   }
 
   switch (point->getMutator()->mutatorKind()) {
-  case MutatorKind::MathAddMutator:
-    return isJunkMutation<MathAddVisitor>(astStorage, point);
   case MutatorKind::MathSubMutator:
     return isJunkMutation<MathSubVisitor>(astStorage, point);
   case MutatorKind::MathMulMutator:
@@ -91,6 +89,15 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     return isJunkMutation<cxx::LessThanVisitor>(astStorage, point);
   case MutatorKind::CXX_Relation_LessOrEqualToGreaterThan:
     return isJunkMutation<cxx::LessOrEqualVisitor>(astStorage, point);
+
+  case MutatorKind::CXX_Arithmetic_AddToSub:
+    return isJunkMutation<cxx::AddVisitor>(astStorage, point);
+  case MutatorKind::CXX_Arithmetic_AddAssignToSubAssign:
+    return isJunkMutation<cxx::AddAssignVisitor>(astStorage, point);
+  case MutatorKind::CXX_Arithmetic_PreIncToPreDec:
+    return isJunkMutation<cxx::PreIncVisitor>(astStorage, point);
+  case MutatorKind::CXX_Arithmetic_PostIncToPostDec:
+    return isJunkMutation<cxx::PostIncVisitor>(astStorage, point);
   default:
     return false;
   }

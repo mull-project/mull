@@ -1,8 +1,8 @@
 #include "mull/Mutators/MutatorsFactory.h"
 
 #include "mull/Mutators/AndOrReplacementMutator.h"
+#include "mull/Mutators/CXX/ArithmeticMutators.h"
 #include "mull/Mutators/CXX/RelationalMutators.h"
-#include "mull/Mutators/MathAddMutator.h"
 #include "mull/Mutators/MathDivMutator.h"
 #include "mull/Mutators/MathMulMutator.h"
 #include "mull/Mutators/MathSubMutator.h"
@@ -31,6 +31,7 @@ static const string ConstantMutatorsGroup = "constant";
 static const string ConditionalBoundaryMutatorsGroup =
     "conditionals_boundary_mutator";
 static const string NegateRelationalMutatorsGroup = "negate_relational";
+static const string ArithmeticMutatorsGroup = "arithmetic";
 
 static const string DefaultMutatorsGroup = "default";
 static const string ExperimentalMutatorsGroup = "experimental";
@@ -55,22 +56,29 @@ MutatorsFactory::MutatorsFactory() {
   groupsMapping[ConditionalMutatorsGroup] = {
       AndOrReplacementMutator::ID, NegateConditionMutator::ID,
       ConditionalBoundaryMutatorsGroup, NegateRelationalMutatorsGroup};
-  groupsMapping[MathMutatorsGroup] = {MathAddMutator::ID, MathSubMutator::ID,
+  groupsMapping[MathMutatorsGroup] = {cxx::AddToSub::ID, MathSubMutator::ID,
                                       MathMulMutator::ID, MathDivMutator::ID};
   groupsMapping[FunctionsMutatorsGroup] = {ReplaceCallMutator::ID,
                                            RemoveVoidFunctionMutator::ID};
   groupsMapping[ConstantMutatorsGroup] = {ScalarValueMutator::ID};
-  groupsMapping[DefaultMutatorsGroup] = {MathAddMutator::ID,
+  groupsMapping[DefaultMutatorsGroup] = {cxx::AddToSub::ID,
                                          NegateConditionMutator::ID,
                                          RemoveVoidFunctionMutator::ID};
-  groupsMapping[ExperimentalMutatorsGroup] = {
-      MathSubMutator::ID,           MathMulMutator::ID,
-      MathDivMutator::ID,           AndOrReplacementMutator::ID,
-      ReplaceAssignmentMutator::ID, ReplaceCallMutator::ID,
-      ScalarValueMutator::ID,       ConditionalBoundaryMutatorsGroup,
-      NegateRelationalMutatorsGroup};
-  groupsMapping[CXXMutatorsGroup] = {ConditionalBoundaryMutatorsGroup,
-                                     NegateRelationalMutatorsGroup};
+  groupsMapping[ExperimentalMutatorsGroup] = {MathSubMutator::ID,
+                                              MathMulMutator::ID,
+                                              MathDivMutator::ID,
+                                              AndOrReplacementMutator::ID,
+                                              ReplaceAssignmentMutator::ID,
+                                              ReplaceCallMutator::ID,
+                                              ScalarValueMutator::ID,
+                                              ConditionalBoundaryMutatorsGroup,
+                                              NegateRelationalMutatorsGroup,
+                                              ArithmeticMutatorsGroup};
+  groupsMapping[CXXMutatorsGroup] = {
+      ConditionalBoundaryMutatorsGroup,
+      NegateRelationalMutatorsGroup,
+      ArithmeticMutatorsGroup,
+  };
   groupsMapping[AllMutatorsGroup] = {DefaultMutatorsGroup,
                                      ExperimentalMutatorsGroup};
 
@@ -86,6 +94,12 @@ MutatorsFactory::MutatorsFactory() {
       cxx::LessThanToGreaterOrEqual::ID, cxx::LessOrEqualToGreaterThan::ID,
       cxx::EqualToNotEqual::ID,          cxx::NotEqualToEqual::ID,
   };
+  groupsMapping[ArithmeticMutatorsGroup] = {
+      cxx::AddToSub::ID,
+      cxx::AddAssignToSubAssign::ID,
+      cxx::PostIncToPostDec::ID,
+      cxx::PreIncToPreDec::ID,
+  };
 }
 
 template <typename MutatorClass>
@@ -94,7 +108,6 @@ void addMutator(std::map<std::string, std::unique_ptr<Mutator>> &mapping) {
 }
 
 void MutatorsFactory::init() {
-  addMutator<MathAddMutator>(mutatorsMapping);
   addMutator<MathSubMutator>(mutatorsMapping);
   addMutator<MathDivMutator>(mutatorsMapping);
   addMutator<MathMulMutator>(mutatorsMapping);
@@ -119,6 +132,11 @@ void MutatorsFactory::init() {
   addMutator<cxx::LessThanToGreaterOrEqual>(mutatorsMapping);
   addMutator<cxx::GreaterOrEqualToLessThan>(mutatorsMapping);
   addMutator<cxx::GreaterThanToLessOrEqual>(mutatorsMapping);
+
+  addMutator<cxx::AddToSub>(mutatorsMapping);
+  addMutator<cxx::AddAssignToSubAssign>(mutatorsMapping);
+  addMutator<cxx::PreIncToPreDec>(mutatorsMapping);
+  addMutator<cxx::PostIncToPostDec>(mutatorsMapping);
 }
 
 vector<unique_ptr<Mutator>>

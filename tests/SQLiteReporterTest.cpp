@@ -7,20 +7,18 @@
 #include "mull/Filter.h"
 #include "mull/Metrics/Metrics.h"
 #include "mull/MutationsFinder.h"
-#include "mull/Mutators/MathAddMutator.h"
 #include "mull/Program/Program.h"
 #include "mull/Result.h"
 #include "mull/TestFrameworks/SimpleTest/SimpleTestFinder.h"
 #include "mull/Testee.h"
-
-#include "gtest/gtest.h"
+#include <mull/Mutators/CXX/ArithmeticMutators.h>
 
 #include <cstring>
-#include <ostream>
-
+#include <gtest/gtest.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Type.h>
+#include <ostream>
 #include <sqlite3.h>
 
 using namespace mull;
@@ -47,8 +45,7 @@ TEST(SQLiteReporter, integrationTest) {
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  std::unique_ptr<MathAddMutator> addMutator = make_unique<MathAddMutator>();
-  mutators.emplace_back(std::move(addMutator));
+  mutators.emplace_back(make_unique<cxx::AddToSub>());
   MutationsFinder mutationsFinder(std::move(mutators), configuration);
   Filter filter;
 
@@ -425,8 +422,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   Program program({}, {}, std::move(bitcode));
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  std::unique_ptr<MathAddMutator> addMutator = make_unique<MathAddMutator>();
-  mutators.emplace_back(std::move(addMutator));
+  mutators.emplace_back(make_unique<cxx::AddToSub>());
   MutationsFinder mutationsFinder(std::move(mutators), configuration);
   Filter filter;
   SimpleTestFinder testFinder;
@@ -561,8 +557,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   Program program({}, {}, std::move(bitcode));
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  std::unique_ptr<MathAddMutator> addMutator = make_unique<MathAddMutator>();
-  mutators.emplace_back(std::move(addMutator));
+  mutators.emplace_back(make_unique<cxx::AddToSub>());
   MutationsFinder mutationsFinder(std::move(mutators), configuration);
   Filter filter;
 

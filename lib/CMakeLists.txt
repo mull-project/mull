@@ -14,7 +14,6 @@ set(mull_sources
   Instrumentation/Callbacks.cpp
   Instrumentation/Instrumentation.cpp
 
-  Mutators/MathAddMutator.cpp
   Mutators/AndOrReplacementMutator.cpp
   Mutators/MutatorsFactory.cpp
   Mutators/NegateConditionMutator.cpp
@@ -81,7 +80,6 @@ set(mull_sources
   ObjectLoader.cpp
   JunkDetection/CXX/Visitors/AndOrReplacementVisitor.cpp
   JunkDetection/CXX/Visitors/InstructionRangeVisitor.cpp
-  JunkDetection/CXX/Visitors/MathAddVisitor.cpp
   JunkDetection/CXX/Visitors/MathDivVisitor.cpp
   JunkDetection/CXX/Visitors/MathMulVisitor.cpp
   JunkDetection/CXX/Visitors/MathSubVisitor.cpp

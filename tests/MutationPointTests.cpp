@@ -5,7 +5,6 @@
 #include "mull/Filter.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/AndOrReplacementMutator.h"
-#include "mull/Mutators/MathAddMutator.h"
 #include "mull/Mutators/MathDivMutator.h"
 #include "mull/Mutators/MathMulMutator.h"
 #include "mull/Mutators/MathSubMutator.h"
@@ -31,32 +30,6 @@
 
 using namespace mull;
 using namespace llvm;
-
-TEST(MutationPoint, MathAddMutator_applyMutation) {
-  LLVMContext context;
-  BitcodeLoader loader;
-  auto bitcode = loader.loadBitcodeAtPath(
-      fixtures::simple_test_count_letters_count_letters_bc_path(), context);
-
-  MathAddMutator mutator;
-  auto mutationPoints = mutator.getMutations(
-      bitcode.get(), bitcode->getModule()->getFunction("count_letters"));
-
-  ASSERT_EQ(1U, mutationPoints.size());
-
-  MutationPoint *mutationPoint = mutationPoints.front();
-  MutationPointAddress address = mutationPoint->getAddress();
-  ASSERT_TRUE(isa<BinaryOperator>(mutationPoint->getOriginalValue()));
-
-  mutationPoint->setMutatedFunction(mutationPoint->getOriginalFunction());
-  mutationPoint->applyMutation();
-
-  auto &mutatedInstruction = mutationPoint->getAddress().findInstruction(
-      mutationPoint->getOriginalFunction());
-
-  ASSERT_TRUE(isa<BinaryOperator>(mutatedInstruction));
-  ASSERT_EQ(Instruction::Sub, mutatedInstruction.getOpcode());
-}
 
 TEST(MutationPoint, MathSubMutator_applyMutation) {
   LLVMContext context;

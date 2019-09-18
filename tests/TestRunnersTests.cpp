@@ -4,7 +4,6 @@
 #include "mull/Config/Configuration.h"
 #include "mull/Filter.h"
 #include "mull/MutationsFinder.h"
-#include "mull/Mutators/MathAddMutator.h"
 #include "mull/Program/Program.h"
 #include "mull/TestFrameworks/NativeTestRunner.h"
 #include "mull/TestFrameworks/SimpleTest/SimpleTestFinder.h"
@@ -13,6 +12,7 @@
 #include "mull/Toolchain/JITEngine.h"
 #include "mull/Toolchain/Toolchain.h"
 #include "mull/Toolchain/Trampolines.h"
+#include <mull/Mutators/CXX/ArithmeticMutators.h>
 
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/IR/InstIterator.h>
@@ -55,7 +55,7 @@ TEST(NativeTestRunner, runTest) {
   NativeTestRunner::OwnedObjectFiles ownedObjectFiles;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<MathAddMutator>());
+  mutators.emplace_back(make_unique<cxx::AddToSub>());
   MutationsFinder mutationsFinder(std::move(mutators), configuration);
   Filter filter;
 

@@ -1,7 +1,6 @@
 #include <thread>
 
 #include "ConfigParserTestFixture.h"
-#include "mull/Mutators/MathAddMutator.h"
 #include "mull/Mutators/MathDivMutator.h"
 #include "mull/Mutators/MathMulMutator.h"
 #include "mull/Mutators/MathSubMutator.h"
@@ -357,7 +356,6 @@ TEST_F(ConfigParserTestFixture, loadConfig_Mutators_Unspecified) {
 TEST_F(ConfigParserTestFixture, loadConfig_Mutators_SpecificValue) {
   const char *configYAML = R"YAML(
 mutators:
-  - math_add_mutator
   - negate_mutator
   - math_sub_mutator
   - math_mul_mutator
@@ -368,14 +366,14 @@ mutators:
   configWithYamlContent(configYAML);
 
   auto mutators = config.getMutators();
-  ASSERT_EQ(7U, mutators.size());
-  ASSERT_EQ(MathAddMutator::ID, mutators[0]);
-  ASSERT_EQ(NegateConditionMutator::ID, mutators[1]);
-  ASSERT_EQ(MathSubMutator::ID, mutators[2]);
-  ASSERT_EQ(MathMulMutator::ID, mutators[3]);
-  ASSERT_EQ(MathDivMutator::ID, mutators[4]);
-  ASSERT_EQ(ScalarValueMutator::ID, mutators[5]);
-  ASSERT_EQ(ReplaceCallMutator::ID, mutators[6]);
+  ASSERT_EQ(6U, mutators.size());
+  size_t index = 0;
+  ASSERT_EQ(NegateConditionMutator::ID, mutators[index++]);
+  ASSERT_EQ(MathSubMutator::ID, mutators[index++]);
+  ASSERT_EQ(MathMulMutator::ID, mutators[index++]);
+  ASSERT_EQ(MathDivMutator::ID, mutators[index++]);
+  ASSERT_EQ(ScalarValueMutator::ID, mutators[index++]);
+  ASSERT_EQ(ReplaceCallMutator::ID, mutators[index++]);
 }
 
 TEST_F(ConfigParserTestFixture, loadConfig_tests_SpecificValue) {

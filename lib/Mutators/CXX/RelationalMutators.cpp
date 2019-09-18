@@ -146,8 +146,6 @@ GreaterOrEqualToLessThan::GreaterOrEqualToLessThan()
                         GreaterOrEqualToLessThan::ID, "Replaces >= with <", "<",
                         "Replaced >= with <") {}
 
-#pragma mark--------
-
 const std::string LessThanToGreaterOrEqual::ID = "cxx_relational_lt_to_ge";
 
 static std::vector<std::unique_ptr<irm::IRMutation>>

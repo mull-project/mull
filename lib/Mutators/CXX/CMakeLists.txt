@@ -1,4 +1,5 @@
 set (SOURCES
+  ArithmeticMutators.cpp
   RelationalMutators.cpp
   TrivialCXXMutator.cpp
   )
