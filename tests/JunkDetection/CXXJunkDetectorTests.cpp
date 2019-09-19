@@ -101,6 +101,11 @@ static const CXXJunkDetectorTestParameter parameters[] = {
     CXXJunkDetectorTestParameter(fixtures::mutators_math_div_junk_bc_path(),
                                  new cxx::DivAssignToMulAssign, 2),
 
+    CXXJunkDetectorTestParameter(fixtures::mutators_rem_to_div_junk_bc_path(),
+                                 new cxx::RemToDiv, 5),
+    CXXJunkDetectorTestParameter(fixtures::mutators_rem_to_div_junk_bc_path(),
+                                 new cxx::RemAssignToDivAssign, 3),
+
     CXXJunkDetectorTestParameter(fixtures::mutators_math_sub_junk_bc_path(),
                                  new cxx::SubToAdd, 5),
     CXXJunkDetectorTestParameter(fixtures::mutators_math_sub_junk_bc_path(),
