@@ -50,6 +50,19 @@ enum class MutatorKind {
   CXX_Arithmetic_RemToDiv,
   CXX_Arithmetic_RemAssignToDivAssign,
 
+  CXX_Bitwise_LShiftToRShift,
+  CXX_Bitwise_LShiftAssignToRShiftAssign,
+
+  CXX_Bitwise_RShiftToLShift,
+  CXX_Bitwise_RShiftAssignToLShiftAssign,
+
+  CXX_Bitwise_OrToAnd,
+  CXX_Bitwise_OrAssignToAndAssign,
+  CXX_Bitwise_AndToOr,
+  CXX_Bitwise_AndAssignToOrAssign,
+  CXX_Bitwise_XorToOr,
+  CXX_Bitwise_XorAssignToOrAssign,
+
   CXX_Relation_LessThanToLessOrEqual,
   CXX_Relation_LessOrEqualToLessThan,
   CXX_Relation_GreaterThanToGreaterOrEqual,

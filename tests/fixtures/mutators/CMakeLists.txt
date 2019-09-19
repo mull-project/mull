@@ -1,5 +1,6 @@
 add_subdirectory(and_or_replacement)
 add_subdirectory(and_or_replacement_cpp)
+add_subdirectory(bitwise)
 add_subdirectory(boundary)
 add_subdirectory(math_add)
 add_subdirectory(math_div)
