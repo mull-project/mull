@@ -129,3 +129,29 @@ MulAssignToDivAssign::MulAssignToDivAssign()
                         MutatorKind::CXX_Arithmetic_MulAssignToDivAssign,
                         MulAssignToDivAssign::ID,
                         "Replaces *= with /=", "/=", "Replaced *= with /=") {}
+
+#pragma mark - Div to mul
+
+static std::vector<std::unique_ptr<irm::IRMutation>> getDivToMul() {
+  std::vector<std::unique_ptr<irm::IRMutation>> mutators;
+  mutators.emplace_back(new irm::FDivToFMul());
+  mutators.emplace_back(new irm::SDivToMul());
+  mutators.emplace_back(new irm::UDivToMul());
+  return mutators;
+}
+
+const std::string DivToMul::ID = "cxx_arithmetic_div_to_mul";
+
+DivToMul::DivToMul()
+    : TrivialCXXMutator(std::move(getDivToMul()),
+                        MutatorKind::CXX_Arithmetic_DivToMul, DivToMul::ID,
+                        "Replaces / with *", "*", "Replaced / with *") {}
+
+const std::string DivAssignToMulAssign::ID =
+    "cxx_arithmetic_div_assign_to_mul_assign";
+
+DivAssignToMulAssign::DivAssignToMulAssign()
+    : TrivialCXXMutator(std::move(getDivToMul()),
+                        MutatorKind::CXX_Arithmetic_DivAssignToMulAssign,
+                        DivAssignToMulAssign::ID,
+                        "Replaces /= with *=", "*=", "Replaced /= with *=") {}

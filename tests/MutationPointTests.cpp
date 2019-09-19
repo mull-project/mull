@@ -5,7 +5,6 @@
 #include "mull/Filter.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/AndOrReplacementMutator.h"
-#include "mull/Mutators/MathDivMutator.h"
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "mull/Mutators/ReplaceAssignmentMutator.h"
 #include "mull/Mutators/ReplaceCallMutator.h"
@@ -28,57 +27,6 @@
 
 using namespace mull;
 using namespace llvm;
-
-TEST(MutationPoint, MathDivMutator_applyMutation) {
-  LLVMContext context;
-  BitcodeLoader loader;
-  auto bitcode = loader.loadBitcodeAtPath(
-      fixtures::mutators_math_div_module_bc_path(), context);
-
-  MathDivMutator mutator;
-  auto mutationPoints = mutator.getMutations(
-      bitcode.get(), bitcode->getModule()->getFunction("math_div"));
-
-  ASSERT_EQ(1U, mutationPoints.size());
-
-  MutationPoint *mutationPoint = mutationPoints.front();
-  MutationPointAddress address = mutationPoint->getAddress();
-  ASSERT_TRUE(isa<BinaryOperator>(mutationPoint->getOriginalValue()));
-
-  mutationPoint->setMutatedFunction(mutationPoint->getOriginalFunction());
-  mutationPoint->applyMutation();
-
-  auto &mutatedInstruction = mutationPoint->getAddress().findInstruction(
-      mutationPoint->getOriginalFunction());
-
-  ASSERT_TRUE(isa<BinaryOperator>(mutatedInstruction));
-  ASSERT_EQ(Instruction::Mul, mutatedInstruction.getOpcode());
-}
-
-TEST(MutationPoint, NegateConditionMutator_applyMutation) {
-  LLVMContext context;
-  BitcodeLoader loader;
-
-  auto bitcode = loader.loadBitcodeAtPath(
-      fixtures::mutators_negate_condition_testee_bc_path(), context);
-
-  cxx::LessThanToGreaterOrEqual mutator;
-  auto mutationPoints = mutator.getMutations(
-      bitcode.get(), bitcode->getModule()->getFunction("max"));
-
-  ASSERT_EQ(1U, mutationPoints.size());
-
-  MutationPoint *mutationPoint = mutationPoints.front();
-  ASSERT_TRUE(isa<CmpInst>(mutationPoint->getOriginalValue()));
-  mutationPoint->setMutatedFunction(mutationPoint->getOriginalFunction());
-  mutationPoint->applyMutation();
-
-  auto &mutatedInstruction = mutationPoint->getAddress().findInstruction(
-      mutationPoint->getOriginalFunction());
-  auto mutatedCmpInstruction = cast<CmpInst>(&mutatedInstruction);
-  ASSERT_EQ(mutatedCmpInstruction->getPredicate(),
-            CmpInst::Predicate::ICMP_SGE);
-}
 
 TEST(MutationPoint, AndOrReplacementMutator_applyMutation) {
   LLVMContext context;

@@ -2,7 +2,6 @@
 
 #include "ConfigParserTestFixture.h"
 #include "mull/Mutators/CXX/ArithmeticMutators.h"
-#include "mull/Mutators/MathDivMutator.h"
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "mull/Mutators/RemoveVoidFunctionMutator.h"
 #include "mull/Mutators/ReplaceCallMutator.h"
@@ -358,7 +357,7 @@ mutators:
   - negate_mutator
   - cxx_arithmetic_sub_to_add
   - cxx_arithmetic_mul_to_div
-  - math_div_mutator
+  - cxx_arithmetic_div_to_mul
   - scalar_value_mutator
   - replace_call_mutator
   )YAML";
@@ -370,7 +369,7 @@ mutators:
   ASSERT_EQ(NegateConditionMutator::ID, mutators[index++]);
   ASSERT_EQ(cxx::SubToAdd::ID, mutators[index++]);
   ASSERT_EQ(cxx::MulToDiv::ID, mutators[index++]);
-  ASSERT_EQ(MathDivMutator::ID, mutators[index++]);
+  ASSERT_EQ(cxx::DivToMul::ID, mutators[index++]);
   ASSERT_EQ(ScalarValueMutator::ID, mutators[index++]);
   ASSERT_EQ(ReplaceCallMutator::ID, mutators[index++]);
 }
