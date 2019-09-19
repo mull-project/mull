@@ -94,7 +94,9 @@ MutatorsFactory::MutatorsFactory() {
       cxx::PostDecToPostInc::ID, cxx::PreDecToPreInc::ID,
 
       cxx::MulToDiv::ID,         cxx::MulAssignToDivAssign::ID,
-      cxx::DivToMul::ID,         cxx::DivAssignToMulAssign::ID};
+      cxx::DivToMul::ID,         cxx::DivAssignToMulAssign::ID,
+      cxx::RemToDiv::ID,         cxx::RemAssignToDivAssign::ID,
+  };
 }
 
 template <typename MutatorClass>
@@ -139,6 +141,9 @@ void MutatorsFactory::init() {
 
   addMutator<cxx::DivToMul>(mutatorsMapping);
   addMutator<cxx::DivAssignToMulAssign>(mutatorsMapping);
+
+  addMutator<cxx::RemToDiv>(mutatorsMapping);
+  addMutator<cxx::RemAssignToDivAssign>(mutatorsMapping);
 }
 
 vector<unique_ptr<Mutator>>

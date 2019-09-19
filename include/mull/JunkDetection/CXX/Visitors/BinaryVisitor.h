@@ -57,6 +57,10 @@ typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_Div> DivVisitor;
 typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_DivAssign>
     DivAssignVisitor;
 
+typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_Rem> RemVisitor;
+typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_RemAssign>
+    RemAssignVisitor;
+
 } // namespace cxx
 
 } // namespace mull

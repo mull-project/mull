@@ -47,6 +47,9 @@ enum class MutatorKind {
   CXX_Arithmetic_DivToMul,
   CXX_Arithmetic_DivAssignToMulAssign,
 
+  CXX_Arithmetic_RemToDiv,
+  CXX_Arithmetic_RemAssignToDivAssign,
+
   CXX_Relation_LessThanToLessOrEqual,
   CXX_Relation_LessOrEqualToLessThan,
   CXX_Relation_GreaterThanToGreaterOrEqual,

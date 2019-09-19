@@ -109,6 +109,11 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
   case MutatorKind::CXX_Arithmetic_DivAssignToMulAssign:
     return isJunkMutation<cxx::DivAssignVisitor>(astStorage, point);
 
+  case MutatorKind::CXX_Arithmetic_RemToDiv:
+    return isJunkMutation<cxx::RemVisitor>(astStorage, point);
+  case MutatorKind::CXX_Arithmetic_RemAssignToDivAssign:
+    return isJunkMutation<cxx::RemAssignVisitor>(astStorage, point);
+
   default:
     return false;
   }
