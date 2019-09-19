@@ -114,6 +114,28 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
   case MutatorKind::CXX_Arithmetic_RemAssignToDivAssign:
     return isJunkMutation<cxx::RemAssignVisitor>(astStorage, point);
 
+  case MutatorKind::CXX_Bitwise_LShiftToRShift:
+    return isJunkMutation<cxx::LShiftVisitor>(astStorage, point);
+  case MutatorKind::CXX_Bitwise_LShiftAssignToRShiftAssign:
+    return isJunkMutation<cxx::LShiftAssignVisitor>(astStorage, point);
+  case MutatorKind::CXX_Bitwise_RShiftToLShift:
+    return isJunkMutation<cxx::RShiftVisitor>(astStorage, point);
+  case MutatorKind::CXX_Bitwise_RShiftAssignToLShiftAssign:
+    return isJunkMutation<cxx::RShiftAssignVisitor>(astStorage, point);
+
+  case MutatorKind::CXX_Bitwise_AndToOr:
+    return isJunkMutation<cxx::BitAndVisitor>(astStorage, point);
+  case MutatorKind::CXX_Bitwise_AndAssignToOrAssign:
+    return isJunkMutation<cxx::BitAndAssignVisitor>(astStorage, point);
+  case MutatorKind::CXX_Bitwise_OrToAnd:
+    return isJunkMutation<cxx::BitOrVisitor>(astStorage, point);
+  case MutatorKind::CXX_Bitwise_OrAssignToAndAssign:
+    return isJunkMutation<cxx::BitOrAssignVisitor>(astStorage, point);
+  case MutatorKind::CXX_Bitwise_XorToOr:
+    return isJunkMutation<cxx::BitXorVisitor>(astStorage, point);
+  case MutatorKind::CXX_Bitwise_XorAssignToOrAssign:
+    return isJunkMutation<cxx::BitXorAssignVisitor>(astStorage, point);
+
   default:
     return false;
   }

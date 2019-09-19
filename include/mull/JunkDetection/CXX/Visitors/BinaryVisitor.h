@@ -61,6 +61,24 @@ typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_Rem> RemVisitor;
 typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_RemAssign>
     RemAssignVisitor;
 
+typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_Shl> LShiftVisitor;
+typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_ShlAssign>
+    LShiftAssignVisitor;
+
+typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_Shr> RShiftVisitor;
+typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_ShrAssign>
+    RShiftAssignVisitor;
+
+typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_And> BitAndVisitor;
+typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_AndAssign>
+    BitAndAssignVisitor;
+typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_Or> BitOrVisitor;
+typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_OrAssign>
+    BitOrAssignVisitor;
+typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_Xor> BitXorVisitor;
+typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_XorAssign>
+    BitXorAssignVisitor;
+
 } // namespace cxx
 
 } // namespace mull

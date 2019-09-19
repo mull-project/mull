@@ -10,6 +10,7 @@
 #include "mull/Mutators/ReplaceCallMutator.h"
 #include "mull/Mutators/ScalarValueMutator.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
+#include <mull/Mutators/CXX/BitwiseMutators.h>
 #include <mull/Mutators/CXX/RelationalMutators.h>
 
 #include <gtest/gtest.h>
@@ -114,6 +115,29 @@ static const CXXJunkDetectorTestParameter parameters[] = {
                                  new cxx::PreDecToPreInc, 1),
     CXXJunkDetectorTestParameter(fixtures::mutators_math_sub_junk_bc_path(),
                                  new cxx::PostDecToPostInc, 3),
+
+    /// Shifts
+    CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_shifts_bc_path(),
+                                 new cxx::LShiftToRShift, 4),
+    CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_shifts_bc_path(),
+                                 new cxx::LShiftAssignToRShiftAssign, 5),
+    CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_shifts_bc_path(),
+                                 new cxx::RShiftToLShift, 3),
+    CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_shifts_bc_path(),
+                                 new cxx::RShiftAssignToLShiftAssign, 3),
+    /// Bit operations
+    CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(),
+                                 new cxx::OrToAnd, 2),
+    CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(),
+                                 new cxx::OrAssignToAndAssign, 1),
+    CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(),
+                                 new cxx::AndToOr, 2),
+    CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(),
+                                 new cxx::AndAssignToOrAssign, 2),
+    CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(),
+                                 new cxx::XorToOr, 2),
+    CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(),
+                                 new cxx::XorAssignToOrAssign, 3),
 
     CXXJunkDetectorTestParameter(
         fixtures::mutators_remove_void_function_junk_bc_path(),

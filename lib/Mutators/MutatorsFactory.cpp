@@ -1,7 +1,9 @@
 #include "mull/Mutators/MutatorsFactory.h"
 
+#include "mull/Logger.h"
 #include "mull/Mutators/AndOrReplacementMutator.h"
 #include "mull/Mutators/CXX/ArithmeticMutators.h"
+#include "mull/Mutators/CXX/BitwiseMutators.h"
 #include "mull/Mutators/CXX/RelationalMutators.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Mutators/NegateConditionMutator.h"
@@ -9,11 +11,7 @@
 #include "mull/Mutators/ReplaceAssignmentMutator.h"
 #include "mull/Mutators/ReplaceCallMutator.h"
 #include "mull/Mutators/ScalarValueMutator.h"
-
-#include "mull/Logger.h"
-
 #include <llvm/ADT/STLExtras.h>
-
 #include <set>
 #include <sstream>
 
@@ -29,6 +27,7 @@ static const string ConditionalBoundaryMutatorsGroup =
     "conditionals_boundary_mutator";
 static const string NegateRelationalMutatorsGroup = "negate_relational";
 static const string ArithmeticMutatorsGroup = "arithmetic";
+static const string BitwiseMutatorsGroup = "bitwise";
 
 static const string DefaultMutatorsGroup = "default";
 static const string ExperimentalMutatorsGroup = "experimental";
@@ -65,7 +64,8 @@ MutatorsFactory::MutatorsFactory() {
       AndOrReplacementMutator::ID,      ReplaceAssignmentMutator::ID,
       ReplaceCallMutator::ID,           ScalarValueMutator::ID,
       ConditionalBoundaryMutatorsGroup, NegateRelationalMutatorsGroup,
-      ArithmeticMutatorsGroup};
+      ArithmeticMutatorsGroup,          BitwiseMutatorsGroup,
+  };
   groupsMapping[CXXMutatorsGroup] = {
       ConditionalBoundaryMutatorsGroup,
       NegateRelationalMutatorsGroup,
@@ -96,6 +96,15 @@ MutatorsFactory::MutatorsFactory() {
       cxx::MulToDiv::ID,         cxx::MulAssignToDivAssign::ID,
       cxx::DivToMul::ID,         cxx::DivAssignToMulAssign::ID,
       cxx::RemToDiv::ID,         cxx::RemAssignToDivAssign::ID,
+  };
+
+  groupsMapping[BitwiseMutatorsGroup] = {
+      cxx::LShiftToRShift::ID, cxx::LShiftAssignToRShiftAssign::ID,
+      cxx::RShiftToLShift::ID, cxx::RShiftAssignToLShiftAssign::ID,
+
+      cxx::AndToOr::ID,        cxx::AndAssignToOrAssign::ID,
+      cxx::OrToAnd::ID,        cxx::OrAssignToAndAssign::ID,
+      cxx::XorToOr::ID,        cxx::XorAssignToOrAssign::ID,
   };
 }
 
@@ -144,6 +153,18 @@ void MutatorsFactory::init() {
 
   addMutator<cxx::RemToDiv>(mutatorsMapping);
   addMutator<cxx::RemAssignToDivAssign>(mutatorsMapping);
+
+  addMutator<cxx::LShiftToRShift>(mutatorsMapping);
+  addMutator<cxx::LShiftAssignToRShiftAssign>(mutatorsMapping);
+  addMutator<cxx::RShiftToLShift>(mutatorsMapping);
+  addMutator<cxx::RShiftAssignToLShiftAssign>(mutatorsMapping);
+
+  addMutator<cxx::AndToOr>(mutatorsMapping);
+  addMutator<cxx::AndAssignToOrAssign>(mutatorsMapping);
+  addMutator<cxx::OrToAnd>(mutatorsMapping);
+  addMutator<cxx::OrAssignToAndAssign>(mutatorsMapping);
+  addMutator<cxx::XorToOr>(mutatorsMapping);
+  addMutator<cxx::XorAssignToOrAssign>(mutatorsMapping);
 }
 
 vector<unique_ptr<Mutator>>
