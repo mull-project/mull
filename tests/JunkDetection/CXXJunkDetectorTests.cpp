@@ -6,11 +6,11 @@
 #include "mull/Mutators/AndOrReplacementMutator.h"
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "mull/Mutators/RemoveVoidFunctionMutator.h"
-#include "mull/Mutators/ReplaceAssignmentMutator.h"
 #include "mull/Mutators/ReplaceCallMutator.h"
 #include "mull/Mutators/ScalarValueMutator.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 #include <mull/Mutators/CXX/BitwiseMutators.h>
+#include <mull/Mutators/CXX/NumberMutators.h>
 #include <mull/Mutators/CXX/RelationalMutators.h>
 
 #include <gtest/gtest.h>
@@ -170,13 +170,17 @@ static const CXXJunkDetectorTestParameter parameters[] = {
         new cxx::LessOrEqualToGreaterThan, 3),
 
     CXXJunkDetectorTestParameter(
+        fixtures::mutators_replace_assignment_junk_bc_path(),
+        new cxx::NumberAssignConst, 5),
+    CXXJunkDetectorTestParameter(
+        fixtures::mutators_replace_assignment_junk_bc_path(),
+        new cxx::NumberInitConst, 6),
+
+    CXXJunkDetectorTestParameter(
         fixtures::mutators_and_or_replacement_cpp_junk_bc_path(),
         new AndOrReplacementMutator, 4),
     CXXJunkDetectorTestParameter(fixtures::mutators_scalar_value_junk_bc_path(),
                                  new ScalarValueMutator, 5),
-    CXXJunkDetectorTestParameter(
-        fixtures::mutators_replace_assignment_junk_bc_path(),
-        new ReplaceAssignmentMutator, 5),
 };
 
 INSTANTIATE_TEST_CASE_P(CXXJunkDetection, CXXJunkDetectorTest,

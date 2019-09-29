@@ -18,7 +18,6 @@ set(mull_sources
   Mutators/MutatorsFactory.cpp
   Mutators/NegateConditionMutator.cpp
   Mutators/RemoveVoidFunctionMutator.cpp
-  Mutators/ReplaceAssignmentMutator.cpp
   Mutators/ReplaceCallMutator.cpp
   Mutators/ScalarValueMutator.cpp
 
@@ -80,7 +79,6 @@ set(mull_sources
   JunkDetection/CXX/Visitors/NegateConditionVisitor.cpp
   JunkDetection/CXX/Visitors/RemoveVoidFunctionVisitor.cpp
   JunkDetection/CXX/Visitors/ReplaceCallVisitor.cpp
-  JunkDetection/CXX/Visitors/ReplaceAssignmentVisitor.cpp
   JunkDetection/CXX/ASTStorage.cpp
   JunkDetection/CXX/CompilationDatabase.cpp
 

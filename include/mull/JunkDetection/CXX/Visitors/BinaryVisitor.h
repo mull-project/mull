@@ -79,6 +79,8 @@ typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_Xor> BitXorVisitor;
 typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_XorAssign>
     BitXorAssignVisitor;
 
+typedef BinaryVisitor<clang::BinaryOperator::Opcode::BO_Assign> AssignVisitor;
+
 } // namespace cxx
 
 } // namespace mull

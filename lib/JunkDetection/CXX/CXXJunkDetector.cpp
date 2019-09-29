@@ -8,10 +8,10 @@
 #include "mull/JunkDetection/CXX/Visitors/BinaryVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/NegateConditionVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/RemoveVoidFunctionVisitor.h"
-#include "mull/JunkDetection/CXX/Visitors/ReplaceAssignmentVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/ReplaceCallVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/ScalarValueVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/UnaryVisitor.h"
+#include "mull/JunkDetection/CXX/Visitors/VarDeclVisitor.h"
 
 using namespace mull;
 
@@ -57,8 +57,6 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     return isJunkMutation<AndOrReplacementVisitor>(astStorage, point);
   case MutatorKind::ScalarValueMutator:
     return isJunkMutation<ScalarValueVisitor>(astStorage, point);
-  case MutatorKind::ReplaceAssignmentMutator:
-    return isJunkMutation<ReplaceAssignmentVisitor>(astStorage, point);
 
   case MutatorKind::CXX_Relation_LessThanToLessOrEqual:
     return isJunkMutation<cxx::LessThanVisitor>(astStorage, point);
@@ -135,6 +133,11 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     return isJunkMutation<cxx::BitXorVisitor>(astStorage, point);
   case MutatorKind::CXX_Bitwise_XorAssignToOrAssign:
     return isJunkMutation<cxx::BitXorAssignVisitor>(astStorage, point);
+
+  case MutatorKind::CXX_Number_AssignConst:
+    return isJunkMutation<cxx::AssignVisitor>(astStorage, point);
+  case MutatorKind::CXX_Number_InitConst:
+    return isJunkMutation<cxx::VarDeclVisitor>(astStorage, point);
 
   default:
     return false;

@@ -118,7 +118,7 @@ TEST(MutatorsFactory, CompositeMutators) {
 
   {
     mutators = factory.mutators({"experimental"});
-    ASSERT_EQ(mutators.size(), 38UL);
+    ASSERT_EQ(mutators.size(), 39UL);
 
     ASSERT_NE(searchResult, mutators.end());
     searchResult = find_if(mutators.begin(), mutators.end(),
@@ -131,9 +131,6 @@ TEST(MutatorsFactory, CompositeMutators) {
                            predicate("and_or_replacement_mutator"));
     ASSERT_NE(searchResult, mutators.end());
     searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("replace_assignment_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
                            predicate("replace_call_mutator"));
     ASSERT_NE(searchResult, mutators.end());
     searchResult = find_if(mutators.begin(), mutators.end(),
@@ -143,7 +140,7 @@ TEST(MutatorsFactory, CompositeMutators) {
 
   {
     mutators = factory.mutators({"all"});
-    ASSERT_EQ(mutators.size(), 40UL);
+    ASSERT_EQ(mutators.size(), 41UL);
 
     searchResult = find_if(mutators.begin(), mutators.end(),
                            predicate("cxx_arithmetic_div_to_mul"));
@@ -164,9 +161,6 @@ TEST(MutatorsFactory, CompositeMutators) {
                            predicate("remove_void_function_mutator"));
     ASSERT_NE(searchResult, mutators.end());
     searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("replace_assignment_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
                            predicate("replace_call_mutator"));
     ASSERT_NE(searchResult, mutators.end());
     searchResult = find_if(mutators.begin(), mutators.end(),
@@ -176,7 +170,7 @@ TEST(MutatorsFactory, CompositeMutators) {
 
   {
     mutators = factory.mutators({"default", "experimental"});
-    ASSERT_EQ(mutators.size(), 40UL);
+    ASSERT_EQ(mutators.size(), 41UL);
 
     searchResult = find_if(mutators.begin(), mutators.end(),
                            predicate("cxx_arithmetic_rem_to_div"));
@@ -199,9 +193,6 @@ TEST(MutatorsFactory, CompositeMutators) {
     ASSERT_NE(searchResult, mutators.end());
     searchResult = find_if(mutators.begin(), mutators.end(),
                            predicate("remove_void_function_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("replace_assignment_mutator"));
     ASSERT_NE(searchResult, mutators.end());
     searchResult = find_if(mutators.begin(), mutators.end(),
                            predicate("replace_call_mutator"));

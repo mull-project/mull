@@ -3,6 +3,7 @@ set (SOURCES
   BitwiseMutators.cpp
   RelationalMutators.cpp
   TrivialCXXMutator.cpp
+  NumberMutators.cpp
   )
 
 add_library(mull-cxx-mutators ${SOURCES})
