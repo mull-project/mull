@@ -6,7 +6,6 @@
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/AndOrReplacementMutator.h"
 #include "mull/Mutators/NegateConditionMutator.h"
-#include "mull/Mutators/ReplaceAssignmentMutator.h"
 #include "mull/Mutators/ReplaceCallMutator.h"
 #include "mull/Mutators/ScalarValueMutator.h"
 #include "mull/Program/Program.h"
@@ -22,6 +21,7 @@
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Transforms/Utils/Cloning.h>
 #include <mull/Mutators/CXX/RelationalMutators.h>
+#include <mull/Mutators/CXX/NumberMutators.h>
 
 #include "gtest/gtest.h"
 
@@ -110,36 +110,13 @@ TEST(MutationPoint, ReplaceCallMutator_applyMutation) {
   ASSERT_TRUE(isa<BinaryOperator>(mutatedInstruction));
 }
 
-TEST(MutationPoint, ReplaceAssignmentMutator_applyMutation) {
-  LLVMContext context;
-  BitcodeLoader loader;
-  auto bitcode = loader.loadBitcodeAtPath(
-      fixtures::mutators_replace_assignment_module_bc_path(), context);
-
-  ReplaceAssignmentMutator mutator;
-  auto mutationPoints = mutator.getMutations(
-      bitcode.get(), bitcode->getModule()->getFunction("replace_assignment"));
-
-  EXPECT_EQ(2U, mutationPoints.size());
-
-  MutationPoint *mutationPoint = mutationPoints[0];
-  EXPECT_TRUE(isa<StoreInst>(mutationPoint->getOriginalValue()));
-
-  mutationPoint->setMutatedFunction(mutationPoint->getOriginalFunction());
-  mutationPoint->applyMutation();
-
-  auto &mutatedInstruction = mutationPoint->getAddress().findInstruction(
-      mutationPoint->getOriginalFunction());
-  ASSERT_TRUE(isa<StoreInst>(mutatedInstruction));
-}
-
 TEST(MutationPoint, OriginalValuePresent) {
   LLVMContext context;
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
       fixtures::mutators_replace_assignment_module_bc_path(), context);
 
-  ReplaceAssignmentMutator mutator;
+  cxx::NumberAssignConst mutator;
   auto mutationPoints = mutator.getMutations(
       bitcode.get(), bitcode->getModule()->getFunction("replace_assignment"));
 

@@ -29,7 +29,6 @@ enum class MutatorKind {
   ReplaceCallMutator,
   AndOrReplacementMutator,
   ScalarValueMutator,
-  ReplaceAssignmentMutator,
 
   CXX_Arithmetic_AddToSub,
   CXX_Arithmetic_AddAssignToSubAssign,
@@ -75,6 +74,9 @@ enum class MutatorKind {
 
   CXX_Relation_EqualToNotEqual,
   CXX_Relation_NotEqualToEqual,
+
+  CXX_Number_AssignConst,
+  CXX_Number_InitConst,
 };
 
 class Mutator {

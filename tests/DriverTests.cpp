@@ -13,7 +13,6 @@
 #include "mull/Mutators/MutatorsFactory.h"
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "mull/Mutators/RemoveVoidFunctionMutator.h"
-#include "mull/Mutators/ReplaceAssignmentMutator.h"
 #include "mull/ObjectLoader.h"
 #include "mull/Program/Program.h"
 #include "mull/Result.h"
@@ -22,6 +21,7 @@
 #include "mull/Toolchain/Toolchain.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 #include <mull/Mutators/CXX/RelationalMutators.h>
+#include <mull/Mutators/CXX/NumberMutators.h>
 
 #include <functional>
 
@@ -686,7 +686,7 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutator_CPP) {
       fixtures::mutators_replace_assignment_module_bc_path()};
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<ReplaceAssignmentMutator>());
+  mutators.emplace_back(make_unique<cxx::NumberAssignConst>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;

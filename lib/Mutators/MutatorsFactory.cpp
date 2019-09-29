@@ -4,11 +4,11 @@
 #include "mull/Mutators/AndOrReplacementMutator.h"
 #include "mull/Mutators/CXX/ArithmeticMutators.h"
 #include "mull/Mutators/CXX/BitwiseMutators.h"
+#include "mull/Mutators/CXX/NumberMutators.h"
 #include "mull/Mutators/CXX/RelationalMutators.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "mull/Mutators/RemoveVoidFunctionMutator.h"
-#include "mull/Mutators/ReplaceAssignmentMutator.h"
 #include "mull/Mutators/ReplaceCallMutator.h"
 #include "mull/Mutators/ScalarValueMutator.h"
 #include <llvm/ADT/STLExtras.h>
@@ -28,6 +28,7 @@ static const string ConditionalBoundaryMutatorsGroup =
 static const string NegateRelationalMutatorsGroup = "negate_relational";
 static const string ArithmeticMutatorsGroup = "arithmetic";
 static const string BitwiseMutatorsGroup = "bitwise";
+static const string NumbersMutatorsGroup = "numbers";
 
 static const string DefaultMutatorsGroup = "default";
 static const string ExperimentalMutatorsGroup = "experimental";
@@ -61,7 +62,7 @@ MutatorsFactory::MutatorsFactory() {
                                          NegateConditionMutator::ID,
                                          RemoveVoidFunctionMutator::ID};
   groupsMapping[ExperimentalMutatorsGroup] = {
-      AndOrReplacementMutator::ID,      ReplaceAssignmentMutator::ID,
+      AndOrReplacementMutator::ID,      NumbersMutatorsGroup,
       ReplaceCallMutator::ID,           ScalarValueMutator::ID,
       ConditionalBoundaryMutatorsGroup, NegateRelationalMutatorsGroup,
       ArithmeticMutatorsGroup,          BitwiseMutatorsGroup,
@@ -70,6 +71,7 @@ MutatorsFactory::MutatorsFactory() {
       ConditionalBoundaryMutatorsGroup,
       NegateRelationalMutatorsGroup,
       ArithmeticMutatorsGroup,
+      NumbersMutatorsGroup,
   };
   groupsMapping[AllMutatorsGroup] = {DefaultMutatorsGroup,
                                      ExperimentalMutatorsGroup};
@@ -106,6 +108,9 @@ MutatorsFactory::MutatorsFactory() {
       cxx::OrToAnd::ID,        cxx::OrAssignToAndAssign::ID,
       cxx::XorToOr::ID,        cxx::XorAssignToOrAssign::ID,
   };
+
+  groupsMapping[NumbersMutatorsGroup] = {cxx::NumberInitConst::ID,
+                                         cxx::NumberAssignConst::ID};
 }
 
 template <typename MutatorClass>
@@ -117,7 +122,6 @@ void MutatorsFactory::init() {
   addMutator<NegateConditionMutator>(mutatorsMapping);
   addMutator<AndOrReplacementMutator>(mutatorsMapping);
 
-  addMutator<ReplaceAssignmentMutator>(mutatorsMapping);
   addMutator<ReplaceCallMutator>(mutatorsMapping);
   addMutator<RemoveVoidFunctionMutator>(mutatorsMapping);
   addMutator<ScalarValueMutator>(mutatorsMapping);
@@ -165,6 +169,9 @@ void MutatorsFactory::init() {
   addMutator<cxx::OrAssignToAndAssign>(mutatorsMapping);
   addMutator<cxx::XorToOr>(mutatorsMapping);
   addMutator<cxx::XorAssignToOrAssign>(mutatorsMapping);
+
+  addMutator<cxx::NumberAssignConst>(mutatorsMapping);
+  addMutator<cxx::NumberInitConst>(mutatorsMapping);
 }
 
 vector<unique_ptr<Mutator>>
