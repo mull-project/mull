@@ -7,6 +7,7 @@
 #include <map>
 #include <mutex>
 #include <string>
+#include <vector>
 
 namespace mull {
 
@@ -22,12 +23,17 @@ public:
   clang::SourceLocation getLocation(MutationPoint *point);
   bool isInSystemHeader(clang::SourceLocation &location);
 
+  clang::Decl *getDecl(clang::SourceLocation &location);
+
 private:
+  void recordDeclarations();
+
   const clang::FileEntry *findFileEntry(const MutationPoint *point);
   const clang::FileEntry *findFileEntry(const std::string &filePath);
 
   std::unique_ptr<clang::ASTUnit> ast;
   std::mutex mutex;
+  std::vector<clang::Decl *> decls;
 };
 
 class ASTStorage {

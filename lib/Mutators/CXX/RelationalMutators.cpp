@@ -92,7 +92,7 @@ EqualToNotEqual::EqualToNotEqual()
     : TrivialCXXMutator(std::move(getEqualToNotEqual()),
                         MutatorKind::CXX_Relation_EqualToNotEqual,
                         EqualToNotEqual::ID,
-                        "Replaces == with !=", "!=", "Replaced != with !=") {}
+                        "Replaces == with !=", "!=", "Replaced == with !=") {}
 
 const std::string NotEqualToEqual::ID = "cxx_relational_ne_to_eq";
 
