@@ -9,7 +9,7 @@
 #include <mull/Filter.h>
 #include <mull/MutationsFinder.h>
 #include <mull/Mutators/MutatorsFactory.h>
-#include <mull/Parallelization/TaskExecutor.h>
+#include <mull/Parallelization/Parallelization.h>
 #include <mull/Program/Program.h>
 #include <mull/Toolchain/Toolchain.h>
 
@@ -46,7 +46,11 @@ int main(int argc, char **argv) {
 
   mull::SingleTaskExecutor prepareMutants("Preparing mutants", [&] {
     for (auto &bc : program.bitcode()) {
-      bc->prepareMutations();
+      mull::Bitcode &bitcode = *bc;
+      std::vector<std::string> mutatedFunctions;
+      mull::CloneMutatedFunctionsTask::cloneFunctions(bitcode, mutatedFunctions);
+      mull::DeleteOriginalFunctionsTask::deleteFunctions(bitcode);
+      mull::InsertMutationTrampolinesTask::insertTrampolines(bitcode);
     }
   });
   prepareMutants.execute();

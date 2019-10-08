@@ -65,6 +65,7 @@ set(mull_sources
   Parallelization/Tasks/InstrumentedCompilationTask.cpp
   Parallelization/Tasks/OriginalTestExecutionTask.cpp
   Parallelization/Tasks/MutantExecutionTask.cpp
+  Parallelization/Tasks/MutantPreparationTasks.cpp
   Parallelization/Tasks/MutationFilterTask.cpp
   Parallelization/Tasks/OriginalCompilationTask.cpp
   Parallelization/Tasks/ApplyMutationTask.cpp

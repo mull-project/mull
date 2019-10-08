@@ -16,7 +16,6 @@
 
 #include <llvm/Support/DynamicLibrary.h>
 #include <llvm/Support/Path.h>
-#include <llvm/Transforms/Utils/Cloning.h>
 
 #include <algorithm>
 #include <fstream>
@@ -207,24 +206,30 @@ std::vector<std::unique_ptr<MutationResult>>
 Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
   std::vector<std::string> mutatedFunctions;
 
-  SingleTaskExecutor prepareMutationsTask("Preparing mutations", [&]() {
-    for (auto &bitcode : program.bitcode()) {
-      auto functions = bitcode->prepareMutations();
-      for (auto &name : functions) {
-        mutatedFunctions.push_back(name);
-      }
-    }
-  });
-  prepareMutationsTask.execute();
+  auto workers = config.parallelization.workers;
+  TaskExecutor<CloneMutatedFunctionsTask> cloneFunctions(
+      "Cloning functions for mutation", program.bitcode(), mutatedFunctions,
+      std::move(std::vector<CloneMutatedFunctionsTask>(workers)));
+  cloneFunctions.execute();
 
-  std::vector<int> empty;
+  std::vector<int> Nothing;
+  TaskExecutor<DeleteOriginalFunctionsTask> deleteOriginalFunctions(
+      "Removing original functions", program.bitcode(), Nothing,
+      std::move(std::vector<DeleteOriginalFunctionsTask>(workers)));
+  deleteOriginalFunctions.execute();
+
+  TaskExecutor<InsertMutationTrampolinesTask> redirectFunctions(
+      "Redirect mutated functions", program.bitcode(), Nothing,
+      std::move(std::vector<InsertMutationTrampolinesTask>(workers)));
+  redirectFunctions.execute();
+
   TaskExecutor<ApplyMutationTask> applyMutations(
-      "Applying mutations", mutationPoints, empty, {ApplyMutationTask()});
+      "Applying mutations", mutationPoints, Nothing, {ApplyMutationTask()});
   applyMutations.execute();
 
   std::vector<OriginalCompilationTask> compilationTasks;
-  compilationTasks.reserve(config.parallelization.workers);
-  for (int i = 0; i < config.parallelization.workers; i++) {
+  compilationTasks.reserve(workers);
+  for (int i = 0; i < workers; i++) {
     compilationTasks.emplace_back(toolchain);
   }
   TaskExecutor<OriginalCompilationTask> mutantCompiler(

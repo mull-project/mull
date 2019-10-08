@@ -20,8 +20,9 @@
 #include <llvm/IR/Module.h>
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Transforms/Utils/Cloning.h>
-#include <mull/Mutators/CXX/RelationalMutators.h>
 #include <mull/Mutators/CXX/NumberMutators.h>
+#include <mull/Mutators/CXX/RelationalMutators.h>
+#include <mull/Parallelization/Parallelization.h>
 
 #include "gtest/gtest.h"
 
@@ -133,7 +134,12 @@ TEST(MutationPoint, OriginalValuePresent) {
   for (auto *mutation : mutationPoints) {
     bitcode->addMutation(mutation);
   }
-  bitcode->prepareMutations();
+
+  std::vector<std::string> mutatedFunctions;
+  CloneMutatedFunctionsTask::cloneFunctions(*bitcode, mutatedFunctions);
+  DeleteOriginalFunctionsTask::deleteFunctions(*bitcode);
+  InsertMutationTrampolinesTask::insertTrampolines(*bitcode);
+
   for (auto *mutation : mutationPoints) {
     mutation->applyMutation();
   }

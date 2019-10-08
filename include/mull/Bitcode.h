@@ -30,8 +30,10 @@ public:
   std::string getInstrumentedUniqueIdentifier() const;
   std::string getMutatedUniqueIdentifier() const;
 
-  std::vector<std::string> prepareMutations();
   void addMutation(MutationPoint *point);
+
+  std::map<llvm::Function *, std::vector<MutationPoint *>> &
+  getMutationPointsMap();
 
 private:
   std::unique_ptr<llvm::Module> module;
