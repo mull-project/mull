@@ -3,6 +3,7 @@
 #include "LLVMCompatibility.h"
 #include "mull/Logger.h"
 #include "mull/MutationPoint.h"
+#include "mull/Parallelization/Parallelization.h"
 
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
@@ -11,6 +12,7 @@
 #include <llvm/Support/Path.h>
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Transforms/Utils/Cloning.h>
+#include <llvm/Transforms/Utils/CodeExtractor.h>
 
 using namespace mull;
 using namespace llvm;
@@ -56,45 +58,6 @@ std::string Bitcode::getUniqueIdentifier() { return uniqueIdentifier; }
 
 std::string Bitcode::getUniqueIdentifier() const { return uniqueIdentifier; }
 
-std::vector<std::string> Bitcode::prepareMutations() {
-  std::vector<std::string> mutatedFunctionNames;
-
-  for (auto pair : mutationPoints) {
-    auto original = pair.first;
-    auto anyPoint = pair.second.front();
-    mutatedFunctionNames.push_back(anyPoint->getTrampolineName());
-    for (auto point : pair.second) {
-      ValueToValueMapTy map;
-      auto mutatedFunction = CloneFunction(original, map);
-      point->setMutatedFunction(mutatedFunction);
-    }
-    ValueToValueMapTy map;
-    auto originalCopy = CloneFunction(original, map);
-    originalCopy->setName(anyPoint->getOriginalFunctionName());
-    original->deleteBody();
-
-    std::vector<Value *> args;
-
-    for (auto &arg : original->args()) {
-      args.push_back(&arg);
-    }
-
-    auto trampoline =
-        module->getOrInsertGlobal(anyPoint->getTrampolineName(),
-                                  original->getFunctionType()->getPointerTo());
-    BasicBlock *block =
-        BasicBlock::Create(module->getContext(), "indirect_call", original);
-    auto loadValue =
-        new LoadInst(trampoline, "indirect_function_pointer", block);
-    // name has to be empty for void functions:
-    // http://lists.llvm.org/pipermail/llvm-dev/2016-March/096242.html
-    auto callInst = CallInst::Create(loadValue, args, "", block);
-    ReturnInst::Create(module->getContext(), callInst, block);
-  }
-
-  return mutatedFunctionNames;
-}
-
 void Bitcode::addMutation(MutationPoint *point) {
   std::lock_guard<std::mutex> guard(mutex);
   auto function = point->getOriginalFunction();
@@ -130,4 +93,9 @@ std::string Bitcode::getMutatedUniqueIdentifier() const {
   MD5::stringifyResult(hash, result);
 
   return (getUniqueIdentifier() + "_" + result + "_mutated").str();
+}
+
+std::map<llvm::Function *, std::vector<MutationPoint *>> &
+Bitcode::getMutationPointsMap() {
+  return mutationPoints;
 }

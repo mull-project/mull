@@ -13,6 +13,7 @@
 #include "mull/Toolchain/Toolchain.h"
 #include "mull/Toolchain/Trampolines.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
+#include <mull/Parallelization/Parallelization.h>
 
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/IR/InstIterator.h>
@@ -45,10 +46,10 @@ TEST(NativeTestRunner, runTest) {
   Module *moduleWithTests = bitcodeWithTests->getModule();
   Module *moduleWithTestees = bitcodeWithTestees->getModule();
 
-  std::vector<std::unique_ptr<Bitcode>> bitcode;
-  bitcode.push_back(std::move(bitcodeWithTestees));
-  bitcode.push_back(std::move(bitcodeWithTests));
-  Program program({}, {}, std::move(bitcode));
+  std::vector<std::unique_ptr<Bitcode>> bitcodeFiles;
+  bitcodeFiles.push_back(std::move(bitcodeWithTestees));
+  bitcodeFiles.push_back(std::move(bitcodeWithTests));
+  Program program({}, {}, std::move(bitcodeFiles));
 
   NativeTestRunner testRunner(toolchain.mangler());
   NativeTestRunner::ObjectFiles objectFiles;
@@ -79,7 +80,11 @@ TEST(NativeTestRunner, runTest) {
 
   JITEngine jit;
 
-  auto mutatedFunctions = mutationPoint->getBitcode()->prepareMutations();
+  Bitcode &bitcode = *mutationPoint->getBitcode();
+  std::vector<std::string> mutatedFunctions;
+  CloneMutatedFunctionsTask::cloneFunctions(bitcode, mutatedFunctions);
+  DeleteOriginalFunctionsTask::deleteFunctions(bitcode);
+  InsertMutationTrampolinesTask::insertTrampolines(bitcode);
   mutationPoint->applyMutation();
 
   {
