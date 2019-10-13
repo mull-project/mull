@@ -10,6 +10,12 @@ set(mull_sources
   Filter.cpp
   MutationsFinder.cpp
 
+  AST/ASTFilter.cpp
+  AST/ASTFinder.cpp
+  AST/ASTMutations.cpp
+  AST/ASTSearchTask.cpp
+  AST/ASTVisitor.cpp
+
   Instrumentation/DynamicCallTree.cpp
   Instrumentation/Callbacks.cpp
   Instrumentation/Instrumentation.cpp
@@ -51,6 +57,7 @@ set(mull_sources
   JunkDetection/CXX/CXXJunkDetector.cpp
 
   Reporters/ASTSourceInfoProvider.cpp
+  Reporters/ASTWhitelistSourceInfoProvider.cpp
   Reporters/SourceManager.cpp
   Reporters/SQLiteReporter.cpp
   Reporters/TimeReporter.cpp

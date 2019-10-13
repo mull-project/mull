@@ -588,9 +588,9 @@ AND_OR_MutationType AndOrReplacementMutator::findPossibleMutationInBranch(
   return AND_OR_MutationType_None;
 }
 
-std::vector<MutationPoint *>
-AndOrReplacementMutator::getMutations(Bitcode *bitcode,
-                                      llvm::Function *function) {
+std::vector<MutationPoint *> AndOrReplacementMutator::getMutations(
+    Bitcode *bitcode, llvm::Function *function,
+    const mull::InstructionFilter &instructionFilter) {
   assert(bitcode);
   assert(function);
 

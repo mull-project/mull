@@ -10,6 +10,7 @@
 #include "mull/Filter.h"
 #include "mull/JunkDetection/CXX/ASTStorage.h"
 #include "mull/Metrics/Metrics.h"
+#include "mull/MutationFilters/FilePathFilter.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Program/Program.h"
 #include "mull/Reporters/ASTSourceInfoProvider.h"
@@ -71,7 +72,8 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<cxx::AddToSub>());
-  MutationsFinder mutationsFinder(std::move(mutators), configuration);
+  MutationsFinder mutationsFinder(std::move(mutators), configuration,
+                                  FilePathFilter(), NullInstructionFilter());
   Filter filter;
 
   SimpleTestFinder testFinder;

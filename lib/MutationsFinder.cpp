@@ -9,8 +9,11 @@ using namespace mull;
 using namespace llvm;
 
 MutationsFinder::MutationsFinder(std::vector<std::unique_ptr<Mutator>> mutators,
-                                 const Configuration &config)
-    : mutators(std::move(mutators)), config(config) {}
+                                 const Configuration &config,
+                                 const FilePathFilter &filePathFilter,
+                                 const InstructionFilter &instructionFilter)
+    : mutators(std::move(mutators)), config(config),
+      filePathFilter(filePathFilter), instructionFilter(instructionFilter) {}
 
 std::vector<MutationPoint *>
 MutationsFinder::getMutationPoints(const Program &program,
@@ -19,7 +22,8 @@ MutationsFinder::getMutationPoints(const Program &program,
   std::vector<SearchMutationPointsTask> tasks;
   tasks.reserve(config.parallelization.workers);
   for (int i = 0; i < config.parallelization.workers; i++) {
-    tasks.emplace_back(filter, program, mutators);
+    tasks.emplace_back(filter, program, mutators, filePathFilter,
+                       instructionFilter);
   }
 
   TaskExecutor<SearchMutationPointsTask> finder(

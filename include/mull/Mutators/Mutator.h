@@ -1,5 +1,7 @@
 #pragma once
 
+#include "mull/InstructionFilter.h"
+
 #include <string>
 #include <vector>
 
@@ -91,7 +93,8 @@ public:
                              const MutationPointAddress &address,
                              irm::IRMutation *lowLevelMutation) = 0;
   virtual std::vector<MutationPoint *>
-  getMutations(Bitcode *bitcode, llvm::Function *function) = 0;
+  getMutations(Bitcode *bitcode, llvm::Function *function,
+               const mull::InstructionFilter &instructionFilter) = 0;
 
   virtual ~Mutator() = default;
 };

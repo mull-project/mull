@@ -61,7 +61,8 @@ void NegateConditionMutator::applyMutation(llvm::Function *function,
 
 std::vector<MutationPoint *>
 NegateConditionMutator::getMutations(Bitcode *bitcode,
-                                     llvm::Function *function) {
+                                     llvm::Function *function,
+                                     const mull::InstructionFilter &instructionFilter) {
   assert(bitcode);
   assert(function);
 

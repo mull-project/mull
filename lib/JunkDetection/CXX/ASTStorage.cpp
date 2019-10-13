@@ -15,6 +15,9 @@ using namespace llvm;
 ThreadSafeASTUnit::ThreadSafeASTUnit(clang::ASTUnit *ast)
     : ast(std::unique_ptr<clang::ASTUnit>(ast)) {}
 
+ThreadSafeASTUnit::ThreadSafeASTUnit(std::unique_ptr<clang::ASTUnit> ast)
+  : ast(std::move(ast)) {}
+
 clang::SourceManager &ThreadSafeASTUnit::getSourceManager() {
   return ast->getSourceManager();
 }
@@ -80,6 +83,50 @@ ASTStorage::ASTStorage(const std::string &cxxCompilationDatabasePath,
                        const std::string &cxxCompilationFlags)
     : compilationDatabase(CompilationDatabase::Path(cxxCompilationDatabasePath),
                           CompilationDatabase::Flags(cxxCompilationFlags)) {}
+
+ThreadSafeASTUnit *ASTStorage::findASTByPath(const std::string &sourceFile) {
+  assert(llvm::sys::fs::is_regular_file(sourceFile));
+
+  std::lock_guard<std::mutex> guard(mutex);
+  if (astUnits.count(sourceFile)) {
+    return astUnits.at(sourceFile).get();
+  }
+
+  auto compilationFlags =
+    compilationDatabase.compilationFlagsForFile(sourceFile);
+  std::vector<const char *> args({"mull-cxx"});
+  for (auto &flag : compilationFlags) {
+    args.push_back(flag.c_str());
+  }
+  args.push_back(sourceFile.c_str());
+
+  clang::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diagnosticsEngine(
+    clang::CompilerInstance::createDiagnostics(new clang::DiagnosticOptions));
+
+  auto ast = clang::ASTUnit::LoadFromCommandLine(
+    args.data(), args.data() + args.size(),
+    std::make_shared<clang::PCHContainerOperations>(), diagnosticsEngine, "");
+
+  bool hasErrors = (ast == nullptr) || diagnosticsEngine->hasErrorOccurred() ||
+                   diagnosticsEngine->hasUnrecoverableErrorOccurred() ||
+                   diagnosticsEngine->hasUncompilableErrorOccurred() ||
+                   diagnosticsEngine->hasFatalErrorOccurred();
+  if (hasErrors) {
+    std::stringstream message;
+    message << "Cannot parse file: '" << sourceFile << "':\n";
+    for (auto &arg : args) {
+      message << arg << " ";
+    }
+    message << "\n";
+    message << "Make sure that the flags provided to Mull are the same flags "
+               "that are used for normal compilation.\n";
+    Logger::error() << message.str();
+  }
+
+  auto threadSafeAST = new ThreadSafeASTUnit(ast);
+  astUnits[sourceFile] = std::unique_ptr<ThreadSafeASTUnit>(threadSafeAST);
+  return threadSafeAST;
+}
 
 ThreadSafeASTUnit *ASTStorage::findAST(const MutationPoint *point) {
   assert(point);

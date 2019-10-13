@@ -3,6 +3,7 @@
 #include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Filter.h"
+#include "mull/MutationPoint.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/AndOrReplacementMutator.h"
 #include "mull/Mutators/NegateConditionMutator.h"
@@ -10,7 +11,6 @@
 #include "mull/Mutators/ScalarValueMutator.h"
 #include "mull/Program/Program.h"
 #include "mull/Testee.h"
-#include "mull/MutationPoint.h"
 
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/IR/InstIterator.h>
@@ -35,10 +35,12 @@ TEST(MutationPoint, AndOrReplacementMutator_applyMutation) {
   auto bitcode = loader.loadBitcodeAtPath(
       fixtures::mutators_and_or_replacement_module_bc_path(), context);
 
+  NullInstructionFilter instructionFilter;
   AndOrReplacementMutator mutator;
   auto mutationPoints = mutator.getMutations(
       bitcode.get(),
-      bitcode->getModule()->getFunction("testee_AND_operator_2branches"));
+      bitcode->getModule()->getFunction("testee_AND_operator_2branches"),
+      instructionFilter);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -58,8 +60,10 @@ TEST(MutationPoint, ScalarValueMutator_applyMutation) {
       fixtures::mutators_scalar_value_module_bc_path(), context);
 
   ScalarValueMutator mutator;
+  NullInstructionFilter instructionFilter;
   auto mutationPoints = mutator.getMutations(
-      bitcode.get(), bitcode->getModule()->getFunction("scalar_value"));
+      bitcode.get(), bitcode->getModule()->getFunction("scalar_value"),
+      instructionFilter);
 
   ASSERT_EQ(4U, mutationPoints.size());
 
@@ -94,8 +98,10 @@ TEST(MutationPoint, ReplaceCallMutator_applyMutation) {
       fixtures::mutators_replace_call_module_bc_path(), context);
 
   ReplaceCallMutator mutator;
+  NullInstructionFilter instructionFilter;
   auto mutationPoints = mutator.getMutations(
-      bitcode.get(), bitcode->getModule()->getFunction("replace_call"));
+      bitcode.get(), bitcode->getModule()->getFunction("replace_call"),
+      instructionFilter);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -118,8 +124,10 @@ TEST(MutationPoint, OriginalValuePresent) {
       fixtures::mutators_replace_assignment_module_bc_path(), context);
 
   cxx::NumberAssignConst mutator;
+  NullInstructionFilter instructionFilter;
   auto mutationPoints = mutator.getMutations(
-      bitcode.get(), bitcode->getModule()->getFunction("replace_assignment"));
+      bitcode.get(), bitcode->getModule()->getFunction("replace_assignment"),
+      instructionFilter);
 
   ASSERT_EQ(2U, mutationPoints.size());
 

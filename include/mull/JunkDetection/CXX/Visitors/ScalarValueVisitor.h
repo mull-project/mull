@@ -12,7 +12,6 @@ class ScalarValueVisitor
 public:
   explicit ScalarValueVisitor(const VisitorParameters &parameters);
   bool VisitExpr(clang::Expr *expr);
-
   clang::Expr *foundMutant();
 
 private:

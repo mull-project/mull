@@ -25,8 +25,9 @@ void ReplaceCallMutator::applyMutation(llvm::Function *function,
   lowLevelMutation->mutate(&instruction);
 }
 
-std::vector<MutationPoint *>
-ReplaceCallMutator::getMutations(Bitcode *bitcode, llvm::Function *function) {
+std::vector<MutationPoint *> ReplaceCallMutator::getMutations(
+    Bitcode *bitcode, llvm::Function *function,
+    const mull::InstructionFilter &instructionFilter) {
   assert(bitcode);
   assert(function);
 

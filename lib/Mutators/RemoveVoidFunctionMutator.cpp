@@ -28,7 +28,8 @@ void RemoveVoidFunctionMutator::applyMutation(
 
 std::vector<MutationPoint *>
 RemoveVoidFunctionMutator::getMutations(Bitcode *bitcode,
-                                        llvm::Function *function) {
+                                        llvm::Function *function,
+                                        const mull::InstructionFilter &instructionFilter) {
   assert(bitcode);
   assert(function);
 

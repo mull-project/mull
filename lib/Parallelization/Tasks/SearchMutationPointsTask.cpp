@@ -1,6 +1,7 @@
 #include "mull/Parallelization/Tasks/SearchMutationPointsTask.h"
 
 #include "mull/Filter.h"
+#include "mull/MutationFilters/FilePathFilter.h"
 #include "mull/Parallelization/Progress.h"
 #include "mull/Program/Program.h"
 
@@ -29,8 +30,11 @@ static int GetFunctionIndex(llvm::Function *function) {
 
 SearchMutationPointsTask::SearchMutationPointsTask(
     Filter &filter, const Program &program,
-    std::vector<std::unique_ptr<Mutator>> &mutators)
-    : filter(filter), program(program), mutators(mutators) {}
+    std::vector<std::unique_ptr<Mutator>> &mutators,
+    const FilePathFilter &filePathFilter,
+    const InstructionFilter &instructionFilter)
+    : filter(filter), program(program), mutators(mutators),
+      filePathFilter(filePathFilter), instructionFilter(instructionFilter) {}
 
 void SearchMutationPointsTask::
 operator()(iterator begin, iterator end,
@@ -42,8 +46,14 @@ operator()(iterator begin, iterator end,
     auto moduleID = function->getParent()->getModuleIdentifier();
     Bitcode *bitcode = program.bitcodeWithIdentifier(moduleID);
 
+    const std::string sourceFile = bitcode->getModule()->getSourceFileName();
+    if (filePathFilter.shouldSkip(sourceFile)) {
+      continue;
+    }
+
     for (auto &mutator : mutators) {
-      auto mutants = mutator->getMutations(bitcode, function);
+      auto mutants =
+          mutator->getMutations(bitcode, function, instructionFilter);
       for (auto mutant : mutants) {
         for (auto &reachableTest : testee.getReachableTests()) {
           mutant->addReachableTest(reachableTest.first, reachableTest.second);

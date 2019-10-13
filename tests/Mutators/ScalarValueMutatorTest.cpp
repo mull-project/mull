@@ -4,9 +4,9 @@
 #include "mull/BitcodeLoader.h"
 #include "mull/MutationPoint.h"
 
-#include <llvm/IR/LLVMContext.h>
 #include <gtest/gtest.h>
 #include <irm/irm.h>
+#include <llvm/IR/LLVMContext.h>
 
 using namespace mull;
 using namespace llvm;
@@ -18,8 +18,10 @@ TEST(ScalarValueMutator, getMutationPoint) {
       fixtures::mutators_scalar_value_module_bc_path(), context);
 
   ScalarValueMutator mutator;
+  NullInstructionFilter instructionFilter;
   auto mutants = mutator.getMutations(
-      bitcode.get(), bitcode->getModule()->getFunction("scalar_value"));
+      bitcode.get(), bitcode->getModule()->getFunction("scalar_value"),
+      instructionFilter);
 
   ASSERT_EQ(mutants.size(), 4U);
 

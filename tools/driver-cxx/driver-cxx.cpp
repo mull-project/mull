@@ -10,9 +10,13 @@
 #include <llvm/Support/TargetSelect.h>
 
 #include <iostream>
+#include <memory>
 #include <unistd.h>
 
 #include "DynamicLibraries.h"
+#include "mull/AST/ASTFilter.h"
+#include "mull/AST/ASTFinder.h"
+#include "mull/AST/ASTTypes.h"
 #include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Driver.h"
@@ -27,6 +31,7 @@
 #include "mull/Parallelization/Parallelization.h"
 #include "mull/Program/Program.h"
 #include "mull/Reporters/ASTSourceInfoProvider.h"
+#include "mull/Reporters/ASTWhitelistSourceInfoProvider.h"
 #include "mull/Reporters/IDEReporter.h"
 #include "mull/Result.h"
 #include "mull/Sandbox/ProcessSandbox.h"
@@ -237,7 +242,11 @@ static void validateInputFile() {
   }
 }
 
+enum class MutationSearchType { RAW = 0, JUNK_DETECTION = 1, AST_SEARCH = 2 };
+
 int main(int argc, char **argv) {
+  MutationSearchType mutationSearchType = MutationSearchType::RAW;
+
   llvm_compat::setVersionPrinter(mull::printVersionInformation,
                                  mull::printVersionInformationStream);
   MutatorsCLIOptions mutatorsOptions(Mutators);
@@ -332,15 +341,20 @@ int main(int argc, char **argv) {
         CompilationDatabasePath.getValue();
     junkDetectionEnabled = true;
   }
+
+  if (junkDetectionEnabled) {
+    mutationSearchType = MutationSearchType::JUNK_DETECTION;
+  }
+
+  // TODO: STAN
+  mutationSearchType = MutationSearchType::AST_SEARCH;
+  junkDetectionEnabled = false;
+
   mull::ASTStorage astStorage(junkDetectionConfig.cxxCompilationDatabasePath,
                               junkDetectionConfig.cxxCompilationFlags);
-  mull::ASTSourceInfoProvider sourceInfoProvider(astStorage);
+
   mull::CXXJunkDetector junkDetector(astStorage);
   mull::JunkMutationFilter junkFilter(junkDetector);
-
-  mull::Filter filter;
-  mull::MutationsFinder mutationsFinder(mutatorsOptions.mutators(),
-                                        configuration);
 
   mull::Metrics metrics;
 
@@ -362,6 +376,46 @@ int main(int argc, char **argv) {
     mutationFilters.push_back(&junkFilter);
   }
 
+  /// AST Search
+  std::unique_ptr<mull::InstructionFilter> instructionFilter =
+      std::unique_ptr<mull::NullInstructionFilter>(
+          new mull::NullInstructionFilter());
+  std::unique_ptr<mull::SourceInfoProvider> sourceInfoProvider =
+      std::unique_ptr<mull::SourceInfoProvider>();
+
+  /// TODO: STAN
+  mull::ASTMutations astMutations;
+  if (mutationSearchType == MutationSearchType::AST_SEARCH) {
+    mull::TraverseMask astTraverseMask = mull::TraverseMask::NONE;
+    for (auto &mutator : mutatorsOptions.mutators()) {
+      if (mutator->mutatorKind() == mull::MutatorKind::ScalarValueMutator) {
+        astTraverseMask = static_cast<mull::TraverseMask>(
+            astTraverseMask | mull::TraverseMask::SCALAR);
+      }
+
+      if (mutator->mutatorKind() == mull::MutatorKind::CXX_Arithmetic_AddToSub) {
+        astTraverseMask = static_cast<mull::TraverseMask>(
+          astTraverseMask | mull::TraverseMask::BINARY_OP);
+      }
+    }
+
+    mull::ASTFinder astFinder;
+    astMutations = astFinder.findMutations(
+        configuration, program, filePathFilter, astStorage, astTraverseMask);
+
+    instructionFilter = std::unique_ptr<mull::ASTFilter>(
+        new mull::ASTFilter(astMutations, filePathFilter));
+    sourceInfoProvider = std::unique_ptr<mull::ASTWhitelistSourceInfoProvider>(
+        new mull::ASTWhitelistSourceInfoProvider(astStorage, astMutations));
+  }
+
+  mull::Filter filter;
+
+  /// Finding mutations
+  mull::MutationsFinder mutationsFinder(mutatorsOptions.mutators(),
+                                        configuration, filePathFilter,
+                                        *instructionFilter);
+
   mull::Driver driver(configuration, *sandbox, program, toolchain,
                       mutationFilters, filter, mutationsFinder, metrics,
                       testFramework);
@@ -380,10 +434,16 @@ int main(int argc, char **argv) {
           llvm::make_unique<mull::SQLiteReporter>(ReportDirectory, ReportName));
     } break;
     case Elements: {
-      if (junkDetectionEnabled) {
+      if (mutationSearchType == MutationSearchType::JUNK_DETECTION) {
+        mull::ASTSourceInfoProvider sourceInfoProvider(astStorage);
+
         reporters.push_back(
             llvm::make_unique<mull::MutationTestingElementsReporter>(
                 ReportDirectory, ReportName, sourceInfoProvider));
+      } else if (mutationSearchType == MutationSearchType::AST_SEARCH) {
+        reporters.push_back(
+            llvm::make_unique<mull::MutationTestingElementsReporter>(
+                ReportDirectory, ReportName, *sourceInfoProvider));
       } else {
         mull::Logger::warn()
             << "The Mutation Testing Elements Reporter requires "

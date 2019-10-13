@@ -14,8 +14,9 @@ TEST(Relational, LessThanToLessOrEqual) {
 
   cxx::LessThanToLessOrEqual mutator;
   std::vector<MutationPoint *> mutants;
+  NullInstructionFilter instructionFilter;
   for (auto &function : bitcode->getModule()->functions()) {
-    auto m = mutator.getMutations(bitcode.get(), &function);
+    auto m = mutator.getMutations(bitcode.get(), &function, instructionFilter);
     std::copy(m.begin(), m.end(), std::back_inserter(mutants));
   }
 
@@ -30,8 +31,9 @@ TEST(Relational, LessOrEqualToLessThan) {
 
   cxx::LessOrEqualToLessThan mutator;
   std::vector<MutationPoint *> mutants;
+  NullInstructionFilter instructionFilter;
   for (auto &function : bitcode->getModule()->functions()) {
-    auto m = mutator.getMutations(bitcode.get(), &function);
+    auto m = mutator.getMutations(bitcode.get(), &function, instructionFilter);
     std::copy(m.begin(), m.end(), std::back_inserter(mutants));
   }
 
@@ -46,8 +48,9 @@ TEST(Relational, GreaterThanToGreaterOrEqual) {
 
   cxx::GreaterThanToGreaterOrEqual mutator;
   std::vector<MutationPoint *> mutants;
+  NullInstructionFilter instructionFilter;
   for (auto &function : bitcode->getModule()->functions()) {
-    auto m = mutator.getMutations(bitcode.get(), &function);
+    auto m = mutator.getMutations(bitcode.get(), &function, instructionFilter);
     std::copy(m.begin(), m.end(), std::back_inserter(mutants));
   }
 
@@ -62,8 +65,9 @@ TEST(Relational, GreaterOrEqualToGreaterThan) {
 
   cxx::GreaterOrEqualToGreaterThan mutator;
   std::vector<MutationPoint *> mutants;
+  NullInstructionFilter instructionFilter;
   for (auto &function : bitcode->getModule()->functions()) {
-    auto m = mutator.getMutations(bitcode.get(), &function);
+    auto m = mutator.getMutations(bitcode.get(), &function, instructionFilter);
     std::copy(m.begin(), m.end(), std::back_inserter(mutants));
   }
 

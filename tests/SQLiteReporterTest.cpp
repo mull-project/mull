@@ -6,6 +6,7 @@
 #include "mull/Config/RawConfig.h"
 #include "mull/Filter.h"
 #include "mull/Metrics/Metrics.h"
+#include "mull/MutationFilters/FilePathFilter.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Program/Program.h"
 #include "mull/Result.h"
@@ -23,6 +24,8 @@
 
 using namespace mull;
 using namespace llvm;
+
+static FilePathFilter nullPathFilter;
 
 TEST(SQLiteReporter, integrationTest) {
 
@@ -46,7 +49,8 @@ TEST(SQLiteReporter, integrationTest) {
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<cxx::AddToSub>());
-  MutationsFinder mutationsFinder(std::move(mutators), configuration);
+  MutationsFinder mutationsFinder(std::move(mutators), configuration,
+                                  nullPathFilter, NullInstructionFilter());
   Filter filter;
 
   SimpleTestFinder testFinder;
@@ -423,7 +427,10 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<cxx::AddToSub>());
-  MutationsFinder mutationsFinder(std::move(mutators), configuration);
+  NullInstructionFilter instructionFilter;
+  MutationsFinder mutationsFinder(std::move(mutators), configuration,
+                                  nullPathFilter,
+                                  instructionFilter);
   Filter filter;
   SimpleTestFinder testFinder;
   auto tests = testFinder.findTests(program, filter);
@@ -558,7 +565,10 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<cxx::AddToSub>());
-  MutationsFinder mutationsFinder(std::move(mutators), configuration);
+  NullInstructionFilter instructionFilter;
+  MutationsFinder mutationsFinder(std::move(mutators), configuration,
+                                  nullPathFilter,
+                                  instructionFilter);
   Filter filter;
 
   SimpleTestFinder testFinder;

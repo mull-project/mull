@@ -3,6 +3,7 @@
 #include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Filter.h"
+#include <mull/MutationFilters/FilePathFilter.h>
 #include "mull/MutationsFinder.h"
 #include "mull/Program/Program.h"
 #include "mull/TestFrameworks/NativeTestRunner.h"
@@ -29,6 +30,8 @@
 
 using namespace mull;
 using namespace llvm;
+
+static FilePathFilter nullPathFilter;
 
 TEST(NativeTestRunner, runTest) {
   Configuration configuration;
@@ -57,7 +60,9 @@ TEST(NativeTestRunner, runTest) {
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<cxx::AddToSub>());
-  MutationsFinder mutationsFinder(std::move(mutators), configuration);
+  MutationsFinder mutationsFinder(std::move(mutators), configuration,
+                                  nullPathFilter,
+                                  NullInstructionFilter());
   Filter filter;
 
   Function *testeeFunction = program.lookupDefinedFunction("count_letters");

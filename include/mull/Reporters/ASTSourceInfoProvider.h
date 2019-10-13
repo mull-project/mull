@@ -1,13 +1,8 @@
 #pragma once
 
-namespace mull {
+#include "mull/AST/ASTTypes.h"
 
-struct MutationPointSourceInfo {
-  int beginLine = -1;
-  int beginColumn = -1;
-  int endLine = -1;
-  int endColumn = -1;
-};
+namespace mull {
 
 class ASTStorage;
 class MutationPoint;
@@ -16,6 +11,7 @@ class SourceInfoProvider {
 public:
   virtual MutationPointSourceInfo
   getSourceInfo(MutationPoint *mutationPoint) = 0;
+  virtual ~SourceInfoProvider() {};
 };
 
 class ASTSourceInfoProvider : public SourceInfoProvider {

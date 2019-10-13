@@ -6,6 +6,7 @@
 
 namespace mull {
 
+class FilePathFilter;
 class Filter;
 class Program;
 class progress_counter;
@@ -17,7 +18,9 @@ public:
   using iterator = In::const_iterator;
 
   SearchMutationPointsTask(Filter &filter, const Program &program,
-                           std::vector<std::unique_ptr<Mutator>> &mutators);
+                           std::vector<std::unique_ptr<Mutator>> &mutators,
+                           const FilePathFilter &filePathFilter,
+                           const InstructionFilter &instructionFilter);
   void operator()(iterator begin, iterator end, Out &storage,
                   progress_counter &counter);
 
@@ -25,6 +28,8 @@ private:
   Filter &filter;
   const Program &program;
   std::vector<std::unique_ptr<Mutator>> &mutators;
+  const FilePathFilter &filePathFilter;
+  const InstructionFilter &instructionFilter;
 };
 
 } // namespace mull

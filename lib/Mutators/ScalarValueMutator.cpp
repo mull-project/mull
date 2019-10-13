@@ -27,14 +27,19 @@ void ScalarValueMutator::applyMutation(llvm::Function *function,
   lowLevelMutation->mutate(&instruction);
 }
 
-std::vector<MutationPoint *>
-ScalarValueMutator::getMutations(Bitcode *bitcode, llvm::Function *function) {
+std::vector<MutationPoint *> ScalarValueMutator::getMutations(
+    Bitcode *bitcode, llvm::Function *function,
+    const mull::InstructionFilter &instructionFilter) {
   assert(bitcode);
   assert(function);
 
   std::vector<MutationPoint *> mutations;
 
   for (auto &instruction : instructions(function)) {
+    if (!instructionFilter.validMutation(instruction)) {
+      continue;
+    }
+
     for (auto &llMutation : lowLevelMutators) {
       if (llMutation->canMutate(&instruction)) {
         std::string diagnostics = "Replacing scalar with 0 or 42";

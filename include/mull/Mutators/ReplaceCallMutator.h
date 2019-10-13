@@ -27,8 +27,9 @@ public:
                      const MutationPointAddress &address,
                      irm::IRMutation *lowLevelMutation) override;
 
-  std::vector<MutationPoint *> getMutations(Bitcode *bitcode,
-                                            llvm::Function *function) override;
+  std::vector<MutationPoint *>
+  getMutations(Bitcode *bitcode, llvm::Function *function,
+               const mull::InstructionFilter &instructionFilter) override;
 
 private:
   std::vector<std::unique_ptr<irm::IRMutation>> lowLevelMutators;

@@ -42,6 +42,7 @@ CXXJunkDetector::CXXJunkDetector(ASTStorage &astStorage)
     : astStorage(astStorage) {}
 
 bool CXXJunkDetector::isJunk(MutationPoint *point) {
+  ///return false;
   if (point->getSourceLocation().isNull()) {
     return true;
   }

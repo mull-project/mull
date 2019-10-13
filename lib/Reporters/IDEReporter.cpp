@@ -63,9 +63,9 @@ void IDEReporter::reportResults(const Result &result, const RawConfig &config,
 
   SourceManager sourceManager;
   for (auto mutant : result.getMutationPoints()) {
-    if (killedMutants.find(mutant) == killedMutants.end()) {
+    //if (killedMutants.find(mutant) == killedMutants.end()) {
       printSurvivedMutant(sourceManager, *mutant);
-    }
+    //}
   }
 
   auto rawScore =
