@@ -22,6 +22,9 @@ add_library(MullVersion ${CMAKE_BINARY_DIR}/lib/Version.cpp)
 target_include_directories(MullVersion PRIVATE
   ${MULL_INCLUDE_DIRS}
 )
+target_include_directories(MullVersion SYSTEM PRIVATE
+  ${THIRD_PARTY_INCLUDE_DIRS}
+)
 set_target_properties(MullVersion PROPERTIES
   LINK_FLAGS ${MULL_LINK_FLAGS}
   COMPILE_FLAGS ${MULL_CXX_FLAGS}

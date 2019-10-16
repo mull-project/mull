@@ -52,10 +52,13 @@ target_link_libraries(mull-tests
   )
 target_include_directories(mull-tests PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${MULL_SOURCE_DIR}/vendor/googletest/include
   ${MULL_INCLUDE_DIRS}
   ${factory_include_dir}
   )
+target_include_directories(mull-tests SYSTEM PRIVATE
+  ${MULL_SOURCE_DIR}/vendor/googletest/include
+  ${THIRD_PARTY_INCLUDE_DIRS}
+)
 set_target_properties(mull-tests PROPERTIES
   COMPILE_FLAGS ${MULL_CXX_FLAGS}
   LINK_FLAGS ${MULL_LINK_FLAGS}

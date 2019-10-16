@@ -21,6 +21,9 @@ macro(add_mull_executable)
   target_include_directories(${local_NAME} PUBLIC
     ${MULL_INCLUDE_DIRS}
   )
+  target_include_directories(${local_NAME} SYSTEM PRIVATE
+    ${THIRD_PARTY_INCLUDE_DIRS}
+  )
 
   INSTALL(TARGETS ${local_NAME}
     RUNTIME DESTINATION bin
@@ -49,6 +52,9 @@ macro(add_mull_internal_executable)
   )
   target_include_directories(${local_NAME} PUBLIC
     ${MULL_INCLUDE_DIRS}
+  )
+  target_include_directories(${local_NAME} SYSTEM PRIVATE
+    ${THIRD_PARTY_INCLUDE_DIRS}
   )
 endmacro()
 
