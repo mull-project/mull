@@ -160,7 +160,12 @@ target_link_libraries(mull
   irm
   mull-cxx-mutators
   )
-target_include_directories(mull PUBLIC ${MULL_INCLUDE_DIRS} ${CMAKE_SOURCE_DIR}/vendor)
+target_include_directories(mull PUBLIC
+  ${MULL_INCLUDE_DIRS}
+)
+target_include_directories(mull SYSTEM PRIVATE
+  ${THIRD_PARTY_INCLUDE_DIRS}
+)
 
 set_target_properties(mull PROPERTIES
   COMPILE_FLAGS ${MULL_CXX_FLAGS}
