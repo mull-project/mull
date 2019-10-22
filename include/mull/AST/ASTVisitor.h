@@ -21,7 +21,7 @@ class ASTVisitor : public clang::RecursiveASTVisitor<ASTVisitor> {
   clang::SourceManager &sourceManager;
   mull::FilePathFilter &filePathFilter;
   mull::TraverseMask traverseMask;
-
+  bool shouldSkipCurrentFunction;
 public:
   explicit ASTVisitor(mull::ThreadSafeASTUnit &astUnit,
                       mull::ASTMutations &mutations,
@@ -29,7 +29,7 @@ public:
                       mull::TraverseMask traverseMask);
 
   bool VisitBinaryOperator(clang::BinaryOperator *binaryOperator);
-
+  bool VisitFunctionDecl(clang::FunctionDecl* Decl);
   bool VisitExpr(clang::Expr *expr);
 
   void traverse();

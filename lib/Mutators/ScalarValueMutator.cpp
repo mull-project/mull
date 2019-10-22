@@ -36,7 +36,7 @@ std::vector<MutationPoint *> ScalarValueMutator::getMutations(
   std::vector<MutationPoint *> mutations;
 
   for (auto &instruction : instructions(function)) {
-    if (!instructionFilter.validMutation(instruction)) {
+    if (!instructionFilter.validScalarMutation(instruction)) {
       continue;
     }
 

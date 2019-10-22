@@ -32,9 +32,9 @@ ParallelizationConfig::ParallelizationConfig()
     : workers(0), testExecutionWorkers(0), mutantExecutionWorkers(0) {}
 
 void ParallelizationConfig::normalize() {
-  // TODO: STAN
-  int defaultWorkers = std::max(std::thread::hardware_concurrency(), uint(1));
-//  int defaultWorkers = 1; ///std::max(std::thread::hardware_concurrency(), uint(1));
+//   TODO: STAN
+//  int defaultWorkers = std::max(std::thread::hardware_concurrency(), uint(1));
+  int defaultWorkers = 1; ///std::max(std::thread::hardware_concurrency(), uint(1));
   if (workers == 0) {
     workers = defaultWorkers;
   }

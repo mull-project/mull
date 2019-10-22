@@ -13,6 +13,7 @@ public:
   ~ASTFilter() {}
 
   bool validMutation(llvm::Instruction &instruction) const;
+  bool validScalarMutation(llvm::Instruction &instruction) const;
 
 private:
   const ASTMutations &astMutations;

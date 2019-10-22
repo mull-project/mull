@@ -76,10 +76,15 @@ findPotentialMutableParentStmt(const clang::Stmt *statement,
       return false;
     }
 
-    // TODO: Not implemented
-    if (const clang::CXXConstructorDecl *constructorDecl =
+    if (const clang::CXXConstructorDecl *cxxConstructorDecl =
       parent.get<clang::CXXConstructorDecl>()) {
-      return false;
+
+      for (auto &member : cxxConstructorDecl->inits()) {
+        if (member->getInit() == statement) {
+          *mutationLocation = member->getMemberLocation();
+          return true;
+        }
+      }
     }
 
     // TODO: Not implemented
@@ -109,9 +114,23 @@ ASTVisitor::ASTVisitor(mull::ThreadSafeASTUnit &astUnit,
                        mull::FilePathFilter &filePathFilter,
                        mull::TraverseMask traverseMask)
     : astUnit(astUnit), mutations(mutations), filePathFilter(filePathFilter),
-      sourceManager(astUnit.getSourceManager()), traverseMask(traverseMask) {}
+      sourceManager(astUnit.getSourceManager()), traverseMask(traverseMask),
+      shouldSkipCurrentFunction(false) {}
+
+bool ASTVisitor::VisitFunctionDecl(clang::FunctionDecl* Decl) {
+  if (Decl->getNameAsString() == "main") {
+    shouldSkipCurrentFunction = true;
+  } else {
+    shouldSkipCurrentFunction = false;
+  }
+  return clang::RecursiveASTVisitor<ASTVisitor>::VisitFunctionDecl(Decl);
+}
 
 bool ASTVisitor::VisitBinaryOperator(clang::BinaryOperator *binaryOperator) {
+  if (shouldSkipCurrentFunction) {
+    return true;
+  }
+
   if ((traverseMask & mull::TraverseMask::BINARY_OP) == 0) {
     return true;
   }
@@ -131,6 +150,10 @@ bool ASTVisitor::VisitBinaryOperator(clang::BinaryOperator *binaryOperator) {
 }
 
 bool ASTVisitor::VisitExpr(clang::Expr *expr) {
+  if (shouldSkipCurrentFunction) {
+    return true;
+  }
+
   if ((traverseMask & mull::TraverseMask::SCALAR) == 0) {
     return true;
   }
