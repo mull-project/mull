@@ -206,6 +206,13 @@ std::vector<std::unique_ptr<MutationResult>>
 Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
   std::vector<std::string> mutatedFunctions;
 
+  SingleTaskExecutor prepareMutations("Prepare mutations", [&]() {
+    for (auto point : mutationPoints) {
+      point->getBitcode()->addMutation(point);
+    }
+  });
+  prepareMutations.execute();
+
   auto workers = config.parallelization.workers;
   TaskExecutor<CloneMutatedFunctionsTask> cloneFunctions(
       "Cloning functions for mutation", program.bitcode(), mutatedFunctions,

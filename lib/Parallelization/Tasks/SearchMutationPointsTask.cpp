@@ -45,7 +45,6 @@ operator()(iterator begin, iterator end,
     for (auto &mutator : mutators) {
       auto mutants = mutator->getMutations(bitcode, function);
       for (auto mutant : mutants) {
-        bitcode->addMutation(mutant);
         for (auto &reachableTest : testee.getReachableTests()) {
           mutant->addReachableTest(reachableTest.first, reachableTest.second);
         }

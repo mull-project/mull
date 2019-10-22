@@ -59,7 +59,6 @@ std::string Bitcode::getUniqueIdentifier() { return uniqueIdentifier; }
 std::string Bitcode::getUniqueIdentifier() const { return uniqueIdentifier; }
 
 void Bitcode::addMutation(MutationPoint *point) {
-  std::lock_guard<std::mutex> guard(mutex);
   auto function = point->getOriginalFunction();
   mutationPoints[function].push_back(point);
 }

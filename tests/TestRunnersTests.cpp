@@ -67,7 +67,9 @@ TEST(NativeTestRunner, runTest) {
 
   std::vector<MutationPoint *> mutationPoints =
       mutationsFinder.getMutationPoints(program, mergedTestees, filter);
-
+  for (auto point : mutationPoints) {
+    point->getBitcode()->addMutation(point);
+  }
   MutationPoint *mutationPoint = mutationPoints.front();
 
   SimpleTestFinder testFinder;
