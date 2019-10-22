@@ -64,10 +64,10 @@ findPotentialMutableParentStmt(const clang::Stmt *statement,
                                             mutationLocation);
     }
 
-    // TODO: Not implemented
     if (const clang::CStyleCastExpr *castExpr =
       parent.get<clang::CStyleCastExpr>()) {
-      return false;
+      return findPotentialMutableParentStmt(castExpr, astContext, sourceManager,
+                                            mutationLocation);
     }
 
     // TODO: Not implemented
