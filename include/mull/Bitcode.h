@@ -41,7 +41,6 @@ private:
   std::string uniqueIdentifier;
 
   std::map<llvm::Function *, std::vector<MutationPoint *>> mutationPoints;
-  std::mutex mutex;
 
   explicit Bitcode(std::unique_ptr<llvm::Module> module);
 };
