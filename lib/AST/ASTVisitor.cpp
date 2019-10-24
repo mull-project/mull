@@ -25,6 +25,9 @@ static bool isConstant(clang::Stmt *statement) {
   if (llvm::isa<clang::CharacterLiteral>(statement)) {
     return true;
   }
+  if (llvm::isa<clang::DeclRefExpr>(statement)) {
+    return true;
+  }
   return false;
 }
 
@@ -36,6 +39,9 @@ findPotentialMutableParentStmt(const clang::Stmt *statement,
   assert(mutationLocation);
 
   for (auto &parent : astContext.getParents(*statement)) {
+//    llvm::errs() << "\n";
+//    statement->dump(llvm::errs(), sourceManager);
+//    parent.dump(llvm::errs(), sourceManager);
     if (const clang::BinaryOperator *binaryOpParent =
             parent.get<clang::BinaryOperator>()) {
       *mutationLocation = binaryOpParent->getOperatorLoc();
@@ -73,7 +79,6 @@ findPotentialMutableParentStmt(const clang::Stmt *statement,
     // TODO: Not implemented
     if (const clang::ConstantExpr *constantExpr =
       parent.get<clang::ConstantExpr>()) {
-//      assert(0);
       return false;
     }
 
@@ -103,9 +108,10 @@ findPotentialMutableParentStmt(const clang::Stmt *statement,
     llvm::errs() << "\n";
     statement->dump(llvm::errs(), sourceManager);
     parent.dump(llvm::errs(), sourceManager);
+//    assert(0);
+
     return false;
 
-    //assert(0);
   }
 
   return false;
