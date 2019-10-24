@@ -73,6 +73,7 @@ findPotentialMutableParentStmt(const clang::Stmt *statement,
     // TODO: Not implemented
     if (const clang::ConstantExpr *constantExpr =
       parent.get<clang::ConstantExpr>()) {
+//      assert(0);
       return false;
     }
 
@@ -92,10 +93,10 @@ findPotentialMutableParentStmt(const clang::Stmt *statement,
       return true;
     }
 
-    // TODO: Not implemented
     if (const clang::CXXTemporaryObjectExpr *cxxTemporaryObjectExpr =
       parent.get<clang::CXXTemporaryObjectExpr>()) {
-      return false;
+      *mutationLocation = cxxTemporaryObjectExpr->getExprLoc();
+      return true;
     }
 
     // TODO: Not implemented
@@ -104,7 +105,7 @@ findPotentialMutableParentStmt(const clang::Stmt *statement,
     parent.dump(llvm::errs(), sourceManager);
     return false;
 
-//    assert(0);
+    //assert(0);
   }
 
   return false;

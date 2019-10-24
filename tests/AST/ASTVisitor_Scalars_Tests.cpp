@@ -347,3 +347,43 @@ void foo() {
   ASSERT_EQ(clangColumn, 11U);
 }
 
+TEST(ASTVisitorTest, cxxTemporaryObjectExpr) {
+  const char *const binaryOperator = R"(///
+struct X {
+  X(int, char *);
+};
+
+X create_X() {
+  const char str[] = "not relevant to the test";
+  return X(1234, (char *)str); // creates a CXXTemporaryObjectExpr
+};
+)";
+
+  ASTStorage storage("", "");
+
+  std::unique_ptr<clang::ASTUnit> astUnit(
+    clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
+
+  ASTMutations astMutations;
+
+  ThreadSafeASTUnit threadSafeAstUnit(std::move(astUnit));
+  ASTVisitor astVisitor(threadSafeAstUnit, astMutations,
+                        nullPathFilter,
+                        mull::TraverseMask::SCALAR);
+
+  astVisitor.traverse();
+
+  clang::SourceManager &sourceManager = threadSafeAstUnit.getSourceManager();
+
+  const ASTMutation &mutation = astMutations.getMutation(fakeSourceFilePath, 8, 10);
+
+  clang::SourceLocation begin = mutation.stmt->getSourceRange().getBegin();
+
+  int clangLine = sourceManager.getExpansionLineNumber(begin);
+  int clangColumn = sourceManager.getExpansionColumnNumber(begin);
+
+  ASSERT_EQ(astMutations.count(), 1U);
+  ASSERT_TRUE(astMutations.locationExists(fakeSourceFilePath, 8, 10));
+  ASSERT_EQ(clangLine, 8U);
+  ASSERT_EQ(clangColumn, 12U);
+}
