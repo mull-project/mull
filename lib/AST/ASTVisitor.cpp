@@ -87,10 +87,9 @@ findPotentialMutableParentStmt(const clang::Stmt *statement,
       }
     }
 
-    // TODO: Not implemented
-    if (const clang::VarDecl *varDecl =
-      parent.get<clang::VarDecl>()) {
-      return false;
+    if (const clang::VarDecl *varDecl = parent.get<clang::VarDecl>()) {
+      *mutationLocation = varDecl->getLocation();
+      return true;
     }
 
     // TODO: Not implemented
@@ -100,10 +99,12 @@ findPotentialMutableParentStmt(const clang::Stmt *statement,
     }
 
     // TODO: Not implemented
-    return false;
+    llvm::errs() << "\n";
     statement->dump(llvm::errs(), sourceManager);
     parent.dump(llvm::errs(), sourceManager);
-    assert(0);
+    return false;
+
+//    assert(0);
   }
 
   return false;
