@@ -397,6 +397,11 @@ int main(int argc, char **argv) {
         astTraverseMask = static_cast<mull::TraverseMask>(
           astTraverseMask | mull::TraverseMask::BINARY_OP);
       }
+
+      if (mutator->mutatorKind() == mull::MutatorKind::RemoveVoidFunctionMutator) {
+        astTraverseMask = static_cast<mull::TraverseMask>(
+          astTraverseMask | mull::TraverseMask::VOID_CALL);
+      }
     }
 
     mull::ASTFinder astFinder;

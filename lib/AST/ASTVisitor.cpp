@@ -39,9 +39,9 @@ findPotentialMutableParentStmt(const clang::Stmt *statement,
   assert(mutationLocation);
 
   for (auto &parent : astContext.getParents(*statement)) {
-//    llvm::errs() << "\n";
-//    statement->dump(llvm::errs(), sourceManager);
-//    parent.dump(llvm::errs(), sourceManager);
+    //    llvm::errs() << "\n";
+    //    statement->dump(llvm::errs(), sourceManager);
+    //    parent.dump(llvm::errs(), sourceManager);
     if (const clang::BinaryOperator *binaryOpParent =
             parent.get<clang::BinaryOperator>()) {
       *mutationLocation = binaryOpParent->getOperatorLoc();
@@ -54,7 +54,8 @@ findPotentialMutableParentStmt(const clang::Stmt *statement,
       return true;
     }
 
-    if (const clang::CXXMemberCallExpr *callExpr = parent.get<clang::CXXMemberCallExpr>()) {
+    if (const clang::CXXMemberCallExpr *callExpr =
+            parent.get<clang::CXXMemberCallExpr>()) {
       *mutationLocation = callExpr->getExprLoc();
       return true;
     }
@@ -71,19 +72,19 @@ findPotentialMutableParentStmt(const clang::Stmt *statement,
     }
 
     if (const clang::CStyleCastExpr *castExpr =
-      parent.get<clang::CStyleCastExpr>()) {
+            parent.get<clang::CStyleCastExpr>()) {
       return findPotentialMutableParentStmt(castExpr, astContext, sourceManager,
                                             mutationLocation);
     }
 
     // TODO: Not implemented
     if (const clang::ConstantExpr *constantExpr =
-      parent.get<clang::ConstantExpr>()) {
+            parent.get<clang::ConstantExpr>()) {
       return false;
     }
 
     if (const clang::CXXConstructorDecl *cxxConstructorDecl =
-      parent.get<clang::CXXConstructorDecl>()) {
+            parent.get<clang::CXXConstructorDecl>()) {
 
       for (auto &member : cxxConstructorDecl->inits()) {
         if (member->getInit() == statement) {
@@ -99,7 +100,7 @@ findPotentialMutableParentStmt(const clang::Stmt *statement,
     }
 
     if (const clang::CXXTemporaryObjectExpr *cxxTemporaryObjectExpr =
-      parent.get<clang::CXXTemporaryObjectExpr>()) {
+            parent.get<clang::CXXTemporaryObjectExpr>()) {
       *mutationLocation = cxxTemporaryObjectExpr->getExprLoc();
       return true;
     }
@@ -108,10 +109,9 @@ findPotentialMutableParentStmt(const clang::Stmt *statement,
     llvm::errs() << "\n";
     statement->dump(llvm::errs(), sourceManager);
     parent.dump(llvm::errs(), sourceManager);
-//    assert(0);
+    //    assert(0);
 
     return false;
-
   }
 
   return false;
@@ -125,7 +125,7 @@ ASTVisitor::ASTVisitor(mull::ThreadSafeASTUnit &astUnit,
       sourceManager(astUnit.getSourceManager()), traverseMask(traverseMask),
       shouldSkipCurrentFunction(false) {}
 
-bool ASTVisitor::VisitFunctionDecl(clang::FunctionDecl* Decl) {
+bool ASTVisitor::VisitFunctionDecl(clang::FunctionDecl *Decl) {
   if (Decl->getNameAsString() == "main") {
     shouldSkipCurrentFunction = true;
   } else {
@@ -162,22 +162,20 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
     return true;
   }
 
-  if ((traverseMask & mull::TraverseMask::SCALAR) == 0) {
-    return true;
-  }
-
   clang::SourceLocation exprLocation = expr->getBeginLoc();
   if (astUnit.isInSystemHeader(exprLocation)) {
     return true;
   }
 
   const std::string sourceLocation =
-    astUnit.getSourceManager().getFilename(exprLocation).str();
+      astUnit.getSourceManager().getFilename(exprLocation).str();
 
   if (sourceLocation.empty()) {
     /// TODO: asserts only?
     return true;
   }
+
+//  expr->dump();
 
   if (filePathFilter.shouldSkip(sourceLocation)) {
     return true;
@@ -190,8 +188,7 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
     return true;
   }
 
-  if (isConstant(expr)) {
-
+  if ((traverseMask & mull::TraverseMask::SCALAR) != 0 && isConstant(expr)) {
     expr = expr->IgnoreImplicit();
 
     //    expr = expr->Ignore();
@@ -215,6 +212,16 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
 
     /// TODO: STAN
     /// assert(0 && "Should not reach here");
+  }
+
+  if (const clang::CallExpr *callExpr = clang::dyn_cast<clang::CallExpr>(expr)) {
+    if ((traverseMask & mull::TraverseMask::VOID_CALL) != 0) {
+      auto *type = callExpr->getType().getTypePtrOrNull();
+      if (type && type->isVoidType()) {
+        saveMutationPoint(callExpr, callExpr->getBeginLoc());
+      }
+      return true;
+    }
   }
 
   return true;

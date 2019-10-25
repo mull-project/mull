@@ -15,8 +15,9 @@ enum TraverseMask: int {
 
   BINARY_OP = (1u << 0),
   SCALAR = (1u << 1),
+  VOID_CALL = (1u << 2),
 
-  ALL = BINARY_OP | SCALAR
+  ALL = BINARY_OP | SCALAR | VOID_CALL
 };
 struct MutationPointSourceInfo {
   int beginLine = -1;
