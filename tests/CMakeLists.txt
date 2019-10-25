@@ -2,7 +2,8 @@ add_subdirectory(fixtures)
 generate_fixture_factory(FACTORY_HEADER)
 
 set(mull_unittests_sources
-  AST/ASTVisitor_BinaryOperators_Tests.cpp
+  AST/BinaryOperators/ASTVisitor_BinaryOperators_Arithmetics_Tests.cpp
+  AST/BinaryOperators/ASTVisitor_BinaryOperators_Relational_Tests.cpp
   AST/ASTVisitor_RemoveVoidCall_Tests.cpp
   AST/ASTVisitor_Scalars_Tests.cpp
 

@@ -402,6 +402,12 @@ int main(int argc, char **argv) {
         astTraverseMask = static_cast<mull::TraverseMask>(
           astTraverseMask | mull::TraverseMask::VOID_CALL);
       }
+
+      if (mutator->mutatorKind() >= mull::MutatorKind::CXX_Relation_LessThanToLessOrEqual &&
+        mutator->mutatorKind() <= mull::MutatorKind::CXX_Relation_NotEqualToEqual) {
+        astTraverseMask = static_cast<mull::TraverseMask>(
+          astTraverseMask | mull::TraverseMask::BINARY_OP);
+      }
     }
 
     mull::ASTFinder astFinder;
