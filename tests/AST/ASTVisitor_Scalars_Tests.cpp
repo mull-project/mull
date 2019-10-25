@@ -35,7 +35,7 @@ int add() {
   astVisitor.traverse();
 
   ASSERT_EQ(astMutations.count(), 1U);
-  //  ASSERT_TRUE(astMutations.locationExists(3, 3));
+  ASSERT_TRUE(astMutations.locationExists(fakeSourceFilePath, 3, 3));
 }
 
 TEST(ASTVisitorTest, integerScalarWithBinaryOperator) {
@@ -72,6 +72,8 @@ int add(int a) {
   ASSERT_TRUE(astMutations.locationExists(fakeSourceFilePath, 3, 12));
   ASSERT_EQ(clangLine, 3U);
   ASSERT_EQ(clangColumn, 14U);
+  ASSERT_EQ(mutation.line, 3U);
+  ASSERT_EQ(mutation.column, 12U);
 }
 
 TEST(ASTVisitorTest, integerScalarAsAnArgumentToAFunctionCall) {
@@ -98,8 +100,21 @@ void caller() {
 
   astVisitor.traverse();
 
+  clang::SourceManager &sourceManager = threadSafeAstUnit.getSourceManager();
+
+  const ASTMutation &mutation = astMutations.getMutation(fakeSourceFilePath, 6, 3);
+
+  clang::SourceLocation begin = mutation.stmt->getSourceRange().getBegin();
+
+  int clangLine = sourceManager.getExpansionLineNumber(begin);
+  int clangColumn = sourceManager.getExpansionColumnNumber(begin);
+
   ASSERT_EQ(astMutations.count(), 1U);
   ASSERT_TRUE(astMutations.locationExists(fakeSourceFilePath, 6, 3));
+  ASSERT_EQ(clangLine, 6U);
+  ASSERT_EQ(clangColumn, 10U);
+  ASSERT_EQ(mutation.line, 6);
+  ASSERT_EQ(mutation.column, 3);
 }
 
 
@@ -109,11 +124,9 @@ int at(unsigned int a) {
   return a;
 }
 
-static bool func() {
-  if (at(0)) {
-    return func(line);
-  }
-  return func(line);
+static int func() {
+  int result = at(0);
+  return result;
 }
 )";
 
@@ -138,9 +151,9 @@ static bool func() {
   ASSERT_EQ(astMutations.count(), 1U);
 
 
-  ASSERT_TRUE(astMutations.locationExists(fakeSourceFilePath, 7, 7));
+  ASSERT_TRUE(astMutations.locationExists(fakeSourceFilePath, 7, 16));
 
-  const ASTMutation &mutation = astMutations.getMutation(fakeSourceFilePath, 7, 7);
+  const ASTMutation &mutation = astMutations.getMutation(fakeSourceFilePath, 7, 16);
 
   clang::SourceLocation begin = mutation.stmt->getSourceRange().getBegin();
 
@@ -148,7 +161,9 @@ static bool func() {
   int clangColumn = sourceManager.getExpansionColumnNumber(begin);
 
   ASSERT_EQ(clangLine, 7U);
-  ASSERT_EQ(clangColumn, 10U);
+  ASSERT_EQ(clangColumn, 19U);
+  ASSERT_EQ(mutation.line, 7);
+  ASSERT_EQ(mutation.column, 16);
 }
 
 TEST(ASTVisitorTest, integerScalarAsAnArgumentToACXXMemberFunctionCall) {

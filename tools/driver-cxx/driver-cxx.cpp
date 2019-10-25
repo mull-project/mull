@@ -393,20 +393,30 @@ int main(int argc, char **argv) {
             astTraverseMask | mull::TraverseMask::SCALAR);
       }
 
-      if (mutator->mutatorKind() == mull::MutatorKind::CXX_Arithmetic_AddToSub) {
+      if (mutator->mutatorKind() ==
+          mull::MutatorKind::CXX_Arithmetic_AddToSub) {
         astTraverseMask = static_cast<mull::TraverseMask>(
-          astTraverseMask | mull::TraverseMask::BINARY_OP);
+            astTraverseMask | mull::TraverseMask::BINARY_OP);
       }
 
-      if (mutator->mutatorKind() == mull::MutatorKind::RemoveVoidFunctionMutator) {
+      if (mutator->mutatorKind() ==
+          mull::MutatorKind::RemoveVoidFunctionMutator) {
         astTraverseMask = static_cast<mull::TraverseMask>(
-          astTraverseMask | mull::TraverseMask::VOID_CALL);
+            astTraverseMask | mull::TraverseMask::VOID_CALL);
       }
 
-      if (mutator->mutatorKind() >= mull::MutatorKind::CXX_Relation_LessThanToLessOrEqual &&
-        mutator->mutatorKind() <= mull::MutatorKind::CXX_Relation_NotEqualToEqual) {
+      if (mutator->mutatorKind() >=
+              mull::MutatorKind::CXX_Relation_LessThanToLessOrEqual &&
+          mutator->mutatorKind() <=
+              mull::MutatorKind::CXX_Relation_NotEqualToEqual) {
         astTraverseMask = static_cast<mull::TraverseMask>(
-          astTraverseMask | mull::TraverseMask::BINARY_OP);
+            astTraverseMask | mull::TraverseMask::BINARY_OP);
+      }
+
+      if (mutator->mutatorKind() ==
+          mull::MutatorKind::AndOrReplacementMutator) {
+        astTraverseMask = static_cast<mull::TraverseMask>(
+            astTraverseMask | mull::TraverseMask::BINARY_OP);
       }
     }
 

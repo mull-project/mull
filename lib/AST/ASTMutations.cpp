@@ -54,9 +54,7 @@ void ASTMutations::dump() const {
     std::cout << "file: " << entry.first << "\n";
 
     for (auto &info : entry.second) {
-
       std::cout << "line/col: " << info.second.line << " " << info.second.column << "\n";
-
     }
   }
 }

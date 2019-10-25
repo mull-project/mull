@@ -16,17 +16,22 @@ using namespace mull;
 
 static bool isConstant(clang::Stmt *statement) {
   statement = statement->IgnoreImplicit();
-  if (llvm::isa<clang::IntegerLiteral>(statement)) {
+  if (clang::isa<clang::IntegerLiteral>(statement)) {
     return true;
   }
-  if (llvm::isa<clang::FloatingLiteral>(statement)) {
+  if (clang::isa<clang::FloatingLiteral>(statement)) {
     return true;
   }
-  if (llvm::isa<clang::CharacterLiteral>(statement)) {
+  if (clang::isa<clang::CharacterLiteral>(statement)) {
     return true;
   }
-  if (llvm::isa<clang::DeclRefExpr>(statement)) {
-    return true;
+  if (const clang::DeclRefExpr *declRefExpr =
+          clang::dyn_cast<clang::DeclRefExpr>(statement)) {
+    const clang::Decl *referencedDecl =
+        declRefExpr->getReferencedDeclOfCallee();
+    if (clang::isa<clang::EnumConstantDecl>(referencedDecl)) {
+      return true;
+    }
   }
   return false;
 }
@@ -139,7 +144,8 @@ bool ASTVisitor::VisitBinaryOperator(clang::BinaryOperator *binaryOperator) {
     return true;
   }
 
-  if ((traverseMask & mull::TraverseMask::BINARY_OP) == 0) {
+  if ((traverseMask & mull::TraverseMask::BINARY_OP) == 0 &&
+      (traverseMask & mull::TraverseMask::AND_OR) == 0) {
     return true;
   }
 
@@ -147,6 +153,7 @@ bool ASTVisitor::VisitBinaryOperator(clang::BinaryOperator *binaryOperator) {
   assert(range.isValid());
 
   clang::SourceLocation beginLocation = binaryOperator->getOperatorLoc();
+  beginLocation.dump(sourceManager);
 
   if (astUnit.isInSystemHeader(beginLocation)) {
     return true;
@@ -175,7 +182,7 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
     return true;
   }
 
-//  expr->dump();
+  expr->dump();
 
   if (filePathFilter.shouldSkip(sourceLocation)) {
     return true;
@@ -184,7 +191,7 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
   /// In case of PredefinedExpr, the expression expr->children() yields
   /// children which are nullptr. These nodes should be junk anyway, so we
   /// ignore them early.
-  if (llvm::isa<clang::PredefinedExpr>(expr)) {
+  if (clang::isa<clang::PredefinedExpr>(expr)) {
     return true;
   }
 
@@ -214,7 +221,8 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
     /// assert(0 && "Should not reach here");
   }
 
-  if (const clang::CallExpr *callExpr = clang::dyn_cast<clang::CallExpr>(expr)) {
+  if (const clang::CallExpr *callExpr =
+          clang::dyn_cast<clang::CallExpr>(expr)) {
     if ((traverseMask & mull::TraverseMask::VOID_CALL) != 0) {
       auto *type = callExpr->getType().getTypePtrOrNull();
       if (type && type->isVoidType()) {

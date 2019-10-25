@@ -13,11 +13,12 @@ namespace mull {
 enum TraverseMask: int {
   NONE = 0,
 
-  BINARY_OP = (1u << 0),
-  SCALAR = (1u << 1),
-  VOID_CALL = (1u << 2),
+  AND_OR = (1u << 0),
+  BINARY_OP = (1u << 1),
+  SCALAR = (1u << 2),
+  VOID_CALL = (1u << 3),
 
-  ALL = BINARY_OP | SCALAR | VOID_CALL
+  ALL = AND_OR | BINARY_OP | SCALAR | VOID_CALL
 };
 struct MutationPointSourceInfo {
   int beginLine = -1;
