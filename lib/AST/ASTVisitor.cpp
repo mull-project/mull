@@ -165,6 +165,8 @@ bool ASTVisitor::VisitBinaryOperator(clang::BinaryOperator *binaryOperator) {
 }
 
 bool ASTVisitor::VisitExpr(clang::Expr *expr) {
+  expr->dump();
+
   if (shouldSkipCurrentFunction) {
     return true;
   }
@@ -191,6 +193,14 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
   /// ignore them early.
   if (clang::isa<clang::PredefinedExpr>(expr)) {
     return true;
+  }
+
+  if ((traverseMask & mull::TraverseMask::REPLACE_CALL) != 0) {
+    if (clang::isa<clang::CallExpr>(expr)) {
+      saveMutationPoint(expr, expr->getBeginLoc());
+
+      return true;
+    }
   }
 
   if ((traverseMask & mull::TraverseMask::NEGATE) != 0) {
