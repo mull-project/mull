@@ -15,10 +15,11 @@ enum TraverseMask: int {
 
   AND_OR = (1u << 0),
   BINARY_OP = (1u << 1),
-  SCALAR = (1u << 2),
-  VOID_CALL = (1u << 3),
+  NEGATE = (1u << 3),
+  SCALAR = (1u << 4),
+  VOID_CALL = (1u << 5),
 
-  ALL = AND_OR | BINARY_OP | SCALAR | VOID_CALL
+  ALL = AND_OR | BINARY_OP | NEGATE | SCALAR | VOID_CALL
 };
 struct MutationPointSourceInfo {
   int beginLine = -1;

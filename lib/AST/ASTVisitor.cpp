@@ -182,8 +182,6 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
     return true;
   }
 
-  expr->dump();
-
   if (filePathFilter.shouldSkip(sourceLocation)) {
     return true;
   }
@@ -192,6 +190,27 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
   /// children which are nullptr. These nodes should be junk anyway, so we
   /// ignore them early.
   if (clang::isa<clang::PredefinedExpr>(expr)) {
+    return true;
+  }
+
+  if ((traverseMask & mull::TraverseMask::NEGATE) != 0) {
+    if (clang::isa<clang::ImplicitCastExpr>(expr)) {
+      return true;
+    }
+
+    if (clang::DeclRefExpr *declRefExpr = clang::dyn_cast<clang::DeclRefExpr>(expr)) {
+      for (auto &parent : astUnit.getASTContext().getParents(*declRefExpr)) {
+        if (const clang::UnaryOperator *unaryOperator = parent.get<clang::UnaryOperator>()) {
+          if (clang::Expr *subExpr = unaryOperator->getSubExpr()) {
+            saveMutationPoint(unaryOperator, subExpr->getExprLoc());
+          }
+          return true;
+        }
+      }
+
+      saveMutationPoint(declRefExpr, declRefExpr->getExprLoc());
+    }
+
     return true;
   }
 

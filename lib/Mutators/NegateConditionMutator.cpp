@@ -2,6 +2,7 @@
 #include "mull/MutationPoint.h"
 #include <irm/irm.h>
 #include <llvm/IR/InstIterator.h>
+#include <llvm/IR/Module.h>
 #include <sstream>
 
 using namespace llvm;
@@ -69,8 +70,14 @@ NegateConditionMutator::getMutations(Bitcode *bitcode,
   std::vector<MutationPoint *> mutations;
 
   for (auto &instruction : instructions(function)) {
+    llvm::errs() << "\n";
+    instruction.print(llvm::errs(), true);
+    llvm::errs() << "\n";
+
     for (auto &llMutation : lowLevelMutators) {
       if (llMutation->canMutate(&instruction)) {
+
+        instruction.getModule()->print(llvm::errs(), nullptr, true);
 
         auto cmpMutator =
             reinterpret_cast<irm::_CmpInstPredicateReplacementBase *>(
