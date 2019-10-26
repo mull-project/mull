@@ -419,16 +419,22 @@ int main(int argc, char **argv) {
             astTraverseMask | mull::TraverseMask::BINARY_OP);
       }
 
-      if (mutator->mutatorKind() ==
-        mull::MutatorKind::NegateMutator) {
+      if (mutator->mutatorKind() >=
+              mull::MutatorKind::CXX_Bitwise_LShiftToRShift &&
+          mutator->mutatorKind() <=
+              mull::MutatorKind::CXX_Bitwise_XorAssignToOrAssign) {
         astTraverseMask = static_cast<mull::TraverseMask>(
-          astTraverseMask | mull::TraverseMask::NEGATE);
+            astTraverseMask | mull::TraverseMask::BINARY_OP);
       }
 
-      if (mutator->mutatorKind() ==
-        mull::MutatorKind::ReplaceCallMutator) {
+      if (mutator->mutatorKind() == mull::MutatorKind::NegateMutator) {
         astTraverseMask = static_cast<mull::TraverseMask>(
-          astTraverseMask | mull::TraverseMask::REPLACE_CALL);
+            astTraverseMask | mull::TraverseMask::NEGATE);
+      }
+
+      if (mutator->mutatorKind() == mull::MutatorKind::ReplaceCallMutator) {
+        astTraverseMask = static_cast<mull::TraverseMask>(
+            astTraverseMask | mull::TraverseMask::REPLACE_CALL);
       }
     }
 

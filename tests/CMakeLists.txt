@@ -8,6 +8,7 @@ set(mull_unittests_sources
   AST/ASTVisitor_ReplaceCall_Tests.cpp
   AST/ASTVisitor_Scalars_Tests.cpp
   AST/BinaryOperators/ASTVisitor_BinaryOperators_Arithmetics_Tests.cpp
+  AST/BinaryOperators/ASTVisitor_BinaryOperators_Bitwise_Tests.cpp
   AST/BinaryOperators/ASTVisitor_BinaryOperators_Relational_Tests.cpp
 
   CompilerTests.cpp
