@@ -8,9 +8,9 @@
 #include "mull/Metrics/Metrics.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Program/Program.h"
+#include "mull/ReachableFunction.h"
 #include "mull/Result.h"
 #include "mull/TestFrameworks/SimpleTest/SimpleTestFinder.h"
-#include "mull/Testee.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 
 #include <cstring>
@@ -54,15 +54,16 @@ TEST(SQLiteReporter, integrationTest) {
 
   auto &test = tests.front();
 
-  Function *testeeFunction = program.lookupDefinedFunction("count_letters");
-  ASSERT_FALSE(testeeFunction->empty());
+  Function *reachableFunction = program.lookupDefinedFunction("count_letters");
+  ASSERT_FALSE(reachableFunction->empty());
 
-  std::vector<std::unique_ptr<Testee>> testees;
-  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
-  auto mergedTestees = mergeTestees(testees);
+  std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions;
+  reachableFunctions.emplace_back(
+      make_unique<ReachableFunction>(reachableFunction, nullptr, 1));
+  auto functionsUnderTest = mergeReachableFunctions(reachableFunctions);
 
   std::vector<MutationPoint *> mutationPoints =
-      mutationsFinder.getMutationPoints(program, mergedTestees, filter);
+      mutationsFinder.getMutationPoints(program, functionsUnderTest, filter);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -90,9 +91,9 @@ TEST(SQLiteReporter, integrationTest) {
   mutatedTestExecutionResult.stdoutOutput = "mutatedTestExecutionResult.STDOUT";
   mutatedTestExecutionResult.stderrOutput = "mutatedTestExecutionResult.STDERR";
 
-  auto mutationResult =
-      make_unique<MutationResult>(mutatedTestExecutionResult, mutationPoint,
-                                  testees.front()->getDistance(), &test);
+  auto mutationResult = make_unique<MutationResult>(
+      mutatedTestExecutionResult, mutationPoint,
+      reachableFunctions.front()->getDistance(), &test);
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
   mutationResults.push_back(std::move(mutationResult));
@@ -430,15 +431,16 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
 
   auto &test = tests.front();
 
-  Function *testeeFunction = program.lookupDefinedFunction("count_letters");
-  ASSERT_FALSE(testeeFunction->empty());
+  Function *reachableFunction = program.lookupDefinedFunction("count_letters");
+  ASSERT_FALSE(reachableFunction->empty());
 
-  std::vector<std::unique_ptr<Testee>> testees;
-  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
-  auto mergedTestees = mergeTestees(testees);
+  std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions;
+  reachableFunctions.emplace_back(
+      make_unique<ReachableFunction>(reachableFunction, nullptr, 1));
+  auto functionsUnderTest = mergeReachableFunctions(reachableFunctions);
 
   std::vector<MutationPoint *> mutationPoints =
-      mutationsFinder.getMutationPoints(program, mergedTestees, filter);
+      mutationsFinder.getMutationPoints(program, functionsUnderTest, filter);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -461,9 +463,9 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
 
-  auto mutationResult =
-      make_unique<MutationResult>(mutatedTestExecutionResult, mutationPoint,
-                                  testees.front()->getDistance(), &test);
+  auto mutationResult = make_unique<MutationResult>(
+      mutatedTestExecutionResult, mutationPoint,
+      reachableFunctions.front()->getDistance(), &test);
   mutationResults.push_back(std::move(mutationResult));
 
   MetricsMeasure resultTime;
@@ -565,15 +567,16 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   auto tests = testFinder.findTests(program, filter);
   auto &test = *tests.begin();
 
-  Function *testeeFunction = program.lookupDefinedFunction("count_letters");
-  ASSERT_FALSE(testeeFunction->empty());
+  Function *reachableFunction = program.lookupDefinedFunction("count_letters");
+  ASSERT_FALSE(reachableFunction->empty());
 
-  std::vector<std::unique_ptr<Testee>> testees;
-  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
-  auto mergedTestees = mergeTestees(testees);
+  std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions;
+  reachableFunctions.emplace_back(
+      make_unique<ReachableFunction>(reachableFunction, nullptr, 1));
+  auto functionsUnderTest = mergeReachableFunctions(reachableFunctions);
 
   std::vector<MutationPoint *> mutationPoints =
-      mutationsFinder.getMutationPoints(program, mergedTestees, filter);
+      mutationsFinder.getMutationPoints(program, functionsUnderTest, filter);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -596,9 +599,9 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
 
-  auto mutationResult =
-      make_unique<MutationResult>(mutatedTestExecutionResult, mutationPoint,
-                                  testees.front()->getDistance(), &test);
+  auto mutationResult = make_unique<MutationResult>(
+      mutatedTestExecutionResult, mutationPoint,
+      reachableFunctions.front()->getDistance(), &test);
   mutationResults.push_back(std::move(mutationResult));
 
   MetricsMeasure resultTime;

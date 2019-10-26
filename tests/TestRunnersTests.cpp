@@ -5,9 +5,9 @@
 #include "mull/Filter.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Program/Program.h"
+#include "mull/ReachableFunction.h"
 #include "mull/TestFrameworks/NativeTestRunner.h"
 #include "mull/TestFrameworks/SimpleTest/SimpleTestFinder.h"
-#include "mull/Testee.h"
 #include "mull/Toolchain/Compiler.h"
 #include "mull/Toolchain/JITEngine.h"
 #include "mull/Toolchain/Toolchain.h"
@@ -60,13 +60,14 @@ TEST(NativeTestRunner, runTest) {
   MutationsFinder mutationsFinder(std::move(mutators), configuration);
   Filter filter;
 
-  Function *testeeFunction = program.lookupDefinedFunction("count_letters");
-  std::vector<std::unique_ptr<Testee>> testees;
-  testees.emplace_back(make_unique<Testee>(testeeFunction, nullptr, 1));
-  auto mergedTestees = mergeTestees(testees);
+  Function *reachableFunction = program.lookupDefinedFunction("count_letters");
+  std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions;
+  reachableFunctions.emplace_back(
+      make_unique<ReachableFunction>(reachableFunction, nullptr, 1));
+  auto functionsUnderTest = mergeReachableFunctions(reachableFunctions);
 
   std::vector<MutationPoint *> mutationPoints =
-      mutationsFinder.getMutationPoints(program, mergedTestees, filter);
+      mutationsFinder.getMutationPoints(program, functionsUnderTest, filter);
   for (auto point : mutationPoints) {
     point->getBitcode()->addMutation(point);
   }

@@ -2,7 +2,7 @@
 
 #include "mull/Instrumentation/Callbacks.h"
 #include "mull/Instrumentation/DynamicCallTree.h"
-#include "mull/Testee.h"
+#include "mull/ReachableFunction.h"
 
 #include <vector>
 
@@ -22,8 +22,8 @@ public:
   void recordFunctions(llvm::Module *originalModule);
   void insertCallbacks(llvm::Module *instrumentedModule);
 
-  std::vector<std::unique_ptr<Testee>> getTestees(Test &test, Filter &filter,
-                                                  int distance);
+  std::vector<std::unique_ptr<ReachableFunction>>
+  getReachableFunctions(Test &test, Filter &filter, int distance);
 
   void setupInstrumentationInfo(Test &test);
   void cleanupInstrumentationInfo(Test &test);

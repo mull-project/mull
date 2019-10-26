@@ -7,7 +7,7 @@
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Program/Program.h"
-#include "mull/Testee.h"
+#include "mull/ReachableFunction.h"
 
 #include <llvm/IR/Argument.h>
 #include <llvm/IR/BasicBlock.h>

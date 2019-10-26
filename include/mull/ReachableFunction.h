@@ -5,32 +5,32 @@
 namespace mull {
 class Test;
 
-class MergedTestee {
+class FunctionUnderTest {
 public:
-  explicit MergedTestee(llvm::Function *function, Test *test, int distance);
+  FunctionUnderTest(llvm::Function *function, Test *test, int distance);
   void addReachableTest(Test *test, int distance);
   const std::vector<std::pair<Test *, int>> &getReachableTests() const;
-  llvm::Function *getTesteeFunction() const;
+  llvm::Function *getFunction() const;
 
 private:
   std::vector<std::pair<Test *, int>> reachableTests;
   llvm::Function *function;
 };
 
-class Testee {
+class ReachableFunction {
 public:
-  Testee(llvm::Function *testeeFunction, Test *test, int distance);
-  llvm::Function *getTesteeFunction() const;
+  ReachableFunction(llvm::Function *function, Test *test, int distance);
+  llvm::Function *getFunction() const;
   Test *getTest() const;
   int getDistance() const;
 
 private:
-  llvm::Function *testeeFunction;
+  llvm::Function *function;
   Test *test;
   int distance;
 };
 
-std::vector<MergedTestee>
-mergeTestees(std::vector<std::unique_ptr<Testee>> &testees);
+std::vector<FunctionUnderTest> mergeReachableFunctions(
+    std::vector<std::unique_ptr<ReachableFunction>> &functions);
 
 } // namespace mull

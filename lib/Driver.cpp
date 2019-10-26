@@ -9,9 +9,9 @@
 #include "mull/MutationsFinder.h"
 #include "mull/Parallelization/Parallelization.h"
 #include "mull/Program/Program.h"
+#include "mull/ReachableFunction.h"
 #include "mull/Result.h"
 #include "mull/TestFrameworks/TestFramework.h"
-#include "mull/Testee.h"
 #include "mull/Toolchain/JITEngine.h"
 
 #include <llvm/Support/DynamicLibrary.h>
@@ -129,14 +129,14 @@ std::vector<MutationPoint *> Driver::findMutationPoints(vector<Test> &tests) {
                        testFramework.runner(), config, filter, jit);
   }
 
-  std::vector<std::unique_ptr<Testee>> testees;
-  TaskExecutor<OriginalTestExecutionTask> testRunner("Running original tests",
-                                                     tests, testees, tasks);
+  std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions;
+  TaskExecutor<OriginalTestExecutionTask> testRunner(
+      "Running original tests", tests, reachableFunctions, tasks);
   testRunner.execute();
 
-  auto mergedTestees = mergeTestees(testees);
+  auto functionsUnderTest = mergeReachableFunctions(reachableFunctions);
   std::vector<MutationPoint *> mutationPoints =
-      mutationsFinder.getMutationPoints(program, mergedTestees, filter);
+      mutationsFinder.getMutationPoints(program, functionsUnderTest, filter);
 
   {
     /// Cleans up the memory allocated for the vector itself as well

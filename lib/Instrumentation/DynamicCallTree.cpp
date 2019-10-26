@@ -1,7 +1,7 @@
 #include "mull/Instrumentation/DynamicCallTree.h"
 
+#include "mull/ReachableFunction.h"
 #include "mull/TestFrameworks/Test.h"
-#include "mull/Testee.h"
 
 #include <queue>
 #include <stack>
@@ -125,10 +125,11 @@ std::vector<CallTree *> DynamicCallTree::extractTestSubtrees(CallTree *root,
   return subtrees;
 }
 
-std::vector<std::unique_ptr<Testee>>
-DynamicCallTree::createTestees(std::vector<CallTree *> subtrees, Test &test,
-                               int maxDistance, Filter &filter) {
-  std::vector<std::unique_ptr<Testee>> testees;
+std::vector<std::unique_ptr<ReachableFunction>>
+DynamicCallTree::createReachableFunctions(std::vector<CallTree *> subtrees,
+                                          Test &test, int maxDistance,
+                                          Filter &filter) {
+  std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions;
 
   for (CallTree *root : subtrees) {
     const int offset = root->level;
@@ -145,9 +146,8 @@ DynamicCallTree::createTestees(std::vector<CallTree *> subtrees, Test &test,
       }
 
       int distance = node->level - offset;
-      std::unique_ptr<Testee> testee(
-          make_unique<Testee>(node->function, &test, distance));
-      testees.push_back(std::move(testee));
+      reachableFunctions.emplace_back(
+          make_unique<ReachableFunction>(node->function, &test, distance));
       if (distance < maxDistance) {
         for (std::unique_ptr<CallTree> &child : node->children) {
           nodes.push(child.get());
@@ -156,5 +156,5 @@ DynamicCallTree::createTestees(std::vector<CallTree *> subtrees, Test &test,
     }
   }
 
-  return testees;
+  return reachableFunctions;
 }

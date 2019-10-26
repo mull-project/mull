@@ -31,16 +31,16 @@ int main(int argc, char **argv) {
   mull::Configuration configuration;
   mull::MutationsFinder finder(std::move(mutators), configuration);
 
-  std::vector<mull::MergedTestee> testees;
+  std::vector<mull::FunctionUnderTest> functionsUnderTest;
   for (auto &bc : program.bitcode()) {
     for (auto &function : bc->getModule()->functions()) {
-      testees.emplace_back(&function, nullptr, 1);
+      functionsUnderTest.emplace_back(&function, nullptr, 1);
     }
   }
 
   mull::Filter filter;
 
-  auto mutants = finder.getMutationPoints(program, testees, filter);
+  auto mutants = finder.getMutationPoints(program, functionsUnderTest, filter);
 
   printf("Found %lu mutants\n", mutants.size());
 

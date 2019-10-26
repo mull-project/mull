@@ -1,6 +1,6 @@
 #include "mull/Instrumentation/DynamicCallTree.h"
+#include "mull/ReachableFunction.h"
 #include "mull/TestFrameworks/Test.h"
-#include "mull/Testee.h"
 
 #include "gtest/gtest.h"
 #include <llvm/IR/Function.h>
@@ -297,7 +297,7 @@ TEST(DynamicCallTree, test_subtrees) {
   EXPECT_EQ(root->function, F2);
 }
 
-TEST(DynamicCallTree, testees) {
+TEST(DynamicCallTree, reachableFunctions) {
   Function *phonyFunction = nullptr;
   Function *F1 = fakeFunction("F1");
   Function *F2 = fakeFunction("F2");
@@ -338,63 +338,65 @@ TEST(DynamicCallTree, testees) {
   Filter nullFilter;
 
   {
-    std::vector<std::unique_ptr<Testee>> testees =
-        DynamicCallTree::createTestees(subtrees, test, 5, nullFilter);
+    std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions =
+        DynamicCallTree::createReachableFunctions(subtrees, test, 5,
+                                                  nullFilter);
 
-    EXPECT_EQ(4U, testees.size());
+    EXPECT_EQ(4U, reachableFunctions.size());
 
-    Testee *testeeF2 = testees.begin()->get();
-    EXPECT_EQ(testeeF2->getTesteeFunction(), F2);
-    EXPECT_EQ(testeeF2->getDistance(), 0);
+    ReachableFunction *reachableF2 = reachableFunctions.begin()->get();
+    EXPECT_EQ(reachableF2->getFunction(), F2);
+    EXPECT_EQ(reachableF2->getDistance(), 0);
 
-    Testee *testeeF3 = (testees.begin() + 1)->get();
-    EXPECT_EQ(testeeF3->getTesteeFunction(), F3);
-    EXPECT_EQ(testeeF3->getDistance(), 1);
+    ReachableFunction *reachableF3 = (reachableFunctions.begin() + 1)->get();
+    EXPECT_EQ(reachableF3->getFunction(), F3);
+    EXPECT_EQ(reachableF3->getDistance(), 1);
 
-    Testee *testeeF4 = (testees.begin() + 2)->get();
-    EXPECT_EQ(testeeF4->getTesteeFunction(), F4);
-    EXPECT_EQ(testeeF4->getDistance(), 1);
+    ReachableFunction *reachableF4 = (reachableFunctions.begin() + 2)->get();
+    EXPECT_EQ(reachableF4->getFunction(), F4);
+    EXPECT_EQ(reachableF4->getDistance(), 1);
 
-    Testee *testeeF5 = (testees.begin() + 3)->get();
-    EXPECT_EQ(testeeF5->getTesteeFunction(), F5);
-    EXPECT_EQ(testeeF5->getDistance(), 2);
+    ReachableFunction *reachableF5 = (reachableFunctions.begin() + 3)->get();
+    EXPECT_EQ(reachableF5->getFunction(), F5);
+    EXPECT_EQ(reachableF5->getDistance(), 2);
   }
 
   {
-    std::vector<std::unique_ptr<Testee>> testees =
-        DynamicCallTree::createTestees(subtrees, test, 1, nullFilter);
-    EXPECT_EQ(3U, testees.size());
+    std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions =
+        DynamicCallTree::createReachableFunctions(subtrees, test, 1,
+                                                  nullFilter);
+    EXPECT_EQ(3U, reachableFunctions.size());
 
-    Testee *testeeF2 = testees.begin()->get();
-    EXPECT_EQ(testeeF2->getTesteeFunction(), F2);
-    EXPECT_EQ(testeeF2->getDistance(), 0);
+    ReachableFunction *reachableF2 = reachableFunctions.begin()->get();
+    EXPECT_EQ(reachableF2->getFunction(), F2);
+    EXPECT_EQ(reachableF2->getDistance(), 0);
 
-    Testee *testeeF3 = (testees.begin() + 1)->get();
-    EXPECT_EQ(testeeF3->getTesteeFunction(), F3);
-    EXPECT_EQ(testeeF3->getDistance(), 1);
+    ReachableFunction *reachableF3 = (reachableFunctions.begin() + 1)->get();
+    EXPECT_EQ(reachableF3->getFunction(), F3);
+    EXPECT_EQ(reachableF3->getDistance(), 1);
 
-    Testee *testeeF4 = (testees.begin() + 2)->get();
-    EXPECT_EQ(testeeF4->getTesteeFunction(), F4);
-    EXPECT_EQ(testeeF4->getDistance(), 1);
+    ReachableFunction *reachableF4 = (reachableFunctions.begin() + 2)->get();
+    EXPECT_EQ(reachableF4->getFunction(), F4);
+    EXPECT_EQ(reachableF4->getDistance(), 1);
   }
 
   {
     Filter filter;
     filter.skipByName("F5");
-    std::vector<std::unique_ptr<Testee>> testees =
-        DynamicCallTree::createTestees(subtrees, test, 5, filter);
-    EXPECT_EQ(3U, testees.size());
+    std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions =
+        DynamicCallTree::createReachableFunctions(subtrees, test, 5, filter);
+    EXPECT_EQ(3U, reachableFunctions.size());
 
-    Testee *testeeF2 = testees.begin()->get();
-    EXPECT_EQ(testeeF2->getTesteeFunction(), F2);
-    EXPECT_EQ(testeeF2->getDistance(), 0);
+    ReachableFunction *reachableF2 = reachableFunctions.begin()->get();
+    EXPECT_EQ(reachableF2->getFunction(), F2);
+    EXPECT_EQ(reachableF2->getDistance(), 0);
 
-    Testee *testeeF3 = (testees.begin() + 1)->get();
-    EXPECT_EQ(testeeF3->getTesteeFunction(), F3);
-    EXPECT_EQ(testeeF3->getDistance(), 1);
+    ReachableFunction *reachableF3 = (reachableFunctions.begin() + 1)->get();
+    EXPECT_EQ(reachableF3->getFunction(), F3);
+    EXPECT_EQ(reachableF3->getDistance(), 1);
 
-    Testee *testeeF4 = (testees.begin() + 2)->get();
-    EXPECT_EQ(testeeF4->getTesteeFunction(), F4);
-    EXPECT_EQ(testeeF4->getDistance(), 1);
+    ReachableFunction *reachableF4 = (reachableFunctions.begin() + 2)->get();
+    EXPECT_EQ(reachableF4->getFunction(), F4);
+    EXPECT_EQ(reachableF4->getDistance(), 1);
   }
 }

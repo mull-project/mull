@@ -3,14 +3,14 @@
 #include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Filter.h"
+#include "mull/MutationPoint.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/AndOrReplacementMutator.h"
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "mull/Mutators/ReplaceCallMutator.h"
 #include "mull/Mutators/ScalarValueMutator.h"
 #include "mull/Program/Program.h"
-#include "mull/Testee.h"
-#include "mull/MutationPoint.h"
+#include "mull/ReachableFunction.h"
 
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/IR/InstIterator.h>
