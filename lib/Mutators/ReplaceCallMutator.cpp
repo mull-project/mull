@@ -34,6 +34,9 @@ std::vector<MutationPoint *> ReplaceCallMutator::getMutations(
   std::vector<MutationPoint *> mutations;
 
   for (auto &instruction : instructions(function)) {
+    if (!instructionFilter.validMutation(instruction)) {
+      continue;
+    }
     for (auto &llMutation : lowLevelMutators) {
       if (llMutation->canMutate(&instruction)) {
         CallSite callSite(&instruction);

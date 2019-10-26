@@ -70,9 +70,9 @@ NegateConditionMutator::getMutations(Bitcode *bitcode,
   std::vector<MutationPoint *> mutations;
 
   for (auto &instruction : instructions(function)) {
-    llvm::errs() << "\n";
-    instruction.print(llvm::errs(), true);
-    llvm::errs() << "\n";
+    if (!instructionFilter.validMutation(instruction)) {
+      continue;
+    }
 
     for (auto &llMutation : lowLevelMutators) {
       if (llMutation->canMutate(&instruction)) {

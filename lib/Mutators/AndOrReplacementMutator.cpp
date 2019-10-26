@@ -597,6 +597,10 @@ std::vector<MutationPoint *> AndOrReplacementMutator::getMutations(
   std::vector<MutationPoint *> mutations;
 
   for (auto &instruction : instructions(function)) {
+    if (!instructionFilter.validMutation(instruction)) {
+      continue;
+    }
+
     AND_OR_MutationType mutationType = findPossibleMutation(instruction);
     if (mutationType == AND_OR_MutationType_None) {
       continue;

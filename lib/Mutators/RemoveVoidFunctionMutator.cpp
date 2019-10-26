@@ -36,6 +36,9 @@ RemoveVoidFunctionMutator::getMutations(Bitcode *bitcode,
   std::vector<MutationPoint *> mutations;
 
   for (auto &instruction : instructions(function)) {
+    if (!instructionFilter.validMutation(instruction)) {
+      continue;
+    }
     for (auto &llMutation : lowLevelMutators) {
       if (llMutation->canMutate(&instruction)) {
         CallSite callSite = CallSite(&instruction);
