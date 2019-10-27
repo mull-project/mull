@@ -2,6 +2,7 @@
 gitref: master
 repo_url: https://github.com/mull-project/mull.git
 working_dir: /opt
+SDKROOT: /
 
 llvm_mapping:
   macos:
@@ -81,4 +82,3 @@ skip_package: false
 
 # Overriden by FreeBSD playbook
 make_program: make
-

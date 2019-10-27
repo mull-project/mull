@@ -26,6 +26,7 @@ jobs:
             -e gitref=$GITHUB_SHA \
             -e host=localhost \
             -e skip_package=true \
+            -e SDKROOT=`xcrun -show-sdk-path` \
             --verbose
       - name: Run Ubuntu
         if: matrix.os == 'ubuntu-18.04'

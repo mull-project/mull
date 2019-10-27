@@ -31,12 +31,6 @@
     - name: Prepare Working Directory
       include: helpers/working-directory.yaml
 
-    - name: Install headers into /usr/include
-      command: installer -pkg /Library/Developer/CommandLineTools/Packages/macOS_SDK_headers_for_macOS_10.14.pkg -target /
-      args:
-        creates: /usr/include
-      become: true
-
     - name: Install Required Packages
       homebrew:
         name: "{{ packages }}"
