@@ -33,7 +33,7 @@
       - cmake
       - -G
       - Ninja
-      - -DCMAKE_CXX_FLAGS=-fembed-bitcode -nostdinc++ -isystem {{ llvm_dir }}/include/c++/v1 -isystem {{ llvm_dir }}/lib/clang/{{ llvm_version }}/include
+      - -DCMAKE_CXX_FLAGS=-fembed-bitcode --sysroot={{ SDKROOT }} -nostdinc++ -isystem {{ llvm_dir }}/include/c++/v1 -isystem {{ llvm_dir }}/lib/clang/{{ llvm_version }}/include
       - -DCMAKE_EXE_LINKER_FLAGS=-lc++ -L {{ llvm_dir }}/lib
       - -DCMAKE_BUILD_TYPE=Debug
       - -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
@@ -67,7 +67,7 @@
       - -ld_search_path=/lib/x86_64-linux-gnu
       - -ld_search_path=/usr/lib/x86_64-linux-gnu
       - -ld_search_path={{ llvm_dir }}/lib
-      - -compilation-flags=-isystem {{ llvm_dir }}/include/c++/v1 -isystem {{ llvm_dir }}/lib/clang/{{ llvm_version }}/include
+      - -compilation-flags=--sysroot={{ SDKROOT }} -isystem {{ llvm_dir }}/include/c++/v1 -isystem {{ llvm_dir }}/lib/clang/{{ llvm_version }}/include
       - -compdb-path={{ working_dir }}/integration/fmt.build.dir/compile_commands.json
       - "{{ working_dir }}/integration/fmt.build.dir/bin/core-test"
   environment:
@@ -85,7 +85,7 @@
     state: directory
 
 - name: Prepare build system for OpenSSL (no-shared)
-  command: ./config -no-asm -no-shared -g -O0 -fembed-bitcode
+  command: ./config -no-asm -no-shared -g -O0 -fembed-bitcode --sysroot={{ SDKROOT }}
   args:
     chdir: "{{ working_dir }}/integration/openssl-no-shared"
     creates: "{{ working_dir }}/integration/openssl-no-shared/Makefile"
