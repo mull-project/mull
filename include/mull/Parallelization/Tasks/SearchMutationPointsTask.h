@@ -2,7 +2,7 @@
 
 #include "mull/MutationPoint.h"
 #include "mull/Mutators/Mutator.h"
-#include "mull/Testee.h"
+#include "mull/ReachableFunction.h"
 
 namespace mull {
 
@@ -12,7 +12,7 @@ class progress_counter;
 
 class SearchMutationPointsTask {
 public:
-  using In = const std::vector<MergedTestee>;
+  using In = const std::vector<FunctionUnderTest>;
   using Out = std::vector<std::unique_ptr<MutationPoint>>;
   using iterator = In::const_iterator;
 

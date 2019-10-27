@@ -35,7 +35,7 @@ set(mull_sources
   MutationPoint.cpp
   TestFrameworks/TestRunner.cpp
   TestFrameworks/Test.cpp
-  Testee.cpp
+  ReachableFunction.cpp
 
 
   TestFrameworks/SimpleTest/SimpleTestFinder.cpp

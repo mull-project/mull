@@ -3,7 +3,7 @@
 #include "mull/Config/Configuration.h"
 #include "mull/Parallelization/Parallelization.h"
 #include "mull/Program/Program.h"
-#include "mull/Testee.h"
+#include "mull/ReachableFunction.h"
 
 using namespace mull;
 using namespace llvm;
@@ -14,7 +14,7 @@ MutationsFinder::MutationsFinder(std::vector<std::unique_ptr<Mutator>> mutators,
 
 std::vector<MutationPoint *>
 MutationsFinder::getMutationPoints(const Program &program,
-                                   std::vector<MergedTestee> &testees,
+                                   std::vector<FunctionUnderTest> &functions,
                                    Filter &filter) {
   std::vector<SearchMutationPointsTask> tasks;
   tasks.reserve(config.parallelization.workers);
@@ -23,7 +23,7 @@ MutationsFinder::getMutationPoints(const Program &program,
   }
 
   TaskExecutor<SearchMutationPointsTask> finder(
-      "Searching mutants across functions", testees, ownedPoints, tasks);
+      "Searching mutants across functions", functions, ownedPoints, tasks);
   finder.execute();
 
   std::vector<MutationPoint *> mutationPoints;

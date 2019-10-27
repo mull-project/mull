@@ -58,16 +58,17 @@ void Instrumentation::insertCallbacks(llvm::Module *instrumentedModule) {
   }
 }
 
-std::vector<std::unique_ptr<Testee>>
-Instrumentation::getTestees(Test &test, Filter &filter, int distance) {
+std::vector<std::unique_ptr<ReachableFunction>>
+Instrumentation::getReachableFunctions(Test &test, Filter &filter,
+                                       int distance) {
   auto &mapping = test.getInstrumentationInfo().callTreeMapping;
 
   auto callTree = DynamicCallTree::createCallTree(mapping, functions);
   auto subtrees = DynamicCallTree::extractTestSubtrees(callTree.get(), test);
-  auto testees =
-      DynamicCallTree::createTestees(subtrees, test, distance, filter);
+  auto functionsUnderTest = DynamicCallTree::createReachableFunctions(
+      subtrees, test, distance, filter);
 
-  return testees;
+  return functionsUnderTest;
 }
 
 void Instrumentation::setupInstrumentationInfo(Test &test) {

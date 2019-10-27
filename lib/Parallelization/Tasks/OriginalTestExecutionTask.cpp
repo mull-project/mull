@@ -33,10 +33,11 @@ void OriginalTestExecutionTask::operator()(iterator begin, iterator end,
 
     test.setExecutionResult(testExecutionResult);
 
-    std::vector<std::unique_ptr<Testee>> testees;
+    std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions;
 
     if (testExecutionResult.status == Passed) {
-      testees = instrumentation.getTestees(test, filter, config.maxDistance);
+      reachableFunctions = instrumentation.getReachableFunctions(
+          test, filter, config.maxDistance);
     } else {
       std::stringstream failureMessage;
       failureMessage << "\n";
@@ -52,11 +53,12 @@ void OriginalTestExecutionTask::operator()(iterator begin, iterator end,
     }
     instrumentation.cleanupInstrumentationInfo(test);
 
-    if (testees.empty()) {
+    if (reachableFunctions.empty()) {
       continue;
     }
 
-    for (auto it = std::next(testees.begin()); it != testees.end(); ++it) {
+    for (auto it = std::next(reachableFunctions.begin());
+         it != reachableFunctions.end(); ++it) {
       storage.push_back(std::move(*it));
     }
   }

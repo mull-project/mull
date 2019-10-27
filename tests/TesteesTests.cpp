@@ -1,11 +1,11 @@
 #include "FixturePaths.h"
 #include "mull/BitcodeLoader.h"
-#include "mull/Testee.h"
+#include "mull/ReachableFunction.h"
 #include "gtest/gtest.h"
 
 using namespace mull;
 
-TEST(Testees, mergeTestees) {
+TEST(FunctionsUnderTest, mergeReachableFunctions) {
   llvm::LLVMContext llvmContext;
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
@@ -13,18 +13,21 @@ TEST(Testees, mergeTestees) {
 
   auto &allFunctions = bitcode->getModule()->getFunctionList();
 
-  std::vector<std::unique_ptr<Testee>> allTestees;
+  std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions;
   for (auto &func : allFunctions) {
-    allTestees.push_back(llvm::make_unique<Testee>(&func, nullptr, 1));
-    allTestees.push_back(llvm::make_unique<Testee>(&func, nullptr, 2));
-    allTestees.push_back(llvm::make_unique<Testee>(&func, nullptr, 3));
+    reachableFunctions.push_back(
+        llvm::make_unique<ReachableFunction>(&func, nullptr, 1));
+    reachableFunctions.push_back(
+        llvm::make_unique<ReachableFunction>(&func, nullptr, 2));
+    reachableFunctions.push_back(
+        llvm::make_unique<ReachableFunction>(&func, nullptr, 3));
   }
 
-  auto mergedTestees = mergeTestees(allTestees);
+  auto functionsUnderTest = mergeReachableFunctions(reachableFunctions);
 
-  ASSERT_EQ(allFunctions.size(), mergedTestees.size());
+  ASSERT_EQ(allFunctions.size(), functionsUnderTest.size());
 
-  for (auto &merged : mergedTestees) {
+  for (auto &merged : functionsUnderTest) {
     ASSERT_EQ(size_t(3), merged.getReachableTests().size());
   }
 }

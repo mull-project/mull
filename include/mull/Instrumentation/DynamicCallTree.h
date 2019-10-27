@@ -11,7 +11,7 @@
 namespace mull {
 
 class Test;
-class Testee;
+class ReachableFunction;
 
 struct CallTree {
   llvm::Function *function;
@@ -38,13 +38,13 @@ public:
   createCallTree(uint32_t *mapping, std::vector<CallTreeFunction> functions);
   static std::vector<CallTree *> extractTestSubtrees(CallTree *root,
                                                      Test &test);
-  static std::vector<std::unique_ptr<Testee>>
-  createTestees(std::vector<CallTree *> subtrees, Test &test, int maxDistance,
-                Filter &filter);
+  static std::vector<std::unique_ptr<ReachableFunction>>
+  createReachableFunctions(std::vector<CallTree *> subtrees, Test &test,
+                           int maxDistance, Filter &filter);
 
-  static void enterFunction(const uint32_t functionIndex, uint32_t *mapping,
+  static void enterFunction(uint32_t functionIndex, uint32_t *mapping,
                             std::stack<uint32_t> &stack);
-  static void leaveFunction(const uint32_t functionIndex, uint32_t *mapping,
+  static void leaveFunction(uint32_t functionIndex, uint32_t *mapping,
                             std::stack<uint32_t> &stack);
 };
 
