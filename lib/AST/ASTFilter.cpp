@@ -59,12 +59,6 @@ bool ASTFilter::validScalarMutation(llvm::Instruction &instruction) const {
     return false;
   }
 
-  /// TODO: we might want to reconsider this because some mutations can be
-  /// part of this instruction.
-  if (llvm::dyn_cast<llvm::GetElementPtrInst>(&instruction)) {
-    return false;
-  }
-
   int line = debugInfo.getLine();
   int column = debugInfo.getCol();
 
@@ -77,6 +71,19 @@ bool ASTFilter::validScalarMutation(llvm::Instruction &instruction) const {
 
   if (line <= 0 || column <= 0) {
     // TODO: STAN What is here?
+    return false;
+  }
+
+  /// TODO: we might want to reconsider this because some mutations can be
+  /// part of this instruction.
+  if (llvm::dyn_cast<llvm::GetElementPtrInst>(&instruction)) {
+    return false;
+  }
+
+  // TODO: For now we are not aware of the valid AST mutations that result in
+  // the following instructions.
+  if (llvm::dyn_cast<llvm::SExtInst>(&instruction) ||
+      llvm::dyn_cast<llvm::LoadInst>(&instruction)) {
     return false;
   }
 

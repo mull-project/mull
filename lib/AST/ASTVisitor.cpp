@@ -36,11 +36,10 @@ static bool isConstant(clang::Stmt *statement) {
   return false;
 }
 
-static bool
-findPotentialMutableParentStmt(const clang::Stmt *statement,
-                               clang::ASTContext &astContext,
-                               clang::SourceManager &sourceManager,
-                               clang::SourceLocation *mutationLocation) {
+static bool findPotentialMutableParentStmt(
+    const clang::Stmt *statement, clang::ASTContext &astContext,
+    clang::SourceManager &sourceManager,
+    clang::SourceLocation *mutationLocation, ASTNodeType *astNodeType) {
   assert(mutationLocation);
 
   for (auto &parent : astContext.getParents(*statement)) {
@@ -50,36 +49,40 @@ findPotentialMutableParentStmt(const clang::Stmt *statement,
     if (const clang::BinaryOperator *binaryOpParent =
             parent.get<clang::BinaryOperator>()) {
       *mutationLocation = binaryOpParent->getOperatorLoc();
+      *astNodeType = ASTNodeType::BINARY_OPERATOR;
       return true;
     }
 
     if (const clang::ReturnStmt *returnParent =
             parent.get<clang::ReturnStmt>()) {
       *mutationLocation = returnParent->getBeginLoc();
+      *astNodeType = ASTNodeType::RETURN_STATEMENT;
       return true;
     }
 
     if (const clang::CXXMemberCallExpr *callExpr =
             parent.get<clang::CXXMemberCallExpr>()) {
       *mutationLocation = callExpr->getExprLoc();
+      *astNodeType = ASTNodeType::CXX_MEMBER_CALL_EXPRESSION;
       return true;
     }
 
     if (const clang::CallExpr *callExpr = parent.get<clang::CallExpr>()) {
       *mutationLocation = callExpr->getBeginLoc();
+      *astNodeType = ASTNodeType::CALL_EXPRESSION;
       return true;
     }
 
     if (const clang::ImplicitCastExpr *castExpr =
             parent.get<clang::ImplicitCastExpr>()) {
       return findPotentialMutableParentStmt(castExpr, astContext, sourceManager,
-                                            mutationLocation);
+                                            mutationLocation, astNodeType);
     }
 
     if (const clang::CStyleCastExpr *castExpr =
             parent.get<clang::CStyleCastExpr>()) {
       return findPotentialMutableParentStmt(castExpr, astContext, sourceManager,
-                                            mutationLocation);
+                                            mutationLocation, astNodeType);
     }
 
     // TODO: Not implemented
@@ -94,6 +97,7 @@ findPotentialMutableParentStmt(const clang::Stmt *statement,
       for (auto &member : cxxConstructorDecl->inits()) {
         if (member->getInit() == statement) {
           *mutationLocation = member->getMemberLocation();
+          *astNodeType = ASTNodeType::CXX_CONSTRUCTOR_DECLARATION;
           return true;
         }
       }
@@ -101,13 +105,23 @@ findPotentialMutableParentStmt(const clang::Stmt *statement,
 
     if (const clang::VarDecl *varDecl = parent.get<clang::VarDecl>()) {
       *mutationLocation = varDecl->getLocation();
+      *astNodeType = ASTNodeType::VARIABLE_DECLARATION;
       return true;
     }
 
     if (const clang::CXXTemporaryObjectExpr *cxxTemporaryObjectExpr =
             parent.get<clang::CXXTemporaryObjectExpr>()) {
       *mutationLocation = cxxTemporaryObjectExpr->getExprLoc();
+      *astNodeType = ASTNodeType::CXX_TEMPORARY_OBJECT_EXPRESSION;
       return true;
+    }
+
+    // TODO: Not implemented on the LLVM IR level.
+    if (const clang::ArraySubscriptExpr *arraySubscriptExpr =
+      parent.get<clang::ArraySubscriptExpr>()) {
+      *mutationLocation = arraySubscriptExpr->getExprLoc();
+      *astNodeType = ASTNodeType::ARRAY_SUBSCRIPT_EXPRESSION;
+      return false;
     }
 
     // TODO: Not implemented
@@ -159,7 +173,9 @@ bool ASTVisitor::VisitBinaryOperator(clang::BinaryOperator *binaryOperator) {
     return true;
   }
 
-  saveMutationPoint(binaryOperator, beginLocation);
+  // TODO: difference with AND-OR!
+  saveMutationPoint(ASTMutationType::BINARY, ASTNodeType::BINARY_OPERATOR,
+                    binaryOperator, beginLocation);
 
   return true;
 }
@@ -197,7 +213,9 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
 
   if ((traverseMask & mull::TraverseMask::REPLACE_CALL) != 0) {
     if (clang::isa<clang::CallExpr>(expr)) {
-      saveMutationPoint(expr, expr->getBeginLoc());
+      saveMutationPoint(ASTMutationType::REPLACE_CALL,
+                        ASTNodeType::CALL_EXPRESSION, expr,
+                        expr->getBeginLoc());
 
       return true;
     }
@@ -208,17 +226,23 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
       return true;
     }
 
-    if (clang::DeclRefExpr *declRefExpr = clang::dyn_cast<clang::DeclRefExpr>(expr)) {
+    if (clang::DeclRefExpr *declRefExpr =
+            clang::dyn_cast<clang::DeclRefExpr>(expr)) {
       for (auto &parent : astUnit.getASTContext().getParents(*declRefExpr)) {
-        if (const clang::UnaryOperator *unaryOperator = parent.get<clang::UnaryOperator>()) {
+        if (const clang::UnaryOperator *unaryOperator =
+                parent.get<clang::UnaryOperator>()) {
           if (clang::Expr *subExpr = unaryOperator->getSubExpr()) {
-            saveMutationPoint(unaryOperator, subExpr->getExprLoc());
+            saveMutationPoint(ASTMutationType::NEGATE,
+                              ASTNodeType::UNARY_OPERATOR, unaryOperator,
+                              subExpr->getExprLoc());
           }
           return true;
         }
       }
 
-      saveMutationPoint(declRefExpr, declRefExpr->getExprLoc());
+      // TODO does this have to be here? CALL_EXPRESSION?
+      saveMutationPoint(ASTMutationType::NEGATE, ASTNodeType::CALL_EXPRESSION,
+                        declRefExpr, declRefExpr->getExprLoc());
     }
 
     return true;
@@ -236,11 +260,14 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
     /// constant location.
 
     clang::SourceLocation mutationLocation;
+    ASTNodeType astNodeType;
     bool foundMutableParent = findPotentialMutableParentStmt(
-        expr, astUnit.getASTContext(), sourceManager, &mutationLocation);
+        expr, astUnit.getASTContext(), sourceManager, &mutationLocation,
+        &astNodeType);
 
     if (foundMutableParent) {
-      saveMutationPoint(expr, mutationLocation);
+      saveMutationPoint(ASTMutationType::SCALAR, astNodeType, expr,
+                        mutationLocation);
       return true;
     }
 
@@ -255,7 +282,9 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
     if ((traverseMask & mull::TraverseMask::VOID_CALL) != 0) {
       auto *type = callExpr->getType().getTypePtrOrNull();
       if (type && type->isVoidType()) {
-        saveMutationPoint(callExpr, callExpr->getBeginLoc());
+        saveMutationPoint(ASTMutationType::REMOVE_VOID,
+                          ASTNodeType::CALL_EXPRESSION, callExpr,
+                          callExpr->getBeginLoc());
       }
       return true;
     }
@@ -269,7 +298,9 @@ void ASTVisitor::traverse() {
   TraverseDecl(context.getTranslationUnitDecl());
 }
 
-void ASTVisitor::saveMutationPoint(const clang::Stmt *stmt,
+void ASTVisitor::saveMutationPoint(ASTMutationType mutationType,
+                                   ASTNodeType nodeType,
+                                   const clang::Stmt *stmt,
                                    clang::SourceLocation location) {
 
   int beginColumn = sourceManager.getExpansionColumnNumber(location);
@@ -291,5 +322,6 @@ void ASTVisitor::saveMutationPoint(const clang::Stmt *stmt,
     exit(1);
   }
 
-  mutations.saveExpr(sourceFilePath, stmt, beginLine, beginColumn);
+  mutations.saveExpr(sourceFilePath, mutationType, nodeType, stmt, beginLine,
+                     beginColumn);
 }

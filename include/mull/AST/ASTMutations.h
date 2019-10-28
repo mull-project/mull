@@ -33,8 +33,9 @@ public:
 
   void dump() const;
 
-  void saveExpr(std::string &sourceFile, const clang::Stmt *const expression,
-                int line, int column);
+  void saveExpr(std::string &sourceFile, ASTMutationType mutationType,
+                ASTNodeType nodeType,
+                const clang::Stmt *const expression, int line, int column);
 };
 
 } // namespace mull
