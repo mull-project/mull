@@ -3,10 +3,11 @@
 #include "TestModuleFactory.h"
 #include "mull/BitcodeLoader.h"
 #include "mull/MutationPoint.h"
+#include "mull/ReachableFunction.h"
 
-#include <llvm/IR/LLVMContext.h>
 #include <gtest/gtest.h>
 #include <irm/irm.h>
+#include <llvm/IR/LLVMContext.h>
 
 using namespace mull;
 using namespace llvm;
@@ -18,8 +19,9 @@ TEST(ScalarValueMutator, getMutationPoint) {
       fixtures::mutators_scalar_value_module_bc_path(), context);
 
   ScalarValueMutator mutator;
-  auto mutants = mutator.getMutations(
-      bitcode.get(), bitcode->getModule()->getFunction("scalar_value"));
+  FunctionUnderTest functionUnderTest(
+      bitcode->getModule()->getFunction("scalar_value"), nullptr, 0);
+  auto mutants = mutator.getMutations(bitcode.get(), functionUnderTest);
 
   ASSERT_EQ(mutants.size(), 4U);
 

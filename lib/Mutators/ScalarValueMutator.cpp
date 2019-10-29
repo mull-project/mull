@@ -1,5 +1,6 @@
 #include "mull/Mutators/ScalarValueMutator.h"
 #include "mull/MutationPoint.h"
+#include "mull/ReachableFunction.h"
 #include <irm/irm.h>
 #include <llvm/IR/InstIterator.h>
 
@@ -28,13 +29,13 @@ void ScalarValueMutator::applyMutation(llvm::Function *function,
 }
 
 std::vector<MutationPoint *>
-ScalarValueMutator::getMutations(Bitcode *bitcode, llvm::Function *function) {
+ScalarValueMutator::getMutations(Bitcode *bitcode,
+                                 const FunctionUnderTest &function) {
   assert(bitcode);
-  assert(function);
 
   std::vector<MutationPoint *> mutations;
 
-  for (auto &instruction : instructions(function)) {
+  for (auto &instruction : instructions(function.getFunction())) {
     for (auto &llMutation : lowLevelMutators) {
       if (llMutation->canMutate(&instruction)) {
         std::string diagnostics = "Replacing scalar with 0 or 42";

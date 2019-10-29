@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Mutator.h"
-
 #include <vector>
 
 enum AND_OR_MutationType {
@@ -29,6 +28,7 @@ namespace mull {
 class Bitcode;
 class MutationPoint;
 class MutationPointAddress;
+class ReachableFunction;
 
 class AndOrReplacementMutator : public Mutator {
 
@@ -69,7 +69,7 @@ public:
                      const MutationPointAddress &address,
                      irm::IRMutation *lowLevelMutation) override;
 
-  std::vector<MutationPoint *> getMutations(Bitcode *bitcode,
-                                            llvm::Function *function) override;
+  std::vector<MutationPoint *>
+  getMutations(Bitcode *bitcode, const FunctionUnderTest &function) override;
 };
 } // namespace mull

@@ -3,20 +3,10 @@
 #include "FixturePaths.h"
 #include "mull/BitcodeLoader.h"
 #include "mull/Mutators/Mutator.h"
+#include "mull/ReachableFunction.h"
 
 #include <gtest/gtest.h>
-#include <irm/irm.h>
-#include <llvm/IR/Argument.h>
-#include <llvm/IR/BasicBlock.h>
-#include <llvm/IR/Constants.h>
-#include <llvm/IR/DerivedTypes.h>
-#include <llvm/IR/Function.h>
-#include <llvm/IR/InstrTypes.h>
-#include <llvm/IR/Instructions.h>
 #include <llvm/IR/LLVMContext.h>
-#include <llvm/IR/Module.h>
-#include <llvm/IR/Type.h>
-#include <llvm/IR/Value.h>
 
 using namespace mull;
 using namespace llvm;
@@ -30,7 +20,8 @@ TEST(RemoveVoidFunctionMutator, getMutationPoints) {
   RemoveVoidFunctionMutator mutator;
   std::vector<MutationPoint *> mutants;
   for (auto &function : bitcode->getModule()->functions()) {
-    auto points = mutator.getMutations(bitcode.get(), &function);
+    FunctionUnderTest functionUnderTest(&function, nullptr, 0);
+    auto points = mutator.getMutations(bitcode.get(), functionUnderTest);
     std::copy(points.begin(), points.end(), std::back_inserter(mutants));
   }
 

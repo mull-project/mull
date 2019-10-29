@@ -11,9 +11,7 @@ class Instruction;
 } // namespace llvm
 
 namespace irm {
-
 class IRMutation;
-
 }
 
 namespace mull {
@@ -21,6 +19,7 @@ namespace mull {
 class Bitcode;
 class MutationPoint;
 class MutationPointAddress;
+class FunctionUnderTest;
 struct SourceLocation;
 
 enum class MutatorKind {
@@ -91,7 +90,7 @@ public:
                              const MutationPointAddress &address,
                              irm::IRMutation *lowLevelMutation) = 0;
   virtual std::vector<MutationPoint *>
-  getMutations(Bitcode *bitcode, llvm::Function *function) = 0;
+  getMutations(Bitcode *bitcode, const FunctionUnderTest &function) = 0;
 
   virtual ~Mutator() = default;
 };

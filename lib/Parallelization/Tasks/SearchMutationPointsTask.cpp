@@ -27,7 +27,7 @@ void SearchMutationPointsTask::operator()(iterator begin, iterator end,
     Bitcode *bitcode = program.bitcodeWithIdentifier(moduleID);
 
     for (auto &mutator : mutators) {
-      auto mutants = mutator->getMutations(bitcode, function);
+      auto mutants = mutator->getMutations(bitcode, functionUnderTest);
       for (auto mutant : mutants) {
         for (auto &reachableTest : functionUnderTest.getReachableTests()) {
           mutant->addReachableTest(reachableTest.first, reachableTest.second);

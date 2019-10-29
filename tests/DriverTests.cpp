@@ -20,8 +20,8 @@
 #include "mull/Toolchain/Mangler.h"
 #include "mull/Toolchain/Toolchain.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
-#include <mull/Mutators/CXX/RelationalMutators.h>
 #include <mull/Mutators/CXX/NumberMutators.h>
+#include <mull/Mutators/CXX/RelationalMutators.h>
 
 #include <functional>
 
