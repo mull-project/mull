@@ -7,7 +7,6 @@
 #include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Config/RawConfig.h"
-#include "mull/Filter.h"
 #include "mull/JunkDetection/CXX/ASTStorage.h"
 #include "mull/Metrics/Metrics.h"
 #include "mull/MutationsFinder.h"
@@ -72,10 +71,9 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<cxx::AddToSub>());
   MutationsFinder mutationsFinder(std::move(mutators), configuration);
-  Filter filter;
 
   SimpleTestFinder testFinder;
-  auto tests = testFinder.findTests(program, filter);
+  auto tests = testFinder.findTests(program);
 
   auto &test = tests.front();
 
@@ -88,7 +86,7 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   auto functionsUnderTest = mergeReachableFunctions(reachableFunctions);
 
   std::vector<MutationPoint *> mutationPoints =
-      mutationsFinder.getMutationPoints(program, functionsUnderTest, filter);
+      mutationsFinder.getMutationPoints(program, functionsUnderTest);
 
   ASSERT_EQ(1U, mutationPoints.size());
 

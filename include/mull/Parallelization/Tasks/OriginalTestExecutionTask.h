@@ -8,7 +8,6 @@ namespace mull {
 class Instrumentation;
 class ProcessSandbox;
 class TestRunner;
-class Filter;
 class JITEngine;
 class progress_counter;
 class Program;
@@ -23,8 +22,7 @@ public:
 
   OriginalTestExecutionTask(Instrumentation &instrumentation, Program &program,
                             const ProcessSandbox &sandbox, TestRunner &runner,
-                            const Configuration &config, Filter &filter,
-                            JITEngine &jit);
+                            const Configuration &config, JITEngine &jit);
 
   void operator()(iterator begin, iterator end, Out &storage,
                   progress_counter &counter);
@@ -35,7 +33,6 @@ private:
   const ProcessSandbox &sandbox;
   TestRunner &runner;
   const Configuration &config;
-  Filter &filter;
   JITEngine &jit;
 };
 } // namespace mull

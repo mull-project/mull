@@ -1,7 +1,6 @@
 #include "mull/TestFrameworks/CustomTestFramework/CustomTestFinder.h"
 
 #include "mull/Config/Configuration.h"
-#include "mull/Filter.h"
 #include "mull/Logger.h"
 #include "mull/Program/Program.h"
 #include "mull/TestFrameworks/Test.h"
@@ -19,8 +18,7 @@ CustomTestFinder::CustomTestFinder(
     const std::vector<CustomTestDefinition> &definitions)
     : testDefinitions(definitions) {}
 
-std::vector<Test> CustomTestFinder::findTests(Program &program,
-                                              Filter &filter) {
+std::vector<Test> CustomTestFinder::findTests(Program &program) {
   std::map<std::string, std::vector<CustomTestDefinition>> testMapping;
   for (const auto &definition : testDefinitions) {
     testMapping[definition.methodName].push_back(definition);
@@ -40,10 +38,6 @@ std::vector<Test> CustomTestFinder::findTests(Program &program,
       }
 
       for (auto &definition : testMapping.at(functionName)) {
-        if (filter.shouldSkipTest(definition.testName)) {
-          continue;
-        }
-
         std::string programName = definition.programName;
         if (programName.empty()) {
           programName = "mull";

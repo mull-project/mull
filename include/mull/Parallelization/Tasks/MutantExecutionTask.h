@@ -12,7 +12,6 @@ class Driver;
 class ProcessSandbox;
 class TestRunner;
 class Toolchain;
-class Filter;
 class Mangler;
 class progress_counter;
 class Program;
@@ -27,7 +26,7 @@ public:
 
   MutantExecutionTask(const ProcessSandbox &sandbox, Program &program,
                       TestRunner &runner, const Configuration &config,
-                      Filter &filter, Mangler &mangler,
+                      Mangler &mangler,
                       std::vector<llvm::object::ObjectFile *> &objectFiles,
                       std::vector<std::string> &mutatedFunctionNames);
 
@@ -40,7 +39,6 @@ private:
   const ProcessSandbox &sandbox;
   TestRunner &runner;
   const Configuration &config;
-  Filter &filter;
   Mangler &mangler;
   std::vector<llvm::object::ObjectFile *> &objectFiles;
   std::vector<std::string> &mutatedFunctionNames;

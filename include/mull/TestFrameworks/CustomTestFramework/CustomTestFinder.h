@@ -16,7 +16,7 @@ class CustomTestFinder : public TestFinder {
 public:
   explicit CustomTestFinder(
       const std::vector<CustomTestDefinition> &definitions);
-  std::vector<Test> findTests(Program &program, Filter &filter) override;
+  std::vector<Test> findTests(Program &program) override;
 };
 
 } // namespace mull

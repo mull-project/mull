@@ -1,7 +1,5 @@
 #include "mull/TestFrameworks/GoogleTest/GoogleTestFinder.h"
 
-#include "mull/Filter.h"
-#include "mull/Logger.h"
 #include "mull/Program/Program.h"
 
 #include <llvm/IR/CallSite.h>
@@ -9,9 +7,6 @@
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/InstIterator.h>
 #include <llvm/IR/Instructions.h>
-#include <llvm/IR/LLVMContext.h>
-#include <llvm/IR/Module.h>
-#include <llvm/Support/Debug.h>
 #include <llvm/Support/raw_ostream.h>
 
 #include <vector>
@@ -52,8 +47,7 @@ using namespace llvm;
 /// Note: except of Typed and Value Prametrized Tests
 ///
 
-std::vector<Test> GoogleTestFinder::findTests(Program &program,
-                                              Filter &filter) {
+std::vector<Test> GoogleTestFinder::findTests(Program &program) {
   std::vector<Test> tests;
 
   auto testInfoTypeName = StringRef("class.testing::TestInfo");
@@ -199,9 +193,6 @@ std::vector<Test> GoogleTestFinder::findTests(Program &program,
       /// Once we've got the Name of a Test Suite and the name of a Test Case
       /// We can construct the name of a Test
       const std::string testName = testSuiteName + "." + testCaseName;
-      if (filter.shouldSkipTest(testName)) {
-        continue;
-      }
 
       /// And the part of Test Body function name
       std::string testBodyFunctionName =

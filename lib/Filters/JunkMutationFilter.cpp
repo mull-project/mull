@@ -1,4 +1,4 @@
-#include "mull/MutationFilters/JunkMutationFilter.h"
+#include "mull/Filters/JunkMutationFilter.h"
 
 #include "mull/JunkDetection/JunkDetector.h"
 

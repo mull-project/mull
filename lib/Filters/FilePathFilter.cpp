@@ -1,13 +1,14 @@
-#include "mull/MutationFilters/FilePathFilter.h"
+#include "mull/Filters/FilePathFilter.h"
 
 #include "mull/MutationPoint.h"
 
 #include <cassert>
+#include <llvm/Support/raw_ostream.h>
 
 using namespace mull;
 
 bool FilePathFilter::shouldSkip(MutationPoint *point) {
-  for (auto r : filters) {
+  for (const auto &r : filters) {
     assert(!point->getSourceLocation().isNull());
     auto path = point->getSourceLocation().filePath;
     if (std::regex_search(path, r)) {
@@ -15,6 +16,18 @@ bool FilePathFilter::shouldSkip(MutationPoint *point) {
     }
   }
 
+  return false;
+}
+
+bool FilePathFilter::shouldSkip(llvm::Function *function) {
+  for (const auto &r : filters) {
+    SourceLocation location = SourceLocation::locationFromFunction(function);
+    assert(!location.isNull());
+    auto path = location.filePath;
+    if (std::regex_search(path, r)) {
+      return true;
+    }
+  }
   return false;
 }
 

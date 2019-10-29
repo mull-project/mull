@@ -1,9 +1,9 @@
 #pragma once
 
 #include "mull/ExecutionResult.h"
+#include "mull/Filters/MutationFilter.h"
 #include "mull/IDEDiagnostics.h"
 #include "mull/Instrumentation/Instrumentation.h"
-#include "mull/MutationFilters/MutationFilter.h"
 #include "mull/MutationResult.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Sandbox/ProcessSandbox.h"
@@ -32,13 +32,14 @@ class TestFramework;
 class MutationsFinder;
 class Metrics;
 class JunkDetector;
+class FunctionFilter;
+struct Filters;
 
 class Driver {
   const Configuration &config;
   Program &program;
   TestFramework &testFramework;
   Toolchain &toolchain;
-  Filter &filter;
   MutationsFinder &mutationsFinder;
   const ProcessSandbox &sandbox;
   IDEDiagnostics *diagnostics;
@@ -49,12 +50,12 @@ class Driver {
       ownedObjectFiles;
   Instrumentation instrumentation;
   Metrics &metrics;
-  std::vector<MutationFilter *> &mutationFilters;
+
+  struct Filters &filters;
 
 public:
   Driver(const Configuration &config, const ProcessSandbox &sandbox,
-         Program &program, Toolchain &t,
-         std::vector<MutationFilter *> &mutationFilters, Filter &f,
+         Program &program, Toolchain &t, Filters &filters,
          MutationsFinder &mutationsFinder, Metrics &metrics,
          TestFramework &testFramework);
 
@@ -70,6 +71,8 @@ private:
   std::vector<MutationPoint *> findMutationPoints(std::vector<Test> &tests);
   std::vector<MutationPoint *>
   filterMutations(std::vector<MutationPoint *> mutationPoints);
+  std::vector<FunctionUnderTest>
+  filterFunctions(std::vector<FunctionUnderTest> functions);
 
   std::vector<std::unique_ptr<MutationResult>>
   runMutations(std::vector<MutationPoint *> &mutationPoints);

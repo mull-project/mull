@@ -15,11 +15,11 @@ using namespace llvm;
 
 MutantExecutionTask::MutantExecutionTask(
     const ProcessSandbox &sandbox, Program &program, TestRunner &runner,
-    const Configuration &config, Filter &filter, Mangler &mangler,
+    const Configuration &config, Mangler &mangler,
     std::vector<llvm::object::ObjectFile *> &objectFiles,
     std::vector<std::string> &mutatedFunctionNames)
     : sandbox(sandbox), program(program), runner(runner), config(config),
-      filter(filter), mangler(mangler), objectFiles(objectFiles),
+      mangler(mangler), objectFiles(objectFiles),
       mutatedFunctionNames(mutatedFunctionNames) {}
 
 void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,

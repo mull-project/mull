@@ -12,17 +12,16 @@ class progress_counter;
 
 class SearchMutationPointsTask {
 public:
-  using In = const std::vector<FunctionUnderTest>;
+  using In = std::vector<FunctionUnderTest>;
   using Out = std::vector<std::unique_ptr<MutationPoint>>;
-  using iterator = In::const_iterator;
+  using iterator = In::iterator;
 
-  SearchMutationPointsTask(Filter &filter, const Program &program,
+  SearchMutationPointsTask(const Program &program,
                            std::vector<std::unique_ptr<Mutator>> &mutators);
   void operator()(iterator begin, iterator end, Out &storage,
                   progress_counter &counter);
 
 private:
-  Filter &filter;
   const Program &program;
   std::vector<std::unique_ptr<Mutator>> &mutators;
 };

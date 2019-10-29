@@ -4,12 +4,12 @@
 #include "mull/Config/ConfigParser.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Config/RawConfig.h"
-#include "mull/Filter.h"
+#include "mull/Filters/Filters.h"
+#include "mull/Filters/JunkMutationFilter.h"
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
 #include "mull/JunkDetection/JunkDetector.h"
 #include "mull/Logger.h"
 #include "mull/Metrics/Metrics.h"
-#include "mull/MutationFilters/JunkMutationFilter.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/MutatorsFactory.h"
 #include "mull/Parallelization/TaskExecutor.h"
@@ -79,32 +79,13 @@ int main(int argc, char *argv[]) {
   InitializeNativeTargetAsmParser();
 
   Toolchain toolchain(configuration);
-  Filter filter;
-
-  for (const std::string &location : rawConfig.getExcludeLocations()) {
-    filter.skipByLocation(location);
-  }
-
-  for (const std::string &test : rawConfig.getTests()) {
-    filter.includeTest(test);
-  }
+  Filters filters;
 
   const std::string &testFrameworkName = rawConfig.getTestFramework();
 
   auto mutatorsFactory = MutatorsFactory();
   auto mutators = mutatorsFactory.mutators(rawConfig.getMutators());
   MutationsFinder mutationsFinder(std::move(mutators), configuration);
-
-  if (testFrameworkName == "GoogleTest") {
-    filter.skipByName("testing8internal");
-    filter.skipByName("testing15AssertionResult");
-    filter.skipByName("testing7Message");
-    filter.skipByName("clang_call_terminate");
-
-    filter.skipByLocation("include/c++/v1");
-    filter.skipByLocation("gtest");
-    filter.skipByLocation("gmock");
-  }
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(testFrameworkFactory.createTestFramework(
@@ -177,8 +158,8 @@ int main(int argc, char *argv[]) {
   mutationFilters.push_back(&junkMutationFilter);
 
   Metrics metrics;
-  Driver driver(configuration, *sandbox, program, toolchain, mutationFilters,
-                filter, mutationsFinder, metrics, testFramework);
+  Driver driver(configuration, *sandbox, program, toolchain, filters,
+                mutationsFinder, metrics, testFramework);
 
   metrics.beginRun();
   auto result = driver.Run();

@@ -4,7 +4,6 @@
 #include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Config/RawConfig.h"
-#include "mull/Filter.h"
 #include "mull/Metrics/Metrics.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Program/Program.h"
@@ -16,7 +15,6 @@
 #include <cstring>
 #include <gtest/gtest.h>
 #include <llvm/IR/LLVMContext.h>
-#include <llvm/IR/Module.h>
 #include <llvm/IR/Type.h>
 #include <ostream>
 #include <sqlite3.h>
@@ -47,10 +45,9 @@ TEST(SQLiteReporter, integrationTest) {
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<cxx::AddToSub>());
   MutationsFinder mutationsFinder(std::move(mutators), configuration);
-  Filter filter;
 
   SimpleTestFinder testFinder;
-  auto tests = testFinder.findTests(program, filter);
+  auto tests = testFinder.findTests(program);
 
   auto &test = tests.front();
 
@@ -63,7 +60,7 @@ TEST(SQLiteReporter, integrationTest) {
   auto functionsUnderTest = mergeReachableFunctions(reachableFunctions);
 
   std::vector<MutationPoint *> mutationPoints =
-      mutationsFinder.getMutationPoints(program, functionsUnderTest, filter);
+      mutationsFinder.getMutationPoints(program, functionsUnderTest);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -425,9 +422,8 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<cxx::AddToSub>());
   MutationsFinder mutationsFinder(std::move(mutators), configuration);
-  Filter filter;
   SimpleTestFinder testFinder;
-  auto tests = testFinder.findTests(program, filter);
+  auto tests = testFinder.findTests(program);
 
   auto &test = tests.front();
 
@@ -440,7 +436,7 @@ TEST(SQLiteReporter, do_emitDebugInfo) {
   auto functionsUnderTest = mergeReachableFunctions(reachableFunctions);
 
   std::vector<MutationPoint *> mutationPoints =
-      mutationsFinder.getMutationPoints(program, functionsUnderTest, filter);
+      mutationsFinder.getMutationPoints(program, functionsUnderTest);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -561,10 +557,9 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<cxx::AddToSub>());
   MutationsFinder mutationsFinder(std::move(mutators), configuration);
-  Filter filter;
 
   SimpleTestFinder testFinder;
-  auto tests = testFinder.findTests(program, filter);
+  auto tests = testFinder.findTests(program);
   auto &test = *tests.begin();
 
   Function *reachableFunction = program.lookupDefinedFunction("count_letters");
@@ -576,7 +571,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   auto functionsUnderTest = mergeReachableFunctions(reachableFunctions);
 
   std::vector<MutationPoint *> mutationPoints =
-      mutationsFinder.getMutationPoints(program, functionsUnderTest, filter);
+      mutationsFinder.getMutationPoints(program, functionsUnderTest);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -626,7 +621,7 @@ TEST(SQLiteReporter, do_not_emitDebugInfo) {
   std::string selectQuery = "SELECT count(*) FROM mutation_point_debug";
   sqlite3_stmt *selectStmt;
   sqlite3_prepare(database, selectQuery.c_str(), selectQuery.size(),
-                  &selectStmt, NULL);
+                  &selectStmt, nullptr);
 
   int count;
 

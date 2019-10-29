@@ -1,33 +1,30 @@
-#include <ebc/BitcodeArchive.h>
 #include <ebc/BitcodeContainer.h>
-#include <ebc/BitcodeMetadata.h>
 #include <ebc/BitcodeRetriever.h>
-#include <ebc/EmbeddedBitcode.h>
 #include <ebc/EmbeddedFile.h>
 
-#include <llvm/IR/Module.h>
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/TargetSelect.h>
 
-#include <iostream>
 #include <unistd.h>
 
 #include "DynamicLibraries.h"
 #include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Driver.h"
+#include "mull/Filters/FilePathFilter.h"
+#include "mull/Filters/Filters.h"
+#include "mull/Filters/JunkMutationFilter.h"
+#include "mull/Filters/NoDebugInfoFilter.h"
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
-#include "mull/JunkDetection/JunkDetector.h"
 #include "mull/Metrics/Metrics.h"
-#include "mull/MutationFilters/FilePathFilter.h"
-#include "mull/MutationFilters/JunkMutationFilter.h"
-#include "mull/MutationFilters/NoDebugInfoFilter.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/MutatorsFactory.h"
 #include "mull/Parallelization/Parallelization.h"
 #include "mull/Program/Program.h"
 #include "mull/Reporters/ASTSourceInfoProvider.h"
 #include "mull/Reporters/IDEReporter.h"
+#include "mull/Reporters/MutationTestingElementsReporter.h"
+#include "mull/Reporters/SQLiteReporter.h"
 #include "mull/Result.h"
 #include "mull/Sandbox/ProcessSandbox.h"
 #include "mull/TestFrameworks/TestFrameworkFactory.h"
@@ -38,8 +35,6 @@
 #include "mull/Config/ConfigurationOptions.h"
 #include "mull/Config/RawConfig.h"
 #include "mull/Metrics/Metrics.h"
-#include "mull/Reporters/MutationTestingElementsReporter.h"
-#include "mull/Reporters/SQLiteReporter.h"
 
 class LoadBitcodeFromBinaryTask {
 public:
@@ -338,7 +333,6 @@ int main(int argc, char **argv) {
   mull::CXXJunkDetector junkDetector(astStorage);
   mull::JunkMutationFilter junkFilter(junkDetector);
 
-  mull::Filter filter;
   mull::MutationsFinder mutationsFinder(mutatorsOptions.mutators(),
                                         configuration);
 
@@ -346,25 +340,26 @@ int main(int argc, char **argv) {
 
   auto sandbox = GetProcessSandbox(SandboxOption);
 
-  std::vector<mull::MutationFilter *> mutationFilters;
+  mull::Filters filters;
 
   mull::NoDebugInfoFilter noDebugInfoFilter;
-  mutationFilters.push_back(&noDebugInfoFilter);
+  filters.mutationFilters.push_back(&noDebugInfoFilter);
+  filters.functionFilters.push_back(&noDebugInfoFilter);
 
   mull::FilePathFilter filePathFilter;
-  mutationFilters.push_back(&filePathFilter);
+  filters.mutationFilters.push_back(&filePathFilter);
+  filters.functionFilters.push_back(&filePathFilter);
 
   for (const auto &regex : ExcludePaths) {
     filePathFilter.exclude(regex);
   }
 
   if (junkDetectionEnabled) {
-    mutationFilters.push_back(&junkFilter);
+    filters.mutationFilters.push_back(&junkFilter);
   }
 
-  mull::Driver driver(configuration, *sandbox, program, toolchain,
-                      mutationFilters, filter, mutationsFinder, metrics,
-                      testFramework);
+  mull::Driver driver(configuration, *sandbox, program, toolchain, filters,
+                      mutationsFinder, metrics, testFramework);
   metrics.beginRun();
   auto result = driver.Run();
   metrics.endRun();

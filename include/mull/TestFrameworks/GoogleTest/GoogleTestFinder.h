@@ -7,11 +7,10 @@
 namespace mull {
 
 class Program;
-class Filter;
 
 class GoogleTestFinder : public TestFinder {
 public:
-  std::vector<Test> findTests(Program &program, Filter &filter) override;
+  std::vector<Test> findTests(Program &program) override;
 };
 
 } // namespace mull

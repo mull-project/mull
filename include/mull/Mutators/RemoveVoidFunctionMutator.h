@@ -3,6 +3,7 @@
 #include "Mutator.h"
 #include <irm/irm.h>
 #include <memory>
+#include <mull/ReachableFunction.h>
 #include <vector>
 
 namespace llvm {
