@@ -2,6 +2,7 @@
 
 #include "mull/Logger.h"
 #include "mull/MutationPoint.h"
+#include "mull/ReachableFunction.h"
 #include "mull/SourceLocation.h"
 
 #include <llvm/IR/Constants.h>
@@ -590,13 +591,12 @@ AND_OR_MutationType AndOrReplacementMutator::findPossibleMutationInBranch(
 
 std::vector<MutationPoint *>
 AndOrReplacementMutator::getMutations(Bitcode *bitcode,
-                                      llvm::Function *function) {
+                                      const FunctionUnderTest &function) {
   assert(bitcode);
-  assert(function);
 
   std::vector<MutationPoint *> mutations;
 
-  for (auto &instruction : instructions(function)) {
+  for (auto &instruction : instructions(function.getFunction())) {
     AND_OR_MutationType mutationType = findPossibleMutation(instruction);
     if (mutationType == AND_OR_MutationType_None) {
       continue;

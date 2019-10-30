@@ -34,11 +34,12 @@ TEST(MutationPoint, AndOrReplacementMutator_applyMutation) {
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
       fixtures::mutators_and_or_replacement_module_bc_path(), context);
-
   AndOrReplacementMutator mutator;
-  auto mutationPoints = mutator.getMutations(
-      bitcode.get(),
-      bitcode->getModule()->getFunction("testee_AND_operator_2branches"));
+
+  FunctionUnderTest functionUnderTest(
+      bitcode->getModule()->getFunction("testee_AND_operator_2branches"),
+      nullptr, 0);
+  auto mutationPoints = mutator.getMutations(bitcode.get(), functionUnderTest);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -58,8 +59,9 @@ TEST(MutationPoint, ScalarValueMutator_applyMutation) {
       fixtures::mutators_scalar_value_module_bc_path(), context);
 
   ScalarValueMutator mutator;
-  auto mutationPoints = mutator.getMutations(
-      bitcode.get(), bitcode->getModule()->getFunction("scalar_value"));
+  FunctionUnderTest functionUnderTest(
+      bitcode->getModule()->getFunction("scalar_value"), nullptr, 0);
+  auto mutationPoints = mutator.getMutations(bitcode.get(), functionUnderTest);
 
   ASSERT_EQ(4U, mutationPoints.size());
 
@@ -94,8 +96,9 @@ TEST(MutationPoint, ReplaceCallMutator_applyMutation) {
       fixtures::mutators_replace_call_module_bc_path(), context);
 
   ReplaceCallMutator mutator;
-  auto mutationPoints = mutator.getMutations(
-      bitcode.get(), bitcode->getModule()->getFunction("replace_call"));
+  FunctionUnderTest functionUnderTest(
+      bitcode->getModule()->getFunction("replace_call"), nullptr, 0);
+  auto mutationPoints = mutator.getMutations(bitcode.get(), functionUnderTest);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
@@ -118,8 +121,9 @@ TEST(MutationPoint, OriginalValuePresent) {
       fixtures::mutators_replace_assignment_module_bc_path(), context);
 
   cxx::NumberAssignConst mutator;
-  auto mutationPoints = mutator.getMutations(
-      bitcode.get(), bitcode->getModule()->getFunction("replace_assignment"));
+  FunctionUnderTest functionUnderTest(
+      bitcode->getModule()->getFunction("replace_assignment"), nullptr, 0);
+  auto mutationPoints = mutator.getMutations(bitcode.get(), functionUnderTest);
 
   ASSERT_EQ(2U, mutationPoints.size());
 

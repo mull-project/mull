@@ -2,6 +2,7 @@
 #include <gtest/gtest.h>
 #include <mull/BitcodeLoader.h>
 #include <mull/Mutators/CXX/RelationalMutators.h>
+#include <mull/ReachableFunction.h>
 
 using namespace mull;
 using namespace llvm;
@@ -15,7 +16,8 @@ TEST(Relational, LessThanToLessOrEqual) {
   cxx::LessThanToLessOrEqual mutator;
   std::vector<MutationPoint *> mutants;
   for (auto &function : bitcode->getModule()->functions()) {
-    auto m = mutator.getMutations(bitcode.get(), &function);
+    FunctionUnderTest functionUnderTest(&function, nullptr, 0);
+    auto m = mutator.getMutations(bitcode.get(), functionUnderTest);
     std::copy(m.begin(), m.end(), std::back_inserter(mutants));
   }
 
@@ -31,7 +33,8 @@ TEST(Relational, LessOrEqualToLessThan) {
   cxx::LessOrEqualToLessThan mutator;
   std::vector<MutationPoint *> mutants;
   for (auto &function : bitcode->getModule()->functions()) {
-    auto m = mutator.getMutations(bitcode.get(), &function);
+    FunctionUnderTest functionUnderTest(&function, nullptr, 0);
+    auto m = mutator.getMutations(bitcode.get(), functionUnderTest);
     std::copy(m.begin(), m.end(), std::back_inserter(mutants));
   }
 
@@ -47,7 +50,8 @@ TEST(Relational, GreaterThanToGreaterOrEqual) {
   cxx::GreaterThanToGreaterOrEqual mutator;
   std::vector<MutationPoint *> mutants;
   for (auto &function : bitcode->getModule()->functions()) {
-    auto m = mutator.getMutations(bitcode.get(), &function);
+    FunctionUnderTest functionUnderTest(&function, nullptr, 0);
+    auto m = mutator.getMutations(bitcode.get(), functionUnderTest);
     std::copy(m.begin(), m.end(), std::back_inserter(mutants));
   }
 
@@ -63,7 +67,8 @@ TEST(Relational, GreaterOrEqualToGreaterThan) {
   cxx::GreaterOrEqualToGreaterThan mutator;
   std::vector<MutationPoint *> mutants;
   for (auto &function : bitcode->getModule()->functions()) {
-    auto m = mutator.getMutations(bitcode.get(), &function);
+    FunctionUnderTest functionUnderTest(&function, nullptr, 0);
+    auto m = mutator.getMutations(bitcode.get(), functionUnderTest);
     std::copy(m.begin(), m.end(), std::back_inserter(mutants));
   }
 

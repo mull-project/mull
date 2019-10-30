@@ -1,5 +1,6 @@
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "mull/MutationPoint.h"
+#include "mull/ReachableFunction.h"
 #include <irm/irm.h>
 #include <llvm/IR/InstIterator.h>
 #include <sstream>
@@ -61,13 +62,12 @@ void NegateConditionMutator::applyMutation(llvm::Function *function,
 
 std::vector<MutationPoint *>
 NegateConditionMutator::getMutations(Bitcode *bitcode,
-                                     llvm::Function *function) {
+                                     const FunctionUnderTest &function) {
   assert(bitcode);
-  assert(function);
 
   std::vector<MutationPoint *> mutations;
 
-  for (auto &instruction : instructions(function)) {
+  for (auto &instruction : instructions(function.getFunction())) {
     for (auto &llMutation : lowLevelMutators) {
       if (llMutation->canMutate(&instruction)) {
 

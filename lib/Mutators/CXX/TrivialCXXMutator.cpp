@@ -1,5 +1,6 @@
 #include "mull/Mutators/CXX/TrivialCXXMutator.h"
 #include "mull/MutationPoint.h"
+#include "mull/ReachableFunction.h"
 #include <irm/irm.h>
 #include <llvm/IR/InstIterator.h>
 
@@ -30,13 +31,13 @@ void TrivialCXXMutator::applyMutation(llvm::Function *function,
 }
 
 std::vector<MutationPoint *>
-TrivialCXXMutator::getMutations(Bitcode *bitcode, llvm::Function *function) {
+TrivialCXXMutator::getMutations(Bitcode *bitcode,
+                                const FunctionUnderTest &function) {
   assert(bitcode);
-  assert(function);
 
   std::vector<MutationPoint *> mutations;
 
-  for (auto &instruction : instructions(function)) {
+  for (auto &instruction : instructions(function.getFunction())) {
     for (auto &llMutation : lowLevelMutators) {
       if (llMutation->canMutate(&instruction)) {
         auto point = new MutationPoint(this, llMutation.get(), &instruction,

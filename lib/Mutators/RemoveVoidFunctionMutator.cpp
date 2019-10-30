@@ -1,5 +1,6 @@
 #include "mull/Mutators/RemoveVoidFunctionMutator.h"
 #include "mull/MutationPoint.h"
+#include "mull/ReachableFunction.h"
 #include <irm/irm.h>
 #include <llvm/IR/CallSite.h>
 #include <llvm/IR/InstIterator.h>
@@ -28,13 +29,12 @@ void RemoveVoidFunctionMutator::applyMutation(
 
 std::vector<MutationPoint *>
 RemoveVoidFunctionMutator::getMutations(Bitcode *bitcode,
-                                        llvm::Function *function) {
+                                        const FunctionUnderTest &function) {
   assert(bitcode);
-  assert(function);
 
   std::vector<MutationPoint *> mutations;
 
-  for (auto &instruction : instructions(function)) {
+  for (auto &instruction : instructions(function.getFunction())) {
     for (auto &llMutation : lowLevelMutators) {
       if (llMutation->canMutate(&instruction)) {
         CallSite callSite = CallSite(&instruction);
@@ -57,4 +57,3 @@ RemoveVoidFunctionMutator::getMutations(Bitcode *bitcode,
 
   return mutations;
 }
-
