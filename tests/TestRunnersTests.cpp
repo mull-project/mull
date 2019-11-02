@@ -2,30 +2,24 @@
 #include "TestModuleFactory.h"
 #include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
-#include "mull/Filter.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Program/Program.h"
 #include "mull/ReachableFunction.h"
 #include "mull/TestFrameworks/NativeTestRunner.h"
 #include "mull/TestFrameworks/SimpleTest/SimpleTestFinder.h"
-#include "mull/Toolchain/Compiler.h"
 #include "mull/Toolchain/JITEngine.h"
 #include "mull/Toolchain/Toolchain.h"
 #include "mull/Toolchain/Trampolines.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 #include <mull/Parallelization/Parallelization.h>
 
-#include <llvm/ExecutionEngine/ExecutionEngine.h>
-#include <llvm/IR/InstIterator.h>
-#include <llvm/IR/InstrTypes.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <llvm/Support/DynamicLibrary.h>
 #include <llvm/Support/SourceMgr.h>
-#include <llvm/Support/TargetSelect.h>
 #include <llvm/Transforms/Utils/Cloning.h>
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 using namespace mull;
 using namespace llvm;
@@ -58,7 +52,6 @@ TEST(NativeTestRunner, runTest) {
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<cxx::AddToSub>());
   MutationsFinder mutationsFinder(std::move(mutators), configuration);
-  Filter filter;
 
   Function *reachableFunction = program.lookupDefinedFunction("count_letters");
   std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions;
@@ -67,7 +60,7 @@ TEST(NativeTestRunner, runTest) {
   auto functionsUnderTest = mergeReachableFunctions(reachableFunctions);
 
   std::vector<MutationPoint *> mutationPoints =
-      mutationsFinder.getMutationPoints(program, functionsUnderTest, filter);
+      mutationsFinder.getMutationPoints(program, functionsUnderTest);
   for (auto point : mutationPoints) {
     point->getBitcode()->addMutation(point);
   }
@@ -75,7 +68,7 @@ TEST(NativeTestRunner, runTest) {
 
   SimpleTestFinder testFinder;
 
-  auto tests = testFinder.findTests(program, filter);
+  auto tests = testFinder.findTests(program);
 
   ASSERT_NE(0U, tests.size());
 

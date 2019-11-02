@@ -1,27 +1,16 @@
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "FixturePaths.h"
 #include "TestModuleFactory.h"
-#include "mull/Config/Configuration.h"
-#include "mull/Filter.h"
 #include "mull/MutationPoint.h"
-#include "mull/MutationsFinder.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Program/Program.h"
 #include "mull/ReachableFunction.h"
 
-#include <llvm/IR/Argument.h>
-#include <llvm/IR/BasicBlock.h>
-#include <llvm/IR/Constants.h>
-#include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/Function.h>
-#include <llvm/IR/InstrTypes.h>
-#include <llvm/IR/Instructions.h>
 #include <llvm/IR/LLVMContext.h>
-#include <llvm/IR/Module.h>
 #include <llvm/IR/Type.h>
-#include <llvm/IR/Value.h>
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 using namespace mull;
 using namespace llvm;

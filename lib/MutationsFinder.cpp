@@ -14,12 +14,11 @@ MutationsFinder::MutationsFinder(std::vector<std::unique_ptr<Mutator>> mutators,
 
 std::vector<MutationPoint *>
 MutationsFinder::getMutationPoints(const Program &program,
-                                   std::vector<FunctionUnderTest> &functions,
-                                   Filter &filter) {
+                                   std::vector<FunctionUnderTest> &functions) {
   std::vector<SearchMutationPointsTask> tasks;
   tasks.reserve(config.parallelization.workers);
   for (int i = 0; i < config.parallelization.workers; i++) {
-    tasks.emplace_back(filter, program, mutators);
+    tasks.emplace_back(program, mutators);
   }
 
   TaskExecutor<SearchMutationPointsTask> finder(

@@ -2,6 +2,8 @@
 
 #include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
+#include "mull/Filters/Filters.h"
+#include "mull/Filters/FunctionFilter.h"
 #include "mull/JunkDetection/JunkDetector.h"
 #include "mull/Logger.h"
 #include "mull/Metrics/Metrics.h"
@@ -101,7 +103,7 @@ void Driver::loadDynamicLibraries() {
 std::vector<Test> Driver::findTests() {
   std::vector<Test> tests;
   SingleTaskExecutor task("Searching tests", [&]() {
-    tests = testFramework.finder().findTests(program, filter);
+    tests = testFramework.finder().findTests(program);
   });
   task.execute();
   return tests;
@@ -126,7 +128,7 @@ std::vector<MutationPoint *> Driver::findMutationPoints(vector<Test> &tests) {
   tasks.reserve(config.parallelization.testExecutionWorkers);
   for (int i = 0; i < config.parallelization.testExecutionWorkers; i++) {
     tasks.emplace_back(instrumentation, program, sandbox,
-                       testFramework.runner(), config, filter, jit);
+                       testFramework.runner(), config, jit);
   }
 
   std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions;
@@ -134,9 +136,14 @@ std::vector<MutationPoint *> Driver::findMutationPoints(vector<Test> &tests) {
       "Running original tests", tests, reachableFunctions, tasks);
   testRunner.execute();
 
-  auto functionsUnderTest = mergeReachableFunctions(reachableFunctions);
+  std::vector<FunctionUnderTest> functionsUnderTest =
+      mergeReachableFunctions(reachableFunctions);
+
+  std::vector<FunctionUnderTest> filteredFunctions =
+      filterFunctions(functionsUnderTest);
+
   std::vector<MutationPoint *> mutationPoints =
-      mutationsFinder.getMutationPoints(program, functionsUnderTest, filter);
+      mutationsFinder.getMutationPoints(program, filteredFunctions);
 
   {
     /// Cleans up the memory allocated for the vector itself as well
@@ -150,7 +157,7 @@ std::vector<MutationPoint *>
 Driver::filterMutations(std::vector<MutationPoint *> mutationPoints) {
   std::vector<MutationPoint *> mutations = std::move(mutationPoints);
 
-  for (auto filter : mutationFilters) {
+  for (auto filter : filters.mutationFilters) {
     std::vector<MutationFilterTask> tasks;
     tasks.reserve(config.parallelization.workers);
     for (int i = 0; i < config.parallelization.workers; i++) {
@@ -166,6 +173,29 @@ Driver::filterMutations(std::vector<MutationPoint *> mutationPoints) {
   }
 
   return mutations;
+}
+
+std::vector<FunctionUnderTest>
+Driver::filterFunctions(std::vector<FunctionUnderTest> functions) {
+  std::vector<FunctionUnderTest> filteredFunctions(std::move(functions));
+
+  for (auto filter : filters.functionFilters) {
+    std::vector<FunctionFilterTask> tasks;
+    tasks.reserve(config.parallelization.workers);
+    for (int i = 0; i < config.parallelization.workers; i++) {
+      tasks.emplace_back(*filter);
+    }
+
+    std::string label =
+        std::string("Applying function filter: ") + filter->name();
+    std::vector<FunctionUnderTest> tmp;
+    TaskExecutor<FunctionFilterTask> filterRunner(label, filteredFunctions, tmp,
+                                                  std::move(tasks));
+    filterRunner.execute();
+    filteredFunctions = std::move(tmp);
+  }
+
+  return filteredFunctions;
 }
 
 std::vector<std::unique_ptr<MutationResult>>
@@ -257,7 +287,7 @@ Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
   std::vector<MutantExecutionTask> tasks;
   tasks.reserve(config.parallelization.mutantExecutionWorkers);
   for (int i = 0; i < config.parallelization.mutantExecutionWorkers; i++) {
-    tasks.emplace_back(sandbox, program, testFramework.runner(), config, filter,
+    tasks.emplace_back(sandbox, program, testFramework.runner(), config,
                        toolchain.mangler(), objectFiles, mutatedFunctions);
   }
   metrics.beginMutantsExecution();
@@ -284,13 +314,11 @@ std::vector<llvm::object::ObjectFile *> Driver::AllInstrumentedObjectFiles() {
 }
 
 Driver::Driver(const Configuration &config, const ProcessSandbox &sandbox,
-               Program &program, Toolchain &t,
-               std::vector<MutationFilter *> &mutationFilters, Filter &f,
+               Program &program, Toolchain &t, Filters &filters,
                MutationsFinder &mutationsFinder, Metrics &metrics,
                TestFramework &testFramework)
     : config(config), sandbox(sandbox), program(program),
-      testFramework(testFramework), toolchain(t),
-      mutationFilters(mutationFilters), filter(f),
+      testFramework(testFramework), toolchain(t), filters(filters),
       mutationsFinder(mutationsFinder), instrumentation(), metrics(metrics) {
 
   if (config.diagnostics != Diagnostics::None) {

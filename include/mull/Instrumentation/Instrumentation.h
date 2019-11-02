@@ -23,7 +23,7 @@ public:
   void insertCallbacks(llvm::Module *instrumentedModule);
 
   std::vector<std::unique_ptr<ReachableFunction>>
-  getReachableFunctions(Test &test, Filter &filter, int distance);
+  getReachableFunctions(Test &test, int distance);
 
   void setupInstrumentationInfo(Test &test);
   void cleanupInstrumentationInfo(Test &test);

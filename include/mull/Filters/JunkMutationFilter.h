@@ -17,4 +17,4 @@ private:
   JunkDetector &junkDetector;
 };
 
-}
+} // namespace mull

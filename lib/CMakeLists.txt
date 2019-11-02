@@ -7,7 +7,6 @@ set(mull_sources
   Sandbox/ProcessSandbox.cpp
   Logger.cpp
   BitcodeLoader.cpp
-  Filter.cpp
   MutationsFinder.cpp
 
   Instrumentation/DynamicCallTree.cpp
@@ -69,6 +68,8 @@ set(mull_sources
   Parallelization/Tasks/MutationFilterTask.cpp
   Parallelization/Tasks/OriginalCompilationTask.cpp
   Parallelization/Tasks/ApplyMutationTask.cpp
+  Parallelization/Tasks/FunctionFilterTask.cpp
+
   Config/ConfigurationOptions.cpp
   Config/Configuration.cpp
   TestFrameworks/TestFramework.cpp
@@ -89,9 +90,9 @@ set(mull_sources
 
   TestFrameworks/NativeTestRunner.cpp
 
-  MutationFilters/JunkMutationFilter.cpp
-  MutationFilters/NoDebugInfoFilter.cpp
-  MutationFilters/FilePathFilter.cpp
+  Filters/JunkMutationFilter.cpp
+  Filters/NoDebugInfoFilter.cpp
+  Filters/FilePathFilter.cpp
   JunkDetection/CXX/Visitors/ScalarValueVisitor.cpp)
 
 set(MULL_INCLUDE_DIR ${MULL_SOURCE_DIR}/include/mull)

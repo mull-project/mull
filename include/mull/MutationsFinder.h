@@ -8,9 +8,9 @@
 #include "mull/Mutators/Mutator.h"
 
 namespace mull {
+
 struct Configuration;
 class Program;
-class Filter;
 class ReachableFunction;
 
 class MutationsFinder {
@@ -19,7 +19,7 @@ public:
                            const Configuration &config);
   std::vector<MutationPoint *>
   getMutationPoints(const Program &program,
-                    std::vector<FunctionUnderTest> &functions, Filter &filter);
+                    std::vector<FunctionUnderTest> &functions);
 
 private:
   std::vector<std::unique_ptr<Mutator>> mutators;

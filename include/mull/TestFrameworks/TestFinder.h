@@ -11,7 +11,7 @@ class Filter;
 
 class TestFinder {
 public:
-  virtual std::vector<Test> findTests(Program &program, Filter &filter) = 0;
+  virtual std::vector<Test> findTests(Program &program) = 0;
   virtual ~TestFinder() = default;
 };
 

@@ -1,6 +1,5 @@
 #pragma once
 
-#include <mull/Filter.h>
 #include <mull/MutationResult.h>
 
 namespace mull {

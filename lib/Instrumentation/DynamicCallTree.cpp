@@ -127,8 +127,7 @@ std::vector<CallTree *> DynamicCallTree::extractTestSubtrees(CallTree *root,
 
 std::vector<std::unique_ptr<ReachableFunction>>
 DynamicCallTree::createReachableFunctions(std::vector<CallTree *> subtrees,
-                                          Test &test, int maxDistance,
-                                          Filter &filter) {
+                                          Test &test, int maxDistance) {
   std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions;
 
   for (CallTree *root : subtrees) {
@@ -140,10 +139,6 @@ DynamicCallTree::createReachableFunctions(std::vector<CallTree *> subtrees,
     while (!nodes.empty()) {
       CallTree *node = nodes.front();
       nodes.pop();
-
-      if (filter.shouldSkipFunction(node->function)) {
-        continue;
-      }
 
       int distance = node->level - offset;
       reachableFunctions.emplace_back(

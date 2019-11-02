@@ -2,26 +2,18 @@
 #include "TestModuleFactory.h"
 #include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
-#include "mull/Filter.h"
 #include "mull/MutationPoint.h"
-#include "mull/MutationsFinder.h"
 #include "mull/Mutators/AndOrReplacementMutator.h"
-#include "mull/Mutators/NegateConditionMutator.h"
 #include "mull/Mutators/ReplaceCallMutator.h"
 #include "mull/Mutators/ScalarValueMutator.h"
-#include "mull/Program/Program.h"
 #include "mull/ReachableFunction.h"
 
-#include <llvm/ExecutionEngine/ExecutionEngine.h>
-#include <llvm/IR/InstIterator.h>
 #include <llvm/IR/InstrTypes.h>
 #include <llvm/IR/Instructions.h>
 #include <llvm/IR/LLVMContext.h>
-#include <llvm/IR/Module.h>
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Transforms/Utils/Cloning.h>
 #include <mull/Mutators/CXX/NumberMutators.h>
-#include <mull/Mutators/CXX/RelationalMutators.h>
 #include <mull/Parallelization/Parallelization.h>
 
 #include "gtest/gtest.h"

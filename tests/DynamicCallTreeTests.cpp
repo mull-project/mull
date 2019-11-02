@@ -335,12 +335,9 @@ TEST(DynamicCallTree, reachableFunctions) {
   std::vector<CallTree *> subtrees =
       DynamicCallTree::extractTestSubtrees(callTree.get(), test);
 
-  Filter nullFilter;
-
   {
     std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions =
-        DynamicCallTree::createReachableFunctions(subtrees, test, 5,
-                                                  nullFilter);
+        DynamicCallTree::createReachableFunctions(subtrees, test, 5);
 
     EXPECT_EQ(4U, reachableFunctions.size());
 
@@ -363,28 +360,7 @@ TEST(DynamicCallTree, reachableFunctions) {
 
   {
     std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions =
-        DynamicCallTree::createReachableFunctions(subtrees, test, 1,
-                                                  nullFilter);
-    EXPECT_EQ(3U, reachableFunctions.size());
-
-    ReachableFunction *reachableF2 = reachableFunctions.begin()->get();
-    EXPECT_EQ(reachableF2->getFunction(), F2);
-    EXPECT_EQ(reachableF2->getDistance(), 0);
-
-    ReachableFunction *reachableF3 = (reachableFunctions.begin() + 1)->get();
-    EXPECT_EQ(reachableF3->getFunction(), F3);
-    EXPECT_EQ(reachableF3->getDistance(), 1);
-
-    ReachableFunction *reachableF4 = (reachableFunctions.begin() + 2)->get();
-    EXPECT_EQ(reachableF4->getFunction(), F4);
-    EXPECT_EQ(reachableF4->getDistance(), 1);
-  }
-
-  {
-    Filter filter;
-    filter.skipByName("F5");
-    std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions =
-        DynamicCallTree::createReachableFunctions(subtrees, test, 5, filter);
+        DynamicCallTree::createReachableFunctions(subtrees, test, 1);
     EXPECT_EQ(3U, reachableFunctions.size());
 
     ReachableFunction *reachableF2 = reachableFunctions.begin()->get();

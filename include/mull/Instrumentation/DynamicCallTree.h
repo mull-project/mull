@@ -1,7 +1,5 @@
 #pragma once
 
-#include "mull/Filter.h"
-
 #include <list>
 #include <stack>
 #include <vector>
@@ -40,7 +38,7 @@ public:
                                                      Test &test);
   static std::vector<std::unique_ptr<ReachableFunction>>
   createReachableFunctions(std::vector<CallTree *> subtrees, Test &test,
-                           int maxDistance, Filter &filter);
+                           int maxDistance);
 
   static void enterFunction(uint32_t functionIndex, uint32_t *mapping,
                             std::stack<uint32_t> &stack);

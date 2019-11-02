@@ -6,7 +6,6 @@
 
 #include <mull/BitcodeLoader.h>
 #include <mull/Config/Configuration.h>
-#include <mull/Filter.h>
 #include <mull/MutationsFinder.h>
 #include <mull/Mutators/MutatorsFactory.h>
 #include <mull/Parallelization/Parallelization.h>
@@ -38,9 +37,7 @@ int main(int argc, char **argv) {
     }
   }
 
-  mull::Filter filter;
-
-  auto mutants = finder.getMutationPoints(program, functionsUnderTest, filter);
+  auto mutants = finder.getMutationPoints(program, functionsUnderTest);
 
   printf("Found %lu mutants\n", mutants.size());
 

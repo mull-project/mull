@@ -3,6 +3,7 @@
 #include "mull/ReachableFunction.h"
 #include <irm/irm.h>
 #include <llvm/IR/InstIterator.h>
+#include <mull/ReachableFunction.h>
 
 using namespace llvm;
 using namespace mull;

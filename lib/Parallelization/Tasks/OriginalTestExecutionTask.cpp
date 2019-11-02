@@ -16,9 +16,9 @@ using namespace llvm;
 OriginalTestExecutionTask::OriginalTestExecutionTask(
     Instrumentation &instrumentation, Program &program,
     const ProcessSandbox &sandbox, TestRunner &runner,
-    const Configuration &config, Filter &filter, JITEngine &jit)
+    const Configuration &config, JITEngine &jit)
     : instrumentation(instrumentation), program(program), sandbox(sandbox),
-      runner(runner), config(config), filter(filter), jit(jit) {}
+      runner(runner), config(config), jit(jit) {}
 
 void OriginalTestExecutionTask::operator()(iterator begin, iterator end,
                                            Out &storage,
@@ -36,8 +36,8 @@ void OriginalTestExecutionTask::operator()(iterator begin, iterator end,
     std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions;
 
     if (testExecutionResult.status == Passed) {
-      reachableFunctions = instrumentation.getReachableFunctions(
-          test, filter, config.maxDistance);
+      reachableFunctions =
+          instrumentation.getReachableFunctions(test, config.maxDistance);
     } else {
       std::stringstream failureMessage;
       failureMessage << "\n";

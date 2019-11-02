@@ -1,18 +1,12 @@
 #include "mull/TestFrameworks/SimpleTest/SimpleTestFinder.h"
 
-#include "mull/Filter.h"
 #include "mull/Logger.h"
 #include "mull/Program/Program.h"
-
-#include <llvm/IR/Module.h>
-
-#include <vector>
 
 using namespace mull;
 using namespace llvm;
 
-std::vector<Test> SimpleTestFinder::findTests(Program &program,
-                                              Filter &filter) {
+std::vector<Test> SimpleTestFinder::findTests(Program &program) {
   std::vector<Test> tests;
 
   for (auto &bitcode : program.bitcode()) {

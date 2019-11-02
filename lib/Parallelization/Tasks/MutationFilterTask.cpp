@@ -1,6 +1,6 @@
 #include "mull/Parallelization/Tasks/MutationFilterTask.h"
 
-#include "mull/MutationFilters/MutationFilter.h"
+#include "mull/Filters/MutationFilter.h"
 #include "mull/Parallelization/Progress.h"
 
 using namespace mull;

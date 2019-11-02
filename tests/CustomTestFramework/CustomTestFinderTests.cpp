@@ -2,7 +2,6 @@
 #include "mull/BitcodeLoader.h"
 #include "mull/Config/ConfigParser.h"
 #include "mull/Config/Configuration.h"
-#include "mull/Filter.h"
 #include "mull/Program/Program.h"
 #include "mull/TestFrameworks/CustomTestFramework/CustomTestFinder.h"
 
@@ -32,10 +31,9 @@ TEST(CustomTestFinder, findTests) {
       CustomTestDefinition("passing", "passing_test", "mull", {"passing_test"}),
   });
 
-  Filter filter;
   CustomTestFinder testFinder(testDefinitions);
 
-  vector<mull::Test> tests = testFinder.findTests(program, filter);
+  vector<mull::Test> tests = testFinder.findTests(program);
   ASSERT_EQ(2U, tests.size());
 
   vector<mull::Test>::iterator searchResult;
@@ -91,10 +89,9 @@ custom_tests:
   ASSERT_EQ(program.getStaticConstructors().front()->getName(),
             "initGlobalVariable");
 
-  Filter filter;
   CustomTestFinder testFinder(config.getCustomTests());
 
-  vector<mull::Test> tests = testFinder.findTests(program, filter);
+  vector<mull::Test> tests = testFinder.findTests(program);
   ASSERT_EQ(2U, tests.size());
 
   vector<mull::Test>::iterator searchResult;
@@ -109,55 +106,6 @@ custom_tests:
   ASSERT_EQ(failingTest.getProgramName(), "some_name");
   ASSERT_EQ(failingTest.getArguments().size(), 1UL);
   ASSERT_EQ(failingTest.getArguments().front(), "failing_test");
-
-  searchResult = find_if(tests.begin(), tests.end(), [&](mull::Test &test) {
-    return test.getTestName() == "passing";
-  });
-  ASSERT_NE(searchResult, tests.end());
-
-  mull::Test &passingTest = *searchResult;
-  ASSERT_EQ(passingTest.getTestName(), "passing");
-  ASSERT_EQ(passingTest.getProgramName(), "mull");
-  ASSERT_EQ(passingTest.getArguments().size(), 1UL);
-  ASSERT_EQ(passingTest.getArguments().front(), "passing_test");
-}
-
-TEST(CustomTestFinder, findTests_withFilter) {
-  const char *rawConfig = R"YAML(
-custom_tests:
-  - name:   failing
-    method: failing_test
-    program: some_name
-    arguments: [ "failing_test" ]
-  - name:   passing
-    method: passing_test
-    arguments: [ "passing_test" ]
-  )YAML";
-
-  yaml::Input input(rawConfig);
-
-  ConfigParser parser;
-  auto config = parser.loadConfig(input);
-  Configuration configuration(config);
-  configuration.bitcodePaths = {mull::fixtures::custom_test_distance_bc_path(),
-                                mull::fixtures::custom_test_main_bc_path(),
-                                mull::fixtures::custom_test_test_bc_path()};
-
-  BitcodeLoader loader;
-  auto bitcode = loader.loadBitcode(configuration);
-  Program program({}, {}, std::move(bitcode));
-  ASSERT_EQ(program.getStaticConstructors().size(), 1UL);
-  ASSERT_EQ(program.getStaticConstructors().front()->getName(),
-            "initGlobalVariable");
-
-  Filter filter;
-  filter.includeTest("passing");
-  CustomTestFinder testFinder(config.getCustomTests());
-
-  vector<mull::Test> tests = testFinder.findTests(program, filter);
-  ASSERT_EQ(1U, tests.size());
-
-  vector<mull::Test>::iterator searchResult;
 
   searchResult = find_if(tests.begin(), tests.end(), [&](mull::Test &test) {
     return test.getTestName() == "passing";
@@ -187,10 +135,9 @@ TEST(CustomTestFinder, findTests_withEmptyConfig) {
   auto bitcode = loader.loadBitcode(configuration);
   Program program({}, {}, std::move(bitcode));
 
-  Filter filter;
   CustomTestFinder testFinder(config.getCustomTests());
 
-  vector<mull::Test> tests = testFinder.findTests(program, filter);
+  vector<mull::Test> tests = testFinder.findTests(program);
   ASSERT_EQ(1U, tests.size());
 
   mull::Test &test = tests.front();
