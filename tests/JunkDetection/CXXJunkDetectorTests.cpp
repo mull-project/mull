@@ -141,12 +141,6 @@ static const CXXJunkDetectorTestParameter parameters[] = {
                                  new cxx::XorAssignToOrAssign, 3),
 
     CXXJunkDetectorTestParameter(
-        fixtures::mutators_remove_void_function_junk_bc_path(),
-        new RemoveVoidFunctionMutator, 6),
-    CXXJunkDetectorTestParameter(fixtures::mutators_replace_call_junk_bc_path(),
-                                 new ReplaceCallMutator, 11),
-
-    CXXJunkDetectorTestParameter(
         fixtures::mutators_negate_condition_junk_bc_path(),
         new NegateConditionMutator, 6),
 
@@ -182,6 +176,12 @@ static const CXXJunkDetectorTestParameter parameters[] = {
         new AndOrReplacementMutator, 4),
     CXXJunkDetectorTestParameter(fixtures::mutators_scalar_value_junk_bc_path(),
                                  new ScalarValueMutator, 5),
+
+    CXXJunkDetectorTestParameter(
+        fixtures::mutators_remove_void_function_junk_bc_path(),
+        new RemoveVoidFunctionMutator, 6),
+    CXXJunkDetectorTestParameter(fixtures::mutators_replace_call_junk_bc_path(),
+                                 new ReplaceCallMutator, 11),
 };
 
 INSTANTIATE_TEST_CASE_P(CXXJunkDetection, CXXJunkDetectorTest,

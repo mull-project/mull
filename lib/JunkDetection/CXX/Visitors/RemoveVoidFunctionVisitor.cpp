@@ -2,35 +2,40 @@
 
 using namespace mull;
 
+static bool isVoidCall(clang::CallExpr *callExpression) {
+  auto *type = callExpression->getType().getTypePtrOrNull();
+  return type && type->isVoidType();
+}
+
 RemoveVoidFunctionVisitor::RemoveVoidFunctionVisitor(
     const VisitorParameters &parameters)
-    : visitor(parameters), astContext(parameters.astContext) {}
+    : matchingExpression(nullptr), parameters(parameters) {}
 
 bool RemoveVoidFunctionVisitor::VisitCallExpr(clang::CallExpr *callExpression) {
-  handleCallExpr(callExpression);
-  return true;
+  return !validCallExpr(callExpression,
+                        callExpression->getSourceRange().getBegin());
 }
 
 bool RemoveVoidFunctionVisitor::VisitCXXMemberCallExpr(
     clang::CXXMemberCallExpr *callExpression) {
-  handleCallExpr(callExpression);
-  return true;
+  return !validCallExpr(callExpression, callExpression->getExprLoc());
 }
 
 bool RemoveVoidFunctionVisitor::VisitCXXOperatorCallExpr(
     clang::CXXOperatorCallExpr *callExpression) {
-  handleCallExpr(callExpression);
-  return true;
+  return !validCallExpr(callExpression, callExpression->getOperatorLoc());
 }
 
-void RemoveVoidFunctionVisitor::handleCallExpr(
-    clang::CallExpr *callExpression) {
-  auto *type = callExpression->getType().getTypePtrOrNull();
-  if (type && type->isVoidType()) {
-    visitor.visitRangeWithASTExpr(callExpression);
+bool RemoveVoidFunctionVisitor::validCallExpr(clang::CallExpr *callExpression,
+                                              clang::SourceLocation location) {
+  if (isVoidCall(callExpression) && location == parameters.sourceLocation) {
+    assert(!matchingExpression && "Already found");
+    matchingExpression = callExpression;
+    return true;
   }
+  return false;
 }
 
 clang::Expr *RemoveVoidFunctionVisitor::foundMutant() {
-  return visitor.getMatchingASTNode();
+  return matchingExpression;
 }

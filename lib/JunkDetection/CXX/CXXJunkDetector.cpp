@@ -1,6 +1,5 @@
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
 
-#include "mull/Config/RawConfig.h"
 #include "mull/MutationPoint.h"
 #include "mull/Mutators/Mutator.h"
 
