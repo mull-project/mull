@@ -11,7 +11,7 @@ class ScalarValueVisitor
     : public clang::RecursiveASTVisitor<ScalarValueVisitor> {
 public:
   explicit ScalarValueVisitor(const VisitorParameters &parameters);
-  bool VisitExpr(clang::Expr *expr);
+  bool VisitExpr(clang::Expr *expression);
 
   clang::Expr *foundMutant();
 

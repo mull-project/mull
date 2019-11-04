@@ -6,6 +6,9 @@ SDKROOT: /
 
 llvm_mapping:
   macos:
+    9.0.0:
+      url: http://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-darwin-apple.tar.xz
+      path: clang+llvm-9.0.0-x86_64-darwin-apple
     8.0.0:
       url: https://releases.llvm.org/8.0.0/clang+llvm-8.0.0-x86_64-apple-darwin.tar.xz
       path: clang+llvm-8.0.0-x86_64-apple-darwin
@@ -40,6 +43,9 @@ llvm_mapping:
       path: clang+llvm-3.9.0-x86_64-linux-gnu-debian8
 
   ubuntu:
+    9.0.0:
+      url: http://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
+      path: clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04
     8.0.0:
       url: https://releases.llvm.org/8.0.0/clang+llvm-8.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz
       path: clang+llvm-8.0.0-x86_64-linux-gnu-ubuntu-16.04

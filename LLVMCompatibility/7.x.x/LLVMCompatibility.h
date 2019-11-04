@@ -6,6 +6,9 @@
 
 namespace llvm {
 class raw_ostream;
+namespace object {
+class SectionRef;
+}
 }
 
 namespace llvm_compat {
@@ -29,6 +32,5 @@ std::unique_ptr<Module> parseBitcode(MemoryBufferRef bufferRef,
 
 void setVersionPrinter(void (*oldPrinter)(), void (*newPrinter)(raw_ostream &));
 
-Function *GetOrInsertFunction(Module &module, const std::string &name,
-                              FunctionType *functionType);
+StringRef getSectionContent(const object::SectionRef &section);
 } // namespace llvm_compat

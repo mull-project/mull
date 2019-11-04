@@ -1,13 +1,13 @@
 #include "DynamicLibraries.h"
 #include "mull/Logger.h"
 
+#include <LLVMCompatibility.h>
 #include <llvm/Object/ELFObjectFile.h>
 #include <llvm/Object/ELFTypes.h>
 #include <llvm/Object/MachO.h>
 #include <llvm/Support/FileSystem.h>
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/Path.h>
-
 #include <unistd.h>
 
 using namespace llvm::object;
@@ -39,10 +39,10 @@ void librariesFromElf(const ELFObjectFile<T> &file,
   assert((*dynamicSectionIterator) != nullSection &&
          "Could not find .dynamic section");
 
-  llvm::StringRef stringTable;
-  stringTableIterator->getContents(stringTable);
-  llvm::StringRef dynamicSection;
-  dynamicSectionIterator->getContents(dynamicSection);
+  llvm::StringRef stringTable =
+      llvm_compat::getSectionContent(*stringTableIterator);
+  llvm::StringRef dynamicSection =
+      llvm_compat::getSectionContent(*dynamicSectionIterator);
 
   Elf_Dyn_Base<T> dynamicEntry{};
   uint64_t sectionSize = dynamicSectionIterator->getSize();
