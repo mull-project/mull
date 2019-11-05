@@ -15,12 +15,14 @@ public:
   bool VisitCallExpr(clang::CallExpr *callExpression);
   bool VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *callExpression);
   bool VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *callExpression);
-  void handleCallExpr(clang::CallExpr *callExpression);
   clang::Expr *foundMutant();
 
 private:
-  InstructionRangeVisitor visitor;
-  const clang::ASTContext &astContext;
+  bool validCallExpr(clang::CallExpr *callExpression,
+                     clang::SourceLocation location);
+
+  const VisitorParameters &parameters;
+  clang::Expr *matchingExpression;
 };
 
 } // namespace mull
