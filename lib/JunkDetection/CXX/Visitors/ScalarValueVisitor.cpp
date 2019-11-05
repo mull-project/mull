@@ -11,7 +11,6 @@ static bool isDeclRefConstant(clang::DeclRefExpr *declRef);
 /// A variable declaration is constant if all of its children are constants
 
 static bool isConstant(clang::Stmt *statement) {
-  statement = statement->IgnoreImplicit();
   if (llvm::isa<clang::IntegerLiteral>(statement)) {
     return true;
   }
@@ -35,12 +34,15 @@ bool isDeclRefConstant(clang::DeclRefExpr *declRef) {
     return false;
   }
 
-  auto init = varDecl->getInit();
-  if (isConstant(init)) {
+  clang::Expr *init = varDecl->getInit();
+  if (isConstant(init->IgnoreImplicit())) {
     return true;
   }
 
-  for (auto child : init->children()) {
+  for (clang::Stmt *child : init->children()) {
+    if (auto expr = llvm::dyn_cast<clang::Expr>(child)) {
+      child = expr->IgnoreImplicit();
+    }
     if (!isConstant(child)) {
       return false;
     }
@@ -52,26 +54,29 @@ bool isDeclRefConstant(clang::DeclRefExpr *declRef) {
 ScalarValueVisitor::ScalarValueVisitor(const VisitorParameters &parameters)
     : visitor(parameters) {}
 
-bool ScalarValueVisitor::VisitExpr(clang::Expr *expr) {
+bool ScalarValueVisitor::VisitExpr(clang::Expr *expression) {
 
-  /// In case of PredefinedExpr, the expression expr->children() yields
+  /// In case of PredefinedExpr, the expression expression->children() yields
   /// children which are nullptr. These nodes should be junk anyway, so we
   /// ignore them early.
-  if (llvm::isa<clang::PredefinedExpr>(expr)) {
+  if (llvm::isa<clang::PredefinedExpr>(expression)) {
     return true;
   }
 
-  expr = expr->IgnoreImplicit();
-  for (auto child : expr->children()) {
+  expression = expression->IgnoreImplicit();
+  for (auto child : expression->children()) {
     if (!child) {
       llvm::errs() << "Ignoring expression with a nullptr child:" << "\n";
-      expr->dump(llvm::errs());
+      expression->dump(llvm::errs());
       continue;
     }
 
-    child = child->IgnoreImplicit();
+    if (auto expr = llvm::dyn_cast<clang::Expr>(child)) {
+      child = expr->IgnoreImplicit();
+    }
+
     if (isConstant(child)) {
-      visitor.visitRangeWithASTExpr(expr);
+      visitor.visitRangeWithASTExpr(expression);
     }
   }
   return true;

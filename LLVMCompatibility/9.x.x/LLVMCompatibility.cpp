@@ -1,6 +1,7 @@
 #include "LLVMCompatibility.h"
 
 #include <llvm/Bitcode/BitcodeReader.h>
+#include <llvm/Object/ObjectFile.h>
 
 using namespace llvm;
 
@@ -56,10 +57,12 @@ void setVersionPrinter(void (*oldPrinter)(),
   llvm::cl::SetVersionPrinter(newPrinter);
 }
 
-Function *GetOrInsertFunction(Module &module, const std::string &name,
-                              FunctionType *functionType) {
-  return cast<Function>(
-      module.getOrInsertFunction(name, functionType).getCallee());
+StringRef getSectionContent(const object::SectionRef &section) {
+  Expected<StringRef> content = section.getContents();
+  if (!content) {
+    return {};
+  }
+  return content.get();
 }
 
 } // namespace llvm_compat

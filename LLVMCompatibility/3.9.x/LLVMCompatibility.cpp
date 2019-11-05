@@ -1,6 +1,7 @@
 #include "LLVMCompatibility.h"
 
 #include <llvm/Bitcode/ReaderWriter.h>
+#include <llvm/Object/ObjectFile.h>
 
 using namespace llvm;
 
@@ -37,9 +38,10 @@ void setVersionPrinter(void (*oldPrinter)(),
   llvm::cl::SetVersionPrinter(oldPrinter);
 }
 
-Function *GetOrInsertFunction(Module &module, const std::string &name,
-                              FunctionType *functionType) {
-  return cast<Function>(module.getOrInsertFunction(name, functionType));
+StringRef getSectionContent(const object::SectionRef &section) {
+  StringRef content;
+  section.getContents(content);
+  return content;
 }
 
 } // namespace llvm_compat
