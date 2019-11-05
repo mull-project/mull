@@ -53,6 +53,7 @@ TEST(MutationPoint, ScalarValueMutator_applyMutation) {
   ScalarValueMutator mutator;
   FunctionUnderTest functionUnderTest(
       bitcode->getModule()->getFunction("scalar_value"), nullptr, 0);
+  functionUnderTest.selectInstructions({});
   auto mutationPoints = mutator.getMutations(bitcode.get(), functionUnderTest);
 
   ASSERT_EQ(4U, mutationPoints.size());
@@ -90,6 +91,7 @@ TEST(MutationPoint, ReplaceCallMutator_applyMutation) {
   ReplaceCallMutator mutator;
   FunctionUnderTest functionUnderTest(
       bitcode->getModule()->getFunction("replace_call"), nullptr, 0);
+  functionUnderTest.selectInstructions({});
   auto mutationPoints = mutator.getMutations(bitcode.get(), functionUnderTest);
 
   ASSERT_EQ(1U, mutationPoints.size());
@@ -115,6 +117,7 @@ TEST(MutationPoint, OriginalValuePresent) {
   cxx::NumberAssignConst mutator;
   FunctionUnderTest functionUnderTest(
       bitcode->getModule()->getFunction("replace_assignment"), nullptr, 0);
+  functionUnderTest.selectInstructions({});
   auto mutationPoints = mutator.getMutations(bitcode.get(), functionUnderTest);
 
   ASSERT_EQ(2U, mutationPoints.size());

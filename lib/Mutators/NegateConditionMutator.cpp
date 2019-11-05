@@ -2,8 +2,6 @@
 #include "mull/MutationPoint.h"
 #include "mull/ReachableFunction.h"
 #include <irm/irm.h>
-#include <llvm/IR/InstIterator.h>
-#include <mull/ReachableFunction.h>
 #include <sstream>
 
 using namespace llvm;
@@ -68,20 +66,20 @@ NegateConditionMutator::getMutations(Bitcode *bitcode,
 
   std::vector<MutationPoint *> mutations;
 
-  for (auto &instruction : instructions(function.getFunction())) {
-    for (auto &llMutation : lowLevelMutators) {
-      if (llMutation->canMutate(&instruction)) {
+  for (llvm::Instruction *instruction : function.getSelectedInstructions()) {
+    for (auto &mutator : lowLevelMutators) {
+      if (mutator->canMutate(instruction)) {
 
         auto cmpMutator =
             reinterpret_cast<irm::_CmpInstPredicateReplacementBase *>(
-                llMutation.get());
+                mutator.get());
 
         std::string diagnostics =
             getDiagnostics(cmpMutator->_getFrom(), cmpMutator->_getTo());
 
         std::string replacement = describePredicate(cmpMutator->_getTo());
 
-        auto point = new MutationPoint(this, llMutation.get(), &instruction,
+        auto point = new MutationPoint(this, mutator.get(), instruction,
                                        replacement, bitcode, diagnostics);
         mutations.push_back(point);
       }

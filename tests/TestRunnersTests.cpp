@@ -58,6 +58,7 @@ TEST(NativeTestRunner, runTest) {
   reachableFunctions.emplace_back(
       make_unique<ReachableFunction>(reachableFunction, nullptr, 1));
   auto functionsUnderTest = mergeReachableFunctions(reachableFunctions);
+  functionsUnderTest.back().selectInstructions({});
 
   std::vector<MutationPoint *> mutationPoints =
       mutationsFinder.getMutationPoints(program, functionsUnderTest);

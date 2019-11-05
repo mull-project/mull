@@ -69,6 +69,7 @@ set(mull_sources
   Parallelization/Tasks/OriginalCompilationTask.cpp
   Parallelization/Tasks/ApplyMutationTask.cpp
   Parallelization/Tasks/FunctionFilterTask.cpp
+  Parallelization/Tasks/InstructionSelectionTask.cpp
 
   Config/ConfigurationOptions.cpp
   Config/Configuration.cpp

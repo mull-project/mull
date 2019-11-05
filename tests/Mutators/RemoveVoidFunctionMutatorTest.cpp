@@ -21,6 +21,7 @@ TEST(RemoveVoidFunctionMutator, getMutationPoints) {
   std::vector<MutationPoint *> mutants;
   for (auto &function : bitcode->getModule()->functions()) {
     FunctionUnderTest functionUnderTest(&function, nullptr, 0);
+    functionUnderTest.selectInstructions({});
     auto points = mutator.getMutations(bitcode.get(), functionUnderTest);
     std::copy(points.begin(), points.end(), std::back_inserter(mutants));
   }

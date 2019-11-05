@@ -1,10 +1,8 @@
 #include "mull/Driver.h"
 
-#include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Filters/Filters.h"
 #include "mull/Filters/FunctionFilter.h"
-#include "mull/JunkDetection/JunkDetector.h"
 #include "mull/Logger.h"
 #include "mull/Metrics/Metrics.h"
 #include "mull/MutationResult.h"
@@ -17,13 +15,8 @@
 #include "mull/Toolchain/JITEngine.h"
 
 #include <llvm/Support/DynamicLibrary.h>
-#include <llvm/Support/Path.h>
 
 #include <algorithm>
-#include <fstream>
-#include <map>
-#include <sys/mman.h>
-#include <sys/types.h>
 #include <vector>
 
 using namespace llvm;
@@ -142,6 +135,8 @@ std::vector<MutationPoint *> Driver::findMutationPoints(vector<Test> &tests) {
   std::vector<FunctionUnderTest> filteredFunctions =
       filterFunctions(functionsUnderTest);
 
+  selectInstructions(filteredFunctions);
+
   std::vector<MutationPoint *> mutationPoints =
       mutationsFinder.getMutationPoints(program, filteredFunctions);
 
@@ -196,6 +191,19 @@ Driver::filterFunctions(std::vector<FunctionUnderTest> functions) {
   }
 
   return filteredFunctions;
+}
+
+void Driver::selectInstructions(std::vector<FunctionUnderTest> &functions) {
+  std::vector<InstructionSelectionTask> tasks;
+  tasks.reserve(config.parallelization.workers);
+  for (int i = 0; i < config.parallelization.workers; i++) {
+    tasks.emplace_back(filters.instructionFilters);
+  }
+
+  std::vector<int> Nothing;
+  TaskExecutor<InstructionSelectionTask> filterRunner(
+      "Instruction selection", functions, Nothing, std::move(tasks));
+  filterRunner.execute();
 }
 
 std::vector<std::unique_ptr<MutationResult>>
