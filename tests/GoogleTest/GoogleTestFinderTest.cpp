@@ -2,7 +2,6 @@
 #include "FixturePaths.h"
 #include "TestModuleFactory.h"
 #include "mull/BitcodeLoader.h"
-#include "mull/Config/ConfigParser.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Driver.h"
 #include "mull/MutationsFinder.h"
@@ -26,29 +25,18 @@ using namespace llvm;
 #pragma mark - Finding Tests
 
 TEST(GoogleTestFinder, FindTest) {
-  LLVMContext llvmContext;
+  LLVMContext context;
   BitcodeLoader loader;
   auto bitcodeWithTests = loader.loadBitcodeAtPath(
-      fixtures::google_test_google_test_Test_bc_path(), llvmContext);
+      fixtures::google_test_google_test_Test_bc_path(), context);
 
   std::vector<std::unique_ptr<Bitcode>> bitcode;
   bitcode.push_back(std::move(bitcodeWithTests));
   Program program({}, {}, std::move(bitcode));
 
-  const char *configYAML = R"YAML(
-mutators:
-- math_add_mutator
-- negate_mutator
-- remove_void_function_mutator
-)YAML";
+  GoogleTestFinder finder;
 
-  yaml::Input Input(configYAML);
-
-  ConfigParser Parser;
-  auto config = Parser.loadConfig(Input);
-  GoogleTestFinder Finder;
-
-  auto tests = Finder.findTests(program);
+  auto tests = finder.findTests(program);
 
   ASSERT_EQ(2U, tests.size());
 
@@ -57,27 +45,16 @@ mutators:
 }
 
 TEST(DISABLED_GoogleTestRunner, runTest) {
-  const char *configYAML = R"YAML(
-mutators:
-  - math_add_mutator
-  - negate_mutator
-  - remove_void_function_mutator
-  )YAML";
-
-  yaml::Input Input(configYAML);
-
-  ConfigParser Parser;
-  auto rawConfig = Parser.loadConfig(Input);
-  Configuration configuration(rawConfig);
+  Configuration configuration;
 
   Toolchain toolchain(configuration);
 
-  LLVMContext llvmContext;
+  LLVMContext context;
   BitcodeLoader loader;
   auto bitcodeWithTests = loader.loadBitcodeAtPath(
-      fixtures::google_test_google_test_Test_bc_path(), llvmContext);
+      fixtures::google_test_google_test_Test_bc_path(), context);
   auto bitcodeWithTestees = loader.loadBitcodeAtPath(
-      fixtures::google_test_google_test_Testee_bc_path(), llvmContext);
+      fixtures::google_test_google_test_Testee_bc_path(), context);
 
   auto binaryWithTests = toolchain.compiler().compileModule(
       bitcodeWithTests->getModule(), toolchain.targetMachine());

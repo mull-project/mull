@@ -1,8 +1,6 @@
 add_subdirectory(Mutators/CXX)
 
 set(mull_sources
-  Config/ConfigParser.cpp
-  Config/RawConfig.cpp
   Driver.cpp
   Sandbox/ProcessSandbox.cpp
   Logger.cpp

@@ -14,8 +14,7 @@ public:
   MutationTestingElementsReporter(const std::string &reportDir,
                                   const std::string &reportName,
                                   SourceInfoProvider &sourceInfoProvider);
-  void reportResults(const Result &result, const RawConfig &config,
-                     const Metrics &metrics) override;
+  void reportResults(const Result &result, const Metrics &metrics) override;
 
   const std::string &getJSONPath();
 

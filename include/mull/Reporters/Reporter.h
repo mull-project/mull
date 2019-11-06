@@ -3,13 +3,11 @@
 namespace mull {
 
 class Result;
-class RawConfig;
 class Metrics;
 
 class Reporter {
 public:
-  virtual void reportResults(const Result &result, const RawConfig &config,
-                             const Metrics &metrics) = 0;
+  virtual void reportResults(const Result &result, const Metrics &metrics) = 0;
   virtual ~Reporter() = default;
 };
 

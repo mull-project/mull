@@ -1,6 +1,5 @@
 #include "FixturePaths.h"
 #include "mull/BitcodeLoader.h"
-#include "mull/Config/RawConfig.h"
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
 #include "mull/MutationPoint.h"
 #include "mull/Mutators/AndOrReplacementMutator.h"
@@ -59,10 +58,7 @@ TEST_P(CXXJunkDetectorTest, detectJunk) {
     std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
   }
 
-  JunkDetectionConfig junkConfig;
-
-  ASTStorage astStorage(junkConfig.cxxCompilationDatabasePath,
-                        junkConfig.cxxCompilationFlags);
+  ASTStorage astStorage("", "");
   CXXJunkDetector detector(astStorage);
 
   std::vector<MutationPoint *> nonJunkMutationPoints;
@@ -211,12 +207,10 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
 
   ASSERT_EQ(points.size(), 8U);
 
-  JunkDetectionConfig junkConfig;
-  junkConfig.cxxCompilationDatabasePath =
+  std::string cxxCompilationDatabasePath =
       fixtures::junk_detection_compdb_absolute_compile_commands_json_path();
 
-  ASTStorage astStorage(junkConfig.cxxCompilationDatabasePath,
-                        junkConfig.cxxCompilationFlags);
+  ASTStorage astStorage(cxxCompilationDatabasePath, "");
   CXXJunkDetector detector(astStorage);
 
   std::vector<MutationPoint *> nonJunkMutationPoints;
@@ -252,12 +246,10 @@ TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
 
   ASSERT_EQ(points.size(), 8U);
 
-  JunkDetectionConfig junkConfig;
-  junkConfig.cxxCompilationDatabasePath =
+  std::string cxxCompilationDatabasePath =
       fixtures::junk_detection_compdb_relative_compile_commands_json_path();
 
-  ASTStorage astStorage(junkConfig.cxxCompilationDatabasePath,
-                        junkConfig.cxxCompilationFlags);
+  ASTStorage astStorage(cxxCompilationDatabasePath, "");
   CXXJunkDetector detector(astStorage);
 
   std::vector<MutationPoint *> nonJunkMutationPoints;
@@ -294,12 +286,10 @@ TEST(CXXJunkDetector, no_compdb) {
 
   ASSERT_EQ(points.size(), 8U);
 
-  JunkDetectionConfig junkConfig;
-  junkConfig.cxxCompilationFlags =
+  std::string cxxCompilationFlags =
       std::string("-I ") + fixtures::junk_detection_compdb_include__path();
 
-  ASTStorage astStorage(junkConfig.cxxCompilationDatabasePath,
-                        junkConfig.cxxCompilationFlags);
+  ASTStorage astStorage("", cxxCompilationFlags);
   CXXJunkDetector detector(astStorage);
 
   std::vector<MutationPoint *> nonJunkMutationPoints;

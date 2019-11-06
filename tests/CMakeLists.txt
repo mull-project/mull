@@ -3,7 +3,6 @@ generate_fixture_factory(FACTORY_HEADER)
 
 set(mull_unittests_sources
   CompilerTests.cpp
-  ConfigParserTests.cpp
   DriverTests.cpp
   ProcessSandboxTest.cpp
   MutationPointTests.cpp
@@ -35,7 +34,6 @@ set(mull_unittests_sources
   TestModuleFactory.cpp
   TestModuleFactory.h
 
-  ConfigParserTestFixture.h
   ${FACTORY_HEADER}
 
   JunkDetection/CompilationDatabaseTests.cpp
