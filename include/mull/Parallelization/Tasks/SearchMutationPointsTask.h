@@ -6,7 +6,6 @@
 
 namespace mull {
 
-class Filter;
 class Program;
 class progress_counter;
 

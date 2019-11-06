@@ -21,6 +21,7 @@ TEST(ScalarValueMutator, getMutationPoint) {
   ScalarValueMutator mutator;
   FunctionUnderTest functionUnderTest(
       bitcode->getModule()->getFunction("scalar_value"), nullptr, 0);
+  functionUnderTest.selectInstructions({});
   auto mutants = mutator.getMutations(bitcode.get(), functionUnderTest);
 
   ASSERT_EQ(mutants.size(), 4U);

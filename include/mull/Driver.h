@@ -73,6 +73,7 @@ private:
   filterMutations(std::vector<MutationPoint *> mutationPoints);
   std::vector<FunctionUnderTest>
   filterFunctions(std::vector<FunctionUnderTest> functions);
+  void selectInstructions(std::vector<FunctionUnderTest> &functions);
 
   std::vector<std::unique_ptr<MutationResult>>
   runMutations(std::vector<MutationPoint *> &mutationPoints);

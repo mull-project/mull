@@ -2,7 +2,6 @@
 #include "mull/MutationPoint.h"
 #include "mull/ReachableFunction.h"
 #include <irm/irm.h>
-#include <llvm/IR/InstIterator.h>
 
 using namespace mull;
 using namespace mull::cxx;
@@ -37,10 +36,10 @@ TrivialCXXMutator::getMutations(Bitcode *bitcode,
 
   std::vector<MutationPoint *> mutations;
 
-  for (auto &instruction : instructions(function.getFunction())) {
-    for (auto &llMutation : lowLevelMutators) {
-      if (llMutation->canMutate(&instruction)) {
-        auto point = new MutationPoint(this, llMutation.get(), &instruction,
+  for (llvm::Instruction *instruction : function.getSelectedInstructions()) {
+    for (auto &mutator : lowLevelMutators) {
+      if (mutator->canMutate(instruction)) {
+        auto point = new MutationPoint(this, mutator.get(), instruction,
                                        replacement, bitcode, diagnostics);
         mutations.push_back(point);
       }

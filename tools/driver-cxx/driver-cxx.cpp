@@ -34,7 +34,6 @@
 
 #include "mull/Config/ConfigurationOptions.h"
 #include "mull/Config/RawConfig.h"
-#include "mull/Metrics/Metrics.h"
 
 class LoadBitcodeFromBinaryTask {
 public:
@@ -345,6 +344,7 @@ int main(int argc, char **argv) {
   mull::NoDebugInfoFilter noDebugInfoFilter;
   filters.mutationFilters.push_back(&noDebugInfoFilter);
   filters.functionFilters.push_back(&noDebugInfoFilter);
+  filters.instructionFilters.push_back(&noDebugInfoFilter);
 
   mull::FilePathFilter filePathFilter;
   filters.mutationFilters.push_back(&filePathFilter);
