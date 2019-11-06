@@ -23,11 +23,16 @@ static bool isJunkMutation(ASTStorage &storage, MutationPoint *point) {
     return true;
   }
 
+  clang::Decl *decl = ast->getDecl(location);
+  if (!decl) {
+    return true;
+  }
+
   VisitorParameters parameters = {.sourceManager = ast->getSourceManager(),
                                   .sourceLocation = location,
                                   .astContext = ast->getASTContext()};
   Visitor visitor(parameters);
-  visitor.TraverseDecl(ast->getASTContext().getTranslationUnitDecl());
+  visitor.TraverseDecl(decl);
 
   if (clang::Expr *mutantExpression = visitor.foundMutant()) {
     storage.setMutantASTNode(point, mutantExpression);
