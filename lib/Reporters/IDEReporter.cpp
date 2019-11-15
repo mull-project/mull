@@ -38,8 +38,7 @@ static void printSurvivedMutant(SourceManager &sourceManager,
   Logger::info() << caret << "\n";
 }
 
-void IDEReporter::reportResults(const Result &result, const RawConfig &config,
-                                const Metrics &metrics) {
+void IDEReporter::reportResults(const Result &result, const Metrics &metrics) {
   if (result.getMutationPoints().empty()) {
     Logger::info() << "No mutants found. Mutation score: infinitely high\n";
     return;

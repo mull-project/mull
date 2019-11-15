@@ -1,13 +1,9 @@
 #include "FixturePaths.h"
 #include "mull/BitcodeLoader.h"
-#include "mull/Config/ConfigParser.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Program/Program.h"
 #include "mull/TestFrameworks/CustomTestFramework/CustomTestFinder.h"
-
-#include <llvm/IR/LLVMContext.h>
-
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 using namespace mull;
 using namespace llvm;
@@ -62,25 +58,16 @@ TEST(CustomTestFinder, findTests) {
 }
 
 TEST(CustomTestFinder, findTests_viaConfig) {
-  const char *rawConfig = R"YAML(
-custom_tests:
-  - name:   failing
-    method: failing_test
-    program: some_name
-    arguments: [ "failing_test" ]
-  - name:   passing
-    method: passing_test
-    arguments: [ "passing_test" ]
-  )YAML";
-
-  yaml::Input input(rawConfig);
-
-  ConfigParser parser;
-  auto config = parser.loadConfig(input);
-  Configuration configuration(config);
+  Configuration configuration;
   configuration.bitcodePaths = {mull::fixtures::custom_test_distance_bc_path(),
                                 mull::fixtures::custom_test_main_bc_path(),
                                 mull::fixtures::custom_test_test_bc_path()};
+
+  std::vector<CustomTestDefinition> testDefinitions({
+      CustomTestDefinition("failing", "failing_test", "some_name",
+                           {"failing_test"}),
+      CustomTestDefinition("passing", "passing_test", "mull", {"passing_test"}),
+  });
 
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcode(configuration);
@@ -89,7 +76,7 @@ custom_tests:
   ASSERT_EQ(program.getStaticConstructors().front()->getName(),
             "initGlobalVariable");
 
-  CustomTestFinder testFinder(config.getCustomTests());
+  CustomTestFinder testFinder(testDefinitions);
 
   vector<mull::Test> tests = testFinder.findTests(program);
   ASSERT_EQ(2U, tests.size());
@@ -120,13 +107,7 @@ custom_tests:
 }
 
 TEST(CustomTestFinder, findTests_withEmptyConfig) {
-  const char *rawConfig = "";
-
-  yaml::Input input(rawConfig);
-
-  ConfigParser parser;
-  auto config = parser.loadConfig(input);
-  Configuration configuration(config);
+  Configuration configuration;
   configuration.bitcodePaths = {mull::fixtures::custom_test_distance_bc_path(),
                                 mull::fixtures::custom_test_main_bc_path(),
                                 mull::fixtures::custom_test_test_bc_path()};
@@ -135,7 +116,9 @@ TEST(CustomTestFinder, findTests_withEmptyConfig) {
   auto bitcode = loader.loadBitcode(configuration);
   Program program({}, {}, std::move(bitcode));
 
-  CustomTestFinder testFinder(config.getCustomTests());
+  std::vector<CustomTestDefinition> testDefinitions(
+      {CustomTestDefinition("main", "main", "mull", {})});
+  CustomTestFinder testFinder(testDefinitions);
 
   vector<mull::Test> tests = testFinder.findTests(program);
   ASSERT_EQ(1U, tests.size());

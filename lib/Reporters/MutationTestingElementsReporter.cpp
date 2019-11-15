@@ -1,6 +1,5 @@
 #include "mull/Reporters/MutationTestingElementsReporter.h"
 
-#include "mull/Config/RawConfig.h"
 #include "mull/Logger.h"
 #include "mull/MutationResult.h"
 #include "mull/Mutators/Mutator.h"
@@ -16,7 +15,6 @@
 #include <set>
 #include <sstream>
 #include <string>
-#include <utility>
 #include <vector>
 
 using namespace mull;
@@ -114,7 +112,6 @@ MutationTestingElementsReporter::MutationTestingElementsReporter(
 }
 
 void MutationTestingElementsReporter::reportResults(const Result &result,
-                                                    const RawConfig &config,
                                                     const Metrics &metrics) {
   if (result.getMutationPoints().empty()) {
     Logger::info() << "No mutants found. Mutation score: infinitely high\n";

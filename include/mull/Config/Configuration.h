@@ -7,7 +7,7 @@
 
 namespace mull {
 
-class RawConfig;
+extern int MullDefaultTimeoutMilliseconds;
 
 struct Configuration {
   bool dryRunEnabled;
@@ -29,7 +29,6 @@ struct Configuration {
   std::vector<CustomTestDefinition> customTests;
 
   Configuration();
-  explicit Configuration(RawConfig &raw);
 };
 
 } // namespace mull

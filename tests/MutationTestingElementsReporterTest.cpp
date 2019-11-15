@@ -6,7 +6,6 @@
 #include "mull/Bitcode.h"
 #include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
-#include "mull/Config/RawConfig.h"
 #include "mull/JunkDetection/CXX/ASTStorage.h"
 #include "mull/Metrics/Metrics.h"
 #include "mull/MutationsFinder.h"
@@ -17,11 +16,10 @@
 #include "mull/TestFrameworks/SimpleTest/SimpleTestFinder.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 
-#include <cstring>
+#include <fstream>
 #include <gtest/gtest.h>
 #include <json11/json11.hpp>
 #include <llvm/IR/LLVMContext.h>
-#include <llvm/IR/Module.h>
 #include <llvm/IR/Type.h>
 #include <ostream>
 
@@ -131,7 +129,7 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   MutationTestingElementsReporter reporter("", "", sourceInfoProvider);
   Metrics metrics;
   metrics.setDriverRunTime(resultTime);
-  reporter.reportResults(result, RawConfig(), metrics);
+  reporter.reportResults(result, metrics);
 
   /// STEP3. Making assertions.
   std::vector<ExecutionResult> executionResults{testExecutionResult,

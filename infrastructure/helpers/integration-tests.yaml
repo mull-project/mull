@@ -1,14 +1,11 @@
 ---
 - name: Run Mull examples
-  command: "{{ make_program }} {{ item }}"
+  command: "{{ make_program }} run_cxx"
   args:
     chdir: "{{ source_dir }}/Examples/HelloWorld"
   environment:
     CXX: "{{ llvm_dir }}/bin/clang++"
     LD_LIBRARY_PATH: "{{ llvm_dir }}/lib"
-  loop:
-    - run_driver
-    - run_cxx
 
 - name: Prepare integration tests
   file:

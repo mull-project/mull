@@ -10,6 +10,7 @@
 #include "DynamicLibraries.h"
 #include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
+#include "mull/Config/ConfigurationOptions.h"
 #include "mull/Driver.h"
 #include "mull/Filters/FilePathFilter.h"
 #include "mull/Filters/Filters.h"
@@ -29,11 +30,6 @@
 #include "mull/Sandbox/ProcessSandbox.h"
 #include "mull/TestFrameworks/TestFrameworkFactory.h"
 #include "mull/Version.h"
-
-/// Temp includes to make it running
-
-#include "mull/Config/ConfigurationOptions.h"
-#include "mull/Config/RawConfig.h"
 
 class LoadBitcodeFromBinaryTask {
 public:
@@ -316,18 +312,17 @@ int main(int argc, char **argv) {
       testFrameworkOption.testFramework(toolchain, configuration));
 
   bool junkDetectionEnabled = false;
-  mull::JunkDetectionConfig junkDetectionConfig;
+  std::string cxxCompilationFlags;
+  std::string cxxCompilationDatabasePath;
   if (!CompilationFlags.empty()) {
-    junkDetectionConfig.cxxCompilationFlags = CompilationFlags.getValue();
+    cxxCompilationFlags = CompilationFlags.getValue();
     junkDetectionEnabled = true;
   }
   if (!CompilationDatabasePath.empty()) {
-    junkDetectionConfig.cxxCompilationDatabasePath =
-        CompilationDatabasePath.getValue();
+    cxxCompilationDatabasePath = CompilationDatabasePath.getValue();
     junkDetectionEnabled = true;
   }
-  mull::ASTStorage astStorage(junkDetectionConfig.cxxCompilationDatabasePath,
-                              junkDetectionConfig.cxxCompilationFlags);
+  mull::ASTStorage astStorage(cxxCompilationDatabasePath, cxxCompilationFlags);
   mull::ASTSourceInfoProvider sourceInfoProvider(astStorage);
   mull::CXXJunkDetector junkDetector(astStorage);
   mull::JunkMutationFilter junkFilter(junkDetector);
@@ -391,9 +386,8 @@ int main(int argc, char **argv) {
     reporters.push_back(llvm::make_unique<mull::IDEReporter>());
   }
 
-  mull::RawConfig rawConfig;
   for (auto &reporter : reporters) {
-    reporter->reportResults(*result, rawConfig, metrics);
+    reporter->reportResults(*result, metrics);
   }
 
   llvm::llvm_shutdown();

@@ -1,7 +1,6 @@
 #include "mull/Reporters/SQLiteReporter.h"
 
 #include "mull/Bitcode.h"
-#include "mull/Config/RawConfig.h"
 #include "mull/ExecutionResult.h"
 #include "mull/Logger.h"
 #include "mull/Metrics/Metrics.h"
@@ -14,13 +13,11 @@
 #include <llvm/IR/Instruction.h>
 #include <llvm/IR/Module.h>
 #include <llvm/Support/FileSystem.h>
-#include <llvm/Support/Path.h>
 #include <llvm/Support/raw_ostream.h>
 
 #include <sqlite3.h>
 #include <sstream>
 #include <string>
-#include <sys/param.h>
 #include <unistd.h>
 
 using namespace mull;
@@ -94,7 +91,6 @@ SQLiteReporter::SQLiteReporter(const std::string &reportDir,
 std::string mull::SQLiteReporter::getDatabasePath() { return databasePath; }
 
 void mull::SQLiteReporter::reportResults(const Result &result,
-                                         const RawConfig &config,
                                          const Metrics &metrics) {
   sqlite3 *database;
   sqlite3_open(databasePath.c_str(), &database);
@@ -261,97 +257,6 @@ void mull::SQLiteReporter::reportResults(const Result &result,
     sqlite3_step(insertMutationPointStmt);
     sqlite3_clear_bindings(insertMutationPointStmt);
     sqlite3_reset(insertMutationPointStmt);
-
-    std::string mutationPointID = mutationPoint->getUniqueIdentifier();
-
-    if (config.shouldEmitDebugInfo()) {
-      std::string function;
-      llvm::raw_string_ostream f_ostream(function);
-      instruction->getFunction()->print(f_ostream);
-
-      std::string basicBlock;
-      llvm::raw_string_ostream bb_ostream(basicBlock);
-      instruction->getParent()->print(bb_ostream);
-
-      std::string instr;
-      llvm::raw_string_ostream i_ostream(instr);
-      instruction->print(i_ostream);
-
-      int index = 1;
-      sqlite3_bind_text(insertMutationPointDebugStmt, index++,
-                        location.filePath.c_str(), -1, SQLITE_TRANSIENT);
-      sqlite3_bind_text(insertMutationPointDebugStmt, index++,
-                        location.directory.c_str(), -1, SQLITE_TRANSIENT);
-
-      sqlite3_bind_int(insertMutationPointDebugStmt, index++, location.line);
-      sqlite3_bind_int(insertMutationPointDebugStmt, index++, location.column);
-
-      sqlite3_bind_text(insertMutationPointDebugStmt, index++,
-                        f_ostream.str().c_str(), -1, SQLITE_TRANSIENT);
-      sqlite3_bind_text(insertMutationPointDebugStmt, index++,
-                        bb_ostream.str().c_str(), -1, SQLITE_TRANSIENT);
-      sqlite3_bind_text(insertMutationPointDebugStmt, index++,
-                        i_ostream.str().c_str(), -1, SQLITE_TRANSIENT);
-
-      sqlite3_bind_text(insertMutationPointDebugStmt, index++,
-                        mutationPoint->getUniqueIdentifier().c_str(), -1,
-                        SQLITE_TRANSIENT);
-
-      sqlite3_step(insertMutationPointDebugStmt);
-      sqlite3_clear_bindings(insertMutationPointDebugStmt);
-      sqlite3_reset(insertMutationPointDebugStmt);
-    }
-  }
-
-  /// Config
-  {
-    const char *insertConfigQuery =
-        "INSERT INTO config VALUES(?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, "
-        "?11, ?12, ?13, ?14, ?15)";
-    sqlite3_stmt *insertConfigStmt;
-    sqlite3_prepare(database, insertConfigQuery, -1, &insertConfigStmt,
-                    nullptr);
-
-    // Start and end times are not part of a config however we are
-    // mixing them in to make them into a final report.
-    const long startTime = metrics.driverRunTime().begin.count();
-    const long endTime = metrics.driverRunTime().end.count();
-
-    std::string csvBitcodePaths = vectorToCsv(config.getBitcodePaths());
-    std::string csvMutators = vectorToCsv(config.getMutators());
-    std::string csvDynamicLibraries =
-        vectorToCsv(config.getDynamicLibrariesPaths());
-    std::string csvObjectFiles = vectorToCsv(config.getObjectFilesPaths());
-    std::string csvTests = vectorToCsv(config.getTests());
-
-    int index = 1;
-    sqlite3_bind_text(insertConfigStmt, index++,
-                      config.getProjectName().c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(insertConfigStmt, index++, csvBitcodePaths.c_str(), -1,
-                      SQLITE_TRANSIENT);
-    sqlite3_bind_text(insertConfigStmt, index++, csvMutators.c_str(), -1,
-                      SQLITE_TRANSIENT);
-    sqlite3_bind_text(insertConfigStmt, index++, csvDynamicLibraries.c_str(),
-                      -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(insertConfigStmt, index++, csvObjectFiles.c_str(), -1,
-                      SQLITE_TRANSIENT);
-    sqlite3_bind_text(insertConfigStmt, index++, csvTests.c_str(), -1,
-                      SQLITE_TRANSIENT);
-
-    sqlite3_bind_int(insertConfigStmt, index++, config.forkEnabled());
-    sqlite3_bind_int(insertConfigStmt, index++, config.dryRunModeEnabled());
-    sqlite3_bind_int(insertConfigStmt, index++, config.failFastModeEnabled());
-    sqlite3_bind_int(insertConfigStmt, index++, config.cachingEnabled());
-    sqlite3_bind_int(insertConfigStmt, index++, config.getTimeout());
-    sqlite3_bind_int(insertConfigStmt, index++, config.getMaxDistance());
-
-    sqlite3_bind_text(insertConfigStmt, index++,
-                      config.getCacheDirectory().c_str(), -1, SQLITE_TRANSIENT);
-
-    sqlite3_bind_int64(insertConfigStmt, index++, startTime);
-    sqlite3_bind_int64(insertConfigStmt, index++, endTime);
-
-    sqlite3_step(insertConfigStmt);
   }
 
   sqlite_exec(database, "END TRANSACTION");
