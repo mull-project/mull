@@ -111,6 +111,11 @@ llvm::cl::opt<bool>
                  llvm::cl::desc("Disables cache (enabled by default)"),
                  llvm::cl::cat(MullCXXCategory), llvm::cl::init(false));
 
+llvm::cl::opt<bool>
+    DryRun("dry-run", llvm::cl::Optional,
+                 llvm::cl::desc("Skips real mutants execution"),
+                 llvm::cl::cat(MullCXXCategory), llvm::cl::init(false));
+
 enum MutatorsOptionIndex : int { _mutatorsOptionIndex_unused };
 llvm::cl::list<MutatorsOptionIndex> Mutators("mutators", llvm::cl::ZeroOrMore,
                                              llvm::cl::desc("Choose mutators:"),
@@ -246,6 +251,7 @@ int main(int argc, char **argv) {
   llvm::InitializeNativeTargetAsmParser();
 
   mull::Configuration configuration;
+  configuration.dryRunEnabled = DryRun.getValue();
   configuration.customTests.push_back(
       mull::CustomTestDefinition("main", "main", "mull", {}));
   configuration.customTests.push_back(
