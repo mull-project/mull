@@ -11,6 +11,8 @@ set(mull_sources
   Instrumentation/Callbacks.cpp
   Instrumentation/Instrumentation.cpp
 
+  Parallelization/Tasks/LoadBitcodeFromBinaryTask.cpp
+
   Mutators/AndOrReplacementMutator.cpp
   Mutators/MutatorsFactory.cpp
   Mutators/NegateConditionMutator.cpp

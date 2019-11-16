@@ -2,13 +2,12 @@
 #include <ebc/BitcodeRetriever.h>
 #include <ebc/EmbeddedFile.h>
 
-#include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/TargetSelect.h>
 
 #include <unistd.h>
 
 #include "DynamicLibraries.h"
-#include "mull/BitcodeLoader.h"
+#include "mull/Parallelization/Tasks/LoadBitcodeFromBinaryTask.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Config/ConfigurationOptions.h"
 #include "mull/Driver.h"
@@ -30,44 +29,6 @@
 #include "mull/Sandbox/ProcessSandbox.h"
 #include "mull/TestFrameworks/TestFrameworkFactory.h"
 #include "mull/Version.h"
-
-class LoadBitcodeFromBinaryTask {
-public:
-  using In = std::vector<std::unique_ptr<ebc::EmbeddedFile>>;
-  using Out = std::vector<std::unique_ptr<mull::Bitcode>>;
-  using iterator = In::iterator;
-
-  explicit LoadBitcodeFromBinaryTask(llvm::LLVMContext &context)
-      : context(context) {}
-
-  void operator()(iterator begin, iterator end, Out &storage,
-                  mull::progress_counter &counter) {
-    for (auto it = begin; it != end; it++, counter.increment()) {
-      auto pair = (*it)->GetRawBuffer();
-      const auto data = pair.first;
-      const auto size = pair.second;
-      assert(data);
-      assert(size);
-
-      llvm::StringRef bufferView(data, size);
-      auto ownedBuffer = llvm::MemoryBuffer::getMemBufferCopy(bufferView);
-      auto buffer = ownedBuffer.get();
-
-      auto modulePair = mull::loadModuleFromBuffer(context, *buffer);
-      auto hash = modulePair.first;
-      auto module = std::move(modulePair.second);
-      assert(module && "Could not load module");
-      module->setModuleIdentifier(hash);
-
-      auto bitcode = llvm::make_unique<mull::Bitcode>(
-          std::move(module), std::move(ownedBuffer), hash);
-      storage.push_back(std::move(bitcode));
-    }
-  }
-
-private:
-  llvm::LLVMContext &context;
-};
 
 llvm::cl::OptionCategory MullCXXCategory("mull-cxx");
 
@@ -291,14 +252,14 @@ int main(int argc, char **argv) {
   extractBitcodeBuffers.execute();
 
   std::vector<std::unique_ptr<llvm::LLVMContext>> contexts;
-  std::vector<LoadBitcodeFromBinaryTask> tasks;
+  std::vector<mull::LoadBitcodeFromBinaryTask> tasks;
   for (int i = 0; i < configuration.parallelization.workers; i++) {
     auto context = llvm::make_unique<llvm::LLVMContext>();
-    tasks.emplace_back(LoadBitcodeFromBinaryTask(*context));
+    tasks.emplace_back(mull::LoadBitcodeFromBinaryTask(*context));
     contexts.push_back(std::move(context));
   }
   std::vector<std::unique_ptr<mull::Bitcode>> bitcode;
-  mull::TaskExecutor<LoadBitcodeFromBinaryTask> executor(
+  mull::TaskExecutor<mull::LoadBitcodeFromBinaryTask> executor(
       "Loading bitcode files", embeddedFiles, bitcode, std::move(tasks));
   executor.execute();
 
