@@ -188,6 +188,11 @@ llvm::cl::list<std::string> ExcludePaths(
     llvm::cl::desc("File/directory paths to ignore (supports regex)"),
     llvm::cl::cat(MullCXXCategory));
 
+llvm::cl::list<std::string> IncludePaths(
+  "include-path", llvm::cl::ZeroOrMore,
+  llvm::cl::desc("File/directory paths to whitelist (supports regex)"),
+  llvm::cl::cat(MullCXXCategory));
+
 #if LLVM_VERSION_MAJOR == 3
 #define TRAILING_NULL , nullptr
 #else
@@ -353,6 +358,9 @@ int main(int argc, char **argv) {
 
   for (const auto &regex : ExcludePaths) {
     filePathFilter.exclude(regex);
+  }
+  for (const auto &regex : IncludePaths) {
+    filePathFilter.include(regex);
   }
 
   if (junkDetectionEnabled) {
