@@ -23,18 +23,46 @@ bool FilePathFilter::shouldSkip(llvm::Instruction *instruction) const {
 }
 
 bool FilePathFilter::shouldSkip(const mull::SourceLocation &location) const {
-  for (const auto &r : filters) {
-    assert(!location.isNull());
-    auto path = location.filePath;
-    if (std::regex_search(path, r)) {
-      return true;
+  assert(!location.isNull());
+  return shouldSkip(location.filePath);
+}
+
+bool FilePathFilter::shouldSkip(const std::string &sourceFilePath) const {
+  std::lock_guard<std::mutex> lock(cacheMutex);
+
+  if (cache.count(sourceFilePath) == 0) {
+    bool allow = true;
+
+    if (includeFilters.empty()) {
+      for (const auto &r : excludeFilters) {
+        if (std::regex_search(sourceFilePath, r)) {
+          allow = false;
+          break;
+        }
+      }
+    } else {
+      allow = false;
+
+      for (const auto &r : includeFilters) {
+        if (std::regex_search(sourceFilePath, r)) {
+          allow = true;
+          break;
+        }
+      }
     }
+
+    cache[sourceFilePath] = allow;
   }
-  return false;
+
+  return (! cache[sourceFilePath]);
 }
 
 std::string FilePathFilter::name() { return "file path"; }
 
 void FilePathFilter::exclude(const std::string &filter) {
-  filters.push_back(std::regex(filter, std::regex::grep));
+  excludeFilters.push_back(std::regex(filter, std::regex::grep));
+}
+
+void FilePathFilter::include(const std::string &filter) {
+  includeFilters.push_back(std::regex(filter, std::regex::grep));
 }

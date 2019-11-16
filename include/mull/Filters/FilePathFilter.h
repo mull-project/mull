@@ -3,7 +3,10 @@
 #include "mull/Filters/FunctionFilter.h"
 #include "mull/Filters/InstructionFilter.h"
 #include "mull/Filters/MutationFilter.h"
+
+#include <mutex>
 #include <regex>
+#include <unordered_map>
 #include <vector>
 
 namespace mull {
@@ -18,10 +21,16 @@ public:
   bool shouldSkip(llvm::Instruction *instruction) const override;
   std::string name() override;
   void exclude(const std::string &filter);
+  void include(const std::string &filter);
 
 private:
   bool shouldSkip(const mull::SourceLocation &location) const;
+  bool shouldSkip(const std::string &sourceFilePath) const;
 
-  std::vector<std::regex> filters;
+  std::vector<std::regex> includeFilters;
+  std::vector<std::regex> excludeFilters;
+
+  mutable std::unordered_map<std::string, bool> cache;
+  mutable std::mutex cacheMutex;
 };
 } // namespace mull
