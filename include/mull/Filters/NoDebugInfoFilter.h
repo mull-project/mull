@@ -14,7 +14,6 @@ public:
   bool shouldSkip(llvm::Function *function) override;
   bool shouldSkip(llvm::Instruction *instruction) const override;
   std::string name() override;
-
-private:
+  virtual ~NoDebugInfoFilter() {};
 };
 } // namespace mull
