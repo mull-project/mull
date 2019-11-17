@@ -1,15 +1,18 @@
 #pragma once
 
+#include "mull/Filters/Filter.h"
+
 #include <string>
 
 namespace mull {
 
 class MutationPoint;
 
-class MutationFilter {
+class MutationFilter : virtual public Filter {
 public:
   virtual bool shouldSkip(MutationPoint *point) = 0;
   virtual std::string name() = 0;
+  virtual ~MutationFilter() {};
 };
 
 } // namespace mull

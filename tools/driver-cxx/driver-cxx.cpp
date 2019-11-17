@@ -4,14 +4,12 @@
 
 #include <llvm/Support/TargetSelect.h>
 
-#include <unistd.h>
-
 #include "DynamicLibraries.h"
-#include "mull/Parallelization/Tasks/LoadBitcodeFromBinaryTask.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Config/ConfigurationOptions.h"
 #include "mull/Driver.h"
 #include "mull/Filters/FilePathFilter.h"
+#include "mull/Filters/Filter.h"
 #include "mull/Filters/Filters.h"
 #include "mull/Filters/JunkMutationFilter.h"
 #include "mull/Filters/NoDebugInfoFilter.h"
@@ -20,6 +18,7 @@
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/MutatorsFactory.h"
 #include "mull/Parallelization/Parallelization.h"
+#include "mull/Parallelization/Tasks/LoadBitcodeFromBinaryTask.h"
 #include "mull/Program/Program.h"
 #include "mull/Reporters/ASTSourceInfoProvider.h"
 #include "mull/Reporters/IDEReporter.h"
@@ -29,6 +28,10 @@
 #include "mull/Sandbox/ProcessSandbox.h"
 #include "mull/TestFrameworks/TestFrameworkFactory.h"
 #include "mull/Version.h"
+
+#include <unistd.h>
+
+#include <memory>
 
 llvm::cl::OptionCategory MullCXXCategory("mull-cxx");
 
@@ -72,10 +75,10 @@ llvm::cl::opt<bool>
                  llvm::cl::desc("Disables cache (enabled by default)"),
                  llvm::cl::cat(MullCXXCategory), llvm::cl::init(false));
 
-llvm::cl::opt<bool>
-    DryRun("dry-run", llvm::cl::Optional,
-                 llvm::cl::desc("Skips real mutants execution"),
-                 llvm::cl::cat(MullCXXCategory), llvm::cl::init(false));
+llvm::cl::opt<bool> DryRun("dry-run", llvm::cl::Optional,
+                           llvm::cl::desc("Skips real mutants execution"),
+                           llvm::cl::cat(MullCXXCategory),
+                           llvm::cl::init(false));
 
 enum MutatorsOptionIndex : int { _mutatorsOptionIndex_unused };
 llvm::cl::list<MutatorsOptionIndex> Mutators("mutators", llvm::cl::ZeroOrMore,
@@ -150,9 +153,9 @@ llvm::cl::list<std::string> ExcludePaths(
     llvm::cl::cat(MullCXXCategory));
 
 llvm::cl::list<std::string> IncludePaths(
-  "include-path", llvm::cl::ZeroOrMore,
-  llvm::cl::desc("File/directory paths to whitelist (supports regex)"),
-  llvm::cl::cat(MullCXXCategory));
+    "include-path", llvm::cl::ZeroOrMore,
+    llvm::cl::desc("File/directory paths to whitelist (supports regex)"),
+    llvm::cl::cat(MullCXXCategory));
 
 #if LLVM_VERSION_MAJOR == 3
 #define TRAILING_NULL , nullptr
@@ -297,7 +300,6 @@ int main(int argc, char **argv) {
   mull::ASTStorage astStorage(cxxCompilationDatabasePath, cxxCompilationFlags);
   mull::ASTSourceInfoProvider sourceInfoProvider(astStorage);
   mull::CXXJunkDetector junkDetector(astStorage);
-  mull::JunkMutationFilter junkFilter(junkDetector);
 
   mull::MutationsFinder mutationsFinder(mutatorsOptions.mutators(),
                                         configuration);
@@ -306,26 +308,33 @@ int main(int argc, char **argv) {
 
   auto sandbox = GetProcessSandbox(SandboxOption);
 
+  std::vector<std::unique_ptr<mull::Filter>> filterStorage;
   mull::Filters filters;
 
-  mull::NoDebugInfoFilter noDebugInfoFilter;
-  filters.mutationFilters.push_back(&noDebugInfoFilter);
-  filters.functionFilters.push_back(&noDebugInfoFilter);
-  filters.instructionFilters.push_back(&noDebugInfoFilter);
+  auto *noDebugInfoFilter = new mull::NoDebugInfoFilter;
+  auto *filePathFilter = new mull::FilePathFilter;
 
-  mull::FilePathFilter filePathFilter;
-  filters.mutationFilters.push_back(&filePathFilter);
-  filters.functionFilters.push_back(&filePathFilter);
+  filterStorage.emplace_back(noDebugInfoFilter);
+  filterStorage.emplace_back(filePathFilter);
+
+  filters.mutationFilters.push_back(noDebugInfoFilter);
+  filters.functionFilters.push_back(noDebugInfoFilter);
+  filters.instructionFilters.push_back(noDebugInfoFilter);
+
+  filters.mutationFilters.push_back(filePathFilter);
+  filters.functionFilters.push_back(filePathFilter);
 
   for (const auto &regex : ExcludePaths) {
-    filePathFilter.exclude(regex);
+    filePathFilter->exclude(regex);
   }
   for (const auto &regex : IncludePaths) {
-    filePathFilter.include(regex);
+    filePathFilter->include(regex);
   }
 
   if (junkDetectionEnabled) {
-    filters.mutationFilters.push_back(&junkFilter);
+    auto *junkFilter = new mull::JunkMutationFilter(junkDetector);
+    filters.mutationFilters.push_back(junkFilter);
+    filterStorage.emplace_back(junkFilter);
   }
 
   mull::Driver driver(configuration, *sandbox, program, toolchain, filters,

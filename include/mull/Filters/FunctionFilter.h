@@ -1,5 +1,7 @@
 #pragma once
 
+#include "mull/Filters/Filter.h"
+
 #include <string>
 
 namespace llvm {
@@ -8,10 +10,11 @@ class Function;
 
 namespace mull {
 
-class FunctionFilter {
+class FunctionFilter : virtual public Filter {
 public:
   virtual bool shouldSkip(llvm::Function *function) = 0;
   virtual std::string name() = 0;
+  virtual ~FunctionFilter() {};
 };
 
 } // namespace mull
