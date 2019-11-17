@@ -4,6 +4,7 @@
 #include "mull/MutationPoint.h"
 #include "mull/Mutators/AndOrReplacementMutator.h"
 #include "mull/Mutators/NegateConditionMutator.h"
+#include "mull/Mutators/OrAndReplacementMutator.h"
 #include "mull/Mutators/RemoveVoidFunctionMutator.h"
 #include "mull/Mutators/ReplaceCallMutator.h"
 #include "mull/Mutators/ScalarValueMutator.h"
@@ -169,8 +170,13 @@ static const CXXJunkDetectorTestParameter parameters[] = {
         new cxx::NumberInitConst, 6),
 
     CXXJunkDetectorTestParameter(
-        fixtures::mutators_and_or_replacement_cpp_junk_bc_path(),
-        new AndOrReplacementMutator, 4),
+        fixtures::mutators_and_or_and_to_or_replacement_cpp_junk_bc_path(),
+        new AndOrReplacementMutator, 2),
+
+    CXXJunkDetectorTestParameter(
+        fixtures::mutators_and_or_or_to_and_replacement_cpp_junk_bc_path(),
+        new OrAndReplacementMutator, 2),
+
     CXXJunkDetectorTestParameter(fixtures::mutators_scalar_value_junk_bc_path(),
                                  new ScalarValueMutator, 5),
 

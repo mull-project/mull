@@ -61,7 +61,8 @@ Mutators can be specified either by their names or by groups.
  - `math_div_mutator`: replaces `/` with `*`
  - `math_mul_mutator`: replaces `*` with `/`
  - `conditional`: group, includes 3 next mutators
- - `and_or_replacement_mutator`: replaces `&&` with `||` and vice versa
+ - `and_to_or_replacement_mutator`: replaces `&&` with `||`
+ - `or_to_and_replacement_mutator`: replaces `||` with `&&`
  - `negate_mutator`: negates all conditions, e.g.: `!=` -> `=`, `<` -> `>=`
  - `conditionals_boundary_mutator`: mutates boundaries, e.g.: `<` -> `<=`, `<=` -> `<`
  - `functions`: group, includes 2 next mutators

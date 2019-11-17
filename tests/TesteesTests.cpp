@@ -9,7 +9,8 @@ TEST(FunctionsUnderTest, mergeReachableFunctions) {
   llvm::LLVMContext llvmContext;
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
-      fixtures::mutators_and_or_replacement_module_bc_path(), llvmContext);
+      fixtures::mutators_and_or_and_to_or_replacement_module_bc_path(),
+      llvmContext);
 
   auto &allFunctions = bitcode->getModule()->getFunctionList();
 

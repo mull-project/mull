@@ -25,7 +25,8 @@ TEST(MutationPoint, AndOrReplacementMutator_applyMutation) {
   LLVMContext context;
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
-      fixtures::mutators_and_or_replacement_module_bc_path(), context);
+      fixtures::mutators_and_or_and_to_or_replacement_module_bc_path(),
+      context);
   AndOrReplacementMutator mutator;
 
   FunctionUnderTest functionUnderTest(
