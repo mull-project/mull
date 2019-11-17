@@ -60,10 +60,10 @@
       - mull-cxx
       - -test-framework=GoogleTest
       - -mutators=cxx_arithmetic_add_to_sub
-      - -ld_search_path=/usr/local/lib
-      - -ld_search_path=/lib/x86_64-linux-gnu
-      - -ld_search_path=/usr/lib/x86_64-linux-gnu
-      - -ld_search_path={{ llvm_dir }}/lib
+      - -ld-search-path=/usr/local/lib
+      - -ld-search-path=/lib/x86_64-linux-gnu
+      - -ld-search-path=/usr/lib/x86_64-linux-gnu
+      - -ld-search-path={{ llvm_dir }}/lib
       - -compilation-flags=--sysroot={{ SDKROOT }} -isystem {{ llvm_dir }}/include/c++/v1 -isystem {{ llvm_dir }}/lib/clang/{{ llvm_version }}/include
       - -compdb-path={{ working_dir }}/integration/fmt.build.dir/compile_commands.json
       - "{{ working_dir }}/integration/fmt.build.dir/bin/core-test"
@@ -100,7 +100,7 @@
     argv:
       - mull-cxx
       - -test-framework=CustomTest
-      - -ld_search_path=/lib/x86_64-linux-gnu
+      - -ld-search-path=/lib/x86_64-linux-gnu
       - "{{ working_dir }}/integration/openssl-no-shared/test/bio_enc_test"
   environment:
     LD_LIBRARY_PATH: "{{ llvm_dir }}/lib"

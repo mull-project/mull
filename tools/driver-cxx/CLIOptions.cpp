@@ -1,4 +1,7 @@
 #include "CLIOptions.h"
+#include <mull/Reporters/IDEReporter.h>
+#include <mull/Reporters/MutationTestingElementsReporter.h>
+#include <mull/Reporters/SQLiteReporter.h>
 
 using namespace mull;
 using namespace tool;
@@ -31,7 +34,7 @@ opt<std::string> tool::ReportName(
   "report-name",
   desc("Filename for the report (only for supported reporters). Defaults to <timestamp>.<extension>"),
   Optional,
-  init("."),
+  init(""),
   cat(MullCXXCategory));
 
 opt<bool> tool::DisableCache(
@@ -97,31 +100,17 @@ list<std::string> tool::IncludePaths(
   ZeroOrMore,
   cat(MullCXXCategory));
 
-#if LLVM_VERSION_MAJOR == 3
-#define TRAILING_NULL , nullptr
-#else
-#define TRAILING_NULL
-#endif
+opt<SandboxKind> tool::SandboxOption(
+    "sandbox",
+    desc("Choose sandbox approach:"),
+    Optional,
+    init(SandboxKind::Timer),
+    cat(MullCXXCategory));
 
-opt<SandboxType> tool::SandboxOption(
-  "sandbox",
-  desc("Choose sandbox level:"),
-  values(clEnumVal(None, "No sandboxing"),
-         clEnumVal(Watchdog, "Uses 4 processes, not recommended"),
-         clEnumVal(Timer, "Fastest, Recommended")
-         TRAILING_NULL),
-  init(Timer),
-  cat(MullCXXCategory));
-
-
-list<ReporterType> tool::ReporterOption(
+list<ReporterKind> tool::ReportersOption(
   "reporters",
   desc("Choose reporters:"),
-  OneOrMore,
-  values(clEnumVal(IDE, "Prints compiler-like warnings into stdout"),
-         clEnumVal(SQLite, "Saves results into an SQLite database"),
-         clEnumVal(Elements, "Generates mutation-testing-elements compatible JSON file")
-         TRAILING_NULL),
+  ZeroOrMore,
   cat(MullCXXCategory));
 
 // clang-format on
@@ -156,4 +145,61 @@ TestFramework TestFrameworkCLIOptions::testFramework(Toolchain &toolchain,
                                                      Configuration &configuration) {
   auto &name = options[parameter.getValue()].first;
   return factory.createTestFramework(name, toolchain, configuration);
+}
+
+SandboxCLIOptions::SandboxCLIOptions(opt<SandboxKind> &parameter) : parameter(parameter) {
+  parameter.getParser().addLiteralOption("None", SandboxKind::NoSandbox, "No sandboxing");
+  parameter.getParser().addLiteralOption(
+      "Watchdog", SandboxKind::Watchdog, "Uses 4 processes, not recommended");
+  parameter.getParser().addLiteralOption("Timer", SandboxKind::Timer, "Fastest, Recommended");
+}
+
+std::unique_ptr<mull::ProcessSandbox> SandboxCLIOptions::sandbox() {
+  switch (parameter.getValue()) {
+  case SandboxKind::NoSandbox:
+    return llvm::make_unique<mull::NullProcessSandbox>();
+  case SandboxKind::Watchdog:
+    return llvm::make_unique<mull::ForkWatchdogSandbox>();
+  case SandboxKind::Timer:
+    return llvm::make_unique<mull::ForkTimerSandbox>();
+  }
+}
+
+ReportersCLIOptions::ReportersCLIOptions(list<ReporterKind> &parameter) : parameter(parameter) {
+  parameter.getParser().addLiteralOption(
+      "IDE", ReporterKind::IDE, "Prints compiler-like warnings into stdout");
+  parameter.getParser().addLiteralOption(
+      "SQLite", ReporterKind::SQLite, "Saves results into an SQLite database");
+  parameter.getParser().addLiteralOption(
+      "Elements",
+      ReporterKind::Elements,
+      "Generates mutation-testing-elements compatible JSON file");
+}
+
+std::vector<std::unique_ptr<Reporter>> ReportersCLIOptions::reporters(ReporterParameters params) {
+  std::vector<std::unique_ptr<mull::Reporter>> reporters;
+  std::string &name = params.reporterName;
+  std::string &directory = params.reporterDirectory;
+  SourceInfoProvider &provider = params.sourceInfoProvider;
+
+  // TODO: Move to a better place
+  for (auto i = 0; i < parameter.getNumOccurrences(); i++) {
+    switch (parameter[i]) {
+    case ReporterKind::IDE: {
+      reporters.push_back(llvm::make_unique<mull::IDEReporter>());
+    } break;
+    case ReporterKind::SQLite: {
+      reporters.emplace_back(new mull::SQLiteReporter(directory, name));
+    } break;
+    case ReporterKind::Elements: {
+      reporters.emplace_back(new mull::MutationTestingElementsReporter(directory, name, provider));
+    } break;
+    }
+  }
+
+  if (reporters.empty()) {
+    reporters.push_back(llvm::make_unique<mull::IDEReporter>());
+  }
+
+  return reporters;
 }

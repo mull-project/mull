@@ -3,6 +3,9 @@
 #include <llvm/Support/CommandLine.h>
 #include <mull/Mutators/Mutator.h>
 #include <mull/Mutators/MutatorsFactory.h>
+#include <mull/Reporters/ASTSourceInfoProvider.h>
+#include <mull/Reporters/Reporter.h>
+#include <mull/Sandbox/ProcessSandbox.h>
 #include <mull/TestFrameworks/TestFramework.h>
 #include <mull/TestFrameworks/TestFrameworkFactory.h>
 #include <mull/Toolchain/Toolchain.h>
@@ -33,16 +36,12 @@ enum TestFrameworkOptionIndex : int { _testFrameworkOptionIndex_unused };
 
 extern list<MutatorsOptionIndex> Mutators;
 extern opt<TestFrameworkOptionIndex> TestFrameworks;
+extern list<ReporterKind> ReportersOption;
+extern opt<SandboxKind> SandboxOption;
 
 extern list<std::string> LDSearchPaths;
 extern list<std::string> ExcludePaths;
 extern list<std::string> IncludePaths;
-
-enum SandboxType { None, Watchdog, Timer };
-enum ReporterType { IDE, SQLite, Elements };
-
-extern opt<SandboxType> SandboxOption;
-extern list<ReporterType> ReporterOption;
 
 class MutatorsCLIOptions {
 public:
@@ -55,6 +54,21 @@ private:
   list<MutatorsOptionIndex> &parameter;
 };
 
+struct ReporterParameters {
+  std::string reporterName;
+  std::string reporterDirectory;
+  SourceInfoProvider &sourceInfoProvider;
+};
+
+class ReportersCLIOptions {
+public:
+  explicit ReportersCLIOptions(list<ReporterKind> &parameter);
+  std::vector<std::unique_ptr<Reporter>> reporters(ReporterParameters params);
+
+private:
+  list<ReporterKind> &parameter;
+};
+
 class TestFrameworkCLIOptions {
 public:
   explicit TestFrameworkCLIOptions(opt<TestFrameworkOptionIndex> &parameter);
@@ -64,6 +78,15 @@ private:
   TestFrameworkFactory factory;
   std::vector<std::pair<std::string, std::string>> options;
   opt<TestFrameworkOptionIndex> &parameter;
+};
+
+class SandboxCLIOptions {
+public:
+  explicit SandboxCLIOptions(opt<SandboxKind> &parameter);
+  std::unique_ptr<mull::ProcessSandbox> sandbox();
+
+private:
+  opt<SandboxKind> &parameter;
 };
 
 } // namespace tool

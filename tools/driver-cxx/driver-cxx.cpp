@@ -17,33 +17,17 @@
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
 #include "mull/Metrics/Metrics.h"
 #include "mull/MutationsFinder.h"
-#include "mull/Mutators/MutatorsFactory.h"
 #include "mull/Parallelization/Parallelization.h"
 #include "mull/Parallelization/Tasks/LoadBitcodeFromBinaryTask.h"
 #include "mull/Program/Program.h"
 #include "mull/Reporters/ASTSourceInfoProvider.h"
-#include "mull/Reporters/IDEReporter.h"
-#include "mull/Reporters/MutationTestingElementsReporter.h"
-#include "mull/Reporters/SQLiteReporter.h"
 #include "mull/Result.h"
-#include "mull/Sandbox/ProcessSandbox.h"
 #include "mull/TestFrameworks/TestFrameworkFactory.h"
 #include "mull/Version.h"
 
 #include <unistd.h>
 
 #include <memory>
-
-std::unique_ptr<mull::ProcessSandbox> GetProcessSandbox(llvm::cl::opt<tool::SandboxType> &option) {
-  if (option == tool::SandboxType::None) {
-    return llvm::make_unique<mull::NullProcessSandbox>();
-  }
-  if (option == tool::SandboxType::Watchdog) {
-    return llvm::make_unique<mull::ForkWatchdogSandbox>();
-  }
-
-  return llvm::make_unique<mull::ForkTimerSandbox>();
-}
 
 static void validateInputFile() {
   if (access(tool::InputFile.getValue().c_str(), R_OK) != 0) {
@@ -55,8 +39,11 @@ static void validateInputFile() {
 int main(int argc, char **argv) {
   llvm_compat::setVersionPrinter(mull::printVersionInformation,
                                  mull::printVersionInformationStream);
+
   tool::MutatorsCLIOptions mutatorsOptions(tool::Mutators);
   tool::TestFrameworkCLIOptions testFrameworkOption(tool::TestFrameworks);
+  tool::SandboxCLIOptions sandboxOption(tool::SandboxOption);
+  tool::ReportersCLIOptions reportersOption(tool::ReportersOption);
 
   llvm::cl::HideUnrelatedOptions(tool::MullCXXCategory);
   llvm::cl::ParseCommandLineOptions(argc, argv);
@@ -151,7 +138,7 @@ int main(int argc, char **argv) {
 
   mull::Metrics metrics;
 
-  auto sandbox = GetProcessSandbox(tool::SandboxOption);
+  auto sandbox = sandboxOption.sandbox();
 
   std::vector<std::unique_ptr<mull::Filter>> filterStorage;
   mull::Filters filters;
@@ -194,30 +181,12 @@ int main(int argc, char **argv) {
   auto result = driver.Run();
   metrics.endRun();
 
-  std::vector<std::unique_ptr<mull::Reporter>> reporters;
-  for (auto i = 0; i < tool::ReporterOption.getNumOccurrences(); i++) {
-    switch (tool::ReporterOption[i]) {
-    case tool::IDE: {
-      reporters.push_back(llvm::make_unique<mull::IDEReporter>());
-    } break;
-    case tool::SQLite: {
-      reporters.push_back(
-          llvm::make_unique<mull::SQLiteReporter>(tool::ReportDirectory, tool::ReportName));
-    } break;
-    case tool::Elements: {
-      if (junkDetectionEnabled) {
-        reporters.push_back(llvm::make_unique<mull::MutationTestingElementsReporter>(
-            tool::ReportDirectory, tool::ReportName, sourceInfoProvider));
-      } else {
-        mull::Logger::warn() << "The Mutation Testing Elements Reporter requires "
-                                "the compilation database to be provided";
-      }
-    } break;
-    }
-  }
-  if (reporters.empty()) {
-    reporters.push_back(llvm::make_unique<mull::IDEReporter>());
-  }
+  tool::ReporterParameters params{
+    .reporterDirectory = tool::ReportDirectory.getValue(),
+    .reporterName = tool::ReportName.getValue(),
+    .sourceInfoProvider = sourceInfoProvider,
+  };
+  std::vector<std::unique_ptr<mull::Reporter>> reporters = reportersOption.reporters(params);
 
   for (auto &reporter : reporters) {
     reporter->reportResults(*result, metrics);
