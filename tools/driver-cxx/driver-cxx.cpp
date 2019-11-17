@@ -4,6 +4,7 @@
 
 #include <llvm/Support/TargetSelect.h>
 
+#include "CLIOptions.h"
 #include "DynamicLibraries.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Config/ConfigurationOptions.h"
@@ -33,161 +34,11 @@
 
 #include <memory>
 
-llvm::cl::OptionCategory MullCXXCategory("mull-cxx");
-
-llvm::cl::opt<std::string> InputFile(llvm::cl::Positional,
-                                     llvm::cl::desc("<input file>"),
-                                     llvm::cl::Required);
-
-llvm::cl::opt<unsigned> Workers("workers", llvm::cl::Optional,
-                                llvm::cl::desc("How many threads to use"),
-                                llvm::cl::cat(MullCXXCategory));
-
-llvm::cl::opt<std::string> CompilationDatabasePath(
-    "compdb-path", llvm::cl::Optional,
-    llvm::cl::desc("Path to a compilation database (compile_commands.json) for "
-                   "junk detection"),
-    llvm::cl::cat(MullCXXCategory), llvm::cl::init(""));
-
-llvm::cl::opt<std::string> CompilationFlags(
-    "compilation-flags", llvm::cl::Optional,
-    llvm::cl::desc("Extra compilation flags for junk detection"),
-    llvm::cl::cat(MullCXXCategory), llvm::cl::init(""));
-
-llvm::cl::opt<std::string> CacheDir(
-    "cache-dir", llvm::cl::Optional,
-    llvm::cl::desc("Where to store cache (defaults to /tmp/mull-cache)"),
-    llvm::cl::cat(MullCXXCategory), llvm::cl::init("/tmp/mull-cache"));
-
-llvm::cl::opt<std::string>
-    ReportDirectory("report-dir", llvm::cl::Optional,
-                    llvm::cl::desc("Where to store report (defaults to '.')"),
-                    llvm::cl::cat(MullCXXCategory), llvm::cl::init("."));
-
-llvm::cl::opt<std::string> ReportName(
-    "report-name", llvm::cl::Optional,
-    llvm::cl::desc("Filename for the report (only for supported reporters). "
-                   "Defaults to <timestamp>.<extension>"),
-    llvm::cl::cat(MullCXXCategory), llvm::cl::init("."));
-
-llvm::cl::opt<bool>
-    DisableCache("disable-cache", llvm::cl::Optional,
-                 llvm::cl::desc("Disables cache (enabled by default)"),
-                 llvm::cl::cat(MullCXXCategory), llvm::cl::init(false));
-
-llvm::cl::opt<bool> DryRun("dry-run", llvm::cl::Optional,
-                           llvm::cl::desc("Skips real mutants execution"),
-                           llvm::cl::cat(MullCXXCategory),
-                           llvm::cl::init(false));
-
-enum MutatorsOptionIndex : int { _mutatorsOptionIndex_unused };
-llvm::cl::list<MutatorsOptionIndex> Mutators("mutators", llvm::cl::ZeroOrMore,
-                                             llvm::cl::desc("Choose mutators:"),
-                                             llvm::cl::cat(MullCXXCategory));
-
-class MutatorsCLIOptions {
-public:
-  explicit MutatorsCLIOptions(llvm::cl::list<MutatorsOptionIndex> &parameter)
-      : options(factory.commandLineOptions()), parameter(parameter) {
-    int index = 0;
-    for (auto &option : options) {
-      parameter.getParser().addLiteralOption(option.first.c_str(), index++,
-                                             option.second.c_str());
-    }
-  }
-
-  std::vector<std::unique_ptr<mull::Mutator>> mutators() {
-    std::vector<std::string> selectedGroups;
-    for (int i = 0; i < parameter.size(); i++) {
-      auto &name = parameter[i];
-      selectedGroups.push_back(options[name].first);
-    }
-
-    return factory.mutators(selectedGroups);
-  }
-
-private:
-  mull::MutatorsFactory factory;
-  std::vector<std::pair<std::string, std::string>> options;
-  llvm::cl::list<MutatorsOptionIndex> &parameter;
-};
-
-enum TestFrameworkOptionIndex : int { _testFrameworkOptionIndex_unused };
-llvm::cl::opt<TestFrameworkOptionIndex>
-    TestFrameworks("test-framework", llvm::cl::Required,
-                   llvm::cl::desc("Choose test framework:"),
-                   llvm::cl::cat(MullCXXCategory));
-
-class TestFrameworkCLIOptions {
-public:
-  explicit TestFrameworkCLIOptions(
-      llvm::cl::opt<TestFrameworkOptionIndex> &parameter)
-      : options(factory.commandLineOptions()), parameter(parameter) {
-    int index = 0;
-    for (auto &option : options) {
-      parameter.getParser().addLiteralOption(option.first.c_str(), index++,
-                                             option.second.c_str());
-    }
-  }
-
-  mull::TestFramework testFramework(mull::Toolchain &toolchain,
-                                    mull::Configuration &configuration) {
-    auto &name = options[parameter.getValue()].first;
-    return factory.createTestFramework(name, toolchain, configuration);
-  }
-
-private:
-  mull::TestFrameworkFactory factory;
-  std::vector<std::pair<std::string, std::string>> options;
-  llvm::cl::opt<TestFrameworkOptionIndex> &parameter;
-};
-
-llvm::cl::list<std::string> LDSearchPaths("ld_search_path",
-                                          llvm::cl::ZeroOrMore,
-                                          llvm::cl::desc("Library search path"),
-                                          llvm::cl::cat(MullCXXCategory));
-
-llvm::cl::list<std::string> ExcludePaths(
-    "exclude-path", llvm::cl::ZeroOrMore,
-    llvm::cl::desc("File/directory paths to ignore (supports regex)"),
-    llvm::cl::cat(MullCXXCategory));
-
-llvm::cl::list<std::string> IncludePaths(
-    "include-path", llvm::cl::ZeroOrMore,
-    llvm::cl::desc("File/directory paths to whitelist (supports regex)"),
-    llvm::cl::cat(MullCXXCategory));
-
-#if LLVM_VERSION_MAJOR == 3
-#define TRAILING_NULL , nullptr
-#else
-#define TRAILING_NULL
-#endif
-
-enum SandboxType { None, Watchdog, Timer };
-llvm::cl::opt<SandboxType> SandboxOption(
-    "sandbox", llvm::cl::desc("Choose sandbox level:"),
-    llvm::cl::values(clEnumVal(None, "No sandboxing"),
-                     clEnumVal(Watchdog, "Uses 4 processes, not recommended"),
-                     clEnumVal(Timer, "Fastest, Recommended") TRAILING_NULL),
-    llvm::cl::cat(MullCXXCategory), llvm::cl::init(Timer));
-
-enum ReporterType { IDE, SQLite, Elements };
-llvm::cl::list<ReporterType> ReporterOption(
-    "reporters", llvm::cl::ZeroOrMore, llvm::cl::desc("Choose reporters:"),
-    llvm::cl::values(
-        clEnumVal(IDE, "Prints compiler-like warnings into stdout"),
-        clEnumVal(SQLite, "Saves results into an SQLite database"),
-        clEnumVal(Elements,
-                  "Generates mutation-testing-elements compatible JSON file")
-            TRAILING_NULL),
-    llvm::cl::cat(MullCXXCategory));
-
-std::unique_ptr<mull::ProcessSandbox>
-GetProcessSandbox(llvm::cl::opt<SandboxType> &option) {
-  if (option == SandboxType::None) {
+std::unique_ptr<mull::ProcessSandbox> GetProcessSandbox(llvm::cl::opt<tool::SandboxType> &option) {
+  if (option == tool::SandboxType::None) {
     return llvm::make_unique<mull::NullProcessSandbox>();
   }
-  if (option == SandboxType::Watchdog) {
+  if (option == tool::SandboxType::Watchdog) {
     return llvm::make_unique<mull::ForkWatchdogSandbox>();
   }
 
@@ -195,8 +46,8 @@ GetProcessSandbox(llvm::cl::opt<SandboxType> &option) {
 }
 
 static void validateInputFile() {
-  if (access(InputFile.getValue().c_str(), R_OK) != 0) {
-    perror(InputFile.getValue().c_str());
+  if (access(tool::InputFile.getValue().c_str(), R_OK) != 0) {
+    perror(tool::InputFile.getValue().c_str());
     exit(1);
   }
 }
@@ -204,10 +55,10 @@ static void validateInputFile() {
 int main(int argc, char **argv) {
   llvm_compat::setVersionPrinter(mull::printVersionInformation,
                                  mull::printVersionInformationStream);
-  MutatorsCLIOptions mutatorsOptions(Mutators);
-  TestFrameworkCLIOptions testFrameworkOption(TestFrameworks);
+  tool::MutatorsCLIOptions mutatorsOptions(tool::Mutators);
+  tool::TestFrameworkCLIOptions testFrameworkOption(tool::TestFrameworks);
 
-  llvm::cl::HideUnrelatedOptions(MullCXXCategory);
+  llvm::cl::HideUnrelatedOptions(tool::MullCXXCategory);
   llvm::cl::ParseCommandLineOptions(argc, argv);
 
   validateInputFile();
@@ -220,43 +71,39 @@ int main(int argc, char **argv) {
   llvm::InitializeNativeTargetAsmParser();
 
   mull::Configuration configuration;
-  configuration.dryRunEnabled = DryRun.getValue();
-  configuration.customTests.push_back(
-      mull::CustomTestDefinition("main", "main", "mull", {}));
-  configuration.customTests.push_back(
-      mull::CustomTestDefinition("main", "_main", "mull", {}));
+  configuration.dryRunEnabled = tool::DryRunOption.getValue();
+  configuration.customTests.push_back(mull::CustomTestDefinition("main", "main", "mull", {}));
+  configuration.customTests.push_back(mull::CustomTestDefinition("main", "_main", "mull", {}));
   configuration.failFastEnabled = true;
 
-  if (Workers) {
+  if (tool::Workers) {
     mull::ParallelizationConfig parallelizationConfig;
-    parallelizationConfig.workers = Workers;
+    parallelizationConfig.workers = tool::Workers;
     parallelizationConfig.normalize();
     configuration.parallelization = parallelizationConfig;
   } else {
-    configuration.parallelization =
-        mull::ParallelizationConfig::defaultConfig();
+    configuration.parallelization = mull::ParallelizationConfig::defaultConfig();
   }
 
-  if (!DisableCache.getValue()) {
+  if (!tool::DisableCache.getValue()) {
     configuration.cacheEnabled = true;
-    configuration.cacheDirectory = CacheDir.getValue();
+    configuration.cacheDirectory = tool::CacheDir.getValue();
   }
 
   std::vector<std::unique_ptr<ebc::EmbeddedFile>> embeddedFiles;
-  mull::SingleTaskExecutor extractBitcodeBuffers(
-      "Extracting bitcode from executable", [&] {
-        ebc::BitcodeRetriever bitcodeRetriever(InputFile.getValue());
-        for (auto &bitcodeInfo : bitcodeRetriever.GetBitcodeInfo()) {
-          auto &container = bitcodeInfo.bitcodeContainer;
-          if (container) {
-            for (auto &file : container->GetRawEmbeddedFiles()) {
-              embeddedFiles.push_back(std::move(file));
-            }
-          } else {
-            mull::Logger::warn() << "No bitcode: " << bitcodeInfo.arch << "\n";
-          }
+  mull::SingleTaskExecutor extractBitcodeBuffers("Extracting bitcode from executable", [&] {
+    ebc::BitcodeRetriever bitcodeRetriever(tool::InputFile.getValue());
+    for (auto &bitcodeInfo : bitcodeRetriever.GetBitcodeInfo()) {
+      auto &container = bitcodeInfo.bitcodeContainer;
+      if (container) {
+        for (auto &file : container->GetRawEmbeddedFiles()) {
+          embeddedFiles.push_back(std::move(file));
         }
-      });
+      } else {
+        mull::Logger::warn() << "No bitcode: " << bitcodeInfo.arch << "\n";
+      }
+    }
+  });
   extractBitcodeBuffers.execute();
 
   std::vector<std::unique_ptr<llvm::LLVMContext>> contexts;
@@ -272,41 +119,39 @@ int main(int argc, char **argv) {
   executor.execute();
 
   std::vector<std::string> librarySearchPaths;
-  for (auto &searchPath : LDSearchPaths) {
+  for (auto &searchPath : tool::LDSearchPaths) {
     librarySearchPaths.push_back(searchPath);
   }
 
   auto dynamicLibraries =
-      mull::findDynamicLibraries(InputFile.getValue(), librarySearchPaths);
+      mull::findDynamicLibraries(tool::InputFile.getValue(), librarySearchPaths);
 
   mull::Program program(dynamicLibraries, {}, std::move(bitcode));
 
   mull::Toolchain toolchain(configuration);
 
-  mull::TestFramework testFramework(
-      testFrameworkOption.testFramework(toolchain, configuration));
+  mull::TestFramework testFramework(testFrameworkOption.testFramework(toolchain, configuration));
 
   bool junkDetectionEnabled = false;
   std::string cxxCompilationFlags;
   std::string cxxCompilationDatabasePath;
-  if (!CompilationFlags.empty()) {
-    cxxCompilationFlags = CompilationFlags.getValue();
+  if (!tool::CompilationFlags.empty()) {
+    cxxCompilationFlags = tool::CompilationFlags.getValue();
     junkDetectionEnabled = true;
   }
-  if (!CompilationDatabasePath.empty()) {
-    cxxCompilationDatabasePath = CompilationDatabasePath.getValue();
+  if (!tool::CompilationDatabasePath.empty()) {
+    cxxCompilationDatabasePath = tool::CompilationDatabasePath.getValue();
     junkDetectionEnabled = true;
   }
   mull::ASTStorage astStorage(cxxCompilationDatabasePath, cxxCompilationFlags);
   mull::ASTSourceInfoProvider sourceInfoProvider(astStorage);
   mull::CXXJunkDetector junkDetector(astStorage);
 
-  mull::MutationsFinder mutationsFinder(mutatorsOptions.mutators(),
-                                        configuration);
+  mull::MutationsFinder mutationsFinder(mutatorsOptions.mutators(), configuration);
 
   mull::Metrics metrics;
 
-  auto sandbox = GetProcessSandbox(SandboxOption);
+  auto sandbox = GetProcessSandbox(tool::SandboxOption);
 
   std::vector<std::unique_ptr<mull::Filter>> filterStorage;
   mull::Filters filters;
@@ -324,10 +169,10 @@ int main(int argc, char **argv) {
   filters.mutationFilters.push_back(filePathFilter);
   filters.functionFilters.push_back(filePathFilter);
 
-  for (const auto &regex : ExcludePaths) {
+  for (const auto &regex : tool::ExcludePaths) {
     filePathFilter->exclude(regex);
   }
-  for (const auto &regex : IncludePaths) {
+  for (const auto &regex : tool::IncludePaths) {
     filePathFilter->include(regex);
   }
 
@@ -337,31 +182,35 @@ int main(int argc, char **argv) {
     filterStorage.emplace_back(junkFilter);
   }
 
-  mull::Driver driver(configuration, *sandbox, program, toolchain, filters,
-                      mutationsFinder, metrics, testFramework);
+  mull::Driver driver(configuration,
+                      *sandbox,
+                      program,
+                      toolchain,
+                      filters,
+                      mutationsFinder,
+                      metrics,
+                      testFramework);
   metrics.beginRun();
   auto result = driver.Run();
   metrics.endRun();
 
   std::vector<std::unique_ptr<mull::Reporter>> reporters;
-  for (auto i = 0; i < ReporterOption.getNumOccurrences(); i++) {
-    switch (ReporterOption[i]) {
-    case IDE: {
+  for (auto i = 0; i < tool::ReporterOption.getNumOccurrences(); i++) {
+    switch (tool::ReporterOption[i]) {
+    case tool::IDE: {
       reporters.push_back(llvm::make_unique<mull::IDEReporter>());
     } break;
-    case SQLite: {
+    case tool::SQLite: {
       reporters.push_back(
-          llvm::make_unique<mull::SQLiteReporter>(ReportDirectory, ReportName));
+          llvm::make_unique<mull::SQLiteReporter>(tool::ReportDirectory, tool::ReportName));
     } break;
-    case Elements: {
+    case tool::Elements: {
       if (junkDetectionEnabled) {
-        reporters.push_back(
-            llvm::make_unique<mull::MutationTestingElementsReporter>(
-                ReportDirectory, ReportName, sourceInfoProvider));
+        reporters.push_back(llvm::make_unique<mull::MutationTestingElementsReporter>(
+            tool::ReportDirectory, tool::ReportName, sourceInfoProvider));
       } else {
-        mull::Logger::warn()
-            << "The Mutation Testing Elements Reporter requires "
-               "the compilation database to be provided";
+        mull::Logger::warn() << "The Mutation Testing Elements Reporter requires "
+                                "the compilation database to be provided";
       }
     } break;
     }
@@ -377,8 +226,7 @@ int main(int argc, char **argv) {
   llvm::llvm_shutdown();
 
   totalExecutionTime.finish();
-  mull::Logger::info() << "\nTotal execution time: "
-                       << totalExecutionTime.duration()
+  mull::Logger::info() << "\nTotal execution time: " << totalExecutionTime.duration()
                        << mull::MetricsMeasure::precision() << "\n";
 
   return 0;

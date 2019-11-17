@@ -1,6 +1,7 @@
 set (SOURCES
   ${CMAKE_CURRENT_LIST_DIR}/driver-cxx.cpp
   ${CMAKE_CURRENT_LIST_DIR}/DynamicLibraries.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/CLIOptions.cpp
 )
 
 if ("LLVM" IN_LIST LLVM_AVAILABLE_LIBS)
