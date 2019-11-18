@@ -8,6 +8,7 @@
 #include "mull/Mutators/CXX/RelationalMutators.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Mutators/NegateConditionMutator.h"
+#include "mull/Mutators/OrAndReplacementMutator.h"
 #include "mull/Mutators/RemoveVoidFunctionMutator.h"
 #include "mull/Mutators/ReplaceCallMutator.h"
 #include "mull/Mutators/ScalarValueMutator.h"
@@ -51,8 +52,9 @@ static void expandGroups(const vector<string> &groups,
 
 MutatorsFactory::MutatorsFactory() {
   groupsMapping[ConditionalMutatorsGroup] = {
-      AndOrReplacementMutator::ID, NegateConditionMutator::ID,
-      ConditionalBoundaryMutatorsGroup, NegateRelationalMutatorsGroup};
+      AndOrReplacementMutator::ID, OrAndReplacementMutator::ID,
+      NegateConditionMutator::ID, ConditionalBoundaryMutatorsGroup,
+      NegateRelationalMutatorsGroup};
   groupsMapping[MathMutatorsGroup] = {cxx::AddToSub::ID, cxx::SubToAdd::ID,
                                       cxx::MulToDiv::ID, cxx::DivToMul::ID};
   groupsMapping[FunctionsMutatorsGroup] = {ReplaceCallMutator::ID,
@@ -62,10 +64,11 @@ MutatorsFactory::MutatorsFactory() {
                                          NegateConditionMutator::ID,
                                          RemoveVoidFunctionMutator::ID};
   groupsMapping[ExperimentalMutatorsGroup] = {
-      AndOrReplacementMutator::ID,      NumbersMutatorsGroup,
-      ReplaceCallMutator::ID,           ScalarValueMutator::ID,
-      ConditionalBoundaryMutatorsGroup, NegateRelationalMutatorsGroup,
-      ArithmeticMutatorsGroup,          BitwiseMutatorsGroup,
+      AndOrReplacementMutator::ID,   OrAndReplacementMutator::ID,
+      NumbersMutatorsGroup,          ReplaceCallMutator::ID,
+      ScalarValueMutator::ID,        ConditionalBoundaryMutatorsGroup,
+      NegateRelationalMutatorsGroup, ArithmeticMutatorsGroup,
+      BitwiseMutatorsGroup,
   };
   groupsMapping[CXXMutatorsGroup] = {
       ConditionalBoundaryMutatorsGroup,
@@ -120,7 +123,9 @@ void addMutator(std::map<std::string, std::unique_ptr<Mutator>> &mapping) {
 
 void MutatorsFactory::init() {
   addMutator<NegateConditionMutator>(mutatorsMapping);
+
   addMutator<AndOrReplacementMutator>(mutatorsMapping);
+  addMutator<OrAndReplacementMutator>(mutatorsMapping);
 
   addMutator<ReplaceCallMutator>(mutatorsMapping);
   addMutator<RemoveVoidFunctionMutator>(mutatorsMapping);

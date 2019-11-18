@@ -1,4 +1,4 @@
-#include "mull/Mutators/AndOrReplacementMutator.h"
+#include "mull/Mutators/OrAndReplacementMutator.h"
 
 #include "mull/Logger.h"
 #include "mull/MutationPoint.h"
@@ -18,48 +18,48 @@
 using namespace llvm;
 using namespace mull;
 
-const std::string AndOrReplacementMutator::ID = "and_to_or_replacement_mutator";
-const std::string AndOrReplacementMutator::description =
-    "Replaces && with ||";
+const std::string OrAndReplacementMutator::ID = "or_to_and_replacement_mutator";
+const std::string OrAndReplacementMutator::description =
+    "Replaces || with &&";
 
-static std::string getMutationTypeToString(AND_OR_MutationType mutationType) {
+static std::string getMutationTypeToString(OR_AND_MutationType mutationType) {
   switch (mutationType) {
-  case AND_OR_MutationType_AND_to_OR_Pattern1:
-  case AND_OR_MutationType_AND_to_OR_Pattern2:
-  case AND_OR_MutationType_AND_to_OR_Pattern3:
-    return std::string("||");
+  case OR_AND_MutationType_OR_to_AND_Pattern1:
+  case OR_AND_MutationType_OR_to_AND_Pattern2:
+  case OR_AND_MutationType_OR_to_AND_Pattern3:
+    return std::string("&&");
   default:
     assert(0 && "should not reach here");
   }
 }
 
-AND_OR_MutationType AndOrReplacementMutator::findPossibleMutation(Value &V) {
+OR_AND_MutationType OrAndReplacementMutator::findPossibleMutation(Value &V) {
   BranchInst *branchInst = dyn_cast<BranchInst>(&V);
 
   if (branchInst == nullptr) {
-    return AND_OR_MutationType_None;
+    return OR_AND_MutationType_None;
   }
 
   if (branchInst->isConditional() == false) {
-    return AND_OR_MutationType_None;
+    return OR_AND_MutationType_None;
   }
 
   /// TODO: Discuss how to filter out irrelevant branch instructions.
   SourceLocation location = SourceLocation::locationFromInstruction(branchInst);
   if (!location.isNull()) {
     if (location.filePath.find("include/c++/v1") != std::string::npos) {
-      return AND_OR_MutationType_None;
+      return OR_AND_MutationType_None;
     }
   }
 
   BranchInst *secondBranch = nullptr;
-  AND_OR_MutationType possibleMutationType =
+  OR_AND_MutationType possibleMutationType =
       findPossibleMutationInBranch(branchInst, &secondBranch);
 
   return possibleMutationType;
 }
 
-void AndOrReplacementMutator::applyMutation(llvm::Function *function,
+void OrAndReplacementMutator::applyMutation(llvm::Function *function,
                                             const MutationPointAddress &address,
                                             irm::IRMutation *lowLevelMutation) {
   llvm::Instruction &I = address.findInstruction(function);
@@ -69,25 +69,25 @@ void AndOrReplacementMutator::applyMutation(llvm::Function *function,
   assert(branchInst->isConditional());
 
   BranchInst *secondBranch = nullptr;
-  AND_OR_MutationType possibleMutationType =
+  OR_AND_MutationType possibleMutationType =
       findPossibleMutationInBranch(branchInst, &secondBranch);
 
-  if (possibleMutationType == AND_OR_MutationType_AND_to_OR_Pattern1) {
-    return applyMutationANDToOR_Pattern1(branchInst, secondBranch);
+  if (possibleMutationType == OR_AND_MutationType_OR_to_AND_Pattern1) {
+    return applyMutationORToAND_Pattern1(branchInst, secondBranch);
   }
 
-  if (possibleMutationType == AND_OR_MutationType_AND_to_OR_Pattern2) {
-    return applyMutationANDToOR_Pattern2(branchInst, secondBranch);
+  if (possibleMutationType == OR_AND_MutationType_OR_to_AND_Pattern2) {
+    return applyMutationORToAND_Pattern2(branchInst, secondBranch);
   }
 
-  if (possibleMutationType == AND_OR_MutationType_AND_to_OR_Pattern3) {
-    return applyMutationANDToOR_Pattern3(branchInst, secondBranch);
+  if (possibleMutationType == OR_AND_MutationType_OR_to_AND_Pattern3) {
+    return applyMutationORToAND_Pattern3(branchInst, secondBranch);
   }
 }
 
-#pragma mark - Private: Apply mutations: AND -> OR
+#pragma mark - Private: Apply mutations: OR -> AND
 
-void AndOrReplacementMutator::applyMutationANDToOR_Pattern1(
+void OrAndReplacementMutator::applyMutationORToAND_Pattern1(
     BranchInst *firstBranch, BranchInst *secondBranch) {
 
   assert(firstBranch != nullptr);
@@ -101,18 +101,19 @@ void AndOrReplacementMutator::applyMutationANDToOR_Pattern1(
   assert(sourceValue);
 
   /// Left branch value is somehow operand #2, right is #1.
-  BasicBlock *firstBranchLeftBB =
-      dyn_cast<BasicBlock>(firstBranch->getOperand(2));
   BasicBlock *firstBranchRightBB =
       dyn_cast<BasicBlock>(firstBranch->getOperand(1));
-  assert(firstBranchLeftBB);
   assert(firstBranchRightBB);
 
   BasicBlock *secondBranchLeftBB =
       dyn_cast<BasicBlock>(secondBranch->getOperand(2));
+  BasicBlock *secondBranchRightBB =
+      dyn_cast<BasicBlock>(secondBranch->getOperand(1));
+  assert(secondBranchLeftBB);
+  assert(secondBranchRightBB);
 
   BranchInst *replacement =
-      BranchInst::Create(secondBranchLeftBB, firstBranchLeftBB, sourceValue);
+      BranchInst::Create(firstBranchRightBB, secondBranchRightBB, sourceValue);
 
   /// If I add a named instruction, and the name already exist
   /// in a basic block, then LLVM will make another unique name of it
@@ -125,7 +126,7 @@ void AndOrReplacementMutator::applyMutationANDToOR_Pattern1(
   firstBranch->eraseFromParent();
 
   /// If one of the second branch's successor basic blocks has a PHI node and
-  /// second branch's left basic block jumps to that successor block,
+  /// second branch's right basic block jumps to that successor block,
   /// we need to update PHI node to also accept a jump from a replacement
   /// branch instruction.
   for (unsigned index = 0;
@@ -133,8 +134,7 @@ void AndOrReplacementMutator::applyMutationANDToOR_Pattern1(
        index++) {
     BasicBlock *secondBranchSuccessorBlock =
         secondBranch->getParent()->getTerminator()->getSuccessor(index);
-
-    if (secondBranchLeftBB != secondBranchSuccessorBlock) {
+    if (secondBranchRightBB != secondBranchSuccessorBlock) {
       continue;
     }
 
@@ -158,7 +158,7 @@ void AndOrReplacementMutator::applyMutationANDToOR_Pattern1(
   }
 }
 
-void AndOrReplacementMutator::applyMutationANDToOR_Pattern2(
+void OrAndReplacementMutator::applyMutationORToAND_Pattern2(
     BranchInst *firstBranch, BranchInst *secondBranch) {
 
   assert(firstBranch != nullptr);
@@ -174,16 +174,17 @@ void AndOrReplacementMutator::applyMutationANDToOR_Pattern2(
   /// Left branch value is somehow operand #2, right is #1.
   BasicBlock *firstBranchLeftBB =
       dyn_cast<BasicBlock>(firstBranch->getOperand(2));
-  BasicBlock *firstBranchRightBB =
-      dyn_cast<BasicBlock>(firstBranch->getOperand(1));
   assert(firstBranchLeftBB);
-  assert(firstBranchRightBB);
 
   BasicBlock *secondBranchLeftBB =
       dyn_cast<BasicBlock>(secondBranch->getOperand(2));
+  BasicBlock *secondBranchRightBB =
+      dyn_cast<BasicBlock>(secondBranch->getOperand(1));
+  assert(secondBranchLeftBB);
+  assert(secondBranchRightBB);
 
   BranchInst *replacement =
-      BranchInst::Create(firstBranchRightBB, secondBranchLeftBB, sourceValue);
+      BranchInst::Create(secondBranchRightBB, firstBranchLeftBB, sourceValue);
 
   /// If I add a named instruction, and the name already exist
   /// in a basic block, then LLVM will make another unique name of it
@@ -196,7 +197,7 @@ void AndOrReplacementMutator::applyMutationANDToOR_Pattern2(
   firstBranch->eraseFromParent();
 
   /// If one of the second branch's successor basic blocks has a PHI node and
-  /// second branch's left basic block jumps to that successor block,
+  /// second branch's right basic block jumps to that successor block,
   /// we need to update PHI node to also accept a jump from a replacement
   /// branch instruction.
   for (unsigned index = 0;
@@ -204,7 +205,7 @@ void AndOrReplacementMutator::applyMutationANDToOR_Pattern2(
        index++) {
     BasicBlock *secondBranchSuccessorBlock =
         secondBranch->getParent()->getTerminator()->getSuccessor(index);
-    if (secondBranchLeftBB != secondBranchSuccessorBlock) {
+    if (secondBranchRightBB != secondBranchSuccessorBlock) {
       continue;
     }
 
@@ -228,7 +229,7 @@ void AndOrReplacementMutator::applyMutationANDToOR_Pattern2(
   }
 }
 
-void AndOrReplacementMutator::applyMutationANDToOR_Pattern3(
+void OrAndReplacementMutator::applyMutationORToAND_Pattern3(
     BranchInst *firstBranch, BranchInst *secondBranch) {
   Module *module = firstBranch->getParent()->getParent()->getParent();
 
@@ -242,7 +243,6 @@ void AndOrReplacementMutator::applyMutationANDToOR_Pattern3(
 
     break;
   }
-
   assert(phiNode);
 
   ConstantInt *intValueForIncomingBlock0 =
@@ -260,6 +260,7 @@ void AndOrReplacementMutator::applyMutationANDToOR_Pattern3(
 
   auto firstBranchLeftBB = dyn_cast<BasicBlock>(firstBranch->getOperand(2));
   auto firstBranchRightBB = dyn_cast<BasicBlock>(firstBranch->getOperand(1));
+
   Value *firstBranchConditionValue =
       dyn_cast<Value>(firstBranch->getOperand(0));
   assert(firstBranchConditionValue);
@@ -280,11 +281,11 @@ void AndOrReplacementMutator::applyMutationANDToOR_Pattern3(
 
 #pragma mark - Private: Finding possible mutations
 
-AND_OR_MutationType AndOrReplacementMutator::findPossibleMutationInBranch(
+OR_AND_MutationType OrAndReplacementMutator::findPossibleMutationInBranch(
     BranchInst *branchInst, BranchInst **secondBranchInst) {
 
   if (branchInst->isConditional() == false) {
-    return AND_OR_MutationType_None;
+    return OR_AND_MutationType_None;
   }
 
   BasicBlock *leftBB = dyn_cast<BasicBlock>(branchInst->getOperand(2));
@@ -312,20 +313,20 @@ AND_OR_MutationType AndOrReplacementMutator::findPossibleMutationInBranch(
       auto candidateBranchInst_leftBB = candidateBranchInst->getOperand(2);
       auto candidateBranchInst_rightBB = candidateBranchInst->getOperand(1);
 
-      if (candidateBranchInst_rightBB == rightBB) {
+      if (candidateBranchInst_leftBB == leftBB) {
         if (secondBranchInst) {
           *secondBranchInst = candidateBranchInst;
         }
 
-        return AND_OR_MutationType_AND_to_OR_Pattern1;
+        return OR_AND_MutationType_OR_to_AND_Pattern1;
       }
 
-      else if (candidateBranchInst_rightBB == leftBB) {
+      else if (candidateBranchInst_leftBB == rightBB) {
         if (secondBranchInst) {
           *secondBranchInst = candidateBranchInst;
         }
 
-        return AND_OR_MutationType_AND_to_OR_Pattern2;
+        return OR_AND_MutationType_OR_to_AND_Pattern2;
       }
 
       for (auto &instruction : *candidateBranchInst->getParent()) {
@@ -340,35 +341,35 @@ AND_OR_MutationType AndOrReplacementMutator::findPossibleMutationInBranch(
             continue;
           }
 
-          if (candidateBranchInst->getParent() == rightBB) {
+          if (candidateBranchInst->getParent() == leftBB) {
             if (secondBranchInst) {
               *secondBranchInst = candidateBranchInst;
             }
 
-            return AND_OR_MutationType_AND_to_OR_Pattern3;
+            return OR_AND_MutationType_OR_to_AND_Pattern3;
           }
         }
       }
     }
   }
 
-  return AND_OR_MutationType_None;
+  return OR_AND_MutationType_None;
 }
 
 std::vector<MutationPoint *>
-AndOrReplacementMutator::getMutations(Bitcode *bitcode,
+OrAndReplacementMutator::getMutations(Bitcode *bitcode,
                                       const FunctionUnderTest &function) {
   assert(bitcode);
 
   std::vector<MutationPoint *> mutations;
 
   for (auto &instruction : instructions(function.getFunction())) {
-    AND_OR_MutationType mutationType = findPossibleMutation(instruction);
-    if (mutationType == AND_OR_MutationType_None) {
+    OR_AND_MutationType mutationType = findPossibleMutation(instruction);
+    if (mutationType == OR_AND_MutationType_None) {
       continue;
     }
 
-    std::string diagnostics = "AND-OR Replacement";
+    std::string diagnostics = "OR-AND Replacement";
     std::string replacement = getMutationTypeToString(mutationType);
 
     auto point = new MutationPoint(this, nullptr, &instruction, replacement,

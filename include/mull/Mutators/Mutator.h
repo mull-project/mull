@@ -26,8 +26,10 @@ enum class MutatorKind {
   NegateMutator,
   RemoveVoidFunctionMutator,
   ReplaceCallMutator,
-  AndOrReplacementMutator,
   ScalarValueMutator,
+
+  CXX_AndOrReplacementMutator,
+  CXX_OrAndReplacementMutator,
 
   CXX_Arithmetic_AddToSub,
   CXX_Arithmetic_AddAssignToSubAssign,

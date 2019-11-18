@@ -9,6 +9,7 @@
 #include "mull/Metrics/Metrics.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/AndOrReplacementMutator.h"
+#include "mull/Mutators/OrAndReplacementMutator.h"
 #include "mull/Mutators/RemoveVoidFunctionMutator.h"
 #include "mull/ObjectLoader.h"
 #include "mull/Program/Program.h"
@@ -366,7 +367,7 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutator) {
 TEST(Driver, SimpleTest_ANDORReplacementMutator) {
   Configuration configuration;
   configuration.bitcodePaths = {
-      fixtures::mutators_and_or_replacement_module_bc_path()};
+      fixtures::mutators_and_or_and_to_or_replacement_module_bc_path()};
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<AndOrReplacementMutator>());
@@ -388,7 +389,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
                 metrics, testFramework);
 
   auto result = driver.Run();
-  ASSERT_EQ(12U, result->getTests().size());
+  ASSERT_EQ(4U, result->getTests().size());
 
   auto mutants = result->getMutationResults().begin();
 
@@ -408,128 +409,6 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
               mutant->getTest()->getExecutionResult().status);
     ASSERT_EQ("test_AND_operator_1branch", mutant->getTest()->getTestName());
     ASSERT_EQ(ExecutionStatus::Failed, mutant->getExecutionResult().status);
-  }
-
-  /// Mutation #3: OR operator with 2 branches.
-  {
-    auto mutant = (mutants++)->get();
-    ASSERT_EQ(ExecutionStatus::Passed,
-              mutant->getTest()->getExecutionResult().status);
-    ASSERT_EQ("test_OR_operator_2branches", mutant->getTest()->getTestName());
-    ASSERT_EQ(ExecutionStatus::Failed, mutant->getExecutionResult().status);
-  }
-
-  /// Mutation #4: OR operator with 1 branch.
-  {
-    auto mutant4 = (mutants++)->get();
-    ASSERT_EQ(ExecutionStatus::Passed,
-              mutant4->getTest()->getExecutionResult().status);
-    ASSERT_EQ("test_OR_operator_1branch", mutant4->getTest()->getTestName());
-    ASSERT_EQ(ExecutionStatus::Failed, mutant4->getExecutionResult().status);
-  }
-
-  /// Mutation #5: Compound AND then OR expression.
-  {
-    // Mutant 5.1 should pass because it is a relaxing AND -> OR replacement.
-    auto mutant5_1 = (mutants++)->get();
-    ASSERT_EQ(ExecutionStatus::Passed,
-              mutant5_1->getTest()->getExecutionResult().status);
-    ASSERT_EQ("test_compound_AND_then_OR_operator",
-              mutant5_1->getTest()->getTestName());
-    ASSERT_EQ(ExecutionStatus::Passed, mutant5_1->getExecutionResult().status);
-
-    // Mutant 5.2 should pass because it is a stressing OR -> AND replacement.
-    auto mutant5_2 = (mutants++)->get();
-    ASSERT_EQ(ExecutionStatus::Passed,
-              mutant5_2->getTest()->getExecutionResult().status);
-    ASSERT_EQ("test_compound_AND_then_OR_operator",
-              mutant5_2->getTest()->getTestName());
-    ASSERT_EQ(ExecutionStatus::Failed, mutant5_2->getExecutionResult().status);
-  }
-
-  /// Mutation #6: Compound AND then AND expression.
-  {
-    auto mutant6_1 = (mutants++)->get();
-    ASSERT_EQ(ExecutionStatus::Passed,
-              mutant6_1->getTest()->getExecutionResult().status);
-    ASSERT_EQ("test_compound_AND_then_AND_operator",
-              mutant6_1->getTest()->getTestName());
-    ASSERT_EQ(ExecutionStatus::Failed, mutant6_1->getExecutionResult().status);
-
-    auto mutant6_2 = (mutants++)->get();
-    ASSERT_EQ(ExecutionStatus::Passed,
-              mutant6_2->getTest()->getExecutionResult().status);
-    ASSERT_EQ("test_compound_AND_then_AND_operator",
-              mutant6_2->getTest()->getTestName());
-    ASSERT_EQ(ExecutionStatus::Passed, mutant6_2->getExecutionResult().status);
-  }
-
-  /// Mutation #7: Compound OR then AND expression.
-  {
-    auto mutant7_1 = (mutants++)->get();
-    ASSERT_EQ(ExecutionStatus::Passed,
-              mutant7_1->getTest()->getExecutionResult().status);
-    ASSERT_EQ("test_compound_OR_then_AND_operator",
-              mutant7_1->getTest()->getTestName());
-    ASSERT_EQ(ExecutionStatus::Failed, mutant7_1->getExecutionResult().status);
-
-    auto mutant7_2 = (mutants++)->get();
-    ASSERT_EQ(ExecutionStatus::Passed,
-              mutant7_2->getTest()->getExecutionResult().status);
-    ASSERT_EQ("test_compound_OR_then_AND_operator",
-              mutant7_2->getTest()->getTestName());
-    ASSERT_EQ(ExecutionStatus::Passed, mutant7_2->getExecutionResult().status);
-  }
-
-  /// Mutation #8: Compound OR then OR expression.
-  {
-    auto mutant8_1 = (mutants++)->get();
-    ASSERT_EQ(ExecutionStatus::Passed,
-              mutant8_1->getTest()->getExecutionResult().status);
-    ASSERT_EQ("test_compound_OR_then_OR_operator",
-              mutant8_1->getTest()->getTestName());
-    ASSERT_EQ(ExecutionStatus::Failed, mutant8_1->getExecutionResult().status);
-
-    auto mutant8_2 = (mutants++)->get();
-    ASSERT_EQ(ExecutionStatus::Passed,
-              mutant8_2->getTest()->getExecutionResult().status);
-    ASSERT_EQ("test_compound_OR_then_OR_operator",
-              mutant8_2->getTest()->getTestName());
-    ASSERT_EQ(ExecutionStatus::Passed, mutant8_2->getExecutionResult().status);
-  }
-
-  /// Edge case for Pattern #1: OR expression that always evaluates to a scalar
-  /// value but also contains a dummy function call (presence of a dummy
-  /// function makes the Branch instruction to be generated).
-  {
-    auto mutant1 = (mutants++)->get();
-    ASSERT_EQ(ExecutionStatus::Passed,
-              mutant1->getTest()->getExecutionResult().status);
-    ASSERT_EQ(
-        "test_OR_operator_always_scalars_case_with_function_call_pattern1",
-        mutant1->getTest()->getTestName());
-    ASSERT_EQ(ExecutionStatus::Passed, mutant1->getExecutionResult().status);
-
-    auto mutant2 = (mutants++)->get();
-    ASSERT_EQ(ExecutionStatus::Passed,
-              mutant2->getTest()->getExecutionResult().status);
-    ASSERT_EQ(
-        "test_OR_operator_always_scalars_case_with_function_call_pattern1",
-        mutant2->getTest()->getTestName());
-    ASSERT_EQ(ExecutionStatus::Passed, mutant2->getExecutionResult().status);
-  }
-
-  /// Edge case for Pattern #3: OR expression that always evaluates to a scalar
-  /// value but also contains a dummy function call (presence of a dummy
-  /// function makes the Branch instruction to be generated).
-  {
-    auto mutant = (mutants++)->get();
-    ASSERT_EQ(ExecutionStatus::Passed,
-              mutant->getTest()->getExecutionResult().status);
-    ASSERT_EQ(
-        "test_OR_operator_always_scalars_case_with_function_call_pattern3",
-        mutant->getTest()->getTestName());
-    ASSERT_EQ(ExecutionStatus::Passed, mutant->getExecutionResult().status);
   }
 
   /// Edge case for Pattern #1: AND expression that always evaluates to a scalar
@@ -569,10 +448,197 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
   ASSERT_EQ(mutants, result->getMutationResults().end());
 }
 
-TEST(Driver, SimpleTest_ANDORReplacementMutator_CPP) {
+TEST(Driver, SimpleTest_ORToANDReplacementMutator) {
   Configuration configuration;
   configuration.bitcodePaths = {
-      fixtures::mutators_and_or_replacement_cpp_module_bc_path()};
+    fixtures::mutators_and_or_or_to_and_replacement_module_bc_path()};
+
+  std::vector<std::unique_ptr<Mutator>> mutators;
+  mutators.emplace_back(make_unique<OrAndReplacementMutator>());
+  MutationsFinder finder(std::move(mutators), configuration);
+
+  BitcodeLoader loader;
+  Program program({}, {}, loader.loadBitcode(configuration));
+
+  Toolchain toolchain(configuration);
+  Metrics metrics;
+
+  TestFrameworkFactory testFrameworkFactory;
+  TestFramework testFramework(
+    testFrameworkFactory.simpleTestFramework(toolchain, configuration));
+  ForkTimerSandbox sandbox;
+  Filters filters;
+
+  Driver driver(configuration, sandbox, program, toolchain, filters, finder,
+                metrics, testFramework);
+
+  auto result = driver.Run();
+  ASSERT_EQ(4U, result->getTests().size());
+
+  auto mutants = result->getMutationResults().begin();
+
+  /// Mutation #1: OR operator with 2 branches.
+  {
+    auto mutant = (mutants++)->get();
+    ASSERT_EQ(ExecutionStatus::Passed,
+              mutant->getTest()->getExecutionResult().status);
+    ASSERT_EQ("test_OR_operator_2branches", mutant->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Failed, mutant->getExecutionResult().status);
+  }
+
+  /// Mutation #2: OR operator with 1 branch.
+  {
+    auto mutant = (mutants++)->get();
+    ASSERT_EQ(ExecutionStatus::Passed,
+              mutant->getTest()->getExecutionResult().status);
+    ASSERT_EQ("test_OR_operator_1branch", mutant->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Failed, mutant->getExecutionResult().status);
+  }
+
+  /// Edge case for Pattern #1: OR expression that always evaluates to a scalar
+  /// value but also contains a dummy function call (presence of a dummy
+  /// function makes the Branch instruction to be generated).
+  {
+    auto mutant1 = (mutants++)->get();
+    ASSERT_EQ(ExecutionStatus::Passed,
+              mutant1->getTest()->getExecutionResult().status);
+    ASSERT_EQ(
+      "test_OR_operator_always_scalars_case_with_function_call_pattern1",
+      mutant1->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Passed, mutant1->getExecutionResult().status);
+
+    auto mutant2 = (mutants++)->get();
+    ASSERT_EQ(ExecutionStatus::Passed,
+              mutant2->getTest()->getExecutionResult().status);
+    ASSERT_EQ(
+      "test_OR_operator_always_scalars_case_with_function_call_pattern1",
+      mutant2->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Passed, mutant2->getExecutionResult().status);
+  }
+
+  /// Edge case for Pattern #3: OR expression that always evaluates to a scalar
+  /// value but also contains a dummy function call (presence of a dummy
+  /// function makes the Branch instruction to be generated).
+  {
+    auto mutant = (mutants++)->get();
+    ASSERT_EQ(ExecutionStatus::Passed,
+              mutant->getTest()->getExecutionResult().status);
+    ASSERT_EQ(
+      "test_OR_operator_always_scalars_case_with_function_call_pattern3",
+      mutant->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Passed, mutant->getExecutionResult().status);
+  }
+
+  ASSERT_EQ(mutants, result->getMutationResults().end());
+}
+
+TEST(Driver, SimpleTest_ANDORReplacementMutator_CompoundOperators) {
+  Configuration configuration;
+  configuration.bitcodePaths = {
+    fixtures::mutators_and_or_and_or_replacement_compound_module_bc_path()};
+
+  std::vector<std::unique_ptr<Mutator>> mutators;
+  mutators.emplace_back(make_unique<AndOrReplacementMutator>());
+  mutators.emplace_back(make_unique<OrAndReplacementMutator>());
+  MutationsFinder finder(std::move(mutators), configuration);
+
+  BitcodeLoader loader;
+  Program program({}, {}, loader.loadBitcode(configuration));
+
+  Toolchain toolchain(configuration);
+  Metrics metrics;
+
+  TestFrameworkFactory testFrameworkFactory;
+  TestFramework testFramework(
+    testFrameworkFactory.simpleTestFramework(toolchain, configuration));
+  ForkTimerSandbox sandbox;
+  Filters filters;
+
+  Driver driver(configuration, sandbox, program, toolchain, filters, finder,
+                metrics, testFramework);
+
+  auto result = driver.Run();
+  ASSERT_EQ(4U, result->getTests().size());
+
+  auto mutants = result->getMutationResults().begin();
+
+  /// Mutation #1: Compound AND then OR expression.
+  {
+    // Mutant 1.1 should pass because it is a relaxing AND -> OR replacement.
+    auto mutant1_1 = (mutants++)->get();
+    ASSERT_EQ(ExecutionStatus::Passed,
+              mutant1_1->getTest()->getExecutionResult().status);
+    ASSERT_EQ("test_compound_AND_then_OR_operator",
+              mutant1_1->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Passed, mutant1_1->getExecutionResult().status);
+
+    // Mutant 1.2 should pass because it is a stressing OR -> AND replacement.
+    auto mutant1_2 = (mutants++)->get();
+    ASSERT_EQ(ExecutionStatus::Passed,
+              mutant1_2->getTest()->getExecutionResult().status);
+    ASSERT_EQ("test_compound_AND_then_OR_operator",
+              mutant1_2->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Failed, mutant1_2->getExecutionResult().status);
+  }
+
+  /// Mutation #2: Compound AND then AND expression.
+  {
+    auto mutant6_1 = (mutants++)->get();
+    ASSERT_EQ(ExecutionStatus::Passed,
+              mutant6_1->getTest()->getExecutionResult().status);
+    ASSERT_EQ("test_compound_AND_then_AND_operator",
+              mutant6_1->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Failed, mutant6_1->getExecutionResult().status);
+
+    auto mutant6_2 = (mutants++)->get();
+    ASSERT_EQ(ExecutionStatus::Passed,
+              mutant6_2->getTest()->getExecutionResult().status);
+    ASSERT_EQ("test_compound_AND_then_AND_operator",
+              mutant6_2->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Passed, mutant6_2->getExecutionResult().status);
+  }
+
+  /// Mutation #3: Compound OR then AND expression.
+  {
+    auto mutant3_1 = (mutants++)->get();
+    ASSERT_EQ(ExecutionStatus::Passed,
+              mutant3_1->getTest()->getExecutionResult().status);
+    ASSERT_EQ("test_compound_OR_then_AND_operator",
+              mutant3_1->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Passed, mutant3_1->getExecutionResult().status);
+
+    auto mutant3_2 = (mutants++)->get();
+    ASSERT_EQ(ExecutionStatus::Passed,
+              mutant3_2->getTest()->getExecutionResult().status);
+    ASSERT_EQ("test_compound_OR_then_AND_operator",
+              mutant3_2->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Failed, mutant3_2->getExecutionResult().status);
+  }
+
+  /// Mutation #4: Compound OR then OR expression.
+  {
+    auto mutant4_1 = (mutants++)->get();
+    ASSERT_EQ(ExecutionStatus::Passed,
+              mutant4_1->getTest()->getExecutionResult().status);
+    ASSERT_EQ("test_compound_OR_then_OR_operator",
+              mutant4_1->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Failed, mutant4_1->getExecutionResult().status);
+
+    auto mutant4_2 = (mutants++)->get();
+    ASSERT_EQ(ExecutionStatus::Passed,
+              mutant4_2->getTest()->getExecutionResult().status);
+    ASSERT_EQ("test_compound_OR_then_OR_operator",
+              mutant4_2->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Passed, mutant4_2->getExecutionResult().status);
+  }
+
+  ASSERT_EQ(mutants, result->getMutationResults().end());
+}
+
+TEST(Driver, SimpleTest_ANDToORReplacementMutator_CPP) {
+  Configuration configuration;
+  configuration.bitcodePaths = {
+      fixtures::mutators_and_or_and_to_or_replacement_cpp_module_bc_path()};
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(make_unique<AndOrReplacementMutator>());
@@ -594,68 +660,100 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator_CPP) {
                 metrics, testFramework);
 
   auto result = driver.Run();
-  ASSERT_EQ(6U, result->getTests().size());
+  ASSERT_EQ(3U, result->getTests().size());
+
+  auto mutants = result->getMutationResults().begin();
+
+  /// Mutation #1: AND operator
+  {
+    auto mutant = (mutants++)->get();
+    ASSERT_EQ(ExecutionStatus::Passed,
+              mutant->getTest()->getExecutionResult().status);
+    ASSERT_EQ("_Z26test_AND_operator_with_CPPv",
+              mutant->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Failed, mutant->getExecutionResult().status);
+  }
+
+  /// Mutation #2: AND operator (PHI case)
+  {
+    auto mutant = (mutants++)->get();
+    ASSERT_EQ(ExecutionStatus::Passed,
+              mutant->getTest()->getExecutionResult().status);
+    ASSERT_EQ("_Z35test_AND_operator_with_CPP_PHI_casev",
+              mutant->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Failed, mutant->getExecutionResult().status);
+  }
+
+  /// Mutation #3: AND operator (Assert)
+  {
+    auto mutant = (mutants++)->get();
+    ASSERT_EQ(ExecutionStatus::Passed,
+              mutant->getTest()->getExecutionResult().status);
+    ASSERT_EQ("_Z37test_AND_operator_with_CPP_and_assertv",
+              mutant->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Crashed, mutant->getExecutionResult().status);
+  }
+
+  ASSERT_EQ(mutants, result->getMutationResults().end());
+}
+
+TEST(Driver, SimpleTest_ORToANDReplacementMutator_CPP) {
+  Configuration configuration;
+  configuration.bitcodePaths = {
+    fixtures::mutators_and_or_or_to_and_replacement_cpp_module_bc_path()};
+
+  std::vector<std::unique_ptr<Mutator>> mutators;
+  mutators.emplace_back(make_unique<OrAndReplacementMutator>());
+  MutationsFinder finder(std::move(mutators), configuration);
+
+  BitcodeLoader loader;
+  Program program({}, {}, loader.loadBitcode(configuration));
+
+  Toolchain toolchain(configuration);
+  Metrics metrics;
+
+  TestFrameworkFactory testFrameworkFactory;
+  TestFramework testFramework(
+    testFrameworkFactory.simpleTestFramework(toolchain, configuration));
+  ForkTimerSandbox sandbox;
+  Filters filters;
+
+  Driver driver(configuration, sandbox, program, toolchain, filters, finder,
+                metrics, testFramework);
+
+  auto result = driver.Run();
+  ASSERT_EQ(3U, result->getTests().size());
 
   auto mutants = result->getMutationResults().begin();
 
   /// Mutation #1: OR operator
   {
-    auto mutant1 = (mutants++)->get();
+    auto mutant = (mutants++)->get();
     ASSERT_EQ(ExecutionStatus::Passed,
-              mutant1->getTest()->getExecutionResult().status);
+              mutant->getTest()->getExecutionResult().status);
     ASSERT_EQ("_Z25test_OR_operator_with_CPPv",
-              mutant1->getTest()->getTestName());
-    ASSERT_EQ(ExecutionStatus::Failed, mutant1->getExecutionResult().status);
+              mutant->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Failed, mutant->getExecutionResult().status);
   }
 
   /// Mutation #2: OR operator (PHI case)
   {
-    auto mutant2 = (mutants++)->get();
+    auto mutant = (mutants++)->get();
     ASSERT_EQ(ExecutionStatus::Passed,
-              mutant2->getTest()->getExecutionResult().status);
+              mutant->getTest()->getExecutionResult().status);
     ASSERT_EQ("_Z34test_OR_operator_with_CPP_PHI_casev",
-              mutant2->getTest()->getTestName());
-    ASSERT_EQ(ExecutionStatus::Failed, mutant2->getExecutionResult().status);
+              mutant->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Failed, mutant->getExecutionResult().status);
   }
 
   /// Mutation #3: OR operator (Assert)
   {
-    auto mutant3 = (mutants++)->get();
+    auto mutant = (mutants++)->get();
     ASSERT_EQ(ExecutionStatus::Passed,
-              mutant3->getTest()->getExecutionResult().status);
+              mutant->getTest()->getExecutionResult().status);
     ASSERT_EQ("_Z36test_OR_operator_with_CPP_and_assertv",
-              mutant3->getTest()->getTestName());
-    ASSERT_EQ(ExecutionStatus::Crashed, mutant3->getExecutionResult().status);
-  }
-
-  /// Mutation #4: AND operator
-  {
-    auto mutant4 = (mutants++)->get();
-    ASSERT_EQ(ExecutionStatus::Passed,
-              mutant4->getTest()->getExecutionResult().status);
-    ASSERT_EQ("_Z26test_AND_operator_with_CPPv",
-              mutant4->getTest()->getTestName());
-    ASSERT_EQ(ExecutionStatus::Failed, mutant4->getExecutionResult().status);
-  }
-
-  /// Mutation #5: AND operator (PHI case)
-  {
-    auto mutant5 = (mutants++)->get();
-    ASSERT_EQ(ExecutionStatus::Passed,
-              mutant5->getTest()->getExecutionResult().status);
-    ASSERT_EQ("_Z35test_AND_operator_with_CPP_PHI_casev",
-              mutant5->getTest()->getTestName());
-    ASSERT_EQ(ExecutionStatus::Failed, mutant5->getExecutionResult().status);
-  }
-
-  /// Mutation #6: AND operator (Assert)
-  {
-    auto mutant6 = (mutants++)->get();
-    ASSERT_EQ(ExecutionStatus::Passed,
-              mutant6->getTest()->getExecutionResult().status);
-    ASSERT_EQ("_Z37test_AND_operator_with_CPP_and_assertv",
-              mutant6->getTest()->getTestName());
-    ASSERT_EQ(ExecutionStatus::Crashed, mutant6->getExecutionResult().status);
+              mutant->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Crashed, mutant->getExecutionResult().status);
   }
 
   ASSERT_EQ(mutants, result->getMutationResults().end());

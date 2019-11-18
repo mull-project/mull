@@ -14,6 +14,7 @@ set(mull_sources
   Parallelization/Tasks/LoadBitcodeFromBinaryTask.cpp
 
   Mutators/AndOrReplacementMutator.cpp
+  Mutators/OrAndReplacementMutator.cpp
   Mutators/MutatorsFactory.cpp
   Mutators/NegateConditionMutator.cpp
   Mutators/RemoveVoidFunctionMutator.cpp

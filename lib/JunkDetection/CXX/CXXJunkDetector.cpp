@@ -57,7 +57,9 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     return isJunkMutation<ReplaceCallVisitor>(astStorage, point);
   case MutatorKind::NegateMutator:
     return isJunkMutation<NegateConditionVisitor>(astStorage, point);
-  case MutatorKind::AndOrReplacementMutator:
+  case MutatorKind::CXX_AndOrReplacementMutator:
+    return isJunkMutation<AndOrReplacementVisitor>(astStorage, point);
+  case MutatorKind::CXX_OrAndReplacementMutator:
     return isJunkMutation<AndOrReplacementVisitor>(astStorage, point);
   case MutatorKind::ScalarValueMutator:
     return isJunkMutation<ScalarValueVisitor>(astStorage, point);
