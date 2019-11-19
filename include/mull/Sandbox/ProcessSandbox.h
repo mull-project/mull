@@ -5,6 +5,8 @@
 
 namespace mull {
 
+enum class SandboxKind { NoSandbox, Watchdog, Timer };
+
 class ProcessSandbox {
 public:
   const static int MullExitCode = 0;

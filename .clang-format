@@ -1,3 +1,9 @@
 ---
-BasedOnStyle:  LLVM
+BasedOnStyle: LLVM
+Cpp11BracedListStyle: false
+AllowShortBlocksOnASingleLine: false
+AllowShortFunctionsOnASingleLine: Empty
+AllowShortLoopsOnASingleLine: false
+BinPackArguments: false
+ColumnLimit: 100
 
