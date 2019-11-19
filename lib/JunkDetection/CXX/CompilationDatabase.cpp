@@ -102,7 +102,11 @@ loadDatabaseFromFile(const std::string &path,
   }
 
   for (auto &command : commands) {
-    database[command.file] = flagsFromCommand(command, extraFlags);
+    std::string filePath = command.file;
+    if (!filePath.empty() && !llvm::sys::path::is_absolute(filePath)) {
+      filePath = command.directory + llvm::sys::path::get_separator().str() + filePath;
+    }
+    database[filePath] = flagsFromCommand(command, extraFlags);
   }
 
   return database;

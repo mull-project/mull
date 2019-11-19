@@ -1,7 +1,9 @@
 #include "mull/SourceLocation.h"
 
 #include <string>
+#include <utility>
 
+#include <LLVMCompatibility.h>
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/DebugLoc.h>
 #include <llvm/IR/Function.h>
@@ -10,17 +12,23 @@
 
 namespace mull {
 
-SourceLocation::SourceLocation(const std::string &directory,
-                               const std::string &filePath, int line,
-                               int column)
-    : directory(directory), filePath(filePath), line(line), column(column) {}
-
-const SourceLocation SourceLocation::nullSourceLocation() {
-  return SourceLocation(std::string(), std::string(), 0, 0);
+std::string absoluteFilePath(const std::string &directory, const std::string &filePath) {
+  if (!filePath.empty() && !llvm::sys::path::is_absolute(filePath)) {
+    return directory + llvm::sys::path::get_separator().str() + filePath;
+  }
+  return filePath;
 }
 
-const SourceLocation
-SourceLocation::locationFromInstruction(const llvm::Instruction *instruction) {
+SourceLocation::SourceLocation(std::string unitDirectory, std::string unitFilePath,
+                               std::string directory, std::string filePath, int line, int column)
+    : unitDirectory(std::move(unitDirectory)), unitFilePath(std::move(unitFilePath)),
+      directory(std::move(directory)), filePath(std::move(filePath)), line(line), column(column) {}
+
+SourceLocation SourceLocation::nullSourceLocation() {
+  return SourceLocation(std::string(), std::string(), std::string(), std::string(), 0, 0);
+}
+
+SourceLocation SourceLocation::locationFromInstruction(const llvm::Instruction *instruction) {
   if (instruction->getMetadata(0) == nullptr) {
     return nullSourceLocation();
   }
@@ -32,35 +40,48 @@ SourceLocation::locationFromInstruction(const llvm::Instruction *instruction) {
   int line = debugInfo->getLine();
   int column = debugInfo->getColumn();
 
-  if (!llvm::sys::path::is_absolute(filePath)) {
-    filePath = directory + llvm::sys::path::get_separator().str() + filePath;
+  filePath = absoluteFilePath(directory, filePath);
+
+  std::string unitDirectory;
+  std::string unitFilePath;
+  llvm::DICompileUnit *unit = llvm_compat::getUnit(debugInfo);
+  if (unit) {
+    unitDirectory = unit->getDirectory();
+    unitFilePath = unit->getFilename();
   }
 
-  return SourceLocation(directory, filePath, line, column);
+  unitFilePath = absoluteFilePath(unitDirectory, unitFilePath);
+
+  return SourceLocation(unitDirectory, unitFilePath, directory, filePath, line, column);
 }
 
-const SourceLocation
-SourceLocation::locationFromFunction(const llvm::Function *function) {
+SourceLocation SourceLocation::locationFromFunction(const llvm::Function *function) {
   if (function->getMetadata(0) == nullptr) {
     return nullSourceLocation();
   }
 
   auto debugInfo = llvm::dyn_cast<llvm::DISubprogram>(function->getMetadata(0));
 
+  std::string unitDirectory;
+  std::string unitFilePath;
+  if (llvm::DICompileUnit *unit = debugInfo->getUnit()) {
+    unitDirectory = unit->getDirectory();
+    unitFilePath = unit->getFilename();
+  }
+
   std::string directory = debugInfo->getDirectory();
   std::string filePath = debugInfo->getFilename();
   int line = debugInfo->getLine();
   int column = 0;
 
-  if (!llvm::sys::path::is_absolute(filePath)) {
-    filePath = directory + llvm::sys::path::get_separator().str() + filePath;
-  }
+  filePath = absoluteFilePath(directory, filePath);
+  unitFilePath = absoluteFilePath(unitDirectory, unitFilePath);
 
-  return SourceLocation(directory, filePath, line, column);
+  return SourceLocation(unitDirectory, unitFilePath, directory, filePath, line, column);
 }
 
 bool SourceLocation::isNull() const {
-  return (directory == "" && filePath == "" && line == 0 && column == 0) ||
+  return (directory.empty() && filePath.empty() && line == 0 && column == 0) ||
          // this case happened when compiled with '-Og', please look at:
          // https://github.com/mull-project/mull/issues/519
          // https://github.com/mull-project/mull/issues/520

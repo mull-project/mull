@@ -85,7 +85,6 @@ public:
   void setMutatedFunction(llvm::Function *function);
 
   const SourceLocation &getSourceLocation() const;
-  const std::string getSourceFileName() const;
 
   void addReachableTest(Test *test, int distance);
   void applyMutation();
