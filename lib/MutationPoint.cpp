@@ -133,10 +133,6 @@ const SourceLocation &MutationPoint::getSourceLocation() const {
   return sourceLocation;
 }
 
-const std::string MutationPoint::getSourceFileName() const {
-  return getBitcode()->getModule()->getSourceFileName();
-}
-
 Function *MutationPoint::getOriginalFunction() { return originalFunction; }
 
 void MutationPoint::setMutatedFunction(llvm::Function *function) {

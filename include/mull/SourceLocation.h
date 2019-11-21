@@ -10,19 +10,19 @@ class Function;
 namespace mull {
 
 struct SourceLocation {
+  std::string unitDirectory;
+  std::string unitFilePath;
   std::string directory;
   std::string filePath;
   int line;
   int column;
-  SourceLocation(const std::string &directory, const std::string &filePath,
-                 int line, int column);
+  SourceLocation(std::string unitDirectory, std::string unitFilePath, std::string directory,
+                 std::string filePath, int line, int column);
   bool isNull() const;
 
-  const static SourceLocation
-  locationFromInstruction(const llvm::Instruction *instruction);
-  const static SourceLocation
-  locationFromFunction(const llvm::Function *function);
-  const static SourceLocation nullSourceLocation();
+  static SourceLocation locationFromInstruction(const llvm::Instruction *instruction);
+  static SourceLocation locationFromFunction(const llvm::Function *function);
+  static SourceLocation nullSourceLocation();
 };
 
 } // namespace mull

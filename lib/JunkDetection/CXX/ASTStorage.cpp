@@ -66,17 +66,12 @@ bool ThreadSafeASTUnit::isInSystemHeader(clang::SourceLocation &location) {
 const clang::FileEntry *
 ThreadSafeASTUnit::findFileEntry(const MutationPoint *point) {
   assert(point);
-  assert(!point->getSourceLocation().isNull() && "Missing debug information?");
 
-  auto filePath = point->getSourceLocation().filePath;
-  const clang::FileEntry *file = findFileEntry(filePath);
-  if (file != nullptr) {
-    return file;
-  }
+  SourceLocation sourceLocation = point->getSourceLocation();
+  assert(!sourceLocation.isNull() && "Missing debug information?");
 
-  const std::string &sourceFile = point->getSourceFileName();
-
-  return findFileEntry(sourceFile);
+  const clang::FileEntry *file = findFileEntry(sourceLocation.filePath);
+  return file ? file : findFileEntry(sourceLocation.unitFilePath);
 }
 
 const clang::FileEntry *
@@ -106,8 +101,7 @@ clang::SourceLocation ThreadSafeASTUnit::getLocation(MutationPoint *point) {
 
   /// getLocation from the ASTUnit it not thread safe
   std::lock_guard<std::mutex> lock(mutex);
-  auto location =
-      ast->getLocation(file, mutantLocation.line, mutantLocation.column);
+  auto location = ast->getLocation(file, mutantLocation.line, mutantLocation.column);
   assert(location.isValid());
   return location;
 }
@@ -187,7 +181,7 @@ ThreadSafeASTUnit *ASTStorage::findAST(const MutationPoint *point) {
   assert(point);
   assert(!point->getSourceLocation().isNull() && "Missing debug information?");
 
-  const std::string &sourceFile = point->getSourceFileName();
+  const std::string &sourceFile = point->getSourceLocation().unitFilePath;
 
   std::lock_guard<std::mutex> guard(mutex);
   if (astUnits.count(sourceFile)) {
