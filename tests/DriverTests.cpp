@@ -8,8 +8,8 @@
 #include "mull/JunkDetection/JunkDetector.h"
 #include "mull/Metrics/Metrics.h"
 #include "mull/MutationsFinder.h"
-#include "mull/Mutators/AndOrReplacementMutator.h"
-#include "mull/Mutators/OrAndReplacementMutator.h"
+#include "mull/Mutators/CXX/AndToOrMutator.h"
+#include "mull/Mutators/CXX/OrToAndMutator.h"
 #include "mull/Mutators/RemoveVoidFunctionMutator.h"
 #include "mull/ObjectLoader.h"
 #include "mull/Program/Program.h"
@@ -26,7 +26,9 @@
 #include <llvm/ADT/SmallString.h>
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/YAMLParser.h>
+#include <mull/Filters/FilePathFilter.h>
 #include <mull/Filters/Filters.h>
+#include <mull/Filters/NoDebugInfoFilter.h>
 
 using namespace mull;
 using namespace llvm;
@@ -370,7 +372,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
       fixtures::mutators_and_or_and_to_or_replacement_module_bc_path()};
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<AndOrReplacementMutator>());
+  mutators.emplace_back(make_unique<AndToOrMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;
@@ -454,7 +456,7 @@ TEST(Driver, SimpleTest_ORToANDReplacementMutator) {
     fixtures::mutators_and_or_or_to_and_replacement_module_bc_path()};
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<OrAndReplacementMutator>());
+  mutators.emplace_back(make_unique<OrToAndMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;
@@ -538,8 +540,8 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator_CompoundOperators) {
     fixtures::mutators_and_or_and_or_replacement_compound_module_bc_path()};
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<AndOrReplacementMutator>());
-  mutators.emplace_back(make_unique<OrAndReplacementMutator>());
+  mutators.emplace_back(make_unique<AndToOrMutator>());
+  mutators.emplace_back(make_unique<OrToAndMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;
@@ -641,7 +643,7 @@ TEST(Driver, SimpleTest_ANDToORReplacementMutator_CPP) {
       fixtures::mutators_and_or_and_to_or_replacement_cpp_module_bc_path()};
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<AndOrReplacementMutator>());
+  mutators.emplace_back(make_unique<AndToOrMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;
@@ -700,10 +702,11 @@ TEST(Driver, SimpleTest_ANDToORReplacementMutator_CPP) {
 TEST(Driver, SimpleTest_ORToANDReplacementMutator_CPP) {
   Configuration configuration;
   configuration.bitcodePaths = {
-    fixtures::mutators_and_or_or_to_and_replacement_cpp_module_bc_path()};
+    fixtures::mutators_and_or_or_to_and_replacement_cpp_module_bc_path()
+  };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<OrAndReplacementMutator>());
+  mutators.emplace_back(make_unique<OrToAndMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;
@@ -713,13 +716,18 @@ TEST(Driver, SimpleTest_ORToANDReplacementMutator_CPP) {
   Metrics metrics;
 
   TestFrameworkFactory testFrameworkFactory;
-  TestFramework testFramework(
-    testFrameworkFactory.simpleTestFramework(toolchain, configuration));
+  TestFramework testFramework(testFrameworkFactory.simpleTestFramework(toolchain, configuration));
   ForkTimerSandbox sandbox;
   Filters filters;
+  NoDebugInfoFilter debugInfoFilter;
+  filters.mutationFilters.push_back(&debugInfoFilter);
 
-  Driver driver(configuration, sandbox, program, toolchain, filters, finder,
-                metrics, testFramework);
+  FilePathFilter filePathFilter;
+  filePathFilter.exclude("include/c++/v1");
+  filters.mutationFilters.push_back(&filePathFilter);
+
+  Driver driver(
+      configuration, sandbox, program, toolchain, filters, finder, metrics, testFramework);
 
   auto result = driver.Run();
   ASSERT_EQ(3U, result->getTests().size());
@@ -729,30 +737,24 @@ TEST(Driver, SimpleTest_ORToANDReplacementMutator_CPP) {
   /// Mutation #1: OR operator
   {
     auto mutant = (mutants++)->get();
-    ASSERT_EQ(ExecutionStatus::Passed,
-              mutant->getTest()->getExecutionResult().status);
-    ASSERT_EQ("_Z25test_OR_operator_with_CPPv",
-              mutant->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Passed, mutant->getTest()->getExecutionResult().status);
+    ASSERT_EQ("_Z25test_OR_operator_with_CPPv", mutant->getTest()->getTestName());
     ASSERT_EQ(ExecutionStatus::Failed, mutant->getExecutionResult().status);
   }
 
   /// Mutation #2: OR operator (PHI case)
   {
     auto mutant = (mutants++)->get();
-    ASSERT_EQ(ExecutionStatus::Passed,
-              mutant->getTest()->getExecutionResult().status);
-    ASSERT_EQ("_Z34test_OR_operator_with_CPP_PHI_casev",
-              mutant->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Passed, mutant->getTest()->getExecutionResult().status);
+    ASSERT_EQ("_Z34test_OR_operator_with_CPP_PHI_casev", mutant->getTest()->getTestName());
     ASSERT_EQ(ExecutionStatus::Failed, mutant->getExecutionResult().status);
   }
 
   /// Mutation #3: OR operator (Assert)
   {
     auto mutant = (mutants++)->get();
-    ASSERT_EQ(ExecutionStatus::Passed,
-              mutant->getTest()->getExecutionResult().status);
-    ASSERT_EQ("_Z36test_OR_operator_with_CPP_and_assertv",
-              mutant->getTest()->getTestName());
+    ASSERT_EQ(ExecutionStatus::Passed, mutant->getTest()->getExecutionResult().status);
+    ASSERT_EQ("_Z36test_OR_operator_with_CPP_and_assertv", mutant->getTest()->getTestName());
     ASSERT_EQ(ExecutionStatus::Crashed, mutant->getExecutionResult().status);
   }
 
