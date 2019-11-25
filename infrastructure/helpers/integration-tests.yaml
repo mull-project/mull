@@ -59,7 +59,7 @@
     argv:
       - mull-cxx
       - -test-framework=GoogleTest
-      - -mutators=cxx_arithmetic_add_to_sub
+      - -mutators=cxx_add_to_sub
       - -ld-search-path=/usr/local/lib
       - -ld-search-path=/lib/x86_64-linux-gnu
       - -ld-search-path=/usr/lib/x86_64-linux-gnu

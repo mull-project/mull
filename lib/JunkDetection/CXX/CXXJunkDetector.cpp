@@ -57,73 +57,73 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
   case MutatorKind::ScalarValueMutator:
     return isJunkMutation<ScalarValueVisitor>(astStorage, point);
 
-  case MutatorKind::CXX_Relation_LessThanToLessOrEqual:
+  case MutatorKind::CXX_LessThanToLessOrEqual:
     return isJunkMutation<cxx::LessThanVisitor>(astStorage, point);
-  case MutatorKind::CXX_Relation_LessOrEqualToLessThan:
+  case MutatorKind::CXX_LessOrEqualToLessThan:
     return isJunkMutation<cxx::LessOrEqualVisitor>(astStorage, point);
-  case MutatorKind::CXX_Relation_GreaterThanToGreaterOrEqual:
+  case MutatorKind::CXX_GreaterThanToGreaterOrEqual:
     return isJunkMutation<cxx::GreaterThanVisitor>(astStorage, point);
-  case MutatorKind::CXX_Relation_GreaterOrEqualToGreaterThan:
+  case MutatorKind::CXX_GreaterOrEqualToGreaterThan:
     return isJunkMutation<cxx::GreaterOrEqualVisitor>(astStorage, point);
-  case MutatorKind::CXX_Relation_EqualToNotEqual:
+  case MutatorKind::CXX_EqualToNotEqual:
     return isJunkMutation<cxx::EqualVisitor>(astStorage, point);
-  case MutatorKind::CXX_Relation_NotEqualToEqual:
+  case MutatorKind::CXX_NotEqualToEqual:
     return isJunkMutation<cxx::NotEqualVisitor>(astStorage, point);
-  case MutatorKind::CXX_Relation_GreaterThanToLessOrEqual:
+  case MutatorKind::CXX_GreaterThanToLessOrEqual:
     return isJunkMutation<cxx::GreaterThanVisitor>(astStorage, point);
-  case MutatorKind::CXX_Relation_GreaterOrEqualToLessThan:
+  case MutatorKind::CXX_GreaterOrEqualToLessThan:
     return isJunkMutation<cxx::GreaterOrEqualVisitor>(astStorage, point);
-  case MutatorKind::CXX_Relation_LessThanToGreaterOrEqual:
+  case MutatorKind::CXX_LessThanToGreaterOrEqual:
     return isJunkMutation<cxx::LessThanVisitor>(astStorage, point);
-  case MutatorKind::CXX_Relation_LessOrEqualToGreaterThan:
+  case MutatorKind::CXX_LessOrEqualToGreaterThan:
     return isJunkMutation<cxx::LessOrEqualVisitor>(astStorage, point);
 
-  case MutatorKind::CXX_Arithmetic_AddToSub:
+  case MutatorKind::CXX_AddToSub:
     return isJunkMutation<cxx::AddVisitor>(astStorage, point);
-  case MutatorKind::CXX_Arithmetic_AddAssignToSubAssign:
+  case MutatorKind::CXX_AddAssignToSubAssign:
     return isJunkMutation<cxx::AddAssignVisitor>(astStorage, point);
-  case MutatorKind::CXX_Arithmetic_PreIncToPreDec:
+  case MutatorKind::CXX_PreIncToPreDec:
     return isJunkMutation<cxx::PreIncVisitor>(astStorage, point);
-  case MutatorKind::CXX_Arithmetic_PostIncToPostDec:
+  case MutatorKind::CXX_PostIncToPostDec:
     return isJunkMutation<cxx::PostIncVisitor>(astStorage, point);
 
-  case MutatorKind::CXX_Arithmetic_SubToAdd:
+  case MutatorKind::CXX_SubToAdd:
     return isJunkMutation<cxx::SubVisitor>(astStorage, point);
-  case MutatorKind::CXX_Arithmetic_SubAssignToAddAssign:
+  case MutatorKind::CXX_SubAssignToAddAssign:
     return isJunkMutation<cxx::SubAssignVisitor>(astStorage, point);
-  case MutatorKind::CXX_Arithmetic_PreDecToPreInc:
+  case MutatorKind::CXX_PreDecToPreInc:
     return isJunkMutation<cxx::PreDecVisitor>(astStorage, point);
-  case MutatorKind::CXX_Arithmetic_PostDecToPostInc:
+  case MutatorKind::CXX_PostDecToPostInc:
     return isJunkMutation<cxx::PostDecVisitor>(astStorage, point);
 
-  case MutatorKind::CXX_Arithmetic_MulToDiv:
+  case MutatorKind::CXX_MulToDiv:
     return isJunkMutation<cxx::MulVisitor>(astStorage, point);
-  case MutatorKind::CXX_Arithmetic_MulAssignToDivAssign:
+  case MutatorKind::CXX_MulAssignToDivAssign:
     return isJunkMutation<cxx::MulAssignVisitor>(astStorage, point);
 
-  case MutatorKind::CXX_Arithmetic_DivToMul:
+  case MutatorKind::CXX_DivToMul:
     return isJunkMutation<cxx::DivVisitor>(astStorage, point);
-  case MutatorKind::CXX_Arithmetic_DivAssignToMulAssign:
+  case MutatorKind::CXX_DivAssignToMulAssign:
     return isJunkMutation<cxx::DivAssignVisitor>(astStorage, point);
 
-  case MutatorKind::CXX_Arithmetic_RemToDiv:
+  case MutatorKind::CXX_RemToDiv:
     return isJunkMutation<cxx::RemVisitor>(astStorage, point);
-  case MutatorKind::CXX_Arithmetic_RemAssignToDivAssign:
+  case MutatorKind::CXX_RemAssignToDivAssign:
     return isJunkMutation<cxx::RemAssignVisitor>(astStorage, point);
 
-  case MutatorKind::CXX_Arithmetic_BitwiseNotToNoop:
+  case MutatorKind::CXX_BitwiseNotToNoop:
     return isJunkMutation<cxx::BitwiseNotVisitor>(astStorage, point);
 
-  case MutatorKind::CXX_Arithmetic_UnaryMinusToNoop:
+  case MutatorKind::CXX_UnaryMinusToNoop:
     return isJunkMutation<cxx::UnaryMinusVisitor>(astStorage, point);
 
-  case MutatorKind::CXX_Bitwise_LShiftToRShift:
+  case MutatorKind::CXX_LShiftToRShift:
     return isJunkMutation<cxx::LShiftVisitor>(astStorage, point);
-  case MutatorKind::CXX_Bitwise_LShiftAssignToRShiftAssign:
+  case MutatorKind::CXX_LShiftAssignToRShiftAssign:
     return isJunkMutation<cxx::LShiftAssignVisitor>(astStorage, point);
-  case MutatorKind::CXX_Bitwise_RShiftToLShift:
+  case MutatorKind::CXX_RShiftToLShift:
     return isJunkMutation<cxx::RShiftVisitor>(astStorage, point);
-  case MutatorKind::CXX_Bitwise_RShiftAssignToLShiftAssign:
+  case MutatorKind::CXX_RShiftAssignToLShiftAssign:
     return isJunkMutation<cxx::RShiftAssignVisitor>(astStorage, point);
 
   case MutatorKind::CXX_Bitwise_AndToOr:
@@ -139,9 +139,9 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
   case MutatorKind::CXX_Bitwise_XorAssignToOrAssign:
     return isJunkMutation<cxx::BitXorAssignVisitor>(astStorage, point);
 
-  case MutatorKind::CXX_Number_AssignConst:
+  case MutatorKind::CXX_AssignConst:
     return isJunkMutation<cxx::AssignVisitor>(astStorage, point);
-  case MutatorKind::CXX_Number_InitConst:
+  case MutatorKind::CXX_InitConst:
     return isJunkMutation<cxx::VarDeclVisitor>(astStorage, point);
 
   case MutatorKind::CXX_Logical_AndToOr:

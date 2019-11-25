@@ -11,22 +11,18 @@ static std::vector<std::unique_ptr<irm::IRMutation>> getLLShiftToLRShift() {
   return mutators;
 }
 
-const std::string LShiftToRShift::ID = "cxx_bitwise_lshift_to_rshift";
+const std::string LShiftToRShift::ID = "cxx_lshift_to_rshift";
 
 LShiftToRShift::LShiftToRShift()
-    : TrivialCXXMutator(std::move(getLLShiftToLRShift()),
-                        MutatorKind::CXX_Bitwise_LShiftToRShift,
-                        LShiftToRShift::ID, "Replaces << with >>", ">>",
-                        "Replaced << with >>") {}
+    : TrivialCXXMutator(std::move(getLLShiftToLRShift()), MutatorKind::CXX_LShiftToRShift,
+                        LShiftToRShift::ID, "Replaces << with >>", ">>", "Replaced << with >>") {}
 
-const std::string LShiftAssignToRShiftAssign::ID =
-    "cxx_bitwise_lshift_assign_to_rshift_assign";
+const std::string LShiftAssignToRShiftAssign::ID = "cxx_lshift_assign_to_rshift_assign";
 
 LShiftAssignToRShiftAssign::LShiftAssignToRShiftAssign()
     : TrivialCXXMutator(std::move(getLLShiftToLRShift()),
-                        MutatorKind::CXX_Bitwise_LShiftAssignToRShiftAssign,
-                        LShiftAssignToRShiftAssign::ID, "Replaces <<= with >>=",
-                        ">>=", "Replaced <<= with >>=") {}
+                        MutatorKind::CXX_LShiftAssignToRShiftAssign, LShiftAssignToRShiftAssign::ID,
+                        "Replaces <<= with >>=", ">>=", "Replaced <<= with >>=") {}
 
 static std::vector<std::unique_ptr<irm::IRMutation>> getRShiftToLShift() {
   std::vector<std::unique_ptr<irm::IRMutation>> mutators;
@@ -35,22 +31,18 @@ static std::vector<std::unique_ptr<irm::IRMutation>> getRShiftToLShift() {
   return mutators;
 }
 
-const std::string RShiftToLShift::ID = "cxx_bitwise_rshift_to_lshift";
+const std::string RShiftToLShift::ID = "cxx_rshift_to_lshift";
 
 RShiftToLShift::RShiftToLShift()
-    : TrivialCXXMutator(std::move(getRShiftToLShift()),
-                        MutatorKind::CXX_Bitwise_RShiftToLShift,
-                        RShiftToLShift::ID, "Replaces << with >>", ">>",
-                        "Replaced >> with <<") {}
+    : TrivialCXXMutator(std::move(getRShiftToLShift()), MutatorKind::CXX_RShiftToLShift,
+                        RShiftToLShift::ID, "Replaces << with >>", ">>", "Replaced >> with <<") {}
 
-const std::string RShiftAssignToLShiftAssign::ID =
-    "cxx_bitwise_rshift_assign_to_lshift_assign";
+const std::string RShiftAssignToLShiftAssign::ID = "cxx_bitwise_rshift_assign_to_lshift_assign";
 
 RShiftAssignToLShiftAssign::RShiftAssignToLShiftAssign()
-    : TrivialCXXMutator(std::move(getRShiftToLShift()),
-                        MutatorKind::CXX_Bitwise_RShiftAssignToLShiftAssign,
-                        RShiftAssignToLShiftAssign::ID, "Replaces >>= with <<=",
-                        "<<=", "Replaced >>= with <<=") {}
+    : TrivialCXXMutator(std::move(getRShiftToLShift()), MutatorKind::CXX_RShiftAssignToLShiftAssign,
+                        RShiftAssignToLShiftAssign::ID,
+                        "Replaces >>= with <<=", "<<=", "Replaced >>= with <<=") {}
 
 #pragma mark - Bit operations
 
@@ -60,19 +52,16 @@ static std::vector<std::unique_ptr<irm::IRMutation>> getOrToAnd() {
   return mutators;
 }
 
-const std::string OrToAnd::ID = "cxx_bitwise_or_to_and";
+const std::string BitwiseOrToAnd::ID = "cxx_or_to_and";
 
-OrToAnd::OrToAnd()
-    : TrivialCXXMutator(std::move(getOrToAnd()),
-                        MutatorKind::CXX_Bitwise_OrToAnd, OrToAnd::ID,
-                        "Replaces | with &", "&", "Replaced | with &") {}
+BitwiseOrToAnd::BitwiseOrToAnd()
+    : TrivialCXXMutator(std::move(getOrToAnd()), MutatorKind::CXX_Bitwise_OrToAnd,
+                        BitwiseOrToAnd::ID, "Replaces | with &", "&", "Replaced | with &") {}
 
-const std::string OrAssignToAndAssign::ID =
-    "cxx_bitwise_or_assign_to_and_assign";
+const std::string OrAssignToAndAssign::ID = "cxx_or_assign_to_and_assign";
 
 OrAssignToAndAssign::OrAssignToAndAssign()
-    : TrivialCXXMutator(std::move(getOrToAnd()),
-                        MutatorKind::CXX_Bitwise_OrAssignToAndAssign,
+    : TrivialCXXMutator(std::move(getOrToAnd()), MutatorKind::CXX_Bitwise_OrAssignToAndAssign,
                         OrAssignToAndAssign::ID,
                         "Replaces |= with &=", "&=", "Replaced |= with &=") {}
 
@@ -82,19 +71,16 @@ static std::vector<std::unique_ptr<irm::IRMutation>> getAndToOr() {
   return mutators;
 }
 
-const std::string AndToOr::ID = "cxx_bitwise_and_to_or";
+const std::string BitwiseAndToOr::ID = "cxx_and_to_or";
 
-AndToOr::AndToOr()
-    : TrivialCXXMutator(std::move(getAndToOr()),
-                        MutatorKind::CXX_Bitwise_AndToOr, AndToOr::ID,
-                        "Replaces & with |", "|", "Replaced & with |") {}
+BitwiseAndToOr::BitwiseAndToOr()
+    : TrivialCXXMutator(std::move(getAndToOr()), MutatorKind::CXX_Bitwise_AndToOr,
+                        BitwiseAndToOr::ID, "Replaces & with |", "|", "Replaced & with |") {}
 
-const std::string AndAssignToOrAssign::ID =
-    "cxx_bitwise_and_assign_to_or_assign";
+const std::string AndAssignToOrAssign::ID = "cxx_and_assign_to_or_assign";
 
 AndAssignToOrAssign::AndAssignToOrAssign()
-    : TrivialCXXMutator(std::move(getAndToOr()),
-                        MutatorKind::CXX_Bitwise_AndAssignToOrAssign,
+    : TrivialCXXMutator(std::move(getAndToOr()), MutatorKind::CXX_Bitwise_AndAssignToOrAssign,
                         AndAssignToOrAssign::ID,
                         "Replaces &= with |=", "|=", "Replaced &= with |=") {}
 
@@ -104,18 +90,15 @@ static std::vector<std::unique_ptr<irm::IRMutation>> getXorToOr() {
   return mutators;
 }
 
-const std::string XorToOr::ID = "cxx_bitwise_xor_to_or";
+const std::string XorToOr::ID = "cxx_xor_to_or";
 
 XorToOr::XorToOr()
-    : TrivialCXXMutator(std::move(getXorToOr()),
-                        MutatorKind::CXX_Bitwise_XorToOr, XorToOr::ID,
+    : TrivialCXXMutator(std::move(getXorToOr()), MutatorKind::CXX_Bitwise_XorToOr, XorToOr::ID,
                         "Replaces ^ with |", "|", "Replaced ^ with |") {}
 
-const std::string XorAssignToOrAssign::ID =
-    "cxx_bitwise_xor_assign_to_or_assign";
+const std::string XorAssignToOrAssign::ID = "cxx_xor_assign_to_or_assign";
 
 XorAssignToOrAssign::XorAssignToOrAssign()
-    : TrivialCXXMutator(std::move(getXorToOr()),
-                        MutatorKind::CXX_Bitwise_XorAssignToOrAssign,
+    : TrivialCXXMutator(std::move(getXorToOr()), MutatorKind::CXX_Bitwise_XorAssignToOrAssign,
                         XorAssignToOrAssign::ID,
                         "Replaces ^= with |=", "|=", "Replaced ^= with |=") {}

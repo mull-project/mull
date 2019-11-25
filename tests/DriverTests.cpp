@@ -8,8 +8,8 @@
 #include "mull/JunkDetection/JunkDetector.h"
 #include "mull/Metrics/Metrics.h"
 #include "mull/MutationsFinder.h"
-#include "mull/Mutators/CXX/AndToOrMutator.h"
-#include "mull/Mutators/CXX/OrToAndMutator.h"
+#include "mull/Mutators/CXX/LogicalAndToOr.h"
+#include "mull/Mutators/CXX/LogicalOrToAnd.h"
 #include "mull/Mutators/RemoveVoidFunctionMutator.h"
 #include "mull/ObjectLoader.h"
 #include "mull/Program/Program.h"
@@ -372,7 +372,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
       fixtures::mutators_and_or_and_to_or_replacement_module_bc_path()};
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<AndToOrMutator>());
+  mutators.emplace_back(make_unique<cxx::LogicalAndToOr>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;
@@ -456,7 +456,7 @@ TEST(Driver, SimpleTest_ORToANDReplacementMutator) {
     fixtures::mutators_and_or_or_to_and_replacement_module_bc_path()};
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<OrToAndMutator>());
+  mutators.emplace_back(make_unique<cxx::LogicalOrToAnd>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;
@@ -540,8 +540,8 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator_CompoundOperators) {
     fixtures::mutators_and_or_and_or_replacement_compound_module_bc_path()};
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<AndToOrMutator>());
-  mutators.emplace_back(make_unique<OrToAndMutator>());
+  mutators.emplace_back(make_unique<cxx::LogicalAndToOr>());
+  mutators.emplace_back(make_unique<cxx::LogicalOrToAnd>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;
@@ -643,7 +643,7 @@ TEST(Driver, SimpleTest_ANDToORReplacementMutator_CPP) {
       fixtures::mutators_and_or_and_to_or_replacement_cpp_module_bc_path()};
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<AndToOrMutator>());
+  mutators.emplace_back(make_unique<cxx::LogicalAndToOr>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;
@@ -706,7 +706,7 @@ TEST(Driver, SimpleTest_ORToANDReplacementMutator_CPP) {
   };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<OrToAndMutator>());
+  mutators.emplace_back(make_unique<cxx::LogicalOrToAnd>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;

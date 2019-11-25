@@ -13,8 +13,8 @@ set(mull_sources
 
   Parallelization/Tasks/LoadBitcodeFromBinaryTask.cpp
 
-        Mutators/CXX/AndToOrMutator.cpp
-        Mutators/CXX/OrToAndMutator.cpp
+  Mutators/CXX/LogicalAndToOr.cpp
+  Mutators/CXX/LogicalOrToAnd.cpp
   Mutators/MutatorsFactory.cpp
   Mutators/NegateConditionMutator.cpp
   Mutators/RemoveVoidFunctionMutator.cpp

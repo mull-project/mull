@@ -1,4 +1,4 @@
-#include "mull/Mutators/CXX/OrToAndMutator.h"
+#include "mull/Mutators/CXX/LogicalAndToOr.h"
 
 #include "mull/Logger.h"
 #include "mull/MutationPoint.h"
@@ -14,29 +14,30 @@
 
 using namespace llvm;
 using namespace mull;
+using namespace mull::cxx;
 
-const std::string OrToAndMutator::ID = "cxx_logical_or_to_and";
-const std::string OrToAndMutator::description = "Replaces || with &&";
+const std::string LogicalAndToOr::ID = "cxx_logical_and_to_or";
+const std::string LogicalAndToOr::description = "Replaces && with ||";
 
-OR_AND_MutationType OrToAndMutator::findPossibleMutation(Value &V) {
+AND_OR_MutationType LogicalAndToOr::findPossibleMutation(Value &V) {
   auto *branchInst = dyn_cast<BranchInst>(&V);
 
   if (branchInst == nullptr) {
-    return OR_AND_MutationType_None;
+    return AND_OR_MutationType_None;
   }
 
   if (!branchInst->isConditional()) {
-    return OR_AND_MutationType_None;
+    return AND_OR_MutationType_None;
   }
 
   BranchInst *secondBranch = nullptr;
-  OR_AND_MutationType possibleMutationType =
+  AND_OR_MutationType possibleMutationType =
       findPossibleMutationInBranch(branchInst, &secondBranch);
 
   return possibleMutationType;
 }
 
-void OrToAndMutator::applyMutation(llvm::Function *function, const MutationPointAddress &address,
+void LogicalAndToOr::applyMutation(llvm::Function *function, const MutationPointAddress &address,
                                    irm::IRMutation *lowLevelMutation) {
   llvm::Instruction &I = address.findInstruction(function);
 
@@ -45,25 +46,25 @@ void OrToAndMutator::applyMutation(llvm::Function *function, const MutationPoint
   assert(branchInst->isConditional());
 
   BranchInst *secondBranch = nullptr;
-  OR_AND_MutationType possibleMutationType =
+  AND_OR_MutationType possibleMutationType =
       findPossibleMutationInBranch(branchInst, &secondBranch);
 
-  if (possibleMutationType == OR_AND_MutationType_OR_to_AND_Pattern1) {
-    return applyMutationORToAND_Pattern1(branchInst, secondBranch);
+  if (possibleMutationType == AND_OR_MutationType_AND_to_OR_Pattern1) {
+    return applyMutationANDToOR_Pattern1(branchInst, secondBranch);
   }
 
-  if (possibleMutationType == OR_AND_MutationType_OR_to_AND_Pattern2) {
-    return applyMutationORToAND_Pattern2(branchInst, secondBranch);
+  if (possibleMutationType == AND_OR_MutationType_AND_to_OR_Pattern2) {
+    return applyMutationANDToOR_Pattern2(branchInst, secondBranch);
   }
 
-  if (possibleMutationType == OR_AND_MutationType_OR_to_AND_Pattern3) {
-    return applyMutationORToAND_Pattern3(branchInst, secondBranch);
+  if (possibleMutationType == AND_OR_MutationType_AND_to_OR_Pattern3) {
+    return applyMutationANDToOR_Pattern3(branchInst, secondBranch);
   }
 }
 
-#pragma mark - Private: Apply mutations: OR -> AND
+#pragma mark - Private: Apply mutations: AND -> OR
 
-void OrToAndMutator::applyMutationORToAND_Pattern1(BranchInst *firstBranch,
+void LogicalAndToOr::applyMutationANDToOR_Pattern1(BranchInst *firstBranch,
                                                    BranchInst *secondBranch) {
 
   assert(firstBranch != nullptr);
@@ -77,16 +78,14 @@ void OrToAndMutator::applyMutationORToAND_Pattern1(BranchInst *firstBranch,
   assert(sourceValue);
 
   /// Left branch value is somehow operand #2, right is #1.
+  auto *firstBranchLeftBB = dyn_cast<BasicBlock>(firstBranch->getOperand(2));
   auto *firstBranchRightBB = dyn_cast<BasicBlock>(firstBranch->getOperand(1));
+  assert(firstBranchLeftBB);
   assert(firstBranchRightBB);
 
-  auto *secondBranchLeftBB = dyn_cast<BasicBlock>(secondBranch->getOperand(2));
-  auto *secondBranchRightBB = dyn_cast<BasicBlock>(secondBranch->getOperand(1));
-  assert(secondBranchLeftBB);
-  assert(secondBranchRightBB);
+  auto secondBranchLeftBB = dyn_cast<BasicBlock>(secondBranch->getOperand(2));
 
-  BranchInst *replacement =
-      BranchInst::Create(firstBranchRightBB, secondBranchRightBB, sourceValue);
+  BranchInst *replacement = BranchInst::Create(secondBranchLeftBB, firstBranchLeftBB, sourceValue);
 
   /// If I add a named instruction, and the name already exist
   /// in a basic block, then LLVM will make another unique name of it
@@ -99,14 +98,15 @@ void OrToAndMutator::applyMutationORToAND_Pattern1(BranchInst *firstBranch,
   firstBranch->eraseFromParent();
 
   /// If one of the second branch's successor basic blocks has a PHI node and
-  /// second branch's right basic block jumps to that successor block,
+  /// second branch's left basic block jumps to that successor block,
   /// we need to update PHI node to also accept a jump from a replacement
   /// branch instruction.
   for (unsigned index = 0; index < secondBranch->getParent()->getTerminator()->getNumSuccessors();
        index++) {
     BasicBlock *secondBranchSuccessorBlock =
         secondBranch->getParent()->getTerminator()->getSuccessor(index);
-    if (secondBranchRightBB != secondBranchSuccessorBlock) {
+
+    if (secondBranchLeftBB != secondBranchSuccessorBlock) {
       continue;
     }
 
@@ -130,7 +130,7 @@ void OrToAndMutator::applyMutationORToAND_Pattern1(BranchInst *firstBranch,
   }
 }
 
-void OrToAndMutator::applyMutationORToAND_Pattern2(BranchInst *firstBranch,
+void LogicalAndToOr::applyMutationANDToOR_Pattern2(BranchInst *firstBranch,
                                                    BranchInst *secondBranch) {
 
   assert(firstBranch != nullptr);
@@ -145,14 +145,13 @@ void OrToAndMutator::applyMutationORToAND_Pattern2(BranchInst *firstBranch,
 
   /// Left branch value is somehow operand #2, right is #1.
   auto *firstBranchLeftBB = dyn_cast<BasicBlock>(firstBranch->getOperand(2));
+  auto *firstBranchRightBB = dyn_cast<BasicBlock>(firstBranch->getOperand(1));
   assert(firstBranchLeftBB);
+  assert(firstBranchRightBB);
 
   auto *secondBranchLeftBB = dyn_cast<BasicBlock>(secondBranch->getOperand(2));
-  auto *secondBranchRightBB = dyn_cast<BasicBlock>(secondBranch->getOperand(1));
-  assert(secondBranchLeftBB);
-  assert(secondBranchRightBB);
 
-  BranchInst *replacement = BranchInst::Create(secondBranchRightBB, firstBranchLeftBB, sourceValue);
+  BranchInst *replacement = BranchInst::Create(firstBranchRightBB, secondBranchLeftBB, sourceValue);
 
   /// If I add a named instruction, and the name already exist
   /// in a basic block, then LLVM will make another unique name of it
@@ -165,14 +164,14 @@ void OrToAndMutator::applyMutationORToAND_Pattern2(BranchInst *firstBranch,
   firstBranch->eraseFromParent();
 
   /// If one of the second branch's successor basic blocks has a PHI node and
-  /// second branch's right basic block jumps to that successor block,
+  /// second branch's left basic block jumps to that successor block,
   /// we need to update PHI node to also accept a jump from a replacement
   /// branch instruction.
   for (unsigned index = 0; index < secondBranch->getParent()->getTerminator()->getNumSuccessors();
        index++) {
     BasicBlock *secondBranchSuccessorBlock =
         secondBranch->getParent()->getTerminator()->getSuccessor(index);
-    if (secondBranchRightBB != secondBranchSuccessorBlock) {
+    if (secondBranchLeftBB != secondBranchSuccessorBlock) {
       continue;
     }
 
@@ -188,7 +187,7 @@ void OrToAndMutator::applyMutationORToAND_Pattern2(BranchInst *firstBranch,
         continue;
       }
 
-      unsigned operandIndex = llvm::PHINode::getOperandNumForIncomingValue(i);
+      unsigned operandIndex = PN->getOperandNumForIncomingValue(i);
       Value *operand = PN->getOperand(operandIndex);
 
       PN->addIncoming(operand, replacement->getParent());
@@ -196,7 +195,7 @@ void OrToAndMutator::applyMutationORToAND_Pattern2(BranchInst *firstBranch,
   }
 }
 
-void OrToAndMutator::applyMutationORToAND_Pattern3(BranchInst *firstBranch,
+void LogicalAndToOr::applyMutationANDToOR_Pattern3(BranchInst *firstBranch,
                                                    BranchInst *secondBranch) {
   Module *module = firstBranch->getParent()->getParent()->getParent();
 
@@ -210,6 +209,7 @@ void OrToAndMutator::applyMutationORToAND_Pattern3(BranchInst *firstBranch,
 
     break;
   }
+
   assert(phiNode);
 
   auto *intValueForIncomingBlock0 = dyn_cast<ConstantInt>(phiNode->getOperand(0));
@@ -224,7 +224,6 @@ void OrToAndMutator::applyMutationORToAND_Pattern3(BranchInst *firstBranch,
 
   auto firstBranchLeftBB = dyn_cast<BasicBlock>(firstBranch->getOperand(2));
   auto firstBranchRightBB = dyn_cast<BasicBlock>(firstBranch->getOperand(1));
-
   auto *firstBranchConditionValue = dyn_cast<Value>(firstBranch->getOperand(0));
   assert(firstBranchConditionValue);
 
@@ -244,20 +243,20 @@ void OrToAndMutator::applyMutationORToAND_Pattern3(BranchInst *firstBranch,
 
 #pragma mark - Private: Finding possible mutations
 
-OR_AND_MutationType OrToAndMutator::findPossibleMutationInBranch(BranchInst *branchInst,
+AND_OR_MutationType LogicalAndToOr::findPossibleMutationInBranch(BranchInst *branchInst,
                                                                  BranchInst **secondBranchInst) {
 
   if (!branchInst->isConditional()) {
-    return OR_AND_MutationType_None;
+    return AND_OR_MutationType_None;
   }
 
   auto *leftBB = dyn_cast<BasicBlock>(branchInst->getOperand(2));
-  auto rightBB = dyn_cast<BasicBlock>(branchInst->getOperand(1));
+  auto *rightBB = dyn_cast<BasicBlock>(branchInst->getOperand(1));
 
   bool passedBranchInst = false;
   for (BasicBlock &bb : *branchInst->getFunction()) {
     for (Instruction &instruction : bb) {
-      auto candidateBranchInst = dyn_cast<BranchInst>(&instruction);
+      auto *candidateBranchInst = dyn_cast<BranchInst>(&instruction);
 
       if (!candidateBranchInst || !candidateBranchInst->isConditional()) {
         continue;
@@ -275,20 +274,18 @@ OR_AND_MutationType OrToAndMutator::findPossibleMutationInBranch(BranchInst *bra
       auto candidateBranchInst_leftBB = candidateBranchInst->getOperand(2);
       auto candidateBranchInst_rightBB = candidateBranchInst->getOperand(1);
 
-      if (candidateBranchInst_leftBB == leftBB) {
+      if (candidateBranchInst_rightBB == rightBB) {
         if (secondBranchInst) {
           *secondBranchInst = candidateBranchInst;
         }
 
-        return OR_AND_MutationType_OR_to_AND_Pattern1;
-      }
-
-      else if (candidateBranchInst_leftBB == rightBB) {
+        return AND_OR_MutationType_AND_to_OR_Pattern1;
+      } else if (candidateBranchInst_rightBB == leftBB) {
         if (secondBranchInst) {
           *secondBranchInst = candidateBranchInst;
         }
 
-        return OR_AND_MutationType_OR_to_AND_Pattern2;
+        return AND_OR_MutationType_AND_to_OR_Pattern2;
       }
 
       for (auto &instruction : *candidateBranchInst->getParent()) {
@@ -303,35 +300,34 @@ OR_AND_MutationType OrToAndMutator::findPossibleMutationInBranch(BranchInst *bra
             continue;
           }
 
-          if (candidateBranchInst->getParent() == leftBB) {
+          if (candidateBranchInst->getParent() == rightBB) {
             if (secondBranchInst) {
               *secondBranchInst = candidateBranchInst;
             }
 
-            return OR_AND_MutationType_OR_to_AND_Pattern3;
+            return AND_OR_MutationType_AND_to_OR_Pattern3;
           }
         }
       }
     }
   }
 
-  return OR_AND_MutationType_None;
+  return AND_OR_MutationType_None;
 }
 
-std::vector<MutationPoint *> OrToAndMutator::getMutations(Bitcode *bitcode,
+std::vector<MutationPoint *> LogicalAndToOr::getMutations(Bitcode *bitcode,
                                                           const FunctionUnderTest &function) {
   assert(bitcode);
 
   std::vector<MutationPoint *> mutations;
 
   for (auto &instruction : instructions(function.getFunction())) {
-    OR_AND_MutationType mutationType = findPossibleMutation(instruction);
-    if (mutationType == OR_AND_MutationType_None) {
+    AND_OR_MutationType mutationType = findPossibleMutation(instruction);
+    if (mutationType == AND_OR_MutationType_None) {
       continue;
     }
-
     auto point =
-        new MutationPoint(this, nullptr, &instruction, "&&", bitcode, "OR-AND Replacement");
+        new MutationPoint(this, nullptr, &instruction, "||", bitcode, "AND-OR Replacement");
     mutations.push_back(point);
   }
 

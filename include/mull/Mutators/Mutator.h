@@ -28,36 +28,36 @@ enum class MutatorKind {
   ReplaceCallMutator,
   ScalarValueMutator,
 
+  CXX_AddToSub,
+  CXX_AddAssignToSubAssign,
+  CXX_PreIncToPreDec,
+  CXX_PostIncToPostDec,
+
+  CXX_SubToAdd,
+  CXX_SubAssignToAddAssign,
+  CXX_PreDecToPreInc,
+  CXX_PostDecToPostInc,
+
+  CXX_MulToDiv,
+  CXX_MulAssignToDivAssign,
+
+  CXX_DivToMul,
+  CXX_DivAssignToMulAssign,
+
+  CXX_RemToDiv,
+  CXX_RemAssignToDivAssign,
+
+  CXX_BitwiseNotToNoop,
+  CXX_UnaryMinusToNoop,
+
+  CXX_LShiftToRShift,
+  CXX_LShiftAssignToRShiftAssign,
+
+  CXX_RShiftToLShift,
+  CXX_RShiftAssignToLShiftAssign,
+
   CXX_Logical_AndToOr,
   CXX_Logical_OrToAnd,
-
-  CXX_Arithmetic_AddToSub,
-  CXX_Arithmetic_AddAssignToSubAssign,
-  CXX_Arithmetic_PreIncToPreDec,
-  CXX_Arithmetic_PostIncToPostDec,
-
-  CXX_Arithmetic_SubToAdd,
-  CXX_Arithmetic_SubAssignToAddAssign,
-  CXX_Arithmetic_PreDecToPreInc,
-  CXX_Arithmetic_PostDecToPostInc,
-
-  CXX_Arithmetic_MulToDiv,
-  CXX_Arithmetic_MulAssignToDivAssign,
-
-  CXX_Arithmetic_DivToMul,
-  CXX_Arithmetic_DivAssignToMulAssign,
-
-  CXX_Arithmetic_RemToDiv,
-  CXX_Arithmetic_RemAssignToDivAssign,
-
-  CXX_Arithmetic_BitwiseNotToNoop,
-  CXX_Arithmetic_UnaryMinusToNoop,
-
-  CXX_Bitwise_LShiftToRShift,
-  CXX_Bitwise_LShiftAssignToRShiftAssign,
-
-  CXX_Bitwise_RShiftToLShift,
-  CXX_Bitwise_RShiftAssignToLShiftAssign,
 
   CXX_Bitwise_OrToAnd,
   CXX_Bitwise_OrAssignToAndAssign,
@@ -66,21 +66,21 @@ enum class MutatorKind {
   CXX_Bitwise_XorToOr,
   CXX_Bitwise_XorAssignToOrAssign,
 
-  CXX_Relation_LessThanToLessOrEqual,
-  CXX_Relation_LessOrEqualToLessThan,
-  CXX_Relation_GreaterThanToGreaterOrEqual,
-  CXX_Relation_GreaterOrEqualToGreaterThan,
+  CXX_LessThanToLessOrEqual,
+  CXX_LessOrEqualToLessThan,
+  CXX_GreaterThanToGreaterOrEqual,
+  CXX_GreaterOrEqualToGreaterThan,
 
-  CXX_Relation_GreaterThanToLessOrEqual,
-  CXX_Relation_GreaterOrEqualToLessThan,
-  CXX_Relation_LessThanToGreaterOrEqual,
-  CXX_Relation_LessOrEqualToGreaterThan,
+  CXX_GreaterThanToLessOrEqual,
+  CXX_GreaterOrEqualToLessThan,
+  CXX_LessThanToGreaterOrEqual,
+  CXX_LessOrEqualToGreaterThan,
 
-  CXX_Relation_EqualToNotEqual,
-  CXX_Relation_NotEqualToEqual,
+  CXX_EqualToNotEqual,
+  CXX_NotEqualToEqual,
 
-  CXX_Number_AssignConst,
-  CXX_Number_InitConst,
+  CXX_AssignConst,
+  CXX_InitConst,
 };
 
 class Mutator {

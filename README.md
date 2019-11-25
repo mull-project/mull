@@ -219,14 +219,14 @@ make core-test
 Run without junk detection and only one mutator:
 
 ```
-mull-cxx -test-framework=GoogleTest -mutators=math_add_mutator ./bin/core-test
+mull-cxx -test-framework=GoogleTest -mutators=cxx_add_to_sub ./bin/core-test
 ```
 
 Run with junk detection:
 
 ```
 mull-cxx -test-framework=GoogleTest \
-  -mutators=math_add_mutator \
+  -mutators=cxx_add_to_sub \
   -compdb-path compile_commands.json \
   -compilation-flags="\
     -isystem /opt/llvm/5.0.0/include/c++/v1 \
@@ -339,4 +339,3 @@ month={April},}
 ## Copyright
 
 Copyright (c) 2016-2019 Alex Denisov <alex@lowlevelbits.org> and Stanislav Pankevich <s.pankevich@gmail.com>. See LICENSE for details.
-

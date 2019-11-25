@@ -3,7 +3,7 @@
 #include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
 #include "mull/MutationPoint.h"
-#include "mull/Mutators/CXX/AndToOrMutator.h"
+#include "mull/Mutators/CXX/LogicalAndToOr.h"
 #include "mull/Mutators/ReplaceCallMutator.h"
 #include "mull/Mutators/ScalarValueMutator.h"
 #include "mull/ReachableFunction.h"
@@ -27,7 +27,7 @@ TEST(MutationPoint, AndOrReplacementMutator_applyMutation) {
   auto bitcode = loader.loadBitcodeAtPath(
       fixtures::mutators_and_or_and_to_or_replacement_module_bc_path(),
       context);
-  AndToOrMutator mutator;
+  cxx::LogicalAndToOr mutator;
 
   FunctionUnderTest functionUnderTest(
       bitcode->getModule()->getFunction("testee_AND_operator_2branches"),

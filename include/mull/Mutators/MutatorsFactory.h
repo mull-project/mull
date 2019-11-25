@@ -10,17 +10,16 @@
 namespace mull {
 
 class MutatorsFactory {
-  std::map<std::string, std::unique_ptr<Mutator>> mutatorsMapping;
-  std::map<std::string, std::vector<std::string>> groupsMapping;
-
-  void init();
-
 public:
   MutatorsFactory();
-  std::vector<std::unique_ptr<Mutator>>
-  mutators(const std::vector<std::string> &groups);
-
+  std::vector<std::unique_ptr<Mutator>> mutators(const std::vector<std::string> &groups);
   std::vector<std::pair<std::string, std::string>> commandLineOptions();
+
+private:
+  void init();
+
+  std::map<std::string, std::unique_ptr<Mutator>> mutatorsMapping;
+  std::map<std::string, std::vector<std::string>> groupsMapping;
 };
 
 } // namespace mull

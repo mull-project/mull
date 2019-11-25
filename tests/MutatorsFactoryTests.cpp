@@ -15,35 +15,28 @@ TEST(MutatorsFactory, SingleMutators) {
   Mutator *mutator = nullptr;
 
   {
-    mutators = factory.mutators({ "cxx_arithmetic_sub_to_add" });
-    ASSERT_EQ(mutators.size(), 1UL);
-    mutator = mutators[0].get();
-    ASSERT_EQ(mutator->getUniqueIdentifier(), "cxx_arithmetic_sub_to_add");
-  }
-
-  {
-    mutators = factory.mutators({"negate_mutator"});
+    mutators = factory.mutators({ "negate_mutator" });
     ASSERT_EQ(mutators.size(), 1UL);
     mutator = mutators[0].get();
     ASSERT_EQ(mutator->getUniqueIdentifier(), "negate_mutator");
   }
 
   {
-    mutators = factory.mutators({"remove_void_function_mutator"});
+    mutators = factory.mutators({ "remove_void_function_mutator" });
     ASSERT_EQ(mutators.size(), 1UL);
     mutator = mutators[0].get();
     ASSERT_EQ(mutator->getUniqueIdentifier(), "remove_void_function_mutator");
   }
 
   {
-    mutators = factory.mutators({"replace_call_mutator"});
+    mutators = factory.mutators({ "replace_call_mutator" });
     ASSERT_EQ(mutators.size(), 1UL);
     mutator = mutators[0].get();
     ASSERT_EQ(mutator->getUniqueIdentifier(), "replace_call_mutator");
   }
 
   {
-    mutators = factory.mutators({"scalar_value_mutator"});
+    mutators = factory.mutators({ "scalar_value_mutator" });
     ASSERT_EQ(mutators.size(), 1UL);
     mutator = mutators[0].get();
     ASSERT_EQ(mutator->getUniqueIdentifier(), "scalar_value_mutator");
@@ -51,9 +44,7 @@ TEST(MutatorsFactory, SingleMutators) {
 }
 
 static std::function<bool(unique_ptr<Mutator> &)> predicate(const char *name) {
-  return [=](const unique_ptr<Mutator> &o) {
-    return o->getUniqueIdentifier() == name;
-  };
+  return [=](const unique_ptr<Mutator> &o) { return o->getUniqueIdentifier() == name; };
 }
 
 TEST(MutatorsFactory, CompositeMutators) {
@@ -62,140 +53,30 @@ TEST(MutatorsFactory, CompositeMutators) {
   vector<unique_ptr<Mutator>>::iterator searchResult;
 
   {
-    mutators = factory.mutators({"math"});
+    mutators = factory.mutators({ "cxx_arithmetic" });
+    ASSERT_EQ(mutators.size(), 6UL);
+
+    searchResult = find_if(mutators.begin(), mutators.end(), predicate("cxx_div_to_mul"));
+    ASSERT_NE(searchResult, mutators.end());
+    searchResult = find_if(mutators.begin(), mutators.end(), predicate("cxx_mul_to_div"));
+    ASSERT_NE(searchResult, mutators.end());
+    searchResult = find_if(mutators.begin(), mutators.end(), predicate("cxx_sub_to_add"));
+    ASSERT_NE(searchResult, mutators.end());
+  }
+
+  {
+    mutators = factory.mutators({ "experimental" });
     ASSERT_EQ(mutators.size(), 4UL);
 
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("cxx_arithmetic_div_to_mul"));
+    searchResult = find_if(mutators.begin(), mutators.end(), predicate("replace_call_mutator"));
     ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("cxx_arithmetic_mul_to_div"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("cxx_arithmetic_sub_to_add"));
+    searchResult = find_if(mutators.begin(), mutators.end(), predicate("scalar_value_mutator"));
     ASSERT_NE(searchResult, mutators.end());
   }
 
   {
-    mutators = factory.mutators({"functions"});
-    ASSERT_EQ(mutators.size(), 2UL);
-
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("remove_void_function_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("replace_call_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
-  }
-
-  {
-    mutators = factory.mutators({"constant"});
-    ASSERT_EQ(mutators.size(), 1UL);
-
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("scalar_value_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
-  }
-
-  {
-    mutators = factory.mutators({"default"});
-    ASSERT_EQ(mutators.size(), 3UL);
-
-    searchResult =
-        find_if(mutators.begin(), mutators.end(), predicate("negate_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("remove_void_function_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
-  }
-
-  {
-    mutators = factory.mutators({"experimental"});
-    ASSERT_EQ(mutators.size(), 40UL);
-
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("cxx_arithmetic_mul_to_div"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("cxx_arithmetic_sub_to_add"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(), predicate("cxx_logical_and_to_or"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(), predicate("cxx_logical_or_to_and"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("replace_call_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("scalar_value_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
-  }
-
-  {
-    mutators = factory.mutators({"all"});
-    ASSERT_EQ(mutators.size(), 42UL);
-
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("cxx_arithmetic_div_to_mul"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("cxx_arithmetic_mul_to_div"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("cxx_arithmetic_sub_to_add"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(), predicate("cxx_logical_and_to_or"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(), predicate("cxx_logical_or_to_and"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult =
-        find_if(mutators.begin(), mutators.end(), predicate("negate_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("remove_void_function_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("replace_call_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("scalar_value_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
-  }
-
-  {
-    mutators = factory.mutators({"default", "experimental"});
-    ASSERT_EQ(mutators.size(), 42UL);
-
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("cxx_arithmetic_rem_to_div"));
-    ASSERT_NE(searchResult, mutators.end());
-
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("cxx_arithmetic_div_to_mul"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("cxx_arithmetic_mul_to_div"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("cxx_arithmetic_sub_to_add"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(), predicate("cxx_logical_and_to_or"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(), predicate("cxx_logical_or_to_and"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult =
-        find_if(mutators.begin(), mutators.end(), predicate("negate_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("remove_void_function_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("replace_call_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("scalar_value_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
+    mutators = factory.mutators({ "all" });
+    ASSERT_EQ(mutators.size(), 38UL);
   }
 }
 
@@ -206,28 +87,23 @@ TEST(MutatorsFactory, UniqueMutators) {
   Mutator *mutator = nullptr;
 
   {
-    mutators = factory.mutators(
-        {"cxx_arithmetic_add_to_sub", "cxx_arithmetic_add_to_sub"});
+    mutators = factory.mutators({ "cxx_add_to_sub", "cxx_add_to_sub" });
     ASSERT_EQ(mutators.size(), 1UL);
     mutator = mutators[0].get();
-    ASSERT_EQ(mutator->getUniqueIdentifier(), "cxx_arithmetic_add_to_sub");
+    ASSERT_EQ(mutator->getUniqueIdentifier(), "cxx_add_to_sub");
   }
 
   {
-    mutators = factory.mutators({"math", "cxx_arithmetic_add_to_sub"});
-    ASSERT_EQ(mutators.size(), 4UL);
+    mutators = factory.mutators({ "cxx_arithmetic", "cxx_add_to_sub" });
+    ASSERT_EQ(mutators.size(), 6UL);
 
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("cxx_arithmetic_add_to_sub"));
+    searchResult = find_if(mutators.begin(), mutators.end(), predicate("cxx_add_to_sub"));
     ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("cxx_arithmetic_div_to_mul"));
+    searchResult = find_if(mutators.begin(), mutators.end(), predicate("cxx_div_to_mul"));
     ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("cxx_arithmetic_mul_to_div"));
+    searchResult = find_if(mutators.begin(), mutators.end(), predicate("cxx_mul_to_div"));
     ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("cxx_arithmetic_sub_to_add"));
+    searchResult = find_if(mutators.begin(), mutators.end(), predicate("cxx_sub_to_add"));
     ASSERT_NE(searchResult, mutators.end());
   }
 }
