@@ -96,6 +96,25 @@ public:
   BitwiseNotToNoop();
 };
 
+class UnaryMinusToNoop : public Mutator {
+public:
+  UnaryMinusToNoop();
+
+  std::string getUniqueIdentifier() override;
+  std::string getUniqueIdentifier() const override;
+  std::string getDescription() const override;
+  MutatorKind mutatorKind() override;
+
+  void applyMutation(llvm::Function *function, const MutationPointAddress &address,
+                     irm::IRMutation *lowLevelMutation) override;
+
+  std::vector<MutationPoint *> getMutations(Bitcode *bitcode,
+                                            const FunctionUnderTest &function) override;
+
+private:
+  std::vector<std::unique_ptr<irm::IRMutation>> lowLevelMutators;
+};
+
 } // namespace cxx
 
 } // namespace mull

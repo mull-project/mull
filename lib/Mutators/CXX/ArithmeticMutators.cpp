@@ -1,4 +1,5 @@
 #include "mull/Mutators/CXX/ArithmeticMutators.h"
+#include "mull/MutationPoint.h"
 
 using namespace mull;
 using namespace mull::cxx;
@@ -174,3 +175,61 @@ const std::string BitwiseNotToNoop::ID = "cxx_arithmetic_bitwise_not_to_noop";
 BitwiseNotToNoop::BitwiseNotToNoop()
     : TrivialCXXMutator(std::move(getBitNotToNoop()), MutatorKind::CXX_Arithmetic_BitwiseNotToNoop,
                         BitwiseNotToNoop::ID, "Replaces ~x with x", "", "Replaced ~x with x") {}
+
+/// Non-trivial mutators
+
+UnaryMinusToNoop::UnaryMinusToNoop() {
+  lowLevelMutators.emplace_back(new irm::SwapSubOperands);
+  lowLevelMutators.emplace_back(new irm::SwapFSubOperands);
+}
+
+std::string UnaryMinusToNoop::getUniqueIdentifier() {
+  return "cxx_arithmetic_minus_to_noop";
+}
+std::string UnaryMinusToNoop::getUniqueIdentifier() const {
+  return "cxx_arithmetic_minus_to_noop";
+}
+
+std::string UnaryMinusToNoop::getDescription() const {
+  return "Replaces -x with x";
+}
+
+MutatorKind UnaryMinusToNoop::mutatorKind() {
+  return MutatorKind::CXX_Arithmetic_UnaryMinusToNoop;
+}
+
+void UnaryMinusToNoop::applyMutation(llvm::Function *function, const MutationPointAddress &address,
+                                     irm::IRMutation *lowLevelMutation) {
+  llvm::Instruction &instruction = address.findInstruction(function);
+  lowLevelMutation->mutate(&instruction);
+}
+
+static bool isZero(llvm::Value *value) {
+  if (auto constInt = llvm::dyn_cast<llvm::ConstantInt>(value)) {
+    return constInt->isZero();
+  }
+  if (auto constFP = llvm::dyn_cast<llvm::ConstantFP>(value)) {
+    return constFP->isZero();
+  }
+
+  return false;
+}
+
+std::vector<MutationPoint *> UnaryMinusToNoop::getMutations(Bitcode *bitcode,
+                                                            const FunctionUnderTest &function) {
+  assert(bitcode);
+
+  std::vector<MutationPoint *> mutations;
+
+  for (llvm::Instruction *instruction : function.getSelectedInstructions()) {
+    for (auto &mutator : lowLevelMutators) {
+      if (mutator->canMutate(instruction) && isZero(instruction->getOperand(0))) {
+        auto point =
+            new MutationPoint(this, mutator.get(), instruction, "", bitcode, "Replaced -x with x");
+        mutations.push_back(point);
+      }
+    }
+  }
+
+  return mutations;
+}
