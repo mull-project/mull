@@ -13,8 +13,8 @@ set(mull_sources
 
   Parallelization/Tasks/LoadBitcodeFromBinaryTask.cpp
 
-  Mutators/AndOrReplacementMutator.cpp
-  Mutators/OrAndReplacementMutator.cpp
+        Mutators/CXX/AndToOrMutator.cpp
+        Mutators/CXX/OrToAndMutator.cpp
   Mutators/MutatorsFactory.cpp
   Mutators/NegateConditionMutator.cpp
   Mutators/RemoveVoidFunctionMutator.cpp
@@ -78,8 +78,7 @@ set(mull_sources
   TestFrameworks/TestFrameworkFactory.cpp
   Program/Program.cpp
   ObjectLoader.cpp
-  JunkDetection/CXX/Visitors/AndOrReplacementVisitor.cpp
-  JunkDetection/CXX/Visitors/InstructionRangeVisitor.cpp
+        JunkDetection/CXX/Visitors/InstructionRangeVisitor.cpp
   JunkDetection/CXX/Visitors/NegateConditionVisitor.cpp
   JunkDetection/CXX/Visitors/RemoveVoidFunctionVisitor.cpp
   JunkDetection/CXX/Visitors/ReplaceCallVisitor.cpp

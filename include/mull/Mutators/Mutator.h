@@ -28,8 +28,8 @@ enum class MutatorKind {
   ReplaceCallMutator,
   ScalarValueMutator,
 
-  CXX_AndOrReplacementMutator,
-  CXX_OrAndReplacementMutator,
+  CXX_Logical_AndToOr,
+  CXX_Logical_OrToAnd,
 
   CXX_Arithmetic_AddToSub,
   CXX_Arithmetic_AddAssignToSubAssign,

@@ -3,7 +3,6 @@
 #include "mull/MutationPoint.h"
 #include "mull/Mutators/Mutator.h"
 
-#include "mull/JunkDetection/CXX/Visitors/AndOrReplacementVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/BinaryVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/NegateConditionVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/RemoveVoidFunctionVisitor.h"
@@ -57,10 +56,6 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     return isJunkMutation<ReplaceCallVisitor>(astStorage, point);
   case MutatorKind::NegateMutator:
     return isJunkMutation<NegateConditionVisitor>(astStorage, point);
-  case MutatorKind::CXX_AndOrReplacementMutator:
-    return isJunkMutation<AndOrReplacementVisitor>(astStorage, point);
-  case MutatorKind::CXX_OrAndReplacementMutator:
-    return isJunkMutation<AndOrReplacementVisitor>(astStorage, point);
   case MutatorKind::ScalarValueMutator:
     return isJunkMutation<ScalarValueVisitor>(astStorage, point);
 
@@ -144,6 +139,11 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     return isJunkMutation<cxx::AssignVisitor>(astStorage, point);
   case MutatorKind::CXX_Number_InitConst:
     return isJunkMutation<cxx::VarDeclVisitor>(astStorage, point);
+
+  case MutatorKind::CXX_Logical_AndToOr:
+    return isJunkMutation<cxx::LogicalAndVisitor>(astStorage, point);
+  case MutatorKind::CXX_Logical_OrToAnd:
+    return isJunkMutation<cxx::LogicalOrVisitor>(astStorage, point);
 
   default:
     return false;

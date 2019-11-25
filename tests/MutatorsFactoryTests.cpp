@@ -15,24 +15,10 @@ TEST(MutatorsFactory, SingleMutators) {
   Mutator *mutator = nullptr;
 
   {
-    mutators = factory.mutators({"cxx_arithmetic_sub_to_add"});
+    mutators = factory.mutators({ "cxx_arithmetic_sub_to_add" });
     ASSERT_EQ(mutators.size(), 1UL);
     mutator = mutators[0].get();
     ASSERT_EQ(mutator->getUniqueIdentifier(), "cxx_arithmetic_sub_to_add");
-  }
-
-  {
-    mutators = factory.mutators({"and_to_or_replacement_mutator"});
-    ASSERT_EQ(mutators.size(), 1UL);
-    mutator = mutators[0].get();
-    ASSERT_EQ(mutator->getUniqueIdentifier(), "and_to_or_replacement_mutator");
-  }
-
-  {
-    mutators = factory.mutators({"or_to_and_replacement_mutator"});
-    ASSERT_EQ(mutators.size(), 1UL);
-    mutator = mutators[0].get();
-    ASSERT_EQ(mutator->getUniqueIdentifier(), "or_to_and_replacement_mutator");
   }
 
   {
@@ -134,11 +120,9 @@ TEST(MutatorsFactory, CompositeMutators) {
     searchResult = find_if(mutators.begin(), mutators.end(),
                            predicate("cxx_arithmetic_sub_to_add"));
     ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("and_to_or_replacement_mutator"));
+    searchResult = find_if(mutators.begin(), mutators.end(), predicate("cxx_logical_and_to_or"));
     ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("or_to_and_replacement_mutator"));
+    searchResult = find_if(mutators.begin(), mutators.end(), predicate("cxx_logical_or_to_and"));
     ASSERT_NE(searchResult, mutators.end());
     searchResult = find_if(mutators.begin(), mutators.end(),
                            predicate("replace_call_mutator"));
@@ -161,11 +145,9 @@ TEST(MutatorsFactory, CompositeMutators) {
     searchResult = find_if(mutators.begin(), mutators.end(),
                            predicate("cxx_arithmetic_sub_to_add"));
     ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("and_to_or_replacement_mutator"));
+    searchResult = find_if(mutators.begin(), mutators.end(), predicate("cxx_logical_and_to_or"));
     ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("or_to_and_replacement_mutator"));
+    searchResult = find_if(mutators.begin(), mutators.end(), predicate("cxx_logical_or_to_and"));
     ASSERT_NE(searchResult, mutators.end());
     searchResult =
         find_if(mutators.begin(), mutators.end(), predicate("negate_mutator"));
@@ -198,11 +180,9 @@ TEST(MutatorsFactory, CompositeMutators) {
     searchResult = find_if(mutators.begin(), mutators.end(),
                            predicate("cxx_arithmetic_sub_to_add"));
     ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("and_to_or_replacement_mutator"));
+    searchResult = find_if(mutators.begin(), mutators.end(), predicate("cxx_logical_and_to_or"));
     ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(),
-                           predicate("or_to_and_replacement_mutator"));
+    searchResult = find_if(mutators.begin(), mutators.end(), predicate("cxx_logical_or_to_and"));
     ASSERT_NE(searchResult, mutators.end());
     searchResult =
         find_if(mutators.begin(), mutators.end(), predicate("negate_mutator"));
