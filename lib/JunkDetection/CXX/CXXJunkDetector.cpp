@@ -114,6 +114,9 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
   case MutatorKind::CXX_Arithmetic_BitwiseNotToNoop:
     return isJunkMutation<cxx::BitwiseNotVisitor>(astStorage, point);
 
+  case MutatorKind::CXX_Arithmetic_UnaryMinusToNoop:
+    return isJunkMutation<cxx::UnaryMinusVisitor>(astStorage, point);
+
   case MutatorKind::CXX_Bitwise_LShiftToRShift:
     return isJunkMutation<cxx::LShiftVisitor>(astStorage, point);
   case MutatorKind::CXX_Bitwise_LShiftAssignToRShiftAssign:

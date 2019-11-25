@@ -38,6 +38,7 @@ typedef UnaryVisitor<clang::UnaryOperator::Opcode::UO_PostInc> PostIncVisitor;
 typedef UnaryVisitor<clang::UnaryOperator::Opcode::UO_PreDec> PreDecVisitor;
 typedef UnaryVisitor<clang::UnaryOperator::Opcode::UO_PostDec> PostDecVisitor;
 typedef UnaryVisitor<clang::UnaryOperator::Opcode::UO_Not> BitwiseNotVisitor;
+typedef UnaryVisitor<clang::UnaryOperator::Opcode::UO_Minus> UnaryMinusVisitor;
 
 } // namespace cxx
 

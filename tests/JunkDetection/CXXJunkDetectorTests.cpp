@@ -106,6 +106,8 @@ static const CXXJunkDetectorTestParameter parameters[] = {
 
   CXXJunkDetectorTestParameter(fixtures::mutators_math_bitwise_not_bc_path(),
                                new cxx::BitwiseNotToNoop, 2),
+  CXXJunkDetectorTestParameter(fixtures::mutators_math_unary_minus_bc_path(),
+                               new cxx::UnaryMinusToNoop, 4),
 
   /// Shifts
   CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_shifts_bc_path(), new cxx::LShiftToRShift,
