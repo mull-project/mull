@@ -2,16 +2,16 @@
 #include "mull/BitcodeLoader.h"
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
 #include "mull/MutationPoint.h"
-#include "mull/Mutators/CXX/AndToOrMutator.h"
-#include "mull/Mutators/CXX/OrToAndMutator.h"
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "mull/Mutators/RemoveVoidFunctionMutator.h"
 #include "mull/Mutators/ReplaceCallMutator.h"
 #include "mull/Mutators/ScalarValueMutator.h"
 #include "mull/ReachableFunction.h"
+#include <mull/Mutators/CXX/AndToOrMutator.h>
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 #include <mull/Mutators/CXX/BitwiseMutators.h>
 #include <mull/Mutators/CXX/NumberMutators.h>
+#include <mull/Mutators/CXX/OrToAndMutator.h>
 #include <mull/Mutators/CXX/RelationalMutators.h>
 
 #include <gtest/gtest.h>
@@ -27,22 +27,17 @@ struct CXXJunkDetectorTestParameter {
   const char *bitcodePath;
   Mutator *mutator;
   uint8_t nonJunkMutants;
-  CXXJunkDetectorTestParameter(const char *bitcodePath, Mutator *mutator,
-                               uint8_t nonJunkMutants)
-      : bitcodePath(bitcodePath), mutator(mutator),
-        nonJunkMutants(nonJunkMutants) {}
+  CXXJunkDetectorTestParameter(const char *bitcodePath, Mutator *mutator, uint8_t nonJunkMutants)
+      : bitcodePath(bitcodePath), mutator(mutator), nonJunkMutants(nonJunkMutants) {}
 
-  friend std::ostream &operator<<(std::ostream &os,
-                                  const CXXJunkDetectorTestParameter &bar) {
-    os << "path(" << bar.bitcodePath << ") mutator("
-       << bar.mutator->getUniqueIdentifier() << ") non-junk-mutants("
-       << std::to_string(bar.nonJunkMutants) << ")";
+  friend std::ostream &operator<<(std::ostream &os, const CXXJunkDetectorTestParameter &bar) {
+    os << "path(" << bar.bitcodePath << ") mutator(" << bar.mutator->getUniqueIdentifier()
+       << ") non-junk-mutants(" << std::to_string(bar.nonJunkMutants) << ")";
     return os;
   }
 };
 
-class CXXJunkDetectorTest : public TestWithParam<CXXJunkDetectorTestParameter> {
-};
+class CXXJunkDetectorTest : public TestWithParam<CXXJunkDetectorTestParameter> {};
 
 TEST_P(CXXJunkDetectorTest, detectJunk) {
   auto &parameter = GetParam();
@@ -54,8 +49,7 @@ TEST_P(CXXJunkDetectorTest, detectJunk) {
   for (auto &function : bitcode->getModule()->functions()) {
     FunctionUnderTest functionUnderTest(&function, nullptr, 0);
     functionUnderTest.selectInstructions({});
-    auto mutants =
-        parameter.mutator->getMutations(bitcode.get(), functionUnderTest);
+    auto mutants = parameter.mutator->getMutations(bitcode.get(), functionUnderTest);
     std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
   }
 
@@ -109,6 +103,9 @@ static const CXXJunkDetectorTestParameter parameters[] = {
                                1),
   CXXJunkDetectorTestParameter(fixtures::mutators_math_sub_junk_bc_path(),
                                new cxx::PostDecToPostInc, 3),
+
+  CXXJunkDetectorTestParameter(fixtures::mutators_math_bitwise_not_bc_path(),
+                               new cxx::BitwiseNotToNoop, 2),
 
   /// Shifts
   CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_shifts_bc_path(), new cxx::LShiftToRShift,
@@ -167,8 +164,7 @@ static const CXXJunkDetectorTestParameter parameters[] = {
                                new ReplaceCallMutator, 11),
 };
 
-INSTANTIATE_TEST_CASE_P(CXXJunkDetection, CXXJunkDetectorTest,
-                        testing::ValuesIn(parameters));
+INSTANTIATE_TEST_CASE_P(CXXJunkDetection, CXXJunkDetectorTest, testing::ValuesIn(parameters));
 
 TEST(CXXJunkDetector, compdb_absolute_paths) {
   LLVMContext context;
@@ -212,8 +208,7 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
 TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
   LLVMContext context;
   BitcodeLoader loader;
-  auto bitcode = loader.loadBitcodeAtPath(
-      fixtures::junk_detection_compdb_main_bc_path(), context);
+  auto bitcode = loader.loadBitcodeAtPath(fixtures::junk_detection_compdb_main_bc_path(), context);
 
   std::vector<MutationPoint *> points;
   std::vector<std::unique_ptr<Mutator>> mutators;

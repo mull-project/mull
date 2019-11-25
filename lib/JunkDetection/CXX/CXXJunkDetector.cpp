@@ -13,8 +13,7 @@
 
 using namespace mull;
 
-template <typename Visitor>
-static bool isJunkMutation(ASTStorage &storage, MutationPoint *point) {
+template <typename Visitor> static bool isJunkMutation(ASTStorage &storage, MutationPoint *point) {
   auto ast = storage.findAST(point);
   auto location = ast->getLocation(point);
 
@@ -27,9 +26,9 @@ static bool isJunkMutation(ASTStorage &storage, MutationPoint *point) {
     return true;
   }
 
-  VisitorParameters parameters = {.sourceManager = ast->getSourceManager(),
-                                  .sourceLocation = location,
-                                  .astContext = ast->getASTContext()};
+  VisitorParameters parameters = { .sourceManager = ast->getSourceManager(),
+                                   .sourceLocation = location,
+                                   .astContext = ast->getASTContext() };
   Visitor visitor(parameters);
   visitor.TraverseDecl(decl);
 
@@ -41,8 +40,7 @@ static bool isJunkMutation(ASTStorage &storage, MutationPoint *point) {
   return true;
 }
 
-CXXJunkDetector::CXXJunkDetector(ASTStorage &astStorage)
-    : astStorage(astStorage) {}
+CXXJunkDetector::CXXJunkDetector(ASTStorage &astStorage) : astStorage(astStorage) {}
 
 bool CXXJunkDetector::isJunk(MutationPoint *point) {
   if (point->getSourceLocation().isNull()) {
@@ -113,6 +111,9 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
   case MutatorKind::CXX_Arithmetic_RemAssignToDivAssign:
     return isJunkMutation<cxx::RemAssignVisitor>(astStorage, point);
 
+  case MutatorKind::CXX_Arithmetic_BitwiseNotToNoop:
+    return isJunkMutation<cxx::BitwiseNotVisitor>(astStorage, point);
+
   case MutatorKind::CXX_Bitwise_LShiftToRShift:
     return isJunkMutation<cxx::LShiftVisitor>(astStorage, point);
   case MutatorKind::CXX_Bitwise_LShiftAssignToRShiftAssign:
@@ -146,6 +147,6 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     return isJunkMutation<cxx::LogicalOrVisitor>(astStorage, point);
 
   default:
-    return false;
+    return true;
   }
 }
