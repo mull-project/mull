@@ -78,7 +78,7 @@ public:
   DivAssignToMulAssign();
 };
 
-class RemToDiv  : public TrivialCXXMutator {
+class RemToDiv : public TrivialCXXMutator {
 public:
   static const std::string ID;
   RemToDiv();
@@ -88,6 +88,12 @@ class RemAssignToDivAssign : public TrivialCXXMutator {
 public:
   static const std::string ID;
   RemAssignToDivAssign();
+};
+
+class BitwiseNotToNoop : public TrivialCXXMutator {
+public:
+  static const std::string ID;
+  BitwiseNotToNoop();
 };
 
 } // namespace cxx

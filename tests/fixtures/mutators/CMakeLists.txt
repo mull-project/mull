@@ -1,6 +1,7 @@
 add_subdirectory(and_or)
 add_subdirectory(bitwise)
 add_subdirectory(boundary)
+add_subdirectory(math)
 add_subdirectory(math_add)
 add_subdirectory(math_div)
 add_subdirectory(math_mul)

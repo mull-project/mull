@@ -50,6 +50,8 @@ enum class MutatorKind {
   CXX_Arithmetic_RemToDiv,
   CXX_Arithmetic_RemAssignToDivAssign,
 
+  CXX_Arithmetic_BitwiseNotToNoop,
+
   CXX_Bitwise_LShiftToRShift,
   CXX_Bitwise_LShiftAssignToRShiftAssign,
 
