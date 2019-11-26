@@ -98,6 +98,7 @@ public:
 
 class UnaryMinusToNoop : public Mutator {
 public:
+  static const std::string ID;
   UnaryMinusToNoop();
 
   std::string getUniqueIdentifier() override;

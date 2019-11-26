@@ -155,7 +155,7 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   const Json &mutationJSON = mutantsJSON.at(0);
 
   const std::string &mutationId = mutationJSON["id"].string_value();
-  ASSERT_EQ("cxx_arithmetic_add_to_sub", mutationId);
+  ASSERT_EQ("cxx_add_to_sub", mutationId);
 
   const std::string &mutationStatus = mutationJSON["status"].string_value();
   ASSERT_EQ("Killed", mutationStatus);

@@ -33,10 +33,10 @@ public:
 
 #pragma mark - Bit operations
 
-class OrToAnd : public TrivialCXXMutator {
+class BitwiseOrToAnd : public TrivialCXXMutator {
 public:
   static const std::string ID;
-  OrToAnd();
+  BitwiseOrToAnd();
 };
 
 class OrAssignToAndAssign : public TrivialCXXMutator {
@@ -45,10 +45,10 @@ public:
   OrAssignToAndAssign();
 };
 
-class AndToOr : public TrivialCXXMutator {
+class BitwiseAndToOr : public TrivialCXXMutator {
 public:
   static const std::string ID;
-  AndToOr();
+  BitwiseAndToOr();
 };
 
 class AndAssignToOrAssign : public TrivialCXXMutator {

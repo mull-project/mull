@@ -7,11 +7,11 @@
 #include "mull/Mutators/ReplaceCallMutator.h"
 #include "mull/Mutators/ScalarValueMutator.h"
 #include "mull/ReachableFunction.h"
-#include <mull/Mutators/CXX/AndToOrMutator.h>
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 #include <mull/Mutators/CXX/BitwiseMutators.h>
+#include <mull/Mutators/CXX/LogicalAndToOr.h>
+#include <mull/Mutators/CXX/LogicalOrToAnd.h>
 #include <mull/Mutators/CXX/NumberMutators.h>
-#include <mull/Mutators/CXX/OrToAndMutator.h>
 #include <mull/Mutators/CXX/RelationalMutators.h>
 
 #include <gtest/gtest.h>
@@ -119,10 +119,10 @@ static const CXXJunkDetectorTestParameter parameters[] = {
   CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_shifts_bc_path(),
                                new cxx::RShiftAssignToLShiftAssign, 3),
   /// Bit operations
-  CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(), new cxx::OrToAnd, 2),
+  CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(), new cxx::BitwiseOrToAnd, 2),
   CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(),
                                new cxx::OrAssignToAndAssign, 1),
-  CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(), new cxx::AndToOr, 2),
+  CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(), new cxx::BitwiseAndToOr, 2),
   CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(),
                                new cxx::AndAssignToOrAssign, 2),
   CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(), new cxx::XorToOr, 2),
@@ -152,10 +152,10 @@ static const CXXJunkDetectorTestParameter parameters[] = {
                                new cxx::NumberInitConst, 6),
 
   CXXJunkDetectorTestParameter(fixtures::mutators_and_or_and_to_or_replacement_cpp_junk_bc_path(),
-                               new AndToOrMutator, 2),
+                               new cxx::LogicalAndToOr, 2),
 
   CXXJunkDetectorTestParameter(fixtures::mutators_and_or_or_to_and_replacement_cpp_junk_bc_path(),
-                               new OrToAndMutator, 2),
+                               new cxx::LogicalOrToAnd, 2),
 
   CXXJunkDetectorTestParameter(fixtures::mutators_scalar_value_junk_bc_path(),
                                new ScalarValueMutator, 5),
