@@ -182,8 +182,8 @@ int main(int argc, char **argv) {
   metrics.endRun();
 
   tool::ReporterParameters params{
-    .reporterDirectory = tool::ReportDirectory.getValue(),
     .reporterName = tool::ReportName.getValue(),
+    .reporterDirectory = tool::ReportDirectory.getValue(),
     .sourceInfoProvider = sourceInfoProvider,
   };
   std::vector<std::unique_ptr<mull::Reporter>> reporters = reportersOption.reporters(params);
