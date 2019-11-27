@@ -6,10 +6,10 @@ Welcome to Mull's documentation!
 
    GettingStarted
    MutationTestingIntro
+   HelloWorld
    SupportedMutations
    CommandLineReference
    HackingOnMull
-
 
 .. Indices and tables
    ==================
