@@ -1,8 +1,5 @@
 #include "FixturePaths.h"
 #include "mull/JunkDetection/CXX/CompilationDatabase.h"
-
-#include <clang/Basic/Version.h>
-
 #include <gtest/gtest.h>
 
 using namespace mull;
