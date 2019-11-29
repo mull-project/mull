@@ -1,7 +1,7 @@
 [
 {
   "directory": "/foo/bar",
-  "arguments": "clang++ -I foo -I bar -c foobar.cpp",
+  "arguments": [ "clang++", "-I", "foo", "-I", "bar", "-c", "foobar.cpp" ],
   "file": "foobar.cpp",
   "output" : "foobar.exe"
 }

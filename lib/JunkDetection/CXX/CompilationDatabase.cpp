@@ -12,23 +12,30 @@
 
 using namespace mull;
 
-/// Skips the next word even if it is several spaces away:
-///
-/// Examples:
-///     ' aaa bbb' ->  ' aaa bbb'
-///      ^                   ^
-///
-///     '   aaa bbb' ->  '   aaa bbb'
-///      ^                       ^
-static void skipNextWord(std::istringstream &stream) {
-  int c = stream.get();
-  while (c == ' ') {
-    stream.ignore(std::numeric_limits<std::streamsize>::max(), ' ');
-    c = stream.get();
+static std::vector<std::string> filterFlags(const std::vector<std::string> &flags,
+                                            bool stripCompiler) {
+  std::vector<std::string> filteredFlags;
+  if (flags.empty()) {
+    return filteredFlags;
   }
-  if (stream.good()) {
-    stream.unget();
+  auto it = flags.begin();
+  auto end = flags.end();
+
+  if (stripCompiler) {
+    ++it;
   }
+
+  while (it != end) {
+    std::string flag = *(it++);
+    if (flag == "-c") {
+      if (it != end) {
+        ++it;
+      }
+      continue;
+    }
+    filteredFlags.push_back(flag);
+  }
+  return filteredFlags;
 }
 
 static std::vector<std::string> flagsFromString(const std::string &s) {
@@ -41,36 +48,22 @@ static std::vector<std::string> flagsFromString(const std::string &s) {
     if (value.empty()) {
       continue;
     }
-    if (value == "-c") {
-      skipNextWord(stream);
-      continue;
-    }
     flags.push_back(value);
   }
 
   return flags;
 }
 
-const std::string &commandOrArguments(const CompileCommand &command) {
+static std::vector<std::string> flagsFromCommand(const CompileCommand &command) {
   if (command.arguments.empty()) {
-    return command.command;
+    return filterFlags(flagsFromString(command.command), true);
   }
-  return command.arguments;
+  return filterFlags(command.arguments, true);
 }
 
-static std::vector<std::string>
-flagsFromCommand(const CompileCommand &command,
-                 const std::vector<std::string> &extraFlags) {
-  const std::string &input = commandOrArguments(command);
-
-  std::istringstream stream(input);
-  std::string compiler;
-  stream >> compiler;
-
-  std::string rest;
-  std::getline(stream, rest);
-
-  std::vector<std::string> flags = flagsFromString(rest);
+static std::vector<std::string> flagsFromCommand(const CompileCommand &command,
+                                                 const std::vector<std::string> &extraFlags) {
+  std::vector<std::string> flags = flagsFromCommand(command);
   for (auto &extra : extraFlags) {
     flags.push_back(extra);
   }
@@ -78,8 +71,7 @@ flagsFromCommand(const CompileCommand &command,
 }
 
 static std::map<std::string, std::vector<std::string>>
-loadDatabaseFromFile(const std::string &path,
-                     const std::vector<std::string> &extraFlags) {
+loadDatabaseFromFile(const std::string &path, const std::vector<std::string> &extraFlags) {
   std::map<std::string, std::vector<std::string>> database;
   if (path.empty()) {
     return database;
@@ -114,11 +106,11 @@ loadDatabaseFromFile(const std::string &path,
 
 CompilationDatabase::CompilationDatabase(CompilationDatabase::Path path,
                                          CompilationDatabase::Flags flags)
-    : extraFlags(flagsFromString(flags.getFlags())),
+    : extraFlags(filterFlags(flagsFromString(flags.getFlags()), false)),
       database(loadDatabaseFromFile(path.getPath(), extraFlags)) {}
 
-const std::vector<std::string> &CompilationDatabase::compilationFlagsForFile(
-    const std::string &filepath) const {
+const std::vector<std::string> &
+CompilationDatabase::compilationFlagsForFile(const std::string &filepath) const {
   if (database.empty()) {
     return extraFlags;
   }
