@@ -64,6 +64,12 @@ static std::vector<std::string> flagsFromCommand(const CompileCommand &command) 
 static std::vector<std::string> flagsFromCommand(const CompileCommand &command,
                                                  const std::vector<std::string> &extraFlags) {
   std::vector<std::string> flags = flagsFromCommand(command);
+  /// The compilation database produced from running
+  /// clang ... -MJ <comp.database.json>
+  /// contains a file name in the "arguments" array. Since the file name
+  /// itself is not a compilation flag we filter it out.
+  flags.erase(std::remove(flags.begin(), flags.end(), command.file), flags.end());
+
   for (auto &extra : extraFlags) {
     flags.push_back(extra);
   }

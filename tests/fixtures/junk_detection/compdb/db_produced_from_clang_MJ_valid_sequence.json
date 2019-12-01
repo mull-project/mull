@@ -1,0 +1,26 @@
+[
+  { "directory": "/tmp",
+    "file": "main.cpp",
+    "output": "/var/folders/sy/_sd67yzn5td5flr2_6vf73w40000gp/T/main-95dd9a.bc",
+    "arguments": [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang",
+      "-xc++", "main.cpp", "-fembed-bitcode=all", "-g", "-O0", "-o", "hello-world",
+      "-Wno-framework-include-private-from-public", "-Wno-atimport-in-framework-header",
+      "-Wno-extra-semi-stmt", "-Wno-quoted-include-in-framework-header", "-mlinker-version=520",
+      "-mtune=core2", "-m64", "-mmacosx-version-min=10.14.0", "-stdlib=libc++",
+      "--target=x86_64-apple-macosx10.14.0"
+    ]
+  },
+  { "directory": "/tmp",
+    "file": "/var/folders/sy/_sd67yzn5td5flr2_6vf73w40000gp/T/main-95dd9a.bc",
+    "output": "/var/folders/sy/_sd67yzn5td5flr2_6vf73w40000gp/T/main-559957.o",
+    "arguments": [
+      "/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/clang",
+      "-xir", "/var/folders/sy/_sd67yzn5td5flr2_6vf73w40000gp/T/main-95dd9a.bc", "-fembed-bitcode=all",
+      "-g", "-O0", "-o", "hello-world", "-Wno-framework-include-private-from-public",
+      "-Wno-atimport-in-framework-header", "-Wno-extra-semi-stmt",
+      "-Wno-quoted-include-in-framework-header", "-mlinker-version=520", "-mtune=core2", "-m64",
+      "-mmacosx-version-min=10.14.0", "-stdlib=libc++", "--target=x86_64-apple-macosx10.14.0"
+    ]
+  }
+]
