@@ -110,3 +110,20 @@ TEST(CompilationDatabaseFromFile, includesCompilationFlagsPassedSeparately) {
   ASSERT_EQ(compilationFlags.at(6), std::string("-isystem"));
   ASSERT_EQ(compilationFlags.at(7), std::string("/usr/include"));
 }
+
+TEST(CompilationDatabaseFromFile, parsesCompilationFlagsFromClangMJCommandValid) {
+  auto path = fixtures::junk_detection_compdb_db_produced_from_clang_MJ_valid_sequence_json_path();
+  const CompilationDatabase database(
+      CompilationDatabase::Path(path),
+      CompilationDatabase::Flags("-isystem /usr/local/include -isystem /usr/include"));
+
+  const std::string file("/tmp/main.cpp");
+  auto compilationFlags = database.compilationFlagsForFile(file);
+
+  ASSERT_EQ(compilationFlags.size(), size_t(20));
+  ASSERT_EQ(compilationFlags.at(0), std::string("-xc++"));
+  ASSERT_EQ(compilationFlags.at(1), std::string("-fembed-bitcode=all"));
+  ASSERT_EQ(compilationFlags.at(2), std::string("-g"));
+  ASSERT_EQ(compilationFlags.at(18), std::string("-isystem"));
+  ASSERT_EQ(compilationFlags.at(19), std::string("/usr/include"));
+}

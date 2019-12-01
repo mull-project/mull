@@ -34,6 +34,7 @@ set (databases
   ${CMAKE_CURRENT_LIST_DIR}/db_with_commands.json
   ${CMAKE_CURRENT_LIST_DIR}/db_with_output.json
   ${CMAKE_CURRENT_LIST_DIR}/db_with_fullpath_compiler.json
+  ${CMAKE_CURRENT_LIST_DIR}/db_produced_from_clang_MJ_valid_sequence.json
 )
 
 foreach(database ${databases})
