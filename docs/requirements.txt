@@ -1,2 +1,2 @@
 guzzle_sphinx_theme
-
+sphinx>=2.2.0

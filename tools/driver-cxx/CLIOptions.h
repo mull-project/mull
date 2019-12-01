@@ -47,6 +47,7 @@ class MutatorsCLIOptions {
 public:
   explicit MutatorsCLIOptions(list<MutatorsOptionIndex> &parameter);
   std::vector<std::unique_ptr<mull::Mutator>> mutators();
+  std::vector<std::pair<std::string, std::string>> &getOptions();
 
 private:
   MutatorsFactory factory;
@@ -88,5 +89,11 @@ public:
 private:
   opt<SandboxKind> &parameter;
 };
+
+extern opt<bool> DumpCLIInterface;
+void dumpCLIInterface();
+
+extern opt<bool> DumpMutators;
+void dumpMutators();
 
 } // namespace tool

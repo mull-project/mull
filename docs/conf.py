@@ -14,17 +14,25 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
+import re
 import guzzle_sphinx_theme
 
 # -- Project information -----------------------------------------------------
 
+def project_version():
+    with open("../CMakeLists.txt") as f:
+        for line in f:
+            m = re.search('MULL_VERSION (\d.\d.\d)', line)
+            if m:
+                return m.group(1)
+
 project = 'Mull'
-copyright = '2019, Alex Denisov'
-author = 'Alex Denisov'
+copyright = '2019, Mull Project'
+author = 'Alex Denisov <alex@lowlevelbits.org>, Stanislav Pankevich <s.pankevich@gmail.com>'
 
-# The full version, including alpha/beta/rc tags
-release = '0.5.0'
-
+version = project_version()
+release = version
+print("Generating docs for Mull" + version)
 
 # -- General configuration ---------------------------------------------------
 
@@ -52,8 +60,6 @@ html_theme_path = guzzle_sphinx_theme.html_theme_path()
 extensions.append("guzzle_sphinx_theme")
 html_theme = 'guzzle_sphinx_theme'
 
-# html_theme = 'pyramid'
-
 html_theme_options = {
     "project_nav_name": "Mull",
 }
@@ -63,4 +69,5 @@ html_sidebars = { '**': ['globaltoc.html', 'searchbox.html'] }
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+html_css_files = [ 'custom.css' ]
 master_doc = 'index'

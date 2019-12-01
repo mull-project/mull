@@ -1,7 +1,9 @@
 cmake_minimum_required(VERSION 3.7.0)
 
+set (MULL_VERSION 0.5.0)
+
 project(Mull
-  VERSION 0.5.0
+  VERSION ${MULL_VERSION}
   LANGUAGES C CXX
 )
 
@@ -199,3 +201,4 @@ add_subdirectory(tools)
 add_subdirectory(tests)
 add_subdirectory(vendor/googletest)
 add_subdirectory(vendor/libirm)
+add_subdirectory(docs)
