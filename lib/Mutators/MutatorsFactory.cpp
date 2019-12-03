@@ -238,7 +238,7 @@ vector<unique_ptr<Mutator>> MutatorsFactory::mutators(const vector<string> &grou
 
 /// Command Line Options
 
-std::string descriptionForGroup(const std::vector<std::string> &groupMembers) {
+std::string MutatorsFactory::descriptionForGroup(const std::vector<std::string> &groupMembers) {
   if (groupMembers.empty()) {
     return std::string("empty group?");
   }
@@ -269,4 +269,12 @@ std::vector<std::pair<std::string, std::string>> MutatorsFactory::commandLineOpt
   }
 
   return options;
+}
+
+std::map<std::string, std::unique_ptr<Mutator>> &MutatorsFactory::getMutatorsMapping() {
+  return mutatorsMapping;
+}
+
+std::map<std::string, std::vector<std::string>> &MutatorsFactory::getGroupsMapping() {
+  return groupsMapping;
 }

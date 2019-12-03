@@ -13,6 +13,7 @@ uint64_t JITSymbolAddress(JITSymbol &symbol) {
   return symbol.getAddress();
 }
 
+
 JITSymbolFlags JITSymbolFlagsFromObjectSymbol(const object::BasicSymbolRef &symbol) {
   return orc::JITSymbol::flagsFromObjectSymbol(symbol);
 }
@@ -51,6 +52,10 @@ DICompileUnit *getUnit(const DebugLoc &debugLocation) {
     scope = scope->getScope().resolve();
   }
   return scope ? llvm::cast<llvm::DISubprogram>(scope)->getUnit() : nullptr;
+}
+
+bool parseCommandLineOptions(int argc, char **argv) {
+  return llvm::cl::ParseCommandLineOptions(argc, argv, "", true);
 }
 
 } // namespace llvm_compat

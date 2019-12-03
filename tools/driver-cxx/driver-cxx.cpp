@@ -46,7 +46,18 @@ int main(int argc, char **argv) {
   tool::ReportersCLIOptions reportersOption(tool::ReportersOption);
 
   llvm::cl::HideUnrelatedOptions(tool::MullCXXCategory);
-  llvm::cl::ParseCommandLineOptions(argc, argv);
+  bool validOptions = llvm_compat::parseCommandLineOptions(argc, argv);
+  if (!validOptions) {
+    if (tool::DumpCLIInterface) {
+      tool::dumpCLIInterface();
+      return 0;
+    }
+    if (tool::DumpMutators) {
+      tool::dumpMutators();
+      return 0;
+    }
+    return 1;
+  }
 
   validateInputFile();
 

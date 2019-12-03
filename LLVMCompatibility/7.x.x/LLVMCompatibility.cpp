@@ -64,4 +64,9 @@ DICompileUnit *getUnit(const DebugLoc &debugLocation) {
   }
   return scope ? llvm::cast<llvm::DISubprogram>(scope)->getUnit() : nullptr;
 }
+
+bool parseCommandLineOptions(int argc, char **argv) {
+  return llvm::cl::ParseCommandLineOptions(argc, argv, "", &llvm::errs());
+}
+
 } // namespace llvm_compat

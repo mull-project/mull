@@ -36,4 +36,6 @@ void setVersionPrinter(void (*oldPrinter)(), void (*newPrinter)(raw_ostream &));
 StringRef getSectionContent(const object::SectionRef &section);
 
 DICompileUnit *getUnit(const DebugLoc &debugLocation);
+
+bool parseCommandLineOptions(int argc, char **argv);
 } // namespace llvm_compat
