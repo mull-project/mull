@@ -76,18 +76,21 @@ TEST(CompilationDatabaseFromFile, loadsFromValidFiles) {
       fixtures::junk_detection_compdb_db_with_output_json_path(),
   });
 
-  const std::string file("/foo/bar/foobar.cpp");
-  for (auto &path : databasePaths) {
-    const CompilationDatabase database(CompilationDatabase::Path(path),
-                                       CompilationDatabase::Flags(""));
+  std::vector<std::string> files(
+      { "/foo/bar/foobar.cpp", "/foo/bar/./foobar.cpp", "/foo/bar/buzz/../foobar.cpp" });
+  for (const std::string &file : files) {
+    for (auto &path : databasePaths) {
+      const CompilationDatabase database(CompilationDatabase::Path(path),
+                                         CompilationDatabase::Flags(""));
 
-    auto compilationFlags = database.compilationFlagsForFile(file);
-    ASSERT_EQ(compilationFlags.size(), size_t(4));
+      auto compilationFlags = database.compilationFlagsForFile(file);
+      ASSERT_EQ(compilationFlags.size(), size_t(4));
 
-    ASSERT_EQ(compilationFlags.at(0), std::string("-I"));
-    ASSERT_EQ(compilationFlags.at(1), std::string("foo"));
-    ASSERT_EQ(compilationFlags.at(2), std::string("-I"));
-    ASSERT_EQ(compilationFlags.at(3), std::string("bar"));
+      ASSERT_EQ(compilationFlags.at(0), std::string("-I"));
+      ASSERT_EQ(compilationFlags.at(1), std::string("foo"));
+      ASSERT_EQ(compilationFlags.at(2), std::string("-I"));
+      ASSERT_EQ(compilationFlags.at(3), std::string("bar"));
+    }
   }
 }
 

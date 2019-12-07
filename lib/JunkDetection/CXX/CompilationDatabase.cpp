@@ -131,5 +131,12 @@ CompilationDatabase::compilationFlagsForFile(const std::string &filepath) const 
     return it->second;
   }
 
+  llvm::SmallString<128> dotlessPath(filepath);
+  llvm::sys::path::remove_dots(dotlessPath, true);
+  it = database.find(dotlessPath.str());
+  if (it != database.end()) {
+    return it->second;
+  }
+
   return extraFlags;
 }
