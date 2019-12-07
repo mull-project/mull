@@ -66,7 +66,7 @@ TEST(MutatorsFactory, CompositeMutators) {
 
   {
     mutators = factory.mutators({ "experimental" });
-    ASSERT_EQ(mutators.size(), 4UL);
+    ASSERT_EQ(mutators.size(), 6UL);
 
     searchResult = find_if(mutators.begin(), mutators.end(), predicate("replace_call_mutator"));
     ASSERT_NE(searchResult, mutators.end());
