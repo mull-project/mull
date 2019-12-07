@@ -49,7 +49,7 @@
     Groups:
       :all:	cxx_all, experimental
 
-      :cxx_all:	cxx_assignment, cxx_increment, cxx_decrement, cxx_arithmetic, cxx_logical, cxx_comparison, cxx_boundary
+      :cxx_all:	cxx_assignment, cxx_increment, cxx_decrement, cxx_arithmetic, cxx_comparison, cxx_boundary
 
       :cxx_arithmetic:	cxx_minus_to_noop, cxx_add_to_sub, cxx_sub_to_add, cxx_mul_to_div, cxx_div_to_mul, cxx_rem_to_div
 
@@ -75,7 +75,7 @@
 
       :cxx_logical:	cxx_logical_and_to_or, cxx_logical_or_to_and
 
-      :experimental:	negate_mutator, remove_void_function_mutator, scalar_value_mutator, replace_call_mutator
+      :experimental:	negate_mutator, remove_void_function_mutator, scalar_value_mutator, replace_call_mutator, cxx_logical
 
     Single mutators:
       :cxx_add_assign_to_sub_assign:	Replaces += with -=
