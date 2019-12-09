@@ -3,7 +3,7 @@
   pip:
     name:
       - lit==0.9.0
-      - filecheck==0.0.3
+      - filecheck==0.0.5
     executable: pip3
 
 - name: Run LIT tests
