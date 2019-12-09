@@ -1,0 +1,9 @@
+**dSYM
+*.exe
+*.html
+*.json
+*.md.out
+*.script
+*.tmp
+
+
