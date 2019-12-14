@@ -20,15 +20,21 @@ class FunctionUnderTest;
 class NegateConditionMutator : public Mutator {
 
 public:
-  static const std::string ID;
-  static const std::string description;
+  static std::string ID();
+  static std::string description();
 
   NegateConditionMutator();
 
   MutatorKind mutatorKind() override { return MutatorKind::NegateMutator; }
-  std::string getUniqueIdentifier() override { return ID; }
-  std::string getUniqueIdentifier() const override { return ID; }
-  std::string getDescription() const override { return description; }
+  std::string getUniqueIdentifier() override {
+    return ID();
+  }
+  std::string getUniqueIdentifier() const override {
+    return ID();
+  }
+  std::string getDescription() const override {
+    return description();
+  }
 
   void applyMutation(llvm::Function *function,
                      const MutationPointAddress &address,

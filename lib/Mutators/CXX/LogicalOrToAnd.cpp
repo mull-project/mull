@@ -16,8 +16,12 @@ using namespace llvm;
 using namespace mull;
 using namespace mull::cxx;
 
-const std::string LogicalOrToAnd::ID = "cxx_logical_or_to_and";
-const std::string LogicalOrToAnd::description = "Replaces || with &&";
+std::string LogicalOrToAnd::ID() {
+  return "cxx_logical_or_to_and";
+}
+std::string LogicalOrToAnd::description() {
+  return "Replaces || with &&";
+}
 
 OR_AND_MutationType LogicalOrToAnd::findPossibleMutation(Value &V) {
   auto *branchInst = dyn_cast<BranchInst>(&V);

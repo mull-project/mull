@@ -7,9 +7,12 @@
 using namespace llvm;
 using namespace mull;
 
-const std::string NegateConditionMutator::ID = "negate_mutator";
-const std::string NegateConditionMutator::description =
-    "Negates conditionals !x to x and x to !x";
+std::string NegateConditionMutator::ID() {
+  return "negate_mutator";
+}
+std::string NegateConditionMutator::description() {
+  return "Negates conditionals !x to x and x to !x";
+}
 
 NegateConditionMutator::NegateConditionMutator() : lowLevelMutators() {
   /// == -> !=
@@ -60,8 +63,7 @@ void NegateConditionMutator::applyMutation(llvm::Function *function,
 }
 
 std::vector<MutationPoint *>
-NegateConditionMutator::getMutations(Bitcode *bitcode,
-                                     const FunctionUnderTest &function) {
+NegateConditionMutator::getMutations(Bitcode *bitcode, const FunctionUnderTest &function) {
   assert(bitcode);
 
   std::vector<MutationPoint *> mutations;
@@ -70,17 +72,14 @@ NegateConditionMutator::getMutations(Bitcode *bitcode,
     for (auto &mutator : lowLevelMutators) {
       if (mutator->canMutate(instruction)) {
 
-        auto cmpMutator =
-            reinterpret_cast<irm::_CmpInstPredicateReplacementBase *>(
-                mutator.get());
+        auto cmpMutator = reinterpret_cast<irm::_CmpInstPredicateReplacementBase *>(mutator.get());
 
-        std::string diagnostics =
-            getDiagnostics(cmpMutator->_getFrom(), cmpMutator->_getTo());
+        std::string diagnostics = getDiagnostics(cmpMutator->_getFrom(), cmpMutator->_getTo());
 
         std::string replacement = describePredicate(cmpMutator->_getTo());
 
-        auto point = new MutationPoint(this, mutator.get(), instruction,
-                                       replacement, bitcode, diagnostics);
+        auto point =
+            new MutationPoint(this, mutator.get(), instruction, replacement, bitcode, diagnostics);
         mutations.push_back(point);
       }
     }

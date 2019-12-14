@@ -40,17 +40,17 @@ class LogicalOrToAnd : public Mutator {
   static void applyMutationORToAND_Pattern3(BranchInst *firstBranch, BranchInst *secondBranch);
 
 public:
-  static const std::string ID;
-  static const std::string description;
+  static std::string ID();
+  static std::string description();
 
   std::string getUniqueIdentifier() override {
-    return ID;
+    return ID();
   }
   std::string getUniqueIdentifier() const override {
-    return ID;
+    return ID();
   }
   std::string getDescription() const override {
-    return description;
+    return description();
   }
   MutatorKind mutatorKind() override {
     return MutatorKind::CXX_Logical_OrToAnd;

@@ -8,27 +8,27 @@
 using namespace llvm;
 using namespace mull;
 
-const std::string RemoveVoidFunctionMutator::ID =
-    "remove_void_function_mutator";
-const std::string RemoveVoidFunctionMutator::description =
-    "Removes calls to a function returning void";
+std::string RemoveVoidFunctionMutator::ID() {
+  return "remove_void_function_mutator";
+}
+std::string RemoveVoidFunctionMutator::description() {
+  return "Removes calls to a function returning void";
+}
 
 RemoveVoidFunctionMutator::RemoveVoidFunctionMutator() : lowLevelMutators() {
   lowLevelMutators.push_back(llvm::make_unique<irm::RemoveVoidFunctionCall>());
-  lowLevelMutators.push_back(
-      llvm::make_unique<irm::RemoveVoidIntrinsicsCall>());
+  lowLevelMutators.push_back(llvm::make_unique<irm::RemoveVoidIntrinsicsCall>());
 }
 
-void RemoveVoidFunctionMutator::applyMutation(
-    llvm::Function *function, const MutationPointAddress &address,
-    irm::IRMutation *lowLevelMutation) {
+void RemoveVoidFunctionMutator::applyMutation(llvm::Function *function,
+                                              const MutationPointAddress &address,
+                                              irm::IRMutation *lowLevelMutation) {
   llvm::Instruction &instruction = address.findInstruction(function);
   lowLevelMutation->mutate(&instruction);
 }
 
 std::vector<MutationPoint *>
-RemoveVoidFunctionMutator::getMutations(Bitcode *bitcode,
-                                        const FunctionUnderTest &function) {
+RemoveVoidFunctionMutator::getMutations(Bitcode *bitcode, const FunctionUnderTest &function) {
   assert(bitcode);
 
   std::vector<MutationPoint *> mutations;
@@ -47,8 +47,8 @@ RemoveVoidFunctionMutator::getMutations(Bitcode *bitcode,
 
         std::string replacement = "🚫";
 
-        auto point = new MutationPoint(this, mutator.get(), instruction,
-                                       replacement, bitcode, diagnostics);
+        auto point =
+            new MutationPoint(this, mutator.get(), instruction, replacement, bitcode, diagnostics);
         mutations.push_back(point);
       }
     }

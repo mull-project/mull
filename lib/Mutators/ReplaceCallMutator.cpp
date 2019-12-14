@@ -8,9 +8,12 @@
 using namespace llvm;
 using namespace mull;
 
-const std::string ReplaceCallMutator::ID = "replace_call_mutator";
-const std::string ReplaceCallMutator::description =
-    "Replaces call to a function with 42";
+std::string ReplaceCallMutator::ID() {
+  return "replace_call_mutator";
+}
+std::string ReplaceCallMutator::description() {
+  return "Replaces call to a function with 42";
+}
 
 ReplaceCallMutator::ReplaceCallMutator() : lowLevelMutators() {
   lowLevelMutators.push_back(llvm::make_unique<irm::IntCallReplacement>(42));
@@ -25,9 +28,8 @@ void ReplaceCallMutator::applyMutation(llvm::Function *function,
   lowLevelMutation->mutate(&instruction);
 }
 
-std::vector<MutationPoint *>
-ReplaceCallMutator::getMutations(Bitcode *bitcode,
-                                 const FunctionUnderTest &function) {
+std::vector<MutationPoint *> ReplaceCallMutator::getMutations(Bitcode *bitcode,
+                                                              const FunctionUnderTest &function) {
   assert(bitcode);
 
   std::vector<MutationPoint *> mutations;
@@ -46,8 +48,8 @@ ReplaceCallMutator::getMutations(Bitcode *bitcode,
 
         std::string replacement = "42";
 
-        auto point = new MutationPoint(this, mutator.get(), instruction,
-                                       replacement, bitcode, diagnostics.str());
+        auto point = new MutationPoint(
+            this, mutator.get(), instruction, replacement, bitcode, diagnostics.str());
         mutations.push_back(point);
       }
     }

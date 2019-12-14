@@ -15,31 +15,39 @@ static std::vector<std::unique_ptr<irm::IRMutation>> getAddToSub() {
   return mutators;
 }
 
-const std::string AddToSub::ID = "cxx_add_to_sub";
+std::string AddToSub::ID() {
+  return "cxx_add_to_sub";
+}
 
 AddToSub::AddToSub()
-    : TrivialCXXMutator(std::move(getAddToSub()), MutatorKind::CXX_AddToSub, AddToSub::ID,
+    : TrivialCXXMutator(std::move(getAddToSub()), MutatorKind::CXX_AddToSub, AddToSub::ID(),
                         "Replaces + with -", "-", "Replaced + with -") {}
 
-const std::string AddAssignToSubAssign::ID = "cxx_add_assign_to_sub_assign";
+std::string AddAssignToSubAssign::ID() {
+  return "cxx_add_assign_to_sub_assign";
+}
 
 AddAssignToSubAssign::AddAssignToSubAssign()
     : TrivialCXXMutator(std::move(getAddToSub()), MutatorKind::CXX_AddAssignToSubAssign,
-                        AddAssignToSubAssign::ID,
+                        AddAssignToSubAssign::ID(),
                         "Replaces += with -=", "-=", "Replaced += with -=") {}
 
-const std::string PostIncToPostDec::ID = "cxx_post_inc_to_post_dec";
+std::string PostIncToPostDec::ID() {
+  return "cxx_post_inc_to_post_dec";
+}
 
 PostIncToPostDec::PostIncToPostDec()
     : TrivialCXXMutator(std::move(getAddToSub()), MutatorKind::CXX_PostIncToPostDec,
-                        PostIncToPostDec::ID, "Replaces x++ with x--", "--",
+                        PostIncToPostDec::ID(), "Replaces x++ with x--", "--",
                         "Replaced x++ with x--") {}
 
-const std::string PreIncToPreDec::ID = "cxx_pre_inc_to_pre_dec";
+std::string PreIncToPreDec::ID() {
+  return "cxx_pre_inc_to_pre_dec";
+}
 
 PreIncToPreDec::PreIncToPreDec()
     : TrivialCXXMutator(std::move(getAddToSub()), MutatorKind::CXX_PreIncToPreDec,
-                        PreIncToPreDec::ID, "Replaces ++x with --x", "--",
+                        PreIncToPreDec::ID(), "Replaces ++x with --x", "--",
                         "Replaced ++x with --x") {}
 
 #pragma mark - Sub to add
@@ -52,17 +60,21 @@ static std::vector<std::unique_ptr<irm::IRMutation>> getSubToAdd() {
   return mutators;
 }
 
-const std::string SubToAdd::ID = "cxx_sub_to_add";
+std::string SubToAdd::ID() {
+  return "cxx_sub_to_add";
+}
 
 SubToAdd::SubToAdd()
-    : TrivialCXXMutator(std::move(getSubToAdd()), MutatorKind::CXX_SubToAdd, SubToAdd::ID,
+    : TrivialCXXMutator(std::move(getSubToAdd()), MutatorKind::CXX_SubToAdd, SubToAdd::ID(),
                         "Replaces - with +", "+", "Replaced - with +") {}
 
-const std::string SubAssignToAddAssign::ID = "cxx_sub_assign_to_add_assign";
+std::string SubAssignToAddAssign::ID() {
+  return "cxx_sub_assign_to_add_assign";
+}
 
 SubAssignToAddAssign::SubAssignToAddAssign()
     : TrivialCXXMutator(std::move(getSubToAdd()), MutatorKind::CXX_SubAssignToAddAssign,
-                        SubAssignToAddAssign::ID,
+                        SubAssignToAddAssign::ID(),
                         "Replaces -= with +=", "+=", "Replaced -= with +=") {}
 
 static std::vector<std::unique_ptr<irm::IRMutation>> getDecToInc() {
@@ -82,18 +94,22 @@ static std::vector<std::unique_ptr<irm::IRMutation>> getDecToInc() {
   return mutators;
 }
 
-const std::string PostDecToPostInc::ID = "cxx_post_dec_to_post_inc";
+std::string PostDecToPostInc::ID() {
+  return "cxx_post_dec_to_post_inc";
+}
 
 PostDecToPostInc::PostDecToPostInc()
     : TrivialCXXMutator(std::move(getDecToInc()), MutatorKind::CXX_PostDecToPostInc,
-                        PostDecToPostInc::ID, "Replaces x-- with x++", "++",
+                        PostDecToPostInc::ID(), "Replaces x-- with x++", "++",
                         "Replaced x-- with x++") {}
 
-const std::string PreDecToPreInc::ID = "cxx_pre_dec_to_pre_inc";
+std::string PreDecToPreInc::ID() {
+  return "cxx_pre_dec_to_pre_inc";
+}
 
 PreDecToPreInc::PreDecToPreInc()
     : TrivialCXXMutator(std::move(getDecToInc()), MutatorKind::CXX_PreDecToPreInc,
-                        PreDecToPreInc::ID, "Replaces --x with ++x", "++",
+                        PreDecToPreInc::ID(), "Replaces --x with ++x", "++",
                         "Replaced --x with ++x") {}
 
 #pragma mark - Mul to div
@@ -105,17 +121,21 @@ static std::vector<std::unique_ptr<irm::IRMutation>> getMulToDiv() {
   return mutators;
 }
 
-const std::string MulToDiv::ID = "cxx_mul_to_div";
+std::string MulToDiv::ID() {
+  return "cxx_mul_to_div";
+}
 
 MulToDiv::MulToDiv()
-    : TrivialCXXMutator(std::move(getMulToDiv()), MutatorKind::CXX_MulToDiv, MulToDiv::ID,
+    : TrivialCXXMutator(std::move(getMulToDiv()), MutatorKind::CXX_MulToDiv, MulToDiv::ID(),
                         "Replaces * with /", "/", "Replaced * with /") {}
 
-const std::string MulAssignToDivAssign::ID = "cxx_mul_assign_to_div_assign";
+std::string MulAssignToDivAssign::ID() {
+  return "cxx_mul_assign_to_div_assign";
+}
 
 MulAssignToDivAssign::MulAssignToDivAssign()
     : TrivialCXXMutator(std::move(getMulToDiv()), MutatorKind::CXX_MulAssignToDivAssign,
-                        MulAssignToDivAssign::ID,
+                        MulAssignToDivAssign::ID(),
                         "Replaces *= with /=", "/=", "Replaced *= with /=") {}
 
 #pragma mark - Div to mul
@@ -128,17 +148,21 @@ static std::vector<std::unique_ptr<irm::IRMutation>> getDivToMul() {
   return mutators;
 }
 
-const std::string DivToMul::ID = "cxx_div_to_mul";
+std::string DivToMul::ID() {
+  return "cxx_div_to_mul";
+}
 
 DivToMul::DivToMul()
-    : TrivialCXXMutator(std::move(getDivToMul()), MutatorKind::CXX_DivToMul, DivToMul::ID,
+    : TrivialCXXMutator(std::move(getDivToMul()), MutatorKind::CXX_DivToMul, DivToMul::ID(),
                         "Replaces / with *", "*", "Replaced / with *") {}
 
-const std::string DivAssignToMulAssign::ID = "cxx_div_assign_to_mul_assign";
+std::string DivAssignToMulAssign::ID() {
+  return "cxx_div_assign_to_mul_assign";
+}
 
 DivAssignToMulAssign::DivAssignToMulAssign()
     : TrivialCXXMutator(std::move(getDivToMul()), MutatorKind::CXX_DivAssignToMulAssign,
-                        DivAssignToMulAssign::ID,
+                        DivAssignToMulAssign::ID(),
                         "Replaces /= with *=", "*=", "Replaced /= with *=") {}
 
 #pragma mark - Rem to div
@@ -151,17 +175,21 @@ static std::vector<std::unique_ptr<irm::IRMutation>> getRemToDiv() {
   return mutators;
 }
 
-const std::string RemToDiv::ID = "cxx_rem_to_div";
+std::string RemToDiv::ID() {
+  return "cxx_rem_to_div";
+}
 
 RemToDiv::RemToDiv()
-    : TrivialCXXMutator(std::move(getRemToDiv()), MutatorKind::CXX_RemToDiv, RemToDiv::ID,
+    : TrivialCXXMutator(std::move(getRemToDiv()), MutatorKind::CXX_RemToDiv, RemToDiv::ID(),
                         "Replaces % with /", "/", "Replaced % with /") {}
 
-const std::string RemAssignToDivAssign::ID = "cxx_rem_assign_to_div_assign";
+std::string RemAssignToDivAssign::ID() {
+  return "cxx_rem_assign_to_div_assign";
+}
 
 RemAssignToDivAssign::RemAssignToDivAssign()
     : TrivialCXXMutator(std::move(getRemToDiv()), MutatorKind::CXX_RemAssignToDivAssign,
-                        RemAssignToDivAssign::ID,
+                        RemAssignToDivAssign::ID(),
                         "Replaces %= with /=", "/=", "Replaced %= with /=") {}
 
 static std::vector<std::unique_ptr<irm::IRMutation>> getBitNotToNoop() {
@@ -170,15 +198,19 @@ static std::vector<std::unique_ptr<irm::IRMutation>> getBitNotToNoop() {
   return mutators;
 }
 
-const std::string BitwiseNotToNoop::ID = "cxx_bitwise_not_to_noop";
+std::string BitwiseNotToNoop::ID() {
+  return "cxx_bitwise_not_to_noop";
+}
 
 BitwiseNotToNoop::BitwiseNotToNoop()
     : TrivialCXXMutator(std::move(getBitNotToNoop()), MutatorKind::CXX_BitwiseNotToNoop,
-                        BitwiseNotToNoop::ID, "Replaces ~x with x", "", "Replaced ~x with x") {}
+                        BitwiseNotToNoop::ID(), "Replaces ~x with x", "", "Replaced ~x with x") {}
 
 /// Non-trivial mutators
 
-const std::string UnaryMinusToNoop::ID = "cxx_minus_to_noop";
+std::string UnaryMinusToNoop::ID() {
+  return "cxx_minus_to_noop";
+}
 
 UnaryMinusToNoop::UnaryMinusToNoop() {
   lowLevelMutators.emplace_back(new irm::SwapSubOperands);
@@ -186,10 +218,10 @@ UnaryMinusToNoop::UnaryMinusToNoop() {
 }
 
 std::string UnaryMinusToNoop::getUniqueIdentifier() {
-  return UnaryMinusToNoop::ID;
+  return UnaryMinusToNoop::ID();
 }
 std::string UnaryMinusToNoop::getUniqueIdentifier() const {
-  return UnaryMinusToNoop::ID;
+  return UnaryMinusToNoop::ID();
 }
 
 std::string UnaryMinusToNoop::getDescription() const {

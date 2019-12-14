@@ -6,17 +6,18 @@
 using namespace llvm;
 using namespace mull;
 
-const std::string ScalarValueMutator::ID = "scalar_value_mutator";
-const std::string ScalarValueMutator::description =
-    "Replaces zeros with 42, and non-zeros with 0";
+std::string ScalarValueMutator::ID() {
+  return "scalar_value_mutator";
+}
+std::string ScalarValueMutator::description() {
+  return "Replaces zeros with 42, and non-zeros with 0";
+}
 
 ScalarValueMutator::ScalarValueMutator() : lowLevelMutators() {
   // i == operand position
   for (auto i = 0; i < 5; i++) {
-    lowLevelMutators.push_back(
-        llvm::make_unique<irm::ConstIntReplacement>(42, i));
-    lowLevelMutators.push_back(
-        llvm::make_unique<irm::ConstFloatReplacement>(42, i));
+    lowLevelMutators.push_back(llvm::make_unique<irm::ConstIntReplacement>(42, i));
+    lowLevelMutators.push_back(llvm::make_unique<irm::ConstFloatReplacement>(42, i));
   }
 }
 
@@ -27,9 +28,8 @@ void ScalarValueMutator::applyMutation(llvm::Function *function,
   lowLevelMutation->mutate(&instruction);
 }
 
-std::vector<MutationPoint *>
-ScalarValueMutator::getMutations(Bitcode *bitcode,
-                                 const FunctionUnderTest &function) {
+std::vector<MutationPoint *> ScalarValueMutator::getMutations(Bitcode *bitcode,
+                                                              const FunctionUnderTest &function) {
   assert(bitcode);
 
   std::vector<MutationPoint *> mutations;
@@ -40,8 +40,8 @@ ScalarValueMutator::getMutations(Bitcode *bitcode,
         std::string diagnostics = "Replacing scalar with 0 or 42";
         std::string replacement = "0 or 42";
 
-        auto point = new MutationPoint(this, mutator.get(), instruction,
-                                       replacement, bitcode, diagnostics);
+        auto point =
+            new MutationPoint(this, mutator.get(), instruction, replacement, bitcode, diagnostics);
         mutations.push_back(point);
       }
     }
