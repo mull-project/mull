@@ -7,8 +7,7 @@
 
 namespace mull {
 
-class ReplaceCallVisitor
-    : public clang::RecursiveASTVisitor<ReplaceCallVisitor> {
+class ReplaceCallVisitor : public clang::RecursiveASTVisitor<ReplaceCallVisitor> {
 public:
   ReplaceCallVisitor(const VisitorParameters &parameters);
 
@@ -20,7 +19,6 @@ public:
 
 private:
   InstructionRangeVisitor visitor;
-  const clang::ASTContext &astContext;
 };
 
 } // namespace mull

@@ -274,7 +274,6 @@ OR_AND_MutationType LogicalOrToAnd::findPossibleMutationInBranch(BranchInst *bra
       }
 
       auto candidateBranchInst_leftBB = candidateBranchInst->getOperand(2);
-      auto candidateBranchInst_rightBB = candidateBranchInst->getOperand(1);
 
       if (candidateBranchInst_leftBB == leftBB) {
         if (secondBranchInst) {

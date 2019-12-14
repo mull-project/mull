@@ -15,35 +15,32 @@
 using namespace mull;
 
 NativeTestRunner::NativeTestRunner(Mangler &mangler)
-    : mangler(mangler), overrides(mangler),
-      trampoline(new InstrumentationInfo *) {}
+    : mangler(mangler), overrides(mangler), trampoline(new InstrumentationInfo *) {}
 
-NativeTestRunner::~NativeTestRunner() { delete trampoline; }
+NativeTestRunner::~NativeTestRunner() {
+  delete trampoline;
+}
 
-void *NativeTestRunner::getConstructorPointer(const llvm::Function &function,
-                                              JITEngine &jit) {
+void *NativeTestRunner::getConstructorPointer(const llvm::Function &function, JITEngine &jit) {
   auto name = mangler.getNameWithPrefix(function.getName().str());
   return getFunctionPointer(name, jit);
 }
 
-void *NativeTestRunner::getFunctionPointer(const std::string &functionName,
-                                           JITEngine &jit) {
+void *NativeTestRunner::getFunctionPointer(const std::string &functionName, JITEngine &jit) {
   llvm_compat::JITSymbol &symbol = jit.getSymbol(functionName);
   auto address = llvm_compat::JITSymbolAddress(symbol);
 
   void *pointer = reinterpret_cast<void *>(static_cast<uintptr_t>(address));
 
   if (pointer == nullptr) {
-    Logger::error() << "Can not find a pointer to the function '"
-                    << functionName << "'\n";
+    Logger::error() << "Can not find a pointer to the function '" << functionName << "'\n";
     exit(1);
   }
 
   return pointer;
 }
 
-void NativeTestRunner::runStaticConstructor(llvm::Function *constructor,
-                                            JITEngine &jit) {
+void NativeTestRunner::runStaticConstructor(llvm::Function *constructor, JITEngine &jit) {
   void *CtorPointer = getConstructorPointer(*constructor, jit);
 
   auto ctor = ((int (*)())(intptr_t)CtorPointer);
@@ -51,16 +48,12 @@ void NativeTestRunner::runStaticConstructor(llvm::Function *constructor,
 }
 
 void NativeTestRunner::loadInstrumentedProgram(ObjectFiles &objectFiles,
-                                               Instrumentation &instrumentation,
-                                               JITEngine &jit) {
-  InstrumentationResolver resolver(overrides, instrumentation, mangler,
-                                   trampoline);
-  jit.addObjectFiles(objectFiles, resolver,
-                     llvm::make_unique<llvm::SectionMemoryManager>());
+                                               Instrumentation &instrumentation, JITEngine &jit) {
+  InstrumentationResolver resolver(overrides, instrumentation, mangler, trampoline);
+  jit.addObjectFiles(objectFiles, resolver, llvm::make_unique<llvm::SectionMemoryManager>());
 }
 
-ExecutionStatus NativeTestRunner::runTest(JITEngine &jit, Program &program,
-                                          Test &test) {
+ExecutionStatus NativeTestRunner::runTest(JITEngine &jit, Program &program, Test &test) {
   *trampoline = &test.getInstrumentationInfo();
 
   for (auto &constructor : program.getStaticConstructors()) {
@@ -72,15 +65,15 @@ ExecutionStatus NativeTestRunner::runTest(JITEngine &jit, Program &program,
   size_t argc = arguments.size();
   char **argv = new char *[argc + 1];
 
-  for (int i = 0; i < argc; i++) {
+  for (size_t i = 0; i < argc; i++) {
     std::string &argument = arguments[i];
     argv[i] = new char[argument.length() + 1];
     strcpy(argv[i], argument.c_str());
   }
   argv[argc] = nullptr;
 
-  void *mainPointer = getFunctionPointer(
-      mangler.getNameWithPrefix(test.getDriverFunctionName()), jit);
+  void *mainPointer =
+      getFunctionPointer(mangler.getNameWithPrefix(test.getDriverFunctionName()), jit);
   auto main = ((int (*)(int, char **))(intptr_t)mainPointer);
   int exitStatus = main(static_cast<int>(argc), argv);
 
@@ -98,10 +91,8 @@ ExecutionStatus NativeTestRunner::runTest(JITEngine &jit, Program &program,
 }
 
 void NativeTestRunner::loadMutatedProgram(TestRunner::ObjectFiles &objectFiles,
-                                          Trampolines &trampolines,
-                                          JITEngine &jit) {
+                                          Trampolines &trampolines, JITEngine &jit) {
   trampolines.allocateTrampolines(mangler);
-  MutationResolver resolver(overrides, trampolines, mangler);
-  jit.addObjectFiles(objectFiles, resolver,
-                     llvm::make_unique<llvm::SectionMemoryManager>());
+  MutationResolver resolver(overrides, trampolines);
+  jit.addObjectFiles(objectFiles, resolver, llvm::make_unique<llvm::SectionMemoryManager>());
 }
