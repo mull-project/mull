@@ -261,7 +261,7 @@ std::vector<std::unique_ptr<Reporter>> ReportersCLIOptions::reporters(ReporterPa
   }
 
   if (reporters.empty()) {
-    reporters.push_back(llvm::make_unique<mull::IDEReporter>());
+    reporters.push_back(llvm::make_unique<mull::IDEReporter>(IDEReporterShowKilled));
   }
 
   return reporters;
