@@ -25,18 +25,6 @@ using namespace llvm;
 
 static void createTables(sqlite3 *database);
 
-static std::string vectorToCsv(const std::vector<std::string> &v) {
-  if (v.empty()) {
-    return std::string();
-  }
-
-  std::stringstream csv;
-  std::copy(v.begin(), v.end() - 1,
-            std::ostream_iterator<std::string>(csv, ","));
-  csv << *(v.end() - 1);
-  return csv.str();
-}
-
 void sqlite_exec(sqlite3 *database, const char *sql) {
   char *errorMessage;
   int result = sqlite3_exec(database, sql, nullptr, nullptr, &errorMessage);
@@ -57,12 +45,6 @@ void sqlite_step(sqlite3 *database, sqlite3_stmt *stmt) {
     Logger::error() << "Shutting down\n";
     exit(18);
   }
-}
-
-static std::string currentTimestamp() {
-  time_t t;
-  time(&t);
-  return std::to_string(t);
 }
 
 static std::string getReportName(const std::string &name) {
@@ -213,9 +195,6 @@ void mull::SQLiteReporter::reportResults(const Result &result,
                   &insertMutationPointDebugStmt, nullptr);
 
   for (auto mutationPoint : result.getMutationPoints()) {
-    Instruction *instruction =
-        dyn_cast<Instruction>(mutationPoint->getOriginalValue());
-
     SourceLocation location = mutationPoint->getSourceLocation();
 
     int index = 1;

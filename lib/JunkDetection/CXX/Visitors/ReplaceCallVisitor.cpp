@@ -2,22 +2,19 @@
 
 using namespace mull;
 
-ReplaceCallVisitor::ReplaceCallVisitor(const VisitorParameters &parameters)
-    : visitor(parameters), astContext(parameters.astContext) {}
+ReplaceCallVisitor::ReplaceCallVisitor(const VisitorParameters &parameters) : visitor(parameters) {}
 
 bool ReplaceCallVisitor::VisitCallExpr(clang::CallExpr *callExpression) {
   handleCallExpr(callExpression);
   return true;
 }
 
-bool ReplaceCallVisitor::VisitCXXMemberCallExpr(
-    clang::CXXMemberCallExpr *callExpression) {
+bool ReplaceCallVisitor::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *callExpression) {
   handleCallExpr(callExpression);
   return true;
 }
 
-bool ReplaceCallVisitor::VisitCXXOperatorCallExpr(
-    clang::CXXOperatorCallExpr *callExpression) {
+bool ReplaceCallVisitor::VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *callExpression) {
   handleCallExpr(callExpression);
   return true;
 }

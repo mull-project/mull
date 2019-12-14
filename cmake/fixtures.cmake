@@ -84,7 +84,7 @@ namespace fixtures {
 
     file(APPEND ${FIXTURE_FACTORY}
 "
-static const char *${path_prefix}_${filename}_${extension}_path() {
+__attribute__((used)) static const char *${path_prefix}_${filename}_${extension}_path() {
   return \"${fixture}\";
 }
 ")

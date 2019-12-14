@@ -9,8 +9,7 @@
 using namespace mull;
 using namespace llvm;
 
-void NormalIDEDiagnostics::report(mull::MutationPoint *mutationPoint,
-                                  bool killed) {
+void NormalIDEDiagnostics::report(mull::MutationPoint *mutationPoint, bool killed) {
   if (diagnostics == Diagnostics::None) {
     return;
   }
@@ -23,24 +22,17 @@ void NormalIDEDiagnostics::report(mull::MutationPoint *mutationPoint,
     return;
   }
 
-  const std::string &diagnostics = mutationPoint->getDiagnostics();
-  if (diagnostics.empty()) {
+  const std::string &message = mutationPoint->getDiagnostics();
+  if (message.empty()) {
     return;
   }
 
-  Instruction *instruction =
-      dyn_cast<Instruction>(mutationPoint->getOriginalValue());
-  if (instruction->getMetadata(0) == nullptr) {
+  SourceLocation sourceLocation = mutationPoint->getSourceLocation();
+  if (sourceLocation.isNull()) {
     return;
   }
 
-  const DebugLoc &debugLoc = instruction->getDebugLoc();
-
-  std::string fileNameOrNil = debugLoc->getFilename().str();
-  std::string lineOrNil = std::to_string(debugLoc->getLine());
-  std::string columnOrNil = std::to_string(debugLoc->getColumn());
-
-  errs() << "\n";
-  errs() << fileNameOrNil << ":" << lineOrNil << ":" << columnOrNil << ": "
-         << "warning: " << diagnostics << "\n";
+  errs() << "\n"
+         << sourceLocation.filePath << ":" << sourceLocation.line << ":" << sourceLocation.column
+         << ": warning: " << message << "\n";
 }
