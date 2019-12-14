@@ -1,8 +1,12 @@
 # Changelog
 
-## [0.7.0] - TBD
+## [0.6.1] - 14 Dec 2019
 
- - TBD
+ - Moved `LogicalAndToOr` and `LogicalOrToAnd` to `experimental` group #638
+ - `IDEReporter` now can also show killed mutants next to survived #640
+ - Fixed an issue with the compilation database containing relative paths #637
+ - Gained first proper integration tests #631
+ - [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2019-12-04..2019-12-14)
 
 ## [0.6.0] - 04 Dec 2019
 
