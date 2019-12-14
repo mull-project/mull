@@ -37,6 +37,8 @@ enum TestFrameworkOptionIndex : int { _testFrameworkOptionIndex_unused };
 extern list<MutatorsOptionIndex> Mutators;
 extern opt<TestFrameworkOptionIndex> TestFrameworks;
 extern list<ReporterKind> ReportersOption;
+extern opt<bool> IDEReporterShowKilled;
+
 extern opt<SandboxKind> SandboxOption;
 
 extern list<std::string> LDSearchPaths;

@@ -129,6 +129,13 @@ list<ReporterKind> tool::ReportersOption(
   value_desc("reporter"),
   cat(MullCXXCategory));
 
+opt<bool> tool::IDEReporterShowKilled(
+  "ide-reporter-show-killed",
+  desc("Makes IDEReporter to also report killed mutations (disabled by default)"),
+  Optional,
+  init(false),
+  cat(MullCXXCategory));
+
 opt<bool> tool::DumpCLIInterface(
     "dump-cli",
     desc("Prints CLI options in the Sphinx/RST friendly format"),
@@ -242,7 +249,7 @@ std::vector<std::unique_ptr<Reporter>> ReportersCLIOptions::reporters(ReporterPa
   for (auto i = 0; i < parameter.getNumOccurrences(); i++) {
     switch (parameter[i]) {
     case ReporterKind::IDE: {
-      reporters.push_back(llvm::make_unique<mull::IDEReporter>());
+      reporters.push_back(llvm::make_unique<mull::IDEReporter>(IDEReporterShowKilled));
     } break;
     case ReporterKind::SQLite: {
       reporters.emplace_back(new mull::SQLiteReporter(directory, name));
@@ -289,6 +296,7 @@ void tool::dumpCLIInterface() {
       &ReportName,
       &ReportDirectory,
       reporters,
+      &IDEReporterShowKilled,
 
       &CompilationDatabasePath,
       &CompilationFlags,
