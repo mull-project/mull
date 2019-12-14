@@ -13,18 +13,20 @@ static std::vector<std::unique_ptr<irm::IRMutation>> getNumberMutators() {
   return mutators;
 }
 
-const std::string NumberAssignConst::ID = "cxx_assign_const";
+std::string NumberAssignConst::ID() {
+  return "cxx_assign_const";
+}
 
 NumberAssignConst::NumberAssignConst()
-    : TrivialCXXMutator(std::move(getNumberMutators()),
-                        MutatorKind::CXX_AssignConst,
-                        NumberAssignConst::ID, "Replaces 'a = b' with 'a = 42'",
-                        "42", "Replaced 'a = b' with 'a = 42'") {}
+    : TrivialCXXMutator(std::move(getNumberMutators()), MutatorKind::CXX_AssignConst,
+                        NumberAssignConst::ID(), "Replaces 'a = b' with 'a = 42'", "42",
+                        "Replaced 'a = b' with 'a = 42'") {}
 
-const std::string NumberInitConst::ID = "cxx_init_const";
+std::string NumberInitConst::ID() {
+  return "cxx_init_const";
+}
 
 NumberInitConst::NumberInitConst()
-    : TrivialCXXMutator(std::move(getNumberMutators()),
-                        MutatorKind::CXX_InitConst, NumberInitConst::ID,
-                        "Replaces 'T a = b' with 'T a = 42'", "42",
+    : TrivialCXXMutator(std::move(getNumberMutators()), MutatorKind::CXX_InitConst,
+                        NumberInitConst::ID(), "Replaces 'T a = b' with 'T a = 42'", "42",
                         "Replaced 'T a = b' with 'T a = 42'") {}

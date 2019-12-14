@@ -20,14 +20,20 @@ class FunctionUnderTest;
 class ScalarValueMutator : public Mutator {
 
 public:
-  static const std::string ID;
-  static const std::string description;
+  static std::string ID();
+  static std::string description();
 
   ScalarValueMutator();
 
-  std::string getUniqueIdentifier() override { return ID; }
-  std::string getUniqueIdentifier() const override { return ID; }
-  std::string getDescription() const override { return description; }
+  std::string getUniqueIdentifier() override {
+    return ID();
+  }
+  std::string getUniqueIdentifier() const override {
+    return ID();
+  }
+  std::string getDescription() const override {
+    return description();
+  }
   MutatorKind mutatorKind() override { return MutatorKind::ScalarValueMutator; }
 
   void applyMutation(llvm::Function *function,

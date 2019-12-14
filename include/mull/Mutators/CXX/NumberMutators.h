@@ -8,13 +8,13 @@ namespace cxx {
 
 class NumberAssignConst : public TrivialCXXMutator {
 public:
-  static const std::string ID;
+  static std::string ID();
   NumberAssignConst();
 };
 
 class NumberInitConst : public TrivialCXXMutator {
 public:
-  static const std::string ID;
+  static std::string ID();
   NumberInitConst();
 };
 

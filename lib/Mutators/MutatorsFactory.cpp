@@ -19,22 +19,52 @@
 using namespace mull;
 using namespace std;
 
-static const string Experimental = "experimental";
-static const string AllMutatorsGroup = "all";
+static string Experimental() {
+  return "experimental";
+}
+static string AllMutatorsGroup() {
+  return "all";
+}
 
-static const string CXX_Assignment = "cxx_assignment";
-static const string CXX_Const_Assignment = "cxx_const_assignment";
-static const string CXX_Arithmetic_Assignment = "cxx_arithmetic_assignment";
-static const string CXX_Bitwise_Assignment = "cxx_bitwise_assignment";
-static const string CXX_Increment = "cxx_increment";
-static const string CXX_Decrement = "cxx_decrement";
-static const string CXX_Arithmetic = "cxx_arithmetic";
-static const string CXX_Bitwise = "cxx_bitwise";
-static const string CXX_Logical = "cxx_logical";
-static const string CXX_Comparison = "cxx_comparison";
-static const string CXX_Boundary = "cxx_boundary";
-static const string CXX_All = "cxx_all";
-static const string CXX_Default = "cxx_default";
+static string CXX_Assignment() {
+  return "cxx_assignment";
+}
+static string CXX_Const_Assignment() {
+  return "cxx_const_assignment";
+}
+static string CXX_Arithmetic_Assignment() {
+  return "cxx_arithmetic_assignment";
+}
+static string CXX_Bitwise_Assignment() {
+  return "cxx_bitwise_assignment";
+}
+static string CXX_Increment() {
+  return "cxx_increment";
+}
+static string CXX_Decrement() {
+  return "cxx_decrement";
+}
+static string CXX_Arithmetic() {
+  return "cxx_arithmetic";
+}
+static string CXX_Bitwise() {
+  return "cxx_bitwise";
+}
+static string CXX_Logical() {
+  return "cxx_logical";
+}
+static string CXX_Comparison() {
+  return "cxx_comparison";
+}
+static string CXX_Boundary() {
+  return "cxx_boundary";
+}
+static string CXX_All() {
+  return "cxx_all";
+}
+static string CXX_Default() {
+  return "cxx_default";
+}
 
 static void expandGroups(const vector<string> &groups, const map<string, vector<string>> &mapping,
                          set<string> &expandedGroups) {
@@ -48,104 +78,105 @@ static void expandGroups(const vector<string> &groups, const map<string, vector<
 }
 
 MutatorsFactory::MutatorsFactory() {
-  groupsMapping[CXX_Const_Assignment] = {
-    cxx::NumberAssignConst::ID, // a = b | a = Const
-    cxx::NumberInitConst::ID,   // a(b)  | a(Const)
+  groupsMapping[CXX_Const_Assignment()] = {
+    cxx::NumberAssignConst::ID(), // a = b | a = Const
+    cxx::NumberInitConst::ID(),   // a(b)  | a(Const)
   };
 
-  groupsMapping[CXX_Bitwise_Assignment] = {
-    cxx::AndAssignToOrAssign::ID,        // &=  | |=
-    cxx::OrAssignToAndAssign::ID,        // |=  | &=
-    cxx::XorAssignToOrAssign::ID,        // ^=  | |=
-    cxx::LShiftAssignToRShiftAssign::ID, // <<= | >>=
-    cxx::RShiftAssignToLShiftAssign::ID, // >>= | <<=
+  groupsMapping[CXX_Bitwise_Assignment()] = {
+    cxx::AndAssignToOrAssign::ID(),        // &=  | |=
+    cxx::OrAssignToAndAssign::ID(),        // |=  | &=
+    cxx::XorAssignToOrAssign::ID(),        // ^=  | |=
+    cxx::LShiftAssignToRShiftAssign::ID(), // <<= | >>=
+    cxx::RShiftAssignToLShiftAssign::ID(), // >>= | <<=
   };
 
-  groupsMapping[CXX_Arithmetic_Assignment] = {
-    cxx::AddAssignToSubAssign::ID, // += | -=
-    cxx::SubAssignToAddAssign::ID, // -= | +=
-    cxx::MulAssignToDivAssign::ID, // *= | /=
-    cxx::DivAssignToMulAssign::ID, // /= | *=
-    cxx::RemAssignToDivAssign::ID, // %= | /=
+  groupsMapping[CXX_Arithmetic_Assignment()] = {
+    cxx::AddAssignToSubAssign::ID(), // += | -=
+    cxx::SubAssignToAddAssign::ID(), // -= | +=
+    cxx::MulAssignToDivAssign::ID(), // *= | /=
+    cxx::DivAssignToMulAssign::ID(), // /= | *=
+    cxx::RemAssignToDivAssign::ID(), // %= | /=
   };
 
-  groupsMapping[CXX_Increment] = {
-    cxx::PreIncToPreDec::ID,   // ++x | --x
-    cxx::PostIncToPostDec::ID, // x++ | x--
+  groupsMapping[CXX_Increment()] = {
+    cxx::PreIncToPreDec::ID(),   // ++x | --x
+    cxx::PostIncToPostDec::ID(), // x++ | x--
   };
 
-  groupsMapping[CXX_Decrement] = {
-    cxx::PreDecToPreInc::ID,   // --x | ++x
-    cxx::PostDecToPostInc::ID, // x-- | x++
+  groupsMapping[CXX_Decrement()] = {
+    cxx::PreDecToPreInc::ID(),   // --x | ++x
+    cxx::PostDecToPostInc::ID(), // x-- | x++
   };
 
-  groupsMapping[CXX_Arithmetic] = {
-    cxx::UnaryMinusToNoop::ID, // -x     | x
-    cxx::AddToSub::ID,         // a + b  | a - b
-    cxx::SubToAdd::ID,         // a - b  | a + b
-    cxx::MulToDiv::ID,         // a * b  | a / b
-    cxx::DivToMul::ID,         // a / b  | a * b
-    cxx::RemToDiv::ID,         // a % b  | a / b
+  groupsMapping[CXX_Arithmetic()] = {
+    cxx::UnaryMinusToNoop::ID(), // -x     | x
+    cxx::AddToSub::ID(),         // a + b  | a - b
+    cxx::SubToAdd::ID(),         // a - b  | a + b
+    cxx::MulToDiv::ID(),         // a * b  | a / b
+    cxx::DivToMul::ID(),         // a / b  | a * b
+    cxx::RemToDiv::ID(),         // a % b  | a / b
   };
 
-  groupsMapping[CXX_Bitwise] = {
-    cxx::BitwiseNotToNoop::ID, // ~x     | x
-    cxx::BitwiseAndToOr::ID,   // a & b  | a | b
-    cxx::BitwiseOrToAnd::ID,   // a | b  | a & b
-    cxx::XorToOr::ID,          // a ^ b  |
-    cxx::LShiftToRShift::ID,   // a << b | a >> b
-    cxx::RShiftToLShift::ID,   // a >> b | a << b
+  groupsMapping[CXX_Bitwise()] = {
+    cxx::BitwiseNotToNoop::ID(), // ~x     | x
+    cxx::BitwiseAndToOr::ID(),   // a & b  | a | b
+    cxx::BitwiseOrToAnd::ID(),   // a | b  | a & b
+    cxx::XorToOr::ID(),          // a ^ b  |
+    cxx::LShiftToRShift::ID(),   // a << b | a >> b
+    cxx::RShiftToLShift::ID(),   // a >> b | a << b
   };
 
-  groupsMapping[CXX_Logical] = {
-    cxx::LogicalAndToOr::ID, // a && b | a || b
-    cxx::LogicalOrToAnd::ID, // a || b | a && b
+  groupsMapping[CXX_Logical()] = {
+    cxx::LogicalAndToOr::ID(), // a && b | a || b
+    cxx::LogicalOrToAnd::ID(), // a || b | a && b
   };
 
-  groupsMapping[CXX_Comparison] = {
-    cxx::EqualToNotEqual::ID,          // == | !=
-    cxx::NotEqualToEqual::ID,          // != | ==
-    cxx::LessOrEqualToGreaterThan::ID, // <= | >
-    cxx::LessThanToGreaterOrEqual::ID, // <  | >=
-    cxx::GreaterOrEqualToLessThan::ID, // >= | <
-    cxx::GreaterThanToLessOrEqual::ID, // >  | <=
+  groupsMapping[CXX_Comparison()] = {
+    cxx::EqualToNotEqual::ID(),          // == | !=
+    cxx::NotEqualToEqual::ID(),          // != | ==
+    cxx::LessOrEqualToGreaterThan::ID(), // <= | >
+    cxx::LessThanToGreaterOrEqual::ID(), // <  | >=
+    cxx::GreaterOrEqualToLessThan::ID(), // >= | <
+    cxx::GreaterThanToLessOrEqual::ID(), // >  | <=
   };
 
-  groupsMapping[CXX_Boundary] = {
-    cxx::LessOrEqualToLessThan::ID,       // <= | <
-    cxx::LessThanToLessOrEqual::ID,       // <  | <=
-    cxx::GreaterOrEqualToGreaterThan::ID, // >= | >
-    cxx::GreaterThanToGreaterOrEqual::ID, // >  | >=
+  groupsMapping[CXX_Boundary()] = {
+    cxx::LessOrEqualToLessThan::ID(),       // <= | <
+    cxx::LessThanToLessOrEqual::ID(),       // <  | <=
+    cxx::GreaterOrEqualToGreaterThan::ID(), // >= | >
+    cxx::GreaterThanToGreaterOrEqual::ID(), // >  | >=
   };
 
-  groupsMapping[CXX_Assignment] = {
-    CXX_Bitwise_Assignment,
-    CXX_Arithmetic_Assignment,
-    CXX_Const_Assignment,
+  groupsMapping[CXX_Assignment()] = {
+    CXX_Bitwise_Assignment(),
+    CXX_Arithmetic_Assignment(),
+    CXX_Const_Assignment(),
   };
 
-  groupsMapping[CXX_All] = {
-    CXX_Assignment, CXX_Increment, CXX_Decrement, CXX_Arithmetic, CXX_Comparison, CXX_Boundary,
+  groupsMapping[CXX_All()] = {
+    CXX_Assignment(), CXX_Increment(),  CXX_Decrement(),
+    CXX_Arithmetic(), CXX_Comparison(), CXX_Boundary(),
   };
 
-  groupsMapping[CXX_Default] = {
-    CXX_Increment,
-    CXX_Arithmetic,
-    CXX_Comparison,
-    CXX_Boundary,
+  groupsMapping[CXX_Default()] = {
+    CXX_Increment(),
+    CXX_Arithmetic(),
+    CXX_Comparison(),
+    CXX_Boundary(),
   };
 
-  groupsMapping[Experimental] = { NegateConditionMutator::ID,
-                                  RemoveVoidFunctionMutator::ID,
-                                  ScalarValueMutator::ID,
-                                  ReplaceCallMutator::ID,
-                                  CXX_Logical };
-  groupsMapping[AllMutatorsGroup] = { CXX_All, Experimental };
+  groupsMapping[Experimental()] = { NegateConditionMutator::ID(),
+                                    RemoveVoidFunctionMutator::ID(),
+                                    ScalarValueMutator::ID(),
+                                    ReplaceCallMutator::ID(),
+                                    CXX_Logical() };
+  groupsMapping[AllMutatorsGroup()] = { CXX_All(), Experimental() };
 }
 
 template <typename MutatorClass>
 void addMutator(std::map<std::string, std::unique_ptr<Mutator>> &mapping) {
-  mapping[MutatorClass::ID] = make_unique<MutatorClass>();
+  mapping[MutatorClass::ID()] = make_unique<MutatorClass>();
 }
 
 void MutatorsFactory::init() {
@@ -211,7 +242,7 @@ vector<unique_ptr<Mutator>> MutatorsFactory::mutators(const vector<string> &grou
   set<string> expandedGroups;
 
   if (groups.empty()) {
-    expandGroups({ CXX_Default }, groupsMapping, expandedGroups);
+    expandGroups({ CXX_Default() }, groupsMapping, expandedGroups);
   } else {
     expandGroups(groups, groupsMapping, expandedGroups);
   }
@@ -257,10 +288,10 @@ std::vector<std::pair<std::string, std::string>> MutatorsFactory::commandLineOpt
   }
 
   std::set<std::string> mutatorsSet;
-  std::vector<std::string> groups({ AllMutatorsGroup });
-  expandGroups({ AllMutatorsGroup }, groupsMapping, mutatorsSet);
+  std::vector<std::string> groups({ AllMutatorsGroup() });
+  expandGroups({ AllMutatorsGroup() }, groupsMapping, mutatorsSet);
 
-  auto allMutators = mutators({ AllMutatorsGroup });
+  auto allMutators = mutators({ AllMutatorsGroup() });
 
   for (auto &mutator : allMutators) {
     options.emplace_back(mutator->getUniqueIdentifier(), mutator->getDescription());
