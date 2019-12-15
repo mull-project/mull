@@ -23,6 +23,7 @@
       - ninja
       - gnu-tar
       - pkg-config
+      - python3
 
   vars_files:
     - helpers/variables.yaml
