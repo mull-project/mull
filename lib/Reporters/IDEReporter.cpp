@@ -76,17 +76,18 @@ void IDEReporter::reportResults(const Result &result, const Metrics &metrics) {
     }
   }
 
-  Logger::info() << "\nSurvived mutants (" << survivedMutantsCount << "/"
-                 << result.getMutationPoints().size() << "):\n\n";
-
-  for (auto &mutant : result.getMutationPoints()) {
-    if (killedMutants.find(mutant) == killedMutants.end()) {
-      printMutant(sourceManager, *mutant, true);
-    }
-  }
-
   if (survivedMutantsCount > 0) {
+    Logger::info() << "\nSurvived mutants (" << survivedMutantsCount << "/"
+                   << result.getMutationPoints().size() << "):\n\n";
+
+    for (auto &mutant : result.getMutationPoints()) {
+      if (killedMutants.find(mutant) == killedMutants.end()) {
+        printMutant(sourceManager, *mutant, true);
+      }
+    }
     Logger::info() << "\n";
+  } else {
+    Logger::info() << "\nAll mutations have been killed\n\n";
   }
 
   auto rawScore = double(killedMutants.size()) / double(result.getMutationPoints().size());
