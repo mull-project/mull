@@ -23,7 +23,8 @@ Vagrant.configure(2) do |config|
       ansible.verbose = "v"
       ansible.playbook = "debian-playbook.yaml"
       ansible.extra_vars = {
-        llvm_version: ENV['LLVM_VERSION'] || '6.0.0'
+        llvm_version: ENV['LLVM_VERSION'] || '6.0.0',
+        gitref: ENV['GITREF'] || 'master',
       }
     end
   end
@@ -40,7 +41,8 @@ Vagrant.configure(2) do |config|
       ansible.verbose = "v"
       ansible.playbook = "ubuntu-playbook.yaml"
       ansible.extra_vars = {
-        llvm_version: ENV['LLVM_VERSION'] || '6.0.0'
+        llvm_version: ENV['LLVM_VERSION'] || '6.0.0',
+        gitref: ENV['GITREF'] || 'master',
       }
     end
   end
@@ -57,7 +59,8 @@ Vagrant.configure(2) do |config|
       ansible.verbose = "v"
       ansible.playbook = "ubuntu-playbook.yaml"
       ansible.extra_vars = {
-        llvm_version: ENV['LLVM_VERSION'] || '6.0.0'
+        llvm_version: ENV['LLVM_VERSION'] || '6.0.0',
+        gitref: ENV['GITREF'] || 'master',
       }
     end
   end
@@ -76,7 +79,8 @@ Vagrant.configure(2) do |config|
       ansible.verbose = "v"
       ansible.playbook = "fedora-playbook.yaml"
       ansible.extra_vars = {
-        llvm_version: ENV['LLVM_VERSION'] || '6.0.0'
+        llvm_version: ENV['LLVM_VERSION'] || '6.0.0',
+        gitref: ENV['GITREF'] || 'master',
       }
     end
   end
@@ -99,7 +103,8 @@ Vagrant.configure(2) do |config|
       ansible.extra_vars = {
         llvm_version: ENV['LLVM_VERSION'] || '8.0.0',
         ansible_python_interpreter: '/usr/local/bin/python',
-        make_program: 'gmake'
+        make_program: 'gmake',
+        gitref: ENV['GITREF'] || 'master',
       }
     end
   end
@@ -115,6 +120,7 @@ Vagrant.configure(2) do |config|
       ansible.playbook = "macos-playbook.yaml"
       ansible.extra_vars = {
         llvm_version: ENV['LLVM_VERSION'] || '8.0.0',
+        gitref: ENV['GITREF'] || 'master',
       }
     end
 

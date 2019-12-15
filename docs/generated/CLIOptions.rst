@@ -18,6 +18,8 @@
 
     :Elements:	Generates mutation-testing-elements compatible JSON file
 
+--ide-reporter-show-killed		Makes IDEReporter to also report killed mutations (disabled by default)
+
 --compdb-path filename		Path to a compilation database (compile_commands.json) for junk detection
 
 --compilation-flags string		Extra compilation flags for junk detection
