@@ -7,7 +7,6 @@
 
 #include <map>
 #include <set>
-#include <string>
 #include <utility>
 
 using namespace mull;
@@ -70,8 +69,14 @@ void IDEReporter::reportSurvivedMutants(const Result &result, const Metrics &met
                  << result.getMutationPoints().size() << "):\n\n";
 
   SourceManager sourceManager;
-  for (auto &mutant : survivedMutants) {
-    printMutant(sourceManager, *mutant, true);
+
+  /// It is important that below we iterate over result.getMutationPoints()
+  /// because we want the output to be stable across multiple executions of Mull.
+  /// Optimizing this here was a bad idea: https://github.com/mull-project/mull/pull/640
+  for (auto &mutant : result.getMutationPoints()) {
+    if (survivedMutants.find(mutant) != survivedMutants.end()) {
+      printMutant(sourceManager, *mutant, true);
+    }
   }
   if (!survivedMutants.empty()) {
     Logger::info() << "\n";
@@ -110,15 +115,22 @@ void IDEReporter::reportAllMutants(const Result &result, const Metrics &metrics)
   Logger::info() << "\nKilled mutants (" << killedMutantsCount << "/"
                  << result.getMutationPoints().size() << "):\n\n";
 
-  for (auto &mutant : killedMutants) {
-    printMutant(sourceManager, *mutant, false);
+  /// It is important that below we iterate over result.getMutationPoints()
+  /// because we want the output to be stable across multiple executions of Mull.
+  /// Optimizing this here was a bad idea: https://github.com/mull-project/mull/pull/640.
+  for (auto &mutant : result.getMutationPoints()) {
+    if (killedMutants.find(mutant) != killedMutants.end()) {
+      printMutant(sourceManager, *mutant, false);
+    }
   }
 
   Logger::info() << "\nSurvived mutants (" << survivedMutantsCount << "/"
                  << result.getMutationPoints().size() << "):\n\n";
 
-  for (auto &mutant : survivedMutants) {
-    printMutant(sourceManager, *mutant, true);
+  for (auto &mutant : result.getMutationPoints()) {
+    if (survivedMutants.find(mutant) != survivedMutants.end()) {
+      printMutant(sourceManager, *mutant, true);
+    }
   }
   if (!survivedMutants.empty()) {
     Logger::info() << "\n";
