@@ -10,6 +10,11 @@ add_custom_target(generate-mutators-doc
   WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
 
+add_custom_target(generate-html-docs
+  COMMAND make html
+  WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+)
+
 add_custom_target(build-docs
-  DEPENDS generate-mutators-doc generate-cli-options-doc
+  DEPENDS generate-mutators-doc generate-cli-options-doc generate-html-docs
 )

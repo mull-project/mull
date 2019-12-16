@@ -141,7 +141,7 @@ verbose.
 .. code-block:: text
 
     $ clang -fembed-bitcode -g main.cpp -o hello-world
-    $ mull-cxx -test-framework=CustomTest -ide-reporter-show-killed %s.exe hello-world
+    $ mull-cxx -test-framework=CustomTest -ide-reporter-show-killed hello-world
     Extracting bitcode from executable (threads: 1): 1/1. Finished in 4ms.
     Loading bitcode files (threads: 1): 1/1. Finished in 12ms.
     Compiling instrumented code (threads: 1): 1/1. Finished in 12ms.
@@ -228,7 +228,7 @@ The code:
 .. code-block:: text
 
     $ clang -fembed-bitcode -g main.cpp -o hello-world
-    $ mull-cxx -test-framework=CustomTest -ide-reporter-show-killed %s.exe hello-world
+    $ mull-cxx -test-framework=CustomTest -ide-reporter-show-killed hello-world
     Extracting bitcode from executable (threads: 1): 1/1. Finished in 2ms.
     Loading bitcode files (threads: 1): 1/1. Finished in 12ms.
     Compiling instrumented code (threads: 1): 1/1. Finished in 12ms.
