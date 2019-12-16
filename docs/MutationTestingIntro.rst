@@ -1,2 +1,2 @@
-Introduction into Mutation Testing
-==================================
+Introduction to Mutation Testing
+================================
