@@ -6,7 +6,7 @@ Welcome to Mull's documentation!
 
    GettingStarted
    MutationTestingIntro
-   HelloWorld
+   Tutorials
    SupportedMutations
    CommandLineReference
    HackingOnMull
