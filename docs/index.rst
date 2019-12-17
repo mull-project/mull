@@ -9,6 +9,7 @@ Welcome to Mull's documentation!
    Tutorials
    SupportedMutations
    CommandLineReference
+   ForResearchers
    HackingOnMull
 
 .. Indices and tables
