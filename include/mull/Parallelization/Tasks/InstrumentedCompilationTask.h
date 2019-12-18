@@ -17,13 +17,14 @@ public:
   using Out = std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>>;
   using iterator = In::const_iterator;
 
-  InstrumentedCompilationTask(Instrumentation &instrumentation,
+  InstrumentedCompilationTask(Diagnostics &diagnostics, Instrumentation &instrumentation,
                               Toolchain &toolchain);
 
   void operator()(iterator begin, iterator end, Out &storage,
                   progress_counter &counter);
 
 private:
+  Diagnostics &diagnostics;
   Instrumentation &instrumentation;
   Toolchain &toolchain;
 };

@@ -13,7 +13,7 @@ MutationsFinder::MutationsFinder(std::vector<std::unique_ptr<Mutator>> mutators,
     : mutators(std::move(mutators)), config(config) {}
 
 std::vector<MutationPoint *>
-MutationsFinder::getMutationPoints(const Program &program,
+MutationsFinder::getMutationPoints(Diagnostics &diagnostics, const Program &program,
                                    std::vector<FunctionUnderTest> &functions) {
   std::vector<SearchMutationPointsTask> tasks;
   tasks.reserve(config.parallelization.workers);
@@ -22,7 +22,7 @@ MutationsFinder::getMutationPoints(const Program &program,
   }
 
   TaskExecutor<SearchMutationPointsTask> finder(
-      "Searching mutants across functions", functions, ownedPoints, tasks);
+      diagnostics, "Searching mutants across functions", functions, ownedPoints, tasks);
   finder.execute();
 
   std::vector<MutationPoint *> mutationPoints;

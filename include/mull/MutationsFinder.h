@@ -12,14 +12,13 @@ namespace mull {
 struct Configuration;
 class Program;
 class ReachableFunction;
+class Diagnostics;
 
 class MutationsFinder {
 public:
-  explicit MutationsFinder(std::vector<std::unique_ptr<Mutator>> mutators,
-                           const Configuration &config);
-  std::vector<MutationPoint *>
-  getMutationPoints(const Program &program,
-                    std::vector<FunctionUnderTest> &functions);
+  MutationsFinder(std::vector<std::unique_ptr<Mutator>> mutators, const Configuration &config);
+  std::vector<MutationPoint *> getMutationPoints(Diagnostics &diagnostics, const Program &program,
+                                                 std::vector<FunctionUnderTest> &functions);
 
 private:
   std::vector<std::unique_ptr<Mutator>> mutators;

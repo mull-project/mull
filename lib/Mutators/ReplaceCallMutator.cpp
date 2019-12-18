@@ -4,6 +4,7 @@
 #include <irm/irm.h>
 #include <llvm/IR/CallSite.h>
 #include <sstream>
+#include <assert.h>
 
 using namespace llvm;
 using namespace mull;

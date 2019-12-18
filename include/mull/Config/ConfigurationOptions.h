@@ -5,9 +5,9 @@
 
 namespace mull {
 
-enum class Diagnostics { None, Survived, Killed, All };
+enum class IDEDiagnosticsKind { None, Survived, Killed, All };
 
-std::string diagnosticsToString(Diagnostics diagnostics);
+std::string diagnosticsToString(IDEDiagnosticsKind diagnostics);
 
 struct ParallelizationConfig {
   int workers;

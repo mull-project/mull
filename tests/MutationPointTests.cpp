@@ -13,6 +13,7 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Transforms/Utils/Cloning.h>
+#include <mull/Diagnostics/Diagnostics.h>
 #include <mull/Mutators/CXX/NumberMutators.h>
 #include <mull/Parallelization/Parallelization.h>
 
@@ -22,16 +23,15 @@ using namespace mull;
 using namespace llvm;
 
 TEST(MutationPoint, AndOrReplacementMutator_applyMutation) {
+  Diagnostics diagnostics;
   LLVMContext context;
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
-      fixtures::mutators_and_or_and_to_or_replacement_module_bc_path(),
-      context);
+      fixtures::mutators_and_or_and_to_or_replacement_module_bc_path(), context, diagnostics);
   cxx::LogicalAndToOr mutator;
 
   FunctionUnderTest functionUnderTest(
-      bitcode->getModule()->getFunction("testee_AND_operator_2branches"),
-      nullptr, 0);
+      bitcode->getModule()->getFunction("testee_AND_operator_2branches"), nullptr, 0);
   auto mutationPoints = mutator.getMutations(bitcode.get(), functionUnderTest);
 
   ASSERT_EQ(1U, mutationPoints.size());
@@ -40,16 +40,17 @@ TEST(MutationPoint, AndOrReplacementMutator_applyMutation) {
   mutationPoint->setMutatedFunction(mutationPoint->getOriginalFunction());
   mutationPoint->applyMutation();
 
-  auto &mutatedInstruction = mutationPoint->getAddress().findInstruction(
-      mutationPoint->getOriginalFunction());
+  auto &mutatedInstruction =
+      mutationPoint->getAddress().findInstruction(mutationPoint->getOriginalFunction());
   ASSERT_TRUE(isa<BranchInst>(&mutatedInstruction));
 }
 
 TEST(MutationPoint, ScalarValueMutator_applyMutation) {
+  Diagnostics diagnostics;
   LLVMContext context;
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
-      fixtures::mutators_scalar_value_module_bc_path(), context);
+      fixtures::mutators_scalar_value_module_bc_path(), context, diagnostics);
 
   ScalarValueMutator mutator;
   FunctionUnderTest functionUnderTest(
@@ -78,16 +79,17 @@ TEST(MutationPoint, ScalarValueMutator_applyMutation) {
   mutationPoint1->setMutatedFunction(mutationPoint1->getOriginalFunction());
   mutationPoint1->applyMutation();
 
-  auto &mutatedInstruction = mutationPoint1->getAddress().findInstruction(
-      mutationPoint1->getOriginalFunction());
+  auto &mutatedInstruction =
+      mutationPoint1->getAddress().findInstruction(mutationPoint1->getOriginalFunction());
   ASSERT_TRUE(isa<StoreInst>(mutatedInstruction));
 }
 
 TEST(MutationPoint, ReplaceCallMutator_applyMutation) {
+  Diagnostics diagnostics;
   LLVMContext context;
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
-      fixtures::mutators_replace_call_module_bc_path(), context);
+      fixtures::mutators_replace_call_module_bc_path(), context, diagnostics);
 
   ReplaceCallMutator mutator;
   FunctionUnderTest functionUnderTest(
@@ -104,16 +106,17 @@ TEST(MutationPoint, ReplaceCallMutator_applyMutation) {
   mutationPoint->setMutatedFunction(mutationPoint->getOriginalFunction());
   mutationPoint->applyMutation();
 
-  auto &mutatedInstruction = mutationPoint->getAddress().findInstruction(
-      mutationPoint->getOriginalFunction());
+  auto &mutatedInstruction =
+      mutationPoint->getAddress().findInstruction(mutationPoint->getOriginalFunction());
   ASSERT_TRUE(isa<BinaryOperator>(mutatedInstruction));
 }
 
 TEST(MutationPoint, OriginalValuePresent) {
+  Diagnostics diagnostics;
   LLVMContext context;
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
-      fixtures::mutators_replace_assignment_module_bc_path(), context);
+      fixtures::mutators_replace_assignment_module_bc_path(), context, diagnostics);
 
   cxx::NumberAssignConst mutator;
   FunctionUnderTest functionUnderTest(

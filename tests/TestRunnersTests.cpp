@@ -20,22 +20,23 @@
 #include <llvm/Transforms/Utils/Cloning.h>
 
 #include <gtest/gtest.h>
+#include <mull/Diagnostics/Diagnostics.h>
 
 using namespace mull;
 using namespace llvm;
 
 TEST(NativeTestRunner, runTest) {
+  Diagnostics diagnostics;
   Configuration configuration;
 
-  Toolchain toolchain(configuration);
+  Toolchain toolchain(diagnostics, configuration);
 
-  LLVMContext llvmContext;
+  LLVMContext context;
   BitcodeLoader loader;
   auto bitcodeWithTests = loader.loadBitcodeAtPath(
-      fixtures::simple_test_count_letters_test_count_letters_bc_path(),
-      llvmContext);
+      fixtures::simple_test_count_letters_test_count_letters_bc_path(), context, diagnostics);
   auto bitcodeWithTestees = loader.loadBitcodeAtPath(
-      fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
+      fixtures::simple_test_count_letters_count_letters_bc_path(), context, diagnostics);
 
   Module *moduleWithTests = bitcodeWithTests->getModule();
   Module *moduleWithTestees = bitcodeWithTestees->getModule();
@@ -45,7 +46,7 @@ TEST(NativeTestRunner, runTest) {
   bitcodeFiles.push_back(std::move(bitcodeWithTests));
   Program program({}, {}, std::move(bitcodeFiles));
 
-  NativeTestRunner testRunner(toolchain.mangler());
+  NativeTestRunner testRunner(diagnostics, toolchain.mangler());
   NativeTestRunner::ObjectFiles objectFiles;
   NativeTestRunner::OwnedObjectFiles ownedObjectFiles;
 
@@ -55,13 +56,12 @@ TEST(NativeTestRunner, runTest) {
 
   Function *reachableFunction = program.lookupDefinedFunction("count_letters");
   std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions;
-  reachableFunctions.emplace_back(
-      make_unique<ReachableFunction>(reachableFunction, nullptr, 1));
+  reachableFunctions.emplace_back(make_unique<ReachableFunction>(reachableFunction, nullptr, 1));
   auto functionsUnderTest = mergeReachableFunctions(reachableFunctions);
   functionsUnderTest.back().selectInstructions({});
 
   std::vector<MutationPoint *> mutationPoints =
-      mutationsFinder.getMutationPoints(program, functionsUnderTest);
+      mutationsFinder.getMutationPoints(diagnostics, program, functionsUnderTest);
   for (auto point : mutationPoints) {
     point->getBitcode()->addMutation(point);
   }
@@ -75,7 +75,7 @@ TEST(NativeTestRunner, runTest) {
 
   auto &test = tests.front();
 
-  JITEngine jit;
+  JITEngine jit(diagnostics);
 
   Bitcode &bitcode = *mutationPoint->getBitcode();
   std::vector<std::string> mutatedFunctions;
@@ -85,15 +85,15 @@ TEST(NativeTestRunner, runTest) {
   mutationPoint->applyMutation();
 
   {
-    auto owningBinary = toolchain.compiler().compileModule(
-        moduleWithTests, toolchain.targetMachine());
+    auto owningBinary =
+        toolchain.compiler().compileModule(moduleWithTests, toolchain.targetMachine());
     objectFiles.push_back(owningBinary.getBinary());
     ownedObjectFiles.push_back(std::move(owningBinary));
   }
 
   {
-    auto owningBinary = toolchain.compiler().compileModule(
-        moduleWithTestees, toolchain.targetMachine());
+    auto owningBinary =
+        toolchain.compiler().compileModule(moduleWithTestees, toolchain.targetMachine());
     objectFiles.push_back(owningBinary.getBinary());
     ownedObjectFiles.push_back(std::move(owningBinary));
   }
@@ -108,13 +108,10 @@ TEST(NativeTestRunner, runTest) {
 
   auto name = mutationPoint->getOriginalFunction()->getName().str();
   auto bitcodeId = mutationPoint->getBitcode()->getUniqueIdentifier();
-  auto trampolineName =
-      mangler.getNameWithPrefix(mutationPoint->getTrampolineName());
-  auto mutatedFunctionName =
-      mangler.getNameWithPrefix(mutationPoint->getMutatedFunctionName());
+  auto trampolineName = mangler.getNameWithPrefix(mutationPoint->getTrampolineName());
+  auto mutatedFunctionName = mangler.getNameWithPrefix(mutationPoint->getMutatedFunctionName());
   uint64_t *trampoline = trampolines.findTrampoline(trampolineName);
-  uint64_t address =
-      llvm_compat::JITSymbolAddress(jit.getSymbol(mutatedFunctionName));
+  uint64_t address = llvm_compat::JITSymbolAddress(jit.getSymbol(mutatedFunctionName));
   assert(address);
   *trampoline = address;
 

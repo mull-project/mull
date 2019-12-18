@@ -10,15 +10,15 @@ using namespace mull;
 using namespace llvm;
 
 void NormalIDEDiagnostics::report(mull::MutationPoint *mutationPoint, bool killed) {
-  if (diagnostics == Diagnostics::None) {
+  if (diagnostics == IDEDiagnosticsKind::None) {
     return;
   }
 
-  if (diagnostics == Diagnostics::Survived && killed) {
+  if (diagnostics == IDEDiagnosticsKind::Survived && killed) {
     return;
   }
 
-  if (diagnostics == Diagnostics::Killed && !killed) {
+  if (diagnostics == IDEDiagnosticsKind::Killed && !killed) {
     return;
   }
 

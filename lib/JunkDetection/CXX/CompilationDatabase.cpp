@@ -1,10 +1,6 @@
 #include "mull/JunkDetection/CXX/CompilationDatabase.h"
-
 #include "CompilationDatabaseParser.h"
-#include "mull/Logger.h"
-
-#include <clang/Basic/Version.h>
-#include <llvm/ADT/STLExtras.h>
+#include "mull/Diagnostics/Diagnostics.h"
 #include <llvm/ADT/SmallString.h>
 #include <llvm/Support/Path.h>
 
@@ -77,7 +73,8 @@ static std::vector<std::string> flagsFromCommand(const CompileCommand &command,
 }
 
 static std::map<std::string, std::vector<std::string>>
-loadDatabaseFromFile(const std::string &path, const std::vector<std::string> &extraFlags) {
+loadDatabaseFromFile(Diagnostics &diagnostics, const std::string &path,
+                     const std::vector<std::string> &extraFlags) {
   std::map<std::string, std::vector<std::string>> database;
   if (path.empty()) {
     return database;
@@ -87,7 +84,7 @@ loadDatabaseFromFile(const std::string &path, const std::vector<std::string> &ex
 
   auto bufferOrError = llvm::MemoryBuffer::getFile(path);
   if (!bufferOrError) {
-    Logger::error() << "Can not read compilation database: " << path << '\n';
+    diagnostics.warning(std::string("Can not read compilation database: ") + path);
   } else {
     auto buffer = bufferOrError->get();
     llvm::yaml::Input json(buffer->getBuffer());
@@ -95,7 +92,7 @@ loadDatabaseFromFile(const std::string &path, const std::vector<std::string> &ex
     json >> commands;
 
     if (json.error()) {
-      Logger::error() << "Can not read compilation database: " << path << '\n';
+      diagnostics.warning(std::string("Can not read compilation database: ") + path);
     }
   }
 
@@ -110,10 +107,10 @@ loadDatabaseFromFile(const std::string &path, const std::vector<std::string> &ex
   return database;
 }
 
-CompilationDatabase::CompilationDatabase(CompilationDatabase::Path path,
+CompilationDatabase::CompilationDatabase(Diagnostics &diagnostics, CompilationDatabase::Path path,
                                          CompilationDatabase::Flags flags)
     : extraFlags(filterFlags(flagsFromString(flags.getFlags()), false)),
-      database(loadDatabaseFromFile(path.getPath(), extraFlags)) {}
+      database(loadDatabaseFromFile(diagnostics, path.getPath(), extraFlags)) {}
 
 const std::vector<std::string> &
 CompilationDatabase::compilationFlagsForFile(const std::string &filepath) const {

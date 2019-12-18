@@ -1,6 +1,7 @@
 #include "FixturePaths.h"
 #include <gtest/gtest.h>
 #include <mull/BitcodeLoader.h>
+#include <mull/Diagnostics/Diagnostics.h>
 #include <mull/Mutators/CXX/RelationalMutators.h>
 #include <mull/ReachableFunction.h>
 
@@ -8,10 +9,11 @@ using namespace mull;
 using namespace llvm;
 
 TEST(Relational, LessThanToLessOrEqual) {
+  Diagnostics diagnostics;
   LLVMContext context;
   BitcodeLoader loader;
-  auto bitcode = loader.loadBitcodeAtPath(
-      fixtures::mutators_boundary_module_bc_path(), context);
+  auto bitcode =
+      loader.loadBitcodeAtPath(fixtures::mutators_boundary_module_bc_path(), context, diagnostics);
 
   cxx::LessThanToLessOrEqual mutator;
   std::vector<MutationPoint *> mutants;
@@ -26,10 +28,11 @@ TEST(Relational, LessThanToLessOrEqual) {
 }
 
 TEST(Relational, LessOrEqualToLessThan) {
+  Diagnostics diagnostics;
   LLVMContext context;
   BitcodeLoader loader;
-  auto bitcode = loader.loadBitcodeAtPath(
-      fixtures::mutators_boundary_module_bc_path(), context);
+  auto bitcode =
+      loader.loadBitcodeAtPath(fixtures::mutators_boundary_module_bc_path(), context, diagnostics);
 
   cxx::LessOrEqualToLessThan mutator;
   std::vector<MutationPoint *> mutants;
@@ -44,10 +47,11 @@ TEST(Relational, LessOrEqualToLessThan) {
 }
 
 TEST(Relational, GreaterThanToGreaterOrEqual) {
+  Diagnostics diagnostics;
   LLVMContext context;
   BitcodeLoader loader;
-  auto bitcode = loader.loadBitcodeAtPath(
-      fixtures::mutators_boundary_module_bc_path(), context);
+  auto bitcode =
+      loader.loadBitcodeAtPath(fixtures::mutators_boundary_module_bc_path(), context, diagnostics);
 
   cxx::GreaterThanToGreaterOrEqual mutator;
   std::vector<MutationPoint *> mutants;
@@ -62,10 +66,11 @@ TEST(Relational, GreaterThanToGreaterOrEqual) {
 }
 
 TEST(Relational, GreaterOrEqualToGreaterThan) {
+  Diagnostics diagnostics;
   LLVMContext context;
   BitcodeLoader loader;
-  auto bitcode = loader.loadBitcodeAtPath(
-      fixtures::mutators_boundary_module_bc_path(), context);
+  auto bitcode =
+      loader.loadBitcodeAtPath(fixtures::mutators_boundary_module_bc_path(), context, diagnostics);
 
   cxx::GreaterOrEqualToGreaterThan mutator;
   std::vector<MutationPoint *> mutants;

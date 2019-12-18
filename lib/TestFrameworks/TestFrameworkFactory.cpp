@@ -10,20 +10,20 @@
 using namespace mull;
 using namespace llvm;
 
-TestFramework
-TestFrameworkFactory::createTestFramework(const std::string &name,
-                                          Toolchain &toolchain,
-                                          Configuration &configuration) {
+TestFramework TestFrameworkFactory::createTestFramework(const std::string &name,
+                                                        Toolchain &toolchain,
+                                                        Configuration &configuration,
+                                                        Diagnostics &diagnostics) {
   if (name == "GoogleTest") {
-    return googleTestFramework(toolchain, configuration);
+    return googleTestFramework(toolchain, configuration, diagnostics);
   }
 
   if (name == "SimpleTest") {
-    return simpleTestFramework(toolchain, configuration);
+    return simpleTestFramework(toolchain, configuration, diagnostics);
   }
 
   if (name == "CustomTest") {
-    return customTestFramework(toolchain, configuration);
+    return customTestFramework(toolchain, configuration, diagnostics);
   }
 
   std::string errorMessage("Unknown test framework: ");
@@ -31,36 +31,35 @@ TestFrameworkFactory::createTestFramework(const std::string &name,
   llvm_unreachable(errorMessage.c_str());
 }
 
-TestFramework
-TestFrameworkFactory::simpleTestFramework(Toolchain &toolchain,
-                                          Configuration &configuration) {
+TestFramework TestFrameworkFactory::simpleTestFramework(Toolchain &toolchain,
+                                                        Configuration &configuration,
+                                                        Diagnostics &diagnostics) {
   auto finder = make_unique<SimpleTestFinder>();
-  auto runner = make_unique<NativeTestRunner>(toolchain.mangler());
+  auto runner = make_unique<NativeTestRunner>(diagnostics, toolchain.mangler());
   return TestFramework(std::move(finder), std::move(runner));
 }
 
-TestFramework
-TestFrameworkFactory::googleTestFramework(Toolchain &toolchain,
-                                          Configuration &configuration) {
+TestFramework TestFrameworkFactory::googleTestFramework(Toolchain &toolchain,
+                                                        Configuration &configuration,
+                                                        Diagnostics &diagnostics) {
   auto finder = make_unique<GoogleTestFinder>();
-  auto runner = make_unique<NativeTestRunner>(toolchain.mangler());
+  auto runner = make_unique<NativeTestRunner>(diagnostics, toolchain.mangler());
   return TestFramework(std::move(finder), std::move(runner));
 }
 
-TestFramework
-TestFrameworkFactory::customTestFramework(Toolchain &toolchain,
-                                          Configuration &configuration) {
+TestFramework TestFrameworkFactory::customTestFramework(Toolchain &toolchain,
+                                                        Configuration &configuration,
+                                                        Diagnostics &diagnostics) {
   auto finder = make_unique<CustomTestFinder>(configuration.customTests);
-  auto runner = make_unique<NativeTestRunner>(toolchain.mangler());
+  auto runner = make_unique<NativeTestRunner>(diagnostics, toolchain.mangler());
   return TestFramework(std::move(finder), std::move(runner));
 }
 
-std::vector<std::pair<std::string, std::string>>
-TestFrameworkFactory::commandLineOptions() {
+std::vector<std::pair<std::string, std::string>> TestFrameworkFactory::commandLineOptions() {
   std::vector<std::pair<std::string, std::string>> options(
-      {std::make_pair("GoogleTest", "Google Test Framework"),
-       std::make_pair("CustomTest", "Custom Test Framework"),
-       std::make_pair("SimpleTest", "Simple Test (For internal usage only)")});
+      { std::make_pair("GoogleTest", "Google Test Framework"),
+        std::make_pair("CustomTest", "Custom Test Framework"),
+        std::make_pair("SimpleTest", "Simple Test (For internal usage only)") });
 
   return options;
 }

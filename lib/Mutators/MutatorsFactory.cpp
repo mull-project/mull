@@ -1,6 +1,6 @@
 #include "mull/Mutators/MutatorsFactory.h"
 
-#include "mull/Logger.h"
+#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Mutators/CXX/ArithmeticMutators.h"
 #include "mull/Mutators/CXX/BitwiseMutators.h"
 #include "mull/Mutators/CXX/LogicalAndToOr.h"
@@ -77,7 +77,7 @@ static void expandGroups(const vector<string> &groups, const map<string, vector<
   }
 }
 
-MutatorsFactory::MutatorsFactory() {
+MutatorsFactory::MutatorsFactory(Diagnostics &diagnostics) : diagnostics(diagnostics) {
   groupsMapping[CXX_Const_Assignment()] = {
     cxx::NumberAssignConst::ID(), // a = b | a = Const
     cxx::NumberInitConst::ID(),   // a(b)  | a(Const)
@@ -251,7 +251,7 @@ vector<unique_ptr<Mutator>> MutatorsFactory::mutators(const vector<string> &grou
 
   for (const string &group : expandedGroups) {
     if (mutatorsMapping.count(group) == 0) {
-      Logger::error() << "Unknown mutator: '" << group << "'\n";
+      diagnostics.warning(std::string("Unknown mutator: ") + group);
       continue;
     }
     mutators.emplace_back(std::move(mutatorsMapping.at(group)));
@@ -259,7 +259,7 @@ vector<unique_ptr<Mutator>> MutatorsFactory::mutators(const vector<string> &grou
   }
 
   if (mutators.empty()) {
-    Logger::error() << "No valid mutators specified.\n";
+    diagnostics.warning("No valid mutators specified.");
   }
 
   return mutators;

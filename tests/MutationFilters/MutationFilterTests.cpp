@@ -9,14 +9,16 @@
 
 #include <gtest/gtest.h>
 #include <llvm/IR/LLVMContext.h>
+#include <mull/Diagnostics/Diagnostics.h>
 
 using namespace mull;
 
 TEST(NoDebugInfoFilter, withDebugInfo) {
+  Diagnostics diagnostics;
   llvm::LLVMContext context;
   BitcodeLoader loader;
   auto path = fixtures::mutation_filters_no_debug_filter_with_debug_bc_path();
-  auto bitcode = loader.loadBitcodeAtPath(path, context);
+  auto bitcode = loader.loadBitcodeAtPath(path, context, diagnostics);
   std::vector<MutationPoint *> points;
 
   cxx::AddToSub mutator;
@@ -41,11 +43,11 @@ TEST(NoDebugInfoFilter, withDebugInfo) {
 }
 
 TEST(NoDebugInfoFilter, withouDebugInfo) {
+  Diagnostics diagnostics;
   llvm::LLVMContext context;
   BitcodeLoader loader;
-  auto path =
-      fixtures::mutation_filters_no_debug_filter_without_debug_bc_path();
-  auto bitcode = loader.loadBitcodeAtPath(path, context);
+  auto path = fixtures::mutation_filters_no_debug_filter_without_debug_bc_path();
+  auto bitcode = loader.loadBitcodeAtPath(path, context, diagnostics);
 
   std::vector<MutationPoint *> points;
   cxx::AddToSub mutator;
@@ -70,11 +72,11 @@ TEST(NoDebugInfoFilter, withouDebugInfo) {
 }
 
 TEST(FilePathFilter, doesNotFilterEmpty) {
+  Diagnostics diagnostics;
   llvm::LLVMContext context;
   BitcodeLoader loader;
-  auto path =
-      fixtures::mutation_filters_file_path_some_test_file_name_bc_path();
-  auto bitcode = loader.loadBitcodeAtPath(path, context);
+  auto path = fixtures::mutation_filters_file_path_some_test_file_name_bc_path();
+  auto bitcode = loader.loadBitcodeAtPath(path, context, diagnostics);
 
   std::vector<MutationPoint *> points;
   cxx::AddToSub mutator;
@@ -99,11 +101,11 @@ TEST(FilePathFilter, doesNotFilterEmpty) {
 }
 
 TEST(FilePathFilter, doesNotFilterMismatch) {
+  Diagnostics diagnostics;
   llvm::LLVMContext context;
   BitcodeLoader loader;
-  auto path =
-      fixtures::mutation_filters_file_path_some_test_file_name_bc_path();
-  auto bitcode = loader.loadBitcodeAtPath(path, context);
+  auto path = fixtures::mutation_filters_file_path_some_test_file_name_bc_path();
+  auto bitcode = loader.loadBitcodeAtPath(path, context, diagnostics);
 
   std::vector<MutationPoint *> points;
   cxx::AddToSub mutator;
@@ -129,11 +131,11 @@ TEST(FilePathFilter, doesNotFilterMismatch) {
 }
 
 TEST(FilePathFilter, filtersPlainString) {
+  Diagnostics diagnostics;
   llvm::LLVMContext context;
   BitcodeLoader loader;
-  auto path =
-      fixtures::mutation_filters_file_path_some_test_file_name_bc_path();
-  auto bitcode = loader.loadBitcodeAtPath(path, context);
+  auto path = fixtures::mutation_filters_file_path_some_test_file_name_bc_path();
+  auto bitcode = loader.loadBitcodeAtPath(path, context, diagnostics);
 
   std::vector<MutationPoint *> points;
   cxx::AddToSub mutator;
@@ -159,11 +161,11 @@ TEST(FilePathFilter, filtersPlainString) {
 }
 
 TEST(FilePathFilter, filtersWithRegex) {
+  Diagnostics diagnostics;
   llvm::LLVMContext context;
   BitcodeLoader loader;
-  auto path =
-      fixtures::mutation_filters_file_path_some_test_file_name_bc_path();
-  auto bitcode = loader.loadBitcodeAtPath(path, context);
+  auto path = fixtures::mutation_filters_file_path_some_test_file_name_bc_path();
+  auto bitcode = loader.loadBitcodeAtPath(path, context, diagnostics);
 
   std::vector<MutationPoint *> points;
   cxx::AddToSub mutator;

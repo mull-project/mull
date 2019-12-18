@@ -18,6 +18,7 @@
 #include <llvm/Support/YAMLTraits.h>
 
 #include <gtest/gtest.h>
+#include <mull/Diagnostics/Diagnostics.h>
 
 using namespace mull;
 using namespace llvm;
@@ -25,10 +26,11 @@ using namespace llvm;
 #pragma mark - Finding Tests
 
 TEST(GoogleTestFinder, FindTest) {
+  Diagnostics diagnostics;
   LLVMContext context;
   BitcodeLoader loader;
   auto bitcodeWithTests = loader.loadBitcodeAtPath(
-      fixtures::google_test_google_test_Test_bc_path(), context);
+      fixtures::google_test_google_test_Test_bc_path(), context, diagnostics);
 
   std::vector<std::unique_ptr<Bitcode>> bitcode;
   bitcode.push_back(std::move(bitcodeWithTests));
@@ -45,21 +47,22 @@ TEST(GoogleTestFinder, FindTest) {
 }
 
 TEST(DISABLED_GoogleTestRunner, runTest) {
+  Diagnostics diagnostics;
   Configuration configuration;
 
-  Toolchain toolchain(configuration);
+  Toolchain toolchain(diagnostics, configuration);
 
   LLVMContext context;
   BitcodeLoader loader;
   auto bitcodeWithTests = loader.loadBitcodeAtPath(
-      fixtures::google_test_google_test_Test_bc_path(), context);
+      fixtures::google_test_google_test_Test_bc_path(), context, diagnostics);
   auto bitcodeWithTestees = loader.loadBitcodeAtPath(
-      fixtures::google_test_google_test_Testee_bc_path(), context);
+      fixtures::google_test_google_test_Testee_bc_path(), context, diagnostics);
 
-  auto binaryWithTests = toolchain.compiler().compileModule(
-      bitcodeWithTests->getModule(), toolchain.targetMachine());
-  auto binaryWithTestees = toolchain.compiler().compileModule(
-      bitcodeWithTestees->getModule(), toolchain.targetMachine());
+  auto binaryWithTests =
+      toolchain.compiler().compileModule(bitcodeWithTests->getModule(), toolchain.targetMachine());
+  auto binaryWithTestees = toolchain.compiler().compileModule(bitcodeWithTestees->getModule(),
+                                                              toolchain.targetMachine());
 
   std::vector<std::unique_ptr<Bitcode>> bitcode;
   bitcode.push_back(std::move(bitcodeWithTests));
@@ -75,11 +78,11 @@ TEST(DISABLED_GoogleTestRunner, runTest) {
   ASSERT_EQ("HelloTest.testSumOfTestee", tests[0].getTestName());
   ASSERT_EQ("HelloTest.testSumOfTestee2", tests[1].getTestName());
 
-  NativeTestRunner runner(toolchain.mangler());
-  JITEngine jit;
+  NativeTestRunner runner(diagnostics, toolchain.mangler());
+  JITEngine jit(diagnostics);
 
   std::vector<llvm::object::ObjectFile *> objects(
-      {binaryWithTests.getBinary(), binaryWithTestees.getBinary()});
+      { binaryWithTests.getBinary(), binaryWithTestees.getBinary() });
   /// TODO: enable eventually
   //  runner.loadProgram(objects, jit);
   runner.runTest(jit, program, tests[0]);

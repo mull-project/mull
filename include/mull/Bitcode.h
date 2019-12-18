@@ -14,13 +14,14 @@ namespace mull {
 
 class MutationPoint;
 class JITEngine;
+class Diagnostics;
 
 class Bitcode {
 public:
   Bitcode(std::unique_ptr<llvm::Module> module,
           std::unique_ptr<llvm::MemoryBuffer> buffer, const std::string &md5);
 
-  std::unique_ptr<Bitcode> clone(llvm::LLVMContext &context);
+  std::unique_ptr<Bitcode> clone(llvm::LLVMContext &context, Diagnostics &diagnostics);
 
   llvm::Module *getModule();
   llvm::Module *getModule() const;

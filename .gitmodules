@@ -9,3 +9,6 @@
 [submodule "vendor/libirm"]
 	path = vendor/libirm
 	url = https://github.com/mull-project/libirm.git
+[submodule "vendor/spdlog"]
+	path = vendor/spdlog
+	url = https://github.com/gabime/spdlog.git

@@ -1,21 +1,18 @@
 #include "mull/TestFrameworks/CustomTestFramework/CustomTestFinder.h"
 
 #include "mull/Config/Configuration.h"
-#include "mull/Logger.h"
 #include "mull/Program/Program.h"
 #include "mull/TestFrameworks/Test.h"
 
 #include <llvm/IR/Module.h>
 
 #include <map>
-#include <string>
 #include <vector>
 
 using namespace mull;
 using namespace llvm;
 
-CustomTestFinder::CustomTestFinder(
-    const std::vector<CustomTestDefinition> &definitions)
+CustomTestFinder::CustomTestFinder(const std::vector<CustomTestDefinition> &definitions)
     : testDefinitions(definitions) {}
 
 std::vector<Test> CustomTestFinder::findTests(Program &program) {
@@ -43,8 +40,8 @@ std::vector<Test> CustomTestFinder::findTests(Program &program) {
           programName = "mull";
         }
 
-        tests.emplace_back(definition.testName, programName, "main",
-                           definition.callArguments, &function);
+        tests.emplace_back(
+            definition.testName, programName, "main", definition.callArguments, &function);
       }
     }
   }

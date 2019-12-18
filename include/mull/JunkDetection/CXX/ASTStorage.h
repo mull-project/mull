@@ -12,6 +12,7 @@
 namespace mull {
 
 class MutationPoint;
+class Diagnostics;
 
 class ThreadSafeASTUnit {
 public:
@@ -38,7 +39,7 @@ private:
 
 class ASTStorage {
 public:
-  ASTStorage(const std::string &cxxCompilationDatabasePath,
+  ASTStorage(Diagnostics &diagnostics, const std::string &cxxCompilationDatabasePath,
              const std::string &cxxCompilationFlags);
 
   ThreadSafeASTUnit *findAST(const MutationPoint *point);
@@ -48,6 +49,7 @@ public:
                         clang::Expr *mutantExpression);
 
 private:
+  Diagnostics &diagnostics;
   std::mutex mutex;
   std::mutex mutantNodesMutex;
 

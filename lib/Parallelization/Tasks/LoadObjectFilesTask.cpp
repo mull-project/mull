@@ -1,37 +1,21 @@
 #include "mull/Parallelization/Tasks/LoadObjectFilesTask.h"
-
-#include "mull/Logger.h"
+#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Parallelization/Progress.h"
 
 using namespace mull;
 using namespace llvm;
 
+LoadObjectFilesTask::LoadObjectFilesTask(Diagnostics &diagnostics) : diagnostics(diagnostics) {}
+
 void LoadObjectFilesTask::operator()(iterator begin, iterator end, Out &storage,
                                      progress_counter &counter) {
   for (auto it = begin; it != end; it++, counter.increment()) {
     auto objectFilePath = *it;
-    ErrorOr<std::unique_ptr<MemoryBuffer>> buffer =
-        MemoryBuffer::getFile(objectFilePath);
-
-    if (!buffer) {
-      Logger::error() << "Cannot load object file: " << objectFilePath << "\n";
+    auto objectFile = llvm::object::ObjectFile::createObjectFile(objectFilePath);
+    if (!objectFile) {
+      diagnostics.warning(std::string("Cannot load object file: ") + objectFilePath);
       continue;
     }
-
-    Expected<std::unique_ptr<object::ObjectFile>> objectOrError =
-        object::ObjectFile::createObjectFile(buffer.get()->getMemBufferRef());
-
-    if (!objectOrError) {
-      Logger::error() << "Cannot create object file: " << objectFilePath
-                      << "\n";
-      continue;
-    }
-
-    std::unique_ptr<object::ObjectFile> objectFile(
-        std::move(objectOrError.get()));
-
-    auto owningObject = object::OwningBinary<object::ObjectFile>(
-        std::move(objectFile), std::move(buffer.get()));
-    storage.push_back(std::move(owningObject));
+    storage.emplace_back(std::move(objectFile.get()));
   }
 }

@@ -11,6 +11,7 @@ class TestRunner;
 class JITEngine;
 class progress_counter;
 class Program;
+class Diagnostics;
 
 struct Configuration;
 
@@ -20,14 +21,15 @@ public:
   using Out = std::vector<std::unique_ptr<ReachableFunction>>;
   using iterator = In::iterator;
 
-  OriginalTestExecutionTask(Instrumentation &instrumentation, Program &program,
-                            const ProcessSandbox &sandbox, TestRunner &runner,
+  OriginalTestExecutionTask(Diagnostics &diagnostics, Instrumentation &instrumentation,
+                            Program &program, const ProcessSandbox &sandbox, TestRunner &runner,
                             const Configuration &config, JITEngine &jit);
 
   void operator()(iterator begin, iterator end, Out &storage,
                   progress_counter &counter);
 
 private:
+  Diagnostics &diagnostics;
   Instrumentation &instrumentation;
   Program &program;
   const ProcessSandbox &sandbox;

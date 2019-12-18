@@ -18,7 +18,6 @@ int MullDefaultTimeoutMilliseconds = 3000;
 Configuration::Configuration()
     : dryRunEnabled(false), failFastEnabled(false), cacheEnabled(false),
       timeout(MullDefaultTimeoutMilliseconds), maxDistance(128),
-      diagnostics(Diagnostics::None),
-      parallelization(singleThreadParallelization()) {}
+      diagnostics(IDEDiagnosticsKind::None), parallelization(singleThreadParallelization()) {}
 
 } // namespace mull

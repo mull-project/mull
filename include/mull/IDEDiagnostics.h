@@ -15,11 +15,11 @@ public:
 
 class NormalIDEDiagnostics : public IDEDiagnostics {
 public:
-  explicit NormalIDEDiagnostics(Diagnostics diagnostics) : diagnostics(diagnostics) {}
+  explicit NormalIDEDiagnostics(IDEDiagnosticsKind diagnostics) : diagnostics(diagnostics) {}
   void report(MutationPoint *mutationPoint, bool killed) override;
 
 private:
-  Diagnostics diagnostics;
+  IDEDiagnosticsKind diagnostics;
 };
 
 class NullIDEDiagnostics : public IDEDiagnostics {

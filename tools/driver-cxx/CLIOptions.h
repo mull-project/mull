@@ -47,7 +47,7 @@ extern list<std::string> IncludePaths;
 
 class MutatorsCLIOptions {
 public:
-  explicit MutatorsCLIOptions(list<MutatorsOptionIndex> &parameter);
+  MutatorsCLIOptions(Diagnostics &diagnostics, list<MutatorsOptionIndex> &parameter);
   std::vector<std::unique_ptr<mull::Mutator>> mutators();
   std::vector<std::pair<std::string, std::string>> &getOptions();
 
@@ -65,19 +65,22 @@ struct ReporterParameters {
 
 class ReportersCLIOptions {
 public:
-  explicit ReportersCLIOptions(list<ReporterKind> &parameter);
+  ReportersCLIOptions(Diagnostics &diagnostics, list<ReporterKind> &parameter);
   std::vector<std::unique_ptr<Reporter>> reporters(ReporterParameters params);
 
 private:
+  Diagnostics &diagnostics;
   list<ReporterKind> &parameter;
 };
 
 class TestFrameworkCLIOptions {
 public:
-  explicit TestFrameworkCLIOptions(opt<TestFrameworkOptionIndex> &parameter);
+  explicit TestFrameworkCLIOptions(Diagnostics &diagnostics,
+                                   opt<TestFrameworkOptionIndex> &parameter);
   TestFramework testFramework(Toolchain &toolchain, Configuration &configuration);
 
 private:
+  Diagnostics &diagnostics;
   TestFrameworkFactory factory;
   std::vector<std::pair<std::string, std::string>> options;
   opt<TestFrameworkOptionIndex> &parameter;
@@ -93,9 +96,9 @@ private:
 };
 
 extern opt<bool> DumpCLIInterface;
-void dumpCLIInterface();
+void dumpCLIInterface(Diagnostics &diagnostics);
 
 extern opt<bool> DumpMutators;
-void dumpMutators();
+void dumpMutators(Diagnostics &diagnostics);
 
 } // namespace tool

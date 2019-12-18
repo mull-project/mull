@@ -10,9 +10,10 @@
 using namespace mull;
 using namespace llvm;
 
-InstrumentedCompilationTask::InstrumentedCompilationTask(
-    Instrumentation &instrumentation, Toolchain &toolchain)
-    : instrumentation(instrumentation), toolchain(toolchain) {}
+InstrumentedCompilationTask::InstrumentedCompilationTask(Diagnostics &diagnostics,
+                                                         Instrumentation &instrumentation,
+                                                         Toolchain &toolchain)
+    : diagnostics(diagnostics), instrumentation(instrumentation), toolchain(toolchain) {}
 
 void InstrumentedCompilationTask::operator()(iterator begin, iterator end,
                                              Out &storage,
@@ -23,11 +24,11 @@ void InstrumentedCompilationTask::operator()(iterator begin, iterator end,
   std::unique_ptr<TargetMachine> localMachine(target);
 
   for (auto it = begin; it != end; it++, counter.increment()) {
-    auto &bitcode = *it->get();
+    auto &bitcode = **it;
     auto objectFile = toolchain.cache().getInstrumentedObject(bitcode);
     if (objectFile.getBinary() == nullptr) {
       LLVMContext instrumentationContext;
-      auto clonedBitcode = bitcode.clone(instrumentationContext);
+      auto clonedBitcode = bitcode.clone(instrumentationContext, diagnostics);
 
       instrumentation.insertCallbacks(clonedBitcode->getModule());
       objectFile =

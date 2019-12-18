@@ -1,6 +1,5 @@
 #include "mull/Mutators/CXX/LogicalAndToOr.h"
 
-#include "mull/Logger.h"
 #include "mull/MutationPoint.h"
 #include "mull/ReachableFunction.h"
 #include "mull/SourceLocation.h"

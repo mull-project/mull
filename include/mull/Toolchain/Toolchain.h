@@ -8,6 +8,7 @@
 
 namespace mull {
 struct Configuration;
+class Diagnostics;
 
 class Toolchain {
 
@@ -23,7 +24,7 @@ class Toolchain {
   Mangler nameMangler;
 
 public:
-  explicit Toolchain(const Configuration &config);
+  Toolchain(Diagnostics &diagnostics, const Configuration &config);
 
   ObjectCache &cache();
   Compiler &compiler();

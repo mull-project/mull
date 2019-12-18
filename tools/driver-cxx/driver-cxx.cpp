@@ -8,6 +8,7 @@
 #include "DynamicLibraries.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Config/ConfigurationOptions.h"
+#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Driver.h"
 #include "mull/Filters/FilePathFilter.h"
 #include "mull/Filters/Filter.h"
@@ -25,9 +26,9 @@
 #include "mull/TestFrameworks/TestFrameworkFactory.h"
 #include "mull/Version.h"
 
-#include <unistd.h>
-
 #include <memory>
+#include <sstream>
+#include <unistd.h>
 
 static void validateInputFile() {
   if (access(tool::InputFile.getValue().c_str(), R_OK) != 0) {
@@ -37,23 +38,24 @@ static void validateInputFile() {
 }
 
 int main(int argc, char **argv) {
+  mull::Diagnostics diagnostics;
   llvm_compat::setVersionPrinter(mull::printVersionInformation,
                                  mull::printVersionInformationStream);
 
-  tool::MutatorsCLIOptions mutatorsOptions(tool::Mutators);
-  tool::TestFrameworkCLIOptions testFrameworkOption(tool::TestFrameworks);
+  tool::MutatorsCLIOptions mutatorsOptions(diagnostics, tool::Mutators);
+  tool::TestFrameworkCLIOptions testFrameworkOption(diagnostics, tool::TestFrameworks);
   tool::SandboxCLIOptions sandboxOption(tool::SandboxOption);
-  tool::ReportersCLIOptions reportersOption(tool::ReportersOption);
+  tool::ReportersCLIOptions reportersOption(diagnostics, tool::ReportersOption);
 
   llvm::cl::HideUnrelatedOptions(tool::MullCXXCategory);
   bool validOptions = llvm_compat::parseCommandLineOptions(argc, argv);
   if (!validOptions) {
     if (tool::DumpCLIInterface) {
-      tool::dumpCLIInterface();
+      tool::dumpCLIInterface(diagnostics);
       return 0;
     }
     if (tool::DumpMutators) {
-      tool::dumpMutators();
+      tool::dumpMutators(diagnostics);
       return 0;
     }
     return 1;
@@ -89,31 +91,32 @@ int main(int argc, char **argv) {
   }
 
   std::vector<std::unique_ptr<ebc::EmbeddedFile>> embeddedFiles;
-  mull::SingleTaskExecutor extractBitcodeBuffers("Extracting bitcode from executable", [&] {
-    ebc::BitcodeRetriever bitcodeRetriever(tool::InputFile.getValue());
-    for (auto &bitcodeInfo : bitcodeRetriever.GetBitcodeInfo()) {
-      auto &container = bitcodeInfo.bitcodeContainer;
-      if (container) {
-        for (auto &file : container->GetRawEmbeddedFiles()) {
-          embeddedFiles.push_back(std::move(file));
+  mull::SingleTaskExecutor extractBitcodeBuffers(
+      diagnostics, "Extracting bitcode from executable", [&] {
+        ebc::BitcodeRetriever bitcodeRetriever(tool::InputFile.getValue());
+        for (auto &bitcodeInfo : bitcodeRetriever.GetBitcodeInfo()) {
+          auto &container = bitcodeInfo.bitcodeContainer;
+          if (container) {
+            for (auto &file : container->GetRawEmbeddedFiles()) {
+              embeddedFiles.push_back(std::move(file));
+            }
+          } else {
+            diagnostics.warning(std::string("No bitcode: ") + bitcodeInfo.arch);
+          }
         }
-      } else {
-        mull::Logger::warn() << "No bitcode: " << bitcodeInfo.arch << "\n";
-      }
-    }
-  });
+      });
   extractBitcodeBuffers.execute();
 
   std::vector<std::unique_ptr<llvm::LLVMContext>> contexts;
   std::vector<mull::LoadBitcodeFromBinaryTask> tasks;
   for (int i = 0; i < configuration.parallelization.workers; i++) {
     auto context = llvm::make_unique<llvm::LLVMContext>();
-    tasks.emplace_back(mull::LoadBitcodeFromBinaryTask(*context));
+    tasks.emplace_back(mull::LoadBitcodeFromBinaryTask(diagnostics, *context));
     contexts.push_back(std::move(context));
   }
   std::vector<std::unique_ptr<mull::Bitcode>> bitcode;
   mull::TaskExecutor<mull::LoadBitcodeFromBinaryTask> executor(
-      "Loading bitcode files", embeddedFiles, bitcode, std::move(tasks));
+      diagnostics, "Loading bitcode files", embeddedFiles, bitcode, std::move(tasks));
   executor.execute();
 
   std::vector<std::string> librarySearchPaths;
@@ -122,11 +125,11 @@ int main(int argc, char **argv) {
   }
 
   auto dynamicLibraries =
-      mull::findDynamicLibraries(tool::InputFile.getValue(), librarySearchPaths);
+      mull::findDynamicLibraries(diagnostics, tool::InputFile.getValue(), librarySearchPaths);
 
   mull::Program program(dynamicLibraries, {}, std::move(bitcode));
 
-  mull::Toolchain toolchain(configuration);
+  mull::Toolchain toolchain(diagnostics, configuration);
 
   mull::TestFramework testFramework(testFrameworkOption.testFramework(toolchain, configuration));
 
@@ -141,7 +144,7 @@ int main(int argc, char **argv) {
     cxxCompilationDatabasePath = tool::CompilationDatabasePath.getValue();
     junkDetectionEnabled = true;
   }
-  mull::ASTStorage astStorage(cxxCompilationDatabasePath, cxxCompilationFlags);
+  mull::ASTStorage astStorage(diagnostics, cxxCompilationDatabasePath, cxxCompilationFlags);
   mull::ASTSourceInfoProvider sourceInfoProvider(astStorage);
   mull::CXXJunkDetector junkDetector(astStorage);
 
@@ -180,7 +183,8 @@ int main(int argc, char **argv) {
     filterStorage.emplace_back(junkFilter);
   }
 
-  mull::Driver driver(configuration,
+  mull::Driver driver(diagnostics,
+                      configuration,
                       *sandbox,
                       program,
                       toolchain,
@@ -206,8 +210,9 @@ int main(int argc, char **argv) {
   llvm::llvm_shutdown();
 
   totalExecutionTime.finish();
-  mull::Logger::info() << "\nTotal execution time: " << totalExecutionTime.duration()
-                       << mull::MetricsMeasure::precision() << "\n";
+  std::stringstream stringstream;
+  stringstream << "Total execution time: " << totalExecutionTime.duration()
+               << mull::MetricsMeasure::precision();
 
   return 0;
 }

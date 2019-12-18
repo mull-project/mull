@@ -17,11 +17,12 @@ public:
   using Out = std::vector<std::unique_ptr<Bitcode>>;
   using iterator = In::const_iterator;
 
-  BitcodeLoadingTask(llvm::LLVMContext &context, BitcodeLoader &loader);
+  BitcodeLoadingTask(Diagnostics &diagnostics, llvm::LLVMContext &context, BitcodeLoader &loader);
   void operator()(iterator begin, iterator end, Out &storage,
                   progress_counter &counter);
 
 private:
+  Diagnostics &diagnostics;
   llvm::LLVMContext &context;
   BitcodeLoader &loader;
 };

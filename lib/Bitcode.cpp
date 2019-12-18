@@ -1,7 +1,7 @@
 #include "mull/Bitcode.h"
 
 #include "LLVMCompatibility.h"
-#include "mull/Logger.h"
+#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/MutationPoint.h"
 #include "mull/Parallelization/Parallelization.h"
 
@@ -12,7 +12,7 @@
 #include <llvm/Support/Path.h>
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Transforms/Utils/Cloning.h>
-#include <llvm/Transforms/Utils/CodeExtractor.h>
+#include <assert.h>
 
 using namespace mull;
 using namespace llvm;
@@ -21,27 +21,23 @@ using namespace std;
 Bitcode::Bitcode(std::unique_ptr<llvm::Module> module)
     : module(std::move(module)), uniqueIdentifier("") {}
 
-Bitcode::Bitcode(std::unique_ptr<llvm::Module> module,
-                 std::unique_ptr<llvm::MemoryBuffer> buffer,
+Bitcode::Bitcode(std::unique_ptr<llvm::Module> module, std::unique_ptr<llvm::MemoryBuffer> buffer,
                  const std::string &md5)
     : module(std::move(module)), buffer(std::move(buffer)) {
-  uniqueIdentifier =
-      llvm::sys::path::stem(this->module->getModuleIdentifier()).str() + "_" +
-      md5;
+  uniqueIdentifier = llvm::sys::path::stem(this->module->getModuleIdentifier()).str() + "_" + md5;
 }
 
-std::unique_ptr<Bitcode> Bitcode::clone(LLVMContext &context) {
+std::unique_ptr<Bitcode> Bitcode::clone(LLVMContext &context, Diagnostics &diagnostics) {
   assert(buffer.get() && "Cannot clone non-original module");
   auto clone = llvm_compat::parseBitcode(buffer->getMemBufferRef(), context);
   if (!clone) {
-    Logger::error() << "Cannot clone module \n";
+    diagnostics.error("Cannot clone module \n");
     return nullptr;
   }
 
   clone->setModuleIdentifier(module->getModuleIdentifier());
 
-  return make_unique<Bitcode>(std::move(clone), std::unique_ptr<MemoryBuffer>(),
-                              "");
+  return make_unique<Bitcode>(std::move(clone), std::unique_ptr<MemoryBuffer>(), "");
 }
 
 llvm::Module *Bitcode::getModule() {
@@ -54,9 +50,13 @@ llvm::Module *Bitcode::getModule() const {
   return module.get();
 }
 
-std::string Bitcode::getUniqueIdentifier() { return uniqueIdentifier; }
+std::string Bitcode::getUniqueIdentifier() {
+  return uniqueIdentifier;
+}
 
-std::string Bitcode::getUniqueIdentifier() const { return uniqueIdentifier; }
+std::string Bitcode::getUniqueIdentifier() const {
+  return uniqueIdentifier;
+}
 
 void Bitcode::addMutation(MutationPoint *point) {
   auto function = point->getOriginalFunction();
@@ -73,7 +73,7 @@ std::string Bitcode::getMutatedUniqueIdentifier() const {
   }
 
   std::vector<std::string> mutationPointsIds;
-  for (auto mutationPair : mutationPoints) {
+  for (const auto &mutationPair : mutationPoints) {
     for (auto point : mutationPair.second) {
       mutationPointsIds.push_back(point->getUniqueIdentifier());
     }
@@ -86,7 +86,7 @@ std::string Bitcode::getMutatedUniqueIdentifier() const {
     hasher.update(id);
   }
 
-  MD5::MD5Result hash;
+  MD5::MD5Result hash{};
   hasher.final(hash);
   SmallString<32> result;
   MD5::stringifyResult(hash, result);
@@ -94,7 +94,6 @@ std::string Bitcode::getMutatedUniqueIdentifier() const {
   return (getUniqueIdentifier() + "_" + result + "_mutated").str();
 }
 
-std::map<llvm::Function *, std::vector<MutationPoint *>> &
-Bitcode::getMutationPointsMap() {
+std::map<llvm::Function *, std::vector<MutationPoint *>> &Bitcode::getMutationPointsMap() {
   return mutationPoints;
 }

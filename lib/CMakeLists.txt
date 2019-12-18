@@ -1,9 +1,9 @@
 add_subdirectory(Mutators/CXX)
+add_subdirectory(Diagnostics)
 
 set(mull_sources
   Driver.cpp
   Sandbox/ProcessSandbox.cpp
-  Logger.cpp
   BitcodeLoader.cpp
   MutationsFinder.cpp
 
@@ -161,6 +161,7 @@ target_link_libraries(mull
   Threads::Threads
   irm
   mull-cxx-mutators
+  Diagnostics
   )
 target_include_directories(mull PUBLIC
   ${MULL_INCLUDE_DIRS}

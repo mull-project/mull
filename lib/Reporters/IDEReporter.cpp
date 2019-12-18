@@ -1,13 +1,15 @@
 #include "mull/Reporters/IDEReporter.h"
 
-#include "mull/Logger.h"
+#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/MutationResult.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Reporters/SourceManager.h"
 #include "mull/Result.h"
 
+#include <assert.h>
 #include <map>
 #include <set>
+#include <sstream>
 #include <utility>
 
 using namespace mull;
@@ -16,17 +18,16 @@ static bool mutantSurvived(const ExecutionStatus &status) {
   return status == ExecutionStatus::Passed;
 }
 
-static void printMutant(SourceManager &sourceManager, const MutationPoint &mutant, bool survived) {
+static void printMutant(Diagnostics &diagnostics, SourceManager &sourceManager,
+                        const MutationPoint &mutant, bool survived) {
   auto &sourceLocation = mutant.getSourceLocation();
   assert(!sourceLocation.isNull() && "Debug information is missing?");
 
-  const std::string status = survived ? "Survived" : "Killed";
-  Logger::info() << sourceLocation.filePath << ":" << sourceLocation.line << ":"
-                 << sourceLocation.column << ": warning: " << status << ": "
-                 << mutant.getDiagnostics() << " "
-                 << "[" << mutant.getMutatorIdentifier() << "]"
-                 << "\n";
-
+  std::stringstream stringstream;
+  stringstream << sourceLocation.filePath << ":" << sourceLocation.line << ":"
+               << sourceLocation.column << ": warning: " << (survived ? "Survived" : "Killed")
+               << ": " << mutant.getDiagnostics() << " [" << mutant.getMutatorIdentifier() << "]"
+               << "\n";
   auto line = sourceManager.getLine(sourceLocation);
   assert(sourceLocation.column < line.size());
 
@@ -38,15 +39,17 @@ static void printMutant(SourceManager &sourceManager, const MutationPoint &mutan
   }
   caret[sourceLocation.column - 1] = '^';
 
-  Logger::info() << line;
-  Logger::info() << caret << "\n";
+  stringstream << line << caret << "\n";
+  fprintf(stdout, "%s", stringstream.str().c_str());
+  fflush(stdout);
 }
 
-IDEReporter::IDEReporter(bool showKilled) : showKilled(showKilled) {}
+IDEReporter::IDEReporter(Diagnostics &diagnostics, bool showKilled)
+    : diagnostics(diagnostics), showKilled(showKilled) {}
 
 void IDEReporter::reportResults(const Result &result, const Metrics &metrics) {
   if (result.getMutationPoints().empty()) {
-    Logger::info() << "No mutants found. Mutation score: infinitely high\n";
+    diagnostics.info("No mutants found. Mutation score: infinitely high");
     return;
   }
 
@@ -69,31 +72,33 @@ void IDEReporter::reportResults(const Result &result, const Metrics &metrics) {
   /// because we want the output to be stable across multiple executions of Mull.
   /// Optimizing this here was a bad idea: https://github.com/mull-project/mull/pull/640.
   if (showKilled && killedMutantsCount > 0) {
-    Logger::info() << "\nKilled mutants (" << killedMutantsCount << "/"
-                   << result.getMutationPoints().size() << "):\n\n";
-
+    std::stringstream stringstream;
+    stringstream << "Killed mutants (" << killedMutantsCount << "/"
+                 << result.getMutationPoints().size() << "):";
+    diagnostics.info(stringstream.str());
     for (auto &mutant : result.getMutationPoints()) {
       if (killedMutants.find(mutant) != killedMutants.end()) {
-        printMutant(sourceManager, *mutant, false);
+        printMutant(diagnostics, sourceManager, *mutant, false);
       }
     }
   }
 
   if (survivedMutantsCount > 0) {
-    Logger::info() << "\nSurvived mutants (" << survivedMutantsCount << "/"
-                   << result.getMutationPoints().size() << "):\n\n";
+    std::stringstream stringstream;
+    stringstream << "Survived mutants (" << survivedMutantsCount << "/"
+                 << result.getMutationPoints().size() << "):";
+    diagnostics.info(stringstream.str());
 
     for (auto &mutant : result.getMutationPoints()) {
       if (killedMutants.find(mutant) == killedMutants.end()) {
-        printMutant(sourceManager, *mutant, true);
+        printMutant(diagnostics, sourceManager, *mutant, true);
       }
     }
-    Logger::info() << "\n";
   } else {
-    Logger::info() << "\nAll mutations have been killed\n\n";
+    diagnostics.info("All mutations have been killed");
   }
 
   auto rawScore = double(killedMutants.size()) / double(result.getMutationPoints().size());
   auto score = uint(rawScore * 100);
-  Logger::info() << "Mutation score: " << score << "%\n";
+  diagnostics.info(std::string("Mutation score: ") + std::to_string(score) + '%');
 }

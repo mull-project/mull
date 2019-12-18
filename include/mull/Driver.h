@@ -34,6 +34,7 @@ class Metrics;
 class JunkDetector;
 class FunctionFilter;
 struct Filters;
+class Diagnostics;
 
 class Driver {
   const Configuration &config;
@@ -42,7 +43,8 @@ class Driver {
   Toolchain &toolchain;
   MutationsFinder &mutationsFinder;
   const ProcessSandbox &sandbox;
-  IDEDiagnostics *diagnostics;
+  IDEDiagnostics *ideDiagnostics;
+  Diagnostics &diagnostics;
 
   std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>>
       instrumentedObjectFiles;
@@ -54,10 +56,9 @@ class Driver {
   struct Filters &filters;
 
 public:
-  Driver(const Configuration &config, const ProcessSandbox &sandbox,
-         Program &program, Toolchain &t, Filters &filters,
-         MutationsFinder &mutationsFinder, Metrics &metrics,
-         TestFramework &testFramework);
+  Driver(Diagnostics &diagnostics, const Configuration &config, const ProcessSandbox &sandbox,
+         Program &program, Toolchain &t, Filters &filters, MutationsFinder &mutationsFinder,
+         Metrics &metrics, TestFramework &testFramework);
 
   ~Driver();
 

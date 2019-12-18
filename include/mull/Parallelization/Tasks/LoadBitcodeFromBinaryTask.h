@@ -5,13 +5,14 @@
 #include <vector>
 
 namespace ebc {
-  class EmbeddedFile;
+class EmbeddedFile;
 }
 
 namespace mull {
 
 class Bitcode;
 class progress_counter;
+class Diagnostics;
 
 class LoadBitcodeFromBinaryTask {
 public:
@@ -19,13 +20,13 @@ public:
   using Out = std::vector<std::unique_ptr<mull::Bitcode>>;
   using iterator = In::iterator;
 
-  explicit LoadBitcodeFromBinaryTask(llvm::LLVMContext &context)
-    : context(context) {}
+  LoadBitcodeFromBinaryTask(Diagnostics &diagnostics, llvm::LLVMContext &context)
+      : diagnostics(diagnostics), context(context) {}
 
-  void operator()(iterator begin, iterator end, Out &storage,
-                  mull::progress_counter &counter);
+  void operator()(iterator begin, iterator end, Out &storage, mull::progress_counter &counter);
 
 private:
+  Diagnostics &diagnostics;
   llvm::LLVMContext &context;
 };
-}
+} // namespace mull

@@ -1,39 +1,32 @@
 #include "mull/Sandbox/ProcessSandbox.h"
 
+#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/ExecutionResult.h"
-#include "mull/Logger.h"
 
 #include <cerrno>
 #include <chrono>
 #include <csignal>
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
-#include <stdlib.h>
-#include <stdio.h>
+#include <llvm/Support/FileSystem.h>
+#include <sstream>
 #include <sys/mman.h>
 #include <sys/time.h>
-#include <sys/types.h>
 #include <sys/wait.h>
 #include <thread>
 #include <unistd.h>
 
-#include <llvm/Support/FileSystem.h>
-
 using namespace std::chrono;
 
-static pid_t mullFork(const char *processName) {
-  //  static int childrenCount = 0;
-  //  childrenCount++;
+static pid_t mullFork(mull::Diagnostics &diagnostics, const char *processName) {
   const pid_t pid = fork();
   if (pid == -1) {
-    mull::Logger::error()
-        << "Failed to create "
-        << processName
-        //                            << " after creating " << childrenCount
-        //                            << " child processes\n";
-        << "\n";
-    mull::Logger::error() << strerror(errno) << "\n";
-    mull::Logger::error() << "Shutting down\n";
-    exit(1);
+    std::stringstream stringstream;
+    stringstream << "Failed to create " << processName << "\n"
+                 << strerror(errno) << "\n"
+                 << "Shutting down";
+    diagnostics.error(stringstream.str());
   }
   return pid;
 }
@@ -69,7 +62,7 @@ void handle_alarm_signal(int signal, siginfo_t *info, void *context) {
 }
 
 void handle_timeout(long long timeoutMilliseconds) {
-  struct sigaction action{};
+  struct sigaction action {};
   memset(&action, 0, sizeof(action));
   action.sa_sigaction = &handle_alarm_signal;
   if (sigaction(SIGALRM, &action, nullptr) != 0) {
@@ -77,7 +70,7 @@ void handle_timeout(long long timeoutMilliseconds) {
     abort();
   }
 
-  struct itimerval timer{};
+  struct itimerval timer {};
   timer.it_value.tv_sec = timeoutMilliseconds / 1000;
   /// Cut off seconds, and convert what's left into microseconds
   timer.it_value.tv_usec = (timeoutMilliseconds % 1000) * 1000;
@@ -92,9 +85,9 @@ void handle_timeout(long long timeoutMilliseconds) {
   }
 }
 
-mull::ExecutionResult
-mull::ForkTimerSandbox::run(std::function<ExecutionStatus(void)> function,
-                            long long timeoutMilliseconds) const {
+mull::ExecutionResult mull::ForkTimerSandbox::run(Diagnostics &diagnostics,
+                                                  std::function<ExecutionStatus(void)> function,
+                                                  long long timeoutMilliseconds) const {
   llvm::SmallString<32> stderrFilename;
   llvm::sys::fs::createUniqueFile("/tmp/mull.stderr.%%%%%%", stderrFilename);
 
@@ -102,12 +95,11 @@ mull::ForkTimerSandbox::run(std::function<ExecutionStatus(void)> function,
   llvm::sys::fs::createUniqueFile("/tmp/mull.stdout.%%%%%%", stdoutFilename);
 
   /// Creating a memory to be shared between child and parent.
-  ExecutionStatus *sharedStatus = (ExecutionStatus *)mmap(
-      nullptr, sizeof(ExecutionStatus), PROT_READ | PROT_WRITE,
-      MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+  auto *sharedStatus = (ExecutionStatus *)mmap(
+      nullptr, sizeof(ExecutionStatus), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
 
   auto start = high_resolution_clock::now();
-  const pid_t workerPID = mullFork("worker");
+  const pid_t workerPID = mullFork(diagnostics, "worker");
   if (workerPID == 0) {
     freopen(stderrFilename.c_str(), "w", stderr);
     freopen(stdoutFilename.c_str(), "w", stdout);
@@ -127,8 +119,7 @@ mull::ForkTimerSandbox::run(std::function<ExecutionStatus(void)> function,
 
     auto elapsed = high_resolution_clock::now() - start;
     ExecutionResult result;
-    result.runningTime =
-        duration_cast<std::chrono::milliseconds>(elapsed).count();
+    result.runningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
     result.exitStatus = WEXITSTATUS(status);
     result.stderrOutput = readFileAndUnlink(stderrFilename.c_str());
     result.stdoutOutput = readFileAndUnlink(stdoutFilename.c_str());
@@ -161,9 +152,9 @@ mull::ForkTimerSandbox::run(std::function<ExecutionStatus(void)> function,
   }
 }
 
-mull::ExecutionResult
-mull::ForkWatchdogSandbox::run(std::function<ExecutionStatus(void)> function,
-                               long long timeoutMilliseconds) const {
+mull::ExecutionResult mull::ForkWatchdogSandbox::run(Diagnostics &diagnostics,
+                                                     std::function<ExecutionStatus(void)> function,
+                                                     long long timeoutMilliseconds) const {
   llvm::SmallString<32> stderrFilename;
   llvm::sys::fs::createUniqueFile("/tmp/mull.stderr.%%%%%%", stderrFilename);
 
@@ -171,26 +162,21 @@ mull::ForkWatchdogSandbox::run(std::function<ExecutionStatus(void)> function,
   llvm::sys::fs::createUniqueFile("/tmp/mull.stdout.%%%%%%", stdoutFilename);
 
   /// Creating a memory to be shared between child and parent.
-  void *sharedMemory = mmap(nullptr,
-                            sizeof(ExecutionResult),
-                            PROT_READ | PROT_WRITE,
-                            MAP_SHARED | MAP_ANONYMOUS,
-                            -1,
-                            0);
+  void *sharedMemory = mmap(
+      nullptr, sizeof(ExecutionResult), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
 
   ExecutionResult *sharedResult = new (sharedMemory) ExecutionResult();
 
-  const pid_t watchdogPID = mullFork("watchdog");
+  const pid_t watchdogPID = mullFork(diagnostics, "watchdog");
   if (watchdogPID == 0) {
 
-    const pid_t timerPID = mullFork("timer");
+    const pid_t timerPID = mullFork(diagnostics, "timer");
     if (timerPID == 0) {
-      std::this_thread::sleep_for(
-          std::chrono::milliseconds(timeoutMilliseconds));
+      std::this_thread::sleep_for(std::chrono::milliseconds(timeoutMilliseconds));
       exit(0);
     }
 
-    const pid_t workerPID = mullFork("worker");
+    const pid_t workerPID = mullFork(diagnostics, "worker");
 
     auto start = high_resolution_clock::now();
 
@@ -201,8 +187,7 @@ mull::ForkWatchdogSandbox::run(std::function<ExecutionStatus(void)> function,
       sharedResult->status = function();
 
       auto elapsed = high_resolution_clock::now() - start;
-      sharedResult->runningTime =
-          duration_cast<std::chrono::milliseconds>(elapsed).count();
+      sharedResult->runningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
 
       fflush(stderr);
       fflush(stdout);
@@ -214,8 +199,7 @@ mull::ForkWatchdogSandbox::run(std::function<ExecutionStatus(void)> function,
     const pid_t exitedPID = waitpid(WAIT_ANY, &status, 0);
 
     auto elapsed = high_resolution_clock::now() - start;
-    long long runningTime =
-        duration_cast<std::chrono::milliseconds>(elapsed).count();
+    long long runningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
 
     if (exitedPID == timerPID) {
       /// Timer Process finished first, meaning that the worker timed out
@@ -239,7 +223,8 @@ mull::ForkWatchdogSandbox::run(std::function<ExecutionStatus(void)> function,
         sharedResult->status = AbnormalExit;
       }
 
-      else if (WIFEXITED(status) && WEXITSTATUS(status) == MullExitCode && sharedResult->status == Invalid) {
+      else if (WIFEXITED(status) && WEXITSTATUS(status) == MullExitCode &&
+               sharedResult->status == Invalid) {
         sharedResult->status = Passed;
       }
     } else {
@@ -271,9 +256,9 @@ mull::ForkWatchdogSandbox::run(std::function<ExecutionStatus(void)> function,
   return result;
 }
 
-mull::ExecutionResult
-mull::NullProcessSandbox::run(std::function<ExecutionStatus(void)> function,
-                              long long timeoutMilliseconds) const {
+mull::ExecutionResult mull::NullProcessSandbox::run(Diagnostics &diagnostics,
+                                                    std::function<ExecutionStatus(void)> function,
+                                                    long long timeoutMilliseconds) const {
   ExecutionResult result;
   result.status = function();
   return result;

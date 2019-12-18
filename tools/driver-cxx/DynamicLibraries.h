@@ -5,7 +5,9 @@
 
 namespace mull {
 
-std::vector<std::string>
-findDynamicLibraries(const std::string &executablePath,
-                     std::vector<std::string> &librarySearchPaths);
-}
+class Diagnostics;
+
+std::vector<std::string> findDynamicLibraries(mull::Diagnostics &diagnostics,
+                                              const std::string &executablePath,
+                                              std::vector<std::string> &librarySearchPaths);
+} // namespace mull

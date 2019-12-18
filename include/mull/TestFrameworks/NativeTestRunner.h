@@ -9,10 +9,11 @@ class Mangler;
 class JITEngine;
 class Mangler;
 struct InstrumentationInfo;
+class Diagnostics;
 
 class NativeTestRunner : public TestRunner {
 public:
-  explicit NativeTestRunner(Mangler &mangler);
+  NativeTestRunner(Diagnostics &diagnostics, Mangler &mangler);
   ~NativeTestRunner() override;
 
   void loadInstrumentedProgram(ObjectFiles &objectFiles,
@@ -24,6 +25,7 @@ public:
                           Test &test) override;
 
 private:
+  Diagnostics &diagnostics;
   Mangler &mangler;
   CXXRuntimeOverrides overrides;
   InstrumentationInfo **trampoline;

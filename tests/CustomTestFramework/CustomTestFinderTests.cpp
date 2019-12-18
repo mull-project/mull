@@ -1,6 +1,7 @@
 #include "FixturePaths.h"
 #include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
+#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Program/Program.h"
 #include "mull/TestFrameworks/CustomTestFramework/CustomTestFinder.h"
 #include <gtest/gtest.h>
@@ -10,21 +11,21 @@ using namespace llvm;
 using namespace std;
 
 TEST(CustomTestFinder, findTests) {
+  Diagnostics diagnostics;
   Configuration configuration;
-  configuration.bitcodePaths = {mull::fixtures::custom_test_distance_bc_path(),
-                                mull::fixtures::custom_test_main_bc_path(),
-                                mull::fixtures::custom_test_test_bc_path()};
+  configuration.bitcodePaths = { mull::fixtures::custom_test_distance_bc_path(),
+                                 mull::fixtures::custom_test_main_bc_path(),
+                                 mull::fixtures::custom_test_test_bc_path() };
 
   BitcodeLoader loader;
-  auto bitcode = loader.loadBitcode(configuration);
+  auto bitcode = loader.loadBitcode(configuration, diagnostics);
   Program program({}, {}, std::move(bitcode));
   ASSERT_EQ(program.getStaticConstructors().size(), 1UL);
-  ASSERT_EQ(program.getStaticConstructors().front()->getName(),
-            "initGlobalVariable");
+  ASSERT_EQ(program.getStaticConstructors().front()->getName(), "initGlobalVariable");
 
   vector<CustomTestDefinition> testDefinitions({
-      CustomTestDefinition("failing", "failing_test", "mull", {"failing_test"}),
-      CustomTestDefinition("passing", "passing_test", "mull", {"passing_test"}),
+      CustomTestDefinition("failing", "failing_test", "mull", { "failing_test" }),
+      CustomTestDefinition("passing", "passing_test", "mull", { "passing_test" }),
   });
 
   CustomTestFinder testFinder(testDefinitions);
@@ -58,23 +59,22 @@ TEST(CustomTestFinder, findTests) {
 }
 
 TEST(CustomTestFinder, findTests_viaConfig) {
+  Diagnostics diagnostics;
   Configuration configuration;
-  configuration.bitcodePaths = {mull::fixtures::custom_test_distance_bc_path(),
-                                mull::fixtures::custom_test_main_bc_path(),
-                                mull::fixtures::custom_test_test_bc_path()};
+  configuration.bitcodePaths = { mull::fixtures::custom_test_distance_bc_path(),
+                                 mull::fixtures::custom_test_main_bc_path(),
+                                 mull::fixtures::custom_test_test_bc_path() };
 
   std::vector<CustomTestDefinition> testDefinitions({
-      CustomTestDefinition("failing", "failing_test", "some_name",
-                           {"failing_test"}),
-      CustomTestDefinition("passing", "passing_test", "mull", {"passing_test"}),
+      CustomTestDefinition("failing", "failing_test", "some_name", { "failing_test" }),
+      CustomTestDefinition("passing", "passing_test", "mull", { "passing_test" }),
   });
 
   BitcodeLoader loader;
-  auto bitcode = loader.loadBitcode(configuration);
+  auto bitcode = loader.loadBitcode(configuration, diagnostics);
   Program program({}, {}, std::move(bitcode));
   ASSERT_EQ(program.getStaticConstructors().size(), 1UL);
-  ASSERT_EQ(program.getStaticConstructors().front()->getName(),
-            "initGlobalVariable");
+  ASSERT_EQ(program.getStaticConstructors().front()->getName(), "initGlobalVariable");
 
   CustomTestFinder testFinder(testDefinitions);
 
@@ -107,17 +107,18 @@ TEST(CustomTestFinder, findTests_viaConfig) {
 }
 
 TEST(CustomTestFinder, findTests_withEmptyConfig) {
+  Diagnostics diagnostics;
   Configuration configuration;
-  configuration.bitcodePaths = {mull::fixtures::custom_test_distance_bc_path(),
-                                mull::fixtures::custom_test_main_bc_path(),
-                                mull::fixtures::custom_test_test_bc_path()};
+  configuration.bitcodePaths = { mull::fixtures::custom_test_distance_bc_path(),
+                                 mull::fixtures::custom_test_main_bc_path(),
+                                 mull::fixtures::custom_test_test_bc_path() };
 
   BitcodeLoader loader;
-  auto bitcode = loader.loadBitcode(configuration);
+  auto bitcode = loader.loadBitcode(configuration, diagnostics);
   Program program({}, {}, std::move(bitcode));
 
   std::vector<CustomTestDefinition> testDefinitions(
-      {CustomTestDefinition("main", "main", "mull", {})});
+      { CustomTestDefinition("main", "main", "mull", {}) });
   CustomTestFinder testFinder(testDefinitions);
 
   vector<mull::Test> tests = testFinder.findTests(program);

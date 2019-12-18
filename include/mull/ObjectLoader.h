@@ -8,7 +8,7 @@ class Configuration;
 
 class ObjectLoader {
 public:
-  ObjectFiles loadObjectFiles(Configuration &configuration);
+  ObjectFiles loadObjectFiles(Configuration &configuration, Diagnostics &diagnostics);
 
 private:
 };
