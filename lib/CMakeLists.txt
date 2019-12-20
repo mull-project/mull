@@ -5,6 +5,7 @@ set(mull_sources
   Driver.cpp
   Sandbox/ProcessSandbox.cpp
   BitcodeLoader.cpp
+  BitcodeMetadataReader.cpp
   MutationsFinder.cpp
 
   Instrumentation/DynamicCallTree.cpp

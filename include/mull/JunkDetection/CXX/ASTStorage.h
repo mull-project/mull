@@ -40,13 +40,13 @@ private:
 class ASTStorage {
 public:
   ASTStorage(Diagnostics &diagnostics, const std::string &cxxCompilationDatabasePath,
-             const std::string &cxxCompilationFlags);
+             const std::string &cxxCompilationFlags,
+             const std::map<std::string, std::string> &bitcodeCompilationFlags);
 
   ThreadSafeASTUnit *findAST(const MutationPoint *point);
 
   clang::Expr *getMutantASTNode(MutationPoint *mutationPoint);
-  void setMutantASTNode(MutationPoint *mutationPoint,
-                        clang::Expr *mutantExpression);
+  void setMutantASTNode(MutationPoint *mutationPoint, clang::Expr *mutantExpression);
 
 private:
   Diagnostics &diagnostics;

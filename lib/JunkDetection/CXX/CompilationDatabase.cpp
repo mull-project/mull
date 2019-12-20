@@ -107,28 +107,75 @@ loadDatabaseFromFile(Diagnostics &diagnostics, const std::string &path,
   return database;
 }
 
+static std::map<std::string, std::vector<std::string>>
+createBitcodeFlags(Diagnostics &diagnostics, CompilationDatabase::BitcodeFlags &bitcodeFlags,
+                   const std::vector<std::string> &extraFlags) {
+  const std::map<std::string, std::string> &bitcodeFlagsMap = bitcodeFlags.getFlags();
+
+  std::map<std::string, std::vector<std::string>> mergedBitcodeFlags;
+
+  for (auto const &bitcodeFileEntry : bitcodeFlagsMap) {
+    std::vector<std::string> fileFlagsArray = flagsFromString(bitcodeFileEntry.second);
+
+    fileFlagsArray = filterFlags(fileFlagsArray, true);
+
+    /// Remove file name from the list of flags
+    fileFlagsArray.erase(
+        std::remove(fileFlagsArray.begin(), fileFlagsArray.end(), bitcodeFileEntry.first),
+        fileFlagsArray.end());
+
+    for (const auto &extraFlag : extraFlags) {
+      fileFlagsArray.push_back(extraFlag);
+    }
+
+    mergedBitcodeFlags[bitcodeFileEntry.first] = fileFlagsArray;
+  }
+
+  return mergedBitcodeFlags;
+}
+
 CompilationDatabase::CompilationDatabase(Diagnostics &diagnostics, CompilationDatabase::Path path,
-                                         CompilationDatabase::Flags flags)
+                                         CompilationDatabase::Flags flags,
+                                         CompilationDatabase::BitcodeFlags bitcodeFlags)
     : extraFlags(filterFlags(flagsFromString(flags.getFlags()), false)),
-      database(loadDatabaseFromFile(diagnostics, path.getPath(), extraFlags)) {}
+      database(loadDatabaseFromFile(diagnostics, path.getPath(), extraFlags)),
+      bitcodeFlags(createBitcodeFlags(diagnostics, bitcodeFlags, extraFlags)) {}
 
 const std::vector<std::string> &
 CompilationDatabase::compilationFlagsForFile(const std::string &filepath) const {
-  if (database.empty()) {
+  if (database.empty() && bitcodeFlags.empty()) {
     return extraFlags;
   }
 
-  auto it = database.find(filepath);
-  if (it != database.end()) {
+  /// Look in bitcode flags
+  auto it = bitcodeFlags.find(filepath);
+  if (it != bitcodeFlags.end()) {
     return it->second;
   }
   auto filename = llvm::sys::path::filename(filepath);
+  it = bitcodeFlags.find(filename);
+  if (it != bitcodeFlags.end()) {
+    return it->second;
+  }
+
+  llvm::SmallString<128> dotlessPath(filepath);
+  llvm::sys::path::remove_dots(dotlessPath, true);
+  it = bitcodeFlags.find(dotlessPath.str());
+  if (it != bitcodeFlags.end()) {
+    return it->second;
+  }
+
+  /// Look in compilation database
+  it = database.find(filepath);
+  if (it != database.end()) {
+    return it->second;
+  }
+  filename = llvm::sys::path::filename(filepath);
   it = database.find(filename);
   if (it != database.end()) {
     return it->second;
   }
 
-  llvm::SmallString<128> dotlessPath(filepath);
   llvm::sys::path::remove_dots(dotlessPath, true);
   it = database.find(dotlessPath.str());
   if (it != database.end()) {

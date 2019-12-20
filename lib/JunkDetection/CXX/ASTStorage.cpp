@@ -168,10 +168,12 @@ clang::Decl *ThreadSafeASTUnit::getDecl(clang::SourceLocation &location) {
 }
 
 ASTStorage::ASTStorage(Diagnostics &diagnostics, const std::string &cxxCompilationDatabasePath,
-                       const std::string &cxxCompilationFlags)
+                       const std::string &cxxCompilationFlags,
+                       const std::map<std::string, std::string> &bitcodeCompilationFlags)
     : diagnostics(diagnostics),
       compilationDatabase(diagnostics, CompilationDatabase::Path(cxxCompilationDatabasePath),
-                          CompilationDatabase::Flags(cxxCompilationFlags)) {}
+                          CompilationDatabase::Flags(cxxCompilationFlags),
+                          CompilationDatabase::BitcodeFlags(bitcodeCompilationFlags)) {}
 
 ThreadSafeASTUnit *ASTStorage::findAST(const MutationPoint *point) {
   assert(point);

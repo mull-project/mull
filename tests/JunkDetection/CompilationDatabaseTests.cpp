@@ -9,7 +9,8 @@ TEST(CompilationDatabaseFromCompilationFlags, returnsAllFlags) {
   Diagnostics diagnostics;
   const CompilationDatabase database(diagnostics,
                                      CompilationDatabase::Path(""),
-                                     CompilationDatabase::Flags("-I     /usr/foo/include   "));
+                                     CompilationDatabase::Flags("-I     /usr/foo/include   "),
+                                     CompilationDatabase::BitcodeFlags({}));
 
   const std::string filepath("foobar");
   const auto &flags = database.compilationFlagsForFile(filepath);
@@ -20,7 +21,8 @@ TEST(CompilationDatabaseFromCompilationFlags, returnsAllFlagsForAnyFile) {
   Diagnostics diagnostics;
   const CompilationDatabase database(diagnostics,
                                      CompilationDatabase::Path(""),
-                                     CompilationDatabase::Flags("-I /usr/foo/include   "));
+                                     CompilationDatabase::Flags("-I /usr/foo/include   "),
+                                     CompilationDatabase::BitcodeFlags({}));
 
   const std::string foo("foo");
   const std::string bar("bar");
@@ -44,8 +46,10 @@ TEST(CompilationDatabaseFromCompilationFlags, cleansUpFlags) {
 
   const std::string file("foobar.cpp");
   for (auto &flags : testFlags) {
-    const CompilationDatabase database(
-        diagnostics, CompilationDatabase::Path(""), CompilationDatabase::Flags(flags));
+    const CompilationDatabase database(diagnostics,
+                                       CompilationDatabase::Path(""),
+                                       CompilationDatabase::Flags(flags),
+                                       CompilationDatabase::BitcodeFlags({}));
 
     const auto &compilationFlags = database.compilationFlagsForFile(file);
     ASSERT_EQ(compilationFlags.size(), size_t(0));
@@ -63,8 +67,9 @@ TEST(CompilationDatabaseFromCompilationFlags, cleansUpMixedFlags) {
 
   const std::string file("foobar.cpp");
   for (auto &flags : testFlags) {
-    const CompilationDatabase database(
-        diagnostics, CompilationDatabase::Path(""), CompilationDatabase::Flags(flags));
+    const CompilationDatabase database(diagnostics, CompilationDatabase::Path(""),
+                                       CompilationDatabase::Flags(flags),
+                                       CompilationDatabase::BitcodeFlags({}));
 
     auto compilationFlags = database.compilationFlagsForFile(file);
     ASSERT_EQ(compilationFlags.size(), size_t(4));
@@ -88,8 +93,10 @@ TEST(CompilationDatabaseFromFile, loadsFromValidFiles) {
       { "/foo/bar/foobar.cpp", "/foo/bar/./foobar.cpp", "/foo/bar/buzz/../foobar.cpp" });
   for (const std::string &file : files) {
     for (auto &path : databasePaths) {
-      const CompilationDatabase database(
-          diagnostics, CompilationDatabase::Path(path), CompilationDatabase::Flags(""));
+      const CompilationDatabase database(diagnostics,
+                                         CompilationDatabase::Path(path),
+                                         CompilationDatabase::Flags(""),
+                                         CompilationDatabase::BitcodeFlags({}));
 
       auto compilationFlags = database.compilationFlagsForFile(file);
       ASSERT_EQ(compilationFlags.size(), size_t(4));
@@ -108,7 +115,8 @@ TEST(CompilationDatabaseFromFile, includesCompilationFlagsPassedSeparately) {
   const CompilationDatabase database(
       diagnostics,
       CompilationDatabase::Path(path),
-      CompilationDatabase::Flags("-isystem /usr/local/include -isystem /usr/include"));
+      CompilationDatabase::Flags("-isystem /usr/local/include -isystem /usr/include"),
+      CompilationDatabase::BitcodeFlags({}));
 
   const std::string file("/foo/bar/foobar.cpp");
   auto compilationFlags = database.compilationFlagsForFile(file);
@@ -130,7 +138,8 @@ TEST(CompilationDatabaseFromFile, parsesCompilationFlagsFromClangMJCommandValid)
   const CompilationDatabase database(
       diagnostics,
       CompilationDatabase::Path(path),
-      CompilationDatabase::Flags("-isystem /usr/local/include -isystem /usr/include"));
+      CompilationDatabase::Flags("-isystem /usr/local/include -isystem /usr/include"),
+      CompilationDatabase::BitcodeFlags({}));
 
   const std::string file("/tmp/main.cpp");
   auto compilationFlags = database.compilationFlagsForFile(file);
@@ -141,4 +150,26 @@ TEST(CompilationDatabaseFromFile, parsesCompilationFlagsFromClangMJCommandValid)
   ASSERT_EQ(compilationFlags.at(2), std::string("-g"));
   ASSERT_EQ(compilationFlags.at(18), std::string("-isystem"));
   ASSERT_EQ(compilationFlags.at(19), std::string("/usr/include"));
+}
+
+TEST(CompilationDatabaseFromFile, parsesCompilationFlagsObtainedFromBitcode) {
+  const std::string fakeFile = "/opt/fake/file.cpp";
+
+  Diagnostics diagnostics;
+
+  std::map<std::string, std::string> bitcodeFlags;
+  bitcodeFlags[fakeFile] = "clang -DBITCODE_FLAG=1 -g";
+
+  const CompilationDatabase database(
+    diagnostics,
+    CompilationDatabase::Path(""),
+    CompilationDatabase::Flags("-DEXTRA_FLAG=1"),
+    CompilationDatabase::BitcodeFlags(bitcodeFlags));
+
+  auto compilationFlags = database.compilationFlagsForFile(fakeFile);
+
+  ASSERT_EQ(compilationFlags.size(), size_t(3));
+  ASSERT_EQ(compilationFlags.at(0), std::string("-DBITCODE_FLAG=1"));
+  ASSERT_EQ(compilationFlags.at(1), std::string("-g"));
+  ASSERT_EQ(compilationFlags.at(2), std::string("-DEXTRA_FLAG=1"));
 }
