@@ -105,3 +105,15 @@
   environment:
     LD_LIBRARY_PATH: "{{ llvm_dir }}/lib"
 
+- name: Run Mull against OpenSSL (watchdog sandbox, no-shared)
+  command:
+  args:
+    argv:
+      - mull-cxx
+      - -test-framework=CustomTest
+      - -sandbox=Watchdog
+      - -ld-search-path=/lib/x86_64-linux-gnu
+      - "{{ working_dir }}/integration/openssl-no-shared/test/bio_enc_test"
+  environment:
+    LD_LIBRARY_PATH: "{{ llvm_dir }}/lib"
+
