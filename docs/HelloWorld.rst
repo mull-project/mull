@@ -165,13 +165,13 @@ verbose.
 
     Killed mutants (1/2):
 
-    /sandbox/mull/tests-lit/tests/tutorials/hello-world/step-5-one-survived-mutations/sample.cpp:13:11: warning: Killed: Replaced >= with <
+    /sandbox/mull/tests-lit/tests/tutorials/hello-world/step-5-one-survived-mutations/sample.cpp:13:11: warning: Killed: Replaced >= with < [cxx_ge_to_lt]
       if (age >= 21) {
               ^
 
     Survived mutants (1/2):
 
-    /sandbox/mull/tests-lit/tests/tutorials/hello-world/step-5-one-survived-mutations/sample.cpp:13:11: warning: Survived: Replaced >= with >
+    /sandbox/mull/tests-lit/tests/tutorials/hello-world/step-5-one-survived-mutations/sample.cpp:13:11: warning: Survived: Replaced >= with > [cxx_ge_to_gt]
       if (age >= 21) {
               ^
 
@@ -252,10 +252,10 @@ The code:
 
     Killed mutants (2/2):
 
-    /sandbox/mull/tests-lit/tests/tutorials/hello-world/step-6-no-survived-mutations/sample.cpp:13:11: warning: Killed: Replaced >= with >
+    /sandbox/mull/tests-lit/tests/tutorials/hello-world/step-6-no-survived-mutations/sample.cpp:13:11: warning: Killed: Replaced >= with > [cxx_ge_to_gt]
       if (age >= 21) {
               ^
-    /sandbox/mull/tests-lit/tests/tutorials/hello-world/step-6-no-survived-mutations/sample.cpp:13:11: warning: Killed: Replaced >= with <
+    /sandbox/mull/tests-lit/tests/tutorials/hello-world/step-6-no-survived-mutations/sample.cpp:13:11: warning: Killed: Replaced >= with < [cxx_ge_to_lt]
       if (age >= 21) {
               ^
 

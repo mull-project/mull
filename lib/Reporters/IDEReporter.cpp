@@ -2,6 +2,7 @@
 
 #include "mull/Logger.h"
 #include "mull/MutationResult.h"
+#include "mull/Mutators/Mutator.h"
 #include "mull/Reporters/SourceManager.h"
 #include "mull/Result.h"
 
@@ -22,7 +23,9 @@ static void printMutant(SourceManager &sourceManager, const MutationPoint &mutan
   const std::string status = survived ? "Survived" : "Killed";
   Logger::info() << sourceLocation.filePath << ":" << sourceLocation.line << ":"
                  << sourceLocation.column << ": warning: " << status << ": "
-                 << mutant.getDiagnostics() << "\n";
+                 << mutant.getDiagnostics() << " "
+                 << "[" << mutant.getMutatorIdentifier() << "]"
+                 << "\n";
 
   auto line = sourceManager.getLine(sourceLocation);
   assert(sourceLocation.column < line.size());

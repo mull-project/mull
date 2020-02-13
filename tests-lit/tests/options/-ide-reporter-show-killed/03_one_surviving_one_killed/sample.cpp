@@ -11,7 +11,7 @@
 ; WITHOUT-OPTION:{{^Running mutants \(threads: 2\): 2\/2.*$}}
 ; WITHOUT-OPTION:Survived mutants (1/2):
 ; WITHOUT-OPTION-EMPTY:
-; WITHOUT-OPTION-NEXT:{{^.*}}sample.cpp:42:19: warning: Survived: Replaced + with -{{$}}
+; WITHOUT-OPTION-NEXT:{{^.*}}sample.cpp:42:19: warning: Survived: Replaced + with - [cxx_add_to_sub]{{$}}
 ; WITHOUT-OPTION-NEXT:  result = result + 0;
 ; WITHOUT-OPTION-NEXT:                  ^
 ; WITHOUT-OPTION-EMPTY:
