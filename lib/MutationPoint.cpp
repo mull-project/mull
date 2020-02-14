@@ -123,6 +123,10 @@ std::string MutationPoint::getUniqueIdentifier() const {
   return uniqueIdentifier;
 }
 
+std::string MutationPoint::getMutatorIdentifier() const {
+  return mutator->getUniqueIdentifier();
+}
+
 const std::string &MutationPoint::getDiagnostics() { return diagnostics; }
 
 const std::string &MutationPoint::getDiagnostics() const { return diagnostics; }

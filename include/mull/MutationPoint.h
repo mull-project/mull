@@ -94,6 +94,8 @@ public:
   std::string getUniqueIdentifier();
   std::string getUniqueIdentifier() const;
 
+  std::string getMutatorIdentifier() const;
+
   const std::string &getDiagnostics();
   const std::string &getDiagnostics() const;
 
