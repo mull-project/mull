@@ -17,7 +17,7 @@ struct Configuration {
   int timeout;
   int maxDistance;
 
-  Diagnostics diagnostics;
+  IDEDiagnosticsKind diagnostics;
 
   std::vector<std::string> bitcodePaths;
   std::vector<std::string> objectFilePaths;

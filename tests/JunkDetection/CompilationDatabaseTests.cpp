@@ -1,11 +1,14 @@
 #include "FixturePaths.h"
 #include "mull/JunkDetection/CXX/CompilationDatabase.h"
 #include <gtest/gtest.h>
+#include <mull/Diagnostics/Diagnostics.h>
 
 using namespace mull;
 
 TEST(CompilationDatabaseFromCompilationFlags, returnsAllFlags) {
-  const CompilationDatabase database(CompilationDatabase::Path(""),
+  Diagnostics diagnostics;
+  const CompilationDatabase database(diagnostics,
+                                     CompilationDatabase::Path(""),
                                      CompilationDatabase::Flags("-I     /usr/foo/include   "));
 
   const std::string filepath("foobar");
@@ -14,7 +17,9 @@ TEST(CompilationDatabaseFromCompilationFlags, returnsAllFlags) {
 }
 
 TEST(CompilationDatabaseFromCompilationFlags, returnsAllFlagsForAnyFile) {
-  const CompilationDatabase database(CompilationDatabase::Path(""),
+  Diagnostics diagnostics;
+  const CompilationDatabase database(diagnostics,
+                                     CompilationDatabase::Path(""),
                                      CompilationDatabase::Flags("-I /usr/foo/include   "));
 
   const std::string foo("foo");
@@ -34,12 +39,13 @@ TEST(CompilationDatabaseFromCompilationFlags, returnsAllFlagsForAnyFile) {
 }
 
 TEST(CompilationDatabaseFromCompilationFlags, cleansUpFlags) {
+  Diagnostics diagnostics;
   const std::vector<std::string> testFlags({ "-c", "-c foo.cpp", "-c     foo.cpp" });
 
   const std::string file("foobar.cpp");
   for (auto &flags : testFlags) {
-    const CompilationDatabase database(CompilationDatabase::Path(""),
-                                       CompilationDatabase::Flags(flags));
+    const CompilationDatabase database(
+        diagnostics, CompilationDatabase::Path(""), CompilationDatabase::Flags(flags));
 
     const auto &compilationFlags = database.compilationFlagsForFile(file);
     ASSERT_EQ(compilationFlags.size(), size_t(0));
@@ -47,6 +53,7 @@ TEST(CompilationDatabaseFromCompilationFlags, cleansUpFlags) {
 }
 
 TEST(CompilationDatabaseFromCompilationFlags, cleansUpMixedFlags) {
+  Diagnostics diagnostics;
   const std::vector<std::string> testFlags({
       "-I foo -I bar -c foo.cpp",
       "-c foo.cpp -I foo -I bar",
@@ -56,8 +63,8 @@ TEST(CompilationDatabaseFromCompilationFlags, cleansUpMixedFlags) {
 
   const std::string file("foobar.cpp");
   for (auto &flags : testFlags) {
-    const CompilationDatabase database(CompilationDatabase::Path(""),
-                                       CompilationDatabase::Flags(flags));
+    const CompilationDatabase database(
+        diagnostics, CompilationDatabase::Path(""), CompilationDatabase::Flags(flags));
 
     auto compilationFlags = database.compilationFlagsForFile(file);
     ASSERT_EQ(compilationFlags.size(), size_t(4));
@@ -70,6 +77,7 @@ TEST(CompilationDatabaseFromCompilationFlags, cleansUpMixedFlags) {
 }
 
 TEST(CompilationDatabaseFromFile, loadsFromValidFiles) {
+  Diagnostics diagnostics;
   const std::vector<std::string> databasePaths({
       fixtures::junk_detection_compdb_db_with_arguments_json_path(),
       fixtures::junk_detection_compdb_db_with_commands_json_path(),
@@ -80,8 +88,8 @@ TEST(CompilationDatabaseFromFile, loadsFromValidFiles) {
       { "/foo/bar/foobar.cpp", "/foo/bar/./foobar.cpp", "/foo/bar/buzz/../foobar.cpp" });
   for (const std::string &file : files) {
     for (auto &path : databasePaths) {
-      const CompilationDatabase database(CompilationDatabase::Path(path),
-                                         CompilationDatabase::Flags(""));
+      const CompilationDatabase database(
+          diagnostics, CompilationDatabase::Path(path), CompilationDatabase::Flags(""));
 
       auto compilationFlags = database.compilationFlagsForFile(file);
       ASSERT_EQ(compilationFlags.size(), size_t(4));
@@ -95,8 +103,10 @@ TEST(CompilationDatabaseFromFile, loadsFromValidFiles) {
 }
 
 TEST(CompilationDatabaseFromFile, includesCompilationFlagsPassedSeparately) {
+  Diagnostics diagnostics;
   auto path = fixtures::junk_detection_compdb_db_with_fullpath_compiler_json_path();
   const CompilationDatabase database(
+      diagnostics,
       CompilationDatabase::Path(path),
       CompilationDatabase::Flags("-isystem /usr/local/include -isystem /usr/include"));
 
@@ -115,8 +125,10 @@ TEST(CompilationDatabaseFromFile, includesCompilationFlagsPassedSeparately) {
 }
 
 TEST(CompilationDatabaseFromFile, parsesCompilationFlagsFromClangMJCommandValid) {
+  Diagnostics diagnostics;
   auto path = fixtures::junk_detection_compdb_db_produced_from_clang_MJ_valid_sequence_json_path();
   const CompilationDatabase database(
+      diagnostics,
       CompilationDatabase::Path(path),
       CompilationDatabase::Flags("-isystem /usr/local/include -isystem /usr/include"));
 

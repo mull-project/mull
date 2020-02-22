@@ -8,6 +8,7 @@
 namespace mull {
 
 class progress_counter;
+class Diagnostics;
 
 class LoadObjectFilesTask {
 public:
@@ -15,10 +16,11 @@ public:
   using Out = std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>>;
   using iterator = In::const_iterator;
 
-  LoadObjectFilesTask() = default;
+  explicit LoadObjectFilesTask(Diagnostics &diagnostics);
   void operator()(iterator begin, iterator end, Out &storage,
                   progress_counter &counter);
 
 private:
+  Diagnostics &diagnostics;
 };
 } // namespace mull

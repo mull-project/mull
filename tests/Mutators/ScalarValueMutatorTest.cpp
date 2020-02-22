@@ -8,15 +8,17 @@
 #include <gtest/gtest.h>
 #include <irm/irm.h>
 #include <llvm/IR/LLVMContext.h>
+#include <mull/Diagnostics/Diagnostics.h>
 
 using namespace mull;
 using namespace llvm;
 
 TEST(ScalarValueMutator, getMutationPoint) {
+  Diagnostics diagnostics;
   LLVMContext context;
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
-      fixtures::mutators_scalar_value_module_bc_path(), context);
+      fixtures::mutators_scalar_value_module_bc_path(), context, diagnostics);
 
   ScalarValueMutator mutator;
   FunctionUnderTest functionUnderTest(

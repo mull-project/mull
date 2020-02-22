@@ -1,6 +1,7 @@
 #pragma once
 
 #include <clang/AST/RecursiveASTVisitor.h>
+#include <assert.h>
 
 namespace mull {
 

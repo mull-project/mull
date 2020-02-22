@@ -2,36 +2,37 @@
 
 #include "LLVMCompatibility.h"
 #include "mull/Bitcode.h"
-#include "mull/Logger.h"
+#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/MutationPoint.h"
+#include <sstream>
 
 using namespace mull;
 using namespace llvm::object;
 
-ObjectCache::ObjectCache(bool useCache, const std::string &cacheDir)
+ObjectCache::ObjectCache(Diagnostics &diagnostics, bool useCache, const std::string &cacheDir)
     : useOnDiskCache(useCache), cacheDirectory(cacheDir) {
   if (useOnDiskCache) {
     auto error = llvm::sys::fs::create_directories(cacheDir);
     if (error) {
-      Logger::info() << "Cache directory '" << cacheDirectory
-                     << "' is not accessible\n";
-      Logger::info() << "Underlying issue:\n";
-      Logger::info() << error.message() << "\n";
-      Logger::info() << "falling back to in-memory cache\n";
+      std::stringstream stringstream;
+      stringstream << "Cache directory '" << cacheDirectory << "' is not accessible\n"
+                   << "Underlying issue:\n"
+                   << error.message() << "\n"
+                   << "falling back to in-memory cache";
+      diagnostics.warning(stringstream.str());
       useOnDiskCache = false;
     }
   }
 }
 
-OwningBinary<ObjectFile>
-ObjectCache::getObjectFromDisk(const std::string &identifier) {
+OwningBinary<ObjectFile> ObjectCache::getObjectFromDisk(const std::string &identifier) {
   if (!useOnDiskCache) {
     return OwningBinary<ObjectFile>();
   }
 
   std::string cacheName(cacheDirectory + "/" + identifier + ".o");
 
-  auto buffer = llvm::MemoryBuffer::getFile(cacheName.c_str());
+  auto buffer = llvm::MemoryBuffer::getFile(cacheName);
 
   if (!buffer) {
     return OwningBinary<ObjectFile>();
@@ -46,13 +47,11 @@ ObjectCache::getObjectFromDisk(const std::string &identifier) {
 
   std::unique_ptr<ObjectFile> objectFile(std::move(objectOrError.get()));
 
-  auto owningObject =
-      OwningBinary<ObjectFile>(std::move(objectFile), std::move(buffer.get()));
+  auto owningObject = OwningBinary<ObjectFile>(std::move(objectFile), std::move(buffer.get()));
   return owningObject;
 }
 
-OwningBinary<ObjectFile>
-ObjectCache::getInstrumentedObject(const Bitcode &bitcode) {
+OwningBinary<ObjectFile> ObjectCache::getInstrumentedObject(const Bitcode &bitcode) {
   return getObjectFromDisk(bitcode.getInstrumentedUniqueIdentifier());
 }
 
@@ -60,8 +59,7 @@ OwningBinary<ObjectFile> ObjectCache::getObject(const Bitcode &bitcode) {
   return getObjectFromDisk(bitcode.getMutatedUniqueIdentifier());
 }
 
-void ObjectCache::putObjectOnDisk(OwningBinary<ObjectFile> &object,
-                                  const std::string &identifier) {
+void ObjectCache::putObjectOnDisk(OwningBinary<ObjectFile> &object, const std::string &identifier) {
   if (!useOnDiskCache) {
     return;
   }
@@ -74,12 +72,10 @@ void ObjectCache::putObjectOnDisk(OwningBinary<ObjectFile> &object,
   outfile.close();
 }
 
-void ObjectCache::putInstrumentedObject(OwningBinary<ObjectFile> &object,
-                                        const Bitcode &bitcode) {
+void ObjectCache::putInstrumentedObject(OwningBinary<ObjectFile> &object, const Bitcode &bitcode) {
   putObjectOnDisk(object, bitcode.getInstrumentedUniqueIdentifier());
 }
 
-void ObjectCache::putObject(OwningBinary<ObjectFile> &object,
-                            const Bitcode &bitcode) {
+void ObjectCache::putObject(OwningBinary<ObjectFile> &object, const Bitcode &bitcode) {
   putObjectOnDisk(object, bitcode.getMutatedUniqueIdentifier());
 }

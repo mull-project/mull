@@ -1,8 +1,8 @@
+#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Mutators/MutatorsFactory.h"
 
-#include "gtest/gtest.h"
-
 #include <functional>
+#include <gtest/gtest.h>
 #include <vector>
 
 using namespace mull;
@@ -10,7 +10,8 @@ using namespace llvm;
 using namespace std;
 
 TEST(MutatorsFactory, SingleMutators) {
-  MutatorsFactory factory;
+  Diagnostics diagnostics;
+  MutatorsFactory factory(diagnostics);
   vector<unique_ptr<Mutator>> mutators;
   Mutator *mutator = nullptr;
 
@@ -48,7 +49,8 @@ static std::function<bool(unique_ptr<Mutator> &)> predicate(const char *name) {
 }
 
 TEST(MutatorsFactory, CompositeMutators) {
-  MutatorsFactory factory;
+  Diagnostics diagnostics;
+  MutatorsFactory factory(diagnostics);
   vector<unique_ptr<Mutator>> mutators;
   vector<unique_ptr<Mutator>>::iterator searchResult;
 
@@ -81,7 +83,8 @@ TEST(MutatorsFactory, CompositeMutators) {
 }
 
 TEST(MutatorsFactory, UniqueMutators) {
-  MutatorsFactory factory;
+  Diagnostics diagnostics;
+  MutatorsFactory factory(diagnostics);
   vector<unique_ptr<Mutator>> mutators;
   vector<unique_ptr<Mutator>>::iterator searchResult;
   Mutator *mutator = nullptr;

@@ -1,27 +1,32 @@
 #include "mull/Parallelization/Progress.h"
 
+#include "mull/Diagnostics/Diagnostics.h"
 #include <llvm/Support/raw_ostream.h>
+#include <sstream>
 #include <unistd.h>
 #include <vector>
 
 using namespace mull;
 
-progress_counter::progress_counter(const progress_counter &v)
-    : value(v.value.load()) {}
+progress_counter::progress_counter(const progress_counter &v) : value(v.value.load()) {}
 
-void progress_counter::increment() { value++; }
+void progress_counter::increment() {
+  value++;
+}
 
-progress_counter::CounterType progress_counter::get() { return value.load(); }
+progress_counter::CounterType progress_counter::get() {
+  return value.load();
+}
 
-progress_reporter::progress_reporter(std::string &name,
+progress_reporter::progress_reporter(Diagnostics &diagnostics, std::string &name,
                                      std::vector<progress_counter> &counters,
-                                     progress_counter::CounterType total,
-                                     size_t workers, llvm::raw_ostream &stream)
-    : counters(counters), stream(stream), total(total), previousValue(0),
-      name(name), workers(workers) {
+                                     progress_counter::CounterType total, size_t workers)
+    : diagnostics(diagnostics), counters(counters), total(total), previousValue(0), name(name),
+      workers(workers) {
   hasTerminal = getenv("TERM") != nullptr;
-  bool forceReport = true;
-  printProgress(0, total, forceReport);
+  std::stringstream stringstream;
+  stringstream << name << " (threads: " << this->workers << ")";
+  diagnostics.info(stringstream.str());
 }
 
 void progress_reporter::operator()() {
@@ -46,9 +51,8 @@ void progress_reporter::operator()() {
 }
 
 void progress_reporter::printProgress(progress_counter::CounterType current,
-                                      progress_counter::CounterType total,
-                                      bool force) {
-  if (current == previousValue && !force) {
+                                      progress_counter::CounterType total, bool force) {
+  if (current == previousValue) {
     return;
   }
 
@@ -57,12 +61,14 @@ void progress_reporter::printProgress(progress_counter::CounterType current,
     terminator = '\r';
   }
 
-  const char *format = "%c%s (threads: %d): %zu/%zu";
-  const size_t bufferSize(128);
-  char message[bufferSize];
-  snprintf(message, bufferSize, format, terminator, name.c_str(), workers,
-           current, total);
-  stream << message;
-  stream.flush();
+  const size_t barWidth = 32;
+  size_t starsCount = (double)current / total * barWidth;
+  std::string stars(starsCount, '#');
+  std::string dots(barWidth - starsCount, '-');
+
+  std::stringstream stringstream;
+  std::string padding(7, ' ');
+  stringstream << terminator << padding << "[" << stars << dots << "] " << current << "/" << total;
+  diagnostics.progress(stringstream.str());
   previousValue = current;
 }

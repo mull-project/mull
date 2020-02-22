@@ -2,11 +2,11 @@
 ; RUN: cd / && %CLANG_EXEC -fembed-bitcode -g -O0 %s -o %s.exe
 ; RUN: cd %CURRENT_DIR
 ; RUN: (unset TERM; %MULL_EXEC -test-framework CustomTest -ide-reporter-show-killed %s.exe 2>&1; test $? = 0) | %FILECHECK_EXEC %s --strict-whitespace --match-full-lines
-; CHECK:Killed mutants (2/2):
+; CHECK:[info] Killed mutants (2/2):
 ; CHECK:{{^.*}}sample.cpp:13:11: warning: Killed: Replaced >= with > [cxx_ge_to_gt]{{$}}
 ; CHECK:{{^.*}}sample.cpp:13:11: warning: Killed: Replaced >= with < [cxx_ge_to_lt]{{$}}
-; CHECK:All mutations have been killed
-; CHECK:Mutation score: 100%
+; CHECK:[info] All mutations have been killed
+; CHECK:[info] Mutation score: 100%
 **/
 
 bool valid_age(int age) {

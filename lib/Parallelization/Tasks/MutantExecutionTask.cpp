@@ -13,13 +13,13 @@
 using namespace mull;
 using namespace llvm;
 
-MutantExecutionTask::MutantExecutionTask(
-    const ProcessSandbox &sandbox, Program &program, TestRunner &runner,
-    const Configuration &config, Mangler &mangler,
-    std::vector<llvm::object::ObjectFile *> &objectFiles,
-    std::vector<std::string> &mutatedFunctionNames)
-    : sandbox(sandbox), program(program), runner(runner), config(config),
-      mangler(mangler), objectFiles(objectFiles),
+MutantExecutionTask::MutantExecutionTask(Diagnostics &diagnostics, const ProcessSandbox &sandbox,
+                                         Program &program, TestRunner &runner,
+                                         const Configuration &config, Mangler &mangler,
+                                         std::vector<llvm::object::ObjectFile *> &objectFiles,
+                                         std::vector<std::string> &mutatedFunctionNames)
+    : diagnostics(diagnostics), jit(diagnostics), sandbox(sandbox), program(program),
+      runner(runner), config(config), mangler(mangler), objectFiles(objectFiles),
       mutatedFunctionNames(mutatedFunctionNames) {}
 
 void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
@@ -31,13 +31,10 @@ void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
   for (auto it = begin; it != end; ++it, counter.increment()) {
     auto mutationPoint = *it;
 
-    auto trampolineName =
-        mangler.getNameWithPrefix(mutationPoint->getTrampolineName());
-    auto mutatedFunctionName =
-        mangler.getNameWithPrefix(mutationPoint->getMutatedFunctionName());
+    auto trampolineName = mangler.getNameWithPrefix(mutationPoint->getTrampolineName());
+    auto mutatedFunctionName = mangler.getNameWithPrefix(mutationPoint->getMutatedFunctionName());
     uint64_t *trampoline = trampolines.findTrampoline(trampolineName);
-    uint64_t address =
-        llvm_compat::JITSymbolAddress(jit.getSymbol(mutatedFunctionName));
+    uint64_t address = llvm_compat::JITSymbolAddress(jit.getSymbol(mutatedFunctionName));
     uint64_t originalAddress = *trampoline;
     *trampoline = address;
 
@@ -54,24 +51,22 @@ void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
         const auto sandboxTimeout = std::max(30LL, timeout);
 
         result = sandbox.run(
+            diagnostics,
             [&]() {
               ExecutionStatus status = runner.runTest(jit, program, *test);
-              assert(status != ExecutionStatus::Invalid &&
-                     "Expect to see valid TestResult");
+              assert(status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
               return status;
             },
             sandboxTimeout);
 
-        assert(result.status != ExecutionStatus::Invalid &&
-               "Expect to see valid TestResult");
+        assert(result.status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
 
         if (result.status != ExecutionStatus::Passed) {
           atLeastOneTestFailed = true;
         }
       }
 
-      storage.push_back(
-          make_unique<MutationResult>(result, mutationPoint, distance, test));
+      storage.push_back(make_unique<MutationResult>(result, mutationPoint, distance, test));
     }
 
     *trampoline = originalAddress;

@@ -1,6 +1,5 @@
 #pragma once
 
-#include "mull/Logger.h"
 #include "mull/Parallelization/Progress.h"
 #include "mull/Parallelization/TaskExecutor.h"
 

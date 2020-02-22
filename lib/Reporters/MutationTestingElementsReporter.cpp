@@ -1,6 +1,6 @@
 #include "mull/Reporters/MutationTestingElementsReporter.h"
 
-#include "mull/Logger.h"
+#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/MutationResult.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Reporters/ASTSourceInfoProvider.h"
@@ -24,9 +24,9 @@ static bool mutantSurvived(const ExecutionStatus &status) {
   return status == ExecutionStatus::Passed;
 }
 
-json11::Json createFiles(const Result &result,
-                         const std::set<MutationPoint *> &killedMutants,
-                         SourceInfoProvider &sourceInfoProvider) {
+static json11::Json createFiles(Diagnostics &diagnostics, const Result &result,
+                                const std::set<MutationPoint *> &killedMutants,
+                                SourceInfoProvider &sourceInfoProvider) {
   SourceManager sourceManager;
 
   Json::object filesJSON;
@@ -59,22 +59,22 @@ json11::Json createFiles(const Result &result,
 
     for (MutationPoint *mutationPoint : fileMutationPoints.second) {
       MutationPointSourceInfo sourceInfo =
-          sourceInfoProvider.getSourceInfo(mutationPoint);
+          sourceInfoProvider.getSourceInfo(diagnostics, mutationPoint);
 
-      std::string status =
-          (killedMutants.count(mutationPoint) == 0) ? "Survived" : "Killed";
+      std::string status = (killedMutants.count(mutationPoint) == 0) ? "Survived" : "Killed";
 
-      Json mpJson = Json::object{
-          {"id", mutationPoint->getMutator()->getUniqueIdentifier()},
-          {"mutatorName", mutationPoint->getDiagnostics()},
-          {"replacement", mutationPoint->getReplacement()},
-          {"location",
-           Json::object{
-               {"start", Json::object{{"line", sourceInfo.beginLine},
-                                      {"column", sourceInfo.beginColumn}}},
-               {"end", Json::object{{"line", sourceInfo.endLine},
-                                    {"column", sourceInfo.endColumn}}}}},
-          {"status", status}};
+      Json mpJson =
+          Json::object{ { "id", mutationPoint->getMutator()->getUniqueIdentifier() },
+                        { "mutatorName", mutationPoint->getDiagnostics() },
+                        { "replacement", mutationPoint->getReplacement() },
+                        { "location",
+                          Json::object{ { "start",
+                                          Json::object{ { "line", sourceInfo.beginLine },
+                                                        { "column", sourceInfo.beginColumn } } },
+                                        { "end",
+                                          Json::object{ { "line", sourceInfo.endLine },
+                                                        { "column", sourceInfo.endColumn } } } } },
+                        { "status", status } };
       mutantsEntries.push_back(mpJson);
     }
 
@@ -102,19 +102,18 @@ static std::string getReportDir(const std::string &dir) {
 }
 
 MutationTestingElementsReporter::MutationTestingElementsReporter(
-    const std::string &reportDir, const std::string &reportName,
+    Diagnostics &diagnostics, const std::string &reportDir, const std::string &reportName,
     SourceInfoProvider &sourceInfoProvider)
-    : filename(getFilename(reportName)),
+    : diagnostics(diagnostics), filename(getFilename(reportName)),
       htmlPath(getReportDir(reportDir) + "/" + filename + ".html"),
       jsonPath(getReportDir(reportDir) + "/" + filename + ".json"),
       sourceInfoProvider(sourceInfoProvider) {
   llvm::sys::fs::create_directories(reportDir);
 }
 
-void MutationTestingElementsReporter::reportResults(const Result &result,
-                                                    const Metrics &metrics) {
+void MutationTestingElementsReporter::reportResults(const Result &result, const Metrics &metrics) {
   if (result.getMutationPoints().empty()) {
-    Logger::info() << "No mutants found. Mutation score: infinitely high\n";
+    diagnostics.info("No mutants found. Mutation score: infinitely high");
     return;
   }
   generateHTMLFile();
@@ -129,19 +128,18 @@ void MutationTestingElementsReporter::reportResults(const Result &result,
     }
   }
 
-  auto rawScore =
-      double(killedMutants.size()) / double(result.getMutationPoints().size());
+  auto rawScore = double(killedMutants.size()) / double(result.getMutationPoints().size());
   auto score = uint(rawScore * 100);
 
   Json json = Json::object{
-      {"mutationScore", (int)score},
-      {"thresholds", Json::object{{"high", 80}, {"low", 60}}},
-      {"files", createFiles(result, killedMutants, sourceInfoProvider)},
+    { "mutationScore", (int)score },
+    { "thresholds", Json::object{ { "high", 80 }, { "low", 60 } } },
+    { "files", createFiles(diagnostics, result, killedMutants, sourceInfoProvider) },
   };
   std::string json_str = json.dump();
 
-  Logger::info() << "Mutation Testing Elements reporter: generating report to "
-                 << jsonPath << "\n";
+  diagnostics.info(std::string("Mutation Testing Elements reporter: generating report to ") +
+                   jsonPath);
 
   std::ofstream out(jsonPath);
   out << json_str;

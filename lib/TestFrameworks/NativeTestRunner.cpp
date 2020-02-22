@@ -1,7 +1,7 @@
 #include "mull/TestFrameworks/NativeTestRunner.h"
 
 #include "LLVMCompatibility.h"
-#include "mull/Logger.h"
+#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Program/Program.h"
 #include "mull/TestFrameworks/Test.h"
 #include "mull/Toolchain/JITEngine.h"
@@ -14,8 +14,9 @@
 
 using namespace mull;
 
-NativeTestRunner::NativeTestRunner(Mangler &mangler)
-    : mangler(mangler), overrides(mangler), trampoline(new InstrumentationInfo *) {}
+NativeTestRunner::NativeTestRunner(Diagnostics &diagnostics, Mangler &mangler)
+    : diagnostics(diagnostics), mangler(mangler), overrides(mangler),
+      trampoline(new InstrumentationInfo *) {}
 
 NativeTestRunner::~NativeTestRunner() {
   delete trampoline;
@@ -33,8 +34,7 @@ void *NativeTestRunner::getFunctionPointer(const std::string &functionName, JITE
   void *pointer = reinterpret_cast<void *>(static_cast<uintptr_t>(address));
 
   if (pointer == nullptr) {
-    Logger::error() << "Can not find a pointer to the function '" << functionName << "'\n";
-    exit(1);
+    diagnostics.error(std::string("Can not find a pointer to the function: " + functionName));
   }
 
   return pointer;

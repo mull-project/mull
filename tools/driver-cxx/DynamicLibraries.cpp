@@ -1,5 +1,5 @@
 #include "DynamicLibraries.h"
-#include "mull/Logger.h"
+#include "mull/Diagnostics/Diagnostics.h"
 
 #include <LLVMCompatibility.h>
 #include <llvm/Object/ELFObjectFile.h>
@@ -13,8 +13,7 @@
 using namespace llvm::object;
 
 template <typename T>
-void librariesFromElf(const ELFObjectFile<T> &file,
-                      std::vector<std::string> &libraries) {
+void librariesFromElf(const ELFObjectFile<T> &file, std::vector<std::string> &libraries) {
   SectionRef nullSection;
   section_iterator stringTableIterator(nullSection);
   section_iterator dynamicSectionIterator(nullSection);
@@ -25,8 +24,7 @@ void librariesFromElf(const ELFObjectFile<T> &file,
     elfSection.getName(name);
     // FIXME: the dynamic string table should be taken based on .dynamic
     // section's sh_link value
-    if (elfSection.getType() == llvm::ELF::SHT_STRTAB &&
-        name.equals(".dynstr")) {
+    if (elfSection.getType() == llvm::ELF::SHT_STRTAB && name.equals(".dynstr")) {
       stringTableIterator = it;
     }
     if (elfSection.getType() == llvm::ELF::SHT_DYNAMIC) {
@@ -34,15 +32,11 @@ void librariesFromElf(const ELFObjectFile<T> &file,
     }
   }
 
-  assert((*stringTableIterator) != nullSection &&
-         "Could not find string table");
-  assert((*dynamicSectionIterator) != nullSection &&
-         "Could not find .dynamic section");
+  assert((*stringTableIterator) != nullSection && "Could not find string table");
+  assert((*dynamicSectionIterator) != nullSection && "Could not find .dynamic section");
 
-  llvm::StringRef stringTable =
-      llvm_compat::getSectionContent(*stringTableIterator);
-  llvm::StringRef dynamicSection =
-      llvm_compat::getSectionContent(*dynamicSectionIterator);
+  llvm::StringRef stringTable = llvm_compat::getSectionContent(*stringTableIterator);
+  llvm::StringRef dynamicSection = llvm_compat::getSectionContent(*dynamicSectionIterator);
 
   Elf_Dyn_Base<T> dynamicEntry{};
   uint64_t sectionSize = dynamicSectionIterator->getSize();
@@ -60,8 +54,7 @@ void librariesFromElf(const ELFObjectFile<T> &file,
   }
 }
 
-void librariesFromMachO(const MachOObjectFile &file,
-                        std::vector<std::string> &libraries) {
+void librariesFromMachO(const MachOObjectFile &file, std::vector<std::string> &libraries) {
   for (auto &loadCommand : file.load_commands()) {
     if (loadCommand.C.cmd != llvm::MachO::LC_LOAD_DYLIB) {
       continue;
@@ -72,9 +65,8 @@ void librariesFromMachO(const MachOObjectFile &file,
   }
 }
 
-static std::string
-resolveLibraryPath(const std::string &library,
-                   const std::vector<std::string> &librarySearchPaths) {
+static std::string resolveLibraryPath(const std::string &library,
+                                      const std::vector<std::string> &librarySearchPaths) {
   if (llvm::sys::path::is_absolute(library)) {
     return library;
   }
@@ -89,22 +81,20 @@ resolveLibraryPath(const std::string &library,
   return library;
 }
 
-std::vector<std::string>
-mull::findDynamicLibraries(const std::string &executablePath,
-                           std::vector<std::string> &librarySearchPaths) {
+std::vector<std::string> mull::findDynamicLibraries(mull::Diagnostics &diagnostics,
+                                                    const std::string &executablePath,
+                                                    std::vector<std::string> &librarySearchPaths) {
   std::vector<std::string> libraries;
 
   auto bufferOr = llvm::MemoryBuffer::getFile(executablePath);
   if (!bufferOr) {
-    mull::Logger::error() << "\nCannot open executable: " << executablePath
-                          << "\n";
+    diagnostics.error(std::string("Cannot open executable: ") + executablePath);
   }
   std::unique_ptr<llvm::MemoryBuffer> buffer(std::move(bufferOr.get()));
 
   auto symbolicOr = SymbolicFile::createSymbolicFile(buffer->getMemBufferRef());
   if (!symbolicOr) {
-    mull::Logger::error() << "\nCannot create symbolic file from: "
-                          << executablePath << "\n";
+    diagnostics.error(std::string("Cannot create symbolic file from: ") + executablePath);
   }
 
   std::unique_ptr<SymbolicFile> symbolicFile(std::move(symbolicOr.get()));
@@ -132,8 +122,7 @@ mull::findDynamicLibraries(const std::string &executablePath,
     if (llvm::sys::fs::exists(libraryPath)) {
       resolvedLibraries.push_back(libraryPath);
     } else {
-      mull::Logger::error()
-          << "Could not find dynamic library: " << library << "\n";
+      diagnostics.warning(std::string("Could not find dynamic library: ") + library);
     }
   }
 

@@ -1,12 +1,14 @@
 #include "mull/Toolchain/JITEngine.h"
+#include "mull/Diagnostics/Diagnostics.h"
 
-#include <mull/Logger.h>
+#include <sstream>
 #include <unordered_set>
 
 using namespace mull;
 using namespace llvm;
 
-JITEngine::JITEngine() : symbolNotFound(nullptr) {}
+JITEngine::JITEngine(Diagnostics &diagnostics)
+    : diagnostics(diagnostics), symbolNotFound(nullptr) {}
 
 void JITEngine::addObjectFiles(std::vector<object::ObjectFile *> &files,
                                llvm_compat::SymbolResolver &resolver,
@@ -69,10 +71,12 @@ void JITEngine::addObjectFiles(std::vector<object::ObjectFile *> &files,
   }
 
   if (!unresolvedSymbols.empty()) {
-    Logger::error() << "\nJIT engine could not resolve the following symbols:\n";
+    std::stringstream stringstream;
+    stringstream << "JIT engine could not resolve the following symbols:\n";
     for (const std::string &name : unresolvedSymbols) {
-      Logger::error() << name << "\n";
+      stringstream << name << "\n";
     }
+    diagnostics.warning(stringstream.str());
   }
 }
 

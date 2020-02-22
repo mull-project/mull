@@ -5,10 +5,10 @@
 #include "mull/Toolchain/Compiler.h"
 
 #include <llvm/IR/Function.h>
-#include <llvm/IR/Instructions.h>
 #include <llvm/Transforms/Utils/Cloning.h>
 
 #include <utility>
+#include <assert.h>
 
 using namespace llvm;
 using namespace mull;

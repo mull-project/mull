@@ -9,9 +9,11 @@
 
 namespace mull {
 
+class Diagnostics;
+
 class MutatorsFactory {
 public:
-  MutatorsFactory();
+  MutatorsFactory(Diagnostics &diagnostics);
   std::vector<std::unique_ptr<Mutator>> mutators(const std::vector<std::string> &groups);
   void init();
   static std::string descriptionForGroup(const std::vector<std::string> &groupMembers);
@@ -20,6 +22,7 @@ public:
   std::map<std::string, std::vector<std::string>> &getGroupsMapping();
 
 private:
+  Diagnostics &diagnostics;
   std::map<std::string, std::unique_ptr<Mutator>> mutatorsMapping;
   std::map<std::string, std::vector<std::string>> groupsMapping;
 };

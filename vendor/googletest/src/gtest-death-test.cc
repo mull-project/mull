@@ -402,7 +402,7 @@ class DeathTestImpl : public DeathTest {
 
   // Called in the parent process only. Reads the result code of the death
   // test child process via a pipe, interprets it to set the outcome_
-  // member, and closes read_fd_.  Outputs diagnostics and terminates in
+  // member, and closes read_fd_.  Outputs ideDiagnostics and terminates in
   // case of unexpected codes.
   void ReadAndInterpretStatusByte();
 
@@ -431,7 +431,7 @@ class DeathTestImpl : public DeathTest {
 
 // Called in the parent process only. Reads the result code of the death
 // test child process via a pipe, interprets it to set the outcome_
-// member, and closes read_fd_.  Outputs diagnostics and terminates in
+// member, and closes read_fd_.  Outputs ideDiagnostics and terminates in
 // case of unexpected codes.
 void DeathTestImpl::ReadAndInterpretStatusByte() {
   char flag;

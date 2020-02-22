@@ -11,18 +11,18 @@
 
 namespace mull {
 
-std::string diagnosticsToString(Diagnostics diagnostics) {
+std::string diagnosticsToString(IDEDiagnosticsKind diagnostics) {
   switch (diagnostics) {
-  case Diagnostics::None: {
+  case IDEDiagnosticsKind::None: {
     return "none";
   }
-  case Diagnostics::Survived: {
+  case IDEDiagnosticsKind::Survived: {
     return "survived";
   }
-  case Diagnostics::Killed: {
+  case IDEDiagnosticsKind::Killed: {
     return "killed";
   }
-  case Diagnostics::All: {
+  case IDEDiagnosticsKind::All: {
     return "all";
   }
   }

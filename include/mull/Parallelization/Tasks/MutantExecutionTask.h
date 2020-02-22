@@ -24,9 +24,8 @@ public:
   using Out = std::vector<std::unique_ptr<MutationResult>>;
   using iterator = In::const_iterator;
 
-  MutantExecutionTask(const ProcessSandbox &sandbox, Program &program,
-                      TestRunner &runner, const Configuration &config,
-                      Mangler &mangler,
+  MutantExecutionTask(Diagnostics &diagnostics, const ProcessSandbox &sandbox, Program &program,
+                      TestRunner &runner, const Configuration &config, Mangler &mangler,
                       std::vector<llvm::object::ObjectFile *> &objectFiles,
                       std::vector<std::string> &mutatedFunctionNames);
 
@@ -34,6 +33,7 @@ public:
                   progress_counter &counter);
 
 private:
+  Diagnostics &diagnostics;
   JITEngine jit;
   Program &program;
   const ProcessSandbox &sandbox;

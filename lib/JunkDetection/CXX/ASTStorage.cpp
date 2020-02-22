@@ -1,6 +1,6 @@
 #include "mull/JunkDetection/CXX/ASTStorage.h"
 
-#include "mull/Logger.h"
+#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/MutationPoint.h"
 
 #include <clang/AST/RecursiveASTVisitor.h>
@@ -15,8 +15,7 @@ using namespace llvm;
 class DeclVisitor : public clang::RecursiveASTVisitor<DeclVisitor> {
 
 public:
-  DeclVisitor(clang::SourceManager &sourceManager,
-              std::vector<clang::Decl *> &decls)
+  DeclVisitor(clang::SourceManager &sourceManager, std::vector<clang::Decl *> &decls)
       : sourceManager(sourceManager), declarations(decls) {}
 
   bool VisitFunctionTemplateDecl(clang::FunctionTemplateDecl *decl) {
@@ -63,8 +62,7 @@ bool ThreadSafeASTUnit::isInSystemHeader(clang::SourceLocation &location) {
   return ast->getSourceManager().isInSystemHeader(location);
 }
 
-const clang::FileEntry *
-ThreadSafeASTUnit::findFileEntry(const MutationPoint *point) {
+const clang::FileEntry *ThreadSafeASTUnit::findFileEntry(const MutationPoint *point) {
   assert(point);
 
   SourceLocation sourceLocation = point->getSourceLocation();
@@ -74,8 +72,7 @@ ThreadSafeASTUnit::findFileEntry(const MutationPoint *point) {
   return file ? file : findFileEntry(sourceLocation.unitFilePath);
 }
 
-const clang::FileEntry *
-ThreadSafeASTUnit::findFileEntry(const std::string &filePath) {
+const clang::FileEntry *ThreadSafeASTUnit::findFileEntry(const std::string &filePath) {
   auto &sourceManager = ast->getSourceManager();
   auto begin = sourceManager.fileinfo_begin();
   auto end = sourceManager.fileinfo_end();
@@ -111,8 +108,7 @@ struct SortLocationComparator {
       : sourceManager(sourceManager), cmp(sourceManager) {}
 
   bool operator()(const clang::Decl *lhs, const clang::Decl *rhs) const {
-    return cmp(lhs->getSourceRange().getBegin(),
-               rhs->getSourceRange().getBegin());
+    return cmp(lhs->getSourceRange().getBegin(), rhs->getSourceRange().getBegin());
   }
 
   clang::SourceManager &sourceManager;
@@ -124,8 +120,7 @@ struct UniqueLocationComparator {
       : sourceManager(sourceManager), cmp(sourceManager) {}
 
   bool operator()(const clang::Decl *lhs, const clang::Decl *rhs) const {
-    return !cmp(lhs->getSourceRange().getEnd(),
-                rhs->getSourceRange().getBegin());
+    return !cmp(lhs->getSourceRange().getEnd(), rhs->getSourceRange().getBegin());
   }
 
   clang::SourceManager &sourceManager;
@@ -151,14 +146,14 @@ clang::Decl *ThreadSafeASTUnit::getDecl(clang::SourceLocation &location) {
     return nullptr;
   }
   std::lock_guard<std::mutex> lock(mutex);
-  clang::BeforeThanCompare<clang::SourceLocation> comparator(
-      ast->getSourceManager());
+  clang::BeforeThanCompare<clang::SourceLocation> comparator(ast->getSourceManager());
 
-  auto lower = std::lower_bound(
-      decls.begin(), decls.end(), location,
-      [&](const clang::Decl *decl, const clang::SourceLocation &loc) {
-        return comparator(decl->getSourceRange().getEnd(), loc);
-      });
+  auto lower = std::lower_bound(decls.begin(),
+                                decls.end(),
+                                location,
+                                [&](const clang::Decl *decl, const clang::SourceLocation &loc) {
+                                  return comparator(decl->getSourceRange().getEnd(), loc);
+                                });
 
   if (lower == decls.end()) {
     return nullptr;
@@ -172,9 +167,10 @@ clang::Decl *ThreadSafeASTUnit::getDecl(clang::SourceLocation &location) {
   return nullptr;
 }
 
-ASTStorage::ASTStorage(const std::string &cxxCompilationDatabasePath,
+ASTStorage::ASTStorage(Diagnostics &diagnostics, const std::string &cxxCompilationDatabasePath,
                        const std::string &cxxCompilationFlags)
-    : compilationDatabase(CompilationDatabase::Path(cxxCompilationDatabasePath),
+    : diagnostics(diagnostics),
+      compilationDatabase(diagnostics, CompilationDatabase::Path(cxxCompilationDatabasePath),
                           CompilationDatabase::Flags(cxxCompilationFlags)) {}
 
 ThreadSafeASTUnit *ASTStorage::findAST(const MutationPoint *point) {
@@ -188,9 +184,8 @@ ThreadSafeASTUnit *ASTStorage::findAST(const MutationPoint *point) {
     return astUnits.at(sourceFile).get();
   }
 
-  auto compilationFlags =
-      compilationDatabase.compilationFlagsForFile(sourceFile);
-  std::vector<const char *> args({"mull-cxx"});
+  auto compilationFlags = compilationDatabase.compilationFlagsForFile(sourceFile);
+  std::vector<const char *> args({ "mull-cxx" });
   for (auto &flag : compilationFlags) {
     args.push_back(flag.c_str());
   }
@@ -199,9 +194,11 @@ ThreadSafeASTUnit *ASTStorage::findAST(const MutationPoint *point) {
   clang::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diagnosticsEngine(
       clang::CompilerInstance::createDiagnostics(new clang::DiagnosticOptions));
 
-  auto ast = clang::ASTUnit::LoadFromCommandLine(
-      args.data(), args.data() + args.size(),
-      std::make_shared<clang::PCHContainerOperations>(), diagnosticsEngine, "");
+  auto ast = clang::ASTUnit::LoadFromCommandLine(args.data(),
+                                                 args.data() + args.size(),
+                                                 std::make_shared<clang::PCHContainerOperations>(),
+                                                 diagnosticsEngine,
+                                                 "");
 
   bool hasErrors = (ast == nullptr) || diagnosticsEngine->hasErrorOccurred() ||
                    diagnosticsEngine->hasUnrecoverableErrorOccurred() ||
@@ -215,8 +212,8 @@ ThreadSafeASTUnit *ASTStorage::findAST(const MutationPoint *point) {
     }
     message << "\n";
     message << "Make sure that the flags provided to Mull are the same flags "
-               "that are used for normal compilation.\n";
-    Logger::error() << message.str();
+               "that are used for normal compilation.";
+    diagnostics.warning(message.str());
   }
 
   auto threadSafeAST = new ThreadSafeASTUnit(ast);
@@ -234,8 +231,7 @@ clang::Expr *ASTStorage::getMutantASTNode(MutationPoint *mutationPoint) {
   return mutantASTNode;
 }
 
-void ASTStorage::setMutantASTNode(MutationPoint *mutationPoint,
-                                  clang::Expr *mutantExpression) {
+void ASTStorage::setMutantASTNode(MutationPoint *mutationPoint, clang::Expr *mutantExpression) {
   std::lock_guard<std::mutex> lockGuard(mutantNodesMutex);
   mutantASTNodes[mutationPoint] = mutantExpression;
 }

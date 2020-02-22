@@ -1,4 +1,7 @@
 #include "mull/Parallelization/TaskExecutor.h"
+#include "mull/Diagnostics/Diagnostics.h"
+#include <assert.h>
+#include <sstream>
 
 namespace mull {
 std::vector<int> taskBatches(size_t itemsCount, size_t tasks) {
@@ -31,9 +34,10 @@ std::vector<int> taskBatches(size_t itemsCount, size_t tasks) {
   return result;
 }
 
-void printTimeSummary(MetricsMeasure measure) {
-  Logger::info() << ". Finished in " << measure.duration()
-                 << MetricsMeasure::precision() << ".\n";
+void printTimeSummary(Diagnostics &diagnostics, MetricsMeasure measure) {
+  std::stringstream stringstream;
+  stringstream << ". Finished in " << measure.duration() << MetricsMeasure::precision();
+  diagnostics.progress(stringstream.str());
 }
 
 } // namespace mull

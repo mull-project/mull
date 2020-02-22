@@ -7,6 +7,7 @@
 #include "mull/Mutators/ReplaceCallMutator.h"
 #include "mull/Mutators/ScalarValueMutator.h"
 #include "mull/ReachableFunction.h"
+#include <mull/Diagnostics/Diagnostics.h>
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 #include <mull/Mutators/CXX/BitwiseMutators.h>
 #include <mull/Mutators/CXX/LogicalAndToOr.h>
@@ -40,10 +41,11 @@ struct CXXJunkDetectorTestParameter {
 class CXXJunkDetectorTest : public TestWithParam<CXXJunkDetectorTestParameter> {};
 
 TEST_P(CXXJunkDetectorTest, detectJunk) {
+  Diagnostics diagnostics;
   auto &parameter = GetParam();
   LLVMContext context;
   BitcodeLoader loader;
-  auto bitcode = loader.loadBitcodeAtPath(parameter.bitcodePath, context);
+  auto bitcode = loader.loadBitcodeAtPath(parameter.bitcodePath, context, diagnostics);
 
   std::vector<MutationPoint *> points;
   for (auto &function : bitcode->getModule()->functions()) {
@@ -53,7 +55,7 @@ TEST_P(CXXJunkDetectorTest, detectJunk) {
     std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
   }
 
-  ASTStorage astStorage("", "");
+  ASTStorage astStorage(diagnostics, "", "");
   CXXJunkDetector detector(astStorage);
 
   std::vector<MutationPoint *> nonJunkMutationPoints;
@@ -119,10 +121,12 @@ static const CXXJunkDetectorTestParameter parameters[] = {
   CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_shifts_bc_path(),
                                new cxx::RShiftAssignToLShiftAssign, 3),
   /// Bit operations
-  CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(), new cxx::BitwiseOrToAnd, 2),
+  CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(), new cxx::BitwiseOrToAnd,
+                               2),
   CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(),
                                new cxx::OrAssignToAndAssign, 1),
-  CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(), new cxx::BitwiseAndToOr, 2),
+  CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(), new cxx::BitwiseAndToOr,
+                               2),
   CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(),
                                new cxx::AndAssignToOrAssign, 2),
   CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(), new cxx::XorToOr, 2),
@@ -169,10 +173,11 @@ static const CXXJunkDetectorTestParameter parameters[] = {
 INSTANTIATE_TEST_CASE_P(CXXJunkDetection, CXXJunkDetectorTest, testing::ValuesIn(parameters));
 
 TEST(CXXJunkDetector, compdb_absolute_paths) {
+  Diagnostics diagnostics;
   LLVMContext context;
   BitcodeLoader loader;
   auto path = fixtures::junk_detection_compdb_main_bc_path();
-  auto bitcode = loader.loadBitcodeAtPath(path, context);
+  auto bitcode = loader.loadBitcodeAtPath(path, context, diagnostics);
 
   std::vector<MutationPoint *> points;
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -194,7 +199,7 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
   std::string cxxCompilationDatabasePath =
       fixtures::junk_detection_compdb_absolute_compile_commands_json_path();
 
-  ASTStorage astStorage(cxxCompilationDatabasePath, "");
+  ASTStorage astStorage(diagnostics, cxxCompilationDatabasePath, "");
   CXXJunkDetector detector(astStorage);
 
   std::vector<MutationPoint *> nonJunkMutationPoints;
@@ -208,9 +213,11 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
 }
 
 TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
+  Diagnostics diagnostics;
   LLVMContext context;
   BitcodeLoader loader;
-  auto bitcode = loader.loadBitcodeAtPath(fixtures::junk_detection_compdb_main_bc_path(), context);
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::junk_detection_compdb_main_bc_path(), context, diagnostics);
 
   std::vector<MutationPoint *> points;
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -232,7 +239,7 @@ TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
   std::string cxxCompilationDatabasePath =
       fixtures::junk_detection_compdb_relative_compile_commands_json_path();
 
-  ASTStorage astStorage(cxxCompilationDatabasePath, "");
+  ASTStorage astStorage(diagnostics, cxxCompilationDatabasePath, "");
   CXXJunkDetector detector(astStorage);
 
   std::vector<MutationPoint *> nonJunkMutationPoints;
@@ -246,10 +253,11 @@ TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
 }
 
 TEST(CXXJunkDetector, no_compdb) {
+  Diagnostics diagnostics;
   LLVMContext context;
   BitcodeLoader loader;
   auto path = fixtures::junk_detection_compdb_main_bc_path();
-  auto bitcode = loader.loadBitcodeAtPath(path, context);
+  auto bitcode = loader.loadBitcodeAtPath(path, context, diagnostics);
 
   std::vector<MutationPoint *> points;
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -272,7 +280,7 @@ TEST(CXXJunkDetector, no_compdb) {
   std::string cxxCompilationFlags =
       std::string("-I ") + fixtures::junk_detection_compdb_include__path();
 
-  ASTStorage astStorage("", cxxCompilationFlags);
+  ASTStorage astStorage(diagnostics, "", cxxCompilationFlags);
   CXXJunkDetector detector(astStorage);
 
   std::vector<MutationPoint *> nonJunkMutationPoints;

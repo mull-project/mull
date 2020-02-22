@@ -21,6 +21,7 @@
 #include <json11/json11.hpp>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Type.h>
+#include <mull/Diagnostics/Diagnostics.h>
 #include <ostream>
 
 using namespace mull;
@@ -36,7 +37,8 @@ class MockASTSourceInfoProvider : public SourceInfoProvider {
 public:
   virtual ~MockASTSourceInfoProvider() = default;
 
-  MutationPointSourceInfo getSourceInfo(MutationPoint *mutationPoint) override {
+  MutationPointSourceInfo getSourceInfo(Diagnostics &diagnostics,
+                                        MutationPoint *mutationPoint) override {
     MutationPointSourceInfo info;
     info.beginColumn = beginColumnStub;
     info.beginLine = beginLineStub;
@@ -52,13 +54,13 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   /// - 1 test with 1 testee with 1 mutation point.
   /// - 1 test execution result which includes 1 normal test execution and 1
   /// mutated test execution.
+  Diagnostics diagnostics;
   LLVMContext llvmContext;
   BitcodeLoader loader;
   auto bitcodeWithTests = loader.loadBitcodeAtPath(
-      fixtures::simple_test_count_letters_test_count_letters_bc_path(),
-      llvmContext);
+      fixtures::simple_test_count_letters_test_count_letters_bc_path(), llvmContext, diagnostics);
   auto bitcodeWithTestees = loader.loadBitcodeAtPath(
-      fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext);
+      fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext, diagnostics);
 
   std::vector<std::unique_ptr<Bitcode>> modules;
   modules.push_back(std::move(bitcodeWithTests));
@@ -79,22 +81,19 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   ASSERT_FALSE(reachableFunction->empty());
 
   std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions;
-  reachableFunctions.emplace_back(
-      make_unique<ReachableFunction>(reachableFunction, nullptr, 1));
+  reachableFunctions.emplace_back(make_unique<ReachableFunction>(reachableFunction, nullptr, 1));
   auto functionsUnderTest = mergeReachableFunctions(reachableFunctions);
   functionsUnderTest.back().selectInstructions({});
 
   std::vector<MutationPoint *> mutationPoints =
-      mutationsFinder.getMutationPoints(program, functionsUnderTest);
+      mutationsFinder.getMutationPoints(diagnostics, program, functionsUnderTest);
 
   ASSERT_EQ(1U, mutationPoints.size());
 
   MutationPoint *mutationPoint = mutationPoints.front();
 
-  std::vector<std::string> testIds(
-      {test.getUniqueIdentifier(), test.getUniqueIdentifier()});
-  std::vector<std::string> mutationPointIds(
-      {"", mutationPoint->getUniqueIdentifier()});
+  std::vector<std::string> testIds({ test.getUniqueIdentifier(), test.getUniqueIdentifier() });
+  std::vector<std::string> mutationPointIds({ "", mutationPoint->getUniqueIdentifier() });
 
   const long long RunningTime_1 = 1;
   const long long RunningTime_2 = 2;
@@ -114,8 +113,7 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   mutatedTestExecutionResult.stderrOutput = "mutatedTestExecutionResult.STDERR";
 
   auto mutationResult = make_unique<MutationResult>(
-      mutatedTestExecutionResult, mutationPoint,
-      reachableFunctions.front()->getDistance(), &test);
+      mutatedTestExecutionResult, mutationPoint, reachableFunctions.front()->getDistance(), &test);
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
   mutationResults.push_back(std::move(mutationResult));
@@ -126,18 +124,16 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
 
   /// STEP2. Reporting results to JSON
   MockASTSourceInfoProvider sourceInfoProvider;
-  MutationTestingElementsReporter reporter("", "", sourceInfoProvider);
+  MutationTestingElementsReporter reporter(diagnostics, "", "", sourceInfoProvider);
   Metrics metrics;
   metrics.setDriverRunTime(resultTime);
   reporter.reportResults(result, metrics);
 
   /// STEP3. Making assertions.
-  std::vector<ExecutionResult> executionResults{testExecutionResult,
-                                                mutatedTestExecutionResult};
+  std::vector<ExecutionResult> executionResults{ testExecutionResult, mutatedTestExecutionResult };
 
   std::ifstream t(reporter.getJSONPath());
-  std::string str((std::istreambuf_iterator<char>(t)),
-                  std::istreambuf_iterator<char>());
+  std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
   std::string err;
   Json object = Json::parse(str, err);
 

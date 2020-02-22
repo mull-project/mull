@@ -7,6 +7,7 @@
 #include <llvm/IR/Module.h>
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/TargetSelect.h>
+#include <mull/Diagnostics/Diagnostics.h>
 
 #include "gtest/gtest.h"
 
@@ -18,16 +19,15 @@ TEST(Compiler, CompileModule) {
   InitializeNativeTargetAsmPrinter();
   InitializeNativeTargetAsmParser();
 
-  std::unique_ptr<TargetMachine> targetMachine(EngineBuilder().selectTarget(
-      Triple(), "", "", SmallVector<std::string, 1>()));
+  std::unique_ptr<TargetMachine> targetMachine(
+      EngineBuilder().selectTarget(Triple(), "", "", SmallVector<std::string, 1>()));
 
   Compiler compiler;
-
+  Diagnostics diagnostics;
   LLVMContext llvmContext;
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
-      fixtures::simple_test_count_letters_test_count_letters_bc_path(),
-      llvmContext);
+      fixtures::simple_test_count_letters_test_count_letters_bc_path(), llvmContext, diagnostics);
   auto binary = compiler.compileModule(bitcode->getModule(), *targetMachine);
 
   ASSERT_NE(nullptr, binary.getBinary());

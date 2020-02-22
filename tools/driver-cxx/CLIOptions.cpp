@@ -154,8 +154,9 @@ opt<bool> tool::DumpMutators(
 
 // clang-format on
 
-MutatorsCLIOptions::MutatorsCLIOptions(list<MutatorsOptionIndex> &parameter)
-    : options(factory.commandLineOptions()), parameter(parameter) {
+MutatorsCLIOptions::MutatorsCLIOptions(Diagnostics &diagnostics,
+                                       list<MutatorsOptionIndex> &parameter)
+    : factory(diagnostics), options(factory.commandLineOptions()), parameter(parameter) {
   int index = 0;
   for (auto &option : options) {
     parameter.getParser().addLiteralOption(option.first.c_str(), index++, option.second.c_str());
@@ -176,8 +177,9 @@ std::vector<std::pair<std::string, std::string>> &MutatorsCLIOptions::getOptions
   return options;
 }
 
-TestFrameworkCLIOptions::TestFrameworkCLIOptions(opt<TestFrameworkOptionIndex> &parameter)
-    : options(factory.commandLineOptions()), parameter(parameter) {
+TestFrameworkCLIOptions::TestFrameworkCLIOptions(Diagnostics &diagnostics,
+                                                 opt<TestFrameworkOptionIndex> &parameter)
+    : diagnostics(diagnostics), options(factory.commandLineOptions()), parameter(parameter) {
   int index = 0;
   for (auto &option : options) {
     parameter.getParser().addLiteralOption(option.first.c_str(), index++, option.second.c_str());
@@ -187,7 +189,7 @@ TestFrameworkCLIOptions::TestFrameworkCLIOptions(opt<TestFrameworkOptionIndex> &
 TestFramework TestFrameworkCLIOptions::testFramework(Toolchain &toolchain,
                                                      Configuration &configuration) {
   auto &name = options[parameter.getValue()].first;
-  return factory.createTestFramework(name, toolchain, configuration);
+  return factory.createTestFramework(name, toolchain, configuration, diagnostics);
 }
 
 struct SandboxDefinition {
@@ -233,7 +235,8 @@ static std::vector<ReporterDefinition> reporterOptions({
       ReporterKind::Elements },
 });
 
-ReportersCLIOptions::ReportersCLIOptions(list<ReporterKind> &parameter) : parameter(parameter) {
+ReportersCLIOptions::ReportersCLIOptions(Diagnostics &diagnostics, list<ReporterKind> &parameter)
+    : diagnostics(diagnostics), parameter(parameter) {
   for (ReporterDefinition &opt : reporterOptions) {
     parameter.getParser().addLiteralOption(opt.name.c_str(), opt.kind, opt.description.c_str());
   }
@@ -249,19 +252,20 @@ std::vector<std::unique_ptr<Reporter>> ReportersCLIOptions::reporters(ReporterPa
   for (auto i = 0; i < parameter.getNumOccurrences(); i++) {
     switch (parameter[i]) {
     case ReporterKind::IDE: {
-      reporters.push_back(llvm::make_unique<mull::IDEReporter>(IDEReporterShowKilled));
+      reporters.emplace_back(new mull::IDEReporter(diagnostics, IDEReporterShowKilled));
     } break;
     case ReporterKind::SQLite: {
-      reporters.emplace_back(new mull::SQLiteReporter(directory, name));
+      reporters.emplace_back(new mull::SQLiteReporter(diagnostics, directory, name));
     } break;
     case ReporterKind::Elements: {
-      reporters.emplace_back(new mull::MutationTestingElementsReporter(directory, name, provider));
+      reporters.emplace_back(
+          new mull::MutationTestingElementsReporter(diagnostics, directory, name, provider));
     } break;
     }
   }
 
   if (reporters.empty()) {
-    reporters.push_back(llvm::make_unique<mull::IDEReporter>(IDEReporterShowKilled));
+    reporters.emplace_back(new mull::IDEReporter(diagnostics, IDEReporterShowKilled));
   }
 
   return reporters;
@@ -282,7 +286,7 @@ static std::string sanitizeString(const std::string &input) {
   return result;
 }
 
-void tool::dumpCLIInterface() {
+void tool::dumpCLIInterface(Diagnostics &diagnostics) {
   // Enumerating CLI options explicitly to control the order and what to show
   Option *mutators = &(Option &)Mutators;
   Option *reporters = &(Option &)ReportersOption;
@@ -323,7 +327,7 @@ void tool::dumpCLIInterface() {
     help << "\n\n";
 
     if (option == mutators) {
-      MutatorsFactory factory;
+      MutatorsFactory factory(diagnostics);
       factory.init();
 
       help << "    Groups:\n";
@@ -361,8 +365,8 @@ void tool::dumpCLIInterface() {
   llvm::outs() << help.str();
 }
 
-void tool::dumpMutators() {
-  MutatorsFactory factory;
+void tool::dumpMutators(Diagnostics &diagnostics) {
+  MutatorsFactory factory(diagnostics);
   factory.init();
 
   std::vector<Mutator *> availableMutators;

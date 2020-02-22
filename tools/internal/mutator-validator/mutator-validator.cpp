@@ -6,6 +6,7 @@
 
 #include <mull/BitcodeLoader.h>
 #include <mull/Config/Configuration.h>
+#include <mull/Diagnostics/Diagnostics.h>
 #include <mull/MutationsFinder.h>
 #include <mull/Mutators/MutatorsFactory.h>
 #include <mull/Parallelization/Parallelization.h>
@@ -14,17 +15,17 @@
 
 int main(int argc, char **argv) {
   assert(argc == 3 && "Expect mutator name and path to a bitcode file");
-
-  std::vector<std::string> mutatorGroups({argv[1]});
+  mull::Diagnostics diagnostics;
+  std::vector<std::string> mutatorGroups({ argv[1] });
   const char *bitcodePath = argv[2];
 
   mull::BitcodeLoader loader;
   llvm::LLVMContext context;
   std::vector<std::unique_ptr<mull::Bitcode>> bitcode;
-  bitcode.push_back(std::move(loader.loadBitcodeAtPath(bitcodePath, context)));
+  bitcode.push_back(std::move(loader.loadBitcodeAtPath(bitcodePath, context, diagnostics)));
   mull::Program program({}, {}, std::move(bitcode));
 
-  mull::MutatorsFactory factory;
+  mull::MutatorsFactory factory(diagnostics);
   auto mutators = factory.mutators(mutatorGroups);
 
   mull::Configuration configuration;
@@ -37,11 +38,11 @@ int main(int argc, char **argv) {
     }
   }
 
-  auto mutants = finder.getMutationPoints(program, functionsUnderTest);
+  auto mutants = finder.getMutationPoints(diagnostics, program, functionsUnderTest);
 
   printf("Found %lu mutants\n", mutants.size());
 
-  mull::SingleTaskExecutor prepareMutants("Preparing mutants", [&] {
+  mull::SingleTaskExecutor prepareMutants(diagnostics, "Preparing mutants", [&] {
     for (auto &bc : program.bitcode()) {
       mull::Bitcode &bitcode = *bc;
       std::vector<std::string> mutatedFunctions;
@@ -52,19 +53,18 @@ int main(int argc, char **argv) {
   });
   prepareMutants.execute();
 
-  mull::SingleTaskExecutor applyMutants("Applying mutants", [&] {
+  mull::SingleTaskExecutor applyMutants(diagnostics, "Applying mutants", [&] {
     for (auto &mutant : mutants) {
       mutant->applyMutation();
     }
   });
   applyMutants.execute();
 
-  mull::Toolchain toolchain(configuration);
-  mull::SingleTaskExecutor compileMutants("Compiling mutants", [&] {
+  mull::Toolchain toolchain(diagnostics, configuration);
+  mull::SingleTaskExecutor compileMutants(diagnostics, "Compiling mutants", [&] {
     for (auto &bc : program.bitcode()) {
       assert(!llvm::verifyModule(*bc->getModule(), &llvm::errs()));
-      toolchain.compiler().compileModule(bc->getModule(),
-                                         toolchain.targetMachine());
+      toolchain.compiler().compileModule(bc->getModule(), toolchain.targetMachine());
     }
   });
   compileMutants.execute();
