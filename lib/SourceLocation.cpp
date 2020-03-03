@@ -1,5 +1,7 @@
 #include "mull/SourceLocation.h"
 
+#import "mull/Path.h"
+
 #include <string>
 #include <utility>
 
@@ -8,16 +10,8 @@
 #include <llvm/IR/DebugLoc.h>
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Instruction.h>
-#include <llvm/Support/Path.h>
 
 namespace mull {
-
-std::string absoluteFilePath(const std::string &directory, const std::string &filePath) {
-  if (!filePath.empty() && !llvm::sys::path::is_absolute(filePath)) {
-    return directory + llvm::sys::path::get_separator().str() + filePath;
-  }
-  return filePath;
-}
 
 SourceLocation::SourceLocation(std::string unitDirectory, std::string unitFilePath,
                                std::string directory, std::string filePath, int line, int column)

@@ -73,6 +73,8 @@ set(mull_sources
   Parallelization/Tasks/FunctionFilterTask.cpp
   Parallelization/Tasks/InstructionSelectionTask.cpp
 
+  Path.cpp
+
   Config/ConfigurationOptions.cpp
   Config/Configuration.cpp
   TestFrameworks/TestFramework.cpp

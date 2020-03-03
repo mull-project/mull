@@ -142,8 +142,7 @@ int main(int argc, char **argv) {
   std::string cxxCompilationFlags;
   std::string cxxCompilationDatabasePath;
   if (!bitcodeCompilationFlags.empty()) {
-    diagnostics.info(std::string("Found compilation flags in the input bitcode\n"));
-
+    diagnostics.info(std::string("Found compilation flags in the input bitcode"));
     junkDetectionEnabled = true;
   }
   if (!tool::CompilationFlags.empty()) {

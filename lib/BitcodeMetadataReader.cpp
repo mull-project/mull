@@ -1,6 +1,7 @@
 #include "mull/BitcodeMetadataReader.h"
 
 #include "mull/Bitcode.h"
+#include "mull/Path.h"
 
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/Module.h>
@@ -13,12 +14,16 @@ std::map<std::string, std::string> mull::BitcodeMetadataReader::getCompilationDa
   }
   for (auto &bitcodeModule: bitcode) {
     llvm::Module *module = bitcodeModule->getModule();
-    std::string moduleFileName = module->getSourceFileName();
 
     for (llvm::DICompileUnit *unit : module->debug_compile_units()) {
+      llvm::StringRef directory = unit->getDirectory();
+      llvm::StringRef fileName = unit->getFilename();
+      std::string unitFullPath = absoluteFilePath(directory, fileName);
+
       llvm::StringRef unitFlags = unit->getFlags();
+
       if (!unitFlags.empty()) {
-        bitcodeCompilationFlags[moduleFileName] = unitFlags.str();
+        bitcodeCompilationFlags[unitFullPath] = unitFlags.str();
       }
     }
   }
