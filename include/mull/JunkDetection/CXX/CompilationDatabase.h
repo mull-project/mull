@@ -31,15 +31,26 @@ public:
   private:
     std::string flags;
   };
+  class BitcodeFlags {
+  public:
+    explicit BitcodeFlags(std::map<std::string, std::string> bitcodeFlags)
+        : bitcodeFlags(std::move(bitcodeFlags)) {}
+    const std::map<std::string, std::string> &getFlags() const {
+      return bitcodeFlags;
+    }
+  private:
+    std::map<std::string, std::string> bitcodeFlags;
+  };
 
 public:
-  CompilationDatabase(Diagnostics &diagnostics, Path path, Flags flags);
+  CompilationDatabase(Diagnostics &diagnostics, Path path, Flags flags, BitcodeFlags bitcodeFlags);
 
   const std::vector<std::string> &compilationFlagsForFile(const std::string &filepath) const;
 
 private:
   const std::vector<std::string> extraFlags;
   const std::map<std::string, std::vector<std::string>> database;
+  const std::map<std::string, std::vector<std::string>> bitcodeFlags;
 };
 
 } // namespace mull

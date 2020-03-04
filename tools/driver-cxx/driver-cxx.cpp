@@ -6,6 +6,7 @@
 
 #include "CLIOptions.h"
 #include "DynamicLibraries.h"
+#include "mull/BitcodeMetadataReader.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Config/ConfigurationOptions.h"
 #include "mull/Diagnostics/Diagnostics.h"
@@ -127,6 +128,10 @@ int main(int argc, char **argv) {
   auto dynamicLibraries =
       mull::findDynamicLibraries(diagnostics, tool::InputFile.getValue(), librarySearchPaths);
 
+  mull::BitcodeMetadataReader bitcodeCompilationDatabaseLoader;
+  std::map<std::string, std::string> bitcodeCompilationFlags =
+      bitcodeCompilationDatabaseLoader.getCompilationDatabase(bitcode);
+
   mull::Program program(dynamicLibraries, {}, std::move(bitcode));
 
   mull::Toolchain toolchain(diagnostics, configuration);
@@ -136,6 +141,10 @@ int main(int argc, char **argv) {
   bool junkDetectionEnabled = false;
   std::string cxxCompilationFlags;
   std::string cxxCompilationDatabasePath;
+  if (!bitcodeCompilationFlags.empty()) {
+    diagnostics.info(std::string("Found compilation flags in the input bitcode"));
+    junkDetectionEnabled = true;
+  }
   if (!tool::CompilationFlags.empty()) {
     cxxCompilationFlags = tool::CompilationFlags.getValue();
     junkDetectionEnabled = true;
@@ -144,7 +153,10 @@ int main(int argc, char **argv) {
     cxxCompilationDatabasePath = tool::CompilationDatabasePath.getValue();
     junkDetectionEnabled = true;
   }
-  mull::ASTStorage astStorage(diagnostics, cxxCompilationDatabasePath, cxxCompilationFlags);
+
+  mull::ASTStorage astStorage(diagnostics,
+      cxxCompilationDatabasePath, cxxCompilationFlags, bitcodeCompilationFlags);
+
   mull::ASTSourceInfoProvider sourceInfoProvider(astStorage);
   mull::CXXJunkDetector junkDetector(astStorage);
 

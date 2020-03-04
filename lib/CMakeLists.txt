@@ -5,6 +5,7 @@ set(mull_sources
   Driver.cpp
   Sandbox/ProcessSandbox.cpp
   BitcodeLoader.cpp
+  BitcodeMetadataReader.cpp
   MutationsFinder.cpp
 
   Instrumentation/DynamicCallTree.cpp
@@ -71,6 +72,8 @@ set(mull_sources
   Parallelization/Tasks/ApplyMutationTask.cpp
   Parallelization/Tasks/FunctionFilterTask.cpp
   Parallelization/Tasks/InstructionSelectionTask.cpp
+
+  Path.cpp
 
   Config/ConfigurationOptions.cpp
   Config/Configuration.cpp
