@@ -13,9 +13,12 @@
 
 using namespace mull;
 
-template <typename Visitor> static bool isJunkMutation(ASTStorage &storage, MutationPoint *point) {
+template <typename Visitor>
+static bool isJunkMutation(ASTStorage &storage,
+                           MutationPoint *point) {
   auto ast = storage.findAST(point);
   auto location = ast->getLocation(point);
+  clang::SourceManager &sourceManager = ast->getSourceManager();
 
   if (ast->isInSystemHeader(location)) {
     return true;
@@ -26,21 +29,28 @@ template <typename Visitor> static bool isJunkMutation(ASTStorage &storage, Muta
     return true;
   }
 
-  VisitorParameters parameters = { .sourceManager = ast->getSourceManager(),
+  VisitorParameters parameters = { .sourceManager = sourceManager,
                                    .sourceLocation = location,
                                    .astContext = ast->getASTContext() };
   Visitor visitor(parameters);
   visitor.TraverseDecl(decl);
 
   if (clang::Expr *mutantExpression = visitor.foundMutant()) {
-    storage.setMutantASTNode(point, mutantExpression);
+    const std::string &sourceFile = point->getSourceLocation().unitFilePath;
+
+    int beginLine = sourceManager.getExpansionLineNumber(location, nullptr);
+    int beginColumn = sourceManager.getExpansionColumnNumber(location);
+
+    storage.saveMutation(
+        sourceFile, point->getMutator()->mutatorKind(), mutantExpression, beginLine, beginColumn);
     return false;
   }
 
   return true;
 }
 
-CXXJunkDetector::CXXJunkDetector(ASTStorage &astStorage) : astStorage(astStorage) {}
+CXXJunkDetector::CXXJunkDetector(ASTStorage &astStorage)
+    : astStorage(astStorage) {}
 
 bool CXXJunkDetector::isJunk(MutationPoint *point) {
   if (point->getSourceLocation().isNull()) {

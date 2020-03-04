@@ -1,6 +1,7 @@
 #pragma once
 
-#include "CompilationDatabase.h"
+#include "mull/AST/ASTMutationStorage.h"
+#include "mull/JunkDetection/CXX/CompilationDatabase.h"
 
 #include <clang/Frontend/ASTUnit.h>
 
@@ -45,8 +46,11 @@ public:
 
   ThreadSafeASTUnit *findAST(const MutationPoint *point);
 
-  clang::Expr *getMutantASTNode(MutationPoint *mutationPoint);
-  void setMutantASTNode(MutationPoint *mutationPoint, clang::Expr *mutantExpression);
+  const ASTMutation &getMutation(const std::string &sourceFile, mull::MutatorKind mutatorKind,
+                                 int line, int column) const;
+
+  void saveMutation(const std::string &sourceFile, mull::MutatorKind mutatorKind,
+                    const clang::Stmt *const expression, int line, int column);
 
 private:
   Diagnostics &diagnostics;
@@ -55,7 +59,7 @@ private:
 
   CompilationDatabase compilationDatabase;
   std::map<std::string, std::unique_ptr<ThreadSafeASTUnit>> astUnits;
-  std::map<MutationPoint *, clang::Expr *> mutantASTNodes;
+  ASTMutationStorage mutations;
 };
 
 } // namespace mull

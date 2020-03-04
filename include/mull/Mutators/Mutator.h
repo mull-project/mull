@@ -91,13 +91,22 @@ public:
 
   virtual std::string getDescription() const = 0;
 
-  virtual void applyMutation(llvm::Function *function,
-                             const MutationPointAddress &address,
+  virtual void applyMutation(llvm::Function *function, const MutationPointAddress &address,
                              irm::IRMutation *lowLevelMutation) = 0;
-  virtual std::vector<MutationPoint *>
-  getMutations(Bitcode *bitcode, const FunctionUnderTest &function) = 0;
+  virtual std::vector<MutationPoint *> getMutations(Bitcode *bitcode,
+                                                    const FunctionUnderTest &function) = 0;
 
   virtual ~Mutator() = default;
 };
 
 } // namespace mull
+
+namespace std {
+
+template <> struct std::hash<mull::MutatorKind> {
+  std::size_t operator()(const mull::MutatorKind &k) const {
+    return static_cast<std::size_t>(k);
+  }
+};
+
+} // namespace std
