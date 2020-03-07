@@ -137,4 +137,16 @@ std::string MutationKindToString(MutatorKind mutatorKind) {
   }
   }
 }
+
+MutatorKindSet::MutatorKindSet(std::unordered_set<mull::MutatorKind> mutators)
+    : mutators(mutators) {}
+
+MutatorKindSet MutatorKindSet::create(std::vector<MutatorKind> mutators) {
+  std::unordered_set<MutatorKind> mutatorsSet(mutators.begin(), mutators.end());
+  return MutatorKindSet(mutatorsSet);
+}
+
+bool MutatorKindSet::includesMutator(mull::MutatorKind mutatorKind) const {
+  return mutators.count(mutatorKind) > 0;
+}
 } // namespace mull

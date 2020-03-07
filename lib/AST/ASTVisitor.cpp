@@ -1,0 +1,99 @@
+#include "mull/AST/ASTVisitor.h"
+
+#include "mull/Program/Program.h"
+
+#include <clang/AST/RecursiveASTVisitor.h>
+#include <clang/Basic/SourceLocation.h>
+
+using namespace mull;
+
+ASTVisitor::ASTVisitor(mull::Diagnostics &diagnostics, mull::ThreadSafeASTUnit &astUnit,
+                       mull::SingleASTUnitMutations &singleUnitMutations,
+                       mull::FilePathFilter &filePathFilter, mull::MutatorKindSet mutatorKindSet)
+    : diagnostics(diagnostics), astUnit(astUnit), singleUnitMutations(singleUnitMutations),
+      filePathFilter(filePathFilter), sourceManager(astUnit.getSourceManager()),
+      mutatorKindSet(mutatorKindSet), shouldSkipCurrentFunction(false) {}
+
+bool ASTVisitor::VisitFunctionDecl(clang::FunctionDecl *Decl) {
+  if (Decl->getNameAsString() == "main") {
+    shouldSkipCurrentFunction = true;
+  } else {
+    shouldSkipCurrentFunction = false;
+  }
+  return clang::RecursiveASTVisitor<ASTVisitor>::VisitFunctionDecl(Decl);
+}
+
+bool ASTVisitor::VisitExpr(clang::Expr *expr) {
+  if (shouldSkipCurrentFunction) {
+    return true;
+  }
+
+#if LLVM_VERSION_MAJOR >= 7
+  clang::SourceLocation exprLocation = expr->getBeginLoc();
+#else
+  clang::SourceLocation exprLocation = expr->getLocStart();
+#endif
+
+  if (astUnit.isInSystemHeader(exprLocation)) {
+    return true;
+  }
+
+  const std::string sourceLocation = astUnit.getSourceManager().getFilename(exprLocation).str();
+  if (sourceLocation.empty()) {
+    /// TODO: asserts only?
+    return true;
+  }
+
+  if (filePathFilter.shouldSkip(sourceLocation)) {
+    return true;
+  }
+
+  if (clang::BinaryOperator *binaryOperator = clang::dyn_cast<clang::BinaryOperator>(expr)) {
+    if (binaryOperator->getOpcode() == clang::BO_Add &&
+        mutatorKindSet.includesMutator(mull::MutatorKind::CXX_AddToSub)) {
+      clang::SourceLocation binaryOperatorLocation = binaryOperator->getOperatorLoc();
+      saveMutationPoint(mull::MutatorKind::CXX_AddToSub, binaryOperator, binaryOperatorLocation);
+      return true;
+    }
+  }
+  return true;
+}
+
+void ASTVisitor::traverse() {
+  clang::ASTContext &context = astUnit.getASTContext();
+  TraverseDecl(context.getTranslationUnitDecl());
+}
+
+void ASTVisitor::saveMutationPoint(mull::MutatorKind mutatorKind, const clang::Stmt *stmt,
+                                   clang::SourceLocation location) {
+
+  int beginLine = sourceManager.getExpansionLineNumber(location, nullptr);
+  int beginColumn = sourceManager.getExpansionColumnNumber(location);
+
+  std::string sourceFilePath = astUnit.getSourceManager().getFilename(location).str();
+  if (sourceFilePath.size() == 0) {
+    /// we reach here because of asserts()
+    /// TODO: maybe there are more cases.
+    return;
+  }
+
+  if (!llvm::sys::fs::is_regular_file(sourceFilePath) && sourceFilePath != "input.cc") {
+    diagnostics.error(std::string("ASTVisitor: invalid source file path: '") +
+                      sourceFilePath + "'\n");
+  }
+
+  std::string description = MutationKindToString(mutatorKind);
+
+  diagnostics.debug(std::string("AST Search: recording mutation \"") + description +
+                    "\": " + sourceFilePath + ":" + std::to_string(beginLine) + ":" +
+                    std::to_string(beginColumn));
+
+  int hash = mull::lineColumnHash(beginLine, beginColumn);
+
+  if (singleUnitMutations.count(mutatorKind) == 0) {
+    singleUnitMutations.emplace(mutatorKind, SingleMutationTypeBucket());
+  }
+
+  singleUnitMutations[mutatorKind].emplace(hash,
+                                           ASTMutation(mutatorKind, beginLine, beginColumn, stmt));
+}

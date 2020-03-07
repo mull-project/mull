@@ -122,6 +122,11 @@ opt<SandboxKind> tool::SandboxOption(
     init(SandboxKind::Timer),
     cat(MullCXXCategory));
 
+opt<bool> tool::EnableAST(
+  "enable-ast", llvm::cl::Optional,
+  llvm::cl::desc("Enable \"white\" AST search (disabled by default)"),
+  llvm::cl::cat(MullCXXCategory), llvm::cl::init(false));
+
 list<ReporterKind> tool::ReportersOption(
   "reporters",
   desc("Choose reporters:"),

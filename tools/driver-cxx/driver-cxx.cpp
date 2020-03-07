@@ -6,6 +6,8 @@
 
 #include "CLIOptions.h"
 #include "DynamicLibraries.h"
+#include "mull/AST/ASTFinder.h"
+#include "mull/AST/ASTMutationFilter.h"
 #include "mull/BitcodeMetadataReader.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Config/ConfigurationOptions.h"
@@ -19,6 +21,7 @@
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
 #include "mull/Metrics/Metrics.h"
 #include "mull/MutationsFinder.h"
+#include "mull/Mutators/MutatorKind.h"
 #include "mull/Parallelization/Parallelization.h"
 #include "mull/Parallelization/Tasks/LoadBitcodeFromBinaryTask.h"
 #include "mull/Program/Program.h"
@@ -69,7 +72,8 @@ int main(int argc, char **argv) {
 
   if (tool::StrictModeEnabled) {
     diagnostics.enableStrictMode();
-    diagnostics.info("Diagnostics: Strict Mode enabled. Warning messages will be treated as fatal errors.");
+    diagnostics.info(
+        "Diagnostics: Strict Mode enabled. Warning messages will be treated as fatal errors.");
   }
 
   validateInputFile();
@@ -155,24 +159,29 @@ int main(int argc, char **argv) {
 
   mull::TestFramework testFramework(testFrameworkOption.testFramework(toolchain, configuration));
 
-  bool junkDetectionEnabled = false;
+  bool bitcodeCompilationDatabaseAvailable = false;
+  bool compilationDatabasePathAvailable = false;
+  bool bitcodeCompilationFlagsAvailable = false;
   std::string cxxCompilationFlags;
   std::string cxxCompilationDatabasePath;
   if (!bitcodeCompilationFlags.empty()) {
     diagnostics.info(std::string("Found compilation flags in the input bitcode"));
-    junkDetectionEnabled = true;
+    bitcodeCompilationDatabaseAvailable = true;
   }
   if (!tool::CompilationFlags.empty()) {
     cxxCompilationFlags = tool::CompilationFlags.getValue();
-    junkDetectionEnabled = true;
+    bitcodeCompilationFlagsAvailable = true;
   }
   if (!tool::CompilationDatabasePath.empty()) {
     cxxCompilationDatabasePath = tool::CompilationDatabasePath.getValue();
-    junkDetectionEnabled = true;
+    compilationDatabasePathAvailable = true;
   }
+  bool compilationDatabaseInfoAvailable = bitcodeCompilationDatabaseAvailable ||
+                                          compilationDatabasePathAvailable ||
+                                          bitcodeCompilationFlagsAvailable;
 
-  mull::ASTStorage astStorage(diagnostics,
-      cxxCompilationDatabasePath, cxxCompilationFlags, bitcodeCompilationFlags);
+  mull::ASTStorage astStorage(
+      diagnostics, cxxCompilationDatabasePath, cxxCompilationFlags, bitcodeCompilationFlags);
 
   mull::ASTSourceInfoProvider sourceInfoProvider(astStorage);
   mull::CXXJunkDetector junkDetector(astStorage);
@@ -206,7 +215,23 @@ int main(int argc, char **argv) {
     filePathFilter->include(regex);
   }
 
-  if (junkDetectionEnabled) {
+  if (tool::EnableAST && compilationDatabaseInfoAvailable) {
+    std::vector<mull::MutatorKind> mutationKinds;
+    for (auto &mutator : mutatorsOptions.mutators()) {
+      mutationKinds.push_back(mutator->mutatorKind());
+    }
+
+    mull::MutatorKindSet mutatorKindSet = mull::MutatorKindSet::create(mutationKinds);
+
+    mull::ASTFinder astFinder(mutatorKindSet);
+    astFinder.findMutations(diagnostics, configuration, program, *filePathFilter, astStorage);
+
+    mull::ASTMutationFilter *astMutationFilter =
+        new mull::ASTMutationFilter(diagnostics, astStorage);
+    filters.mutationFilters.push_back(astMutationFilter);
+  }
+
+  if (compilationDatabaseInfoAvailable) {
     auto *junkFilter = new mull::JunkMutationFilter(junkDetector);
     filters.mutationFilters.push_back(junkFilter);
     filterStorage.emplace_back(junkFilter);
