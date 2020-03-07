@@ -17,6 +17,7 @@ set(mull_sources
 
   Mutators/CXX/LogicalAndToOr.cpp
   Mutators/CXX/LogicalOrToAnd.cpp
+  Mutators/MutatorKind.cpp
   Mutators/MutatorsFactory.cpp
   Mutators/NegateConditionMutator.cpp
   Mutators/RemoveVoidFunctionMutator.cpp
