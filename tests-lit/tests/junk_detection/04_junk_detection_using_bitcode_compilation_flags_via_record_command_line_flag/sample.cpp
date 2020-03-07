@@ -22,5 +22,6 @@ int main() {
 ; RUN: (unset TERM; %MULL_EXEC -test-framework CustomTest -mutators=all -reporters=IDE -ide-reporter-show-killed %s.exe 2>&1; test $? = 0) | %FILECHECK_EXEC %s --strict-whitespace --match-full-lines --check-prefix=WITH-RECORD-COMMAND-LINE
 ; WITH-RECORD-COMMAND-LINE:[info] Found compilation flags in the input bitcode
 ; WITH-RECORD-COMMAND-LINE-NOT:{{^.*[Ee]rror.*$}}
+; WITH-RECORD-COMMAND-LINE:[info] Killed mutants (1/1):
 **/
 
