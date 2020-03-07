@@ -1,7 +1,9 @@
 #include "mull/Reporters/ASTSourceInfoProvider.h"
 
+#include "mull/AST/ASTMutationStorage.h"
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/JunkDetection/CXX/ASTStorage.h"
+#include "mull/MutationPoint.h"
 
 #include <clang/AST/Expr.h>
 #include <clang/Lex/Lexer.h>
@@ -15,7 +17,17 @@ MutationPointSourceInfo ASTSourceInfoProvider::getSourceInfo(Diagnostics &diagno
   MutationPointSourceInfo info = MutationPointSourceInfo();
   clang::SourceRange sourceRange;
 
-  clang::Expr *mutantASTNode = astStorage.getMutantASTNode(mutationPoint);
+  const SourceLocation &sourceLocation = mutationPoint->getSourceLocation();
+  const std::string &sourceFile = sourceLocation.unitFilePath;
+
+  const ASTMutation &astMutation =
+      astStorage.getMutation(sourceFile,
+                             mutationPoint->getMutator()->mutatorKind(),
+                             sourceLocation.line,
+                             sourceLocation.column);
+
+  const clang::Stmt *const mutantASTNode = astMutation.stmt;
+
   ThreadSafeASTUnit *astUnit = astStorage.findAST(mutationPoint);
 
   if (mutantASTNode == nullptr) {

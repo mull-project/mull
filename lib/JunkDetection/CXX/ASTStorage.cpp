@@ -173,7 +173,8 @@ ASTStorage::ASTStorage(Diagnostics &diagnostics, const std::string &cxxCompilati
     : diagnostics(diagnostics),
       compilationDatabase(diagnostics, CompilationDatabase::Path(cxxCompilationDatabasePath),
                           CompilationDatabase::Flags(cxxCompilationFlags),
-                          CompilationDatabase::BitcodeFlags(bitcodeCompilationFlags)) {}
+                          CompilationDatabase::BitcodeFlags(bitcodeCompilationFlags)),
+      mutations() {}
 
 ThreadSafeASTUnit *ASTStorage::findAST(const MutationPoint *point) {
   assert(point);
@@ -223,17 +224,14 @@ ThreadSafeASTUnit *ASTStorage::findAST(const MutationPoint *point) {
   return threadSafeAST;
 }
 
-clang::Expr *ASTStorage::getMutantASTNode(MutationPoint *mutationPoint) {
-  std::lock_guard<std::mutex> lockGuard(mutantNodesMutex);
-  if (mutantASTNodes.count(mutationPoint) == 0) {
-    return nullptr;
-  }
-
-  clang::Expr *mutantASTNode = mutantASTNodes[mutationPoint];
-  return mutantASTNode;
+const ASTMutation &ASTStorage::getMutation(const std::string &sourceFile,
+                                           mull::MutatorKind mutatorKind, int line,
+                                           int column) const {
+  return mutations.getMutation(sourceFile, mutatorKind, line, column);
 }
 
-void ASTStorage::setMutantASTNode(MutationPoint *mutationPoint, clang::Expr *mutantExpression) {
+void ASTStorage::saveMutation(const std::string &sourceFile, mull::MutatorKind mutatorKind,
+                              const clang::Stmt *const expression, int line, int column) {
   std::lock_guard<std::mutex> lockGuard(mutantNodesMutex);
-  mutantASTNodes[mutationPoint] = mutantExpression;
+  mutations.saveMutation(sourceFile, mutatorKind, expression, line, column);
 }
