@@ -37,7 +37,7 @@ std::vector<int> taskBatches(size_t itemsCount, size_t tasks) {
 void printTimeSummary(Diagnostics &diagnostics, MetricsMeasure measure) {
   std::stringstream stringstream;
   stringstream << ". Finished in " << measure.duration() << MetricsMeasure::precision();
-  diagnostics.progress(stringstream.str());
+  diagnostics.progress(stringstream.str(), false);
 }
 
 } // namespace mull

@@ -23,7 +23,6 @@ progress_reporter::progress_reporter(Diagnostics &diagnostics, std::string &name
                                      progress_counter::CounterType total, size_t workers)
     : diagnostics(diagnostics), counters(counters), total(total), previousValue(0), name(name),
       workers(workers) {
-  hasTerminal = getenv("TERM") != nullptr;
   std::stringstream stringstream;
   stringstream << name << " (threads: " << this->workers << ")";
   diagnostics.info(stringstream.str());
@@ -56,11 +55,6 @@ void progress_reporter::printProgress(progress_counter::CounterType current,
     return;
   }
 
-  char terminator = '\n';
-  if (hasTerminal) {
-    terminator = '\r';
-  }
-
   const size_t barWidth = 32;
   size_t starsCount = (double)current / total * barWidth;
   std::string stars(starsCount, '#');
@@ -68,7 +62,7 @@ void progress_reporter::printProgress(progress_counter::CounterType current,
 
   std::stringstream stringstream;
   std::string padding(7, ' ');
-  stringstream << terminator << padding << "[" << stars << dots << "] " << current << "/" << total;
+  stringstream << padding << "[" << stars << dots << "] " << current << "/" << total;
   diagnostics.progress(stringstream.str());
   previousValue = current;
 }

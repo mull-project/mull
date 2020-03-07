@@ -39,6 +39,5 @@ private:
   progress_counter::CounterType previousValue;
   std::string name;
   size_t workers;
-  bool hasTerminal;
 };
 } // namespace mull

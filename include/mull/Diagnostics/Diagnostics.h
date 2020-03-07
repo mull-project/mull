@@ -1,32 +1,34 @@
 #pragma once
 
-#include <string>
 #include <mutex>
+#include <string>
 
 namespace mull {
 
-class DiagnosticsImpl;
-
 class Diagnostics {
 public:
+  enum LogLevel { Info, Warning, Error, Debug };
+
   Diagnostics();
-  ~Diagnostics();
 
   void enableDebugMode();
 
   void info(const std::string& message);
   void warning(const std::string& message);
   void error(const std::string& message);
-  void progress(const std::string& message);
+  void progress(const std::string &message, bool clear = true);
   void debug(const std::string& message);
 
 private:
-  void prepare();
+  void log(LogLevel level, const std::string &message);
+  void interceptProgress();
 
-  DiagnosticsImpl *impl;
   std::mutex mutex;
   bool seenProgress;
+  bool showColor;
+  bool hasTerm;
   bool debugModeEnabled;
+  FILE *output;
 };
 
-}
+} // namespace mull
