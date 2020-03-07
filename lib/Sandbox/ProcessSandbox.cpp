@@ -101,15 +101,16 @@ mull::ExecutionResult mull::ForkTimerSandbox::run(Diagnostics &diagnostics,
   auto start = high_resolution_clock::now();
   const pid_t workerPID = mullFork(diagnostics, "worker");
   if (workerPID == 0) {
+    freopen(stderrFilename.c_str(), "w", stderr);
+    freopen(stdoutFilename.c_str(), "w", stdout);
+
     /// TODO: There is an issue with freopen: it hangs once in a while, so as a hack we add the
     /// timeout handling before calling freopen. There is a bug somewhere and it needs to be fixed.
     /// It happens only on macOS, here is the most relevant thread:
     /// hangs in flockfile() during fread() or fclose()
     /// https://groups.google.com/forum/#!topic/darwin-dev/e5qPebpfvYM
+    /// PS: It was observed only when spdlog was added to the project
     handle_timeout(timeoutMilliseconds);
-
-    freopen(stderrFilename.c_str(), "w", stderr);
-    freopen(stdoutFilename.c_str(), "w", stdout);
 
     *sharedStatus = function();
 
