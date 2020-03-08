@@ -62,6 +62,11 @@ int main(int argc, char **argv) {
     return 1;
   }
 
+  if (tool::DebugEnabled) {
+    diagnostics.enableDebugMode();
+    diagnostics.debug("Diagnostics: debug mode enabled");
+  }
+
   validateInputFile();
 
   mull::MetricsMeasure totalExecutionTime;

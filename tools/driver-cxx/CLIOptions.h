@@ -39,6 +39,8 @@ extern opt<TestFrameworkOptionIndex> TestFrameworks;
 extern list<ReporterKind> ReportersOption;
 extern opt<bool> IDEReporterShowKilled;
 
+extern opt<bool> DebugEnabled;
+
 extern opt<SandboxKind> SandboxOption;
 
 extern list<std::string> LDSearchPaths;
