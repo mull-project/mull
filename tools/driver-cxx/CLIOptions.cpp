@@ -136,6 +136,13 @@ opt<bool> tool::IDEReporterShowKilled(
   init(false),
   cat(MullCXXCategory));
 
+opt<bool> tool::DebugEnabled(
+  "debug",
+  desc("Enables Debug Mode: more logs are printed"),
+  Optional,
+  init(false),
+  cat(MullCXXCategory));
+
 opt<bool> tool::DumpCLIInterface(
     "dump-cli",
     desc("Prints CLI options in the Sphinx/RST friendly format"),
@@ -301,6 +308,7 @@ void tool::dumpCLIInterface(Diagnostics &diagnostics) {
       &ReportDirectory,
       reporters,
       &IDEReporterShowKilled,
+      &DebugEnabled,
 
       &CompilationDatabasePath,
       &CompilationFlags,

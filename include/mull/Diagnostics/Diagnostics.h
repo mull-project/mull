@@ -12,10 +12,13 @@ public:
   Diagnostics();
   ~Diagnostics();
 
+  void enableDebugMode();
+
   void info(const std::string& message);
   void warning(const std::string& message);
   void error(const std::string& message);
   void progress(const std::string& message);
+  void debug(const std::string& message);
 
 private:
   void prepare();
@@ -23,6 +26,7 @@ private:
   DiagnosticsImpl *impl;
   std::mutex mutex;
   bool seenProgress;
+  bool debugModeEnabled;
 };
 
 }
