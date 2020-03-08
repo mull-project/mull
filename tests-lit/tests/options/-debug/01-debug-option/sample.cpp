@@ -15,6 +15,6 @@ int main() {
 ; WITHOUT-DEBUG-NOT:{{^.*\[debug\].*$}}
 ; WITHOUT-DEBUG:{{^.*}}sample.cpp:2:12: warning: Killed: Replaced + with - [cxx_add_to_sub]{{$}}
 
-; WITH-DEBUG:[debug] Diagnostics: debug mode enabled
+; WITH-DEBUG:[debug] Diagnostics: Debug Mode enabled. Debug-level messages will be printed.
 ; WITH-DEBUG:{{^.*}}sample.cpp:2:12: warning: Killed: Replaced + with - [cxx_add_to_sub]{{$}}
 **/

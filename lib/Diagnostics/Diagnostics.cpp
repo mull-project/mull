@@ -9,7 +9,7 @@ static const char *colors[] = { "\033[32m", "\033[33m", "\033[31m" };
 
 Diagnostics::Diagnostics()
     : seenProgress(false), showColor(false), hasTerm(false), debugModeEnabled(false),
-      output(stdout) {
+      strictModeEnabled(false), output(stdout) {
   hasTerm = getenv("TERM") != nullptr;
   showColor = isatty(fileno(output)) && hasTerm;
 }
@@ -35,16 +35,27 @@ void Diagnostics::enableDebugMode() {
   debugModeEnabled = true;
 }
 
+void Diagnostics::enableStrictMode() {
+  strictModeEnabled = true;
+}
+
 void Diagnostics::info(const std::string &message) {
   log(LogLevel::Info, message);
 }
 
 void Diagnostics::warning(const std::string &message) {
   log(LogLevel::Warning, message);
+  if (strictModeEnabled) {
+    log(LogLevel::Warning,
+        "Strict Mode enabled: warning messages are treated as fatal errors. Exiting now.");
+    exit(1);
+  }
 }
 
 void Diagnostics::error(const std::string &message) {
   log(LogLevel::Error, message);
+  log(LogLevel::Error, "Error messages are treated as fatal errors. Exiting now.");
+  exit(1);
 }
 
 void Diagnostics::progress(const std::string &message, bool clear) {

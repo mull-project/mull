@@ -12,6 +12,7 @@ public:
   Diagnostics();
 
   void enableDebugMode();
+  void enableStrictMode();
 
   void info(const std::string& message);
   void warning(const std::string& message);
@@ -28,6 +29,7 @@ private:
   bool showColor;
   bool hasTerm;
   bool debugModeEnabled;
+  bool strictModeEnabled;
   FILE *output;
 };
 
