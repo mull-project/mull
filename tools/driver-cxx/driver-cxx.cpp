@@ -64,7 +64,12 @@ int main(int argc, char **argv) {
 
   if (tool::DebugEnabled) {
     diagnostics.enableDebugMode();
-    diagnostics.debug("Diagnostics: debug mode enabled");
+    diagnostics.debug("Diagnostics: Debug Mode enabled. Debug-level messages will be printed.");
+  }
+
+  if (tool::StrictModeEnabled) {
+    diagnostics.enableStrictMode();
+    diagnostics.info("Diagnostics: Strict Mode enabled. Warning messages will be treated as fatal errors.");
   }
 
   validateInputFile();

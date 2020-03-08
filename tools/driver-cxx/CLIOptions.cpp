@@ -143,6 +143,13 @@ opt<bool> tool::DebugEnabled(
   init(false),
   cat(MullCXXCategory));
 
+opt<bool> tool::StrictModeEnabled(
+  "strict",
+  desc("Enables Strict Mode: all warning messages are treated as fatal errors"),
+  Optional,
+  init(false),
+  cat(MullCXXCategory));
+
 opt<bool> tool::DumpCLIInterface(
     "dump-cli",
     desc("Prints CLI options in the Sphinx/RST friendly format"),
@@ -309,6 +316,7 @@ void tool::dumpCLIInterface(Diagnostics &diagnostics) {
       reporters,
       &IDEReporterShowKilled,
       &DebugEnabled,
+      &StrictModeEnabled,
 
       &CompilationDatabasePath,
       &CompilationFlags,

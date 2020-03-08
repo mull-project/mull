@@ -13,6 +13,7 @@ public:
   ~Diagnostics();
 
   void enableDebugMode();
+  void enableStrictMode();
 
   void info(const std::string& message);
   void warning(const std::string& message);
@@ -27,6 +28,7 @@ private:
   std::mutex mutex;
   bool seenProgress;
   bool debugModeEnabled;
+  bool strictModeEnabled;
 };
 
 }

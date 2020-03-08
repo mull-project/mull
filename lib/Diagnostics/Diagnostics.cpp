@@ -23,7 +23,7 @@ private:
 };
 
 Diagnostics::Diagnostics()
-    : impl(new DiagnosticsImpl()), seenProgress(false), debugModeEnabled(false) {}
+    : impl(new DiagnosticsImpl()), seenProgress(false), debugModeEnabled(false), strictModeEnabled(false) {}
 
 Diagnostics::~Diagnostics() {
   delete impl;
@@ -33,6 +33,11 @@ void Diagnostics::enableDebugMode() {
   std::lock_guard<std::mutex> guard(mutex);
   debugModeEnabled = true;
   impl->enableDebugMode();
+}
+
+void Diagnostics::enableStrictMode() {
+  std::lock_guard<std::mutex> guard(mutex);
+  strictModeEnabled = true;
 }
 
 void Diagnostics::info(const std::string &message) {
@@ -45,12 +50,19 @@ void Diagnostics::warning(const std::string &message) {
   std::lock_guard<std::mutex> guard(mutex);
   prepare();
   impl->log().warn(message);
+  if (strictModeEnabled) {
+    impl->log().warn(
+        "Strict Mode enabled: warning messages are treated as fatal errors. Exiting now.");
+    exit(1);
+  }
 }
 
 void Diagnostics::error(const std::string &message) {
   std::lock_guard<std::mutex> guard(mutex);
   prepare();
   impl->log().error(message);
+  impl->log().error("Error messages are treated as fatal errors. Exiting now.");
+  exit(1);
 }
 
 void Diagnostics::progress(const std::string &message) {

@@ -40,6 +40,7 @@ extern list<ReporterKind> ReportersOption;
 extern opt<bool> IDEReporterShowKilled;
 
 extern opt<bool> DebugEnabled;
+extern opt<bool> StrictModeEnabled;
 
 extern opt<SandboxKind> SandboxOption;
 
