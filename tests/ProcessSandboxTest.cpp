@@ -9,7 +9,7 @@ using namespace mull;
 using ::testing::TestWithParam;
 using ::testing::Values;
 
-/// The timeout should be long enough to overlive the unit test suite running
+/// The timeout should be long enough to outlive the unit test suite running
 /// on a cold start (fresh start without a "warmup").
 static const long long Timeout = 1100;
 
