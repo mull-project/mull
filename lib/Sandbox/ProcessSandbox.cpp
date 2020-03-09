@@ -22,52 +22,21 @@ using namespace std::chrono;
 static pid_t mullFork(mull::Diagnostics &diagnostics, const char *processName) {
   const pid_t pid = fork();
   if (pid == -1) {
-    std::stringstream stringstream;
-    stringstream << "Failed to create " << processName << "\n"
-                 << strerror(errno) << "\n"
-                 << "Shutting down";
-    diagnostics.error(stringstream.str());
+    diagnostics.error(std::string("fork(") + processName + "): " + strerror(errno));
   }
   return pid;
-}
-
-static std::string readFileAndUnlink(const char *filename) {
-  FILE *file = fopen(filename, "r");
-  if (!file) {
-    perror("fopen");
-    printf("fopen: %s\n", filename);
-    return std::string("Mull error: could not read output");
-  }
-  if (unlink(filename) == -1) {
-    perror("unlink");
-    printf("unlink: %s\n", filename);
-  }
-
-  fseek(file, 0, SEEK_END);
-  int size = ftell(file);
-  rewind(file);
-
-  char *buffer = (char *)malloc(sizeof(char) * (size + 1));
-  fread(buffer, sizeof(char), size, file);
-  buffer[size] = '\0';
-  std::string output(buffer);
-  free(buffer);
-  fclose(file);
-
-  return output;
 }
 
 void handle_alarm_signal(int signal, siginfo_t *info, void *context) {
   _exit(mull::ForkTimerSandbox::MullTimeoutCode);
 }
 
-void handle_timeout(long long timeoutMilliseconds) {
+void handle_timeout(mull::Diagnostics &diagnostics, long long timeoutMilliseconds) {
   struct sigaction action {};
   memset(&action, 0, sizeof(action));
   action.sa_sigaction = &handle_alarm_signal;
   if (sigaction(SIGALRM, &action, nullptr) != 0) {
-    perror("sigaction");
-    abort();
+    diagnostics.error(std::string("sigaction: ") + strerror(errno));
   }
 
   struct itimerval timer {};
@@ -80,19 +49,65 @@ void handle_timeout(long long timeoutMilliseconds) {
   timer.it_interval.tv_usec = 0;
 
   if (setitimer(ITIMER_REAL, &timer, nullptr) != 0) {
-    perror("setitimer");
-    abort();
+    diagnostics.error(std::string("setitimer: ") + strerror(errno));
   }
 }
+
+class Pipe {
+public:
+  Pipe(mull::Diagnostics &diagnostics) : diagnostics(diagnostics), shouldCapture(true) {
+    creator = getpid();
+    int pipes[2];
+    if (shouldCapture && pipe(pipes) == 0) {
+      pipe_read = pipes[0];
+      pipe_write = pipes[1];
+    } else {
+      shouldCapture = false;
+      diagnostics.warning(std::string("pipe: ") + strerror(errno));
+    }
+  }
+  void redirect(int to) {
+    assert(creator != getpid() && "Should be called from the child process");
+    if (shouldCapture) {
+      if (dup2(pipe_write, to) == -1) {
+        diagnostics.warning(std::string("dup2: ") + strerror(errno));
+        shouldCapture = false;
+      }
+      close(pipe_read);
+      close(pipe_write);
+    }
+  }
+  std::string capture() {
+    assert(creator == getpid() && "Should be called from the creator process");
+    std::string output;
+    if (shouldCapture) {
+      close(pipe_write);
+      char buffer[8];
+      ssize_t count = read(pipe_read, buffer, sizeof(buffer) - 1);
+      buffer[count] = '\0';
+      while (count > 0) {
+        output.append(buffer);
+        count = read(pipe_read, buffer, sizeof(buffer) - 1);
+        buffer[count] = '\0';
+      }
+      close(pipe_read);
+    }
+    return output;
+  }
+
+private:
+  mull::Diagnostics &diagnostics;
+  pid_t creator;
+  int pipe_write = -1;
+  int pipe_read = -1;
+  bool shouldCapture;
+};
 
 mull::ExecutionResult mull::ForkTimerSandbox::run(Diagnostics &diagnostics,
                                                   std::function<ExecutionStatus(void)> function,
                                                   long long timeoutMilliseconds) const {
-  llvm::SmallString<32> stderrFilename;
-  llvm::sys::fs::createUniqueFile("/tmp/mull.stderr.%%%%%%", stderrFilename);
-
-  llvm::SmallString<32> stdoutFilename;
-  llvm::sys::fs::createUniqueFile("/tmp/mull.stdout.%%%%%%", stdoutFilename);
+  Pipe stdoutPipe(diagnostics);
+  Pipe stderrPipe(diagnostics);
 
   /// Creating a memory to be shared between child and parent.
   auto *sharedStatus = (ExecutionStatus *)mmap(
@@ -101,18 +116,12 @@ mull::ExecutionResult mull::ForkTimerSandbox::run(Diagnostics &diagnostics,
   auto start = high_resolution_clock::now();
   const pid_t workerPID = mullFork(diagnostics, "worker");
   if (workerPID == 0) {
-    /// TODO: There is an issue with freopen: it hangs once in a while, so as a hack we add the
-    /// timeout handling before calling freopen. There is a bug somewhere and it needs to be fixed.
-    /// It happens only on macOS, here is the most relevant thread:
-    /// hangs in flockfile() during fread() or fclose()
-    /// https://groups.google.com/forum/#!topic/darwin-dev/e5qPebpfvYM
-    handle_timeout(timeoutMilliseconds);
+    stdoutPipe.redirect(STDOUT_FILENO);
+    stderrPipe.redirect(STDERR_FILENO);
 
-    freopen(stderrFilename.c_str(), "w", stderr);
-    freopen(stdoutFilename.c_str(), "w", stdout);
+    handle_timeout(diagnostics, timeoutMilliseconds);
 
     *sharedStatus = function();
-
     fflush(stderr);
     fflush(stdout);
     _exit(MullExitCode);
@@ -126,8 +135,8 @@ mull::ExecutionResult mull::ForkTimerSandbox::run(Diagnostics &diagnostics,
     ExecutionResult result;
     result.runningTime = duration_cast<std::chrono::milliseconds>(elapsed).count();
     result.exitStatus = WEXITSTATUS(status);
-    result.stderrOutput = readFileAndUnlink(stderrFilename.c_str());
-    result.stdoutOutput = readFileAndUnlink(stdoutFilename.c_str());
+    result.stdoutOutput = stdoutPipe.capture();
+    result.stderrOutput = stderrPipe.capture();
     result.status = *sharedStatus;
 
     if (WIFSIGNALED(status)) {
@@ -160,17 +169,14 @@ mull::ExecutionResult mull::ForkTimerSandbox::run(Diagnostics &diagnostics,
 mull::ExecutionResult mull::ForkWatchdogSandbox::run(Diagnostics &diagnostics,
                                                      std::function<ExecutionStatus(void)> function,
                                                      long long timeoutMilliseconds) const {
-  llvm::SmallString<32> stderrFilename;
-  llvm::sys::fs::createUniqueFile("/tmp/mull.stderr.%%%%%%", stderrFilename);
-
-  llvm::SmallString<32> stdoutFilename;
-  llvm::sys::fs::createUniqueFile("/tmp/mull.stdout.%%%%%%", stdoutFilename);
+  Pipe stdoutPipe(diagnostics);
+  Pipe stderrPipe(diagnostics);
 
   /// Creating a memory to be shared between child and parent.
   void *sharedMemory = mmap(
       nullptr, sizeof(ExecutionResult), PROT_READ | PROT_WRITE, MAP_SHARED | MAP_ANONYMOUS, -1, 0);
 
-  ExecutionResult *sharedResult = new (sharedMemory) ExecutionResult();
+  auto *sharedResult = new (sharedMemory) ExecutionResult();
 
   const pid_t watchdogPID = mullFork(diagnostics, "watchdog");
   if (watchdogPID == 0) {
@@ -186,8 +192,8 @@ mull::ExecutionResult mull::ForkWatchdogSandbox::run(Diagnostics &diagnostics,
     auto start = high_resolution_clock::now();
 
     if (workerPID == 0) {
-      freopen(stderrFilename.c_str(), "w", stderr);
-      freopen(stdoutFilename.c_str(), "w", stdout);
+      stdoutPipe.redirect(STDOUT_FILENO);
+      stderrPipe.redirect(STDERR_FILENO);
 
       sharedResult->status = function();
 
@@ -248,8 +254,8 @@ mull::ExecutionResult mull::ForkWatchdogSandbox::run(Diagnostics &diagnostics,
 
   ExecutionResult result = *sharedResult;
 
-  result.stderrOutput = readFileAndUnlink(stderrFilename.c_str());
-  result.stdoutOutput = readFileAndUnlink(stdoutFilename.c_str());
+  result.stdoutOutput = stdoutPipe.capture();
+  result.stderrOutput = stderrPipe.capture();
 
   /// Check that mummap succeeds:
   /// "On success, munmap() returns 0, on failure -1, and errno is set (probably
