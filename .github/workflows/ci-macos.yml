@@ -1,0 +1,45 @@
+name: CI macOS
+
+on: [pull_request]
+
+jobs:
+  test:
+    name: LLVM ${{ matrix.LLVM_VERSION }}
+    runs-on: macOS-latest
+    strategy:
+      matrix:
+        LLVM_VERSION: ["3.9", "4.0", "5.0", "6.0", "7.0", "8.0", "9.0"]
+
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          submodules: true
+      - name: Detect Mull version
+        id: version
+        run: |
+          env | sort
+          grep -Eo "MULL_VERSION [0-9.]+" CMakeLists.txt | awk ' { print $2 } '
+          grep -Eo "\"number\": [0-9]+" $GITHUB_EVENT_PATH | awk ' { print $2; exit } '
+          echo ::set-output name=version::`grep -Eo "MULL_VERSION [0-9.]+" CMakeLists.txt | awk ' { print $2 } '`.`grep -Eo "\"number\": [0-9]+" $GITHUB_EVENT_PATH | awk ' { print $2; exit } '`
+      - name: Run CI task
+        run: |
+          pip install ansible
+          cd infrastructure && \
+          ansible-playbook macos-playbook.yaml \
+            -e llvm_version="${{ matrix.LLVM_VERSION }}.0" \
+            -e source_dir=$PWD/.. \
+            -e gitref=$GITHUB_SHA \
+            -e host=localhost \
+            -e SDKROOT=`xcrun -show-sdk-path` \
+            -e mull_version=${{ steps.version.outputs.version }} \
+            --verbose
+      - name: Publish package (macOS)
+        if: matrix.LLVM_VERSION == '9.0'
+        run: |
+          curl --silent --show-error --location --request DELETE \
+            --user "alexdenisov:${{ secrets.BINTRAY_API_KEY }}" \
+            "https://api.bintray.com/packages/mull-project/macos/mull-nightly/versions/${{ steps.version.outputs.version }}"
+          curl --silent --show-error --fail --location --request PUT \
+            --upload-file infrastructure/packages/`cat infrastructure/PACKAGE_FILE_NAME`.zip \
+            --user "alexdenisov:${{ secrets.BINTRAY_API_KEY }}" \
+            "https://api.bintray.com/content/mull-project/macos/mull-nightly/${{ steps.version.outputs.version }}/`cat infrastructure/PACKAGE_FILE_NAME`.zip;publish=1"

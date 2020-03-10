@@ -11,7 +11,7 @@
     package_maker_path: PackageMaker.app
 
     package_extensions:
-      - dmg
+      - zip
 
     mull_cxx_flags: ""
 
@@ -65,4 +65,3 @@
 
     - name: Integration Tests
       include: helpers/integration-tests.yaml
-
