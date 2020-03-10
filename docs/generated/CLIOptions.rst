@@ -22,6 +22,8 @@
 
 --debug		Enables Debug Mode: more logs are printed
 
+--strict		Enables Strict Mode: all warning messages are treated as fatal errors
+
 --compdb-path filename		Path to a compilation database (compile_commands.json) for junk detection
 
 --compilation-flags string		Extra compilation flags for junk detection
