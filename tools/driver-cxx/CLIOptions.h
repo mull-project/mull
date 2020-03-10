@@ -42,6 +42,10 @@ extern opt<bool> IDEReporterShowKilled;
 extern opt<bool> DebugEnabled;
 extern opt<bool> StrictModeEnabled;
 
+extern opt<bool> NoOutput;
+extern opt<bool> NoTestOutput;
+extern opt<bool> NoMutantOutput;
+
 extern opt<SandboxKind> SandboxOption;
 
 extern list<std::string> LDSearchPaths;

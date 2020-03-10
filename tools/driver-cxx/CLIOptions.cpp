@@ -150,6 +150,27 @@ opt<bool> tool::StrictModeEnabled(
   init(false),
   cat(MullCXXCategory));
 
+opt<bool> tool::NoTestOutput(
+    "no-test-output",
+    desc("Does not capture output from test runs"),
+    Optional,
+    init(false),
+    cat(MullCXXCategory));
+
+opt<bool> tool::NoMutantOutput(
+    "no-mutant-output",
+    desc("Does not capture output from mutant runs"),
+    Optional,
+    init(false),
+    cat(MullCXXCategory));
+
+opt<bool> tool::NoOutput(
+    "no-output",
+    desc("Combines -no-test-output and -no-mutant-output"),
+    Optional,
+    init(false),
+    cat(MullCXXCategory));
+
 opt<bool> tool::DumpCLIInterface(
     "dump-cli",
     desc("Prints CLI options in the Sphinx/RST friendly format"),
@@ -317,6 +338,10 @@ void tool::dumpCLIInterface(Diagnostics &diagnostics) {
       &IDEReporterShowKilled,
       &DebugEnabled,
       &StrictModeEnabled,
+
+      &NoTestOutput,
+      &NoMutantOutput,
+      &NoOutput,
 
       &CompilationDatabasePath,
       &CompilationFlags,

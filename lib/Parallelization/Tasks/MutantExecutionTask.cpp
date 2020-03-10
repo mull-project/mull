@@ -57,7 +57,8 @@ void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
               assert(status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
               return status;
             },
-            sandboxTimeout);
+            sandboxTimeout,
+            config.captureMutantOutput);
 
         assert(result.status != ExecutionStatus::Invalid && "Expect to see valid TestResult");
 

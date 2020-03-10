@@ -13,6 +13,8 @@ struct Configuration {
   bool dryRunEnabled;
   bool failFastEnabled;
   bool cacheEnabled;
+  bool captureTestOutput;
+  bool captureMutantOutput;
 
   int timeout;
   int maxDistance;

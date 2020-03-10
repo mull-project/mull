@@ -247,7 +247,7 @@ void mull::SQLiteReporter::reportResults(const Result &result, const Metrics &me
 
   sqlite3_close(database);
 
-  outs() << "Results can be found at '" << databasePath << "'\n";
+  diagnostics.info(std::string("Results can be found at '") + databasePath + "'");
 }
 
 #pragma mark - Database Schema

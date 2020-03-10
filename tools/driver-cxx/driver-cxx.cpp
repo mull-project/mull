@@ -101,6 +101,13 @@ int main(int argc, char **argv) {
     configuration.cacheDirectory = tool::CacheDir.getValue();
   }
 
+  if (tool::NoTestOutput.getValue() || tool::NoOutput.getValue()) {
+    configuration.captureTestOutput = false;
+  }
+  if (tool::NoMutantOutput.getValue() || tool::NoOutput.getValue()) {
+    configuration.captureMutantOutput = false;
+  }
+
   std::vector<std::unique_ptr<ebc::EmbeddedFile>> embeddedFiles;
   mull::SingleTaskExecutor extractBitcodeBuffers(
       diagnostics, "Extracting bitcode from executable", [&] {

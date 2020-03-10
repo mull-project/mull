@@ -15,25 +15,25 @@ public:
 
   virtual ~ProcessSandbox() = default;
   virtual ExecutionResult run(Diagnostics &diagnostics, std::function<ExecutionStatus()> function,
-                              long long timeoutMilliseconds) const = 0;
+                              long long timeoutMilliseconds, bool shouldCaptureOutput) const = 0;
 };
 
 class ForkTimerSandbox : public ProcessSandbox {
 public:
   ExecutionResult run(Diagnostics &diagnostics, std::function<ExecutionStatus()> function,
-                      long long timeoutMilliseconds) const override;
+                      long long timeoutMilliseconds, bool shouldCaptureOutput) const override;
 };
 
 class ForkWatchdogSandbox : public ProcessSandbox {
 public:
   ExecutionResult run(Diagnostics &diagnostics, std::function<ExecutionStatus()> function,
-                      long long timeoutMilliseconds) const override;
+                      long long timeoutMilliseconds, bool shouldCaptureOutput) const override;
 };
 
 class NullProcessSandbox : public ProcessSandbox {
 public:
   ExecutionResult run(Diagnostics &diagnostics, std::function<ExecutionStatus()> function,
-                      long long timeoutMilliseconds) const override;
+                      long long timeoutMilliseconds, bool shouldCaptureOutput) const override;
 };
 
 } // namespace mull
