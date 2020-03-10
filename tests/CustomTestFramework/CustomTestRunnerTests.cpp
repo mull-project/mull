@@ -79,7 +79,7 @@ TEST_P(CustomTestRunnerTest, all) {
   Trampolines trampolines(trampolineNames);
   runner.loadMutatedProgram(objects, trampolines, jit);
   ExecutionResult result = sandbox.run(
-      diagnostics, [&]() { return runner.runTest(jit, program, test); }, TestTimeout);
+      diagnostics, [&]() { return runner.runTest(jit, program, test); }, TestTimeout, true);
   ASSERT_EQ(result.status, parameter.status);
 }
 

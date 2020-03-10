@@ -24,6 +24,12 @@
 
 --strict		Enables Strict Mode: all warning messages are treated as fatal errors
 
+--no-test-output		Does not capture output from test runs
+
+--no-mutant-output		Does not capture output from mutant runs
+
+--no-output		Combines -no-test-output and -no-mutant-output
+
 --compdb-path filename		Path to a compilation database (compile_commands.json) for junk detection
 
 --compilation-flags string		Extra compilation flags for junk detection

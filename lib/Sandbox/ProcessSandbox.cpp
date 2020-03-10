@@ -10,7 +10,6 @@
 #include <cstdlib>
 #include <cstring>
 #include <llvm/Support/FileSystem.h>
-#include <sstream>
 #include <sys/mman.h>
 #include <sys/time.h>
 #include <sys/wait.h>
@@ -55,26 +54,40 @@ void handle_timeout(mull::Diagnostics &diagnostics, long long timeoutMillisecond
 
 class Pipe {
 public:
-  Pipe(mull::Diagnostics &diagnostics) : diagnostics(diagnostics), shouldCapture(true) {
+  Pipe(mull::Diagnostics &diagnostics, bool shouldCaptureOutput)
+      : diagnostics(diagnostics), shouldCapture(shouldCaptureOutput) {
     creator = getpid();
     int pipes[2];
-    if (shouldCapture && pipe(pipes) == 0) {
+    if (shouldCapture) {
+      while (pipe(pipes) != 0) {
+        if (errno == EINTR) {
+          continue;
+        } else {
+          shouldCapture = false;
+          diagnostics.warning(std::string("pipe: ") + strerror(errno));
+          break;
+        }
+      }
       pipe_read = pipes[0];
       pipe_write = pipes[1];
-    } else {
-      shouldCapture = false;
-      diagnostics.warning(std::string("pipe: ") + strerror(errno));
     }
   }
   void redirect(int to) {
     assert(creator != getpid() && "Should be called from the child process");
     if (shouldCapture) {
-      if (dup2(pipe_write, to) == -1) {
-        diagnostics.warning(std::string("dup2: ") + strerror(errno));
-        shouldCapture = false;
+      while (dup2(pipe_write, to) == -1) {
+        if (errno == EINTR) {
+          continue;
+        } else {
+          diagnostics.warning(std::string("dup2: ") + strerror(errno));
+          shouldCapture = false;
+          break;
+        }
       }
       close(pipe_read);
       close(pipe_write);
+    } else {
+      close(to);
     }
   }
   std::string capture() {
@@ -105,9 +118,10 @@ private:
 
 mull::ExecutionResult mull::ForkTimerSandbox::run(Diagnostics &diagnostics,
                                                   std::function<ExecutionStatus(void)> function,
-                                                  long long timeoutMilliseconds) const {
-  Pipe stdoutPipe(diagnostics);
-  Pipe stderrPipe(diagnostics);
+                                                  long long timeoutMilliseconds,
+                                                  bool shouldCaptureOutput) const {
+  Pipe stdoutPipe(diagnostics, shouldCaptureOutput);
+  Pipe stderrPipe(diagnostics, shouldCaptureOutput);
 
   /// Creating a memory to be shared between child and parent.
   auto *sharedStatus = (ExecutionStatus *)mmap(
@@ -168,9 +182,10 @@ mull::ExecutionResult mull::ForkTimerSandbox::run(Diagnostics &diagnostics,
 
 mull::ExecutionResult mull::ForkWatchdogSandbox::run(Diagnostics &diagnostics,
                                                      std::function<ExecutionStatus(void)> function,
-                                                     long long timeoutMilliseconds) const {
-  Pipe stdoutPipe(diagnostics);
-  Pipe stderrPipe(diagnostics);
+                                                     long long timeoutMilliseconds,
+                                                     bool shouldCaptureOutput) const {
+  Pipe stdoutPipe(diagnostics, shouldCaptureOutput);
+  Pipe stderrPipe(diagnostics, shouldCaptureOutput);
 
   /// Creating a memory to be shared between child and parent.
   void *sharedMemory = mmap(
@@ -269,7 +284,8 @@ mull::ExecutionResult mull::ForkWatchdogSandbox::run(Diagnostics &diagnostics,
 
 mull::ExecutionResult mull::NullProcessSandbox::run(Diagnostics &diagnostics,
                                                     std::function<ExecutionStatus(void)> function,
-                                                    long long timeoutMilliseconds) const {
+                                                    long long timeoutMilliseconds,
+                                                    bool shouldCaptureOutput) const {
   ExecutionResult result;
   result.status = function();
   return result;

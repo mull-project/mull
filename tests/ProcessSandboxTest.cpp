@@ -31,7 +31,8 @@ TYPED_TEST_P(ProcessSandboxTest, captureOutputFromChildProcess) {
 
         return ExecutionStatus::Passed;
       },
-      Timeout);
+      Timeout,
+      true);
 
   ASSERT_EQ(result.status, Passed);
 
@@ -39,12 +40,36 @@ TYPED_TEST_P(ProcessSandboxTest, captureOutputFromChildProcess) {
   ASSERT_STREQ(result.stderrOutput.c_str(), stderrMessage);
 }
 
+TYPED_TEST_P(ProcessSandboxTest, doesNotCaptureOutputFromChildProcess) {
+  Diagnostics diagnostics;
+  TypeParam sandbox;
+
+  static const char stdoutMessage[] = "Printing to stdout from a sandboxed child\n";
+  static const char stderrMessage[] = "Printing to stderr from a sandboxed child\n";
+
+  ExecutionResult result = sandbox.run(
+      diagnostics,
+      [&]() {
+        printf("%s", stdoutMessage);
+        fprintf(stderr, "%s", stderrMessage);
+
+        return ExecutionStatus::Passed;
+      },
+      Timeout,
+      false);
+
+  ASSERT_EQ(result.status, Passed);
+
+  ASSERT_STREQ(result.stdoutOutput.c_str(), "");
+  ASSERT_STREQ(result.stderrOutput.c_str(), "");
+}
+
 TYPED_TEST_P(ProcessSandboxTest, statusPassedIfExitingWithZeroAndResultWasSet) {
   Diagnostics diagnostics;
   TypeParam sandbox;
 
   ExecutionResult result = sandbox.run(
-      diagnostics, [&]() { return ExecutionStatus::Passed; }, Timeout);
+      diagnostics, [&]() { return ExecutionStatus::Passed; }, Timeout, true);
 
   ASSERT_EQ(result.status, Passed);
 }
@@ -59,7 +84,8 @@ TYPED_TEST_P(ProcessSandboxTest, statusAbnormalExit_IfExitingWithNonZero) {
         exit(1);
         return ExecutionStatus::Passed;
       },
-      Timeout);
+      Timeout,
+      true);
 
   ASSERT_EQ(result.status, AbnormalExit);
 }
@@ -74,7 +100,8 @@ TYPED_TEST_P(ProcessSandboxTest, statusPassedIfExitedWithZero) {
         exit(0);
         return ExecutionStatus::Passed;
       },
-      Timeout);
+      Timeout,
+      true);
 
   ASSERT_EQ(result.status, Passed);
 }
@@ -89,7 +116,8 @@ TYPED_TEST_P(ProcessSandboxTest, statusTimeout) {
         sleep(3);
         return ExecutionStatus::Passed;
       },
-      Timeout);
+      Timeout,
+      true);
 
   ASSERT_EQ(result.status, Timedout);
 }
@@ -104,12 +132,14 @@ TYPED_TEST_P(ProcessSandboxTest, statusCrashed) {
         abort();
         return ExecutionStatus::Passed;
       },
-      Timeout);
+      Timeout,
+      true);
 
   ASSERT_EQ(result.status, Crashed);
 }
 
 REGISTER_TYPED_TEST_CASE_P(ProcessSandboxTest, captureOutputFromChildProcess,
+                           doesNotCaptureOutputFromChildProcess,
                            statusPassedIfExitingWithZeroAndResultWasSet,
                            statusAbnormalExit_IfExitingWithNonZero, statusPassedIfExitedWithZero,
                            statusTimeout, statusCrashed);
