@@ -16,7 +16,7 @@ jobs:
         with:
           submodules: true
       - name: Run macOS
-        if: matrix.os == 'macOS-10.15'
+        if: matrix.os == 'macOS-10.15xx'
         run: |
           pip install ansible
           cd infrastructure && \
@@ -40,5 +40,15 @@ jobs:
             -e source_dir=$PWD/.. \
             -e gitref=$GITHUB_SHA \
             -e host=localhost \
-            -e skip_package=true \
+            -e skip_package=false \
             --verbose
+      - name: Check package
+        if: matrix.os == 'ubuntu-18.04'
+        run: |
+          pwd
+          ls packages
+      - uses: actions/upload-artifact@v1
+        if: matrix.os == 'ubuntu-18.04'
+        with:
+          name: package
+          path: packages

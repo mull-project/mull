@@ -58,6 +58,6 @@
     - name: Build Mull
       include: helpers/build-mull.yaml
 
-    - name: Integration Tests
-      include: helpers/integration-tests.yaml
+#    - name: Integration Tests
+#      include: helpers/integration-tests.yaml
 
