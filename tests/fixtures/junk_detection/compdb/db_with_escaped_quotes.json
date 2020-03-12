@@ -1,0 +1,7 @@
+[
+  {
+    "directory": "/src/builds/amd64-linux-mull",
+    "command": "/usr/bin/clang++-9  -DQT_CORE_LIB -DQT_TESTCASE_BUILDDIR=\\\"/src/builds/amd64-linux-mull\\\" -o tests/TestingUnitTests/CMakeFiles/TestingUnitTests.dir/ModuleTestSuite.cpp.o -c /src/tests/TestingUnitTests/ModuleTestSuite.cpp",
+    "file": "/tmp/main.cpp"
+  }
+]

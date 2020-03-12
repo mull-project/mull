@@ -152,6 +152,25 @@ TEST(CompilationDatabaseFromFile, parsesCompilationFlagsFromClangMJCommandValid)
   ASSERT_EQ(compilationFlags.at(19), std::string("/usr/include"));
 }
 
+TEST(CompilationDatabaseFromFile, parsesCompilationDatabaseWithEscapedQuotes) {
+  Diagnostics diagnostics;
+  auto path = fixtures::junk_detection_compdb_db_with_escaped_quotes_json_path();
+  const CompilationDatabase database(
+    diagnostics,
+    CompilationDatabase::Path(path),
+    CompilationDatabase::Flags(""),
+    CompilationDatabase::BitcodeFlags({}));
+
+  const std::string file("/tmp/main.cpp");
+  auto compilationFlags = database.compilationFlagsForFile(file);
+
+  ASSERT_EQ(compilationFlags.size(), size_t(4));
+  ASSERT_EQ(compilationFlags.at(0), std::string("-DQT_CORE_LIB"));
+  ASSERT_EQ(compilationFlags.at(1), std::string("-DQT_TESTCASE_BUILDDIR=\"/src/builds/amd64-linux-mull\""));
+  ASSERT_EQ(compilationFlags.at(2), std::string("-o"));
+  ASSERT_EQ(compilationFlags.at(3), std::string("tests/TestingUnitTests/CMakeFiles/TestingUnitTests.dir/ModuleTestSuite.cpp.o"));
+}
+
 TEST(CompilationDatabaseFromFile, parsesCompilationFlagsObtainedFromBitcode) {
   const std::string fakeFile = "/opt/fake/file.cpp";
 
