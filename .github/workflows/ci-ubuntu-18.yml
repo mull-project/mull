@@ -1,0 +1,55 @@
+name: CI Ubuntu 18.04
+
+on: [pull_request]
+
+jobs:
+  test:
+    name: LLVM ${{ matrix.LLVM_VERSION }}
+    runs-on: ubuntu-latest
+    container: ubuntu:18.04
+    strategy:
+      matrix:
+        LLVM_VERSION: ["3.9", "4.0", "5.0", "6.0", "7.0", "8.0", "9.0"]
+
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          submodules: true
+      - name: Detect Mull version
+        id: version
+        run: |
+          env | sort
+          grep -Eo "MULL_VERSION [0-9.]+" CMakeLists.txt | awk ' { print $2 } '
+          grep -Eo "\"number\": [0-9]+" $GITHUB_EVENT_PATH | awk ' { print $2; exit } '
+          echo ::set-output name=version::`grep -Eo "MULL_VERSION [0-9.]+" CMakeLists.txt | awk ' { print $2 } '`.`grep -Eo "\"number\": [0-9]+" $GITHUB_EVENT_PATH | awk ' { print $2; exit } '`
+      - name: Install software
+        run: |
+          apt-get update && apt-get install -y python-pip curl
+          pip install ansible
+      - name: Patch 3.9/4.0
+        if: matrix.LLVM_VERSION == '3.9' || matrix.LLVM_VERSION == '4.0'
+        run: |
+          ln -s /usr/include/locale.h /usr/include/xlocale.h
+      - name: Run CI task
+        run: |
+          cd infrastructure && \
+          ansible-playbook ubuntu-playbook.yaml \
+            -e llvm_version="${{ matrix.LLVM_VERSION }}.0" \
+            -e source_dir=$PWD/.. \
+            -e gitref=$GITHUB_SHA \
+            -e host=localhost \
+            -e mull_version=${{ steps.version.outputs.version }} \
+            --verbose
+      - name: Publish package
+        if: matrix.LLVM_VERSION == '9.0'
+        run: |
+          curl --silent --show-error --location --request DELETE \
+            --user "alexdenisov:${{ secrets.BINTRAY_API_KEY }}" \
+            "https://api.bintray.com/packages/mull-project/ubuntu-18/mull-nightly/versions/${{ steps.version.outputs.version }}"
+          curl --silent --show-error --fail --location --request PUT \
+            --upload-file infrastructure/packages/`cat infrastructure/PACKAGE_FILE_NAME`.deb \
+            --user "alexdenisov:${{ secrets.BINTRAY_API_KEY }}" \
+            -H "X-Bintray-Debian-Distribution: nightly" \
+            -H "X-Bintray-Debian-Component: main" \
+            -H "X-Bintray-Debian-Architecture: amd64" \
+            "https://api.bintray.com/content/mull-project/ubuntu-18/mull-nightly/${{ steps.version.outputs.version }}/pool/main/m/`cat infrastructure/PACKAGE_FILE_NAME`.deb;publish=1"

@@ -38,7 +38,7 @@
     state: directory
 
 - name: Prepare Build System (Release)
-  command: cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DPATH_TO_LLVM={{ llvm_dir }} -DCMAKE_CXX_FLAGS="{{ mull_cxx_flags }}" {{ source_dir }}
+  command: cmake -G Ninja -DMULL_VERSION={{ mull_version }} -DCMAKE_BUILD_TYPE=Release -DPATH_TO_LLVM={{ llvm_dir }} -DCMAKE_CXX_FLAGS="{{ mull_cxx_flags }}" {{ source_dir }}
   args:
     chdir: "{{ release_build_dir }}"
     creates: "{{ release_build_dir }}/CMakeCache.txt"
@@ -70,14 +70,12 @@
   args:
     chdir: "{{ release_build_dir }}"
   become: true
-  when: not skip_package
 
 - name: Copy package file name
   fetch:
     src: "{{ release_build_dir }}/PACKAGE_FILE_NAME"
     dest: PACKAGE_FILE_NAME
     flat: true
-  when: not skip_package
 
 - name: Copy package to the local machine
   fetch:
@@ -85,10 +83,8 @@
     dest: "packages/{{ lookup('file', 'PACKAGE_FILE_NAME') }}.{{ item }}"
     flat: true
   with_items: "{{ package_extensions }}"
-  when: not skip_package
 
 - name: Print Mull version
   command: mull-cxx -version
   args:
     chdir: "{{ release_build_dir }}"
-

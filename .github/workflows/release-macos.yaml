@@ -1,0 +1,49 @@
+name: Release macOS
+
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  test:
+    name: Release macOS Package
+    runs-on: macOS-latest
+
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          submodules: true
+      - name: Detect Mull version
+        id: version
+        run: |
+          if [ `echo $GITHUB_REF | awk -F/ ' { print $3 } '` != `grep -Eo "MULL_VERSION [0-9.]+" CMakeLists.txt | awk ' { print $2 } '` ];
+          then
+            false
+          fi
+          echo ::set-output name=version::`grep -Eo "MULL_VERSION [0-9.]+" CMakeLists.txt | awk ' { print $2 } '`
+      - name: Install software
+        run: |
+          apt-get update && apt-get install -y python-pip curl
+          pip install ansible
+      - name: Run CI task
+        run: |
+          pip install ansible
+          cd infrastructure && \
+          ansible-playbook macos-playbook.yaml \
+            -e llvm_version="9.0.0" \
+            -e source_dir=$PWD/.. \
+            -e gitref=$GITHUB_SHA \
+            -e host=localhost \
+            -e SDKROOT=`xcrun -show-sdk-path` \
+            -e mull_version=${{ steps.version.outputs.version }} \
+            --verbose
+      - name: Publish package
+        run: |
+          curl --silent --show-error --location --request DELETE \
+            --user "alexdenisov:${{ secrets.BINTRAY_API_KEY }}" \
+            "https://api.bintray.com/packages/mull-project/macos/mull/versions/${{ steps.version.outputs.version }}"
+          curl --silent --show-error --fail --location --request PUT \
+            --upload-file infrastructure/packages/`cat infrastructure/PACKAGE_FILE_NAME`.zip \
+            --user "alexdenisov:${{ secrets.BINTRAY_API_KEY }}" \
+            "https://api.bintray.com/content/mull-project/macos/mull/${{ steps.version.outputs.version }}/`cat infrastructure/PACKAGE_FILE_NAME`.zip;publish=1"

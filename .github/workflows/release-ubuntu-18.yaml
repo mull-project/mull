@@ -1,0 +1,51 @@
+name: Release Ubuntu 18.04
+
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  test:
+    name: Release Ubuntu Package
+    runs-on: ubuntu-latest
+    container: ubuntu:18.04
+
+    steps:
+      - uses: actions/checkout@v1
+        with:
+          submodules: true
+      - name: Detect Mull version
+        id: version
+        run: |
+          if [ `echo $GITHUB_REF | awk -F/ ' { print $3 } '` != `grep -Eo "MULL_VERSION [0-9.]+" CMakeLists.txt | awk ' { print $2 } '` ];
+          then
+            false
+          fi
+          echo ::set-output name=version::`grep -Eo "MULL_VERSION [0-9.]+" CMakeLists.txt | awk ' { print $2 } '`
+      - name: Install software
+        run: |
+          apt-get update && apt-get install -y python-pip curl
+          pip install ansible
+      - name: Run CI task
+        run: |
+          cd infrastructure && \
+          ansible-playbook ubuntu-playbook.yaml \
+            -e llvm_version="9.0.0" \
+            -e source_dir=$PWD/.. \
+            -e gitref=$GITHUB_SHA \
+            -e host=localhost \
+            -e mull_version=${{ steps.version.outputs.version }} \
+            --verbose
+      - name: Publish package
+        run: |
+          curl --silent --show-error --location --request DELETE \
+            --user "alexdenisov:${{ secrets.BINTRAY_API_KEY }}" \
+            "https://api.bintray.com/packages/mull-project/ubuntu-18/mull/versions/${{ steps.version.outputs.version }}"
+          curl --silent --show-error --fail --location --request PUT \
+            --upload-file infrastructure/packages/`cat infrastructure/PACKAGE_FILE_NAME`.deb \
+            --user "alexdenisov:${{ secrets.BINTRAY_API_KEY }}" \
+            -H "X-Bintray-Debian-Distribution: nightly" \
+            -H "X-Bintray-Debian-Component: main" \
+            -H "X-Bintray-Debian-Architecture: amd64" \
+            "https://api.bintray.com/content/mull-project/ubuntu-18/mull/${{ steps.version.outputs.version }}/pool/main/m/`cat infrastructure/PACKAGE_FILE_NAME`.deb;publish=1"
