@@ -2,6 +2,8 @@
 
 #include <functional>
 #include <string>
+#include <unordered_set>
+#include <vector>
 
 namespace mull {
 
@@ -79,3 +81,14 @@ template <> struct std::hash<mull::MutatorKind> {
 };
 
 } // namespace std
+
+namespace mull {
+class MutatorKindSet {
+public:
+  static MutatorKindSet create(std::vector<MutatorKind> mutators);
+  bool includesMutator(mull::MutatorKind mutatorKind) const;
+private:
+  MutatorKindSet(std::unordered_set<mull::MutatorKind> mutators);
+  std::unordered_set<mull::MutatorKind> mutators;
+};
+}

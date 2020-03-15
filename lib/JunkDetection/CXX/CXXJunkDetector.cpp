@@ -13,9 +13,7 @@
 
 using namespace mull;
 
-template <typename Visitor>
-static bool isJunkMutation(ASTStorage &storage,
-                           MutationPoint *point) {
+template <typename Visitor> static bool isJunkMutation(ASTStorage &storage, MutationPoint *point) {
   auto ast = storage.findAST(point);
   auto location = ast->getLocation(point);
   clang::SourceManager &sourceManager = ast->getSourceManager();
@@ -49,8 +47,7 @@ static bool isJunkMutation(ASTStorage &storage,
   return true;
 }
 
-CXXJunkDetector::CXXJunkDetector(ASTStorage &astStorage)
-    : astStorage(astStorage) {}
+CXXJunkDetector::CXXJunkDetector(ASTStorage &astStorage) : astStorage(astStorage) {}
 
 bool CXXJunkDetector::isJunk(MutationPoint *point) {
   if (point->getSourceLocation().isNull()) {

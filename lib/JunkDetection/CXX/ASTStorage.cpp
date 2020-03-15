@@ -174,7 +174,7 @@ ASTStorage::ASTStorage(Diagnostics &diagnostics, const std::string &cxxCompilati
       compilationDatabase(diagnostics, CompilationDatabase::Path(cxxCompilationDatabasePath),
                           CompilationDatabase::Flags(cxxCompilationFlags),
                           CompilationDatabase::BitcodeFlags(bitcodeCompilationFlags)),
-      mutations() {}
+      mutations(diagnostics) {}
 
 ThreadSafeASTUnit *ASTStorage::findAST(const MutationPoint *point) {
   assert(point);
@@ -182,6 +182,10 @@ ThreadSafeASTUnit *ASTStorage::findAST(const MutationPoint *point) {
 
   const std::string &sourceFile = point->getSourceLocation().unitFilePath;
 
+  return findAST(sourceFile);
+}
+
+ThreadSafeASTUnit *ASTStorage::findAST(const std::string &sourceFile) {
   std::lock_guard<std::mutex> guard(mutex);
   if (astUnits.count(sourceFile)) {
     return astUnits.at(sourceFile).get();
@@ -234,4 +238,14 @@ void ASTStorage::saveMutation(const std::string &sourceFile, mull::MutatorKind m
                               const clang::Stmt *const expression, int line, int column) {
   std::lock_guard<std::mutex> lockGuard(mutantNodesMutex);
   mutations.saveMutation(sourceFile, mutatorKind, expression, line, column);
+}
+
+void ASTStorage::saveMutations(std::unordered_map<SourceFilePath, SingleASTUnitMutations> &storage) {
+  mutations.saveMutations(storage);
+}
+
+bool ASTStorage::mutationExists(const std::string &sourceFile,
+                                mull::MutatorKind mutatorKind, int line,
+                                int column) {
+  return mutations.mutationExists(sourceFile, mutatorKind, line, column);
 }

@@ -47,6 +47,7 @@ extern opt<bool> NoTestOutput;
 extern opt<bool> NoMutantOutput;
 
 extern opt<SandboxKind> SandboxOption;
+extern opt<bool> EnableAST;
 
 extern list<std::string> LDSearchPaths;
 extern list<std::string> ExcludePaths;

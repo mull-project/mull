@@ -15,7 +15,8 @@ mull::LineColumnHash mull::lineColumnHash(int line, int column) {
   return (line + column) * (line + column + 1) / 2 + line;
 }
 
-ASTMutationStorage::ASTMutationStorage() : storage() {}
+ASTMutationStorage::ASTMutationStorage(Diagnostics &diagnostics)
+    : storage(), diagnostics(diagnostics) {}
 
 int ASTMutationStorage::count() const {
   int count = 0;
@@ -47,9 +48,30 @@ const ASTMutation &ASTMutationStorage::getMutation(const std::string &sourceFile
   return mutation;
 }
 
+bool ASTMutationStorage::mutationExists(const std::string &sourceFile,
+                                        mull::MutatorKind mutatorKind, int line, int column) const {
+  assert(llvm::sys::fs::is_regular_file(sourceFile) || sourceFile == "input.cc");
+
+  assert(storage.count(sourceFile) > 0);
+
+  const SingleASTUnitMutations &astUnitMutations = storage.at(sourceFile);
+  assert(astUnitMutations.count(mutatorKind) > 0);
+
+  const SingleMutationTypeBucket &oneMutationBucket = astUnitMutations.at(mutatorKind);
+
+  LineColumnHash hash = lineColumnHash(line, column);
+  return oneMutationBucket.count(hash) > 0;
+}
+
 void ASTMutationStorage::saveMutation(const std::string &sourceFile, mull::MutatorKind mutatorKind,
                                       const clang::Stmt *const expression, int line, int column) {
   assert(llvm::sys::fs::is_regular_file(sourceFile) || sourceFile == "input.cc");
+
+  std::string description = MutationKindToString(mutatorKind);
+
+  diagnostics.debug(std::string("ASTMutationStorage: recording mutation \"") + description +
+                    "\": " + sourceFile + ":" + std::to_string(line) + ":" +
+                    std::to_string(column));
 
   int hash = mull::lineColumnHash(line, column);
 
@@ -63,4 +85,8 @@ void ASTMutationStorage::saveMutation(const std::string &sourceFile, mull::Mutat
 
   storage[sourceFile][mutatorKind].emplace(hash,
                                            ASTMutation(mutatorKind, line, column, expression));
+}
+
+void ASTMutationStorage::saveMutations(std::unordered_map<SourceFilePath, SingleASTUnitMutations> &mutations) {
+  storage.swap(mutations);
 }
