@@ -18,11 +18,10 @@
 
 using namespace mull;
 
-ASTFinder::ASTFinder(mull::MutatorKindSet mutatorKindSet) : mutatorKindSet(mutatorKindSet) {}
+ASTFinder::ASTFinder(const MutatorKindSet &mutatorKindSet) : mutatorKindSet(mutatorKindSet) {}
 
-void mull::ASTFinder::findMutations(mull::Diagnostics &diagnostics, const mull::Configuration &config,
-                                    mull::Program &program, mull::FilePathFilter &pathFilter,
-                                    mull::ASTStorage &storage) {
+void ASTFinder::findMutations(Diagnostics &diagnostics, const Configuration &config,
+                              Program &program, FilePathFilter &pathFilter, ASTStorage &storage) {
 
   std::vector<std::pair<SourceFilePath, SingleASTUnitMutations>> mutationsAsVector;
   std::vector<mull::ASTSearchTask> tasks;
@@ -41,7 +40,7 @@ void mull::ASTFinder::findMutations(mull::Diagnostics &diagnostics, const mull::
 
   std::unordered_map<SourceFilePath, SingleASTUnitMutations> mutations;
 
-  for (auto &unitMutationsPair: mutationsAsVector) {
+  for (auto &unitMutationsPair : mutationsAsVector) {
     mutations.emplace(unitMutationsPair.first, unitMutationsPair.second);
   }
 

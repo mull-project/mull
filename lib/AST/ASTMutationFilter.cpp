@@ -18,7 +18,7 @@ bool ASTMutationFilter::shouldSkip(MutationPoint *point) {
 
   const llvm::DebugLoc &debugInfo = instruction->getDebugLoc();
   if (!debugInfo) {
-    return false;
+    return true;
   }
 
   int line = debugInfo.getLine();

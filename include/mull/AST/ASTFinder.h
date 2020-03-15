@@ -12,13 +12,12 @@ class FilePathFilter;
 
 class ASTFinder {
 public:
-  ASTFinder(mull::MutatorKindSet mutatorKindSet);
+  ASTFinder(const MutatorKindSet &mutatorKindSet);
 
-  void findMutations(Diagnostics &diagnostics,
-                     const mull::Configuration &config, mull::Program &program,
-                     mull::FilePathFilter &pathFilter, mull::ASTStorage &storage);
+  void findMutations(Diagnostics &diagnostics, const Configuration &config, Program &program,
+                     FilePathFilter &pathFilter, ASTStorage &storage);
 
 private:
-  mull::MutatorKindSet mutatorKindSet;
+  const mull::MutatorKindSet &mutatorKindSet;
 };
 } // namespace mull

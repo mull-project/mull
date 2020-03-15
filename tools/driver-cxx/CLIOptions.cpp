@@ -339,6 +339,7 @@ void tool::dumpCLIInterface(Diagnostics &diagnostics) {
 
       &ReportName,
       &ReportDirectory,
+      &EnableAST,
       reporters,
       &IDEReporterShowKilled,
       &DebugEnabled,

@@ -18,16 +18,16 @@ public:
   using Out = std::vector<std::pair<SourceFilePath, SingleASTUnitMutations>>;
   using iterator = In::const_iterator;
 
-  ASTSearchTask(mull::Diagnostics &diagnostics, mull::ASTStorage &astStorage,
-                mull::MutatorKindSet mutatorKindSet, mull::FilePathFilter &pathFilter);
+  ASTSearchTask(Diagnostics &diagnostics, ASTStorage &astStorage,
+                MutatorKindSet mutatorKindSet, FilePathFilter &pathFilter);
 
-  void operator()(iterator begin, iterator end, Out &storage, mull::progress_counter &counter);
+  void operator()(iterator begin, iterator end, Out &storage, progress_counter &counter);
 
 private:
-  mull::Diagnostics &diagnostics;
-  mull::ASTStorage &astStorage;
-  mull::MutatorKindSet mutatorKindSet;
-  mull::FilePathFilter &pathFilter;
+  Diagnostics &diagnostics;
+  ASTStorage &astStorage;
+  MutatorKindSet mutatorKindSet;
+  FilePathFilter &pathFilter;
 };
 
 } // namespace mull

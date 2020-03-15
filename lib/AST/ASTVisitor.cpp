@@ -71,15 +71,14 @@ void ASTVisitor::saveMutationPoint(mull::MutatorKind mutatorKind, const clang::S
   int beginColumn = sourceManager.getExpansionColumnNumber(location);
 
   std::string sourceFilePath = astUnit.getSourceManager().getFilename(location).str();
-  if (sourceFilePath.size() == 0) {
+  if (sourceFilePath.empty()) {
     /// we reach here because of asserts()
     /// TODO: maybe there are more cases.
     return;
   }
 
   if (!llvm::sys::fs::is_regular_file(sourceFilePath) && sourceFilePath != "input.cc") {
-    diagnostics.error(std::string("ASTVisitor: invalid source file path: '") +
-                      sourceFilePath + "'\n");
+    diagnostics.error(std::string("ASTVisitor: invalid source file path: '") + sourceFilePath);
   }
 
   std::string description = MutationKindToString(mutatorKind);

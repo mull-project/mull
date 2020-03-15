@@ -10,6 +10,8 @@
 
 --report-dir directory		Where to store report (defaults to '.')
 
+--enable-ast		Enable "white" AST search (disabled by default)
+
 --reporters reporter		Choose reporters:
 
     :IDE:	Prints compiler-like warnings into stdout

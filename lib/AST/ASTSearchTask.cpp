@@ -21,7 +21,7 @@ void ASTSearchTask::operator()(iterator begin, iterator end, Out &storage,
     const llvm::Module *const module = bitcode->getModule();
     std::string sourceFileName = module->getSourceFileName();
     if (pathFilter.shouldSkip(sourceFileName)) {
-      diagnostics.info(std::string("ASTSearchTask: skipping path: ") + sourceFileName);
+      diagnostics.debug(std::string("ASTSearchTask: skipping path: ") + sourceFileName);
       continue;
     }
 
@@ -38,7 +38,7 @@ void ASTSearchTask::operator()(iterator begin, iterator end, Out &storage,
     visitor.TraverseDecl(ast->getASTContext().getTranslationUnitDecl());
   }
 
-  for (auto &elem: mutationUnits) {
+  for (auto &elem : mutationUnits) {
     storage.push_back(std::make_pair(elem.first, elem.second));
   }
 }
