@@ -1,8 +1,8 @@
 #pragma once
 
 #include "mull/Diagnostics/Diagnostics.h"
-#include "mull/JunkDetection/CXX/ASTStorage.h"
 #include "mull/Filters/FilePathFilter.h"
+#include "mull/JunkDetection/CXX/ASTStorage.h"
 
 #include <clang/AST/RecursiveASTVisitor.h>
 
@@ -20,11 +20,9 @@ class ASTVisitor : public clang::RecursiveASTVisitor<ASTVisitor> {
   bool shouldSkipCurrentFunction;
 
 public:
-  explicit ASTVisitor(mull::Diagnostics &diagnostics,
-                      mull::ThreadSafeASTUnit &astUnit,
+  explicit ASTVisitor(mull::Diagnostics &diagnostics, mull::ThreadSafeASTUnit &astUnit,
                       mull::SingleASTUnitMutations &singleUnitMutations,
-                      mull::FilePathFilter &filePathFilter,
-                      mull::MutatorKindSet mutatorKindSet);
+                      mull::FilePathFilter &filePathFilter, mull::MutatorKindSet mutatorKindSet);
 
   bool VisitFunctionDecl(clang::FunctionDecl *Decl);
   bool VisitExpr(clang::Expr *expr);
@@ -32,8 +30,7 @@ public:
   void traverse();
 
 private:
-  void saveMutationPoint(mull::MutatorKind mutatorKind,
-                         const clang::Stmt *stmt,
+  void saveMutationPoint(mull::MutatorKind mutatorKind, const clang::Stmt *stmt,
                          clang::SourceLocation location);
 };
 

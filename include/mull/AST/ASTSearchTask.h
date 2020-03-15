@@ -18,8 +18,8 @@ public:
   using Out = std::vector<std::pair<SourceFilePath, SingleASTUnitMutations>>;
   using iterator = In::const_iterator;
 
-  ASTSearchTask(Diagnostics &diagnostics, ASTStorage &astStorage,
-                MutatorKindSet mutatorKindSet, FilePathFilter &pathFilter);
+  ASTSearchTask(Diagnostics &diagnostics, ASTStorage &astStorage, MutatorKindSet mutatorKindSet,
+                FilePathFilter &pathFilter);
 
   void operator()(iterator begin, iterator end, Out &storage, progress_counter &counter);
 
