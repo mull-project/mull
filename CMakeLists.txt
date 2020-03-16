@@ -5,9 +5,9 @@ set (MULL_VERSION 0.6.1)
 endif()
 
 project(Mull
-  VERSION ${MULL_VERSION}
   LANGUAGES C CXX
 )
+set (PROJECT_VERSION ${MULL_VERSION})
 
 set (PROJECT_DESCRIPTION "LLVM-based mutation testing")
 set (PROJECT_HOMEPAGE_URL "https://github.com/mull-project/mull")

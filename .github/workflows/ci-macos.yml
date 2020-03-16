@@ -1,6 +1,17 @@
 name: CI macOS
 
-on: [pull_request]
+env:
+  BINTRAY_REPO: "macos"
+  LLVM_RELEASE: "9.0"
+
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+  release:
+    types:
+      - created
 
 jobs:
   test:
@@ -14,13 +25,32 @@ jobs:
       - uses: actions/checkout@v1
         with:
           submodules: true
-      - name: Detect Mull version
-        id: version
+      - name: Set build settings
+        id: settings
         run: |
-          env | sort
-          grep -Eo "MULL_VERSION [0-9.]+" CMakeLists.txt | awk ' { print $2 } '
-          grep -Eo "\"number\": [0-9]+" $GITHUB_EVENT_PATH | awk ' { print $2; exit } '
-          echo ::set-output name=version::`grep -Eo "MULL_VERSION [0-9.]+" CMakeLists.txt | awk ' { print $2 } '`.`grep -Eo "\"number\": [0-9]+" $GITHUB_EVENT_PATH | awk ' { print $2; exit } '`
+          echo ::set-output name=version::`grep -Eo "MULL_VERSION [0-9.]+" CMakeLists.txt | awk ' { print $2 } '`
+
+          case $GITHUB_EVENT_NAME in
+            "pull_request")
+              echo ::set-output name=suffix::-pr`grep -Eo "\"number\": [0-9]+" $GITHUB_EVENT_PATH | awk ' { print $2; exit } '`
+              echo ::set-output name=package::mull-nightly
+              echo ::set-output name=channel::nightly
+            ;;
+            "push")
+              echo ::set-output name=suffix::-trunk`git rev-list HEAD --count`
+              echo ::set-output name=package::mull-nightly
+              echo ::set-output name=channel::nightly
+            ;;
+            "release")
+              echo ::set-output name=suffix::""
+              echo ::set-output name=package::mull
+              echo ::set-output name=channel::stable
+              if [ `echo $GITHUB_REF | awk -F/ ' { print $3 } '` != `grep -Eo "MULL_VERSION [0-9.]+" CMakeLists.txt | awk ' { print $2 } '` ];
+              then
+                false
+              fi
+            ;;
+          esac
       - name: Run CI task
         run: |
           pip install ansible
@@ -31,15 +61,15 @@ jobs:
             -e gitref=$GITHUB_SHA \
             -e host=localhost \
             -e SDKROOT=`xcrun -show-sdk-path` \
-            -e mull_version=${{ steps.version.outputs.version }} \
+            -e mull_version=${{ steps.settings.outputs.version }}${{ steps.settings.outputs.suffix }} \
             --verbose
-      - name: Publish package (macOS)
-        if: matrix.LLVM_VERSION == '9.0'
+      - name: Publish package
+        if: matrix.LLVM_VERSION == env.LLVM_RELEASE
         run: |
           curl --silent --show-error --location --request DELETE \
             --user "alexdenisov:${{ secrets.BINTRAY_API_KEY }}" \
-            "https://api.bintray.com/packages/mull-project/macos/mull-nightly/versions/${{ steps.version.outputs.version }}"
+            "https://api.bintray.com/packages/mull-project/${{ env.BINTRAY_REPO }}/${{ steps.settings.outputs.package }}/versions/${{ steps.settings.outputs.version }}${{ steps.settings.outputs.suffix }}"
           curl --silent --show-error --fail --location --request PUT \
             --upload-file infrastructure/packages/`cat infrastructure/PACKAGE_FILE_NAME`.zip \
             --user "alexdenisov:${{ secrets.BINTRAY_API_KEY }}" \
-            "https://api.bintray.com/content/mull-project/macos/mull-nightly/${{ steps.version.outputs.version }}/`cat infrastructure/PACKAGE_FILE_NAME`.zip;publish=1"
+            "https://api.bintray.com/content/mull-project/${{ env.BINTRAY_REPO }}/${{ steps.settings.outputs.package }}/${{ steps.settings.outputs.version }}${{ steps.settings.outputs.suffix }}/pool/main/m/`cat infrastructure/PACKAGE_FILE_NAME`.zip;publish=1"
