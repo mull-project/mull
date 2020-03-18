@@ -43,8 +43,8 @@ private:
   std::vector<clang::Decl *> &declarations;
 };
 
-ThreadSafeASTUnit::ThreadSafeASTUnit(clang::ASTUnit *ast)
-    : ast(std::unique_ptr<clang::ASTUnit>(ast)) {
+ThreadSafeASTUnit::ThreadSafeASTUnit(std::unique_ptr<clang::ASTUnit> ast)
+    : ast(std::move(ast)) {
   if (this->ast) {
     recordDeclarations();
   }
@@ -223,7 +223,7 @@ ThreadSafeASTUnit *ASTStorage::findAST(const std::string &sourceFile) {
     diagnostics.warning(message.str());
   }
 
-  auto threadSafeAST = new ThreadSafeASTUnit(ast);
+  auto threadSafeAST = new ThreadSafeASTUnit(std::unique_ptr<clang::ASTUnit>(ast));
   astUnits[sourceFile] = std::unique_ptr<ThreadSafeASTUnit>(threadSafeAST);
   return threadSafeAST;
 }

@@ -6,6 +6,7 @@
 #include <clang/Frontend/ASTUnit.h>
 
 #include <map>
+#include <memory>
 #include <mutex>
 #include <string>
 #include <vector>
@@ -17,7 +18,7 @@ class Diagnostics;
 
 class ThreadSafeASTUnit {
 public:
-  explicit ThreadSafeASTUnit(clang::ASTUnit *ast);
+  explicit ThreadSafeASTUnit(std::unique_ptr<clang::ASTUnit> ast);
 
   clang::SourceManager &getSourceManager();
   clang::ASTContext &getASTContext();
