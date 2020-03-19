@@ -7,6 +7,11 @@
 
 using namespace mull;
 
+static std::vector<std::pair<clang::BinaryOperator::Opcode, mull::MutatorKind>> BINARY_MUTATIONS = {
+  { clang::BO_Add, mull::MutatorKind::CXX_AddToSub },
+  { clang::BO_Sub, mull::MutatorKind::CXX_SubToAdd },
+};
+
 ASTVisitor::ASTVisitor(mull::Diagnostics &diagnostics, mull::ThreadSafeASTUnit &astUnit,
                        mull::SingleASTUnitMutations &singleUnitMutations,
                        mull::FilePathFilter &filePathFilter, mull::MutatorKindSet mutatorKindSet)
@@ -49,12 +54,16 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
   }
 
   if (clang::BinaryOperator *binaryOperator = clang::dyn_cast<clang::BinaryOperator>(expr)) {
-    if (binaryOperator->getOpcode() == clang::BO_Add &&
-        mutatorKindSet.includesMutator(mull::MutatorKind::CXX_AddToSub)) {
-      clang::SourceLocation binaryOperatorLocation = binaryOperator->getOperatorLoc();
-      saveMutationPoint(mull::MutatorKind::CXX_AddToSub, binaryOperator, binaryOperatorLocation);
-      return true;
+    clang::SourceLocation binaryOperatorLocation = binaryOperator->getOperatorLoc();
+    for (const std::pair<clang::BinaryOperator::Opcode, mull::MutatorKind> &mutation :
+         BINARY_MUTATIONS) {
+      if (binaryOperator->getOpcode() == mutation.first &&
+          mutatorKindSet.includesMutator(mutation.second)) {
+        saveMutationPoint(mutation.second, binaryOperator, binaryOperatorLocation);
+        return true;
+      }
     }
+    return true;
   }
   return true;
 }
