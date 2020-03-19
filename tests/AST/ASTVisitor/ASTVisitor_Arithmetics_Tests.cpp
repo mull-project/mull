@@ -15,7 +15,7 @@ static const char *const fakeSourceFilePath = "input.cc";
 
 static FilePathFilter nullPathFilter;
 
-TEST(ASTVisitorTest, binaryAddOperator) {
+TEST(ASTVisitorTest, binaryAddToSubOperator) {
   const char *const binaryOperator = R"(///
 int add(int a, int b) {
   return a + b;
@@ -46,4 +46,37 @@ int add(int a, int b) {
 
   ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_AddToSub].size(), 1U);
   ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_AddToSub].count(locationHash), 1U);
+}
+
+TEST(ASTVisitorTest, binarySubToAddOperator) {
+  const char *const binaryOperator = R"(///
+int sub(int a, int b) {
+  return a - b;
+}
+)";
+
+  Diagnostics diagnostics;
+  ASTStorage storage(diagnostics, "", "", {});
+
+  std::unique_ptr<clang::ASTUnit> astUnit(
+    clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
+  assert(astUnit);
+
+  SingleASTUnitMutations singleUnitMutations;
+
+  MutatorKindSet mutatorKindSet = MutatorKindSet::create({ MutatorKind::CXX_SubToAdd });
+
+  ThreadSafeASTUnit threadSafeAstUnit(std::move(astUnit));
+  ASTVisitor astVisitor(
+    diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
+
+  astVisitor.traverse();
+
+  LineColumnHash locationHash = lineColumnHash(3, 12);
+
+  ASSERT_EQ(singleUnitMutations.size(), 1U);
+  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_SubToAdd), 1U);
+
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_SubToAdd].size(), 1U);
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_SubToAdd].count(locationHash), 1U);
 }
