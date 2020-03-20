@@ -10,6 +10,9 @@ using namespace mull;
 static std::vector<std::pair<clang::BinaryOperator::Opcode, mull::MutatorKind>> BINARY_MUTATIONS = {
   { clang::BO_Add, mull::MutatorKind::CXX_AddToSub },
   { clang::BO_Sub, mull::MutatorKind::CXX_SubToAdd },
+  { clang::BO_Mul, mull::MutatorKind::CXX_MulToDiv },
+  { clang::BO_Div, mull::MutatorKind::CXX_DivToMul },
+  { clang::BO_Rem, mull::MutatorKind::CXX_RemToDiv },
 };
 
 ASTVisitor::ASTVisitor(mull::Diagnostics &diagnostics, mull::ThreadSafeASTUnit &astUnit,

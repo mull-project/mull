@@ -80,3 +80,102 @@ int sub(int a, int b) {
   ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_SubToAdd].size(), 1U);
   ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_SubToAdd].count(locationHash), 1U);
 }
+
+TEST(ASTVisitorTest, binaryMulToDivOperator) {
+  const char *const binaryOperator = R"(///
+int mul(int a, int b) {
+  return a * b;
+}
+)";
+
+  Diagnostics diagnostics;
+  ASTStorage storage(diagnostics, "", "", {});
+
+  std::unique_ptr<clang::ASTUnit> astUnit(
+    clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
+  assert(astUnit);
+
+  SingleASTUnitMutations singleUnitMutations;
+
+  MutatorKindSet mutatorKindSet = MutatorKindSet::create({ MutatorKind::CXX_MulToDiv });
+
+  ThreadSafeASTUnit threadSafeAstUnit(std::move(astUnit));
+  ASTVisitor astVisitor(
+    diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
+
+  astVisitor.traverse();
+
+  LineColumnHash locationHash = lineColumnHash(3, 12);
+
+  ASSERT_EQ(singleUnitMutations.size(), 1U);
+  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_MulToDiv), 1U);
+
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_MulToDiv].size(), 1U);
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_MulToDiv].count(locationHash), 1U);
+}
+
+TEST(ASTVisitorTest, binaryDivToMullOperator) {
+  const char *const binaryOperator = R"(///
+int mul(int a, int b) {
+  return a / b;
+}
+)";
+
+  Diagnostics diagnostics;
+  ASTStorage storage(diagnostics, "", "", {});
+
+  std::unique_ptr<clang::ASTUnit> astUnit(
+    clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
+  assert(astUnit);
+
+  SingleASTUnitMutations singleUnitMutations;
+
+  MutatorKindSet mutatorKindSet = MutatorKindSet::create({ MutatorKind::CXX_DivToMul });
+
+  ThreadSafeASTUnit threadSafeAstUnit(std::move(astUnit));
+  ASTVisitor astVisitor(
+    diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
+
+  astVisitor.traverse();
+
+  LineColumnHash locationHash = lineColumnHash(3, 12);
+
+  ASSERT_EQ(singleUnitMutations.size(), 1U);
+  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_DivToMul), 1U);
+
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_DivToMul].size(), 1U);
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_DivToMul].count(locationHash), 1U);
+}
+
+TEST(ASTVisitorTest, binaryRemToDivOperator) {
+  const char *const binaryOperator = R"(///
+int rem(int a, int b) {
+  return a % b;
+}
+)";
+
+  Diagnostics diagnostics;
+  ASTStorage storage(diagnostics, "", "", {});
+
+  std::unique_ptr<clang::ASTUnit> astUnit(
+    clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
+  assert(astUnit);
+
+  SingleASTUnitMutations singleUnitMutations;
+
+  MutatorKindSet mutatorKindSet = MutatorKindSet::create({ MutatorKind::CXX_RemToDiv });
+
+  ThreadSafeASTUnit threadSafeAstUnit(std::move(astUnit));
+  ASTVisitor astVisitor(
+    diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
+
+  astVisitor.traverse();
+
+  LineColumnHash locationHash = lineColumnHash(3, 12);
+
+  ASSERT_EQ(singleUnitMutations.size(), 1U);
+  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_RemToDiv), 1U);
+
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_RemToDiv].size(), 1U);
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_RemToDiv].count(locationHash), 1U);
+}
