@@ -213,3 +213,37 @@ int add_assign(int a, int b) {
   ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_AddAssignToSubAssign].size(), 1U);
   ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_AddAssignToSubAssign].count(locationHash), 1U);
 }
+
+TEST(ASTVisitorTest, binarySubAssignToAddAssignOperator) {
+  const char *const binaryOperator = R"(///
+int sub_assign(int a, int b) {
+  a -= b;
+  return a;
+}
+)";
+
+  Diagnostics diagnostics;
+  ASTStorage storage(diagnostics, "", "", {});
+
+  std::unique_ptr<clang::ASTUnit> astUnit(
+    clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
+  assert(astUnit);
+
+  SingleASTUnitMutations singleUnitMutations;
+
+  MutatorKindSet mutatorKindSet = MutatorKindSet::create({ MutatorKind::CXX_SubAssignToAddAssign });
+
+  ThreadSafeASTUnit threadSafeAstUnit(std::move(astUnit));
+  ASTVisitor astVisitor(
+    diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
+
+  astVisitor.traverse();
+
+  LineColumnHash locationHash = lineColumnHash(3, 5);
+
+  ASSERT_EQ(singleUnitMutations.size(), 1U);
+  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_SubAssignToAddAssign), 1U);
+
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_SubAssignToAddAssign].size(), 1U);
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_SubAssignToAddAssign].count(locationHash), 1U);
+}
