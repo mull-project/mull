@@ -281,3 +281,37 @@ int mul_assign(int a, int b) {
   ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_MulAssignToDivAssign].size(), 1U);
   ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_MulAssignToDivAssign].count(locationHash), 1U);
 }
+
+TEST(ASTVisitorTest, binaryDivAssignToMulAssignOperator) {
+  const char *const binaryOperator = R"(///
+int div_assign(int a, int b) {
+  a /= b;
+  return a;
+}
+)";
+
+  Diagnostics diagnostics;
+  ASTStorage storage(diagnostics, "", "", {});
+
+  std::unique_ptr<clang::ASTUnit> astUnit(
+    clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
+  assert(astUnit);
+
+  SingleASTUnitMutations singleUnitMutations;
+
+  MutatorKindSet mutatorKindSet = MutatorKindSet::create({ MutatorKind::CXX_DivAssignToMulAssign });
+
+  ThreadSafeASTUnit threadSafeAstUnit(std::move(astUnit));
+  ASTVisitor astVisitor(
+    diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
+
+  astVisitor.traverse();
+
+  LineColumnHash locationHash = lineColumnHash(3, 5);
+
+  ASSERT_EQ(singleUnitMutations.size(), 1U);
+  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_DivAssignToMulAssign), 1U);
+
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_DivAssignToMulAssign].size(), 1U);
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_DivAssignToMulAssign].count(locationHash), 1U);
+}
