@@ -59,7 +59,7 @@ int sub(int a, int b) {
   ASTStorage storage(diagnostics, "", "", {});
 
   std::unique_ptr<clang::ASTUnit> astUnit(
-    clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
+      clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
   assert(astUnit);
 
   SingleASTUnitMutations singleUnitMutations;
@@ -68,7 +68,7 @@ int sub(int a, int b) {
 
   ThreadSafeASTUnit threadSafeAstUnit(std::move(astUnit));
   ASTVisitor astVisitor(
-    diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
+      diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
 
   astVisitor.traverse();
 
@@ -92,7 +92,7 @@ int mul(int a, int b) {
   ASTStorage storage(diagnostics, "", "", {});
 
   std::unique_ptr<clang::ASTUnit> astUnit(
-    clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
+      clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
   assert(astUnit);
 
   SingleASTUnitMutations singleUnitMutations;
@@ -101,7 +101,7 @@ int mul(int a, int b) {
 
   ThreadSafeASTUnit threadSafeAstUnit(std::move(astUnit));
   ASTVisitor astVisitor(
-    diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
+      diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
 
   astVisitor.traverse();
 
@@ -125,7 +125,7 @@ int mul(int a, int b) {
   ASTStorage storage(diagnostics, "", "", {});
 
   std::unique_ptr<clang::ASTUnit> astUnit(
-    clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
+      clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
   assert(astUnit);
 
   SingleASTUnitMutations singleUnitMutations;
@@ -134,7 +134,7 @@ int mul(int a, int b) {
 
   ThreadSafeASTUnit threadSafeAstUnit(std::move(astUnit));
   ASTVisitor astVisitor(
-    diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
+      diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
 
   astVisitor.traverse();
 
@@ -158,7 +158,7 @@ int rem(int a, int b) {
   ASTStorage storage(diagnostics, "", "", {});
 
   std::unique_ptr<clang::ASTUnit> astUnit(
-    clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
+      clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
   assert(astUnit);
 
   SingleASTUnitMutations singleUnitMutations;
@@ -167,7 +167,7 @@ int rem(int a, int b) {
 
   ThreadSafeASTUnit threadSafeAstUnit(std::move(astUnit));
   ASTVisitor astVisitor(
-    diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
+      diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
 
   astVisitor.traverse();
 
@@ -192,7 +192,7 @@ int add_assign(int a, int b) {
   ASTStorage storage(diagnostics, "", "", {});
 
   std::unique_ptr<clang::ASTUnit> astUnit(
-    clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
+      clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
   assert(astUnit);
 
   SingleASTUnitMutations singleUnitMutations;
@@ -201,7 +201,7 @@ int add_assign(int a, int b) {
 
   ThreadSafeASTUnit threadSafeAstUnit(std::move(astUnit));
   ASTVisitor astVisitor(
-    diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
+      diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
 
   astVisitor.traverse();
 
@@ -226,7 +226,7 @@ int sub_assign(int a, int b) {
   ASTStorage storage(diagnostics, "", "", {});
 
   std::unique_ptr<clang::ASTUnit> astUnit(
-    clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
+      clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
   assert(astUnit);
 
   SingleASTUnitMutations singleUnitMutations;
@@ -235,7 +235,7 @@ int sub_assign(int a, int b) {
 
   ThreadSafeASTUnit threadSafeAstUnit(std::move(astUnit));
   ASTVisitor astVisitor(
-    diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
+      diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
 
   astVisitor.traverse();
 
@@ -260,7 +260,7 @@ int mul_assign(int a, int b) {
   ASTStorage storage(diagnostics, "", "", {});
 
   std::unique_ptr<clang::ASTUnit> astUnit(
-    clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
+      clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
   assert(astUnit);
 
   SingleASTUnitMutations singleUnitMutations;
@@ -269,7 +269,7 @@ int mul_assign(int a, int b) {
 
   ThreadSafeASTUnit threadSafeAstUnit(std::move(astUnit));
   ASTVisitor astVisitor(
-    diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
+      diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
 
   astVisitor.traverse();
 
@@ -294,7 +294,7 @@ int div_assign(int a, int b) {
   ASTStorage storage(diagnostics, "", "", {});
 
   std::unique_ptr<clang::ASTUnit> astUnit(
-    clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
+      clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
   assert(astUnit);
 
   SingleASTUnitMutations singleUnitMutations;
@@ -303,7 +303,7 @@ int div_assign(int a, int b) {
 
   ThreadSafeASTUnit threadSafeAstUnit(std::move(astUnit));
   ASTVisitor astVisitor(
-    diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
+      diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
 
   astVisitor.traverse();
 
@@ -314,4 +314,38 @@ int div_assign(int a, int b) {
 
   ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_DivAssignToMulAssign].size(), 1U);
   ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_DivAssignToMulAssign].count(locationHash), 1U);
+}
+
+TEST(ASTVisitorTest, binaryRemAssignToDivAssignOperator) {
+  const char *const binaryOperator = R"(///
+int div_assign(int a, int b) {
+  a %= b;
+  return a;
+}
+)";
+
+  Diagnostics diagnostics;
+  ASTStorage storage(diagnostics, "", "", {});
+
+  std::unique_ptr<clang::ASTUnit> astUnit(
+      clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
+  assert(astUnit);
+
+  SingleASTUnitMutations singleUnitMutations;
+
+  MutatorKindSet mutatorKindSet = MutatorKindSet::create({ MutatorKind::CXX_RemAssignToDivAssign });
+
+  ThreadSafeASTUnit threadSafeAstUnit(std::move(astUnit));
+  ASTVisitor astVisitor(
+      diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
+
+  astVisitor.traverse();
+
+  LineColumnHash locationHash = lineColumnHash(3, 5);
+
+  ASSERT_EQ(singleUnitMutations.size(), 1U);
+  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_RemAssignToDivAssign), 1U);
+
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_RemAssignToDivAssign].size(), 1U);
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_RemAssignToDivAssign].count(locationHash), 1U);
 }
