@@ -15,6 +15,7 @@ static std::vector<std::pair<clang::BinaryOperator::Opcode, mull::MutatorKind>> 
   { clang::BO_Rem, MutatorKind::CXX_RemToDiv },
   {clang::BO_AddAssign,MutatorKind::CXX_AddAssignToSubAssign},
   {clang::BO_SubAssign,MutatorKind::CXX_SubAssignToAddAssign},
+  {clang::BO_MulAssign,MutatorKind::CXX_MulAssignToDivAssign},
 };
 
 ASTVisitor::ASTVisitor(mull::Diagnostics &diagnostics, mull::ThreadSafeASTUnit &astUnit,
