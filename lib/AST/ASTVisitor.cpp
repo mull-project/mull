@@ -8,11 +8,17 @@
 using namespace mull;
 
 static std::vector<std::pair<clang::BinaryOperator::Opcode, mull::MutatorKind>> BINARY_MUTATIONS = {
-  { clang::BO_Add, mull::MutatorKind::CXX_AddToSub },
-  { clang::BO_Sub, mull::MutatorKind::CXX_SubToAdd },
-  { clang::BO_Mul, mull::MutatorKind::CXX_MulToDiv },
-  { clang::BO_Div, mull::MutatorKind::CXX_DivToMul },
-  { clang::BO_Rem, mull::MutatorKind::CXX_RemToDiv },
+  { clang::BO_Add, MutatorKind::CXX_AddToSub },
+  { clang::BO_Sub, MutatorKind::CXX_SubToAdd },
+  { clang::BO_Mul, MutatorKind::CXX_MulToDiv },
+  { clang::BO_Div, MutatorKind::CXX_DivToMul },
+  { clang::BO_Rem, MutatorKind::CXX_RemToDiv },
+
+  {clang::BO_AddAssign, MutatorKind::CXX_AddAssignToSubAssign},
+  {clang::BO_SubAssign, MutatorKind::CXX_SubAssignToAddAssign},
+  {clang::BO_MulAssign, MutatorKind::CXX_MulAssignToDivAssign},
+  {clang::BO_DivAssign, MutatorKind::CXX_DivAssignToMulAssign},
+  {clang::BO_RemAssign, MutatorKind::CXX_RemAssignToDivAssign},
 };
 
 ASTVisitor::ASTVisitor(mull::Diagnostics &diagnostics, mull::ThreadSafeASTUnit &astUnit,
