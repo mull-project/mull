@@ -349,3 +349,69 @@ int div_assign(int a, int b) {
   ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_RemAssignToDivAssign].size(), 1U);
   ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_RemAssignToDivAssign].count(locationHash), 1U);
 }
+
+TEST(ASTVisitorTest, binaryEqualToToNotEqualOperator) {
+  const char *const binaryOperator = R"(///
+int eq(int a, int b) {
+  return a == b;
+}
+)";
+
+  Diagnostics diagnostics;
+  ASTStorage storage(diagnostics, "", "", {});
+
+  std::unique_ptr<clang::ASTUnit> astUnit(
+    clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
+  assert(astUnit);
+
+  SingleASTUnitMutations singleUnitMutations;
+
+  MutatorKindSet mutatorKindSet = MutatorKindSet::create({ MutatorKind::CXX_EqualToNotEqual });
+
+  ThreadSafeASTUnit threadSafeAstUnit(std::move(astUnit));
+  ASTVisitor astVisitor(
+    diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
+
+  astVisitor.traverse();
+
+  LineColumnHash locationHash = lineColumnHash(3, 12);
+
+  ASSERT_EQ(singleUnitMutations.size(), 1U);
+  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_EqualToNotEqual), 1U);
+
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_EqualToNotEqual].size(), 1U);
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_EqualToNotEqual].count(locationHash), 1U);
+}
+
+TEST(ASTVisitorTest, binaryNotEqualToEqualOperator) {
+  const char *const binaryOperator = R"(///
+int neq(int a, int b) {
+  return a != b;
+}
+)";
+
+  Diagnostics diagnostics;
+  ASTStorage storage(diagnostics, "", "", {});
+
+  std::unique_ptr<clang::ASTUnit> astUnit(
+    clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
+  assert(astUnit);
+
+  SingleASTUnitMutations singleUnitMutations;
+
+  MutatorKindSet mutatorKindSet = MutatorKindSet::create({ MutatorKind::CXX_NotEqualToEqual });
+
+  ThreadSafeASTUnit threadSafeAstUnit(std::move(astUnit));
+  ASTVisitor astVisitor(
+    diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
+
+  astVisitor.traverse();
+
+  LineColumnHash locationHash = lineColumnHash(3, 12);
+
+  ASSERT_EQ(singleUnitMutations.size(), 1U);
+  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_NotEqualToEqual), 1U);
+
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_NotEqualToEqual].size(), 1U);
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_NotEqualToEqual].count(locationHash), 1U);
+}
