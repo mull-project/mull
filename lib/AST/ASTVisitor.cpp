@@ -14,11 +14,18 @@ static std::vector<std::pair<clang::BinaryOperator::Opcode, mull::MutatorKind>> 
   { clang::BO_Div, MutatorKind::CXX_DivToMul },
   { clang::BO_Rem, MutatorKind::CXX_RemToDiv },
 
-  {clang::BO_AddAssign, MutatorKind::CXX_AddAssignToSubAssign},
-  {clang::BO_SubAssign, MutatorKind::CXX_SubAssignToAddAssign},
-  {clang::BO_MulAssign, MutatorKind::CXX_MulAssignToDivAssign},
-  {clang::BO_DivAssign, MutatorKind::CXX_DivAssignToMulAssign},
-  {clang::BO_RemAssign, MutatorKind::CXX_RemAssignToDivAssign},
+  { clang::BO_AddAssign, MutatorKind::CXX_AddAssignToSubAssign },
+  { clang::BO_SubAssign, MutatorKind::CXX_SubAssignToAddAssign },
+  { clang::BO_MulAssign, MutatorKind::CXX_MulAssignToDivAssign },
+  { clang::BO_DivAssign, MutatorKind::CXX_DivAssignToMulAssign },
+  { clang::BO_RemAssign, MutatorKind::CXX_RemAssignToDivAssign },
+
+  { clang::BO_EQ, MutatorKind::CXX_EqualToNotEqual },
+  { clang::BO_NE, MutatorKind::CXX_NotEqualToEqual },
+  { clang::BO_GT, MutatorKind::CXX_GreaterThanToLessOrEqual },
+  { clang::BO_LT, MutatorKind::CXX_LessThanToGreaterOrEqual },
+  { clang::BO_GE, MutatorKind::CXX_GreaterOrEqualToLessThan },
+  { clang::BO_LE, MutatorKind::CXX_LessOrEqualToGreaterThan }
 };
 
 ASTVisitor::ASTVisitor(mull::Diagnostics &diagnostics, mull::ThreadSafeASTUnit &astUnit,
