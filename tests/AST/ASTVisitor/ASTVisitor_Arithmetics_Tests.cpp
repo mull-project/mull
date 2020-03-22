@@ -415,3 +415,69 @@ int neq(int a, int b) {
   ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_NotEqualToEqual].size(), 1U);
   ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_NotEqualToEqual].count(locationHash), 1U);
 }
+
+TEST(ASTVisitorTest, binaryGreaterThanToLessThanOrEqualOperator) {
+  const char *const binaryOperator = R"(///
+int greater_than(int a, int b) {
+  return a > b;
+}
+)";
+
+  Diagnostics diagnostics;
+  ASTStorage storage(diagnostics, "", "", {});
+
+  std::unique_ptr<clang::ASTUnit> astUnit(
+    clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
+  assert(astUnit);
+
+  SingleASTUnitMutations singleUnitMutations;
+
+  MutatorKindSet mutatorKindSet = MutatorKindSet::create({ MutatorKind::CXX_GreaterThanToLessOrEqual });
+
+  ThreadSafeASTUnit threadSafeAstUnit(std::move(astUnit));
+  ASTVisitor astVisitor(
+    diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
+
+  astVisitor.traverse();
+
+  LineColumnHash locationHash = lineColumnHash(3, 12);
+
+  ASSERT_EQ(singleUnitMutations.size(), 1U);
+  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_GreaterThanToLessOrEqual), 1U);
+
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_GreaterThanToLessOrEqual].size(), 1U);
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_GreaterThanToLessOrEqual].count(locationHash), 1U);
+}
+
+TEST(ASTVisitorTest, binaryLessThanToGreaterThanOrEqualOperator) {
+  const char *const binaryOperator = R"(///
+int less_than(int a, int b) {
+  return a < b;
+}
+)";
+
+  Diagnostics diagnostics;
+  ASTStorage storage(diagnostics, "", "", {});
+
+  std::unique_ptr<clang::ASTUnit> astUnit(
+    clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
+  assert(astUnit);
+
+  SingleASTUnitMutations singleUnitMutations;
+
+  MutatorKindSet mutatorKindSet = MutatorKindSet::create({ MutatorKind::CXX_LessThanToGreaterOrEqual });
+
+  ThreadSafeASTUnit threadSafeAstUnit(std::move(astUnit));
+  ASTVisitor astVisitor(
+    diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
+
+  astVisitor.traverse();
+
+  LineColumnHash locationHash = lineColumnHash(3, 12);
+
+  ASSERT_EQ(singleUnitMutations.size(), 1U);
+  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_LessThanToGreaterOrEqual), 1U);
+
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_LessThanToGreaterOrEqual].size(), 1U);
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_LessThanToGreaterOrEqual].count(locationHash), 1U);
+}
