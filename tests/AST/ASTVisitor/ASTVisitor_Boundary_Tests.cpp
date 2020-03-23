@@ -47,3 +47,36 @@ int greater_than(int a, int b) {
   ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_GreaterThanToGreaterOrEqual].size(), 1U);
   ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_GreaterThanToGreaterOrEqual].count(locationHash), 1U);
 }
+
+TEST(ASTVisitor_Arithmetic, lessThanToLessThanOrEqual) {
+  const char *const binaryOperator = R"(///
+int less_than(int a, int b) {
+  return a < b;
+}
+)";
+
+  Diagnostics diagnostics;
+  ASTStorage storage(diagnostics, "", "", {});
+
+  std::unique_ptr<clang::ASTUnit> astUnit(
+    clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
+  assert(astUnit);
+
+  SingleASTUnitMutations singleUnitMutations;
+
+  MutatorKindSet mutatorKindSet = MutatorKindSet::create({ MutatorKind::CXX_LessThanToLessOrEqual });
+
+  ThreadSafeASTUnit threadSafeAstUnit(std::move(astUnit));
+  ASTVisitor astVisitor(
+    diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
+
+  astVisitor.traverse();
+
+  LineColumnHash locationHash = lineColumnHash(3, 12);
+
+  ASSERT_EQ(singleUnitMutations.size(), 1U);
+  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_LessThanToLessOrEqual), 1U);
+
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_LessThanToLessOrEqual].size(), 1U);
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_LessThanToLessOrEqual].count(locationHash), 1U);
+}
