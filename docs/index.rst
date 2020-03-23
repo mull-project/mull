@@ -6,6 +6,7 @@ Welcome to Mull's documentation!
 
    GettingStarted
    MutationTestingIntro
+   Installation
    Tutorials
    SupportedMutations
    CommandLineReference
