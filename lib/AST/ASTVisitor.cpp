@@ -25,7 +25,12 @@ static std::vector<std::pair<clang::BinaryOperator::Opcode, mull::MutatorKind>> 
   { clang::BO_GT, MutatorKind::CXX_GreaterThanToLessOrEqual },
   { clang::BO_LT, MutatorKind::CXX_LessThanToGreaterOrEqual },
   { clang::BO_GE, MutatorKind::CXX_GreaterOrEqualToLessThan },
-  { clang::BO_LE, MutatorKind::CXX_LessOrEqualToGreaterThan }
+  { clang::BO_LE, MutatorKind::CXX_LessOrEqualToGreaterThan },
+
+  { clang::BO_GT, MutatorKind::CXX_GreaterThanToGreaterOrEqual },
+  { clang::BO_LT, MutatorKind::CXX_LessThanToLessOrEqual },
+  { clang::BO_GE, MutatorKind::CXX_GreaterOrEqualToGreaterThan },
+  { clang::BO_LE, MutatorKind::CXX_LessOrEqualToLessThan }
 };
 
 ASTVisitor::ASTVisitor(mull::Diagnostics &diagnostics, mull::ThreadSafeASTUnit &astUnit,

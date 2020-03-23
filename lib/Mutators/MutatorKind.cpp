@@ -109,7 +109,7 @@ std::string MutationKindToString(MutatorKind mutatorKind) {
     return "Greater Than to Greater or Equal";
   }
   case MutatorKind::CXX_GreaterOrEqualToGreaterThan: {
-    return "Greater Or to Equal To Greater Than";
+    return "Greater Or Equal to Greater Than";
   }
   case MutatorKind::CXX_GreaterThanToLessOrEqual: {
     return "Greater Than to Less Or Equal";

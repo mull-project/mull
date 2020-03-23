@@ -4,6 +4,7 @@ generate_fixture_factory(FACTORY_HEADER)
 set(mull_unittests_sources
   AST/ASTVisitor/ASTVisitor_Arithmetic_Tests.cpp
   AST/ASTVisitor/ASTVisitor_ArithmeticAssignment_Tests.cpp
+  AST/ASTVisitor/ASTVisitor_Boundary_Tests.cpp
   AST/ASTVisitor/ASTVisitor_Comparison_Tests.cpp
 
   CompilerTests.cpp
