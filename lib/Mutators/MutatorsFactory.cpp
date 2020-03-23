@@ -155,8 +155,8 @@ MutatorsFactory::MutatorsFactory(Diagnostics &diagnostics) : diagnostics(diagnos
   };
 
   groupsMapping[CXX_All()] = {
-    CXX_Assignment(), CXX_Increment(),  CXX_Decrement(),
-    CXX_Arithmetic(), CXX_Comparison(), CXX_Boundary(),
+    CXX_Assignment(), CXX_Increment(), CXX_Decrement(), CXX_Arithmetic(),
+    CXX_Comparison(), CXX_Boundary(),  CXX_Bitwise(),
   };
 
   groupsMapping[CXX_Default()] = {
