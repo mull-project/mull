@@ -5,7 +5,7 @@ Mull comes with a number of precompiled binaries for macOS and Ubuntu.
 Please, refer to the `Hacking on Mull <HackingOnMull.html>`_ to build Mull from sources.
 
 Install on Ubuntu
-=================
+*****************
 
 Get the Bintray public GPG key:
 
@@ -43,7 +43,7 @@ You can also install Mull for Ubuntu-16.04 or get the latest "nightly" build fro
     deb https://dl.bintray.com/mull-project/ubuntu-16 nightly main
 
 Install on macOS
-================
+****************
 
 Check the latest version on `Bintray <https://bintray.com/mull-project/macos/mull/_latestVersion>`_.
 
