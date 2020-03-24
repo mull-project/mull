@@ -113,3 +113,36 @@ int bitwise_xor(int a, int b) {
   ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_Bitwise_XorToOr].size(), 1U);
   ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_Bitwise_XorToOr].count(locationHash), 1U);
 }
+
+TEST(ASTVisitor_Bitwise, bitwiseLeftShiftToRight) {
+  const char *const binaryOperator = R"(///
+int bitwise_left_shift(int a, int b) {
+  return a << b;
+}
+)";
+
+  Diagnostics diagnostics;
+  ASTStorage storage(diagnostics, "", "", {});
+
+  std::unique_ptr<clang::ASTUnit> astUnit(
+    clang::tooling::buildASTFromCode(binaryOperator, fakeSourceFilePath));
+  assert(astUnit);
+
+  SingleASTUnitMutations singleUnitMutations;
+
+  MutatorKindSet mutatorKindSet = MutatorKindSet::create({ MutatorKind::CXX_LShiftToRShift });
+
+  ThreadSafeASTUnit threadSafeAstUnit(std::move(astUnit));
+  ASTVisitor astVisitor(
+    diagnostics, threadSafeAstUnit, singleUnitMutations, nullPathFilter, mutatorKindSet);
+
+  astVisitor.traverse();
+
+  LineColumnHash locationHash = lineColumnHash(3, 12);
+
+  ASSERT_EQ(singleUnitMutations.size(), 1U);
+  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_LShiftToRShift), 1U);
+
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_LShiftToRShift].size(), 1U);
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_LShiftToRShift].count(locationHash), 1U);
+}
