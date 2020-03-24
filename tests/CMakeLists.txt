@@ -5,6 +5,7 @@ set(mull_unittests_sources
   AST/ASTVisitor/ASTVisitor_Arithmetic_Tests.cpp
   AST/ASTVisitor/ASTVisitor_ArithmeticAssignment_Tests.cpp
   AST/ASTVisitor/ASTVisitor_Bitwise_Tests.cpp
+  AST/ASTVisitor/ASTVisitor_BitwiseAssignment_Tests.cpp
   AST/ASTVisitor/ASTVisitor_Boundary_Tests.cpp
   AST/ASTVisitor/ASTVisitor_Comparison_Tests.cpp
 

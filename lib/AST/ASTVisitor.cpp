@@ -36,8 +36,13 @@ static std::vector<std::pair<clang::BinaryOperator::Opcode, mull::MutatorKind>> 
   { clang::BO_Or, MutatorKind::CXX_Bitwise_OrToAnd },
   { clang::BO_Xor, MutatorKind::CXX_Bitwise_XorToOr },
   { clang::BO_Shl, MutatorKind::CXX_LShiftToRShift },
-  { clang::BO_Shr, MutatorKind::CXX_RShiftToLShift }
+  { clang::BO_Shr, MutatorKind::CXX_RShiftToLShift },
 
+  { clang::BO_AndAssign, MutatorKind::CXX_Bitwise_AndAssignToOrAssign },
+  { clang::BO_OrAssign, MutatorKind::CXX_Bitwise_OrAssignToAndAssign },
+  { clang::BO_XorAssign, MutatorKind::CXX_Bitwise_XorAssignToOrAssign },
+  { clang::BO_ShlAssign, MutatorKind::CXX_LShiftAssignToRShiftAssign },
+  { clang::BO_ShrAssign, MutatorKind::CXX_RShiftAssignToLShiftAssign }
 };
 
 ASTVisitor::ASTVisitor(mull::Diagnostics &diagnostics, mull::ThreadSafeASTUnit &astUnit,
