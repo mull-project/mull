@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.7.0] - 24 Mar 2020
+
+- Introduced online documentation https://mull.readthedocs.io/en/latest/
+- Stable and nightly builds are now hosted on [Bintray](http://bintray.com/mull-project) [#676](https://github.com/mull-project/mull/pull/676)
+- Ubuntu packages now can be installed/updated via `apt-get` https://mull.readthedocs.io/en/latest/Installation.html#install-on-ubuntu
+- Also, packages are now smaller [#690](https://github.com/mull-project/mull/pull/690)
+- Mull can read compilation flags from the bitcode file (`-grecord-command-line` compiler option) [#663](https://github.com/mull-project/mull/pull/663)
+- Improve JUnit report integration [#660](https://github.com/mull-project/mull/pull/660)
+- Added options to control capture of the stderr/stdout from test runs [#674](https://github.com/mull-project/mull/pull/674)
+- Fixed a bug with junk detection not reading compilation database correctly [#679](https://github.com/mull-project/mull/pull/679)
+- Revamped the logging mechanism [#655](https://github.com/mull-project/mull/pull/655)
+- Show warning when there is no debug information [#654](https://github.com/mull-project/mull/pull/654)
+- Logger has a debug option [#669](https://github.com/mull-project/mull/pull/669)
+- Strict mode added: treat warnings as fatal errors [#673](https://github.com/mull-project/mull/pull/673)
+- Work on the "white list" AST search has started [#677](https://github.com/mull-project/mull/pull/677)
+- [All the changes](https://github.com/mull-project/mull/pulls?page=2&q=is%3Apr+merged%3A2019-12-15..2020-03-24)
+
 ## [0.6.1] - 14 Dec 2019
 
  - Moved `LogicalAndToOr` and `LogicalOrToAnd` to `experimental` group #638
