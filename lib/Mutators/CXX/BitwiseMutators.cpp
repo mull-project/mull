@@ -45,7 +45,7 @@ RShiftToLShift::RShiftToLShift()
                         RShiftToLShift::ID(), "Replaces << with >>", ">>", "Replaced >> with <<") {}
 
 std::string RShiftAssignToLShiftAssign::ID() {
-  return "cxx_bitwise_rshift_assign_to_lshift_assign";
+  return "cxx_rshift_assign_to_lshift_assign";
 }
 
 RShiftAssignToLShiftAssign::RShiftAssignToLShiftAssign()

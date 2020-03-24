@@ -10,64 +10,64 @@
 .. |desc4| replace:: Replaces 'a = b' with 'a = 42'
 .. |op5| replace:: cxx_bitwise_not_to_noop
 .. |desc5| replace:: Replaces ~x with x
-.. |op6| replace:: cxx_bitwise_rshift_assign_to_lshift_assign
-.. |desc6| replace:: Replaces >>= with <<=
-.. |op7| replace:: cxx_div_assign_to_mul_assign
-.. |desc7| replace:: Replaces /= with \*=
-.. |op8| replace:: cxx_div_to_mul
-.. |desc8| replace:: Replaces / with *
-.. |op9| replace:: cxx_eq_to_ne
-.. |desc9| replace:: Replaces == with !=
-.. |op10| replace:: cxx_ge_to_gt
-.. |desc10| replace:: Replaces >= with >
-.. |op11| replace:: cxx_ge_to_lt
-.. |desc11| replace:: Replaces >= with <
-.. |op12| replace:: cxx_gt_to_ge
-.. |desc12| replace:: Replaces > with >=
-.. |op13| replace:: cxx_gt_to_le
-.. |desc13| replace:: Replaces > with <=
-.. |op14| replace:: cxx_init_const
-.. |desc14| replace:: Replaces 'T a = b' with 'T a = 42'
-.. |op15| replace:: cxx_le_to_gt
-.. |desc15| replace:: Replaces <= with >
-.. |op16| replace:: cxx_le_to_lt
-.. |desc16| replace:: Replaces <= with <
-.. |op17| replace:: cxx_logical_and_to_or
-.. |desc17| replace:: Replaces && with ||
-.. |op18| replace:: cxx_logical_or_to_and
-.. |desc18| replace:: Replaces || with &&
-.. |op19| replace:: cxx_lshift_assign_to_rshift_assign
-.. |desc19| replace:: Replaces <<= with >>=
-.. |op20| replace:: cxx_lshift_to_rshift
-.. |desc20| replace:: Replaces << with >>
-.. |op21| replace:: cxx_lt_to_ge
-.. |desc21| replace:: Replaces < with >=
-.. |op22| replace:: cxx_lt_to_le
-.. |desc22| replace:: Replaces < with <=
-.. |op23| replace:: cxx_minus_to_noop
-.. |desc23| replace:: Replaces -x with x
-.. |op24| replace:: cxx_mul_assign_to_div_assign
-.. |desc24| replace:: Replaces \*= with /=
-.. |op25| replace:: cxx_mul_to_div
-.. |desc25| replace:: Replaces * with /
-.. |op26| replace:: cxx_ne_to_eq
-.. |desc26| replace:: Replaces != with ==
-.. |op27| replace:: cxx_or_assign_to_and_assign
-.. |desc27| replace:: Replaces \|= with &=
-.. |op28| replace:: cxx_or_to_and
-.. |desc28| replace:: Replaces | with &
-.. |op29| replace:: cxx_post_dec_to_post_inc
-.. |desc29| replace:: Replaces x-- with x++
-.. |op30| replace:: cxx_post_inc_to_post_dec
-.. |desc30| replace:: Replaces x++ with x--
-.. |op31| replace:: cxx_pre_dec_to_pre_inc
-.. |desc31| replace:: Replaces --x with ++x
-.. |op32| replace:: cxx_pre_inc_to_pre_dec
-.. |desc32| replace:: Replaces ++x with --x
-.. |op33| replace:: cxx_rem_assign_to_div_assign
-.. |desc33| replace:: Replaces %= with /=
-.. |op34| replace:: cxx_rem_to_div
-.. |desc34| replace:: Replaces % with /
+.. |op6| replace:: cxx_div_assign_to_mul_assign
+.. |desc6| replace:: Replaces /= with \*=
+.. |op7| replace:: cxx_div_to_mul
+.. |desc7| replace:: Replaces / with *
+.. |op8| replace:: cxx_eq_to_ne
+.. |desc8| replace:: Replaces == with !=
+.. |op9| replace:: cxx_ge_to_gt
+.. |desc9| replace:: Replaces >= with >
+.. |op10| replace:: cxx_ge_to_lt
+.. |desc10| replace:: Replaces >= with <
+.. |op11| replace:: cxx_gt_to_ge
+.. |desc11| replace:: Replaces > with >=
+.. |op12| replace:: cxx_gt_to_le
+.. |desc12| replace:: Replaces > with <=
+.. |op13| replace:: cxx_init_const
+.. |desc13| replace:: Replaces 'T a = b' with 'T a = 42'
+.. |op14| replace:: cxx_le_to_gt
+.. |desc14| replace:: Replaces <= with >
+.. |op15| replace:: cxx_le_to_lt
+.. |desc15| replace:: Replaces <= with <
+.. |op16| replace:: cxx_logical_and_to_or
+.. |desc16| replace:: Replaces && with ||
+.. |op17| replace:: cxx_logical_or_to_and
+.. |desc17| replace:: Replaces || with &&
+.. |op18| replace:: cxx_lshift_assign_to_rshift_assign
+.. |desc18| replace:: Replaces <<= with >>=
+.. |op19| replace:: cxx_lshift_to_rshift
+.. |desc19| replace:: Replaces << with >>
+.. |op20| replace:: cxx_lt_to_ge
+.. |desc20| replace:: Replaces < with >=
+.. |op21| replace:: cxx_lt_to_le
+.. |desc21| replace:: Replaces < with <=
+.. |op22| replace:: cxx_minus_to_noop
+.. |desc22| replace:: Replaces -x with x
+.. |op23| replace:: cxx_mul_assign_to_div_assign
+.. |desc23| replace:: Replaces \*= with /=
+.. |op24| replace:: cxx_mul_to_div
+.. |desc24| replace:: Replaces * with /
+.. |op25| replace:: cxx_ne_to_eq
+.. |desc25| replace:: Replaces != with ==
+.. |op26| replace:: cxx_or_assign_to_and_assign
+.. |desc26| replace:: Replaces \|= with &=
+.. |op27| replace:: cxx_or_to_and
+.. |desc27| replace:: Replaces | with &
+.. |op28| replace:: cxx_post_dec_to_post_inc
+.. |desc28| replace:: Replaces x-- with x++
+.. |op29| replace:: cxx_post_inc_to_post_dec
+.. |desc29| replace:: Replaces x++ with x--
+.. |op30| replace:: cxx_pre_dec_to_pre_inc
+.. |desc30| replace:: Replaces --x with ++x
+.. |op31| replace:: cxx_pre_inc_to_pre_dec
+.. |desc31| replace:: Replaces ++x with --x
+.. |op32| replace:: cxx_rem_assign_to_div_assign
+.. |desc32| replace:: Replaces %= with /=
+.. |op33| replace:: cxx_rem_to_div
+.. |desc33| replace:: Replaces % with /
+.. |op34| replace:: cxx_rshift_assign_to_lshift_assign
+.. |desc34| replace:: Replaces >>= with <<=
 .. |op35| replace:: cxx_rshift_to_lshift
 .. |desc35| replace:: Replaces << with >>
 .. |op36| replace:: cxx_sub_assign_to_add_assign
