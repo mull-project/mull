@@ -88,7 +88,7 @@ set(mull_sources
   TestFrameworks/TestFrameworkFactory.cpp
   Program/Program.cpp
   ObjectLoader.cpp
-        JunkDetection/CXX/Visitors/InstructionRangeVisitor.cpp
+  JunkDetection/CXX/Visitors/InstructionRangeVisitor.cpp
   JunkDetection/CXX/Visitors/NegateConditionVisitor.cpp
   JunkDetection/CXX/Visitors/RemoveVoidFunctionVisitor.cpp
   JunkDetection/CXX/Visitors/ReplaceCallVisitor.cpp
@@ -184,23 +184,3 @@ set_target_properties(mull PROPERTIES
   COMPILE_FLAGS ${MULL_CXX_FLAGS}
   LINK_FLAGS ${MULL_LINK_FLAGS}
   )
-
-## The following is needed to make CMake to generate a folder structure in Xcode
-## that corresponds to a physical folder structure.
-#get_target_property(HERE_TARGET_SOURCES mull SOURCES)
-#foreach(source_file ${HERE_TARGET_SOURCES})
-#  if (source_file MATCHES "(.*)\.h$")
-#    file(RELATIVE_PATH relative_source_file ${MULL_INCLUDE_DIR} ${source_file})
-#    get_filename_component(relative_path ${relative_source_file} DIRECTORY)
-#    source_group("Header Files\\${relative_path}" FILES ${source_file})
-#  else()
-#    get_filename_component(relative_path ${source_file} DIRECTORY)
-#    source_group("Source Files\\${relative_path}" FILES ${source_file})
-#  endif()
-#endforeach()
-
-INSTALL(TARGETS mull
-  LIBRARY DESTINATION lib
-  ARCHIVE DESTINATION lib
-  )
-
