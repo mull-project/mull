@@ -78,7 +78,7 @@ TEST(MutatorsFactory, CompositeMutators) {
 
   {
     mutators = factory.mutators({ "all" });
-    ASSERT_EQ(mutators.size(), 38UL);
+    ASSERT_EQ(mutators.size(), 44UL);
   }
 }
 
