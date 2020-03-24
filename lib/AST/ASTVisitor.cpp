@@ -35,7 +35,8 @@ static std::vector<std::pair<clang::BinaryOperator::Opcode, mull::MutatorKind>> 
   { clang::BO_And, MutatorKind::CXX_Bitwise_AndToOr },
   { clang::BO_Or, MutatorKind::CXX_Bitwise_OrToAnd },
   { clang::BO_Xor, MutatorKind::CXX_Bitwise_XorToOr },
-  { clang::BO_Shl, MutatorKind::CXX_LShiftToRShift }
+  { clang::BO_Shl, MutatorKind::CXX_LShiftToRShift },
+  { clang::BO_Shr, MutatorKind::CXX_RShiftToLShift }
 
 };
 
