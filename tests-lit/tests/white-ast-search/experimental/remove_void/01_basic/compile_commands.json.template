@@ -1,0 +1,16 @@
+[
+  {
+    "arguments": [
+      "cc",
+      "-c",
+      "-fembed-bitcode",
+      "-g",
+      "-O0",
+      "-o",
+      "%PWD/sample.cpp.exe",
+      "%PWD/sample.cpp"
+    ],
+    "directory": "/",
+    "file": "%PWD/sample.cpp"
+  }
+]
