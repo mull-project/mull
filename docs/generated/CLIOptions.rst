@@ -73,7 +73,7 @@
 
       :cxx_bitwise:	cxx_bitwise_not_to_noop, cxx_and_to_or, cxx_or_to_and, cxx_xor_to_or, cxx_lshift_to_rshift, cxx_rshift_to_lshift
 
-      :cxx_bitwise_assignment:	cxx_and_assign_to_or_assign, cxx_or_assign_to_and_assign, cxx_xor_assign_to_or_assign, cxx_lshift_assign_to_rshift_assign, cxx_bitwise_rshift_assign_to_lshift_assign
+      :cxx_bitwise_assignment:	cxx_and_assign_to_or_assign, cxx_or_assign_to_and_assign, cxx_xor_assign_to_or_assign, cxx_lshift_assign_to_rshift_assign, cxx_rshift_assign_to_lshift_assign
 
       :cxx_boundary:	cxx_le_to_lt, cxx_lt_to_le, cxx_ge_to_gt, cxx_gt_to_ge
 
@@ -103,8 +103,6 @@
       :cxx_assign_const:	Replaces 'a = b' with 'a = 42'
 
       :cxx_bitwise_not_to_noop:	Replaces ~x with x
-
-      :cxx_bitwise_rshift_assign_to_lshift_assign:	Replaces >>= with <<=
 
       :cxx_div_assign_to_mul_assign:	Replaces /= with \*=
 
@@ -161,6 +159,8 @@
       :cxx_rem_assign_to_div_assign:	Replaces %= with /=
 
       :cxx_rem_to_div:	Replaces % with /
+
+      :cxx_rshift_assign_to_lshift_assign:	Replaces >>= with <<=
 
       :cxx_rshift_to_lshift:	Replaces << with >>
 
