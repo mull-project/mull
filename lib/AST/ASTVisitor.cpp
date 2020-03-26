@@ -44,8 +44,8 @@ static std::vector<std::pair<clang::BinaryOperator::Opcode, mull::MutatorKind>> 
   { clang::BO_ShlAssign, MutatorKind::CXX_LShiftAssignToRShiftAssign },
   { clang::BO_ShrAssign, MutatorKind::CXX_RShiftAssignToLShiftAssign },
 
-  {clang::BO_LAnd, MutatorKind::CXX_Logical_AndToOr},
-  {clang::BO_LOr, MutatorKind::CXX_Logical_OrToAnd}
+  { clang::BO_LAnd, MutatorKind::CXX_Logical_AndToOr },
+  { clang::BO_LOr, MutatorKind::CXX_Logical_OrToAnd }
 };
 
 ASTVisitor::ASTVisitor(mull::Diagnostics &diagnostics, mull::ThreadSafeASTUnit &astUnit,
@@ -89,6 +89,7 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
     return true;
   }
 
+  /// Binary Operators
   if (clang::BinaryOperator *binaryOperator = clang::dyn_cast<clang::BinaryOperator>(expr)) {
     clang::SourceLocation binaryOperatorLocation = binaryOperator->getOperatorLoc();
     for (const std::pair<clang::BinaryOperator::Opcode, mull::MutatorKind> &mutation :
@@ -101,6 +102,18 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
     }
     return true;
   }
+
+  /// Remove Void
+  if (const clang::CallExpr *callExpr = clang::dyn_cast<clang::CallExpr>(expr)) {
+    if (mutatorKindSet.includesMutator(MutatorKind::RemoveVoidFunctionMutator)) {
+      auto *type = callExpr->getType().getTypePtrOrNull();
+      if (type && type->isVoidType()) {
+        saveMutationPoint(mull::MutatorKind::RemoveVoidFunctionMutator, callExpr, exprLocation);
+      }
+      return true;
+    }
+  }
+
   return true;
 }
 
