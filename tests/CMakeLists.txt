@@ -10,6 +10,7 @@ set(mull_unittests_sources
   AST/ASTVisitor/ASTVisitor_Comparison_Tests.cpp
   AST/ASTVisitor/ASTVisitor_Logical_Tests.cpp
   AST/ASTVisitor/ASTVisitor_RemoveVoid_Tests.cpp
+  AST/ASTVisitor/ASTVisitor_ReplaceCall_Tests.cpp
 
   CompilerTests.cpp
   DriverTests.cpp
