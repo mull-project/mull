@@ -4,8 +4,6 @@ Mull is a tool for Mutation Testing based on LLVM/Clang with a strong focus on C
 
 For installation and usage please refer to the latest documentation: https://mull.readthedocs.io/en/latest/
 
-![Xcode integration](/screenshot.png)
-
 ## Contributing
 
 Here is the starting point: [CONTRIBUTING.md](CONTRIBUTING.md)
