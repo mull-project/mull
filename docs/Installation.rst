@@ -29,9 +29,9 @@ Check if everything works:
     $ mull-cxx --version
     Mull: LLVM-based mutation testing
     https://github.com/mull-project/mull
-    Version: 0.6.2
-    Commit: bd11b48
-    Date: 13 Mar 2020
+    Version: 0.7.0
+    Commit: 1638698
+    Date: 28 Mar 2020
     LLVM: 9.0.0
 
 You can also install Mull for Ubuntu-16.04 or get the latest "nightly" build from the corresponding repositories:
@@ -47,13 +47,13 @@ Install on macOS
 
 Check the latest version on `Bintray <https://bintray.com/mull-project/macos/mull/_latestVersion>`_.
 
-Download and unzip the version you need:
+Go to the `Files` tab, download and unzip the version you need:
 
 .. code-block:: bash
 
-    wget "https://bintray.com/mull-project/macos/download_file?file_path=Mull-0.6.2-LLVM-9.0-macOS-10.15.3.zip" -O mull.zip
+    wget "https://bintray.com/mull-project/macos/download_file?file_path=pool%2Fmain%2Fm%2FMull-0.7.0-LLVM-9.0-macOS-10.15.3.zip" -O mull.zip
     unzip mull.zip
-    cp ./Mull-0.6.2-LLVM-9.0-macOS-10.15.3/bin/mull-cxx /usr/local/bin/mull-cxx
+    cp Mull-0.7.0-LLVM-9.0-macOS-10.15.3/bin/mull-cxx /usr/local/bin/mull-cxx
 
 Check the installation:
 
@@ -62,9 +62,9 @@ Check the installation:
     $ mull-cxx --version
     Mull: LLVM-based mutation testing
     https://github.com/mull-project/mull
-    Version: 0.6.2
-    Commit: bd11b48
-    Date: 13 Mar 2020
+    Version: 0.7.0
+    Commit: 1638698
+    Date: 28 Mar 2020
     LLVM: 9.0.0
 
 Installation via `Homebrew <https://brew.sh>`_ is on our TODO-list.
