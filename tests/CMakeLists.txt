@@ -18,6 +18,7 @@ set(mull_unittests_sources
   Helpers/MutationArtefact.cpp
 
   Mutations-E2E/Mutation_Arithmetic_Add_Test.cpp
+  Mutations-E2E/Negate/01_Mutation_Negate_Bool_UnaryNot_Test.cpp
 
   CompilerTests.cpp
   DriverTests.cpp
