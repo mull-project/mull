@@ -1,6 +1,6 @@
 # Mull
 
-Mull is a LLVM-based tool for Mutation Testing with a strong focus on C and C++ languages.
+Mull is a tool for Mutation Testing based on LLVM/Clang with a strong focus on C and C++ languages.
 
 For installation and usage please refer to the latest documentation: https://mull.readthedocs.io/en/latest/
 
