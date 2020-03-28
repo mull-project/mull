@@ -104,12 +104,20 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
   }
 
   /// Remove Void
-  if (const clang::CallExpr *callExpr = clang::dyn_cast<clang::CallExpr>(expr)) {
-    if (mutatorKindSet.includesMutator(MutatorKind::RemoveVoidFunctionMutator)) {
+  if (mutatorKindSet.includesMutator(MutatorKind::RemoveVoidFunctionMutator)) {
+    if (const clang::CallExpr *callExpr = clang::dyn_cast<clang::CallExpr>(expr)) {
       auto *type = callExpr->getType().getTypePtrOrNull();
       if (type && type->isVoidType()) {
         saveMutationPoint(mull::MutatorKind::RemoveVoidFunctionMutator, callExpr, exprLocation);
       }
+      return true;
+    }
+  }
+
+  /// Replace Call
+  if (mutatorKindSet.includesMutator(MutatorKind::ReplaceCallMutator)) {
+    if (clang::isa<clang::CallExpr>(expr)) {
+      saveMutationPoint(mull::MutatorKind::ReplaceCallMutator, expr, exprLocation);
       return true;
     }
   }
