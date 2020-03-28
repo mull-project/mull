@@ -32,5 +32,5 @@ There is a non-exhaustive [list](https://github.com/mull-project/mull/issues)
 of planned features. Feel free to implement any of them, or come up with some
 features you think would be beneficial for the project.
 
-Here is the starting point: [Hacking on Mull](documentation/hacking.md).
+Here is the starting point: [Hacking on Mull](https://mull.readthedocs.io/en/latest/HackingOnMull.html).
 
