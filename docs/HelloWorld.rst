@@ -11,7 +11,7 @@ down to ``Complete example`` below.
 
 ----
 
-The tutorial assumes that you have installed Mull on your system and
+The tutorial assumes that you have `installed <Installation.html>`_ Mull on your system and
 have the `mull-cxx` executable available:
 
 .. code-block:: bash
@@ -19,10 +19,10 @@ have the `mull-cxx` executable available:
     $ mull-cxx -version
     Mull: LLVM-based mutation testing
     https://github.com/mull-project/mull
-    Version: 0.5.0
-    Commit: 791522f
-    Date: 27 Nov 2019
-    LLVM: 8.0.0
+    Version: 0.7.0
+    Commit: 1638698
+    Date: 28 Mar 2020
+    LLVM: 9.0.0
 
 The most important thing that Mull needs to know is the path to your program
 which must be a valid C or C++ executable. Let's create a C program:
@@ -64,14 +64,14 @@ Now the output is different:
 
 .. code-block:: text
 
-    mull-cxx -test-framework CustomTest hello-world
-    Extracting bitcode from executable (threads: 1): 0/1No bitcode: x86_64
-    Extracting bitcode from executable (threads: 1): 1/1. Finished in 1ms.
-    Loading dynamic libraries (threads: 1): 1/1. Finished in 0ms.
-    Searching tests (threads: 1): 1/1. Finished in 0ms.
-    No mutants found. Mutation score: infinitely high
-
-    Total execution time: 1ms
+    [info] Extracting bitcode from executable (threads: 1)
+    [warning] No bitcode: x86_64
+           [################################] 1/1. Finished in 1ms
+    [info] Loading dynamic libraries (threads: 1)
+           [################################] 1/1. Finished in 0ms
+    [info] Searching tests (threads: 1)
+           [################################] 1/1. Finished in 0ms
+    [info] No mutants found. Mutation score: infinitely high
 
 Notice the ``No bitcode: x86_64`` warning! Now Mull is already trying to work
 with our executable but there is still one important detail that is missing: we
@@ -88,16 +88,21 @@ Let's try again:
 
     $ clang -fembed-bitcode -g main.cpp -o hello-world
     $ mull-cxx -test-framework CustomTest hello-world
-    Extracting bitcode from executable (threads: 1): 1/1. Finished in 2ms.
-    Loading bitcode files (threads: 1): 1/1. Finished in 13ms.
-    Compiling instrumented code (threads: 1): 1/1. Finished in 33ms.
-    Loading dynamic libraries (threads: 1): 1/1. Finished in 0ms.
-    Searching tests (threads: 1): 1/1. Finished in 0ms.
-    Preparing original test run (threads: 1): 1/1. Finished in 2ms.
-    Running original tests (threads: 1): 1/1. Finished in 10ms.
-    No mutants found. Mutation score: infinitely high
-
-    Total execution time: 62ms
+    [info] Extracting bitcode from executable (threads: 1)
+           [################################] 1/1. Finished in 3ms
+    [info] Loading bitcode files (threads: 1)
+           [################################] 1/1. Finished in 11ms
+    [info] Compiling instrumented code (threads: 1)
+           [################################] 1/1. Finished in 11ms
+    [info] Loading dynamic libraries (threads: 1)
+           [################################] 1/1. Finished in 0ms
+    [info] Searching tests (threads: 1)
+           [################################] 1/1. Finished in 0ms
+    [info] Preparing original test run (threads: 1)
+           [################################] 1/1. Finished in 1ms
+    [info] Running original tests (threads: 1)
+           [################################] 1/1. Finished in 12ms
+    [info] No mutants found. Mutation score: infinitely high
 
 The ``No bitcode: x86_64`` warning has gone and now we can focus on another
 important part of the output: ``No mutants found. Mutation score: infinitely
@@ -142,42 +147,55 @@ verbose.
 
     $ clang -fembed-bitcode -g main.cpp -o hello-world
     $ mull-cxx -test-framework=CustomTest -ide-reporter-show-killed hello-world
-    Extracting bitcode from executable (threads: 1): 1/1. Finished in 4ms.
-    Loading bitcode files (threads: 1): 1/1. Finished in 12ms.
-    Compiling instrumented code (threads: 1): 1/1. Finished in 12ms.
-    Loading dynamic libraries (threads: 1): 1/1. Finished in 0ms.
-    Searching tests (threads: 1): 1/1. Finished in 0ms.
-    Preparing original test run (threads: 1): 1/1. Finished in 1ms.
-    Running original tests (threads: 1): 1/1. Finished in 12ms.
-    Applying function filter: no debug info (threads: 1): 1/1. Finished in 10ms.
-    Applying function filter: file path (threads: 1): 1/1. Finished in 11ms.
-    Instruction selection (threads: 1): 1/1. Finished in 12ms.
-    Searching mutants across functions (threads: 1): 1/1. Finished in 10ms.
-    Applying filter: no debug info (threads: 1): 1/1. Finished in 0ms.
-    Applying filter: file path (threads: 1): 1/1. Finished in 0ms.
-    Prepare mutations (threads: 1): 1/1. Finished in 0ms.
-    Cloning functions for mutation (threads: 1): 1/1. Finished in 13ms.
-    Removing original functions (threads: 1): 1/1. Finished in 13ms.
-    Redirect mutated functions (threads: 1): 1/1. Finished in 10ms.
-    Applying mutations (threads: 1): 1/1. Finished in 12ms.
-    Compiling original code (threads: 1): 1/1. Finished in 11ms.
-    Running mutants (threads: 1): 1/1. Finished in 12ms.
-
-    Killed mutants (1/2):
-
-    /sandbox/mull/tests-lit/tests/tutorials/hello-world/step-5-one-survived-mutations/sample.cpp:13:11: warning: Killed: Replaced >= with < [cxx_ge_to_lt]
+    [info] Extracting bitcode from executable (threads: 1)
+           [################################] 1/1. Finished in 10ms
+    [info] Loading bitcode files (threads: 1)
+           [################################] 1/1. Finished in 12ms
+    [info] Compiling instrumented code (threads: 1)
+           [################################] 1/1. Finished in 12ms
+    [info] Loading dynamic libraries (threads: 1)
+           [################################] 1/1. Finished in 0ms
+    [info] Searching tests (threads: 1)
+           [################################] 1/1. Finished in 0ms
+    [info] Preparing original test run (threads: 1)
+           [################################] 1/1. Finished in 1ms
+    [info] Running original tests (threads: 1)
+           [################################] 1/1. Finished in 11ms
+    [info] Applying function filter: no debug info (threads: 1)
+           [################################] 1/1. Finished in 1ms
+    [info] Applying function filter: file path (threads: 1)
+           [################################] 1/1. Finished in 10ms
+    [info] Instruction selection (threads: 1)
+           [################################] 1/1. Finished in 0ms
+    [info] Searching mutants across functions (threads: 1)
+           [################################] 1/1. Finished in 13ms
+    [info] Applying filter: no debug info (threads: 2)
+           [################################] 2/2. Finished in 0ms
+    [info] Applying filter: file path (threads: 2)
+           [################################] 2/2. Finished in 10ms
+    [info] Prepare mutations (threads: 1)
+           [################################] 1/1. Finished in 0ms
+    [info] Cloning functions for mutation (threads: 1)
+           [################################] 1/1. Finished in 11ms
+    [info] Removing original functions (threads: 1)
+           [################################] 1/1. Finished in 10ms
+    [info] Redirect mutated functions (threads: 1)
+           [################################] 1/1. Finished in 1ms
+    [info] Applying mutations (threads: 1)
+           [################################] 2/2. Finished in 0ms
+    [info] Compiling original code (threads: 1)
+           [################################] 1/1. Finished in 10ms
+    [info] Running mutants (threads: 2)
+           [################################] 2/2. Finished in 12ms
+    [info] Killed mutants (1/2):
+    /tmp/sc-b3yQyijWP/main.cpp:2:11: warning: Killed: Replaced >= with < [cxx_ge_to_lt]
       if (age >= 21) {
               ^
-
-    Survived mutants (1/2):
-
-    /sandbox/mull/tests-lit/tests/tutorials/hello-world/step-5-one-survived-mutations/sample.cpp:13:11: warning: Survived: Replaced >= with > [cxx_ge_to_gt]
+    [info] Survived mutants (1/2):
+    /tmp/sc-b3yQyijWP/main.cpp:2:11: warning: Survived: Replaced >= with > [cxx_ge_to_gt]
       if (age >= 21) {
               ^
-
-    Mutation score: 50%
-
-    Total execution time: 161ms
+    [info] Mutation score: 50%
 
 What we are seeing now is two mutations: one mutation is ``Killed``, another
 one is ``Survived``. If we take a closer look at the code and the contents
@@ -229,41 +247,55 @@ The code:
 
     $ clang -fembed-bitcode -g main.cpp -o hello-world
     $ mull-cxx -test-framework=CustomTest -ide-reporter-show-killed hello-world
-    Extracting bitcode from executable (threads: 1): 1/1. Finished in 2ms.
-    Loading bitcode files (threads: 1): 1/1. Finished in 12ms.
-    Compiling instrumented code (threads: 1): 1/1. Finished in 12ms.
-    Loading dynamic libraries (threads: 1): 1/1. Finished in 0ms.
-    Searching tests (threads: 1): 1/1. Finished in 0ms.
-    Preparing original test run (threads: 1): 1/1. Finished in 0ms.
-    Running original tests (threads: 1): 1/1. Finished in 12ms.
-    Applying function filter: no debug info (threads: 1): 1/1. Finished in 12ms.
-    Applying function filter: file path (threads: 1): 1/1. Finished in 13ms.
-    Instruction selection (threads: 1): 1/1. Finished in 11ms.
-    Searching mutants across functions (threads: 1): 1/1. Finished in 12ms.
-    Applying filter: no debug info (threads: 2): 2/2. Finished in 1ms.
-    Applying filter: file path (threads: 2): 2/2. Finished in 11ms.
-    Prepare mutations (threads: 1): 1/1. Finished in 0ms.
-    Cloning functions for mutation (threads: 1): 1/1. Finished in 13ms.
-    Removing original functions (threads: 1): 1/1. Finished in 10ms.
-    Redirect mutated functions (threads: 1): 1/1. Finished in 11ms.
-    Applying mutations (threads: 1): 2/2. Finished in 0ms.
-    Compiling original code (threads: 1): 1/1. Finished in 11ms.
-    Running mutants (threads: 2): 2/2. Finished in 12ms.
-
-    Killed mutants (2/2):
-
-    /sandbox/mull/tests-lit/tests/tutorials/hello-world/step-6-no-survived-mutations/sample.cpp:13:11: warning: Killed: Replaced >= with > [cxx_ge_to_gt]
+    [info] Extracting bitcode from executable (threads: 1)
+           [################################] 1/1. Finished in 4ms
+    [info] Loading bitcode files (threads: 1)
+           [################################] 1/1. Finished in 12ms
+    [info] Compiling instrumented code (threads: 1)
+           [################################] 1/1. Finished in 11ms
+    [info] Loading dynamic libraries (threads: 1)
+           [################################] 1/1. Finished in 0ms
+    [info] Searching tests (threads: 1)
+           [################################] 1/1. Finished in 0ms
+    [info] Preparing original test run (threads: 1)
+           [################################] 1/1. Finished in 1ms
+    [info] Running original tests (threads: 1)
+           [################################] 1/1. Finished in 10ms
+    [info] Applying function filter: no debug info (threads: 1)
+           [################################] 1/1. Finished in 11ms
+    [info] Applying function filter: file path (threads: 1)
+           [################################] 1/1. Finished in 11ms
+    [info] Instruction selection (threads: 1)
+           [################################] 1/1. Finished in 11ms
+    [info] Searching mutants across functions (threads: 1)
+           [################################] 1/1. Finished in 0ms
+    [info] Applying filter: no debug info (threads: 2)
+           [################################] 2/2. Finished in 0ms
+    [info] Applying filter: file path (threads: 2)
+           [################################] 2/2. Finished in 0ms
+    [info] Prepare mutations (threads: 1)
+           [################################] 1/1. Finished in 1ms
+    [info] Cloning functions for mutation (threads: 1)
+           [################################] 1/1. Finished in 11ms
+    [info] Removing original functions (threads: 1)
+           [################################] 1/1. Finished in 12ms
+    [info] Redirect mutated functions (threads: 1)
+           [################################] 1/1. Finished in 0ms
+    [info] Applying mutations (threads: 1)
+           [################################] 2/2. Finished in 0ms
+    [info] Compiling original code (threads: 1)
+           [################################] 1/1. Finished in 12ms
+    [info] Running mutants (threads: 2)
+           [################################] 2/2. Finished in 10ms
+    [info] Killed mutants (2/2):
+    /tmp/sc-b3yQyijWP/main.cpp:2:11: warning: Killed: Replaced >= with > [cxx_ge_to_gt]
       if (age >= 21) {
               ^
-    /sandbox/mull/tests-lit/tests/tutorials/hello-world/step-6-no-survived-mutations/sample.cpp:13:11: warning: Killed: Replaced >= with < [cxx_ge_to_lt]
+    /tmp/sc-b3yQyijWP/main.cpp:2:11: warning: Killed: Replaced >= with < [cxx_ge_to_lt]
       if (age >= 21) {
               ^
-
-    All mutations have been killed
-
-    Mutation score: 100%
-
-    Total execution time: 158ms
+    [info] All mutations have been killed
+    [info] Mutation score: 100%
 
 Summary
 -------
