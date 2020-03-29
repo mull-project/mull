@@ -38,7 +38,7 @@
     state: directory
 
 - name: Prepare Build System (Release)
-  command: cmake -G Ninja -DMULL_VERSION={{ mull_version }} -DCMAKE_BUILD_TYPE=Release -DPATH_TO_LLVM={{ llvm_dir }} -DCMAKE_CXX_FLAGS="{{ mull_cxx_flags }}" {{ source_dir }}
+  command: cmake -G Ninja -DMULL_VERSION={{ mull_version }} -DCMAKE_BUILD_TYPE=Release -DPATH_TO_LLVM={{ llvm_dir }} -DCMAKE_CXX_FLAGS="{{ mull_cxx_flags }} -flto" {{ source_dir }}
   args:
     chdir: "{{ release_build_dir }}"
     creates: "{{ release_build_dir }}/CMakeCache.txt"
