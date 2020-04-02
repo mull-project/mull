@@ -75,6 +75,8 @@ public:
   ~MutationPoint() = default;
 
   Mutator *getMutator();
+  Mutator *getMutator() const;
+
   const MutationPointAddress &getAddress() const;
   llvm::Value *getOriginalValue() const;
   Bitcode *getBitcode() const;
@@ -102,6 +104,8 @@ public:
   std::string getTrampolineName();
   std::string getMutatedFunctionName();
   std::string getOriginalFunctionName() const;
+
+  std::string dump() const;
 };
 
 } // namespace mull

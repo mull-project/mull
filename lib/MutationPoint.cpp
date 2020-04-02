@@ -8,6 +8,7 @@
 #include <llvm/Transforms/Utils/Cloning.h>
 
 #include <assert.h>
+#include <sstream>
 #include <utility>
 
 using namespace llvm;
@@ -90,6 +91,10 @@ Mutator *MutationPoint::getMutator() {
   return mutator;
 }
 
+Mutator *MutationPoint::getMutator() const {
+  return mutator;
+}
+
 const MutationPointAddress &MutationPoint::getAddress() const {
   return address;
 }
@@ -167,4 +172,12 @@ std::string MutationPoint::getMutatedFunctionName() {
 
 std::string MutationPoint::getOriginalFunctionName() const {
   return originalFunction->getName().str() + "_" + bitcode->getUniqueIdentifier() + "_original";
+}
+
+std::string MutationPoint::dump() const {
+  std::stringstream ss;
+  ss << "Mutation Point: " << getMutator()->getUniqueIdentifier() << " "
+     << getSourceLocation().filePath << ":" << getSourceLocation().line << ":"
+     << getSourceLocation().column;
+  return ss.str();
 }
