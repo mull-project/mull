@@ -52,8 +52,7 @@ public:
   llvm::Instruction &findInstruction(llvm::Module *module) const;
   llvm::Instruction &findInstruction(llvm::Function *function) const;
 
-  const static MutationPointAddress
-  addressFromInstruction(const llvm::Instruction *instruction);
+  const static MutationPointAddress addressFromInstruction(const llvm::Instruction *instruction);
 };
 
 class MutationPoint {
@@ -70,13 +69,14 @@ class MutationPoint {
   irm::IRMutation *irMutator;
 
 public:
-  MutationPoint(Mutator *mutator, irm::IRMutation *irMutator,
-                llvm::Instruction *instruction, std::string replacement,
-                Bitcode *m, std::string diagnostics);
+  MutationPoint(Mutator *mutator, irm::IRMutation *irMutator, llvm::Instruction *instruction,
+                std::string replacement, Bitcode *m, std::string diagnostics);
 
   ~MutationPoint() = default;
 
   Mutator *getMutator();
+  Mutator *getMutator() const;
+
   const MutationPointAddress &getAddress() const;
   llvm::Value *getOriginalValue() const;
   Bitcode *getBitcode() const;
@@ -104,6 +104,8 @@ public:
   std::string getTrampolineName();
   std::string getMutatedFunctionName();
   std::string getOriginalFunctionName() const;
+
+  std::string dump() const;
 };
 
 } // namespace mull

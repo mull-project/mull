@@ -19,6 +19,8 @@
 
 #include "gtest/gtest.h"
 
+#include <regex>
+
 using namespace mull;
 using namespace llvm;
 
@@ -154,4 +156,26 @@ TEST(MutationPoint, OriginalValuePresent) {
     mutation->getOriginalValue()->print(stream);
     ASSERT_EQ(s, mutantRepresentations[i]);
   }
+}
+
+TEST(MutationPoint, dump) {
+  Diagnostics diagnostics;
+  LLVMContext context;
+  BitcodeLoader loader;
+  auto bitcode = loader.loadBitcodeAtPath(
+    fixtures::mutators_replace_assignment_module_bc_path(), context, diagnostics);
+
+  cxx::NumberAssignConst mutator;
+  FunctionUnderTest functionUnderTest(
+    bitcode->getModule()->getFunction("replace_assignment"), nullptr, 0);
+  functionUnderTest.selectInstructions({});
+  auto mutationPoints = mutator.getMutations(bitcode.get(), functionUnderTest);
+
+  ASSERT_EQ(2U, mutationPoints.size());
+
+  const std::string dump = mutationPoints[1]->dump();
+
+  auto const dumpRegex = std::regex("Mutation Point: cxx_assign_const .*/module\\.c:6:7");
+
+  ASSERT_TRUE(std::regex_search(dump, dumpRegex));
 }
