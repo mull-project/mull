@@ -2,12 +2,14 @@
 
 #include "mull/BitcodeLoader.h"
 #include "mull/Mutators/Mutator.h"
+#include "mull/Reporters/SourceManager.h"
 #include "mull/Toolchain/Compiler.h"
 
 #include <llvm/IR/Function.h>
 #include <llvm/Transforms/Utils/Cloning.h>
 
 #include <assert.h>
+#include <iomanip>
 #include <sstream>
 #include <utility>
 
@@ -179,5 +181,63 @@ std::string MutationPoint::dump() const {
   ss << "Mutation Point: " << getMutator()->getUniqueIdentifier() << " "
      << getSourceLocation().filePath << ":" << getSourceLocation().line << ":"
      << getSourceLocation().column;
+  return ss.str();
+}
+
+std::string MutationPoint::dumpSourceCodeContext() const {
+  std::stringstream ss;
+
+  if (sourceLocation.isNull() || sourceLocation.line == 0 || sourceLocation.column == 0 ||
+      sourceLocation.filePath.empty()) {
+    ss << "Source code information is unavailable. Possibly a junk mutation.";
+    return ss.str();
+  }
+
+  SourceManager sourceManager;
+
+  const std::string delimiter = ":";
+
+  const size_t totalLines = sourceManager.getNumberOfLines(sourceLocation);
+
+  const size_t maxLineNumber = std::min(totalLines, (size_t)(sourceLocation.line + 1));
+
+  const size_t maxDigits = (maxLineNumber == 0) ? 1 : (log10(maxLineNumber) + 1);
+
+  auto line = sourceManager.getLine(sourceLocation);
+  assert(sourceLocation.column < line.size());
+
+  std::string caret(sourceLocation.column, ' ');
+  for (size_t index = 0; index < sourceLocation.column; index++) {
+    if (line[index] == '\t') {
+      caret[index] = '\t';
+    }
+  }
+  caret[sourceLocation.column - 1] = '^';
+  caret.insert(0, std::string(maxDigits + delimiter.size(), ' '));
+
+  if (sourceLocation.line > 1) {
+    SourceLocation previousLineLocation(sourceLocation.unitDirectory,
+                                        sourceLocation.unitFilePath,
+                                        sourceLocation.directory,
+                                        sourceLocation.filePath,
+                                        sourceLocation.line - 1,
+                                        sourceLocation.column);
+    auto previousLine = sourceManager.getLine(previousLineLocation);
+    ss << std::setw(maxDigits) << previousLineLocation.line << delimiter << previousLine;
+  }
+
+  ss << std::setw(maxDigits) << sourceLocation.line << delimiter << line << caret << "\n";
+
+  if (sourceLocation.line < totalLines) {
+    SourceLocation nextLineLocation(sourceLocation.unitDirectory,
+                                    sourceLocation.unitFilePath,
+                                    sourceLocation.directory,
+                                    sourceLocation.filePath,
+                                    sourceLocation.line + 1,
+                                    sourceLocation.column);
+    auto nextLine = sourceManager.getLine(nextLineLocation);
+    ss << std::setw(maxDigits) << nextLineLocation.line << delimiter << nextLine;
+  }
+
   return ss.str();
 }

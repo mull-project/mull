@@ -26,6 +26,12 @@ std::string SourceManager::getLine(const SourceLocation &location) {
   return line;
 }
 
+size_t SourceManager::getNumberOfLines(const SourceLocation &location) {
+  const LineOffset &lineOffset = getLineOffset(location);
+  assert(lineOffset.offsets.size() > 0);
+  return lineOffset.offsets.size() - 1;
+}
+
 LineOffset &SourceManager::getLineOffset(const SourceLocation &location) {
   if (lineOffsets.count(location.filePath)) {
     return lineOffsets.at(location.filePath);
@@ -43,6 +49,7 @@ LineOffset &SourceManager::getLineOffset(const SourceLocation &location) {
       offsets.push_back(offset);
     }
   }
+  offsets.push_back(offset);
 
   LineOffset lineOffset(file, offsets);
   auto inserted =
