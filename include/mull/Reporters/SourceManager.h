@@ -18,6 +18,7 @@ struct LineOffset {
 class SourceManager {
 public:
   std::string getLine(const SourceLocation &location);
+  size_t getNumberOfLines(const SourceLocation &location);
 
   ~SourceManager();
 

@@ -179,3 +179,38 @@ TEST(MutationPoint, dump) {
 
   ASSERT_TRUE(std::regex_search(dump, dumpRegex));
 }
+
+static std::string leftTrimmedString(const std::string &string) {
+  if (string.empty())
+    return "";
+  std::string newString = string;
+  while (newString.at(0) == '\n') {
+    newString.erase(0, 1);
+  }
+  return newString;
+}
+
+TEST(MutationPoint, dumpSourceCodeContext) {
+  Diagnostics diagnostics;
+  LLVMContext context;
+  BitcodeLoader loader;
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::mutators_replace_assignment_module_bc_path(), context, diagnostics);
+
+  cxx::NumberAssignConst mutator;
+  FunctionUnderTest functionUnderTest(
+      bitcode->getModule()->getFunction("replace_assignment"), nullptr, 0);
+  functionUnderTest.selectInstructions({});
+  auto mutationPoints = mutator.getMutations(bitcode.get(), functionUnderTest);
+
+  ASSERT_EQ(2U, mutationPoints.size());
+
+  ASSERT_EQ(mutationPoints[0]->dumpSourceCodeContext(),
+            "Source code information is unavailable. Possibly a junk mutation.");
+  ASSERT_EQ(mutationPoints[1]->dumpSourceCodeContext(), leftTrimmedString(R"LITERAL(
+5:int replace_assignment(int a) {
+6:  int b = a + 100;
+        ^
+7:
+)LITERAL"));
+}
