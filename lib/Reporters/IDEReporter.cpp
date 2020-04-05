@@ -3,7 +3,7 @@
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/MutationResult.h"
 #include "mull/Mutators/Mutator.h"
-#include "mull/Reporters/SourceManager.h"
+#include "mull/Reporters/SourceCodeReader.h"
 #include "mull/Result.h"
 
 #include <assert.h>
@@ -18,7 +18,7 @@ static bool mutantSurvived(const ExecutionStatus &status) {
   return status == ExecutionStatus::Passed;
 }
 
-static void printMutant(Diagnostics &diagnostics, SourceManager &sourceManager,
+static void printMutant(Diagnostics &diagnostics, SourceCodeReader &sourceCodeReader,
                         const MutationPoint &mutant, bool survived) {
   auto &sourceLocation = mutant.getSourceLocation();
   assert(!sourceLocation.isNull() && "Debug information is missing?");
@@ -28,24 +28,15 @@ static void printMutant(Diagnostics &diagnostics, SourceManager &sourceManager,
                << sourceLocation.column << ": warning: " << (survived ? "Survived" : "Killed")
                << ": " << mutant.getDiagnostics() << " [" << mutant.getMutatorIdentifier() << "]"
                << "\n";
-  auto line = sourceManager.getLine(sourceLocation);
-  assert(sourceLocation.column < line.size());
 
-  std::string caret(sourceLocation.column, ' ');
-  for (size_t index = 0; index < sourceLocation.column; index++) {
-    if (line[index] == '\t') {
-      caret[index] = '\t';
-    }
-  }
-  caret[sourceLocation.column - 1] = '^';
+  stringstream << sourceCodeReader.getSourceLineWithCaret(sourceLocation);
 
-  stringstream << line << caret << "\n";
   fprintf(stdout, "%s", stringstream.str().c_str());
   fflush(stdout);
 }
 
 IDEReporter::IDEReporter(Diagnostics &diagnostics, bool showKilled)
-    : diagnostics(diagnostics), showKilled(showKilled) {}
+    : diagnostics(diagnostics), showKilled(showKilled), sourceCodeReader() {}
 
 void IDEReporter::reportResults(const Result &result, const Metrics &metrics) {
   if (result.getMutationPoints().empty()) {
@@ -66,8 +57,6 @@ void IDEReporter::reportResults(const Result &result, const Metrics &metrics) {
   auto survivedMutantsCount = result.getMutationPoints().size() - killedMutants.size();
   auto killedMutantsCount = killedMutants.size();
 
-  SourceManager sourceManager;
-
   /// It is important that below we iterate over result.getMutationPoints()
   /// because we want the output to be stable across multiple executions of Mull.
   /// Optimizing this here was a bad idea: https://github.com/mull-project/mull/pull/640.
@@ -78,7 +67,7 @@ void IDEReporter::reportResults(const Result &result, const Metrics &metrics) {
     diagnostics.info(stringstream.str());
     for (auto &mutant : result.getMutationPoints()) {
       if (killedMutants.find(mutant) != killedMutants.end()) {
-        printMutant(diagnostics, sourceManager, *mutant, false);
+        printMutant(diagnostics, sourceCodeReader, *mutant, false);
       }
     }
   }
@@ -91,7 +80,7 @@ void IDEReporter::reportResults(const Result &result, const Metrics &metrics) {
 
     for (auto &mutant : result.getMutationPoints()) {
       if (killedMutants.find(mutant) == killedMutants.end()) {
-        printMutant(diagnostics, sourceManager, *mutant, true);
+        printMutant(diagnostics, sourceCodeReader, *mutant, true);
       }
     }
   } else {

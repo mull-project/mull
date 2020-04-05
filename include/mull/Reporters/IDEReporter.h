@@ -1,6 +1,7 @@
 #pragma once
 
-#include "Reporter.h"
+#include "mull/Reporters/Reporter.h"
+#include "mull/Reporters/SourceCodeReader.h"
 
 namespace mull {
 
@@ -14,6 +15,7 @@ public:
 private:
   Diagnostics &diagnostics;
   bool showKilled;
+  SourceCodeReader sourceCodeReader;
 
   void reportSurvivedMutants(const Result &result, const Metrics &metrics);
   void reportAllMutants(const Result &result, const Metrics &metrics);

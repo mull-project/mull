@@ -66,3 +66,21 @@ std::string SourceCodeReader::getContext(const mull::SourceLocation &sourceLocat
 
   return ss.str();
 }
+
+std::string SourceCodeReader::getSourceLineWithCaret(const SourceLocation &sourceLocation) {
+  std::stringstream ss;
+
+  auto line = sourceManager.getLine(sourceLocation);
+  assert(sourceLocation.column < line.size());
+
+  std::string caret(sourceLocation.column, ' ');
+  for (size_t index = 0; index < sourceLocation.column; index++) {
+    if (line[index] == '\t') {
+      caret[index] = '\t';
+    }
+  }
+  caret[sourceLocation.column - 1] = '^';
+
+  ss << line << caret << "\n";
+  return ss.str();
+}
