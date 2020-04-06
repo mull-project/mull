@@ -59,9 +59,11 @@ set(mull_sources
   JunkDetection/CXX/CXXJunkDetector.cpp
 
   Reporters/ASTSourceInfoProvider.cpp
+  Reporters/SourceCodeReader.cpp
   Reporters/SourceManager.cpp
   Reporters/SQLiteReporter.cpp
   Reporters/TimeReporter.cpp
+
   SourceLocation.cpp
 
   Parallelization/Progress.cpp
