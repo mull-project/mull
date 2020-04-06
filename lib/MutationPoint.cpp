@@ -9,8 +9,7 @@
 #include <llvm/IR/Function.h>
 #include <llvm/Transforms/Utils/Cloning.h>
 
-#include <assert.h>
-#include <iomanip>
+#include <cassert>
 #include <sstream>
 #include <utility>
 
