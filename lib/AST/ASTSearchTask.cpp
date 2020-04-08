@@ -25,7 +25,7 @@ void ASTSearchTask::operator()(iterator begin, iterator end, Out &storage,
       continue;
     }
 
-    if (!llvm::sys::fs::is_regular_file(sourceFileName) && sourceFileName != "input.cc") {
+    if (!llvm::sys::fs::is_regular_file(sourceFileName) && sourceFileName != "/in-memory-file.cc") {
       diagnostics.error(std::string("ASTSearchTask: invalid source file path: ") + sourceFileName);
     }
 

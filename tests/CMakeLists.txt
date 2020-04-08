@@ -12,6 +12,11 @@ set(mull_unittests_sources
   AST/ASTVisitor/ASTVisitor_RemoveVoid_Tests.cpp
   AST/ASTVisitor/ASTVisitor_ReplaceCall_Tests.cpp
 
+  Helpers/InMemoryCompiler.cpp
+  Helpers/InMemoryFixture.cpp
+
+  Mutations-E2E/Mutation_Arithmetic_Add_Test.cpp
+
   CompilerTests.cpp
   DriverTests.cpp
   ProcessSandboxTest.cpp
@@ -57,7 +62,9 @@ target_link_libraries(mull-tests
   mull
   google-test
   json11
-  )
+  clangCodeGen
+)
+
 target_include_directories(mull-tests PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}
   ${MULL_INCLUDE_DIRS}

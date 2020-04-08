@@ -48,6 +48,8 @@ public:
   ThreadSafeASTUnit *findAST(const MutationPoint *point);
   ThreadSafeASTUnit *findAST(const std::string &sourceFile);
 
+  void setAST(const std::string &sourceFile, std::unique_ptr<ThreadSafeASTUnit> astUnit);
+
   const ASTMutation &getMutation(const std::string &sourceFile, mull::MutatorKind mutatorKind,
                                  int line, int column) const;
 

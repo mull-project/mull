@@ -11,7 +11,7 @@
 using namespace mull;
 using namespace llvm;
 
-static const char *const fakeSourceFilePath = "input.cc";
+static const char *const fakeSourceFilePath = "/in-memory-file.cc";
 
 static FilePathFilter nullPathFilter;
 
