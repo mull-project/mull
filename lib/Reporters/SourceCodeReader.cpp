@@ -2,6 +2,8 @@
 
 #include "mull/SourceLocation.h"
 
+#include <llvm/Support/FileSystem.h>
+
 #include <cassert>
 #include <cmath>
 #include <iomanip>
@@ -17,6 +19,11 @@ std::string SourceCodeReader::getContext(const mull::SourceLocation &sourceLocat
   if (sourceLocation.isNull() || sourceLocation.line == 0 || sourceLocation.column == 0 ||
       sourceLocation.filePath.empty()) {
     ss << "Source code information is unavailable. Possibly a junk mutation.";
+    return ss.str();
+  }
+
+  if (!llvm::sys::fs::exists(sourceLocation.filePath)) {
+    ss << "File does not exist: " << sourceLocation.filePath;
     return ss.str();
   }
 

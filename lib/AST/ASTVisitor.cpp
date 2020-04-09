@@ -143,7 +143,7 @@ void ASTVisitor::saveMutationPoint(mull::MutatorKind mutatorKind, const clang::S
     return;
   }
 
-  if (!llvm::sys::fs::is_regular_file(sourceFilePath) && sourceFilePath != "input.cc") {
+  if (!llvm::sys::fs::is_regular_file(sourceFilePath) && sourceFilePath != "/in-memory-file.cc") {
     diagnostics.error(std::string("ASTVisitor: invalid source file path: '") + sourceFilePath);
   }
 

@@ -32,7 +32,7 @@ int ASTMutationStorage::count() const {
 const ASTMutation &ASTMutationStorage::getMutation(const std::string &sourceFile,
                                                    MutatorKind mutatorKind, int line,
                                                    int column) const {
-  assert(llvm::sys::fs::is_regular_file(sourceFile) || sourceFile == "input.cc");
+  assert(llvm::sys::fs::is_regular_file(sourceFile) || sourceFile == "/in-memory-file.cc");
 
   assert(storage.count(sourceFile) > 0);
 
@@ -50,7 +50,7 @@ const ASTMutation &ASTMutationStorage::getMutation(const std::string &sourceFile
 
 bool ASTMutationStorage::mutationExists(const std::string &sourceFile,
                                         mull::MutatorKind mutatorKind, int line, int column) const {
-  assert(llvm::sys::fs::is_regular_file(sourceFile) || sourceFile == "input.cc");
+  assert(llvm::sys::fs::is_regular_file(sourceFile) || sourceFile == "/in-memory-file.cc");
 
   assert(storage.count(sourceFile) > 0);
 
@@ -65,7 +65,7 @@ bool ASTMutationStorage::mutationExists(const std::string &sourceFile,
 
 void ASTMutationStorage::saveMutation(const std::string &sourceFile, mull::MutatorKind mutatorKind,
                                       const clang::Stmt *const expression, int line, int column) {
-  assert(llvm::sys::fs::is_regular_file(sourceFile) || sourceFile == "input.cc");
+  assert(llvm::sys::fs::is_regular_file(sourceFile) || sourceFile == "/in-memory-file.cc");
 
   std::string description = MutationKindToString(mutatorKind);
 

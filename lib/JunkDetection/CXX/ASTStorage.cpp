@@ -43,8 +43,7 @@ private:
   std::vector<clang::Decl *> &declarations;
 };
 
-ThreadSafeASTUnit::ThreadSafeASTUnit(std::unique_ptr<clang::ASTUnit> ast)
-    : ast(std::move(ast)) {
+ThreadSafeASTUnit::ThreadSafeASTUnit(std::unique_ptr<clang::ASTUnit> ast) : ast(std::move(ast)) {
   if (this->ast) {
     recordDeclarations();
   }
@@ -181,8 +180,17 @@ ThreadSafeASTUnit *ASTStorage::findAST(const MutationPoint *point) {
   assert(!point->getSourceLocation().isNull() && "Missing debug information?");
 
   const std::string &sourceFile = point->getSourceLocation().unitFilePath;
+  if (llvm::sys::fs::exists(sourceFile)) {
+    return findAST(sourceFile);
+  }
 
-  return findAST(sourceFile);
+  if (sourceFile == "/in-memory-file.cc") {
+    const std::string &unitSourceFile = point->getSourceLocation().filePath;
+    return findAST(unitSourceFile);
+  }
+
+  diagnostics.warning("ThreadSafeASTUnit: source location does not exist: " + sourceFile);
+  return nullptr;
 }
 
 ThreadSafeASTUnit *ASTStorage::findAST(const std::string &sourceFile) {
@@ -228,6 +236,11 @@ ThreadSafeASTUnit *ASTStorage::findAST(const std::string &sourceFile) {
   return threadSafeAST;
 }
 
+void ASTStorage::setAST(const std::string &sourceFile, std::unique_ptr<ThreadSafeASTUnit> astUnit) {
+  std::lock_guard<std::mutex> guard(mutex);
+  astUnits[sourceFile] = std::move(astUnit);
+}
+
 const ASTMutation &ASTStorage::getMutation(const std::string &sourceFile,
                                            mull::MutatorKind mutatorKind, int line,
                                            int column) const {
@@ -240,12 +253,12 @@ void ASTStorage::saveMutation(const std::string &sourceFile, mull::MutatorKind m
   mutations.saveMutation(sourceFile, mutatorKind, expression, line, column);
 }
 
-void ASTStorage::saveMutations(std::unordered_map<SourceFilePath, SingleASTUnitMutations> &storage) {
+void ASTStorage::saveMutations(
+    std::unordered_map<SourceFilePath, SingleASTUnitMutations> &storage) {
   mutations.saveMutations(storage);
 }
 
-bool ASTStorage::mutationExists(const std::string &sourceFile,
-                                mull::MutatorKind mutatorKind, int line,
-                                int column) {
+bool ASTStorage::mutationExists(const std::string &sourceFile, mull::MutatorKind mutatorKind,
+                                int line, int column) {
   return mutations.mutationExists(sourceFile, mutatorKind, line, column);
 }
