@@ -14,6 +14,8 @@ set(mull_unittests_sources
 
   Helpers/InMemoryCompiler.cpp
   Helpers/InMemoryFixture.cpp
+  Helpers/MutationTestBed.cpp
+  Helpers/MutationArtefact.cpp
 
   Mutations-E2E/Mutation_Arithmetic_Add_Test.cpp
 
