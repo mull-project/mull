@@ -8,20 +8,11 @@ using namespace mull_test;
 MutationArtefact::MutationArtefact(mull::SingleASTUnitMutations astMutations,
                                    std::vector<mull::MutationPoint *> nonJunkMutationPoints,
                                    std::vector<mull::MutationPoint *> junkMutationPoints,
-                                   std::unique_ptr<mull::Bitcode> bitcode,
-                                   std::unique_ptr<llvm::LLVMContext> context)
-  : astMutations(astMutations), nonJunkMutationPoints(nonJunkMutationPoints),
-    junkMutationPoints(junkMutationPoints), bitcode(std::move(bitcode)),
-    context(std::move(context)) {}
-
-MutationArtefact::~MutationArtefact() {
-  /// We need to enforce the order of deallocation:
-  /// First we deallocate the LLVM bitcode and then the underlying LLVM context.
-  /// Doing this explicitly in order to avoid implicit deallocation of
-  /// MutationArtefact's members.
-  bitcode.reset();
-  context.reset();
-}
+                                   std::unique_ptr<llvm::LLVMContext> context,
+                                   std::unique_ptr<mull::Bitcode> bitcode)
+    : astMutations(astMutations), nonJunkMutationPoints(nonJunkMutationPoints),
+      junkMutationPoints(junkMutationPoints), context(std::move(context)),
+      bitcode(std::move(bitcode)) {}
 
 const mull::SingleASTUnitMutations &MutationArtefact::getASTMutations() const {
   return astMutations;

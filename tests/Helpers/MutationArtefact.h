@@ -8,7 +8,7 @@
 namespace mull {
 class MutationPoint;
 class Bitcode;
-}
+} // namespace mull
 
 namespace llvm {
 class LLVMContext;
@@ -21,18 +21,24 @@ public:
   MutationArtefact(mull::SingleASTUnitMutations astMutations,
                    std::vector<mull::MutationPoint *> nonJunkMutationPoints,
                    std::vector<mull::MutationPoint *> junkMutationPoints,
-                   std::unique_ptr <mull::Bitcode> bitcode,
-                   std::unique_ptr <llvm::LLVMContext> context);
-  ~MutationArtefact();
+                   std::unique_ptr<llvm::LLVMContext> context,
+                   std::unique_ptr<mull::Bitcode> bitcode);
   const mull::SingleASTUnitMutations &getASTMutations() const;
   const std::vector<mull::MutationPoint *> &getNonJunkMutationPoints() const;
   const std::vector<mull::MutationPoint *> &getJunkMutationPoints() const;
+
 private:
   mull::SingleASTUnitMutations astMutations;
   std::vector<mull::MutationPoint *> nonJunkMutationPoints;
   std::vector<mull::MutationPoint *> junkMutationPoints;
-  std::unique_ptr <mull::Bitcode> bitcode;
-  std::unique_ptr <llvm::LLVMContext> context;
+
+  /// We need to enforce the order of deallocation:
+  /// First we deallocate the LLVM bitcode and then the underlying LLVM context.
+  /// Doing this explicitly in order to avoid implicit deallocation of
+  /// MutationArtefact's members.
+  /// C++ deallocates members in the reverse order, so bitcode goes first.
+  std::unique_ptr<llvm::LLVMContext> context;
+  std::unique_ptr<mull::Bitcode> bitcode;
 };
 
-}
+} // namespace mull_test

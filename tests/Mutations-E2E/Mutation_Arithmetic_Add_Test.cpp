@@ -1,6 +1,7 @@
 #include "FixturePaths.h"
 
 #include "mull/AST/ASTVisitor.h"
+#include "mull/Bitcode.h"
 #include "mull/MutationPoint.h"
 #include "mull/Mutators/CXX/ArithmeticMutators.h"
 
