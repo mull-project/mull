@@ -6,3 +6,4 @@ Tutorials
 
    HelloWorld
    fmtlibTutorial
+   OpenSSLTutorial

@@ -18,7 +18,7 @@ Add the repository:
 
 .. code-block:: bash
 
-    sudo echo "deb https://dl.bintray.com/mull-project/ubuntu-18 stable main" >> /etc/apt/sources.list
+    echo "deb https://dl.bintray.com/mull-project/ubuntu-18 stable main" | sudo tee -a /etc/apt/sources.list
     sudo apt-get update
     sudo apt-get install mull
 
