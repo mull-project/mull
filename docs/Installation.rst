@@ -2,22 +2,16 @@ Installation
 ============
 
 Mull comes with a number of precompiled binaries for macOS and Ubuntu.
+
 Please, refer to the `Hacking on Mull <HackingOnMull.html>`_ to build Mull from sources.
 
 Install on Ubuntu
 *****************
 
-Get the Bintray public GPG key:
-
 .. code-block:: bash
 
-    wget https://bintray.com/user/downloadSubjectPublicKey?username=bintray -O bintray.key
-    sudo apt-key add bintray.key
-
-Add the repository:
-
-.. code-block:: bash
-
+    wget https://api.bintray.com/users/bintray/keys/gpg/public.key
+    sudo apt-key add public.key
     echo "deb https://dl.bintray.com/mull-project/ubuntu-18 stable main" | sudo tee -a /etc/apt/sources.list
     sudo apt-get update
     sudo apt-get install mull
@@ -45,15 +39,13 @@ You can also install Mull for Ubuntu-16.04 or get the latest "nightly" build fro
 Install on macOS
 ****************
 
-Check the latest version on `Bintray <https://bintray.com/mull-project/macos/mull/_latestVersion>`_.
+Get the latest version here `Bintray <https://bintray.com/mull-project/macos/mull/_latestVersion>`_.
 
-Go to the `Files` tab, download and unzip the version you need:
+Or install via Homebrew:
 
 .. code-block:: bash
 
-    wget "https://bintray.com/mull-project/macos/download_file?file_path=pool%2Fmain%2Fm%2FMull-0.7.0-LLVM-9.0-macOS-10.15.3.zip" -O mull.zip
-    unzip mull.zip
-    cp Mull-0.7.0-LLVM-9.0-macOS-10.15.3/bin/mull-cxx /usr/local/bin/mull-cxx
+    brew install mull-project/mull/mull-stable
 
 Check the installation:
 
@@ -66,7 +58,5 @@ Check the installation:
     Commit: 1638698
     Date: 28 Mar 2020
     LLVM: 9.0.0
-
-Installation via `Homebrew <https://brew.sh>`_ is on our TODO-list.
 
 You can also get the latest "nightly" build from `here <https://bintray.com/mull-project/macos/mull-nightly/_latestVersion>`_.
