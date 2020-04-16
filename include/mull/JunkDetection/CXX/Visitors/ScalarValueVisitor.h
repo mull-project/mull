@@ -1,5 +1,6 @@
 #pragma once
 
+#include "mull/AST/ASTScalarMutationMatcher.h"
 #include "InstructionRangeVisitor.h"
 #include "VisitorParameters.h"
 
@@ -17,6 +18,7 @@ public:
 
 private:
   InstructionRangeVisitor visitor;
+  ASTScalarMutationMatcher scalarMutationMatcher;
 };
 
 } // namespace mull

@@ -52,31 +52,13 @@ bool isDeclRefConstant(clang::DeclRefExpr *declRef) {
 }
 
 ScalarValueVisitor::ScalarValueVisitor(const VisitorParameters &parameters)
-    : visitor(parameters) {}
+    : visitor(parameters), scalarMutationMatcher(parameters.astContext) {}
 
 bool ScalarValueVisitor::VisitExpr(clang::Expr *expression) {
-
-  /// In case of PredefinedExpr, the expression expression->children() yields
-  /// children which are nullptr. These nodes should be junk anyway, so we
-  /// ignore them early.
-  if (llvm::isa<clang::PredefinedExpr>(expression)) {
-    return true;
-  }
-
-  expression = expression->IgnoreImplicit();
-  for (auto child : expression->children()) {
-    if (!child) {
-      llvm::errs() << "Ignoring expression with a nullptr child:" << "\n";
-      expression->dump(llvm::errs());
-      continue;
-    }
-
-    if (auto expr = llvm::dyn_cast<clang::Expr>(child)) {
-      child = expr->IgnoreImplicit();
-    }
-
-    if (isConstant(child)) {
-      visitor.visitRangeWithASTExpr(expression);
+  const clang::Stmt *potentialMutableStatement = nullptr;
+  if (scalarMutationMatcher.isMutableExpr(*expression, &potentialMutableStatement, nullptr)) {
+    if (potentialMutableStatement) {
+      visitor.visitRangeWithASTExpr(potentialMutableStatement);
     }
   }
   return true;

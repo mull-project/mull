@@ -1,5 +1,6 @@
 #pragma once
 
+#include "mull/AST/ASTScalarMutationMatcher.h"
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Filters/FilePathFilter.h"
 #include "mull/JunkDetection/CXX/ASTStorage.h"
@@ -17,6 +18,7 @@ class ASTVisitor : public clang::RecursiveASTVisitor<ASTVisitor> {
   clang::SourceManager &sourceManager;
   mull::FilePathFilter &filePathFilter;
   mull::MutatorKindSet mutatorKindSet;
+  mull::ASTScalarMutationMatcher scalarMutationMatcher;
   bool shouldSkipCurrentFunction;
 
 public:
