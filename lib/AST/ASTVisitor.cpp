@@ -64,17 +64,30 @@ bool ASTVisitor::VisitFunctionDecl(clang::FunctionDecl *Decl) {
   return clang::RecursiveASTVisitor<ASTVisitor>::VisitFunctionDecl(Decl);
 }
 
+static clang::SourceLocation ClangCompatibilityExprGetBeginLoc(const clang::Expr &expr) {
+#if LLVM_VERSION_MAJOR >= 7
+  return expr.getBeginLoc();
+#else
+  return expr.getLocStart();
+#endif
+}
+
 bool ASTVisitor::VisitExpr(clang::Expr *expr) {
   if (shouldSkipCurrentFunction) {
     return true;
   }
 
-#if LLVM_VERSION_MAJOR >= 7
-  clang::SourceLocation exprLocation = expr->getBeginLoc();
-#else
-  clang::SourceLocation exprLocation = expr->getLocStart();
-#endif
+  /// We want to ignore the ImplicitCastExpr nodes because we visit their
+  /// children anyway.
+  /// Example:
+  /// ImplicitCastExpr 0x7fb19806a018 '_Bool' <LValueToRValue>
+  /// `-DeclRefExpr 0x7fb198069ff0 '_Bool' lvalue ParmVar 0x7fb198069e38 'a' '_Bool'
+  /// There will be another visit on DeclRefExpr.
+  if (clang::isa<clang::ImplicitCastExpr>(expr)) {
+    return true;
+  }
 
+  clang::SourceLocation exprLocation = ClangCompatibilityExprGetBeginLoc(*expr);
   if (astUnit.isInSystemHeader(exprLocation)) {
     return true;
   }
@@ -118,6 +131,24 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
   if (mutatorKindSet.includesMutator(MutatorKind::ReplaceCallMutator)) {
     if (clang::isa<clang::CallExpr>(expr)) {
       saveMutationPoint(mull::MutatorKind::ReplaceCallMutator, expr, exprLocation);
+      return true;
+    }
+  }
+
+  /// Negate
+  if (mutatorKindSet.includesMutator(MutatorKind::NegateMutator)) {
+    if (const clang::UnaryOperator *unaryOperator = clang::dyn_cast<clang::UnaryOperator>(expr)) {
+      if (unaryOperator->getOpcode() == clang::UnaryOperatorKind::UO_LNot) {
+        if (clang::Expr *subExpr = unaryOperator->getSubExpr()) {
+          subExpr = subExpr->IgnoreImplicit();
+
+          clang::SourceLocation unaryOperatorBeginLoc =
+              ClangCompatibilityExprGetBeginLoc(*unaryOperator);
+
+          saveMutationPoint(mull::MutatorKind::NegateMutator, unaryOperator, unaryOperatorBeginLoc);
+          return true;
+        }
+      }
       return true;
     }
   }
