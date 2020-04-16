@@ -81,4 +81,4 @@ jobs:
           curl --silent --show-error --fail --location --request PUT \
             --upload-file infrastructure/packages/`cat infrastructure/PACKAGE_FILE_NAME`.zip \
             --user "alexdenisov:${{ secrets.BINTRAY_API_KEY }}" \
-            "https://api.bintray.com/content/mull-project/${{ env.BINTRAY_REPO }}/${{ steps.settings.outputs.package }}/${{ steps.settings.outputs.version }}${{ steps.settings.outputs.suffix }}/pool/main/m/`cat infrastructure/PACKAGE_FILE_NAME`.zip;publish=1"
+            "https://api.bintray.com/content/mull-project/${{ env.BINTRAY_REPO }}/${{ steps.settings.outputs.package }}/${{ steps.settings.outputs.version }}${{ steps.settings.outputs.suffix }}/`cat infrastructure/PACKAGE_FILE_NAME`.zip;publish=1"
