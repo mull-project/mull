@@ -7,6 +7,7 @@ set(mull_sources
   AST/ASTMutationStorage.cpp
   AST/ASTSearchTask.cpp
   AST/ASTVisitor.cpp
+  AST/MullClangCompatibility.cpp
 
   Driver.cpp
   Sandbox/ProcessSandbox.cpp
