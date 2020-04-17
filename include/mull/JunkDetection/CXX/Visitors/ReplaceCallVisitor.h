@@ -15,7 +15,7 @@ public:
   bool VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *callExpression);
   bool VisitCXXOperatorCallExpr(clang::CXXOperatorCallExpr *callExpression);
   void handleCallExpr(clang::CallExpr *callExpression);
-  clang::Expr *foundMutant();
+  const clang::Stmt *foundMutant();
 
 private:
   InstructionRangeVisitor visitor;
