@@ -1,4 +1,5 @@
 #include "mull/AST/ASTVisitor.h"
+#include "mull/AST/MullClangCompatibility.h"
 
 #include "mull/Program/Program.h"
 
@@ -64,14 +65,6 @@ bool ASTVisitor::VisitFunctionDecl(clang::FunctionDecl *Decl) {
   return clang::RecursiveASTVisitor<ASTVisitor>::VisitFunctionDecl(Decl);
 }
 
-static clang::SourceLocation ClangCompatibilityExprGetBeginLoc(const clang::Expr &expr) {
-#if LLVM_VERSION_MAJOR >= 7
-  return expr.getBeginLoc();
-#else
-  return expr.getLocStart();
-#endif
-}
-
 bool ASTVisitor::VisitExpr(clang::Expr *expr) {
   if (shouldSkipCurrentFunction) {
     return true;
@@ -87,7 +80,7 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
     return true;
   }
 
-  clang::SourceLocation exprLocation = ClangCompatibilityExprGetBeginLoc(*expr);
+  clang::SourceLocation exprLocation = ClangCompatibilityStmtGetBeginLoc(*expr);
   if (astUnit.isInSystemHeader(exprLocation)) {
     return true;
   }
@@ -143,7 +136,7 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
           subExpr = subExpr->IgnoreImplicit();
 
           clang::SourceLocation unaryOperatorBeginLoc =
-              ClangCompatibilityExprGetBeginLoc(*unaryOperator);
+              ClangCompatibilityStmtGetBeginLoc(*unaryOperator);
 
           saveMutationPoint(mull::MutatorKind::NegateMutator, unaryOperator, unaryOperatorBeginLoc);
           return true;
