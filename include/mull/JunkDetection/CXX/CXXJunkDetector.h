@@ -6,7 +6,6 @@
 namespace mull {
 
 class MutationPoint;
-struct JunkDetectionConfig;
 
 class CXXJunkDetector : public JunkDetector {
 public:

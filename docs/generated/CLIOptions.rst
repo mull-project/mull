@@ -87,7 +87,7 @@
 
       :cxx_increment:	cxx_pre_inc_to_pre_dec, cxx_post_inc_to_post_dec
 
-      :cxx_logical:	cxx_logical_and_to_or, cxx_logical_or_to_and
+      :cxx_logical:	cxx_logical_and_to_or, cxx_logical_or_to_and, cxx_remove_negation
 
       :experimental:	negate_mutator, remove_void_function_mutator, scalar_value_mutator, replace_call_mutator, cxx_logical
 
@@ -159,6 +159,8 @@
       :cxx_rem_assign_to_div_assign:	Replaces %= with /=
 
       :cxx_rem_to_div:	Replaces % with /
+
+      :cxx_remove_negation:	Replaces !a with a
 
       :cxx_rshift_assign_to_lshift_assign:	Replaces >>= with <<=
 

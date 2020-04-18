@@ -14,6 +14,7 @@
 #include <mull/Mutators/CXX/LogicalOrToAnd.h>
 #include <mull/Mutators/CXX/NumberMutators.h>
 #include <mull/Mutators/CXX/RelationalMutators.h>
+#include <mull/Mutators/CXX/RemoveNegation.h>
 
 #include <gtest/gtest.h>
 #include <llvm/IR/LLVMContext.h>
@@ -133,6 +134,9 @@ static const CXXJunkDetectorTestParameter parameters[] = {
   CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(), new cxx::XorToOr, 2),
   CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(),
                                new cxx::XorAssignToOrAssign, 3),
+
+  CXXJunkDetectorTestParameter(fixtures::mutators_remove_negation_main_bc_path(),
+                               new cxx::RemoveNegation, 3),
 
   CXXJunkDetectorTestParameter(fixtures::mutators_negate_condition_junk_bc_path(),
                                new NegateConditionMutator, 6),

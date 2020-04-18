@@ -67,8 +67,20 @@ TEST(MutatorsFactory, CompositeMutators) {
   }
 
   {
+    mutators = factory.mutators({ "cxx_logical" });
+    ASSERT_EQ(mutators.size(), 3UL);
+
+    searchResult = find_if(mutators.begin(), mutators.end(), predicate("cxx_logical_or_to_and"));
+    ASSERT_NE(searchResult, mutators.end());
+    searchResult = find_if(mutators.begin(), mutators.end(), predicate("cxx_logical_and_to_or"));
+    ASSERT_NE(searchResult, mutators.end());
+    searchResult = find_if(mutators.begin(), mutators.end(), predicate("cxx_remove_negation"));
+    ASSERT_NE(searchResult, mutators.end());
+  }
+
+  {
     mutators = factory.mutators({ "experimental" });
-    ASSERT_EQ(mutators.size(), 6UL);
+    ASSERT_EQ(mutators.size(), 7UL);
 
     searchResult = find_if(mutators.begin(), mutators.end(), predicate("replace_call_mutator"));
     ASSERT_NE(searchResult, mutators.end());
@@ -78,7 +90,7 @@ TEST(MutatorsFactory, CompositeMutators) {
 
   {
     mutators = factory.mutators({ "all" });
-    ASSERT_EQ(mutators.size(), 44UL);
+    ASSERT_EQ(mutators.size(), 45UL);
   }
 }
 

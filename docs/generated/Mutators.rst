@@ -66,26 +66,28 @@
 .. |desc32| replace:: Replaces %= with /=
 .. |op33| replace:: cxx_rem_to_div
 .. |desc33| replace:: Replaces % with /
-.. |op34| replace:: cxx_rshift_assign_to_lshift_assign
-.. |desc34| replace:: Replaces >>= with <<=
-.. |op35| replace:: cxx_rshift_to_lshift
-.. |desc35| replace:: Replaces << with >>
-.. |op36| replace:: cxx_sub_assign_to_add_assign
-.. |desc36| replace:: Replaces -= with +=
-.. |op37| replace:: cxx_sub_to_add
-.. |desc37| replace:: Replaces - with +
-.. |op38| replace:: cxx_xor_assign_to_or_assign
-.. |desc38| replace:: Replaces ^= with \|=
-.. |op39| replace:: cxx_xor_to_or
-.. |desc39| replace:: Replaces ^ with |
-.. |op40| replace:: negate_mutator
-.. |desc40| replace:: Negates conditionals !x to x and x to !x
-.. |op41| replace:: remove_void_function_mutator
-.. |desc41| replace:: Removes calls to a function returning void
-.. |op42| replace:: replace_call_mutator
-.. |desc42| replace:: Replaces call to a function with 42
-.. |op43| replace:: scalar_value_mutator
-.. |desc43| replace:: Replaces zeros with 42, and non-zeros with 0
+.. |op34| replace:: cxx_remove_negation
+.. |desc34| replace:: Replaces !a with a
+.. |op35| replace:: cxx_rshift_assign_to_lshift_assign
+.. |desc35| replace:: Replaces >>= with <<=
+.. |op36| replace:: cxx_rshift_to_lshift
+.. |desc36| replace:: Replaces << with >>
+.. |op37| replace:: cxx_sub_assign_to_add_assign
+.. |desc37| replace:: Replaces -= with +=
+.. |op38| replace:: cxx_sub_to_add
+.. |desc38| replace:: Replaces - with +
+.. |op39| replace:: cxx_xor_assign_to_or_assign
+.. |desc39| replace:: Replaces ^= with \|=
+.. |op40| replace:: cxx_xor_to_or
+.. |desc40| replace:: Replaces ^ with |
+.. |op41| replace:: negate_mutator
+.. |desc41| replace:: Negates conditionals !x to x and x to !x
+.. |op42| replace:: remove_void_function_mutator
+.. |desc42| replace:: Removes calls to a function returning void
+.. |op43| replace:: replace_call_mutator
+.. |desc43| replace:: Replaces call to a function with 42
+.. |op44| replace:: scalar_value_mutator
+.. |desc44| replace:: Replaces zeros with 42, and non-zeros with 0
 
 
 ============= ==================
@@ -135,4 +137,5 @@ Operator Name Operator Semantics
 |op41|        |desc41|
 |op42|        |desc42|
 |op43|        |desc43|
+|op44|        |desc44|
 ============= ==================

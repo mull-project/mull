@@ -26,7 +26,7 @@ Run Mull against the ``core-test``:
 
 If everything works, you will see a number of confusing mutations within the report:
 
-.. code-blocK:: test
+.. code-blocK:: text
 
     /opt/llvm/9.0.0/bin/../include/c++/v1/__tree:2114:5: warning: Survived: Replaced + with - [cxx_add_to_sub]
         ++size();

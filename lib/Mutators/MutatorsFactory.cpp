@@ -7,6 +7,7 @@
 #include "mull/Mutators/CXX/LogicalOrToAnd.h"
 #include "mull/Mutators/CXX/NumberMutators.h"
 #include "mull/Mutators/CXX/RelationalMutators.h"
+#include "mull/Mutators/CXX/RemoveNegation.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "mull/Mutators/RemoveVoidFunctionMutator.h"
@@ -130,6 +131,7 @@ MutatorsFactory::MutatorsFactory(Diagnostics &diagnostics) : diagnostics(diagnos
   groupsMapping[CXX_Logical()] = {
     cxx::LogicalAndToOr::ID(), // a && b | a || b
     cxx::LogicalOrToAnd::ID(), // a || b | a && b
+    cxx::RemoveNegation::ID(), // !a     | a
   };
 
   groupsMapping[CXX_Comparison()] = {
@@ -219,6 +221,7 @@ void MutatorsFactory::init() {
 
   addMutator<cxx::LogicalAndToOr>(mutatorsMapping);
   addMutator<cxx::LogicalOrToAnd>(mutatorsMapping);
+  addMutator<cxx::RemoveNegation>(mutatorsMapping);
 
   addMutator<cxx::EqualToNotEqual>(mutatorsMapping);
   addMutator<cxx::NotEqualToEqual>(mutatorsMapping);
