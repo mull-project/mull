@@ -45,6 +45,5 @@ public:
 
 private:
   std::vector<std::unique_ptr<irm::IRMutation>> lowLevelMutators;
-  irm::NegateXORReplacement negateXorMutator;
 };
 } // namespace mull

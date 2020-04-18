@@ -115,20 +115,6 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
     return true;
   }
 
-  /// Unary Operators
-  if (auto *unaryOperator = clang::dyn_cast<clang::UnaryOperator>(expr)) {
-    clang::SourceLocation location = unaryOperator->getOperatorLoc();
-    for (const std::pair<clang::UnaryOperator::Opcode, mull::MutatorKind> &mutation :
-         UNARY_MUTATIONS) {
-      if (unaryOperator->getOpcode() == mutation.first &&
-          mutatorKindSet.includesMutator(mutation.second)) {
-        saveMutationPoint(mutation.second, unaryOperator, location);
-        return true;
-      }
-    }
-    return true;
-  }
-
   /// Remove Void
   if (mutatorKindSet.includesMutator(MutatorKind::RemoveVoidFunctionMutator)) {
     if (const clang::CallExpr *callExpr = clang::dyn_cast<clang::CallExpr>(expr)) {
@@ -164,6 +150,20 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
       }
       return true;
     }
+  }
+
+  /// Unary Operators
+  if (auto *unaryOperator = clang::dyn_cast<clang::UnaryOperator>(expr)) {
+    clang::SourceLocation location = unaryOperator->getOperatorLoc();
+    for (const std::pair<clang::UnaryOperator::Opcode, mull::MutatorKind> &mutation :
+         UNARY_MUTATIONS) {
+      if (unaryOperator->getOpcode() == mutation.first &&
+          mutatorKindSet.includesMutator(mutation.second)) {
+        saveMutationPoint(mutation.second, unaryOperator, location);
+        return true;
+      }
+    }
+    return true;
   }
 
   return true;
