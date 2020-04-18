@@ -136,7 +136,7 @@ static const CXXJunkDetectorTestParameter parameters[] = {
                                new cxx::XorAssignToOrAssign, 3),
 
   CXXJunkDetectorTestParameter(fixtures::mutators_remove_negation_main_bc_path(),
-                               new cxx::RemoveNegation, 3),
+                               new cxx::RemoveNegation, 4),
 
   CXXJunkDetectorTestParameter(fixtures::mutators_negate_condition_junk_bc_path(),
                                new NegateConditionMutator, 6),
