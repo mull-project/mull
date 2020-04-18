@@ -13,13 +13,13 @@ namespace mull {
 class InstructionRangeVisitor {
 public:
   InstructionRangeVisitor(const VisitorParameters &parameters);
-  void visitRangeWithASTExpr(clang::Expr *expression);
-  clang::Expr *getMatchingASTNode();
+  void visitRangeWithASTExpr(const clang::Stmt *stmt);
+  const clang::Stmt *getMatchingASTNode();
 
 private:
   const clang::SourceManager &sourceManager;
   const clang::SourceLocation &sourceLocation;
-  clang::Expr *bestMatchingASTNode;
+  const clang::Stmt *bestMatchingASTNode;
 };
 
 } // namespace mull

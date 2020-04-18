@@ -13,7 +13,7 @@ public:
   NegateConditionVisitor(const VisitorParameters &parameters);
 
   bool VisitUnaryOperator(clang::UnaryOperator *unaryOperator);
-  clang::Expr *foundMutant();
+  const clang::Stmt *foundMutant();
 
 private:
   InstructionRangeVisitor visitor;

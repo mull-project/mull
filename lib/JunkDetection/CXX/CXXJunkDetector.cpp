@@ -34,14 +34,14 @@ template <typename Visitor> static bool isJunkMutation(ASTStorage &storage, Muta
   Visitor visitor(parameters);
   visitor.TraverseDecl(decl);
 
-  if (clang::Expr *mutantExpression = visitor.foundMutant()) {
+  if (const clang::Stmt *mutantStmt = visitor.foundMutant()) {
     const std::string &sourceFile = point->getSourceLocation().unitFilePath;
 
     int beginLine = sourceManager.getExpansionLineNumber(location, nullptr);
     int beginColumn = sourceManager.getExpansionColumnNumber(location);
 
     storage.saveMutation(
-        sourceFile, point->getMutator()->mutatorKind(), mutantExpression, beginLine, beginColumn);
+      sourceFile, point->getMutator()->mutatorKind(), mutantStmt, beginLine, beginColumn);
     return false;
   }
 

@@ -13,7 +13,7 @@ public:
   explicit ScalarValueVisitor(const VisitorParameters &parameters);
   bool VisitExpr(clang::Expr *expression);
 
-  clang::Expr *foundMutant();
+  const clang::Stmt *foundMutant();
 
 private:
   InstructionRangeVisitor visitor;

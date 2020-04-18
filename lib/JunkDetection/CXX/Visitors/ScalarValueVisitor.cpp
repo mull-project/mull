@@ -82,6 +82,6 @@ bool ScalarValueVisitor::VisitExpr(clang::Expr *expression) {
   return true;
 }
 
-clang::Expr *ScalarValueVisitor::foundMutant() {
+const clang::Stmt *ScalarValueVisitor::foundMutant() {
   return visitor.getMatchingASTNode();
 }

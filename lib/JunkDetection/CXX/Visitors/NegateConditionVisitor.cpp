@@ -14,6 +14,6 @@ bool NegateConditionVisitor::VisitUnaryOperator(
   return true;
 }
 
-clang::Expr *NegateConditionVisitor::foundMutant() {
+const clang::Stmt *NegateConditionVisitor::foundMutant() {
   return visitor.getMatchingASTNode();
 }
