@@ -6,6 +6,8 @@
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/Basic/SourceLocation.h>
 
+#include <utility>
+
 using namespace mull;
 
 static std::vector<std::pair<clang::BinaryOperator::Opcode, mull::MutatorKind>> BINARY_MUTATIONS = {
@@ -49,12 +51,16 @@ static std::vector<std::pair<clang::BinaryOperator::Opcode, mull::MutatorKind>> 
   { clang::BO_LOr, MutatorKind::CXX_Logical_OrToAnd }
 };
 
+static std::vector<std::pair<clang::UnaryOperator::Opcode, mull::MutatorKind>> UNARY_MUTATIONS = {
+  { clang::UO_LNot, MutatorKind::CXX_RemoveNegation }
+};
+
 ASTVisitor::ASTVisitor(mull::Diagnostics &diagnostics, mull::ThreadSafeASTUnit &astUnit,
                        mull::SingleASTUnitMutations &singleUnitMutations,
                        mull::FilePathFilter &filePathFilter, mull::MutatorKindSet mutatorKindSet)
     : diagnostics(diagnostics), astUnit(astUnit), singleUnitMutations(singleUnitMutations),
       filePathFilter(filePathFilter), sourceManager(astUnit.getSourceManager()),
-      mutatorKindSet(mutatorKindSet), shouldSkipCurrentFunction(false) {}
+      mutatorKindSet(std::move(mutatorKindSet)), shouldSkipCurrentFunction(false) {}
 
 bool ASTVisitor::VisitFunctionDecl(clang::FunctionDecl *Decl) {
   if (Decl->getNameAsString() == "main") {
@@ -103,6 +109,20 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
       if (binaryOperator->getOpcode() == mutation.first &&
           mutatorKindSet.includesMutator(mutation.second)) {
         saveMutationPoint(mutation.second, binaryOperator, binaryOperatorLocation);
+        return true;
+      }
+    }
+    return true;
+  }
+
+  /// Unary Operators
+  if (auto *unaryOperator = clang::dyn_cast<clang::UnaryOperator>(expr)) {
+    clang::SourceLocation location = unaryOperator->getOperatorLoc();
+    for (const std::pair<clang::UnaryOperator::Opcode, mull::MutatorKind> &mutation :
+         UNARY_MUTATIONS) {
+      if (unaryOperator->getOpcode() == mutation.first &&
+          mutatorKindSet.includesMutator(mutation.second)) {
+        saveMutationPoint(mutation.second, unaryOperator, location);
         return true;
       }
     }
