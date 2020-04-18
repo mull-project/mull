@@ -14,7 +14,7 @@ std::string NegateConditionMutator::description() {
   return "Negates conditionals !x to x and x to !x";
 }
 
-NegateConditionMutator::NegateConditionMutator() : lowLevelMutators(), negateXorMutator() {
+NegateConditionMutator::NegateConditionMutator() : lowLevelMutators() {
   /// == -> !=
   lowLevelMutators.push_back(llvm::make_unique<irm::ICMP_EQToICMP_NE>());
   lowLevelMutators.push_back(llvm::make_unique<irm::FCMP_OEQToFCMP_ONE>());
@@ -69,12 +69,6 @@ NegateConditionMutator::getMutations(Bitcode *bitcode, const FunctionUnderTest &
   std::vector<MutationPoint *> mutations;
 
   for (llvm::Instruction *instruction : function.getSelectedInstructions()) {
-    if (negateXorMutator.canMutate(instruction)) {
-      std::string diagnostics = "Negate Condition: replaced !x with !!x";
-      auto point =
-        new MutationPoint(this, &negateXorMutator, instruction, "", bitcode, diagnostics);
-      mutations.push_back(point);
-    }
 
     for (auto &mutator : lowLevelMutators) {
       if (mutator->canMutate(instruction)) {

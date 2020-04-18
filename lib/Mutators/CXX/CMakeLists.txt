@@ -4,6 +4,7 @@ set (SOURCES
   RelationalMutators.cpp
   TrivialCXXMutator.cpp
   NumberMutators.cpp
+  RemoveNegation.cpp
   )
 
 add_library(mull-cxx-mutators ${SOURCES})

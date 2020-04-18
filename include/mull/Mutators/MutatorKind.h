@@ -66,6 +66,8 @@ enum class MutatorKind {
 
   CXX_AssignConst,
   CXX_InitConst,
+
+  CXX_RemoveNegation,
 };
 
 std::string MutationKindToString(MutatorKind mutatorKind);

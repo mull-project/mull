@@ -135,6 +135,9 @@ std::string MutationKindToString(MutatorKind mutatorKind) {
   case MutatorKind::CXX_InitConst: {
     return "Init Const";
   }
+  case MutatorKind::CXX_RemoveNegation: {
+    return "Remove Unary Negation";
+  }
   }
 }
 

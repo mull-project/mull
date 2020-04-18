@@ -1,12 +1,9 @@
 #include "FixturePaths.h"
 
+#include "mull/AST/ASTVisitor.h"
 #include "mull/Bitcode.h"
 #include "mull/MutationPoint.h"
-#include "mull/Mutators/NegateConditionMutator.h"
-
-#include <clang/Frontend/ASTUnit.h>
-#include <clang/Tooling/Tooling.h>
-#include <llvm/IR/Module.h>
+#include "mull/Mutators/CXX/RemoveNegation.h"
 
 #include "Helpers/MutationTestBed.h"
 
@@ -16,16 +13,14 @@ using namespace mull;
 using namespace mull_test;
 using namespace llvm;
 
-static FilePathFilter nullPathFilter;
-
 static const std::string testCode = std::string(R"(///
-bool isFalse(bool a) {
+int add(int a) {
   return !a;
 }
 )");
 
-TEST(Mutation_Negate_Bool_UnaryNot, End_2_End) {
-  mull::NegateConditionMutator mutator;
+TEST(RemoveNegation, End_2_End) {
+  mull::cxx::RemoveNegation mutator;
 
   MutationTestBed mutationTestBed;
 
@@ -36,10 +31,10 @@ TEST(Mutation_Negate_Bool_UnaryNot, End_2_End) {
 
   SingleASTUnitMutations singleUnitMutations = artefact->getASTMutations();
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::NegateMutator), 1U);
+  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_RemoveNegation), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::NegateMutator].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::NegateMutator].count(locationHash), 1U);
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_RemoveNegation].size(), 1U);
+  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_RemoveNegation].count(locationHash), 1U);
 
   /// 2. IR and Junk Detection Assertions
   std::vector<MutationPoint *> nonJunkMutationPoints = artefact->getNonJunkMutationPoints();
@@ -48,10 +43,8 @@ TEST(Mutation_Negate_Bool_UnaryNot, End_2_End) {
   ASSERT_EQ(nonJunkMutationPoints.size(), 1);
   ASSERT_EQ(junkMutationPoints.size(), 0);
 
-  {
-    MutationPoint &mutationPoint = *nonJunkMutationPoints.at(0);
-    auto const dumpRegex =
-      std::regex("Mutation Point: negate_mutator /in-memory-file.cc:3:10");
-    ASSERT_TRUE(std::regex_search(mutationPoint.dump(), dumpRegex));
-  }
+  MutationPoint &mutationPoint = *nonJunkMutationPoints.at(0);
+
+  auto const dumpRegex = std::regex("Mutation Point: cxx_remove_negation /in-memory-file.cc:3:10");
+  ASSERT_TRUE(std::regex_search(mutationPoint.dump(), dumpRegex));
 }

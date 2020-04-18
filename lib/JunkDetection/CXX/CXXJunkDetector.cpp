@@ -1,4 +1,5 @@
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
+#include <mull/Mutators/CXX/RemoveNegation.h>
 
 #include "mull/MutationPoint.h"
 #include "mull/Mutators/Mutator.h"
@@ -155,6 +156,9 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     return isJunkMutation<cxx::LogicalAndVisitor>(astStorage, point);
   case MutatorKind::CXX_Logical_OrToAnd:
     return isJunkMutation<cxx::LogicalOrVisitor>(astStorage, point);
+
+  case MutatorKind::CXX_RemoveNegation:
+    return isJunkMutation<cxx::UnaryLNotVisitor>(astStorage, point);
 
   default:
     return true;
