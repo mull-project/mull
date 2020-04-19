@@ -60,7 +60,8 @@ ASTVisitor::ASTVisitor(mull::Diagnostics &diagnostics, mull::ThreadSafeASTUnit &
                        mull::FilePathFilter &filePathFilter, mull::MutatorKindSet mutatorKindSet)
     : diagnostics(diagnostics), astUnit(astUnit), singleUnitMutations(singleUnitMutations),
       filePathFilter(filePathFilter), sourceManager(astUnit.getSourceManager()),
-      mutatorKindSet(std::move(mutatorKindSet)), shouldSkipCurrentFunction(false) {}
+      mutatorKindSet(std::move(mutatorKindSet)), scalarMutationMatcher(astUnit.getASTContext()),
+      shouldSkipCurrentFunction(false) {}
 
 bool ASTVisitor::VisitFunctionDecl(clang::FunctionDecl *Decl) {
   if (Decl->getNameAsString() == "main") {
@@ -164,6 +165,15 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
       }
     }
     return true;
+  }
+
+  /// Scalar
+  if (mutatorKindSet.includesMutator(MutatorKind::ScalarValueMutator)) {
+    clang::SourceLocation mutationLocation;
+    bool isMutable = scalarMutationMatcher.isMutableExpr(*expr, nullptr, &mutationLocation);
+    if (isMutable) {
+      saveMutationPoint(mull::MutatorKind::ScalarValueMutator, expr, mutationLocation);
+    }
   }
 
   return true;

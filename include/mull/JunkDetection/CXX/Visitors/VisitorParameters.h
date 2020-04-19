@@ -9,7 +9,7 @@ namespace mull {
 struct VisitorParameters {
   const clang::SourceManager &sourceManager;
   const clang::SourceLocation &sourceLocation;
-  const clang::ASTContext &astContext;
+  clang::ASTContext &astContext;
 };
 
 } // namespace mull

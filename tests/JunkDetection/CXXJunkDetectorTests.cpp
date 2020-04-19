@@ -166,8 +166,9 @@ static const CXXJunkDetectorTestParameter parameters[] = {
   CXXJunkDetectorTestParameter(fixtures::mutators_and_or_or_to_and_replacement_cpp_junk_bc_path(),
                                new cxx::LogicalOrToAnd, 2),
 
+  /// TODO: Will be made obsolete by scalar mutation end-to-end tests.
   CXXJunkDetectorTestParameter(fixtures::mutators_scalar_value_junk_bc_path(),
-                               new ScalarValueMutator, 5),
+                               new ScalarValueMutator, 0),
 
   CXXJunkDetectorTestParameter(fixtures::mutators_remove_void_function_junk_bc_path(),
                                new RemoveVoidFunctionMutator, 6),

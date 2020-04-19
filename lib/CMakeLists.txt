@@ -5,6 +5,7 @@ set(mull_sources
   AST/ASTFinder.cpp
   AST/ASTMutationFilter.cpp
   AST/ASTMutationStorage.cpp
+  AST/ASTScalarMutationMatcher.cpp
   AST/ASTSearchTask.cpp
   AST/ASTVisitor.cpp
   AST/MullClangCompatibility.cpp
