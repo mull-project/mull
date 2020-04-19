@@ -20,6 +20,7 @@ set(mull_unittests_sources
   Mutations-E2E/Mutation_Arithmetic_Add_Test.cpp
   Mutations-E2E/CXX/RemoveNegationTest.cpp
   Mutations-E2E/Scalar/01_Mutation_Scalar_ReturnValue_Test.cpp
+  Mutations-E2E/Scalar/02_Mutation_Scalar_BinaryOperand_Test.cpp
 
   CompilerTests.cpp
   DriverTests.cpp
