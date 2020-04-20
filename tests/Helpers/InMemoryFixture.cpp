@@ -17,8 +17,12 @@ using namespace mull_test;
 static const char *const fakeSourceFilePath = "/in-memory-file.cc";
 
 std::unique_ptr<clang::ASTUnit> InMemoryFixture::createAST(const std::string &sourceCode) {
+  static const std::vector<std::string> args = {
+    "-std=c++11"
+  };
+
   std::unique_ptr<clang::ASTUnit> astUnit =
-      clang::tooling::buildASTFromCode(sourceCode, fakeSourceFilePath);
+      clang::tooling::buildASTFromCodeWithArgs(sourceCode, args, fakeSourceFilePath);
   assert(astUnit);
   return astUnit;
 }
