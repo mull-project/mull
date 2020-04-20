@@ -52,18 +52,16 @@ bool isDeclRefConstant(clang::DeclRefExpr *declRef) {
 }
 
 ScalarValueVisitor::ScalarValueVisitor(const VisitorParameters &parameters)
-    : visitor(parameters), scalarMutationMatcher(parameters.astContext) {}
+    : mutantStmt(nullptr), scalarMutationMatcher(parameters.astContext) {}
 
 bool ScalarValueVisitor::VisitExpr(clang::Expr *expression) {
   const clang::Stmt *potentialMutableStatement = nullptr;
   if (scalarMutationMatcher.isMutableExpr(*expression, &potentialMutableStatement, nullptr)) {
-    if (potentialMutableStatement) {
-      visitor.visitRangeWithASTExpr(potentialMutableStatement);
-    }
+    mutantStmt = expression;
   }
   return true;
 }
 
 const clang::Stmt *ScalarValueVisitor::foundMutant() {
-  return visitor.getMatchingASTNode();
+  return mutantStmt;
 }

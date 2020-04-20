@@ -17,7 +17,7 @@ public:
   const clang::Stmt *foundMutant();
 
 private:
-  InstructionRangeVisitor visitor;
+  const clang::Stmt *mutantStmt;
   ASTScalarMutationMatcher scalarMutationMatcher;
 };
 

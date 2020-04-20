@@ -168,7 +168,7 @@ static const CXXJunkDetectorTestParameter parameters[] = {
 
   /// TODO: Will be made obsolete by scalar mutation end-to-end tests.
   CXXJunkDetectorTestParameter(fixtures::mutators_scalar_value_junk_bc_path(),
-                               new ScalarValueMutator, 1),
+                               new ScalarValueMutator, 9),
 
   CXXJunkDetectorTestParameter(fixtures::mutators_remove_void_function_junk_bc_path(),
                                new RemoveVoidFunctionMutator, 6),

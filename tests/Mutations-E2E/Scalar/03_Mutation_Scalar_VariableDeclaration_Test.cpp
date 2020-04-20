@@ -19,12 +19,13 @@ using namespace llvm;
 static FilePathFilter nullPathFilter;
 
 static const std::string testCode = std::string(R"(///
-int foo(int a) {
-  return a + 5;
+int foo() {
+  int var = 0;
+  return var;
 }
 )");
 
-TEST(Mutation_Scalar_BinaryOperand, End_2_End) {
+TEST(Mutation_Scalar_VariableDeclaration, End_2_End) {
   mull::ScalarValueMutator mutator;
 
   MutationTestBed mutationTestBed;
@@ -32,7 +33,7 @@ TEST(Mutation_Scalar_BinaryOperand, End_2_End) {
   std::unique_ptr<MutationArtefact> artefact = mutationTestBed.generate(testCode, mutator);
 
   /// 1. AST Assertions
-  LineColumnHash locationHash = lineColumnHash(3, 12);
+  LineColumnHash locationHash = lineColumnHash(3, 7);
 
   SingleASTUnitMutations singleUnitMutations = artefact->getASTMutations();
   ASSERT_EQ(singleUnitMutations.size(), 1U);
@@ -52,7 +53,7 @@ TEST(Mutation_Scalar_BinaryOperand, End_2_End) {
     MutationPoint &mutationPoint = *nonJunkMutationPoints.at(0);
 
     auto const dumpRegex =
-      std::regex("Mutation Point: scalar_value_mutator /in-memory-file.cc:3:12");
+      std::regex("Mutation Point: scalar_value_mutator /in-memory-file.cc:3:7");
     ASSERT_TRUE(std::regex_search(mutationPoint.dump(), dumpRegex));
   }
 }
