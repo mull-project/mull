@@ -44,7 +44,11 @@ std::unique_ptr<llvm::Module> InMemoryCompiler::compile(std::string code,
 
   /// Configure options
 
-  /// auto* languageOptions = compilerInvocation->getLangOpts();
+  const auto languageOptions = compilerInvocation.getLangOpts();
+  languageOptions->CPlusPlus = 1;
+  languageOptions->CPlusPlus11 = 1;
+  languageOptions->Bool = 1;
+
   /// auto& preprocessorOptions = compilerInvocation->getPreprocessorOpts();
   /// auto& targetOptions = compilerInvocation->getTargetOpts();
   auto &frontEndOptions = compilerInvocation.getFrontendOpts();

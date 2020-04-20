@@ -58,10 +58,12 @@ bool ASTScalarMutationMatcher::findMutableParentStmt(const clang::Stmt &statemen
       return true;
     }
     if (const clang::VarDecl *varDecl = parent.get<clang::VarDecl>()) {
-      if (mutationLocation) {
-        *mutationLocation = varDecl->getLocation();
+      if (varDecl->getType().isConstQualified() == false) {
+        if (mutationLocation) {
+          *mutationLocation = varDecl->getLocation();
+        }
+        return true;
       }
-      return true;
     }
   }
   return false;

@@ -57,3 +57,57 @@ TEST(Mutation_Scalar_VariableDeclaration, End_2_End) {
     ASSERT_TRUE(std::regex_search(mutationPoint.dump(), dumpRegex));
   }
 }
+
+TEST(Mutation_Scalar_VariableDeclaration, DoesNotApply_ConstVars) {
+  const std::string constTestCode = std::string(R"(///
+int foo() {
+  const int var = 0;
+  return var;
+}
+)");
+
+  mull::ScalarValueMutator mutator;
+
+  MutationTestBed mutationTestBed;
+
+  std::unique_ptr<MutationArtefact> artefact = mutationTestBed.generate(constTestCode, mutator);
+
+  /// 1. AST Assertions
+  SingleASTUnitMutations singleUnitMutations = artefact->getASTMutations();
+  ASSERT_EQ(singleUnitMutations.size(), 0U);
+  ASSERT_EQ(singleUnitMutations.count(MutatorKind::ScalarValueMutator), 0U);
+
+  /// 2. IR and Junk Detection Assertions
+  std::vector<MutationPoint *> nonJunkMutationPoints = artefact->getNonJunkMutationPoints();
+  std::vector<MutationPoint *> junkMutationPoints = artefact->getJunkMutationPoints();
+
+  ASSERT_EQ(nonJunkMutationPoints.size(), 0);
+  ASSERT_EQ(junkMutationPoints.size(), 2);
+}
+
+TEST(Mutation_Scalar_VariableDeclaration, DoesNotApply_ConstExprVars) {
+  const std::string constTestCode = std::string(R"(///
+int foo() {
+  constexpr int var = 0;
+  return var;
+}
+)");
+
+  mull::ScalarValueMutator mutator;
+
+  MutationTestBed mutationTestBed;
+
+  std::unique_ptr<MutationArtefact> artefact = mutationTestBed.generate(constTestCode, mutator);
+
+  /// 1. AST Assertions
+  SingleASTUnitMutations singleUnitMutations = artefact->getASTMutations();
+  ASSERT_EQ(singleUnitMutations.size(), 0U);
+  ASSERT_EQ(singleUnitMutations.count(MutatorKind::ScalarValueMutator), 0U);
+
+  /// 2. IR and Junk Detection Assertions
+  std::vector<MutationPoint *> nonJunkMutationPoints = artefact->getNonJunkMutationPoints();
+  std::vector<MutationPoint *> junkMutationPoints = artefact->getJunkMutationPoints();
+
+  ASSERT_EQ(nonJunkMutationPoints.size(), 0);
+  ASSERT_EQ(junkMutationPoints.size(), 2);
+}
