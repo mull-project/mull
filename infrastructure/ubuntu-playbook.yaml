@@ -25,6 +25,7 @@
       - uuid-dev
       - binutils
       - liblzma-dev
+      - python3-pip
 
   vars_files:
     - helpers/variables.yaml
@@ -58,6 +59,8 @@
     - name: Build Mull
       include: helpers/build-mull.yaml
 
+    - name: LIT Tests
+      include: helpers/lit-tests.yaml
+
     - name: Integration Tests
       include: helpers/integration-tests.yaml
-

@@ -14,8 +14,9 @@ else()
 endif()
 
 set(TEST_CXX_FLAGS
-  "-isystem ${PATH_TO_LLVM}/include/c++/v1 -isystem ${PATH_TO_LLVM}/lib/clang/${LLVM_VERSION}/include"
+  "-stdlib=libc++ -isystem ${PATH_TO_LLVM}/include/c++/v1 -isystem ${PATH_TO_LLVM}/lib/clang/${LLVM_VERSION}/include"
 )
+
 if (SYSROOT)
   set(TEST_CXX_FLAGS "${TEST_CXX_FLAGS} ${SYSROOT}")
 endif()
