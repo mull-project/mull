@@ -7,6 +7,14 @@ endif()
 project(Mull
   LANGUAGES C CXX
 )
+
+# -DRECORD_TIMING=ON
+if (RECORD_TIMING)
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "\"${CMAKE_COMMAND}\" -E time")
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "\"${CMAKE_COMMAND}\" -E time")
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_CUSTOM "\"${CMAKE_COMMAND}\" -E time")
+endif()
+
 set (PROJECT_VERSION ${MULL_VERSION})
 
 set (PROJECT_DESCRIPTION "LLVM-based mutation testing")

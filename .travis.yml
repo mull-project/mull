@@ -65,6 +65,7 @@ script:
       -e SDKROOT=`xcrun -show-sdk-path` \
       -e mull_version=$version$suffix \
       --verbose
+    echo $?
     if [ $LLVM_VERSION == 9.0 ];
     then
       pwd
