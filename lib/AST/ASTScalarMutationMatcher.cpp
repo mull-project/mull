@@ -65,6 +65,12 @@ bool ASTScalarMutationMatcher::findMutableParentStmt(const clang::Stmt &statemen
         return true;
       }
     }
+    if (const clang::CallExpr *callExpr = parent.get<clang::CallExpr>()) {
+      if (mutationLocation) {
+        *mutationLocation = ClangCompatibilityStmtGetBeginLoc(*callExpr);
+      }
+      return true;
+    }
   }
   return false;
 }

@@ -22,6 +22,7 @@ set(mull_unittests_sources
   Mutations-E2E/Scalar/01_Mutation_Scalar_ReturnValue_Test.cpp
   Mutations-E2E/Scalar/02_Mutation_Scalar_BinaryOperand_Test.cpp
   Mutations-E2E/Scalar/03_Mutation_Scalar_VariableDeclaration_Test.cpp
+  Mutations-E2E/Scalar/04_Mutation_Scalar_CallArgument_Test.cpp
 
   CompilerTests.cpp
   DriverTests.cpp
