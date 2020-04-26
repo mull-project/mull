@@ -5,12 +5,9 @@ env:
   LLVM_RELEASE: "9.0"
 
 on:
-  pull_request:
   push:
-    branches:
-      - master
-    tags:
-      - "**"
+    branches-ignore:
+      - '**'
 
 jobs:
   test:

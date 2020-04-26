@@ -11,7 +11,7 @@
     state: directory
 
 - name: Prepare Build System (Debug)
-  command: cmake -G Ninja -DPATH_TO_LLVM={{ llvm_dir }} -DCMAKE_CXX_FLAGS="{{ mull_cxx_flags }}" {{ source_dir }}
+  command: cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DPATH_TO_LLVM={{ llvm_dir }} -DCMAKE_CXX_FLAGS="{{ mull_cxx_flags }}" {{ source_dir }}
   args:
     chdir: "{{ debug_build_dir }}"
     creates: "{{ debug_build_dir }}/CMakeCache.txt"
