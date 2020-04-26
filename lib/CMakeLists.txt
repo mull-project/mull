@@ -170,7 +170,7 @@ find_package(Threads REQUIRED)
 
 target_link_libraries(mull
   ${MULL_LLVM_LIBRARIES}
-  ${SQLITE_DEPENDENCY}
+  sqlite3
   clangTooling
   Threads::Threads
   irm

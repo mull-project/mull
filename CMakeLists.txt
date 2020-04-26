@@ -51,18 +51,6 @@ endif()
 # https://stackoverflow.com/questions/22140520/how-to-enable-assert-in-cmake-release-mode
 string(REPLACE "-DNDEBUG" "" CMAKE_CXX_FLAGS_RELEASE "${CMAKE_CXX_FLAGS_RELEASE}")
 
-# Using system's SQLite version by default
-# But also trying to find it using PkgConfig
-# See https://github.com/mull-project/mull/issues/401 for details
-set (SQLITE_DEPENDENCY sqlite3)
-find_package(PkgConfig)
-if (PkgConfig_FOUND)
-  pkg_check_modules(SQLITE3 sqlite3 IMPORTED_TARGET)
-  if (SQLITE3_FOUND)
-    set (SQLITE_DEPENDENCY PkgConfig::SQLITE3)
-  endif()
-endif()
-
 option(MULL_BUILD_32_BITS "Enable 32 bits build" OFF)
 
 if (${BUILD_AGAINST_PRECOMPILED_LLVM})
@@ -163,8 +151,6 @@ add_subdirectory(vendor)
 set (MULL_DEFINITIONS ${LLVM_DEFINITIONS})
 set (THIRD_PARTY_INCLUDE_DIRS
   ${LLVM_INCLUDE_DIRS}
-  ${SQLITE3_INCLUDE_DIRS}
-  ${SQLITE3_INCLUDEDIR}
   ${CMAKE_CURRENT_LIST_DIR}/vendor/LibEBC/lib/include
   ${CMAKE_CURRENT_LIST_DIR}/vendor/libirm/include
   ${CMAKE_SOURCE_DIR}/vendor
