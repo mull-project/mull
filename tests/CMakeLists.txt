@@ -17,7 +17,8 @@ set(mull_unittests_sources
   Helpers/MutationTestBed.cpp
   Helpers/MutationArtefact.cpp
 
-  Mutations-E2E/Mutation_Arithmetic_Add_Test.cpp
+  Mutations-E2E/CXX/Arithmetic/Mutation_Arithmetic_Add_Test.cpp
+  Mutations-E2E/CXX/Arithmetic/Mutation_Arithmetic_UnaryMinusToNoop_Test.cpp
   Mutations-E2E/CXX/RemoveNegationTest.cpp
   Mutations-E2E/Scalar/01_Mutation_Scalar_ReturnValue_Test.cpp
   Mutations-E2E/Scalar/02_Mutation_Scalar_BinaryOperand_Test.cpp

@@ -52,7 +52,8 @@ static std::vector<std::pair<clang::BinaryOperator::Opcode, mull::MutatorKind>> 
 };
 
 static std::vector<std::pair<clang::UnaryOperator::Opcode, mull::MutatorKind>> UNARY_MUTATIONS = {
-  { clang::UO_LNot, MutatorKind::CXX_RemoveNegation }
+  { clang::UO_LNot, MutatorKind::CXX_RemoveNegation },
+  { clang::UO_Minus, MutatorKind::CXX_UnaryMinusToNoop }
 };
 
 ASTVisitor::ASTVisitor(mull::Diagnostics &diagnostics, mull::ThreadSafeASTUnit &astUnit,
