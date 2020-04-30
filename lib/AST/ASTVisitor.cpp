@@ -168,12 +168,33 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
     return true;
   }
 
+  /// Variable declaration
+  if (mutatorKindSet.includesMutator(MutatorKind::CXX_InitConst)) {
+    clang::SourceLocation mutationLocation;
+    bool isMutable = scalarMutationMatcher.isMutableVarDeclExpr(*expr, &mutationLocation);
+    if (isMutable) {
+      saveMutationPoint(mull::MutatorKind::CXX_InitConst, expr, mutationLocation);
+      return true;
+    }
+  }
+
+  /// Variable assignment
+  if (mutatorKindSet.includesMutator(MutatorKind::CXX_AssignConst)) {
+    clang::SourceLocation mutationLocation;
+    bool isMutable = scalarMutationMatcher.isMutableAssignmentExpr(*expr, &mutationLocation);
+    if (isMutable) {
+      saveMutationPoint(mull::MutatorKind::CXX_AssignConst, expr, mutationLocation);
+      return true;
+    }
+  }
+
   /// Scalar
   if (mutatorKindSet.includesMutator(MutatorKind::ScalarValueMutator)) {
     clang::SourceLocation mutationLocation;
     bool isMutable = scalarMutationMatcher.isMutableExpr(*expr, nullptr, &mutationLocation);
     if (isMutable) {
       saveMutationPoint(mull::MutatorKind::ScalarValueMutator, expr, mutationLocation);
+      return true;
     }
   }
 
