@@ -1,46 +1,26 @@
 #pragma once
 
 #include "VisitorParameters.h"
-#include <clang/AST/RecursiveASTVisitor.h>
 #include <assert.h>
+#include <clang/AST/RecursiveASTVisitor.h>
 
 namespace mull {
 
 namespace cxx {
 
-template <clang::UnaryOperator::Opcode opcode>
-class UnaryVisitor : public clang::RecursiveASTVisitor<UnaryVisitor<opcode>> {
+class UnaryVisitor : public clang::RecursiveASTVisitor<UnaryVisitor> {
 public:
-  explicit UnaryVisitor(const VisitorParameters &parameters)
-      : parameters(parameters), matchingExpression(nullptr) {}
-
-  bool VisitUnaryOperator(clang::UnaryOperator *unaryOperator) {
-    if (unaryOperator->getOpcode() != opcode) {
-      return true;
-    }
-
-    if (unaryOperator->getOperatorLoc() == parameters.sourceLocation) {
-      assert(!matchingExpression && "Already found");
-      matchingExpression = unaryOperator;
-      return false;
-    }
-    return true;
-  }
-
-  clang::Expr *foundMutant() { return matchingExpression; }
+  static clang::Expr *findMutant(const VisitorParameters &parameters,
+                                 clang::UnaryOperator::Opcode opcode, clang::Decl *decl);
+  UnaryVisitor(const VisitorParameters &parameters, clang::UnaryOperator::Opcode opcode);
+  bool VisitUnaryOperator(clang::UnaryOperator *unaryOperator);
+  clang::Expr *foundMutant();
 
 private:
   const VisitorParameters &parameters;
   clang::Expr *matchingExpression;
+  clang::UnaryOperator::Opcode opcode;
 };
-
-typedef UnaryVisitor<clang::UnaryOperator::Opcode::UO_PreInc> PreIncVisitor;
-typedef UnaryVisitor<clang::UnaryOperator::Opcode::UO_PostInc> PostIncVisitor;
-typedef UnaryVisitor<clang::UnaryOperator::Opcode::UO_PreDec> PreDecVisitor;
-typedef UnaryVisitor<clang::UnaryOperator::Opcode::UO_PostDec> PostDecVisitor;
-typedef UnaryVisitor<clang::UnaryOperator::Opcode::UO_Not> BitwiseNotVisitor;
-typedef UnaryVisitor<clang::UnaryOperator::Opcode::UO_Minus> UnaryMinusVisitor;
-typedef UnaryVisitor<clang::UnaryOperator::Opcode::UO_LNot> UnaryLNotVisitor;
 
 } // namespace cxx
 

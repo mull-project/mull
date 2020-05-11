@@ -14,9 +14,183 @@
 
 using namespace mull;
 
-template <typename Visitor> static bool isJunkMutation(ASTStorage &storage, MutationPoint *point) {
-  auto ast = storage.findAST(point);
-  auto location = ast->getLocation(point);
+CXXJunkDetector::CXXJunkDetector(ASTStorage &astStorage) : astStorage(astStorage) {}
+
+static const clang::Stmt *findMutantExpression(MutationPoint *point,
+                                               VisitorParameters &visitorParameters,
+                                               clang::Decl *decl) {
+  switch (point->getMutator()->mutatorKind()) {
+  case MutatorKind::RemoveVoidFunctionMutator: {
+    RemoveVoidFunctionVisitor visitor(visitorParameters);
+    visitor.TraverseDecl(decl);
+    return visitor.foundMutant();
+  }
+  case MutatorKind::ReplaceCallMutator: {
+    ReplaceCallVisitor visitor(visitorParameters);
+    visitor.TraverseDecl(decl);
+    return visitor.foundMutant();
+  }
+  case MutatorKind::NegateMutator: {
+    NegateConditionVisitor visitor(visitorParameters);
+    visitor.TraverseDecl(decl);
+    return visitor.foundMutant();
+  }
+  case MutatorKind::ScalarValueMutator: {
+    ScalarValueVisitor visitor(visitorParameters);
+    visitor.TraverseDecl(decl);
+    return visitor.foundMutant();
+  }
+  case MutatorKind::CXX_LessThanToLessOrEqual:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_LT);
+
+  case MutatorKind::CXX_LessOrEqualToLessThan:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_LE);
+  case MutatorKind::CXX_GreaterThanToGreaterOrEqual:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_GT);
+  case MutatorKind::CXX_GreaterOrEqualToGreaterThan:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_GE);
+  case MutatorKind::CXX_EqualToNotEqual:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_EQ);
+  case MutatorKind::CXX_NotEqualToEqual:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_NE);
+  case MutatorKind::CXX_GreaterThanToLessOrEqual:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_GT);
+  case MutatorKind::CXX_GreaterOrEqualToLessThan:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_GE);
+  case MutatorKind::CXX_LessThanToGreaterOrEqual:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_LT);
+  case MutatorKind::CXX_LessOrEqualToGreaterThan:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_LE);
+
+  case MutatorKind::CXX_AddToSub:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_Add);
+  case MutatorKind::CXX_AddAssignToSubAssign:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_AddAssign);
+  case MutatorKind::CXX_PreIncToPreDec:
+    return cxx::UnaryVisitor::findMutant(
+        visitorParameters, clang::UnaryOperator::Opcode::UO_PreInc, decl);
+  case MutatorKind::CXX_PostIncToPostDec:
+    return cxx::UnaryVisitor::findMutant(
+        visitorParameters, clang::UnaryOperator::Opcode::UO_PostInc, decl);
+
+  case MutatorKind::CXX_SubToAdd:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_Sub);
+  case MutatorKind::CXX_SubAssignToAddAssign:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_SubAssign);
+  case MutatorKind::CXX_PreDecToPreInc:
+    return cxx::UnaryVisitor::findMutant(
+        visitorParameters, clang::UnaryOperator::Opcode::UO_PreDec, decl);
+
+  case MutatorKind::CXX_PostDecToPostInc:
+    return cxx::UnaryVisitor::findMutant(
+        visitorParameters, clang::UnaryOperator::Opcode::UO_PostDec, decl);
+
+  case MutatorKind::CXX_MulToDiv:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_Mul);
+  case MutatorKind::CXX_MulAssignToDivAssign:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_MulAssign);
+
+  case MutatorKind::CXX_DivToMul:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_Div);
+  case MutatorKind::CXX_DivAssignToMulAssign:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_DivAssign);
+
+  case MutatorKind::CXX_RemToDiv:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_Rem);
+  case MutatorKind::CXX_RemAssignToDivAssign:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_RemAssign);
+
+  case MutatorKind::CXX_BitwiseNotToNoop:
+    return cxx::UnaryVisitor::findMutant(
+        visitorParameters, clang::UnaryOperator::Opcode::UO_Not, decl);
+
+  case MutatorKind::CXX_UnaryMinusToNoop:
+    return cxx::UnaryVisitor::findMutant(
+        visitorParameters, clang::UnaryOperator::Opcode::UO_Minus, decl);
+
+  case MutatorKind::CXX_LShiftToRShift:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_Shl);
+  case MutatorKind::CXX_LShiftAssignToRShiftAssign:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_ShlAssign);
+  case MutatorKind::CXX_RShiftToLShift:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_Shr);
+  case MutatorKind::CXX_RShiftAssignToLShiftAssign:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_ShrAssign);
+
+  case MutatorKind::CXX_Bitwise_AndToOr:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_And);
+  case MutatorKind::CXX_Bitwise_AndAssignToOrAssign:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_AndAssign);
+  case MutatorKind::CXX_Bitwise_OrToAnd:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_Or);
+  case MutatorKind::CXX_Bitwise_OrAssignToAndAssign:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_OrAssign);
+  case MutatorKind::CXX_Bitwise_XorToOr:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_Xor);
+  case MutatorKind::CXX_Bitwise_XorAssignToOrAssign:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_XorAssign);
+
+  case MutatorKind::CXX_AssignConst:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_Assign);
+  case MutatorKind::CXX_InitConst: {
+    cxx::VarDeclVisitor visitor(visitorParameters);
+    visitor.TraverseDecl(decl);
+    return visitor.foundMutant();
+  }
+  case MutatorKind::CXX_Logical_AndToOr:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_LAnd);
+  case MutatorKind::CXX_Logical_OrToAnd:
+    return cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_LOr);
+
+  case MutatorKind::CXX_RemoveNegation:
+    return cxx::UnaryVisitor::findMutant(
+        visitorParameters, clang::UnaryOperator::Opcode::UO_LNot, decl);
+
+  default:
+    return nullptr;
+  }
+}
+
+bool CXXJunkDetector::isJunk(MutationPoint *point) {
+  if (point->getSourceLocation().isNull()) {
+    return true;
+  }
+
+  ThreadSafeASTUnit *ast = astStorage.findAST(point);
+  clang::SourceLocation location = ast->getLocation(point);
   clang::SourceManager &sourceManager = ast->getSourceManager();
 
   if (ast->isInSystemHeader(location)) {
@@ -28,139 +202,21 @@ template <typename Visitor> static bool isJunkMutation(ASTStorage &storage, Muta
     return true;
   }
 
-  VisitorParameters parameters = { .sourceManager = sourceManager,
-                                   .sourceLocation = location,
-                                   .astContext = ast->getASTContext() };
-  Visitor visitor(parameters);
-  visitor.TraverseDecl(decl);
+  VisitorParameters visitorParameters = { .sourceManager = sourceManager,
+                                          .sourceLocation = location,
+                                          .astContext = ast->getASTContext() };
 
-  if (const clang::Stmt *mutantStmt = visitor.foundMutant()) {
-    const std::string &sourceFile = point->getSourceLocation().unitFilePath;
+  const clang::Stmt *mutantExpression = findMutantExpression(point, visitorParameters, decl);
 
-    int beginLine = sourceManager.getExpansionLineNumber(location, nullptr);
-    int beginColumn = sourceManager.getExpansionColumnNumber(location);
-
-    storage.saveMutation(
-      sourceFile, point->getMutator()->mutatorKind(), mutantStmt, beginLine, beginColumn);
-    return false;
-  }
-
-  return true;
-}
-
-CXXJunkDetector::CXXJunkDetector(ASTStorage &astStorage) : astStorage(astStorage) {}
-
-bool CXXJunkDetector::isJunk(MutationPoint *point) {
-  if (point->getSourceLocation().isNull()) {
+  if (!mutantExpression) {
     return true;
   }
 
-  switch (point->getMutator()->mutatorKind()) {
-  case MutatorKind::RemoveVoidFunctionMutator:
-    return isJunkMutation<RemoveVoidFunctionVisitor>(astStorage, point);
-  case MutatorKind::ReplaceCallMutator:
-    return isJunkMutation<ReplaceCallVisitor>(astStorage, point);
-  case MutatorKind::NegateMutator:
-    return isJunkMutation<NegateConditionVisitor>(astStorage, point);
-  case MutatorKind::ScalarValueMutator:
-    return isJunkMutation<ScalarValueVisitor>(astStorage, point);
+  const std::string &sourceFile = point->getSourceLocation().unitFilePath;
+  int beginLine = sourceManager.getExpansionLineNumber(location, nullptr);
+  int beginColumn = sourceManager.getExpansionColumnNumber(location);
 
-  case MutatorKind::CXX_LessThanToLessOrEqual:
-    return isJunkMutation<cxx::LessThanVisitor>(astStorage, point);
-  case MutatorKind::CXX_LessOrEqualToLessThan:
-    return isJunkMutation<cxx::LessOrEqualVisitor>(astStorage, point);
-  case MutatorKind::CXX_GreaterThanToGreaterOrEqual:
-    return isJunkMutation<cxx::GreaterThanVisitor>(astStorage, point);
-  case MutatorKind::CXX_GreaterOrEqualToGreaterThan:
-    return isJunkMutation<cxx::GreaterOrEqualVisitor>(astStorage, point);
-  case MutatorKind::CXX_EqualToNotEqual:
-    return isJunkMutation<cxx::EqualVisitor>(astStorage, point);
-  case MutatorKind::CXX_NotEqualToEqual:
-    return isJunkMutation<cxx::NotEqualVisitor>(astStorage, point);
-  case MutatorKind::CXX_GreaterThanToLessOrEqual:
-    return isJunkMutation<cxx::GreaterThanVisitor>(astStorage, point);
-  case MutatorKind::CXX_GreaterOrEqualToLessThan:
-    return isJunkMutation<cxx::GreaterOrEqualVisitor>(astStorage, point);
-  case MutatorKind::CXX_LessThanToGreaterOrEqual:
-    return isJunkMutation<cxx::LessThanVisitor>(astStorage, point);
-  case MutatorKind::CXX_LessOrEqualToGreaterThan:
-    return isJunkMutation<cxx::LessOrEqualVisitor>(astStorage, point);
-
-  case MutatorKind::CXX_AddToSub:
-    return isJunkMutation<cxx::AddVisitor>(astStorage, point);
-  case MutatorKind::CXX_AddAssignToSubAssign:
-    return isJunkMutation<cxx::AddAssignVisitor>(astStorage, point);
-  case MutatorKind::CXX_PreIncToPreDec:
-    return isJunkMutation<cxx::PreIncVisitor>(astStorage, point);
-  case MutatorKind::CXX_PostIncToPostDec:
-    return isJunkMutation<cxx::PostIncVisitor>(astStorage, point);
-
-  case MutatorKind::CXX_SubToAdd:
-    return isJunkMutation<cxx::SubVisitor>(astStorage, point);
-  case MutatorKind::CXX_SubAssignToAddAssign:
-    return isJunkMutation<cxx::SubAssignVisitor>(astStorage, point);
-  case MutatorKind::CXX_PreDecToPreInc:
-    return isJunkMutation<cxx::PreDecVisitor>(astStorage, point);
-  case MutatorKind::CXX_PostDecToPostInc:
-    return isJunkMutation<cxx::PostDecVisitor>(astStorage, point);
-
-  case MutatorKind::CXX_MulToDiv:
-    return isJunkMutation<cxx::MulVisitor>(astStorage, point);
-  case MutatorKind::CXX_MulAssignToDivAssign:
-    return isJunkMutation<cxx::MulAssignVisitor>(astStorage, point);
-
-  case MutatorKind::CXX_DivToMul:
-    return isJunkMutation<cxx::DivVisitor>(astStorage, point);
-  case MutatorKind::CXX_DivAssignToMulAssign:
-    return isJunkMutation<cxx::DivAssignVisitor>(astStorage, point);
-
-  case MutatorKind::CXX_RemToDiv:
-    return isJunkMutation<cxx::RemVisitor>(astStorage, point);
-  case MutatorKind::CXX_RemAssignToDivAssign:
-    return isJunkMutation<cxx::RemAssignVisitor>(astStorage, point);
-
-  case MutatorKind::CXX_BitwiseNotToNoop:
-    return isJunkMutation<cxx::BitwiseNotVisitor>(astStorage, point);
-
-  case MutatorKind::CXX_UnaryMinusToNoop:
-    return isJunkMutation<cxx::UnaryMinusVisitor>(astStorage, point);
-
-  case MutatorKind::CXX_LShiftToRShift:
-    return isJunkMutation<cxx::LShiftVisitor>(astStorage, point);
-  case MutatorKind::CXX_LShiftAssignToRShiftAssign:
-    return isJunkMutation<cxx::LShiftAssignVisitor>(astStorage, point);
-  case MutatorKind::CXX_RShiftToLShift:
-    return isJunkMutation<cxx::RShiftVisitor>(astStorage, point);
-  case MutatorKind::CXX_RShiftAssignToLShiftAssign:
-    return isJunkMutation<cxx::RShiftAssignVisitor>(astStorage, point);
-
-  case MutatorKind::CXX_Bitwise_AndToOr:
-    return isJunkMutation<cxx::BitAndVisitor>(astStorage, point);
-  case MutatorKind::CXX_Bitwise_AndAssignToOrAssign:
-    return isJunkMutation<cxx::BitAndAssignVisitor>(astStorage, point);
-  case MutatorKind::CXX_Bitwise_OrToAnd:
-    return isJunkMutation<cxx::BitOrVisitor>(astStorage, point);
-  case MutatorKind::CXX_Bitwise_OrAssignToAndAssign:
-    return isJunkMutation<cxx::BitOrAssignVisitor>(astStorage, point);
-  case MutatorKind::CXX_Bitwise_XorToOr:
-    return isJunkMutation<cxx::BitXorVisitor>(astStorage, point);
-  case MutatorKind::CXX_Bitwise_XorAssignToOrAssign:
-    return isJunkMutation<cxx::BitXorAssignVisitor>(astStorage, point);
-
-  case MutatorKind::CXX_AssignConst:
-    return isJunkMutation<cxx::AssignVisitor>(astStorage, point);
-  case MutatorKind::CXX_InitConst:
-    return isJunkMutation<cxx::VarDeclVisitor>(astStorage, point);
-
-  case MutatorKind::CXX_Logical_AndToOr:
-    return isJunkMutation<cxx::LogicalAndVisitor>(astStorage, point);
-  case MutatorKind::CXX_Logical_OrToAnd:
-    return isJunkMutation<cxx::LogicalOrVisitor>(astStorage, point);
-
-  case MutatorKind::CXX_RemoveNegation:
-    return isJunkMutation<cxx::UnaryLNotVisitor>(astStorage, point);
-
-  default:
-    return true;
-  }
+  astStorage.saveMutation(
+      sourceFile, point->getMutator()->mutatorKind(), mutantExpression, beginLine, beginColumn);
+  return false;
 }
