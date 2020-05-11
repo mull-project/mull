@@ -24,21 +24,9 @@ bool ASTScalarMutationMatcher::isMutableExpr(const clang::Expr &expr,
     return false;
   }
 
-  bool foundMutableParent = findMutableParentStmt(expr, mutableParentStmt, mutationLocation);
-  if (foundMutableParent) {
-    return true;
-  }
-
-  return false;
-}
-
-bool ASTScalarMutationMatcher::findMutableParentStmt(const clang::Stmt &statement,
-                                                     const clang::Stmt **mutableParentStmt,
-                                                     clang::SourceLocation *mutationLocation) {
-
   /// Please keep in mind that the method used for obtaining mutationLocation
   /// can be different for each parent statement depending on its type.
-  for (auto &parent : context.getParents(statement)) {
+  for (auto &parent : context.getParents(expr)) {
     if (const clang::ReturnStmt *returnParent = parent.get<clang::ReturnStmt>()) {
       if (mutableParentStmt) {
         *mutableParentStmt = returnParent;
@@ -57,6 +45,18 @@ bool ASTScalarMutationMatcher::findMutableParentStmt(const clang::Stmt &statemen
       }
       return true;
     }
+  }
+
+  return false;
+}
+
+bool ASTScalarMutationMatcher::isMutableVarDeclExpr(const clang::Expr &expr,
+                                                    clang::SourceLocation *mutationLocation) {
+  if (isConstant(expr) == false) {
+    return false;
+  }
+
+  for (auto &parent : context.getParents(expr)) {
     if (const clang::VarDecl *varDecl = parent.get<clang::VarDecl>()) {
       if (varDecl->getType().isConstQualified() == false) {
         if (mutationLocation) {
@@ -66,5 +66,26 @@ bool ASTScalarMutationMatcher::findMutableParentStmt(const clang::Stmt &statemen
       }
     }
   }
+
+  return false;
+}
+
+bool ASTScalarMutationMatcher::isMutableAssignmentExpr(const clang::Expr &expr,
+                                                       clang::SourceLocation *mutationLocation) {
+  if (isConstant(expr) == false) {
+    return false;
+  }
+
+  for (auto &parent : context.getParents(expr)) {
+    if (const clang::BinaryOperator *binaryOperator = parent.get<clang::BinaryOperator>()) {
+      if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Assign) {
+        if (mutationLocation) {
+          *mutationLocation = binaryOperator->getOperatorLoc();
+        }
+        return true;
+      }
+    }
+  }
+
   return false;
 }

@@ -20,6 +20,10 @@ public:
       return true;
     }
 
+    if (decl->getType().isConstQualified()) {
+      return true;
+    }
+
     if (decl->getLocation() == parameters.sourceLocation) {
       assert(!matchingExpression && "Already found");
       matchingExpression = decl->getInit();
