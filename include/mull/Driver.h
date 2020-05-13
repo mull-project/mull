@@ -30,7 +30,6 @@ class Filter;
 class Result;
 class TestFramework;
 class MutationsFinder;
-class Metrics;
 class JunkDetector;
 class FunctionFilter;
 struct Filters;
@@ -46,23 +45,20 @@ class Driver {
   IDEDiagnostics *ideDiagnostics;
   Diagnostics &diagnostics;
 
-  std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>>
-      instrumentedObjectFiles;
-  std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>>
-      ownedObjectFiles;
+  std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> instrumentedObjectFiles;
+  std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> ownedObjectFiles;
   Instrumentation instrumentation;
-  Metrics &metrics;
 
   struct Filters &filters;
 
 public:
   Driver(Diagnostics &diagnostics, const Configuration &config, const ProcessSandbox &sandbox,
          Program &program, Toolchain &t, Filters &filters, MutationsFinder &mutationsFinder,
-         Metrics &metrics, TestFramework &testFramework);
+         TestFramework &testFramework);
 
   ~Driver();
 
-  std::unique_ptr<Result> Run();
+  std::unique_ptr<Result> run();
 
 private:
   void compileInstrumentedBitcodeFiles();
@@ -70,10 +66,8 @@ private:
 
   std::vector<Test> findTests();
   std::vector<MutationPoint *> findMutationPoints(std::vector<Test> &tests);
-  std::vector<MutationPoint *>
-  filterMutations(std::vector<MutationPoint *> mutationPoints);
-  std::vector<FunctionUnderTest>
-  filterFunctions(std::vector<FunctionUnderTest> functions);
+  std::vector<MutationPoint *> filterMutations(std::vector<MutationPoint *> mutationPoints);
+  std::vector<FunctionUnderTest> filterFunctions(std::vector<FunctionUnderTest> functions);
   void selectInstructions(std::vector<FunctionUnderTest> &functions);
 
   std::vector<std::unique_ptr<MutationResult>>

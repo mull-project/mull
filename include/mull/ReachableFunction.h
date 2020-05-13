@@ -34,7 +34,7 @@ private:
   int distance;
 };
 
-std::vector<FunctionUnderTest> mergeReachableFunctions(
-    std::vector<std::unique_ptr<ReachableFunction>> &functions);
+std::vector<FunctionUnderTest>
+mergeReachableFunctions(std::vector<std::unique_ptr<ReachableFunction>> &functions);
 
 } // namespace mull

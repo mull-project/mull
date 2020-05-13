@@ -7,7 +7,7 @@
 #include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
 #include "mull/JunkDetection/CXX/ASTStorage.h"
-#include "mull/Metrics/Metrics.h"
+#include "mull/Metrics/MetricsMeasure.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Program/Program.h"
 #include "mull/ReachableFunction.h"
@@ -125,9 +125,7 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   /// STEP2. Reporting results to JSON
   MockASTSourceInfoProvider sourceInfoProvider;
   MutationTestingElementsReporter reporter(diagnostics, "", "", sourceInfoProvider);
-  Metrics metrics;
-  metrics.setDriverRunTime(resultTime);
-  reporter.reportResults(result, metrics);
+  reporter.reportResults(result);
 
   /// STEP3. Making assertions.
   std::vector<ExecutionResult> executionResults{ testExecutionResult, mutatedTestExecutionResult };

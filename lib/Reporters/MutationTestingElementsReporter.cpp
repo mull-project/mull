@@ -111,7 +111,7 @@ MutationTestingElementsReporter::MutationTestingElementsReporter(
   llvm::sys::fs::create_directories(reportDir);
 }
 
-void MutationTestingElementsReporter::reportResults(const Result &result, const Metrics &metrics) {
+void MutationTestingElementsReporter::reportResults(const Result &result) {
   if (result.getMutationPoints().empty()) {
     diagnostics.info("No mutants found. Mutation score: infinitely high");
     return;

@@ -7,7 +7,6 @@
 namespace mull {
 
 class Result;
-class Metrics;
 class Diagnostics;
 
 class SQLiteReporter : public Reporter {
@@ -15,7 +14,7 @@ public:
   explicit SQLiteReporter(Diagnostics &diagnostics, const std::string &reportDir = "",
                           const std::string &reportName = "");
 
-  void reportResults(const Result &result, const Metrics &metrics) override;
+  void reportResults(const Result &result) override;
 
   std::string getDatabasePath();
 

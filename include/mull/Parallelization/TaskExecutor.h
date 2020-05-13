@@ -8,7 +8,7 @@
 #include <assert.h>
 
 #include "Progress.h"
-#include "mull/Metrics/Metrics.h"
+#include "mull/Metrics/MetricsMeasure.h"
 
 namespace mull {
 

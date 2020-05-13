@@ -3,7 +3,6 @@
 #include "mull/Bitcode.h"
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/ExecutionResult.h"
-#include "mull/Metrics/Metrics.h"
 #include "mull/MutationResult.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Result.h"
@@ -13,7 +12,6 @@
 #include <llvm/IR/Instruction.h>
 #include <llvm/IR/Module.h>
 #include <llvm/Support/FileSystem.h>
-#include <llvm/Support/raw_ostream.h>
 
 #include <sqlite3.h>
 #include <sstream>
@@ -73,7 +71,7 @@ std::string mull::SQLiteReporter::getDatabasePath() {
   return databasePath;
 }
 
-void mull::SQLiteReporter::reportResults(const Result &result, const Metrics &metrics) {
+void mull::SQLiteReporter::reportResults(const Result &result) {
   sqlite3 *database;
   sqlite3_open(databasePath.c_str(), &database);
 
