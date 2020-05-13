@@ -61,7 +61,7 @@ void Driver::compileInstrumentedBitcodeFiles() {
 }
 
 void Driver::loadDynamicLibraries() {
-  SingleTaskExecutor task(diagnostics, "Loading dynamic libraries", [&]() {
+  singleTask.execute("Loading dynamic libraries", [&]() {
     for (const std::string &dylibPath : program.getDynamicLibraryPaths()) {
       std::string msg;
       auto error = sys::DynamicLibrary::LoadLibraryPermanently(dylibPath.c_str(), &msg);
@@ -72,14 +72,12 @@ void Driver::loadDynamicLibraries() {
       }
     }
   });
-  task.execute();
 }
 
 std::vector<Test> Driver::findTests() {
   std::vector<Test> tests;
-  SingleTaskExecutor task(
-      diagnostics, "Searching tests", [&]() { tests = testFramework.finder().findTests(program); });
-  task.execute();
+  singleTask.execute("Searching tests",
+                     [&]() { tests = testFramework.finder().findTests(program); });
   return tests;
 }
 
@@ -91,10 +89,9 @@ std::vector<MutationPoint *> Driver::findMutationPoints(vector<Test> &tests) {
   auto objectFiles = AllInstrumentedObjectFiles();
   JITEngine jit(diagnostics);
 
-  SingleTaskExecutor prepareOriginalTestRunTask(diagnostics, "Preparing original test run", [&]() {
+  singleTask.execute("Preparing original test run", [&]() {
     testFramework.runner().loadInstrumentedProgram(objectFiles, instrumentation, jit);
   });
-  prepareOriginalTestRunTask.execute();
 
   std::vector<OriginalTestExecutionTask> tasks;
   tasks.reserve(config.parallelization.testExecutionWorkers);
@@ -215,12 +212,11 @@ std::vector<std::unique_ptr<MutationResult>>
 Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
   std::vector<std::string> mutatedFunctions;
 
-  SingleTaskExecutor prepareMutations(diagnostics, "Prepare mutations", [&]() {
+  singleTask.execute("Prepare mutations", [&]() {
     for (auto point : mutationPoints) {
       point->getBitcode()->addMutation(point);
     }
   });
-  prepareMutations.execute();
 
   auto workers = config.parallelization.workers;
   TaskExecutor<CloneMutatedFunctionsTask> cloneFunctions(
@@ -312,7 +308,7 @@ Driver::Driver(Diagnostics &diagnostics, const Configuration &config, const Proc
                TestFramework &testFramework)
     : config(config), sandbox(sandbox), program(program), testFramework(testFramework),
       toolchain(t), filters(filters), mutationsFinder(mutationsFinder), diagnostics(diagnostics),
-      instrumentation() {
+      instrumentation(), singleTask(diagnostics) {
 
   if (config.diagnostics != IDEDiagnosticsKind::None) {
     this->ideDiagnostics = new NormalIDEDiagnostics(config.diagnostics);

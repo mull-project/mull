@@ -1,11 +1,11 @@
 #pragma once
 
+#include <assert.h>
 #include <functional>
 #include <string>
 #include <thread>
 #include <utility>
 #include <vector>
-#include <assert.h>
 
 #include "Progress.h"
 #include "mull/Metrics/MetricsMeasure.h"
@@ -105,10 +105,9 @@ class SingleTaskTag {};
 
 template <> class TaskExecutor<SingleTaskTag> {
 public:
-  TaskExecutor(Diagnostics &diagnostics, std::string name, std::function<void(void)> task)
-      : diagnostics(diagnostics), name(std::move(name)), task(std::move(task)) {}
+  explicit TaskExecutor(Diagnostics &diagnostics) : diagnostics(diagnostics) {}
 
-  void execute() {
+  void execute(std::string name, const std::function<void(void)> &task) {
     MetricsMeasure measure;
     measure.start();
     std::vector<progress_counter> unusedCounters{};
@@ -124,8 +123,6 @@ public:
 
 private:
   Diagnostics &diagnostics;
-  std::string name;
-  std::function<void(void)> task;
 };
 
 typedef TaskExecutor<SingleTaskTag> SingleTaskExecutor;

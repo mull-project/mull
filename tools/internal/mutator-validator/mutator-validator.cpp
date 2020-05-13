@@ -42,7 +42,8 @@ int main(int argc, char **argv) {
 
   printf("Found %lu mutants\n", mutants.size());
 
-  mull::SingleTaskExecutor prepareMutants(diagnostics, "Preparing mutants", [&] {
+  mull::SingleTaskExecutor singleTask(diagnostics);
+  singleTask.execute("Preparing mutants", [&] {
     for (auto &bc : program.bitcode()) {
       mull::Bitcode &bitcode = *bc;
       std::vector<std::string> mutatedFunctions;
@@ -51,23 +52,20 @@ int main(int argc, char **argv) {
       mull::InsertMutationTrampolinesTask::insertTrampolines(bitcode);
     }
   });
-  prepareMutants.execute();
 
-  mull::SingleTaskExecutor applyMutants(diagnostics, "Applying mutants", [&] {
+  singleTask.execute("Applying mutants", [&] {
     for (auto &mutant : mutants) {
       mutant->applyMutation();
     }
   });
-  applyMutants.execute();
 
   mull::Toolchain toolchain(diagnostics, configuration);
-  mull::SingleTaskExecutor compileMutants(diagnostics, "Compiling mutants", [&] {
+  singleTask.execute("Compiling mutants", [&] {
     for (auto &bc : program.bitcode()) {
       assert(!llvm::verifyModule(*bc->getModule(), &llvm::errs()));
       toolchain.compiler().compileModule(bc->getModule(), toolchain.targetMachine());
     }
   });
-  compileMutants.execute();
 
   return 0;
 }

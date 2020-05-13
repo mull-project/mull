@@ -113,21 +113,20 @@ int main(int argc, char **argv) {
   }
 
   std::vector<std::unique_ptr<ebc::EmbeddedFile>> embeddedFiles;
-  mull::SingleTaskExecutor extractBitcodeBuffers(
-      diagnostics, "Extracting bitcode from executable", [&] {
-        ebc::BitcodeRetriever bitcodeRetriever(tool::InputFile.getValue());
-        for (auto &bitcodeInfo : bitcodeRetriever.GetBitcodeInfo()) {
-          auto &container = bitcodeInfo.bitcodeContainer;
-          if (container) {
-            for (auto &file : container->GetRawEmbeddedFiles()) {
-              embeddedFiles.push_back(std::move(file));
-            }
-          } else {
-            diagnostics.warning(std::string("No bitcode: ") + bitcodeInfo.arch);
-          }
+  mull::SingleTaskExecutor extractBitcodeBuffers(diagnostics);
+  extractBitcodeBuffers.execute("Extracting bitcode from executable", [&] {
+    ebc::BitcodeRetriever bitcodeRetriever(tool::InputFile.getValue());
+    for (auto &bitcodeInfo : bitcodeRetriever.GetBitcodeInfo()) {
+      auto &container = bitcodeInfo.bitcodeContainer;
+      if (container) {
+        for (auto &file : container->GetRawEmbeddedFiles()) {
+          embeddedFiles.push_back(std::move(file));
         }
-      });
-  extractBitcodeBuffers.execute();
+      } else {
+        diagnostics.warning(std::string("No bitcode: ") + bitcodeInfo.arch);
+      }
+    }
+  });
 
   std::vector<std::unique_ptr<llvm::LLVMContext>> contexts;
   std::vector<mull::LoadBitcodeFromBinaryTask> tasks;

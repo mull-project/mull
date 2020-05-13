@@ -6,6 +6,7 @@
 #include "mull/Instrumentation/Instrumentation.h"
 #include "mull/MutationResult.h"
 #include "mull/Mutators/Mutator.h"
+#include "mull/Parallelization/TaskExecutor.h"
 #include "mull/Sandbox/ProcessSandbox.h"
 #include "mull/TestFrameworks/Test.h"
 #include "mull/Toolchain/Toolchain.h"
@@ -50,6 +51,7 @@ class Driver {
   Instrumentation instrumentation;
 
   struct Filters &filters;
+  SingleTaskExecutor singleTask;
 
 public:
   Driver(Diagnostics &diagnostics, const Configuration &config, const ProcessSandbox &sandbox,
