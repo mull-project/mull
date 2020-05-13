@@ -11,6 +11,7 @@ int main() {
 }
 
 /**
+; REQUIRES: LLVM_8_OR_HIGHER
 ; RUN: cd / && %CLANG_EXEC -fembed-bitcode -g -DFLAG=1 %s -o %s.exe
 ; RUN: cd %CURRENT_DIR
 ; RUN: (unset TERM; %MULL_EXEC -test-framework CustomTest -mutators=all -reporters=IDE -ide-reporter-show-killed %s.exe 2>&1; test $? = 0) | %FILECHECK_EXEC %s --strict-whitespace --match-full-lines --check-prefix=WITHOUT-RECORD-COMMAND-LINE
