@@ -6,7 +6,6 @@
 #include "mull/ExecutionResult.h"
 #include "mull/Filters/JunkMutationFilter.h"
 #include "mull/JunkDetection/JunkDetector.h"
-#include "mull/Metrics/Metrics.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/CXX/LogicalAndToOr.h"
 #include "mull/Mutators/CXX/LogicalOrToAnd.h"
@@ -41,7 +40,6 @@ TEST(Driver, RunningWithNoTests) {
   Diagnostics diagnostics;
   MutationsFinder finder({}, configuration);
   Toolchain toolchain(diagnostics, configuration);
-  Metrics metrics;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
@@ -56,10 +54,9 @@ TEST(Driver, RunningWithNoTests) {
                 toolchain,
                 filters,
                 finder,
-                metrics,
                 testFramework);
 
-  auto result = driver.Run();
+  auto result = driver.run();
   ASSERT_EQ(0u, result->getTests().size());
   ASSERT_EQ(0u, result->getMutationResults().size());
 }
@@ -72,7 +69,7 @@ TEST(Driver, SimpleTest_MathAddMutator) {
   /// Initialize Driver using ModuleLoader and Config
   /// Driver should initialize (make them injectable? DI?)
   /// TestRunner and TestFinder based on the Config
-  /// Then Run all the tests using driver
+  /// Then run all the tests using driver
 
   Diagnostics diagnostics;
   Configuration configuration;
@@ -87,7 +84,6 @@ TEST(Driver, SimpleTest_MathAddMutator) {
   MutationsFinder finder(std::move(mutators), configuration);
 
   Toolchain toolchain(diagnostics, configuration);
-  Metrics metrics;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
@@ -102,14 +98,13 @@ TEST(Driver, SimpleTest_MathAddMutator) {
                 toolchain,
                 filters,
                 finder,
-                metrics,
                 testFramework);
 
   /// Given the modules we use here we expect:
   ///
   /// 1 original test, which has Passed state
   /// 1 mutant test, which has Failed state
-  auto result = driver.Run();
+  auto result = driver.run();
   ASSERT_EQ(1u, result->getTests().size());
 
   auto firstResult = result->getMutationResults().begin()->get();
@@ -132,7 +127,7 @@ TEST(Driver, SimpleTest_MathSubMutator) {
   /// Initialize Driver using ModuleLoader and Config
   /// Driver should initialize (make them injectable? DI?)
   /// TestRunner and TestFinder based on the Config
-  /// Then Run all the tests using driver
+  /// Then run all the tests using driver
 
   Diagnostics diagnostics;
   Configuration configuration;
@@ -146,7 +141,6 @@ TEST(Driver, SimpleTest_MathSubMutator) {
   MutationsFinder finder(std::move(mutators), configuration);
 
   Toolchain toolchain(diagnostics, configuration);
-  Metrics metrics;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
@@ -161,14 +155,13 @@ TEST(Driver, SimpleTest_MathSubMutator) {
                 toolchain,
                 filters,
                 finder,
-                metrics,
                 testFramework);
 
   /// Given the modules we use here we expect:
   ///
   /// 1 original test, which has Passed state
   /// 1 mutant test, which has Failed state
-  auto result = driver.Run();
+  auto result = driver.run();
   ASSERT_EQ(1u, result->getTests().size());
 
   auto firstResult = result->getMutationResults().begin()->get();
@@ -191,7 +184,7 @@ TEST(Driver, SimpleTest_MathMulMutator) {
   /// Initialize Driver using ModuleLoader and Config
   /// Driver should initialize (make them injectable? DI?)
   /// TestRunner and TestFinder based on the Config
-  /// Then Run all the tests using driver
+  /// Then run all the tests using driver
   Diagnostics diagnostics;
   Configuration configuration;
   configuration.bitcodePaths = { fixtures::mutators_math_mul_module_bc_path() };
@@ -204,7 +197,6 @@ TEST(Driver, SimpleTest_MathMulMutator) {
   MutationsFinder finder(std::move(mutators), configuration);
 
   Toolchain toolchain(diagnostics, configuration);
-  Metrics metrics;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
@@ -219,14 +211,13 @@ TEST(Driver, SimpleTest_MathMulMutator) {
                 toolchain,
                 filters,
                 finder,
-                metrics,
                 testFramework);
 
   /// Given the modules we use here we expect:
   ///
   /// 1 original test, which has Passed state
   /// 1 mutant test, which has Failed state
-  auto result = driver.Run();
+  auto result = driver.run();
   ASSERT_EQ(1u, result->getTests().size());
 
   auto firstResult = result->getMutationResults().begin()->get();
@@ -248,7 +239,7 @@ TEST(Driver, SimpleTest_MathDivMutator) {
   /// Initialize Driver using ModuleLoader and Config
   /// Driver should initialize (make them injectable? DI?)
   /// TestRunner and TestFinder based on the Config
-  /// Then Run all the tests using driver
+  /// Then run all the tests using driver
   Diagnostics diagnostics;
   Configuration configuration;
   configuration.bitcodePaths = { fixtures::mutators_math_div_module_bc_path() };
@@ -261,7 +252,6 @@ TEST(Driver, SimpleTest_MathDivMutator) {
   MutationsFinder finder(std::move(mutators), configuration);
 
   Toolchain toolchain(diagnostics, configuration);
-  Metrics metrics;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
@@ -276,14 +266,13 @@ TEST(Driver, SimpleTest_MathDivMutator) {
                 toolchain,
                 filters,
                 finder,
-                metrics,
                 testFramework);
 
   /// Given the modules we use here we expect:
   ///
   /// 1 original test, which has Passed state
   /// 1 mutant test, which has Failed state
-  auto result = driver.Run();
+  auto result = driver.run();
   ASSERT_EQ(1u, result->getTests().size());
 
   auto firstResult = result->getMutationResults().begin()->get();
@@ -305,7 +294,7 @@ TEST(Driver, SimpleTest_CXXLessThanToGreaterOrEqual) {
   /// Initialize Driver using ModuleLoader and Config
   /// Driver should initialize (make them injectable? DI?)
   /// TestRunner and TestFinder based on the Config
-  /// Then Run all the tests using driver
+  /// Then run all the tests using driver
   Diagnostics diagnostics;
   Configuration configuration;
   configuration.bitcodePaths = { fixtures::mutators_negate_condition_testee_bc_path(),
@@ -319,7 +308,6 @@ TEST(Driver, SimpleTest_CXXLessThanToGreaterOrEqual) {
   Program program({}, {}, loader.loadBitcode(configuration, diagnostics));
 
   Toolchain toolchain(diagnostics, configuration);
-  Metrics metrics;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
@@ -334,14 +322,13 @@ TEST(Driver, SimpleTest_CXXLessThanToGreaterOrEqual) {
                 toolchain,
                 filters,
                 finder,
-                metrics,
                 testFramework);
 
   /// Given the modules we use here we expect:
   ///
   /// 1 original test, which has Passed state
   /// 1 mutant test, which has Failed state
-  auto result = driver.Run();
+  auto result = driver.run();
   ASSERT_EQ(1u, result->getTests().size());
 
   auto firstResult = result->getMutationResults().begin()->get();
@@ -371,7 +358,6 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutator) {
   Program program({}, {}, loader.loadBitcode(configuration, diagnostics));
 
   Toolchain toolchain(diagnostics, configuration);
-  Metrics metrics;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
@@ -386,14 +372,13 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutator) {
                 toolchain,
                 filters,
                 finder,
-                metrics,
                 testFramework);
 
   /// Given the modules we use here we expect:
   ///
   /// 1 original test, which has Passed state
   /// 1 mutant test, which has Failed state
-  auto result = driver.Run();
+  auto result = driver.run();
   ASSERT_EQ(1u, result->getTests().size());
   return;
 
@@ -423,7 +408,6 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
   Program program({}, {}, loader.loadBitcode(configuration, diagnostics));
 
   Toolchain toolchain(diagnostics, configuration);
-  Metrics metrics;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
@@ -438,10 +422,9 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
                 toolchain,
                 filters,
                 finder,
-                metrics,
                 testFramework);
 
-  auto result = driver.Run();
+  auto result = driver.run();
   ASSERT_EQ(4U, result->getTests().size());
 
   auto mutants = result->getMutationResults().begin();
@@ -506,7 +489,6 @@ TEST(Driver, SimpleTest_ORToANDReplacementMutator) {
   Program program({}, {}, loader.loadBitcode(configuration, diagnostics));
 
   Toolchain toolchain(diagnostics, configuration);
-  Metrics metrics;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
@@ -521,10 +503,9 @@ TEST(Driver, SimpleTest_ORToANDReplacementMutator) {
                 toolchain,
                 filters,
                 finder,
-                metrics,
                 testFramework);
 
-  auto result = driver.Run();
+  auto result = driver.run();
   ASSERT_EQ(4U, result->getTests().size());
 
   auto mutants = result->getMutationResults().begin();
@@ -592,7 +573,6 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator_CompoundOperators) {
   Program program({}, {}, loader.loadBitcode(configuration, diagnostics));
 
   Toolchain toolchain(diagnostics, configuration);
-  Metrics metrics;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
@@ -607,10 +587,9 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator_CompoundOperators) {
                 toolchain,
                 filters,
                 finder,
-                metrics,
                 testFramework);
 
-  auto result = driver.Run();
+  auto result = driver.run();
   ASSERT_EQ(4U, result->getTests().size());
 
   auto mutants = result->getMutationResults().begin();
@@ -687,7 +666,6 @@ TEST(Driver, SimpleTest_ANDToORReplacementMutator_CPP) {
   Program program({}, {}, loader.loadBitcode(configuration, diagnostics));
 
   Toolchain toolchain(diagnostics, configuration);
-  Metrics metrics;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
@@ -702,10 +680,9 @@ TEST(Driver, SimpleTest_ANDToORReplacementMutator_CPP) {
                 toolchain,
                 filters,
                 finder,
-                metrics,
                 testFramework);
 
-  auto result = driver.Run();
+  auto result = driver.run();
   ASSERT_EQ(3U, result->getTests().size());
 
   auto mutants = result->getMutationResults().begin();
@@ -752,7 +729,6 @@ TEST(Driver, SimpleTest_ORToANDReplacementMutator_CPP) {
   Program program({}, {}, loader.loadBitcode(configuration, diagnostics));
 
   Toolchain toolchain(diagnostics, configuration);
-  Metrics metrics;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
@@ -773,10 +749,9 @@ TEST(Driver, SimpleTest_ORToANDReplacementMutator_CPP) {
                 toolchain,
                 filters,
                 finder,
-                metrics,
                 testFramework);
 
-  auto result = driver.Run();
+  auto result = driver.run();
   ASSERT_EQ(3U, result->getTests().size());
 
   auto mutants = result->getMutationResults().begin();
@@ -821,7 +796,6 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutator_CPP) {
   Program program({}, {}, loader.loadBitcode(configuration, diagnostics));
 
   Toolchain toolchain(diagnostics, configuration);
-  Metrics metrics;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
@@ -836,10 +810,9 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutator_CPP) {
                 toolchain,
                 filters,
                 finder,
-                metrics,
                 testFramework);
 
-  auto result = driver.Run();
+  auto result = driver.run();
   ASSERT_EQ(1U, result->getTests().size());
 
   auto mutants = result->getMutationResults().begin();
@@ -876,7 +849,6 @@ TEST(Driver, DISABLED_customTest) {
   Program program({}, {}, loader.loadBitcode(configuration, diagnostics));
 
   Toolchain toolchain(diagnostics, configuration);
-  Metrics metrics;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
@@ -892,10 +864,9 @@ TEST(Driver, DISABLED_customTest) {
                 toolchain,
                 filters,
                 finder,
-                metrics,
                 testFramework);
 
-  auto result = driver.Run();
+  auto result = driver.run();
   ASSERT_EQ(1U, result->getTests().size());
   ASSERT_EQ(3UL, result->getMutationResults().size());
 
@@ -925,7 +896,6 @@ TEST(Driver, customTest_withDynamicLibraries) {
       configuration.dynamicLibraryPaths, {}, loader.loadBitcode(configuration, diagnostics));
 
   Toolchain toolchain(diagnostics, configuration);
-  Metrics metrics;
   NullJunkDetector junkDetector;
 
   TestFrameworkFactory testFrameworkFactory;
@@ -942,10 +912,9 @@ TEST(Driver, customTest_withDynamicLibraries) {
                 toolchain,
                 filters,
                 finder,
-                metrics,
                 testFramework);
 
-  auto result = driver.Run();
+  auto result = driver.run();
   ASSERT_EQ(1U, result->getTests().size());
 
   auto &test = result->getTests().front();
@@ -974,7 +943,6 @@ TEST(Driver, DISABLED_junkDetector_included) {
   Program program({}, {}, loader.loadBitcode(configuration, diagnostics));
 
   Toolchain toolchain(diagnostics, configuration);
-  Metrics metrics;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
@@ -994,10 +962,9 @@ TEST(Driver, DISABLED_junkDetector_included) {
                 toolchain,
                 filters,
                 finder,
-                metrics,
                 testFramework);
 
-  auto result = driver.Run();
+  auto result = driver.run();
   ASSERT_EQ(1U, result->getTests().size());
   ASSERT_EQ(0UL, result->getMutationResults().size());
 }
@@ -1021,7 +988,6 @@ TEST(Driver, DISABLED_junkDetector_excluded) {
   Program program({}, {}, loader.loadBitcode(configuration, diagnostics));
 
   Toolchain toolchain(diagnostics, configuration);
-  Metrics metrics;
 
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
@@ -1037,10 +1003,9 @@ TEST(Driver, DISABLED_junkDetector_excluded) {
                 toolchain,
                 filters,
                 finder,
-                metrics,
                 testFramework);
 
-  auto result = driver.Run();
+  auto result = driver.run();
   ASSERT_EQ(1U, result->getTests().size());
   ASSERT_EQ(3UL, result->getMutationResults().size());
 }
@@ -1065,7 +1030,6 @@ TEST(Driver, customTest_withDynamicLibraries_and_ObjectFiles) {
                   bitcodeLoader.loadBitcode(configuration, diagnostics));
 
   Toolchain toolchain(diagnostics, configuration);
-  Metrics metrics;
   NullJunkDetector junkDetector;
 
   TestFrameworkFactory testFrameworkFactory;
@@ -1082,10 +1046,9 @@ TEST(Driver, customTest_withDynamicLibraries_and_ObjectFiles) {
                 toolchain,
                 filters,
                 finder,
-                metrics,
                 testFramework);
 
-  auto result = driver.Run();
+  auto result = driver.run();
   ASSERT_EQ(1U, result->getTests().size());
 
   auto &test = result->getTests().front();
@@ -1111,7 +1074,6 @@ TEST(Driver, DISABLED_customTest_withExceptions) {
                   bitcodeLoader.loadBitcode(configuration, diagnostics));
 
   Toolchain toolchain(diagnostics, configuration);
-  Metrics metrics;
   NullJunkDetector junkDetector;
 
   TestFrameworkFactory testFrameworkFactory;
@@ -1128,10 +1090,9 @@ TEST(Driver, DISABLED_customTest_withExceptions) {
                 toolchain,
                 filters,
                 finder,
-                metrics,
                 testFramework);
 
-  auto result = driver.Run();
+  auto result = driver.run();
   ASSERT_EQ(1U, result->getTests().size());
 
   auto &test = result->getTests().front();

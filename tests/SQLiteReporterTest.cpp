@@ -3,7 +3,7 @@
 #include "TestModuleFactory.h"
 #include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
-#include "mull/Metrics/Metrics.h"
+#include "mull/Metrics/MetricsMeasure.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Program/Program.h"
 #include "mull/ReachableFunction.h"
@@ -96,9 +96,7 @@ TEST(SQLiteReporter, integrationTest) {
 
   /// STEP2. Reporting results to SQLite
   SQLiteReporter reporter(diagnostics, "integration test", "");
-  Metrics metrics;
-  metrics.setDriverRunTime(resultTime);
-  reporter.reportResults(result, metrics);
+  reporter.reportResults(result);
 
   /// STEP3. Making assertions.
   std::vector<ExecutionResult> executionResults{ testExecutionResult, mutatedTestExecutionResult };

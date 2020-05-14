@@ -38,7 +38,7 @@ static void printMutant(Diagnostics &diagnostics, SourceCodeReader &sourceCodeRe
 IDEReporter::IDEReporter(Diagnostics &diagnostics, bool showKilled)
     : diagnostics(diagnostics), showKilled(showKilled), sourceCodeReader() {}
 
-void IDEReporter::reportResults(const Result &result, const Metrics &metrics) {
+void IDEReporter::reportResults(const Result &result) {
   if (result.getMutationPoints().empty()) {
     diagnostics.info("No mutants found. Mutation score: infinitely high");
     return;

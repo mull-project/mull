@@ -19,7 +19,7 @@
 #include "mull/Filters/JunkMutationFilter.h"
 #include "mull/Filters/NoDebugInfoFilter.h"
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
-#include "mull/Metrics/Metrics.h"
+#include "mull/Metrics/MetricsMeasure.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/MutatorKind.h"
 #include "mull/Parallelization/Parallelization.h"
@@ -113,21 +113,20 @@ int main(int argc, char **argv) {
   }
 
   std::vector<std::unique_ptr<ebc::EmbeddedFile>> embeddedFiles;
-  mull::SingleTaskExecutor extractBitcodeBuffers(
-      diagnostics, "Extracting bitcode from executable", [&] {
-        ebc::BitcodeRetriever bitcodeRetriever(tool::InputFile.getValue());
-        for (auto &bitcodeInfo : bitcodeRetriever.GetBitcodeInfo()) {
-          auto &container = bitcodeInfo.bitcodeContainer;
-          if (container) {
-            for (auto &file : container->GetRawEmbeddedFiles()) {
-              embeddedFiles.push_back(std::move(file));
-            }
-          } else {
-            diagnostics.warning(std::string("No bitcode: ") + bitcodeInfo.arch);
-          }
+  mull::SingleTaskExecutor extractBitcodeBuffers(diagnostics);
+  extractBitcodeBuffers.execute("Extracting bitcode from executable", [&] {
+    ebc::BitcodeRetriever bitcodeRetriever(tool::InputFile.getValue());
+    for (auto &bitcodeInfo : bitcodeRetriever.GetBitcodeInfo()) {
+      auto &container = bitcodeInfo.bitcodeContainer;
+      if (container) {
+        for (auto &file : container->GetRawEmbeddedFiles()) {
+          embeddedFiles.push_back(std::move(file));
         }
-      });
-  extractBitcodeBuffers.execute();
+      } else {
+        diagnostics.warning(std::string("No bitcode: ") + bitcodeInfo.arch);
+      }
+    }
+  });
 
   std::vector<std::unique_ptr<llvm::LLVMContext>> contexts;
   std::vector<mull::LoadBitcodeFromBinaryTask> tasks;
@@ -188,8 +187,6 @@ int main(int argc, char **argv) {
 
   mull::MutationsFinder mutationsFinder(mutatorsOptions.mutators(), configuration);
 
-  mull::Metrics metrics;
-
   auto sandbox = sandboxOption.sandbox();
 
   std::vector<std::unique_ptr<mull::Filter>> filterStorage;
@@ -244,11 +241,8 @@ int main(int argc, char **argv) {
                       toolchain,
                       filters,
                       mutationsFinder,
-                      metrics,
                       testFramework);
-  metrics.beginRun();
-  auto result = driver.Run();
-  metrics.endRun();
+  auto result = driver.run();
 
   tool::ReporterParameters params{
     .reporterName = tool::ReportName.getValue(),
@@ -258,7 +252,7 @@ int main(int argc, char **argv) {
   std::vector<std::unique_ptr<mull::Reporter>> reporters = reportersOption.reporters(params);
 
   for (auto &reporter : reporters) {
-    reporter->reportResults(*result, metrics);
+    reporter->reportResults(*result);
   }
 
   llvm::llvm_shutdown();

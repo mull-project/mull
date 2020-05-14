@@ -4,7 +4,6 @@
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Filters/Filters.h"
 #include "mull/Filters/FunctionFilter.h"
-#include "mull/Metrics/Metrics.h"
 #include "mull/MutationResult.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Parallelization/Parallelization.h"
@@ -29,25 +28,7 @@ Driver::~Driver() {
   delete this->ideDiagnostics;
 }
 
-/// TODO: Remove the following comments as they are irrelevant
-/// Populate mull::Context with modules using
-/// ModulePaths from mull::Config.
-/// mull::Context should be populated using ModuleLoader
-/// so that we could inject modules from string for testing purposes
-
-/// Having mull::Context in place we could instantiate TestFinder and find all
-/// tests Using same TestFinder we could find mutation points, apply them
-/// sequentially and run tests/mutants using newly created TestRunner
-
-/// This method should return (somehow) results of the tests/mutants execution
-/// So that we could easily plug in some TestReporter
-
-/// UPD: The method returns set of results
-/// Number of results equals to a number of tests
-/// Each result contains result of execution of an original test and
-/// all the results of each mutant within corresponding MutationPoint
-
-std::unique_ptr<Result> Driver::Run() {
+std::unique_ptr<Result> Driver::run() {
   compileInstrumentedBitcodeFiles();
   loadDynamicLibraries();
 
@@ -61,8 +42,6 @@ std::unique_ptr<Result> Driver::Run() {
 }
 
 void Driver::compileInstrumentedBitcodeFiles() {
-  metrics.beginInstrumentedCompilation();
-
   for (auto &bitcode : program.bitcode()) {
     instrumentation.recordFunctions(bitcode->getModule());
   }
@@ -79,12 +58,10 @@ void Driver::compileInstrumentedBitcodeFiles() {
                                                      instrumentedObjectFiles,
                                                      tasks);
   compiler.execute();
-
-  metrics.endInstrumentedCompilation();
 }
 
 void Driver::loadDynamicLibraries() {
-  SingleTaskExecutor task(diagnostics, "Loading dynamic libraries", [&]() {
+  singleTask.execute("Loading dynamic libraries", [&]() {
     for (const std::string &dylibPath : program.getDynamicLibraryPaths()) {
       std::string msg;
       auto error = sys::DynamicLibrary::LoadLibraryPermanently(dylibPath.c_str(), &msg);
@@ -95,14 +72,12 @@ void Driver::loadDynamicLibraries() {
       }
     }
   });
-  task.execute();
 }
 
 std::vector<Test> Driver::findTests() {
   std::vector<Test> tests;
-  SingleTaskExecutor task(
-      diagnostics, "Searching tests", [&]() { tests = testFramework.finder().findTests(program); });
-  task.execute();
+  singleTask.execute("Searching tests",
+                     [&]() { tests = testFramework.finder().findTests(program); });
   return tests;
 }
 
@@ -114,10 +89,9 @@ std::vector<MutationPoint *> Driver::findMutationPoints(vector<Test> &tests) {
   auto objectFiles = AllInstrumentedObjectFiles();
   JITEngine jit(diagnostics);
 
-  SingleTaskExecutor prepareOriginalTestRunTask(diagnostics, "Preparing original test run", [&]() {
+  singleTask.execute("Preparing original test run", [&]() {
     testFramework.runner().loadInstrumentedProgram(objectFiles, instrumentation, jit);
   });
-  prepareOriginalTestRunTask.execute();
 
   std::vector<OriginalTestExecutionTask> tasks;
   tasks.reserve(config.parallelization.testExecutionWorkers);
@@ -227,11 +201,9 @@ Driver::dryRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
   for (int i = 0; i < config.parallelization.workers; i++) {
     tasks.emplace_back(DryRunMutantExecutionTask());
   }
-  metrics.beginMutantsExecution();
   TaskExecutor<DryRunMutantExecutionTask> mutantRunner(
       diagnostics, "Running mutants (dry run)", mutationPoints, mutationResults, std::move(tasks));
   mutantRunner.execute();
-  metrics.endMutantsExecution();
 
   return mutationResults;
 }
@@ -240,12 +212,11 @@ std::vector<std::unique_ptr<MutationResult>>
 Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
   std::vector<std::string> mutatedFunctions;
 
-  SingleTaskExecutor prepareMutations(diagnostics, "Prepare mutations", [&]() {
+  singleTask.execute("Prepare mutations", [&]() {
     for (auto point : mutationPoints) {
       point->getBitcode()->addMutation(point);
     }
   });
-  prepareMutations.execute();
 
   auto workers = config.parallelization.workers;
   TaskExecutor<CloneMutatedFunctionsTask> cloneFunctions(
@@ -311,11 +282,9 @@ Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
                        objectFiles,
                        mutatedFunctions);
   }
-  metrics.beginMutantsExecution();
   TaskExecutor<MutantExecutionTask> mutantRunner(
       diagnostics, "Running mutants", mutationPoints, mutationResults, std::move(tasks));
   mutantRunner.execute();
-  metrics.endMutantsExecution();
 
   return mutationResults;
 }
@@ -336,10 +305,10 @@ std::vector<llvm::object::ObjectFile *> Driver::AllInstrumentedObjectFiles() {
 
 Driver::Driver(Diagnostics &diagnostics, const Configuration &config, const ProcessSandbox &sandbox,
                Program &program, Toolchain &t, Filters &filters, MutationsFinder &mutationsFinder,
-               Metrics &metrics, TestFramework &testFramework)
+               TestFramework &testFramework)
     : config(config), sandbox(sandbox), program(program), testFramework(testFramework),
       toolchain(t), filters(filters), mutationsFinder(mutationsFinder), diagnostics(diagnostics),
-      instrumentation(), metrics(metrics) {
+      instrumentation(), singleTask(diagnostics) {
 
   if (config.diagnostics != IDEDiagnosticsKind::None) {
     this->ideDiagnostics = new NormalIDEDiagnostics(config.diagnostics);
