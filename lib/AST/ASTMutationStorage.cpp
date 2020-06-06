@@ -52,10 +52,14 @@ bool ASTMutationStorage::mutationExists(const std::string &sourceFile,
                                         mull::MutatorKind mutatorKind, int line, int column) const {
   assert(llvm::sys::fs::is_regular_file(sourceFile) || sourceFile == "/in-memory-file.cc");
 
-  assert(storage.count(sourceFile) > 0);
+  if (storage.count(sourceFile) == 0) {
+    return false;
+  }
 
   const SingleASTUnitMutations &astUnitMutations = storage.at(sourceFile);
-  assert(astUnitMutations.count(mutatorKind) > 0);
+  if (astUnitMutations.count(mutatorKind) == 0) {
+    return false;
+  }
 
   const SingleMutationTypeBucket &oneMutationBucket = astUnitMutations.at(mutatorKind);
 
