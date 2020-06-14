@@ -111,7 +111,6 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
       if (binaryOperator->getOpcode() == mutation.first &&
           mutatorKindSet.includesMutator(mutation.second)) {
         saveMutationPoint(mutation.second, binaryOperator, binaryOperatorLocation);
-        return true;
       }
     }
     return true;
