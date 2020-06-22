@@ -76,7 +76,7 @@ std::string MutationKindToString(MutatorKind mutatorKind);
 
 namespace std {
 
-template <> struct std::hash<mull::MutatorKind> {
+template <> struct hash<mull::MutatorKind> {
   std::size_t operator()(const mull::MutatorKind &k) const {
     return static_cast<std::size_t>(k);
   }
