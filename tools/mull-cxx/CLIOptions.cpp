@@ -253,11 +253,11 @@ SandboxCLIOptions::SandboxCLIOptions(opt<SandboxKind> &parameter) : parameter(pa
 std::unique_ptr<mull::ProcessSandbox> SandboxCLIOptions::sandbox() {
   switch (parameter.getValue()) {
   case SandboxKind::NoSandbox:
-    return llvm::make_unique<mull::NullProcessSandbox>();
+    return std::make_unique<mull::NullProcessSandbox>();
   case SandboxKind::Watchdog:
-    return llvm::make_unique<mull::ForkWatchdogSandbox>();
+    return std::make_unique<mull::ForkWatchdogSandbox>();
   case SandboxKind::Timer:
-    return llvm::make_unique<mull::ForkTimerSandbox>();
+    return std::make_unique<mull::ForkTimerSandbox>();
   }
 }
 

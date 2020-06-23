@@ -42,7 +42,7 @@ TEST(SQLiteReporter, integrationTest) {
   Configuration configuration;
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<cxx::AddToSub>());
+  mutators.emplace_back(std::make_unique<cxx::AddToSub>());
   MutationsFinder mutationsFinder(std::move(mutators), configuration);
 
   SimpleTestFinder testFinder;
@@ -54,7 +54,7 @@ TEST(SQLiteReporter, integrationTest) {
   ASSERT_FALSE(reachableFunction->empty());
 
   std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions;
-  reachableFunctions.emplace_back(make_unique<ReachableFunction>(reachableFunction, nullptr, 1));
+  reachableFunctions.emplace_back(std::make_unique<ReachableFunction>(reachableFunction, nullptr, 1));
   auto functionsUnderTest = mergeReachableFunctions(reachableFunctions);
   functionsUnderTest.back().selectInstructions({});
   std::vector<MutationPoint *> mutationPoints =
@@ -84,7 +84,7 @@ TEST(SQLiteReporter, integrationTest) {
   mutatedTestExecutionResult.stdoutOutput = "mutatedTestExecutionResult.STDOUT";
   mutatedTestExecutionResult.stderrOutput = "mutatedTestExecutionResult.STDERR";
 
-  auto mutationResult = make_unique<MutationResult>(
+  auto mutationResult = std::make_unique<MutationResult>(
       mutatedTestExecutionResult, mutationPoint, reachableFunctions.front()->getDistance(), &test);
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;

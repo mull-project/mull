@@ -19,7 +19,7 @@ void DryRunMutantExecutionTask::operator()(iterator begin, iterator end,
       result.status = DryRun;
       result.runningTime = timeout;
       storage.push_back(
-          make_unique<MutationResult>(result, mutationPoint, distance, test));
+          std::make_unique<MutationResult>(result, mutationPoint, distance, test));
     }
   }
 }

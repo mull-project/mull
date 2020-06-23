@@ -50,7 +50,7 @@ void NativeTestRunner::runStaticConstructor(llvm::Function *constructor, JITEngi
 void NativeTestRunner::loadInstrumentedProgram(ObjectFiles &objectFiles,
                                                Instrumentation &instrumentation, JITEngine &jit) {
   InstrumentationResolver resolver(overrides, instrumentation, mangler, trampoline);
-  jit.addObjectFiles(objectFiles, resolver, llvm::make_unique<llvm::SectionMemoryManager>());
+  jit.addObjectFiles(objectFiles, resolver, std::make_unique<llvm::SectionMemoryManager>());
 }
 
 ExecutionStatus NativeTestRunner::runTest(JITEngine &jit, Program &program, Test &test) {
@@ -94,5 +94,5 @@ void NativeTestRunner::loadMutatedProgram(TestRunner::ObjectFiles &objectFiles,
                                           Trampolines &trampolines, JITEngine &jit) {
   trampolines.allocateTrampolines(mangler);
   MutationResolver resolver(overrides, trampolines);
-  jit.addObjectFiles(objectFiles, resolver, llvm::make_unique<llvm::SectionMemoryManager>());
+  jit.addObjectFiles(objectFiles, resolver, std::make_unique<llvm::SectionMemoryManager>());
 }

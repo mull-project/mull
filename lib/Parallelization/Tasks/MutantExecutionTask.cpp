@@ -67,7 +67,7 @@ void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
         }
       }
 
-      storage.push_back(make_unique<MutationResult>(result, mutationPoint, distance, test));
+      storage.push_back(std::make_unique<MutationResult>(result, mutationPoint, distance, test));
     }
 
     *trampoline = originalAddress;

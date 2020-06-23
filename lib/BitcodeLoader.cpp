@@ -59,7 +59,7 @@ std::unique_ptr<Bitcode> BitcodeLoader::loadBitcodeAtPath(const std::string &pat
     return nullptr;
   }
 
-  return make_unique<Bitcode>(std::move(module), std::move(buffer.get()), hash);
+  return std::make_unique<Bitcode>(std::move(module), std::move(buffer.get()), hash);
 }
 
 std::vector<std::unique_ptr<Bitcode>> BitcodeLoader::loadBitcode(const Configuration &config,
@@ -68,7 +68,7 @@ std::vector<std::unique_ptr<Bitcode>> BitcodeLoader::loadBitcode(const Configura
 
   std::vector<BitcodeLoadingTask> tasks;
   for (int i = 0; i < config.parallelization.workers; i++) {
-    auto context = llvm::make_unique<LLVMContext>();
+    auto context = std::make_unique<LLVMContext>();
     tasks.emplace_back(diagnostics, *context, *this);
     contexts.push_back(std::move(context));
   }

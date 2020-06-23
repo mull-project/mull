@@ -131,7 +131,7 @@ int main(int argc, char **argv) {
   std::vector<std::unique_ptr<llvm::LLVMContext>> contexts;
   std::vector<mull::LoadBitcodeFromBinaryTask> tasks;
   for (int i = 0; i < configuration.parallelization.workers; i++) {
-    auto context = llvm::make_unique<llvm::LLVMContext>();
+    auto context = std::make_unique<llvm::LLVMContext>();
     tasks.emplace_back(mull::LoadBitcodeFromBinaryTask(diagnostics, *context));
     contexts.push_back(std::move(context));
   }

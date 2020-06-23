@@ -141,7 +141,7 @@ endif()
 
 set(MULL_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-set (MULL_CXX_FLAGS "-std=c++11 -fPIC -fvisibility-inlines-hidden -fno-exceptions -Wunused -Werror")
+set (MULL_CXX_FLAGS "-std=c++14 -fPIC -fvisibility-inlines-hidden -fno-exceptions -Wunused -Werror")
 if (NOT LLVM_ENABLE_RTTI)
   set(MULL_CXX_FLAGS "${MULL_CXX_FLAGS} -fno-rtti")
 endif()
