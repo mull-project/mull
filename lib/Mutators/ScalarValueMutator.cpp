@@ -16,8 +16,8 @@ std::string ScalarValueMutator::description() {
 ScalarValueMutator::ScalarValueMutator() : lowLevelMutators() {
   // i == operand position
   for (auto i = 0; i < 5; i++) {
-    lowLevelMutators.push_back(llvm::make_unique<irm::ConstIntReplacement>(42, i));
-    lowLevelMutators.push_back(llvm::make_unique<irm::ConstFloatReplacement>(42, i));
+    lowLevelMutators.push_back(std::make_unique<irm::ConstIntReplacement>(42, i));
+    lowLevelMutators.push_back(std::make_unique<irm::ConstFloatReplacement>(42, i));
   }
 }
 

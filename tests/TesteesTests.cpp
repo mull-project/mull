@@ -17,9 +17,9 @@ TEST(FunctionsUnderTest, mergeReachableFunctions) {
 
   std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions;
   for (auto &func : allFunctions) {
-    reachableFunctions.push_back(llvm::make_unique<ReachableFunction>(&func, nullptr, 1));
-    reachableFunctions.push_back(llvm::make_unique<ReachableFunction>(&func, nullptr, 2));
-    reachableFunctions.push_back(llvm::make_unique<ReachableFunction>(&func, nullptr, 3));
+    reachableFunctions.push_back(std::make_unique<ReachableFunction>(&func, nullptr, 1));
+    reachableFunctions.push_back(std::make_unique<ReachableFunction>(&func, nullptr, 2));
+    reachableFunctions.push_back(std::make_unique<ReachableFunction>(&func, nullptr, 3));
   }
 
   auto functionsUnderTest = mergeReachableFunctions(reachableFunctions);

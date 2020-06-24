@@ -16,13 +16,13 @@ std::string NegateConditionMutator::description() {
 
 NegateConditionMutator::NegateConditionMutator() : lowLevelMutators() {
   /// == -> !=
-  lowLevelMutators.push_back(llvm::make_unique<irm::ICMP_EQToICMP_NE>());
-  lowLevelMutators.push_back(llvm::make_unique<irm::FCMP_OEQToFCMP_ONE>());
-  lowLevelMutators.push_back(llvm::make_unique<irm::FCMP_UEQToFCMP_UNE>());
+  lowLevelMutators.push_back(std::make_unique<irm::ICMP_EQToICMP_NE>());
+  lowLevelMutators.push_back(std::make_unique<irm::FCMP_OEQToFCMP_ONE>());
+  lowLevelMutators.push_back(std::make_unique<irm::FCMP_UEQToFCMP_UNE>());
   /// != -> ==
-  lowLevelMutators.push_back(llvm::make_unique<irm::ICMP_NEToICMP_EQ>());
-  lowLevelMutators.push_back(llvm::make_unique<irm::FCMP_ONEToFCMP_OEQ>());
-  lowLevelMutators.push_back(llvm::make_unique<irm::FCMP_UNEToFCMP_UEQ>());
+  lowLevelMutators.push_back(std::make_unique<irm::ICMP_NEToICMP_EQ>());
+  lowLevelMutators.push_back(std::make_unique<irm::FCMP_ONEToFCMP_OEQ>());
+  lowLevelMutators.push_back(std::make_unique<irm::FCMP_UNEToFCMP_UEQ>());
 }
 
 static std::string describePredicate(CmpInst::Predicate predicate) {

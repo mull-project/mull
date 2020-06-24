@@ -80,7 +80,7 @@ TEST(Driver, SimpleTest_MathAddMutator) {
   Program program({}, {}, loader.loadBitcode(configuration, diagnostics));
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<cxx::AddToSub>());
+  mutators.emplace_back(std::make_unique<cxx::AddToSub>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   Toolchain toolchain(diagnostics, configuration);
@@ -137,7 +137,7 @@ TEST(Driver, SimpleTest_MathSubMutator) {
   Program program({}, {}, loader.loadBitcode(configuration, diagnostics));
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<cxx::SubToAdd>());
+  mutators.emplace_back(std::make_unique<cxx::SubToAdd>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   Toolchain toolchain(diagnostics, configuration);
@@ -193,7 +193,7 @@ TEST(Driver, SimpleTest_MathMulMutator) {
   Program program({}, {}, loader.loadBitcode(configuration, diagnostics));
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<cxx::MulToDiv>());
+  mutators.emplace_back(std::make_unique<cxx::MulToDiv>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   Toolchain toolchain(diagnostics, configuration);
@@ -248,7 +248,7 @@ TEST(Driver, SimpleTest_MathDivMutator) {
   Program program({}, {}, loader.loadBitcode(configuration, diagnostics));
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<cxx::DivToMul>());
+  mutators.emplace_back(std::make_unique<cxx::DivToMul>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   Toolchain toolchain(diagnostics, configuration);
@@ -301,7 +301,7 @@ TEST(Driver, SimpleTest_CXXLessThanToGreaterOrEqual) {
                                  fixtures::mutators_negate_condition_tester_bc_path() };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<cxx::LessThanToGreaterOrEqual>());
+  mutators.emplace_back(std::make_unique<cxx::LessThanToGreaterOrEqual>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;
@@ -351,7 +351,7 @@ TEST(Driver, SimpleTest_RemoveVoidFunctionMutator) {
                                  fixtures::mutators_remove_void_function_tester_bc_path() };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<RemoveVoidFunctionMutator>());
+  mutators.emplace_back(std::make_unique<RemoveVoidFunctionMutator>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;
@@ -401,7 +401,7 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator) {
   configuration.bitcodePaths = { fixtures::mutators_and_or_and_to_or_replacement_module_bc_path() };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<cxx::LogicalAndToOr>());
+  mutators.emplace_back(std::make_unique<cxx::LogicalAndToOr>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;
@@ -482,7 +482,7 @@ TEST(Driver, SimpleTest_ORToANDReplacementMutator) {
   configuration.bitcodePaths = { fixtures::mutators_and_or_or_to_and_replacement_module_bc_path() };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<cxx::LogicalOrToAnd>());
+  mutators.emplace_back(std::make_unique<cxx::LogicalOrToAnd>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;
@@ -565,8 +565,8 @@ TEST(Driver, SimpleTest_ANDORReplacementMutator_CompoundOperators) {
   };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<cxx::LogicalAndToOr>());
-  mutators.emplace_back(make_unique<cxx::LogicalOrToAnd>());
+  mutators.emplace_back(std::make_unique<cxx::LogicalAndToOr>());
+  mutators.emplace_back(std::make_unique<cxx::LogicalOrToAnd>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;
@@ -659,7 +659,7 @@ TEST(Driver, SimpleTest_ANDToORReplacementMutator_CPP) {
   };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<cxx::LogicalAndToOr>());
+  mutators.emplace_back(std::make_unique<cxx::LogicalAndToOr>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;
@@ -722,7 +722,7 @@ TEST(Driver, SimpleTest_ORToANDReplacementMutator_CPP) {
   };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<cxx::LogicalOrToAnd>());
+  mutators.emplace_back(std::make_unique<cxx::LogicalOrToAnd>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;
@@ -789,7 +789,7 @@ TEST(Driver, SimpleTest_ReplaceAssignmentMutator_CPP) {
   configuration.bitcodePaths = { fixtures::mutators_replace_assignment_module_bc_path() };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<cxx::NumberAssignConst>());
+  mutators.emplace_back(std::make_unique<cxx::NumberAssignConst>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;
@@ -842,7 +842,7 @@ TEST(Driver, DISABLED_customTest) {
                                  mull::fixtures::custom_test_test_bc_path() };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<cxx::AddToSub>());
+  mutators.emplace_back(std::make_unique<cxx::AddToSub>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;
@@ -888,7 +888,7 @@ TEST(Driver, customTest_withDynamicLibraries) {
                                  fixtures::dylibs_and_objects_main_bc_path() };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<cxx::AddToSub>());
+  mutators.emplace_back(std::make_unique<cxx::AddToSub>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;
@@ -936,7 +936,7 @@ TEST(Driver, DISABLED_junkDetector_included) {
                                  fixtures::custom_test_test_bc_path() };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<cxx::AddToSub>());
+  mutators.emplace_back(std::make_unique<cxx::AddToSub>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;
@@ -981,7 +981,7 @@ TEST(Driver, DISABLED_junkDetector_excluded) {
                                  fixtures::custom_test_test_bc_path() };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<cxx::AddToSub>());
+  mutators.emplace_back(std::make_unique<cxx::AddToSub>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader loader;
@@ -1020,7 +1020,7 @@ TEST(Driver, customTest_withDynamicLibraries_and_ObjectFiles) {
   configuration.bitcodePaths = { fixtures::dylibs_and_objects_test_bc_path() };
 
   std::vector<std::unique_ptr<Mutator>> mutators;
-  mutators.emplace_back(make_unique<cxx::AddToSub>());
+  mutators.emplace_back(std::make_unique<cxx::AddToSub>());
   MutationsFinder finder(std::move(mutators), configuration);
 
   BitcodeLoader bitcodeLoader;

@@ -17,9 +17,9 @@ std::string ReplaceCallMutator::description() {
 }
 
 ReplaceCallMutator::ReplaceCallMutator() : lowLevelMutators() {
-  lowLevelMutators.push_back(llvm::make_unique<irm::IntCallReplacement>(42));
-  lowLevelMutators.push_back(llvm::make_unique<irm::FloatCallReplacement>(42));
-  lowLevelMutators.push_back(llvm::make_unique<irm::DoubleCallReplacement>(42));
+  lowLevelMutators.push_back(std::make_unique<irm::IntCallReplacement>(42));
+  lowLevelMutators.push_back(std::make_unique<irm::FloatCallReplacement>(42));
+  lowLevelMutators.push_back(std::make_unique<irm::DoubleCallReplacement>(42));
 }
 
 void ReplaceCallMutator::applyMutation(llvm::Function *function,

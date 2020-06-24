@@ -47,7 +47,7 @@ void fillInCallTree(std::vector<CallTreeFunction> &functions,
   }
 
   CallTreeFunction &function = functions[functionIndex];
-  std::unique_ptr<CallTree> node = make_unique<CallTree>(function.function);
+  std::unique_ptr<CallTree> node = std::make_unique<CallTree>(function.function);
   function.treeRoot = node.get();
 
   fillInCallTree(functions, callTreeMapping, parent);
@@ -91,7 +91,7 @@ DynamicCallTree::createCallTree(uint32_t *mapping,
   /// form.
   ///
 
-  std::unique_ptr<CallTree> phonyRoot = make_unique<CallTree>(nullptr);
+  std::unique_ptr<CallTree> phonyRoot = std::make_unique<CallTree>(nullptr);
   CallTreeFunction &rootFunction = functions[0];
   rootFunction.treeRoot = phonyRoot.get();
 
@@ -142,7 +142,7 @@ DynamicCallTree::createReachableFunctions(std::vector<CallTree *> subtrees,
 
       int distance = node->level - offset;
       reachableFunctions.emplace_back(
-          make_unique<ReachableFunction>(node->function, &test, distance));
+          std::make_unique<ReachableFunction>(node->function, &test, distance));
       if (distance < maxDistance) {
         for (std::unique_ptr<CallTree> &child : node->children) {
           nodes.push(child.get());

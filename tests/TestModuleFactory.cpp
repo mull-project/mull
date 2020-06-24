@@ -37,7 +37,7 @@ std::unique_ptr<Bitcode> loadBitcodeFromIR(const char *path,
 
   assert(!llvm::verifyModule(*module, &dbgs()));
 
-  return make_unique<Bitcode>(
+  return std::make_unique<Bitcode>(
       std::move(module), std::unique_ptr<llvm::MemoryBuffer>(), "fake_path");
 }
 

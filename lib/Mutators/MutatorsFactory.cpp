@@ -178,7 +178,7 @@ MutatorsFactory::MutatorsFactory(Diagnostics &diagnostics) : diagnostics(diagnos
 
 template <typename MutatorClass>
 void addMutator(std::map<std::string, std::unique_ptr<Mutator>> &mapping) {
-  mapping[MutatorClass::ID()] = make_unique<MutatorClass>();
+  mapping[MutatorClass::ID()] = std::make_unique<MutatorClass>();
 }
 
 void MutatorsFactory::init() {

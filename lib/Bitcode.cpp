@@ -37,7 +37,7 @@ std::unique_ptr<Bitcode> Bitcode::clone(LLVMContext &context, Diagnostics &diagn
 
   clone->setModuleIdentifier(module->getModuleIdentifier());
 
-  return make_unique<Bitcode>(std::move(clone), std::unique_ptr<MemoryBuffer>(), "");
+  return std::make_unique<Bitcode>(std::move(clone), std::unique_ptr<MemoryBuffer>(), "");
 }
 
 llvm::Module *Bitcode::getModule() {

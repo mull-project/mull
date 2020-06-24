@@ -16,8 +16,8 @@ std::string RemoveVoidFunctionMutator::description() {
 }
 
 RemoveVoidFunctionMutator::RemoveVoidFunctionMutator() : lowLevelMutators() {
-  lowLevelMutators.push_back(llvm::make_unique<irm::RemoveVoidFunctionCall>());
-  lowLevelMutators.push_back(llvm::make_unique<irm::RemoveVoidIntrinsicsCall>());
+  lowLevelMutators.push_back(std::make_unique<irm::RemoveVoidFunctionCall>());
+  lowLevelMutators.push_back(std::make_unique<irm::RemoveVoidIntrinsicsCall>());
 }
 
 void RemoveVoidFunctionMutator::applyMutation(llvm::Function *function,

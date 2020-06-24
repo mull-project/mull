@@ -37,7 +37,7 @@ void LoadBitcodeFromBinaryTask::operator()(iterator begin, iterator end, Out &st
     module->setModuleIdentifier(hash);
 
     auto bitcode =
-        llvm::make_unique<mull::Bitcode>(std::move(module), std::move(ownedBuffer), hash);
+        std::make_unique<mull::Bitcode>(std::move(module), std::move(ownedBuffer), hash);
     storage.push_back(std::move(bitcode));
   }
 }

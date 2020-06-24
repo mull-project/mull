@@ -34,24 +34,24 @@ TestFramework TestFrameworkFactory::createTestFramework(const std::string &name,
 TestFramework TestFrameworkFactory::simpleTestFramework(Toolchain &toolchain,
                                                         Configuration &configuration,
                                                         Diagnostics &diagnostics) {
-  auto finder = make_unique<SimpleTestFinder>();
-  auto runner = make_unique<NativeTestRunner>(diagnostics, toolchain.mangler());
+  auto finder = std::make_unique<SimpleTestFinder>();
+  auto runner = std::make_unique<NativeTestRunner>(diagnostics, toolchain.mangler());
   return TestFramework(std::move(finder), std::move(runner));
 }
 
 TestFramework TestFrameworkFactory::googleTestFramework(Toolchain &toolchain,
                                                         Configuration &configuration,
                                                         Diagnostics &diagnostics) {
-  auto finder = make_unique<GoogleTestFinder>();
-  auto runner = make_unique<NativeTestRunner>(diagnostics, toolchain.mangler());
+  auto finder = std::make_unique<GoogleTestFinder>();
+  auto runner = std::make_unique<NativeTestRunner>(diagnostics, toolchain.mangler());
   return TestFramework(std::move(finder), std::move(runner));
 }
 
 TestFramework TestFrameworkFactory::customTestFramework(Toolchain &toolchain,
                                                         Configuration &configuration,
                                                         Diagnostics &diagnostics) {
-  auto finder = make_unique<CustomTestFinder>(configuration.customTests);
-  auto runner = make_unique<NativeTestRunner>(diagnostics, toolchain.mangler());
+  auto finder = std::make_unique<CustomTestFinder>(configuration.customTests);
+  auto runner = std::make_unique<NativeTestRunner>(diagnostics, toolchain.mangler());
   return TestFramework(std::move(finder), std::move(runner));
 }
 
