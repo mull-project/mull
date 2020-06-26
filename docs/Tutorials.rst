@@ -7,3 +7,4 @@ Tutorials
    HelloWorld
    fmtlibTutorial
    OpenSSLTutorial
+   SQLiteReport

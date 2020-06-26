@@ -1,0 +1,48 @@
+digraph Mull {
+  graph [pad="0.5", nodesep="0.5", ranksep="2"];
+  node [shape=plain] rankdir=LR;
+
+  ExecutionResult [
+    label = <
+      <table border="0" cellborder="1" cellspacing="0">
+        <tr><td><i>execution_result</i></td></tr>
+        <tr><td port="test_id">test_id</td></tr>
+        <tr><td port="mutation_point_id">mutation_point_id</td></tr>
+        <tr><td port="status">status</td></tr>
+        <tr><td port="duration">duration</td></tr>
+        <tr><td port="stdout">stdout</td></tr>
+        <tr><td port="stderr">stderr</td></tr>
+      </table>
+    >
+  ];
+
+  Test [
+    label = <
+      <table border="0" cellborder="1" cellspacing="0">
+        <tr><td><i>test</i></td></tr>
+        <tr><td port="unique_id">unique_id</td></tr>
+        <tr><td port="test_name">test_name</td></tr>
+        <tr><td port="location_file">location_file</td></tr>
+        <tr><td port="location_line">location_line</td></tr>
+      </table>
+    >
+  ];
+
+  MutationPoint [
+    label = <
+      <table border="0" cellborder="1" cellspacing="0">
+        <tr><td><i>mutation_point</i></td></tr>
+        <tr><td port="unique_id">unique_id</td></tr>
+        <tr><td port="mutator">mutator</td></tr>
+        <tr><td port="function_name">function_name</td></tr>
+        <tr><td port="filename">filename</td></tr>
+        <tr><td port="directory">directory</td></tr>
+        <tr><td port="line_number">line_number</td></tr>
+        <tr><td port="column_number">column_number</td></tr>
+      </table>
+    >
+  ];
+
+  ExecutionResult:test_id -> Test:unique_id;
+  ExecutionResult:mutation_point_id -> MutationPoint:unique_id;
+}
