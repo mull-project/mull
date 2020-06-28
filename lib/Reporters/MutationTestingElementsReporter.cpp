@@ -159,7 +159,7 @@ void MutationTestingElementsReporter::generateHTMLFile() {
   out << "  <script defer src=\"" << url << "\"></script>";
   out << "</head>\n";
   out << "<body>\n";
-  out << "  <mutation-test-report-app src=\"" << filename << ".json\""
+  out << "  <mutation-test-report-app src=\"" << filename << ".json\">"
       << "</mutation-test-report-app>\n";
   out << "</body>\n";
   out << "</html>";
