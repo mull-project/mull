@@ -4,9 +4,9 @@ OpenSSL tutorial
 This tutorial will show you how to run Mull against `OpenSSL <https://github.com/openssl/openssl>`_.
 This tutorial is similar to the `fmtlib tutorial <fmtlibTutorial.html>`_, but there are two key differences:
 
-  - fmtlib uses CMake-based build system, while OpenSSL' build system is very custom and constitutes of a number of shell-scripts
-  - fmtlib is written in C++, while OpenSSL has some (optional) assembly code
-  - fmtlib's build system gives us a nice, ready to use compilation database, while for OpenSSL we need to mimic it manually
+- fmtlib uses CMake-based build system, while OpenSSL' build system is very custom and constitutes of a number of shell-scripts
+- fmtlib is written in C++, while OpenSSL has some (optional) assembly code
+- fmtlib's build system gives us a nice, ready to use compilation database, while for OpenSSL we need to mimic it manually
 
 Let's get started!
 
