@@ -53,7 +53,6 @@ Empty ``mutation_point_id`` indicates that a test was run to gather code coverag
 The ``status`` field stores a numerical value as described in the following table:
 
 .. list-table::
-   :width: 100%
    :header-rows: 1
 
    * - Numeric value
