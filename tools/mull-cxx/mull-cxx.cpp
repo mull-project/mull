@@ -261,6 +261,7 @@ int main(int argc, char **argv) {
   std::stringstream stringstream;
   stringstream << "Total execution time: " << totalExecutionTime.duration()
                << mull::MetricsMeasure::precision();
+  diagnostics.info(stringstream.str());
 
   return 0;
 }
