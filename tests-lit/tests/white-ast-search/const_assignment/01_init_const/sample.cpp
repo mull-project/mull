@@ -31,5 +31,6 @@ int main() {
 ; CHECK:  int var = 0;
 ; CHECK:      ^
 ; CHECK:[info] Mutation score: 100%
+; CHECK:[info] Total execution time: {{.*}}
 ; CHECK-EMPTY:
 **/

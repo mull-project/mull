@@ -22,5 +22,6 @@ int main() {
 ; CHECK:[info] Survived mutants (1/2):
 ; CHECK:{{^.*}}main.cpp:6:10: warning: Survived: Replaced !a with a [cxx_remove_negation]{{$}}
 ; CHECK:[info] Mutation score: 50%
+; CHECK:[info] Total execution time: {{.*}}
 ; CHECK-EMPTY:
 **/
