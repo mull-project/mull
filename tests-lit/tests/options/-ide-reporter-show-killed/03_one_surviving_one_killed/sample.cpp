@@ -11,26 +11,24 @@
 ; WITHOUT-OPTION:[info] Running mutants (threads: 2)
 ; WITHOUT-OPTION:{{^       \[################################\] 2/2\. Finished .*}}
 ; WITHOUT-OPTION:[info] Survived mutants (1/2):
-; WITHOUT-OPTION-NEXT:{{^.*}}sample.cpp:38:19: warning: Survived: Replaced + with - [cxx_add_to_sub]
+; WITHOUT-OPTION-NEXT:{{^.*}}sample.cpp:36:19: warning: Survived: Replaced + with - [cxx_add_to_sub]
 ; WITHOUT-OPTION-NEXT:  result = result + 0;
 ; WITHOUT-OPTION-NEXT:                  ^
 ; WITHOUT-OPTION-NEXT:[info] Mutation score: 50%
-; WITHOUT-OPTION-EMPTY:
 
 ; RUN: (unset TERM; %MULL_EXEC -test-framework CustomTest -mutators=cxx_add_to_sub -ide-reporter-show-killed %s.exe | %FILECHECK_EXEC %s --strict-whitespace --match-full-lines --check-prefix=WITH-OPTION)
 ; RUN: (unset TERM; %MULL_EXEC -test-framework CustomTest -mutators=cxx_add_to_sub -reporters=IDE -ide-reporter-show-killed %s.exe | %FILECHECK_EXEC %s --strict-whitespace --match-full-lines --check-prefix=WITH-OPTION)
 ; WITH-OPTION:[info] Running mutants (threads: 2)
 ; WITH-OPTION:{{^       \[################################\] 2/2\. Finished .*}}
 ; WITH-OPTION:[info] Killed mutants (1/2):
-; WITH-OPTION-NEXT:{{^.*}}sample.cpp:37:18: warning: Killed: Replaced + with - [cxx_add_to_sub]
+; WITH-OPTION-NEXT:{{^.*}}sample.cpp:35:18: warning: Killed: Replaced + with - [cxx_add_to_sub]
 ; WITH-OPTION-NEXT:  int result = a + b;
 ; WITH-OPTION-NEXT:                 ^
 ; WITH-OPTION-NEXT:[info] Survived mutants (1/2):
-; WITH-OPTION-NEXT:{{^.*}}sample.cpp:38:19: warning: Survived: Replaced + with - [cxx_add_to_sub]
+; WITH-OPTION-NEXT:{{^.*}}sample.cpp:36:19: warning: Survived: Replaced + with - [cxx_add_to_sub]
 ; WITH-OPTION-NEXT:  result = result + 0;
 ; WITH-OPTION-NEXT:                  ^
 ; WITH-OPTION-NEXT:[info] Mutation score: 50%
-; WITH-OPTION-EMPTY:
 */
 
 int sum(int a, int b) {

@@ -28,5 +28,6 @@ int main() {
 ; CHECK:  return a != b;
 ; CHECK:           ^
 ; CHECK:[info] Mutation score: 100%
+; CHECK:[info] Total execution time: {{.*}}
 ; CHECK-EMPTY:
 **/

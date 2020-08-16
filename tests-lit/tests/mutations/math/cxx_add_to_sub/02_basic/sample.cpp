@@ -6,6 +6,7 @@
 ; CHECK:{{^       \[################################\] 1/1\. Finished .*}}
 ; CHECK:[info] All mutations have been killed
 ; CHECK:[info] Mutation score: 100%
+; CHECK:[info] Total execution time: {{.*}}
 ; CHECK-EMPTY:
 **/
 

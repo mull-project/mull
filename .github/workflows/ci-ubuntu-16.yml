@@ -22,16 +22,18 @@ jobs:
         LLVM_VERSION: ["8.0"]
 
     steps:
-      - uses: actions/checkout@v1
+      - name: Install software
+        run: |
+          apt-get update && apt-get install -y software-properties-common
+          add-apt-repository ppa:git-core/ppa
+          apt-get update && apt-get install -y python-pip curl git
+          pip install ansible
+      - uses: actions/checkout@v2
         with:
           submodules: true
       - name: For debugging
         run: |
           env | sort
-      - name: Install software
-        run: |
-          apt-get update && apt-get install -y python-pip curl git
-          pip install ansible
       - name: Set build settings
         id: settings
         run: |

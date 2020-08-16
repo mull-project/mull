@@ -35,5 +35,6 @@ CHECK:{{^.*}}sample.cpp:2:12: warning: Killed: Replaced > with <= [cxx_gt_to_le]
 CHECK:  return a > b;
 CHECK:           ^
 CHECK:[info] Mutation score: 100%
+CHECK:[info] Total execution time: {{.*}}
 CHECK-EMPTY:
 **/

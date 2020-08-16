@@ -29,5 +29,6 @@ int main() {
 ; CHECK:  a /= b;
 ; CHECK:    ^
 ; CHECK:[info] Mutation score: 100%
+; CHECK:[info] Total execution time: {{.*}}
 ; CHECK-EMPTY:
 **/

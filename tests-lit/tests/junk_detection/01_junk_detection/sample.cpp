@@ -24,5 +24,4 @@ int main() {
 ; WITH-JUNK-DETECTION:           ^
 ; WITH-JUNK-DETECTION:[info] All mutations have been killed
 ; WITH-JUNK-DETECTION:[info] Mutation score: 100%
-; WITH-JUNK-DETECTION-EMPTY:
 **/
