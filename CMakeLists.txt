@@ -37,7 +37,7 @@ if (SOURCE_LLVM_DIR)
 endif()
 
 if (NOT PATH_TO_LLVM)
-  message(FATAL_ERROR " 
+  message(FATAL_ERROR "
   The cmake is supposed to be called with PATH_TO_LLVM pointing to
  a precompiled version of LLVM or to to the source code of LLVM
  Examples:
@@ -105,7 +105,7 @@ else()
   add_subdirectory(${PATH_TO_LLVM} llvm-build-dir)
 
   if (NOT TARGET clangTooling)
-    message(FATAL_ERROR " 
+    message(FATAL_ERROR "
  Cannot find clangTooling target. Did you forget to clone clang sources?
  Clean CMake cache and make sure they are available at:
  ${PATH_TO_LLVM}/tools/clang")
@@ -194,6 +194,7 @@ SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib" "${LLVM_LIB_PATH}")
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 add_subdirectory(LLVMCompatibility/${LLVM_COMPATIBILITY_DIR})
+add_subdirectory(LLVMCompatibility/emutls)
 add_subdirectory(lib)
 add_subdirectory(tools)
 add_subdirectory(tests)
