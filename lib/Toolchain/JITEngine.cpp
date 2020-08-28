@@ -61,7 +61,7 @@ void JITEngine::addObjectFiles(std::vector<object::ObjectFile *> &files,
   diagnostics.debug("Resolving symbol references");
   auto it = unresolvedSymbols.begin();
   while (it != unresolvedSymbols.end()) {
-    std::string name = *it;
+    const std::string &name = *it;
     auto dlSymbol = dynamicLoader.getSymbol(name);
     if (dlSymbol.getAddress() != 0) {
       std::ostringstream ss;
