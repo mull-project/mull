@@ -19,6 +19,7 @@ void JITEngine::addObjectFiles(std::vector<object::ObjectFile *> &files,
 
   std::unordered_set<std::string> unresolvedSymbols;
 
+  diagnostics.debug("Building symbol table");
   for (auto object : files) {
     objectFiles.push_back(object);
 
@@ -45,6 +46,9 @@ void JITEngine::addObjectFiles(std::vector<object::ObjectFile *> &files,
   dynamicLoader.setProcessAllSections(false);
 
   for (auto &object : objectFiles) {
+    std::ostringstream ss;
+    ss << "Load object " << object->getFileName().str();
+    diagnostics.debug(ss.str());
     dynamicLoader.loadObject(*object);
   }
 
@@ -54,16 +58,23 @@ void JITEngine::addObjectFiles(std::vector<object::ObjectFile *> &files,
 
   dynamicLoader.finalizeWithMemoryManagerLocking();
 
+  diagnostics.debug("Resolving symbol references");
   auto it = unresolvedSymbols.begin();
   while (it != unresolvedSymbols.end()) {
     std::string name = *it;
     auto dlSymbol = dynamicLoader.getSymbol(name);
     if (dlSymbol.getAddress() != 0) {
+      std::ostringstream ss;
+      ss << "Found static symbol " << name;
+      diagnostics.debug(ss.str());
       it = unresolvedSymbols.erase(it);
       continue;
     }
     auto resolverSymbol = llvm_compat::JITSymbol(resolver.findSymbol(name));
     if (llvm_compat::JITSymbolAddress(resolverSymbol) != 0) {
+      std::ostringstream ss;
+      ss << "Found dynamic library symbol " << name;
+      diagnostics.debug(ss.str());
       it = unresolvedSymbols.erase(it);
       continue;
     }
