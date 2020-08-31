@@ -13,6 +13,8 @@ public:
   TestFramework createTestFramework(const std::string &name, Toolchain &toolchain,
                                     Configuration &configuration, Diagnostics &diagnostics);
 
+  TestFramework boostTestFramework(Toolchain &toolchain, Configuration &configuration,
+                                    Diagnostics &diagnostics);
   TestFramework simpleTestFramework(Toolchain &toolchain, Configuration &configuration,
                                     Diagnostics &diagnostics);
   TestFramework cppuTestFramework(Toolchain &toolchain, Configuration &configuration,
