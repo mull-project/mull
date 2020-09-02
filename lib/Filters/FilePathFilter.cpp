@@ -33,19 +33,20 @@ bool FilePathFilter::shouldSkip(const std::string &sourceFilePath) const {
   if (cache.count(sourceFilePath) == 0) {
     bool allow = true;
 
-    if (includeFilters.empty()) {
-      for (const auto &r : excludeFilters) {
-        if (std::regex_search(sourceFilePath, r)) {
-          allow = false;
-          break;
-        }
-      }
-    } else {
+    if (!includeFilters.empty()) {
       allow = false;
 
       for (const auto &r : includeFilters) {
         if (std::regex_search(sourceFilePath, r)) {
           allow = true;
+          break;
+        }
+      }
+    }
+    if (allow) {
+      for (const auto &r : excludeFilters) {
+        if (std::regex_search(sourceFilePath, r)) {
+          allow = false;
           break;
         }
       }
