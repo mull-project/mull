@@ -85,7 +85,7 @@ jobs:
             -e mull_version=${{ steps.settings.outputs.version }}${{ steps.settings.outputs.suffix }} \
             --verbose
       - name: Publish package
-        if: matrix.LLVM_VERSION == env.LLVM_RELEASE
+        if: matrix.LLVM_VERSION == env.LLVM_RELEASE && env.CHECK_SECRETS != null
         run: |
           curl --silent --show-error --location --request DELETE \
             --user "alexdenisov:${{ secrets.BINTRAY_API_KEY }}" \

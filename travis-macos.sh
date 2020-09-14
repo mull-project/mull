@@ -2,6 +2,8 @@ set -e
 set -v
 set -x
 
+env
+
 export version=`grep -Eo "MULL_VERSION [0-9.]+" CMakeLists.txt | awk ' { print $2 } '`
 
 case $TRAVIS_EVENT_TYPE in
@@ -42,7 +44,7 @@ ansible-playbook macos-playbook.yaml \
   -e SDKROOT=`xcrun -show-sdk-path` \
   -e mull_version=$version$suffix \
   --verbose
-if [ $LLVM_VERSION == 9.0 ];
+if [ $LLVM_VERSION == 9.0 ] && [ -n "$BINTRAY_API_KEY" ];
 then
   curl --silent --show-error --location --request DELETE \
         --user "alexdenisov:$BINTRAY_API_KEY" \
