@@ -1,6 +1,7 @@
 add_subdirectory(custom_test)
 add_subdirectory(dylibs_and_objects)
 add_subdirectory(google_test)
+add_subdirectory(cpputest_test)
 add_subdirectory(junk_detection)
 add_subdirectory(mutators)
 add_subdirectory(simple_test)

@@ -56,7 +56,7 @@
 
     :CustomTest:	Custom Test Framework
 
-    :CppUTest:         CppUTest Framework
+    :CppUTest:	CppUTest Framework
 
     :SimpleTest:	Simple Test (For internal usage only)
 

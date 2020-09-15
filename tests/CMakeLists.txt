@@ -48,6 +48,8 @@ set(mull_unittests_sources
 
   GoogleTest/GoogleTestFinderTest.cpp
 
+  CppUTest/CppUTestFinderTest.cpp
+
   CustomTestFramework/CustomTestRunnerTests.cpp
   CustomTestFramework/CustomTestFinderTests.cpp
 
@@ -69,6 +71,7 @@ add_executable(mull-tests EXCLUDE_FROM_ALL ${mull_unittests_sources})
 target_link_libraries(mull-tests
   mull
   google-test
+  CppUTest
   json11
   clangCodeGen
 )
