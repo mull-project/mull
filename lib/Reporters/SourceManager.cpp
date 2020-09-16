@@ -43,7 +43,7 @@ LineOffset &SourceManager::getLineOffset(const SourceLocation &location) {
   }
   std::vector<uint32_t> offsets;
   uint32_t offset = 0;
-  char c = '\n';
+  int c = '\n';
   for (; c != EOF; c = fgetc(file), offset++) {
     if (c == '\n') {
       offsets.push_back(offset);
