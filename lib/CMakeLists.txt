@@ -162,8 +162,8 @@ else ()
     LLVMOrcJIT
     LLVMSupport
     LLVMOption
-    LLVMX86CodeGen
-    LLVMX86AsmParser
+    LLVM${LLVM_NATIVE_ARCH}CodeGen
+    LLVM${LLVM_NATIVE_ARCH}AsmParser
     )
 endif ()
 
