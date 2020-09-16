@@ -16,6 +16,8 @@ enum ExecutionStatus {
 
 static std::string executionStatusAsString(ExecutionStatus status) {
   switch (status) {
+  default:
+    return "Unknown";
   case Invalid:
     return "Invalid";
   case Failed:
