@@ -4,7 +4,7 @@
 #include "LLVMCompatibility.h"
 
 #include <list>
-#include <set>
+#include <map>
 #include <string>
 #include <sstream>
 
@@ -14,10 +14,26 @@ using namespace llvm;
 namespace {
   template<typename Container>
   std::string computeTestPath(const std::string &symbolName, const Container &testSuitePaths){
-    auto pos = symbolName.rfind("::");
-    auto baseName = symbolName.substr(pos + 2);
-    auto symbolPath = symbolName.substr(0, pos + 2);
+    // Hack: Cut away any template arguments as a workaround for templated test
+    // cases not being properly detected
+    auto templatePos = symbolName.find('<');
+    auto pos = symbolName.rfind("::", templatePos);
+    if (pos != std::string::npos) {
+      pos += 2; // skip past the "::"
+    }
+    else {
+      pos = 0;
+    }
+    std::string baseName = symbolName.substr(pos);
+    if (templatePos != std::string::npos) {
+      // Use wildcard match for templated cases
+      // This will cause additional overhead because unmutated test cases will be run in addition
+      // to the one being mutated, so this is only a workaround to get _any_ results.
+      baseName = symbolName.substr(pos, templatePos - pos) + "<*";
+    }
+    auto symbolPath = symbolName.substr(0, pos);
     for (auto it = std::rbegin(testSuitePaths); it != std::rend(testSuitePaths); ++it) {
+      // Check if the symbol begins with the test suite namespace
       if (symbolPath.rfind(it->first, 0) != std::string::npos) {
         return it->second + "/" + baseName;
       }
