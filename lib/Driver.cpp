@@ -64,6 +64,9 @@ void Driver::loadDynamicLibraries() {
   singleTask.execute("Loading dynamic libraries", [&]() {
     for (const std::string &dylibPath : program.getDynamicLibraryPaths()) {
       std::string msg;
+      std::ostringstream ss;
+      ss << "Loading dynamic library " << dylibPath;
+      diagnostics.debug(ss.str());
       auto error = sys::DynamicLibrary::LoadLibraryPermanently(dylibPath.c_str(), &msg);
       if (error) {
         std::stringstream message;
