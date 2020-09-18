@@ -2,6 +2,7 @@
 
 #include "mull/Config/Configuration.h"
 #include "mull/TestFrameworks/CustomTestFramework/CustomTestFinder.h"
+#include "mull/TestFrameworks/CppUTest/CppUTestFinder.h"
 #include "mull/TestFrameworks/GoogleTest/GoogleTestFinder.h"
 #include "mull/TestFrameworks/NativeTestRunner.h"
 #include "mull/TestFrameworks/SimpleTest/SimpleTestFinder.h"
@@ -16,6 +17,10 @@ TestFramework TestFrameworkFactory::createTestFramework(const std::string &name,
                                                         Diagnostics &diagnostics) {
   if (name == "GoogleTest") {
     return googleTestFramework(toolchain, configuration, diagnostics);
+  }
+
+  if (name == "CppUTest") {
+    return cppuTestFramework(toolchain, configuration, diagnostics);
   }
 
   if (name == "SimpleTest") {
@@ -39,6 +44,14 @@ TestFramework TestFrameworkFactory::simpleTestFramework(Toolchain &toolchain,
   return TestFramework(std::move(finder), std::move(runner));
 }
 
+TestFramework TestFrameworkFactory::cppuTestFramework(Toolchain &toolchain,
+                                                        Configuration &configuration,
+                                                        Diagnostics &diagnostics) {
+  auto finder = make_unique<CppUTestFinder>();
+  auto runner = make_unique<NativeTestRunner>(diagnostics, toolchain.mangler());
+  return TestFramework(std::move(finder), std::move(runner));
+}
+
 TestFramework TestFrameworkFactory::googleTestFramework(Toolchain &toolchain,
                                                         Configuration &configuration,
                                                         Diagnostics &diagnostics) {
@@ -59,6 +72,7 @@ std::vector<std::pair<std::string, std::string>> TestFrameworkFactory::commandLi
   std::vector<std::pair<std::string, std::string>> options(
       { std::make_pair("GoogleTest", "Google Test Framework"),
         std::make_pair("CustomTest", "Custom Test Framework"),
+        std::make_pair("CppUTest", "CppUTest Framework"),
         std::make_pair("SimpleTest", "Simple Test (For internal usage only)") });
 
   return options;

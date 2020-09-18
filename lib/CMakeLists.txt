@@ -51,6 +51,7 @@ set(mull_sources
   TestFrameworks/SimpleTest/SimpleTestFinder.cpp
 
   TestFrameworks/GoogleTest/GoogleTestFinder.cpp
+  TestFrameworks/CppUTest/CppUTestFinder.cpp
 
   TestFrameworks/CustomTestFramework/CustomTestFinder.cpp
 
@@ -130,6 +131,7 @@ set(mull_header_dirs
   ${MULL_INCLUDE_DIR}/TestFrameworks
   ${MULL_INCLUDE_DIR}/TestFrameworks/CustomTestFramework
   ${MULL_INCLUDE_DIR}/TestFrameworks/GoogleTest
+  ${MULL_INCLUDE_DIR}/TestFrameworks/CppUTest
   ${MULL_INCLUDE_DIR}/TestFrameworks/SimpleTest
   ${MULL_INCLUDE_DIR}/Toolchain
   ${MULL_INCLUDE_DIR}/Toolchain/Resolvers
