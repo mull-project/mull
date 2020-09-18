@@ -256,6 +256,7 @@ std::unique_ptr<mull::ProcessSandbox> SandboxCLIOptions::sandbox() {
     return std::make_unique<mull::NullProcessSandbox>();
   case SandboxKind::Watchdog:
     return std::make_unique<mull::ForkWatchdogSandbox>();
+  default:
   case SandboxKind::Timer:
     return std::make_unique<mull::ForkTimerSandbox>();
   }

@@ -13,6 +13,9 @@ namespace mull {
 
 std::string diagnosticsToString(IDEDiagnosticsKind diagnostics) {
   switch (diagnostics) {
+  default: {
+    return "unknown";
+  }
   case IDEDiagnosticsKind::None: {
     return "none";
   }

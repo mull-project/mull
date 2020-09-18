@@ -3,6 +3,9 @@
 namespace mull {
 std::string MutationKindToString(MutatorKind mutatorKind) {
   switch (mutatorKind) {
+  default: {
+    return "Unknown";
+  }
   case MutatorKind::NegateMutator: {
     return "Negate";
   }
