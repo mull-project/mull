@@ -7,9 +7,8 @@ static bool isVoidCall(clang::CallExpr *callExpression) {
   return type && type->isVoidType();
 }
 
-RemoveVoidFunctionVisitor::RemoveVoidFunctionVisitor(
-    const VisitorParameters &parameters)
-    : matchingExpression(nullptr), parameters(parameters) {}
+RemoveVoidFunctionVisitor::RemoveVoidFunctionVisitor(const VisitorParameters &parameters)
+    : parameters(parameters), matchingExpression(nullptr) {}
 
 bool RemoveVoidFunctionVisitor::VisitCallExpr(clang::CallExpr *callExpression) {
   return !validCallExpr(callExpression,
