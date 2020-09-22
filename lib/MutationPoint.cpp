@@ -81,13 +81,13 @@ MutationPointAddress::addressFromInstruction(const llvm::Instruction *instructio
 MutationPoint::MutationPoint(Mutator *mutator, irm::IRMutation *irMutator,
                              llvm::Instruction *instruction, std::string replacement, Bitcode *m,
                              std::string diagnostics)
-    : mutator(mutator), irMutator(irMutator),
-      address(MutationPointAddress::addressFromInstruction(instruction)), bitcode(m),
-      originalFunction(instruction->getFunction()), mutatedFunction(nullptr),
+    : mutator(mutator), address(MutationPointAddress::addressFromInstruction(instruction)),
+      bitcode(m), originalFunction(instruction->getFunction()), mutatedFunction(nullptr),
+      uniqueIdentifier(bitcode->getUniqueIdentifier() + "_" + address.getIdentifier() + "_" +
+                       mutator->getUniqueIdentifier()),
       diagnostics(std::move(diagnostics)), replacement(replacement),
       sourceLocation(SourceLocation::locationFromInstruction(instruction)), reachableTests(),
-      uniqueIdentifier(bitcode->getUniqueIdentifier() + "_" + address.getIdentifier() + "_" +
-                       mutator->getUniqueIdentifier()) {}
+      irMutator(irMutator) {}
 
 Mutator *MutationPoint::getMutator() {
   return mutator;
