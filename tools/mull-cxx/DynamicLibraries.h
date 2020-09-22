@@ -7,7 +7,10 @@ namespace mull {
 
 class Diagnostics;
 
-std::vector<std::string> findDynamicLibraries(mull::Diagnostics &diagnostics,
-                                              const std::string &executablePath,
-                                              std::vector<std::string> &librarySearchPaths);
+void resolveLibraries(mull::Diagnostics &diagnostics, std::vector<std::string> &resolvedLibraries,
+                      const std::vector<std::string> &libraries,
+                      const std::vector<std::string> &librarySearchPaths);
+
+std::vector<std::string> getDynamicLibraryDependencies(mull::Diagnostics &diagnostics,
+                                   const std::string &executablePath);
 } // namespace mull

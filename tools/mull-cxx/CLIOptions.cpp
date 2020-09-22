@@ -93,6 +93,13 @@ opt<TestFrameworkOptionIndex> tool::TestFrameworks(
   value_desc("framework"),
   cat(MullCXXCategory));
 
+list<std::string> tool::LDPreloads(
+  "ld-preload",
+  desc("Load the given libraries before dynamic linking"),
+  ZeroOrMore,
+  value_desc("library"),
+  cat(MullCXXCategory));
+
 list<std::string> tool::LDSearchPaths(
   "ld-search-path",
   desc("Library search path"),
@@ -352,6 +359,7 @@ void tool::dumpCLIInterface(Diagnostics &diagnostics) {
 
       &CompilationDatabasePath,
       &CompilationFlags,
+      &(Option &)LDPreloads,
       &(Option &)LDSearchPaths,
       &(Option &)IncludePaths,
       &(Option &)ExcludePaths,

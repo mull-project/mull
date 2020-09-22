@@ -81,9 +81,23 @@ static std::string resolveLibraryPath(const std::string &library,
   return library;
 }
 
-std::vector<std::string> mull::findDynamicLibraries(mull::Diagnostics &diagnostics,
-                                                    const std::string &executablePath,
-                                                    std::vector<std::string> &librarySearchPaths) {
+void mull::resolveLibraries(mull::Diagnostics &diagnostics,
+                            std::vector<std::string> &resolvedLibraries,
+                            const std::vector<std::string> &libraries,
+                            const std::vector<std::string> &librarySearchPaths) {
+  resolvedLibraries.reserve(resolvedLibraries.size() + libraries.size());
+  for (auto &library : libraries) {
+    auto libraryPath = resolveLibraryPath(library, librarySearchPaths);
+    if (llvm::sys::fs::exists(libraryPath)) {
+      resolvedLibraries.push_back(std::move(libraryPath));
+    } else {
+      diagnostics.warning(std::string("Could not find dynamic library: ") + library);
+    }
+  }
+}
+
+std::vector<std::string> mull::getDynamicLibraryDependencies(mull::Diagnostics &diagnostics,
+                                         const std::string &executablePath) {
   std::vector<std::string> libraries;
 
   auto bufferOr = llvm::MemoryBuffer::getFile(executablePath);
@@ -94,7 +108,7 @@ std::vector<std::string> mull::findDynamicLibraries(mull::Diagnostics &diagnosti
 
   auto symbolicOr = SymbolicFile::createSymbolicFile(buffer->getMemBufferRef());
   if (!symbolicOr) {
-    diagnostics.error(std::string("Cannot create symbolic file from: ") + executablePath);
+    diagnostics.error(std::string("Cannot create SymbolicFile from: ") + executablePath);
   }
 
   std::unique_ptr<SymbolicFile> symbolicFile(std::move(symbolicOr.get()));
@@ -115,16 +129,5 @@ std::vector<std::string> mull::findDynamicLibraries(mull::Diagnostics &diagnosti
       librariesFromElf(*elf64BEFile, libraries);
     }
   }
-
-  std::vector<std::string> resolvedLibraries;
-  for (auto &library : libraries) {
-    auto libraryPath = resolveLibraryPath(library, librarySearchPaths);
-    if (llvm::sys::fs::exists(libraryPath)) {
-      resolvedLibraries.push_back(libraryPath);
-    } else {
-      diagnostics.warning(std::string("Could not find dynamic library: ") + library);
-    }
-  }
-
-  return resolvedLibraries;
+  return libraries;
 }

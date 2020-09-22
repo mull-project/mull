@@ -30,6 +30,7 @@
 #include "mull/TestFrameworks/TestFrameworkFactory.h"
 #include "mull/Version.h"
 
+#include <iterator>
 #include <memory>
 #include <sstream>
 #include <unistd.h>
@@ -140,19 +141,27 @@ int main(int argc, char **argv) {
       diagnostics, "Loading bitcode files", embeddedFiles, bitcode, std::move(tasks));
   executor.execute();
 
-  std::vector<std::string> librarySearchPaths;
-  for (auto &searchPath : tool::LDSearchPaths) {
-    librarySearchPaths.push_back(searchPath);
-  }
+  std::vector<std::string> librarySearchPaths(std::begin(tool::LDSearchPaths),
+                                              std::end(tool::LDSearchPaths));
 
-  auto dynamicLibraries =
-      mull::findDynamicLibraries(diagnostics, tool::InputFile.getValue(), librarySearchPaths);
+  std::vector<std::string> libraryPreloads(std::begin(tool::LDPreloads),
+                                           std::end(tool::LDPreloads));
+
+  std::vector<std::string> resolvedLibraries;
+  // First load all -ld-preload libraries
+  mull::resolveLibraries(diagnostics, resolvedLibraries, libraryPreloads, librarySearchPaths);
+  // then load any dynamic libraries listed as DT_NEEDED
+  mull::resolveLibraries(
+      diagnostics,
+      resolvedLibraries,
+      mull::getDynamicLibraryDependencies(diagnostics, tool::InputFile.getValue()),
+      librarySearchPaths);
 
   mull::BitcodeMetadataReader bitcodeCompilationDatabaseLoader;
   std::map<std::string, std::string> bitcodeCompilationFlags =
       bitcodeCompilationDatabaseLoader.getCompilationDatabase(bitcode);
 
-  mull::Program program(dynamicLibraries, {}, std::move(bitcode));
+  mull::Program program(resolvedLibraries, {}, std::move(bitcode));
 
   mull::Toolchain toolchain(diagnostics, configuration);
 
