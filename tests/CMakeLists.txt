@@ -71,7 +71,6 @@ add_executable(mull-tests EXCLUDE_FROM_ALL ${mull_unittests_sources})
 target_link_libraries(mull-tests
   mull
   google-test
-  CppUTest
   json11
   clangCodeGen
 )
