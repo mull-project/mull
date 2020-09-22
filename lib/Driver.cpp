@@ -309,9 +309,9 @@ std::vector<llvm::object::ObjectFile *> Driver::AllInstrumentedObjectFiles() {
 Driver::Driver(Diagnostics &diagnostics, const Configuration &config, const ProcessSandbox &sandbox,
                Program &program, Toolchain &t, Filters &filters, MutationsFinder &mutationsFinder,
                TestFramework &testFramework)
-    : config(config), sandbox(sandbox), program(program), testFramework(testFramework),
-      toolchain(t), filters(filters), mutationsFinder(mutationsFinder), diagnostics(diagnostics),
-      instrumentation(), singleTask(diagnostics) {
+    : config(config), program(program), testFramework(testFramework), toolchain(t),
+      mutationsFinder(mutationsFinder), sandbox(sandbox), diagnostics(diagnostics),
+      instrumentation(), filters(filters), singleTask(diagnostics) {
 
   if (config.diagnostics != IDEDiagnosticsKind::None) {
     this->ideDiagnostics = new NormalIDEDiagnostics(config.diagnostics);
