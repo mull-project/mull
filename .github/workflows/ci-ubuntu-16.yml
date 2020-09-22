@@ -81,6 +81,7 @@ jobs:
             -e llvm_version="${{ matrix.LLVM_VERSION }}.0" \
             -e source_dir=$PWD/.. \
             -e gitref=$GITHUB_SHA \
+            -e checkout=false \
             -e host=localhost \
             -e mull_version=${{ steps.settings.outputs.version }}${{ steps.settings.outputs.suffix }} \
             --verbose

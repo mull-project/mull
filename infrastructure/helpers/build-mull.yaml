@@ -4,6 +4,7 @@
     repo: "{{ repo_url }}"
     dest: "{{ source_dir }}"
     version: "{{ gitref }}"
+  when: checkout
 
 - name: Create Build Directory (Debug)
   file:

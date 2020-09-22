@@ -86,6 +86,7 @@ jobs:
             -e source_dir=$PWD/.. \
             -e gitref=$GITHUB_SHA \
             -e host=localhost \
+            -e checkout=false \
             -e mull_version=${{ steps.settings.outputs.version }}${{ steps.settings.outputs.suffix }} \
             --verbose
       - name: Publish package
