@@ -20,7 +20,7 @@ std::string AddToSub::ID() {
 }
 
 AddToSub::AddToSub()
-    : TrivialCXXMutator(std::move(getAddToSub()), MutatorKind::CXX_AddToSub, AddToSub::ID(),
+    : TrivialCXXMutator(getAddToSub(), MutatorKind::CXX_AddToSub, AddToSub::ID(),
                         "Replaces + with -", "-", "Replaced + with -") {}
 
 std::string AddAssignToSubAssign::ID() {
@@ -28,7 +28,7 @@ std::string AddAssignToSubAssign::ID() {
 }
 
 AddAssignToSubAssign::AddAssignToSubAssign()
-    : TrivialCXXMutator(std::move(getAddToSub()), MutatorKind::CXX_AddAssignToSubAssign,
+    : TrivialCXXMutator(getAddToSub(), MutatorKind::CXX_AddAssignToSubAssign,
                         AddAssignToSubAssign::ID(),
                         "Replaces += with -=", "-=", "Replaced += with -=") {}
 
@@ -37,7 +37,7 @@ std::string PostIncToPostDec::ID() {
 }
 
 PostIncToPostDec::PostIncToPostDec()
-    : TrivialCXXMutator(std::move(getAddToSub()), MutatorKind::CXX_PostIncToPostDec,
+    : TrivialCXXMutator(getAddToSub(), MutatorKind::CXX_PostIncToPostDec,
                         PostIncToPostDec::ID(), "Replaces x++ with x--", "--",
                         "Replaced x++ with x--") {}
 
@@ -46,7 +46,7 @@ std::string PreIncToPreDec::ID() {
 }
 
 PreIncToPreDec::PreIncToPreDec()
-    : TrivialCXXMutator(std::move(getAddToSub()), MutatorKind::CXX_PreIncToPreDec,
+    : TrivialCXXMutator(getAddToSub(), MutatorKind::CXX_PreIncToPreDec,
                         PreIncToPreDec::ID(), "Replaces ++x with --x", "--",
                         "Replaced ++x with --x") {}
 
@@ -65,7 +65,7 @@ std::string SubToAdd::ID() {
 }
 
 SubToAdd::SubToAdd()
-    : TrivialCXXMutator(std::move(getSubToAdd()), MutatorKind::CXX_SubToAdd, SubToAdd::ID(),
+    : TrivialCXXMutator(getSubToAdd(), MutatorKind::CXX_SubToAdd, SubToAdd::ID(),
                         "Replaces - with +", "+", "Replaced - with +") {}
 
 std::string SubAssignToAddAssign::ID() {
@@ -73,7 +73,7 @@ std::string SubAssignToAddAssign::ID() {
 }
 
 SubAssignToAddAssign::SubAssignToAddAssign()
-    : TrivialCXXMutator(std::move(getSubToAdd()), MutatorKind::CXX_SubAssignToAddAssign,
+    : TrivialCXXMutator(getSubToAdd(), MutatorKind::CXX_SubAssignToAddAssign,
                         SubAssignToAddAssign::ID(),
                         "Replaces -= with +=", "+=", "Replaced -= with +=") {}
 
@@ -99,7 +99,7 @@ std::string PostDecToPostInc::ID() {
 }
 
 PostDecToPostInc::PostDecToPostInc()
-    : TrivialCXXMutator(std::move(getDecToInc()), MutatorKind::CXX_PostDecToPostInc,
+    : TrivialCXXMutator(getDecToInc(), MutatorKind::CXX_PostDecToPostInc,
                         PostDecToPostInc::ID(), "Replaces x-- with x++", "++",
                         "Replaced x-- with x++") {}
 
@@ -108,7 +108,7 @@ std::string PreDecToPreInc::ID() {
 }
 
 PreDecToPreInc::PreDecToPreInc()
-    : TrivialCXXMutator(std::move(getDecToInc()), MutatorKind::CXX_PreDecToPreInc,
+    : TrivialCXXMutator(getDecToInc(), MutatorKind::CXX_PreDecToPreInc,
                         PreDecToPreInc::ID(), "Replaces --x with ++x", "++",
                         "Replaced --x with ++x") {}
 
@@ -126,7 +126,7 @@ std::string MulToDiv::ID() {
 }
 
 MulToDiv::MulToDiv()
-    : TrivialCXXMutator(std::move(getMulToDiv()), MutatorKind::CXX_MulToDiv, MulToDiv::ID(),
+    : TrivialCXXMutator(getMulToDiv(), MutatorKind::CXX_MulToDiv, MulToDiv::ID(),
                         "Replaces * with /", "/", "Replaced * with /") {}
 
 std::string MulAssignToDivAssign::ID() {
@@ -134,7 +134,7 @@ std::string MulAssignToDivAssign::ID() {
 }
 
 MulAssignToDivAssign::MulAssignToDivAssign()
-    : TrivialCXXMutator(std::move(getMulToDiv()), MutatorKind::CXX_MulAssignToDivAssign,
+    : TrivialCXXMutator(getMulToDiv(), MutatorKind::CXX_MulAssignToDivAssign,
                         MulAssignToDivAssign::ID(),
                         "Replaces *= with /=", "/=", "Replaced *= with /=") {}
 
@@ -153,7 +153,7 @@ std::string DivToMul::ID() {
 }
 
 DivToMul::DivToMul()
-    : TrivialCXXMutator(std::move(getDivToMul()), MutatorKind::CXX_DivToMul, DivToMul::ID(),
+    : TrivialCXXMutator(getDivToMul(), MutatorKind::CXX_DivToMul, DivToMul::ID(),
                         "Replaces / with *", "*", "Replaced / with *") {}
 
 std::string DivAssignToMulAssign::ID() {
@@ -161,7 +161,7 @@ std::string DivAssignToMulAssign::ID() {
 }
 
 DivAssignToMulAssign::DivAssignToMulAssign()
-    : TrivialCXXMutator(std::move(getDivToMul()), MutatorKind::CXX_DivAssignToMulAssign,
+    : TrivialCXXMutator(getDivToMul(), MutatorKind::CXX_DivAssignToMulAssign,
                         DivAssignToMulAssign::ID(),
                         "Replaces /= with *=", "*=", "Replaced /= with *=") {}
 
@@ -180,7 +180,7 @@ std::string RemToDiv::ID() {
 }
 
 RemToDiv::RemToDiv()
-    : TrivialCXXMutator(std::move(getRemToDiv()), MutatorKind::CXX_RemToDiv, RemToDiv::ID(),
+    : TrivialCXXMutator(getRemToDiv(), MutatorKind::CXX_RemToDiv, RemToDiv::ID(),
                         "Replaces % with /", "/", "Replaced % with /") {}
 
 std::string RemAssignToDivAssign::ID() {
@@ -188,7 +188,7 @@ std::string RemAssignToDivAssign::ID() {
 }
 
 RemAssignToDivAssign::RemAssignToDivAssign()
-    : TrivialCXXMutator(std::move(getRemToDiv()), MutatorKind::CXX_RemAssignToDivAssign,
+    : TrivialCXXMutator(getRemToDiv(), MutatorKind::CXX_RemAssignToDivAssign,
                         RemAssignToDivAssign::ID(),
                         "Replaces %= with /=", "/=", "Replaced %= with /=") {}
 
@@ -203,7 +203,7 @@ std::string BitwiseNotToNoop::ID() {
 }
 
 BitwiseNotToNoop::BitwiseNotToNoop()
-    : TrivialCXXMutator(std::move(getBitNotToNoop()), MutatorKind::CXX_BitwiseNotToNoop,
+    : TrivialCXXMutator(getBitNotToNoop(), MutatorKind::CXX_BitwiseNotToNoop,
                         BitwiseNotToNoop::ID(), "Replaces ~x with x", "", "Replaced ~x with x") {}
 
 /// Non-trivial mutators
