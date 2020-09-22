@@ -60,7 +60,7 @@ ASTVisitor::ASTVisitor(mull::Diagnostics &diagnostics, mull::ThreadSafeASTUnit &
                        mull::SingleASTUnitMutations &singleUnitMutations,
                        mull::FilePathFilter &filePathFilter, mull::MutatorKindSet mutatorKindSet)
     : diagnostics(diagnostics), astUnit(astUnit), singleUnitMutations(singleUnitMutations),
-      filePathFilter(filePathFilter), sourceManager(astUnit.getSourceManager()),
+      sourceManager(astUnit.getSourceManager()), filePathFilter(filePathFilter),
       mutatorKindSet(std::move(mutatorKindSet)), scalarMutationMatcher(astUnit.getASTContext()),
       shouldSkipCurrentFunction(false) {}
 

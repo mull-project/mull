@@ -22,7 +22,7 @@ int main(int argc, char **argv) {
   mull::BitcodeLoader loader;
   llvm::LLVMContext context;
   std::vector<std::unique_ptr<mull::Bitcode>> bitcode;
-  bitcode.push_back(std::move(loader.loadBitcodeAtPath(bitcodePath, context, diagnostics)));
+  bitcode.push_back(loader.loadBitcodeAtPath(bitcodePath, context, diagnostics));
   mull::Program program({}, {}, std::move(bitcode));
 
   mull::MutatorsFactory factory(diagnostics);

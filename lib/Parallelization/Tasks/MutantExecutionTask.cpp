@@ -18,7 +18,7 @@ MutantExecutionTask::MutantExecutionTask(Diagnostics &diagnostics, const Process
                                          const Configuration &config, Mangler &mangler,
                                          std::vector<llvm::object::ObjectFile *> &objectFiles,
                                          std::vector<std::string> &mutatedFunctionNames)
-    : diagnostics(diagnostics), jit(diagnostics), sandbox(sandbox), program(program),
+    : diagnostics(diagnostics), jit(diagnostics), program(program), sandbox(sandbox),
       runner(runner), config(config), mangler(mangler), objectFiles(objectFiles),
       mutatedFunctionNames(mutatedFunctionNames) {}
 

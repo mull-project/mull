@@ -84,9 +84,8 @@ void LogicalOrToAnd::applyMutationORToAND_Pattern1(BranchInst *firstBranch,
   auto *firstBranchRightBB = dyn_cast<BasicBlock>(firstBranch->getOperand(1));
   assert(firstBranchRightBB);
 
-  auto *secondBranchLeftBB = dyn_cast<BasicBlock>(secondBranch->getOperand(2));
   auto *secondBranchRightBB = dyn_cast<BasicBlock>(secondBranch->getOperand(1));
-  assert(secondBranchLeftBB);
+  assert(dyn_cast<BasicBlock>(secondBranch->getOperand(2)));
   assert(secondBranchRightBB);
 
   BranchInst *replacement =
@@ -151,9 +150,8 @@ void LogicalOrToAnd::applyMutationORToAND_Pattern2(BranchInst *firstBranch,
   auto *firstBranchLeftBB = dyn_cast<BasicBlock>(firstBranch->getOperand(2));
   assert(firstBranchLeftBB);
 
-  auto *secondBranchLeftBB = dyn_cast<BasicBlock>(secondBranch->getOperand(2));
   auto *secondBranchRightBB = dyn_cast<BasicBlock>(secondBranch->getOperand(1));
-  assert(secondBranchLeftBB);
+  assert(dyn_cast<BasicBlock>(secondBranch->getOperand(2)));
   assert(secondBranchRightBB);
 
   BranchInst *replacement = BranchInst::Create(secondBranchRightBB, firstBranchLeftBB, sourceValue);

@@ -227,7 +227,7 @@ Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
       "Cloning functions for mutation",
       program.bitcode(),
       mutatedFunctions,
-      std::move(std::vector<CloneMutatedFunctionsTask>(workers)));
+      std::vector<CloneMutatedFunctionsTask>(workers));
   cloneFunctions.execute();
 
   std::vector<int> Nothing;
@@ -236,7 +236,7 @@ Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
       "Removing original functions",
       program.bitcode(),
       Nothing,
-      std::move(std::vector<DeleteOriginalFunctionsTask>(workers)));
+      std::vector<DeleteOriginalFunctionsTask>(workers));
   deleteOriginalFunctions.execute();
 
   TaskExecutor<InsertMutationTrampolinesTask> redirectFunctions(
@@ -244,7 +244,7 @@ Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
       "Redirect mutated functions",
       program.bitcode(),
       Nothing,
-      std::move(std::vector<InsertMutationTrampolinesTask>(workers)));
+      std::vector<InsertMutationTrampolinesTask>(workers));
   redirectFunctions.execute();
 
   TaskExecutor<ApplyMutationTask> applyMutations(
@@ -309,9 +309,9 @@ std::vector<llvm::object::ObjectFile *> Driver::AllInstrumentedObjectFiles() {
 Driver::Driver(Diagnostics &diagnostics, const Configuration &config, const ProcessSandbox &sandbox,
                Program &program, Toolchain &t, Filters &filters, MutationsFinder &mutationsFinder,
                TestFramework &testFramework)
-    : config(config), sandbox(sandbox), program(program), testFramework(testFramework),
-      toolchain(t), filters(filters), mutationsFinder(mutationsFinder), diagnostics(diagnostics),
-      instrumentation(), singleTask(diagnostics) {
+    : config(config), program(program), testFramework(testFramework), toolchain(t),
+      mutationsFinder(mutationsFinder), sandbox(sandbox), diagnostics(diagnostics),
+      instrumentation(), filters(filters), singleTask(diagnostics) {
 
   if (config.diagnostics != IDEDiagnosticsKind::None) {
     this->ideDiagnostics = new NormalIDEDiagnostics(config.diagnostics);

@@ -14,5 +14,5 @@ std::string RemoveNegation::ID() {
 }
 
 RemoveNegation::RemoveNegation()
-    : TrivialCXXMutator(std::move(getMutators()), MutatorKind::CXX_RemoveNegation,
-                        RemoveNegation::ID(), "Replaces !a with a", "", "Replaced !a with a") {}
+    : TrivialCXXMutator(getMutators(), MutatorKind::CXX_RemoveNegation, RemoveNegation::ID(),
+                        "Replaces !a with a", "", "Replaced !a with a") {}

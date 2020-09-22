@@ -68,7 +68,7 @@ static size_t getIndex(Container &container, Value *value) {
   return index;
 }
 
-const MutationPointAddress
+MutationPointAddress
 MutationPointAddress::addressFromInstruction(const llvm::Instruction *instruction) {
   return MutationPointAddress(
       getIndex(instruction->getModule()->getFunctionList(), instruction->getFunction()),
@@ -81,13 +81,13 @@ MutationPointAddress::addressFromInstruction(const llvm::Instruction *instructio
 MutationPoint::MutationPoint(Mutator *mutator, irm::IRMutation *irMutator,
                              llvm::Instruction *instruction, std::string replacement, Bitcode *m,
                              std::string diagnostics)
-    : mutator(mutator), irMutator(irMutator),
-      address(MutationPointAddress::addressFromInstruction(instruction)), bitcode(m),
-      originalFunction(instruction->getFunction()), mutatedFunction(nullptr),
-      diagnostics(std::move(diagnostics)), replacement(replacement),
-      sourceLocation(SourceLocation::locationFromInstruction(instruction)), reachableTests(),
+    : mutator(mutator), address(MutationPointAddress::addressFromInstruction(instruction)),
+      bitcode(m), originalFunction(instruction->getFunction()), mutatedFunction(nullptr),
       uniqueIdentifier(bitcode->getUniqueIdentifier() + "_" + address.getIdentifier() + "_" +
-                       mutator->getUniqueIdentifier()) {}
+                       mutator->getUniqueIdentifier()),
+      diagnostics(std::move(diagnostics)), replacement(std::move(replacement)),
+      sourceLocation(SourceLocation::locationFromInstruction(instruction)), reachableTests(),
+      irMutator(irMutator) {}
 
 Mutator *MutationPoint::getMutator() {
   return mutator;

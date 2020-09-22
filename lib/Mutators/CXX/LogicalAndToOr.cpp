@@ -82,9 +82,8 @@ void LogicalAndToOr::applyMutationANDToOR_Pattern1(BranchInst *firstBranch,
 
   /// Left branch value is somehow operand #2, right is #1.
   auto *firstBranchLeftBB = dyn_cast<BasicBlock>(firstBranch->getOperand(2));
-  auto *firstBranchRightBB = dyn_cast<BasicBlock>(firstBranch->getOperand(1));
   assert(firstBranchLeftBB);
-  assert(firstBranchRightBB);
+  assert(dyn_cast<BasicBlock>(firstBranch->getOperand(1)));
 
   auto secondBranchLeftBB = dyn_cast<BasicBlock>(secondBranch->getOperand(2));
 
@@ -147,9 +146,8 @@ void LogicalAndToOr::applyMutationANDToOR_Pattern2(BranchInst *firstBranch,
   assert(sourceValue);
 
   /// Left branch value is somehow operand #2, right is #1.
-  auto *firstBranchLeftBB = dyn_cast<BasicBlock>(firstBranch->getOperand(2));
   auto *firstBranchRightBB = dyn_cast<BasicBlock>(firstBranch->getOperand(1));
-  assert(firstBranchLeftBB);
+  assert(dyn_cast<BasicBlock>(firstBranch->getOperand(2)));
   assert(firstBranchRightBB);
 
   auto *secondBranchLeftBB = dyn_cast<BasicBlock>(secondBranch->getOperand(2));

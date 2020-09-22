@@ -16,7 +16,7 @@ std::string LShiftToRShift::ID() {
 }
 
 LShiftToRShift::LShiftToRShift()
-    : TrivialCXXMutator(std::move(getLLShiftToLRShift()), MutatorKind::CXX_LShiftToRShift,
+    : TrivialCXXMutator(getLLShiftToLRShift(), MutatorKind::CXX_LShiftToRShift,
                         LShiftToRShift::ID(), "Replaces << with >>", ">>", "Replaced << with >>") {}
 
 std::string LShiftAssignToRShiftAssign::ID() {
@@ -24,7 +24,7 @@ std::string LShiftAssignToRShiftAssign::ID() {
 }
 
 LShiftAssignToRShiftAssign::LShiftAssignToRShiftAssign()
-    : TrivialCXXMutator(std::move(getLLShiftToLRShift()),
+    : TrivialCXXMutator(getLLShiftToLRShift(),
                         MutatorKind::CXX_LShiftAssignToRShiftAssign,
                         LShiftAssignToRShiftAssign::ID(),
                         "Replaces <<= with >>=", ">>=", "Replaced <<= with >>=") {}
@@ -41,7 +41,7 @@ std::string RShiftToLShift::ID() {
 }
 
 RShiftToLShift::RShiftToLShift()
-    : TrivialCXXMutator(std::move(getRShiftToLShift()), MutatorKind::CXX_RShiftToLShift,
+    : TrivialCXXMutator(getRShiftToLShift(), MutatorKind::CXX_RShiftToLShift,
                         RShiftToLShift::ID(), "Replaces << with >>", ">>", "Replaced >> with <<") {}
 
 std::string RShiftAssignToLShiftAssign::ID() {
@@ -49,7 +49,7 @@ std::string RShiftAssignToLShiftAssign::ID() {
 }
 
 RShiftAssignToLShiftAssign::RShiftAssignToLShiftAssign()
-    : TrivialCXXMutator(std::move(getRShiftToLShift()), MutatorKind::CXX_RShiftAssignToLShiftAssign,
+    : TrivialCXXMutator(getRShiftToLShift(), MutatorKind::CXX_RShiftAssignToLShiftAssign,
                         RShiftAssignToLShiftAssign::ID(),
                         "Replaces >>= with <<=", "<<=", "Replaced >>= with <<=") {}
 
@@ -66,7 +66,7 @@ std::string BitwiseOrToAnd::ID() {
 }
 
 BitwiseOrToAnd::BitwiseOrToAnd()
-    : TrivialCXXMutator(std::move(getOrToAnd()), MutatorKind::CXX_Bitwise_OrToAnd,
+    : TrivialCXXMutator(getOrToAnd(), MutatorKind::CXX_Bitwise_OrToAnd,
                         BitwiseOrToAnd::ID(), "Replaces | with &", "&", "Replaced | with &") {}
 
 std::string OrAssignToAndAssign::ID() {
@@ -74,7 +74,7 @@ std::string OrAssignToAndAssign::ID() {
 }
 
 OrAssignToAndAssign::OrAssignToAndAssign()
-    : TrivialCXXMutator(std::move(getOrToAnd()), MutatorKind::CXX_Bitwise_OrAssignToAndAssign,
+    : TrivialCXXMutator(getOrToAnd(), MutatorKind::CXX_Bitwise_OrAssignToAndAssign,
                         OrAssignToAndAssign::ID(),
                         "Replaces |= with &=", "&=", "Replaced |= with &=") {}
 
@@ -89,7 +89,7 @@ std::string BitwiseAndToOr::ID() {
 }
 
 BitwiseAndToOr::BitwiseAndToOr()
-    : TrivialCXXMutator(std::move(getAndToOr()), MutatorKind::CXX_Bitwise_AndToOr,
+    : TrivialCXXMutator(getAndToOr(), MutatorKind::CXX_Bitwise_AndToOr,
                         BitwiseAndToOr::ID(), "Replaces & with |", "|", "Replaced & with |") {}
 
 std::string AndAssignToOrAssign::ID() {
@@ -97,7 +97,7 @@ std::string AndAssignToOrAssign::ID() {
 }
 
 AndAssignToOrAssign::AndAssignToOrAssign()
-    : TrivialCXXMutator(std::move(getAndToOr()), MutatorKind::CXX_Bitwise_AndAssignToOrAssign,
+    : TrivialCXXMutator(getAndToOr(), MutatorKind::CXX_Bitwise_AndAssignToOrAssign,
                         AndAssignToOrAssign::ID(),
                         "Replaces &= with |=", "|=", "Replaced &= with |=") {}
 
@@ -112,7 +112,7 @@ std::string XorToOr::ID() {
 }
 
 XorToOr::XorToOr()
-    : TrivialCXXMutator(std::move(getXorToOr()), MutatorKind::CXX_Bitwise_XorToOr, XorToOr::ID(),
+    : TrivialCXXMutator(getXorToOr(), MutatorKind::CXX_Bitwise_XorToOr, XorToOr::ID(),
                         "Replaces ^ with |", "|", "Replaced ^ with |") {}
 
 std::string XorAssignToOrAssign::ID() {
@@ -120,6 +120,6 @@ std::string XorAssignToOrAssign::ID() {
 }
 
 XorAssignToOrAssign::XorAssignToOrAssign()
-    : TrivialCXXMutator(std::move(getXorToOr()), MutatorKind::CXX_Bitwise_XorAssignToOrAssign,
+    : TrivialCXXMutator(getXorToOr(), MutatorKind::CXX_Bitwise_XorAssignToOrAssign,
                         XorAssignToOrAssign::ID(),
                         "Replaces ^= with |=", "|=", "Replaced ^= with |=") {}
