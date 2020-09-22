@@ -85,7 +85,7 @@ MutationPoint::MutationPoint(Mutator *mutator, irm::IRMutation *irMutator,
       bitcode(m), originalFunction(instruction->getFunction()), mutatedFunction(nullptr),
       uniqueIdentifier(bitcode->getUniqueIdentifier() + "_" + address.getIdentifier() + "_" +
                        mutator->getUniqueIdentifier()),
-      diagnostics(std::move(diagnostics)), replacement(replacement),
+      diagnostics(std::move(diagnostics)), replacement(std::move(replacement)),
       sourceLocation(SourceLocation::locationFromInstruction(instruction)), reachableTests(),
       irMutator(irMutator) {}
 
