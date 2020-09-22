@@ -84,7 +84,7 @@ source_dir: "{{ working_dir }}/mull"
 debug_build_dir: "{{ working_dir }}/build.mull.debug.dir"
 release_build_dir: "{{ working_dir }}/build.mull.release.dir"
 
-skip_package: false
+checkout: true
 
 # Overriden by FreeBSD playbook
 make_program: make

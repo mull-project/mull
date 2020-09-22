@@ -41,6 +41,7 @@ ansible-playbook macos-playbook.yaml \
   -e source_dir=$PWD/.. \
   -e gitref=$TRAVIS_COMMIT \
   -e host=localhost \
+  -e checkout=false \
   -e SDKROOT=`xcrun -show-sdk-path` \
   -e mull_version=$version$suffix \
   --verbose
