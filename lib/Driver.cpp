@@ -227,7 +227,7 @@ Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
       "Cloning functions for mutation",
       program.bitcode(),
       mutatedFunctions,
-      std::move(std::vector<CloneMutatedFunctionsTask>(workers)));
+      std::vector<CloneMutatedFunctionsTask>(workers));
   cloneFunctions.execute();
 
   std::vector<int> Nothing;
@@ -236,7 +236,7 @@ Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
       "Removing original functions",
       program.bitcode(),
       Nothing,
-      std::move(std::vector<DeleteOriginalFunctionsTask>(workers)));
+      std::vector<DeleteOriginalFunctionsTask>(workers));
   deleteOriginalFunctions.execute();
 
   TaskExecutor<InsertMutationTrampolinesTask> redirectFunctions(
@@ -244,7 +244,7 @@ Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
       "Redirect mutated functions",
       program.bitcode(),
       Nothing,
-      std::move(std::vector<InsertMutationTrampolinesTask>(workers)));
+      std::vector<InsertMutationTrampolinesTask>(workers));
   redirectFunctions.execute();
 
   TaskExecutor<ApplyMutationTask> applyMutations(
