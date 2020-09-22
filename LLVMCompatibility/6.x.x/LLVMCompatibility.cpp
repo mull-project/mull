@@ -25,8 +25,7 @@ uint64_t JITSymbolAddress(JITSymbol &symbol) {
 
 object::OwningBinary<object::ObjectFile> compileModule(orc::SimpleCompiler &compiler,
                                                        llvm::Module &module) {
-  auto objectFile = compiler(module);
-  return std::move(objectFile);
+  return compiler(module);
 }
 
 std::unique_ptr<Module> parseBitcode(MemoryBufferRef bufferRef, LLVMContext &context) {
