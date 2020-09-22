@@ -4,7 +4,7 @@
 
 namespace mull {
 
-class Configuration;
+struct Configuration;
 
 class ObjectLoader {
 public:
