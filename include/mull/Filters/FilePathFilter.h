@@ -10,7 +10,7 @@
 #include <vector>
 
 namespace mull {
-class SourceLocation;
+struct SourceLocation;
 
 class FilePathFilter : public MutationFilter,
                        public FunctionFilter,
