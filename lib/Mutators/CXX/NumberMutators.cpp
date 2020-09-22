@@ -18,15 +18,14 @@ std::string NumberAssignConst::ID() {
 }
 
 NumberAssignConst::NumberAssignConst()
-    : TrivialCXXMutator(std::move(getNumberMutators()), MutatorKind::CXX_AssignConst,
-                        NumberAssignConst::ID(), "Replaces 'a = b' with 'a = 42'", "42",
-                        "Replaced 'a = b' with 'a = 42'") {}
+    : TrivialCXXMutator(getNumberMutators(), MutatorKind::CXX_AssignConst, NumberAssignConst::ID(),
+                        "Replaces 'a = b' with 'a = 42'", "42", "Replaced 'a = b' with 'a = 42'") {}
 
 std::string NumberInitConst::ID() {
   return "cxx_init_const";
 }
 
 NumberInitConst::NumberInitConst()
-    : TrivialCXXMutator(std::move(getNumberMutators()), MutatorKind::CXX_InitConst,
-                        NumberInitConst::ID(), "Replaces 'T a = b' with 'T a = 42'", "42",
+    : TrivialCXXMutator(getNumberMutators(), MutatorKind::CXX_InitConst, NumberInitConst::ID(),
+                        "Replaces 'T a = b' with 'T a = 42'", "42",
                         "Replaced 'T a = b' with 'T a = 42'") {}
