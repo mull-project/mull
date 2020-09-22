@@ -6,7 +6,7 @@
 
 namespace mull {
 
-class SourceLocation;
+struct SourceLocation;
 
 class SourceCodeReader {
 public:
