@@ -16,5 +16,5 @@ ObjectFiles ObjectLoader::loadObjectFiles(Configuration &configuration, Diagnost
     objectFiles.emplace_back(std::move(objectFile.get()));
   }
 
-  return std::move(objectFiles);
+  return objectFiles;
 }
