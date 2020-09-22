@@ -20,8 +20,8 @@ std::string LessThanToLessOrEqual::ID() {
 }
 
 LessThanToLessOrEqual::LessThanToLessOrEqual()
-    : TrivialCXXMutator(std::move(getLessThanToLessOrEqual()),
-                        MutatorKind::CXX_LessThanToLessOrEqual, LessThanToLessOrEqual::ID(),
+    : TrivialCXXMutator(getLessThanToLessOrEqual(), MutatorKind::CXX_LessThanToLessOrEqual,
+                        LessThanToLessOrEqual::ID(),
                         "Replaces < with <=", "<=", "Replaced < with <=") {}
 
 std::string LessOrEqualToLessThan::ID() {
@@ -38,9 +38,9 @@ static std::vector<std::unique_ptr<irm::IRMutation>> getLessOrEqualToLessThan() 
 }
 
 LessOrEqualToLessThan::LessOrEqualToLessThan()
-    : TrivialCXXMutator(std::move(getLessOrEqualToLessThan()),
-                        MutatorKind::CXX_LessOrEqualToLessThan, LessOrEqualToLessThan::ID(),
-                        "Replaces <= with <", "<", "Replaced <= with <") {}
+    : TrivialCXXMutator(getLessOrEqualToLessThan(), MutatorKind::CXX_LessOrEqualToLessThan,
+                        LessOrEqualToLessThan::ID(), "Replaces <= with <", "<",
+                        "Replaced <= with <") {}
 
 std::string GreaterThanToGreaterOrEqual::ID() {
   return "cxx_gt_to_ge";
@@ -57,7 +57,7 @@ static std::vector<std::unique_ptr<irm::IRMutation>> getGreaterThanToGreaterOrEq
 
 GreaterThanToGreaterOrEqual::GreaterThanToGreaterOrEqual()
     : TrivialCXXMutator(
-          std::move(getGreaterThanToGreaterOrEqual()), MutatorKind::CXX_GreaterThanToGreaterOrEqual,
+          getGreaterThanToGreaterOrEqual(), MutatorKind::CXX_GreaterThanToGreaterOrEqual,
           GreaterThanToGreaterOrEqual::ID(), "Replaces > with >=", ">=", "Replaced > with >=") {}
 
 std::string GreaterOrEqualToGreaterThan::ID() {
@@ -75,7 +75,7 @@ static std::vector<std::unique_ptr<irm::IRMutation>> getGreaterOrEqualToGreaterT
 
 GreaterOrEqualToGreaterThan::GreaterOrEqualToGreaterThan()
     : TrivialCXXMutator(
-          std::move(getGreaterOrEqualToGreaterThan()), MutatorKind::CXX_GreaterOrEqualToGreaterThan,
+          getGreaterOrEqualToGreaterThan(), MutatorKind::CXX_GreaterOrEqualToGreaterThan,
           GreaterOrEqualToGreaterThan::ID(), "Replaces >= with >", ">", "Replaced >= with >") {}
 
 std::string EqualToNotEqual::ID() {
@@ -91,7 +91,7 @@ static std::vector<std::unique_ptr<irm::IRMutation>> getEqualToNotEqual() {
 }
 
 EqualToNotEqual::EqualToNotEqual()
-    : TrivialCXXMutator(std::move(getEqualToNotEqual()), MutatorKind::CXX_EqualToNotEqual,
+    : TrivialCXXMutator(getEqualToNotEqual(), MutatorKind::CXX_EqualToNotEqual,
                         EqualToNotEqual::ID(), "Replaces == with !=", "!=", "Replaced == with !=") {
 }
 
@@ -108,7 +108,7 @@ static std::vector<std::unique_ptr<irm::IRMutation>> getNotEqualToEqual() {
 }
 
 NotEqualToEqual::NotEqualToEqual()
-    : TrivialCXXMutator(std::move(getNotEqualToEqual()), MutatorKind::CXX_NotEqualToEqual,
+    : TrivialCXXMutator(getNotEqualToEqual(), MutatorKind::CXX_NotEqualToEqual,
                         NotEqualToEqual::ID(), "Replaces != with ==", "==", "Replaced != with ==") {
 }
 
@@ -126,8 +126,8 @@ static std::vector<std::unique_ptr<irm::IRMutation>> getGreaterThanToLessOrEqual
 }
 
 GreaterThanToLessOrEqual::GreaterThanToLessOrEqual()
-    : TrivialCXXMutator(std::move(getGreaterThanToLessOrEqual()),
-                        MutatorKind::CXX_GreaterThanToLessOrEqual, GreaterThanToLessOrEqual::ID(),
+    : TrivialCXXMutator(getGreaterThanToLessOrEqual(), MutatorKind::CXX_GreaterThanToLessOrEqual,
+                        GreaterThanToLessOrEqual::ID(),
                         "Replaces > with <=", "<=", "Replaced > with <=") {}
 
 std::string GreaterOrEqualToLessThan::ID() {
@@ -144,9 +144,9 @@ static std::vector<std::unique_ptr<irm::IRMutation>> getGreaterOrEqualToLessThan
 }
 
 GreaterOrEqualToLessThan::GreaterOrEqualToLessThan()
-    : TrivialCXXMutator(std::move(getGreaterOrEqualToLessThan()),
-                        MutatorKind::CXX_GreaterOrEqualToLessThan, GreaterOrEqualToLessThan::ID(),
-                        "Replaces >= with <", "<", "Replaced >= with <") {}
+    : TrivialCXXMutator(getGreaterOrEqualToLessThan(), MutatorKind::CXX_GreaterOrEqualToLessThan,
+                        GreaterOrEqualToLessThan::ID(), "Replaces >= with <", "<",
+                        "Replaced >= with <") {}
 
 std::string LessThanToGreaterOrEqual::ID() {
   return "cxx_lt_to_ge";
@@ -162,8 +162,8 @@ static std::vector<std::unique_ptr<irm::IRMutation>> getLessThanToGreaterOrEqual
 }
 
 LessThanToGreaterOrEqual::LessThanToGreaterOrEqual()
-    : TrivialCXXMutator(std::move(getLessThanToGreaterOrEqual()),
-                        MutatorKind::CXX_LessThanToGreaterOrEqual, LessThanToGreaterOrEqual::ID(),
+    : TrivialCXXMutator(getLessThanToGreaterOrEqual(), MutatorKind::CXX_LessThanToGreaterOrEqual,
+                        LessThanToGreaterOrEqual::ID(),
                         "Replaces < with >=", ">=", "Replaced < with >=") {}
 
 std::string LessOrEqualToGreaterThan::ID() {
@@ -180,6 +180,6 @@ static std::vector<std::unique_ptr<irm::IRMutation>> getLessOrEqualToGreaterThan
 }
 
 LessOrEqualToGreaterThan::LessOrEqualToGreaterThan()
-    : TrivialCXXMutator(std::move(getLessOrEqualToGreaterThan()),
-                        MutatorKind::CXX_LessOrEqualToGreaterThan, LessOrEqualToGreaterThan::ID(),
-                        "Replaces <= with >", ">", "Replaced <= with >") {}
+    : TrivialCXXMutator(getLessOrEqualToGreaterThan(), MutatorKind::CXX_LessOrEqualToGreaterThan,
+                        LessOrEqualToGreaterThan::ID(), "Replaces <= with >", ">",
+                        "Replaced <= with >") {}
