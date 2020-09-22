@@ -94,7 +94,7 @@ std::vector<std::string> mull::findDynamicLibraries(mull::Diagnostics &diagnosti
 
   auto symbolicOr = SymbolicFile::createSymbolicFile(buffer->getMemBufferRef());
   if (!symbolicOr) {
-    diagnostics.error(std::string("Cannot create symbolic file from: ") + executablePath);
+    diagnostics.error(std::string("Cannot create SymbolicFile from: ") + executablePath);
   }
 
   std::unique_ptr<SymbolicFile> symbolicFile(std::move(symbolicOr.get()));
