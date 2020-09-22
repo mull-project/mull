@@ -52,7 +52,7 @@ public:
   llvm::Instruction &findInstruction(llvm::Module *module) const;
   llvm::Instruction &findInstruction(llvm::Function *function) const;
 
-  const static MutationPointAddress addressFromInstruction(const llvm::Instruction *instruction);
+  static MutationPointAddress addressFromInstruction(const llvm::Instruction *instruction);
 };
 
 class MutationPoint {

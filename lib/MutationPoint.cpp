@@ -68,7 +68,7 @@ static size_t getIndex(Container &container, Value *value) {
   return index;
 }
 
-const MutationPointAddress
+MutationPointAddress
 MutationPointAddress::addressFromInstruction(const llvm::Instruction *instruction) {
   return MutationPointAddress(
       getIndex(instruction->getModule()->getFunctionList(), instruction->getFunction()),
