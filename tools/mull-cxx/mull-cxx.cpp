@@ -144,7 +144,13 @@ int main(int argc, char **argv) {
   std::vector<std::string> librarySearchPaths(std::begin(tool::LDSearchPaths),
                                               std::end(tool::LDSearchPaths));
 
+  std::vector<std::string> libraryPreloads(std::begin(tool::LDPreloads),
+                                           std::end(tool::LDPreloads));
+
   std::vector<std::string> resolvedLibraries;
+  // First load all -ld-preload libraries
+  mull::resolveLibraries(diagnostics, resolvedLibraries, libraryPreloads, librarySearchPaths);
+  // then load any dynamic libraries listed as DT_NEEDED
   mull::resolveLibraries(
       diagnostics,
       resolvedLibraries,
