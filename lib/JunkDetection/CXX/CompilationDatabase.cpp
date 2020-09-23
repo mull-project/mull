@@ -33,10 +33,19 @@ using namespace std::string_literals;
 ///     "/usr/bin/clang++-9 -DQT_TESTCASE_BUILDDIR=\\\"/src/builds/amd64-linux-mull\\\" ...",
 ///   "file": /src/tests/TestingUnitTests/ModuleTestSuite.cpp"
 /// }
-static std::string undoEscapingString(std::string &string) {
-  std::string unescaped(std::regex_replace(string, std::regex(R"(\\\")"), "\""));
-  unescaped = std::regex_replace(unescaped, std::regex(R"(\\\\)"), "\\");
-  return unescaped;
+static void unescapeInplace(std::string &str) {
+  std::string::size_type k = 0;
+  bool is_escaped = false;
+  for (auto c : str) {
+    if (is_escaped) {
+      is_escaped = false;
+    } else if (c == '\\') {
+      is_escaped = true;
+      continue;
+    }
+    str[k++] = c;
+  }
+  str.resize(k);
 }
 
 static std::vector<std::string> filterFlags(const std::vector<std::string> &flags,
@@ -75,7 +84,7 @@ static CompilationDatabase::Flags flagsFromCommand(const CompileCommand &command
   flags.erase(std::remove(flags.begin(), flags.end(), command.file), flags.end());
 
   for (auto &flag : flags) {
-    flag = undoEscapingString(flag);
+    unescapeInplace(flag);
   }
 
   // append extraFlags
