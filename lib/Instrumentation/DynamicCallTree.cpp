@@ -105,7 +105,7 @@ DynamicCallTree::createCallTree(uint32_t *mapping,
 std::vector<CallTree *> DynamicCallTree::extractTestSubtrees(CallTree *root,
                                                              Test &test) {
   std::vector<CallTree *> subtrees;
-  std::vector<const Function *> entryPoints = {test.getTestBody()};
+  std::vector<const Function *> entryPoints = test.getTestFunctions();
 
   std::queue<CallTree *> nodes;
   nodes.push(root);

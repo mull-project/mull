@@ -93,7 +93,7 @@ void mull::SQLiteReporter::reportResults(const Result &result) {
     std::string testUniqueId = test.getUniqueIdentifier();
     ExecutionResult testExecutionResult = test.getExecutionResult();
 
-    auto testLocation = SourceLocation::locationFromFunction(test.getTestBody());
+    auto testLocation = SourceLocation::locationFromFunction(test.getTestFunctions().front());
 
     int executionResultIndex = 1;
     sqlite3_bind_text(insertExecutionResultStmt,
