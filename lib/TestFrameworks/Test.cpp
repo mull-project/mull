@@ -48,3 +48,7 @@ const ExecutionResult &Test::getExecutionResult() const {
 InstrumentationInfo &Test::getInstrumentationInfo() {
   return instrumentationInfo;
 }
+
+void Test::addTestFunction(const llvm::Function *func) {
+  testFunctions.push_back(func);
+}

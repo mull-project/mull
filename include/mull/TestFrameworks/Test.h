@@ -28,6 +28,7 @@ public:
   std::string getUniqueIdentifier() const;
   const std::vector<std::string> &getArguments() const;
   const std::vector<const llvm::Function *> &getTestFunctions() const;
+  void addTestFunction(const llvm::Function *func);
 
   void setExecutionResult(ExecutionResult result);
   const ExecutionResult &getExecutionResult() const;
