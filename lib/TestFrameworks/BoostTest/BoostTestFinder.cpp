@@ -81,15 +81,10 @@ std::vector<Test> BoostTestFinder::findTests(Program &program) {
       std::string demangledName = llvm_compat::demangle(name);
       auto posEnd = demangledName.rfind("::end_suite_registrar");
       if (posEnd == std::string::npos || demangledName.find("::", posEnd + 1) != std::string::npos) {
-        std::ostringstream ss;
-        ss << "false match: " << demangledName;
-        diagnostics.debug(ss.str());
+        // false match
         continue;
       }
       // End suite marker found
-      std::ostringstream ss;
-      ss << "end suite: " << demangledName;
-      diagnostics.debug(ss.str());
       std::string suiteNamespace = demangledName.substr(0, posEnd);
       // Insert suite ordered by path length, this will simplify building the tree further down
       auto it = std::begin(testSuiteNamespaces);
@@ -103,11 +98,6 @@ std::vector<Test> BoostTestFinder::findTests(Program &program) {
       auto fullPath = computeTestPath(suiteNamespace, testSuitePaths);
       testSuitePaths.emplace_back(suiteNamespace + "::", fullPath);
     }
-    for (const auto& entry : testSuitePaths) {
-      std::ostringstream ss;
-      ss << entry.first << " : " << entry.second;
-      diagnostics.debug(ss.str());
-    }
     // Find all test cases within this module
     for (auto &func : bitcode->getModule()->getFunctionList()) {
       if (func.isDeclaration()) {
@@ -119,15 +109,12 @@ std::vector<Test> BoostTestFinder::findTests(Program &program) {
         continue;
       }
       std::string demangledName = llvm_compat::demangle(name);
-      diagnostics.debug(demangledName);
       // Check that the demangled name ends with ::test_method() to
       // filter out lambdas and other methods which are not really test cases
       constexpr std::string::size_type testMethodStrLength = 15; // std::string("::test_method()").length()
       auto posEnd = demangledName.find("::test_method()", demangledName.size() - testMethodStrLength);
       if (posEnd == std::string::npos) {
-        std::ostringstream ss;
-        ss << "false match: " << demangledName;
-        diagnostics.debug(ss.str());
+        // false match
         continue;
       }
       auto fullPath = computeTestPath(demangledName.substr(0, posEnd), testSuitePaths);
