@@ -27,4 +27,6 @@ StringRef getSectionName(const object::SectionRef &section);
 
 DICompileUnit *getUnit(const DebugLoc &debugLocation);
 
+std::string demangle(const std::string &MangledName);
+
 } // namespace llvm_compat

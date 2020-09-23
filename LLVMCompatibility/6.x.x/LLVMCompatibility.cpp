@@ -1,5 +1,6 @@
 #include "LLVMCompatibility.h"
 
+#include <llvm/Demangle/Demangle.h>
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/DebugLoc.h>
 #include <llvm/Object/ObjectFile.h>
@@ -34,6 +35,17 @@ DICompileUnit *getUnit(const DebugLoc &debugLocation) {
     scope = scope->getScope().resolve();
   }
   return scope ? llvm::cast<llvm::DISubprogram>(scope)->getUnit() : nullptr;
+}
+
+std::string demangle(const std::string &MangledName) {
+  char *Demangled = llvm::itaniumDemangle(MangledName.c_str(), nullptr, nullptr, nullptr);
+
+  if (!Demangled)
+    return MangledName;
+
+  std::string Ret = Demangled;
+  std::free(Demangled);
+  return Ret;
 }
 
 } // namespace llvm_compat
