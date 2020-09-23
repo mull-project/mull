@@ -126,7 +126,7 @@ std::vector<CallTree *> DynamicCallTree::extractTestSubtrees(CallTree *root,
 }
 
 std::vector<std::unique_ptr<ReachableFunction>>
-DynamicCallTree::createReachableFunctions(std::vector<CallTree *> subtrees,
+DynamicCallTree::createReachableFunctions(const std::vector<CallTree *>& subtrees,
                                           Test &test, int maxDistance) {
   std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions;
 

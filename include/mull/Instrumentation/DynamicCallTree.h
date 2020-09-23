@@ -37,7 +37,7 @@ public:
   static std::vector<CallTree *> extractTestSubtrees(CallTree *root,
                                                      Test &test);
   static std::vector<std::unique_ptr<ReachableFunction>>
-  createReachableFunctions(std::vector<CallTree *> subtrees, Test &test,
+  createReachableFunctions(const std::vector<CallTree *>& subtrees, Test &test,
                            int maxDistance);
 
   static void enterFunction(uint32_t functionIndex, uint32_t *mapping,
