@@ -50,7 +50,7 @@ std::vector<Test> BoostTestFinder::findTests(Program &program) {
   // test is not using the standard test implementation templates
   // (BOOST_FIXTURE_TEST_CASE_TEMPLATE or BOOST_FIXTURE_TEST_CASE_WITH_DECOR).
 
-  std::vector<Test> tests;
+  std::map<std::string, Test> testCases;
   for (auto &bitcode : program.bitcode()) {
     // Find all test suites first
     std::list<std::string> testSuiteNamespaces;
@@ -98,8 +98,7 @@ std::vector<Test> BoostTestFinder::findTests(Program &program) {
         continue;
       }
       auto name = func.getName();
-      // The actual test case implementation is always
-      // `void test_method()` in the test case subclass
+      // The actual test case implementation is always `void test_method()` in the test case subclass
       if (name.find("test_method") == llvm::StringRef::npos) {
         continue;
       }
@@ -119,10 +118,26 @@ std::vector<Test> BoostTestFinder::findTests(Program &program) {
       std::ostringstream ss;
       ss << "Found test case: " << fullPath;
       diagnostics.debug(ss.str());
-      auto arguments = {std::string("--run_test=") + fullPath};
+      auto arguments = { std::string("--run_test=") + fullPath };
 
-      tests.emplace_back(fullPath, "mull", "main", arguments, &func);
+      // Try to insert a new test case
+      auto kv_added =
+          testCases.emplace(std::piecewise_construct,
+                            std::forward_as_tuple(fullPath),
+                            std::forward_as_tuple(fullPath, "mull", "main", arguments, &func));
+      if (!kv_added.second) {
+        // Already exists in map, append our test method
+        diagnostics.debug(fullPath + " exists, adding another test entry point");
+        Test &test = kv_added.first->second;
+        test.addTestFunction(&func);
+      }
     }
+  }
+
+  std::vector<Test> tests;
+  tests.reserve(testCases.size());
+  for (auto &kv : testCases) {
+    tests.push_back(std::move(kv.second));
   }
 
   return tests;
