@@ -10,10 +10,8 @@ using namespace std::string_literals;
 
 TEST(CompilationDatabaseFromCompilationFlags, returnsAllFlags) {
   Diagnostics diagnostics;
-  const CompilationDatabase database(diagnostics,
-                                     CompilationDatabase::Path(""),
-                                     CompilationDatabase::Flags("-I     /usr/foo/include   "),
-                                     CompilationDatabase::BitcodeFlags({}));
+  const CompilationDatabase database =
+      CompilationDatabase::fromBuffer(diagnostics, "", "-I     /usr/foo/include   ", {});
 
   const std::string filepath("foobar");
   const auto &flags = database.compilationFlagsForFile(filepath);
@@ -22,10 +20,8 @@ TEST(CompilationDatabaseFromCompilationFlags, returnsAllFlags) {
 
 TEST(CompilationDatabaseFromCompilationFlags, returnsAllFlagsForAnyFile) {
   Diagnostics diagnostics;
-  const CompilationDatabase database(diagnostics,
-                                     CompilationDatabase::Path(""),
-                                     CompilationDatabase::Flags("-I /usr/foo/include   "),
-                                     CompilationDatabase::BitcodeFlags({}));
+  const CompilationDatabase database =
+      CompilationDatabase::fromBuffer(diagnostics, "", "-I /usr/foo/include   ", {});
 
   const std::string foo("foo");
   const std::string bar("bar");
@@ -55,10 +51,8 @@ TEST(CompilationDatabaseFromFile, loadsFromValidFiles) {
       { "/foo/bar/foobar.cpp", "/foo/bar/./foobar.cpp", "/foo/bar/buzz/../foobar.cpp" });
   for (const std::string &file : files) {
     for (auto &path : databasePaths) {
-      const CompilationDatabase database(diagnostics,
-                                         CompilationDatabase::Path(path),
-                                         CompilationDatabase::Flags(""),
-                                         CompilationDatabase::BitcodeFlags({}));
+      const CompilationDatabase database =
+          CompilationDatabase::fromFile(diagnostics, path, "", {});
 
       auto compilationFlags = database.compilationFlagsForFile(file);
       ASSERT_EQ(compilationFlags.size(), size_t(5));
@@ -75,11 +69,8 @@ TEST(CompilationDatabaseFromFile, loadsFromValidFiles) {
 TEST(CompilationDatabaseFromFile, includesCompilationFlagsPassedSeparately) {
   Diagnostics diagnostics;
   auto path = fixtures::junk_detection_compdb_db_with_fullpath_compiler_json_path();
-  const CompilationDatabase database(
-      diagnostics,
-      CompilationDatabase::Path(path),
-      CompilationDatabase::Flags("-isystem /usr/local/include -isystem /usr/include"),
-      CompilationDatabase::BitcodeFlags({}));
+  const CompilationDatabase database = CompilationDatabase::fromFile(
+      diagnostics, path, "-isystem /usr/local/include -isystem /usr/include", {});
 
   const std::string file("/foo/bar/foobar.cpp");
   auto compilationFlags = database.compilationFlagsForFile(file);
@@ -99,11 +90,8 @@ TEST(CompilationDatabaseFromFile, includesCompilationFlagsPassedSeparately) {
 TEST(CompilationDatabaseFromFile, parsesCompilationFlagsFromClangMJCommandValid) {
   Diagnostics diagnostics;
   auto path = fixtures::junk_detection_compdb_db_produced_from_clang_MJ_valid_sequence_json_path();
-  const CompilationDatabase database(
-      diagnostics,
-      CompilationDatabase::Path(path),
-      CompilationDatabase::Flags("-isystem /usr/local/include -isystem /usr/include"),
-      CompilationDatabase::BitcodeFlags({}));
+  const CompilationDatabase database = CompilationDatabase::fromFile(
+      diagnostics, path, "-isystem /usr/local/include -isystem /usr/include", {});
 
   const std::string file("/tmp/main.cpp");
   auto compilationFlags = database.compilationFlagsForFile(file);
@@ -119,10 +107,7 @@ TEST(CompilationDatabaseFromFile, parsesCompilationFlagsFromClangMJCommandValid)
 TEST(CompilationDatabaseFromFile, parsesCompilationDatabaseWithEscapedQuotes) {
   Diagnostics diagnostics;
   auto path = fixtures::junk_detection_compdb_db_with_escaped_quotes_json_path();
-  const CompilationDatabase database(diagnostics,
-                                     CompilationDatabase::Path(path),
-                                     CompilationDatabase::Flags(""),
-                                     CompilationDatabase::BitcodeFlags({}));
+  const CompilationDatabase database = CompilationDatabase::fromFile(diagnostics, path, "", {});
 
   const std::string file("/tmp/main.cpp");
   auto compilationFlags = database.compilationFlagsForFile(file);
@@ -144,10 +129,8 @@ TEST(CompilationDatabaseFromFile, parsesCompilationFlagsObtainedFromBitcode) {
   std::map<std::string, std::string> bitcodeFlags;
   bitcodeFlags[fakeFile] = "clang -DBITCODE_FLAG=1 -g";
 
-  const CompilationDatabase database(diagnostics,
-                                     CompilationDatabase::Path(""),
-                                     CompilationDatabase::Flags("-DEXTRA_FLAG=1"),
-                                     CompilationDatabase::BitcodeFlags(bitcodeFlags));
+  const CompilationDatabase database =
+      CompilationDatabase::fromBuffer(diagnostics, "", "-DEXTRA_FLAG=1", bitcodeFlags);
 
   auto compilationFlags = database.compilationFlagsForFile(fakeFile);
 
