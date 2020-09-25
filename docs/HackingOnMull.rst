@@ -113,3 +113,10 @@ ABI. Depending on your OS/setup you may need to tweak the ``_GLIBCXX_USE_CXX11_A
 .. code-block:: bash
 
     cmake -DPATH_TO_LLVM=some-path -DCMAKE_CXX_FLAGS=-D_GLIBCXX_USE_CXX11_ABI=0 ..
+
+If the linker error you get is something like ``undefined reference to `typeinfo for irm::CmpInstPredicateReplacement'``,
+try to pass the ``-fno-rtti`` flag:
+
+.. code-block:: bash
+
+    cmake -DPATH_TO_LLVM=some-path -DCMAKE_CXX_FLAGS=-fno-rtti ..
