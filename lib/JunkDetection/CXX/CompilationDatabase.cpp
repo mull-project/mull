@@ -50,12 +50,6 @@ static std::vector<std::string> filterFlags(const std::vector<std::string> &flag
 
   while (it != end) {
     std::string flag = *(it++);
-    if (flag == "-c") {
-      if (it != end) {
-        ++it;
-      }
-      continue;
-    }
     filteredFlags.push_back(flag);
   }
   return filteredFlags;
