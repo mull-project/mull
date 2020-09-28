@@ -8,6 +8,10 @@ project(Mull
   LANGUAGES C CXX
 )
 
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
+  include(CTest)
+endif()
+
 # -DRECORD_TIMING=ON
 if (RECORD_TIMING)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "\"${CMAKE_COMMAND}\" -E time")
@@ -196,9 +200,11 @@ SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 add_subdirectory(LLVMCompatibility/${LLVM_COMPATIBILITY_DIR})
 add_subdirectory(lib)
 add_subdirectory(tools)
-add_subdirectory(tests)
-add_subdirectory(tests-lit)
-add_subdirectory(vendor/googletest EXCLUDE_FROM_ALL)
+if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
+  add_subdirectory(tests)
+  add_subdirectory(tests-lit)
+  add_subdirectory(vendor/googletest EXCLUDE_FROM_ALL)
+endif()
 add_subdirectory(vendor/libirm EXCLUDE_FROM_ALL)
 add_subdirectory(vendor/spdlog EXCLUDE_FROM_ALL)
 add_subdirectory(docs)
