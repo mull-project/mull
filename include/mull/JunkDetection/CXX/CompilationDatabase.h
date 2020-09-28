@@ -23,10 +23,10 @@ public:
   CompilationDatabase(Database database, Flags extraFlags, Database bitcodeFlags);
 
   static CompilationDatabase fromFile(Diagnostics &diagnostics, const std::string &path,
-                                      std::string extraFlags,
+                                      const std::string& extraFlags,
                                       const std::map<std::string, std::string>& bitcodeFlags);
   static CompilationDatabase fromBuffer(Diagnostics &diagnostics, const std::string &buffer,
-                                        std::string extraFlags,
+                                        const std::string& extraFlags,
                                         const std::map<std::string, std::string>& bitcodeFlags);
 
   const CompilationDatabase::Flags &compilationFlagsForFile(const std::string &filepath) const;
