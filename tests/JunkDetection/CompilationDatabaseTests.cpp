@@ -3,7 +3,10 @@
 #include <gtest/gtest.h>
 #include <mull/Diagnostics/Diagnostics.h>
 
+#include <string>
+
 using namespace mull;
+using namespace std::string_literals;
 
 TEST(CompilationDatabaseFromCompilationFlags, returnsAllFlags) {
   Diagnostics diagnostics;
@@ -60,11 +63,11 @@ TEST(CompilationDatabaseFromFile, loadsFromValidFiles) {
       auto compilationFlags = database.compilationFlagsForFile(file);
       ASSERT_EQ(compilationFlags.size(), size_t(5));
 
-      ASSERT_EQ(compilationFlags.at(0), std::string("-I"));
-      ASSERT_EQ(compilationFlags.at(1), std::string("foo"));
-      ASSERT_EQ(compilationFlags.at(2), std::string("-I"));
-      ASSERT_EQ(compilationFlags.at(3), std::string("bar"));
-      ASSERT_EQ(compilationFlags.at(4), std::string("-c"));
+      ASSERT_EQ(compilationFlags.at(0), "-I"s);
+      ASSERT_EQ(compilationFlags.at(1), "foo"s);
+      ASSERT_EQ(compilationFlags.at(2), "-I"s);
+      ASSERT_EQ(compilationFlags.at(3), "bar"s);
+      ASSERT_EQ(compilationFlags.at(4), "-c"s);
     }
   }
 }
@@ -82,15 +85,15 @@ TEST(CompilationDatabaseFromFile, includesCompilationFlagsPassedSeparately) {
   auto compilationFlags = database.compilationFlagsForFile(file);
   ASSERT_EQ(compilationFlags.size(), size_t(9));
 
-  ASSERT_EQ(compilationFlags.at(0), std::string("-I"));
-  ASSERT_EQ(compilationFlags.at(1), std::string("foo"));
-  ASSERT_EQ(compilationFlags.at(2), std::string("-I"));
-  ASSERT_EQ(compilationFlags.at(3), std::string("bar"));
-  ASSERT_EQ(compilationFlags.at(4), std::string("-c"));
-  ASSERT_EQ(compilationFlags.at(5), std::string("-isystem"));
-  ASSERT_EQ(compilationFlags.at(6), std::string("/usr/local/include"));
-  ASSERT_EQ(compilationFlags.at(7), std::string("-isystem"));
-  ASSERT_EQ(compilationFlags.at(8), std::string("/usr/include"));
+  ASSERT_EQ(compilationFlags.at(0), "-I"s);
+  ASSERT_EQ(compilationFlags.at(1), "foo"s);
+  ASSERT_EQ(compilationFlags.at(2), "-I"s);
+  ASSERT_EQ(compilationFlags.at(3), "bar"s);
+  ASSERT_EQ(compilationFlags.at(4), "-c"s);
+  ASSERT_EQ(compilationFlags.at(5), "-isystem"s);
+  ASSERT_EQ(compilationFlags.at(6), "/usr/local/include"s);
+  ASSERT_EQ(compilationFlags.at(7), "-isystem"s);
+  ASSERT_EQ(compilationFlags.at(8), "/usr/include"s);
 }
 
 TEST(CompilationDatabaseFromFile, parsesCompilationFlagsFromClangMJCommandValid) {
@@ -106,31 +109,31 @@ TEST(CompilationDatabaseFromFile, parsesCompilationFlagsFromClangMJCommandValid)
   auto compilationFlags = database.compilationFlagsForFile(file);
 
   ASSERT_EQ(compilationFlags.size(), size_t(20));
-  ASSERT_EQ(compilationFlags.at(0), std::string("-xc++"));
-  ASSERT_EQ(compilationFlags.at(1), std::string("-fembed-bitcode=all"));
-  ASSERT_EQ(compilationFlags.at(2), std::string("-g"));
-  ASSERT_EQ(compilationFlags.at(18), std::string("-isystem"));
-  ASSERT_EQ(compilationFlags.at(19), std::string("/usr/include"));
+  ASSERT_EQ(compilationFlags.at(0), "-xc++"s);
+  ASSERT_EQ(compilationFlags.at(1), "-fembed-bitcode=all"s);
+  ASSERT_EQ(compilationFlags.at(2), "-g"s);
+  ASSERT_EQ(compilationFlags.at(18), "-isystem"s);
+  ASSERT_EQ(compilationFlags.at(19), "/usr/include"s);
 }
 
 TEST(CompilationDatabaseFromFile, parsesCompilationDatabaseWithEscapedQuotes) {
   Diagnostics diagnostics;
   auto path = fixtures::junk_detection_compdb_db_with_escaped_quotes_json_path();
-  const CompilationDatabase database(
-    diagnostics,
-    CompilationDatabase::Path(path),
-    CompilationDatabase::Flags(""),
-    CompilationDatabase::BitcodeFlags({}));
+  const CompilationDatabase database(diagnostics,
+                                     CompilationDatabase::Path(path),
+                                     CompilationDatabase::Flags(""),
+                                     CompilationDatabase::BitcodeFlags({}));
 
   const std::string file("/tmp/main.cpp");
   auto compilationFlags = database.compilationFlagsForFile(file);
 
   ASSERT_EQ(compilationFlags.size(), size_t(5));
-  ASSERT_EQ(compilationFlags.at(0), std::string("-DQT_CORE_LIB"));
-  ASSERT_EQ(compilationFlags.at(1), std::string("-DQT_TESTCASE_BUILDDIR=\"/src/builds/amd64-linux-mull\""));
-  ASSERT_EQ(compilationFlags.at(2), std::string("-o"));
-  ASSERT_EQ(compilationFlags.at(3), std::string("tests/TestingUnitTests/CMakeFiles/TestingUnitTests.dir/ModuleTestSuite.cpp.o"));
-  ASSERT_EQ(compilationFlags.at(4), std::string("-c"));
+  ASSERT_EQ(compilationFlags.at(0), "-DQT_CORE_LIB"s);
+  ASSERT_EQ(compilationFlags.at(1), "-DQT_TESTCASE_BUILDDIR=\"/src/builds/amd64-linux-mull\""s);
+  ASSERT_EQ(compilationFlags.at(2), "-o"s);
+  ASSERT_EQ(compilationFlags.at(3),
+            "tests/TestingUnitTests/CMakeFiles/TestingUnitTests.dir/ModuleTestSuite.cpp.o"s);
+  ASSERT_EQ(compilationFlags.at(4), "-c"s);
 }
 
 TEST(CompilationDatabaseFromFile, parsesCompilationFlagsObtainedFromBitcode) {
@@ -141,16 +144,15 @@ TEST(CompilationDatabaseFromFile, parsesCompilationFlagsObtainedFromBitcode) {
   std::map<std::string, std::string> bitcodeFlags;
   bitcodeFlags[fakeFile] = "clang -DBITCODE_FLAG=1 -g";
 
-  const CompilationDatabase database(
-    diagnostics,
-    CompilationDatabase::Path(""),
-    CompilationDatabase::Flags("-DEXTRA_FLAG=1"),
-    CompilationDatabase::BitcodeFlags(bitcodeFlags));
+  const CompilationDatabase database(diagnostics,
+                                     CompilationDatabase::Path(""),
+                                     CompilationDatabase::Flags("-DEXTRA_FLAG=1"),
+                                     CompilationDatabase::BitcodeFlags(bitcodeFlags));
 
   auto compilationFlags = database.compilationFlagsForFile(fakeFile);
 
   ASSERT_EQ(compilationFlags.size(), size_t(3));
-  ASSERT_EQ(compilationFlags.at(0), std::string("-DBITCODE_FLAG=1"));
-  ASSERT_EQ(compilationFlags.at(1), std::string("-g"));
-  ASSERT_EQ(compilationFlags.at(2), std::string("-DEXTRA_FLAG=1"));
+  ASSERT_EQ(compilationFlags.at(0), "-DBITCODE_FLAG=1"s);
+  ASSERT_EQ(compilationFlags.at(1), "-g"s);
+  ASSERT_EQ(compilationFlags.at(2), "-DEXTRA_FLAG=1"s);
 }
