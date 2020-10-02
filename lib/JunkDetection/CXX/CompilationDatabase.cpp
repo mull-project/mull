@@ -2,11 +2,11 @@
 #include "mull/Diagnostics/Diagnostics.h"
 #include <clang/Tooling/CompilationDatabase.h>
 #include <clang/Tooling/JSONCompilationDatabase.h>
+#include <llvm/ADT/SmallString.h>
 #include <llvm/Support/Path.h>
 
 #include <algorithm>
 #include <iterator>
-#include <regex>
 #include <sstream>
 #include <string>
 
