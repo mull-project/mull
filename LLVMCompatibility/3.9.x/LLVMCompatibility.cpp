@@ -44,6 +44,11 @@ StringRef getSectionContent(const object::SectionRef &section) {
   section.getContents(content);
   return content;
 }
+StringRef getSectionName(const object::SectionRef &section) {
+  StringRef name;
+  section.getName(name);
+  return name;
+}
 
 DICompileUnit *getUnit(const DebugLoc &debugLocation) {
   DIScope *scope = debugLocation->getScope();

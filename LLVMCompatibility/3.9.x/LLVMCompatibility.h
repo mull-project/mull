@@ -34,6 +34,7 @@ std::unique_ptr<Module> parseBitcode(MemoryBufferRef bufferRef, LLVMContext &con
 void setVersionPrinter(void (*oldPrinter)(), void (*newPrinter)(raw_ostream &));
 
 StringRef getSectionContent(const object::SectionRef &section);
+StringRef getSectionName(const object::SectionRef &section);
 
 DICompileUnit *getUnit(const DebugLoc &debugLocation);
 

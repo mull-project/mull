@@ -6,6 +6,9 @@ SDKROOT: /
 
 llvm_mapping:
   macos:
+    10.0.0:
+      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
+      path: clang+llvm-10.0.0-x86_64-apple-darwin
     9.0.0:
       url: http://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-darwin-apple.tar.xz
       path: clang+llvm-9.0.0-x86_64-darwin-apple
@@ -43,6 +46,9 @@ llvm_mapping:
       path: clang+llvm-3.9.0-x86_64-linux-gnu-debian8
 
   ubuntu:
+    10.0.0:
+      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
+      path: clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04
     9.0.0:
       url: http://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
       path: clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04
@@ -84,7 +90,7 @@ source_dir: "{{ working_dir }}/mull"
 debug_build_dir: "{{ working_dir }}/build.mull.debug.dir"
 release_build_dir: "{{ working_dir }}/build.mull.release.dir"
 
-checkout: true
+checkout: false
 
 # Overriden by FreeBSD playbook
 make_program: make

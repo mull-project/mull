@@ -41,11 +41,10 @@ ansible-playbook macos-playbook.yaml \
   -e source_dir=$PWD/.. \
   -e gitref=$TRAVIS_COMMIT \
   -e host=localhost \
-  -e checkout=false \
   -e SDKROOT=`xcrun -show-sdk-path` \
   -e mull_version=$version$suffix \
   --verbose
-if [ $LLVM_VERSION == 9.0 ] && [ -n "$BINTRAY_API_KEY" ];
+if [ $LLVM_VERSION == 10.0 ] && [ -n "$BINTRAY_API_KEY" ];
 then
   curl --silent --show-error --location --request DELETE \
         --user "alexdenisov:$BINTRAY_API_KEY" \

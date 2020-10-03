@@ -47,8 +47,8 @@ TestFramework TestFrameworkFactory::simpleTestFramework(Toolchain &toolchain,
 TestFramework TestFrameworkFactory::cppuTestFramework(Toolchain &toolchain,
                                                         Configuration &configuration,
                                                         Diagnostics &diagnostics) {
-  auto finder = make_unique<CppUTestFinder>();
-  auto runner = make_unique<NativeTestRunner>(diagnostics, toolchain.mangler());
+  auto finder = std::make_unique<CppUTestFinder>();
+  auto runner = std::make_unique<NativeTestRunner>(diagnostics, toolchain.mangler());
   return TestFramework(std::move(finder), std::move(runner));
 }
 
