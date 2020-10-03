@@ -39,9 +39,13 @@ std::unique_ptr<llvm::Module> InMemoryCompiler::compile(std::string code,
 
   /// Initialize CompilerInvocation
   clang::CompilerInvocation &compilerInvocation = clangCompilerInstance.getInvocation();
+#if LLVM_VERSION_MAJOR > 9
+  clang::CompilerInvocation::CreateFromArgs(
+      compilerInvocation, args, *pDiagnosticsEngine.release());
+#else
   clang::CompilerInvocation::CreateFromArgs(
       compilerInvocation, &args[0], &args[0] + args.size(), *pDiagnosticsEngine.release());
-
+#endif
   /// Configure options
 
   const auto languageOptions = compilerInvocation.getLangOpts();

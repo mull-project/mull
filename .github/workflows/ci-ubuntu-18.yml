@@ -2,7 +2,7 @@ name: CI Ubuntu 18.04
 
 env:
   BINTRAY_REPO: "ubuntu-18"
-  LLVM_RELEASE: "9.0"
+  LLVM_RELEASE: "10.0"
   CHECK_SECRETS: ${{ secrets.BINTRAY_API_KEY }}
 
 on:
@@ -20,7 +20,7 @@ jobs:
     container: ubuntu:18.04
     strategy:
       matrix:
-        LLVM_VERSION: ["3.9", "4.0", "5.0", "6.0", "7.0", "8.0", "9.0"]
+        LLVM_VERSION: ["3.9", "4.0", "5.0", "6.0", "7.0", "8.0", "9.0", "10.0"]
 
     steps:
       - name: Install software
@@ -86,7 +86,6 @@ jobs:
             -e source_dir=$PWD/.. \
             -e gitref=$GITHUB_SHA \
             -e host=localhost \
-            -e checkout=false \
             -e mull_version=${{ steps.settings.outputs.version }}${{ steps.settings.outputs.suffix }} \
             --verbose
       - name: Publish package

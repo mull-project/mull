@@ -1,7 +1,7 @@
 #include "DynamicLibraries.h"
+#include "LLVMCompatibility.h"
 #include "mull/Diagnostics/Diagnostics.h"
 
-#include <LLVMCompatibility.h>
 #include <llvm/Object/ELFObjectFile.h>
 #include <llvm/Object/ELFTypes.h>
 #include <llvm/Object/MachO.h>
@@ -20,8 +20,7 @@ void librariesFromElf(const ELFObjectFile<T> &file, std::vector<std::string> &li
 
   for (auto it = file.section_begin(); it != file.section_end(); ++it) {
     ELFSectionRef elfSection(*it);
-    llvm::StringRef name;
-    elfSection.getName(name);
+    llvm::StringRef name = llvm_compat::getSectionName(elfSection);
     // FIXME: the dynamic string table should be taken based on .dynamic
     // section's sh_link value
     if (elfSection.getType() == llvm::ELF::SHT_STRTAB && name.equals(".dynstr")) {

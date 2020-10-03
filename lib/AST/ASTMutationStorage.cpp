@@ -20,8 +20,8 @@ ASTMutationStorage::ASTMutationStorage(Diagnostics &diagnostics)
 
 int ASTMutationStorage::count() const {
   int count = 0;
-  for (const std::pair<SourceFilePath, SingleASTUnitMutations> &singleUnitMutations : storage) {
-    for (const std::pair<MutatorKind, SingleMutationTypeBucket> &oneMutationBucket :
+  for (const auto &singleUnitMutations : storage) {
+    for (const auto &oneMutationBucket :
          singleUnitMutations.second) {
       count += singleUnitMutations.second.at(oneMutationBucket.first).size();
     }

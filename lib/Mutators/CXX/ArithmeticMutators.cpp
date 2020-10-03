@@ -215,6 +215,9 @@ std::string UnaryMinusToNoop::ID() {
 UnaryMinusToNoop::UnaryMinusToNoop() {
   lowLevelMutators.emplace_back(new irm::SwapSubOperands);
   lowLevelMutators.emplace_back(new irm::SwapFSubOperands);
+#if LLVM_VERSION_MAJOR > 7
+  lowLevelMutators.emplace_back(new irm::SwapFNegWithOperand);
+#endif
 }
 
 std::string UnaryMinusToNoop::getUniqueIdentifier() {
@@ -257,10 +260,13 @@ std::vector<MutationPoint *> UnaryMinusToNoop::getMutations(Bitcode *bitcode,
 
   for (llvm::Instruction *instruction : function.getSelectedInstructions()) {
     for (auto &mutator : lowLevelMutators) {
-      if (mutator->canMutate(instruction) && isZero(instruction->getOperand(0))) {
-        auto point =
-            new MutationPoint(this, mutator.get(), instruction, "", bitcode, "Replaced -x with x");
-        mutations.push_back(point);
+      if (mutator->canMutate(instruction)) {
+        if (!instruction->isBinaryOp() ||
+            (instruction->isBinaryOp() && isZero(instruction->getOperand(0)))) {
+          auto point = new MutationPoint(
+              this, mutator.get(), instruction, "", bitcode, "Replaced -x with x");
+          mutations.push_back(point);
+        }
       }
     }
   }
