@@ -34,7 +34,7 @@ void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
     auto trampolineName = mangler.getNameWithPrefix(mutationPoint->getTrampolineName());
     auto mutatedFunctionName = mangler.getNameWithPrefix(mutationPoint->getMutatedFunctionName());
     uint64_t *trampoline = trampolines.findTrampoline(trampolineName);
-    uint64_t address = llvm_compat::JITSymbolAddress(jit.getSymbol(mutatedFunctionName));
+    uint64_t address = JITEngine::symbolAddress(jit.getSymbol(mutatedFunctionName));
     uint64_t originalAddress = *trampoline;
     *trampoline = address;
 

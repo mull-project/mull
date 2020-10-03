@@ -17,6 +17,8 @@ struct Configuration;
 
 std::pair<std::string, std::unique_ptr<llvm::Module>>
 loadModuleFromBuffer(llvm::LLVMContext &context, llvm::MemoryBuffer &buffer);
+std::unique_ptr<llvm::Module> parseBitcode(llvm::MemoryBufferRef bufferRef,
+                                           llvm::LLVMContext &context);
 
 class BitcodeLoader {
   std::vector<std::unique_ptr<llvm::LLVMContext>> contexts;

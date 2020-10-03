@@ -14,7 +14,7 @@ void JITEngine::addObjectFiles(std::vector<object::ObjectFile *> &files,
                                llvm_compat::SymbolResolver &resolver,
                                std::unique_ptr<llvm::RuntimeDyld::MemoryManager> memManager) {
   std::vector<object::ObjectFile *>().swap(objectFiles);
-  llvm::StringMap<llvm_compat::JITSymbolInfo>().swap(symbolTable);
+  llvm::StringMap<llvm::JITSymbol>().swap(symbolTable);
   memoryManager = std::move(memManager);
 
   std::unordered_set<std::string> unresolvedSymbols;
@@ -38,7 +38,7 @@ void JITEngine::addObjectFiles(std::vector<object::ObjectFile *> &files,
       }
       unresolvedSymbols.erase(name);
       auto flags = llvm_compat::JITSymbolFlagsFromObjectSymbol(symbol);
-      symbolTable.insert(std::make_pair(name, llvm_compat::JITSymbol(0, flags)));
+      symbolTable.insert(std::make_pair(name, llvm::JITSymbol(0, flags)));
     }
   }
 
@@ -70,8 +70,8 @@ void JITEngine::addObjectFiles(std::vector<object::ObjectFile *> &files,
       it = unresolvedSymbols.erase(it);
       continue;
     }
-    auto resolverSymbol = llvm_compat::JITSymbol(resolver.findSymbol(name));
-    if (llvm_compat::JITSymbolAddress(resolverSymbol) != 0) {
+    auto resolverSymbol = llvm::JITSymbol(resolver.findSymbol(name));
+    if (JITEngine::symbolAddress(resolverSymbol) != 0) {
       std::ostringstream ss;
       ss << "Found dynamic library symbol " << name;
       diagnostics.debug(ss.str());
@@ -91,11 +91,21 @@ void JITEngine::addObjectFiles(std::vector<object::ObjectFile *> &files,
   }
 }
 
-llvm_compat::JITSymbol &JITEngine::getSymbol(llvm::StringRef name) {
+llvm::JITSymbol &JITEngine::getSymbol(llvm::StringRef name) {
   auto symbolIterator = symbolTable.find(name);
   if (symbolIterator == symbolTable.end()) {
     return symbolNotFound;
   }
 
   return symbolIterator->second;
+}
+
+uint64_t JITEngine::symbolAddress(llvm::JITSymbol &symbol) {
+  auto addressOrError = symbol.getAddress();
+  if (!addressOrError) {
+    consumeError(addressOrError.takeError());
+    return 0;
+  }
+
+  return addressOrError.get();
 }

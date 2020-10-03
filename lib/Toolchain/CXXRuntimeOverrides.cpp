@@ -2,11 +2,10 @@
 
 #include <cstdint>
 
-int mull::CXXRuntimeOverrides::CXAAtExitOverride(DestructorPtr destructor,
-                                                 void *arg, void *DSOHandle) {
+int mull::CXXRuntimeOverrides::CXAAtExitOverride(DestructorPtr destructor, void *arg,
+                                                 void *DSOHandle) {
   auto &CXXDestructorDataPairs =
-      *reinterpret_cast<mull::CXXRuntimeOverrides::CXXDestructorDataPairList *>(
-          DSOHandle);
+      *reinterpret_cast<mull::CXXRuntimeOverrides::CXXDestructorDataPairList *>(DSOHandle);
   CXXDestructorDataPairs.emplace_back(destructor, arg);
   return 0;
 }
@@ -23,23 +22,19 @@ void mull::CXXRuntimeOverrides::runDestructors() {
   CXXDestructorDataPairs.clear();
 }
 
-void mull::CXXRuntimeOverrides::addOverride(
-    const std::string &name, llvm_compat::JITTargetAddress address) {
+void mull::CXXRuntimeOverrides::addOverride(const std::string &name,
+                                            llvm::JITTargetAddress address) {
   overrides.insert(std::make_pair(name, address));
 }
 
 mull::CXXRuntimeOverrides::CXXRuntimeOverrides(mull::Mangler &mangler) {
-  addOverride(mangler.getNameWithPrefix("__dso_handle"),
-              toTargetAddress(&DSOHandleOverride));
-  addOverride(mangler.getNameWithPrefix("__cxa_atexit"),
-              toTargetAddress(&CXAAtExitOverride));
+  addOverride(mangler.getNameWithPrefix("__dso_handle"), toTargetAddress(&DSOHandleOverride));
+  addOverride(mangler.getNameWithPrefix("__cxa_atexit"), toTargetAddress(&CXAAtExitOverride));
 }
 
-llvm_compat::JITSymbolInfo
-mull::CXXRuntimeOverrides::searchOverrides(const std::string &name) {
+llvm::JITSymbol mull::CXXRuntimeOverrides::searchOverrides(const std::string &name) {
   auto I = overrides.find(name);
   if (I != overrides.end())
-    return llvm_compat::JITSymbolInfo(I->second,
-                                      llvm::JITSymbolFlags::Exported);
+    return llvm::JITSymbol(I->second, llvm::JITSymbolFlags::Exported);
   return nullptr;
 }

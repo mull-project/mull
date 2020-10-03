@@ -14,7 +14,6 @@ const char *mullBuildDateString();
 
 const char *llvmVersionString();
 
-void printVersionInformation();
-void printVersionInformationStream(llvm::raw_ostream &out);
+void printVersionInformation(llvm::raw_ostream &out);
 
 } // namespace mull

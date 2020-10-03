@@ -1,6 +1,7 @@
 #include "mull/Bitcode.h"
 
 #include "LLVMCompatibility.h"
+#include "mull/BitcodeLoader.h"
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/MutationPoint.h"
 #include "mull/Parallelization/Parallelization.h"
@@ -29,7 +30,7 @@ Bitcode::Bitcode(std::unique_ptr<llvm::Module> module, std::unique_ptr<llvm::Mem
 
 std::unique_ptr<Bitcode> Bitcode::clone(LLVMContext &context, Diagnostics &diagnostics) {
   assert(buffer.get() && "Cannot clone non-original module");
-  auto clone = llvm_compat::parseBitcode(buffer->getMemBufferRef(), context);
+  auto clone = parseBitcode(buffer->getMemBufferRef(), context);
   if (!clone) {
     diagnostics.error("Cannot clone module \n");
     return nullptr;

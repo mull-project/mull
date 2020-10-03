@@ -1,11 +1,11 @@
 #include "mull/BitcodeLoader.h"
 
-#include "LLVMCompatibility.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Parallelization/Parallelization.h"
 
 #include <llvm/AsmParser/Parser.h>
+#include <llvm/Bitcode/BitcodeReader.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <llvm/Support/MD5.h>
@@ -28,9 +28,19 @@ static std::string MD5HashFromBuffer(StringRef buffer) {
   return result.str();
 }
 
+std::unique_ptr<Module> mull::parseBitcode(MemoryBufferRef bufferRef, LLVMContext &context) {
+  auto module = parseBitcodeFile(bufferRef, context);
+  if (!module) {
+    logAllUnhandledErrors(module.takeError(), errs(), "\nparseBitcodeFile failed: ");
+    return std::unique_ptr<Module>();
+  }
+
+  return std::move(module.get());
+}
+
 std::pair<std::string, std::unique_ptr<Module>> mull::loadModuleFromBuffer(LLVMContext &context,
                                                                            MemoryBuffer &buffer) {
-  auto module = llvm_compat::parseBitcode(buffer.getMemBufferRef(), context);
+  auto module = parseBitcode(buffer.getMemBufferRef(), context);
   std::string md5 = MD5HashFromBuffer(buffer.getBuffer());
   return std::make_pair(md5, std::move(module));
 }

@@ -28,8 +28,8 @@ void *NativeTestRunner::getConstructorPointer(const llvm::Function &function, JI
 }
 
 void *NativeTestRunner::getFunctionPointer(const std::string &functionName, JITEngine &jit) {
-  llvm_compat::JITSymbol &symbol = jit.getSymbol(functionName);
-  auto address = llvm_compat::JITSymbolAddress(symbol);
+  llvm::JITSymbol &symbol = jit.getSymbol(functionName);
+  auto address = JITEngine::symbolAddress(symbol);
 
   void *pointer = reinterpret_cast<void *>(static_cast<uintptr_t>(address));
 

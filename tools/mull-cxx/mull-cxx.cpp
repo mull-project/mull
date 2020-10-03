@@ -44,8 +44,7 @@ static void validateInputFile() {
 
 int main(int argc, char **argv) {
   mull::Diagnostics diagnostics;
-  llvm_compat::setVersionPrinter(mull::printVersionInformation,
-                                 mull::printVersionInformationStream);
+  llvm::cl::SetVersionPrinter(mull::printVersionInformation);
 
   tool::MutatorsCLIOptions mutatorsOptions(diagnostics, tool::Mutators);
   tool::TestFrameworkCLIOptions testFrameworkOption(diagnostics, tool::TestFrameworks);
@@ -53,7 +52,7 @@ int main(int argc, char **argv) {
   tool::ReportersCLIOptions reportersOption(diagnostics, tool::ReportersOption);
 
   llvm::cl::HideUnrelatedOptions(tool::MullCXXCategory);
-  bool validOptions = llvm_compat::parseCommandLineOptions(argc, argv);
+  bool validOptions = llvm::cl::ParseCommandLineOptions(argc, argv, "", &llvm::errs());
   if (!validOptions) {
     if (tool::DumpCLIInterface) {
       tool::dumpCLIInterface(diagnostics);

@@ -10,9 +10,6 @@ branches:
     - /^\d+\.\d+\.\d+$/
 
 env:
-  - LLVM_VERSION=3.9
-  - LLVM_VERSION=4.0
-  - LLVM_VERSION=5.0
   - LLVM_VERSION=6.0
   - LLVM_VERSION=7.0
   - LLVM_VERSION=8.0

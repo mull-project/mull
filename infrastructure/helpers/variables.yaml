@@ -21,29 +21,11 @@ llvm_mapping:
     6.0.0:
       url: https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-apple-darwin.tar.xz
       path: clang+llvm-6.0.0-x86_64-apple-darwin
-    5.0.0:
-      url: https://releases.llvm.org/5.0.0/clang+llvm-5.0.0-x86_64-apple-darwin.tar.xz
-      path: clang+llvm-5.0.0-x86_64-apple-darwin
-    4.0.0:
-      url: https://releases.llvm.org/4.0.0/clang+llvm-4.0.0-x86_64-apple-darwin.tar.xz
-      path: clang+llvm-4.0.0-x86_64-apple-darwin
-    3.9.0:
-      url: https://releases.llvm.org/3.9.0/clang+llvm-3.9.0-x86_64-apple-darwin.tar.xz
-      path: clang+llvm-3.9.0-x86_64-apple-darwin
 
   debian:
     6.0.0:
       url: https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-debian8.tar.xz
       path: clang+llvm-6.0.0-x86_64-linux-gnu-debian8
-    5.0.0:
-      url: https://releases.llvm.org/5.0.0/clang+llvm-5.0.0-x86_64-linux-gnu-debian8.tar.xz
-      path: clang+llvm-5.0.0-x86_64-linux-gnu-debian8
-    4.0.0:
-      url: https://releases.llvm.org/4.0.0/clang+llvm-4.0.0-x86_64-linux-gnu-debian8.tar.xz
-      path: clang+llvm-4.0.0-x86_64-linux-gnu-debian8
-    3.9.0:
-      url: https://releases.llvm.org/3.9.0/clang+llvm-3.9.0-x86_64-linux-gnu-debian8.tar.xz
-      path: clang+llvm-3.9.0-x86_64-linux-gnu-debian8
 
   ubuntu:
     10.0.0:
@@ -61,15 +43,6 @@ llvm_mapping:
     6.0.0:
       url: https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz
       path: clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-16.04
-    5.0.0:
-      url: https://releases.llvm.org/5.0.0/clang+llvm-5.0.0-linux-x86_64-ubuntu16.04.tar.xz
-      path: clang+llvm-5.0.0-linux-x86_64-ubuntu16.04
-    4.0.0:
-      url: https://releases.llvm.org/4.0.0/clang+llvm-4.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz
-      path: clang+llvm-4.0.0-x86_64-linux-gnu-ubuntu-16.04
-    3.9.0:
-      url: https://releases.llvm.org/3.9.0/clang+llvm-3.9.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz
-      path: clang+llvm-3.9.0-x86_64-linux-gnu-ubuntu-16.04
 
   fedora:
     6.0.0:

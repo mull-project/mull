@@ -12,9 +12,7 @@ const char *mullHomepageString() { return "@PROJECT_HOMEPAGE_URL@"; }
 
 const char *llvmVersionString() { return "@LLVM_VERSION@"; }
 
-void printVersionInformation() { printVersionInformationStream(llvm::errs()); }
-
-void printVersionInformationStream(llvm::raw_ostream &out) {
+void printVersionInformation(llvm::raw_ostream &out) {
   out << "Mull: " << mullDescriptionString() << "\n";
   out << mullHomepageString() << "\n";
   out << "Version: " << mullVersionString() << "\n";
