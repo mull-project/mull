@@ -14,11 +14,10 @@ int main() {
 }
 
 /**
-; RUN: cd / && %CLANG_EXEC -fembed-bitcode %TEST_CXX_FLAGS -g -O0 -DESCAPED_DEFINITION_STUB=/src/builds/amd64-mull %s -o %s.exe
-; RUN: sed -e "s:%PWD:%S:g" -e "s:#TEST_CXX_FLAGS:%TEST_CXX_FLAGS:g" %S/compile_commands.json.template > %S/compile_commands.json
-; RUN: cd %CURRENT_DIR
-; RUN: %MULL_EXEC -test-framework CustomTest -mutators=all -reporters=IDE -ide-reporter-show-killed -compdb-path %S/compile_commands.json %s.exe 2>&1 | %FILECHECK_EXEC %s --strict-whitespace --match-full-lines
+RUN: cd / && %CLANG_EXEC -fembed-bitcode %TEST_CXX_FLAGS -g -O0 -DESCAPED_DEFINITION_STUB=/src/builds/amd64-mull %s -o %s.exe
+RUN: sed -e "s:%PWD:%S:g" -e "s:#TEST_CXX_FLAGS:%TEST_CXX_FLAGS:g" %S/compile_commands.json.template > %S/compile_commands.json
+RUN: cd %CURRENT_DIR
+RUN: %MULL_EXEC -test-framework CustomTest -mutators=all -reporters=IDE -ide-reporter-show-killed -compdb-path %S/compile_commands.json %s.exe 2>&1 | %FILECHECK_EXEC %s --strict-whitespace --match-full-lines
 
-; CHECK-NOT:{{^.*[Ww]arning.*$}}
-; CHCK:[info] Killed mutants (1/1):
+CHECK-NOT:{{^.*[Ww]arning.*$}}
 **/
