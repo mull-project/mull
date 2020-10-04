@@ -21,9 +21,18 @@
     CXX: "{{ llvm_dir }}/bin/clang++"
 
 - name: Build Mull (Debug)
-  command: ninja all
+  command: ninja {{ item }}
   args:
     chdir: "{{ debug_build_dir }}"
+  with_items:
+    - ebc
+    - json11
+    - spdlog
+    - mull-cxx-mutators
+    - MullVersion
+    - LLVMCompatibility
+    - mull
+    - mull-cxx
 
 - name: Build Tests (Debug)
   command: ninja mull-tests
@@ -48,9 +57,18 @@
     CXX: "{{ llvm_dir }}/bin/clang++"
 
 - name: Build Mull (Release)
-  command: ninja all
+  command: ninja {{ item }}
   args:
     chdir: "{{ release_build_dir }}"
+  with_items:
+    - ebc
+    - json11
+    - spdlog
+    - mull-cxx-mutators
+    - MullVersion
+    - LLVMCompatibility
+    - mull
+    - mull-cxx
 
 - name: Build Tests (Release)
   command: ninja mull-tests
