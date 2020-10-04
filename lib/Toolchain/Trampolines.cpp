@@ -23,7 +23,7 @@ void Trampolines::fixupOriginalFunctions(JITEngine &jit) {
     auto it = _trampolines.find(name);
     assert(it != _trampolines.end());
     uint64_t *trampoline = it->second;
-    auto address = llvm_compat::JITSymbolAddress(jit.getSymbol(originalName));
+    auto address = JITEngine::symbolAddress(jit.getSymbol(originalName));
     assert(address);
     *trampoline = address;
   }

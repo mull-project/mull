@@ -18,13 +18,10 @@ class InstrumentationResolver : public llvm_compat::SymbolResolver {
   InstrumentationInfo **trampoline;
 
 public:
-  InstrumentationResolver(CXXRuntimeOverrides &overrides,
-                          Instrumentation &instrumentation,
-                          mull::Mangler &mangler,
-                          InstrumentationInfo **trampoline);
+  InstrumentationResolver(CXXRuntimeOverrides &overrides, Instrumentation &instrumentation,
+                          mull::Mangler &mangler, InstrumentationInfo **trampoline);
 
-  llvm_compat::JITSymbolInfo findSymbol(const std::string &name) override;
-  llvm_compat::JITSymbolInfo
-  findSymbolInLogicalDylib(const std::string &name) override;
+  llvm::JITSymbol findSymbol(const std::string &name) override;
+  llvm::JITSymbol findSymbolInLogicalDylib(const std::string &name) override;
 };
 } // namespace mull

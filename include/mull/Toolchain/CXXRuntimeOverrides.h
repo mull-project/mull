@@ -13,7 +13,7 @@ namespace mull {
 class CXXRuntimeOverrides {
 public:
   explicit CXXRuntimeOverrides(mull::Mangler &mangler);
-  llvm_compat::JITSymbolInfo searchOverrides(const std::string &Name);
+  llvm::JITSymbol searchOverrides(const std::string &Name);
   void runDestructors();
 
 private:
@@ -21,12 +21,11 @@ private:
   using CXXDestructorDataPair = std::pair<DestructorPtr, void *>;
   using CXXDestructorDataPairList = std::vector<CXXDestructorDataPair>;
 
-  void addOverride(const std::string &name,
-                   llvm_compat::JITTargetAddress address);
+  void addOverride(const std::string &name, llvm::JITTargetAddress address);
   static int CXAAtExitOverride(DestructorPtr destructor, void *arg,
                                void *DSOHandle);
 
   CXXDestructorDataPairList DSOHandleOverride;
-  llvm::StringMap<llvm_compat::JITTargetAddress> overrides;
+  llvm::StringMap<llvm::JITTargetAddress> overrides;
 };
 } // namespace mull
