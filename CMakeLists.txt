@@ -12,6 +12,10 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   include(CTest)
 endif()
 
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 # -DRECORD_TIMING=ON
 if (RECORD_TIMING)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "\"${CMAKE_COMMAND}\" -E time")
@@ -147,7 +151,7 @@ endif()
 
 set(MULL_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-set (MULL_CXX_FLAGS "-std=c++14 -fPIC -fvisibility-inlines-hidden -fno-exceptions -Wunused -Wall -Werror")
+set (MULL_CXX_FLAGS "-fPIC -fvisibility-inlines-hidden -fno-exceptions -Wunused -Wall -Werror")
 if (NOT LLVM_ENABLE_RTTI)
   set(MULL_CXX_FLAGS "${MULL_CXX_FLAGS} -fno-rtti")
 endif()
