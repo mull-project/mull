@@ -1,6 +1,8 @@
 add_subdirectory(fixtures)
 generate_fixture_factory(FACTORY_HEADER)
 
+include(GoogleTest)
+
 set(mull_unittests_sources
   AST/ASTVisitor/ASTVisitor_Arithmetic_Tests.cpp
   AST/ASTVisitor/ASTVisitor_ArithmeticAssignment_Tests.cpp
@@ -68,7 +70,7 @@ set(mull_unittests_sources
 get_filename_component(factory_include_dir ${FACTORY_HEADER} DIRECTORY)
 
 add_executable(mull-tests ${mull_unittests_sources})
-add_test(NAME mull-tests COMMAND mull-tests)
+gtest_discover_tests(mull-tests)
 target_link_libraries(mull-tests
   mull
   google-test
