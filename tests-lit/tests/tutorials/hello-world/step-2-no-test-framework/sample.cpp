@@ -1,7 +1,7 @@
 /**
 RUN: cd / && %CLANG_EXEC -fembed-bitcode %s -o %s.exe
 RUN: cd %CURRENT_DIR
-RUN: (%MULL_EXEC %s.exe 2>&1; test $? = 1) | %FILECHECK_EXEC %s --strict-whitespace --match-full-lines
+RUN: (%MULL_EXEC %s.exe 2>&1; test $? = 1) | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines
 
 NOTE: LLVM 9.0.0 suddenly prints 2 extra spaces and one extra "-" so adding a
 NOTE: regex to accommodate.
