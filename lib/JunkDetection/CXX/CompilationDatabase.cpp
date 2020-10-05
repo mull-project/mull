@@ -72,20 +72,20 @@ createBitcodeFlags(Diagnostics &diagnostics, const std::map<std::string, std::st
 
   std::map<std::string, std::vector<std::string>> mergedBitcodeFlags;
 
-  for (auto const &bitcodeFileEntry : bitcodeFlagsMap) {
-    CompilationDatabase::Flags fileFlags = flagsFromString(bitcodeFileEntry.second);
+  for (auto const &[filename, commandline] : bitcodeFlagsMap) {
+    CompilationDatabase::Flags fileFlags = flagsFromString(commandline);
 
     fileFlags = filterFlags(fileFlags, true);
 
     /// Remove file name from the list of flags
-    fileFlags.erase(std::remove(fileFlags.begin(), fileFlags.end(), bitcodeFileEntry.first),
+    fileFlags.erase(std::remove(fileFlags.begin(), fileFlags.end(), filename),
                     fileFlags.end());
 
     for (const auto &extraFlag : extraFlags) {
       fileFlags.push_back(extraFlag);
     }
 
-    mergedBitcodeFlags[bitcodeFileEntry.first] = fileFlags;
+    mergedBitcodeFlags[filename] = fileFlags;
   }
 
   return mergedBitcodeFlags;
