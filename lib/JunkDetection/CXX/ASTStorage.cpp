@@ -170,9 +170,8 @@ ASTStorage::ASTStorage(Diagnostics &diagnostics, const std::string &cxxCompilati
                        const std::string &cxxCompilationFlags,
                        const std::map<std::string, std::string> &bitcodeCompilationFlags)
     : diagnostics(diagnostics),
-      compilationDatabase(diagnostics, CompilationDatabase::Path(cxxCompilationDatabasePath),
-                          CompilationDatabase::Flags(cxxCompilationFlags),
-                          CompilationDatabase::BitcodeFlags(bitcodeCompilationFlags)),
+      compilationDatabase(CompilationDatabase::fromFile(
+          diagnostics, cxxCompilationDatabasePath, cxxCompilationFlags, bitcodeCompilationFlags)),
       mutations(diagnostics) {}
 
 ThreadSafeASTUnit *ASTStorage::findAST(const MutationPoint *point) {

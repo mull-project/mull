@@ -11,46 +11,30 @@ class Diagnostics;
 
 class CompilationDatabase {
 public:
-  class Path {
-  public:
-    explicit Path(std::string p) : path(std::move(p)) {}
-    std::string getPath() const {
-      return path;
-    }
+  using Flags = std::vector<std::string>;
+  using Database = std::map<std::string, Flags>;
 
-  private:
-    std::string path;
-  };
-  class Flags {
-  public:
-    explicit Flags(std::string f) : flags(std::move(f)) {}
-    std::string getFlags() const {
-      return flags;
-    }
+  CompilationDatabase() = default;
+  CompilationDatabase(const CompilationDatabase &) = default;
+  CompilationDatabase(CompilationDatabase &&) = default;
+  CompilationDatabase &operator=(const CompilationDatabase &) = default;
+  CompilationDatabase &operator=(CompilationDatabase &&) = default;
 
-  private:
-    std::string flags;
-  };
-  class BitcodeFlags {
-  public:
-    explicit BitcodeFlags(std::map<std::string, std::string> bitcodeFlags)
-        : bitcodeFlags(std::move(bitcodeFlags)) {}
-    const std::map<std::string, std::string> &getFlags() const {
-      return bitcodeFlags;
-    }
-  private:
-    std::map<std::string, std::string> bitcodeFlags;
-  };
+  CompilationDatabase(Database database, Flags extraFlags, Database bitcodeFlags);
 
-public:
-  CompilationDatabase(Diagnostics &diagnostics, Path path, Flags flags, BitcodeFlags bitcodeFlags);
+  static CompilationDatabase fromFile(Diagnostics &diagnostics, const std::string &path,
+                                      const std::string& extraFlags,
+                                      const std::map<std::string, std::string>& bitcodeFlags);
+  static CompilationDatabase fromBuffer(Diagnostics &diagnostics, const std::string &buffer,
+                                        const std::string& extraFlags,
+                                        const std::map<std::string, std::string>& bitcodeFlags);
 
-  const std::vector<std::string> &compilationFlagsForFile(const std::string &filepath) const;
+  const CompilationDatabase::Flags &compilationFlagsForFile(const std::string &filepath) const;
 
 private:
-  const std::vector<std::string> extraFlags;
-  const std::map<std::string, std::vector<std::string>> database;
-  const std::map<std::string, std::vector<std::string>> bitcodeFlags;
+  Flags extraFlags;
+  Database database;
+  Database bitcodeFlags;
 };
 
 } // namespace mull
