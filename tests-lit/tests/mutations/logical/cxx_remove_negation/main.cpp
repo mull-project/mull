@@ -14,7 +14,7 @@ int main() {
 /**
 RUN: cd / && %CLANG_EXEC -fembed-bitcode -g -O0 %s -o %s.exe
 RUN: cd %CURRENT_DIR
-RUN: %MULL_EXEC -test-framework CustomTest -workers=1 -mutators=cxx_remove_negation --ide-reporter-show-killed -reporters=IDE %s.exe | %FILECHECK_EXEC %s
+RUN: %MULL_EXEC -test-framework CustomTest -workers=1 -mutators=cxx_remove_negation --ide-reporter-show-killed -reporters=IDE %s.exe | %FILECHECK_EXEC %s --dump-input=fail
 CHECK:[info] Running mutants (threads: 1)
 CHECK:{{^       \[################################\] 2/2\. Finished .*}}
 CHECK:[info] Killed mutants (1/2):
