@@ -91,6 +91,8 @@ int main(int argc, char **argv) {
   configuration.customTests.push_back(mull::CustomTestDefinition("main", "_main", "mull", {}));
   configuration.failFastEnabled = true;
 
+  configuration.timeout = tool::Timeout.getValue();
+
   if (tool::Workers) {
     mull::ParallelizationConfig parallelizationConfig;
     parallelizationConfig.workers = tool::Workers;

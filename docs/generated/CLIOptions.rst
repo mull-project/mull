@@ -1,5 +1,7 @@
 --workers number		How many threads to use
 
+--timeout number		Timeout per test run (milliseconds)
+
 --dry-run		Skips real mutants execution. Disabled by default
 
 --cache-dir directory		Where to store cache (defaults to /tmp/mull-cache)
@@ -35,6 +37,8 @@
 --compdb-path filename		Path to a compilation database (compile_commands.json) for junk detection
 
 --compilation-flags string		Extra compilation flags for junk detection
+
+--ld-preload library		Load the given libraries before dynamic linking
 
 --ld-search-path directory		Library search path
 

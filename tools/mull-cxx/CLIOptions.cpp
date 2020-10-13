@@ -1,4 +1,5 @@
 #include "CLIOptions.h"
+#include <mull/Config/Configuration.h>
 #include <mull/Mutators/Mutator.h>
 #include <mull/Reporters/IDEReporter.h>
 #include <mull/Reporters/MutationTestingElementsReporter.h>
@@ -26,6 +27,14 @@ opt<unsigned> tool::Workers(
   Optional,
   value_desc("number"),
   cat(MullCXXCategory));
+
+opt<unsigned> tool::Timeout(
+    "timeout",
+    desc("Timeout per test run (milliseconds)"),
+    Optional,
+    value_desc("number"),
+    init(MullDefaultTimeoutMilliseconds),
+    cat(MullCXXCategory));
 
 opt<std::string> tool::ReportDirectory(
   "report-dir",
@@ -340,6 +349,7 @@ void tool::dumpCLIInterface(Diagnostics &diagnostics) {
   Option *reporters = &(Option &)ReportersOption;
   std::vector<Option *> mullOptions({
       &Workers,
+      &Timeout,
       &DryRunOption,
 
       &CacheDir,

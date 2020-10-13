@@ -20,6 +20,7 @@ extern OptionCategory MullCXXCategory;
 extern opt<std::string> InputFile;
 
 extern opt<unsigned> Workers;
+extern opt<unsigned> Timeout;
 
 extern opt<std::string> ReportName;
 extern opt<std::string> ReportDirectory;
