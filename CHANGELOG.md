@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.8.0] - 14 Oct 2020
+
+- Implemented mutators for (almost) all C++ expressions [#577](https://github.com/mull-project/mull/issues/577)
+- Print total execution time (regression) [#741](https://github.com/mull-project/mull/pull/741)
+- Allow combined include-path + exclude-path (by [Joakim Nohlgård](https://github.com/gebart)) [#747](https://github.com/mull-project/mull/pull/747)
+- Fix a possible infinite loop in SourceManager (by [Evan Lojewski](https://github.com/meklort)) [#748](https://github.com/mull-project/mull/pull/748)
+- Add [CppUTest](http://cpputest.github.io) support (by [Oskari Mantere](https://github.com/OMantere)) [#750](https://github.com/mull-project/mull/pull/750)
+- Fix ppc64le builds (by [Evan Lojewski](https://github.com/meklort)) [#751](https://github.com/mull-project/mull/pull/751)
+- Added `-ld-preload` command line option (by [Joakim Nohlgård](https://github.com/gebart)) [#756](https://github.com/mull-project/mull/pull/756)
+- Compilation database speedup (by [Joakim Nohlgård](https://github.com/gebart)) [#760](https://github.com/mull-project/mull/pull/760)
+- LLVM 10 Support [#761](https://github.com/mull-project/mull/pull/761)
+- LLVM 3.9, 4.0, and 5.0 no longer supported [#762](https://github.com/mull-project/mull/pull/762)
+- Add command line option to configure timeout per test run [#772](https://github.com/mull-project/mull/pull/772)
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2020-03-25..2020-10-14)
+
 ## [0.7.0] - 24 Mar 2020
 
 - Introduced online documentation https://mull.readthedocs.io/en/latest/
@@ -15,7 +30,7 @@
 - Logger has a debug option [#669](https://github.com/mull-project/mull/pull/669)
 - Strict mode added: treat warnings as fatal errors [#673](https://github.com/mull-project/mull/pull/673)
 - Work on the "white list" AST search has started [#677](https://github.com/mull-project/mull/pull/677)
-- [All the changes](https://github.com/mull-project/mull/pulls?page=2&q=is%3Apr+merged%3A2019-12-15..2020-03-24)
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2019-12-15..2020-03-24)
 
 ## [0.6.1] - 14 Dec 2019
 
