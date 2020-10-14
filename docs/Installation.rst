@@ -23,18 +23,16 @@ Check if everything works:
     $ mull-cxx --version
     Mull: LLVM-based mutation testing
     https://github.com/mull-project/mull
-    Version: 0.7.0
-    Commit: 1638698
-    Date: 28 Mar 2020
-    LLVM: 9.0.0
+    Version: 0.8.0
+    Commit: 84f2f4d
+    Date: 13 Oct 2020
+    LLVM: 10.0.0
 
-You can also install Mull for Ubuntu-16.04 or get the latest "nightly" build from the corresponding repositories:
+You can also get the latest "nightly" build from the corresponding repository:
 
 .. code-block::
 
-    deb https://dl.bintray.com/mull-project/ubuntu-16 stable main
     deb https://dl.bintray.com/mull-project/ubuntu-18 nightly main
-    deb https://dl.bintray.com/mull-project/ubuntu-16 nightly main
 
 Install on macOS
 ****************
@@ -54,9 +52,9 @@ Check the installation:
     $ mull-cxx --version
     Mull: LLVM-based mutation testing
     https://github.com/mull-project/mull
-    Version: 0.7.0
-    Commit: 1638698
-    Date: 28 Mar 2020
-    LLVM: 9.0.0
+    Version: 0.8.0
+    Commit: 84f2f4d
+    Date: 13 Oct 2020
+    LLVM: 10.0.0
 
 You can also get the latest "nightly" build from `here <https://bintray.com/mull-project/macos/mull-nightly/_latestVersion>`_.
