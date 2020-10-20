@@ -1,3 +1,4 @@
+add_subdirectory(boosttest_test)
 add_subdirectory(custom_test)
 add_subdirectory(dylibs_and_objects)
 add_subdirectory(google_test)
