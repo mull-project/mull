@@ -34,8 +34,11 @@ namespace {
     auto symbolPath = symbolName.substr(0, pos);
     for (auto it = std::rbegin(testSuitePaths); it != std::rend(testSuitePaths); ++it) {
       // Check if the symbol begins with the test suite namespace
-      if (symbolPath.rfind(it->first, 0) != std::string::npos) {
-        return it->second + "/" + baseName;
+      auto &[prefix, suitePath] = *it;
+      if (symbolPath.rfind(prefix, 0) != std::string::npos) {
+        auto fullPath = suitePath + '/';
+        fullPath += baseName;
+        return fullPath;
       }
     }
     return baseName;
@@ -124,14 +127,14 @@ std::vector<Test> BoostTestFinder::findTests(Program &program) {
       auto arguments = { std::string("--run_test=") + fullPath };
 
       // Try to insert a new test case
-      auto kv_added =
+      auto [it, was_added] =
           testCases.emplace(std::piecewise_construct,
                             std::forward_as_tuple(fullPath),
                             std::forward_as_tuple(fullPath, "mull", "main", arguments, &func));
-      if (!kv_added.second) {
+      if (!was_added) {
         // Already exists in map, append our test method
+        auto &[name, test] = *it;
         diagnostics.debug(fullPath + " exists, adding another test entry point");
-        Test &test = kv_added.first->second;
         test.addTestFunction(&func);
       }
     }
@@ -139,8 +142,8 @@ std::vector<Test> BoostTestFinder::findTests(Program &program) {
 
   std::vector<Test> tests;
   tests.reserve(testCases.size());
-  for (auto &kv : testCases) {
-    tests.push_back(std::move(kv.second));
+  for (auto &[name, test] : testCases) {
+    tests.push_back(std::move(test));
   }
 
   return tests;
