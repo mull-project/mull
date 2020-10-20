@@ -1,5 +1,6 @@
 #include "LLVMCompatibility.h"
 
+#include <llvm/Demangle/Demangle.h>
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/DebugLoc.h>
 #include <llvm/Object/ObjectFile.h>
@@ -43,6 +44,28 @@ DICompileUnit *getUnit(const DebugLoc &debugLocation) {
     scope = scope->getScope().resolve();
   }
   return scope ? llvm::cast<llvm::DISubprogram>(scope)->getUnit() : nullptr;
+}
+
+static bool isItaniumEncoding(const std::string &MangledName) {
+  size_t Pos = MangledName.find_first_not_of('_');
+  // A valid Itanium encoding requires 1-4 leading underscores, followed by 'Z'.
+  return Pos > 0 && Pos <= 4 && MangledName[Pos] == 'Z';
+}
+
+std::string demangle(const std::string &MangledName) {
+  char *Demangled;
+  if (isItaniumEncoding(MangledName))
+    Demangled = llvm::itaniumDemangle(MangledName.c_str(), nullptr, nullptr, nullptr);
+  else
+    Demangled = llvm::microsoftDemangle(MangledName.c_str(), nullptr, nullptr,
+                                        nullptr);
+
+  if (!Demangled)
+    return MangledName;
+
+  std::string Ret = Demangled;
+  std::free(Demangled);
+  return Ret;
 }
 
 } // namespace llvm_compat

@@ -48,6 +48,8 @@ set(mull_sources
   ReachableFunction.cpp
 
 
+  TestFrameworks/BoostTest/BoostTestFinder.cpp
+
   TestFrameworks/SimpleTest/SimpleTestFinder.cpp
 
   TestFrameworks/GoogleTest/GoogleTestFinder.cpp
