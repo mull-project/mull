@@ -22,8 +22,7 @@ public:
   void recordFunctions(llvm::Module *originalModule);
   void insertCallbacks(llvm::Module *instrumentedModule);
 
-  std::vector<std::unique_ptr<ReachableFunction>>
-  getReachableFunctions(Test &test, int distance);
+  std::vector<std::unique_ptr<ReachableFunction>> getReachableFunctions(Test &test, int distance);
 
   void setupInstrumentationInfo(Test &test);
   void cleanupInstrumentationInfo(Test &test);
@@ -34,6 +33,8 @@ public:
   const char *functionIndexOffsetPrefix();
 
 private:
+  size_t getMappingSize(Test &test);
+
   Callbacks callbacks;
   std::vector<CallTreeFunction> functions;
   std::map<std::string, uint32_t> functionOffsetMapping;
