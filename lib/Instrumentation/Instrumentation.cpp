@@ -77,7 +77,7 @@ void Instrumentation::setupInstrumentationInfo(Test &test) {
   assert(functions.size() > 1 &&
          "Functions must be filled in before this call");
 
-  auto mappingSize = sizeof(mapping[0]) * functions.size();
+  auto mappingSize = getMappingSize(test);
   /// Creating a memory to be shared between child and parent.
   auto rawMemory = mmap(nullptr, mappingSize, PROT_READ | PROT_WRITE,
                         MAP_SHARED | MAP_ANONYMOUS, -1, 0);
@@ -87,5 +87,9 @@ void Instrumentation::setupInstrumentationInfo(Test &test) {
 
 void Instrumentation::cleanupInstrumentationInfo(Test &test) {
   std::stack<uint32_t>().swap(test.getInstrumentationInfo().callstack);
-  munmap(test.getInstrumentationInfo().callTreeMapping, functions.size());
+  munmap(test.getInstrumentationInfo().callTreeMapping, getMappingSize(test));
+}
+
+size_t Instrumentation::getMappingSize(Test &test) {
+  return sizeof(test.getInstrumentationInfo().callTreeMapping[0]) * functions.size();
 }
