@@ -4,6 +4,10 @@ Mull is a tool for Mutation Testing based on LLVM/Clang with a strong focus on C
 
 For installation and usage please refer to the latest documentation: https://mull.readthedocs.io/en/latest/
 
+## Join us in Discord
+
+Here is the invitation link to the Discord channel: https://discord.gg/Hphp7dW
+
 ## Contributing
 
 Here is the starting point: [CONTRIBUTING.md](CONTRIBUTING.md)
