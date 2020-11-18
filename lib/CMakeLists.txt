@@ -172,10 +172,11 @@ else ()
 endif ()
 
 find_package(Threads REQUIRED)
+find_package(SQLite3 REQUIRED)
 
 target_link_libraries(mull
   ${MULL_LLVM_LIBRARIES}
-  sqlite3
+  SQLite::SQLite3
   clangTooling
   Threads::Threads
   irm
