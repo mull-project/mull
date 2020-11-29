@@ -56,7 +56,7 @@ If you run it on Linux you should see the following warnings:
 In order to run tests (original or mutated) Mull needs to feed the whole program and all its dependencies into the JIT engine.
 This includes dynamic libraries. Mull extracts them from the executable. On macOS, in most of the cases, the dynamic
 libraries have the full path. However, on Linux there are only names of the libraries, while the full paths normally determined
-by the dynamic linker ``ldd``. Mull does not assume any of the paths, so this is responsibility of the user to provide the paths.
+by the dynamic linker ``ld.so``. Mull does not assume any of the paths, so this is responsibility of the user to provide the paths.
 
 macOS example:
 
