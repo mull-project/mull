@@ -24,7 +24,7 @@ Get sources, configure the build system and build everything:
     make all
 
 Some parts of OpenSSL are written in assembly, but Mull requires LLVM Bitcode to run the program under JIT environment.
-To avoid assembly we ask OpenSSL to no use assembly, but instead fall back to identical C implementation.
+To avoid assembly we ask OpenSSL to not use assembly, but instead fall back to identical C implementation.
 
 If we omit ``-no-shared`` and ``-no-module`` flags, then OpenSSL will build ``libcrypto.dylib`` (or ``.so`` on Linux) and
 link all the test executables against the dynamic library. In this case, the test executable will only contain LLVM Bitcode
@@ -76,7 +76,7 @@ Linux example:
     libc.so.6 => /lib/x86_64-linux-gnu/libc.so.6 (0x00007f4df05d8000)
     /lib64/ld-linux-x86-64.so.2 (0x00007f4df0dec000)
 
-In this example, On Linux, required libraries located under ``/lib/x86_64-linux-gnu``, so we instruct Mull about the paths via ``-ld-search-path`` CLI option:
+In this example, On Linux, required libraries are located under ``/lib/x86_64-linux-gnu``, so we instruct Mull about the paths via ``-ld-search-path`` CLI option:
 
 .. code-block:: bash
 
@@ -111,15 +111,12 @@ which replaces ``<<=`` with ``>>=`` (see the ``-mutators=cxx_lshift_assign_to_rs
     skipped
     ...
 
-This is because not all of the mutations available on the bitcode level can be represented on the source code level.
-These are called Junk Mutations. In order to solve this problem and get reasonable results we need to instruct
-
 This is because not every mutation found at Bitcode level can be represented at the source
 level. Mull can filter them out by looking at the source code, but for that you need to
-provide `compilation database <https://clang.llvm.org/docs/JSONCompilationDatabase.html>`_,
+provide a `compilation database <https://clang.llvm.org/docs/JSONCompilationDatabase.html>`_,
 or compilation flags, or both.
 
-In case of the custom build system it is not trivial to get the compilation database, so we have to hand-craft the compilation flags ourselves.
+In case of a custom build system it is not trivial to get the compilation database, so we have to hand-craft the compilation flags ourselves.
 
 **Please, note:** Clang adds implicit header search paths, which must be added
 explicitly via ``-compilation-flags``. You can get them using the following
@@ -163,7 +160,7 @@ The final command to run Mull looks like this:
        -isystem /usr/include/x86_64-linux-gnu" \
      test/bio_enc_test
 
-If everything is correct, then you will see very similar output:
+If everything is correct, then you will see a very similar output:
 
 .. code-block:: text
 
