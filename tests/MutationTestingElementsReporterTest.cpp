@@ -81,7 +81,8 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   ASSERT_FALSE(reachableFunction->empty());
 
   std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions;
-  reachableFunctions.emplace_back(std::make_unique<ReachableFunction>(reachableFunction, nullptr, 1));
+  reachableFunctions.emplace_back(
+      std::make_unique<ReachableFunction>(reachableFunction, nullptr, 1));
   auto functionsUnderTest = mergeReachableFunctions(reachableFunctions);
   functionsUnderTest.back().selectInstructions({});
 
@@ -137,6 +138,9 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
 
   std::cout << object.dump() << '\n';
   ASSERT_FALSE(object.is_null());
+
+  const std::string &schemaJSON = object["schemaVersion"].string_value();
+  ASSERT_EQ(std::string("1.1.1"), schemaJSON);
 
   const std::map<std::string, Json> &filesJSON = object["files"].object_items();
   ASSERT_EQ(1, filesJSON.size());

@@ -135,6 +135,7 @@ void MutationTestingElementsReporter::reportResults(const Result &result) {
     { "mutationScore", (int)score },
     { "thresholds", Json::object{ { "high", 80 }, { "low", 60 } } },
     { "files", createFiles(diagnostics, result, killedMutants, sourceInfoProvider) },
+    { "schemaVersion", "1.1.1" },
   };
   std::string json_str = json.dump();
 
