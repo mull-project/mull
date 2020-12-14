@@ -20,8 +20,8 @@ Toolchain::NativeTarget::NativeTarget() {
 Toolchain::Toolchain(Diagnostics &diagnostics, const Configuration &config)
     : nativeTarget(), machine(llvm::EngineBuilder().selectTarget(
                           llvm::Triple(), "", "", llvm::SmallVector<std::string, 1>())),
-      objectCache(diagnostics, config.cacheEnabled, config.cacheDirectory), simpleCompiler(),
-      nameMangler(machine->createDataLayout()) {}
+      objectCache(diagnostics, config.cacheEnabled, config.cacheDirectory),
+      simpleCompiler(diagnostics), nameMangler(machine->createDataLayout()) {}
 
 ObjectCache &Toolchain::cache() {
   return objectCache;
