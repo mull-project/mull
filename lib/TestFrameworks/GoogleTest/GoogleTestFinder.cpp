@@ -2,7 +2,6 @@
 
 #include "mull/Program/Program.h"
 
-#include <llvm/IR/CallSite.h>
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/InstIterator.h>
@@ -63,7 +62,7 @@ std::vector<Test> GoogleTestFinder::findTests(Program &program) {
       if (globalValueType->getTypeID() == Type::PointerTyID) {
         globalType = globalValueType->getPointerElementType();
       } else {
-        globalType = globalValueType->getSequentialElementType();
+        globalType = globalValueType->getArrayElementType();
       }
 
       if (!globalType) {
@@ -127,8 +126,8 @@ std::vector<Test> GoogleTestFinder::findTests(Program &program) {
       /// my assumptions are correct or not
 
       StoreInst *storeInstruction = nullptr;
-      for (auto userIterator = globalValue.user_begin();
-           userIterator != globalValue.user_end(); userIterator++) {
+      for (auto userIterator = globalValue.user_begin(); userIterator != globalValue.user_end();
+           userIterator++) {
         auto user = *userIterator;
         if (isa<StoreInst>(user)) {
           storeInstruction = dyn_cast<StoreInst>(user);
@@ -136,67 +135,58 @@ std::vector<Test> GoogleTestFinder::findTests(Program &program) {
         }
       }
 
-      assert(storeInstruction &&
-             "The Global should be used within a store instruction");
+      assert(storeInstruction && "The Global should be used within a store instruction");
       auto valueOperand = storeInstruction->getValueOperand();
 
-      auto callSite = CallSite(valueOperand);
-      assert((callSite.isCall() || callSite.isInvoke()) &&
-             "Store should be using call to MakeAndRegisterTestInfo");
+      llvm::Instruction *callSite = llvm::dyn_cast<llvm::CallInst>(valueOperand);
+      if (!callSite) {
+        callSite = llvm::dyn_cast<llvm::InvokeInst>(valueOperand);
+      }
+      assert(callSite && "Expected Call or Invoke instruction");
 
       /// Once we have the CallInstruction we can extract Test Suite Name
       /// and Test Case Name
       /// To extract them we need climb to the top, i.e.:
       ///
       ///   i8* getelementptr inbounds ([6 x i8], [6 x i8]* @.str, i32 0, i32 0)
-      ///   i8* getelementptr inbounds ([6 x i8], [6 x i8]* @.str1, i32 0, i32
-      ///   0)
+      ///   i8* getelementptr inbounds ([6 x i8], [6 x i8]* @.str1, i32 0, i32 0)
 
-      auto testSuiteNameConstRef =
-          dyn_cast<ConstantExpr>(callSite->getOperand(0));
+      auto testSuiteNameConstRef = dyn_cast<ConstantExpr>(callSite->getOperand(0));
       assert(testSuiteNameConstRef);
 
-      auto testCaseNameConstRef =
-          dyn_cast<ConstantExpr>(callSite->getOperand(1));
+      auto testCaseNameConstRef = dyn_cast<ConstantExpr>(callSite->getOperand(1));
       assert(testCaseNameConstRef);
 
       ///   @.str = private unnamed_addr constant [6 x i8] c"Hello\00", align 1
       ///   @.str = private unnamed_addr constant [6 x i8] c"world\00", align 1
 
-      auto testSuiteNameConst =
-          dyn_cast<GlobalValue>(testSuiteNameConstRef->getOperand(0));
+      auto testSuiteNameConst = dyn_cast<GlobalValue>(testSuiteNameConstRef->getOperand(0));
       assert(testSuiteNameConst);
 
-      auto testCaseNameConst =
-          dyn_cast<GlobalValue>(testCaseNameConstRef->getOperand(0));
+      auto testCaseNameConst = dyn_cast<GlobalValue>(testCaseNameConstRef->getOperand(0));
       assert(testCaseNameConst);
 
       ///   [6 x i8] c"Hello\00"
       ///   [6 x i8] c"world\00"
 
-      auto testSuiteNameConstArray =
-          dyn_cast<ConstantDataArray>(testSuiteNameConst->getOperand(0));
+      auto testSuiteNameConstArray = dyn_cast<ConstantDataArray>(testSuiteNameConst->getOperand(0));
       assert(testSuiteNameConstArray);
 
-      auto testCaseNameConstArray =
-          dyn_cast<ConstantDataArray>(testCaseNameConst->getOperand(0));
+      auto testCaseNameConstArray = dyn_cast<ConstantDataArray>(testCaseNameConst->getOperand(0));
       assert(testCaseNameConstArray);
 
       ///   "Hello"
       ///   "world"
 
-      std::string testSuiteName =
-          testSuiteNameConstArray->getRawDataValues().rtrim('\0').str();
-      std::string testCaseName =
-          testCaseNameConstArray->getRawDataValues().rtrim('\0').str();
+      std::string testSuiteName = testSuiteNameConstArray->getRawDataValues().rtrim('\0').str();
+      std::string testCaseName = testCaseNameConstArray->getRawDataValues().rtrim('\0').str();
 
       /// Once we've got the Name of a Test Suite and the name of a Test Case
       /// We can construct the name of a Test
       const std::string testName = testSuiteName + "." + testCaseName;
 
       /// And the part of Test Body function name
-      std::string testBodyFunctionName =
-          testSuiteName + "_" + testCaseName + "_Test8TestBodyEv";
+      std::string testBodyFunctionName = testSuiteName + "_" + testCaseName + "_Test8TestBodyEv";
       StringRef testBodyFunctionNameRef(testBodyFunctionName);
 
       /// Using the TestBodyFunctionName we could find the function
@@ -211,12 +201,10 @@ std::vector<Test> GoogleTestFinder::findTests(Program &program) {
         }
       }
 
-      assert(testBodyFunction &&
-             "Cannot find the TestBody function for the Test");
+      assert(testBodyFunction && "Cannot find the TestBody function for the Test");
 
-      auto arguments = {std::string("--gtest_filter=") + testName};
-      tests.push_back(
-          Test(testName, "mull", "main", arguments, testBodyFunction));
+      auto arguments = { std::string("--gtest_filter=") + testName };
+      tests.push_back(Test(testName, "mull", "main", arguments, testBodyFunction));
     }
   }
 

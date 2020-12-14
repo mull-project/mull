@@ -56,4 +56,8 @@ std::string demangle(const std::string &MangledName) {
   return llvm::demangle(MangledName);
 }
 
+object::BasicSymbolRef::Flags flagsFromSymbol(object::BasicSymbolRef &symbol) {
+  return static_cast<object::BasicSymbolRef::Flags>(symbol.getFlags());
+}
+
 } // namespace llvm_compat

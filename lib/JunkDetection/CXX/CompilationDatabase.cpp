@@ -152,14 +152,14 @@ CompilationDatabase::compilationFlagsForFile(const std::string &filepath) const 
     return it->second;
   }
   auto filename = llvm::sys::path::filename(filepath);
-  it = bitcodeFlags.find(filename);
+  it = bitcodeFlags.find(filename.str());
   if (it != bitcodeFlags.end()) {
     return it->second;
   }
 
   llvm::SmallString<128> dotlessPath(filepath);
   llvm::sys::path::remove_dots(dotlessPath, true);
-  it = bitcodeFlags.find(dotlessPath.str());
+  it = bitcodeFlags.find(dotlessPath.str().str());
   if (it != bitcodeFlags.end()) {
     return it->second;
   }
@@ -170,13 +170,13 @@ CompilationDatabase::compilationFlagsForFile(const std::string &filepath) const 
     return it->second;
   }
   filename = llvm::sys::path::filename(filepath);
-  it = database.find(filename);
+  it = database.find(filename.str());
   if (it != database.end()) {
     return it->second;
   }
 
   llvm::sys::path::remove_dots(dotlessPath, true);
-  it = database.find(dotlessPath.str());
+  it = database.find(dotlessPath.str().str());
   if (it != database.end()) {
     return it->second;
   }

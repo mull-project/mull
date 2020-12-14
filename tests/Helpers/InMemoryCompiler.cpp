@@ -9,6 +9,9 @@
 
 #include <llvm/IR/Module.h>
 #include <llvm/Support/TargetSelect.h>
+#if LLVM_VERSION_MAJOR >= 11
+#include <llvm/Support/Host.h>
+#endif
 
 using namespace mull_test;
 

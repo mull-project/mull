@@ -1,6 +1,8 @@
 #include "mull/Parallelization/Tasks/MutantPreparationTasks.h"
 #include "mull/MutationPoint.h"
 #include "mull/Parallelization/Progress.h"
+#include <llvm/IR/Constant.h>
+#include <llvm/IR/Instructions.h>
 #include <llvm/Transforms/Utils/Cloning.h>
 
 using namespace mull;
@@ -71,14 +73,22 @@ void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode) {
     auto trampoline = module->getOrInsertGlobal(anyPoint->getTrampolineName(), functionPointer);
     llvm::BasicBlock *block = llvm::BasicBlock::Create(context, "indirect_call", original);
 
-    auto loadValue = new llvm::LoadInst(trampoline, "indirect_function_pointer", block);
-    // name has to be empty for void functions:
-    // http://lists.llvm.org/pipermail/llvm-dev/2016-March/096242.html
-    auto callInst = llvm::CallInst::Create(loadValue, args, "", block);
-    if (original->getFunctionType()->getReturnType()->isVoidTy()) {
-      llvm::ReturnInst::Create(context, block);
-    } else {
-      llvm::ReturnInst::Create(context, callInst, block);
+    auto retType = original->getFunctionType()->getReturnType();
+    llvm::Constant *dummy = nullptr;
+    if (!retType->isVoidTy()) {
+      dummy = llvm::Constant::getNullValue(retType);
+    }
+    auto retVal = llvm::ReturnInst::Create(context, dummy, block);
+
+    auto loadValue = new llvm::LoadInst(trampoline->getType()->getPointerElementType(),
+                                        trampoline,
+                                        "indirect_function_pointer",
+                                        false,
+                                        retVal);
+    auto callInst =
+        llvm::CallInst::Create(original->getFunctionType(), loadValue, args, "", retVal);
+    if (!retType->isVoidTy()) {
+      retVal->setOperand(0, callInst);
     }
   }
 }

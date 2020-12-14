@@ -29,9 +29,9 @@ void JITEngine::addObjectFiles(std::vector<object::ObjectFile *> &files,
         consumeError(nameOrError.takeError());
         continue;
       }
-      std::string name = nameOrError.get();
-      if (symbol.getFlags() & object::SymbolRef::SF_Undefined) {
-        if (!(symbol.getFlags() & object::SymbolRef::SF_Weak)) {
+      std::string name = nameOrError.get().str();
+      if (llvm_compat::flagsFromSymbol(symbol) & object::SymbolRef::SF_Undefined) {
+        if (!(llvm_compat::flagsFromSymbol(symbol) & object::SymbolRef::SF_Weak)) {
           unresolvedSymbols.insert(name);
         }
         continue;

@@ -2,7 +2,7 @@
 #include "mull/MutationPoint.h"
 #include "mull/ReachableFunction.h"
 #include <irm/irm.h>
-#include <llvm/IR/CallSite.h>
+#include <llvm/IR/Instructions.h>
 #include <sstream>
 
 using namespace llvm;
@@ -36,12 +36,12 @@ RemoveVoidFunctionMutator::getMutations(Bitcode *bitcode, const FunctionUnderTes
   for (llvm::Instruction *instruction : function.getSelectedInstructions()) {
     for (auto &mutator : lowLevelMutators) {
       if (mutator->canMutate(instruction)) {
-        CallSite callSite = CallSite(instruction);
+        auto *callSite = llvm::dyn_cast<llvm::CallInst>(instruction);
 
         std::stringstream diagstream;
         diagstream << "Remove Void Call: removed ";
-        if (callSite.getCalledFunction()->hasName()) {
-          diagstream << callSite.getCalledFunction()->getName().str();
+        if (callSite->getCalledFunction()->hasName()) {
+          diagstream << callSite->getCalledFunction()->getName().str();
         }
         std::string diagnostics = diagstream.str();
 

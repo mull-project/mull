@@ -18,7 +18,7 @@ std::map<std::string, std::string> mull::BitcodeMetadataReader::getCompilationDa
     for (llvm::DICompileUnit *unit : module->debug_compile_units()) {
       llvm::StringRef directory = unit->getDirectory();
       llvm::StringRef fileName = unit->getFilename();
-      std::string unitFullPath = absoluteFilePath(directory, fileName);
+      std::string unitFullPath = absoluteFilePath(directory.str(), fileName.str());
 
       llvm::StringRef unitFlags = unit->getFlags();
 

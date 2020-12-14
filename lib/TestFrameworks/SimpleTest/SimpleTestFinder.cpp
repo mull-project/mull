@@ -12,7 +12,8 @@ std::vector<Test> SimpleTestFinder::findTests(Program &program) {
       /// We find C functions having test_ and the same functions if they are
       /// compiled with C++ (mangled as "_Z25test_").
       if (function.getName().find("test_") != std::string::npos) {
-        tests.push_back(Test(function.getName(), "mull", function.getName(), {}, &function));
+        tests.push_back(
+            Test(function.getName().str(), "mull", function.getName().str(), {}, &function));
       }
     }
   }

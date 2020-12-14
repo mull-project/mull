@@ -20,7 +20,7 @@ JITSymbolFlags JITSymbolFlagsFromObjectSymbol(const object::BasicSymbolRef &symb
 object::OwningBinary<object::ObjectFile> compileModule(orc::SimpleCompiler &compiler,
                                                        llvm::Module &module) {
   auto buffer = compiler(module);
-  auto bufferRef = buffer->getMemBufferRef();
+  auto bufferRef = buffer.get()->getMemBufferRef();
   auto objectOrError = object::ObjectFile::createObjectFile(bufferRef);
   if (!objectOrError) {
     consumeError(objectOrError.takeError());
@@ -28,52 +28,43 @@ object::OwningBinary<object::ObjectFile> compileModule(orc::SimpleCompiler &comp
   }
 
   return object::OwningBinary<object::ObjectFile>(std::move(objectOrError.get()),
-                                                  std::move(buffer));
+                                                  std::move(buffer.get()));
 }
 
 StringRef getSectionContent(const object::SectionRef &section) {
-  StringRef content;
-  section.getContents(content);
-  return content;
+  Expected<StringRef> content = section.getContents();
+  if (!content) {
+    return {};
+  }
+  return content.get();
 }
+
 StringRef getSectionName(const object::SectionRef &section) {
-  StringRef name;
-  section.getName(name);
-  return name;
+  Expected<StringRef> name = section.getName();
+  if (!name) {
+    return {};
+  }
+  return name.get();
 }
 
 DICompileUnit *getUnit(const DebugLoc &debugLocation) {
   DIScope *scope = debugLocation->getScope();
   while (!llvm::isa<llvm::DISubprogram>(scope) && scope != nullptr) {
-    scope = scope->getScope().resolve();
+    scope = scope->getScope();
   }
   return scope ? llvm::cast<llvm::DISubprogram>(scope)->getUnit() : nullptr;
 }
 
-static bool isItaniumEncoding(const std::string &MangledName) {
-  size_t Pos = MangledName.find_first_not_of('_');
-  // A valid Itanium encoding requires 1-4 leading underscores, followed by 'Z'.
-  return Pos > 0 && Pos <= 4 && MangledName[Pos] == 'Z';
-}
-
 std::string demangle(const std::string &MangledName) {
-  char *Demangled;
-  if (isItaniumEncoding(MangledName))
-    Demangled = llvm::itaniumDemangle(MangledName.c_str(), nullptr, nullptr, nullptr);
-  else
-    Demangled = llvm::microsoftDemangle(MangledName.c_str(), nullptr, nullptr,
-                                  nullptr);
-
-  if (!Demangled)
-    return MangledName;
-
-  std::string Ret = Demangled;
-  std::free(Demangled);
-  return Ret;
+  return llvm::demangle(MangledName);
 }
 
 object::BasicSymbolRef::Flags flagsFromSymbol(object::BasicSymbolRef &symbol) {
-  return static_cast<object::BasicSymbolRef::Flags>(symbol.getFlags());
+  Expected<uint32_t> maybeFlags = symbol.getFlags();
+  if (!maybeFlags) {
+    return object::BasicSymbolRef::Flags::SF_None;
+  }
+  return static_cast<object::BasicSymbolRef::Flags>(maybeFlags.get());
 }
 
 } // namespace llvm_compat
