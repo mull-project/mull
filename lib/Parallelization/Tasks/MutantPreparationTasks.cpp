@@ -5,8 +5,7 @@
 
 using namespace mull;
 
-void CloneMutatedFunctionsTask::operator()(iterator begin, iterator end,
-                                           Out &storage,
+void CloneMutatedFunctionsTask::operator()(iterator begin, iterator end, Out &storage,
                                            progress_counter &counter) {
   for (auto it = begin; it != end; it++, counter.increment()) {
     Bitcode &bitcode = **it;
@@ -14,8 +13,7 @@ void CloneMutatedFunctionsTask::operator()(iterator begin, iterator end,
   }
 }
 
-void CloneMutatedFunctionsTask::cloneFunctions(Bitcode &bitcode,
-                                               Out &mutatedFunctions) {
+void CloneMutatedFunctionsTask::cloneFunctions(Bitcode &bitcode, Out &mutatedFunctions) {
   for (auto pair : bitcode.getMutationPointsMap()) {
     llvm::Function *original = pair.first;
     MutationPoint *anyPoint = pair.second.front();
@@ -29,8 +27,7 @@ void CloneMutatedFunctionsTask::cloneFunctions(Bitcode &bitcode,
   }
 }
 
-void DeleteOriginalFunctionsTask::operator()(iterator begin, iterator end,
-                                             Out &storage,
+void DeleteOriginalFunctionsTask::operator()(iterator begin, iterator end, Out &storage,
                                              progress_counter &counter) {
   for (auto it = begin; it != end; it++, counter.increment()) {
     Bitcode &bitcode = **it;
@@ -50,8 +47,7 @@ void DeleteOriginalFunctionsTask::deleteFunctions(Bitcode &bitcode) {
   }
 }
 
-void InsertMutationTrampolinesTask::operator()(iterator begin, iterator end,
-                                               Out &storage,
+void InsertMutationTrampolinesTask::operator()(iterator begin, iterator end, Out &storage,
                                                progress_counter &counter) {
   for (auto it = begin; it != end; it++, counter.increment()) {
     Bitcode &bitcode = **it;
@@ -72,16 +68,17 @@ void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode) {
     }
 
     llvm::Type *functionPointer = original->getFunctionType()->getPointerTo();
-    auto trampoline = module->getOrInsertGlobal(anyPoint->getTrampolineName(),
-                                                functionPointer);
-    llvm::BasicBlock *block =
-        llvm::BasicBlock::Create(context, "indirect_call", original);
+    auto trampoline = module->getOrInsertGlobal(anyPoint->getTrampolineName(), functionPointer);
+    llvm::BasicBlock *block = llvm::BasicBlock::Create(context, "indirect_call", original);
 
-    auto loadValue =
-        new llvm::LoadInst(trampoline, "indirect_function_pointer", block);
+    auto loadValue = new llvm::LoadInst(trampoline, "indirect_function_pointer", block);
     // name has to be empty for void functions:
     // http://lists.llvm.org/pipermail/llvm-dev/2016-March/096242.html
     auto callInst = llvm::CallInst::Create(loadValue, args, "", block);
-    llvm::ReturnInst::Create(context, callInst, block);
+    if (original->getFunctionType()->getReturnType()->isVoidTy()) {
+      llvm::ReturnInst::Create(context, block);
+    } else {
+      llvm::ReturnInst::Create(context, callInst, block);
+    }
   }
 }

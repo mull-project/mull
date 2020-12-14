@@ -22,8 +22,8 @@ TEST(Compiler, CompileModule) {
   std::unique_ptr<TargetMachine> targetMachine(
       EngineBuilder().selectTarget(Triple(), "", "", SmallVector<std::string, 1>()));
 
-  Compiler compiler;
   Diagnostics diagnostics;
+  Compiler compiler(diagnostics);
   LLVMContext llvmContext;
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
