@@ -33,6 +33,10 @@ std::unique_ptr<Result> Driver::run() {
   loadDynamicLibraries();
 
   auto tests = findTests();
+  if (tests.empty()) {
+    diagnostics.warning("No tests found. Either switch to CustomTest, or ensure that the "
+                        "executable contains bitcode for all source files.");
+  }
   auto mutationPoints = findMutationPoints(tests);
   auto filteredMutations = filterMutations(std::move(mutationPoints));
   auto mutationResults = runMutations(filteredMutations);
