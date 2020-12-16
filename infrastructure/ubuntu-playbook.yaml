@@ -42,7 +42,7 @@
 
     - name: Download CMake
       get_url:
-        url: https://github.com/Kitware/CMake/releases/download/v3.12.4/cmake-3.12.4-Linux-x86_64.sh
+        url: https://github.com/Kitware/CMake/releases/download/v3.16.9/cmake-3.16.9-Linux-x86_64.sh
         dest: "{{ working_dir }}/cmake.sh"
       register: download_cmake
 
