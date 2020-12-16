@@ -5,6 +5,7 @@
 
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/Basic/SourceLocation.h>
+#include <llvm/Support/FileSystem.h>
 
 #include <utility>
 

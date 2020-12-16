@@ -2,6 +2,7 @@
 
 #include "mull/AST/ASTVisitor.h"
 #include "mull/Parallelization/Progress.h"
+#include <llvm/Support/FileSystem.h>
 
 using namespace mull;
 

@@ -4,6 +4,7 @@
 #include "mull/MutationPoint.h"
 
 #include <clang/AST/RecursiveASTVisitor.h>
+#include <clang/Basic/FileManager.h>
 #include <clang/Frontend/CompilerInstance.h>
 #include <llvm/Support/FileSystem.h>
 #include <llvm/Support/Path.h>

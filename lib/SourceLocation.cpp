@@ -29,8 +29,8 @@ SourceLocation SourceLocation::locationFromInstruction(const llvm::Instruction *
 
   const llvm::DebugLoc &debugInfo = instruction->getDebugLoc();
 
-  std::string directory = debugInfo->getDirectory();
-  std::string filePath = debugInfo->getFilename();
+  std::string directory = debugInfo->getDirectory().str();
+  std::string filePath = debugInfo->getFilename().str();
   int line = debugInfo->getLine();
   int column = debugInfo->getColumn();
 
@@ -63,8 +63,8 @@ SourceLocation SourceLocation::locationFromFunction(const llvm::Function *functi
     unitFilePath = unit->getFilename();
   }
 
-  std::string directory = debugInfo->getDirectory();
-  std::string filePath = debugInfo->getFilename();
+  std::string directory = debugInfo->getDirectory().str();
+  std::string filePath = debugInfo->getFilename().str();
   int line = debugInfo->getLine();
   int column = 0;
 

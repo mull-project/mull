@@ -81,7 +81,7 @@ std::vector<Test> BoostTestFinder::findTests(Program &program) {
       if (name.find("end_suite_registrar") == llvm::StringRef::npos) {
         continue;
       }
-      std::string demangledName = llvm_compat::demangle(name);
+      std::string demangledName = llvm_compat::demangle(name.str());
       auto posEnd = demangledName.rfind("::end_suite_registrar");
       if (posEnd == std::string::npos || demangledName.find("::", posEnd + 1) != std::string::npos) {
         // false match
@@ -111,7 +111,7 @@ std::vector<Test> BoostTestFinder::findTests(Program &program) {
       if (name.find("test_method") == llvm::StringRef::npos) {
         continue;
       }
-      std::string demangledName = llvm_compat::demangle(name);
+      std::string demangledName = llvm_compat::demangle(name.str());
       // Check that the demangled name ends with ::test_method() to
       // filter out lambdas and other methods which are not really test cases
       constexpr std::string::size_type testMethodStrLength = 15; // std::string("::test_method()").length()

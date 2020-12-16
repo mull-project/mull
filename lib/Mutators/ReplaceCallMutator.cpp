@@ -1,10 +1,10 @@
 #include "mull/Mutators/ReplaceCallMutator.h"
 #include "mull/MutationPoint.h"
 #include "mull/ReachableFunction.h"
-#include <irm/irm.h>
-#include <llvm/IR/CallSite.h>
-#include <sstream>
 #include <assert.h>
+#include <irm/irm.h>
+#include <llvm/IR/Instructions.h>
+#include <sstream>
 
 using namespace llvm;
 using namespace mull;
@@ -38,12 +38,12 @@ std::vector<MutationPoint *> ReplaceCallMutator::getMutations(Bitcode *bitcode,
   for (llvm::Instruction *instruction : function.getSelectedInstructions()) {
     for (auto &mutator : lowLevelMutators) {
       if (mutator->canMutate(instruction)) {
-        CallSite callSite(instruction);
+        auto *callSite = llvm::dyn_cast<llvm::CallInst>(instruction);
 
         std::stringstream diagnostics;
         diagnostics << "Replace Call: replaced a call to function ";
-        if (callSite.getCalledFunction()->hasName()) {
-          diagnostics << callSite.getCalledFunction()->getName().str();
+        if (callSite->getCalledFunction()->hasName()) {
+          diagnostics << callSite->getCalledFunction()->getName().str();
         }
         diagnostics << " with 42";
 

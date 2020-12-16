@@ -25,7 +25,7 @@ static std::string MD5HashFromBuffer(StringRef buffer) {
   hasher.final(hash);
   SmallString<32> result;
   MD5::stringifyResult(hash, result);
-  return result.str();
+  return result.str().str();
 }
 
 std::unique_ptr<Module> mull::parseBitcode(MemoryBufferRef bufferRef, LLVMContext &context) {
