@@ -47,7 +47,7 @@ int main(int argc, char **argv) {
     for (auto &bc : program.bitcode()) {
       mull::Bitcode &bitcode = *bc;
       std::vector<std::string> mutatedFunctions;
-      mull::CloneMutatedFunctionsTask::cloneFunctions(bitcode, mutatedFunctions);
+      mull::CloneMutatedFunctionsTask::cloneFunctions(bitcode);
       mull::DeleteOriginalFunctionsTask::deleteFunctions(bitcode);
       mull::InsertMutationTrampolinesTask::insertTrampolines(bitcode);
     }

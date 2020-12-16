@@ -25,9 +25,8 @@ public:
   using iterator = In::const_iterator;
 
   MutantExecutionTask(Diagnostics &diagnostics, const ProcessSandbox &sandbox, Program &program,
-                      TestRunner &runner, const Configuration &config, Mangler &mangler,
-                      std::vector<llvm::object::ObjectFile *> &objectFiles,
-                      std::vector<std::string> &mutatedFunctionNames);
+                      TestRunner &runner, const Configuration &config,
+                      std::vector<llvm::object::ObjectFile *> &objectFiles);
 
   void operator()(iterator begin, iterator end, Out &storage,
                   progress_counter &counter);
@@ -39,8 +38,6 @@ private:
   const ProcessSandbox &sandbox;
   TestRunner &runner;
   const Configuration &config;
-  Mangler &mangler;
   std::vector<llvm::object::ObjectFile *> &objectFiles;
-  std::vector<std::string> &mutatedFunctionNames;
 };
 } // namespace mull

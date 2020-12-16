@@ -168,10 +168,6 @@ void MutationPoint::setMutatedFunction(llvm::Function *function) {
   this->mutatedFunction = function;
 }
 
-std::string MutationPoint::getTrampolineName() {
-  return originalFunction->getName().str() + "_" + bitcode->getUniqueIdentifier() + "_trampoline";
-}
-
 std::string MutationPoint::getMutatedFunctionName() {
   return getUniqueIdentifier();
 }

@@ -38,7 +38,6 @@ set(mull_sources
   Toolchain/Mangler.cpp
   Toolchain/Resolvers/InstrumentationResolver.cpp
   Toolchain/Resolvers/MutationResolver.cpp
-  Toolchain/Trampolines.cpp
   Toolchain/CXXRuntimeOverrides.cpp
 
   Bitcode.cpp

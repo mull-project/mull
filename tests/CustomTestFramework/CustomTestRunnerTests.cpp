@@ -11,7 +11,6 @@
 #include "mull/Toolchain/JITEngine.h"
 #include "mull/Toolchain/Mangler.h"
 #include "mull/Toolchain/Toolchain.h"
-#include "mull/Toolchain/Trampolines.h"
 
 #include "gtest/gtest.h"
 
@@ -75,9 +74,7 @@ TEST_P(CustomTestRunnerTest, all) {
   mull::Test test("test", "mull", "main", parameter.arguments, nullptr);
   ForkTimerSandbox sandbox;
   JITEngine jit(diagnostics);
-  std::vector<std::string> trampolineNames;
-  Trampolines trampolines(trampolineNames);
-  runner.loadMutatedProgram(objects, trampolines, jit);
+  runner.loadMutatedProgram(objects, jit);
   ExecutionResult result = sandbox.run(
       diagnostics, [&]() { return runner.runTest(jit, program, test); }, TestTimeout, true);
   ASSERT_EQ(result.status, parameter.status);

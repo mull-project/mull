@@ -8,7 +8,6 @@
 #include "mull/Toolchain/Mangler.h"
 #include "mull/Toolchain/Resolvers/InstrumentationResolver.h"
 #include "mull/Toolchain/Resolvers/MutationResolver.h"
-#include "mull/Toolchain/Trampolines.h"
 
 #include <llvm/ExecutionEngine/SectionMemoryManager.h>
 
@@ -90,9 +89,7 @@ ExecutionStatus NativeTestRunner::runTest(JITEngine &jit, Program &program, Test
   return ExecutionStatus::Failed;
 }
 
-void NativeTestRunner::loadMutatedProgram(TestRunner::ObjectFiles &objectFiles,
-                                          Trampolines &trampolines, JITEngine &jit) {
-  trampolines.allocateTrampolines(mangler);
-  MutationResolver resolver(overrides, trampolines);
+void NativeTestRunner::loadMutatedProgram(TestRunner::ObjectFiles &objectFiles, JITEngine &jit) {
+  MutationResolver resolver(overrides);
   jit.addObjectFiles(objectFiles, resolver, std::make_unique<llvm::SectionMemoryManager>());
 }
