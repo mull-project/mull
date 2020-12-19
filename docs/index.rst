@@ -5,6 +5,7 @@ Welcome to Mull's documentation!
    :maxdepth: 2
 
    GettingStarted
+   Features
    MutationTestingIntro
    Installation
    Tutorials
