@@ -13,4 +13,4 @@ Doing research? There is a special chapter for you: `For Researchers <ForResearc
 
 If you want to dive deeper and look behind the curtains, then we encourage you to `hack on Mull <HackingOnMull.html>`_.
 
-If you have any questions feel free to `open an issue <https://github.com/mull-project/mull/issues/new>`_ or join the great community of researchers and practitioners on `Slack <https://mutation-testing-slack.herokuapp.com>`_.
+If you have any questions feel free to `open an issue <https://github.com/mull-project/mull/issues/new>`_ or join the great community of researchers and practitioners on `Discord <https://discord.gg/Hphp7dW>`_.
