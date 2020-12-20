@@ -3,6 +3,7 @@
 #include <llvm/Demangle/Demangle.h>
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/DebugLoc.h>
+#include <llvm/IR/Module.h>
 #include <llvm/Object/ObjectFile.h>
 
 using namespace llvm;
@@ -61,8 +62,7 @@ std::string demangle(const std::string &MangledName) {
   if (isItaniumEncoding(MangledName))
     Demangled = llvm::itaniumDemangle(MangledName.c_str(), nullptr, nullptr, nullptr);
   else
-    Demangled = llvm::microsoftDemangle(MangledName.c_str(), nullptr, nullptr,
-                                  nullptr);
+    Demangled = llvm::microsoftDemangle(MangledName.c_str(), nullptr, nullptr, nullptr);
 
   if (!Demangled)
     return MangledName;
@@ -74,6 +74,10 @@ std::string demangle(const std::string &MangledName) {
 
 object::BasicSymbolRef::Flags flagsFromSymbol(object::BasicSymbolRef &symbol) {
   return static_cast<object::BasicSymbolRef::Flags>(symbol.getFlags());
+}
+
+llvm::Value *getOrInsertFunction(llvm::Module *module, StringRef name, FunctionType *type) {
+  return module->getOrInsertFunction(name, type);
 }
 
 } // namespace llvm_compat

@@ -3,6 +3,7 @@
 #include <llvm/Demangle/Demangle.h>
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/DebugLoc.h>
+#include <llvm/IR/Module.h>
 #include <llvm/Object/ObjectFile.h>
 
 using namespace llvm;
@@ -65,6 +66,10 @@ object::BasicSymbolRef::Flags flagsFromSymbol(object::BasicSymbolRef &symbol) {
     return object::BasicSymbolRef::Flags::SF_None;
   }
   return static_cast<object::BasicSymbolRef::Flags>(maybeFlags.get());
+}
+
+llvm::Value *getOrInsertFunction(llvm::Module *module, StringRef name, FunctionType *type) {
+  return module->getOrInsertFunction(name, type).getCallee();
 }
 
 } // namespace llvm_compat

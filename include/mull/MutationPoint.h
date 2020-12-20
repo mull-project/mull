@@ -67,6 +67,7 @@ class MutationPoint {
   const SourceLocation sourceLocation;
   std::vector<std::pair<Test *, int>> reachableTests;
   irm::IRMutation *irMutator;
+  std::string userIdentifier;
 
 public:
   MutationPoint(Mutator *mutator, irm::IRMutation *irMutator, llvm::Instruction *instruction,
@@ -76,6 +77,8 @@ public:
 
   Mutator *getMutator();
   Mutator *getMutator() const;
+
+  const std::string &getUserIdentifier() const;
 
   const MutationPointAddress &getAddress() const;
   llvm::Value *getOriginalValue() const;
