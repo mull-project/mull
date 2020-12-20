@@ -15,6 +15,7 @@ env:
   - LLVM_VERSION=8.0
   - LLVM_VERSION=9.0
   - LLVM_VERSION=10.0
+  - LLVM_VERSION=11.0
 
 script:
   - sh travis-macos.sh

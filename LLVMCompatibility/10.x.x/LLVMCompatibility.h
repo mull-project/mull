@@ -30,5 +30,6 @@ DICompileUnit *getUnit(const DebugLoc &debugLocation);
 std::string demangle(const std::string &MangledName);
 
 object::BasicSymbolRef::Flags flagsFromSymbol(object::BasicSymbolRef &symbol);
+llvm::Value *getOrInsertFunction(llvm::Module *module, StringRef name, FunctionType *type);
 
 } // namespace llvm_compat
