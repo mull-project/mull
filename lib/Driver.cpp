@@ -11,12 +11,16 @@
 #include "mull/ReachableFunction.h"
 #include "mull/Result.h"
 #include "mull/TestFrameworks/TestFramework.h"
-#include "mull/Toolchain/JITEngine.h"
+#include "mull/Toolchain/Runner.h"
 
+#include <llvm/ProfileData/Coverage/CoverageMapping.h>
 #include <llvm/Support/DynamicLibrary.h>
+#include <llvm/Support/Path.h>
 
 #include <algorithm>
 #include <sstream>
+#include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 using namespace llvm;
@@ -29,9 +33,6 @@ Driver::~Driver() {
 }
 
 std::unique_ptr<Result> Driver::run() {
-  compileInstrumentedBitcodeFiles();
-  loadDynamicLibraries();
-
   auto tests = findTests();
   if (tests.empty()) {
     diagnostics.warning("No tests found. Either switch to CustomTest, or ensure that the "
@@ -93,38 +94,43 @@ std::vector<MutationPoint *> Driver::findMutationPoints(vector<Test> &tests) {
     return std::vector<MutationPoint *>();
   }
 
-  auto objectFiles = AllInstrumentedObjectFiles();
-  JITEngine jit(diagnostics);
-
-  singleTask.execute("Preparing original test run", [&]() {
-    testFramework.runner().loadInstrumentedProgram(objectFiles, instrumentation, jit);
-  });
-
-  std::vector<OriginalTestExecutionTask> tasks;
-  tasks.reserve(config.parallelization.testExecutionWorkers);
-  for (int i = 0; i < config.parallelization.testExecutionWorkers; i++) {
-    tasks.emplace_back(
-        diagnostics, instrumentation, program, sandbox, testFramework.runner(), config, jit);
+  (void)sandbox;
+  if (config.skipSanityCheckRun) {
+    ExecutionResult result;
+    result.runningTime = config.timeout;
+    result.status = Passed;
+    for (auto &test : tests) {
+      test.setExecutionResult(result);
+    }
+  } else {
+    Runner runner(diagnostics);
+    singleTask.execute("Sanity check run", [&]() {
+      ExecutionResult result =
+          runner.runProgram(config.executable, {}, {}, config.timeout, config.captureTestOutput);
+      if (result.status != Passed) {
+        std::stringstream failureMessage;
+        failureMessage << "Original test failed\n";
+        failureMessage << "test: ";
+        failureMessage << "main"
+                       << "\n";
+        failureMessage << "status: ";
+        failureMessage << result.getStatusAsString() << "\n";
+        failureMessage << "stdout: '";
+        failureMessage << result.stdoutOutput << "'\n";
+        failureMessage << "stderr: '";
+        failureMessage << result.stderrOutput << "'\n";
+        diagnostics.warning(failureMessage.str());
+      }
+    });
   }
 
-  std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions;
-  TaskExecutor<OriginalTestExecutionTask> testRunner(
-      diagnostics, "Running original tests", tests, reachableFunctions, tasks);
-  testRunner.execute();
-
-  std::vector<FunctionUnderTest> functionsUnderTest = mergeReachableFunctions(reachableFunctions);
-
+  std::vector<FunctionUnderTest> functionsUnderTest = getFunctionsUnderTest(tests);
   std::vector<FunctionUnderTest> filteredFunctions = filterFunctions(functionsUnderTest);
 
   selectInstructions(filteredFunctions);
 
   std::vector<MutationPoint *> mutationPoints =
       mutationsFinder.getMutationPoints(diagnostics, program, filteredFunctions);
-
-  {
-    /// Cleans up the memory allocated for the vector itself as well
-    std::vector<OwningBinary<ObjectFile>>().swap(instrumentedObjectFiles);
-  }
 
   return mutationPoints;
 }
@@ -259,27 +265,24 @@ Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
   for (int i = 0; i < workers; i++) {
     compilationTasks.emplace_back(toolchain);
   }
+  std::vector<std::string> objectFiles;
   TaskExecutor<OriginalCompilationTask> mutantCompiler(diagnostics,
                                                        "Compiling original code",
                                                        program.bitcode(),
-                                                       ownedObjectFiles,
+                                                       objectFiles,
                                                        std::move(compilationTasks));
   mutantCompiler.execute();
 
-  std::vector<object::ObjectFile *> objectFiles;
-  for (auto &object : ownedObjectFiles) {
-    objectFiles.push_back(object.getBinary());
-  }
-  for (auto &object : program.precompiledObjectFiles()) {
-    objectFiles.push_back(object.getBinary());
-  }
+  std::string executable;
+  singleTask.execute("Link mutated program",
+                     [&]() { executable = toolchain.linker().linkObjectFiles(objectFiles); });
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
 
   std::vector<MutantExecutionTask> tasks;
   tasks.reserve(config.parallelization.mutantExecutionWorkers);
   for (int i = 0; i < config.parallelization.mutantExecutionWorkers; i++) {
-    tasks.emplace_back(diagnostics, sandbox, program, testFramework.runner(), config, objectFiles);
+    tasks.emplace_back(config, diagnostics, executable);
   }
   TaskExecutor<MutantExecutionTask> mutantRunner(
       diagnostics, "Running mutants", mutationPoints, mutationResults, std::move(tasks));
@@ -314,4 +317,85 @@ Driver::Driver(Diagnostics &diagnostics, const Configuration &config, const Proc
   } else {
     this->ideDiagnostics = new NullIDEDiagnostics();
   }
+}
+
+static std::unique_ptr<llvm::coverage::CoverageMapping>
+loadCoverage(const Configuration &configuration, Diagnostics &diagnostics) {
+  if (configuration.coverageInfo.empty()) {
+    return nullptr;
+  }
+  llvm::Expected<std::unique_ptr<llvm::coverage::CoverageMapping>> maybeMapping =
+      llvm::coverage::CoverageMapping::load({ configuration.executable },
+                                            configuration.coverageInfo);
+  if (!maybeMapping) {
+    std::string error;
+    llvm::raw_string_ostream os(error);
+    llvm::logAllUnhandledErrors(maybeMapping.takeError(), os, "Cannot read coverage info: ");
+    diagnostics.warning(os.str());
+    return nullptr;
+  }
+  return std::move(maybeMapping.get());
+}
+
+std::vector<FunctionUnderTest> Driver::getFunctionsUnderTest(std::vector<Test> &tests) {
+  std::vector<FunctionUnderTest> functionsUnderTest;
+
+  singleTask.execute("Gathering functions under test", [&]() {
+    std::unique_ptr<llvm::coverage::CoverageMapping> coverage = loadCoverage(config, diagnostics);
+    if (coverage) {
+      /// Some of the function records contain just name, the others are prefixed with the filename
+      /// to avoid collisions
+      /// TODO: check case when filename:functionName is not enough to resolve collisions
+      /// TODO: pick a proper data structure
+      std::unordered_map<std::string, std::unordered_set<std::string>> scopedFunctions;
+      std::unordered_set<std::string> unscopedFunctions;
+      for (auto &it : coverage->getCoveredFunctions()) {
+        if (!it.ExecutionCount) {
+          continue;
+        }
+        std::string scope;
+        std::string name = it.Name;
+        size_t idx = name.find(':');
+        if (idx != std::string::npos) {
+          scope = name.substr(0, idx);
+          name = name.substr(idx + 1);
+        }
+        if (scope.empty()) {
+          unscopedFunctions.insert(name);
+        } else {
+          scopedFunctions[scope].insert(name);
+        }
+      }
+      for (auto &test : tests) {
+        for (auto &bitcode : program.bitcode()) {
+          for (llvm::Function &function : *bitcode->getModule()) {
+            bool covered = false;
+            std::string name = function.getName().str();
+            if (unscopedFunctions.count(name)) {
+              covered = true;
+            } else {
+              std::string filepath = SourceLocation::locationFromFunction(&function).unitFilePath;
+              std::string scope = llvm::sys::path::filename(filepath).str();
+              if (scopedFunctions[scope].count(name)) {
+                covered = true;
+              }
+            }
+            if (covered) {
+              functionsUnderTest.emplace_back(&function, &test, 1);
+            }
+          }
+        }
+      }
+    } else {
+      for (auto &test : tests) {
+        for (auto &bitcode : program.bitcode()) {
+          for (llvm::Function &function : *bitcode->getModule()) {
+            functionsUnderTest.emplace_back(&function, &test, 1);
+          }
+        }
+      }
+    }
+  });
+
+  return functionsUnderTest;
 }

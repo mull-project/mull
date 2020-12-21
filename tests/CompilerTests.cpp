@@ -4,9 +4,9 @@
 
 #include <llvm/ExecutionEngine/ExecutionEngine.h>
 #include <llvm/IR/LLVMContext.h>
-#include <llvm/IR/Module.h>
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/TargetSelect.h>
+#include <mull/Config/Configuration.h>
 #include <mull/Diagnostics/Diagnostics.h>
 
 #include "gtest/gtest.h"
@@ -23,7 +23,8 @@ TEST(Compiler, CompileModule) {
       EngineBuilder().selectTarget(Triple(), "", "", SmallVector<std::string, 1>()));
 
   Diagnostics diagnostics;
-  Compiler compiler(diagnostics);
+  Configuration configuration;
+  Compiler compiler(diagnostics, configuration);
   LLVMContext llvmContext;
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(

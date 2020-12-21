@@ -93,7 +93,7 @@ opt<std::string> tool::Linker(
     desc("Linker program"),
     value_desc("string"),
     Optional,
-    init("clang"),
+    init(""),
     cat(MullCXXCategory));
 
 opt<std::string> tool::LinkerFlags(

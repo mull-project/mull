@@ -14,10 +14,12 @@ namespace mull {
 
 class Bitcode;
 class Diagnostics;
+struct Configuration;
 
 class Compiler {
 public:
-  explicit Compiler(Diagnostics &diagnostics);
+  explicit Compiler(Diagnostics &diagnostics, const Configuration &configuration);
+  std::string compileBitcode(const Bitcode &bitcode);
   llvm::object::OwningBinary<llvm::object::ObjectFile> compileBitcode(const Bitcode &bitcode,
                                                                       llvm::TargetMachine &machine);
   llvm::object::OwningBinary<llvm::object::ObjectFile> compileModule(llvm::Module *module,
@@ -25,5 +27,6 @@ public:
 
 private:
   Diagnostics &diagnostics;
+  const Configuration &configuration;
 };
 } // namespace mull

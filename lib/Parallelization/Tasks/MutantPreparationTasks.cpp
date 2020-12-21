@@ -44,7 +44,7 @@ void DeleteOriginalFunctionsTask::deleteFunctions(Bitcode &bitcode) {
     llvm::ValueToValueMapTy map;
     auto originalCopy = CloneFunction(original, map);
     originalCopy->setName(anyPoint->getOriginalFunctionName());
-    original->deleteBody();
+    original->dropAllReferences();
   }
 }
 
