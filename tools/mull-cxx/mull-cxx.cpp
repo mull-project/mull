@@ -233,12 +233,11 @@ int main(int argc, char **argv) {
     mull::ASTFinder astFinder(mutatorKindSet);
     astFinder.findMutations(diagnostics, configuration, program, *filePathFilter, astStorage);
 
-    mull::ASTMutationFilter *astMutationFilter =
-        new mull::ASTMutationFilter(diagnostics, astStorage);
+    auto *astMutationFilter = new mull::ASTMutationFilter(diagnostics, astStorage);
     filters.mutationFilters.push_back(astMutationFilter);
   }
 
-  if (compilationDatabaseInfoAvailable) {
+  if (!tool::DisableJunkDetection.getValue()) {
     auto *junkFilter = new mull::JunkMutationFilter(junkDetector);
     filters.mutationFilters.push_back(junkFilter);
     filterStorage.emplace_back(junkFilter);

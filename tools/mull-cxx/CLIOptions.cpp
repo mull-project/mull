@@ -67,6 +67,13 @@ opt<std::string> tool::CacheDir(
   init("/tmp/mull-cache"),
   cat(MullCXXCategory));
 
+opt<bool> tool::DisableJunkDetection(
+    "disable-junk-detection",
+    desc("Do not remove junk mutations"),
+    Optional,
+    init(false),
+    cat(MullCXXCategory));
+
 opt<std::string> tool::CompilationDatabasePath(
   "compdb-path",
   desc("Path to a compilation database (compile_commands.json) for junk detection"),
@@ -367,6 +374,7 @@ void tool::dumpCLIInterface(Diagnostics &diagnostics) {
       &NoMutantOutput,
       &NoOutput,
 
+      &DisableJunkDetection,
       &CompilationDatabasePath,
       &CompilationFlags,
       &(Option &)LDPreloads,

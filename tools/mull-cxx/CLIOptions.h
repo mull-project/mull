@@ -25,6 +25,7 @@ extern opt<unsigned> Timeout;
 extern opt<std::string> ReportName;
 extern opt<std::string> ReportDirectory;
 
+extern opt<bool> DisableJunkDetection;
 extern opt<std::string> CompilationDatabasePath;
 extern opt<std::string> CompilationFlags;
 
