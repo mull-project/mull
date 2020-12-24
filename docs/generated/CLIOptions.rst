@@ -34,6 +34,8 @@
 
 --no-output		Combines -no-test-output and -no-mutant-output
 
+--disable-junk-detection		Do not remove junk mutations
+
 --compdb-path filename		Path to a compilation database (compile_commands.json) for junk detection
 
 --compilation-flags string		Extra compilation flags for junk detection
@@ -55,6 +57,8 @@
     :Timer:	Fastest, Recommended
 
 --test-framework framework		Choose test framework:
+
+    :BoostTest:	Boost.Test Framework
 
     :GoogleTest:	Google Test Framework
 

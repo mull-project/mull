@@ -10,10 +10,12 @@ int main() {
   return sum(-2, 2);
 }
 
+// clang-format off
+
 /**
 RUN: cd / && %CLANG_EXEC -fembed-bitcode -g -O0 -DFLAG=1 %s -o %s.exe
 RUN: cd %CURRENT_DIR
-RUN: %MULL_EXEC -test-framework CustomTest -mutators=all -reporters=IDE %s.exe | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITHOUT-JUNK-DETECTION
+RUN: %MULL_EXEC -test-framework CustomTest -disable-junk-detection -mutators=all -reporters=IDE %s.exe | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITHOUT-JUNK-DETECTION
 RUN: %MULL_EXEC -test-framework CustomTest -mutators=all -reporters=IDE -ide-reporter-show-killed -compilation-flags '-DWRONG_FLAG=1' %s.exe 2>&1 | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-JUNK-DETECTION-NO-FLAG
 RUN: %MULL_EXEC -test-framework CustomTest -mutators=all -reporters=IDE -ide-reporter-show-killed -compilation-flags '-DFLAG=1' %s.exe 2>&1 | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-JUNK-DETECTION-WITH-FLAG
 

@@ -6,11 +6,13 @@ int main() {
   return sum(-2, 2);
 }
 
+// clang-format off
+
 /**
 RUN: cd / && %CLANG_EXEC -fembed-bitcode -g -O0 %s -o %s.exe
 RUN: sed -e "s:%PWD:%s:g" %S/compile_commands.json.template > %S/compile_commands.json
 RUN: cd %CURRENT_DIR
-RUN: %MULL_EXEC -test-framework CustomTest -mutators=all -reporters=IDE %s.exe | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITHOUT-JUNK-DETECTION
+RUN: %MULL_EXEC -test-framework CustomTest -disable-junk-detection -mutators=all -reporters=IDE %s.exe | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITHOUT-JUNK-DETECTION
 RUN: %MULL_EXEC -test-framework CustomTest -mutators=all -reporters=IDE -ide-reporter-show-killed -compdb-path %S/compile_commands.json %s.exe | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-JUNK-DETECTION
 
 WITHOUT-JUNK-DETECTION-NOT:{{^.*}}[info] Running mutants (threads: 1){{$}}
