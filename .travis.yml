@@ -18,4 +18,4 @@ env:
   - LLVM_VERSION=11.0
 
 script:
-  - sh travis-macos.sh
+  - travis_wait 35 sh travis-macos.sh
