@@ -1,3 +1,5 @@
+set(clang_cc ${PATH_TO_LLVM}/bin/clang)
+set(clang_cxx ${PATH_TO_LLVM}/bin/clang++)
 set(CLANG_EXEC ${PATH_TO_LLVM}/bin/clang++)
 set(LIT_EXEC lit)
 set(FILECHECK_EXEC filecheck)
@@ -27,6 +29,8 @@ set(LIT_COMMAND
   CURRENT_DIR=${CMAKE_CURRENT_SOURCE_DIR}
   MULL_EXEC=$<TARGET_FILE:mull-cxx>
   CLANG_EXEC=${CLANG_EXEC}
+  clang_cc=${clang_cc}
+  clang_cxx=${clang_cxx}
   FILECHECK_EXEC=${FILECHECK_EXEC}
   TEST_CXX_FLAGS="${TEST_CXX_FLAGS}"
   ${LIT_EXEC}
