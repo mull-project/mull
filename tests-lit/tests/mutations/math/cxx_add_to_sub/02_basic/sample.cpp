@@ -1,3 +1,5 @@
+// clang-format off
+
 /**
 RUN: cd / && %CLANG_EXEC -fembed-bitcode -g -O0 %s -o %s.exe
 RUN: cd %CURRENT_DIR
