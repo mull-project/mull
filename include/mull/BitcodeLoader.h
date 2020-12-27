@@ -16,9 +16,10 @@ namespace mull {
 struct Configuration;
 
 std::pair<std::string, std::unique_ptr<llvm::Module>>
-loadModuleFromBuffer(llvm::LLVMContext &context, llvm::MemoryBuffer &buffer);
+loadModuleFromBuffer(llvm::LLVMContext &context, llvm::MemoryBuffer &buffer,
+                     Diagnostics &diagnostics);
 std::unique_ptr<llvm::Module> parseBitcode(llvm::MemoryBufferRef bufferRef,
-                                           llvm::LLVMContext &context);
+                                           llvm::LLVMContext &context, Diagnostics &diagnostics);
 
 class BitcodeLoader {
   std::vector<std::unique_ptr<llvm::LLVMContext>> contexts;

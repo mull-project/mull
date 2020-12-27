@@ -30,7 +30,7 @@ Bitcode::Bitcode(std::unique_ptr<llvm::Module> module, std::unique_ptr<llvm::Mem
 
 std::unique_ptr<Bitcode> Bitcode::clone(LLVMContext &context, Diagnostics &diagnostics) {
   assert(buffer.get() && "Cannot clone non-original module");
-  auto clone = parseBitcode(buffer->getMemBufferRef(), context);
+  auto clone = parseBitcode(buffer->getMemBufferRef(), context, diagnostics);
   if (!clone) {
     diagnostics.error("Cannot clone module \n");
     return nullptr;

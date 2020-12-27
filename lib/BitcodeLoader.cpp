@@ -28,19 +28,30 @@ static std::string MD5HashFromBuffer(StringRef buffer) {
   return result.str().str();
 }
 
-std::unique_ptr<Module> mull::parseBitcode(MemoryBufferRef bufferRef, LLVMContext &context) {
+std::unique_ptr<Module> mull::parseBitcode(MemoryBufferRef bufferRef, LLVMContext &context,
+                                           Diagnostics &diagnostics) {
   auto module = parseBitcodeFile(bufferRef, context);
   if (!module) {
-    logAllUnhandledErrors(module.takeError(), errs(), "\nparseBitcodeFile failed: ");
+    std::stringstream errorMessage;
+    errorMessage << "parseBitcodeFile failed: \"" << toString(module.takeError()) << "\".";
+
+    auto producerString = getBitcodeProducerString(bufferRef);
+    if (producerString) {
+      errorMessage << " ";
+      errorMessage << "The bitcode file was created with LLVM version: " << producerString.get();
+    }
+
+    diagnostics.warning(errorMessage.str());
+
     return std::unique_ptr<Module>();
   }
 
   return std::move(module.get());
 }
 
-std::pair<std::string, std::unique_ptr<Module>> mull::loadModuleFromBuffer(LLVMContext &context,
-                                                                           MemoryBuffer &buffer) {
-  auto module = parseBitcode(buffer.getMemBufferRef(), context);
+std::pair<std::string, std::unique_ptr<Module>>
+mull::loadModuleFromBuffer(LLVMContext &context, MemoryBuffer &buffer, Diagnostics &diagnostics) {
+  auto module = parseBitcode(buffer.getMemBufferRef(), context, diagnostics);
   std::string md5 = MD5HashFromBuffer(buffer.getBuffer());
   return std::make_pair(md5, std::move(module));
 }
@@ -57,7 +68,7 @@ std::unique_ptr<Bitcode> BitcodeLoader::loadBitcodeAtPath(const std::string &pat
   }
 
   MemoryBuffer *b = buffer.get().get();
-  auto modulePair = loadModuleFromBuffer(context, *b);
+  auto modulePair = loadModuleFromBuffer(context, *b, diagnostics);
 
   std::string hash = modulePair.first;
   std::unique_ptr<llvm::Module> module(std::move(modulePair.second));

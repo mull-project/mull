@@ -23,9 +23,15 @@ void LoadBitcodeFromBinaryTask::operator()(iterator begin, iterator end, Out &st
     auto ownedBuffer = llvm::MemoryBuffer::getMemBufferCopy(bufferView);
     auto buffer = ownedBuffer.get();
 
-    auto modulePair = mull::loadModuleFromBuffer(context, *buffer);
+    auto modulePair = mull::loadModuleFromBuffer(context, *buffer, diagnostics);
     auto hash = modulePair.first;
     auto module = std::move(modulePair.second);
+
+    if (module == nullptr) {
+      diagnostics.warning("Bitcode module could not be loaded. Possible reason: the bitcode "
+                          "file could be built with a newer version of LLVM than is used by Mull.");
+      continue;
+    }
 
     /// How can I check that -g flag (debug info enable) was set, from llvm pass
     /// https://stackoverflow.com/a/21713717/598057
@@ -36,8 +42,7 @@ void LoadBitcodeFromBinaryTask::operator()(iterator begin, iterator end, Out &st
     assert(module && "Could not load module");
     module->setModuleIdentifier(hash);
 
-    auto bitcode =
-        std::make_unique<mull::Bitcode>(std::move(module), std::move(ownedBuffer), hash);
+    auto bitcode = std::make_unique<mull::Bitcode>(std::move(module), std::move(ownedBuffer), hash);
     storage.push_back(std::move(bitcode));
   }
 }
