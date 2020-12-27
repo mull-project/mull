@@ -14,3 +14,7 @@ int test_math_mul() {
   }
   return FAILURE;
 }
+
+int main() {
+  return test_math_mul();
+}

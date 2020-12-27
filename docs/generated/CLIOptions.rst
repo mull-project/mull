@@ -66,8 +66,6 @@
 
     :CppUTest:	CppUTest Framework
 
-    :SimpleTest:	Simple Test (For internal usage only)
-
 --mutators mutator		Choose mutators:
 
     Groups:

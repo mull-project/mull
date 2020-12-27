@@ -4,7 +4,7 @@ namespace mull {
 
 class Filter {
 public:
-  virtual ~Filter() {};
+  virtual ~Filter() = default;
 };
 
 } // namespace mull

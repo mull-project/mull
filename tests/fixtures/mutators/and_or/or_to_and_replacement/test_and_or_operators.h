@@ -1,2 +1,4 @@
 int test_OR_operator_2branches();
 int test_OR_operator_1branch();
+int test_OR_operator_always_scalars_case_with_function_call_pattern1();
+int test_OR_operator_always_scalars_case_with_function_call_pattern3();

@@ -8,7 +8,7 @@
 #include "mull/Program/Program.h"
 #include "mull/ReachableFunction.h"
 #include "mull/Result.h"
-#include "mull/TestFrameworks/SimpleTest/SimpleTestFinder.h"
+#include "mull/TestFrameworks/CustomTestFramework/CustomTestFinder.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 
 #include <cstring>
@@ -41,11 +41,14 @@ TEST(SQLiteReporter, integrationTest) {
   Program program({}, {}, std::move(bitcode));
   Configuration configuration;
 
+  configuration.customTests.push_back(mull::CustomTestDefinition("main", "main", "mull", {}));
+  configuration.customTests.push_back(mull::CustomTestDefinition("main", "_main", "mull", {}));
+
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(std::make_unique<cxx::AddToSub>());
   MutationsFinder mutationsFinder(std::move(mutators), configuration);
 
-  SimpleTestFinder testFinder;
+  CustomTestFinder testFinder(configuration.customTests);
   auto tests = testFinder.findTests(program);
 
   auto &test = tests.front();
@@ -54,7 +57,8 @@ TEST(SQLiteReporter, integrationTest) {
   ASSERT_FALSE(reachableFunction->empty());
 
   std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions;
-  reachableFunctions.emplace_back(std::make_unique<ReachableFunction>(reachableFunction, nullptr, 1));
+  reachableFunctions.emplace_back(
+      std::make_unique<ReachableFunction>(reachableFunction, nullptr, 1));
   auto functionsUnderTest = mergeReachableFunctions(reachableFunctions);
   functionsUnderTest.back().selectInstructions({});
   std::vector<MutationPoint *> mutationPoints =
@@ -182,13 +186,13 @@ TEST(SQLiteReporter, integrationTest) {
         test_location_file = sqlite3_column_text(selectStmt, column++);
         test_location_line = sqlite3_column_int(selectStmt, column++);
 
-        ASSERT_EQ(strcmp((const char *)test_name, "test_count_letters"), 0);
-        ASSERT_EQ(strcmp((const char *)test_unique_id, "test_count_letters"), 0);
+        ASSERT_EQ(strcmp((const char *)test_name, "main"), 0);
+        ASSERT_EQ(strcmp((const char *)test_unique_id, "main"), 0);
 
         const char *location = "simple_test/count_letters/test_count_letters.c";
         ASSERT_NE(strstr((const char *)test_location_file, location), nullptr);
 
-        ASSERT_EQ(test_location_line, 5);
+        ASSERT_EQ(test_location_line, 13);
 
         numberOfRows++;
       } else if (stepResult == SQLITE_DONE) {
