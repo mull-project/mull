@@ -46,8 +46,6 @@ set(mull_unittests_sources
 
   JunkDetection/CXXJunkDetectorTests.cpp
 
-  SimpleTest/SimpleTestFinderTest.cpp
-
   GoogleTest/GoogleTestFinderTest.cpp
 
   CppUTest/CppUTestFinderTest.cpp

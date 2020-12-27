@@ -5,8 +5,8 @@
 #include "mull/MutationsFinder.h"
 #include "mull/Program/Program.h"
 #include "mull/ReachableFunction.h"
+#include "mull/TestFrameworks/CustomTestFramework/CustomTestFinder.h"
 #include "mull/TestFrameworks/NativeTestRunner.h"
-#include "mull/TestFrameworks/SimpleTest/SimpleTestFinder.h"
 #include "mull/Toolchain/JITEngine.h"
 #include "mull/Toolchain/Toolchain.h"
 #include "mull/Toolchain/Trampolines.h"
@@ -28,6 +28,9 @@ using namespace llvm;
 TEST(NativeTestRunner, runTest) {
   Diagnostics diagnostics;
   Configuration configuration;
+
+  configuration.customTests.push_back(mull::CustomTestDefinition("main", "main", "mull", {}));
+  configuration.customTests.push_back(mull::CustomTestDefinition("main", "_main", "mull", {}));
 
   Toolchain toolchain(diagnostics, configuration);
 
@@ -56,7 +59,8 @@ TEST(NativeTestRunner, runTest) {
 
   Function *reachableFunction = program.lookupDefinedFunction("count_letters");
   std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions;
-  reachableFunctions.emplace_back(std::make_unique<ReachableFunction>(reachableFunction, nullptr, 1));
+  reachableFunctions.emplace_back(
+      std::make_unique<ReachableFunction>(reachableFunction, nullptr, 1));
   auto functionsUnderTest = mergeReachableFunctions(reachableFunctions);
   functionsUnderTest.back().selectInstructions({});
 
@@ -67,7 +71,7 @@ TEST(NativeTestRunner, runTest) {
   }
   MutationPoint *mutationPoint = mutationPoints.front();
 
-  SimpleTestFinder testFinder;
+  CustomTestFinder testFinder(configuration.customTests);
 
   auto tests = testFinder.findTests(program);
 

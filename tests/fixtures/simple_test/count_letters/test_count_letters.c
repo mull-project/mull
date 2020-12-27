@@ -10,3 +10,6 @@ int test_count_letters() {
   return FAILURE;
 }
 
+int main() {
+  return test_count_letters();
+}

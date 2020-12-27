@@ -15,8 +15,6 @@ public:
 
   TestFramework boostTestFramework(Toolchain &toolchain, Configuration &configuration,
                                     Diagnostics &diagnostics);
-  TestFramework simpleTestFramework(Toolchain &toolchain, Configuration &configuration,
-                                    Diagnostics &diagnostics);
   TestFramework cppuTestFramework(Toolchain &toolchain, Configuration &configuration,
                                     Diagnostics &diagnostics);
   TestFramework googleTestFramework(Toolchain &toolchain, Configuration &configuration,

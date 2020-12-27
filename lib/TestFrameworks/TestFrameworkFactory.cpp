@@ -6,7 +6,6 @@
 #include "mull/TestFrameworks/CppUTest/CppUTestFinder.h"
 #include "mull/TestFrameworks/GoogleTest/GoogleTestFinder.h"
 #include "mull/TestFrameworks/NativeTestRunner.h"
-#include "mull/TestFrameworks/SimpleTest/SimpleTestFinder.h"
 #include "mull/Toolchain/Toolchain.h"
 
 using namespace mull;
@@ -28,10 +27,6 @@ TestFramework TestFrameworkFactory::createTestFramework(const std::string &name,
     return cppuTestFramework(toolchain, configuration, diagnostics);
   }
 
-  if (name == "SimpleTest") {
-    return simpleTestFramework(toolchain, configuration, diagnostics);
-  }
-
   if (name == "CustomTest") {
     return customTestFramework(toolchain, configuration, diagnostics);
   }
@@ -45,14 +40,6 @@ TestFramework TestFrameworkFactory::boostTestFramework(Toolchain &toolchain,
                                                         Configuration &configuration,
                                                         Diagnostics &diagnostics) {
   auto finder = std::make_unique<BoostTestFinder>(diagnostics);
-  auto runner = std::make_unique<NativeTestRunner>(diagnostics, toolchain.mangler());
-  return TestFramework(std::move(finder), std::move(runner));
-}
-
-TestFramework TestFrameworkFactory::simpleTestFramework(Toolchain &toolchain,
-                                                        Configuration &configuration,
-                                                        Diagnostics &diagnostics) {
-  auto finder = std::make_unique<SimpleTestFinder>();
   auto runner = std::make_unique<NativeTestRunner>(diagnostics, toolchain.mangler());
   return TestFramework(std::move(finder), std::move(runner));
 }
@@ -88,7 +75,6 @@ std::vector<std::pair<std::string, std::string>> TestFrameworkFactory::commandLi
         std::make_pair("GoogleTest", "Google Test Framework"),
         std::make_pair("CustomTest", "Custom Test Framework"),
         std::make_pair("CppUTest", "CppUTest Framework"),
-        std::make_pair("SimpleTest", "Simple Test (For internal usage only)"),
       });
 
   return options;

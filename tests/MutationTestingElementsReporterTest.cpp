@@ -13,7 +13,7 @@
 #include "mull/ReachableFunction.h"
 #include "mull/Reporters/ASTSourceInfoProvider.h"
 #include "mull/Result.h"
-#include "mull/TestFrameworks/SimpleTest/SimpleTestFinder.h"
+#include "mull/TestFrameworks/CustomTestFramework/CustomTestFinder.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 
 #include <fstream>
@@ -68,11 +68,14 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   Program program({}, {}, std::move(modules));
   Configuration configuration;
 
+  configuration.customTests.push_back(mull::CustomTestDefinition("main", "main", "mull", {}));
+  configuration.customTests.push_back(mull::CustomTestDefinition("main", "_main", "mull", {}));
+
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(std::make_unique<cxx::AddToSub>());
   MutationsFinder mutationsFinder(std::move(mutators), configuration);
 
-  SimpleTestFinder testFinder;
+  CustomTestFinder testFinder(configuration.customTests);
   auto tests = testFinder.findTests(program);
 
   auto &test = tests.front();

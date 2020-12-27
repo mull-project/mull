@@ -50,8 +50,6 @@ set(mull_sources
 
   TestFrameworks/BoostTest/BoostTestFinder.cpp
 
-  TestFrameworks/SimpleTest/SimpleTestFinder.cpp
-
   TestFrameworks/GoogleTest/GoogleTestFinder.cpp
   TestFrameworks/CppUTest/CppUTestFinder.cpp
 

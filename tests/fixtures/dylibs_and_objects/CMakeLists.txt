@@ -21,7 +21,7 @@ compile_fixture(
 )
 
 compile_fixture(
-  INPUT ${main_c}
+  INPUT ${test_c}
   OUTPUT_EXTENSION o
   FLAGS -c -mcmodel=large
 )

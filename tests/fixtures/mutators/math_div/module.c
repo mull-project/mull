@@ -12,3 +12,7 @@ int test_math_div() {
   }
   return FAILURE;
 }
+
+int main() {
+  return test_math_div();
+}

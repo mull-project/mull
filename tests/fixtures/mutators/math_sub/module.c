@@ -14,3 +14,7 @@ int test_math_sub() {
   }
   return FAILURE;
 }
+
+int main() {
+  return test_math_sub();
+}

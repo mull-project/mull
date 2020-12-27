@@ -9,4 +9,3 @@ int test_max() {
   }
   return FAILURE;
 }
-
