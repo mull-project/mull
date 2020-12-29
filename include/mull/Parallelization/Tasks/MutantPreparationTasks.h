@@ -11,14 +11,14 @@ class progress_counter;
 class CloneMutatedFunctionsTask {
 public:
   using In = std::vector<std::unique_ptr<Bitcode>>;
-  using Out = std::vector<std::string>;
+  using Out = std::vector<int>;
   using iterator = In::const_iterator;
 
   CloneMutatedFunctionsTask() = default;
 
   void operator()(iterator begin, iterator end, Out &storage,
                   progress_counter &counter);
-  static void cloneFunctions(Bitcode &bitcode, Out &mutatedFunctions);
+  static void cloneFunctions(Bitcode &bitcode);
 
 private:
 };

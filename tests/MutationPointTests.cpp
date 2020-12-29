@@ -140,8 +140,7 @@ TEST(MutationPoint, OriginalValuePresent) {
     bitcode->addMutation(mutation);
   }
 
-  std::vector<std::string> mutatedFunctions;
-  CloneMutatedFunctionsTask::cloneFunctions(*bitcode, mutatedFunctions);
+  CloneMutatedFunctionsTask::cloneFunctions(*bitcode);
   DeleteOriginalFunctionsTask::deleteFunctions(*bitcode);
   InsertMutationTrampolinesTask::insertTrampolines(*bitcode);
 

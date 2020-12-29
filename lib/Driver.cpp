@@ -217,8 +217,6 @@ Driver::dryRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
 
 std::vector<std::unique_ptr<MutationResult>>
 Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
-  std::vector<std::string> mutatedFunctions;
-
   singleTask.execute("Prepare mutations", [&]() {
     for (auto point : mutationPoints) {
       point->getBitcode()->addMutation(point);
@@ -226,11 +224,12 @@ Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
   });
 
   auto workers = config.parallelization.workers;
+  std::vector<int> devNull;
   TaskExecutor<CloneMutatedFunctionsTask> cloneFunctions(
       diagnostics,
       "Cloning functions for mutation",
       program.bitcode(),
-      mutatedFunctions,
+      devNull,
       std::vector<CloneMutatedFunctionsTask>(workers));
   cloneFunctions.execute();
 
@@ -280,14 +279,7 @@ Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
   std::vector<MutantExecutionTask> tasks;
   tasks.reserve(config.parallelization.mutantExecutionWorkers);
   for (int i = 0; i < config.parallelization.mutantExecutionWorkers; i++) {
-    tasks.emplace_back(diagnostics,
-                       sandbox,
-                       program,
-                       testFramework.runner(),
-                       config,
-                       toolchain.mangler(),
-                       objectFiles,
-                       mutatedFunctions);
+    tasks.emplace_back(diagnostics, sandbox, program, testFramework.runner(), config, objectFiles);
   }
   TaskExecutor<MutantExecutionTask> mutantRunner(
       diagnostics, "Running mutants", mutationPoints, mutationResults, std::move(tasks));

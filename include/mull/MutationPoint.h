@@ -104,7 +104,6 @@ public:
 
   const std::string &getReplacement();
 
-  std::string getTrampolineName();
   std::string getMutatedFunctionName();
   std::string getOriginalFunctionName() const;
 

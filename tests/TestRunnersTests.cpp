@@ -9,7 +9,6 @@
 #include "mull/TestFrameworks/NativeTestRunner.h"
 #include "mull/Toolchain/JITEngine.h"
 #include "mull/Toolchain/Toolchain.h"
-#include "mull/Toolchain/Trampolines.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 #include <mull/Parallelization/Parallelization.h>
 
@@ -82,8 +81,7 @@ TEST(NativeTestRunner, runTest) {
   JITEngine jit(diagnostics);
 
   Bitcode &bitcode = *mutationPoint->getBitcode();
-  std::vector<std::string> mutatedFunctions;
-  CloneMutatedFunctionsTask::cloneFunctions(bitcode, mutatedFunctions);
+  CloneMutatedFunctionsTask::cloneFunctions(bitcode);
   DeleteOriginalFunctionsTask::deleteFunctions(bitcode);
   InsertMutationTrampolinesTask::insertTrampolines(bitcode);
   mutationPoint->applyMutation();
@@ -102,22 +100,10 @@ TEST(NativeTestRunner, runTest) {
     ownedObjectFiles.push_back(std::move(owningBinary));
   }
 
-  Trampolines trampolines(mutatedFunctions);
-
-  testRunner.loadMutatedProgram(objectFiles, trampolines, jit);
-  trampolines.fixupOriginalFunctions(jit);
+  testRunner.loadMutatedProgram(objectFiles, jit);
   ASSERT_EQ(ExecutionStatus::Passed, testRunner.runTest(jit, program, test));
 
-  auto &mangler = toolchain.mangler();
-
-  auto name = mutationPoint->getOriginalFunction()->getName().str();
-  auto bitcodeId = mutationPoint->getBitcode()->getUniqueIdentifier();
-  auto trampolineName = mangler.getNameWithPrefix(mutationPoint->getTrampolineName());
-  auto mutatedFunctionName = mangler.getNameWithPrefix(mutationPoint->getMutatedFunctionName());
-  uint64_t *trampoline = trampolines.findTrampoline(trampolineName);
-  uint64_t address = JITEngine::symbolAddress(jit.getSymbol(mutatedFunctionName));
-  assert(address);
-  *trampoline = address;
-
+  setenv(mutationPoint->getUserIdentifier().c_str(), "1", 0);
   ASSERT_EQ(ExecutionStatus::Failed, testRunner.runTest(jit, program, test));
+  unsetenv(mutationPoint->getUserIdentifier().c_str());
 }

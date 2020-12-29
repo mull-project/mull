@@ -19,8 +19,7 @@ public:
   void loadInstrumentedProgram(ObjectFiles &objectFiles,
                                Instrumentation &instrumentation,
                                JITEngine &jit) override;
-  void loadMutatedProgram(ObjectFiles &objectFiles, Trampolines &trampolines,
-                          JITEngine &jit) override;
+  void loadMutatedProgram(ObjectFiles &objectFiles, JITEngine &jit) override;
   ExecutionStatus runTest(JITEngine &jit, Program &program,
                           Test &test) override;
 
