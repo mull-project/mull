@@ -24,29 +24,6 @@
 using namespace mull;
 using namespace llvm;
 
-TEST(MutationPoint, AndOrReplacementMutator_applyMutation) {
-  Diagnostics diagnostics;
-  LLVMContext context;
-  BitcodeLoader loader;
-  auto bitcode = loader.loadBitcodeAtPath(
-      fixtures::mutators_and_or_and_to_or_replacement_module_bc_path(), context, diagnostics);
-  cxx::LogicalAndToOr mutator;
-
-  FunctionUnderTest functionUnderTest(
-      bitcode->getModule()->getFunction("testee_AND_operator_2branches"), nullptr, 0);
-  auto mutationPoints = mutator.getMutations(bitcode.get(), functionUnderTest);
-
-  ASSERT_EQ(1U, mutationPoints.size());
-
-  MutationPoint *mutationPoint = mutationPoints.front();
-  mutationPoint->setMutatedFunction(mutationPoint->getOriginalFunction());
-  mutationPoint->applyMutation();
-
-  auto &mutatedInstruction =
-      mutationPoint->getAddress().findInstruction(mutationPoint->getOriginalFunction());
-  ASSERT_TRUE(isa<BranchInst>(&mutatedInstruction));
-}
-
 TEST(MutationPoint, ScalarValueMutator_applyMutation) {
   Diagnostics diagnostics;
   LLVMContext context;

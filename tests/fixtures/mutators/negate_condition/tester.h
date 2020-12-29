@@ -1,4 +1,0 @@
-
-int test_max();
-
-
