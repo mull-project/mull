@@ -30,10 +30,11 @@ WITH-OPTION-NEXT:  result = result + 0;
 WITH-OPTION-NEXT:                  ^
 WITH-OPTION-NEXT:[info] Mutation score: 50%
 */
-
+extern "C" int printf(const char *, ...);
 int sum(int a, int b) {
   int result = a + b;
   result = result + 0;
+  printf("%d + %d = %d\n", a, b, result);
   return result;
 }
 

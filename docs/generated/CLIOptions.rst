@@ -40,6 +40,12 @@
 
 --compilation-flags string		Extra compilation flags for junk detection
 
+--linker string		Linker program
+
+--linker-flags string		Extra linker flags to produce final executable
+
+--coverage-info string		Path to the coverage info file (LLVM's profdata)
+
 --ld-preload library		Load the given libraries before dynamic linking
 
 --ld-search-path directory		Library search path

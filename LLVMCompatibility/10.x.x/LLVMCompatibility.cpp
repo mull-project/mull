@@ -1,5 +1,6 @@
 #include "LLVMCompatibility.h"
 
+#include <llvm/Bitcode/BitcodeWriter.h>
 #include <llvm/Demangle/Demangle.h>
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/DebugLoc.h>
@@ -68,4 +69,12 @@ llvm::Value *getOrInsertFunction(llvm::Module *module, StringRef name, FunctionT
   return module->getOrInsertFunction(name, type).getCallee();
 }
 
+void writeBitcodeToFile(const llvm::Module &module, llvm::raw_fd_ostream &stream) {
+  llvm::WriteBitcodeToFile(module, stream);
+}
+
+bool addPassesToEmitObjectFile(TargetMachine *targetMachine, legacy::PassManagerBase &passManager,
+                               raw_pwrite_stream &out) {
+  return targetMachine->addPassesToEmitFile(passManager, out, nullptr, llvm::CGFT_ObjectFile);
+}
 } // namespace llvm_compat

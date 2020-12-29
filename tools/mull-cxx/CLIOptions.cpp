@@ -88,6 +88,30 @@ opt<std::string> tool::CompilationFlags(
   Optional,
   cat(MullCXXCategory));
 
+opt<std::string> tool::Linker(
+    "linker",
+    desc("Linker program"),
+    value_desc("string"),
+    Optional,
+    init("clang"),
+    cat(MullCXXCategory));
+
+opt<std::string> tool::LinkerFlags(
+    "linker-flags",
+    desc("Extra linker flags to produce final executable"),
+    value_desc("string"),
+    Optional,
+    init(std::string()),
+    cat(MullCXXCategory));
+
+opt<std::string> tool::CoverageInfo(
+    "coverage-info",
+    desc("Path to the coverage info file (LLVM's profdata)"),
+    value_desc("string"),
+    Optional,
+    init(std::string()),
+    cat(MullCXXCategory));
+
 opt<bool> tool::DryRunOption(
   "dry-run",
   desc("Skips real mutants execution. Disabled by default"),
@@ -377,6 +401,12 @@ void tool::dumpCLIInterface(Diagnostics &diagnostics) {
       &DisableJunkDetection,
       &CompilationDatabasePath,
       &CompilationFlags,
+
+      &Linker,
+      &LinkerFlags,
+
+      &CoverageInfo,
+
       &(Option &)LDPreloads,
       &(Option &)LDSearchPaths,
       &(Option &)IncludePaths,
