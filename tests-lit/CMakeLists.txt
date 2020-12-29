@@ -1,5 +1,6 @@
 set(clang_cc ${PATH_TO_LLVM}/bin/clang)
 set(clang_cxx ${PATH_TO_LLVM}/bin/clang++)
+set(llvm_profdata ${PATH_TO_LLVM}/bin/llvm-profdata)
 set(CLANG_EXEC ${PATH_TO_LLVM}/bin/clang++)
 set(LIT_EXEC lit)
 set(FILECHECK_EXEC filecheck)
@@ -31,6 +32,7 @@ set(LIT_COMMAND
   CLANG_EXEC=${CLANG_EXEC}
   clang_cc=${clang_cc}
   clang_cxx=${clang_cxx}
+  llvm_profdata=${llvm_profdata}
   FILECHECK_EXEC=${FILECHECK_EXEC}
   TEST_CXX_FLAGS="${TEST_CXX_FLAGS}"
   ${LIT_EXEC}

@@ -8,4 +8,3 @@ compile_fixture(
   OUTPUT_EXTENSION bc
   FLAGS -g -c -emit-llvm -I${CMAKE_CURRENT_LIST_DIR}
 )
-

@@ -16,8 +16,9 @@ ParallelizationConfig singleThreadParallelization() {
 int MullDefaultTimeoutMilliseconds = 3000;
 
 Configuration::Configuration()
-    : dryRunEnabled(false), failFastEnabled(false), cacheEnabled(false), captureTestOutput(true),
-      captureMutantOutput(true), timeout(MullDefaultTimeoutMilliseconds), maxDistance(128),
+    : debugEnabled(false), dryRunEnabled(false), failFastEnabled(false), cacheEnabled(false),
+      captureTestOutput(true), captureMutantOutput(true), skipSanityCheckRun(false),
+      timeout(MullDefaultTimeoutMilliseconds), maxDistance(128),
       diagnostics(IDEDiagnosticsKind::None), parallelization(singleThreadParallelization()) {}
 
 } // namespace mull

@@ -10,11 +10,13 @@ namespace mull {
 extern int MullDefaultTimeoutMilliseconds;
 
 struct Configuration {
+  bool debugEnabled;
   bool dryRunEnabled;
   bool failFastEnabled;
   bool cacheEnabled;
   bool captureTestOutput;
   bool captureMutantOutput;
+  bool skipSanityCheckRun;
 
   int timeout;
   int maxDistance;
@@ -26,6 +28,12 @@ struct Configuration {
   std::vector<std::string> dynamicLibraryPaths;
 
   std::string cacheDirectory;
+
+  std::string executable;
+  std::string coverageInfo;
+
+  std::string linker;
+  std::vector<std::string> linkerFlags;
 
   ParallelizationConfig parallelization;
   std::vector<CustomTestDefinition> customTests;

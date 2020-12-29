@@ -29,6 +29,11 @@ extern opt<bool> DisableJunkDetection;
 extern opt<std::string> CompilationDatabasePath;
 extern opt<std::string> CompilationFlags;
 
+extern opt<std::string> Linker;
+extern opt<std::string> LinkerFlags;
+
+extern opt<std::string> CoverageInfo;
+
 extern opt<bool> DryRunOption;
 extern opt<bool> DisableCache;
 extern opt<std::string> CacheDir;
