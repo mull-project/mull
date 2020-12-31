@@ -1,40 +1,36 @@
 #pragma once
 
-#include <llvm/ExecutionEngine/Orc/CompileUtils.h>
-#include <llvm/ExecutionEngine/Orc/ExecutionUtils.h>
-#include <llvm/ExecutionEngine/RuntimeDyld.h>
+#include <llvm/ADT/StringRef.h>
 
 namespace llvm {
+
 class DICompileUnit;
 class DebugLoc;
+class TargetMachine;
+class FunctionType;
+class Value;
+class Module;
+class raw_pwrite_stream;
+class raw_fd_ostream;
+
 namespace object {
 class SectionRef;
 }
+
 namespace legacy {
 class PassManagerBase;
 }
 } // namespace llvm
 
 namespace llvm_compat {
-using namespace llvm;
-
-typedef LegacyJITSymbolResolver SymbolResolver;
-
-JITSymbolFlags JITSymbolFlagsFromObjectSymbol(const object::BasicSymbolRef &symbol);
-
-object::OwningBinary<object::ObjectFile> compileModule(orc::SimpleCompiler &compiler,
-                                                       llvm::Module &module);
-
-StringRef getSectionContent(const object::SectionRef &section);
-StringRef getSectionName(const object::SectionRef &section);
-
-DICompileUnit *getUnit(const DebugLoc &debugLocation);
-
+llvm::StringRef getSectionContent(const llvm::object::SectionRef &section);
+llvm::StringRef getSectionName(const llvm::object::SectionRef &section);
+llvm::DICompileUnit *getUnit(const llvm::DebugLoc &debugLocation);
 std::string demangle(const std::string &MangledName);
-
-object::BasicSymbolRef::Flags flagsFromSymbol(object::BasicSymbolRef &symbol);
-llvm::Value *getOrInsertFunction(llvm::Module *module, StringRef name, FunctionType *type);
+llvm::Value *getOrInsertFunction(llvm::Module *module, llvm::StringRef name,
+                                 llvm::FunctionType *type);
 void writeBitcodeToFile(const llvm::Module &module, llvm::raw_fd_ostream &stream);
-bool addPassesToEmitObjectFile(TargetMachine *targetMachine, legacy::PassManagerBase &passManager,
-                               raw_pwrite_stream &out);
+bool addPassesToEmitObjectFile(llvm::TargetMachine *targetMachine,
+                               llvm::legacy::PassManagerBase &passManager,
+                               llvm::raw_pwrite_stream &out);
 } // namespace llvm_compat

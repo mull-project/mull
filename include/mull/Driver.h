@@ -60,9 +60,6 @@ public:
   std::unique_ptr<Result> run();
 
 private:
-  void compileInstrumentedBitcodeFiles();
-  void loadDynamicLibraries();
-
   std::vector<Test> findTests();
   std::vector<MutationPoint *> findMutationPoints(std::vector<Test> &tests);
   std::vector<MutationPoint *> filterMutations(std::vector<MutationPoint *> mutationPoints);
@@ -71,8 +68,6 @@ private:
 
   std::vector<std::unique_ptr<MutationResult>>
   runMutations(std::vector<MutationPoint *> &mutationPoints);
-
-  std::vector<llvm::object::ObjectFile *> AllInstrumentedObjectFiles();
 
   std::vector<std::unique_ptr<MutationResult>>
   dryRunMutations(const std::vector<MutationPoint *> &mutationPoints);

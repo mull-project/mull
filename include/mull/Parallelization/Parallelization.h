@@ -8,7 +8,6 @@
 #include "mull/Parallelization/Tasks/DryRunMutantExecutionTask.h"
 #include "mull/Parallelization/Tasks/FunctionFilterTask.h"
 #include "mull/Parallelization/Tasks/InstructionSelectionTask.h"
-#include "mull/Parallelization/Tasks/InstrumentedCompilationTask.h"
 #include "mull/Parallelization/Tasks/LoadObjectFilesTask.h"
 #include "mull/Parallelization/Tasks/MutantExecutionTask.h"
 #include "mull/Parallelization/Tasks/MutantPreparationTasks.h"

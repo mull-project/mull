@@ -5,13 +5,13 @@
 #include "mull/Config/Configuration.h"
 #include "mull/Diagnostics/Diagnostics.h"
 
-#include <llvm/ExecutionEngine/Orc/CompileUtils.h>
 #include <llvm/IR/LegacyPassManager.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Verifier.h>
 #include <llvm/Support/DynamicLibrary.h>
 #include <llvm/Support/FileSystem.h>
 #include <llvm/Support/TargetRegistry.h>
+#include <llvm/Target/TargetOptions.h>
 
 using namespace llvm;
 using namespace llvm::object;
@@ -20,31 +20,6 @@ using namespace std::string_literals;
 
 Compiler::Compiler(Diagnostics &diagnostics, const Configuration &configuration)
     : diagnostics(diagnostics), configuration(configuration) {}
-
-OwningBinary<ObjectFile> Compiler::compileBitcode(const Bitcode &bitcode, TargetMachine &machine) {
-  return compileModule(bitcode.getModule(), machine);
-}
-
-OwningBinary<ObjectFile> Compiler::compileModule(Module *module, TargetMachine &machine) {
-  assert(module);
-
-  std::string error;
-  llvm::raw_string_ostream stream(error);
-  if (llvm::verifyModule(*module, &stream)) {
-    stream.flush();
-    diagnostics.error(error);
-  }
-
-  if (module->getDataLayout().isDefault()) {
-    module->setDataLayout(machine.createDataLayout());
-  }
-
-  orc::SimpleCompiler compiler(machine);
-
-  OwningBinary<ObjectFile> objectFile = llvm_compat::compileModule(compiler, *module);
-
-  return objectFile;
-}
 
 static std::string tempFile(Diagnostics &diagnostics, const std::string &extension) {
   llvm::Twine prefix("mull");

@@ -20,10 +20,6 @@ class Compiler {
 public:
   explicit Compiler(Diagnostics &diagnostics, const Configuration &configuration);
   std::string compileBitcode(const Bitcode &bitcode);
-  llvm::object::OwningBinary<llvm::object::ObjectFile> compileBitcode(const Bitcode &bitcode,
-                                                                      llvm::TargetMachine &machine);
-  llvm::object::OwningBinary<llvm::object::ObjectFile> compileModule(llvm::Module *module,
-                                                                     llvm::TargetMachine &machine);
 
 private:
   Diagnostics &diagnostics;
