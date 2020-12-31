@@ -14,5 +14,4 @@
 #include "mull/Parallelization/Tasks/MutantPreparationTasks.h"
 #include "mull/Parallelization/Tasks/MutationFilterTask.h"
 #include "mull/Parallelization/Tasks/OriginalCompilationTask.h"
-#include "mull/Parallelization/Tasks/OriginalTestExecutionTask.h"
 #include "mull/Parallelization/Tasks/SearchMutationPointsTask.h"

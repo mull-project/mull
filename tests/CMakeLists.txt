@@ -29,7 +29,6 @@ set(mull_unittests_sources
 
   CompilerTests.cpp
   DriverTests.cpp
-  ProcessSandboxTest.cpp
   MutationPointTests.cpp
   ModuleLoaderTest.cpp
   DynamicCallTreeTests.cpp
@@ -48,7 +47,6 @@ set(mull_unittests_sources
 
   CppUTest/CppUTestFinderTest.cpp
 
-  CustomTestFramework/CustomTestRunnerTests.cpp
   CustomTestFramework/CustomTestFinderTests.cpp
 
   SQLiteReporterTest.cpp

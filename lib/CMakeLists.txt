@@ -11,7 +11,6 @@ set(mull_sources
   AST/MullClangCompatibility.cpp
 
   Driver.cpp
-  Sandbox/ProcessSandbox.cpp
   BitcodeLoader.cpp
   BitcodeMetadataReader.cpp
   MutationsFinder.cpp
@@ -76,7 +75,6 @@ set(mull_sources
   Parallelization/Tasks/LoadObjectFilesTask.cpp
   Parallelization/Tasks/DryRunMutantExecutionTask.cpp
   Parallelization/Tasks/InstrumentedCompilationTask.cpp
-  Parallelization/Tasks/OriginalTestExecutionTask.cpp
   Parallelization/Tasks/MutantExecutionTask.cpp
   Parallelization/Tasks/MutantPreparationTasks.cpp
   Parallelization/Tasks/MutationFilterTask.cpp

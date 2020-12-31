@@ -161,14 +161,6 @@ list<std::string> tool::IncludePaths(
   value_desc("regex"),
   cat(MullCXXCategory));
 
-opt<SandboxKind> tool::SandboxOption(
-    "sandbox",
-    desc("Choose sandbox approach:"),
-    Optional,
-    value_desc("sandbox"),
-    init(SandboxKind::Timer),
-    cat(MullCXXCategory));
-
 opt<bool> tool::EnableAST(
   "enable-ast", llvm::cl::Optional,
   llvm::cl::desc("Enable \"white\" AST search (disabled by default)"),
@@ -279,36 +271,6 @@ TestFramework TestFrameworkCLIOptions::testFramework(Toolchain &toolchain,
   return factory.createTestFramework(name, toolchain, configuration, diagnostics);
 }
 
-struct SandboxDefinition {
-  std::string name;
-  std::string description;
-  SandboxKind kind;
-};
-
-static std::vector<SandboxDefinition> sandboxes({
-    { "None", "No sandboxing", SandboxKind::NoSandbox },
-    { "Watchdog", "Uses 4 processes, not recommended", SandboxKind::Watchdog },
-    { "Timer", "Fastest, Recommended", SandboxKind::Timer },
-});
-
-SandboxCLIOptions::SandboxCLIOptions(opt<SandboxKind> &parameter) : parameter(parameter) {
-  for (auto &opt : sandboxes) {
-    parameter.getParser().addLiteralOption(opt.name.c_str(), opt.kind, opt.description.c_str());
-  }
-}
-
-std::unique_ptr<mull::ProcessSandbox> SandboxCLIOptions::sandbox() {
-  switch (parameter.getValue()) {
-  case SandboxKind::NoSandbox:
-    return std::make_unique<mull::NullProcessSandbox>();
-  case SandboxKind::Watchdog:
-    return std::make_unique<mull::ForkWatchdogSandbox>();
-  default:
-  case SandboxKind::Timer:
-    return std::make_unique<mull::ForkTimerSandbox>();
-  }
-}
-
 struct ReporterDefinition {
   std::string name;
   std::string description;
@@ -412,7 +374,6 @@ void tool::dumpCLIInterface(Diagnostics &diagnostics) {
       &(Option &)IncludePaths,
       &(Option &)ExcludePaths,
 
-      &SandboxOption,
       &TestFrameworks,
 
       mutators,
@@ -449,12 +410,6 @@ void tool::dumpCLIInterface(Diagnostics &diagnostics) {
 
     if (option == reporters) {
       for (ReporterDefinition &opt : reporterOptions) {
-        help << "    :" << opt.name << ":\t" << opt.description << "\n\n";
-      }
-    }
-
-    if (option == &SandboxOption) {
-      for (auto &opt : sandboxes) {
         help << "    :" << opt.name << ":\t" << opt.description << "\n\n";
       }
     }

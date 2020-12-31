@@ -94,7 +94,6 @@ std::vector<MutationPoint *> Driver::findMutationPoints(vector<Test> &tests) {
     return std::vector<MutationPoint *>();
   }
 
-  (void)sandbox;
   if (config.skipSanityCheckRun) {
     ExecutionResult result;
     result.runningTime = config.timeout;
@@ -305,12 +304,12 @@ std::vector<llvm::object::ObjectFile *> Driver::AllInstrumentedObjectFiles() {
   return objects;
 }
 
-Driver::Driver(Diagnostics &diagnostics, const Configuration &config, const ProcessSandbox &sandbox,
-               Program &program, Toolchain &t, Filters &filters, MutationsFinder &mutationsFinder,
+Driver::Driver(Diagnostics &diagnostics, const Configuration &config, Program &program,
+               Toolchain &t, Filters &filters, MutationsFinder &mutationsFinder,
                TestFramework &testFramework)
     : config(config), program(program), testFramework(testFramework), toolchain(t),
-      mutationsFinder(mutationsFinder), sandbox(sandbox), diagnostics(diagnostics),
-      instrumentation(), filters(filters), singleTask(diagnostics) {
+      mutationsFinder(mutationsFinder), diagnostics(diagnostics), instrumentation(),
+      filters(filters), singleTask(diagnostics) {
 
   if (config.diagnostics != IDEDiagnosticsKind::None) {
     this->ideDiagnostics = new NormalIDEDiagnostics(config.diagnostics);

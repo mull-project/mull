@@ -7,7 +7,6 @@
 #include "mull/MutationResult.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Parallelization/TaskExecutor.h"
-#include "mull/Sandbox/ProcessSandbox.h"
 #include "mull/TestFrameworks/Test.h"
 #include "mull/Toolchain/Toolchain.h"
 
@@ -42,7 +41,6 @@ class Driver {
   TestFramework &testFramework;
   Toolchain &toolchain;
   MutationsFinder &mutationsFinder;
-  const ProcessSandbox &sandbox;
   IDEDiagnostics *ideDiagnostics;
   Diagnostics &diagnostics;
 
@@ -54,9 +52,8 @@ class Driver {
   SingleTaskExecutor singleTask;
 
 public:
-  Driver(Diagnostics &diagnostics, const Configuration &config, const ProcessSandbox &sandbox,
-         Program &program, Toolchain &t, Filters &filters, MutationsFinder &mutationsFinder,
-         TestFramework &testFramework);
+  Driver(Diagnostics &diagnostics, const Configuration &config, Program &program, Toolchain &t,
+         Filters &filters, MutationsFinder &mutationsFinder, TestFramework &testFramework);
 
   ~Driver();
 
