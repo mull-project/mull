@@ -34,7 +34,6 @@ set(mull_unittests_sources
   DynamicCallTreeTests.cpp
   MutatorsFactoryTests.cpp
 
-  TestRunnersTests.cpp
   TaskExecutorTests.cpp
 
   Mutators/NegateConditionMutatorTest.cpp

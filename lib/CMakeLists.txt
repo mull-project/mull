@@ -43,7 +43,6 @@ set(mull_sources
 
   Bitcode.cpp
   MutationPoint.cpp
-  TestFrameworks/TestRunner.cpp
   TestFrameworks/Test.cpp
   ReachableFunction.cpp
 
@@ -103,8 +102,6 @@ set(mull_sources
   Reporters/IDEReporter.cpp
   Reporters/MutationTestingElementsReporter.cpp
   Reporters/SourceManager.cpp
-
-  TestFrameworks/NativeTestRunner.cpp
 
   Filters/JunkMutationFilter.cpp
   Filters/NoDebugInfoFilter.cpp

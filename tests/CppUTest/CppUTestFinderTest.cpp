@@ -7,7 +7,6 @@
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/MutatorsFactory.h"
 #include "mull/Program/Program.h"
-#include "mull/TestFrameworks/NativeTestRunner.h"
 #include "mull/Toolchain/JITEngine.h"
 #include "mull/Toolchain/Toolchain.h"
 
