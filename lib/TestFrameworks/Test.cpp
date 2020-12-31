@@ -1,6 +1,5 @@
 #include "mull/TestFrameworks/Test.h"
 
-#include <mull/TestFrameworks/Test.h>
 #include <utility>
 
 using namespace mull;
@@ -43,10 +42,6 @@ void Test::setExecutionResult(ExecutionResult result) {
 }
 const ExecutionResult &Test::getExecutionResult() const {
   return executionResult;
-}
-
-InstrumentationInfo &Test::getInstrumentationInfo() {
-  return instrumentationInfo;
 }
 
 void Test::addTestFunction(const llvm::Function *func) {

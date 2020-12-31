@@ -30,7 +30,6 @@ set(mull_unittests_sources
   DriverTests.cpp
   MutationPointTests.cpp
   ModuleLoaderTest.cpp
-  DynamicCallTreeTests.cpp
   MutatorsFactoryTests.cpp
 
   TaskExecutorTests.cpp

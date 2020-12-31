@@ -258,8 +258,8 @@ Driver::Driver(Diagnostics &diagnostics, const Configuration &config, Program &p
                Toolchain &t, Filters &filters, MutationsFinder &mutationsFinder,
                TestFramework &testFramework)
     : config(config), program(program), testFramework(testFramework), toolchain(t),
-      mutationsFinder(mutationsFinder), diagnostics(diagnostics), instrumentation(),
-      filters(filters), singleTask(diagnostics) {
+      mutationsFinder(mutationsFinder), diagnostics(diagnostics), filters(filters),
+      singleTask(diagnostics) {
 
   if (config.diagnostics != IDEDiagnosticsKind::None) {
     this->ideDiagnostics = new NormalIDEDiagnostics(config.diagnostics);

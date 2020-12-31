@@ -15,10 +15,6 @@ set(mull_sources
   BitcodeMetadataReader.cpp
   MutationsFinder.cpp
 
-  Instrumentation/DynamicCallTree.cpp
-  Instrumentation/Callbacks.cpp
-  Instrumentation/Instrumentation.cpp
-
   Parallelization/Tasks/LoadBitcodeFromBinaryTask.cpp
 
   Mutators/CXX/LogicalAndToOr.cpp
@@ -106,7 +102,6 @@ set(MULL_INCLUDE_DIR ${MULL_SOURCE_DIR}/include/mull)
 set(mull_header_dirs
   ${MULL_INCLUDE_DIR}
   ${MULL_INCLUDE_DIR}/Config
-  ${MULL_INCLUDE_DIR}/Instrumentation
   ${MULL_INCLUDE_DIR}/JunkDetection
   ${MULL_INCLUDE_DIR}/JunkDetection/CXX/
   ${MULL_INCLUDE_DIR}/JunkDetection/CXX/Visitors

@@ -3,7 +3,6 @@
 #include "mull/ExecutionResult.h"
 #include "mull/Filters/MutationFilter.h"
 #include "mull/IDEDiagnostics.h"
-#include "mull/Instrumentation/Instrumentation.h"
 #include "mull/MutationResult.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Parallelization/TaskExecutor.h"
@@ -43,10 +42,6 @@ class Driver {
   MutationsFinder &mutationsFinder;
   IDEDiagnostics *ideDiagnostics;
   Diagnostics &diagnostics;
-
-  std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> instrumentedObjectFiles;
-  std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> ownedObjectFiles;
-  Instrumentation instrumentation;
 
   struct Filters &filters;
   SingleTaskExecutor singleTask;
