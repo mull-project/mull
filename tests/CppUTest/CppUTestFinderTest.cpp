@@ -3,13 +3,9 @@
 #include "TestModuleFactory.h"
 #include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
-#include "mull/Driver.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/MutatorsFactory.h"
 #include "mull/Program/Program.h"
-#include "mull/TestFrameworks/NativeTestRunner.h"
-#include "mull/Toolchain/JITEngine.h"
-#include "mull/Toolchain/Toolchain.h"
 
 #include <llvm/IR/InstrTypes.h>
 #include <llvm/IR/LLVMContext.h>

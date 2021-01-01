@@ -54,14 +54,6 @@
 
 --exclude-path regex		File/directory paths to ignore (supports regex)
 
---sandbox sandbox		Choose sandbox approach:
-
-    :None:	No sandboxing
-
-    :Watchdog:	Uses 4 processes, not recommended
-
-    :Timer:	Fastest, Recommended
-
 --test-framework framework		Choose test framework:
 
     :BoostTest:	Boost.Test Framework

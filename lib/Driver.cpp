@@ -46,42 +46,6 @@ std::unique_ptr<Result> Driver::run() {
       std::move(tests), std::move(mutationResults), std::move(filteredMutations));
 }
 
-void Driver::compileInstrumentedBitcodeFiles() {
-  for (auto &bitcode : program.bitcode()) {
-    instrumentation.recordFunctions(bitcode->getModule());
-  }
-
-  std::vector<InstrumentedCompilationTask> tasks;
-  tasks.reserve(config.parallelization.workers);
-  for (int i = 0; i < config.parallelization.workers; i++) {
-    tasks.emplace_back(diagnostics, instrumentation, toolchain);
-  }
-
-  TaskExecutor<InstrumentedCompilationTask> compiler(diagnostics,
-                                                     "Compiling instrumented code",
-                                                     program.bitcode(),
-                                                     instrumentedObjectFiles,
-                                                     tasks);
-  compiler.execute();
-}
-
-void Driver::loadDynamicLibraries() {
-  singleTask.execute("Loading dynamic libraries", [&]() {
-    for (const std::string &dylibPath : program.getDynamicLibraryPaths()) {
-      std::string msg;
-      std::ostringstream ss;
-      ss << "Loading dynamic library " << dylibPath;
-      diagnostics.debug(ss.str());
-      auto error = sys::DynamicLibrary::LoadLibraryPermanently(dylibPath.c_str(), &msg);
-      if (error) {
-        std::stringstream message;
-        message << "Cannot load dynamic library '" << dylibPath << "': " << msg << "\n";
-        diagnostics.warning(message.str());
-      }
-    }
-  });
-}
-
 std::vector<Test> Driver::findTests() {
   std::vector<Test> tests;
   singleTask.execute("Searching tests",
@@ -94,7 +58,6 @@ std::vector<MutationPoint *> Driver::findMutationPoints(vector<Test> &tests) {
     return std::vector<MutationPoint *>();
   }
 
-  (void)sandbox;
   if (config.skipSanityCheckRun) {
     ExecutionResult result;
     result.runningTime = config.timeout;
@@ -291,26 +254,12 @@ Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
   return mutationResults;
 }
 
-std::vector<llvm::object::ObjectFile *> Driver::AllInstrumentedObjectFiles() {
-  std::vector<llvm::object::ObjectFile *> objects;
-
-  for (auto &ownedObject : instrumentedObjectFiles) {
-    objects.push_back(ownedObject.getBinary());
-  }
-
-  for (auto &ownedObject : program.precompiledObjectFiles()) {
-    objects.push_back(ownedObject.getBinary());
-  }
-
-  return objects;
-}
-
-Driver::Driver(Diagnostics &diagnostics, const Configuration &config, const ProcessSandbox &sandbox,
-               Program &program, Toolchain &t, Filters &filters, MutationsFinder &mutationsFinder,
+Driver::Driver(Diagnostics &diagnostics, const Configuration &config, Program &program,
+               Toolchain &t, Filters &filters, MutationsFinder &mutationsFinder,
                TestFramework &testFramework)
     : config(config), program(program), testFramework(testFramework), toolchain(t),
-      mutationsFinder(mutationsFinder), sandbox(sandbox), diagnostics(diagnostics),
-      instrumentation(), filters(filters), singleTask(diagnostics) {
+      mutationsFinder(mutationsFinder), diagnostics(diagnostics), filters(filters),
+      singleTask(diagnostics) {
 
   if (config.diagnostics != IDEDiagnosticsKind::None) {
     this->ideDiagnostics = new NormalIDEDiagnostics(config.diagnostics);

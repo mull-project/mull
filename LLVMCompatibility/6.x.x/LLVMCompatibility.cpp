@@ -6,19 +6,11 @@
 #include <llvm/IR/DebugLoc.h>
 #include <llvm/IR/Module.h>
 #include <llvm/Object/ObjectFile.h>
+#include <llvm/Target/TargetMachine.h>
 
 using namespace llvm;
 
 namespace llvm_compat {
-
-JITSymbolFlags JITSymbolFlagsFromObjectSymbol(const object::BasicSymbolRef &symbol) {
-  return JITSymbolFlags::fromObjectSymbol(symbol);
-}
-
-object::OwningBinary<object::ObjectFile> compileModule(orc::SimpleCompiler &compiler,
-                                                       llvm::Module &module) {
-  return compiler(module);
-}
 
 StringRef getSectionContent(const object::SectionRef &section) {
   StringRef content;
@@ -48,10 +40,6 @@ std::string demangle(const std::string &MangledName) {
   std::string Ret = Demangled;
   std::free(Demangled);
   return Ret;
-}
-
-object::BasicSymbolRef::Flags flagsFromSymbol(object::BasicSymbolRef &symbol) {
-  return static_cast<object::BasicSymbolRef::Flags>(symbol.getFlags());
 }
 
 llvm::Value *getOrInsertFunction(llvm::Module *module, StringRef name, FunctionType *type) {

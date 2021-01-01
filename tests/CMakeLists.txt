@@ -27,15 +27,11 @@ set(mull_unittests_sources
   Mutations-E2E/Scalar/01_Mutation_Scalar_ReturnValue_Test.cpp
   Mutations-E2E/Scalar/02_Mutation_Scalar_BinaryOperand_Test.cpp
 
-  CompilerTests.cpp
   DriverTests.cpp
-  ProcessSandboxTest.cpp
   MutationPointTests.cpp
   ModuleLoaderTest.cpp
-  DynamicCallTreeTests.cpp
   MutatorsFactoryTests.cpp
 
-  TestRunnersTests.cpp
   TaskExecutorTests.cpp
 
   Mutators/NegateConditionMutatorTest.cpp
@@ -48,7 +44,6 @@ set(mull_unittests_sources
 
   CppUTest/CppUTestFinderTest.cpp
 
-  CustomTestFramework/CustomTestRunnerTests.cpp
   CustomTestFramework/CustomTestFinderTests.cpp
 
   SQLiteReporterTest.cpp

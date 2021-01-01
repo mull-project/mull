@@ -3,11 +3,9 @@
 #include "mull/ExecutionResult.h"
 #include "mull/Filters/MutationFilter.h"
 #include "mull/IDEDiagnostics.h"
-#include "mull/Instrumentation/Instrumentation.h"
 #include "mull/MutationResult.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Parallelization/TaskExecutor.h"
-#include "mull/Sandbox/ProcessSandbox.h"
 #include "mull/TestFrameworks/Test.h"
 #include "mull/Toolchain/Toolchain.h"
 
@@ -42,30 +40,21 @@ class Driver {
   TestFramework &testFramework;
   Toolchain &toolchain;
   MutationsFinder &mutationsFinder;
-  const ProcessSandbox &sandbox;
   IDEDiagnostics *ideDiagnostics;
   Diagnostics &diagnostics;
-
-  std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> instrumentedObjectFiles;
-  std::vector<llvm::object::OwningBinary<llvm::object::ObjectFile>> ownedObjectFiles;
-  Instrumentation instrumentation;
 
   struct Filters &filters;
   SingleTaskExecutor singleTask;
 
 public:
-  Driver(Diagnostics &diagnostics, const Configuration &config, const ProcessSandbox &sandbox,
-         Program &program, Toolchain &t, Filters &filters, MutationsFinder &mutationsFinder,
-         TestFramework &testFramework);
+  Driver(Diagnostics &diagnostics, const Configuration &config, Program &program, Toolchain &t,
+         Filters &filters, MutationsFinder &mutationsFinder, TestFramework &testFramework);
 
   ~Driver();
 
   std::unique_ptr<Result> run();
 
 private:
-  void compileInstrumentedBitcodeFiles();
-  void loadDynamicLibraries();
-
   std::vector<Test> findTests();
   std::vector<MutationPoint *> findMutationPoints(std::vector<Test> &tests);
   std::vector<MutationPoint *> filterMutations(std::vector<MutationPoint *> mutationPoints);
@@ -74,8 +63,6 @@ private:
 
   std::vector<std::unique_ptr<MutationResult>>
   runMutations(std::vector<MutationPoint *> &mutationPoints);
-
-  std::vector<llvm::object::ObjectFile *> AllInstrumentedObjectFiles();
 
   std::vector<std::unique_ptr<MutationResult>>
   dryRunMutations(const std::vector<MutationPoint *> &mutationPoints);

@@ -1,20 +1,13 @@
 #pragma once
 
 #include "mull/MutationResult.h"
-#include "mull/Toolchain/JITEngine.h"
-
-#include <llvm/Object/ObjectFile.h>
 
 namespace mull {
 
 class MutationPoint;
-class Driver;
-class ProcessSandbox;
-class TestRunner;
 class Toolchain;
-class Mangler;
 class progress_counter;
-class Program;
+class Diagnostics;
 
 struct Configuration;
 

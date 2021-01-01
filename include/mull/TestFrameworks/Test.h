@@ -4,7 +4,6 @@
 #include <vector>
 
 #include "mull/ExecutionResult.h"
-#include "mull/Instrumentation/InstrumentationInfo.h"
 
 namespace llvm {
 class Function;
@@ -32,7 +31,6 @@ public:
 
   void setExecutionResult(ExecutionResult result);
   const ExecutionResult &getExecutionResult() const;
-  InstrumentationInfo &getInstrumentationInfo();
 
 private:
   std::string testName;
@@ -42,7 +40,6 @@ private:
   std::vector<const llvm::Function *> testFunctions;
 
   ExecutionResult executionResult;
-  InstrumentationInfo instrumentationInfo;
 };
 
 } // namespace mull

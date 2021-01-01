@@ -5,7 +5,6 @@
 #include <mull/Mutators/MutatorsFactory.h>
 #include <mull/Reporters/ASTSourceInfoProvider.h>
 #include <mull/Reporters/Reporter.h>
-#include <mull/Sandbox/ProcessSandbox.h>
 #include <mull/TestFrameworks/TestFramework.h>
 #include <mull/TestFrameworks/TestFrameworkFactory.h>
 #include <mull/Toolchain/Toolchain.h>
@@ -53,7 +52,6 @@ extern opt<bool> NoOutput;
 extern opt<bool> NoTestOutput;
 extern opt<bool> NoMutantOutput;
 
-extern opt<SandboxKind> SandboxOption;
 extern opt<bool> EnableAST;
 
 extern list<std::string> LDPreloads;
@@ -100,15 +98,6 @@ private:
   TestFrameworkFactory factory;
   std::vector<std::pair<std::string, std::string>> options;
   opt<TestFrameworkOptionIndex> &parameter;
-};
-
-class SandboxCLIOptions {
-public:
-  explicit SandboxCLIOptions(opt<SandboxKind> &parameter);
-  std::unique_ptr<mull::ProcessSandbox> sandbox();
-
-private:
-  opt<SandboxKind> &parameter;
 };
 
 extern opt<bool> DumpCLIInterface;

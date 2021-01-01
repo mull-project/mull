@@ -5,7 +5,6 @@
 #include "mull/TestFrameworks/BoostTest/BoostTestFinder.h"
 #include "mull/TestFrameworks/CppUTest/CppUTestFinder.h"
 #include "mull/TestFrameworks/GoogleTest/GoogleTestFinder.h"
-#include "mull/TestFrameworks/NativeTestRunner.h"
 #include "mull/Toolchain/Toolchain.h"
 
 using namespace mull;
@@ -40,32 +39,28 @@ TestFramework TestFrameworkFactory::boostTestFramework(Toolchain &toolchain,
                                                         Configuration &configuration,
                                                         Diagnostics &diagnostics) {
   auto finder = std::make_unique<BoostTestFinder>(diagnostics);
-  auto runner = std::make_unique<NativeTestRunner>(diagnostics, toolchain.mangler());
-  return TestFramework(std::move(finder), std::move(runner));
+  return TestFramework(std::move(finder));
 }
 
 TestFramework TestFrameworkFactory::cppuTestFramework(Toolchain &toolchain,
                                                         Configuration &configuration,
                                                         Diagnostics &diagnostics) {
   auto finder = std::make_unique<CppUTestFinder>();
-  auto runner = std::make_unique<NativeTestRunner>(diagnostics, toolchain.mangler());
-  return TestFramework(std::move(finder), std::move(runner));
+  return TestFramework(std::move(finder));
 }
 
 TestFramework TestFrameworkFactory::googleTestFramework(Toolchain &toolchain,
                                                         Configuration &configuration,
                                                         Diagnostics &diagnostics) {
   auto finder = std::make_unique<GoogleTestFinder>();
-  auto runner = std::make_unique<NativeTestRunner>(diagnostics, toolchain.mangler());
-  return TestFramework(std::move(finder), std::move(runner));
+  return TestFramework(std::move(finder));
 }
 
 TestFramework TestFrameworkFactory::customTestFramework(Toolchain &toolchain,
                                                         Configuration &configuration,
                                                         Diagnostics &diagnostics) {
   auto finder = std::make_unique<CustomTestFinder>(configuration.customTests);
-  auto runner = std::make_unique<NativeTestRunner>(diagnostics, toolchain.mangler());
-  return TestFramework(std::move(finder), std::move(runner));
+  return TestFramework(std::move(finder));
 }
 
 std::vector<std::pair<std::string, std::string>> TestFrameworkFactory::commandLineOptions() {

@@ -38,10 +38,8 @@ TEST(Driver, RunningWithNoTests) {
   TestFramework testFramework(
       testFrameworkFactory.customTestFramework(toolchain, configuration, diagnostics));
   Program program({}, {}, {});
-  ForkTimerSandbox sandbox;
   Filters filters;
-  Driver driver(
-      diagnostics, configuration, sandbox, program, toolchain, filters, finder, testFramework);
+  Driver driver(diagnostics, configuration, program, toolchain, filters, finder, testFramework);
 
   auto result = driver.run();
   ASSERT_EQ(0u, result->getTests().size());
@@ -74,12 +72,10 @@ TEST(Driver, DISABLED_customTest_withDynamicLibraries) {
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.customTestFramework(toolchain, configuration, diagnostics));
-  ForkTimerSandbox sandbox;
   Filters filters;
   // filter.includeTest("passing");
 
-  Driver driver(
-      diagnostics, configuration, sandbox, program, toolchain, filters, finder, testFramework);
+  Driver driver(diagnostics, configuration, program, toolchain, filters, finder, testFramework);
 
   auto result = driver.run();
   ASSERT_EQ(1U, result->getTests().size());
@@ -119,12 +115,10 @@ TEST(Driver, DISABLED_customTest_withDynamicLibraries_and_ObjectFiles) {
   TestFrameworkFactory testFrameworkFactory;
   TestFramework testFramework(
       testFrameworkFactory.customTestFramework(toolchain, configuration, diagnostics));
-  ForkTimerSandbox sandbox;
   Filters filters;
   // filter.includeTest("passing");
 
-  Driver driver(
-      diagnostics, configuration, sandbox, program, toolchain, filters, finder, testFramework);
+  Driver driver(diagnostics, configuration, program, toolchain, filters, finder, testFramework);
 
   auto result = driver.run();
   ASSERT_EQ(1U, result->getTests().size());

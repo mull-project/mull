@@ -54,7 +54,6 @@ int main(int argc, char **argv) {
 
   tool::MutatorsCLIOptions mutatorsOptions(diagnostics, tool::Mutators);
   tool::TestFrameworkCLIOptions testFrameworkOption(diagnostics, tool::TestFrameworks);
-  tool::SandboxCLIOptions sandboxOption(tool::SandboxOption);
   tool::ReportersCLIOptions reportersOption(diagnostics, tool::ReportersOption);
 
   llvm::cl::HideUnrelatedOptions(tool::MullCXXCategory);
@@ -210,8 +209,6 @@ int main(int argc, char **argv) {
 
   mull::MutationsFinder mutationsFinder(mutatorsOptions.mutators(), configuration);
 
-  auto sandbox = sandboxOption.sandbox();
-
   std::vector<std::unique_ptr<mull::Filter>> filterStorage;
   mull::Filters filters;
 
@@ -258,7 +255,6 @@ int main(int argc, char **argv) {
 
   mull::Driver driver(diagnostics,
                       configuration,
-                      *sandbox,
                       program,
                       toolchain,
                       filters,

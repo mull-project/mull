@@ -11,14 +11,9 @@ set(mull_sources
   AST/MullClangCompatibility.cpp
 
   Driver.cpp
-  Sandbox/ProcessSandbox.cpp
   BitcodeLoader.cpp
   BitcodeMetadataReader.cpp
   MutationsFinder.cpp
-
-  Instrumentation/DynamicCallTree.cpp
-  Instrumentation/Callbacks.cpp
-  Instrumentation/Instrumentation.cpp
 
   Parallelization/Tasks/LoadBitcodeFromBinaryTask.cpp
 
@@ -32,19 +27,12 @@ set(mull_sources
   Mutators/ScalarValueMutator.cpp
 
   Toolchain/Compiler.cpp
-  Toolchain/ObjectCache.cpp
   Toolchain/Toolchain.cpp
-  Toolchain/JITEngine.cpp
-  Toolchain/Mangler.cpp
-  Toolchain/Resolvers/InstrumentationResolver.cpp
-  Toolchain/Resolvers/MutationResolver.cpp
-  Toolchain/CXXRuntimeOverrides.cpp
   Toolchain/Linker.cpp
   Toolchain/Runner.cpp
 
   Bitcode.cpp
   MutationPoint.cpp
-  TestFrameworks/TestRunner.cpp
   TestFrameworks/Test.cpp
   ReachableFunction.cpp
 
@@ -75,8 +63,6 @@ set(mull_sources
   Parallelization/Tasks/SearchMutationPointsTask.cpp
   Parallelization/Tasks/LoadObjectFilesTask.cpp
   Parallelization/Tasks/DryRunMutantExecutionTask.cpp
-  Parallelization/Tasks/InstrumentedCompilationTask.cpp
-  Parallelization/Tasks/OriginalTestExecutionTask.cpp
   Parallelization/Tasks/MutantExecutionTask.cpp
   Parallelization/Tasks/MutantPreparationTasks.cpp
   Parallelization/Tasks/MutationFilterTask.cpp
@@ -106,8 +92,6 @@ set(mull_sources
   Reporters/MutationTestingElementsReporter.cpp
   Reporters/SourceManager.cpp
 
-  TestFrameworks/NativeTestRunner.cpp
-
   Filters/JunkMutationFilter.cpp
   Filters/NoDebugInfoFilter.cpp
   Filters/FilePathFilter.cpp
@@ -118,7 +102,6 @@ set(MULL_INCLUDE_DIR ${MULL_SOURCE_DIR}/include/mull)
 set(mull_header_dirs
   ${MULL_INCLUDE_DIR}
   ${MULL_INCLUDE_DIR}/Config
-  ${MULL_INCLUDE_DIR}/Instrumentation
   ${MULL_INCLUDE_DIR}/JunkDetection
   ${MULL_INCLUDE_DIR}/JunkDetection/CXX/
   ${MULL_INCLUDE_DIR}/JunkDetection/CXX/Visitors
@@ -135,7 +118,6 @@ set(mull_header_dirs
   ${MULL_INCLUDE_DIR}/TestFrameworks/CppUTest
   ${MULL_INCLUDE_DIR}/TestFrameworks/SimpleTest
   ${MULL_INCLUDE_DIR}/Toolchain
-  ${MULL_INCLUDE_DIR}/Toolchain/Resolvers
   )
 
 # Globbing is not recommended by CMake so maybe consider listing headers
@@ -162,7 +144,6 @@ if ("LLVM" IN_LIST LLVM_AVAILABLE_LIBS)
 else ()
   set(MULL_LLVM_LIBRARIES
     LLVMAsmParser
-    LLVMOrcJIT
     LLVMSupport
     LLVMOption
     LLVM${LLVM_NATIVE_ARCH}CodeGen
