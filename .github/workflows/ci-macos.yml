@@ -2,12 +2,16 @@ name: CI macOS
 
 env:
   BINTRAY_REPO: "macos"
-  LLVM_RELEASE: "9.0"
+  LLVM_RELEASE: "11.0"
+  CHECK_SECRETS: ${{ secrets.BINTRAY_API_KEY }}
 
 on:
+  pull_request:
   push:
-    branches-ignore:
-      - '**'
+    branches:
+      - master
+    tags:
+      - "**"
 
 jobs:
   test:
@@ -15,7 +19,7 @@ jobs:
     runs-on: macOS-latest
     strategy:
       matrix:
-        LLVM_VERSION: ["3.9", "4.0", "5.0", "6.0", "7.0", "8.0", "9.0"]
+        LLVM_VERSION: ["6.0", "7.0", "8.0", "9.0", "10.0", "11.0"]
 
     steps:
       - uses: actions/checkout@v1
@@ -59,7 +63,7 @@ jobs:
           esac
       - name: Run CI task
         run: |
-          pip install ansible
+          pip3 install ansible
           cd infrastructure && \
           ansible-playbook macos-playbook.yaml \
             -e llvm_version="${{ matrix.LLVM_VERSION }}.0" \
@@ -70,7 +74,7 @@ jobs:
             -e mull_version=${{ steps.settings.outputs.version }}${{ steps.settings.outputs.suffix }} \
             --verbose
       - name: Publish package
-        if: matrix.LLVM_VERSION == env.LLVM_RELEASE
+        if: matrix.LLVM_VERSION == env.LLVM_RELEASE && env.CHECK_SECRETS != null
         run: |
           curl --silent --show-error --location --request DELETE \
             --user "alexdenisov:${{ secrets.BINTRAY_API_KEY }}" \
