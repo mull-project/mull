@@ -39,6 +39,8 @@ set(mull_sources
   Toolchain/Resolvers/InstrumentationResolver.cpp
   Toolchain/Resolvers/MutationResolver.cpp
   Toolchain/CXXRuntimeOverrides.cpp
+  Toolchain/Linker.cpp
+  Toolchain/Runner.cpp
 
   Bitcode.cpp
   MutationPoint.cpp
@@ -165,6 +167,8 @@ else ()
     LLVMOption
     LLVM${LLVM_NATIVE_ARCH}CodeGen
     LLVM${LLVM_NATIVE_ARCH}AsmParser
+    LLVMCoverage
+    LLVMProfileData
     )
 endif ()
 
@@ -179,6 +183,7 @@ target_link_libraries(mull
   irm
   mull-cxx-mutators
   Diagnostics
+  reproc++
   )
 target_include_directories(mull PUBLIC
   ${MULL_INCLUDE_DIRS}

@@ -32,6 +32,7 @@
 
 #include <iterator>
 #include <memory>
+#include <iterator>
 #include <sstream>
 #include <unistd.h>
 
@@ -40,6 +41,11 @@ static void validateInputFile() {
     perror(tool::InputFile.getValue().c_str());
     exit(1);
   }
+}
+
+static std::vector<std::string> splitFlags(const std::string &flags) {
+  std::istringstream s{flags};
+  return std::vector<std::string>(std::istream_iterator<std::string>{s}, {});
 }
 
 int main(int argc, char **argv) {
@@ -91,7 +97,14 @@ int main(int argc, char **argv) {
   configuration.customTests.push_back(mull::CustomTestDefinition("main", "_main", "mull", {}));
   configuration.failFastEnabled = true;
 
+  configuration.linker = tool::Linker.getValue();
+  configuration.linkerFlags = splitFlags(tool::LinkerFlags.getValue());
+
+  configuration.debugEnabled = tool::DebugEnabled;
   configuration.timeout = tool::Timeout.getValue();
+
+  configuration.executable = tool::InputFile.getValue();
+  configuration.coverageInfo = tool::CoverageInfo.getValue();
 
   if (tool::Workers) {
     mull::ParallelizationConfig parallelizationConfig;

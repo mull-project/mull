@@ -24,20 +24,14 @@ public:
   using Out = std::vector<std::unique_ptr<MutationResult>>;
   using iterator = In::const_iterator;
 
-  MutantExecutionTask(Diagnostics &diagnostics, const ProcessSandbox &sandbox, Program &program,
-                      TestRunner &runner, const Configuration &config,
-                      std::vector<llvm::object::ObjectFile *> &objectFiles);
+  MutantExecutionTask(const Configuration &configuration, Diagnostics &diagnostics,
+                      const std::string &executable);
 
-  void operator()(iterator begin, iterator end, Out &storage,
-                  progress_counter &counter);
+  void operator()(iterator begin, iterator end, Out &storage, progress_counter &counter);
 
 private:
+  const Configuration &configuration;
   Diagnostics &diagnostics;
-  JITEngine jit;
-  Program &program;
-  const ProcessSandbox &sandbox;
-  TestRunner &runner;
-  const Configuration &config;
-  std::vector<llvm::object::ObjectFile *> &objectFiles;
+  const std::string &executable;
 };
 } // namespace mull

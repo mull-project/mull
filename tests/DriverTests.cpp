@@ -48,13 +48,14 @@ TEST(Driver, RunningWithNoTests) {
   ASSERT_EQ(0u, result->getMutationResults().size());
 }
 
-TEST(Driver, customTest_withDynamicLibraries) {
+TEST(Driver, DISABLED_customTest_withDynamicLibraries) {
   Diagnostics diagnostics;
   Configuration configuration;
 
   configuration.customTests.push_back(mull::CustomTestDefinition("main", "main", "mull", {}));
   configuration.customTests.push_back(mull::CustomTestDefinition("main", "_main", "mull", {}));
-
+  configuration.linker = "clang";
+  configuration.skipSanityCheckRun = true;
   configuration.dynamicLibraryPaths = { fixtures::dylibs_and_objects_distance_dylib_path() };
   configuration.bitcodePaths = { fixtures::dylibs_and_objects_test_bc_path(),
                                  fixtures::dylibs_and_objects_main_bc_path() };
@@ -90,13 +91,14 @@ TEST(Driver, customTest_withDynamicLibraries) {
   ASSERT_EQ(0UL, result->getMutationResults().size());
 }
 
-TEST(Driver, customTest_withDynamicLibraries_and_ObjectFiles) {
+TEST(Driver, DISABLED_customTest_withDynamicLibraries_and_ObjectFiles) {
   Diagnostics diagnostics;
   Configuration configuration;
 
   configuration.customTests.push_back(mull::CustomTestDefinition("main", "main", "mull", {}));
   configuration.customTests.push_back(mull::CustomTestDefinition("main", "_main", "mull", {}));
-
+  configuration.linker = "clang";
+  configuration.skipSanityCheckRun = true;
   configuration.dynamicLibraryPaths = { fixtures::dylibs_and_objects_distance_dylib_path() };
   configuration.objectFilePaths = { fixtures::dylibs_and_objects_test_o_path() };
   configuration.bitcodePaths = { fixtures::dylibs_and_objects_main_bc_path() };

@@ -6,8 +6,8 @@ RUN: cd %CURRENT_DIR
 /// 1) when -reporters=IDE is not provided
 /// 2) when -reporters=IDE is provided
 
-RUN: (unset TERM; %MULL_EXEC -test-framework CustomTest -mutators=cxx_add_to_sub %s.exe | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITHOUT-OPTION)
-RUN: (unset TERM; %MULL_EXEC -test-framework CustomTest -mutators=cxx_add_to_sub -reporters=IDE %s.exe | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITHOUT-OPTION)
+RUN: (unset TERM; %MULL_EXEC -linker=%clang_cxx -test-framework CustomTest -mutators=cxx_add_to_sub %s.exe | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITHOUT-OPTION)
+RUN: (unset TERM; %MULL_EXEC -linker=%clang_cxx -test-framework CustomTest -mutators=cxx_add_to_sub -reporters=IDE %s.exe | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITHOUT-OPTION)
 WITHOUT-OPTION:[info] Running mutants (threads: 2)
 WITHOUT-OPTION:{{^       \[################################\] 2/2\. Finished .*}}
 WITHOUT-OPTION:[info] Survived mutants (1/2):
@@ -16,8 +16,8 @@ WITHOUT-OPTION-NEXT:  result = result + 0;
 WITHOUT-OPTION-NEXT:                  ^
 WITHOUT-OPTION-NEXT:[info] Mutation score: 50%
 
-RUN: (unset TERM; %MULL_EXEC -test-framework CustomTest -mutators=cxx_add_to_sub -ide-reporter-show-killed %s.exe | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-OPTION)
-RUN: (unset TERM; %MULL_EXEC -test-framework CustomTest -mutators=cxx_add_to_sub -reporters=IDE -ide-reporter-show-killed %s.exe | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-OPTION)
+RUN: (unset TERM; %MULL_EXEC -linker=%clang_cxx -test-framework CustomTest -mutators=cxx_add_to_sub -ide-reporter-show-killed %s.exe | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-OPTION)
+RUN: (unset TERM; %MULL_EXEC -linker=%clang_cxx -test-framework CustomTest -mutators=cxx_add_to_sub -reporters=IDE -ide-reporter-show-killed %s.exe | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-OPTION)
 WITH-OPTION:[info] Running mutants (threads: 2)
 WITH-OPTION:{{^       \[################################\] 2/2\. Finished .*}}
 WITH-OPTION:[info] Killed mutants (1/2):

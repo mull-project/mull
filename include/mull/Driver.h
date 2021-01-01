@@ -81,6 +81,8 @@ private:
   dryRunMutations(const std::vector<MutationPoint *> &mutationPoints);
   std::vector<std::unique_ptr<MutationResult>>
   normalRunMutations(const std::vector<MutationPoint *> &mutationPoints);
+
+  std::vector<FunctionUnderTest> getFunctionsUnderTest(std::vector<Test> &tests);
 };
 
 } // namespace mull

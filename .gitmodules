@@ -15,3 +15,6 @@
 [submodule "vendor/cpputest"]
 	path = vendor/cpputest
 	url = https://github.com/cpputest/cpputest.git
+[submodule "vendor/reproc"]
+	path = vendor/reproc
+	url = https://github.com/DaanDeMeyer/reproc.git

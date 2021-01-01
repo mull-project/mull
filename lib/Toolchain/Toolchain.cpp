@@ -21,7 +21,8 @@ Toolchain::Toolchain(Diagnostics &diagnostics, const Configuration &config)
     : nativeTarget(), machine(llvm::EngineBuilder().selectTarget(
                           llvm::Triple(), "", "", llvm::SmallVector<std::string, 1>())),
       objectCache(diagnostics, config.cacheEnabled, config.cacheDirectory),
-      simpleCompiler(diagnostics), nameMangler(machine->createDataLayout()) {}
+      simpleCompiler(diagnostics, config), objectLinker(config, diagnostics),
+      nameMangler(machine->createDataLayout()) {}
 
 ObjectCache &Toolchain::cache() {
   return objectCache;
@@ -37,4 +38,8 @@ llvm::TargetMachine &Toolchain::targetMachine() {
 
 mull::Mangler &Toolchain::mangler() {
   return nameMangler;
+}
+
+Linker &Toolchain::linker() {
+  return objectLinker;
 }
