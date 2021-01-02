@@ -20,13 +20,12 @@ void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
   diagnostics.debug("baseline "s + std::to_string(baselineResult.runningTime));
   for (auto it = begin; it != end; ++it, counter.increment()) {
     MutationPoint *mutationPoint = *it;
-    Test *test = mutationPoint->getReachableTests().front().first;
     ExecutionResult result = runner.runProgram(executable,
                                                {},
                                                { mutationPoint->getUserIdentifier() },
                                                baselineResult.runningTime * 10,
                                                configuration.captureMutantOutput);
 
-    storage.push_back(std::make_unique<MutationResult>(result, mutationPoint, 1, test));
+    storage.push_back(std::make_unique<MutationResult>(result, mutationPoint));
   }
 }

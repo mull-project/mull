@@ -6,6 +6,7 @@
 #include "mull/MutationPoint.h"
 #include "mull/Parallelization/Parallelization.h"
 
+#include <cassert>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
 #include <llvm/Support/MD5.h>
@@ -13,14 +14,12 @@
 #include <llvm/Support/Path.h>
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Transforms/Utils/Cloning.h>
-#include <assert.h>
 
 using namespace mull;
 using namespace llvm;
 using namespace std;
 
-Bitcode::Bitcode(std::unique_ptr<llvm::Module> module)
-    : module(std::move(module)), uniqueIdentifier("") {}
+Bitcode::Bitcode(std::unique_ptr<llvm::Module> module) : module(std::move(module)) {}
 
 Bitcode::Bitcode(std::unique_ptr<llvm::Module> module, std::unique_ptr<llvm::MemoryBuffer> buffer,
                  const std::string &md5)

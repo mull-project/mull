@@ -1,5 +1,4 @@
 #include "TestModuleFactory.h"
-#include "LLVMCompatibility.h"
 
 #include <llvm/AsmParser/Parser.h>
 #include <llvm/IR/LLVMContext.h>
@@ -8,6 +7,7 @@
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/SourceMgr.h>
 
+#include <cassert>
 #include <fstream>
 #include <string>
 

@@ -27,9 +27,6 @@ void SearchMutationPointsTask::operator()(iterator begin, iterator end,
     for (auto &mutator : mutators) {
       auto mutants = mutator->getMutations(bitcode, functionUnderTest);
       for (auto mutant : mutants) {
-        for (auto &reachableTest : functionUnderTest.getReachableTests()) {
-          mutant->addReachableTest(reachableTest.first, reachableTest.second);
-        }
         storage.push_back(std::unique_ptr<MutationPoint>(mutant));
       }
     }

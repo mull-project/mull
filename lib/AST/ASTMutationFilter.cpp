@@ -2,6 +2,7 @@
 
 #include "mull/MutationPoint.h"
 
+#include <cassert>
 #include <llvm/IR/Instruction.h>
 #include <llvm/Support/FileSystem.h>
 

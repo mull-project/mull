@@ -5,8 +5,6 @@
 #include <mull/Mutators/MutatorsFactory.h>
 #include <mull/Reporters/ASTSourceInfoProvider.h>
 #include <mull/Reporters/Reporter.h>
-#include <mull/TestFrameworks/TestFramework.h>
-#include <mull/TestFrameworks/TestFrameworkFactory.h>
 #include <mull/Toolchain/Toolchain.h>
 
 namespace tool {
@@ -38,10 +36,8 @@ extern opt<bool> DisableCache;
 extern opt<std::string> CacheDir;
 
 enum MutatorsOptionIndex : int { _mutatorsOptionIndex_unused };
-enum TestFrameworkOptionIndex : int { _testFrameworkOptionIndex_unused };
 
 extern list<MutatorsOptionIndex> Mutators;
-extern opt<TestFrameworkOptionIndex> TestFrameworks;
 extern list<ReporterKind> ReportersOption;
 extern opt<bool> IDEReporterShowKilled;
 
@@ -83,19 +79,6 @@ public:
 private:
   Diagnostics &diagnostics;
   list<ReporterKind> &parameter;
-};
-
-class TestFrameworkCLIOptions {
-public:
-  explicit TestFrameworkCLIOptions(Diagnostics &diagnostics,
-                                   opt<TestFrameworkOptionIndex> &parameter);
-  TestFramework testFramework(Toolchain &toolchain, Configuration &configuration);
-
-private:
-  Diagnostics &diagnostics;
-  TestFrameworkFactory factory;
-  std::vector<std::pair<std::string, std::string>> options;
-  opt<TestFrameworkOptionIndex> &parameter;
 };
 
 extern opt<bool> DumpCLIInterface;

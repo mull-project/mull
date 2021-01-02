@@ -1,6 +1,7 @@
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "mull/MutationPoint.h"
 #include "mull/ReachableFunction.h"
+#include <cassert>
 #include <irm/irm.h>
 #include <sstream>
 

@@ -13,7 +13,6 @@
 #include "mull/ReachableFunction.h"
 #include "mull/Reporters/ASTSourceInfoProvider.h"
 #include "mull/Result.h"
-#include "mull/TestFrameworks/CustomTestFramework/CustomTestFinder.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 
 #include <fstream>
@@ -62,31 +61,21 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   auto bitcodeWithTestees = loader.loadBitcodeAtPath(
       fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext, diagnostics);
 
+  Function *reachableFunction = bitcodeWithTestees->getModule()->getFunction("count_letters");
+
   std::vector<std::unique_ptr<Bitcode>> modules;
   modules.push_back(std::move(bitcodeWithTests));
   modules.push_back(std::move(bitcodeWithTestees));
   Program program(std::move(modules));
   Configuration configuration;
 
-  configuration.customTests.push_back(mull::CustomTestDefinition("main", "main", "mull", {}));
-  configuration.customTests.push_back(mull::CustomTestDefinition("main", "_main", "mull", {}));
-
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(std::make_unique<cxx::AddToSub>());
   MutationsFinder mutationsFinder(std::move(mutators), configuration);
 
-  CustomTestFinder testFinder(configuration.customTests);
-  auto tests = testFinder.findTests(program);
-
-  auto &test = tests.front();
-
-  Function *reachableFunction = program.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(reachableFunction->empty());
 
-  std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions;
-  reachableFunctions.emplace_back(
-      std::make_unique<ReachableFunction>(reachableFunction, nullptr, 1));
-  auto functionsUnderTest = mergeReachableFunctions(reachableFunctions);
+  std::vector<FunctionUnderTest> functionsUnderTest({ FunctionUnderTest(reachableFunction) });
   functionsUnderTest.back().selectInstructions({});
 
   std::vector<MutationPoint *> mutationPoints =
@@ -96,19 +85,9 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
 
   MutationPoint *mutationPoint = mutationPoints.front();
 
-  std::vector<std::string> testIds({ test.getUniqueIdentifier(), test.getUniqueIdentifier() });
   std::vector<std::string> mutationPointIds({ "", mutationPoint->getUniqueIdentifier() });
 
-  const long long RunningTime_1 = 1;
   const long long RunningTime_2 = 2;
-
-  ExecutionResult testExecutionResult;
-  testExecutionResult.status = Passed;
-  testExecutionResult.runningTime = RunningTime_1;
-  testExecutionResult.stdoutOutput = "testExecutionResult.STDOUT";
-  testExecutionResult.stderrOutput = "testExecutionResult.STDERR";
-
-  test.setExecutionResult(testExecutionResult);
 
   ExecutionResult mutatedTestExecutionResult;
   mutatedTestExecutionResult.status = Failed;
@@ -116,15 +95,14 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   mutatedTestExecutionResult.stdoutOutput = "mutatedTestExecutionResult.STDOUT";
   mutatedTestExecutionResult.stderrOutput = "mutatedTestExecutionResult.STDERR";
 
-  auto mutationResult = std::make_unique<MutationResult>(
-      mutatedTestExecutionResult, mutationPoint, reachableFunctions.front()->getDistance(), &test);
+  auto mutationResult = std::make_unique<MutationResult>(mutatedTestExecutionResult, mutationPoint);
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
   mutationResults.push_back(std::move(mutationResult));
 
   MetricsMeasure resultTime;
 
-  Result result(std::move(tests), std::move(mutationResults), mutationPoints);
+  Result result(std::move(mutationResults), mutationPoints);
 
   /// STEP2. Reporting results to JSON
   MockASTSourceInfoProvider sourceInfoProvider;
@@ -132,7 +110,7 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   reporter.reportResults(result);
 
   /// STEP3. Making assertions.
-  std::vector<ExecutionResult> executionResults{ testExecutionResult, mutatedTestExecutionResult };
+  std::vector<ExecutionResult> executionResults{ mutatedTestExecutionResult };
 
   std::ifstream t(reporter.getJSONPath());
   std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());

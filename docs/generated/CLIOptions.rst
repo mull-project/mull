@@ -50,16 +50,6 @@
 
 --exclude-path regex		File/directory paths to ignore (supports regex)
 
---test-framework framework		Choose test framework:
-
-    :BoostTest:	Boost.Test Framework
-
-    :GoogleTest:	Google Test Framework
-
-    :CustomTest:	Custom Test Framework
-
-    :CppUTest:	CppUTest Framework
-
 --mutators mutator		Choose mutators:
 
     Groups:

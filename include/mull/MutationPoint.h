@@ -65,7 +65,6 @@ class MutationPoint {
   std::string diagnostics;
   std::string replacement;
   const SourceLocation sourceLocation;
-  std::vector<std::pair<Test *, int>> reachableTests;
   irm::IRMutation *irMutator;
   std::string userIdentifier;
 
@@ -89,10 +88,7 @@ public:
 
   const SourceLocation &getSourceLocation() const;
 
-  void addReachableTest(Test *test, int distance);
   void applyMutation();
-
-  const std::vector<std::pair<Test *, int>> &getReachableTests() const;
 
   std::string getUniqueIdentifier();
   std::string getUniqueIdentifier() const;

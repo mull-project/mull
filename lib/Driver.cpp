@@ -10,7 +10,6 @@
 #include "mull/Program/Program.h"
 #include "mull/ReachableFunction.h"
 #include "mull/Result.h"
-#include "mull/TestFrameworks/TestFramework.h"
 #include "mull/Toolchain/Runner.h"
 
 #include <llvm/ProfileData/Coverage/CoverageMapping.h>
@@ -33,39 +32,15 @@ Driver::~Driver() {
 }
 
 std::unique_ptr<Result> Driver::run() {
-  auto tests = findTests();
-  if (tests.empty()) {
-    diagnostics.warning("No tests found. Either switch to CustomTest, or ensure that the "
-                        "executable contains bitcode for all source files.");
-  }
-  auto mutationPoints = findMutationPoints(tests);
+  auto mutationPoints = findMutationPoints();
   auto filteredMutations = filterMutations(std::move(mutationPoints));
   auto mutationResults = runMutations(filteredMutations);
 
-  return std::make_unique<Result>(
-      std::move(tests), std::move(mutationResults), std::move(filteredMutations));
+  return std::make_unique<Result>(std::move(mutationResults), std::move(filteredMutations));
 }
 
-std::vector<Test> Driver::findTests() {
-  std::vector<Test> tests;
-  singleTask.execute("Searching tests",
-                     [&]() { tests = testFramework.finder().findTests(program); });
-  return tests;
-}
-
-std::vector<MutationPoint *> Driver::findMutationPoints(vector<Test> &tests) {
-  if (tests.empty()) {
-    return std::vector<MutationPoint *>();
-  }
-
-  if (config.skipSanityCheckRun) {
-    ExecutionResult result;
-    result.runningTime = config.timeout;
-    result.status = Passed;
-    for (auto &test : tests) {
-      test.setExecutionResult(result);
-    }
-  } else {
+std::vector<MutationPoint *> Driver::findMutationPoints() {
+  if (!config.skipSanityCheckRun) {
     Runner runner(diagnostics);
     singleTask.execute("Sanity check run", [&]() {
       ExecutionResult result =
@@ -87,7 +62,7 @@ std::vector<MutationPoint *> Driver::findMutationPoints(vector<Test> &tests) {
     });
   }
 
-  std::vector<FunctionUnderTest> functionsUnderTest = getFunctionsUnderTest(tests);
+  std::vector<FunctionUnderTest> functionsUnderTest = getFunctionsUnderTest();
   std::vector<FunctionUnderTest> filteredFunctions = filterFunctions(functionsUnderTest);
 
   selectInstructions(filteredFunctions);
@@ -255,11 +230,9 @@ Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints) {
 }
 
 Driver::Driver(Diagnostics &diagnostics, const Configuration &config, Program &program,
-               Toolchain &t, Filters &filters, MutationsFinder &mutationsFinder,
-               TestFramework &testFramework)
-    : config(config), program(program), testFramework(testFramework), toolchain(t),
-      mutationsFinder(mutationsFinder), diagnostics(diagnostics), filters(filters),
-      singleTask(diagnostics) {
+               Toolchain &t, Filters &filters, MutationsFinder &mutationsFinder)
+    : config(config), program(program), toolchain(t), mutationsFinder(mutationsFinder),
+      diagnostics(diagnostics), filters(filters), singleTask(diagnostics) {
 
   if (config.diagnostics != IDEDiagnosticsKind::None) {
     this->ideDiagnostics = new NormalIDEDiagnostics(config.diagnostics);
@@ -286,7 +259,7 @@ loadCoverage(const Configuration &configuration, Diagnostics &diagnostics) {
   return std::move(maybeMapping.get());
 }
 
-std::vector<FunctionUnderTest> Driver::getFunctionsUnderTest(std::vector<Test> &tests) {
+std::vector<FunctionUnderTest> Driver::getFunctionsUnderTest() {
   std::vector<FunctionUnderTest> functionsUnderTest;
 
   singleTask.execute("Gathering functions under test", [&]() {
@@ -315,32 +288,28 @@ std::vector<FunctionUnderTest> Driver::getFunctionsUnderTest(std::vector<Test> &
           scopedFunctions[scope].insert(name);
         }
       }
-      for (auto &test : tests) {
-        for (auto &bitcode : program.bitcode()) {
-          for (llvm::Function &function : *bitcode->getModule()) {
-            bool covered = false;
-            std::string name = function.getName().str();
-            if (unscopedFunctions.count(name)) {
+      for (auto &bitcode : program.bitcode()) {
+        for (llvm::Function &function : *bitcode->getModule()) {
+          bool covered = false;
+          std::string name = function.getName().str();
+          if (unscopedFunctions.count(name)) {
+            covered = true;
+          } else {
+            std::string filepath = SourceLocation::locationFromFunction(&function).unitFilePath;
+            std::string scope = llvm::sys::path::filename(filepath).str();
+            if (scopedFunctions[scope].count(name)) {
               covered = true;
-            } else {
-              std::string filepath = SourceLocation::locationFromFunction(&function).unitFilePath;
-              std::string scope = llvm::sys::path::filename(filepath).str();
-              if (scopedFunctions[scope].count(name)) {
-                covered = true;
-              }
             }
-            if (covered) {
-              functionsUnderTest.emplace_back(&function, &test, 1);
-            }
+          }
+          if (covered) {
+            functionsUnderTest.emplace_back(&function);
           }
         }
       }
     } else {
-      for (auto &test : tests) {
-        for (auto &bitcode : program.bitcode()) {
-          for (llvm::Function &function : *bitcode->getModule()) {
-            functionsUnderTest.emplace_back(&function, &test, 1);
-          }
+      for (auto &bitcode : program.bitcode()) {
+        for (llvm::Function &function : *bitcode->getModule()) {
+          functionsUnderTest.emplace_back(&function);
         }
       }
     }

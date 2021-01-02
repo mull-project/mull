@@ -33,16 +33,7 @@ set(mull_sources
 
   Bitcode.cpp
   MutationPoint.cpp
-  TestFrameworks/Test.cpp
   ReachableFunction.cpp
-
-
-  TestFrameworks/BoostTest/BoostTestFinder.cpp
-
-  TestFrameworks/GoogleTest/GoogleTestFinder.cpp
-  TestFrameworks/CppUTest/CppUTestFinder.cpp
-
-  TestFrameworks/CustomTestFramework/CustomTestFinder.cpp
 
   IDEDiagnostics.cpp
 
@@ -75,8 +66,6 @@ set(mull_sources
 
   Config/ConfigurationOptions.cpp
   Config/Configuration.cpp
-  TestFrameworks/TestFramework.cpp
-  TestFrameworks/TestFrameworkFactory.cpp
   Program/Program.cpp
   JunkDetection/CXX/Visitors/InstructionRangeVisitor.cpp
   JunkDetection/CXX/Visitors/NegateConditionVisitor.cpp
@@ -111,11 +100,6 @@ set(mull_header_dirs
   ${MULL_INCLUDE_DIR}/Parallelization/Tasks
   ${MULL_INCLUDE_DIR}/Program
   ${MULL_INCLUDE_DIR}/Reporters
-  ${MULL_INCLUDE_DIR}/TestFrameworks
-  ${MULL_INCLUDE_DIR}/TestFrameworks/CustomTestFramework
-  ${MULL_INCLUDE_DIR}/TestFrameworks/GoogleTest
-  ${MULL_INCLUDE_DIR}/TestFrameworks/CppUTest
-  ${MULL_INCLUDE_DIR}/TestFrameworks/SimpleTest
   ${MULL_INCLUDE_DIR}/Toolchain
   )
 

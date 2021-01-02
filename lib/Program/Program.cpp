@@ -1,5 +1,6 @@
 #include "mull/Program/Program.h"
 
+#include <cassert>
 #include <llvm/IR/Constants.h>
 #include <utility>
 
@@ -16,18 +17,6 @@ std::vector<std::unique_ptr<Bitcode>> &Program::bitcode() {
 }
 
 void Program::addBitcode(std::unique_ptr<Bitcode> bitcode) {
-  for (auto &function : bitcode->getModule()->getFunctionList()) {
-    if (!function.isDeclaration()) {
-      functionsRegistry.insert(std::make_pair(function.getName(), &function));
-    }
-  }
-
-  for (auto &alias : bitcode->getModule()->getAliasList()) {
-    if (auto function = llvm::dyn_cast<llvm::Function>(alias.getAliasee())) {
-      functionsRegistry.insert(std::make_pair(alias.getName(), function));
-    }
-  }
-
   std::string identifier = bitcode->getModule()->getModuleIdentifier();
 
   assert(bitcodeWithIdentifier(identifier) == nullptr &&
@@ -40,14 +29,6 @@ void Program::addBitcode(std::unique_ptr<Bitcode> bitcode) {
 Bitcode *Program::bitcodeWithIdentifier(const std::string &identifier) const {
   auto it = bitcodeRegistry.find(identifier);
   if (it == bitcodeRegistry.end()) {
-    return nullptr;
-  }
-  return it->second;
-}
-
-llvm::Function *Program::lookupDefinedFunction(llvm::StringRef FunctionName) const {
-  auto it = functionsRegistry.find(FunctionName.str());
-  if (it == functionsRegistry.end()) {
     return nullptr;
   }
   return it->second;

@@ -2,10 +2,10 @@
 #include "FixturePaths.h"
 #include "TestModuleFactory.h"
 #include "mull/MutationPoint.h"
-#include "mull/Mutators/Mutator.h"
 #include "mull/Program/Program.h"
 #include "mull/ReachableFunction.h"
 
+#include <cassert>
 #include <llvm/IR/Function.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Type.h>
@@ -26,7 +26,7 @@ TEST(NegateConditionMutator, getMutationPoints_no_filter) {
   assert(function);
 
   NegateConditionMutator mutator;
-  FunctionUnderTest functionUnderTest(function, nullptr, 0);
+  FunctionUnderTest functionUnderTest(function);
   functionUnderTest.selectInstructions({});
   auto mutants = mutator.getMutations(bitcode.get(), functionUnderTest);
 

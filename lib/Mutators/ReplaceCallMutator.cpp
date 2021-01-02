@@ -1,7 +1,7 @@
 #include "mull/Mutators/ReplaceCallMutator.h"
 #include "mull/MutationPoint.h"
 #include "mull/ReachableFunction.h"
-#include <assert.h>
+#include <cassert>
 #include <irm/irm.h>
 #include <llvm/IR/Instructions.h>
 #include <sstream>

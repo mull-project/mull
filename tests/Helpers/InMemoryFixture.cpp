@@ -2,6 +2,7 @@
 
 #include "Helpers/InMemoryCompiler.h"
 
+#include <cassert>
 #include <clang/Frontend/ASTUnit.h>
 #include <clang/Tooling/Tooling.h>
 #include <llvm/IR/LLVMContext.h>

@@ -5,7 +5,6 @@
 #include "mull/MutationsFinder.h"
 #include "mull/Program/Program.h"
 #include "mull/Result.h"
-#include "mull/TestFrameworks/TestFrameworkFactory.h"
 #include "mull/Toolchain/Toolchain.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 
@@ -24,18 +23,15 @@ using namespace llvm;
 
 TEST(Driver, RunningWithNoTests) {
   Configuration configuration;
+  configuration.skipSanityCheckRun = true;
   Diagnostics diagnostics;
   MutationsFinder finder({}, configuration);
   Toolchain toolchain(diagnostics, configuration);
 
-  TestFrameworkFactory testFrameworkFactory;
-  TestFramework testFramework(
-      testFrameworkFactory.customTestFramework(toolchain, configuration, diagnostics));
   Program program({});
   Filters filters;
-  Driver driver(diagnostics, configuration, program, toolchain, filters, finder, testFramework);
+  Driver driver(diagnostics, configuration, program, toolchain, filters, finder);
 
   auto result = driver.run();
-  ASSERT_EQ(0u, result->getTests().size());
   ASSERT_EQ(0u, result->getMutationResults().size());
 }

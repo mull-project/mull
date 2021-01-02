@@ -21,17 +21,14 @@
 #include "mull/Metrics/MetricsMeasure.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/MutatorKind.h"
-#include "mull/Parallelization/Parallelization.h"
 #include "mull/Parallelization/Tasks/LoadBitcodeFromBinaryTask.h"
 #include "mull/Program/Program.h"
 #include "mull/Reporters/ASTSourceInfoProvider.h"
 #include "mull/Result.h"
-#include "mull/TestFrameworks/TestFrameworkFactory.h"
 #include "mull/Version.h"
 
 #include <iterator>
 #include <memory>
-#include <iterator>
 #include <sstream>
 #include <unistd.h>
 
@@ -52,7 +49,6 @@ int main(int argc, char **argv) {
   llvm::cl::SetVersionPrinter(mull::printVersionInformation);
 
   tool::MutatorsCLIOptions mutatorsOptions(diagnostics, tool::Mutators);
-  tool::TestFrameworkCLIOptions testFrameworkOption(diagnostics, tool::TestFrameworks);
   tool::ReportersCLIOptions reportersOption(diagnostics, tool::ReportersOption);
 
   llvm::cl::HideUnrelatedOptions(tool::MullCXXCategory);
@@ -161,8 +157,6 @@ int main(int argc, char **argv) {
 
   mull::Toolchain toolchain(diagnostics, configuration);
 
-  mull::TestFramework testFramework(testFrameworkOption.testFramework(toolchain, configuration));
-
   bool bitcodeCompilationDatabaseAvailable = false;
   bool compilationDatabasePathAvailable = false;
   bool bitcodeCompilationFlagsAvailable = false;
@@ -236,13 +230,7 @@ int main(int argc, char **argv) {
     filterStorage.emplace_back(junkFilter);
   }
 
-  mull::Driver driver(diagnostics,
-                      configuration,
-                      program,
-                      toolchain,
-                      filters,
-                      mutationsFinder,
-                      testFramework);
+  mull::Driver driver(diagnostics, configuration, program, toolchain, filters, mutationsFinder);
   auto result = driver.run();
 
   tool::ReporterParameters params{

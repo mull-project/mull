@@ -2,6 +2,7 @@
 
 #include "mull/Filters/FunctionFilter.h"
 #include "mull/Parallelization/Progress.h"
+#include <cassert>
 
 using namespace mull;
 
