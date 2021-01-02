@@ -87,26 +87,31 @@ void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode) {
       auto *global = new llvm::GlobalVariable(
           *module, name->getType(), true, llvm::GlobalValue::PrivateLinkage, name);
 
-      llvm::BasicBlock *mutationBlock =
-          llvm::BasicBlock::Create(context, point->getUserIdentifier(), original);
-      new llvm::StoreInst(bitcode.getModule()->getFunction(point->getMutatedFunctionName()),
-                          trampoline,
-                          mutationBlock);
+      llvm::BasicBlock *mutationCheckBlock =
+          llvm::BasicBlock::Create(context, point->getUserIdentifier() + "_check", original);
       llvm::Value *nullPtr = llvm::Constant::getNullValue(charPtr);
       llvm::CmpInst *predicate = llvm::CmpInst::Create(llvm::Instruction::ICmp,
                                                        llvm::ICmpInst::ICMP_NE,
                                                        nullPtr,
                                                        nullPtr,
                                                        "is_enabled",
-                                                       mutationBlock);
+                                                       mutationCheckBlock);
       llvm::Value *zero = llvm::Constant::getNullValue(llvm::Type::getInt64Ty(context));
       auto mutantName =
           llvm::ConstantExpr::getInBoundsGetElementPtr(name->getType(), global, { zero, zero });
       auto getEnvCall =
           llvm::CallInst::Create(getEnvType, getenv, { mutantName }, "check_mutation", predicate);
       predicate->setOperand(0, getEnvCall);
-      llvm::BranchInst::Create(trampolineCall, head, predicate, mutationBlock);
-      head = mutationBlock;
+
+      llvm::BasicBlock *mutationBlock =
+          llvm::BasicBlock::Create(context, point->getUserIdentifier(), original);
+      new llvm::StoreInst(bitcode.getModule()->getFunction(point->getMutatedFunctionName()),
+                          trampoline,
+                          mutationBlock);
+
+      llvm::BranchInst::Create(mutationBlock, head, predicate, mutationCheckBlock);
+      llvm::BranchInst::Create(trampolineCall, mutationBlock);
+      head = mutationCheckBlock;
     }
 
     llvm::BranchInst::Create(head, entry);
