@@ -39,6 +39,7 @@ ExecutionResult Runner::runProgram(const std::string &program,
 
   reproc::options options;
   options.env.extra = reproc::env(env);
+  options.redirect.err.type = reproc::redirect::type::pipe;
 
   std::vector<std::string> allArguments{ program };
   std::copy(std::begin(arguments), std::end(arguments), std::back_inserter(allArguments));
