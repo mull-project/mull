@@ -52,10 +52,6 @@
       - mull-cxx
       - -test-framework=CustomTest
       - -mutators=cxx_add_to_sub
-      - -ld-search-path=/usr/local/lib
-      - -ld-search-path=/lib/x86_64-linux-gnu
-      - -ld-search-path=/usr/lib/x86_64-linux-gnu
-      - -ld-search-path={{ llvm_dir }}/lib
       - -compilation-flags=--sysroot={{ SDKROOT }} -isystem {{ llvm_dir }}/include/c++/v1 -isystem {{ llvm_dir }}/lib/clang/{{ llvm_version }}/include
       - -compdb-path={{ working_dir }}/integration/fmt.build.dir/compile_commands.json
       - -linker={{ llvm_dir }}/bin/clang++
@@ -95,7 +91,6 @@
       - mull-cxx
       - -test-framework=CustomTest
       - -mutators=cxx_add_to_sub
-      - -ld-search-path=/lib/x86_64-linux-gnu
       - -compilation-flags=--sysroot={{ SDKROOT }} -isystem {{ llvm_dir }}/lib/clang/{{ llvm_version }}/include -I{{ working_dir }}/integration/openssl-no-shared/include -I{{ working_dir }}/integration/openssl-no-shared/crypto/include -I{{ working_dir }}/integration/openssl-no-shared
       - -linker={{ llvm_dir }}/bin/clang
       - -linker-flags=-lc++ -ldl -lpthread

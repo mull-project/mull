@@ -29,7 +29,7 @@ TEST(GoogleTestFinder, FindTest) {
 
   std::vector<std::unique_ptr<Bitcode>> bitcode;
   bitcode.push_back(std::move(bitcodeWithTests));
-  Program program({}, {}, std::move(bitcode));
+  Program program(std::move(bitcode));
 
   GoogleTestFinder finder;
 

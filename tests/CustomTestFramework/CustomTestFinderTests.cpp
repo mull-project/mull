@@ -19,9 +19,7 @@ TEST(CustomTestFinder, findTests) {
 
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcode(configuration, diagnostics);
-  Program program({}, {}, std::move(bitcode));
-  ASSERT_EQ(program.getStaticConstructors().size(), 1UL);
-  ASSERT_EQ(program.getStaticConstructors().front()->getName(), "initGlobalVariable");
+  Program program(std::move(bitcode));
 
   vector<CustomTestDefinition> testDefinitions({
       CustomTestDefinition("failing", "failing_test", "mull", { "failing_test" }),
@@ -72,9 +70,7 @@ TEST(CustomTestFinder, findTests_viaConfig) {
 
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcode(configuration, diagnostics);
-  Program program({}, {}, std::move(bitcode));
-  ASSERT_EQ(program.getStaticConstructors().size(), 1UL);
-  ASSERT_EQ(program.getStaticConstructors().front()->getName(), "initGlobalVariable");
+  Program program(std::move(bitcode));
 
   CustomTestFinder testFinder(testDefinitions);
 
@@ -115,7 +111,7 @@ TEST(CustomTestFinder, findTests_withEmptyConfig) {
 
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcode(configuration, diagnostics);
-  Program program({}, {}, std::move(bitcode));
+  Program program(std::move(bitcode));
 
   std::vector<CustomTestDefinition> testDefinitions(
       { CustomTestDefinition("main", "main", "mull", {}) });

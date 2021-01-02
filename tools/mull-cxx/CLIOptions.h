@@ -54,8 +54,6 @@ extern opt<bool> NoMutantOutput;
 
 extern opt<bool> EnableAST;
 
-extern list<std::string> LDPreloads;
-extern list<std::string> LDSearchPaths;
 extern list<std::string> ExcludePaths;
 extern list<std::string> IncludePaths;
 

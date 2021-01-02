@@ -38,7 +38,7 @@ TEST(SQLiteReporter, integrationTest) {
   std::vector<std::unique_ptr<Bitcode>> bitcode;
   bitcode.push_back(std::move(bitcodeWithTests));
   bitcode.push_back(std::move(bitcodeWithTestees));
-  Program program({}, {}, std::move(bitcode));
+  Program program(std::move(bitcode));
   Configuration configuration;
 
   configuration.customTests.push_back(mull::CustomTestDefinition("main", "main", "mull", {}));

@@ -24,7 +24,7 @@ TEST(BoostTestFinder, FindTest) {
 
   std::vector<std::unique_ptr<Bitcode>> bitcode;
   bitcode.push_back(std::move(bitcodeWithTests));
-  Program program({}, {}, std::move(bitcode));
+  Program program(std::move(bitcode));
 
   BoostTestFinder finder(diagnostics);
 

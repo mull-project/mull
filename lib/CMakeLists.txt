@@ -78,7 +78,6 @@ set(mull_sources
   TestFrameworks/TestFramework.cpp
   TestFrameworks/TestFrameworkFactory.cpp
   Program/Program.cpp
-  ObjectLoader.cpp
   JunkDetection/CXX/Visitors/InstructionRangeVisitor.cpp
   JunkDetection/CXX/Visitors/NegateConditionVisitor.cpp
   JunkDetection/CXX/Visitors/RemoveVoidFunctionVisitor.cpp
