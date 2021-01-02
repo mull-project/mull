@@ -126,13 +126,6 @@ list<MutatorsOptionIndex> tool::Mutators(
   value_desc("mutator"),
   cat(MullCXXCategory));
 
-opt<TestFrameworkOptionIndex> tool::TestFrameworks(
-  "test-framework",
-  desc("Choose test framework:"),
-  Required,
-  value_desc("framework"),
-  cat(MullCXXCategory));
-
 list<std::string> tool::ExcludePaths(
   "exclude-path",
   desc("File/directory paths to ignore (supports regex)"),
@@ -242,21 +235,6 @@ std::vector<std::pair<std::string, std::string>> &MutatorsCLIOptions::getOptions
   return options;
 }
 
-TestFrameworkCLIOptions::TestFrameworkCLIOptions(Diagnostics &diagnostics,
-                                                 opt<TestFrameworkOptionIndex> &parameter)
-    : diagnostics(diagnostics), options(factory.commandLineOptions()), parameter(parameter) {
-  int index = 0;
-  for (auto &option : options) {
-    parameter.getParser().addLiteralOption(option.first.c_str(), index++, option.second.c_str());
-  }
-}
-
-TestFramework TestFrameworkCLIOptions::testFramework(Toolchain &toolchain,
-                                                     Configuration &configuration) {
-  auto &name = options[parameter.getValue()].first;
-  return factory.createTestFramework(name, toolchain, configuration, diagnostics);
-}
-
 struct ReporterDefinition {
   std::string name;
   std::string description;
@@ -358,8 +336,6 @@ void tool::dumpCLIInterface(Diagnostics &diagnostics) {
       &(Option &)IncludePaths,
       &(Option &)ExcludePaths,
 
-      &TestFrameworks,
-
       mutators,
   });
 
@@ -395,13 +371,6 @@ void tool::dumpCLIInterface(Diagnostics &diagnostics) {
     if (option == reporters) {
       for (ReporterDefinition &opt : reporterOptions) {
         help << "    :" << opt.name << ":\t" << opt.description << "\n\n";
-      }
-    }
-
-    if (option == &TestFrameworks) {
-      TestFrameworkFactory factory;
-      for (auto &pair : factory.commandLineOptions()) {
-        help << "    :" << pair.first << ":\t" << pair.second << "\n\n";
       }
     }
   }

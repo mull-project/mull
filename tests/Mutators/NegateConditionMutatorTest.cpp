@@ -26,7 +26,7 @@ TEST(NegateConditionMutator, getMutationPoints_no_filter) {
   assert(function);
 
   NegateConditionMutator mutator;
-  FunctionUnderTest functionUnderTest(function, nullptr, 0);
+  FunctionUnderTest functionUnderTest(function);
   functionUnderTest.selectInstructions({});
   auto mutants = mutator.getMutations(bitcode.get(), functionUnderTest);
 

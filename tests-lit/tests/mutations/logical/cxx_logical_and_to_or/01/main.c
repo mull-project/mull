@@ -93,7 +93,7 @@ int main() {
 
 // RUN: cd / && %clang_cc -fembed-bitcode -g -O0 %s -o %s.exe
 // RUN: cd %CURRENT_DIR
-// RUN: unset TERM; %MULL_EXEC -linker=%clang_cc -test-framework CustomTest -mutators=cxx_logical_and_to_or -ide-reporter-show-killed -reporters=IDE %s.exe | %FILECHECK_EXEC %s --dump-input=fail
+// RUN: unset TERM; %MULL_EXEC -linker=%clang_cc -mutators=cxx_logical_and_to_or -ide-reporter-show-killed -reporters=IDE %s.exe | %FILECHECK_EXEC %s --dump-input=fail
 // CHECK:[info] Killed mutants (2/5):
 // CHECK:{{.*}}main.c:8:13: warning: Killed: AND-OR Replacement [cxx_logical_and_to_or]
 // CHECK:  if (a < b && b < c) {

@@ -86,8 +86,7 @@ MutationPoint::MutationPoint(Mutator *mutator, irm::IRMutation *irMutator,
       uniqueIdentifier(bitcode->getUniqueIdentifier() + "_" + address.getIdentifier() + "_" +
                        mutator->getUniqueIdentifier()),
       diagnostics(std::move(diagnostics)), replacement(std::move(replacement)),
-      sourceLocation(SourceLocation::locationFromInstruction(instruction)), reachableTests(),
-      irMutator(irMutator) {
+      sourceLocation(SourceLocation::locationFromInstruction(instruction)), irMutator(irMutator) {
   userIdentifier = mutator->getUniqueIdentifier() + ':' + sourceLocation.filePath + ':' +
                    std::to_string(sourceLocation.line) + ':' +
                    std::to_string(sourceLocation.column);
@@ -118,17 +117,9 @@ Bitcode *MutationPoint::getBitcode() const {
   return bitcode;
 }
 
-void MutationPoint::addReachableTest(Test *test, int distance) {
-  reachableTests.emplace_back(test, distance);
-}
-
 void MutationPoint::applyMutation() {
   assert(mutatedFunction != nullptr);
   mutator->applyMutation(mutatedFunction, address, irMutator);
-}
-
-const std::vector<std::pair<Test *, int>> &MutationPoint::getReachableTests() const {
-  return reachableTests;
 }
 
 std::string MutationPoint::getUniqueIdentifier() {

@@ -42,7 +42,7 @@ std::unique_ptr<MutationArtefact> MutationTestBed::generate(const std::string &s
 
   std::vector<MutationPoint *> points;
   for (auto &function : bitcode->getModule()->functions()) {
-    FunctionUnderTest functionUnderTest(&function, nullptr, 0);
+    FunctionUnderTest functionUnderTest(&function);
     functionUnderTest.selectInstructions({});
     auto mutants = mutator.getMutations(bitcode.get(), functionUnderTest);
     std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));

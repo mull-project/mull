@@ -11,10 +11,12 @@ int main() {
   return neg1(42);
 }
 
+// clang-format off
+
 /**
 RUN: cd / && %CLANG_EXEC -fembed-bitcode -g -O0 %s -o %s.exe
 RUN: cd %CURRENT_DIR
-RUN: unset TERM; %MULL_EXEC -linker=%clang_cxx -test-framework CustomTest -workers=1 -mutators=cxx_remove_negation --ide-reporter-show-killed -reporters=IDE %s.exe | %FILECHECK_EXEC %s --dump-input=fail
+RUN: unset TERM; %MULL_EXEC -linker=%clang_cxx -workers=1 -mutators=cxx_remove_negation --ide-reporter-show-killed -reporters=IDE %s.exe | %FILECHECK_EXEC %s --dump-input=fail
 CHECK:[info] Running mutants (threads: 1)
 CHECK:{{^       \[################################\] 2/2\. Finished .*}}
 CHECK:[info] Killed mutants (1/2):

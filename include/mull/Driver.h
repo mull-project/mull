@@ -6,10 +6,7 @@
 #include "mull/MutationResult.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Parallelization/TaskExecutor.h"
-#include "mull/TestFrameworks/Test.h"
 #include "mull/Toolchain/Toolchain.h"
-
-#include <llvm/Object/ObjectFile.h>
 
 #include <map>
 
@@ -27,7 +24,6 @@ struct Configuration;
 class Program;
 class Filter;
 class Result;
-class TestFramework;
 class MutationsFinder;
 class JunkDetector;
 class FunctionFilter;
@@ -37,7 +33,6 @@ class Diagnostics;
 class Driver {
   const Configuration &config;
   Program &program;
-  TestFramework &testFramework;
   Toolchain &toolchain;
   MutationsFinder &mutationsFinder;
   IDEDiagnostics *ideDiagnostics;
@@ -48,15 +43,14 @@ class Driver {
 
 public:
   Driver(Diagnostics &diagnostics, const Configuration &config, Program &program, Toolchain &t,
-         Filters &filters, MutationsFinder &mutationsFinder, TestFramework &testFramework);
+         Filters &filters, MutationsFinder &mutationsFinder);
 
   ~Driver();
 
   std::unique_ptr<Result> run();
 
 private:
-  std::vector<Test> findTests();
-  std::vector<MutationPoint *> findMutationPoints(std::vector<Test> &tests);
+  std::vector<MutationPoint *> findMutationPoints();
   std::vector<MutationPoint *> filterMutations(std::vector<MutationPoint *> mutationPoints);
   std::vector<FunctionUnderTest> filterFunctions(std::vector<FunctionUnderTest> functions);
   void selectInstructions(std::vector<FunctionUnderTest> &functions);
@@ -69,7 +63,7 @@ private:
   std::vector<std::unique_ptr<MutationResult>>
   normalRunMutations(const std::vector<MutationPoint *> &mutationPoints);
 
-  std::vector<FunctionUnderTest> getFunctionsUnderTest(std::vector<Test> &tests);
+  std::vector<FunctionUnderTest> getFunctionsUnderTest();
 };
 
 } // namespace mull

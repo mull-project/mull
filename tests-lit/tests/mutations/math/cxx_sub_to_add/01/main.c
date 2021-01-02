@@ -17,7 +17,7 @@ int main() {
 
 // RUN: cd / && %clang_cc -fembed-bitcode -g -O0 %s -o %s.exe
 // RUN: cd %CURRENT_DIR
-// RUN: unset TERM; %MULL_EXEC -linker=%clang_cc -test-framework CustomTest -mutators=cxx_sub_to_add -ide-reporter-show-killed -reporters=IDE %s.exe | %FILECHECK_EXEC %s --dump-input=fail
+// RUN: unset TERM; %MULL_EXEC -linker=%clang_cc -mutators=cxx_sub_to_add -ide-reporter-show-killed -reporters=IDE %s.exe | %FILECHECK_EXEC %s --dump-input=fail
 // CHECK:[info] Killed mutants (1/1):
 // CHECK:{{.*}}main.c:2:12: warning: Killed: Replaced - with + [cxx_sub_to_add]
 // CHECK:  return a - b;

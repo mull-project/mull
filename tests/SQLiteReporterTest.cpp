@@ -41,25 +41,14 @@ TEST(SQLiteReporter, integrationTest) {
   Program program(std::move(bitcode));
   Configuration configuration;
 
-  configuration.customTests.push_back(mull::CustomTestDefinition("main", "main", "mull", {}));
-  configuration.customTests.push_back(mull::CustomTestDefinition("main", "_main", "mull", {}));
-
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(std::make_unique<cxx::AddToSub>());
   MutationsFinder mutationsFinder(std::move(mutators), configuration);
 
-  CustomTestFinder testFinder(configuration.customTests);
-  auto tests = testFinder.findTests(program);
-
-  auto &test = tests.front();
-
   Function *reachableFunction = program.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(reachableFunction->empty());
 
-  std::vector<std::unique_ptr<ReachableFunction>> reachableFunctions;
-  reachableFunctions.emplace_back(
-      std::make_unique<ReachableFunction>(reachableFunction, nullptr, 1));
-  auto functionsUnderTest = mergeReachableFunctions(reachableFunctions);
+  std::vector<FunctionUnderTest> functionsUnderTest({ FunctionUnderTest(reachableFunction) });
   functionsUnderTest.back().selectInstructions({});
   std::vector<MutationPoint *> mutationPoints =
       mutationsFinder.getMutationPoints(diagnostics, program, functionsUnderTest);
@@ -68,19 +57,9 @@ TEST(SQLiteReporter, integrationTest) {
 
   MutationPoint *mutationPoint = mutationPoints.front();
 
-  std::vector<std::string> testIds({ test.getUniqueIdentifier(), test.getUniqueIdentifier() });
-  std::vector<std::string> mutationPointIds({ "", mutationPoint->getUniqueIdentifier() });
+  std::vector<std::string> mutationPointIds({ mutationPoint->getUniqueIdentifier() });
 
-  const long long RunningTime_1 = 1;
   const long long RunningTime_2 = 2;
-
-  ExecutionResult testExecutionResult;
-  testExecutionResult.status = Passed;
-  testExecutionResult.runningTime = RunningTime_1;
-  testExecutionResult.stdoutOutput = "testExecutionResult.STDOUT";
-  testExecutionResult.stderrOutput = "testExecutionResult.STDERR";
-
-  test.setExecutionResult(testExecutionResult);
 
   ExecutionResult mutatedTestExecutionResult;
   mutatedTestExecutionResult.status = Failed;
@@ -88,22 +67,21 @@ TEST(SQLiteReporter, integrationTest) {
   mutatedTestExecutionResult.stdoutOutput = "mutatedTestExecutionResult.STDOUT";
   mutatedTestExecutionResult.stderrOutput = "mutatedTestExecutionResult.STDERR";
 
-  auto mutationResult = std::make_unique<MutationResult>(
-      mutatedTestExecutionResult, mutationPoint, reachableFunctions.front()->getDistance(), &test);
+  auto mutationResult = std::make_unique<MutationResult>(mutatedTestExecutionResult, mutationPoint);
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
   mutationResults.push_back(std::move(mutationResult));
 
   MetricsMeasure resultTime;
 
-  Result result(std::move(tests), std::move(mutationResults), mutationPoints);
+  Result result(std::move(mutationResults), mutationPoints);
 
   /// STEP2. Reporting results to SQLite
   SQLiteReporter reporter(diagnostics, "integration test", "");
   reporter.reportResults(result);
 
   /// STEP3. Making assertions.
-  std::vector<ExecutionResult> executionResults{ testExecutionResult, mutatedTestExecutionResult };
+  std::vector<ExecutionResult> executionResults{ mutatedTestExecutionResult };
 
   std::string databasePath = reporter.getDatabasePath();
 
@@ -115,7 +93,6 @@ TEST(SQLiteReporter, integrationTest) {
     sqlite3_stmt *selectStmt;
     sqlite3_prepare(database, selectQuery.c_str(), selectQuery.size(), &selectStmt, nullptr);
 
-    const unsigned char *column_test_id;
     const unsigned char *column_mutation_point_id;
     int column_status;
     int column_duration;
@@ -127,16 +104,14 @@ TEST(SQLiteReporter, integrationTest) {
       int stepResult = sqlite3_step(selectStmt);
 
       if (stepResult == SQLITE_ROW) {
-        column_test_id = sqlite3_column_text(selectStmt, 0);
-        column_mutation_point_id = sqlite3_column_text(selectStmt, 1);
+        column_mutation_point_id = sqlite3_column_text(selectStmt, 0);
 
-        column_status = sqlite3_column_int(selectStmt, 2);
-        column_duration = sqlite3_column_int(selectStmt, 3);
+        column_status = sqlite3_column_int(selectStmt, 1);
+        column_duration = sqlite3_column_int(selectStmt, 2);
 
-        column_stdout = sqlite3_column_text(selectStmt, 4);
-        column_stderr = sqlite3_column_text(selectStmt, 5);
+        column_stdout = sqlite3_column_text(selectStmt, 3);
+        column_stderr = sqlite3_column_text(selectStmt, 4);
 
-        ASSERT_EQ(strcmp((const char *)column_test_id, testIds[numberOfRows].c_str()), 0);
         ASSERT_EQ(
             strcmp((const char *)column_mutation_point_id, mutationPointIds[numberOfRows].c_str()),
             0);
@@ -150,49 +125,6 @@ TEST(SQLiteReporter, integrationTest) {
         ASSERT_EQ(strcmp((const char *)column_stderr,
                          executionResults[numberOfRows].stderrOutput.c_str()),
                   0);
-
-        numberOfRows++;
-      } else if (stepResult == SQLITE_DONE) {
-        break;
-      } else {
-        fprintf(stderr, "Failed.\n");
-        exit(1);
-      }
-    }
-
-    ASSERT_EQ(numberOfRows, 2);
-
-    sqlite3_finalize(selectStmt);
-  }
-
-  {
-    std::string selectQuery = "SELECT * FROM test";
-    sqlite3_stmt *selectStmt;
-    sqlite3_prepare(database, selectQuery.c_str(), selectQuery.size(), &selectStmt, nullptr);
-
-    const unsigned char *test_name;
-    const unsigned char *test_unique_id;
-    const unsigned char *test_location_file;
-    int test_location_line;
-
-    int numberOfRows = 0;
-    while (1) {
-      int stepResult = sqlite3_step(selectStmt);
-
-      if (stepResult == SQLITE_ROW) {
-        int column = 0;
-        test_name = sqlite3_column_text(selectStmt, column++);
-        test_unique_id = sqlite3_column_text(selectStmt, column++);
-        test_location_file = sqlite3_column_text(selectStmt, column++);
-        test_location_line = sqlite3_column_int(selectStmt, column++);
-
-        ASSERT_EQ(strcmp((const char *)test_name, "main"), 0);
-        ASSERT_EQ(strcmp((const char *)test_unique_id, "main"), 0);
-
-        const char *location = "simple_test/count_letters/test_count_letters.c";
-        ASSERT_NE(strstr((const char *)test_location_file, location), nullptr);
-
-        ASSERT_EQ(test_location_line, 13);
 
         numberOfRows++;
       } else if (stepResult == SQLITE_DONE) {

@@ -1,15 +1,17 @@
+// clang-format off
+
 /**
 /// Without debug information we see the error message.
 RUN: cd / && %CLANG_EXEC -fembed-bitcode %s -o %s.exe
 RUN: cd %CURRENT_DIR
-RUN: (unset TERM; %MULL_EXEC -linker=%clang_cxx -test-framework CustomTest -mutators=cxx_add_to_sub %s.exe 2>&1; test $? = 0) | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITHOUT-DEBUG
+RUN: (unset TERM; %MULL_EXEC -linker=%clang_cxx -mutators=cxx_add_to_sub %s.exe 2>&1; test $? = 0) | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITHOUT-DEBUG
 WITHOUT-DEBUG:[warning] Bitcode module does not have debug information.
 WITHOUT-DEBUG:[info] No mutants found. Mutation score: infinitely high
 
 /// With debug information we do not see the error message.
 RUN: cd / && %CLANG_EXEC -fembed-bitcode -g %s -o %s.exe
 RUN: cd %CURRENT_DIR
-RUN: (unset TERM; %MULL_EXEC -linker=%clang_cxx -test-framework CustomTest -mutators=cxx_add_to_sub %s.exe 2>&1; test $? = 0) | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-DEBUG
+RUN: (unset TERM; %MULL_EXEC -linker=%clang_cxx -mutators=cxx_add_to_sub %s.exe 2>&1; test $? = 0) | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-DEBUG
 WITH-DEBUG-NOT:[warning] Bitcode module does not have debug information.
 WITH-DEBUG:[info] Running mutants (threads: 1)
 WITHOUT-OPTION:{{^       \[################################\] 1/1\. Finished .*}}

@@ -8,21 +8,15 @@
 namespace mull {
 
 class Result {
-  std::vector<Test> tests;
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
   std::vector<MutationPoint *> mutationPoints;
 
 public:
-  Result(std::vector<Test> tests,
-         std::vector<std::unique_ptr<MutationResult>> mutationResults,
+  Result(std::vector<std::unique_ptr<MutationResult>> mutationResults,
          std::vector<MutationPoint *> mutationPoints)
-      : tests(std::move(tests)), mutationResults(std::move(mutationResults)),
-        mutationPoints(std::move(mutationPoints)) {}
+      : mutationResults(std::move(mutationResults)), mutationPoints(std::move(mutationPoints)) {}
 
-  std::vector<Test> const &getTests() const { return tests; }
-
-  std::vector<std::unique_ptr<MutationResult>> const &
-  getMutationResults() const {
+  std::vector<std::unique_ptr<MutationResult>> const &getMutationResults() const {
     return mutationResults;
   }
 
