@@ -21,17 +21,14 @@
 #include "mull/Metrics/MetricsMeasure.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Mutators/MutatorKind.h"
-#include "mull/Parallelization/Parallelization.h"
 #include "mull/Parallelization/Tasks/LoadBitcodeFromBinaryTask.h"
 #include "mull/Program/Program.h"
 #include "mull/Reporters/ASTSourceInfoProvider.h"
 #include "mull/Result.h"
-#include "mull/TestFrameworks/TestFrameworkFactory.h"
 #include "mull/Version.h"
 
 #include <iterator>
 #include <memory>
-#include <iterator>
 #include <sstream>
 #include <unistd.h>
 

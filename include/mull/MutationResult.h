@@ -1,10 +1,8 @@
-#include <utility>
-
 #pragma once
 
 #include "ExecutionResult.h"
 #include "MutationPoint.h"
-#include "mull/TestFrameworks/Test.h"
+#include <utility>
 
 namespace mull {
 

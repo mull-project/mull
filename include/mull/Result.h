@@ -2,7 +2,6 @@
 
 #include "MutationPoint.h"
 #include "MutationResult.h"
-#include "mull/TestFrameworks/Test.h"
 #include <vector>
 
 namespace mull {

@@ -5,8 +5,6 @@
 #include <mull/Mutators/MutatorsFactory.h>
 #include <mull/Reporters/ASTSourceInfoProvider.h>
 #include <mull/Reporters/Reporter.h>
-#include <mull/TestFrameworks/TestFramework.h>
-#include <mull/TestFrameworks/TestFrameworkFactory.h>
 #include <mull/Toolchain/Toolchain.h>
 
 namespace tool {

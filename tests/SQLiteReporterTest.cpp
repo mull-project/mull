@@ -8,7 +8,6 @@
 #include "mull/Program/Program.h"
 #include "mull/ReachableFunction.h"
 #include "mull/Result.h"
-#include "mull/TestFrameworks/CustomTestFramework/CustomTestFinder.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 
 #include <cstring>

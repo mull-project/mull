@@ -5,7 +5,6 @@
 #include "mull/MutationsFinder.h"
 #include "mull/Program/Program.h"
 #include "mull/Result.h"
-#include "mull/TestFrameworks/TestFrameworkFactory.h"
 #include "mull/Toolchain/Toolchain.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 

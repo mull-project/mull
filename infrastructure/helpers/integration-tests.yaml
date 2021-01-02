@@ -50,7 +50,6 @@
   args:
     argv:
       - mull-cxx
-      - -test-framework=CustomTest
       - -mutators=cxx_add_to_sub
       - -compilation-flags=--sysroot={{ SDKROOT }} -isystem {{ llvm_dir }}/include/c++/v1 -isystem {{ llvm_dir }}/lib/clang/{{ llvm_version }}/include
       - -compdb-path={{ working_dir }}/integration/fmt.build.dir/compile_commands.json
@@ -89,7 +88,6 @@
   args:
     argv:
       - mull-cxx
-      - -test-framework=CustomTest
       - -mutators=cxx_add_to_sub
       - -compilation-flags=--sysroot={{ SDKROOT }} -isystem {{ llvm_dir }}/lib/clang/{{ llvm_version }}/include -I{{ working_dir }}/integration/openssl-no-shared/include -I{{ working_dir }}/integration/openssl-no-shared/crypto/include -I{{ working_dir }}/integration/openssl-no-shared
       - -linker={{ llvm_dir }}/bin/clang
