@@ -1,7 +1,7 @@
 #include "mull/Parallelization/Tasks/InstructionSelectionTask.h"
 #include "mull/Parallelization/Progress.h"
 #include "mull/ReachableFunction.h"
-#include <assert.h>
+#include <cassert>
 
 using namespace mull;
 

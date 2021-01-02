@@ -3,9 +3,9 @@
 #include "mull/AST/ASTVisitor.h"
 #include "mull/JunkDetection/CXX/ASTStorage.h"
 
+#include <cassert>
 #include <clang/Frontend/ASTUnit.h>
 #include <clang/Tooling/Tooling.h>
-
 #include <gtest/gtest.h>
 
 using namespace mull;

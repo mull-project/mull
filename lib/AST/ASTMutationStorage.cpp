@@ -1,8 +1,8 @@
 #include "mull/AST/ASTMutationStorage.h"
 
-#include <llvm/Support/FileSystem.h>
-
+#include <cassert>
 #include <iostream>
+#include <llvm/Support/FileSystem.h>
 
 using namespace mull;
 

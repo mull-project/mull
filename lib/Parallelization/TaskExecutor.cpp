@@ -1,6 +1,6 @@
 #include "mull/Parallelization/TaskExecutor.h"
 #include "mull/Diagnostics/Diagnostics.h"
-#include <assert.h>
+#include <cassert>
 #include <sstream>
 
 namespace mull {

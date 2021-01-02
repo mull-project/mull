@@ -1,5 +1,6 @@
 #include "mull/Program/Program.h"
 
+#include <cassert>
 #include <llvm/IR/Constants.h>
 #include <utility>
 
