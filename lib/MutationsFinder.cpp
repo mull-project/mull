@@ -18,7 +18,7 @@ MutationsFinder::getMutationPoints(Diagnostics &diagnostics, const Program &prog
   std::vector<SearchMutationPointsTask> tasks;
   tasks.reserve(config.parallelization.workers);
   for (int i = 0; i < config.parallelization.workers; i++) {
-    tasks.emplace_back(program, mutators);
+    tasks.emplace_back(mutators);
   }
 
   TaskExecutor<SearchMutationPointsTask> finder(

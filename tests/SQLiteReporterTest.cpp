@@ -48,7 +48,8 @@ TEST(SQLiteReporter, integrationTest) {
 
   ASSERT_FALSE(reachableFunction->empty());
 
-  std::vector<FunctionUnderTest> functionsUnderTest({ FunctionUnderTest(reachableFunction) });
+  std::vector<FunctionUnderTest> functionsUnderTest(
+      { FunctionUnderTest(reachableFunction, program.bitcode().front().get()) });
   functionsUnderTest.back().selectInstructions({});
   std::vector<MutationPoint *> mutationPoints =
       mutationsFinder.getMutationPoints(diagnostics, program, functionsUnderTest);
@@ -57,7 +58,7 @@ TEST(SQLiteReporter, integrationTest) {
 
   MutationPoint *mutationPoint = mutationPoints.front();
 
-  std::vector<std::string> mutationPointIds({ mutationPoint->getUniqueIdentifier() });
+  std::vector<std::string> mutationPointIds({ mutationPoint->getUserIdentifier() });
 
   const long long RunningTime_2 = 2;
 

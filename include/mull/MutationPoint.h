@@ -47,8 +47,6 @@ public:
   int getBBIndex() const;
   int getIIndex() const;
 
-  std::string getIdentifier() const;
-
   llvm::Instruction &findInstruction(llvm::Module *module) const;
   llvm::Instruction &findInstruction(llvm::Function *function) const;
 
@@ -61,7 +59,6 @@ class MutationPoint {
   Bitcode *bitcode;
   llvm::Function *originalFunction;
   llvm::Function *mutatedFunction;
-  std::string uniqueIdentifier;
   std::string diagnostics;
   std::string replacement;
   const SourceLocation sourceLocation;
@@ -85,13 +82,11 @@ public:
 
   llvm::Function *getOriginalFunction();
   void setMutatedFunction(llvm::Function *function);
+  llvm::Function *getMutatedFunction() const;
 
   const SourceLocation &getSourceLocation() const;
 
   void applyMutation();
-
-  std::string getUniqueIdentifier();
-  std::string getUniqueIdentifier() const;
 
   std::string getMutatorIdentifier() const;
 
