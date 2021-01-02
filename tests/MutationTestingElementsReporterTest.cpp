@@ -61,6 +61,8 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   auto bitcodeWithTestees = loader.loadBitcodeAtPath(
       fixtures::simple_test_count_letters_count_letters_bc_path(), llvmContext, diagnostics);
 
+  Function *reachableFunction = bitcodeWithTestees->getModule()->getFunction("count_letters");
+
   std::vector<std::unique_ptr<Bitcode>> modules;
   modules.push_back(std::move(bitcodeWithTests));
   modules.push_back(std::move(bitcodeWithTestees));
@@ -71,7 +73,6 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   mutators.emplace_back(std::make_unique<cxx::AddToSub>());
   MutationsFinder mutationsFinder(std::move(mutators), configuration);
 
-  Function *reachableFunction = program.lookupDefinedFunction("count_letters");
   ASSERT_FALSE(reachableFunction->empty());
 
   std::vector<FunctionUnderTest> functionsUnderTest({ FunctionUnderTest(reachableFunction) });
