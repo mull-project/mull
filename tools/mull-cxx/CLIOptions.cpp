@@ -133,20 +133,6 @@ opt<TestFrameworkOptionIndex> tool::TestFrameworks(
   value_desc("framework"),
   cat(MullCXXCategory));
 
-list<std::string> tool::LDPreloads(
-  "ld-preload",
-  desc("Load the given libraries before dynamic linking"),
-  ZeroOrMore,
-  value_desc("library"),
-  cat(MullCXXCategory));
-
-list<std::string> tool::LDSearchPaths(
-  "ld-search-path",
-  desc("Library search path"),
-  ZeroOrMore,
-  value_desc("directory"),
-  cat(MullCXXCategory));
-
 list<std::string> tool::ExcludePaths(
   "exclude-path",
   desc("File/directory paths to ignore (supports regex)"),
@@ -369,8 +355,6 @@ void tool::dumpCLIInterface(Diagnostics &diagnostics) {
 
       &CoverageInfo,
 
-      &(Option &)LDPreloads,
-      &(Option &)LDSearchPaths,
       &(Option &)IncludePaths,
       &(Option &)ExcludePaths,
 

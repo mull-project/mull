@@ -65,7 +65,7 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   std::vector<std::unique_ptr<Bitcode>> modules;
   modules.push_back(std::move(bitcodeWithTests));
   modules.push_back(std::move(bitcodeWithTestees));
-  Program program({}, {}, std::move(modules));
+  Program program(std::move(modules));
   Configuration configuration;
 
   configuration.customTests.push_back(mull::CustomTestDefinition("main", "main", "mull", {}));
