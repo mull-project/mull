@@ -87,9 +87,6 @@ int main(int argc, char **argv) {
 
   mull::Configuration configuration;
   configuration.dryRunEnabled = tool::DryRunOption.getValue();
-  configuration.customTests.push_back(mull::CustomTestDefinition("main", "main", "mull", {}));
-  configuration.customTests.push_back(mull::CustomTestDefinition("main", "_main", "mull", {}));
-  configuration.failFastEnabled = true;
 
   configuration.linker = tool::Linker.getValue();
   configuration.linkerFlags = splitFlags(tool::LinkerFlags.getValue());
@@ -107,11 +104,6 @@ int main(int argc, char **argv) {
     configuration.parallelization = parallelizationConfig;
   } else {
     configuration.parallelization = mull::ParallelizationConfig::defaultConfig();
-  }
-
-  if (!tool::DisableCache.getValue()) {
-    configuration.cacheEnabled = true;
-    configuration.cacheDirectory = tool::CacheDir.getValue();
   }
 
   if (tool::NoTestOutput.getValue() || tool::NoOutput.getValue()) {

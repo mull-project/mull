@@ -1,4 +1,3 @@
-
 #include "mull/Config/Configuration.h"
 
 namespace mull {
@@ -16,9 +15,8 @@ ParallelizationConfig singleThreadParallelization() {
 int MullDefaultTimeoutMilliseconds = 3000;
 
 Configuration::Configuration()
-    : debugEnabled(false), dryRunEnabled(false), failFastEnabled(false), cacheEnabled(false),
-      captureTestOutput(true), captureMutantOutput(true), skipSanityCheckRun(false),
-      timeout(MullDefaultTimeoutMilliseconds), maxDistance(128),
+    : debugEnabled(false), dryRunEnabled(false), captureTestOutput(true), captureMutantOutput(true),
+      skipSanityCheckRun(false), timeout(MullDefaultTimeoutMilliseconds),
       diagnostics(IDEDiagnosticsKind::None), parallelization(singleThreadParallelization()) {}
 
 } // namespace mull
