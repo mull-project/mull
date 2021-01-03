@@ -32,8 +32,6 @@ extern opt<std::string> LinkerFlags;
 extern opt<std::string> CoverageInfo;
 
 extern opt<bool> DryRunOption;
-extern opt<bool> DisableCache;
-extern opt<std::string> CacheDir;
 
 enum MutatorsOptionIndex : int { _mutatorsOptionIndex_unused };
 

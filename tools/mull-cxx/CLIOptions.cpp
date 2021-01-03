@@ -52,21 +52,6 @@ opt<std::string> tool::ReportName(
   init(""),
   cat(MullCXXCategory));
 
-opt<bool> tool::DisableCache(
-  "disable-cache",
-  desc("Disables cache (enabled by default)"),
-  Optional,
-  init(false),
-  cat(MullCXXCategory));
-
-opt<std::string> tool::CacheDir(
-  "cache-dir",
-  desc("Where to store cache (defaults to /tmp/mull-cache)"),
-  Optional,
-  value_desc("directory"),
-  init("/tmp/mull-cache"),
-  cat(MullCXXCategory));
-
 opt<bool> tool::DisableJunkDetection(
     "disable-junk-detection",
     desc("Do not remove junk mutations"),
@@ -308,9 +293,6 @@ void tool::dumpCLIInterface(Diagnostics &diagnostics) {
       &Workers,
       &Timeout,
       &DryRunOption,
-
-      &CacheDir,
-      &DisableCache,
 
       &ReportName,
       &ReportDirectory,
