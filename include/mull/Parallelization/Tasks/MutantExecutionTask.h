@@ -5,7 +5,6 @@
 namespace mull {
 
 class MutationPoint;
-class Toolchain;
 class progress_counter;
 class Diagnostics;
 
@@ -18,7 +17,7 @@ public:
   using iterator = In::const_iterator;
 
   MutantExecutionTask(const Configuration &configuration, Diagnostics &diagnostics,
-                      const std::string &executable);
+                      const std::string &executable, ExecutionResult &baseline);
 
   void operator()(iterator begin, iterator end, Out &storage, progress_counter &counter);
 
@@ -26,5 +25,6 @@ private:
   const Configuration &configuration;
   Diagnostics &diagnostics;
   const std::string &executable;
+  ExecutionResult &baseline;
 };
 } // namespace mull

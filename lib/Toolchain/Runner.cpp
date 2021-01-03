@@ -29,8 +29,8 @@ Runner::Runner(Diagnostics &diagnostics) : diagnostics(diagnostics) {}
 
 ExecutionResult Runner::runProgram(const std::string &program,
                                    const std::vector<std::string> &arguments,
-                                   const std::vector<std::string> &environment, int timeout,
-                                   bool captureOutput) {
+                                   const std::vector<std::string> &environment,
+                                   long long int timeout, bool captureOutput) {
   std::vector<std::pair<std::string, std::string>> env;
   env.reserve(environment.size());
   for (auto &e : environment) {
