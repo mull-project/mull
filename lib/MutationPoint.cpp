@@ -51,10 +51,6 @@ int MutationPointAddress::getIIndex() const {
   return instructionIndex;
 }
 
-std::string MutationPointAddress::getIdentifier() const {
-  return identifier;
-}
-
 template <typename Container, typename Value>
 static size_t getIndex(Container &container, Value *value) {
   size_t index = 0;
@@ -83,8 +79,6 @@ MutationPoint::MutationPoint(Mutator *mutator, irm::IRMutation *irMutator,
                              std::string diagnostics)
     : mutator(mutator), address(MutationPointAddress::addressFromInstruction(instruction)),
       bitcode(m), originalFunction(instruction->getFunction()), mutatedFunction(nullptr),
-      uniqueIdentifier(bitcode->getUniqueIdentifier() + "_" + address.getIdentifier() + "_" +
-                       mutator->getUniqueIdentifier()),
       diagnostics(std::move(diagnostics)), replacement(std::move(replacement)),
       sourceLocation(SourceLocation::locationFromInstruction(instruction)), irMutator(irMutator) {
   userIdentifier = mutator->getUniqueIdentifier() + ':' + sourceLocation.filePath + ':' +
@@ -122,14 +116,6 @@ void MutationPoint::applyMutation() {
   mutator->applyMutation(mutatedFunction, address, irMutator);
 }
 
-std::string MutationPoint::getUniqueIdentifier() {
-  return uniqueIdentifier;
-}
-
-std::string MutationPoint::getUniqueIdentifier() const {
-  return uniqueIdentifier;
-}
-
 std::string MutationPoint::getMutatorIdentifier() const {
   return mutator->getUniqueIdentifier();
 }
@@ -154,17 +140,24 @@ Function *MutationPoint::getOriginalFunction() {
   return originalFunction;
 }
 
+llvm::Function *MutationPoint::getMutatedFunction() const {
+  return mutatedFunction;
+}
+
 void MutationPoint::setMutatedFunction(llvm::Function *function) {
   function->setName(getMutatedFunctionName());
   this->mutatedFunction = function;
 }
 
 std::string MutationPoint::getMutatedFunctionName() {
-  return getUniqueIdentifier();
+  if (this->mutatedFunction) {
+    return this->mutatedFunction->getName().str();
+  }
+  return getUserIdentifier();
 }
 
 std::string MutationPoint::getOriginalFunctionName() const {
-  return originalFunction->getName().str() + "_" + bitcode->getUniqueIdentifier() + "_original";
+  return "mull_"s + originalFunction->getName().str() + "_original";
 }
 
 std::string MutationPoint::dump() const {

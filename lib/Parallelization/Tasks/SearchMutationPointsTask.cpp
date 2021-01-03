@@ -11,18 +11,14 @@
 using namespace mull;
 using namespace llvm;
 
-SearchMutationPointsTask::SearchMutationPointsTask(
-    const Program &program, std::vector<std::unique_ptr<Mutator>> &mutators)
-    : program(program), mutators(mutators) {}
+SearchMutationPointsTask::SearchMutationPointsTask(std::vector<std::unique_ptr<Mutator>> &mutators)
+    : mutators(mutators) {}
 
-void SearchMutationPointsTask::operator()(iterator begin, iterator end,
-                                          Out &storage,
+void SearchMutationPointsTask::operator()(iterator begin, iterator end, Out &storage,
                                           progress_counter &counter) {
   for (auto it = begin; it != end; it++, counter.increment()) {
     FunctionUnderTest &functionUnderTest = *it;
-    Function *function = functionUnderTest.getFunction();
-    auto moduleID = function->getParent()->getModuleIdentifier();
-    Bitcode *bitcode = program.bitcodeWithIdentifier(moduleID);
+    Bitcode *bitcode = functionUnderTest.getBitcode();
 
     for (auto &mutator : mutators) {
       auto mutants = mutator->getMutations(bitcode, functionUnderTest);

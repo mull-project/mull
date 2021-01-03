@@ -21,7 +21,8 @@ TEST(ScalarValueMutator, getMutationPoint) {
       fixtures::mutators_scalar_value_module_bc_path(), context, diagnostics);
 
   ScalarValueMutator mutator;
-  FunctionUnderTest functionUnderTest(bitcode->getModule()->getFunction("scalar_value"));
+  FunctionUnderTest functionUnderTest(bitcode->getModule()->getFunction("scalar_value"),
+                                      bitcode.get());
   functionUnderTest.selectInstructions({});
   auto mutants = mutator.getMutations(bitcode.get(), functionUnderTest);
 

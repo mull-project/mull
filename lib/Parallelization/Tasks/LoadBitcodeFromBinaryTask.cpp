@@ -23,9 +23,7 @@ void LoadBitcodeFromBinaryTask::operator()(iterator begin, iterator end, Out &st
     auto ownedBuffer = llvm::MemoryBuffer::getMemBufferCopy(bufferView);
     auto buffer = ownedBuffer.get();
 
-    auto modulePair = mull::loadModuleFromBuffer(context, *buffer, diagnostics);
-    auto hash = modulePair.first;
-    auto module = std::move(modulePair.second);
+    auto module = mull::loadModuleFromBuffer(context, *buffer, diagnostics);
 
     if (module == nullptr) {
       diagnostics.warning("Bitcode module could not be loaded. Possible reason: the bitcode "
@@ -40,9 +38,8 @@ void LoadBitcodeFromBinaryTask::operator()(iterator begin, iterator end, Out &st
     }
 
     assert(module && "Could not load module");
-    module->setModuleIdentifier(hash);
 
-    auto bitcode = std::make_unique<mull::Bitcode>(std::move(module), std::move(ownedBuffer), hash);
+    auto bitcode = std::make_unique<mull::Bitcode>(std::move(module));
     storage.push_back(std::move(bitcode));
   }
 }

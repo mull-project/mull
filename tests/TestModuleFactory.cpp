@@ -37,8 +37,7 @@ std::unique_ptr<Bitcode> loadBitcodeFromIR(const char *path,
 
   assert(!llvm::verifyModule(*module, &dbgs()));
 
-  return std::make_unique<Bitcode>(
-      std::move(module), std::unique_ptr<llvm::MemoryBuffer>(), "fake_path");
+  return std::make_unique<Bitcode>(std::move(module));
 }
 
 } // namespace mull

@@ -3,17 +3,24 @@
 
 #include <llvm/IR/InstIterator.h>
 
-mull::FunctionUnderTest::FunctionUnderTest(llvm::Function *function) : function(function) {}
+using namespace mull;
 
-llvm::Function *mull::FunctionUnderTest::getFunction() const {
+FunctionUnderTest::FunctionUnderTest(llvm::Function *function, Bitcode *bitcode)
+    : function(function), bitcode(bitcode) {}
+
+llvm::Function *FunctionUnderTest::getFunction() const {
   return function;
 }
 
-const std::vector<llvm::Instruction *> &mull::FunctionUnderTest::getSelectedInstructions() const {
+mull::Bitcode *FunctionUnderTest::getBitcode() const {
+  return bitcode;
+}
+
+const std::vector<llvm::Instruction *> &FunctionUnderTest::getSelectedInstructions() const {
   return selectedInstructions;
 }
 
-void mull::FunctionUnderTest::selectInstructions(const std::vector<InstructionFilter *> &filters) {
+void FunctionUnderTest::selectInstructions(const std::vector<InstructionFilter *> &filters) {
   for (llvm::Instruction &instruction : llvm::instructions(function)) {
     bool selected = true;
     for (InstructionFilter *filter : filters) {

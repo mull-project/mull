@@ -32,7 +32,8 @@ TEST(MutationPoint, ScalarValueMutator_applyMutation) {
       fixtures::mutators_scalar_value_module_bc_path(), context, diagnostics);
 
   ScalarValueMutator mutator;
-  FunctionUnderTest functionUnderTest(bitcode->getModule()->getFunction("scalar_value"));
+  FunctionUnderTest functionUnderTest(bitcode->getModule()->getFunction("scalar_value"),
+                                      bitcode.get());
   functionUnderTest.selectInstructions({});
   auto mutationPoints = mutator.getMutations(bitcode.get(), functionUnderTest);
 
@@ -70,7 +71,8 @@ TEST(MutationPoint, ReplaceCallMutator_applyMutation) {
       fixtures::mutators_replace_call_module_bc_path(), context, diagnostics);
 
   ReplaceCallMutator mutator;
-  FunctionUnderTest functionUnderTest(bitcode->getModule()->getFunction("replace_call"));
+  FunctionUnderTest functionUnderTest(bitcode->getModule()->getFunction("replace_call"),
+                                      bitcode.get());
   functionUnderTest.selectInstructions({});
   auto mutationPoints = mutator.getMutations(bitcode.get(), functionUnderTest);
 
@@ -96,7 +98,8 @@ TEST(MutationPoint, OriginalValuePresent) {
       fixtures::mutators_replace_assignment_module_bc_path(), context, diagnostics);
 
   cxx::NumberAssignConst mutator;
-  FunctionUnderTest functionUnderTest(bitcode->getModule()->getFunction("replace_assignment"));
+  FunctionUnderTest functionUnderTest(bitcode->getModule()->getFunction("replace_assignment"),
+                                      bitcode.get());
   functionUnderTest.selectInstructions({});
   auto mutationPoints = mutator.getMutations(bitcode.get(), functionUnderTest);
 
@@ -139,7 +142,8 @@ TEST(MutationPoint, dump) {
       fixtures::mutators_replace_assignment_module_bc_path(), context, diagnostics);
 
   cxx::NumberAssignConst mutator;
-  FunctionUnderTest functionUnderTest(bitcode->getModule()->getFunction("replace_assignment"));
+  FunctionUnderTest functionUnderTest(bitcode->getModule()->getFunction("replace_assignment"),
+                                      bitcode.get());
   functionUnderTest.selectInstructions({});
   auto mutationPoints = mutator.getMutations(bitcode.get(), functionUnderTest);
 
@@ -170,7 +174,8 @@ TEST(MutationPoint, dumpSourceCodeContext) {
       fixtures::mutators_replace_assignment_module_bc_path(), context, diagnostics);
 
   cxx::NumberAssignConst mutator;
-  FunctionUnderTest functionUnderTest(bitcode->getModule()->getFunction("replace_assignment"));
+  FunctionUnderTest functionUnderTest(bitcode->getModule()->getFunction("replace_assignment"),
+                                      bitcode.get());
   functionUnderTest.selectInstructions({});
   auto mutationPoints = mutator.getMutations(bitcode.get(), functionUnderTest);
 

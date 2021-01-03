@@ -18,16 +18,6 @@
 using namespace llvm;
 using namespace mull;
 
-static std::string MD5HashFromBuffer(StringRef buffer) {
-  MD5 hasher;
-  hasher.update(buffer);
-  MD5::MD5Result hash;
-  hasher.final(hash);
-  SmallString<32> result;
-  MD5::stringifyResult(hash, result);
-  return result.str().str();
-}
-
 std::unique_ptr<Module> mull::parseBitcode(MemoryBufferRef bufferRef, LLVMContext &context,
                                            Diagnostics &diagnostics) {
   auto module = parseBitcodeFile(bufferRef, context);
@@ -49,11 +39,9 @@ std::unique_ptr<Module> mull::parseBitcode(MemoryBufferRef bufferRef, LLVMContex
   return std::move(module.get());
 }
 
-std::pair<std::string, std::unique_ptr<Module>>
-mull::loadModuleFromBuffer(LLVMContext &context, MemoryBuffer &buffer, Diagnostics &diagnostics) {
-  auto module = parseBitcode(buffer.getMemBufferRef(), context, diagnostics);
-  std::string md5 = MD5HashFromBuffer(buffer.getBuffer());
-  return std::make_pair(md5, std::move(module));
+std::unique_ptr<Module> mull::loadModuleFromBuffer(LLVMContext &context, MemoryBuffer &buffer,
+                                                   Diagnostics &diagnostics) {
+  return parseBitcode(buffer.getMemBufferRef(), context, diagnostics);
 }
 
 std::unique_ptr<Bitcode> BitcodeLoader::loadBitcodeAtPath(const std::string &path,
@@ -68,10 +56,7 @@ std::unique_ptr<Bitcode> BitcodeLoader::loadBitcodeAtPath(const std::string &pat
   }
 
   MemoryBuffer *b = buffer.get().get();
-  auto modulePair = loadModuleFromBuffer(context, *b, diagnostics);
-
-  std::string hash = modulePair.first;
-  std::unique_ptr<llvm::Module> module(std::move(modulePair.second));
+  std::unique_ptr<llvm::Module> module(loadModuleFromBuffer(context, *b, diagnostics));
 
   if (module == nullptr) {
     std::stringstream message;
@@ -80,7 +65,7 @@ std::unique_ptr<Bitcode> BitcodeLoader::loadBitcodeAtPath(const std::string &pat
     return nullptr;
   }
 
-  return std::make_unique<Bitcode>(std::move(module), std::move(buffer.get()), hash);
+  return std::make_unique<Bitcode>(std::move(module));
 }
 
 std::vector<std::unique_ptr<Bitcode>> BitcodeLoader::loadBitcode(const Configuration &config,

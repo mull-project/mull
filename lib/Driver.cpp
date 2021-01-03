@@ -302,14 +302,14 @@ std::vector<FunctionUnderTest> Driver::getFunctionsUnderTest() {
             }
           }
           if (covered) {
-            functionsUnderTest.emplace_back(&function);
+            functionsUnderTest.emplace_back(&function, bitcode.get());
           }
         }
       }
     } else {
       for (auto &bitcode : program.bitcode()) {
         for (llvm::Function &function : *bitcode->getModule()) {
-          functionsUnderTest.emplace_back(&function);
+          functionsUnderTest.emplace_back(&function, bitcode.get());
         }
       }
     }
