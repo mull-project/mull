@@ -11,7 +11,7 @@ Welcome to Mull's documentation!
    Tutorials
    SupportedMutations
    CommandLineReference
-   ForResearchers
+   HowMullWorks
    HackingOnMull
 
 .. Indices and tables

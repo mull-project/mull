@@ -1,5 +1,5 @@
-For researchers
-===============
+How Mull works
+==============
 
 This page contains a short summary of the design and features of Mull. Also
 the advantages of Mull are highlighted as well as some known issues.
@@ -8,7 +8,6 @@ If you want to learn more than we cover here, Mull has a paper:
 "Mull it over: mutation testing based on LLVM" (see below on this page).
 
 ----
-
 
 Design
 ------

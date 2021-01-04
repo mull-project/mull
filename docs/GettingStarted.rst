@@ -9,7 +9,7 @@ Then, `install Mull <Installation.html>`_ and go through the `tutorials <Tutoria
 As soon as you are comfortable with the basics you may want to learn about various `options and settings <CommandLineReference.html>`_ Mull has,
 as well as pick the right set of available `mutation operators <SupportedMutations.html>`_.
 
-Doing research? There is a special chapter for you: `For Researchers <ForResearchers.html>`_.
+If you are curious about how Mull works under the hood: `How Mull works <HowMullWorks.html>`_.
 
 If you want to dive deeper and look behind the curtains, then we encourage you to `hack on Mull <HackingOnMull.html>`_.
 
