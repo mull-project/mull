@@ -13,30 +13,41 @@ Design
 ------
 
 Mull is based on LLVM and uses its API extensively. The main APIs used are:
-**LLVM IR**, **LLVM JIT**, **Clang AST API**.
+**LLVM IR** and **Clang AST API**.
 
 Mull finds and creates mutations of a program in memory, on the level of LLVM
 bitcode.
 
-Mull uses information about source code obtained via Clang AST API to find which
-mutations in LLVM bitcode are valid (i.e. they trace back to the source code),
-all invalid mutations are ignored in a controlled way.
+All mutations are injected into the original program code and each injected gets
+mutation hidden under a conditional flag that enables that specific mutation.
+The resulting program is compiled into a single binary which is run multiple
+times, one run per mutation. With each run, a condition for a corresponding
+mutation is activated to check how the injection of that particular mutation
+affects the execution of a test suite.
 
-Mull runs the program and its mutated versions in memory using LLVM JIT. The
-``fork()`` call is used to run mutants in child subprocesses so that their
-execution does not affect Mull as a parent process.
+Mull runs the tested program and its mutated versions in child subprocesses so
+that the execution of the tested program does not affect Mull running in a
+parent process.
+
+**Note:** Mull no longer uses LLVM JIT for execution of mutated programs.
+See the
+`Historical note: LLVM JIT deprecation (January 2021)`_.
+
+Mull uses information about source code obtained via Clang AST API to find out
+which mutations in LLVM bitcode are valid (i.e. they trace back to the source
+code), all invalid mutations are ignored in a controlled way.
 
 Mutations search
 ----------------
 
-The default search algorithm simply finds all mutations that can be made on the
+The default search algorithm simply finds all mutations that can be found on the
 level of LLVM bitcode.
 
 The **"black search" algorithm** called Junk Detection uses source code information
 provided by Clang AST to filter out invalid mutations from a set of all possible
 mutations that are found in LLVM bitcode by the default search algorithm.
 
-The **"white search"** algorithm starts with collecting source code information
+The **"white search" algorithm** starts with collecting source code information
 via Clang AST and then feeds this information to the default search algorithm
 which allows finding valid mutations and filtering out invalid mutations
 at the same time.
@@ -58,7 +69,8 @@ See `Supported Mutation Operators <SupportedMutations.html>`_.
 Reporting
 ---------
 
-Mull reports survived/killed mutations to the console by default.
+Mull reports survived/killed mutations to the console by default. The
+compiler-like warnings are printed to standard output.
 
 Mull has an SQLite reporter: mutants and execution results are collected in
 SQLite database. This kind of reporting makes it possible to make SQL queries
@@ -85,20 +97,7 @@ Mull has 3 layers of testing:
 
 1. Unit and integration testing on the level of C++ classes
 2. Integration testing against known real-world projects, such as OpenSSL
-3. Integration testing using LLVM Integrated Tester (in progress)
-
-Current development
--------------------
-
-The current development goals for Mull for Autumn 2019 - Spring 2020 are:
-
-- Stable performance of black and white search algorithms supported by a solid
-  integration test coverage.
-
-- **Incremental mutation testing**. Mull can already run on subsets of program
-  code but the API and workflows are still evolving.
-
-- More mutation operators.
+3. Integration testing using LLVM Integrated Tester (LIT)
 
 Advantages
 ----------
@@ -108,18 +107,16 @@ mutations is very good performance. Combined with incremental mutation testing
 one can get mutation testing reports in the order of few seconds.
 
 Another advantage is language agnosticism. The developers of Mull have been
-focusing on C/C++ as their primary development languages at their jobs but
-the proof of concepts have been developed for the other compiled languages such
-as Rust and Swift.
+focusing on C/C++ as the primary supported languages but the proof of concepts
+for other compiled languages, such as Rust and Swift, have been developed.
 
 A lot of development effort have been put into Mull in order to make it stable
 across different operating systems and versions of LLVM. Combined with the
-growing test coverage and highly modular design the authors are slowly but
-steady getting to the point when they can claim that Mull is a very stable,
-very well tested and maintained system.
+growing test coverage and highly modular design, Mull is a very stable,
+well-tested and maintained system.
 
-Known issues
-------------
+Known issue: Precision
+----------------------
 
 Mull works on the level of LLVM bitcode and from there it gets its strengths
 but also its main weakness: the precision of the information for mutations is
@@ -129,6 +126,15 @@ LLVM bitcode and AST in order to make Mull both fast and precise. Among other
 things the good suite of integration tests is aimed to provide Mull with a good
 contract of supported mutations which are predictable and known to work without
 any side effects.
+
+Historical note: LLVM JIT deprecation (January 2021)
+----------------------------------------------------
+
+The usage of LLVM JIT has been deprecated and all LLVM JIT-related code has been
+removed from Mull by January 2021.
+
+This issue explains the reasons:
+`PSA: Moving away from JIT <https://github.com/mull-project/mull/issues/798>`_.
 
 Paper
 -----

@@ -1,6 +1,8 @@
 Features
 ========
 
+- Mull enables mutation testing of C and C++ projects.
+
 - Mull expects a passing test suite to exit with 0. If the test suite fails, it
   must exit with a non-zero exit code. Any C/C++ test framework that follows
   this convention is supported by Mull.
@@ -9,7 +11,7 @@ Features
 
 - Generate results in various formats:
 
-  - IDE Reporter: compiler-like warnings printed to standard output
+  - IDE Reporter: compiler-like warnings are printed to standard output
 
     - ``sample.cpp:15:11: warning: Killed: Replaced >= with < [cxx_ge_to_lt]``
 
