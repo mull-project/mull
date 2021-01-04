@@ -18,11 +18,11 @@ Mull is based on LLVM and uses its API extensively. The main APIs used are:
 Mull finds and creates mutations of a program in memory, on the level of LLVM
 bitcode.
 
-All mutations are injected into the original program code and each injected gets
-mutation hidden under a conditional flag that enables that specific mutation.
-The resulting program is compiled into a single binary which is run multiple
-times, one run per mutation. With each run, a condition for a corresponding
-mutation is activated to check how the injection of that particular mutation
+All mutations are injected into original program's code. Each injected mutation
+is hidden under a conditional flag that enables that specific mutation. The
+resulting program is compiled into a single binary which is run multiple times,
+one run per mutation. With each run, Mull activates a condition for a
+corresponding mutation to check how the injection of that particular mutation
 affects the execution of a test suite.
 
 Mull runs the tested program and its mutated versions in child subprocesses so
