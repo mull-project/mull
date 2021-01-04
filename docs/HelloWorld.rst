@@ -11,6 +11,9 @@ down to ``Complete example`` below.
 
 ----
 
+Step 1: Checking version
+------------------------
+
 The tutorial assumes that you have `installed <Installation.html>`_ Mull on your system and
 have the `mull-cxx` executable available:
 
@@ -19,10 +22,13 @@ have the `mull-cxx` executable available:
     $ mull-cxx -version
     Mull: LLVM-based mutation testing
     https://github.com/mull-project/mull
-    Version: 0.7.0
-    Commit: 1638698
-    Date: 28 Mar 2020
+    Version: 0.8.0
+    Commit: f94f38ed
+    Date: 04 Jan 2021
     LLVM: 9.0.0
+
+Step 2: Enabling Bitcode
+------------------------
 
 The most important thing that Mull needs to know is the path to your program
 which must be a valid C or C++ executable. Let's create a C program:
@@ -40,27 +46,6 @@ and compile it:
     clang main.cpp -o hello-world
 
 We can already try running ``mull-cxx`` and see what happens:
-
-.. code-block:: bash
-
-    $ mull-cxx hello-world
-    mull-cxx: for the -test-framework option: must be specified at least once!
-
-This is the second important thing that Mull needs: we have to specify which
-kind of test framework Mull should assume our program uses.
-
-We specify ``CustomTest``:
-
-.. code-block:: bash
-
-    mull-cxx -test-framework=CustomTest hello-world
-
-``-test-framework=CustomTest`` parameter tells Mull that it should not expect
-a real test framework such as Google Test or any kind of advanced test suite.
-Instead Mull will simply consider that our tests will be simple test functions
-which we will call from the ``main()`` function.
-
-Now the output is different:
 
 .. code-block:: text
 
@@ -87,7 +72,7 @@ Let's try again:
 .. code-block:: text
 
     $ clang -fembed-bitcode -g main.cpp -o hello-world
-    $ mull-cxx -test-framework CustomTest hello-world
+    $ mull-cxx hello-world
     [info] Extracting bitcode from executable (threads: 1)
            [################################] 1/1. Finished in 3ms
     [info] Loading bitcode files (threads: 1)
@@ -108,6 +93,9 @@ The ``No bitcode: x86_64`` warning has gone and now we can focus on another
 important part of the output: ``No mutants found. Mutation score: infinitely
 high``. We have our executable but we don't have any code so there is nothing
 Mull could work on.
+
+Step 3: Killing mutants, one survived
+-------------------------------------
 
 Let's add some code:
 
@@ -146,7 +134,7 @@ verbose.
 .. code-block:: text
 
     $ clang -fembed-bitcode -g main.cpp -o hello-world
-    $ mull-cxx -test-framework=CustomTest -ide-reporter-show-killed hello-world
+    $ mull-cxx -ide-reporter-show-killed hello-world
     [info] Extracting bitcode from executable (threads: 1)
            [################################] 1/1. Finished in 10ms
     [info] Loading bitcode files (threads: 1)
@@ -206,8 +194,8 @@ what the survived mutation is about: Mull has replaced ``age >= 21`` with
 
 Let's add the third test case and see what happens.
 
-Complete example
-----------------
+Step 4: Killing mutants again, all killed
+-----------------------------------------
 
 The code:
 
@@ -246,7 +234,7 @@ The code:
 .. code-block:: text
 
     $ clang -fembed-bitcode -g main.cpp -o hello-world
-    $ mull-cxx -test-framework=CustomTest -ide-reporter-show-killed hello-world
+    $ mull-cxx -ide-reporter-show-killed hello-world
     [info] Extracting bitcode from executable (threads: 1)
            [################################] 1/1. Finished in 4ms
     [info] Loading bitcode files (threads: 1)
@@ -304,7 +292,7 @@ This is a short summary of what we have learned in tutorial:
 
 - Your code has to be compiled with ``-fembed-bitcode -g`` compile flags:
 
-  - Mull expects embedded bitcode files to be present in binary executable
+  - Mull expects embedded bitcode files to be present in a binary executable
     (ensured by ``-fembed-bitcode``).
 
   - Mull needs debug information to be included by the compiler (enabled by
@@ -314,7 +302,3 @@ This is a short summary of what we have learned in tutorial:
 - Mull expects the following arguments to be always provided:
 
   - Your executable program
-
-  - ``-test-framework`` parameter that tells Mull which kind of testing
-    framework to expect. In this tutorial we have been using the ``CustomTest``
-    framework.
