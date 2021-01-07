@@ -20,7 +20,7 @@ Get sources and build fmtlib:
       -DCMAKE_EXPORT_COMPILE_COMMANDS=ON ..
     make core-test
 
-*Note: last tested against commit ``018688da2a58ba25cdf173bd899734f755adb11a``*
+*Note: last tested against commit 018688da2a58ba25cdf173bd899734f755adb11a*
 
 Run Mull against the ``core-test``:
 
@@ -32,7 +32,7 @@ Run Mull against the ``core-test``:
 Right now you should see a weird and long error message by the end of execution.
 Here is a snippet:
 
-.. code-blocK:: text
+.. code-block:: text
 
     /// skipped
     [info] Applying mutations (threads: 1)
@@ -62,7 +62,7 @@ it just uses ``clang`` which works in most of the cases. However, in this case
 we deal with C++ which needs a corresponding C++ linker. Instead we should be
 using ``clang++``, which will do the job just fine.
 
-*Note: on Linux you may have to specify ``clang-<version>`` or ``clang++-<version>``,
+*Note: on Linux you may have to specify clang-<version> or clang++-<version>,
 where <version> corresponds to the version of clang installed*
 
 Try this:
