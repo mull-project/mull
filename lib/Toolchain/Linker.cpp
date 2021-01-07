@@ -29,7 +29,8 @@ std::string Linker::linkObjectFiles(const std::vector<std::string> &objects) {
   std::copy(std::begin(objects), std::end(objects), std::back_inserter(arguments));
   arguments.emplace_back("-o");
   arguments.push_back(resultPath.str().str());
-  ExecutionResult result = runner.runProgram(configuration.linker, arguments, {}, 50000, true);
+  ExecutionResult result =
+      runner.runProgram(configuration.linker, arguments, {}, configuration.linkerTimeout, true);
   std::stringstream commandStream;
   commandStream << configuration.linker;
   for (std::string &argument : arguments) {
@@ -48,6 +49,6 @@ std::string Linker::linkObjectFiles(const std::vector<std::string> &objects) {
     diagnostics.error(message.str());
   }
   diagnostics.debug("Link command: "s + command);
-  diagnostics.debug("Compiled executable: "s + resultPath.c_str());
+  diagnostics.info("Compiled executable: "s + resultPath.c_str());
   return resultPath.str().str();
 }

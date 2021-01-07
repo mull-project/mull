@@ -28,6 +28,7 @@ extern opt<std::string> CompilationFlags;
 
 extern opt<std::string> Linker;
 extern opt<std::string> LinkerFlags;
+extern opt<unsigned> LinkerTimeout;
 
 extern opt<std::string> CoverageInfo;
 

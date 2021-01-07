@@ -8,6 +8,7 @@
 namespace mull {
 
 extern int MullDefaultTimeoutMilliseconds;
+extern unsigned MullDefaultLinkerTimeoutMilliseconds;
 
 struct Configuration {
   bool debugEnabled;
@@ -17,6 +18,7 @@ struct Configuration {
   bool skipSanityCheckRun;
 
   int timeout;
+  unsigned linkerTimeout;
 
   IDEDiagnosticsKind diagnostics;
 

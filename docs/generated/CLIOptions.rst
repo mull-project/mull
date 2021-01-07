@@ -40,6 +40,8 @@
 
 --linker-flags string		Extra linker flags to produce final executable
 
+--linker-timeout number		Timeout for the linking job (milliseconds)
+
 --coverage-info string		Path to the coverage info file (LLVM's profdata)
 
 --include-path regex		File/directory paths to whitelist (supports regex)

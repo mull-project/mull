@@ -13,10 +13,12 @@ ParallelizationConfig singleThreadParallelization() {
 }
 
 int MullDefaultTimeoutMilliseconds = 3000;
+unsigned MullDefaultLinkerTimeoutMilliseconds = 30000;
 
 Configuration::Configuration()
     : debugEnabled(false), dryRunEnabled(false), captureTestOutput(true), captureMutantOutput(true),
       skipSanityCheckRun(false), timeout(MullDefaultTimeoutMilliseconds),
-      diagnostics(IDEDiagnosticsKind::None), parallelization(singleThreadParallelization()) {}
+      linkerTimeout(MullDefaultLinkerTimeoutMilliseconds), diagnostics(IDEDiagnosticsKind::None),
+      parallelization(singleThreadParallelization()) {}
 
 } // namespace mull

@@ -90,6 +90,14 @@ opt<std::string> tool::LinkerFlags(
     init(std::string()),
     cat(MullCXXCategory));
 
+opt<unsigned> tool::LinkerTimeout(
+    "linker-timeout",
+    desc("Timeout for the linking job (milliseconds)"),
+    Optional,
+    value_desc("number"),
+    init(MullDefaultLinkerTimeoutMilliseconds),
+    cat(MullCXXCategory));
+
 opt<std::string> tool::CoverageInfo(
     "coverage-info",
     desc("Path to the coverage info file (LLVM's profdata)"),
@@ -317,6 +325,7 @@ void tool::dumpCLIInterface(Diagnostics &diagnostics) {
 
       &Linker,
       &LinkerFlags,
+      &LinkerTimeout,
 
       &CoverageInfo,
 

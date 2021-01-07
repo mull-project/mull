@@ -90,6 +90,7 @@ int main(int argc, char **argv) {
 
   configuration.linker = tool::Linker.getValue();
   configuration.linkerFlags = splitFlags(tool::LinkerFlags.getValue());
+  configuration.linkerTimeout = tool::LinkerTimeout.getValue();
 
   configuration.debugEnabled = tool::DebugEnabled;
   configuration.timeout = tool::Timeout.getValue();
