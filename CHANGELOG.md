@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.9.0] - 07 Jan 2021
+
+**Important note**: this release is a breaking change!
+
+We decided to [move away from JIT](https://github.com/mull-project/mull/issues/798)
+and because of that Mull's API has changed.
+Make sure you go though the first three [tutorials](https://mull.readthedocs.io/en/latest/Tutorials.html)
+to see the difference.
+
+Actual changelog:
+
+- Moved to Discord from Slack: [Join Us There](https://discord.gg/Hphp7dW)
+- Added LLVM 11 support [789](https://github.com/mull-project/mull/pull/789)
+- Added Ubuntu 20 support [789](https://github.com/mull-project/mull/pull/789)
+- Moved away from JIT [#798](https://github.com/mull-project/mull/issues/798)
+- Removed explicit test framework support [814](https://github.com/mull-project/mull/pull/814)
+- Special thanks goes to [Joakim Nohlgård](https://github.com/gebart) for bringing Boost test framework support, which is now unfortunately gone [#746](https://github.com/mull-project/mull/pull/746)
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2020-10-14..2021-01-07)
+
 ## [0.8.0] - 14 Oct 2020
 
 - Implemented mutators for (almost) all C++ expressions [#577](https://github.com/mull-project/mull/issues/577)
