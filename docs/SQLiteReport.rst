@@ -1,6 +1,8 @@
 Working with SQLite report
 ==========================
 
+**Warning: the data model has changed and most of the tutorial is no longer relevant/applicable**
+
 From the very beginning, we didn't want to impose our vision on treating the results of mutation testing. Some people do not care about the mutation score, while others do care, but want to calculate it slightly differently.
 
 To solve this problem, Mull splits execution and reporting into separate phases.

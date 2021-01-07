@@ -5,6 +5,6 @@ Tutorials
    :maxdepth: 1
 
    HelloWorld
-   fmtlibTutorial
-   OpenSSLTutorial
+   CompilationDatabaseAndJunk
+   ControlMutationsTutorial
    SQLiteReport
