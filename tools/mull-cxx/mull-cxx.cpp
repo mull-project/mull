@@ -174,6 +174,14 @@ int main(int argc, char **argv) {
       diagnostics, cxxCompilationDatabasePath, cxxCompilationFlags, bitcodeCompilationFlags);
 
   mull::ASTSourceInfoProvider sourceInfoProvider(astStorage);
+  tool::ReporterParameters params{
+      .reporterName = tool::ReportName.getValue(),
+      .reporterDirectory = tool::ReportDirectory.getValue(),
+      .sourceInfoProvider = sourceInfoProvider,
+      .compilationDatabaseAvailable = compilationDatabaseInfoAvailable
+  };
+  std::vector<std::unique_ptr<mull::Reporter>> reporters = reportersOption.reporters(params);
+
   mull::CXXJunkDetector junkDetector(astStorage);
 
   mull::MutationsFinder mutationsFinder(mutatorsOptions.mutators(), configuration);
@@ -224,13 +232,6 @@ int main(int argc, char **argv) {
 
   mull::Driver driver(diagnostics, configuration, program, toolchain, filters, mutationsFinder);
   auto result = driver.run();
-
-  tool::ReporterParameters params{
-    .reporterName = tool::ReportName.getValue(),
-    .reporterDirectory = tool::ReportDirectory.getValue(),
-    .sourceInfoProvider = sourceInfoProvider,
-  };
-  std::vector<std::unique_ptr<mull::Reporter>> reporters = reportersOption.reporters(params);
 
   for (auto &reporter : reporters) {
     reporter->reportResults(*result);

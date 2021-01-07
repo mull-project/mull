@@ -67,6 +67,7 @@ struct ReporterParameters {
   std::string reporterName;
   std::string reporterDirectory;
   SourceInfoProvider &sourceInfoProvider;
+  bool compilationDatabaseAvailable;
 };
 
 class ReportersCLIOptions {
