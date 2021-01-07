@@ -1,5 +1,6 @@
 #include "CLIOptions.h"
 #include <mull/Config/Configuration.h>
+#include <mull/Diagnostics/Diagnostics.h>
 #include <mull/Mutators/Mutator.h>
 #include <mull/Reporters/IDEReporter.h>
 #include <mull/Reporters/MutationTestingElementsReporter.h>
@@ -257,6 +258,10 @@ std::vector<std::unique_ptr<Reporter>> ReportersCLIOptions::reporters(ReporterPa
       reporters.emplace_back(new mull::SQLiteReporter(diagnostics, directory, name));
     } break;
     case ReporterKind::Elements: {
+      if (!params.compilationDatabaseAvailable) {
+        diagnostics.error("Mutation Testing Elements Reporter requires compilation database."
+                          " Please provide it using flags -compdb-path and -compdb-flags.");
+      }
       reporters.emplace_back(
           new mull::MutationTestingElementsReporter(diagnostics, directory, name, provider));
     } break;
