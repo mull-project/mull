@@ -1,24 +1,27 @@
 #pragma once
 
-#include "ExecutionResult.h"
-#include "MutationPoint.h"
+#include "mull/ExecutionResult.h"
 #include <utility>
 
 namespace mull {
 
-class MutationResult {
-  ExecutionResult Result;
-  MutationPoint *MutPoint;
+class Mutant;
 
+class MutationResult {
 public:
-  MutationResult(ExecutionResult R, MutationPoint *MP) : Result(std::move(R)), MutPoint(MP) {}
+  MutationResult(ExecutionResult result, Mutant *mutant)
+      : result(std::move(result)), mutant(mutant) {}
 
   ExecutionResult &getExecutionResult() {
-    return Result;
+    return result;
   }
-  MutationPoint *getMutationPoint() {
-    return MutPoint;
+  Mutant *getMutant() {
+    return mutant;
   }
+
+private:
+  ExecutionResult result;
+  Mutant *mutant;
 };
 
 } // namespace mull

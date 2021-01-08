@@ -14,6 +14,7 @@ set(mull_sources
   BitcodeLoader.cpp
   BitcodeMetadataReader.cpp
   MutationsFinder.cpp
+  Mutant.cpp
 
   Parallelization/Tasks/LoadBitcodeFromBinaryTask.cpp
 

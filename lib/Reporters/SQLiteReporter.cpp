@@ -3,6 +3,7 @@
 #include "mull/Bitcode.h"
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/ExecutionResult.h"
+#include "mull/Mutant.h"
 #include "mull/MutationResult.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Result.h"
@@ -85,8 +86,7 @@ void mull::SQLiteReporter::reportResults(const Result &result) {
   sqlite3_prepare(database, insertExecutionResultQuery, -1, &insertExecutionResultStmt, nullptr);
 
   for (auto &mutationResult : result.getMutationResults()) {
-    MutationPoint *mutationPoint = mutationResult->getMutationPoint();
-    const std::string &pointId = mutationPoint->getUserIdentifier();
+    const std::string &pointId = mutationResult->getMutant()->getIdentifier();
 
     ExecutionResult mutationExecutionResult = mutationResult->getExecutionResult();
 
@@ -114,8 +114,7 @@ void mull::SQLiteReporter::reportResults(const Result &result) {
   }
 
   const char *insertMutationPointQuery =
-      "INSERT OR IGNORE INTO mutation_point VALUES (?1, ?2, ?3, ?4, ?5, ?6, "
-      "?7, ?8, ?9, ?10, ?11, ?12)";
+      "INSERT INTO mutation_point VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)";
   sqlite3_stmt *insertMutationPointStmt;
   sqlite3_prepare(database, insertMutationPointQuery, -1, &insertMutationPointStmt, nullptr);
 
@@ -197,7 +196,7 @@ CREATE TABLE mutation_point (
   ideDiagnostics TEXT,
   line_number INT,
   column_number INT,
-  unique_id TEXT UNIQUE
+  unique_id TEXT
 );
 )CreateTables";
 

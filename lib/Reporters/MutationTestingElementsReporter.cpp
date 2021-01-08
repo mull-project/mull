@@ -1,6 +1,7 @@
 #include "mull/Reporters/MutationTestingElementsReporter.h"
 
 #include "mull/Diagnostics/Diagnostics.h"
+#include "mull/Mutant.h"
 #include "mull/MutationResult.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Reporters/ASTSourceInfoProvider.h"
@@ -25,7 +26,7 @@ static bool mutantSurvived(const ExecutionStatus &status) {
 }
 
 static json11::Json createFiles(Diagnostics &diagnostics, const Result &result,
-                                const std::set<MutationPoint *> &killedMutants,
+                                const std::set<Mutant *> &killedMutants,
                                 SourceInfoProvider &sourceInfoProvider) {
   SourceManager sourceManager;
 
@@ -34,13 +35,13 @@ static json11::Json createFiles(Diagnostics &diagnostics, const Result &result,
   // Mutation Testing Elements Schema suggests storing mutation points based
   // on their source file.
   // Step 1: we create a map: "file => all of its mutation points".
-  std::map<std::string, std::vector<MutationPoint *>> mutationPointsPerFile;
-  for (auto mutant : result.getMutationPoints()) {
+  std::map<std::string, std::vector<Mutant *>> mutationPointsPerFile;
+  for (auto &mutant : result.getMutants()) {
     auto &sourceLocation = mutant->getSourceLocation();
     auto sourceCodeLine = sourceManager.getLine(sourceLocation);
     assert(sourceLocation.column < sourceCodeLine.size());
 
-    mutationPointsPerFile[sourceLocation.filePath].push_back(mutant);
+    mutationPointsPerFile[sourceLocation.filePath].push_back(mutant.get());
   }
 
   // Step 2: Iterate through each file and dump the information about each
@@ -57,16 +58,16 @@ static json11::Json createFiles(Diagnostics &diagnostics, const Result &result,
 
     Json::array mutantsEntries;
 
-    for (MutationPoint *mutationPoint : fileMutationPoints.second) {
+    for (Mutant *mutant : fileMutationPoints.second) {
       MutationPointSourceInfo sourceInfo =
-          sourceInfoProvider.getSourceInfo(diagnostics, mutationPoint);
+          sourceInfoProvider.getSourceInfo(diagnostics, mutant->getMutationPoints().front());
 
-      std::string status = (killedMutants.count(mutationPoint) == 0) ? "Survived" : "Killed";
+      std::string status = (killedMutants.count(mutant) == 0) ? "Survived" : "Killed";
 
       Json mpJson =
-          Json::object{ { "id", mutationPoint->getMutator()->getUniqueIdentifier() },
-                        { "mutatorName", mutationPoint->getDiagnostics() },
-                        { "replacement", mutationPoint->getReplacement() },
+          Json::object{ { "id", mutant->getMutatorIdentifier() },
+                        { "mutatorName", mutant->getDiagnostics() },
+                        { "replacement", mutant->getReplacement() },
                         { "location",
                           Json::object{ { "start",
                                           Json::object{ { "line", sourceInfo.beginLine },
@@ -118,9 +119,9 @@ void MutationTestingElementsReporter::reportResults(const Result &result) {
   }
   generateHTMLFile();
 
-  std::set<MutationPoint *> killedMutants;
+  std::set<Mutant *> killedMutants;
   for (auto &mutationResult : result.getMutationResults()) {
-    auto mutant = mutationResult->getMutationPoint();
+    auto mutant = mutationResult->getMutant();
     auto &executionResult = mutationResult->getExecutionResult();
 
     if (!mutantSurvived(executionResult.status)) {
