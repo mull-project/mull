@@ -56,12 +56,15 @@ private:
   void selectInstructions(std::vector<FunctionUnderTest> &functions);
 
   std::vector<std::unique_ptr<MutationResult>>
-  runMutations(std::vector<MutationPoint *> &mutationPoints);
+  runMutations(std::vector<MutationPoint *> &mutationPoints,
+               std::vector<std::unique_ptr<Mutant>> &mutants);
 
   std::vector<std::unique_ptr<MutationResult>>
-  dryRunMutations(const std::vector<MutationPoint *> &mutationPoints);
+  dryRunMutations(const std::vector<MutationPoint *> &mutationPoints,
+                  std::vector<std::unique_ptr<Mutant>> &mutants);
   std::vector<std::unique_ptr<MutationResult>>
-  normalRunMutations(const std::vector<MutationPoint *> &mutationPoints);
+  normalRunMutations(const std::vector<MutationPoint *> &mutationPoints,
+                     std::vector<std::unique_ptr<Mutant>> &mutants);
 
   std::vector<FunctionUnderTest> getFunctionsUnderTest();
 };

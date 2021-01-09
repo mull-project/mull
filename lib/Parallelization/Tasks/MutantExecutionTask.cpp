@@ -18,13 +18,13 @@ void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
                                      progress_counter &counter) {
   Runner runner(diagnostics);
   for (auto it = begin; it != end; ++it, counter.increment()) {
-    MutationPoint *mutationPoint = *it;
+    auto &mutant = *it;
     ExecutionResult result = runner.runProgram(executable,
                                                {},
-                                               { mutationPoint->getUserIdentifier() },
+                                               { mutant->getIdentifier() },
                                                baseline.runningTime * 10,
                                                configuration.captureMutantOutput);
 
-    storage.push_back(std::make_unique<MutationResult>(result, mutationPoint));
+    storage.push_back(std::make_unique<MutationResult>(result, mutant.get()));
   }
 }

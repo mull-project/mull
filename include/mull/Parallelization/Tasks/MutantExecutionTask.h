@@ -1,18 +1,17 @@
 #pragma once
 
+#include "mull/Mutant.h"
 #include "mull/MutationResult.h"
 
 namespace mull {
 
-class MutationPoint;
 class progress_counter;
 class Diagnostics;
-
 struct Configuration;
 
 class MutantExecutionTask {
 public:
-  using In = const std::vector<MutationPoint *>;
+  using In = const std::vector<std::unique_ptr<Mutant>>;
   using Out = std::vector<std::unique_ptr<MutationResult>>;
   using iterator = In::const_iterator;
 

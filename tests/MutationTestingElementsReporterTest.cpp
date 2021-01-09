@@ -96,14 +96,18 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   mutatedTestExecutionResult.stdoutOutput = "mutatedTestExecutionResult.STDOUT";
   mutatedTestExecutionResult.stderrOutput = "mutatedTestExecutionResult.STDERR";
 
-  auto mutationResult = std::make_unique<MutationResult>(mutatedTestExecutionResult, mutationPoint);
+  auto mutant = std::make_unique<Mutant>(mutationPoint->getUserIdentifier(), mutationPoints);
+  auto mutationResult = std::make_unique<MutationResult>(mutatedTestExecutionResult, mutant.get());
+
+  std::vector<std::unique_ptr<Mutant>> mutants;
+  mutants.push_back(std::move(mutant));
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
   mutationResults.push_back(std::move(mutationResult));
 
   MetricsMeasure resultTime;
 
-  Result result(std::move(mutationResults), mutationPoints);
+  Result result(std::move(mutants), std::move(mutationResults), mutationPoints);
 
   /// STEP2. Reporting results to JSON
   MockASTSourceInfoProvider sourceInfoProvider;
