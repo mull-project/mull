@@ -38,8 +38,8 @@ For Ubuntu 18 use one of the following repositories:
 
 .. code-block::
 
-    deb https://dl.bintray.com/mull-project/ubuntu-20 stable main
-    deb https://dl.bintray.com/mull-project/ubuntu-20 nightly main
+    deb https://dl.bintray.com/mull-project/ubuntu-18 stable main
+    deb https://dl.bintray.com/mull-project/ubuntu-18 nightly main
 
 Install on macOS
 ****************
