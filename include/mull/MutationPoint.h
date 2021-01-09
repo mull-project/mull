@@ -64,12 +64,16 @@ class MutationPoint {
   const SourceLocation sourceLocation;
   irm::IRMutation *irMutator;
   std::string userIdentifier;
+  bool covered;
 
 public:
   MutationPoint(Mutator *mutator, irm::IRMutation *irMutator, llvm::Instruction *instruction,
                 std::string replacement, Bitcode *m, std::string diagnostics);
 
   ~MutationPoint() = default;
+
+  void setCovered(bool isCovered);
+  bool isCovered();
 
   Mutator *getMutator();
   Mutator *getMutator() const;

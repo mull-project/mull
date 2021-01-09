@@ -80,10 +80,19 @@ MutationPoint::MutationPoint(Mutator *mutator, irm::IRMutation *irMutator,
     : mutator(mutator), address(MutationPointAddress::addressFromInstruction(instruction)),
       bitcode(m), originalFunction(instruction->getFunction()), mutatedFunction(nullptr),
       diagnostics(std::move(diagnostics)), replacement(std::move(replacement)),
-      sourceLocation(SourceLocation::locationFromInstruction(instruction)), irMutator(irMutator) {
+      sourceLocation(SourceLocation::locationFromInstruction(instruction)), irMutator(irMutator),
+      covered(true) {
   userIdentifier = mutator->getUniqueIdentifier() + ':' + sourceLocation.filePath + ':' +
                    std::to_string(sourceLocation.line) + ':' +
                    std::to_string(sourceLocation.column);
+}
+
+void MutationPoint::setCovered(bool isCovered) {
+  covered = isCovered;
+}
+
+bool MutationPoint::isCovered() {
+  return covered;
 }
 
 Mutator *MutationPoint::getMutator() {

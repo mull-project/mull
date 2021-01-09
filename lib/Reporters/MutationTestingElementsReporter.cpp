@@ -27,6 +27,7 @@ static bool mutantSurvived(const ExecutionStatus &status) {
 
 static json11::Json createFiles(Diagnostics &diagnostics, const Result &result,
                                 const std::set<Mutant *> &killedMutants,
+                                const std::set<Mutant *> &notCoveredMutants,
                                 SourceInfoProvider &sourceInfoProvider) {
   SourceManager sourceManager;
 
@@ -62,7 +63,12 @@ static json11::Json createFiles(Diagnostics &diagnostics, const Result &result,
       MutationPointSourceInfo sourceInfo =
           sourceInfoProvider.getSourceInfo(diagnostics, mutant->getMutationPoints().front());
 
-      std::string status = (killedMutants.count(mutant) == 0) ? "Survived" : "Killed";
+      std::string status("Survived");
+      if (killedMutants.count(mutant) != 0) {
+        status = "Killed";
+      } else if (notCoveredMutants.count(mutant) != 0) {
+        status = "NoCoverage";
+      }
 
       Json mpJson =
           Json::object{ { "id", mutant->getMutatorIdentifier() },
@@ -120,11 +126,14 @@ void MutationTestingElementsReporter::reportResults(const Result &result) {
   generateHTMLFile();
 
   std::set<Mutant *> killedMutants;
+  std::set<Mutant *> notCoveredMutants;
   for (auto &mutationResult : result.getMutationResults()) {
     auto mutant = mutationResult->getMutant();
     auto &executionResult = mutationResult->getExecutionResult();
 
-    if (!mutantSurvived(executionResult.status)) {
+    if (executionResult.status == NotCovered) {
+      notCoveredMutants.insert(mutant);
+    } else if (!mutantSurvived(executionResult.status)) {
       killedMutants.insert(mutant);
     }
   }
@@ -135,7 +144,8 @@ void MutationTestingElementsReporter::reportResults(const Result &result) {
   Json json = Json::object{
     { "mutationScore", (int)score },
     { "thresholds", Json::object{ { "high", 80 }, { "low", 60 } } },
-    { "files", createFiles(diagnostics, result, killedMutants, sourceInfoProvider) },
+    { "files",
+      createFiles(diagnostics, result, killedMutants, notCoveredMutants, sourceInfoProvider) },
     { "schemaVersion", "1.1.1" },
   };
   std::string json_str = json.dump();

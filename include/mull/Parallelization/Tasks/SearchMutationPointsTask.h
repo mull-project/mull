@@ -1,8 +1,8 @@
 #pragma once
 
+#include "mull/FunctionUnderTest.h"
 #include "mull/MutationPoint.h"
 #include "mull/Mutators/Mutator.h"
-#include "mull/ReachableFunction.h"
 
 namespace mull {
 

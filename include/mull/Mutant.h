@@ -19,6 +19,7 @@ public:
   const std::string &getDiagnostics() const;
   const std::string &getReplacement() const;
   const std::string &getMutatorIdentifier() const;
+  bool isCovered() const;
 
 private:
   std::string identifier;

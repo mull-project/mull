@@ -34,7 +34,7 @@ set(mull_sources
 
   Bitcode.cpp
   MutationPoint.cpp
-  ReachableFunction.cpp
+  FunctionUnderTest.cpp
 
   IDEDiagnostics.cpp
 

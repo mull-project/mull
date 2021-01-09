@@ -1,6 +1,6 @@
 #include "mull/Mutators/RemoveVoidFunctionMutator.h"
+#include "mull/FunctionUnderTest.h"
 #include "mull/MutationPoint.h"
-#include "mull/ReachableFunction.h"
 #include <irm/irm.h>
 #include <llvm/IR/Instructions.h>
 #include <sstream>

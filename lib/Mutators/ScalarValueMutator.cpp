@@ -1,6 +1,6 @@
 #include "mull/Mutators/ScalarValueMutator.h"
+#include "mull/FunctionUnderTest.h"
 #include "mull/MutationPoint.h"
-#include "mull/ReachableFunction.h"
 #include <irm/irm.h>
 
 using namespace llvm;

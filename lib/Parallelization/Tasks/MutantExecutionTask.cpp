@@ -19,12 +19,16 @@ void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
   Runner runner(diagnostics);
   for (auto it = begin; it != end; ++it, counter.increment()) {
     auto &mutant = *it;
-    ExecutionResult result = runner.runProgram(executable,
-                                               {},
-                                               { mutant->getIdentifier() },
-                                               baseline.runningTime * 10,
-                                               configuration.captureMutantOutput);
-
+    ExecutionResult result;
+    if (mutant->isCovered()) {
+      result = runner.runProgram(executable,
+                                 {},
+                                 { mutant->getIdentifier() },
+                                 baseline.runningTime * 10,
+                                 configuration.captureMutantOutput);
+    } else {
+      result.status = NotCovered;
+    }
     storage.push_back(std::make_unique<MutationResult>(result, mutant.get()));
   }
 }

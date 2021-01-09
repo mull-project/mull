@@ -139,6 +139,13 @@ opt<bool> tool::EnableAST(
   llvm::cl::desc("Enable \"white\" AST search (disabled by default)"),
   llvm::cl::cat(MullCXXCategory), llvm::cl::init(false));
 
+opt<bool> tool::IncludeNotCovered(
+    "include-not-covered",
+    desc("Include (but do not run) not covered mutants. Disabled by default"),
+    Optional,
+    init(false),
+    cat(MullCXXCategory));
+
 list<ReporterKind> tool::ReportersOption(
   "reporters",
   desc("Choose reporters:"),
@@ -328,6 +335,7 @@ void tool::dumpCLIInterface(Diagnostics &diagnostics) {
       &LinkerTimeout,
 
       &CoverageInfo,
+      &IncludeNotCovered,
 
       &(Option &)IncludePaths,
       &(Option &)ExcludePaths,

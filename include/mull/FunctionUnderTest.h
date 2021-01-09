@@ -13,15 +13,17 @@ class Bitcode;
 
 class FunctionUnderTest {
 public:
-  explicit FunctionUnderTest(llvm::Function *function, Bitcode *bitcode);
+  FunctionUnderTest(llvm::Function *function, Bitcode *bitcode, bool covered = true);
   llvm::Function *getFunction() const;
   Bitcode *getBitcode() const;
   const std::vector<llvm::Instruction *> &getSelectedInstructions() const;
+  bool isCovered() const;
   void selectInstructions(const std::vector<InstructionFilter *> &filters);
 
 private:
   llvm::Function *function;
   Bitcode *bitcode;
+  bool covered;
   std::vector<llvm::Instruction *> selectedInstructions;
 };
 

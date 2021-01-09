@@ -2,8 +2,8 @@
 #include <gtest/gtest.h>
 #include <mull/BitcodeLoader.h>
 #include <mull/Diagnostics/Diagnostics.h>
+#include <mull/FunctionUnderTest.h>
 #include <mull/Mutators/CXX/RelationalMutators.h>
-#include <mull/ReachableFunction.h>
 
 using namespace mull;
 using namespace llvm;

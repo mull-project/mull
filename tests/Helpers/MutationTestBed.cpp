@@ -3,9 +3,9 @@
 #include "mull/AST/ASTVisitor.h"
 #include "mull/Bitcode.h"
 #include "mull/Diagnostics/Diagnostics.h"
+#include "mull/FunctionUnderTest.h"
 #include "mull/JunkDetection/CXX/ASTStorage.h"
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
-#include "mull/ReachableFunction.h"
 
 using namespace mull;
 using namespace mull_test;

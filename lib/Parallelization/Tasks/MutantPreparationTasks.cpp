@@ -21,6 +21,9 @@ void CloneMutatedFunctionsTask::cloneFunctions(Bitcode &bitcode) {
   for (auto &pair : bitcode.getMutationPointsMap()) {
     llvm::Function *original = pair.first;
     for (MutationPoint *point : pair.second) {
+      if (!point->isCovered()) {
+        continue;
+      }
       llvm::ValueToValueMapTy map;
       llvm::Function *mutatedFunction = llvm::CloneFunction(original, map);
       mutatedFunction->setLinkage(llvm::GlobalValue::InternalLinkage);
@@ -38,14 +41,18 @@ void DeleteOriginalFunctionsTask::operator()(iterator begin, iterator end, Out &
 }
 
 void DeleteOriginalFunctionsTask::deleteFunctions(Bitcode &bitcode) {
-  for (auto pair : bitcode.getMutationPointsMap()) {
+  for (auto &pair : bitcode.getMutationPointsMap()) {
     auto original = pair.first;
-    auto anyPoint = pair.second.front();
-
-    llvm::ValueToValueMapTy map;
-    auto originalCopy = CloneFunction(original, map);
-    originalCopy->setName(anyPoint->getOriginalFunctionName());
-    original->dropAllReferences();
+    /// Remove the original function if at least one mutant is covered
+    for (MutationPoint *point : pair.second) {
+      if (point->isCovered()) {
+        llvm::ValueToValueMapTy map;
+        auto originalCopy = CloneFunction(original, map);
+        originalCopy->setName(point->getOriginalFunctionName());
+        original->dropAllReferences();
+        break;
+      }
+    }
   }
 }
 
@@ -66,6 +73,16 @@ void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode) {
   llvm::Value *getenv = llvm_compat::getOrInsertFunction(module, "getenv", getEnvType);
 
   for (auto pair : bitcode.getMutationPointsMap()) {
+    bool hasCoveredMutants = false;
+    for (auto point : pair.second) {
+      if (point->isCovered()) {
+        hasCoveredMutants = true;
+        break;
+      }
+    }
+    if (!hasCoveredMutants) {
+      continue;
+    }
     llvm::Function *original = pair.first;
 
     llvm::BasicBlock *entry = llvm::BasicBlock::Create(context, "entry", original);
@@ -84,6 +101,9 @@ void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode) {
     llvm::BasicBlock *head = originalBlock;
 
     for (auto &point : pair.second) {
+      if (!point->isCovered()) {
+        continue;
+      }
       auto name = llvm::ConstantDataArray::getString(context, point->getUserIdentifier());
       auto *global = new llvm::GlobalVariable(
           *module, name->getType(), true, llvm::GlobalValue::PrivateLinkage, name);
