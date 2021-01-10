@@ -267,8 +267,8 @@ std::vector<std::unique_ptr<Reporter>> ReportersCLIOptions::reporters(ReporterPa
     } break;
     case ReporterKind::Elements: {
       if (!params.compilationDatabaseAvailable) {
-        diagnostics.error("Mutation Testing Elements Reporter requires compilation database."
-                          " Please provide it using flags -compdb-path and -compdb-flags.");
+        diagnostics.warning("Mutation Testing Elements Reporter may not work without compilation "
+                            "database. Consider providing -compdb-path or -compilation-flags.");
       }
       reporters.emplace_back(
           new mull::MutationTestingElementsReporter(diagnostics, directory, name, provider));
