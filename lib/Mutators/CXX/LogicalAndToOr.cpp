@@ -1,7 +1,7 @@
 #include "mull/Mutators/CXX/LogicalAndToOr.h"
 
+#include "mull/FunctionUnderTest.h"
 #include "mull/MutationPoint.h"
-#include "mull/ReachableFunction.h"
 #include "mull/SourceLocation.h"
 
 #include <iterator>

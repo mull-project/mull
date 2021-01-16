@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mull/ReachableFunction.h"
+#include "mull/FunctionUnderTest.h"
 #include <vector>
 
 namespace mull {

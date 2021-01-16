@@ -97,6 +97,7 @@ int main(int argc, char **argv) {
 
   configuration.executable = tool::InputFile.getValue();
   configuration.coverageInfo = tool::CoverageInfo.getValue();
+  configuration.includeNotCovered = tool::IncludeNotCovered.getValue();
 
   if (tool::Workers) {
     mull::ParallelizationConfig parallelizationConfig;

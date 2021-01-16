@@ -52,6 +52,8 @@ extern opt<bool> EnableAST;
 extern list<std::string> ExcludePaths;
 extern list<std::string> IncludePaths;
 
+extern opt<bool> IncludeNotCovered;
+
 class MutatorsCLIOptions {
 public:
   MutatorsCLIOptions(Diagnostics &diagnostics, list<MutatorsOptionIndex> &parameter);

@@ -44,6 +44,8 @@
 
 --coverage-info string		Path to the coverage info file (LLVM's profdata)
 
+--include-not-covered		Include (but do not run) not covered mutants. Disabled by default
+
 --include-path regex		File/directory paths to whitelist (supports regex)
 
 --exclude-path regex		File/directory paths to ignore (supports regex)

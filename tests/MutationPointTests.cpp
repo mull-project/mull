@@ -2,11 +2,11 @@
 #include "TestModuleFactory.h"
 #include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
+#include "mull/FunctionUnderTest.h"
 #include "mull/MutationPoint.h"
 #include "mull/Mutators/CXX/LogicalAndToOr.h"
 #include "mull/Mutators/ReplaceCallMutator.h"
 #include "mull/Mutators/ScalarValueMutator.h"
-#include "mull/ReachableFunction.h"
 
 #include <llvm/IR/InstrTypes.h>
 #include <llvm/IR/Instructions.h>

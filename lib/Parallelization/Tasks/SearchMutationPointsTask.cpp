@@ -23,6 +23,7 @@ void SearchMutationPointsTask::operator()(iterator begin, iterator end, Out &sto
     for (auto &mutator : mutators) {
       auto mutants = mutator->getMutations(bitcode, functionUnderTest);
       for (auto mutant : mutants) {
+        mutant->setCovered(functionUnderTest.isCovered());
         storage.push_back(std::unique_ptr<MutationPoint>(mutant));
       }
     }

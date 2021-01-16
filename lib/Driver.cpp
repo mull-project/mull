@@ -4,12 +4,12 @@
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Filters/Filters.h"
 #include "mull/Filters/FunctionFilter.h"
+#include "mull/FunctionUnderTest.h"
 #include "mull/Mutant.h"
 #include "mull/MutationResult.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Parallelization/Parallelization.h"
 #include "mull/Program/Program.h"
-#include "mull/ReachableFunction.h"
 #include "mull/Result.h"
 #include "mull/Toolchain/Runner.h"
 
@@ -334,10 +334,15 @@ std::vector<FunctionUnderTest> Driver::getFunctionsUnderTest() {
           }
           if (covered) {
             functionsUnderTest.emplace_back(&function, bitcode.get());
+          } else if (config.includeNotCovered) {
+            functionsUnderTest.emplace_back(&function, bitcode.get(), false);
           }
         }
       }
     } else {
+      if (config.includeNotCovered) {
+        diagnostics.warning("-include-not-covered is enabled, but there is no coverage info!");
+      }
       for (auto &bitcode : program.bitcode()) {
         for (llvm::Function &function : *bitcode->getModule()) {
           functionsUnderTest.emplace_back(&function, bitcode.get());

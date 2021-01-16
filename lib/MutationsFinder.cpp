@@ -1,9 +1,9 @@
 #include "mull/MutationsFinder.h"
 
 #include "mull/Config/Configuration.h"
+#include "mull/FunctionUnderTest.h"
 #include "mull/Parallelization/Parallelization.h"
 #include "mull/Program/Program.h"
-#include "mull/ReachableFunction.h"
 
 using namespace mull;
 using namespace llvm;

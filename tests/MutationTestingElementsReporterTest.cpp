@@ -6,11 +6,11 @@
 #include "mull/Bitcode.h"
 #include "mull/BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
+#include "mull/FunctionUnderTest.h"
 #include "mull/JunkDetection/CXX/ASTStorage.h"
 #include "mull/Metrics/MetricsMeasure.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Program/Program.h"
-#include "mull/ReachableFunction.h"
 #include "mull/Reporters/ASTSourceInfoProvider.h"
 #include "mull/Result.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>

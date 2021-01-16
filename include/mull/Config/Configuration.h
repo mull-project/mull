@@ -16,6 +16,7 @@ struct Configuration {
   bool captureTestOutput;
   bool captureMutantOutput;
   bool skipSanityCheckRun;
+  bool includeNotCovered;
 
   int timeout;
   unsigned linkerTimeout;

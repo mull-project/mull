@@ -11,7 +11,8 @@ enum ExecutionStatus {
   Crashed = 4,
   AbnormalExit = 5,
   DryRun = 6,
-  FailFast = 7
+  FailFast = 7,
+  NotCovered = 8
 };
 
 static std::string executionStatusAsString(ExecutionStatus status) {
@@ -34,6 +35,8 @@ static std::string executionStatusAsString(ExecutionStatus status) {
     return "DryRun";
   case FailFast:
     return "FailFast";
+  case NotCovered:
+    return "NotCovered";
   }
 }
 

@@ -3,7 +3,7 @@
 #include "mull/Mutators/Mutator.h"
 #include <irm/irm.h>
 #include <memory>
-#include <mull/ReachableFunction.h>
+#include <mull/FunctionUnderTest.h>
 #include <vector>
 
 namespace mull {

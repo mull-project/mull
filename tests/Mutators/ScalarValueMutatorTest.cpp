@@ -2,8 +2,8 @@
 #include "FixturePaths.h"
 #include "TestModuleFactory.h"
 #include "mull/BitcodeLoader.h"
+#include "mull/FunctionUnderTest.h"
 #include "mull/MutationPoint.h"
-#include "mull/ReachableFunction.h"
 
 #include <gtest/gtest.h>
 #include <irm/irm.h>

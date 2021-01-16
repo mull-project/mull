@@ -19,21 +19,39 @@ static bool mutantSurvived(const ExecutionStatus &status) {
   return status == ExecutionStatus::Passed;
 }
 
+static bool mutantNotCovered(const ExecutionStatus &status) {
+  return status == ExecutionStatus::NotCovered;
+}
+
 static void printMutant(Diagnostics &diagnostics, SourceCodeReader &sourceCodeReader,
-                        const Mutant &mutant, bool survived) {
+                        const Mutant &mutant, const std::string &status) {
   auto &sourceLocation = mutant.getSourceLocation();
   assert(!sourceLocation.isNull() && "Debug information is missing?");
 
   std::stringstream stringstream;
   stringstream << sourceLocation.filePath << ":" << sourceLocation.line << ":"
-               << sourceLocation.column << ": warning: " << (survived ? "Survived" : "Killed")
-               << ": " << mutant.getDiagnostics() << " [" << mutant.getMutatorIdentifier() << "]"
+               << sourceLocation.column << ": warning: " << status << ": "
+               << mutant.getDiagnostics() << " [" << mutant.getMutatorIdentifier() << "]"
                << "\n";
 
   stringstream << sourceCodeReader.getSourceLineWithCaret(sourceLocation);
 
   fprintf(stdout, "%s", stringstream.str().c_str());
   fflush(stdout);
+}
+
+static void printMutants(Diagnostics &diagnostics, SourceCodeReader &reader,
+                         const std::vector<Mutant *> &mutants, size_t totalSize,
+                         const std::string &status) {
+  if (mutants.empty()) {
+    return;
+  }
+  std::stringstream stringstream;
+  stringstream << status << " mutants (" << mutants.size() << "/" << totalSize << "):";
+  diagnostics.info(stringstream.str());
+  for (auto mutant : mutants) {
+    printMutant(diagnostics, reader, *mutant, status);
+  }
 }
 
 IDEReporter::IDEReporter(Diagnostics &diagnostics, bool showKilled)
@@ -45,46 +63,36 @@ void IDEReporter::reportResults(const Result &result) {
     return;
   }
 
-  std::set<Mutant *> killedMutants;
+  std::vector<Mutant *> killedMutants;
+  std::vector<Mutant *> survivedMutants;
+  std::vector<Mutant *> notCoveredMutants;
   for (auto &mutationResult : result.getMutationResults()) {
     auto mutant = mutationResult->getMutant();
     auto &executionResult = mutationResult->getExecutionResult();
 
-    if (!mutantSurvived(executionResult.status)) {
-      killedMutants.insert(mutant);
+    if (mutantSurvived(executionResult.status)) {
+      survivedMutants.push_back(mutant);
+    } else if (mutantNotCovered(executionResult.status)) {
+      notCoveredMutants.push_back(mutant);
+    } else {
+      killedMutants.push_back(mutant);
     }
   }
 
-  auto survivedMutantsCount = result.getMutants().size() - killedMutants.size();
-  auto killedMutantsCount = killedMutants.size();
+  assert(killedMutants.size() + survivedMutants.size() + notCoveredMutants.size() ==
+         result.getMutationResults().size());
 
-  /// It is important that below we iterate over result.getMutationPoints()
-  /// because we want the output to be stable across multiple executions of Mull.
-  /// Optimizing this here was a bad idea: https://github.com/mull-project/mull/pull/640.
-  if (showKilled && killedMutantsCount > 0) {
-    std::stringstream stringstream;
-    stringstream << "Killed mutants (" << killedMutantsCount << "/" << result.getMutants().size()
-                 << "):";
-    diagnostics.info(stringstream.str());
-    for (auto &mutant : result.getMutants()) {
-      if (killedMutants.find(mutant.get()) != killedMutants.end()) {
-        printMutant(diagnostics, sourceCodeReader, *mutant, false);
-      }
-    }
+  if (showKilled) {
+    printMutants(
+        diagnostics, sourceCodeReader, killedMutants, result.getMutants().size(), "Killed");
   }
 
-  if (survivedMutantsCount > 0) {
-    std::stringstream stringstream;
-    stringstream << "Survived mutants (" << survivedMutantsCount << "/"
-                 << result.getMutants().size() << "):";
-    diagnostics.info(stringstream.str());
+  printMutants(
+      diagnostics, sourceCodeReader, survivedMutants, result.getMutants().size(), "Survived");
+  printMutants(
+      diagnostics, sourceCodeReader, notCoveredMutants, result.getMutants().size(), "Not Covered");
 
-    for (auto &mutant : result.getMutants()) {
-      if (killedMutants.find(mutant.get()) == killedMutants.end()) {
-        printMutant(diagnostics, sourceCodeReader, *mutant, true);
-      }
-    }
-  } else {
+  if (survivedMutants.empty() && notCoveredMutants.empty()) {
     diagnostics.info("All mutations have been killed");
   }
 

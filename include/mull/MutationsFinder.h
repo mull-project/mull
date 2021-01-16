@@ -3,8 +3,8 @@
 #include <map>
 #include <vector>
 
+#include "FunctionUnderTest.h"
 #include "MutationPoint.h"
-#include "ReachableFunction.h"
 #include "mull/Mutators/Mutator.h"
 
 namespace mull {
