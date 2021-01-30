@@ -50,7 +50,8 @@ set(mull_unittests_sources
 
   JunkDetection/CompilationDatabaseTests.cpp
   MutationFilters/MutationFilterTests.cpp
-  )
+  MutationFilters/GitDiffReaderTests.cpp
+)
 
 get_filename_component(factory_include_dir ${FACTORY_HEADER} DIRECTORY)
 

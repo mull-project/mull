@@ -23,7 +23,6 @@ test: ## Run integration tests
 CLEAN_FIND_CMD=find \
 	. \
 	-type f \( \
-		-name '*.exe' -or \
 		-name '*.html' -or \
 		-name '*.json' -or \
 		-name '*.o' -or \

@@ -41,6 +41,7 @@ set(LIT_COMMAND
 )
 
 add_custom_target(tests-lit
+  COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && make clean
   COMMAND ${LIT_COMMAND}
   DEPENDS mull-cxx
 )

@@ -15,6 +15,7 @@
 #include "mull/Filters/FilePathFilter.h"
 #include "mull/Filters/Filter.h"
 #include "mull/Filters/Filters.h"
+#include "mull/Filters/GitDiffFilter.h"
 #include "mull/Filters/JunkMutationFilter.h"
 #include "mull/Filters/NoDebugInfoFilter.h"
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
@@ -40,8 +41,8 @@ static void validateInputFile() {
 }
 
 static std::vector<std::string> splitFlags(const std::string &flags) {
-  std::istringstream s{flags};
-  return std::vector<std::string>(std::istream_iterator<std::string>{s}, {});
+  std::istringstream s{ flags };
+  return std::vector<std::string>(std::istream_iterator<std::string>{ s }, {});
 }
 
 int main(int argc, char **argv) {
@@ -176,12 +177,11 @@ int main(int argc, char **argv) {
       diagnostics, cxxCompilationDatabasePath, cxxCompilationFlags, bitcodeCompilationFlags);
 
   mull::ASTSourceInfoProvider sourceInfoProvider(astStorage);
-  tool::ReporterParameters params{
-      .reporterName = tool::ReportName.getValue(),
-      .reporterDirectory = tool::ReportDirectory.getValue(),
-      .sourceInfoProvider = sourceInfoProvider,
-      .compilationDatabaseAvailable = compilationDatabaseInfoAvailable
-  };
+  tool::ReporterParameters params{ .reporterName = tool::ReportName.getValue(),
+                                   .reporterDirectory = tool::ReportDirectory.getValue(),
+                                   .sourceInfoProvider = sourceInfoProvider,
+                                   .compilationDatabaseAvailable =
+                                       compilationDatabaseInfoAvailable };
   std::vector<std::unique_ptr<mull::Reporter>> reporters = reportersOption.reporters(params);
 
   mull::CXXJunkDetector junkDetector(astStorage);
@@ -209,6 +209,35 @@ int main(int argc, char **argv) {
   }
   for (const auto &regex : tool::IncludePaths) {
     filePathFilter->include(regex);
+  }
+
+  if (!tool::GitDiffRef.getValue().empty()) {
+    if (tool::GitProjectRoot.getValue().empty()) {
+      std::stringstream debugMessage;
+      debugMessage
+          << "-git-diff-ref option has been provided but the path to the Git project root has not "
+             "been specified via -git-project-root. The incremental testing will be disabled.";
+      diagnostics.warning(debugMessage.str());
+    } else if (!llvm::sys::fs::is_directory(tool::GitProjectRoot.getValue())) {
+      std::stringstream debugMessage;
+      debugMessage << "directory provided by -git-project-root does not exist, ";
+      debugMessage << "the incremental testing will be disabled: ";
+      debugMessage << tool::GitProjectRoot.getValue();
+      diagnostics.warning(debugMessage.str());
+    } else {
+      std::string gitProjectRoot = tool::GitProjectRoot.getValue();
+      std::string gitDiffBranch = tool::GitDiffRef.getValue();
+      diagnostics.info(std::string("Incremental testing using Git Diff is enabled.\n")
+                       + "- Git ref: " + gitDiffBranch + "\n"
+                       + "- Git project root: " + gitProjectRoot);
+      mull::GitDiffFilter *gitDiffFilter =
+          mull::GitDiffFilter::createFromGitDiff(diagnostics, gitProjectRoot, gitDiffBranch);
+
+      if (gitDiffFilter) {
+        filterStorage.emplace_back(gitDiffFilter);
+        filters.instructionFilters.push_back(gitDiffFilter);
+      }
+    }
   }
 
   if (tool::EnableAST && compilationDatabaseInfoAvailable) {

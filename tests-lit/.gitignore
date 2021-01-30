@@ -7,4 +7,5 @@
 *.tmp
 *.profdata
 *.profraw
+**/Output/**
 

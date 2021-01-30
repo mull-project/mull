@@ -58,8 +58,8 @@ std::vector<MutationPoint *> Driver::findMutationPoints() {
   if (!config.skipSanityCheckRun) {
     Runner runner(diagnostics);
     singleTask.execute("Sanity check run", [&]() {
-      ExecutionResult result =
-          runner.runProgram(config.executable, {}, {}, config.timeout, config.captureTestOutput);
+      ExecutionResult result = runner.runProgram(
+          config.executable, {}, {}, config.timeout, config.captureTestOutput, std::nullopt);
       if (result.status != Passed) {
         std::stringstream failureMessage;
         failureMessage << "Original test failed\n";
@@ -238,12 +238,13 @@ Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints,
   /// As we take the execution time as a baseline for timeout it makes sense to have an additional
   /// warm up run so that the next runs will be a bit faster
   singleTask.execute("Warm up run", [&]() {
-    runner.runProgram(executable, {}, {}, config.timeout, config.captureMutantOutput);
+    runner.runProgram(executable, {}, {}, config.timeout, config.captureMutantOutput, std::nullopt);
   });
 
   ExecutionResult baseline;
   singleTask.execute("Baseline run", [&]() {
-    baseline = runner.runProgram(executable, {}, {}, config.timeout, config.captureMutantOutput);
+    baseline = runner.runProgram(
+        executable, {}, {}, config.timeout, config.captureMutantOutput, std::nullopt);
   });
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
