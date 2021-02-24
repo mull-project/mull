@@ -154,6 +154,8 @@ void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode) {
                                         retVal);
     auto callInst =
         llvm::CallInst::Create(original->getFunctionType(), loadValue, args, "", retVal);
+    callInst->setAttributes(original->getAttributes());
+    callInst->setCallingConv(original->getCallingConv());
     if (!retType->isVoidTy()) {
       retVal->setOperand(0, callInst);
     }
