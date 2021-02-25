@@ -175,17 +175,16 @@ ASTStorage::ASTStorage(Diagnostics &diagnostics, const std::string &cxxCompilati
           diagnostics, cxxCompilationDatabasePath, cxxCompilationFlags, bitcodeCompilationFlags)),
       mutations(diagnostics) {}
 
-ThreadSafeASTUnit *ASTStorage::findAST(const MutationPoint *point) {
-  assert(point);
-  assert(!point->getSourceLocation().isNull() && "Missing debug information?");
+ThreadSafeASTUnit *ASTStorage::findAST(const SourceLocation &sourceLocation) {
+  assert(!sourceLocation.isNull() && "Missing debug information?");
 
-  const std::string &sourceFile = point->getSourceLocation().unitFilePath;
+  const std::string &sourceFile = sourceLocation.unitFilePath;
   if (llvm::sys::fs::exists(sourceFile)) {
     return findAST(sourceFile);
   }
 
   if (sourceFile == "/in-memory-file.cc") {
-    const std::string &unitSourceFile = point->getSourceLocation().filePath;
+    const std::string &unitSourceFile = sourceLocation.filePath;
     return findAST(unitSourceFile);
   }
 

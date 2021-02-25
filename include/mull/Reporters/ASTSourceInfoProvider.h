@@ -1,5 +1,7 @@
 #pragma once
 
+#include "mull/Mutators/MutatorKind.h"
+
 namespace mull {
 
 struct MutationPointSourceInfo {
@@ -12,11 +14,13 @@ struct MutationPointSourceInfo {
 class ASTStorage;
 class MutationPoint;
 class Diagnostics;
+struct SourceLocation;
 
 class SourceInfoProvider {
 public:
   virtual MutationPointSourceInfo getSourceInfo(Diagnostics &diagnostics,
-                                                MutationPoint *mutationPoint) = 0;
+                                                const SourceLocation &sourceLocation,
+                                                MutatorKind mutatorKind) = 0;
 };
 
 class ASTSourceInfoProvider : public SourceInfoProvider {
@@ -24,7 +28,8 @@ public:
   ~ASTSourceInfoProvider() = default;
   explicit ASTSourceInfoProvider(ASTStorage &astStorage);
   MutationPointSourceInfo getSourceInfo(Diagnostics &diagnostics,
-                                        MutationPoint *mutationPoint) override;
+                                        const SourceLocation &sourceLocation,
+                                        MutatorKind mutatorKind) override;
 
 private:
   ASTStorage &astStorage;

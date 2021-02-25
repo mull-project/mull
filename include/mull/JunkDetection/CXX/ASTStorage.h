@@ -45,7 +45,7 @@ public:
              const std::string &cxxCompilationFlags,
              const std::map<std::string, std::string> &bitcodeCompilationFlags);
 
-  ThreadSafeASTUnit *findAST(const MutationPoint *point);
+  ThreadSafeASTUnit *findAST(const SourceLocation &sourceLocation);
   ThreadSafeASTUnit *findAST(const std::string &sourceFile);
 
   void setAST(const std::string &sourceFile, std::unique_ptr<ThreadSafeASTUnit> astUnit);

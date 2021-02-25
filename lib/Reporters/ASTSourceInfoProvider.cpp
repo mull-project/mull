@@ -13,22 +13,22 @@ using namespace mull;
 ASTSourceInfoProvider::ASTSourceInfoProvider(ASTStorage &astStorage) : astStorage(astStorage) {}
 
 MutationPointSourceInfo ASTSourceInfoProvider::getSourceInfo(Diagnostics &diagnostics,
-                                                             MutationPoint *mutationPoint) {
+                                                             const SourceLocation &sourceLocation,
+                                                             MutatorKind mutatorKind) {
   MutationPointSourceInfo info = MutationPointSourceInfo();
   clang::SourceRange sourceRange;
 
-  const SourceLocation &sourceLocation = mutationPoint->getSourceLocation();
   const std::string &sourceFile = sourceLocation.unitFilePath;
 
   const ASTMutation &astMutation =
       astStorage.getMutation(sourceFile,
-                             mutationPoint->getMutator()->mutatorKind(),
+                             mutatorKind,
                              sourceLocation.line,
                              sourceLocation.column);
 
   const clang::Stmt *const mutantASTNode = astMutation.stmt;
 
-  ThreadSafeASTUnit *astUnit = astStorage.findAST(mutationPoint);
+  ThreadSafeASTUnit *astUnit = astStorage.findAST(sourceLocation);
 
   if (mutantASTNode == nullptr) {
     diagnostics.warning("Cannot find an AST node for mutation point");
