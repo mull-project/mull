@@ -74,18 +74,26 @@ MutationPointAddress::addressFromInstruction(const llvm::Instruction *instructio
 
 #pragma mark - MutationPoint
 
-MutationPoint::MutationPoint(Mutator *mutator, irm::IRMutation *irMutator,
-                             llvm::Instruction *instruction, std::string replacement, Bitcode *m,
-                             std::string diagnostics)
-    : mutator(mutator), address(MutationPointAddress::addressFromInstruction(instruction)),
-      bitcode(m), originalFunction(instruction->getFunction()), mutatedFunction(nullptr),
-      diagnostics(std::move(diagnostics)), replacement(std::move(replacement)),
-      sourceLocation(SourceLocation::locationFromInstruction(instruction)), irMutator(irMutator),
+MutationPoint::MutationPoint(Mutator *mutator, MutationPointAddress address, Bitcode *bitcode,
+                             llvm::Function *originalFunction, llvm::Function *mutatedFunction,
+                             std::string diagnostics, std::string replacement,
+                             SourceLocation sourceLocation, irm::IRMutation *irMutator)
+    : mutator(mutator), address(address), bitcode(bitcode), originalFunction(originalFunction),
+      mutatedFunction(mutatedFunction), diagnostics(std::move(diagnostics)),
+      replacement(std::move(replacement)), sourceLocation(sourceLocation), irMutator(irMutator),
       covered(true) {
   userIdentifier = mutator->getUniqueIdentifier() + ':' + sourceLocation.filePath + ':' +
                    std::to_string(sourceLocation.line) + ':' +
                    std::to_string(sourceLocation.column);
 }
+
+MutationPoint::MutationPoint(Mutator *mutator, irm::IRMutation *irMutator,
+                             llvm::Instruction *instruction, std::string replacement, Bitcode *m,
+                             std::string diagnostics)
+    : MutationPoint(mutator, MutationPointAddress::addressFromInstruction(instruction), bitcode,
+                    instruction->getFunction(), nullptr, std::move(diagnostics),
+                    std::move(replacement), SourceLocation::locationFromInstruction(instruction),
+                    irMutator) {}
 
 void MutationPoint::setCovered(bool isCovered) {
   covered = isCovered;
