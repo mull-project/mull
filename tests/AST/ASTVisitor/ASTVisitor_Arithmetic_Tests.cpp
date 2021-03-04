@@ -42,10 +42,12 @@ int add(int a, int b) {
   LineColumnHash locationHash = lineColumnHash(3, 12);
 
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_AddToSub), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_AddToSub].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_AddToSub].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_AddToSub), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_AddToSub].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_AddToSub].count(locationHash), 1U);
 }
 
 TEST(ASTVisitor_Arithmetic, subToAdd) {
@@ -75,10 +77,12 @@ int sub(int a, int b) {
   LineColumnHash locationHash = lineColumnHash(3, 12);
 
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_SubToAdd), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_SubToAdd].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_SubToAdd].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_SubToAdd), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_SubToAdd].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_SubToAdd].count(locationHash), 1U);
 }
 
 TEST(ASTVisitor_Arithmetic, mulToDiv) {
@@ -108,10 +112,12 @@ int mul(int a, int b) {
   LineColumnHash locationHash = lineColumnHash(3, 12);
 
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_MulToDiv), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_MulToDiv].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_MulToDiv].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_MulToDiv), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_MulToDiv].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_MulToDiv].count(locationHash), 1U);
 }
 
 TEST(ASTVisitor_Arithmetic, divToMul) {
@@ -141,10 +147,12 @@ int mul(int a, int b) {
   LineColumnHash locationHash = lineColumnHash(3, 12);
 
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_DivToMul), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_DivToMul].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_DivToMul].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_DivToMul), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_DivToMul].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_DivToMul].count(locationHash), 1U);
 }
 
 TEST(ASTVisitor_Arithmetic, remToDiv) {
@@ -174,8 +182,10 @@ int rem(int a, int b) {
   LineColumnHash locationHash = lineColumnHash(3, 12);
 
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_RemToDiv), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_RemToDiv].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_RemToDiv].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_RemToDiv), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_RemToDiv].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_RemToDiv].count(locationHash), 1U);
 }

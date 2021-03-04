@@ -42,10 +42,12 @@ int logical_and(int a, int b) {
   LineColumnHash locationHash = lineColumnHash(3, 12);
 
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_Logical_AndToOr), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_Logical_AndToOr].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_Logical_AndToOr].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_Logical_AndToOr), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_Logical_AndToOr].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_Logical_AndToOr].count(locationHash), 1U);
 }
 
 TEST(ASTVisitor_Logical, orToAnd) {
@@ -75,8 +77,10 @@ int logical_or(int a, int b) {
   LineColumnHash locationHash = lineColumnHash(3, 12);
 
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_Logical_OrToAnd), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_Logical_OrToAnd].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_Logical_OrToAnd].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_Logical_OrToAnd), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_Logical_OrToAnd].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_Logical_OrToAnd].count(locationHash), 1U);
 }

@@ -254,7 +254,7 @@ void ASTStorage::saveMutation(const std::string &sourceFile, mull::MutatorKind m
 }
 
 void ASTStorage::saveMutations(
-    std::unordered_map<SourceFilePath, SingleASTUnitMutations> &storage) {
+    std::unordered_map<SourceFilePath, SingleFileMutations> &storage) {
   mutations.saveMutations(storage);
 }
 

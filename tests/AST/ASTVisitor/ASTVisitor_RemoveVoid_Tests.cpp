@@ -43,8 +43,10 @@ void foo() {
   LineColumnHash locationHash = lineColumnHash(4, 3);
 
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::RemoveVoidFunctionMutator), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::RemoveVoidFunctionMutator].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::RemoveVoidFunctionMutator].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::RemoveVoidFunctionMutator), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::RemoveVoidFunctionMutator].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::RemoveVoidFunctionMutator].count(locationHash), 1U);
 }
