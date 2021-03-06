@@ -69,7 +69,7 @@ LLVM
 ----
 
 You need LLVM to build and debug Mull.
-You can use any LLVM version between 3.9 and 8.0.
+You can use any LLVM version between 6.0 and 11.0.
 
 There are several options:
 

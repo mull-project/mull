@@ -1,9 +1,9 @@
 name: CI Ubuntu 18.04
 
 env:
-  BINTRAY_REPO: "ubuntu-18"
+  DISTR_REPO: "ubuntu/bionic"
   LLVM_RELEASE: "10.0"
-  CHECK_SECRETS: ${{ secrets.BINTRAY_API_KEY }}
+  CLOUDSMITH_API_KEY: ${{ secrets.CLOUDSMITH_API_KEY }}
 
 on:
   pull_request:
@@ -46,19 +46,16 @@ jobs:
           case $GITHUB_EVENT_NAME in
             "pull_request")
               echo ::set-output name=suffix::-pr`grep -Eo "\"number\": [0-9]+" $GITHUB_EVENT_PATH | awk ' { print $2; exit } '`
-              echo ::set-output name=package::mull-nightly
               echo ::set-output name=channel::nightly
             ;;
             "push")
               case $GITHUB_REF in
                 "refs/heads/"*)
                   echo ::set-output name=suffix::-trunk`git rev-list HEAD --count`
-                  echo ::set-output name=package::mull-nightly
                   echo ::set-output name=channel::nightly
                 ;;
                 "refs/tags/"*)
                   echo ::set-output name=suffix::""
-                  echo ::set-output name=package::mull
                   echo ::set-output name=channel::stable
                   if [ `echo $GITHUB_REF | awk -F/ ' { print $3 } '` != `grep -Eo "MULL_VERSION [0-9.]+" CMakeLists.txt | awk ' { print $2 } '` ];
                   then
@@ -84,19 +81,8 @@ jobs:
             -e host=localhost \
             -e mull_version=${{ steps.settings.outputs.version }}${{ steps.settings.outputs.suffix }} \
             --verbose
-      - name: Delete package if there is an existing one
-        if: matrix.LLVM_VERSION == env.LLVM_RELEASE && env.CHECK_SECRETS != null
-        run: |
-          curl --silent --show-error --location --request DELETE \
-            --user "alexdenisov:${{ secrets.BINTRAY_API_KEY }}" \
-            "https://api.bintray.com/packages/mull-project/${{ env.BINTRAY_REPO }}/${{ steps.settings.outputs.package }}/versions/${{ steps.settings.outputs.version }}${{ steps.settings.outputs.suffix }}"
       - name: Publish package
-        if: matrix.LLVM_VERSION == env.LLVM_RELEASE && env.CHECK_SECRETS != null
+        if: matrix.LLVM_VERSION == env.LLVM_RELEASE && env.CLOUDSMITH_API_KEY != null
         run: |
-          curl --silent --show-error --fail --location --request PUT \
-            --upload-file infrastructure/packages/`cat infrastructure/PACKAGE_FILE_NAME`.deb \
-            --user "alexdenisov:${{ secrets.BINTRAY_API_KEY }}" \
-            -H "X-Bintray-Debian-Distribution: ${{ steps.settings.outputs.channel }}" \
-            -H "X-Bintray-Debian-Component: main" \
-            -H "X-Bintray-Debian-Architecture: amd64" \
-            "https://api.bintray.com/content/mull-project/${{ env.BINTRAY_REPO }}/${{ steps.settings.outputs.package }}/${{ steps.settings.outputs.version }}${{ steps.settings.outputs.suffix }}/pool/main/m/`cat infrastructure/PACKAGE_FILE_NAME`.deb;publish=1"
+          env LC_ALL=C.UTF-8 LANG=C.UTF-8 cloudsmith push deb mull-project/mull-${{ steps.settings.outputs.channel }}/${{ env.DISTR_REPO }} infrastructure/packages/`cat infrastructure/PACKAGE_FILE_NAME`.deb
+
