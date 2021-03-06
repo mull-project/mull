@@ -10,6 +10,14 @@ class Function;
 namespace mull {
 
 struct SourceLocation {
+  /// The difference between (directory, filePath) and (unitDirectory, unitFilePath)
+  /// is as follows:
+  /// Both paths are the same when a mutation is located in the .c/.cpp file.
+  /// When a mutation is inlined into a preprocessed .c/.cpp file from a header file:
+  /// - the directory and filePath point to the location of the mutation in the
+  ///   inlined header file.
+  /// - the unitDirectory and unitFilePath point to the location of the mutation
+  ///   in the .c/.cpp file.
   std::string unitDirectory;
   std::string unitFilePath;
   std::string directory;

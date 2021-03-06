@@ -215,7 +215,7 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     return true;
   }
 
-  const std::string &sourceFile = point->getSourceLocation().unitFilePath;
+  const std::string &sourceFile = point->getSourceLocation().filePath;
   int beginLine = sourceManager.getExpansionLineNumber(location, nullptr);
   int beginColumn = sourceManager.getExpansionColumnNumber(location);
 

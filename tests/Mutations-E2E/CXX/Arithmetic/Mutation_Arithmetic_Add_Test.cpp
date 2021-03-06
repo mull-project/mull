@@ -31,10 +31,12 @@ TEST(Mutation_Arithmetic_AddToSub, End_2_End) {
 
   SingleASTUnitMutations singleUnitMutations = artefact->getASTMutations();
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_AddToSub), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_AddToSub].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_AddToSub].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations["/in-memory-file.cc"];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_AddToSub), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_AddToSub].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_AddToSub].count(locationHash), 1U);
 
   /// 2. IR and Junk Detection Assertions
   std::vector<MutationPoint *> nonJunkMutationPoints = artefact->getNonJunkMutationPoints();

@@ -42,10 +42,12 @@ int eq(int a, int b) {
   LineColumnHash locationHash = lineColumnHash(3, 12);
 
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_EqualToNotEqual), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_EqualToNotEqual].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_EqualToNotEqual].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_EqualToNotEqual), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_EqualToNotEqual].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_EqualToNotEqual].count(locationHash), 1U);
 }
 
 TEST(ASTVisitor_Comparison, notEqualToEqual) {
@@ -75,10 +77,12 @@ int neq(int a, int b) {
   LineColumnHash locationHash = lineColumnHash(3, 12);
 
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_NotEqualToEqual), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_NotEqualToEqual].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_NotEqualToEqual].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_NotEqualToEqual), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_NotEqualToEqual].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_NotEqualToEqual].count(locationHash), 1U);
 }
 
 TEST(ASTVisitor_Comparison, greaterThanToLessThanOrEqual) {
@@ -108,10 +112,12 @@ int greater_than(int a, int b) {
   LineColumnHash locationHash = lineColumnHash(3, 12);
 
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_GreaterThanToLessOrEqual), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_GreaterThanToLessOrEqual].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_GreaterThanToLessOrEqual].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_GreaterThanToLessOrEqual), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_GreaterThanToLessOrEqual].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_GreaterThanToLessOrEqual].count(locationHash), 1U);
 }
 
 TEST(ASTVisitor_Comparison, lessThanToGreaterThanOrEqual) {
@@ -141,10 +147,12 @@ int less_than(int a, int b) {
   LineColumnHash locationHash = lineColumnHash(3, 12);
 
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_LessThanToGreaterOrEqual), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_LessThanToGreaterOrEqual].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_LessThanToGreaterOrEqual].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_LessThanToGreaterOrEqual), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_LessThanToGreaterOrEqual].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_LessThanToGreaterOrEqual].count(locationHash), 1U);
 }
 
 TEST(ASTVisitor_Comparison, greaterOrEqualToLessThan) {
@@ -174,10 +182,12 @@ int greater_than_or_equal(int a, int b) {
   LineColumnHash locationHash = lineColumnHash(3, 12);
 
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_GreaterOrEqualToLessThan), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_GreaterOrEqualToLessThan].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_GreaterOrEqualToLessThan].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_GreaterOrEqualToLessThan), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_GreaterOrEqualToLessThan].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_GreaterOrEqualToLessThan].count(locationHash), 1U);
 }
 
 TEST(ASTVisitor_Comparison, lessOrEqualToGreaterThan) {
@@ -207,8 +217,10 @@ int less_than_or_equal(int a, int b) {
   LineColumnHash locationHash = lineColumnHash(3, 12);
 
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_LessOrEqualToGreaterThan), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_LessOrEqualToGreaterThan].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_LessOrEqualToGreaterThan].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_LessOrEqualToGreaterThan), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_LessOrEqualToGreaterThan].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_LessOrEqualToGreaterThan].count(locationHash), 1U);
 }

@@ -20,10 +20,9 @@ ASTMutationStorage::ASTMutationStorage(Diagnostics &diagnostics)
 
 int ASTMutationStorage::count() const {
   int count = 0;
-  for (const auto &singleUnitMutations : storage) {
-    for (const auto &oneMutationBucket :
-         singleUnitMutations.second) {
-      count += singleUnitMutations.second.at(oneMutationBucket.first).size();
+  for (const auto &singleFileMutations : storage) {
+    for (const auto &oneMutationBucket : singleFileMutations.second) {
+      count += singleFileMutations.second.at(oneMutationBucket.first).size();
     }
   }
   return count;
@@ -36,10 +35,10 @@ const ASTMutation &ASTMutationStorage::getMutation(const std::string &sourceFile
 
   assert(storage.count(sourceFile) > 0);
 
-  const SingleASTUnitMutations &astUnitMutations = storage.at(sourceFile);
-  assert(astUnitMutations.count(mutatorKind) > 0);
+  const SingleFileMutations &singleFileMutations = storage.at(sourceFile);
+  assert(singleFileMutations.count(mutatorKind) > 0);
 
-  const SingleMutationTypeBucket &oneMutationBucket = astUnitMutations.at(mutatorKind);
+  const SingleMutationTypeBucket &oneMutationBucket = singleFileMutations.at(mutatorKind);
 
   LineColumnHash hash = lineColumnHash(line, column);
   assert(oneMutationBucket.count(hash) > 0);
@@ -56,12 +55,12 @@ bool ASTMutationStorage::mutationExists(const std::string &sourceFile,
     return false;
   }
 
-  const SingleASTUnitMutations &astUnitMutations = storage.at(sourceFile);
-  if (astUnitMutations.count(mutatorKind) == 0) {
+  const SingleFileMutations &singleFileMutations = storage.at(sourceFile);
+  if (singleFileMutations.count(mutatorKind) == 0) {
     return false;
   }
 
-  const SingleMutationTypeBucket &oneMutationBucket = astUnitMutations.at(mutatorKind);
+  const SingleMutationTypeBucket &oneMutationBucket = singleFileMutations.at(mutatorKind);
 
   LineColumnHash hash = lineColumnHash(line, column);
   return oneMutationBucket.count(hash) > 0;
@@ -80,7 +79,7 @@ void ASTMutationStorage::saveMutation(const std::string &sourceFile, mull::Mutat
   int hash = mull::lineColumnHash(line, column);
 
   if (storage.count(sourceFile) == 0) {
-    storage.emplace(sourceFile, SingleASTUnitMutations());
+    storage.emplace(sourceFile, SingleFileMutations());
   }
 
   if (storage[sourceFile].count(mutatorKind) == 0) {
@@ -91,6 +90,7 @@ void ASTMutationStorage::saveMutation(const std::string &sourceFile, mull::Mutat
                                            ASTMutation(mutatorKind, line, column, expression));
 }
 
-void ASTMutationStorage::saveMutations(std::unordered_map<SourceFilePath, SingleASTUnitMutations> &mutations) {
+void ASTMutationStorage::saveMutations(
+    std::unordered_map<SourceFilePath, SingleFileMutations> &mutations) {
   storage.swap(mutations);
 }

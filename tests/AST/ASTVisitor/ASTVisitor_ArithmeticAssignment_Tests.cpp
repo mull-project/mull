@@ -43,10 +43,12 @@ int add_assign(int a, int b) {
   LineColumnHash locationHash = lineColumnHash(3, 5);
 
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_AddAssignToSubAssign), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_AddAssignToSubAssign].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_AddAssignToSubAssign].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_AddAssignToSubAssign), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_AddAssignToSubAssign].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_AddAssignToSubAssign].count(locationHash), 1U);
 }
 
 TEST(ASTVisitor_ArithmeticAssignment, subAssignToAddAssign) {
@@ -77,10 +79,12 @@ int sub_assign(int a, int b) {
   LineColumnHash locationHash = lineColumnHash(3, 5);
 
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_SubAssignToAddAssign), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_SubAssignToAddAssign].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_SubAssignToAddAssign].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_SubAssignToAddAssign), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_SubAssignToAddAssign].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_SubAssignToAddAssign].count(locationHash), 1U);
 }
 
 TEST(ASTVisitor_ArithmeticAssignment, mulAssignToDivAssign) {
@@ -111,10 +115,12 @@ int mul_assign(int a, int b) {
   LineColumnHash locationHash = lineColumnHash(3, 5);
 
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_MulAssignToDivAssign), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_MulAssignToDivAssign].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_MulAssignToDivAssign].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_MulAssignToDivAssign), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_MulAssignToDivAssign].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_MulAssignToDivAssign].count(locationHash), 1U);
 }
 
 TEST(ASTVisitor_ArithmeticAssignment, divAssignToMulAssign) {
@@ -145,10 +151,12 @@ int div_assign(int a, int b) {
   LineColumnHash locationHash = lineColumnHash(3, 5);
 
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_DivAssignToMulAssign), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_DivAssignToMulAssign].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_DivAssignToMulAssign].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_DivAssignToMulAssign), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_DivAssignToMulAssign].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_DivAssignToMulAssign].count(locationHash), 1U);
 }
 
 TEST(ASTVisitor_ArithmeticAssignment, remAssignToDivAssign) {
@@ -179,8 +187,10 @@ int div_assign(int a, int b) {
   LineColumnHash locationHash = lineColumnHash(3, 5);
 
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_RemAssignToDivAssign), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_RemAssignToDivAssign].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_RemAssignToDivAssign].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_RemAssignToDivAssign), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_RemAssignToDivAssign].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_RemAssignToDivAssign].count(locationHash), 1U);
 }

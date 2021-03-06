@@ -42,10 +42,12 @@ int bitwise_and(int a, int b) {
   LineColumnHash locationHash = lineColumnHash(3, 12);
 
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_Bitwise_AndToOr), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_Bitwise_AndToOr].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_Bitwise_AndToOr].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_Bitwise_AndToOr), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_Bitwise_AndToOr].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_Bitwise_AndToOr].count(locationHash), 1U);
 }
 
 TEST(ASTVisitor_Bitwise, bitwiseOrToAnd) {
@@ -75,10 +77,12 @@ int bitwise_or(int a, int b) {
   LineColumnHash locationHash = lineColumnHash(3, 12);
 
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_Bitwise_OrToAnd), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_Bitwise_OrToAnd].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_Bitwise_OrToAnd].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_Bitwise_OrToAnd), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_Bitwise_OrToAnd].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_Bitwise_OrToAnd].count(locationHash), 1U);
 }
 
 TEST(ASTVisitor_Bitwise, bitwiseXorToOr) {
@@ -108,10 +112,12 @@ int bitwise_xor(int a, int b) {
   LineColumnHash locationHash = lineColumnHash(3, 12);
 
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_Bitwise_XorToOr), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_Bitwise_XorToOr].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_Bitwise_XorToOr].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_Bitwise_XorToOr), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_Bitwise_XorToOr].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_Bitwise_XorToOr].count(locationHash), 1U);
 }
 
 TEST(ASTVisitor_Bitwise, bitwiseLeftShiftToRight) {
@@ -141,10 +147,12 @@ int bitwise_left_shift(int a, int b) {
   LineColumnHash locationHash = lineColumnHash(3, 12);
 
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_LShiftToRShift), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_LShiftToRShift].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_LShiftToRShift].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_LShiftToRShift), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_LShiftToRShift].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_LShiftToRShift].count(locationHash), 1U);
 }
 
 TEST(ASTVisitor_Bitwise, bitwiseRightShiftToLeft) {
@@ -174,8 +182,10 @@ int bitwise_right_shift(int a, int b) {
   LineColumnHash locationHash = lineColumnHash(3, 12);
 
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::CXX_RShiftToLShift), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_RShiftToLShift].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::CXX_RShiftToLShift].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_RShiftToLShift), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_RShiftToLShift].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_RShiftToLShift].count(locationHash), 1U);
 }

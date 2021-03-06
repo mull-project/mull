@@ -38,11 +38,25 @@ void ASTFinder::findMutations(Diagnostics &diagnostics, const Configuration &con
                                            tasks);
   finder.execute();
 
-  std::unordered_map<SourceFilePath, SingleASTUnitMutations> mutations;
+  std::unordered_map<SourceFilePath, SingleFileMutations> totalMutations;
 
   for (auto &unitMutationsPair : mutationsAsVector) {
-    mutations.emplace(unitMutationsPair.first, unitMutationsPair.second);
+    for (auto &singleFileMutations : unitMutationsPair.second) {
+      if (totalMutations.count(singleFileMutations.first) == 0) {
+        totalMutations.emplace(singleFileMutations.first, singleFileMutations.second);
+        continue;
+      }
+      SingleFileMutations &singleFileTotalMutations = totalMutations[singleFileMutations.first];
+      for (const auto &oneMutationBucket : singleFileMutations.second) {
+        if (singleFileTotalMutations.count(oneMutationBucket.first) == 0) {
+          singleFileTotalMutations.emplace(oneMutationBucket.first, oneMutationBucket.second);
+          continue;
+        }
+        singleFileTotalMutations[oneMutationBucket.first].insert(oneMutationBucket.second.begin(),
+                                                                 oneMutationBucket.second.end());
+      }
+      totalMutations.emplace(singleFileMutations.first, singleFileMutations.second);
+    }
   }
-
-  storage.saveMutations(mutations);
+  storage.saveMutations(totalMutations);
 }

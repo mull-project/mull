@@ -45,8 +45,10 @@ int caller(int a) {
   LineColumnHash locationHash = lineColumnHash(6, 10);
 
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::ReplaceCallMutator), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::ReplaceCallMutator].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::ReplaceCallMutator].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::ReplaceCallMutator), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::ReplaceCallMutator].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::ReplaceCallMutator].count(locationHash), 1U);
 }

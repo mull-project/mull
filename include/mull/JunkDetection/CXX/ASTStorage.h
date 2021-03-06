@@ -56,7 +56,7 @@ public:
   void saveMutation(const std::string &sourceFile, mull::MutatorKind mutatorKind,
                     const clang::Stmt *const expression, int line, int column);
 
-  void saveMutations(std::unordered_map<SourceFilePath, SingleASTUnitMutations> &storage);
+  void saveMutations(std::unordered_map<SourceFilePath, SingleFileMutations> &storage);
 
   bool mutationExists(const std::string &sourceFile, mull::MutatorKind mutatorKind, int line,
                       int column);

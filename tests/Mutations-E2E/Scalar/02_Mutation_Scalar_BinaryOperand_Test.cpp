@@ -36,10 +36,12 @@ TEST(Mutation_Scalar_BinaryOperand, End_2_End) {
 
   SingleASTUnitMutations singleUnitMutations = artefact->getASTMutations();
   ASSERT_EQ(singleUnitMutations.size(), 1U);
-  ASSERT_EQ(singleUnitMutations.count(MutatorKind::ScalarValueMutator), 1U);
 
-  ASSERT_EQ(singleUnitMutations[MutatorKind::ScalarValueMutator].size(), 1U);
-  ASSERT_EQ(singleUnitMutations[MutatorKind::ScalarValueMutator].count(locationHash), 1U);
+  SingleFileMutations &singleFileMutations = singleUnitMutations["/in-memory-file.cc"];
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::ScalarValueMutator), 1U);
+
+  ASSERT_EQ(singleFileMutations[MutatorKind::ScalarValueMutator].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::ScalarValueMutator].count(locationHash), 1U);
 
   /// 2. IR and Junk Detection Assertions
   std::vector<MutationPoint *> nonJunkMutationPoints = artefact->getNonJunkMutationPoints();

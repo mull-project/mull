@@ -231,10 +231,14 @@ void ASTVisitor::saveMutationPoint(mull::MutatorKind mutatorKind, const clang::S
 
   int hash = mull::lineColumnHash(beginLine, beginColumn);
 
-  if (singleUnitMutations.count(mutatorKind) == 0) {
-    singleUnitMutations.emplace(mutatorKind, SingleMutationTypeBucket());
+  if (singleUnitMutations.count(sourceFilePath) == 0) {
+    singleUnitMutations.emplace(sourceFilePath, SingleFileMutations());
+  }
+  SingleFileMutations &singleFileMutations = singleUnitMutations[sourceFilePath];
+  if (singleFileMutations.count(mutatorKind) == 0) {
+    singleFileMutations.emplace(mutatorKind, SingleMutationTypeBucket());
   }
 
-  singleUnitMutations[mutatorKind].emplace(hash,
+  singleFileMutations[mutatorKind].emplace(hash,
                                            ASTMutation(mutatorKind, beginLine, beginColumn, stmt));
 }
