@@ -39,14 +39,13 @@
       environment:
         HOMEBREW_NO_AUTO_UPDATE: 1
 
-    # PackageMaker.app
-    - name: Copy PackageMaker to the VM
-      copy:
-        src: "{{ package_maker_path }}"
-        dest: /Applications
-        mode: preserve
-      when: package_maker_path is directory
-      become: true
+    - name: Install Python dependencies
+      pip:
+        name:
+          - lit==0.9.0
+          - filecheck==0.0.16
+          - cloudsmith-cli==0.26.0
+        executable: pip3
 
     - name: Create a symbolic link for gnu-tar
       file:

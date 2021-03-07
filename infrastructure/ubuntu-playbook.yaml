@@ -40,6 +40,14 @@
         state: present
       become: true
 
+    - name: Install Python dependencies
+      pip:
+        name:
+          - lit==0.9.0
+          - filecheck==0.0.16
+          - cloudsmith-cli==0.26.0
+        executable: pip3
+
     - name: Download CMake
       get_url:
         url: https://github.com/Kitware/CMake/releases/download/v3.16.9/cmake-3.16.9-Linux-x86_64.sh

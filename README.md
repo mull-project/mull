@@ -31,6 +31,12 @@ ISSN={},
 month={April},}
 ```
 
+## Packages
+
+[![Hosted By: Cloudsmith](https://img.shields.io/badge/OSS%20hosting%20by-cloudsmith-blue?logo=cloudsmith&style=for-the-badge)](https://cloudsmith.com)
+
+Hosting for precompiled packages is graciously provided by  [Cloudsmith](https://cloudsmith.com).
+
 ## Copyright
 
 Copyright (c) 2016-2020 Alex Denisov <alex@lowlevelbits.org> and Stanislav Pankevich <s.pankevich@gmail.com>. See LICENSE for details.

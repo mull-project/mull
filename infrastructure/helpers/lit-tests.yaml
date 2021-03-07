@@ -1,11 +1,4 @@
 ---
-- name: "Install Python dependencies for LIT: lit and filecheck"
-  pip:
-    name:
-      - lit==0.9.0
-      - filecheck==0.0.16
-    executable: pip3
-
 - name: Run LIT tests (Debug)
   command: ninja tests-lit
   args:
