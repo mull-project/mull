@@ -22,7 +22,7 @@ import guzzle_sphinx_theme
 def project_version():
     with open("../CMakeLists.txt") as f:
         for line in f:
-            m = re.search('MULL_VERSION (\d.\d.\d)', line)
+            m = re.search('MULL_VERSION (\d+.\d+.\d+)', line)
             if m:
                 return m.group(1)
 
@@ -32,7 +32,7 @@ author = 'Alex Denisov <alex@lowlevelbits.org>, Stanislav Pankevich <s.pankevich
 
 version = project_version()
 release = version
-print("Generating docs for Mull" + version)
+print("Generating docs for Mull " + version)
 
 # -- General configuration ---------------------------------------------------
 

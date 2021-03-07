@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.10.0] - 07 Mar 2021
+
+**Important note**: Bintray is shutting down, so Mull moved to [Cloudsmith](https://cloudsmith.io/~mull-project/repos/)!
+
+- Fixed bug with incorrect mutation of intrinsics (by [Yuta Saito](https://github.com/kateinoigakukun)) [#libirm/24](https://github.com/mull-project/libirm/pull/24)
+- Fixed bug with losing calling conventions (by [Yuta Saito](https://github.com/kateinoigakukun)) [#834](https://github.com/mull-project/mull/pull/834)
+- Fixed bug with incorrect locations of mutants in the header files [837](https://github.com/mull-project/mull/pull/837)
+- Deduplicate mutants coming from inlined functions/templates [#829](https://github.com/mull-project/mull/pull/829)
+- Add support for not covered mutants [831](https://github.com/mull-project/mull/pull/831)
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2021-01-08..2021-03-07)
+
 ## [0.9.0] - 07 Jan 2021
 
 **Important note**: this release is a breaking change!

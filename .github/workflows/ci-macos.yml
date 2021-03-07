@@ -73,4 +73,17 @@ jobs:
         if: matrix.LLVM_VERSION == env.LLVM_RELEASE && env.CLOUDSMITH_API_KEY != null
         run: |
           cloudsmith push raw mull-project/mull-${{ steps.settings.outputs.channel }} infrastructure/packages/`cat infrastructure/PACKAGE_FILE_NAME`.zip
+      - name: Move package
+        run: |
+          mkdir -p /tmp/packages
+          mv infrastructure/packages/`cat infrastructure/PACKAGE_FILE_NAME`.zip /tmp/packages/`cat infrastructure/PACKAGE_FILE_NAME`.zip
+      - name: Attach package to the tag
+        if: matrix.LLVM_VERSION == env.LLVM_RELEASE && contains(github.ref, 'refs/tags/')
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: /tmp/packages/*.zip
+          tag: ${{ github.ref }}
+          overwrite: true
+          file_glob: true
 

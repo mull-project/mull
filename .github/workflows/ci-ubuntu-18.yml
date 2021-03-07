@@ -85,4 +85,17 @@ jobs:
         if: matrix.LLVM_VERSION == env.LLVM_RELEASE && env.CLOUDSMITH_API_KEY != null
         run: |
           env LC_ALL=C.UTF-8 LANG=C.UTF-8 cloudsmith push deb mull-project/mull-${{ steps.settings.outputs.channel }}/${{ env.DISTR_REPO }} infrastructure/packages/`cat infrastructure/PACKAGE_FILE_NAME`.deb
+      - name: Move package
+        run: |
+          mkdir -p /tmp/packages
+          mv infrastructure/packages/`cat infrastructure/PACKAGE_FILE_NAME`.deb /tmp/packages/`cat infrastructure/PACKAGE_FILE_NAME`.deb
+      - name: Attach package to the tag
+        if: matrix.LLVM_VERSION == env.LLVM_RELEASE && contains(github.ref, 'refs/tags/')
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: /tmp/packages/*.deb
+          tag: ${{ github.ref }}
+          overwrite: true
+          file_glob: true
 
