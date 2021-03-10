@@ -10,6 +10,7 @@ Welcome to Mull's documentation!
    Installation
    Tutorials
    SupportedMutations
+   IncrementalMutationTesting
    CommandLineReference
    HowMullWorks
    HackingOnMull

@@ -49,6 +49,9 @@ extern opt<bool> NoMutantOutput;
 
 extern opt<bool> EnableAST;
 
+extern opt<std::string> GitDiffRef;
+extern opt<std::string> GitProjectRoot;
+
 extern list<std::string> ExcludePaths;
 extern list<std::string> IncludePaths;
 

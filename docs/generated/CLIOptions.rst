@@ -50,6 +50,10 @@
 
 --exclude-path regex		File/directory paths to ignore (supports regex)
 
+--git-diff-ref git commit		Git branch to run diff against (enables incremental testing)
+
+--git-project-root git project root		Path to project's Git root (used together with -git-diff-ref)
+
 --mutators mutator		Choose mutators:
 
     Groups:

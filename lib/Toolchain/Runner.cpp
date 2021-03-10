@@ -30,7 +30,8 @@ Runner::Runner(Diagnostics &diagnostics) : diagnostics(diagnostics) {}
 ExecutionResult Runner::runProgram(const std::string &program,
                                    const std::vector<std::string> &arguments,
                                    const std::vector<std::string> &environment,
-                                   long long int timeout, bool captureOutput) {
+                                   long long int timeout, bool captureOutput,
+                                   std::optional<std::string> optionalWorkingDirectory) {
   std::vector<std::pair<std::string, std::string>> env;
   env.reserve(environment.size());
   for (auto &e : environment) {
@@ -40,6 +41,9 @@ ExecutionResult Runner::runProgram(const std::string &program,
   reproc::options options;
   options.env.extra = reproc::env(env);
   options.redirect.err.type = reproc::redirect::type::pipe;
+  if (auto &workingDirectory = optionalWorkingDirectory) {
+    options.working_directory = workingDirectory->c_str();
+  }
 
   std::vector<std::string> allArguments{ program };
   std::copy(std::begin(arguments), std::end(arguments), std::back_inserter(allArguments));

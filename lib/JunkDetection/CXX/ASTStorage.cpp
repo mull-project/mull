@@ -78,8 +78,12 @@ const clang::FileEntry *ThreadSafeASTUnit::findFileEntry(const std::string &file
   auto end = sourceManager.fileinfo_end();
   const clang::FileEntry *file = nullptr;
   for (auto it = begin; it != end; it++) {
-    StringRef name(it->first->getName());
-    if (name.equals(filePath)) {
+    llvm::StringRef currentSourceFilePath = it->first->getName();
+    /// In LLVM 6, it->first->getName() does not expand to full path for header files.
+    if (!llvm::sys::path::is_absolute(currentSourceFilePath)) {
+      currentSourceFilePath = it->first->tryGetRealPathName();
+    }
+    if (currentSourceFilePath.equals(filePath)) {
       file = it->first;
       break;
     }

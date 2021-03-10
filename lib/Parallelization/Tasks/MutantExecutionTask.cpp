@@ -25,7 +25,8 @@ void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
                                  {},
                                  { mutant->getIdentifier() },
                                  baseline.runningTime * 10,
-                                 configuration.captureMutantOutput);
+                                 configuration.captureMutantOutput,
+                                 std::nullopt);
     } else {
       result.status = NotCovered;
     }

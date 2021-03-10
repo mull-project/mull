@@ -23,6 +23,9 @@ Features
 
 - Parallelized execution of tests
 
+- `Incremental mutation testing <IncrementalMutationTesting.html>`_.
+  Working with mutations found in Git Diff changesets.
+
 - Mull requires test programs to be compiled with Clang/LLVM. Mull supports
   all LLVM versions starting from LLVM 6.
 

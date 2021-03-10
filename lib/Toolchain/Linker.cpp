@@ -29,8 +29,8 @@ std::string Linker::linkObjectFiles(const std::vector<std::string> &objects) {
   std::copy(std::begin(objects), std::end(objects), std::back_inserter(arguments));
   arguments.emplace_back("-o");
   arguments.push_back(resultPath.str().str());
-  ExecutionResult result =
-      runner.runProgram(configuration.linker, arguments, {}, configuration.linkerTimeout, true);
+  ExecutionResult result = runner.runProgram(
+      configuration.linker, arguments, {}, configuration.linkerTimeout, true, std::nullopt);
   std::stringstream commandStream;
   commandStream << configuration.linker;
   for (std::string &argument : arguments) {

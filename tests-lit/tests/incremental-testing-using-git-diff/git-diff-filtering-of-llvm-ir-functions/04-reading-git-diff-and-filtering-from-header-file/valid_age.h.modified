@@ -1,0 +1,8 @@
+#pragma once
+
+static bool valid_age(int age) {
+  if (age >= 21) { // This comment line creates a diff!
+    return true;
+  }
+  return false;
+}
