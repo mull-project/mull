@@ -2,6 +2,7 @@
 #include <ebc/BitcodeRetriever.h>
 #include <ebc/EmbeddedFile.h>
 
+#include <llvm/Support/Path.h>
 #include <llvm/Support/TargetSelect.h>
 
 #include "CLIOptions.h"
@@ -226,16 +227,25 @@ int main(int argc, char **argv) {
       diagnostics.warning(debugMessage.str());
     } else {
       std::string gitProjectRoot = tool::GitProjectRoot.getValue();
-      std::string gitDiffBranch = tool::GitDiffRef.getValue();
-      diagnostics.info(std::string("Incremental testing using Git Diff is enabled.\n")
-                       + "- Git ref: " + gitDiffBranch + "\n"
-                       + "- Git project root: " + gitProjectRoot);
-      mull::GitDiffFilter *gitDiffFilter =
-          mull::GitDiffFilter::createFromGitDiff(diagnostics, gitProjectRoot, gitDiffBranch);
+      llvm::SmallString<256> tmpGitProjectRoot;
+      if (!llvm::sys::fs::real_path(gitProjectRoot, tmpGitProjectRoot)) {
+        gitProjectRoot = tmpGitProjectRoot.str();
 
-      if (gitDiffFilter) {
-        filterStorage.emplace_back(gitDiffFilter);
-        filters.instructionFilters.push_back(gitDiffFilter);
+        std::string gitDiffBranch = tool::GitDiffRef.getValue();
+        diagnostics.info(std::string("Incremental testing using Git Diff is enabled.\n") +
+                         "- Git ref: " + gitDiffBranch + "\n" +
+                         "- Git project root: " + gitProjectRoot);
+        mull::GitDiffFilter *gitDiffFilter =
+            mull::GitDiffFilter::createFromGitDiff(diagnostics, gitProjectRoot, gitDiffBranch);
+
+        if (gitDiffFilter) {
+          filterStorage.emplace_back(gitDiffFilter);
+          filters.instructionFilters.push_back(gitDiffFilter);
+        }
+      } else {
+        diagnostics.warning(
+            std::string("could not expand -git-project-root to an absolute path: ") +
+            gitProjectRoot);
       }
     }
   }
