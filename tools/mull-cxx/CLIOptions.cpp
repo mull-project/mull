@@ -22,6 +22,13 @@ opt<std::string> tool::InputFile(
   value_desc("path"),
   cat(MullCXXCategory));
 
+opt<std::string> tool::OutputFile(
+  "output",
+  desc("output file"),
+  value_desc("path"),
+  init(""),
+  cat(MullCXXCategory));
+
 opt<unsigned> tool::Workers(
   "workers",
   desc("How many threads to use"),
@@ -138,6 +145,16 @@ opt<bool> tool::EnableAST(
   "enable-ast", llvm::cl::Optional,
   llvm::cl::desc("Enable \"white\" AST search (disabled by default)"),
   llvm::cl::cat(MullCXXCategory), llvm::cl::init(false));
+
+opt<bool> tool::KeepObjectFiles(
+    "keep-object-files", llvm::cl::Optional,
+    llvm::cl::desc("Keep temporary object files"),
+    llvm::cl::cat(MullCXXCategory), llvm::cl::init(false));
+
+opt<bool> tool::KeepExecutable(
+    "keep-executable", llvm::cl::Optional,
+    llvm::cl::desc("Keep temporary executable file"),
+    llvm::cl::cat(MullCXXCategory), llvm::cl::init(false));
 
 opt<std::string> tool::GitDiffRef(
     "git-diff-ref",
@@ -324,6 +341,8 @@ void tool::dumpCLIInterface(Diagnostics &diagnostics) {
   Option *mutators = &(Option &)Mutators;
   Option *reporters = &(Option &)ReportersOption;
   std::vector<Option *> mullOptions({
+      &OutputFile,
+
       &Workers,
       &Timeout,
       &DryRunOption,
@@ -335,6 +354,9 @@ void tool::dumpCLIInterface(Diagnostics &diagnostics) {
       &IDEReporterShowKilled,
       &DebugEnabled,
       &StrictModeEnabled,
+
+      &KeepObjectFiles,
+      &KeepExecutable,
 
       &NoTestOutput,
       &NoMutantOutput,

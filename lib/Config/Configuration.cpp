@@ -17,7 +17,8 @@ unsigned MullDefaultLinkerTimeoutMilliseconds = 30000;
 
 Configuration::Configuration()
     : debugEnabled(false), dryRunEnabled(false), captureTestOutput(true), captureMutantOutput(true),
-      skipSanityCheckRun(false), includeNotCovered(false), timeout(MullDefaultTimeoutMilliseconds),
+      skipSanityCheckRun(false), includeNotCovered(false), keepObjectFiles(false),
+      keepExecutable(false), timeout(MullDefaultTimeoutMilliseconds),
       linkerTimeout(MullDefaultLinkerTimeoutMilliseconds), diagnostics(IDEDiagnosticsKind::None),
       parallelization(singleThreadParallelization()) {}
 
