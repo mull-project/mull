@@ -233,6 +233,12 @@ Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints,
   singleTask.execute("Link mutated program",
                      [&]() { executable = toolchain.linker().linkObjectFiles(objectFiles); });
 
+  if (!config.keepObjectFiles) {
+    for (auto &objectFile : objectFiles) {
+      llvm::sys::fs::remove(objectFile);
+    }
+  }
+
   Runner runner(diagnostics);
   /// On macOS, sometimes newly compiled programs take more time to execute for the first run
   /// As we take the execution time as a baseline for timeout it makes sense to have an additional
@@ -257,6 +263,10 @@ Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints,
   TaskExecutor<MutantExecutionTask> mutantRunner(
       diagnostics, "Running mutants", mutants, mutationResults, std::move(tasks));
   mutantRunner.execute();
+
+  if (!config.keepExecutable) {
+    llvm::sys::fs::remove(executable);
+  }
 
   return mutationResults;
 }

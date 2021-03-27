@@ -98,8 +98,12 @@ int main(int argc, char **argv) {
   configuration.timeout = tool::Timeout.getValue();
 
   configuration.executable = tool::InputFile.getValue();
+  configuration.outputFile = tool::OutputFile.getValue();
   configuration.coverageInfo = tool::CoverageInfo.getValue();
   configuration.includeNotCovered = tool::IncludeNotCovered.getValue();
+
+  configuration.keepObjectFiles = tool::KeepObjectFiles.getValue();
+  configuration.keepExecutable = tool::KeepExecutable.getValue();
 
   if (tool::Workers) {
     mull::ParallelizationConfig parallelizationConfig;

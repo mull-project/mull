@@ -38,7 +38,8 @@ set(LIT_COMMAND
   ${LIT_EXEC}
   -vv
   ${CMAKE_CURRENT_SOURCE_DIR}/tests
-)
+
+  )
 
 add_custom_target(tests-lit
   COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && make clean

@@ -15,6 +15,7 @@ using namespace llvm::cl;
 extern OptionCategory MullCXXCategory;
 
 extern opt<std::string> InputFile;
+extern opt<std::string> OutputFile;
 
 extern opt<unsigned> Workers;
 extern opt<unsigned> Timeout;
@@ -48,6 +49,9 @@ extern opt<bool> NoTestOutput;
 extern opt<bool> NoMutantOutput;
 
 extern opt<bool> EnableAST;
+
+extern opt<bool> KeepObjectFiles;
+extern opt<bool> KeepExecutable;
 
 extern opt<std::string> GitDiffRef;
 extern opt<std::string> GitProjectRoot;

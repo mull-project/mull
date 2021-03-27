@@ -39,4 +39,4 @@ CLEAN_FIND_CMD=find \
 CLEAN_FILES=$(shell $(CLEAN_FIND_CMD))
 clean: ## Clean all temporary artefacts
 	echo $(CLEAN_FILES) | \
-		xargs rm -rfv
+		xargs rm -rf

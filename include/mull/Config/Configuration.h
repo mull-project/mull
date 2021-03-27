@@ -17,6 +17,8 @@ struct Configuration {
   bool captureMutantOutput;
   bool skipSanityCheckRun;
   bool includeNotCovered;
+  bool keepObjectFiles;
+  bool keepExecutable;
 
   int timeout;
   unsigned linkerTimeout;
@@ -26,6 +28,7 @@ struct Configuration {
   std::vector<std::string> bitcodePaths;
 
   std::string executable;
+  std::string outputFile;
   std::string coverageInfo;
 
   std::string linker;

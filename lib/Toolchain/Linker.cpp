@@ -10,17 +10,25 @@
 using namespace mull;
 using namespace std::string_literals;
 
+std::string outputFileName(const Configuration &configuration, Diagnostics &diagnostics) {
+  if (configuration.outputFile.empty()) {
+    llvm::Twine prefix("mull");
+    llvm::SmallString<128> resultPath;
+
+    if (std::error_code err = llvm::sys::fs::createTemporaryFile(prefix, "exe", resultPath)) {
+      diagnostics.error("Cannot create temporary file"s + err.message());
+      return std::string();
+    }
+    return resultPath.str().str();
+  }
+  return configuration.outputFile;
+}
+
 Linker::Linker(const Configuration &configuration, Diagnostics &diagnostics)
     : configuration(configuration), diagnostics(diagnostics) {}
 
 std::string Linker::linkObjectFiles(const std::vector<std::string> &objects) {
-  llvm::Twine prefix("mull");
-  llvm::SmallString<128> resultPath;
-
-  if (std::error_code err = llvm::sys::fs::createTemporaryFile(prefix, "exe", resultPath)) {
-    diagnostics.error("Cannot create temporary file"s + err.message());
-    return std::string();
-  }
+  std::string outputFile = outputFileName(configuration, diagnostics);
   Runner runner(diagnostics);
   std::vector<std::string> arguments;
   std::copy(std::begin(configuration.linkerFlags),
@@ -28,7 +36,7 @@ std::string Linker::linkObjectFiles(const std::vector<std::string> &objects) {
             std::back_inserter(arguments));
   std::copy(std::begin(objects), std::end(objects), std::back_inserter(arguments));
   arguments.emplace_back("-o");
-  arguments.push_back(resultPath.str().str());
+  arguments.push_back(outputFile);
   ExecutionResult result = runner.runProgram(
       configuration.linker, arguments, {}, configuration.linkerTimeout, true, std::nullopt);
   std::stringstream commandStream;
@@ -49,6 +57,6 @@ std::string Linker::linkObjectFiles(const std::vector<std::string> &objects) {
     diagnostics.error(message.str());
   }
   diagnostics.debug("Link command: "s + command);
-  diagnostics.info("Compiled executable: "s + resultPath.c_str());
-  return resultPath.str().str();
+  diagnostics.info("Compiled executable: "s + outputFile);
+  return outputFile;
 }

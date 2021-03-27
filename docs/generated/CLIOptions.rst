@@ -1,3 +1,5 @@
+--output path		output file
+
 --workers number		How many threads to use
 
 --timeout number		Timeout per test run (milliseconds)
@@ -23,6 +25,10 @@
 --debug		Enables Debug Mode: more logs are printed
 
 --strict		Enables Strict Mode: all warning messages are treated as fatal errors
+
+--keep-object-files		Keep temporary object files
+
+--keep-executable		Keep temporary executable file
 
 --no-test-output		Does not capture output from test runs
 
