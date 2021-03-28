@@ -50,8 +50,7 @@ std::unique_ptr<Result> Driver::run() {
 
   auto mutationResults = runMutations(filteredMutations, mutants);
 
-  return std::make_unique<Result>(
-      std::move(mutants), std::move(mutationResults), std::move(filteredMutations));
+  return std::make_unique<Result>(std::move(mutants), std::move(mutationResults));
 }
 
 std::vector<MutationPoint *> Driver::findMutationPoints() {

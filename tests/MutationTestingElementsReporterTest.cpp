@@ -107,7 +107,7 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
 
   MetricsMeasure resultTime;
 
-  Result result(std::move(mutants), std::move(mutationResults), mutationPoints);
+  Result result(std::move(mutants), std::move(mutationResults));
 
   /// STEP2. Reporting results to JSON
   MockASTSourceInfoProvider sourceInfoProvider;

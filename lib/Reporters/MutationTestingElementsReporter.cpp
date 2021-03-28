@@ -119,7 +119,7 @@ MutationTestingElementsReporter::MutationTestingElementsReporter(
 }
 
 void MutationTestingElementsReporter::reportResults(const Result &result) {
-  if (result.getMutationPoints().empty()) {
+  if (result.getMutants().empty()) {
     diagnostics.info("No mutants found. Mutation score: infinitely high");
     return;
   }
@@ -138,7 +138,7 @@ void MutationTestingElementsReporter::reportResults(const Result &result) {
     }
   }
 
-  auto rawScore = double(killedMutants.size()) / double(result.getMutationPoints().size());
+  auto rawScore = double(killedMutants.size()) / double(result.getMutants().size());
   auto score = uint(rawScore * 100);
 
   Json json = Json::object{

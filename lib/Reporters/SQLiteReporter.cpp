@@ -3,8 +3,10 @@
 #include "mull/Bitcode.h"
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/ExecutionResult.h"
+#include "mull/Mutant.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Result.h"
+#include "mull/SourceLocation.h"
 
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/Function.h>
