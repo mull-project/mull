@@ -6,10 +6,11 @@
 
 using namespace mull;
 
-Mutant::Mutant(std::string identifier, std::string mutatorIdentifier,
-               const SourceLocation &sourceLocation)
+Mutant::Mutant(std::string identifier, std::string mutatorIdentifier, SourceLocation sourceLocation,
+               bool covered)
     : identifier(std::move(identifier)), mutatorIdentifier(std::move(mutatorIdentifier)),
-      sourceLocation(sourceLocation), mutatorKind(MutatorKind::InvalidKind) {}
+      sourceLocation(std::move(sourceLocation)), covered(covered),
+      mutatorKind(MutatorKind::InvalidKind) {}
 
 const std::string &Mutant::getIdentifier() const {
   return identifier;
@@ -24,17 +25,7 @@ const std::string &Mutant::getMutatorIdentifier() const {
 }
 
 bool Mutant::isCovered() const {
-  for (MutationPoint *point : points) {
-    /// Consider a mutant covered if at least one of the mutation points is covered
-    if (point->isCovered()) {
-      return true;
-    }
-  }
-  return false;
-}
-
-void Mutant::setMutationPoints(std::vector<MutationPoint *> points) {
-  this->points = points;
+  return covered;
 }
 
 void Mutant::setMutatorKind(MutatorKind kind) {

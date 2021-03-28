@@ -72,7 +72,8 @@ TEST(SQLiteReporter, integrationTest) {
   auto anyPoint = mutationPoints.front();
   auto mutant = std::make_unique<Mutant>(mutationPoint->getUserIdentifier(),
                                          anyPoint->getMutatorIdentifier(),
-                                         anyPoint->getSourceLocation());
+                                         anyPoint->getSourceLocation(),
+                                         anyPoint->isCovered());
   auto mutationResult = std::make_unique<MutationResult>(mutatedTestExecutionResult, mutant.get());
 
   std::vector<std::unique_ptr<Mutant>> mutants;

@@ -47,9 +47,18 @@ std::unique_ptr<Result> Driver::run() {
       MutationPoint *anyPoint = pair.second.front();
       std::string mutatorIdentifier = anyPoint->getMutatorIdentifier();
       const SourceLocation &sourceLocation = anyPoint->getSourceLocation();
-      mutants.push_back(std::make_unique<Mutant>(identifier, mutatorIdentifier, sourceLocation));
+      bool covered = false;
+      for (MutationPoint *point : pair.second) {
+        /// Consider a mutant covered if at least one of the mutation points is covered
+        if (point->isCovered()) {
+          covered = true;
+          break;
+        }
+      }
+
+      mutants.push_back(
+          std::make_unique<Mutant>(identifier, mutatorIdentifier, sourceLocation, covered));
       mutants.back()->setMutatorKind(anyPoint->getMutator()->mutatorKind());
-      mutants.back()->setMutationPoints(pair.second);
     }
     std::sort(std::begin(mutants), std::end(mutants), MutantComparator());
   });
