@@ -20,12 +20,12 @@ static const clang::Stmt *findMutantExpression(MutationPoint *point,
                                                VisitorParameters &visitorParameters,
                                                clang::Decl *decl) {
   switch (point->getMutator()->mutatorKind()) {
-  case MutatorKind::RemoveVoidFunctionMutator: {
+  case MutatorKind::CXX_RemoveVoidCall: {
     RemoveVoidFunctionVisitor visitor(visitorParameters);
     visitor.TraverseDecl(decl);
     return visitor.foundMutant();
   }
-  case MutatorKind::ReplaceCallMutator: {
+  case MutatorKind::CXX_ReplaceScalarCall: {
     ReplaceCallVisitor visitor(visitorParameters);
     visitor.TraverseDecl(decl);
     return visitor.foundMutant();

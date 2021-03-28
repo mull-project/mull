@@ -23,8 +23,6 @@ set(mull_sources
   Mutators/MutatorKind.cpp
   Mutators/MutatorsFactory.cpp
   Mutators/NegateConditionMutator.cpp
-  Mutators/RemoveVoidFunctionMutator.cpp
-  Mutators/ReplaceCallMutator.cpp
   Mutators/ScalarValueMutator.cpp
 
   Toolchain/Compiler.cpp

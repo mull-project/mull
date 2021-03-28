@@ -3,6 +3,7 @@
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Mutators/CXX/ArithmeticMutators.h"
 #include "mull/Mutators/CXX/BitwiseMutators.h"
+#include "mull/Mutators/CXX/CallMutators.h"
 #include "mull/Mutators/CXX/LogicalAndToOr.h"
 #include "mull/Mutators/CXX/LogicalOrToAnd.h"
 #include "mull/Mutators/CXX/NumberMutators.h"
@@ -10,8 +11,6 @@
 #include "mull/Mutators/CXX/RemoveNegation.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Mutators/NegateConditionMutator.h"
-#include "mull/Mutators/RemoveVoidFunctionMutator.h"
-#include "mull/Mutators/ReplaceCallMutator.h"
 #include "mull/Mutators/ScalarValueMutator.h"
 #include <llvm/ADT/STLExtras.h>
 #include <set>
@@ -60,6 +59,9 @@ static string CXX_Comparison() {
 static string CXX_Boundary() {
   return "cxx_boundary";
 }
+static string CXX_Calls() {
+  return "cxx_calls";
+}
 static string CXX_All() {
   return "cxx_all";
 }
@@ -79,6 +81,8 @@ static void expandGroups(const vector<string> &groups, const map<string, vector<
 }
 
 MutatorsFactory::MutatorsFactory(Diagnostics &diagnostics) : diagnostics(diagnostics) {
+  groupsMapping[CXX_Calls()] = { cxx::RemoveVoidCall::ID(), cxx::ReplaceScalarCall::ID() };
+
   groupsMapping[CXX_Const_Assignment()] = {
     cxx::NumberAssignConst::ID(), // a = b | a = Const
     cxx::NumberInitConst::ID(),   // a(b)  | a(Const)
@@ -156,10 +160,8 @@ MutatorsFactory::MutatorsFactory(Diagnostics &diagnostics) : diagnostics(diagnos
     CXX_Const_Assignment(),
   };
 
-  groupsMapping[CXX_All()] = {
-    CXX_Assignment(), CXX_Increment(), CXX_Decrement(), CXX_Arithmetic(),
-    CXX_Comparison(), CXX_Boundary(),  CXX_Bitwise(),
-  };
+  groupsMapping[CXX_All()] = { CXX_Assignment(), CXX_Increment(), CXX_Decrement(), CXX_Arithmetic(),
+                               CXX_Comparison(), CXX_Boundary(),  CXX_Bitwise(),   CXX_Calls() };
 
   groupsMapping[CXX_Default()] = {
     CXX_Increment(),
@@ -169,9 +171,7 @@ MutatorsFactory::MutatorsFactory(Diagnostics &diagnostics) : diagnostics(diagnos
   };
 
   groupsMapping[Experimental()] = { NegateConditionMutator::ID(),
-                                    RemoveVoidFunctionMutator::ID(),
                                     ScalarValueMutator::ID(),
-                                    ReplaceCallMutator::ID(),
                                     CXX_Logical() };
   groupsMapping[AllMutatorsGroup()] = { CXX_All(), Experimental() };
 }
@@ -183,9 +183,10 @@ void addMutator(std::map<std::string, std::unique_ptr<Mutator>> &mapping) {
 
 void MutatorsFactory::init() {
   addMutator<NegateConditionMutator>(mutatorsMapping);
-  addMutator<ReplaceCallMutator>(mutatorsMapping);
-  addMutator<RemoveVoidFunctionMutator>(mutatorsMapping);
   addMutator<ScalarValueMutator>(mutatorsMapping);
+
+  addMutator<cxx::RemoveVoidCall>(mutatorsMapping);
+  addMutator<cxx::ReplaceScalarCall>(mutatorsMapping);
 
   addMutator<cxx::NumberAssignConst>(mutatorsMapping);
   addMutator<cxx::NumberInitConst>(mutatorsMapping);

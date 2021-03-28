@@ -1,5 +1,7 @@
 #include "mull/Mutators/MutatorKind.h"
 
+#include <utility>
+
 namespace mull {
 std::string MutationKindToString(MutatorKind mutatorKind) {
   switch (mutatorKind) {
@@ -9,10 +11,10 @@ std::string MutationKindToString(MutatorKind mutatorKind) {
   case MutatorKind::NegateMutator: {
     return "Negate";
   }
-  case MutatorKind::RemoveVoidFunctionMutator: {
+  case MutatorKind::CXX_RemoveVoidCall: {
     return "Remove Void";
   }
-  case MutatorKind::ReplaceCallMutator: {
+  case MutatorKind::CXX_ReplaceScalarCall: {
     return "Replace Call";
   }
   case MutatorKind::ScalarValueMutator: {
@@ -145,7 +147,7 @@ std::string MutationKindToString(MutatorKind mutatorKind) {
 }
 
 MutatorKindSet::MutatorKindSet(std::unordered_set<mull::MutatorKind> mutators)
-    : mutators(mutators) {}
+    : mutators(std::move(mutators)) {}
 
 MutatorKindSet MutatorKindSet::create(std::vector<MutatorKind> mutators) {
   std::unordered_set<MutatorKind> mutatorsSet(mutators.begin(), mutators.end());
