@@ -48,7 +48,7 @@ std::unique_ptr<Result> Driver::run() {
     std::sort(std::begin(mutants), std::end(mutants), MutantComparator());
   });
 
-  auto mutationResults = runMutations(filteredMutations, mutants);
+  auto mutationResults = runMutations(mutants);
 
   return std::make_unique<Result>(std::move(mutants), std::move(mutationResults));
 }
@@ -143,24 +143,22 @@ void Driver::selectInstructions(std::vector<FunctionUnderTest> &functions) {
 }
 
 std::vector<std::unique_ptr<MutationResult>>
-Driver::runMutations(std::vector<MutationPoint *> &mutationPoints,
-                     std::vector<std::unique_ptr<Mutant>> &mutants) {
-  if (mutationPoints.empty()) {
+Driver::runMutations(std::vector<std::unique_ptr<Mutant>> &mutants) {
+  if (mutants.empty()) {
     return std::vector<std::unique_ptr<MutationResult>>();
   }
 
   if (config.dryRunEnabled) {
-    return dryRunMutations(mutationPoints, mutants);
+    return dryRunMutations(mutants);
   }
 
-  return normalRunMutations(mutationPoints, mutants);
+  return normalRunMutations(mutants);
 }
 
 #pragma mark -
 
 std::vector<std::unique_ptr<MutationResult>>
-Driver::dryRunMutations(const std::vector<MutationPoint *> &mutationPoints,
-                        std::vector<std::unique_ptr<Mutant>> &mutants) {
+Driver::dryRunMutations(std::vector<std::unique_ptr<Mutant>> &mutants) {
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
 
   std::vector<DryRunMutantExecutionTask> tasks;
@@ -176,11 +174,14 @@ Driver::dryRunMutations(const std::vector<MutationPoint *> &mutationPoints,
 }
 
 std::vector<std::unique_ptr<MutationResult>>
-Driver::normalRunMutations(const std::vector<MutationPoint *> &mutationPoints,
-                           std::vector<std::unique_ptr<Mutant>> &mutants) {
+Driver::normalRunMutations(std::vector<std::unique_ptr<Mutant>> &mutants) {
+  std::vector<MutationPoint *> mutationPoints;
   singleTask.execute("Prepare mutations", [&]() {
-    for (auto point : mutationPoints) {
-      point->getBitcode()->addMutation(point);
+    for (auto &mutant : mutants) {
+      for (auto point : mutant->getMutationPoints()) {
+        point->getBitcode()->addMutation(point);
+        mutationPoints.push_back(point);
+      }
     }
   });
 
