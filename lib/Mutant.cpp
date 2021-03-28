@@ -12,10 +12,6 @@ const std::string &Mutant::getIdentifier() const {
   return identifier;
 }
 
-const std::vector<MutationPoint *> &Mutant::getMutationPoints() const {
-  return points;
-}
-
 const SourceLocation &Mutant::getSourceLocation() const {
   return points.front()->getSourceLocation();
 }

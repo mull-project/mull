@@ -35,7 +35,7 @@ Driver::~Driver() {
 std::unique_ptr<Result> Driver::run() {
   auto mutationPoints = findMutationPoints();
   auto filteredMutations = filterMutations(std::move(mutationPoints));
-
+  prepareMutations(filteredMutations);
   std::vector<std::unique_ptr<Mutant>> mutants;
   singleTask.execute("Deduplicate mutants", [&]() {
     std::unordered_map<std::string, std::vector<MutationPoint *>> mapping;
@@ -174,15 +174,13 @@ Driver::dryRunMutations(std::vector<std::unique_ptr<Mutant>> &mutants) {
   return mutationResults;
 }
 
-std::vector<std::unique_ptr<MutationResult>>
-Driver::normalRunMutations(std::vector<std::unique_ptr<Mutant>> &mutants) {
-  std::vector<MutationPoint *> mutationPoints;
+void Driver::prepareMutations(std::vector<MutationPoint *> mutationPoints) {
+  if (config.dryRunEnabled) {
+    return;
+  }
   singleTask.execute("Prepare mutations", [&]() {
-    for (auto &mutant : mutants) {
-      for (auto point : mutant->getMutationPoints()) {
-        point->getBitcode()->addMutation(point);
-        mutationPoints.push_back(point);
-      }
+    for (auto point : mutationPoints) {
+      point->getBitcode()->addMutation(point);
     }
   });
 
@@ -216,6 +214,11 @@ Driver::normalRunMutations(std::vector<std::unique_ptr<Mutant>> &mutants) {
   TaskExecutor<ApplyMutationTask> applyMutations(
       diagnostics, "Applying mutations", mutationPoints, Nothing, { ApplyMutationTask() });
   applyMutations.execute();
+}
+
+std::vector<std::unique_ptr<MutationResult>>
+Driver::normalRunMutations(std::vector<std::unique_ptr<Mutant>> &mutants) {
+  auto workers = config.parallelization.workers;
 
   std::vector<OriginalCompilationTask> compilationTasks;
   compilationTasks.reserve(workers);

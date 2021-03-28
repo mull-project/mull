@@ -55,6 +55,8 @@ private:
   std::vector<FunctionUnderTest> filterFunctions(std::vector<FunctionUnderTest> functions);
   void selectInstructions(std::vector<FunctionUnderTest> &functions);
 
+  void prepareMutations(std::vector<MutationPoint *> mutationPoints);
+
   std::vector<std::unique_ptr<MutationResult>>
   runMutations(std::vector<std::unique_ptr<Mutant>> &mutants);
 
