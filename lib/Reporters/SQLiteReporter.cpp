@@ -3,8 +3,6 @@
 #include "mull/Bitcode.h"
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/ExecutionResult.h"
-#include "mull/Mutant.h"
-#include "mull/MutationResult.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Result.h"
 
@@ -86,13 +84,13 @@ void mull::SQLiteReporter::reportResults(const Result &result) {
   sqlite3_prepare(database, insertExecutionResultQuery, -1, &insertExecutionResultStmt, nullptr);
 
   for (auto &mutationResult : result.getMutationResults()) {
-    const std::string &pointId = mutationResult->getMutant()->getIdentifier();
+    const std::string &mutantId = mutationResult->getMutant()->getIdentifier();
 
     ExecutionResult mutationExecutionResult = mutationResult->getExecutionResult();
 
     int executionResultIndex = 1;
     sqlite3_bind_text(
-        insertExecutionResultStmt, executionResultIndex++, pointId.c_str(), -1, SQLITE_TRANSIENT);
+        insertExecutionResultStmt, executionResultIndex++, mutantId.c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_int(
         insertExecutionResultStmt, executionResultIndex++, mutationExecutionResult.status);
     sqlite3_bind_int64(
@@ -113,57 +111,28 @@ void mull::SQLiteReporter::reportResults(const Result &result) {
     sqlite3_reset(insertExecutionResultStmt);
   }
 
-  const char *insertMutationPointQuery =
-      "INSERT INTO mutation_point VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)";
-  sqlite3_stmt *insertMutationPointStmt;
-  sqlite3_prepare(database, insertMutationPointQuery, -1, &insertMutationPointStmt, nullptr);
+  const char *insertMutantQuery = "INSERT INTO mutant VALUES (?1, ?2, ?3, ?4, ?5, ?6)";
+  sqlite3_stmt *insertMutantStmt;
+  sqlite3_prepare(database, insertMutantQuery, -1, &insertMutantStmt, nullptr);
 
-  for (auto mutationPoint : result.getMutationPoints()) {
-    SourceLocation location = mutationPoint->getSourceLocation();
+  for (auto &mutant : result.getMutants()) {
+    SourceLocation location = mutant->getSourceLocation();
 
     int index = 1;
-    sqlite3_bind_text(insertMutationPointStmt,
-                      index++,
-                      mutationPoint->getMutator()->getUniqueIdentifier().c_str(),
-                      -1,
-                      SQLITE_TRANSIENT);
-    sqlite3_bind_text(insertMutationPointStmt,
-                      index++,
-                      mutationPoint->getBitcode()->getModule()->getModuleIdentifier().c_str(),
-                      -1,
-                      SQLITE_TRANSIENT);
-    sqlite3_bind_text(insertMutationPointStmt,
-                      index++,
-                      mutationPoint->getOriginalFunction()->getName().str().c_str(),
-                      -1,
-                      SQLITE_TRANSIENT);
+    sqlite3_bind_text(
+        insertMutantStmt, index++, mutant->getMutatorIdentifier().c_str(), -1, SQLITE_TRANSIENT);
 
-    sqlite3_bind_int(insertMutationPointStmt, index++, mutationPoint->getAddress().getFnIndex());
-    sqlite3_bind_int(insertMutationPointStmt, index++, mutationPoint->getAddress().getBBIndex());
-    sqlite3_bind_int(insertMutationPointStmt, index++, mutationPoint->getAddress().getIIndex());
+    sqlite3_bind_text(insertMutantStmt, index++, location.filePath.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(insertMutantStmt, index++, location.directory.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int(insertMutantStmt, index++, location.line);
+    sqlite3_bind_int(insertMutantStmt, index++, location.column);
 
     sqlite3_bind_text(
-        insertMutationPointStmt, index++, location.filePath.c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(
-        insertMutationPointStmt, index++, location.directory.c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(insertMutationPointStmt,
-                      index++,
-                      mutationPoint->getDiagnostics().c_str(),
-                      -1,
-                      SQLITE_TRANSIENT);
+        insertMutantStmt, index++, mutant->getIdentifier().c_str(), -1, SQLITE_TRANSIENT);
 
-    sqlite3_bind_int(insertMutationPointStmt, index++, location.line);
-    sqlite3_bind_int(insertMutationPointStmt, index++, location.column);
-
-    sqlite3_bind_text(insertMutationPointStmt,
-                      index++,
-                      mutationPoint->getUserIdentifier().c_str(),
-                      -1,
-                      SQLITE_TRANSIENT);
-
-    sqlite3_step(insertMutationPointStmt);
-    sqlite3_clear_bindings(insertMutationPointStmt);
-    sqlite3_reset(insertMutationPointStmt);
+    sqlite3_step(insertMutantStmt);
+    sqlite3_clear_bindings(insertMutantStmt);
+    sqlite3_reset(insertMutantStmt);
   }
 
   sqlite_exec(diagnostics, database, "END TRANSACTION");
@@ -184,16 +153,10 @@ CREATE TABLE execution_result (
   stderr TEXT
 );
 
-CREATE TABLE mutation_point (
+CREATE TABLE mutant (
   mutator TEXT,
-  module_name TEXT,
-  function_name TEXT,
-  function_index INT,
-  basic_block_index INT,
-  instruction_index INT,
   filename TEXT,
   directory TEXT,
-  ideDiagnostics TEXT,
   line_number INT,
   column_number INT,
   unique_id TEXT
