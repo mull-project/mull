@@ -23,17 +23,17 @@ TEST(MutatorsFactory, SingleMutators) {
   }
 
   {
-    mutators = factory.mutators({ "remove_void_function_mutator" });
+    mutators = factory.mutators({ "cxx_remove_void_call" });
     ASSERT_EQ(mutators.size(), 1UL);
     mutator = mutators[0].get();
-    ASSERT_EQ(mutator->getUniqueIdentifier(), "remove_void_function_mutator");
+    ASSERT_EQ(mutator->getUniqueIdentifier(), "cxx_remove_void_call");
   }
 
   {
-    mutators = factory.mutators({ "replace_call_mutator" });
+    mutators = factory.mutators({ "cxx_replace_scalar_call" });
     ASSERT_EQ(mutators.size(), 1UL);
     mutator = mutators[0].get();
-    ASSERT_EQ(mutator->getUniqueIdentifier(), "replace_call_mutator");
+    ASSERT_EQ(mutator->getUniqueIdentifier(), "cxx_replace_scalar_call");
   }
 
   {
@@ -80,10 +80,8 @@ TEST(MutatorsFactory, CompositeMutators) {
 
   {
     mutators = factory.mutators({ "experimental" });
-    ASSERT_EQ(mutators.size(), 7UL);
+    ASSERT_EQ(mutators.size(), 5UL);
 
-    searchResult = find_if(mutators.begin(), mutators.end(), predicate("replace_call_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
     searchResult = find_if(mutators.begin(), mutators.end(), predicate("scalar_value_mutator"));
     ASSERT_NE(searchResult, mutators.end());
   }

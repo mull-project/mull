@@ -11,9 +11,10 @@ enum class MutatorKind {
   InvalidKind,
 
   NegateMutator,
-  RemoveVoidFunctionMutator,
-  ReplaceCallMutator,
   ScalarValueMutator,
+
+  CXX_RemoveVoidCall,
+  CXX_ReplaceScalarCall,
 
   CXX_AddToSub,
   CXX_AddAssignToSubAssign,

@@ -34,7 +34,7 @@ int caller(int a) {
 
   SingleASTUnitMutations singleUnitMutations;
 
-  MutatorKindSet mutatorKindSet = MutatorKindSet::create({ MutatorKind::ReplaceCallMutator });
+  MutatorKindSet mutatorKindSet = MutatorKindSet::create({ MutatorKind::CXX_ReplaceScalarCall });
 
   ThreadSafeASTUnit threadSafeAstUnit(std::move(astUnit));
   ASTVisitor astVisitor(
@@ -47,8 +47,8 @@ int caller(int a) {
   ASSERT_EQ(singleUnitMutations.size(), 1U);
 
   SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
-  ASSERT_EQ(singleFileMutations.count(MutatorKind::ReplaceCallMutator), 1U);
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_ReplaceScalarCall), 1U);
 
-  ASSERT_EQ(singleFileMutations[MutatorKind::ReplaceCallMutator].size(), 1U);
-  ASSERT_EQ(singleFileMutations[MutatorKind::ReplaceCallMutator].count(locationHash), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_ReplaceScalarCall].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_ReplaceScalarCall].count(locationHash), 1U);
 }

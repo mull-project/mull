@@ -32,7 +32,7 @@ void foo() {
 
   SingleASTUnitMutations singleUnitMutations;
 
-  MutatorKindSet mutatorKindSet = MutatorKindSet::create({ MutatorKind::RemoveVoidFunctionMutator });
+  MutatorKindSet mutatorKindSet = MutatorKindSet::create({ MutatorKind::CXX_RemoveVoidCall });
 
   ThreadSafeASTUnit threadSafeAstUnit(std::move(astUnit));
   ASTVisitor astVisitor(
@@ -45,8 +45,8 @@ void foo() {
   ASSERT_EQ(singleUnitMutations.size(), 1U);
 
   SingleFileMutations &singleFileMutations = singleUnitMutations[fakeSourceFilePath];
-  ASSERT_EQ(singleFileMutations.count(MutatorKind::RemoveVoidFunctionMutator), 1U);
+  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_RemoveVoidCall), 1U);
 
-  ASSERT_EQ(singleFileMutations[MutatorKind::RemoveVoidFunctionMutator].size(), 1U);
-  ASSERT_EQ(singleFileMutations[MutatorKind::RemoveVoidFunctionMutator].count(locationHash), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_RemoveVoidCall].size(), 1U);
+  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_RemoveVoidCall].count(locationHash), 1U);
 }

@@ -5,6 +5,7 @@ set (SOURCES
   TrivialCXXMutator.cpp
   NumberMutators.cpp
   RemoveNegation.cpp
+  CallMutators.cpp
   )
 
 add_library(mull-cxx-mutators ${SOURCES})

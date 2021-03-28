@@ -3,9 +3,8 @@
 #include "mull/FunctionUnderTest.h"
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
 #include "mull/MutationPoint.h"
+#include "mull/Mutators/CXX/CallMutators.h"
 #include "mull/Mutators/NegateConditionMutator.h"
-#include "mull/Mutators/RemoveVoidFunctionMutator.h"
-#include "mull/Mutators/ReplaceCallMutator.h"
 #include "mull/Mutators/ScalarValueMutator.h"
 #include <mull/Diagnostics/Diagnostics.h>
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
@@ -171,9 +170,9 @@ static const CXXJunkDetectorTestParameter parameters[] = {
                                new ScalarValueMutator, 2),
 
   CXXJunkDetectorTestParameter(fixtures::mutators_remove_void_function_junk_bc_path(),
-                               new RemoveVoidFunctionMutator, 6),
+                               new cxx::RemoveVoidCall, 6),
   CXXJunkDetectorTestParameter(fixtures::mutators_replace_call_junk_bc_path(),
-                               new ReplaceCallMutator, 11),
+                               new cxx::ReplaceScalarCall, 11),
 };
 
 INSTANTIATE_TEST_CASE_P(CXXJunkDetection, CXXJunkDetectorTest, testing::ValuesIn(parameters));

@@ -4,8 +4,8 @@
 #include "mull/Config/Configuration.h"
 #include "mull/FunctionUnderTest.h"
 #include "mull/MutationPoint.h"
+#include "mull/Mutators/CXX/CallMutators.h"
 #include "mull/Mutators/CXX/LogicalAndToOr.h"
-#include "mull/Mutators/ReplaceCallMutator.h"
 #include "mull/Mutators/ScalarValueMutator.h"
 
 #include <llvm/IR/InstrTypes.h>
@@ -70,7 +70,7 @@ TEST(MutationPoint, ReplaceCallMutator_applyMutation) {
   auto bitcode = loader.loadBitcodeAtPath(
       fixtures::mutators_replace_call_module_bc_path(), context, diagnostics);
 
-  ReplaceCallMutator mutator;
+  cxx::ReplaceScalarCall mutator;
   FunctionUnderTest functionUnderTest(bitcode->getModule()->getFunction("replace_call"),
                                       bitcode.get());
   functionUnderTest.selectInstructions({});
