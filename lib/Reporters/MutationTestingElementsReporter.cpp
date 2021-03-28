@@ -4,6 +4,7 @@
 #include "mull/Mutant.h"
 #include "mull/MutationResult.h"
 #include "mull/Mutators/Mutator.h"
+#include "mull/Mutators/MutatorsFactory.h"
 #include "mull/Reporters/ASTSourceInfoProvider.h"
 #include "mull/Reporters/SourceManager.h"
 #include "mull/Result.h"
@@ -45,6 +46,9 @@ static json11::Json createFiles(Diagnostics &diagnostics, const Result &result,
     mutationPointsPerFile[sourceLocation.filePath].push_back(mutant.get());
   }
 
+  MutatorsFactory factory(diagnostics);
+  factory.init();
+
   // Step 2: Iterate through each file and dump the information about each
   // mutation points to its file's JSON entry.
   for (auto &fileMutationPoints : mutationPointsPerFile) {
@@ -60,8 +64,7 @@ static json11::Json createFiles(Diagnostics &diagnostics, const Result &result,
     Json::array mutantsEntries;
 
     for (Mutant *mutant : fileMutationPoints.second) {
-      MutationPointSourceInfo sourceInfo =
-          sourceInfoProvider.getSourceInfo(diagnostics, mutant->getMutationPoints().front());
+      MutationPointSourceInfo sourceInfo = sourceInfoProvider.getSourceInfo(mutant);
 
       std::string status("Survived");
       if (killedMutants.count(mutant) != 0) {
@@ -70,10 +73,12 @@ static json11::Json createFiles(Diagnostics &diagnostics, const Result &result,
         status = "NoCoverage";
       }
 
+      auto mutator = factory.getMutator(mutant->getMutatorIdentifier());
+
       Json mpJson =
           Json::object{ { "id", mutant->getMutatorIdentifier() },
-                        { "mutatorName", mutant->getDiagnostics() },
-                        { "replacement", mutant->getReplacement() },
+                        { "mutatorName", mutator->getDiagnostics() },
+                        { "replacement", mutator->getReplacement() },
                         { "location",
                           Json::object{ { "start",
                                           Json::object{ { "line", sourceInfo.beginLine },
@@ -119,7 +124,7 @@ MutationTestingElementsReporter::MutationTestingElementsReporter(
 }
 
 void MutationTestingElementsReporter::reportResults(const Result &result) {
-  if (result.getMutationPoints().empty()) {
+  if (result.getMutants().empty()) {
     diagnostics.info("No mutants found. Mutation score: infinitely high");
     return;
   }
@@ -138,7 +143,7 @@ void MutationTestingElementsReporter::reportResults(const Result &result) {
     }
   }
 
-  auto rawScore = double(killedMutants.size()) / double(result.getMutationPoints().size());
+  auto rawScore = double(killedMutants.size()) / double(result.getMutants().size());
   auto score = uint(rawScore * 100);
 
   Json json = Json::object{

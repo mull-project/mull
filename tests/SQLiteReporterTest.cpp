@@ -69,7 +69,11 @@ TEST(SQLiteReporter, integrationTest) {
   mutatedTestExecutionResult.stdoutOutput = "mutatedTestExecutionResult.STDOUT";
   mutatedTestExecutionResult.stderrOutput = "mutatedTestExecutionResult.STDERR";
 
-  auto mutant = std::make_unique<Mutant>(mutationPoint->getUserIdentifier(), mutationPoints);
+  auto anyPoint = mutationPoints.front();
+  auto mutant = std::make_unique<Mutant>(mutationPoint->getUserIdentifier(),
+                                         anyPoint->getMutatorIdentifier(),
+                                         anyPoint->getSourceLocation(),
+                                         anyPoint->isCovered());
   auto mutationResult = std::make_unique<MutationResult>(mutatedTestExecutionResult, mutant.get());
 
   std::vector<std::unique_ptr<Mutant>> mutants;
@@ -80,7 +84,7 @@ TEST(SQLiteReporter, integrationTest) {
 
   MetricsMeasure resultTime;
 
-  Result result(std::move(mutants), std::move(mutationResults), mutationPoints);
+  Result result(std::move(mutants), std::move(mutationResults));
 
   /// STEP2. Reporting results to SQLite
   SQLiteReporter reporter(diagnostics, "integration test", "");

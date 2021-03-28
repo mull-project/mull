@@ -104,6 +104,8 @@ public:
   std::string getUniqueIdentifier() override;
   std::string getUniqueIdentifier() const override;
   std::string getDescription() const override;
+  std::string getDiagnostics() const override;
+  std::string getReplacement() const override;
   MutatorKind mutatorKind() override;
 
   void applyMutation(llvm::Function *function, const MutationPointAddress &address,

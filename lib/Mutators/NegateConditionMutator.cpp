@@ -3,7 +3,6 @@
 #include "mull/MutationPoint.h"
 #include <cassert>
 #include <irm/irm.h>
-#include <sstream>
 
 using namespace llvm;
 using namespace mull;
@@ -26,35 +25,6 @@ NegateConditionMutator::NegateConditionMutator() : lowLevelMutators() {
   lowLevelMutators.push_back(std::make_unique<irm::FCMP_UNEToFCMP_UEQ>());
 }
 
-static std::string describePredicate(CmpInst::Predicate predicate) {
-  switch (predicate) {
-
-  case CmpInst::FCMP_OEQ:
-  case CmpInst::FCMP_UEQ:
-  case CmpInst::ICMP_EQ:
-    return "==";
-
-  case CmpInst::FCMP_ONE:
-  case CmpInst::FCMP_UNE:
-  case CmpInst::ICMP_NE:
-    return "!=";
-
-  default:
-    return "TODO";
-  }
-}
-
-static std::string getDiagnostics(CmpInst::Predicate originalPredicate,
-                                  CmpInst::Predicate negatedPredicate) {
-  std::stringstream diagnostics;
-  diagnostics << "Negate Condition: replaced ";
-  diagnostics << describePredicate(originalPredicate);
-  diagnostics << " with ";
-  diagnostics << describePredicate(negatedPredicate);
-
-  return diagnostics.str();
-}
-
 void NegateConditionMutator::applyMutation(llvm::Function *function,
                                            const MutationPointAddress &address,
                                            irm::IRMutation *lowLevelMutation) {
@@ -70,18 +40,9 @@ NegateConditionMutator::getMutations(Bitcode *bitcode, const FunctionUnderTest &
   std::vector<MutationPoint *> mutations;
 
   for (llvm::Instruction *instruction : function.getSelectedInstructions()) {
-
     for (auto &mutator : lowLevelMutators) {
       if (mutator->canMutate(instruction)) {
-
-        auto cmpMutator = reinterpret_cast<irm::_CmpInstPredicateReplacementBase *>(mutator.get());
-
-        std::string diagnostics = getDiagnostics(cmpMutator->_getFrom(), cmpMutator->_getTo());
-
-        std::string replacement = describePredicate(cmpMutator->_getTo());
-
-        auto point =
-            new MutationPoint(this, mutator.get(), instruction, replacement, bitcode, diagnostics);
+        auto point = new MutationPoint(this, mutator.get(), instruction, bitcode);
         mutations.push_back(point);
       }
     }

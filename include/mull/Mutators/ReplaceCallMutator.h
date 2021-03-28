@@ -29,6 +29,12 @@ public:
   std::string getDescription() const override {
     return description();
   }
+  std::string getDiagnostics() const override {
+    return "Replaced call to a function with 42";
+  }
+  std::string getReplacement() const override {
+    return "42";
+  }
   MutatorKind mutatorKind() override {
     return MutatorKind::ReplaceCallMutator;
   }

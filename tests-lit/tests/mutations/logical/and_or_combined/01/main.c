@@ -89,29 +89,29 @@ int main() {
 // RUN: cd %CURRENT_DIR
 // RUN: unset TERM; %MULL_EXEC -linker=%clang_cc -mutators=cxx_logical_or_to_and -mutators=cxx_logical_and_to_or -ide-reporter-show-killed -reporters=IDE %s.exe | %FILECHECK_EXEC %s --dump-input=fail
 // CHECK:[info] Killed mutants (4/8):
-// CHECK:{{.*}}main.c:6:23: warning: Killed: OR-AND Replacement [cxx_logical_or_to_and]
+// CHECK:{{.*}}main.c:6:23: warning: Killed: Replaced || with && [cxx_logical_or_to_and]
 // CHECK:  if (a < b && (b < c || a < c)) {
 // CHECK:                      ^
-// CHECK:{{.*}}main.c:16:11: warning: Killed: AND-OR Replacement [cxx_logical_and_to_or]
+// CHECK:{{.*}}main.c:16:11: warning: Killed: Replaced && with || [cxx_logical_and_to_or]
 // CHECK:  if ((!A && B) && C) {
 // CHECK:          ^
-// CHECK:{{.*}}main.c:27:13: warning: Killed: OR-AND Replacement [cxx_logical_or_to_and]
+// CHECK:{{.*}}main.c:27:13: warning: Killed: Replaced || with && [cxx_logical_or_to_and]
 // CHECK:  if (a < b || (b < c && a < c)) {
 // CHECK:            ^
-// CHECK:{{.*}}main.c:37:11: warning: Killed: OR-AND Replacement [cxx_logical_or_to_and]
+// CHECK:{{.*}}main.c:37:11: warning: Killed: Replaced || with && [cxx_logical_or_to_and]
 // CHECK:  if ((!A || B) || C) {
 // CHECK:          ^
 // CHECK:[info] Survived mutants (4/8):
-// CHECK:{{.*}}main.c:6:13: warning: Survived: AND-OR Replacement [cxx_logical_and_to_or]
+// CHECK:{{.*}}main.c:6:13: warning: Survived: Replaced && with || [cxx_logical_and_to_or]
 // CHECK:  if (a < b && (b < c || a < c)) {
 // CHECK:            ^
-// CHECK:{{.*}}main.c:16:17: warning: Survived: AND-OR Replacement [cxx_logical_and_to_or]
+// CHECK:{{.*}}main.c:16:17: warning: Survived: Replaced && with || [cxx_logical_and_to_or]
 // CHECK:  if ((!A && B) && C) {
 // CHECK:                ^
-// CHECK:{{.*}}main.c:27:23: warning: Survived: AND-OR Replacement [cxx_logical_and_to_or]
+// CHECK:{{.*}}main.c:27:23: warning: Survived: Replaced && with || [cxx_logical_and_to_or]
 // CHECK:  if (a < b || (b < c && a < c)) {
 // CHECK:                      ^
-// CHECK:{{.*}}main.c:37:17: warning: Survived: OR-AND Replacement [cxx_logical_or_to_and]
+// CHECK:{{.*}}main.c:37:17: warning: Survived: Replaced || with && [cxx_logical_or_to_and]
 // CHECK:  if ((!A || B) || C) {
 // CHECK:                ^
 // CHECK:[info] Mutation score: 50%

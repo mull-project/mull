@@ -1,6 +1,7 @@
 #include "mull/IDEDiagnostics.h"
 
 #include "mull/MutationPoint.h"
+#include "mull/Mutators/Mutator.h"
 
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/Instruction.h>
@@ -22,7 +23,7 @@ void NormalIDEDiagnostics::report(mull::MutationPoint *mutationPoint, bool kille
     return;
   }
 
-  const std::string &message = mutationPoint->getDiagnostics();
+  const std::string &message = mutationPoint->getMutator()->getDiagnostics();
   if (message.empty()) {
     return;
   }

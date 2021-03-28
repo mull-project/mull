@@ -83,13 +83,13 @@ int main() {
 // RUN: cd %CURRENT_DIR
 // RUN: unset TERM; %MULL_EXEC -linker=%clang_cxx -linker-flags="-lc++" -disable-junk-detection -mutators=cxx_logical_or_to_and -ide-reporter-show-killed -reporters=IDE %s.exe | %FILECHECK_EXEC %s --dump-input=fail
 // CHECK:[info] Killed mutants (3/3):
-// CHECK:{{.*}}main.cpp:11:51: warning: Killed: OR-AND Replacement [cxx_logical_or_to_and]
+// CHECK:{{.*}}main.cpp:11:51: warning: Killed: Replaced || with && [cxx_logical_or_to_and]
 // CHECK:  if ((string1.find("STR1") != std::string::npos) || (string2.find("STR1") != std::string::npos)) {
 // CHECK:                                                  ^
-// CHECK:{{.*}}main.cpp:26:51: warning: Killed: OR-AND Replacement [cxx_logical_or_to_and]
+// CHECK:{{.*}}main.cpp:26:51: warning: Killed: Replaced || with && [cxx_logical_or_to_and]
 // CHECK:  if ((string1.find("STR1") != std::string::npos) || (string2.find("STR1") != std::string::npos)) {
 // CHECK:                                                  ^
-// CHECK:{{.*}}main.cpp:43:3: warning: Killed: OR-AND Replacement [cxx_logical_or_to_and]
+// CHECK:{{.*}}main.cpp:43:3: warning: Killed: Replaced || with && [cxx_logical_or_to_and]
 // CHECK:  assert((string1.find("STR1") != std::string::npos) ||
 // CHECK:  ^
 // CHECK:[info] All mutations have been killed

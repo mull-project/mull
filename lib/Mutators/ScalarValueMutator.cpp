@@ -37,11 +37,7 @@ std::vector<MutationPoint *> ScalarValueMutator::getMutations(Bitcode *bitcode,
   for (llvm::Instruction *instruction : function.getSelectedInstructions()) {
     for (auto &mutator : lowLevelMutators) {
       if (mutator->canMutate(instruction)) {
-        std::string diagnostics = "Replacing scalar with 0 or 42";
-        std::string replacement = "0 or 42";
-
-        auto point =
-            new MutationPoint(this, mutator.get(), instruction, replacement, bitcode, diagnostics);
+        auto point = new MutationPoint(this, mutator.get(), instruction, bitcode);
         mutations.push_back(point);
       }
     }

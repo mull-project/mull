@@ -36,8 +36,7 @@ class MockASTSourceInfoProvider : public SourceInfoProvider {
 public:
   virtual ~MockASTSourceInfoProvider() = default;
 
-  MutationPointSourceInfo getSourceInfo(Diagnostics &diagnostics,
-                                        MutationPoint *mutationPoint) override {
+  MutationPointSourceInfo getSourceInfo(Mutant *mutant) override {
     MutationPointSourceInfo info;
     info.beginColumn = beginColumnStub;
     info.beginLine = beginLineStub;
@@ -96,7 +95,11 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   mutatedTestExecutionResult.stdoutOutput = "mutatedTestExecutionResult.STDOUT";
   mutatedTestExecutionResult.stderrOutput = "mutatedTestExecutionResult.STDERR";
 
-  auto mutant = std::make_unique<Mutant>(mutationPoint->getUserIdentifier(), mutationPoints);
+  auto anyPoint = mutationPoints.front();
+  auto mutant = std::make_unique<Mutant>(mutationPoint->getUserIdentifier(),
+                                         anyPoint->getMutatorIdentifier(),
+                                         anyPoint->getSourceLocation(),
+                                         anyPoint->isCovered());
   auto mutationResult = std::make_unique<MutationResult>(mutatedTestExecutionResult, mutant.get());
 
   std::vector<std::unique_ptr<Mutant>> mutants;
@@ -107,7 +110,7 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
 
   MetricsMeasure resultTime;
 
-  Result result(std::move(mutants), std::move(mutationResults), mutationPoints);
+  Result result(std::move(mutants), std::move(mutationResults));
 
   /// STEP2. Reporting results to JSON
   MockASTSourceInfoProvider sourceInfoProvider;

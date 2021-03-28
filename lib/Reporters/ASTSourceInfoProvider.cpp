@@ -3,32 +3,30 @@
 #include "mull/AST/ASTMutationStorage.h"
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/JunkDetection/CXX/ASTStorage.h"
-#include "mull/MutationPoint.h"
+#include "mull/Mutant.h"
+#include "mull/SourceLocation.h"
 
 #include <clang/AST/Expr.h>
 #include <clang/Lex/Lexer.h>
 
 using namespace mull;
 
-ASTSourceInfoProvider::ASTSourceInfoProvider(ASTStorage &astStorage) : astStorage(astStorage) {}
+ASTSourceInfoProvider::ASTSourceInfoProvider(Diagnostics &diagnostics, ASTStorage &astStorage)
+    : diagnostics(diagnostics), astStorage(astStorage) {}
 
-MutationPointSourceInfo ASTSourceInfoProvider::getSourceInfo(Diagnostics &diagnostics,
-                                                             MutationPoint *mutationPoint) {
+MutationPointSourceInfo ASTSourceInfoProvider::getSourceInfo(Mutant *mutant) {
   MutationPointSourceInfo info = MutationPointSourceInfo();
   clang::SourceRange sourceRange;
 
-  const SourceLocation &sourceLocation = mutationPoint->getSourceLocation();
+  const SourceLocation &sourceLocation = mutant->getSourceLocation();
   const std::string &sourceFile = sourceLocation.unitFilePath;
 
-  const ASTMutation &astMutation =
-      astStorage.getMutation(sourceFile,
-                             mutationPoint->getMutator()->mutatorKind(),
-                             sourceLocation.line,
-                             sourceLocation.column);
+  const ASTMutation &astMutation = astStorage.getMutation(
+      sourceFile, mutant->getMutatorKind(), sourceLocation.line, sourceLocation.column);
 
   const clang::Stmt *const mutantASTNode = astMutation.stmt;
 
-  ThreadSafeASTUnit *astUnit = astStorage.findAST(mutationPoint);
+  ThreadSafeASTUnit *astUnit = astStorage.findAST(mutant->getSourceLocation());
 
   if (mutantASTNode == nullptr) {
     diagnostics.warning("Cannot find an AST node for mutation point");

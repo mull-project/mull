@@ -30,7 +30,7 @@ CHECK:[info] Applying filter: junk (threads: 1)
 CHECK:[debug] ASTMutationStorage: recording mutation "Logical Or to And": {{.*}}sample.cpp:2:9
 
 CHECK:[info] Killed mutants (1/1):
-CHECK:{{^.*}}sample.cpp:2:9: warning: Killed: OR-AND Replacement [cxx_logical_or_to_and]{{$}}
+CHECK:{{^.*}}sample.cpp:2:9: warning: Killed: Replaced || with && [cxx_logical_or_to_and]{{$}}
 CHECK:  if (a || b) {
 CHECK:        ^
 CHECK:[info] Mutation score: 100%

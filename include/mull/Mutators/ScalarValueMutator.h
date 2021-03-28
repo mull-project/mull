@@ -34,6 +34,12 @@ public:
   std::string getDescription() const override {
     return description();
   }
+  std::string getDiagnostics() const override {
+    return "Replaced scalar with 0 or 42";
+  }
+  std::string getReplacement() const override {
+    return "0 or 42";
+  }
   MutatorKind mutatorKind() override { return MutatorKind::ScalarValueMutator; }
 
   void applyMutation(llvm::Function *function,

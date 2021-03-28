@@ -55,16 +55,15 @@ private:
   std::vector<FunctionUnderTest> filterFunctions(std::vector<FunctionUnderTest> functions);
   void selectInstructions(std::vector<FunctionUnderTest> &functions);
 
-  std::vector<std::unique_ptr<MutationResult>>
-  runMutations(std::vector<MutationPoint *> &mutationPoints,
-               std::vector<std::unique_ptr<Mutant>> &mutants);
+  void prepareMutations(std::vector<MutationPoint *> mutationPoints);
 
   std::vector<std::unique_ptr<MutationResult>>
-  dryRunMutations(const std::vector<MutationPoint *> &mutationPoints,
-                  std::vector<std::unique_ptr<Mutant>> &mutants);
+  runMutations(std::vector<std::unique_ptr<Mutant>> &mutants);
+
   std::vector<std::unique_ptr<MutationResult>>
-  normalRunMutations(const std::vector<MutationPoint *> &mutationPoints,
-                     std::vector<std::unique_ptr<Mutant>> &mutants);
+  dryRunMutations(std::vector<std::unique_ptr<Mutant>> &mutants);
+  std::vector<std::unique_ptr<MutationResult>>
+  normalRunMutations(std::vector<std::unique_ptr<Mutant>> &mutants);
 
   std::vector<FunctionUnderTest> getFunctionsUnderTest();
 };

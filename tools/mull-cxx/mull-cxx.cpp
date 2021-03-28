@@ -181,7 +181,7 @@ int main(int argc, char **argv) {
   mull::ASTStorage astStorage(
       diagnostics, cxxCompilationDatabasePath, cxxCompilationFlags, bitcodeCompilationFlags);
 
-  mull::ASTSourceInfoProvider sourceInfoProvider(astStorage);
+  mull::ASTSourceInfoProvider sourceInfoProvider(diagnostics, astStorage);
   tool::ReporterParameters params{ .reporterName = tool::ReportName.getValue(),
                                    .reporterDirectory = tool::ReportDirectory.getValue(),
                                    .sourceInfoProvider = sourceInfoProvider,
