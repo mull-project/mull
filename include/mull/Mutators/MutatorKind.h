@@ -8,6 +8,8 @@
 namespace mull {
 
 enum class MutatorKind {
+  InvalidKind,
+
   NegateMutator,
   RemoveVoidFunctionMutator,
   ReplaceCallMutator,

@@ -10,21 +10,19 @@ struct MutationPointSourceInfo {
 };
 
 class ASTStorage;
-class MutationPoint;
+class Mutant;
 class Diagnostics;
 
 class SourceInfoProvider {
 public:
-  virtual MutationPointSourceInfo getSourceInfo(Diagnostics &diagnostics,
-                                                MutationPoint *mutationPoint) = 0;
+  virtual MutationPointSourceInfo getSourceInfo(Diagnostics &diagnostics, Mutant *mutant) = 0;
 };
 
 class ASTSourceInfoProvider : public SourceInfoProvider {
 public:
   ~ASTSourceInfoProvider() = default;
   explicit ASTSourceInfoProvider(ASTStorage &astStorage);
-  MutationPointSourceInfo getSourceInfo(Diagnostics &diagnostics,
-                                        MutationPoint *mutationPoint) override;
+  MutationPointSourceInfo getSourceInfo(Diagnostics &diagnostics, Mutant *mutant) override;
 
 private:
   ASTStorage &astStorage;

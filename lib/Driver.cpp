@@ -44,6 +44,7 @@ std::unique_ptr<Result> Driver::run() {
     }
     for (auto &pair : mapping) {
       mutants.push_back(std::make_unique<Mutant>(pair.first, pair.second));
+      mutants.back()->setMutatorKind(pair.second.front()->getMutator()->mutatorKind());
     }
     std::sort(std::begin(mutants), std::end(mutants), MutantComparator());
   });

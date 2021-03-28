@@ -62,10 +62,8 @@ bool ThreadSafeASTUnit::isInSystemHeader(clang::SourceLocation &location) {
   return ast->getSourceManager().isInSystemHeader(location);
 }
 
-const clang::FileEntry *ThreadSafeASTUnit::findFileEntry(const MutationPoint *point) {
-  assert(point);
-
-  SourceLocation sourceLocation = point->getSourceLocation();
+const clang::FileEntry *
+ThreadSafeASTUnit::findFileEntry(const mull::SourceLocation &sourceLocation) {
   assert(!sourceLocation.isNull() && "Missing debug information?");
 
   const clang::FileEntry *file = findFileEntry(sourceLocation.filePath);
@@ -92,17 +90,15 @@ const clang::FileEntry *ThreadSafeASTUnit::findFileEntry(const std::string &file
   return file;
 }
 
-clang::SourceLocation ThreadSafeASTUnit::getLocation(MutationPoint *point) {
-  auto file = findFileEntry(point);
+clang::SourceLocation ThreadSafeASTUnit::getLocation(const mull::SourceLocation &sourceLocation) {
+  auto file = findFileEntry(sourceLocation);
   assert(file);
   assert(file->isValid());
-
-  auto mutantLocation = point->getSourceLocation();
-  assert(!mutantLocation.isNull());
+  assert(!sourceLocation.isNull());
 
   /// getLocation from the ASTUnit it not thread safe
   std::lock_guard<std::mutex> lock(mutex);
-  auto location = ast->getLocation(file, mutantLocation.line, mutantLocation.column);
+  auto location = ast->getLocation(file, sourceLocation.line, sourceLocation.column);
   assert(location.isValid());
   return location;
 }
@@ -179,17 +175,14 @@ ASTStorage::ASTStorage(Diagnostics &diagnostics, const std::string &cxxCompilati
           diagnostics, cxxCompilationDatabasePath, cxxCompilationFlags, bitcodeCompilationFlags)),
       mutations(diagnostics) {}
 
-ThreadSafeASTUnit *ASTStorage::findAST(const MutationPoint *point) {
-  assert(point);
-  assert(!point->getSourceLocation().isNull() && "Missing debug information?");
-
-  const std::string &sourceFile = point->getSourceLocation().unitFilePath;
+ThreadSafeASTUnit *ASTStorage::findAST(const mull::SourceLocation &sourceLocation) {
+  const std::string &sourceFile = sourceLocation.unitFilePath;
   if (llvm::sys::fs::exists(sourceFile)) {
     return findAST(sourceFile);
   }
 
   if (sourceFile == "/in-memory-file.cc") {
-    const std::string &unitSourceFile = point->getSourceLocation().filePath;
+    const std::string &unitSourceFile = sourceLocation.filePath;
     return findAST(unitSourceFile);
   }
 

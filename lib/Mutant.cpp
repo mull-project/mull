@@ -6,7 +6,7 @@ using namespace mull;
 
 Mutant::Mutant(std::string identifier, std::vector<MutationPoint *> points)
     : identifier(std::move(identifier)), mutatorIdentifier(points.front()->getMutatorIdentifier()),
-      points(std::move(points)) {}
+      points(std::move(points)), mutatorKind(MutatorKind::InvalidKind) {}
 
 const std::string &Mutant::getIdentifier() const {
   return identifier;
@@ -40,6 +40,14 @@ bool Mutant::isCovered() const {
     }
   }
   return false;
+}
+
+void Mutant::setMutatorKind(MutatorKind kind) {
+  mutatorKind = kind;
+}
+
+MutatorKind Mutant::getMutatorKind() const {
+  return mutatorKind;
 }
 
 bool MutantComparator::operator()(std::unique_ptr<Mutant> &lhs, std::unique_ptr<Mutant> &rhs) {

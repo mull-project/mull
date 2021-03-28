@@ -2,6 +2,7 @@
 
 #include "mull/AST/ASTMutationStorage.h"
 #include "mull/JunkDetection/CXX/CompilationDatabase.h"
+#include "mull/SourceLocation.h"
 
 #include <clang/Frontend/ASTUnit.h>
 
@@ -23,7 +24,7 @@ public:
   clang::SourceManager &getSourceManager();
   clang::ASTContext &getASTContext();
 
-  clang::SourceLocation getLocation(MutationPoint *point);
+  clang::SourceLocation getLocation(const mull::SourceLocation &sourceLocation);
   bool isInSystemHeader(clang::SourceLocation &location);
 
   clang::Decl *getDecl(clang::SourceLocation &location);
@@ -31,7 +32,7 @@ public:
 private:
   void recordDeclarations();
 
-  const clang::FileEntry *findFileEntry(const MutationPoint *point);
+  const clang::FileEntry *findFileEntry(const mull::SourceLocation &sourceLocation);
   const clang::FileEntry *findFileEntry(const std::string &filePath);
 
   std::unique_ptr<clang::ASTUnit> ast;
@@ -45,7 +46,7 @@ public:
              const std::string &cxxCompilationFlags,
              const std::map<std::string, std::string> &bitcodeCompilationFlags);
 
-  ThreadSafeASTUnit *findAST(const MutationPoint *point);
+  ThreadSafeASTUnit *findAST(const mull::SourceLocation &sourceLocation);
   ThreadSafeASTUnit *findAST(const std::string &sourceFile);
 
   void setAST(const std::string &sourceFile, std::unique_ptr<ThreadSafeASTUnit> astUnit);

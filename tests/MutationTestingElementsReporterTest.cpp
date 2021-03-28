@@ -36,8 +36,7 @@ class MockASTSourceInfoProvider : public SourceInfoProvider {
 public:
   virtual ~MockASTSourceInfoProvider() = default;
 
-  MutationPointSourceInfo getSourceInfo(Diagnostics &diagnostics,
-                                        MutationPoint *mutationPoint) override {
+  MutationPointSourceInfo getSourceInfo(Diagnostics &diagnostics, Mutant *mutant) override {
     MutationPointSourceInfo info;
     info.beginColumn = beginColumnStub;
     info.beginLine = beginLineStub;
