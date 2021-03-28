@@ -331,7 +331,7 @@ std::vector<MutationPoint *> LogicalOrToAnd::getMutations(Bitcode *bitcode,
       continue;
     }
 
-    auto point = new MutationPoint(this, nullptr, &instruction, "&&", bitcode);
+    auto point = new MutationPoint(this, nullptr, &instruction, bitcode);
     mutations.push_back(point);
   }
 

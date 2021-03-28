@@ -29,6 +29,10 @@ std::string TrivialCXXMutator::getDiagnostics() const {
   return diagnostics;
 }
 
+std::string TrivialCXXMutator::getReplacement() const {
+  return replacement;
+}
+
 MutatorKind TrivialCXXMutator::mutatorKind() {
   return kind;
 }
@@ -48,7 +52,7 @@ std::vector<MutationPoint *> TrivialCXXMutator::getMutations(Bitcode *bitcode,
   for (llvm::Instruction *instruction : function.getSelectedInstructions()) {
     for (auto &mutator : lowLevelMutators) {
       if (mutator->canMutate(instruction)) {
-        auto point = new MutationPoint(this, mutator.get(), instruction, replacement, bitcode);
+        auto point = new MutationPoint(this, mutator.get(), instruction, bitcode);
         mutations.push_back(point);
       }
     }

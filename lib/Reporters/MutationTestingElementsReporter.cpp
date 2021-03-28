@@ -78,7 +78,7 @@ static json11::Json createFiles(Diagnostics &diagnostics, const Result &result,
       Json mpJson =
           Json::object{ { "id", mutant->getMutatorIdentifier() },
                         { "mutatorName", mutator->getDiagnostics() },
-                        { "replacement", mutant->getReplacement() },
+                        { "replacement", mutator->getReplacement() },
                         { "location",
                           Json::object{ { "start",
                                           Json::object{ { "line", sourceInfo.beginLine },

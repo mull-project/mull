@@ -36,9 +36,7 @@ RemoveVoidFunctionMutator::getMutations(Bitcode *bitcode, const FunctionUnderTes
   for (llvm::Instruction *instruction : function.getSelectedInstructions()) {
     for (auto &mutator : lowLevelMutators) {
       if (mutator->canMutate(instruction)) {
-        std::string replacement = "🚫";
-
-        auto point = new MutationPoint(this, mutator.get(), instruction, replacement, bitcode);
+        auto point = new MutationPoint(this, mutator.get(), instruction, bitcode);
         mutations.push_back(point);
       }
     }

@@ -18,7 +18,6 @@ public:
 
   const std::string &getIdentifier() const;
   const SourceLocation &getSourceLocation() const;
-  const std::string &getReplacement() const;
   const std::string &getMutatorIdentifier() const;
   bool isCovered() const;
 

@@ -231,6 +231,10 @@ std::string UnaryMinusToNoop::getDiagnostics() const {
   return "Replaced -x with x";
 }
 
+std::string UnaryMinusToNoop::getReplacement() const {
+  return "";
+}
+
 MutatorKind UnaryMinusToNoop::mutatorKind() {
   return MutatorKind::CXX_UnaryMinusToNoop;
 }
@@ -263,7 +267,7 @@ std::vector<MutationPoint *> UnaryMinusToNoop::getMutations(Bitcode *bitcode,
       if (mutator->canMutate(instruction)) {
         if (!instruction->isBinaryOp() ||
             (instruction->isBinaryOp() && isZero(instruction->getOperand(0)))) {
-          auto point = new MutationPoint(this, mutator.get(), instruction, "", bitcode);
+          auto point = new MutationPoint(this, mutator.get(), instruction, bitcode);
           mutations.push_back(point);
         }
       }

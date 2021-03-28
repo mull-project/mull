@@ -59,7 +59,6 @@ class MutationPoint {
   Bitcode *bitcode;
   llvm::Function *originalFunction;
   llvm::Function *mutatedFunction;
-  std::string replacement;
   const SourceLocation sourceLocation;
   irm::IRMutation *irMutator;
   std::string userIdentifier;
@@ -67,7 +66,7 @@ class MutationPoint {
 
 public:
   MutationPoint(Mutator *mutator, irm::IRMutation *irMutator, llvm::Instruction *instruction,
-                std::string replacement, Bitcode *m);
+                Bitcode *m);
 
   ~MutationPoint() = default;
 
@@ -92,8 +91,6 @@ public:
   void applyMutation();
 
   std::string getMutatorIdentifier() const;
-
-  const std::string &getReplacement();
 
   std::string getMutatedFunctionName();
   std::string getOriginalFunctionName() const;

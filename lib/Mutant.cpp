@@ -23,10 +23,6 @@ const std::string &Mutant::getMutatorIdentifier() const {
   return mutatorIdentifier;
 }
 
-const std::string &Mutant::getReplacement() const {
-  return points.front()->getReplacement();
-}
-
 bool Mutant::isCovered() const {
   for (MutationPoint *point : points) {
     /// Consider a mutant covered if at least one of the mutation points is covered

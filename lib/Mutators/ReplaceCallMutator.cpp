@@ -38,9 +38,7 @@ std::vector<MutationPoint *> ReplaceCallMutator::getMutations(Bitcode *bitcode,
   for (llvm::Instruction *instruction : function.getSelectedInstructions()) {
     for (auto &mutator : lowLevelMutators) {
       if (mutator->canMutate(instruction)) {
-        std::string replacement = "42";
-
-        auto point = new MutationPoint(this, mutator.get(), instruction, replacement, bitcode);
+        auto point = new MutationPoint(this, mutator.get(), instruction, bitcode);
         mutations.push_back(point);
       }
     }

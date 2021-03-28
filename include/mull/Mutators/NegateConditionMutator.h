@@ -37,6 +37,9 @@ public:
   std::string getDiagnostics() const override {
     return "Negated !x to x (or x to !x)";
   }
+  std::string getReplacement() const override {
+    return "x or !x";
+  }
 
   void applyMutation(llvm::Function *function,
                      const MutationPointAddress &address,

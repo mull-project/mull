@@ -326,7 +326,7 @@ std::vector<MutationPoint *> LogicalAndToOr::getMutations(Bitcode *bitcode,
     if (mutationType == AND_OR_MutationType_None) {
       continue;
     }
-    auto point = new MutationPoint(this, nullptr, &instruction, "||", bitcode);
+    auto point = new MutationPoint(this, nullptr, &instruction, bitcode);
     mutations.push_back(point);
   }
 

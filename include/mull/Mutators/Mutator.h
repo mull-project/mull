@@ -32,6 +32,7 @@ public:
 
   virtual std::string getDescription() const = 0;
   virtual std::string getDiagnostics() const = 0;
+  virtual std::string getReplacement() const = 0;
 
   virtual void applyMutation(llvm::Function *function, const MutationPointAddress &address,
                              irm::IRMutation *lowLevelMutation) = 0;

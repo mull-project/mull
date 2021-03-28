@@ -40,6 +40,9 @@ public:
   std::string getDiagnostics() const override {
     return "Removed the call to the function";
   }
+  std::string getReplacement() const override {
+    return "";
+  }
 
   void applyMutation(llvm::Function *function,
                      const MutationPointAddress &address,
