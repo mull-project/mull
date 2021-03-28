@@ -60,7 +60,7 @@ static json11::Json createFiles(Diagnostics &diagnostics, const Result &result,
     Json::array mutantsEntries;
 
     for (Mutant *mutant : fileMutationPoints.second) {
-      MutationPointSourceInfo sourceInfo = sourceInfoProvider.getSourceInfo(diagnostics, mutant);
+      MutationPointSourceInfo sourceInfo = sourceInfoProvider.getSourceInfo(mutant);
 
       std::string status("Survived");
       if (killedMutants.count(mutant) != 0) {

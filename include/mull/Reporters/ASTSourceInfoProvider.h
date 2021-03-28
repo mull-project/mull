@@ -15,16 +15,17 @@ class Diagnostics;
 
 class SourceInfoProvider {
 public:
-  virtual MutationPointSourceInfo getSourceInfo(Diagnostics &diagnostics, Mutant *mutant) = 0;
+  virtual MutationPointSourceInfo getSourceInfo(Mutant *mutant) = 0;
 };
 
 class ASTSourceInfoProvider : public SourceInfoProvider {
 public:
+  ASTSourceInfoProvider(Diagnostics &diagnostics, ASTStorage &astStorage);
   ~ASTSourceInfoProvider() = default;
-  explicit ASTSourceInfoProvider(ASTStorage &astStorage);
-  MutationPointSourceInfo getSourceInfo(Diagnostics &diagnostics, Mutant *mutant) override;
+  MutationPointSourceInfo getSourceInfo(Mutant *mutant) override;
 
 private:
+  Diagnostics &diagnostics;
   ASTStorage &astStorage;
 };
 

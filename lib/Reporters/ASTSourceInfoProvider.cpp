@@ -11,10 +11,10 @@
 
 using namespace mull;
 
-ASTSourceInfoProvider::ASTSourceInfoProvider(ASTStorage &astStorage) : astStorage(astStorage) {}
+ASTSourceInfoProvider::ASTSourceInfoProvider(Diagnostics &diagnostics, ASTStorage &astStorage)
+    : diagnostics(diagnostics), astStorage(astStorage) {}
 
-MutationPointSourceInfo ASTSourceInfoProvider::getSourceInfo(Diagnostics &diagnostics,
-                                                             Mutant *mutant) {
+MutationPointSourceInfo ASTSourceInfoProvider::getSourceInfo(Mutant *mutant) {
   MutationPointSourceInfo info = MutationPointSourceInfo();
   clang::SourceRange sourceRange;
 
