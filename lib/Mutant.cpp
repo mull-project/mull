@@ -1,19 +1,22 @@
 #include "mull/Mutant.h"
+
 #include "mull/MutationPoint.h"
 #include "mull/SourceLocation.h"
+#include <utility>
 
 using namespace mull;
 
-Mutant::Mutant(std::string identifier, std::vector<MutationPoint *> points)
-    : identifier(std::move(identifier)), mutatorIdentifier(points.front()->getMutatorIdentifier()),
-      points(std::move(points)), mutatorKind(MutatorKind::InvalidKind) {}
+Mutant::Mutant(std::string identifier, std::string mutatorIdentifier,
+               const SourceLocation &sourceLocation)
+    : identifier(std::move(identifier)), mutatorIdentifier(std::move(mutatorIdentifier)),
+      sourceLocation(sourceLocation), mutatorKind(MutatorKind::InvalidKind) {}
 
 const std::string &Mutant::getIdentifier() const {
   return identifier;
 }
 
 const SourceLocation &Mutant::getSourceLocation() const {
-  return points.front()->getSourceLocation();
+  return sourceLocation;
 }
 
 const std::string &Mutant::getDiagnostics() const {
@@ -36,6 +39,10 @@ bool Mutant::isCovered() const {
     }
   }
   return false;
+}
+
+void Mutant::setMutationPoints(std::vector<MutationPoint *> points) {
+  this->points = points;
 }
 
 void Mutant::setMutatorKind(MutatorKind kind) {

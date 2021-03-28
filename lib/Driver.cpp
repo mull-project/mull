@@ -43,8 +43,13 @@ std::unique_ptr<Result> Driver::run() {
       mapping[point->getUserIdentifier()].push_back(point);
     }
     for (auto &pair : mapping) {
-      mutants.push_back(std::make_unique<Mutant>(pair.first, pair.second));
-      mutants.back()->setMutatorKind(pair.second.front()->getMutator()->mutatorKind());
+      std::string identifier = pair.first;
+      MutationPoint *anyPoint = pair.second.front();
+      std::string mutatorIdentifier = anyPoint->getMutatorIdentifier();
+      const SourceLocation &sourceLocation = anyPoint->getSourceLocation();
+      mutants.push_back(std::make_unique<Mutant>(identifier, mutatorIdentifier, sourceLocation));
+      mutants.back()->setMutatorKind(anyPoint->getMutator()->mutatorKind());
+      mutants.back()->setMutationPoints(pair.second);
     }
     std::sort(std::begin(mutants), std::end(mutants), MutantComparator());
   });
