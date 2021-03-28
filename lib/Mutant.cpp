@@ -19,10 +19,6 @@ const SourceLocation &Mutant::getSourceLocation() const {
   return sourceLocation;
 }
 
-const std::string &Mutant::getDiagnostics() const {
-  return points.front()->getDiagnostics();
-}
-
 const std::string &Mutant::getMutatorIdentifier() const {
   return mutatorIdentifier;
 }

@@ -18,7 +18,7 @@ RUN: cd / && %CLANG_EXEC -fembed-bitcode -g -DFLAG=1 %s -o %s.exe
 RUN: cd %CURRENT_DIR
 RUN: (unset TERM; %MULL_EXEC -linker=%clang_cxx -disable-junk-detection -mutators=cxx_add_to_sub -mutators=remove_void_function_mutator -reporters=IDE -ide-reporter-show-killed %s.exe 2>&1; test $? = 0) | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITHOUT-RECORD-COMMAND-LINE
 WITHOUT-RECORD-COMMAND-LINE-NOT:Found compilation flags in the input bitcode
-WITHOUT-RECORD-COMMAND-LINE:{{^.*}}sample.cpp:5:13: warning: Survived: Remove Void Call: removed llvm.dbg.declare [remove_void_function_mutator]{{$}}
+WITHOUT-RECORD-COMMAND-LINE:{{^.*}}sample.cpp:5:13: warning: Survived: Removed the call to the function [remove_void_function_mutator]{{$}}
 
 RUN: cd / && %CLANG_EXEC -fembed-bitcode -g -DFLAG=1 -grecord-command-line %s -o %s.exe
 RUN: cd %CURRENT_DIR

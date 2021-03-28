@@ -36,19 +36,9 @@ RemoveVoidFunctionMutator::getMutations(Bitcode *bitcode, const FunctionUnderTes
   for (llvm::Instruction *instruction : function.getSelectedInstructions()) {
     for (auto &mutator : lowLevelMutators) {
       if (mutator->canMutate(instruction)) {
-        auto *callSite = llvm::dyn_cast<llvm::CallInst>(instruction);
-
-        std::stringstream diagstream;
-        diagstream << "Remove Void Call: removed ";
-        if (callSite->getCalledFunction()->hasName()) {
-          diagstream << callSite->getCalledFunction()->getName().str();
-        }
-        std::string diagnostics = diagstream.str();
-
         std::string replacement = "🚫";
 
-        auto point =
-            new MutationPoint(this, mutator.get(), instruction, replacement, bitcode, diagnostics);
+        auto point = new MutationPoint(this, mutator.get(), instruction, replacement, bitcode);
         mutations.push_back(point);
       }
     }

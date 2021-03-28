@@ -28,7 +28,7 @@ CHECK:[info] Applying filter: junk (threads: 1)
 CHECK:[debug] ASTMutationStorage: recording mutation "Scalar Value": {{.*}}sample.cpp:4:12
 
 CHECK:[info] Killed mutants (1/1):
-CHECK:{{^.*}}sample.cpp:4:12: warning: Killed: Replacing scalar with 0 or 42 [scalar_value_mutator]{{$}}
+CHECK:{{^.*}}sample.cpp:4:12: warning: Killed: Replaced scalar with 0 or 42 [scalar_value_mutator]{{$}}
 CHECK:  return a + 5;
 CHECK:           ^
 CHECK:[info] Mutation score: 100%

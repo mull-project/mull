@@ -32,7 +32,7 @@ CHECK:[info] Applying filter: junk (threads: 1)
 CHECK:[debug] ASTMutationStorage: recording mutation "Remove Void": {{.*}}sample.cpp:7:3
 
 CHECK:[info] Killed mutants (1/1):
-CHECK:{{^.*}}sample.cpp:7:3: warning: Killed: Remove Void Call: removed _Z12voidFunctionv [remove_void_function_mutator]{{$}}
+CHECK:{{^.*}}sample.cpp:7:3: warning: Killed: Removed the call to the function [remove_void_function_mutator]{{$}}
 CHECK:  voidFunction();
 CHECK:  ^
 CHECK:[info] Mutation score: 100%

@@ -22,7 +22,7 @@ int main() {
 // RUN: cd %CURRENT_DIR
 // RUN: unset TERM; %MULL_EXEC -linker=%clang_cc -mutators=remove_void_function_mutator -ide-reporter-show-killed -reporters=IDE %s.exe | %FILECHECK_EXEC %s --dump-input=fail
 // CHECK:[info] Killed mutants (1/1):
-// CHECK:{{.*}}8:3: warning: Killed: Remove Void Call: removed void_function [remove_void_function_mutator]
+// CHECK:{{.*}}8:3: warning: Killed: Removed the call to the function [remove_void_function_mutator]
 // CHECK:  void_function();
 // CHECK:  ^
 // CHECK: [info] All mutations have been killed

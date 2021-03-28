@@ -236,6 +236,10 @@ void MutatorsFactory::init() {
   addMutator<cxx::GreaterThanToGreaterOrEqual>(mutatorsMapping);
 }
 
+Mutator *MutatorsFactory::getMutator(const string &mutatorId) {
+  return mutatorsMapping[mutatorId].get();
+}
+
 vector<unique_ptr<Mutator>> MutatorsFactory::mutators(const vector<string> &groups) {
   /// We need to recreate all mutators in case this method called
   /// more than once. It does not happen during normal program execution,

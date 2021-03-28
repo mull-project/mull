@@ -51,6 +51,9 @@ public:
   std::string getDescription() const override {
     return description();
   }
+  std::string getDiagnostics() const override {
+    return "Replaced && with ||";
+  }
   MutatorKind mutatorKind() override {
     return MutatorKind::CXX_Logical_AndToOr;
   }

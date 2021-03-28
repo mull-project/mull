@@ -30,7 +30,7 @@ CHECK:[info] Applying filter: junk (threads: 1)
 CHECK:[debug] ASTMutationStorage: recording mutation "Replace Call": {{.*}}sample.cpp:6:10
 
 CHECK:[info] Killed mutants (1/1):
-CHECK:{{^.*}}sample.cpp:6:10: warning: Killed: Replace Call: replaced a call to function _Z6calleev with 42 [replace_call_mutator]{{$}}
+CHECK:{{^.*}}sample.cpp:6:10: warning: Killed: Replaced call to a function with 42 [replace_call_mutator]{{$}}
 CHECK:  return callee();
 CHECK:         ^
 CHECK:[info] Mutation score: 100%

@@ -38,19 +38,9 @@ std::vector<MutationPoint *> ReplaceCallMutator::getMutations(Bitcode *bitcode,
   for (llvm::Instruction *instruction : function.getSelectedInstructions()) {
     for (auto &mutator : lowLevelMutators) {
       if (mutator->canMutate(instruction)) {
-        auto *callSite = llvm::dyn_cast<llvm::CallInst>(instruction);
-
-        std::stringstream diagnostics;
-        diagnostics << "Replace Call: replaced a call to function ";
-        if (callSite->getCalledFunction()->hasName()) {
-          diagnostics << callSite->getCalledFunction()->getName().str();
-        }
-        diagnostics << " with 42";
-
         std::string replacement = "42";
 
-        auto point = new MutationPoint(
-            this, mutator.get(), instruction, replacement, bitcode, diagnostics.str());
+        auto point = new MutationPoint(this, mutator.get(), instruction, replacement, bitcode);
         mutations.push_back(point);
       }
     }

@@ -4,6 +4,7 @@
 #include "mull/Mutant.h"
 #include "mull/MutationResult.h"
 #include "mull/Mutators/Mutator.h"
+#include "mull/Mutators/MutatorsFactory.h"
 #include "mull/Reporters/ASTSourceInfoProvider.h"
 #include "mull/Reporters/SourceManager.h"
 #include "mull/Result.h"
@@ -45,6 +46,9 @@ static json11::Json createFiles(Diagnostics &diagnostics, const Result &result,
     mutationPointsPerFile[sourceLocation.filePath].push_back(mutant.get());
   }
 
+  MutatorsFactory factory(diagnostics);
+  factory.init();
+
   // Step 2: Iterate through each file and dump the information about each
   // mutation points to its file's JSON entry.
   for (auto &fileMutationPoints : mutationPointsPerFile) {
@@ -69,9 +73,11 @@ static json11::Json createFiles(Diagnostics &diagnostics, const Result &result,
         status = "NoCoverage";
       }
 
+      auto mutator = factory.getMutator(mutant->getMutatorIdentifier());
+
       Json mpJson =
           Json::object{ { "id", mutant->getMutatorIdentifier() },
-                        { "mutatorName", mutant->getDiagnostics() },
+                        { "mutatorName", mutator->getDiagnostics() },
                         { "replacement", mutant->getReplacement() },
                         { "location",
                           Json::object{ { "start",

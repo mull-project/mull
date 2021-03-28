@@ -18,7 +18,6 @@ class MutationPointAddress;
 class FunctionUnderTest;
 
 class NegateConditionMutator : public Mutator {
-
 public:
   static std::string ID();
   static std::string description();
@@ -34,6 +33,9 @@ public:
   }
   std::string getDescription() const override {
     return description();
+  }
+  std::string getDiagnostics() const override {
+    return "Negated !x to x (or x to !x)";
   }
 
   void applyMutation(llvm::Function *function,

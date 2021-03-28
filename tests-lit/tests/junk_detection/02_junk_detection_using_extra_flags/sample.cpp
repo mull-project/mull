@@ -19,7 +19,7 @@ RUN: %MULL_EXEC -linker=%clang_cxx -disable-junk-detection -mutators=cxx_add_to_
 RUN: %MULL_EXEC -linker=%clang_cxx -mutators=cxx_add_to_sub -mutators=remove_void_function_mutator -reporters=IDE -ide-reporter-show-killed -compilation-flags '-DWRONG_FLAG=1' %s.exe 2>&1 | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-JUNK-DETECTION-NO-FLAG
 RUN: %MULL_EXEC -linker=%clang_cxx -mutators=cxx_add_to_sub -mutators=remove_void_function_mutator -reporters=IDE -ide-reporter-show-killed -compilation-flags '-DFLAG=1' %s.exe 2>&1 | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-JUNK-DETECTION-WITH-FLAG
 
-WITHOUT-JUNK-DETECTION:{{^.*}}sample.cpp:5:13: warning: Survived: Remove Void Call: removed llvm.dbg.declare [remove_void_function_mutator]{{$}}
+WITHOUT-JUNK-DETECTION:{{^.*}}sample.cpp:5:13: warning: Survived: Removed the call to the function [remove_void_function_mutator]{{$}}
 
 WITH-JUNK-DETECTION-NO-FLAG:{{^.*}}sample.cpp:2:2: error: "FLAG is not defined"
 WITH-JUNK-DETECTION-NO-FLAG:#error "FLAG is not defined"

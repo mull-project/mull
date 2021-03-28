@@ -37,18 +37,16 @@ std::string PostIncToPostDec::ID() {
 }
 
 PostIncToPostDec::PostIncToPostDec()
-    : TrivialCXXMutator(getAddToSub(), MutatorKind::CXX_PostIncToPostDec,
-                        PostIncToPostDec::ID(), "Replaces x++ with x--", "--",
-                        "Replaced x++ with x--") {}
+    : TrivialCXXMutator(getAddToSub(), MutatorKind::CXX_PostIncToPostDec, PostIncToPostDec::ID(),
+                        "Replaces x++ with x--", "--", "Replaced x++ with x--") {}
 
 std::string PreIncToPreDec::ID() {
   return "cxx_pre_inc_to_pre_dec";
 }
 
 PreIncToPreDec::PreIncToPreDec()
-    : TrivialCXXMutator(getAddToSub(), MutatorKind::CXX_PreIncToPreDec,
-                        PreIncToPreDec::ID(), "Replaces ++x with --x", "--",
-                        "Replaced ++x with --x") {}
+    : TrivialCXXMutator(getAddToSub(), MutatorKind::CXX_PreIncToPreDec, PreIncToPreDec::ID(),
+                        "Replaces ++x with --x", "--", "Replaced ++x with --x") {}
 
 #pragma mark - Sub to add
 
@@ -99,18 +97,16 @@ std::string PostDecToPostInc::ID() {
 }
 
 PostDecToPostInc::PostDecToPostInc()
-    : TrivialCXXMutator(getDecToInc(), MutatorKind::CXX_PostDecToPostInc,
-                        PostDecToPostInc::ID(), "Replaces x-- with x++", "++",
-                        "Replaced x-- with x++") {}
+    : TrivialCXXMutator(getDecToInc(), MutatorKind::CXX_PostDecToPostInc, PostDecToPostInc::ID(),
+                        "Replaces x-- with x++", "++", "Replaced x-- with x++") {}
 
 std::string PreDecToPreInc::ID() {
   return "cxx_pre_dec_to_pre_inc";
 }
 
 PreDecToPreInc::PreDecToPreInc()
-    : TrivialCXXMutator(getDecToInc(), MutatorKind::CXX_PreDecToPreInc,
-                        PreDecToPreInc::ID(), "Replaces --x with ++x", "++",
-                        "Replaced --x with ++x") {}
+    : TrivialCXXMutator(getDecToInc(), MutatorKind::CXX_PreDecToPreInc, PreDecToPreInc::ID(),
+                        "Replaces --x with ++x", "++", "Replaced --x with ++x") {}
 
 #pragma mark - Mul to div
 
@@ -231,6 +227,10 @@ std::string UnaryMinusToNoop::getDescription() const {
   return "Replaces -x with x";
 }
 
+std::string UnaryMinusToNoop::getDiagnostics() const {
+  return "Replaced -x with x";
+}
+
 MutatorKind UnaryMinusToNoop::mutatorKind() {
   return MutatorKind::CXX_UnaryMinusToNoop;
 }
@@ -263,8 +263,7 @@ std::vector<MutationPoint *> UnaryMinusToNoop::getMutations(Bitcode *bitcode,
       if (mutator->canMutate(instruction)) {
         if (!instruction->isBinaryOp() ||
             (instruction->isBinaryOp() && isZero(instruction->getOperand(0)))) {
-          auto point = new MutationPoint(
-              this, mutator.get(), instruction, "", bitcode, "Replaced -x with x");
+          auto point = new MutationPoint(this, mutator.get(), instruction, "", bitcode);
           mutations.push_back(point);
         }
       }

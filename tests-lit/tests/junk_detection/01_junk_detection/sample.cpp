@@ -16,7 +16,7 @@ RUN: %MULL_EXEC -linker=%clang_cxx -workers=1 -disable-junk-detection -mutators=
 RUN: %MULL_EXEC -linker=%clang_cxx -workers=1 -mutators=cxx_add_to_sub -mutators=remove_void_function_mutator -reporters=IDE -ide-reporter-show-killed -compdb-path %S/compile_commands.json %s.exe | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-JUNK-DETECTION
 
 WITHOUT-JUNK-DETECTION:{{^.*}}[info] Running mutants (threads: 1){{$}}
-WITHOUT-JUNK-DETECTION:{{^.*}}sample.cpp:1:13: warning: Survived: Remove Void Call: removed llvm.dbg.declare [remove_void_function_mutator]{{$}}
+WITHOUT-JUNK-DETECTION:{{^.*}}sample.cpp:1:13: warning: Survived: Removed the call to the function [remove_void_function_mutator]{{$}}
 WITHOUT-JUNK-DETECTION-NOT:[info] Mutation score: 100%
 
 WITH-JUNK-DETECTION:{{^.*}}[info] Running mutants (threads: 1){{$}}
