@@ -129,14 +129,14 @@ list<MutatorsOptionIndex> tool::Mutators(
 
 list<std::string> tool::ExcludePaths(
   "exclude-path",
-  desc("File/directory paths to ignore (supports regex)"),
+  desc("File/directory paths to ignore (supports regex, equivalent to \"grep -E\")"),
   ZeroOrMore,
   value_desc("regex"),
   cat(MullCXXCategory));
 
 list<std::string> tool::IncludePaths(
   "include-path",
-  desc("File/directory paths to whitelist (supports regex)"),
+  desc("File/directory paths to whitelist (supports regex, equivalent to \"grep -E\")"),
   ZeroOrMore,
   value_desc("regex"),
   cat(MullCXXCategory));
@@ -158,16 +158,16 @@ opt<bool> tool::KeepExecutable(
 
 opt<std::string> tool::GitDiffRef(
     "git-diff-ref",
-    desc("Git branch to run diff against (enables incremental testing)"),
+    desc("Git branch, commit, or tag to run diff against (enables incremental testing)"),
     Optional,
-    value_desc("git commit"),
+    value_desc("ref"),
     cat(MullCXXCategory));
 
 opt<std::string> tool::GitProjectRoot(
     "git-project-root",
     desc("Path to project's Git root (used together with -git-diff-ref)"),
     Optional,
-    value_desc("git project root"),
+    value_desc("path"),
     cat(MullCXXCategory));
 
 opt<bool> tool::IncludeNotCovered(

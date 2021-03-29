@@ -52,20 +52,20 @@
 
 --include-not-covered		Include (but do not run) not covered mutants. Disabled by default
 
---include-path regex		File/directory paths to whitelist (supports regex)
+--include-path regex		File/directory paths to whitelist (supports regex, equivalent to "grep -E")
 
---exclude-path regex		File/directory paths to ignore (supports regex)
+--exclude-path regex		File/directory paths to ignore (supports regex, equivalent to "grep -E")
 
---git-diff-ref git commit		Git branch to run diff against (enables incremental testing)
+--git-diff-ref ref		Git branch, commit, or tag to run diff against (enables incremental testing)
 
---git-project-root git project root		Path to project's Git root (used together with -git-diff-ref)
+--git-project-root path		Path to project's Git root (used together with -git-diff-ref)
 
 --mutators mutator		Choose mutators:
 
     Groups:
       :all:	cxx_all, experimental
 
-      :cxx_all:	cxx_assignment, cxx_increment, cxx_decrement, cxx_arithmetic, cxx_comparison, cxx_boundary, cxx_bitwise
+      :cxx_all:	cxx_assignment, cxx_increment, cxx_decrement, cxx_arithmetic, cxx_comparison, cxx_boundary, cxx_bitwise, cxx_calls
 
       :cxx_arithmetic:	cxx_minus_to_noop, cxx_add_to_sub, cxx_sub_to_add, cxx_mul_to_div, cxx_div_to_mul, cxx_rem_to_div
 
@@ -79,6 +79,8 @@
 
       :cxx_boundary:	cxx_le_to_lt, cxx_lt_to_le, cxx_ge_to_gt, cxx_gt_to_ge
 
+      :cxx_calls:	cxx_remove_void_call, cxx_replace_scalar_call
+
       :cxx_comparison:	cxx_eq_to_ne, cxx_ne_to_eq, cxx_le_to_gt, cxx_lt_to_ge, cxx_ge_to_lt, cxx_gt_to_le
 
       :cxx_const_assignment:	cxx_assign_const, cxx_init_const
@@ -91,7 +93,7 @@
 
       :cxx_logical:	cxx_logical_and_to_or, cxx_logical_or_to_and, cxx_remove_negation
 
-      :experimental:	negate_mutator, remove_void_function_mutator, scalar_value_mutator, replace_call_mutator, cxx_logical
+      :experimental:	negate_mutator, scalar_value_mutator, cxx_logical
 
     Single mutators:
       :cxx_add_assign_to_sub_assign:	Replaces += with -=
@@ -164,6 +166,10 @@
 
       :cxx_remove_negation:	Replaces !a with a
 
+      :cxx_remove_void_call:	Removes calls to a function returning void
+
+      :cxx_replace_scalar_call:	Replaces call to a function with 42
+
       :cxx_rshift_assign_to_lshift_assign:	Replaces >>= with <<=
 
       :cxx_rshift_to_lshift:	Replaces << with >>
@@ -177,10 +183,6 @@
       :cxx_xor_to_or:	Replaces ^ with |
 
       :negate_mutator:	Negates conditionals !x to x and x to !x
-
-      :remove_void_function_mutator:	Removes calls to a function returning void
-
-      :replace_call_mutator:	Replaces call to a function with 42
 
       :scalar_value_mutator:	Replaces zeros with 42, and non-zeros with 0
 
