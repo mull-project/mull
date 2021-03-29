@@ -61,9 +61,9 @@ bool FilePathFilter::shouldSkip(const std::string &sourceFilePath) const {
 std::string FilePathFilter::name() { return "file path"; }
 
 void FilePathFilter::exclude(const std::string &filter) {
-  excludeFilters.push_back(std::regex(filter, std::regex::grep));
+  excludeFilters.emplace_back(filter, std::regex::egrep);
 }
 
 void FilePathFilter::include(const std::string &filter) {
-  includeFilters.push_back(std::regex(filter, std::regex::grep));
+  includeFilters.emplace_back(filter, std::regex::egrep);
 }
