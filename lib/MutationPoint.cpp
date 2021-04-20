@@ -6,6 +6,7 @@
 #include "mull/Reporters/SourceManager.h"
 #include "mull/Toolchain/Compiler.h"
 
+#include <llvm/IR/Constants.h>
 #include <llvm/IR/Function.h>
 #include <llvm/Transforms/Utils/Cloning.h>
 
@@ -121,6 +122,21 @@ Bitcode *MutationPoint::getBitcode() const {
 void MutationPoint::applyMutation() {
   assert(mutatedFunction != nullptr);
   mutator->applyMutation(mutatedFunction, address, irMutator);
+}
+
+void MutationPoint::recordMutation() {
+  assert(originalFunction != nullptr);
+  llvm::Module *module = originalFunction->getParent();
+  std::string encoding = getUserIdentifier() + ':' + std::to_string(isCovered());
+  llvm::Constant *constant =
+      llvm::ConstantDataArray::getString(module->getContext(), llvm::StringRef(encoding));
+  auto *global = new llvm::GlobalVariable(
+      *module, constant->getType(), true, llvm::GlobalVariable::InternalLinkage, constant);
+#if defined __APPLE__
+  global->setSection("__mull,.mull_mutants");
+#else
+  global->setSection(".mull_mutants");
+#endif
 }
 
 std::string MutationPoint::getMutatorIdentifier() const {

@@ -59,6 +59,11 @@ ExecutionResult Runner::runProgram(const std::string &program,
     auto outputs = drainProcess(process, true);
     errorMessage << "stdout: " << outputs.first << '\n';
     errorMessage << "stderr: " << outputs.second << '\n';
+    errorMessage << "command: ";
+    for (auto &arg : allArguments) {
+      errorMessage << arg << " ";
+    }
+    errorMessage << '\n';
     diagnostics.error(errorMessage.str());
   }
 

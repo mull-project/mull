@@ -81,7 +81,8 @@ int main() {
 
 // RUN: cd / && %clang_cxx %TEST_CXX_FLAGS -fembed-bitcode -g -O0 %s -o %s.exe
 // RUN: cd %CURRENT_DIR
-// RUN: unset TERM; %MULL_EXEC -linker=%clang_cxx -linker-flags="-lc++" -disable-junk-detection -mutators=cxx_logical_or_to_and -ide-reporter-show-killed -reporters=IDE %s.exe | %FILECHECK_EXEC %s --dump-input=fail
+// RUN: unset TERM; %MULL_EXEC -keep-executable -output=%s.mutated.exe -linker=%clang_cxx -linker-flags="-lc++" -disable-junk-detection -mutators=cxx_logical_or_to_and -ide-reporter-show-killed -reporters=IDE %s.exe | %FILECHECK_EXEC %s --dump-input=fail
+// RUN: unset TERM; %mull_runner -ide-reporter-show-killed -reporters=IDE %s.mutated.exe | %FILECHECK_EXEC %s --dump-input=fail
 // CHECK:[info] Killed mutants (3/3):
 // CHECK:{{.*}}main.cpp:11:51: warning: Killed: Replaced || with && [cxx_logical_or_to_and]
 // CHECK:  if ((string1.find("STR1") != std::string::npos) || (string2.find("STR1") != std::string::npos)) {

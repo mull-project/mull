@@ -161,9 +161,11 @@ void Driver::selectInstructions(std::vector<FunctionUnderTest> &functions) {
 std::vector<std::unique_ptr<MutationResult>>
 Driver::runMutations(std::vector<std::unique_ptr<Mutant>> &mutants) {
   if (mutants.empty()) {
+    if (config.keepExecutable && !config.outputFile.empty()) {
+      llvm::sys::fs::copy_file(config.executable, config.outputFile);
+    }
     return std::vector<std::unique_ptr<MutationResult>>();
   }
-
   if (config.dryRunEnabled) {
     return dryRunMutations(mutants);
   }
