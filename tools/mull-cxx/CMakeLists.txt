@@ -1,6 +1,6 @@
 set (SOURCES
   ${CMAKE_CURRENT_LIST_DIR}/mull-cxx.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/CLIOptions.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/../CLIOptions/CLIOptions.cpp
 )
 
 if ("LLVM" IN_LIST LLVM_AVAILABLE_LIBS)
@@ -18,3 +18,4 @@ add_mull_executable(
   SOURCES ${SOURCES}
   LINK_WITH ebc mull ${MULL_CXX_LLVM_LIBRARIES} json11
 )
+target_include_directories(mull-cxx PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../CLIOptions)

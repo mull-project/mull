@@ -2,10 +2,9 @@
 #include <ebc/BitcodeRetriever.h>
 #include <ebc/EmbeddedFile.h>
 
-#include <llvm/Support/Path.h>
 #include <llvm/Support/TargetSelect.h>
 
-#include "CLIOptions.h"
+#include "mull-cxx-cli.h"
 #include "mull/AST/ASTFinder.h"
 #include "mull/AST/ASTMutationFilter.h"
 #include "mull/BitcodeMetadataReader.h"
@@ -53,7 +52,7 @@ int main(int argc, char **argv) {
   tool::MutatorsCLIOptions mutatorsOptions(diagnostics, tool::Mutators);
   tool::ReportersCLIOptions reportersOption(diagnostics, tool::ReportersOption);
 
-  llvm::cl::HideUnrelatedOptions(tool::MullCXXCategory);
+  llvm::cl::HideUnrelatedOptions(tool::MullCategory);
   bool validOptions = llvm::cl::ParseCommandLineOptions(argc, argv, "", &llvm::errs());
   if (!validOptions) {
     if (tool::DumpCLIInterface) {
@@ -185,8 +184,8 @@ int main(int argc, char **argv) {
   tool::ReporterParameters params{ .reporterName = tool::ReportName.getValue(),
                                    .reporterDirectory = tool::ReportDirectory.getValue(),
                                    .sourceInfoProvider = sourceInfoProvider,
-                                   .compilationDatabaseAvailable =
-                                       compilationDatabaseInfoAvailable };
+                                   .compilationDatabaseAvailable = compilationDatabaseInfoAvailable,
+                                   .IDEReporterShowKilled = tool::IDEReporterShowKilled };
   std::vector<std::unique_ptr<mull::Reporter>> reporters = reportersOption.reporters(params);
 
   mull::CXXJunkDetector junkDetector(astStorage);

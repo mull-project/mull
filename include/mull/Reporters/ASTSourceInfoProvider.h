@@ -18,6 +18,13 @@ public:
   virtual MutationPointSourceInfo getSourceInfo(Mutant *mutant) = 0;
 };
 
+class NullSourceInfoProvider : public SourceInfoProvider {
+public:
+  MutationPointSourceInfo getSourceInfo(Mutant *mutant) override {
+    return {};
+  }
+};
+
 class ASTSourceInfoProvider : public SourceInfoProvider {
 public:
   ASTSourceInfoProvider(Diagnostics &diagnostics, ASTStorage &astStorage);
