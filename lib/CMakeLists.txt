@@ -86,6 +86,7 @@ set(mull_sources
   Filters/GitDiffFilter.cpp
 
   JunkDetection/CXX/Visitors/ScalarValueVisitor.cpp
+  MutantRunner.cpp
 )
 
 set(MULL_INCLUDE_DIR ${MULL_SOURCE_DIR}/include/mull)
