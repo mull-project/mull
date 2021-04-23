@@ -88,6 +88,11 @@ int main(int argc, char **argv) {
 
   mull::Configuration configuration;
   configuration.dryRunEnabled = tool::DryRunOption.getValue();
+  if (tool::MutateOnly) {
+    diagnostics.info("Mutate-only mode on: Mull will generate mutants, but won't run them\n");
+    configuration.mutateOnly = true;
+    configuration.skipSanityCheckRun = true;
+  }
 
   configuration.linker = tool::Linker.getValue();
   configuration.linkerFlags = splitFlags(tool::LinkerFlags.getValue());
@@ -277,8 +282,10 @@ int main(int argc, char **argv) {
   mull::Driver driver(diagnostics, configuration, program, toolchain, filters, mutationsFinder);
   auto result = driver.run();
 
-  for (auto &reporter : reporters) {
-    reporter->reportResults(*result);
+  if (!configuration.mutateOnly) {
+    for (auto &reporter : reporters) {
+      reporter->reportResults(*result);
+    }
   }
 
   llvm::llvm_shutdown();

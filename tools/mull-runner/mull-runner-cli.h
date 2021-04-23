@@ -21,11 +21,15 @@ ReportName_();
 ReportDirectory_();
 IDEReporterShowKilled_();
 IncludeNotCovered_();
+RunnerArgs_();
+TestProgram_();
 
 void dumpCLIInterface(mull::Diagnostics &diagnostics) {
   // Enumerating CLI options explicitly to control the order and what to show
   Option *reporters = &(Option &)ReportersOption;
   std::vector<Option *> mullOptions({
+      &(Option &)TestProgram,
+
       &Workers,
       &Timeout,
 

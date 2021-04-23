@@ -39,6 +39,7 @@ GitProjectRoot_();
 EnableAST_();
 DisableJunkDetection_();
 IDEReporterShowKilled_();
+MutateOnly_();
 
 void dumpCLIInterface(Diagnostics &diagnostics) {
   // Enumerating CLI options explicitly to control the order and what to show
@@ -50,6 +51,7 @@ void dumpCLIInterface(Diagnostics &diagnostics) {
       &Workers,
       &Timeout,
       &DryRunOption,
+      &MutateOnly,
 
       &ReportName,
       &ReportDirectory,

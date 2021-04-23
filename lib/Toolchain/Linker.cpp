@@ -57,6 +57,5 @@ std::string Linker::linkObjectFiles(const std::vector<std::string> &objects) {
     diagnostics.error(message.str());
   }
   diagnostics.debug("Link command: "s + command);
-  diagnostics.info("Compiled executable: "s + outputFile);
   return outputFile;
 }

@@ -254,10 +254,15 @@ Driver::normalRunMutations(std::vector<std::unique_ptr<Mutant>> &mutants) {
   singleTask.execute("Link mutated program",
                      [&]() { executable = toolchain.linker().linkObjectFiles(objectFiles); });
 
+  diagnostics.info("Mutated executable: "s + executable);
   if (!config.keepObjectFiles) {
     for (auto &objectFile : objectFiles) {
       llvm::sys::fs::remove(objectFile);
     }
+  }
+
+  if (config.mutateOnly) {
+    return std::vector<std::unique_ptr<MutationResult>>();
   }
 
   MutantRunner mutantRunner(diagnostics, config);
