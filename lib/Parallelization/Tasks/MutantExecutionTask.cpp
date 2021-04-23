@@ -10,9 +10,10 @@ using namespace std::string_literals;
 
 MutantExecutionTask::MutantExecutionTask(const Configuration &configuration,
                                          Diagnostics &diagnostics, const std::string &executable,
-                                         ExecutionResult &baseline)
+                                         ExecutionResult &baseline,
+                                         const std::vector<std::string> &extraArgs)
     : configuration(configuration), diagnostics(diagnostics), executable(executable),
-      baseline(baseline) {}
+      baseline(baseline), extraArgs(extraArgs) {}
 
 void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
                                      progress_counter &counter) {
@@ -22,7 +23,7 @@ void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
     ExecutionResult result;
     if (mutant->isCovered()) {
       result = runner.runProgram(executable,
-                                 {},
+                                 extraArgs,
                                  { mutant->getIdentifier() },
                                  baseline.runningTime * 10,
                                  configuration.captureMutantOutput,

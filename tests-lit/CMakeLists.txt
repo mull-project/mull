@@ -5,6 +5,8 @@ set(CLANG_EXEC ${PATH_TO_LLVM}/bin/clang++)
 set(LIT_EXEC lit)
 set(FILECHECK_EXEC filecheck)
 
+find_package(Python3 COMPONENTS Interpreter)
+
 if(APPLE)
   execute_process(
     COMMAND xcrun -show-sdk-path
@@ -34,12 +36,12 @@ set(LIT_COMMAND
   clang_cc=${clang_cc}
   clang_cxx=${clang_cxx}
   llvm_profdata=${llvm_profdata}
+  python3=${Python3_EXECUTABLE}
   FILECHECK_EXEC=${FILECHECK_EXEC}
   TEST_CXX_FLAGS="${TEST_CXX_FLAGS}"
   ${LIT_EXEC}
   -vv
   ${CMAKE_CURRENT_SOURCE_DIR}/tests
-
   )
 
 add_custom_target(tests-lit

@@ -83,13 +83,22 @@ int main(int argc, char **argv) {
   std::vector<std::unique_ptr<mull::Reporter>> reporters = reportersOption.reporters(params);
 
   std::string executable = tool::InputFile.getValue();
+  std::string testProgram = executable;
+  if (!tool::TestProgram.empty()) {
+    testProgram = tool::TestProgram.getValue();
+  }
+
+  std::vector<std::string> extraArgs;
+  for (size_t argIndex = 0; argIndex < tool::RunnerArgs.getNumOccurrences(); argIndex++) {
+    extraArgs.push_back(tool::RunnerArgs[argIndex]);
+  }
 
   mull::MutantExtractor mutantExtractor(diagnostics);
   std::vector<std::unique_ptr<mull::Mutant>> mutants = mutantExtractor.extractMutants(executable);
 
   mull::MutantRunner mutantRunner(diagnostics, configuration);
   std::vector<std::unique_ptr<mull::MutationResult>> mutationResults =
-      mutantRunner.runMutants(executable, mutants);
+      mutantRunner.runMutants(testProgram, extraArgs, mutants);
 
   auto result = std::make_unique<mull::Result>(std::move(mutants), std::move(mutationResults));
   for (auto &reporter : reporters) {

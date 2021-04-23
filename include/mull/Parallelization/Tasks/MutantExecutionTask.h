@@ -16,7 +16,8 @@ public:
   using iterator = In::const_iterator;
 
   MutantExecutionTask(const Configuration &configuration, Diagnostics &diagnostics,
-                      const std::string &executable, ExecutionResult &baseline);
+                      const std::string &executable, ExecutionResult &baseline,
+                      const std::vector<std::string> &extraArgs);
 
   void operator()(iterator begin, iterator end, Out &storage, progress_counter &counter);
 
@@ -25,5 +26,6 @@ private:
   Diagnostics &diagnostics;
   const std::string &executable;
   ExecutionResult &baseline;
+  const std::vector<std::string> &extraArgs;
 };
 } // namespace mull

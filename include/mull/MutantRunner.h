@@ -15,6 +15,9 @@ public:
   MutantRunner(Diagnostics &diagnostics, const Configuration &configuration);
   std::vector<std::unique_ptr<MutationResult>>
   runMutants(const std::string &executable, std::vector<std::unique_ptr<Mutant>> &mutants);
+  std::vector<std::unique_ptr<MutationResult>>
+  runMutants(const std::string &executable, const std::vector<std::string> &extraArgs,
+             std::vector<std::unique_ptr<Mutant>> &mutants);
 
 private:
   Diagnostics &diagnostics;

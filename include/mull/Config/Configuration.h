@@ -19,6 +19,7 @@ struct Configuration {
   bool includeNotCovered;
   bool keepObjectFiles;
   bool keepExecutable;
+  bool mutateOnly;
 
   int timeout;
   unsigned linkerTimeout;

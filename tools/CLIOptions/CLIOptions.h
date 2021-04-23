@@ -11,13 +11,31 @@
 
 // clang-format off
 
+#define RunnerArgs_() \
+list<std::string> RunnerArgs( \
+    Positional, \
+    desc("free form arguments"), \
+    Optional, \
+    value_desc("strings"), \
+    ZeroOrMore, \
+    cat(MullCategory))
+
+#define TestProgram_() \
+opt<std::string> TestProgram( \
+    "test-program", \
+    desc("test program"), \
+    Optional, \
+    init(""), \
+    value_desc("path"), \
+    cat(MullCategory))
+
 #define InputFile_() \
 opt<std::string> InputFile( \
     Positional, \
     desc("<input file>"), \
     Required, \
     value_desc("path"), \
-    cat(MullCategory)) \
+    cat(MullCategory))
 
 #define OutputFile_() \
 opt<std::string> OutputFile( \
@@ -125,7 +143,15 @@ opt<std::string> CoverageInfo( \
 #define DryRunOption_() \
 opt<bool> DryRunOption( \
     "dry-run", \
-    desc("Skips real mutants execution. Disabled by default"), \
+    desc("Skips mutant execution and generation. Disabled by default"), \
+    Optional, \
+    init(false), \
+    cat(MullCategory))
+
+#define MutateOnly_() \
+opt<bool> MutateOnly( \
+    "mutate-only", \
+    desc("Skips mutant execution. Unlike -dry-run generates mutants. Disabled by default"), \
     Optional, \
     init(false), \
     cat(MullCategory))
