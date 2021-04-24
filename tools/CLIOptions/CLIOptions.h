@@ -23,7 +23,7 @@ list<std::string> RunnerArgs( \
 #define TestProgram_() \
 opt<std::string> TestProgram( \
     "test-program", \
-    desc("test program"), \
+    desc("Path to a test program"), \
     Optional, \
     init(""), \
     value_desc("path"), \
