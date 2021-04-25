@@ -26,3 +26,34 @@ exactly Mull whitelists or blacklists found source lines.
 **Note:** Incremental mutation testing is an experimental feature. Things might
 go wrong. If you encounter any issues, please report them on the
 `mull/issues <https://github.com/mull-project/mull/issues>`_ tracker.
+
+Typical use cases
+-----------------
+
+Under the hood, Mull runs ``git diff`` from a project's root folder. There
+are at least three reasonable options for using the ``-git-diff-ref`` argument:
+
+1. ``-git-diff-ref=origin/main``
+
+   Mull is run from a branch with a few commits against a main branch such as
+   ``main``, ``master`` or equivalent. This is what you get from your branch when you
+   simply do ``git diff origin/master``. This way you can also test your branch
+   if you have Mull running as part of your CI workflow.
+
+2. ``-git-diff-ref=.`` (unstaged), ``-git-diff-ref=HEAD`` (unstaged + staged)
+
+   Mull is run against a diff between the "unclean" tree state and your last
+   commit. This use case is useful when you want to check your work-in-progress
+   code with Mull before committing your changes.
+
+3. ``-git-diff-ref=COMMIT^!``
+
+   Mull is run against a diff of a specific commit (see also
+   `How can I see the changes in a Git commit? <https://stackoverflow.com/questions/17563726/how-can-i-see-the-changes-in-a-git-commit>`_
+   ). This option should be used with caution because Mull does not perform
+   a ``git checkout`` to switch to a given commit's state. Mull always stands
+   on top of the existing tree, so if a provided commit has already been
+   overridden by more recent commits, Mull will not produce the results for
+   that earlier commit which can result in a misleading information in the
+   mutation reports. Use this option only if you are sure that no newer commits
+   in your Git tree have touched the file(s) you are interested in.
