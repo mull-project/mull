@@ -60,6 +60,11 @@ public:
         clang::ImplicitCastExpr *implicitCastExpr = (clang::ImplicitCastExpr *)constImplicitCastExpr;
         implicitCastExpr->setSubExpr(conditionalExpr);
       }
+      else if (const clang::VarDecl *constVarDecl = p.get<clang::VarDecl>()) {
+        llvm::errs() << "Parent is VarDecl\n";
+        clang::VarDecl *varDecl = (clang::VarDecl *)constVarDecl;
+        varDecl->setInit(conditionalExpr);
+      }
       else {
         p.dump(llvm::errs(), context.getSourceManager());
         assert(0);

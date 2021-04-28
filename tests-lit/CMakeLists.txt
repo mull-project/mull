@@ -42,8 +42,8 @@ set(LIT_COMMAND
   TEST_CXX_FLAGS="${TEST_CXX_FLAGS}"
   ${LIT_EXEC}
   -vv
-  --filter cxx-frontend
-  # --filter 04-conditional
+  --filter cxx-front
+   --filter 05-var
   ${CMAKE_CURRENT_SOURCE_DIR}/tests
   )
 
