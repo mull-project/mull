@@ -43,6 +43,7 @@ set(LIT_COMMAND
   ${LIT_EXEC}
   -vv
   --filter cxx-frontend
+  # --filter 04-conditional
   ${CMAKE_CURRENT_SOURCE_DIR}/tests
   )
 

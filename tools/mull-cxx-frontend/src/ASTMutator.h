@@ -50,11 +50,17 @@ public:
         ifStmt->setCond(conditionalExpr);
       } else if (const clang::ConditionalOperator *constConditionalOperator =
                    p.get<clang::ConditionalOperator>()) {
+        llvm::errs() << "Parent is ConditionalOperator\n";
         clang::ConditionalOperator *conditionalOperator =
           (clang::ConditionalOperator *)constConditionalOperator;
         ((ConditionalOperatorNastyCast *)conditionalOperator)
           ->SubExprs[ConditionalOperatorNastyCast::COND] = conditionalExpr;
-      } else {
+      } else if (const clang::ImplicitCastExpr *constImplicitCastExpr = p.get<clang::ImplicitCastExpr>()) {
+        llvm::errs() << "Parent is ImplicitCastExpr\n";
+        clang::ImplicitCastExpr *implicitCastExpr = (clang::ImplicitCastExpr *)constImplicitCastExpr;
+        implicitCastExpr->setSubExpr(conditionalExpr);
+      }
+      else {
         p.dump(llvm::errs(), context.getSourceManager());
         assert(0);
       }
