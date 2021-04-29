@@ -104,10 +104,13 @@ public:
   bool HandleTopLevelDecl(DeclGroupRef DG) override {
     llvm::errs() << "BEGIN: HandleTopLevelDecl():\n";
 
-    //    llvm::errs() << "DUMP: HandleTopLevelDecl():\n";
-    //    cLinkageSpecDecl->dump();
-    //    ctx.getTranslationUnitDecl()->print(errs(), 2);
-    //    ctx.getTranslationUnitDecl()->dump(errs());
+    MutationsSearchVisitor visitor(Instance.getASTContext(), Instance.getSema(), getenvFuncDecl);
+    Instance.getASTContext().getDiagnostics();
+    auto translationUnitDecl = Instance.getASTContext().getTranslationUnitDecl();
+    if (!translationUnitDecl) {
+      printf("translationUnitDecl is nullptr\n");
+      exit(1);
+    }
 
     for (DeclGroupRef::iterator I = DG.begin(), E = DG.end(); I != E; ++I) {
       if ((*I)->getKind() != Decl::Function) {
@@ -120,14 +123,6 @@ public:
       }
 
       errs() << "Looking at function: " << f->getName() << "\n";
-
-      MutationsSearchVisitor visitor(Instance.getASTContext(), Instance.getSema(), getenvFuncDecl);
-      Instance.getASTContext().getDiagnostics();
-      auto translationUnitDecl = Instance.getASTContext().getTranslationUnitDecl();
-      if (!translationUnitDecl) {
-        printf("translationUnitDecl is nullptr\n");
-        exit(1);
-      }
       visitor.TraverseFunctionDecl(f);
     }
     errs() << "FINISHED: HandleTopLevelDecl\n";
