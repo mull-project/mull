@@ -21,9 +21,9 @@ bool ASTMutationsSearchVisitor::VisitBinaryOperator(clang::BinaryOperator *binar
   binaryOperator->dump();
 
   if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Add) {
-    astMutations.emplace_back(ASTMutation::ADD_TO_SUB, binaryOperator);
+    astMutations.emplace_back(mull::MutatorKind::CXX_AddToSub, binaryOperator);
   } else if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_LOr) {
-    astMutations.emplace_back(ASTMutation::OR_TO_AND, binaryOperator);
+    astMutations.emplace_back(mull::MutatorKind::CXX_Logical_OrToAnd, binaryOperator);
   }
 
   return true;

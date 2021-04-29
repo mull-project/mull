@@ -169,9 +169,9 @@ public:
       ExprResult exprResult = treeTransform->TransformBinaryOperator(oldBinaryOperator);
       clang::BinaryOperator *newBinaryOperator = (clang::BinaryOperator *)exprResult.get();
 
-      if (astMutation.mutationType == ASTMutation::ADD_TO_SUB) {
+      if (astMutation.mutationType == mull::MutatorKind::CXX_AddToSub) {
         newBinaryOperator->setOpcode(BinaryOperator::Opcode::BO_Sub);
-      } else if (astMutation.mutationType == ASTMutation::OR_TO_AND) {
+      } else if (astMutation.mutationType == mull::MutatorKind::CXX_Logical_OrToAnd) {
         newBinaryOperator->setOpcode(BinaryOperator::Opcode::BO_LAnd);
       } else {
         assert(0 && "Not implemented");

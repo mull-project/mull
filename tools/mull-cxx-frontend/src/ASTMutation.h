@@ -5,15 +5,15 @@
 #ifndef MULL_TOOLS_MULL_CXX_FRONTEND_SRC_ASTMUTATION_H
 #define MULL_TOOLS_MULL_CXX_FRONTEND_SRC_ASTMUTATION_H
 
-#include <clang/AST/AST.h>
+#include "mull/Mutators/MutatorKind.h"
+
+#include <clang/AST/Stmt.h>
 
 struct ASTMutation {
-  enum MutationType { ADD_TO_SUB = 0, OR_TO_AND };
-
-  MutationType mutationType;
+  mull::MutatorKind mutationType;
   clang::Stmt *mutableStmt;
 
-  ASTMutation(MutationType mutationType, clang::Stmt *toBeMutatedStmt)
+  ASTMutation(mull::MutatorKind mutationType, clang::Stmt *toBeMutatedStmt)
       : mutationType(mutationType), mutableStmt(toBeMutatedStmt) {}
 };
 
