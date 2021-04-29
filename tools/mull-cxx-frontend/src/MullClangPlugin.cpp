@@ -29,15 +29,13 @@ using namespace llvm;
 
 namespace {
 
-class SVisitor : public RecursiveASTVisitor<SVisitor> {
+class MutationsSearchVisitor : public RecursiveASTVisitor<MutationsSearchVisitor> {
   MullTreeTransform myTransform;
   ASTMutator astMutator;
 
 public:
-  SVisitor(ASTContext &context, Sema &sema, FunctionDecl *getenvFuncDecl)
-    : myTransform(sema),
-      astMutator(context, sema, getenvFuncDecl) {
-  }
+  MutationsSearchVisitor(ASTContext &context, Sema &sema, FunctionDecl *getenvFuncDecl)
+      : myTransform(sema), astMutator(context, sema, getenvFuncDecl) {}
 
   bool VisitDecl(Decl *D) {
     //    D->dump();
@@ -59,10 +57,8 @@ public:
     if (binaryOperator->getOpcode() == BinaryOperator::Opcode::BO_Add) {
       errs() << "Before Perform MUTATION:"
              << "\n";
-      ExprResult exprResult =
-        myTransform.TransformBinaryOperator(binaryOperator);
-      clang::BinaryOperator *newBinaryOperator =
-        (clang::BinaryOperator *)exprResult.get();
+      ExprResult exprResult = myTransform.TransformBinaryOperator(binaryOperator);
+      clang::BinaryOperator *newBinaryOperator = (clang::BinaryOperator *)exprResult.get();
       newBinaryOperator->setOpcode(BinaryOperator::Opcode::BO_Sub);
       astMutator.replaceStatement(binaryOperator, newBinaryOperator);
       errs() << "After Perform MUTATION:"
@@ -70,10 +66,8 @@ public:
     } else if (binaryOperator->getOpcode() == BinaryOperator::Opcode::BO_LOr) {
       errs() << "Before Perform MUTATION:"
              << "\n";
-      ExprResult exprResult =
-        myTransform.TransformBinaryOperator(binaryOperator);
-      clang::BinaryOperator *newBinaryOperator =
-        (clang::BinaryOperator *)exprResult.get();
+      ExprResult exprResult = myTransform.TransformBinaryOperator(binaryOperator);
+      clang::BinaryOperator *newBinaryOperator = (clang::BinaryOperator *)exprResult.get();
       newBinaryOperator->setOpcode(BinaryOperator::Opcode::BO_LAnd);
       astMutator.replaceStatement(binaryOperator, newBinaryOperator);
       errs() << "After Perform MUTATION:"
@@ -89,21 +83,19 @@ class MullASTConsumer : public ASTConsumer {
   FunctionDecl *getenvFuncDecl;
 
 public:
-  MullASTConsumer(CompilerInstance &Instance)
-    : Instance(Instance), getenvFuncDecl(nullptr) {
-  }
+  MullASTConsumer(CompilerInstance &Instance) : Instance(Instance), getenvFuncDecl(nullptr) {}
 
   void Initialize(ASTContext &Context) override {
     ASTConsumer::Initialize(Context);
 
     /// Create an external getenv() declaration.
     LinkageSpecDecl *cLinkageSpecDecl =
-      LinkageSpecDecl::Create(Context,
-                              Context.getTranslationUnitDecl(),
-                              SourceLocation(),
-                              SourceLocation(),
-                              LinkageSpecDecl::LanguageIDs::lang_c,
-                              true);
+        LinkageSpecDecl::Create(Context,
+                                Context.getTranslationUnitDecl(),
+                                SourceLocation(),
+                                SourceLocation(),
+                                LinkageSpecDecl::LanguageIDs::lang_c,
+                                true);
     this->getenvFuncDecl = createGetEnvFuncDecl(Context, cLinkageSpecDecl);
     cLinkageSpecDecl->addDecl(this->getenvFuncDecl);
     Context.getTranslationUnitDecl()->addDecl(cLinkageSpecDecl);
@@ -129,11 +121,9 @@ public:
 
       errs() << "Looking at function: " << f->getName() << "\n";
 
-      SVisitor visitor(
-        Instance.getASTContext(), Instance.getSema(), getenvFuncDecl);
+      MutationsSearchVisitor visitor(Instance.getASTContext(), Instance.getSema(), getenvFuncDecl);
       Instance.getASTContext().getDiagnostics();
-      auto translationUnitDecl =
-        Instance.getASTContext().getTranslationUnitDecl();
+      auto translationUnitDecl = Instance.getASTContext().getTranslationUnitDecl();
       if (!translationUnitDecl) {
         printf("translationUnitDecl is nullptr\n");
         exit(1);
@@ -148,51 +138,45 @@ public:
     llvm::errs() << "BEGIN: HandleTranslationUnit():\n";
 
     ReadOnlyVisitor readOnlyVisitor;
-    readOnlyVisitor.TraverseTranslationUnitDecl(
-      Instance.getASTContext().getTranslationUnitDecl());
+    readOnlyVisitor.TraverseTranslationUnitDecl(Instance.getASTContext().getTranslationUnitDecl());
 
     errs() << "FINISHED: HandleTranslationUnit\n";
   }
 
-  clang::FunctionDecl *createGetEnvFuncDecl(ASTContext &context,
-                                            clang::DeclContext *declContext) {
+  clang::FunctionDecl *createGetEnvFuncDecl(ASTContext &context, clang::DeclContext *declContext) {
     /// FunctionDecl 0x7fc7b8897ef0
     /// </Users/Stanislaw/workspace/projects/poc-sandbox/clang-plugin-test/src/fixture.cpp:3:1,
     /// col:33> col:14 getenv 'char *(const char *)' extern
     /// `-ParmVarDecl 0x7fc7b8897e28 <col:21, col:32> col:33 'const char *'
 
-    clang::IdentifierInfo &getenvFuncIdentifierInfo =
-      context.Idents.get("getenv");
+    clang::IdentifierInfo &getenvFuncIdentifierInfo = context.Idents.get("getenv");
     clang::IdentifierInfo &getenvParamNameInfo = context.Idents.get("name");
     clang::DeclarationName declarationName(&getenvFuncIdentifierInfo);
 
     clang::FunctionProtoType::ExtProtoInfo ext;
 
-    clang::QualType parameterType =
-      context.getPointerType(context.getConstType(context.CharTy));
+    clang::QualType parameterType = context.getPointerType(context.getConstType(context.CharTy));
     clang::QualType returnType = context.getPointerType(context.CharTy);
 
     std::vector<clang::QualType> paramTypes;
     paramTypes.push_back(parameterType);
 
-    clang::QualType getenvFuncType =
-      context.getFunctionType(returnType, paramTypes, ext);
+    clang::QualType getenvFuncType = context.getFunctionType(returnType, paramTypes, ext);
 
-    clang::TypeSourceInfo *trivialSourceInfo =
-      context.getTrivialTypeSourceInfo(getenvFuncType);
+    clang::TypeSourceInfo *trivialSourceInfo = context.getTrivialTypeSourceInfo(getenvFuncType);
 
     clang::FunctionDecl *getEnvFuncDecl = clang::FunctionDecl::Create(
-      context,
-      declContext,
-      SourceLocation(),
-      SourceLocation(),
-      declarationName,
-      getenvFuncType,
-      trivialSourceInfo,
-      clang::StorageClass::SC_Extern,
-      false,           /// bool isInlineSpecified = false,
-      true,            /// bool hasWrittenPrototype = true,
-      CSK_unspecified  /// ConstexprSpecKind ConstexprKind = CSK_unspecified
+        context,
+        declContext,
+        SourceLocation(),
+        SourceLocation(),
+        declarationName,
+        getenvFuncType,
+        trivialSourceInfo,
+        clang::StorageClass::SC_Extern,
+        false,          /// bool isInlineSpecified = false,
+        true,           /// bool hasWrittenPrototype = true,
+        CSK_unspecified /// ConstexprSpecKind ConstexprKind = CSK_unspecified
     );
 
     clang::ParmVarDecl *ParDecl = ParmVarDecl::Create(context,
@@ -203,7 +187,7 @@ public:
                                                       parameterType,
                                                       trivialSourceInfo,
                                                       StorageClass::SC_None,
-                                                      nullptr  // Expr *DefArg
+                                                      nullptr // Expr *DefArg
     );
 
     std::vector<clang::ParmVarDecl *> paramDecls;
@@ -216,13 +200,11 @@ public:
 
 class MullAction : public PluginASTAction {
 protected:
-  std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI,
-                                                 llvm::StringRef) override {
+  std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI, llvm::StringRef) override {
     return llvm::make_unique<MullASTConsumer>(CI);
   }
 
-  bool ParseArgs(const CompilerInstance &CI,
-                 const std::vector<std::string> &args) override {
+  bool ParseArgs(const CompilerInstance &CI, const std::vector<std::string> &args) override {
     return true;
   }
 
@@ -232,7 +214,6 @@ protected:
   }
 };
 
-}  // namespace
+} // namespace
 
-static FrontendPluginRegistry::Add<MullAction> X("mull-cxx-frontend",
-                                                 "Mull: Prepare mutations");
+static FrontendPluginRegistry::Add<MullAction> X("mull-cxx-frontend", "Mull: Prepare mutations");
