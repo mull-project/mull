@@ -1,4 +1,8 @@
-add_library(mull-cxx-frontend SHARED src/MullClangPlugin.cpp)
+add_library(mull-cxx-frontend
+  SHARED
+  src/ASTMutationsSearchVisitor.cpp
+  src/MullClangPlugin.cpp
+)
 
 target_link_libraries(mull-cxx-frontend ${MULL_CXX_LLVM_LIBRARIES})
 

@@ -13,7 +13,6 @@
 
 #include <clang/AST/AST.h>
 #include <clang/AST/ASTConsumer.h>
-#include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/Frontend/CompilerInstance.h>
 #include <clang/Frontend/FrontendPluginRegistry.h>
 #include <clang/Sema/Sema.h>
@@ -21,6 +20,7 @@
 #include <llvm/Support/raw_ostream.h>
 
 #include "ASTMutation.h"
+#include "ASTMutationsSearchVisitor.h"
 #include "ASTMutator.h"
 #include "MullTreeTransform.h"
 #include "ReadOnlyVisitor.h"
@@ -29,46 +29,6 @@ using namespace clang;
 using namespace llvm;
 
 namespace {
-
-class MutationsSearchVisitor : public RecursiveASTVisitor<MutationsSearchVisitor> {
-  MullTreeTransform myTransform;
-  ASTMutator astMutator;
-  std::vector<ASTMutation> astMutations;
-
-public:
-  MutationsSearchVisitor(ASTContext &context, Sema &sema, FunctionDecl *getenvFuncDecl)
-      : myTransform(sema), astMutator(context, getenvFuncDecl), astMutations() {}
-
-  std::vector<ASTMutation> getAstMutations() {
-    return astMutations;
-  }
-
-  bool VisitDecl(Decl *D) {
-    //    D->dump();
-    return true;
-  }
-
-  bool VisitFunctionDecl(FunctionDecl *FD) {
-    errs() << "visit function: " << FD->getNameInfo().getAsString() << "\n";
-    FD->dump();
-    //    FD->set
-    //    FD->removeDecl()
-    return true;
-  }
-
-  bool VisitBinaryOperator(clang::BinaryOperator *binaryOperator) {
-    errs() << "VisitBinaryOperator: \n";
-    binaryOperator->dump();
-
-    if (binaryOperator->getOpcode() == BinaryOperator::Opcode::BO_Add) {
-      astMutations.emplace_back(ASTMutation::ADD_TO_SUB, binaryOperator);
-    } else if (binaryOperator->getOpcode() == BinaryOperator::Opcode::BO_LOr) {
-      astMutations.emplace_back(ASTMutation::OR_TO_AND, binaryOperator);
-    }
-
-    return true;
-  }
-};
 
 class MullASTConsumer : public ASTConsumer {
   CompilerInstance &Instance;
@@ -106,7 +66,7 @@ public:
       astMutator = std::make_unique<ASTMutator>(Instance.getASTContext(), getenvFuncDecl);
     }
 
-    MutationsSearchVisitor visitor(Instance.getASTContext(), Instance.getSema(), getenvFuncDecl);
+    ASTMutationsSearchVisitor visitor;
 
     Instance.getASTContext().getDiagnostics();
     auto translationUnitDecl = Instance.getASTContext().getTranslationUnitDecl();
