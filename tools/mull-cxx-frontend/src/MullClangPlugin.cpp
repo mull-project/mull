@@ -1,15 +1,8 @@
-//===- PrintFunctionNames.cpp ---------------------------------------------===//
-//
-// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
-// See https://llvm.org/LICENSE.txt for license information.
-// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
-//
-//===----------------------------------------------------------------------===//
-//
-// Example clang plugin which simply prints the names of all the top-level decls
-// in the input file.
-//
-//===----------------------------------------------------------------------===//
+#include "ASTMutation.h"
+#include "ASTMutationsSearchVisitor.h"
+#include "ASTMutator.h"
+#include "MullTreeTransform.h"
+#include "ReadOnlyVisitor.h"
 
 #include <clang/AST/AST.h>
 #include <clang/AST/ASTConsumer.h>
@@ -18,12 +11,6 @@
 #include <clang/Sema/Sema.h>
 #include <clang/Sema/SemaConsumer.h>
 #include <llvm/Support/raw_ostream.h>
-
-#include "ASTMutation.h"
-#include "ASTMutationsSearchVisitor.h"
-#include "ASTMutator.h"
-#include "MullTreeTransform.h"
-#include "ReadOnlyVisitor.h"
 
 using namespace clang;
 using namespace llvm;
