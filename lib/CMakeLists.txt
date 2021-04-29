@@ -2,6 +2,7 @@ add_subdirectory(Mutators/CXX)
 add_subdirectory(Diagnostics)
 
 set(mull_sources
+  AST/ASTConstants.cpp
   AST/ASTFinder.cpp
   AST/ASTMutationFilter.cpp
   AST/ASTMutationStorage.cpp

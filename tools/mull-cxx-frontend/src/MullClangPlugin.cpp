@@ -161,7 +161,8 @@ public:
       } else if (astMutation.mutationType == mull::MutatorKind::CXX_Logical_OrToAnd) {
         newBinaryOperator->setOpcode(BinaryOperator::Opcode::BO_LAnd);
       } else {
-        assert(0 && "Not implemented");
+        continue;
+        ///assert(0 && "Not implemented");
       }
 
       astMutator->replaceStatement(oldBinaryOperator, newBinaryOperator);
