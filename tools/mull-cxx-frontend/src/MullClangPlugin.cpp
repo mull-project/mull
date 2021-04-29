@@ -20,6 +20,7 @@
 #include <clang/Sema/SemaConsumer.h>
 #include <llvm/Support/raw_ostream.h>
 
+#include "ASTMutation.h"
 #include "ASTMutator.h"
 #include "MullTreeTransform.h"
 #include "ReadOnlyVisitor.h"
@@ -32,10 +33,15 @@ namespace {
 class MutationsSearchVisitor : public RecursiveASTVisitor<MutationsSearchVisitor> {
   MullTreeTransform myTransform;
   ASTMutator astMutator;
+  std::vector<ASTMutation> astMutations;
 
 public:
   MutationsSearchVisitor(ASTContext &context, Sema &sema, FunctionDecl *getenvFuncDecl)
-      : myTransform(sema), astMutator(context, sema, getenvFuncDecl) {}
+      : myTransform(sema), astMutator(context, getenvFuncDecl), astMutations() {}
+
+  std::vector<ASTMutation> getAstMutations() {
+    return astMutations;
+  }
 
   bool VisitDecl(Decl *D) {
     //    D->dump();
@@ -55,23 +61,9 @@ public:
     binaryOperator->dump();
 
     if (binaryOperator->getOpcode() == BinaryOperator::Opcode::BO_Add) {
-      errs() << "Before Perform MUTATION:"
-             << "\n";
-      ExprResult exprResult = myTransform.TransformBinaryOperator(binaryOperator);
-      clang::BinaryOperator *newBinaryOperator = (clang::BinaryOperator *)exprResult.get();
-      newBinaryOperator->setOpcode(BinaryOperator::Opcode::BO_Sub);
-      astMutator.replaceStatement(binaryOperator, newBinaryOperator);
-      errs() << "After Perform MUTATION:"
-             << "\n";
+      astMutations.emplace_back(ASTMutation::ADD_TO_SUB, binaryOperator);
     } else if (binaryOperator->getOpcode() == BinaryOperator::Opcode::BO_LOr) {
-      errs() << "Before Perform MUTATION:"
-             << "\n";
-      ExprResult exprResult = myTransform.TransformBinaryOperator(binaryOperator);
-      clang::BinaryOperator *newBinaryOperator = (clang::BinaryOperator *)exprResult.get();
-      newBinaryOperator->setOpcode(BinaryOperator::Opcode::BO_LAnd);
-      astMutator.replaceStatement(binaryOperator, newBinaryOperator);
-      errs() << "After Perform MUTATION:"
-             << "\n";
+      astMutations.emplace_back(ASTMutation::OR_TO_AND, binaryOperator);
     }
 
     return true;
@@ -81,9 +73,12 @@ public:
 class MullASTConsumer : public ASTConsumer {
   CompilerInstance &Instance;
   FunctionDecl *getenvFuncDecl;
+  std::unique_ptr<MullTreeTransform> treeTransform;
+  std::unique_ptr<ASTMutator> astMutator;
 
 public:
-  MullASTConsumer(CompilerInstance &Instance) : Instance(Instance), getenvFuncDecl(nullptr) {}
+  MullASTConsumer(CompilerInstance &Instance)
+      : Instance(Instance), getenvFuncDecl(nullptr), treeTransform(nullptr), astMutator(nullptr) {}
 
   void Initialize(ASTContext &Context) override {
     ASTConsumer::Initialize(Context);
@@ -104,7 +99,15 @@ public:
   bool HandleTopLevelDecl(DeclGroupRef DG) override {
     llvm::errs() << "BEGIN: HandleTopLevelDecl():\n";
 
+    /// Should be a better place to create this. But at Initialize(), getSema() hits an internal
+    /// assert.
+    if (!treeTransform && !astMutator) {
+      treeTransform = std::make_unique<MullTreeTransform>(Instance.getSema());
+      astMutator = std::make_unique<ASTMutator>(Instance.getASTContext(), getenvFuncDecl);
+    }
+
     MutationsSearchVisitor visitor(Instance.getASTContext(), Instance.getSema(), getenvFuncDecl);
+
     Instance.getASTContext().getDiagnostics();
     auto translationUnitDecl = Instance.getASTContext().getTranslationUnitDecl();
     if (!translationUnitDecl) {
@@ -125,6 +128,10 @@ public:
       errs() << "Looking at function: " << f->getName() << "\n";
       visitor.TraverseFunctionDecl(f);
     }
+
+    std::vector<ASTMutation> foundMutations = visitor.getAstMutations();
+    performMutations(foundMutations);
+
     errs() << "FINISHED: HandleTopLevelDecl\n";
     return true;
   }
@@ -190,6 +197,31 @@ public:
     getEnvFuncDecl->setParams(paramDecls);
 
     return getEnvFuncDecl;
+  }
+
+  void performMutations(std::vector<ASTMutation> &astMutations) {
+    for (ASTMutation &astMutation : astMutations) {
+      errs() << "Before Perform MUTATION:"
+             << "\n";
+
+      clang::BinaryOperator *oldBinaryOperator =
+          dyn_cast<clang::BinaryOperator>(astMutation.mutableStmt);
+      ExprResult exprResult = treeTransform->TransformBinaryOperator(oldBinaryOperator);
+      clang::BinaryOperator *newBinaryOperator = (clang::BinaryOperator *)exprResult.get();
+
+      if (astMutation.mutationType == ASTMutation::ADD_TO_SUB) {
+        newBinaryOperator->setOpcode(BinaryOperator::Opcode::BO_Sub);
+      } else if (astMutation.mutationType == ASTMutation::OR_TO_AND) {
+        newBinaryOperator->setOpcode(BinaryOperator::Opcode::BO_LAnd);
+      } else {
+        assert(0 && "Not implemented");
+      }
+
+      astMutator->replaceStatement(oldBinaryOperator, newBinaryOperator);
+
+      errs() << "After Perform MUTATION:"
+             << "\n";
+    }
   }
 };
 

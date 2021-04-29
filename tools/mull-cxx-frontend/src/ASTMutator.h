@@ -19,12 +19,11 @@ static_assert(sizeof(ConditionalOperatorNastyCast) == sizeof(clang::ConditionalO
 
 class ASTMutator {
   clang::ASTContext &context;
-  MullTreeTransform myTransform;
   clang::FunctionDecl *getenvFuncDecl;
 
 public:
-  ASTMutator(clang::ASTContext &context, clang::Sema &sema, clang::FunctionDecl *getenvFuncDecl)
-      : context(context), myTransform(sema), getenvFuncDecl(getenvFuncDecl) {}
+  ASTMutator(clang::ASTContext &context, clang::FunctionDecl *getenvFuncDecl)
+      : context(context), getenvFuncDecl(getenvFuncDecl) {}
 
   void replaceStatement(clang::BinaryOperator *oldBinaryOperator,
                         clang::BinaryOperator *newBinaryOperator) {
