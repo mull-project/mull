@@ -21,7 +21,8 @@ bool ASTMutationsSearchVisitor::VisitBinaryOperator(clang::BinaryOperator *binar
   for (const std::pair<clang::BinaryOperator::Opcode, mull::MutatorKind> &mutation :
        mull::BINARY_MUTATIONS) {
     if (binaryOperator->getOpcode() == mutation.first && isValidMutation(mutation.second)) {
-      astMutations.emplace_back(mutation.second, binaryOperator);
+      clang::SourceLocation binaryOperatorLocation = binaryOperator->getOperatorLoc();
+      recordMutationPoint(mutation.second, binaryOperator, binaryOperatorLocation);
     }
   }
 
@@ -30,4 +31,22 @@ bool ASTMutationsSearchVisitor::VisitBinaryOperator(clang::BinaryOperator *binar
 
 bool ASTMutationsSearchVisitor::isValidMutation(mull::MutatorKind mutatorKind) {
   return mutationsChecklist.count(mutatorKind) > 0;
+}
+
+void ASTMutationsSearchVisitor::recordMutationPoint(mull::MutatorKind mutatorKind,
+                                                    clang::Stmt *stmt,
+                                                    clang::SourceLocation location) {
+
+  int beginLine = sourceManager.getExpansionLineNumber(location, nullptr);
+  int beginColumn = sourceManager.getExpansionColumnNumber(location);
+
+    std::string sourceFilePath = sourceManager.getFilename(location).str();
+    assert(!sourceFilePath.empty());
+    /// if (sourceFilePath.empty()) {
+    ///  /// we reach here because of asserts()
+    ///  /// TODO: maybe there are more cases.
+    ///  return;
+    /// }
+
+  astMutations.emplace_back(mutatorKind, stmt, beginLine, beginColumn);
 }

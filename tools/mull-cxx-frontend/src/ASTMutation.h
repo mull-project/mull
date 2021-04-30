@@ -1,9 +1,4 @@
-//
-// Created by Stanislav Pankevich on 29.04.21.
-//
-
-#ifndef MULL_TOOLS_MULL_CXX_FRONTEND_SRC_ASTMUTATION_H
-#define MULL_TOOLS_MULL_CXX_FRONTEND_SRC_ASTMUTATION_H
+#pragma once
 
 #include "mull/Mutators/MutatorKind.h"
 
@@ -12,9 +7,8 @@
 struct ASTMutation {
   mull::MutatorKind mutationType;
   clang::Stmt *mutableStmt;
-
-  ASTMutation(mull::MutatorKind mutationType, clang::Stmt *toBeMutatedStmt)
-      : mutationType(mutationType), mutableStmt(toBeMutatedStmt) {}
+  int line;
+  int column;
+  ASTMutation(mull::MutatorKind mutationType, clang::Stmt *toBeMutatedStmt, int line, int column)
+      : mutationType(mutationType), mutableStmt(toBeMutatedStmt), line(line), column(column) {}
 };
-
-#endif // MULL_TOOLS_MULL_CXX_FRONTEND_SRC_ASTMUTATION_H

@@ -55,7 +55,7 @@ public:
       astMutator = std::make_unique<ASTMutator>(Instance.getASTContext(), getenvFuncDecl);
     }
 
-    ASTMutationsSearchVisitor visitor(usedMutatorSet);
+    ASTMutationsSearchVisitor visitor(Instance.getASTContext().getSourceManager(), usedMutatorSet);
 
     Instance.getASTContext().getDiagnostics();
     auto translationUnitDecl = Instance.getASTContext().getTranslationUnitDecl();
