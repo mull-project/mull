@@ -43,7 +43,6 @@ set(LIT_COMMAND
   ${LIT_EXEC}
   -vv
   --filter cxx-front
-  # --filter 06-parent-is-c
   ${CMAKE_CURRENT_SOURCE_DIR}/tests
   )
 

@@ -22,10 +22,12 @@ class MullASTConsumer : public ASTConsumer {
   FunctionDecl *getenvFuncDecl;
   std::unique_ptr<MullTreeTransform> treeTransform;
   std::unique_ptr<ASTMutator> astMutator;
+  std::unordered_set<mull::MutatorKind> usedMutatorSet;
 
 public:
-  MullASTConsumer(CompilerInstance &Instance)
-      : Instance(Instance), getenvFuncDecl(nullptr), treeTransform(nullptr), astMutator(nullptr) {}
+  MullASTConsumer(CompilerInstance &Instance, std::unordered_set<mull::MutatorKind> usedMutatorSet)
+      : Instance(Instance), getenvFuncDecl(nullptr), treeTransform(nullptr), astMutator(nullptr),
+        usedMutatorSet(usedMutatorSet) {}
 
   void Initialize(ASTContext &Context) override {
     ASTConsumer::Initialize(Context);
@@ -53,7 +55,7 @@ public:
       astMutator = std::make_unique<ASTMutator>(Instance.getASTContext(), getenvFuncDecl);
     }
 
-    ASTMutationsSearchVisitor visitor;
+    ASTMutationsSearchVisitor visitor(usedMutatorSet);
 
     Instance.getASTContext().getDiagnostics();
     auto translationUnitDecl = Instance.getASTContext().getTranslationUnitDecl();
@@ -162,7 +164,7 @@ public:
         newBinaryOperator->setOpcode(BinaryOperator::Opcode::BO_LAnd);
       } else {
         continue;
-        ///assert(0 && "Not implemented");
+        /// assert(0 && "Not implemented");
       }
 
       astMutator->replaceStatement(oldBinaryOperator, newBinaryOperator);
@@ -174,12 +176,39 @@ public:
 };
 
 class MullAction : public PluginASTAction {
+  std::unordered_set<mull::MutatorKind> usedMutatorSet;
+
 protected:
   std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI, llvm::StringRef) override {
-    return llvm::make_unique<MullASTConsumer>(CI);
+    return llvm::make_unique<MullASTConsumer>(CI, usedMutatorSet);
   }
 
   bool ParseArgs(const CompilerInstance &CI, const std::vector<std::string> &args) override {
+    const std::unordered_map<std::string, mull::MutatorKind> argsToMutatorsMap = {
+      { "cxx_add_to_sub", mull::MutatorKind::CXX_AddToSub },
+      { "cxx_logical_or_to_and", mull::MutatorKind::CXX_Logical_OrToAnd },
+    };
+    clang::ASTContext &astContext = CI.getASTContext();
+    for (const auto &arg : args) {
+      std::string delimiter = "=";
+      std::vector<std::string> components;
+      size_t last = 0;
+      size_t next = 0;
+      while ((next = arg.find(delimiter, last)) != std::string::npos) {
+        components.push_back(arg.substr(last, next - last));
+        last = next + 1;
+      }
+      components.push_back(arg.substr(last));
+      if (components[0] != "mutators") {
+        clang::DiagnosticsEngine &diag = astContext.getDiagnostics();
+        unsigned diagId = diag.getCustomDiagID(clang::DiagnosticsEngine::Error,
+                                               "Only 'mutator=' argument is supported.");
+        astContext.getDiagnostics().Report(diagId);
+      }
+      assert(components.size() == 2);
+      assert(argsToMutatorsMap.count(components.at(1)) != 0);
+      usedMutatorSet.insert(argsToMutatorsMap.at(components[1]));
+    }
     return true;
   }
 

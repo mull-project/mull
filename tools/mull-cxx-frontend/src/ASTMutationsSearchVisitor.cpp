@@ -20,10 +20,14 @@ bool ASTMutationsSearchVisitor::VisitBinaryOperator(clang::BinaryOperator *binar
 
   for (const std::pair<clang::BinaryOperator::Opcode, mull::MutatorKind> &mutation :
        mull::BINARY_MUTATIONS) {
-    if (binaryOperator->getOpcode() == mutation.first) {
+    if (binaryOperator->getOpcode() == mutation.first && isValidMutation(mutation.second)) {
       astMutations.emplace_back(mutation.second, binaryOperator);
     }
   }
 
   return true;
+}
+
+bool ASTMutationsSearchVisitor::isValidMutation(mull::MutatorKind mutatorKind) {
+  return mutationsChecklist.count(mutatorKind) > 0;
 }
