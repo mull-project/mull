@@ -1,6 +1,9 @@
 add_library(mull-cxx-frontend
   SHARED
+  src/ASTInstrumentation.cpp
   src/ASTMutationsSearchVisitor.cpp
+  src/ASTMutation.cpp
+  src/ASTNodeFactory.cpp
   src/MullClangPlugin.cpp
 
   ${CMAKE_SOURCE_DIR}/lib/AST/ASTConstants.cpp

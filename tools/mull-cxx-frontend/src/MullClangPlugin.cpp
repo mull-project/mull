@@ -1,8 +1,9 @@
+#include "ASTInstrumentation.h"
 #include "ASTMutation.h"
 #include "ASTMutationsSearchVisitor.h"
 #include "ASTMutator.h"
+#include "ASTNodeFactory.h"
 #include "MullTreeTransform.h"
-#include "ReadOnlyVisitor.h"
 
 #include <clang/AST/AST.h>
 #include <clang/AST/ASTConsumer.h>
@@ -19,30 +20,21 @@ namespace {
 
 class MullASTConsumer : public ASTConsumer {
   CompilerInstance &Instance;
-  FunctionDecl *getenvFuncDecl;
+  ASTNodeFactory _factory;
+  ASTInstrumentation instrumentation;
   std::unique_ptr<MullTreeTransform> treeTransform;
   std::unique_ptr<ASTMutator> astMutator;
   std::unordered_set<mull::MutatorKind> usedMutatorSet;
 
 public:
   MullASTConsumer(CompilerInstance &Instance, std::unordered_set<mull::MutatorKind> usedMutatorSet)
-      : Instance(Instance), getenvFuncDecl(nullptr), treeTransform(nullptr), astMutator(nullptr),
+      : Instance(Instance), _factory(Instance.getASTContext()),
+        instrumentation(Instance.getASTContext()), treeTransform(nullptr), astMutator(nullptr),
         usedMutatorSet(usedMutatorSet) {}
 
   void Initialize(ASTContext &Context) override {
     ASTConsumer::Initialize(Context);
-
-    /// Create an external getenv() declaration.
-    LinkageSpecDecl *cLinkageSpecDecl =
-        LinkageSpecDecl::Create(Context,
-                                Context.getTranslationUnitDecl(),
-                                SourceLocation(),
-                                SourceLocation(),
-                                LinkageSpecDecl::LanguageIDs::lang_c,
-                                true);
-    this->getenvFuncDecl = createGetEnvFuncDecl(Context, cLinkageSpecDecl);
-    cLinkageSpecDecl->addDecl(this->getenvFuncDecl);
-    Context.getTranslationUnitDecl()->addDecl(cLinkageSpecDecl);
+    instrumentation.instrumentTranslationUnit();
   }
 
   bool HandleTopLevelDecl(DeclGroupRef DG) override {
@@ -52,22 +44,17 @@ public:
     /// assert.
     if (!treeTransform && !astMutator) {
       treeTransform = std::make_unique<MullTreeTransform>(Instance.getSema());
-      astMutator = std::make_unique<ASTMutator>(Instance.getASTContext(), getenvFuncDecl);
+      astMutator = std::make_unique<ASTMutator>(
+          Instance.getASTContext(), _factory, instrumentation.getMullShouldMutateFuncDecl());
     }
 
     ASTMutationsSearchVisitor visitor(Instance.getASTContext().getSourceManager(), usedMutatorSet);
-
-    Instance.getASTContext().getDiagnostics();
-    auto translationUnitDecl = Instance.getASTContext().getTranslationUnitDecl();
-    if (!translationUnitDecl) {
-      printf("translationUnitDecl is nullptr\n");
-      exit(1);
-    }
 
     for (DeclGroupRef::iterator I = DG.begin(), E = DG.end(); I != E; ++I) {
       if ((*I)->getKind() != Decl::Function) {
         continue;
       }
+
       FunctionDecl *f = static_cast<FunctionDecl *>(*I);
       DeclarationName origName(f->getDeclName());
       if (origName.getAsString() == "main") {
@@ -88,64 +75,11 @@ public:
   void HandleTranslationUnit(ASTContext &context) override {
     llvm::errs() << "BEGIN: HandleTranslationUnit():\n";
 
-    ReadOnlyVisitor readOnlyVisitor;
-    readOnlyVisitor.TraverseTranslationUnitDecl(Instance.getASTContext().getTranslationUnitDecl());
+    // context.getTranslationUnitDecl()->print(llvm::errs(), 2);
+    // context.getTranslationUnitDecl()->dump();
+    // exit(1);
 
     errs() << "FINISHED: HandleTranslationUnit\n";
-  }
-
-  clang::FunctionDecl *createGetEnvFuncDecl(ASTContext &context, clang::DeclContext *declContext) {
-    /// FunctionDecl 0x7fc7b8897ef0
-    /// </Users/Stanislaw/workspace/projects/poc-sandbox/clang-plugin-test/src/fixture.cpp:3:1,
-    /// col:33> col:14 getenv 'char *(const char *)' extern
-    /// `-ParmVarDecl 0x7fc7b8897e28 <col:21, col:32> col:33 'const char *'
-
-    clang::IdentifierInfo &getenvFuncIdentifierInfo = context.Idents.get("getenv");
-    clang::IdentifierInfo &getenvParamNameInfo = context.Idents.get("name");
-    clang::DeclarationName declarationName(&getenvFuncIdentifierInfo);
-
-    clang::FunctionProtoType::ExtProtoInfo ext;
-
-    clang::QualType parameterType = context.getPointerType(context.getConstType(context.CharTy));
-    clang::QualType returnType = context.getPointerType(context.CharTy);
-
-    std::vector<clang::QualType> paramTypes;
-    paramTypes.push_back(parameterType);
-
-    clang::QualType getenvFuncType = context.getFunctionType(returnType, paramTypes, ext);
-
-    clang::TypeSourceInfo *trivialSourceInfo = context.getTrivialTypeSourceInfo(getenvFuncType);
-
-    clang::FunctionDecl *getEnvFuncDecl = clang::FunctionDecl::Create(
-        context,
-        declContext,
-        SourceLocation(),
-        SourceLocation(),
-        declarationName,
-        getenvFuncType,
-        trivialSourceInfo,
-        clang::StorageClass::SC_Extern,
-        false,          /// bool isInlineSpecified = false,
-        true,           /// bool hasWrittenPrototype = true,
-        CSK_unspecified /// ConstexprSpecKind ConstexprKind = CSK_unspecified
-    );
-
-    clang::ParmVarDecl *ParDecl = ParmVarDecl::Create(context,
-                                                      getEnvFuncDecl,
-                                                      SourceLocation(),
-                                                      SourceLocation(),
-                                                      &getenvParamNameInfo,
-                                                      parameterType,
-                                                      trivialSourceInfo,
-                                                      StorageClass::SC_None,
-                                                      nullptr // Expr *DefArg
-    );
-
-    std::vector<clang::ParmVarDecl *> paramDecls;
-    paramDecls.push_back(ParDecl);
-    getEnvFuncDecl->setParams(paramDecls);
-
-    return getEnvFuncDecl;
   }
 
   void performMutations(std::vector<ASTMutation> &astMutations) {
@@ -167,7 +101,8 @@ public:
         /// assert(0 && "Not implemented");
       }
 
-      astMutator->replaceStatement(oldBinaryOperator, newBinaryOperator);
+      astMutator->replaceStatement(
+          oldBinaryOperator, newBinaryOperator, astMutation.mutationIdentifier);
 
       errs() << "After Perform MUTATION:"
              << "\n";

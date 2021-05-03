@@ -33,6 +33,8 @@ set(LIT_COMMAND
   MULL_EXEC=$<TARGET_FILE:mull-cxx>
   mull_runner=$<TARGET_FILE:mull-runner>
   mull_frontend_cxx=$<TARGET_FILE:mull-cxx-frontend>
+  mull_rt=$<TARGET_FILE:mull-rt>
+  mull_path_to_rt=$<TARGET_FILE_DIR:mull-rt>
   CLANG_EXEC=${CLANG_EXEC}
   clang_cc=${clang_cc}
   clang_cxx=${clang_cxx}
@@ -43,6 +45,7 @@ set(LIT_COMMAND
   ${LIT_EXEC}
   -vv
   --filter cxx-front
+  # --filter sandbox
   ${CMAKE_CURRENT_SOURCE_DIR}/tests
   )
 

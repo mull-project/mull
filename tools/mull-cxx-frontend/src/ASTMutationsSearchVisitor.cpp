@@ -8,7 +8,7 @@ std::vector<ASTMutation> ASTMutationsSearchVisitor::getAstMutations() {
 
 bool ASTMutationsSearchVisitor::VisitFunctionDecl(clang::FunctionDecl *FD) {
   llvm::errs() << "visit function: " << FD->getNameInfo().getAsString() << "\n";
-  FD->dump();
+  /// FD->dump();
   //    FD->set
   //    FD->removeDecl()
   return true;
@@ -40,13 +40,14 @@ void ASTMutationsSearchVisitor::recordMutationPoint(mull::MutatorKind mutatorKin
   int beginLine = sourceManager.getExpansionLineNumber(location, nullptr);
   int beginColumn = sourceManager.getExpansionColumnNumber(location);
 
-    std::string sourceFilePath = sourceManager.getFilename(location).str();
-    assert(!sourceFilePath.empty());
-    /// if (sourceFilePath.empty()) {
-    ///  /// we reach here because of asserts()
-    ///  /// TODO: maybe there are more cases.
-    ///  return;
-    /// }
+  std::string sourceFilePath = sourceManager.getFilename(location).str();
+  assert(!sourceFilePath.empty());
+  /// if (sourceFilePath.empty()) {
+  ///  /// we reach here because of asserts()
+  ///  /// TODO: maybe there are more cases.
+  ///  return;
+  /// }
 
-  astMutations.emplace_back(mutatorKind, stmt, beginLine, beginColumn);
+  ASTMutation astMutation(mutatorKind, stmt, sourceFilePath, beginLine, beginColumn);
+  astMutations.emplace_back(astMutation);
 }
