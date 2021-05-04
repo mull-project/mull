@@ -48,7 +48,7 @@ public:
           Instance.getASTContext(), _factory, instrumentation.getMullShouldMutateFuncDecl());
     }
 
-    ASTMutationsSearchVisitor visitor(Instance.getASTContext().getSourceManager(), usedMutatorSet);
+    ASTMutationsSearchVisitor visitor(Instance.getASTContext(), usedMutatorSet);
 
     for (DeclGroupRef::iterator I = DG.begin(), E = DG.end(); I != E; ++I) {
       if ((*I)->getKind() != Decl::Function) {
@@ -87,22 +87,29 @@ public:
       errs() << "Before Perform MUTATION:"
              << "\n";
 
-      clang::BinaryOperator *oldBinaryOperator =
-          dyn_cast<clang::BinaryOperator>(astMutation.mutableStmt);
-      ExprResult exprResult = treeTransform->TransformBinaryOperator(oldBinaryOperator);
-      clang::BinaryOperator *newBinaryOperator = (clang::BinaryOperator *)exprResult.get();
-
       if (astMutation.mutationType == mull::MutatorKind::CXX_AddToSub) {
+        clang::BinaryOperator *oldBinaryOperator =
+            dyn_cast<clang::BinaryOperator>(astMutation.mutableStmt);
+        ExprResult exprResult = treeTransform->TransformBinaryOperator(oldBinaryOperator);
+        clang::BinaryOperator *newBinaryOperator = (clang::BinaryOperator *)exprResult.get();
         newBinaryOperator->setOpcode(BinaryOperator::Opcode::BO_Sub);
+        astMutator->replaceExpression(
+            oldBinaryOperator, newBinaryOperator, astMutation.mutationIdentifier);
       } else if (astMutation.mutationType == mull::MutatorKind::CXX_Logical_OrToAnd) {
+        clang::BinaryOperator *oldBinaryOperator =
+            dyn_cast<clang::BinaryOperator>(astMutation.mutableStmt);
+        ExprResult exprResult = treeTransform->TransformBinaryOperator(oldBinaryOperator);
+        clang::BinaryOperator *newBinaryOperator = (clang::BinaryOperator *)exprResult.get();
         newBinaryOperator->setOpcode(BinaryOperator::Opcode::BO_LAnd);
+        astMutator->replaceExpression(
+            oldBinaryOperator, newBinaryOperator, astMutation.mutationIdentifier);
+      } else if (astMutation.mutationType == mull::MutatorKind::CXX_RemoveVoidCall) {
+        clang::CallExpr *callExpr = dyn_cast<clang::CallExpr>(astMutation.mutableStmt);
+        astMutator->replaceStatement(callExpr, nullptr, astMutation.mutationIdentifier);
       } else {
-        continue;
-        /// assert(0 && "Not implemented");
+        /// continue;
+        assert(0 && "Not implemented");
       }
-
-      astMutator->replaceStatement(
-          oldBinaryOperator, newBinaryOperator, astMutation.mutationIdentifier);
 
       errs() << "After Perform MUTATION:"
              << "\n";
@@ -122,6 +129,7 @@ protected:
     const std::unordered_map<std::string, mull::MutatorKind> argsToMutatorsMap = {
       { "cxx_add_to_sub", mull::MutatorKind::CXX_AddToSub },
       { "cxx_logical_or_to_and", mull::MutatorKind::CXX_Logical_OrToAnd },
+      { "cxx_remove_void_call", mull::MutatorKind::CXX_RemoveVoidCall },
     };
     clang::ASTContext &astContext = CI.getASTContext();
     for (const auto &arg : args) {

@@ -29,6 +29,16 @@ bool ASTMutationsSearchVisitor::VisitBinaryOperator(clang::BinaryOperator *binar
   return true;
 }
 
+bool ASTMutationsSearchVisitor::VisitCallExpr(clang::CallExpr *callExpr) {
+  if (!isValidMutation(mull::MutatorKind::CXX_RemoveVoidCall)) {
+    return true;
+  }
+  if (callExpr->getType() == _context.VoidTy) {
+    recordMutationPoint(mull::MutatorKind::CXX_RemoveVoidCall, callExpr, callExpr->getBeginLoc());
+  }
+  return true;
+}
+
 bool ASTMutationsSearchVisitor::isValidMutation(mull::MutatorKind mutatorKind) {
   return mutationsChecklist.count(mutatorKind) > 0;
 }
@@ -49,5 +59,7 @@ void ASTMutationsSearchVisitor::recordMutationPoint(mull::MutatorKind mutatorKin
   /// }
 
   ASTMutation astMutation(mutatorKind, stmt, sourceFilePath, beginLine, beginColumn);
+
+  llvm::errs() << "Recording mutation point: " << astMutation.mutationIdentifier << "\n";
   astMutations.emplace_back(astMutation);
 }

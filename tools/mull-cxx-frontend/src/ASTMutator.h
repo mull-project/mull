@@ -7,6 +7,7 @@
 
 #include <clang/AST/ASTContext.h>
 #include <clang/Basic/SourceLocation.h>
+#include <llvm/Support/Casting.h>
 #include <llvm/Support/raw_ostream.h>
 
 #include "ASTNodeFactory.h"
@@ -19,7 +20,7 @@ struct ConditionalOperatorNastyCast : public clang::AbstractConditionalOperator 
 static_assert(sizeof(ConditionalOperatorNastyCast) == sizeof(clang::ConditionalOperator));
 
 class ASTMutator {
-  clang::ASTContext &context;
+  clang::ASTContext &_context;
   ASTNodeFactory &_factory;
 
   clang::FunctionDecl *_mullShouldMutateFuncDecl;
@@ -27,14 +28,14 @@ class ASTMutator {
 public:
   ASTMutator(clang::ASTContext &context, ASTNodeFactory &factory,
              clang::FunctionDecl *mullShouldMutateFuncDecl)
-      : context(context), _factory(factory), _mullShouldMutateFuncDecl(mullShouldMutateFuncDecl) {}
+      : _context(context), _factory(factory), _mullShouldMutateFuncDecl(mullShouldMutateFuncDecl) {}
 
-  void replaceStatement(clang::BinaryOperator *oldBinaryOperator,
-                        clang::BinaryOperator *newBinaryOperator, std::string identifier) {
+  void replaceExpression(clang::BinaryOperator *oldBinaryOperator,
+                         clang::BinaryOperator *newBinaryOperator, std::string identifier) {
     clang::ConditionalOperator *conditionalExpr =
         createMutatedExpression(oldBinaryOperator, newBinaryOperator, identifier);
 
-    for (auto p : context.getParents(*oldBinaryOperator)) {
+    for (auto p : _context.getParents(*oldBinaryOperator)) {
       if (const clang::ReturnStmt *aStmt = p.get<clang::ReturnStmt>()) {
         llvm::errs() << "Parent is ReturnStmt\n";
         clang::ReturnStmt *returnStmpt = (clang::ReturnStmt *)aStmt;
@@ -86,95 +87,69 @@ public:
           assert(0 && "Should not reach here");
         }
       } else {
-        p.dump(llvm::errs(), context.getSourceManager());
+        p.dump(llvm::errs(), _context.getSourceManager());
         assert(0);
       }
     }
   }
 
-  clang::IfStmt *createMutatedStatement(clang::FunctionDecl *getenvFuncDecl, clang::Stmt *oldStmt,
-                                        clang::Stmt *newStmt, std::string identifier) {
-    clang::SourceLocation noLoc; // FD->getBeginLoc();
+  void replaceStatement(clang::Stmt *oldStmt, clang::Stmt *newStmt, std::string identifier) {
+    clang::IfStmt *ifCondition = createMutatedStatement(oldStmt, newStmt, identifier);
+    ifCondition->dump();
 
-    clang::DeclRefExpr *declRefExpr = clang::DeclRefExpr::Create(context,
-                                                                 getenvFuncDecl->getQualifierLoc(),
-                                                                 noLoc,
-                                                                 getenvFuncDecl,
-                                                                 false,
-                                                                 noLoc,
-                                                                 getenvFuncDecl->getType(),
-                                                                 clang::VK_LValue);
+    for (auto p : _context.getParents(*oldStmt)) {
+      p.dump(llvm::errs(), _context.getSourceManager());
+
+      const clang::Stmt *constParentStmt = p.get<clang::Stmt>();
+      clang::Stmt *parentStmt = (clang::Stmt *)constParentStmt;
+      assert(parentStmt);
+
+      clang::Stmt::child_iterator parentChildrenIterator =
+          std::find(parentStmt->child_begin(), parentStmt->child_end(), oldStmt);
+      assert(parentChildrenIterator != parentStmt->child_end() && "parent-child relation broken");
+
+      *parentChildrenIterator = ifCondition;
+      return;
+    }
+    return;
+  }
+
+  clang::IfStmt *createMutatedStatement(clang::Stmt *oldStmt, clang::Stmt *newStmt,
+                                        std::string identifier) {
+    clang::CallExpr *mullShouldMutateCallExpr = createMullShouldMutateCallExpr(identifier);
 
     clang::ImplicitCastExpr *implicitCastExpr =
-        clang::ImplicitCastExpr::Create(context,
-                                        context.getPointerType(getenvFuncDecl->getType()),
-                                        clang::CastKind::CK_FunctionToPointerDecay,
-                                        declRefExpr,
-                                        nullptr,
-                                        clang::VK_RValue);
-
-    clang::StringLiteral *stringLiteral = clang::StringLiteral::Create(
-        context,
-        "MULL",
-        clang::StringLiteral::StringKind::Ascii,
-        false,
-        context.getConstantArrayType(
-            context.CharTy, llvm::APInt(8, 5), clang::ArrayType::ArraySizeModifier::Normal, 0),
-        noLoc);
-
-    clang::ImplicitCastExpr *implicitCastExpr2 =
-        clang::ImplicitCastExpr::Create(context,
-                                        context.getPointerType(context.CharTy),
-                                        clang::CastKind::CK_ArrayToPointerDecay,
-                                        stringLiteral,
-                                        nullptr,
-                                        clang::VK_RValue);
-
-    clang::CallExpr *calllExpr = clang::CallExpr::Create(context,
-                                                         implicitCastExpr,
-                                                         { implicitCastExpr2 },
-                                                         getenvFuncDecl->getReturnType(),
-                                                         clang::VK_RValue,
-                                                         noLoc);
-
-    clang::ImplicitCastExpr *implicitCastExpr3 =
-        clang::ImplicitCastExpr::Create(context,
-                                        context.BoolTy,
+        clang::ImplicitCastExpr::Create(_context,
+                                        _context.BoolTy,
                                         clang::CastKind::CK_PointerToBoolean,
-                                        calllExpr,
+                                        mullShouldMutateCallExpr,
                                         nullptr,
                                         clang::VK_RValue);
 
-    //    clang::ReturnStmt *returnStmt = clang::ReturnStmt::Create(
-    //      context,
-    //      noLoc,
-    //      clang::IntegerLiteral::Create(
-    //        context, llvm::APInt(32, 11), context.IntTy, noLoc),
-    //      nullptr);
-    //
-    //    clang::ReturnStmt *returnStmt2 = clang::ReturnStmt::Create(
-    //      context,
-    //      noLoc,
-    //      clang::IntegerLiteral::Create(
-    //        context, llvm::APInt(32, 8), context.IntTy, noLoc),
-    //      nullptr);
-    //
-    //    clang::CXXBoolLiteralExpr *alwaysTrue =
-    //      new (context) clang::CXXBoolLiteralExpr(false, context.BoolTy,
-    //      noLoc);
+    std::vector<clang::Stmt *> thenStmtsVec = {};
+    if (newStmt) {
+      thenStmtsVec.push_back(newStmt);
+    }
+    llvm::ArrayRef<clang::Stmt *> thenStmts = thenStmtsVec;
+    clang::CompoundStmt *compoundThenStmt =
+        clang::CompoundStmt::Create(_context, thenStmts, NULL_LOCATION, NULL_LOCATION);
+
+    llvm::MutableArrayRef<clang::Stmt *> elseStmts = { oldStmt };
+    clang::CompoundStmt *compoundElseStmt =
+        clang::CompoundStmt::Create(_context, elseStmts, NULL_LOCATION, NULL_LOCATION);
 
     clang::IfStmt *ifStmt = clang::IfStmt::Create(
-        context,
-        noLoc,
+        _context,
+        NULL_LOCATION,
         false,
         nullptr,
         nullptr,
         //                                                    alwaysTrue,
         //                                                    //implicitCastExpr3,
-        implicitCastExpr3,
-        newStmt,
-        noLoc,
-        oldStmt);
+        implicitCastExpr,
+        compoundThenStmt,
+        NULL_LOCATION,
+        compoundElseStmt);
 
     return ifStmt;
   }
@@ -195,22 +170,22 @@ public:
     clang::CallExpr *mullShouldMutateCallExpr = createMullShouldMutateCallExpr(identifier);
 
     clang::ImplicitCastExpr *implicitCastExpr3 =
-        clang::ImplicitCastExpr::Create(context,
-                                        context.BoolTy,
+        clang::ImplicitCastExpr::Create(_context,
+                                        _context.BoolTy,
                                         clang::CastKind::CK_PointerToBoolean,
                                         mullShouldMutateCallExpr,
                                         nullptr,
                                         clang::VK_RValue);
 
     clang::ConditionalOperator *conditionalOperator =
-        new (context) clang::ConditionalOperator(implicitCastExpr3,
-                                                 NULL_LOCATION,
-                                                 newExpr,
-                                                 NULL_LOCATION,
-                                                 oldExpr,
-                                                 newExpr->getType(),
-                                                 newExpr->getValueKind(),
-                                                 newExpr->getObjectKind());
+        new (_context) clang::ConditionalOperator(implicitCastExpr3,
+                                                  NULL_LOCATION,
+                                                  newExpr,
+                                                  NULL_LOCATION,
+                                                  oldExpr,
+                                                  newExpr->getType(),
+                                                  newExpr->getValueKind(),
+                                                  newExpr->getObjectKind());
 
     return conditionalOperator;
   }
@@ -231,7 +206,7 @@ public:
     // clang-format on
 
     clang::DeclRefExpr *declRefExpr =
-        clang::DeclRefExpr::Create(context,
+        clang::DeclRefExpr::Create(_context,
                                    _mullShouldMutateFuncDecl->getQualifierLoc(),
                                    NULL_LOCATION,
                                    _mullShouldMutateFuncDecl,
@@ -242,30 +217,30 @@ public:
 
     clang::ImplicitCastExpr *implicitCastExpr = _factory.createImplicitCastExpr(
         declRefExpr,
-        context.getPointerType(_mullShouldMutateFuncDecl->getType()),
+        _context.getPointerType(_mullShouldMutateFuncDecl->getType()),
         clang::CastKind::CK_FunctionToPointerDecay,
         clang::VK_RValue);
 
     clang::StringLiteral *stringLiteral = clang::StringLiteral::Create(
-        context,
+        _context,
         identifier,
         clang::StringLiteral::StringKind::Ascii,
         false,
-        context.getConstantArrayType(context.CharTy,
-                                     llvm::APInt(8, identifier.size() + 1),
-                                     clang::ArrayType::ArraySizeModifier::Normal,
-                                     0),
+        _context.getConstantArrayType(_context.CharTy,
+                                      llvm::APInt(8, identifier.size() + 1),
+                                      clang::ArrayType::ArraySizeModifier::Normal,
+                                      0),
         clang::SourceLocation());
 
     clang::ImplicitCastExpr *implicitCastExpr2 =
-        clang::ImplicitCastExpr::Create(context,
-                                        context.getPointerType(context.CharTy),
+        clang::ImplicitCastExpr::Create(_context,
+                                        _context.getPointerType(_context.CharTy),
                                         clang::CastKind::CK_ArrayToPointerDecay,
                                         stringLiteral,
                                         nullptr,
                                         clang::VK_RValue);
 
-    clang::CallExpr *callExpr = clang::CallExpr::Create(context,
+    clang::CallExpr *callExpr = clang::CallExpr::Create(_context,
                                                         implicitCastExpr,
                                                         { implicitCastExpr2 },
                                                         _mullShouldMutateFuncDecl->getReturnType(),
