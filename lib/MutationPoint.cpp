@@ -9,6 +9,7 @@
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/Function.h>
 #include <llvm/Transforms/Utils/Cloning.h>
+#include <llvm/Transforms/Utils/ModuleUtils.h>
 
 #include <cassert>
 #include <sstream>
@@ -130,13 +131,18 @@ void MutationPoint::recordMutation() {
   std::string encoding = getUserIdentifier() + ':' + std::to_string(isCovered());
   llvm::Constant *constant =
       llvm::ConstantDataArray::getString(module->getContext(), llvm::StringRef(encoding));
-  auto *global = new llvm::GlobalVariable(
-      *module, constant->getType(), true, llvm::GlobalVariable::InternalLinkage, constant);
+  auto *global = new llvm::GlobalVariable(*module,
+                                          constant->getType(),
+                                          true,
+                                          llvm::GlobalVariable::InternalLinkage,
+                                          constant,
+                                          this->getUserIdentifier());
 #if defined __APPLE__
   global->setSection("__mull,.mull_mutants");
 #else
   global->setSection(".mull_mutants");
 #endif
+  llvm::appendToUsed(*module, {global});
 }
 
 std::string MutationPoint::getMutatorIdentifier() const {
