@@ -23,12 +23,12 @@ class ASTMutator {
   clang::ASTContext &_context;
   ASTNodeFactory &_factory;
 
-  clang::FunctionDecl *_mullShouldMutateFuncDecl;
+  clang::FunctionDecl *_getenvFuncDecl;
 
 public:
   ASTMutator(clang::ASTContext &context, ASTNodeFactory &factory,
-             clang::FunctionDecl *mullShouldMutateFuncDecl)
-      : _context(context), _factory(factory), _mullShouldMutateFuncDecl(mullShouldMutateFuncDecl) {}
+             clang::FunctionDecl *getenvFuncDecl)
+      : _context(context), _factory(factory), _getenvFuncDecl(getenvFuncDecl) {}
 
   void replaceExpression(clang::BinaryOperator *oldBinaryOperator,
                          clang::BinaryOperator *newBinaryOperator, std::string identifier) {
@@ -95,7 +95,6 @@ public:
 
   void replaceStatement(clang::Stmt *oldStmt, clang::Stmt *newStmt, std::string identifier) {
     clang::IfStmt *ifCondition = createMutatedStatement(oldStmt, newStmt, identifier);
-    ifCondition->dump();
 
     for (auto p : _context.getParents(*oldStmt)) {
       p.dump(llvm::errs(), _context.getSourceManager());
@@ -116,13 +115,13 @@ public:
 
   clang::IfStmt *createMutatedStatement(clang::Stmt *oldStmt, clang::Stmt *newStmt,
                                         std::string identifier) {
-    clang::CallExpr *mullShouldMutateCallExpr = createMullShouldMutateCallExpr(identifier);
+    clang::CallExpr *getenvCallExpr = createGetenvCallExpr(identifier);
 
     clang::ImplicitCastExpr *implicitCastExpr =
         clang::ImplicitCastExpr::Create(_context,
                                         _context.BoolTy,
                                         clang::CastKind::CK_PointerToBoolean,
-                                        mullShouldMutateCallExpr,
+                                        getenvCallExpr,
                                         nullptr,
                                         clang::VK_RValue);
 
@@ -144,8 +143,6 @@ public:
         false,
         nullptr,
         nullptr,
-        //                                                    alwaysTrue,
-        //                                                    //implicitCastExpr3,
         implicitCastExpr,
         compoundThenStmt,
         NULL_LOCATION,
@@ -156,18 +153,7 @@ public:
 
   clang::ConditionalOperator *createMutatedExpression(clang::Expr *oldExpr, clang::Expr *newExpr,
                                                       std::string identifier) {
-
-    //  |   `-ConditionalOperator 0x7f92fb8a5438 <col:11, col:54> 'int'
-    //      |     |-ImplicitCastExpr 0x7f92fb8a5420 <col:11, col:46> 'bool' <IntegralToBoolean>
-    //      |     | `-CallExpr 0x7f92fb8a53a0 <col:11, col:46> 'int'
-    //      |     |   |-ImplicitCastExpr 0x7f92fb8a5388 <col:11> 'int (*)(const char *)'
-    //      <FunctionToPointerDecay> |     |   | `-DeclRefExpr 0x7f92fb8a5338 <col:11> 'int (const
-    //      char *)' lvalue Function 0x7f92fb833940 'mull_should_mutate_identifier' 'int (const
-    //      char*)' |     |   `-ImplicitCastExpr 0x7f92fb8a53c8 <col:41> 'const char *'
-    //      <ArrayToPointerDecay> |     |     `-StringLiteral 0x7f92fb8a5318 <col:41> 'const char
-    //      [4]' lvalue "FOO" |     |-NEWEXPR |     `-OLDEXPR
-
-    clang::CallExpr *mullShouldMutateCallExpr = createMullShouldMutateCallExpr(identifier);
+    clang::CallExpr *mullShouldMutateCallExpr = createGetenvCallExpr(identifier);
 
     clang::ImplicitCastExpr *implicitCastExpr3 =
         clang::ImplicitCastExpr::Create(_context,
@@ -190,36 +176,22 @@ public:
     return conditionalOperator;
   }
 
-  clang::CallExpr *createMullShouldMutateCallExpr(std::string identifier) {
-    assert(_mullShouldMutateFuncDecl);
-    // Building CallExpr from the above subtree.
-    // clang-format off
-    //  |   `-ConditionalOperator 0x7f92fb8a5438 <col:11, col:54> 'int'
-    //      |     |-ImplicitCastExpr 0x7f92fb8a5420 <col:11, col:46> 'bool' <IntegralToBoolean>
-    //      |     | `-CallExpr 0x7f92fb8a53a0 <col:11, col:46> 'int'
-    //      |     |   |-ImplicitCastExpr 0x7f92fb8a5388 <col:11> 'int (*)(const char *)' <FunctionToPointerDecay>
-    //      |     |   | `-DeclRefExpr 0x7f92fb8a5338 <col:11> 'int (const char *)' lvalue Function 0x7f92fb833940 'mull_should_mutate_identifier' 'int (const char *)'
-    //      |     |   `-ImplicitCastExpr 0x7f92fb8a53c8 <col:41> 'const char *' <ArrayToPointerDecay>
-    //      |     |     `-StringLiteral 0x7f92fb8a5318 <col:41> 'const char [4]' lvalue "FOO"
-    //      |     |-IntegerLiteral 0x7f92fb8a53e0 <col:50> 'int' 0
-    //      |     `-IntegerLiteral 0x7f92fb8a5400 <col:54> 'int' 1
-    // clang-format on
+  clang::CallExpr *createGetenvCallExpr(std::string identifier) {
+    assert(_getenvFuncDecl);
+    clang::DeclRefExpr *declRefExpr = clang::DeclRefExpr::Create(_context,
+                                                                 _getenvFuncDecl->getQualifierLoc(),
+                                                                 NULL_LOCATION,
+                                                                 _getenvFuncDecl,
+                                                                 false,
+                                                                 NULL_LOCATION,
+                                                                 _getenvFuncDecl->getType(),
+                                                                 clang::VK_LValue);
 
-    clang::DeclRefExpr *declRefExpr =
-        clang::DeclRefExpr::Create(_context,
-                                   _mullShouldMutateFuncDecl->getQualifierLoc(),
-                                   NULL_LOCATION,
-                                   _mullShouldMutateFuncDecl,
-                                   false,
-                                   NULL_LOCATION,
-                                   _mullShouldMutateFuncDecl->getType(),
-                                   clang::VK_LValue);
-
-    clang::ImplicitCastExpr *implicitCastExpr = _factory.createImplicitCastExpr(
-        declRefExpr,
-        _context.getPointerType(_mullShouldMutateFuncDecl->getType()),
-        clang::CastKind::CK_FunctionToPointerDecay,
-        clang::VK_RValue);
+    clang::ImplicitCastExpr *implicitCastExpr =
+        _factory.createImplicitCastExpr(declRefExpr,
+                                        _context.getPointerType(_getenvFuncDecl->getType()),
+                                        clang::CastKind::CK_FunctionToPointerDecay,
+                                        clang::VK_RValue);
 
     clang::StringLiteral *stringLiteral = clang::StringLiteral::Create(
         _context,
@@ -243,7 +215,7 @@ public:
     clang::CallExpr *callExpr = clang::CallExpr::Create(_context,
                                                         implicitCastExpr,
                                                         { implicitCastExpr2 },
-                                                        _mullShouldMutateFuncDecl->getReturnType(),
+                                                        _getenvFuncDecl->getReturnType(),
                                                         clang::VK_RValue,
                                                         clang::SourceLocation());
     return callExpr;

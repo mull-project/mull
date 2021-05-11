@@ -20,9 +20,6 @@ ASTMutation::ASTMutation(mull::MutatorKind mutationType, clang::Stmt *toBeMutate
   assert(KINDS_TO_STRINGS.count(mutationType) > 0);
 
   /// mutator:file:line:col:1
-  mis << KINDS_TO_STRINGS.at(mutationType) << ":" << sourceFilePath << ":" << line << ":" << column
-      << ":"
-      << "1";
-
+  mis << KINDS_TO_STRINGS.at(mutationType) << ":" << sourceFilePath << ":" << line << ":" << column;
   this->mutationIdentifier = mis.str();
 }

@@ -1,12 +1,25 @@
 #include "ASTNodeFactory.h"
 
-#include <clang/AST/AST.h>
+#include <clang/AST/ASTContext.h>
 
 const clang::SourceLocation NULL_LOCATION;
 
 clang::IntegerLiteral *ASTNodeFactory::createIntegerLiteral(int value) {
   return clang::IntegerLiteral::Create(
       _context, llvm::APInt(32, 0, true), _context.IntTy, NULL_LOCATION);
+}
+
+clang::StringLiteral *ASTNodeFactory::createStringLiteral(std::string value) {
+  return clang::StringLiteral::Create(
+      _context,
+      value,
+      clang::StringLiteral::StringKind::Ascii,
+      false,
+      _context.getConstantArrayType(_context.getConstType(_context.CharTy),
+                                    llvm::APInt(8, value.size() + 1),
+                                    clang::ArrayType::ArraySizeModifier::Normal,
+                                    0),
+      NULL_LOCATION);
 }
 
 clang::IfStmt *ASTNodeFactory::createIfStmt(clang::Expr *condExpr, clang::Stmt *thenStmt,

@@ -21,20 +21,18 @@ namespace {
 class MullASTConsumer : public ASTConsumer {
   CompilerInstance &Instance;
   ASTNodeFactory _factory;
-  ASTInstrumentation instrumentation;
+  std::unique_ptr<ASTInstrumentation> instrumentation;
   std::unique_ptr<MullTreeTransform> treeTransform;
   std::unique_ptr<ASTMutator> astMutator;
   std::unordered_set<mull::MutatorKind> usedMutatorSet;
 
 public:
   MullASTConsumer(CompilerInstance &Instance, std::unordered_set<mull::MutatorKind> usedMutatorSet)
-      : Instance(Instance), _factory(Instance.getASTContext()),
-        instrumentation(Instance.getASTContext()), treeTransform(nullptr), astMutator(nullptr),
-        usedMutatorSet(usedMutatorSet) {}
+      : Instance(Instance), _factory(Instance.getASTContext()), instrumentation(nullptr),
+        treeTransform(nullptr), astMutator(nullptr), usedMutatorSet(usedMutatorSet) {}
 
   void Initialize(ASTContext &Context) override {
     ASTConsumer::Initialize(Context);
-    instrumentation.instrumentTranslationUnit();
   }
 
   bool HandleTopLevelDecl(DeclGroupRef DG) override {
@@ -43,12 +41,14 @@ public:
     /// Should be a better place to create this. But at Initialize(), getSema() hits an internal
     /// assert.
     if (!treeTransform && !astMutator) {
+      instrumentation = std::make_unique<ASTInstrumentation>(
+          Instance.getASTContext(), Instance.getSema(), _factory);
+      instrumentation->instrumentTranslationUnit();
+
       treeTransform = std::make_unique<MullTreeTransform>(Instance.getSema());
       astMutator = std::make_unique<ASTMutator>(
-          Instance.getASTContext(), _factory, instrumentation.getMullShouldMutateFuncDecl());
+          Instance.getASTContext(), _factory, instrumentation->getGetenvFuncDecl());
     }
-
-    ASTMutationsSearchVisitor visitor(Instance.getASTContext(), usedMutatorSet);
 
     for (DeclGroupRef::iterator I = DG.begin(), E = DG.end(); I != E; ++I) {
       if ((*I)->getKind() != Decl::Function) {
@@ -61,12 +61,12 @@ public:
         continue;
       }
 
+      ASTMutationsSearchVisitor visitor(Instance.getASTContext(), usedMutatorSet);
       errs() << "Looking at function: " << f->getName() << "\n";
       visitor.TraverseFunctionDecl(f);
+      std::vector<ASTMutation> foundMutations = visitor.getAstMutations();
+      performMutations(foundMutations);
     }
-
-    std::vector<ASTMutation> foundMutations = visitor.getAstMutations();
-    performMutations(foundMutations);
 
     errs() << "FINISHED: HandleTopLevelDecl\n";
     return true;
@@ -110,6 +110,10 @@ public:
         /// continue;
         assert(0 && "Not implemented");
       }
+      instrumentation->addMutantStringDefinition(astMutation.mutationIdentifier,
+                                                 static_cast<int>(astMutation.mutationType),
+                                                 astMutation.line,
+                                                 astMutation.column);
 
       errs() << "After Perform MUTATION:"
              << "\n";

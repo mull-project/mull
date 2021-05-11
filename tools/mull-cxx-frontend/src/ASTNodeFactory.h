@@ -14,6 +14,7 @@ public:
   ASTNodeFactory(clang::ASTContext &context) : _context(context) {}
 
   clang::IntegerLiteral *createIntegerLiteral(int value);
+  clang::StringLiteral *createStringLiteral(std::string value);
   clang::IfStmt *createIfStmt(clang::Expr *condExpr, clang::Stmt *thenStmt, clang::Stmt *elseStmt);
   clang::ReturnStmt *createReturnStmt(clang::Expr *expr);
   clang::ImplicitCastExpr *createImplicitCastExpr(clang::Expr *expr, clang::QualType qualType,

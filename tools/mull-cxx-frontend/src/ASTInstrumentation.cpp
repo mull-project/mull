@@ -2,63 +2,125 @@
 #include "ASTNodeFactory.h"
 
 #include <clang/AST/AST.h>
+#include <clang/Sema/Sema.h>
+
+#include <sstream>
 
 void ASTInstrumentation::instrumentTranslationUnit() {
-  _mullShouldMutateFuncDecl = createMullShouldMutateFuncDecl();
-  //  cLinkageSpecDecl->addDecl(_mullShouldMutateFuncDecl);
-  _context.getTranslationUnitDecl()->addDecl(_mullShouldMutateFuncDecl);
+  /// Create an external getenv() declaration.
+  clang::LinkageSpecDecl *cLinkageSpecDecl =
+      clang::LinkageSpecDecl::Create(_context,
+                                     _context.getTranslationUnitDecl(),
+                                     NULL_LOCATION,
+                                     NULL_LOCATION,
+                                     clang::LinkageSpecDecl::LanguageIDs::lang_c,
+                                     true);
+
+  _getenvFuncDecl = createGetEnvFuncDecl(cLinkageSpecDecl);
+  cLinkageSpecDecl->addDecl(_getenvFuncDecl);
+  _context.getTranslationUnitDecl()->addDecl(cLinkageSpecDecl);
 }
 
-clang::FunctionDecl *ASTInstrumentation::getMullShouldMutateFuncDecl() {
-  return _mullShouldMutateFuncDecl;
+void ASTInstrumentation::addMutantStringDefinition(std::string identifier, int mutator, int line,
+                                                   int column) {
+
+  llvm::errs() << "STRINGDEF" << "\n";
+
+  std::ostringstream mis;
+
+  mis << "mull_mutation_" << mutator << "_" << line << "_" << column;
+  std::string variableName = mis.str();
+
+  std::string identifierWithCoverage = identifier + ":1";
+  clang::IdentifierInfo &varDeclIdentifierInfo = _context.Idents.get(variableName);
+
+  clang::StringLiteral *literal = _factory.createStringLiteral(identifierWithCoverage);
+  literal->setValueKind(clang::VK_RValue);
+
+  clang::QualType qualType =
+      _context.getStringLiteralArrayType(_context.getConstType(_context.CharTy), identifierWithCoverage.size());
+
+  clang::VarDecl *varDecl = clang::VarDecl::Create(_context,
+                                                   _context.getTranslationUnitDecl(),
+                                                   NULL_LOCATION,
+                                                   NULL_LOCATION,
+                                                   &varDeclIdentifierInfo,
+                                                   qualType,
+                                                   _context.getTrivialTypeSourceInfo(qualType),
+                                                   clang::StorageClass::SC_Extern);
+  varDecl->setInit(literal);
+
+#if defined __APPLE__
+  const char *mullSection = "__mull,.mull_mutants";
+#else
+  const char *mullSection = ".mull_mutants";
+#endif
+
+  clang::SectionAttr *mullSectionAttr =
+      new (_context) clang::SectionAttr(clang::SourceRange(), _context, mullSection, 0);
+  varDecl->addAttr(mullSectionAttr);
+  _context.getTranslationUnitDecl()->addDecl(varDecl);
+
+  _context.getTranslationUnitDecl()->print(llvm::errs(), 2);
+  assert(varDecl->isThisDeclarationADefinition() == clang::VarDecl::Definition);
+
+  _sema.WeakTopLevelDecls().push_back(varDecl);
 }
 
-clang::FunctionDecl *ASTInstrumentation::createMullShouldMutateFuncDecl() {
-  /// Building this external function declaration:
-  ///
-  /// extern int mull_should_mutate_identifier(const char *identifier);
-  clang::IdentifierInfo &mullShouldMutateFuncIdentifierInfo =
-      _context.Idents.get("mull_should_mutate_identifier");
-  clang::IdentifierInfo &mullShouldMutateParamIdentifierInfo = _context.Idents.get("identifier");
-  clang::DeclarationName declarationName(&mullShouldMutateFuncIdentifierInfo);
+clang::FunctionDecl *ASTInstrumentation::getGetenvFuncDecl() {
+  assert(_getenvFuncDecl);
+  return _getenvFuncDecl;
+}
+
+clang::FunctionDecl *ASTInstrumentation::createGetEnvFuncDecl(clang::DeclContext *declContext) {
+  /// FunctionDecl 0x7fc7b8897ef0
+  /// </Users/Stanislaw/workspace/projects/poc-sandbox/clang-plugin-test/src/fixture.cpp:3:1,
+  /// col:33> col:14 getenv 'char *(const char *)' extern
+  /// `-ParmVarDecl 0x7fc7b8897e28 <col:21, col:32> col:33 'const char *'
+
+  clang::IdentifierInfo &getenvFuncIdentifierInfo = _context.Idents.get("getenv");
+  clang::IdentifierInfo &getenvParamNameInfo = _context.Idents.get("name");
+  clang::DeclarationName declarationName(&getenvFuncIdentifierInfo);
+
+  clang::FunctionProtoType::ExtProtoInfo ext;
 
   clang::QualType parameterType = _context.getPointerType(_context.getConstType(_context.CharTy));
-  clang::QualType returnType = _context.IntTy;
+  clang::QualType returnType = _context.getPointerType(_context.CharTy);
 
   std::vector<clang::QualType> paramTypes;
   paramTypes.push_back(parameterType);
 
-  clang::QualType mullShouldMutateFuncType =
-      _context.getFunctionType(returnType, paramTypes, clang::FunctionProtoType::ExtProtoInfo());
+  clang::QualType getenvFuncType = _context.getFunctionType(returnType, paramTypes, ext);
 
-  clang::FunctionDecl *mullShouldMutateFuncDecl = clang::FunctionDecl::Create(
+  clang::FunctionDecl *getEnvFuncDecl = clang::FunctionDecl::Create(
       _context,
-      _context.getTranslationUnitDecl(),
+      declContext,
       NULL_LOCATION,
       NULL_LOCATION,
       declarationName,
-      mullShouldMutateFuncType,
-      _context.getTrivialTypeSourceInfo(mullShouldMutateFuncType),
+      getenvFuncType,
+      _context.getTrivialTypeSourceInfo(getenvFuncType),
       clang::StorageClass::SC_Extern,
       false,                 /// bool isInlineSpecified = false,
       true,                  /// bool hasWrittenPrototype = true,
       clang::CSK_unspecified /// ConstexprSpecKind ConstexprKind = CSK_unspecified
   );
 
-  clang::ParmVarDecl *ParDecl = clang::ParmVarDecl::Create(_context,
-                                                           mullShouldMutateFuncDecl,
-                                                           NULL_LOCATION,
-                                                           NULL_LOCATION,
-                                                           &mullShouldMutateParamIdentifierInfo,
-                                                           parameterType,
-                                                           _context.getTrivialTypeSourceInfo(parameterType),
-                                                           clang::StorageClass::SC_None,
-                                                           nullptr // Expr *DefArg
-  );
-  ParDecl->setIsUsed();
+  clang::ParmVarDecl *ParDecl =
+      clang::ParmVarDecl::Create(_context,
+                                 getEnvFuncDecl,
+                                 NULL_LOCATION,
+                                 NULL_LOCATION,
+                                 &getenvParamNameInfo,
+                                 parameterType,
+                                 _context.getTrivialTypeSourceInfo(parameterType),
+                                 clang::StorageClass::SC_None,
+                                 nullptr // Expr *DefArg
+      );
+
   std::vector<clang::ParmVarDecl *> paramDecls;
   paramDecls.push_back(ParDecl);
-  mullShouldMutateFuncDecl->setParams(paramDecls);
+  getEnvFuncDecl->setParams(paramDecls);
 
-  return mullShouldMutateFuncDecl;
+  return getEnvFuncDecl;
 }
