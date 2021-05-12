@@ -3,7 +3,6 @@
 #include "ASTMutationsSearchVisitor.h"
 #include "ASTMutator.h"
 #include "ASTNodeFactory.h"
-#include "MullTreeTransform.h"
 
 #include <clang/AST/AST.h>
 #include <clang/AST/ASTConsumer.h>
@@ -22,14 +21,13 @@ class MullASTConsumer : public ASTConsumer {
   CompilerInstance &Instance;
   ASTNodeFactory _factory;
   std::unique_ptr<ASTInstrumentation> instrumentation;
-  std::unique_ptr<MullTreeTransform> treeTransform;
   std::unique_ptr<ASTMutator> astMutator;
   std::unordered_set<mull::MutatorKind> usedMutatorSet;
 
 public:
   MullASTConsumer(CompilerInstance &Instance, std::unordered_set<mull::MutatorKind> usedMutatorSet)
       : Instance(Instance), _factory(Instance.getASTContext()), instrumentation(nullptr),
-        treeTransform(nullptr), astMutator(nullptr), usedMutatorSet(usedMutatorSet) {}
+        astMutator(nullptr), usedMutatorSet(usedMutatorSet) {}
 
   void Initialize(ASTContext &Context) override {
     ASTConsumer::Initialize(Context);
@@ -40,12 +38,11 @@ public:
 
     /// Should be a better place to create this. But at Initialize(), getSema() hits an internal
     /// assert.
-    if (!treeTransform && !astMutator) {
+    if (!astMutator) {
       instrumentation = std::make_unique<ASTInstrumentation>(
           Instance.getASTContext(), Instance.getSema(), _factory);
       instrumentation->instrumentTranslationUnit();
 
-      treeTransform = std::make_unique<MullTreeTransform>(Instance.getSema());
       astMutator = std::make_unique<ASTMutator>(
           Instance.getASTContext(), _factory, instrumentation->getGetenvFuncDecl());
     }
@@ -90,17 +87,23 @@ public:
       if (astMutation.mutationType == mull::MutatorKind::CXX_AddToSub) {
         clang::BinaryOperator *oldBinaryOperator =
             dyn_cast<clang::BinaryOperator>(astMutation.mutableStmt);
-        ExprResult exprResult = treeTransform->TransformBinaryOperator(oldBinaryOperator);
-        clang::BinaryOperator *newBinaryOperator = (clang::BinaryOperator *)exprResult.get();
-        newBinaryOperator->setOpcode(BinaryOperator::Opcode::BO_Sub);
+        clang::BinaryOperator *newBinaryOperator =
+            _factory.createBinaryOperator(BinaryOperator::Opcode::BO_Sub,
+                                          oldBinaryOperator->getLHS(),
+                                          oldBinaryOperator->getRHS(),
+                                          oldBinaryOperator->getType(),
+                                          oldBinaryOperator->getValueKind());
         astMutator->replaceExpression(
             oldBinaryOperator, newBinaryOperator, astMutation.mutationIdentifier);
       } else if (astMutation.mutationType == mull::MutatorKind::CXX_Logical_OrToAnd) {
         clang::BinaryOperator *oldBinaryOperator =
             dyn_cast<clang::BinaryOperator>(astMutation.mutableStmt);
-        ExprResult exprResult = treeTransform->TransformBinaryOperator(oldBinaryOperator);
-        clang::BinaryOperator *newBinaryOperator = (clang::BinaryOperator *)exprResult.get();
-        newBinaryOperator->setOpcode(BinaryOperator::Opcode::BO_LAnd);
+        clang::BinaryOperator *newBinaryOperator =
+            _factory.createBinaryOperator(BinaryOperator::Opcode::BO_LAnd,
+                                          oldBinaryOperator->getLHS(),
+                                          oldBinaryOperator->getRHS(),
+                                          oldBinaryOperator->getType(),
+                                          oldBinaryOperator->getValueKind());
         astMutator->replaceExpression(
             oldBinaryOperator, newBinaryOperator, astMutation.mutationIdentifier);
       } else if (astMutation.mutationType == mull::MutatorKind::CXX_RemoveVoidCall) {

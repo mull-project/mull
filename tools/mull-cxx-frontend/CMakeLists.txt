@@ -3,6 +3,7 @@ add_library(mull-cxx-frontend
   src/ASTInstrumentation.cpp
   src/ASTMutationsSearchVisitor.cpp
   src/ASTMutation.cpp
+  src/ASTMutator.cpp
   src/ASTNodeFactory.cpp
   src/MullClangPlugin.cpp
 
