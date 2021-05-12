@@ -20,59 +20,78 @@ void ASTMutator::replaceExpression(clang::BinaryOperator *oldBinaryOperator,
       createMutatedExpression(oldBinaryOperator, newBinaryOperator, identifier);
 
   for (auto p : _context.getParents(*oldBinaryOperator)) {
-    if (const clang::ReturnStmt *aStmt = p.get<clang::ReturnStmt>()) {
-      llvm::errs() << "Parent is ReturnStmt\n";
-      clang::ReturnStmt *returnStmpt = (clang::ReturnStmt *)aStmt;
-      returnStmpt->setRetValue(conditionalExpr);
-    } else if (const clang::ParenExpr *constParenExpr = p.get<clang::ParenExpr>()) {
-      llvm::errs() << "Parent is ParenExpr\n";
-      clang::ParenExpr *parenExpr = (clang::ParenExpr *)constParenExpr;
-      parenExpr->setSubExpr(conditionalExpr);
-    } else if (const clang::IfStmt *constIfStmt = p.get<clang::IfStmt>()) {
-      llvm::errs() << "Parent is IfStmt\n";
-      clang::IfStmt *ifStmt = (clang::IfStmt *)constIfStmt;
-      ifStmt->setCond(conditionalExpr);
-    } else if (const clang::ConditionalOperator *constConditionalOperator =
-                   p.get<clang::ConditionalOperator>()) {
-      llvm::errs() << "Parent is ConditionalOperator\n";
-      clang::ConditionalOperator *conditionalOperator =
-          (clang::ConditionalOperator *)constConditionalOperator;
-      if (oldBinaryOperator == conditionalOperator->getCond()) {
-        ((ConditionalOperatorNastyCast *)conditionalOperator)
-            ->SubExprs[ConditionalOperatorNastyCast::COND] = conditionalExpr;
-      } else if (oldBinaryOperator == conditionalOperator->getLHS()) {
-        ((ConditionalOperatorNastyCast *)conditionalOperator)
-            ->SubExprs[ConditionalOperatorNastyCast::LHS] = conditionalExpr;
-      } else if (oldBinaryOperator == conditionalOperator->getRHS()) {
-        ((ConditionalOperatorNastyCast *)conditionalOperator)
-            ->SubExprs[ConditionalOperatorNastyCast::RHS] = conditionalExpr;
-      } else {
-        assert(0 && "Should not reach here");
-      }
-    } else if (const clang::ImplicitCastExpr *constImplicitCastExpr =
-                   p.get<clang::ImplicitCastExpr>()) {
-      llvm::errs() << "Parent is ImplicitCastExpr\n";
-      clang::ImplicitCastExpr *implicitCastExpr = (clang::ImplicitCastExpr *)constImplicitCastExpr;
-      implicitCastExpr->setSubExpr(conditionalExpr);
-    } else if (const clang::VarDecl *constVarDecl = p.get<clang::VarDecl>()) {
-      llvm::errs() << "Parent is VarDecl\n";
-      clang::VarDecl *varDecl = (clang::VarDecl *)constVarDecl;
-      varDecl->setInit(conditionalExpr);
-    } else if (const clang::BinaryOperator *constBinaryOperator = p.get<clang::BinaryOperator>()) {
-      llvm::errs() << "Parent is BinaryOperator\n";
-      clang::BinaryOperator *binaryOperator = (clang::BinaryOperator *)constBinaryOperator;
-      if (oldBinaryOperator == binaryOperator->getLHS()) {
-        binaryOperator->setLHS(conditionalExpr);
-      } else if (oldBinaryOperator == binaryOperator->getRHS()) {
-        binaryOperator->setRHS(conditionalExpr);
-      } else {
-        assert(0 && "Should not reach here");
-      }
-    } else {
-      p.dump(llvm::errs(), _context.getSourceManager());
-      assert(0);
+    p.dump(llvm::errs(), _context.getSourceManager());
+
+    if (const clang::Stmt *constParentStmt = p.get<clang::Stmt>()) {
+      clang::Stmt *parentStmt = (clang::Stmt *)constParentStmt;
+      clang::Stmt::child_iterator parentChildrenIterator =
+          std::find(parentStmt->child_begin(), parentStmt->child_end(), oldBinaryOperator);
+      assert(parentChildrenIterator != parentStmt->child_end() && "parent-child relation broken");
+      *parentChildrenIterator = conditionalExpr;
+    }
+    else if (const clang::VarDecl *constVarDecl = p.get<clang::VarDecl>()) {
+      clang::VarDecl *parentVarDecl = (clang::VarDecl *)constVarDecl;
+      parentVarDecl->setInit(conditionalExpr);
+    }
+    else {
+      assert(0 && "error: not implemented");
     }
   }
+
+  //  for (auto p : _context.getParents(*oldBinaryOperator)) {
+  //    if (const clang::ReturnStmt *aStmt = p.get<clang::ReturnStmt>()) {
+  //      llvm::errs() << "Parent is ReturnStmt\n";
+  //      clang::ReturnStmt *returnStmpt = (clang::ReturnStmt *)aStmt;
+  //      returnStmpt->setRetValue(conditionalExpr);
+  //    } else if (const clang::ParenExpr *constParenExpr = p.get<clang::ParenExpr>()) {
+  //      llvm::errs() << "Parent is ParenExpr\n";
+  //      clang::ParenExpr *parenExpr = (clang::ParenExpr *)constParenExpr;
+  //      parenExpr->setSubExpr(conditionalExpr);
+  //    } else if (const clang::IfStmt *constIfStmt = p.get<clang::IfStmt>()) {
+  //      llvm::errs() << "Parent is IfStmt\n";
+  //      clang::IfStmt *ifStmt = (clang::IfStmt *)constIfStmt;
+  //      ifStmt->setCond(conditionalExpr);
+  //    } else if (const clang::ConditionalOperator *constConditionalOperator =
+  //                   p.get<clang::ConditionalOperator>()) {
+  //      llvm::errs() << "Parent is ConditionalOperator\n";
+  //      clang::ConditionalOperator *conditionalOperator =
+  //          (clang::ConditionalOperator *)constConditionalOperator;
+  //      if (oldBinaryOperator == conditionalOperator->getCond()) {
+  //        ((ConditionalOperatorNastyCast *)conditionalOperator)
+  //            ->SubExprs[ConditionalOperatorNastyCast::COND] = conditionalExpr;
+  //      } else if (oldBinaryOperator == conditionalOperator->getLHS()) {
+  //        ((ConditionalOperatorNastyCast *)conditionalOperator)
+  //            ->SubExprs[ConditionalOperatorNastyCast::LHS] = conditionalExpr;
+  //      } else if (oldBinaryOperator == conditionalOperator->getRHS()) {
+  //        ((ConditionalOperatorNastyCast *)conditionalOperator)
+  //            ->SubExprs[ConditionalOperatorNastyCast::RHS] = conditionalExpr;
+  //      } else {
+  //        assert(0 && "Should not reach here");
+  //      }
+  //    } else if (const clang::ImplicitCastExpr *constImplicitCastExpr =
+  //                   p.get<clang::ImplicitCastExpr>()) {
+  //      llvm::errs() << "Parent is ImplicitCastExpr\n";
+  //      clang::ImplicitCastExpr *implicitCastExpr = (clang::ImplicitCastExpr *)constImplicitCastExpr;
+  //      implicitCastExpr->setSubExpr(conditionalExpr);
+  //    } else if (const clang::VarDecl *constVarDecl = p.get<clang::VarDecl>()) {
+  //      llvm::errs() << "Parent is VarDecl\n";
+  //      clang::VarDecl *varDecl = (clang::VarDecl *)constVarDecl;
+  //      varDecl->setInit(conditionalExpr);
+  //    } else if (const clang::BinaryOperator *constBinaryOperator = p.get<clang::BinaryOperator>()) {
+  //      llvm::errs() << "Parent is BinaryOperator\n";
+  //      clang::BinaryOperator *binaryOperator = (clang::BinaryOperator *)constBinaryOperator;
+  //      if (oldBinaryOperator == binaryOperator->getLHS()) {
+  //        binaryOperator->setLHS(conditionalExpr);
+  //      } else if (oldBinaryOperator == binaryOperator->getRHS()) {
+  //        binaryOperator->setRHS(conditionalExpr);
+  //      } else {
+  //        assert(0 && "Should not reach here");
+  //      }
+  //    } else {
+  //      p.dump(llvm::errs(), _context.getSourceManager());
+  //      assert(0);
+  //    }
+  //  }
 }
 
 void ASTMutator::replaceStatement(clang::Stmt *oldStmt, clang::Stmt *newStmt,
