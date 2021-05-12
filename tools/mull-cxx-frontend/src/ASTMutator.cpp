@@ -20,8 +20,6 @@ void ASTMutator::replaceExpression(clang::BinaryOperator *oldBinaryOperator,
       createMutatedExpression(oldBinaryOperator, newBinaryOperator, identifier);
 
   for (auto p : _context.getParents(*oldBinaryOperator)) {
-    p.dump(llvm::errs(), _context.getSourceManager());
-
     if (const clang::Stmt *constParentStmt = p.get<clang::Stmt>()) {
       clang::Stmt *parentStmt = (clang::Stmt *)constParentStmt;
       clang::Stmt::child_iterator parentChildrenIterator =

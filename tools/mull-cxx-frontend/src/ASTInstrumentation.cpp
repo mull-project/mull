@@ -24,8 +24,6 @@ void ASTInstrumentation::instrumentTranslationUnit() {
 void ASTInstrumentation::addMutantStringDefinition(std::string identifier, int mutator, int line,
                                                    int column) {
 
-  llvm::errs() << "STRINGDEF" << "\n";
-
   std::ostringstream mis;
 
   mis << "mull_mutation_" << mutator << "_" << line << "_" << column;
@@ -61,7 +59,6 @@ void ASTInstrumentation::addMutantStringDefinition(std::string identifier, int m
   varDecl->addAttr(mullSectionAttr);
   _context.getTranslationUnitDecl()->addDecl(varDecl);
 
-  _context.getTranslationUnitDecl()->print(llvm::errs(), 2);
   assert(varDecl->isThisDeclarationADefinition() == clang::VarDecl::Definition);
 
   _sema.WeakTopLevelDecls().push_back(varDecl);

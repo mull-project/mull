@@ -7,17 +7,12 @@ std::vector<ASTMutation> ASTMutationsSearchVisitor::getAstMutations() {
 }
 
 bool ASTMutationsSearchVisitor::VisitFunctionDecl(clang::FunctionDecl *FD) {
-  llvm::errs() << "visit function: " << FD->getNameInfo().getAsString() << "\n";
+  /// llvm::errs() << "visit function: " << FD->getNameInfo().getAsString() << "\n";
   /// FD->dump();
-  //    FD->set
-  //    FD->removeDecl()
   return true;
 }
 
 bool ASTMutationsSearchVisitor::VisitBinaryOperator(clang::BinaryOperator *binaryOperator) {
-  llvm::errs() << "VisitBinaryOperator: \n";
-  binaryOperator->dump();
-
   for (const std::pair<clang::BinaryOperator::Opcode, mull::MutatorKind> &mutation :
        mull::BINARY_MUTATIONS) {
     if (binaryOperator->getOpcode() == mutation.first && isValidMutation(mutation.second)) {
@@ -25,14 +20,10 @@ bool ASTMutationsSearchVisitor::VisitBinaryOperator(clang::BinaryOperator *binar
       recordMutationPoint(mutation.second, binaryOperator, binaryOperatorLocation);
     }
   }
-
   return true;
 }
 
 bool ASTMutationsSearchVisitor::VisitCallExpr(clang::CallExpr *callExpr) {
-  if (!isValidMutation(mull::MutatorKind::CXX_RemoveVoidCall)) {
-    return true;
-  }
   if (callExpr->getType() == _context.VoidTy) {
     recordMutationPoint(mull::MutatorKind::CXX_RemoveVoidCall, callExpr, callExpr->getBeginLoc());
   }
@@ -46,17 +37,25 @@ bool ASTMutationsSearchVisitor::isValidMutation(mull::MutatorKind mutatorKind) {
 void ASTMutationsSearchVisitor::recordMutationPoint(mull::MutatorKind mutatorKind,
                                                     clang::Stmt *stmt,
                                                     clang::SourceLocation location) {
+  if (sourceManager.isInSystemHeader(location)) {
+    return;
+  }
+  if (sourceManager.isInSystemMacro(location)) {
+    return;
+  }
+  std::string sourceFilePath = sourceManager.getFilename(location).str();
+  if (sourceFilePath.empty()) {
+    /// we reach here because of asserts()
+    /// TODO: maybe there are more cases.
+    assert(0);
+    return;
+  }
+  if (sourceFilePath.find("include/gtest") != std::string::npos) {
+    return;
+  }
 
   int beginLine = sourceManager.getExpansionLineNumber(location, nullptr);
   int beginColumn = sourceManager.getExpansionColumnNumber(location);
-
-  std::string sourceFilePath = sourceManager.getFilename(location).str();
-  assert(!sourceFilePath.empty());
-  /// if (sourceFilePath.empty()) {
-  ///  /// we reach here because of asserts()
-  ///  /// TODO: maybe there are more cases.
-  ///  return;
-  /// }
 
   ASTMutation astMutation(mutatorKind, stmt, sourceFilePath, beginLine, beginColumn);
 

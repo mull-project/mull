@@ -34,8 +34,6 @@ public:
   }
 
   bool HandleTopLevelDecl(DeclGroupRef DG) override {
-    llvm::errs() << "BEGIN: HandleTopLevelDecl():\n";
-
     /// Should be a better place to create this. But at Initialize(), getSema() hits an internal
     /// assert.
     if (!astMutator) {
@@ -53,37 +51,33 @@ public:
       }
 
       FunctionDecl *f = static_cast<FunctionDecl *>(*I);
-      DeclarationName origName(f->getDeclName());
-      if (origName.getAsString() == "main") {
+      if (f->getDeclName().getAsString() == "main") {
+        continue;
+      }
+
+      clang::SourceLocation functionLocation = f->getLocation();
+      if (Instance.getSourceManager().isInSystemHeader(functionLocation)) {
         continue;
       }
 
       ASTMutationsSearchVisitor visitor(Instance.getASTContext(), usedMutatorSet);
-      errs() << "Looking at function: " << f->getName() << "\n";
+      errs() << "HandleTopLevelDecl: Looking at function: " << f->getDeclName() << "\n";
       visitor.TraverseFunctionDecl(f);
       std::vector<ASTMutation> foundMutations = visitor.getAstMutations();
       performMutations(foundMutations);
     }
 
-    errs() << "FINISHED: HandleTopLevelDecl\n";
     return true;
   }
 
   void HandleTranslationUnit(ASTContext &context) override {
-    llvm::errs() << "BEGIN: HandleTranslationUnit():\n";
-
     // context.getTranslationUnitDecl()->print(llvm::errs(), 2);
     // context.getTranslationUnitDecl()->dump();
     // exit(1);
-
-    errs() << "FINISHED: HandleTranslationUnit\n";
   }
 
   void performMutations(std::vector<ASTMutation> &astMutations) {
     for (ASTMutation &astMutation : astMutations) {
-      errs() << "Before Perform MUTATION:"
-             << "\n";
-
       if (astMutation.mutationType == mull::MutatorKind::CXX_AddToSub) {
         clang::BinaryOperator *oldBinaryOperator =
             dyn_cast<clang::BinaryOperator>(astMutation.mutableStmt);
@@ -117,9 +111,6 @@ public:
                                                  static_cast<int>(astMutation.mutationType),
                                                  astMutation.line,
                                                  astMutation.column);
-
-      errs() << "After Perform MUTATION:"
-             << "\n";
     }
   }
 };
@@ -158,6 +149,11 @@ protected:
       assert(components.size() == 2);
       assert(argsToMutatorsMap.count(components.at(1)) != 0);
       usedMutatorSet.insert(argsToMutatorsMap.at(components[1]));
+    }
+    if (usedMutatorSet.empty()) {
+      usedMutatorSet.insert(mull::MutatorKind::CXX_AddToSub);
+      usedMutatorSet.insert(mull::MutatorKind::CXX_Logical_OrToAnd);
+      usedMutatorSet.insert(mull::MutatorKind::CXX_RemoveVoidCall);
     }
     return true;
   }
