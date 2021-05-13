@@ -35,8 +35,8 @@ void ASTInstrumentation::addMutantStringDefinition(std::string identifier, int m
   clang::StringLiteral *literal = _factory.createStringLiteral(identifierWithCoverage);
   literal->setValueKind(clang::VK_RValue);
 
-  clang::QualType qualType =
-      _context.getStringLiteralArrayType(_context.getConstType(_context.CharTy), identifierWithCoverage.size());
+  clang::QualType qualType = _factory.getStringLiteralArrayType(
+      _context.getConstType(_context.CharTy), identifierWithCoverage.size());
 
   clang::VarDecl *varDecl = clang::VarDecl::Create(_context,
                                                    _context.getTranslationUnitDecl(),
@@ -75,9 +75,7 @@ clang::FunctionDecl *ASTInstrumentation::createGetEnvFuncDecl(clang::DeclContext
   /// col:33> col:14 getenv 'char *(const char *)' extern
   /// `-ParmVarDecl 0x7fc7b8897e28 <col:21, col:32> col:33 'const char *'
 
-  clang::IdentifierInfo &getenvFuncIdentifierInfo = _context.Idents.get("getenv");
   clang::IdentifierInfo &getenvParamNameInfo = _context.Idents.get("name");
-  clang::DeclarationName declarationName(&getenvFuncIdentifierInfo);
 
   clang::FunctionProtoType::ExtProtoInfo ext;
 
@@ -89,19 +87,8 @@ clang::FunctionDecl *ASTInstrumentation::createGetEnvFuncDecl(clang::DeclContext
 
   clang::QualType getenvFuncType = _context.getFunctionType(returnType, paramTypes, ext);
 
-  clang::FunctionDecl *getEnvFuncDecl = clang::FunctionDecl::Create(
-      _context,
-      declContext,
-      NULL_LOCATION,
-      NULL_LOCATION,
-      declarationName,
-      getenvFuncType,
-      _context.getTrivialTypeSourceInfo(getenvFuncType),
-      clang::StorageClass::SC_Extern,
-      false,                 /// bool isInlineSpecified = false,
-      true,                  /// bool hasWrittenPrototype = true,
-      clang::CSK_unspecified /// ConstexprSpecKind ConstexprKind = CSK_unspecified
-  );
+  clang::FunctionDecl *getEnvFuncDecl =
+      _factory.createFunctionDecl("getenv", declContext, getenvFuncType);
 
   clang::ParmVarDecl *ParDecl =
       clang::ParmVarDecl::Create(_context,

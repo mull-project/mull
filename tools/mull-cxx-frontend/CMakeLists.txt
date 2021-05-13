@@ -8,6 +8,7 @@ add_library(mull-cxx-frontend
   src/MullClangPlugin.cpp
 
   ${CMAKE_SOURCE_DIR}/lib/AST/ASTConstants.cpp
+  ${CMAKE_SOURCE_DIR}/lib/AST/MullClangCompatibility.cpp
 )
 
 target_link_libraries(mull-cxx-frontend ${MULL_CXX_LLVM_LIBRARIES})
@@ -44,11 +45,9 @@ target_link_libraries(mull-cxx-frontend PRIVATE
   LLVMAnalysis
   LLVMScalarOpts
   LLVMCoroutines
-  LLVMAggressiveInstCombine
   LLVMAsmPrinter
   LLVMAsmParser
   LLVMBinaryFormat
-  LLVMBitstreamReader
   LLVMDebugInfoDWARF
   LLVMInstCombine
   LLVMMCDisassembler
@@ -72,7 +71,6 @@ target_link_libraries(mull-cxx-frontend PRIVATE
   LLVMObject
   LLVMOption
   LLVMObjCARCOpts
-  LLVMRemarks
   LLVMSelectionDAG
   LLVMSupport
   LLVMTarget

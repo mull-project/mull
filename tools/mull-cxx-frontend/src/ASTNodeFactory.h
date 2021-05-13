@@ -13,6 +13,9 @@ class ASTNodeFactory {
 public:
   ASTNodeFactory(clang::ASTContext &context) : _context(context) {}
 
+  /// AST Nodes
+  clang::FunctionDecl *createFunctionDecl(std::string name, clang::DeclContext *declContext,
+                                          clang::QualType functionType);
   clang::IntegerLiteral *createIntegerLiteral(int value);
   clang::StringLiteral *createStringLiteral(std::string value);
   clang::IfStmt *createIfStmt(clang::Expr *condExpr, clang::Stmt *thenStmt, clang::Stmt *elseStmt);
@@ -24,4 +27,10 @@ public:
                                               clang::Expr *lhs, clang::Expr *rhs,
                                               clang::QualType resultType,
                                               clang::ExprValueKind valueKind);
+  clang::CallExpr *createCallExprSingleArg(clang::Expr *function, clang::Expr *argument,
+                                           clang::QualType returnType,
+                                           clang::ExprValueKind valueKind);
+
+  /// Qual types
+  clang::QualType getStringLiteralArrayType(clang::QualType type, unsigned size);
 };

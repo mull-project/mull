@@ -2,6 +2,8 @@
 
 #include "mull/AST/ASTConstants.h"
 
+#include "mull/AST/MullClangCompatibility.h"
+
 std::vector<ASTMutation> ASTMutationsSearchVisitor::getAstMutations() {
   return astMutations;
 }
@@ -25,7 +27,7 @@ bool ASTMutationsSearchVisitor::VisitBinaryOperator(clang::BinaryOperator *binar
 
 bool ASTMutationsSearchVisitor::VisitCallExpr(clang::CallExpr *callExpr) {
   if (callExpr->getType() == _context.VoidTy) {
-    recordMutationPoint(mull::MutatorKind::CXX_RemoveVoidCall, callExpr, callExpr->getBeginLoc());
+    recordMutationPoint(mull::MutatorKind::CXX_RemoveVoidCall, callExpr, ClangCompatibilityStmtGetBeginLoc(*callExpr));
   }
   return true;
 }

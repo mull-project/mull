@@ -120,7 +120,7 @@ class MullAction : public PluginASTAction {
 
 protected:
   std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI, llvm::StringRef) override {
-    return llvm::make_unique<MullASTConsumer>(CI, usedMutatorSet);
+    return std::make_unique<MullASTConsumer>(CI, usedMutatorSet);
   }
 
   bool ParseArgs(const CompilerInstance &CI, const std::vector<std::string> &args) override {

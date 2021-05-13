@@ -26,12 +26,10 @@ void ASTMutator::replaceExpression(clang::BinaryOperator *oldBinaryOperator,
           std::find(parentStmt->child_begin(), parentStmt->child_end(), oldBinaryOperator);
       assert(parentChildrenIterator != parentStmt->child_end() && "parent-child relation broken");
       *parentChildrenIterator = conditionalExpr;
-    }
-    else if (const clang::VarDecl *constVarDecl = p.get<clang::VarDecl>()) {
+    } else if (const clang::VarDecl *constVarDecl = p.get<clang::VarDecl>()) {
       clang::VarDecl *parentVarDecl = (clang::VarDecl *)constVarDecl;
       parentVarDecl->setInit(conditionalExpr);
-    }
-    else {
+    } else {
       assert(0 && "error: not implemented");
     }
   }
@@ -69,13 +67,14 @@ void ASTMutator::replaceExpression(clang::BinaryOperator *oldBinaryOperator,
   //    } else if (const clang::ImplicitCastExpr *constImplicitCastExpr =
   //                   p.get<clang::ImplicitCastExpr>()) {
   //      llvm::errs() << "Parent is ImplicitCastExpr\n";
-  //      clang::ImplicitCastExpr *implicitCastExpr = (clang::ImplicitCastExpr *)constImplicitCastExpr;
-  //      implicitCastExpr->setSubExpr(conditionalExpr);
+  //      clang::ImplicitCastExpr *implicitCastExpr = (clang::ImplicitCastExpr
+  //      *)constImplicitCastExpr; implicitCastExpr->setSubExpr(conditionalExpr);
   //    } else if (const clang::VarDecl *constVarDecl = p.get<clang::VarDecl>()) {
   //      llvm::errs() << "Parent is VarDecl\n";
   //      clang::VarDecl *varDecl = (clang::VarDecl *)constVarDecl;
   //      varDecl->setInit(conditionalExpr);
-  //    } else if (const clang::BinaryOperator *constBinaryOperator = p.get<clang::BinaryOperator>()) {
+  //    } else if (const clang::BinaryOperator *constBinaryOperator =
+  //    p.get<clang::BinaryOperator>()) {
   //      llvm::errs() << "Parent is BinaryOperator\n";
   //      clang::BinaryOperator *binaryOperator = (clang::BinaryOperator *)constBinaryOperator;
   //      if (oldBinaryOperator == binaryOperator->getLHS()) {
@@ -137,15 +136,8 @@ clang::IfStmt *ASTMutator::createMutatedStatement(clang::Stmt *oldStmt, clang::S
   clang::CompoundStmt *compoundElseStmt =
       clang::CompoundStmt::Create(_context, elseStmts, NULL_LOCATION, NULL_LOCATION);
 
-  clang::IfStmt *ifStmt = clang::IfStmt::Create(_context,
-                                                NULL_LOCATION,
-                                                false,
-                                                nullptr,
-                                                nullptr,
-                                                implicitCastExpr,
-                                                compoundThenStmt,
-                                                NULL_LOCATION,
-                                                compoundElseStmt);
+  clang::IfStmt *ifStmt =
+      _factory.createIfStmt(implicitCastExpr, compoundThenStmt, compoundElseStmt);
 
   return ifStmt;
 }
@@ -212,11 +204,8 @@ clang::CallExpr *ASTMutator::createGetenvCallExpr(std::string identifier) {
                                       nullptr,
                                       clang::VK_RValue);
 
-  clang::CallExpr *callExpr = clang::CallExpr::Create(_context,
-                                                      implicitCastExpr,
-                                                      { implicitCastExpr2 },
-                                                      _getenvFuncDecl->getReturnType(),
-                                                      clang::VK_RValue,
-                                                      clang::SourceLocation());
+  clang::CallExpr *callExpr = _factory.createCallExprSingleArg(
+      implicitCastExpr, implicitCastExpr2, _getenvFuncDecl->getReturnType(), clang::VK_RValue);
+
   return callExpr;
 }
