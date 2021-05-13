@@ -28,60 +28,24 @@ INSTALL(TARGETS mull-cxx-frontend
   RUNTIME DESTINATION lib
 )
 
-target_link_libraries(mull-cxx-frontend PRIVATE
-  clangAnalysis
-  clangAST
-  clangASTMatchers
-  clangBasic
-  clangCodeGen
-  clangFrontend
-  clangLex
-  clangParse
-  clangSema
-  clangSerialization
-  clangEdit
-  clangDriver
-  clangTooling
-  LLVMAnalysis
-  LLVMScalarOpts
-  LLVMCoroutines
-  LLVMAsmPrinter
-  LLVMAsmParser
-  LLVMBinaryFormat
-  LLVMDebugInfoDWARF
-  LLVMInstCombine
-  LLVMMCDisassembler
-  LLVMSupport
-  LLVMCodeGen
-  LLVMCore
-  LLVMCoverage
-  LLVMBitReader
-  LLVMBitWriter
-  LLVMDebugInfoCodeView
-  LLVMDemangle
-  LLVMGlobalISel
-  LLVMInstrumentation
-  LLVMIRReader
-  LLVMLinker
-  LLVMLTO
-  LLVMMC
-  LLVMMCParser
-  LLVMPasses
-  LLVMProfileData
-  LLVMObject
-  LLVMOption
-  LLVMObjCARCOpts
-  LLVMSelectionDAG
-  LLVMSupport
-  LLVMTarget
-  LLVMTransformUtils
-  LLVMX86AsmParser
-  LLVMX86CodeGen
-  LLVMX86Info
-  LLVMX86Desc
-  LLVMVectorize
-  LLVMipo
-  LTO
-  ncurses
-  z
-)
+if (APPLE)
+  target_link_libraries(mull-cxx-frontend PRIVATE
+    clangAnalysis
+    clangAST
+    clangASTMatchers
+    clangBasic
+    clangCodeGen
+    clangFrontend
+    clangLex
+    clangParse
+    clangSema
+    clangSerialization
+    clangEdit
+    clangDriver
+    clangTooling
+  )
+else()
+  target_link_libraries(mull-cxx-frontend PRIVATE
+    clang
+  )
+endif()
