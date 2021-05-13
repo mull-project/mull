@@ -1,6 +1,7 @@
 #include "ASTNodeFactory.h"
 
 #include <clang/AST/ASTContext.h>
+#include <clang/AST/Attr.h>
 
 const clang::SourceLocation NULL_LOCATION;
 
@@ -25,18 +26,17 @@ clang::FunctionDecl *ASTNodeFactory::createFunctionDecl(std::string name,
       clang::CSK_unspecified /// ConstexprSpecKind ConstexprKind = CSK_unspecified
   );
 #else
-  return clang::FunctionDecl::Create(
-      _context,
-      declContext,
-      NULL_LOCATION,
-      NULL_LOCATION,
-      declarationName,
-      functionType,
-      _context.getTrivialTypeSourceInfo(functionType),
-      clang::StorageClass::SC_Extern,
-      false,                 /// bool isInlineSpecified = false,
-      true,                  /// bool hasWrittenPrototype = true,
-      false                  /// bool isConstexprSpecified = false,
+  return clang::FunctionDecl::Create(_context,
+                                     declContext,
+                                     NULL_LOCATION,
+                                     NULL_LOCATION,
+                                     declarationName,
+                                     functionType,
+                                     _context.getTrivialTypeSourceInfo(functionType),
+                                     clang::StorageClass::SC_Extern,
+                                     false, /// bool isInlineSpecified = false,
+                                     true,  /// bool hasWrittenPrototype = true,
+                                     false  /// bool isConstexprSpecified = false,
   );
 #endif
 }
@@ -52,10 +52,7 @@ clang::StringLiteral *ASTNodeFactory::createStringLiteral(std::string value) {
       value,
       clang::StringLiteral::StringKind::Ascii,
       false,
-      _context.getConstantArrayType(_context.getConstType(_context.CharTy),
-                                    llvm::APInt(8, value.size() + 1),
-                                    clang::ArrayType::ArraySizeModifier::Normal,
-                                    0),
+      getConstantArrayType(_context.getConstType(_context.CharTy), value.size()),
       NULL_LOCATION);
 }
 
@@ -106,6 +103,18 @@ clang::BinaryOperator *ASTNodeFactory::createBinaryOperator(clang::BinaryOperato
                                                             clang::Expr *lhs, clang::Expr *rhs,
                                                             clang::QualType resultType,
                                                             clang::ExprValueKind valueKind) {
+#if LLVM_VERSION_MAJOR >= 11
+  clang::FPOptionsOverride fpOptionsOverride;
+  return clang::BinaryOperator::Create(_context,
+                                       lhs,
+                                       rhs,
+                                       opcode,
+                                       resultType,
+                                       valueKind,
+                                       clang::ExprObjectKind::OK_Ordinary,
+                                       NULL_LOCATION,
+                                       fpOptionsOverride);
+#else
   clang::FPOptions fpOptions;
   return new (_context) clang::BinaryOperator(lhs,
                                               rhs,
@@ -115,6 +124,7 @@ clang::BinaryOperator *ASTNodeFactory::createBinaryOperator(clang::BinaryOperato
                                               clang::ExprObjectKind::OK_Ordinary,
                                               NULL_LOCATION,
                                               fpOptions);
+#endif
 }
 
 clang::CallExpr *ASTNodeFactory::createCallExprSingleArg(clang::Expr *function,
@@ -132,9 +142,31 @@ clang::CallExpr *ASTNodeFactory::createCallExprSingleArg(clang::Expr *function,
   return callExpr;
 }
 
+clang::SectionAttr *ASTNodeFactory::createSectionAttr(std::string sectionName) {
+#if LLVM_VERSION_MAJOR >= 10
+  return clang::SectionAttr::Create(_context,
+                                    sectionName,
+                                    clang::SourceRange(),
+                                    clang::AttributeCommonInfo::Syntax::AS_GNU,
+                                    clang::SectionAttr::Spelling::SpellingNotCalculated);
+#else
+  return new (_context) clang::SectionAttr(clang::SourceRange(), _context, sectionName, 0);
+#endif
+}
+
 clang::QualType ASTNodeFactory::getStringLiteralArrayType(clang::QualType type, unsigned size) {
 #if LLVM_VERSION_MAJOR >= 9
   return _context.getStringLiteralArrayType(type, size);
+#else
+  return _context.getConstantArrayType(
+      type, llvm::APInt(32, size + 1), clang::ArrayType::Normal, /*IndexTypeQuals*/ 0);
+#endif
+}
+
+clang::QualType ASTNodeFactory::getConstantArrayType(clang::QualType type, unsigned size) {
+#if LLVM_VERSION_MAJOR >= 10
+  return _context.getConstantArrayType(
+      type, llvm::APInt(8, size + 1), nullptr, clang::ArrayType::ArraySizeModifier::Normal, 0);
 #else
   return _context.getConstantArrayType(
       type, llvm::APInt(32, size + 1), clang::ArrayType::Normal, /*IndexTypeQuals*/ 0);

@@ -54,8 +54,7 @@ void ASTInstrumentation::addMutantStringDefinition(std::string identifier, int m
   const char *mullSection = ".mull_mutants";
 #endif
 
-  clang::SectionAttr *mullSectionAttr =
-      new (_context) clang::SectionAttr(clang::SourceRange(), _context, mullSection, 0);
+  clang::SectionAttr *mullSectionAttr = _factory.createSectionAttr(mullSection);
   varDecl->addAttr(mullSectionAttr);
   _context.getTranslationUnitDecl()->addDecl(varDecl);
 

@@ -3,6 +3,9 @@
 #include "ASTNodeFactory.h"
 
 #include <clang/AST/ASTContext.h>
+#if LLVM_VERSION_MAJOR >= 11
+#include <clang/AST/ParentMapContext.h>
+#endif
 #include <clang/Basic/SourceLocation.h>
 #include <llvm/Support/Casting.h>
 #include <llvm/Support/raw_ostream.h>
@@ -96,8 +99,6 @@ void ASTMutator::replaceStatement(clang::Stmt *oldStmt, clang::Stmt *newStmt,
   clang::IfStmt *ifCondition = createMutatedStatement(oldStmt, newStmt, identifier);
 
   for (auto p : _context.getParents(*oldStmt)) {
-    p.dump(llvm::errs(), _context.getSourceManager());
-
     const clang::Stmt *constParentStmt = p.get<clang::Stmt>();
     clang::Stmt *parentStmt = (clang::Stmt *)constParentStmt;
     assert(parentStmt);
@@ -190,10 +191,7 @@ clang::CallExpr *ASTMutator::createGetenvCallExpr(std::string identifier) {
       identifier,
       clang::StringLiteral::StringKind::Ascii,
       false,
-      _context.getConstantArrayType(_context.CharTy,
-                                    llvm::APInt(8, identifier.size() + 1),
-                                    clang::ArrayType::ArraySizeModifier::Normal,
-                                    0),
+      _factory.getConstantArrayType(_context.CharTy, identifier.size()),
       clang::SourceLocation());
 
   clang::ImplicitCastExpr *implicitCastExpr2 =

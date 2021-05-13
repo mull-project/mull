@@ -79,7 +79,6 @@ target_link_libraries(mull-cxx-frontend PRIVATE
   LLVMX86CodeGen
   LLVMX86Info
   LLVMX86Desc
-  LLVMX86Utils
   LLVMVectorize
   LLVMipo
   LTO

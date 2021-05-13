@@ -7,6 +7,10 @@
 
 extern const clang::SourceLocation NULL_LOCATION;
 
+namespace clang {
+  class SectionAttr;
+}
+
 class ASTNodeFactory {
   clang::ASTContext &_context;
 
@@ -31,6 +35,9 @@ public:
                                            clang::QualType returnType,
                                            clang::ExprValueKind valueKind);
 
+  clang::SectionAttr *createSectionAttr(std::string sectionName);
+
   /// Qual types
   clang::QualType getStringLiteralArrayType(clang::QualType type, unsigned size);
+  clang::QualType getConstantArrayType(clang::QualType type, unsigned size);
 };

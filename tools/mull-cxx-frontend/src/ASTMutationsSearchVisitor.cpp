@@ -4,6 +4,8 @@
 
 #include "mull/AST/MullClangCompatibility.h"
 
+#include <clang/Basic/SourceManager.h>
+
 std::vector<ASTMutation> ASTMutationsSearchVisitor::getAstMutations() {
   return astMutations;
 }
