@@ -2,7 +2,7 @@
 #include "ASTMutation.h"
 #include "ASTMutationsSearchVisitor.h"
 #include "ASTNodeFactory.h"
-#include "ClangASTMutator.h"
+#include "MullASTMutator.h"
 
 #include <clang/AST/AST.h>
 #include <clang/AST/ASTConsumer.h>
@@ -19,15 +19,12 @@ namespace {
 
 class MullASTConsumer : public ASTConsumer {
   CompilerInstance &Instance;
-  ASTNodeFactory _factory;
-  std::unique_ptr<ASTInstrumentation> instrumentation;
-  std::unique_ptr<ClangASTMutator> astMutator;
+  std::unique_ptr<MullASTMutator> astMutator;
   std::unordered_set<mull::MutatorKind> usedMutatorSet;
 
 public:
   MullASTConsumer(CompilerInstance &Instance, std::unordered_set<mull::MutatorKind> usedMutatorSet)
-      : Instance(Instance), _factory(Instance.getASTContext()), instrumentation(nullptr),
-        astMutator(nullptr), usedMutatorSet(usedMutatorSet) {}
+      : Instance(Instance), astMutator(nullptr), usedMutatorSet(usedMutatorSet) {}
 
   void Initialize(ASTContext &Context) override {
     ASTConsumer::Initialize(Context);
@@ -37,12 +34,8 @@ public:
     /// Should be a better place to create this. But at Initialize(), getSema() hits an internal
     /// assert.
     if (!astMutator) {
-      instrumentation = std::make_unique<ASTInstrumentation>(
-          Instance.getASTContext(), Instance.getSema(), _factory);
-      instrumentation->instrumentTranslationUnit();
-
-      astMutator = std::make_unique<ClangASTMutator>(
-          Instance.getASTContext(), _factory, instrumentation->getGetenvFuncDecl());
+      astMutator = std::make_unique<MullASTMutator>(Instance.getASTContext(), Instance.getSema());
+      astMutator->instrumentTranslationUnit();
     }
 
     for (DeclGroupRef::iterator I = DG.begin(), E = DG.end(); I != E; ++I) {
@@ -64,7 +57,7 @@ public:
       errs() << "HandleTopLevelDecl: Looking at function: " << f->getDeclName() << "\n";
       visitor.TraverseFunctionDecl(f);
       std::vector<ASTMutation> foundMutations = visitor.getAstMutations();
-      performMutations(foundMutations);
+      astMutator->performMutations(foundMutations);
     }
 
     return true;
@@ -74,55 +67,6 @@ public:
     // context.getTranslationUnitDecl()->print(llvm::errs(), 2);
     // context.getTranslationUnitDecl()->dump();
     // exit(1);
-  }
-
-  void performMutations(std::vector<ASTMutation> &astMutations) {
-    for (ASTMutation &astMutation : astMutations) {
-      if (astMutation.mutationType == mull::MutatorKind::CXX_AddToSub) {
-        clang::BinaryOperator *oldBinaryOperator =
-            dyn_cast<clang::BinaryOperator>(astMutation.mutableStmt);
-        clang::BinaryOperator *newBinaryOperator =
-            _factory.createBinaryOperator(BinaryOperator::Opcode::BO_Sub,
-                                          oldBinaryOperator->getLHS(),
-                                          oldBinaryOperator->getRHS(),
-                                          oldBinaryOperator->getType(),
-                                          oldBinaryOperator->getValueKind());
-        astMutator->replaceExpression(
-            oldBinaryOperator, newBinaryOperator, astMutation.mutationIdentifier);
-      } else if (astMutation.mutationType == mull::MutatorKind::CXX_SubToAdd) {
-        clang::BinaryOperator *oldBinaryOperator =
-            dyn_cast<clang::BinaryOperator>(astMutation.mutableStmt);
-        clang::BinaryOperator *newBinaryOperator =
-            _factory.createBinaryOperator(BinaryOperator::Opcode::BO_Add,
-                                          oldBinaryOperator->getLHS(),
-                                          oldBinaryOperator->getRHS(),
-                                          oldBinaryOperator->getType(),
-                                          oldBinaryOperator->getValueKind());
-        astMutator->replaceExpression(
-            oldBinaryOperator, newBinaryOperator, astMutation.mutationIdentifier);
-      } else if (astMutation.mutationType == mull::MutatorKind::CXX_Logical_OrToAnd) {
-        clang::BinaryOperator *oldBinaryOperator =
-            dyn_cast<clang::BinaryOperator>(astMutation.mutableStmt);
-        clang::BinaryOperator *newBinaryOperator =
-            _factory.createBinaryOperator(BinaryOperator::Opcode::BO_LAnd,
-                                          oldBinaryOperator->getLHS(),
-                                          oldBinaryOperator->getRHS(),
-                                          oldBinaryOperator->getType(),
-                                          oldBinaryOperator->getValueKind());
-        astMutator->replaceExpression(
-            oldBinaryOperator, newBinaryOperator, astMutation.mutationIdentifier);
-      } else if (astMutation.mutationType == mull::MutatorKind::CXX_RemoveVoidCall) {
-        clang::CallExpr *callExpr = dyn_cast<clang::CallExpr>(astMutation.mutableStmt);
-        astMutator->replaceStatement(callExpr, nullptr, astMutation.mutationIdentifier);
-      } else {
-        /// continue;
-        assert(0 && "Not implemented");
-      }
-      instrumentation->addMutantStringDefinition(astMutation.mutationIdentifier,
-                                                 static_cast<int>(astMutation.mutationType),
-                                                 astMutation.line,
-                                                 astMutation.column);
-    }
   }
 };
 

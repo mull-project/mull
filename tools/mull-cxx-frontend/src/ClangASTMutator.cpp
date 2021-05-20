@@ -1,3 +1,5 @@
+#include "ASTInstrumentation.h"
+
 #include "ClangASTMutator.h"
 
 #include "ASTNodeFactory.h"
@@ -170,7 +172,7 @@ clang::ConditionalOperator *ClangASTMutator::createMutatedExpression(clang::Expr
 }
 
 clang::CallExpr *ClangASTMutator::createGetenvCallExpr(std::string identifier) {
-  assert(_getenvFuncDecl);
+  clang::FunctionDecl *_getenvFuncDecl = _instrumentation.getGetenvFuncDecl();
   clang::DeclRefExpr *declRefExpr = clang::DeclRefExpr::Create(_context,
                                                                _getenvFuncDecl->getQualifierLoc(),
                                                                NULL_LOCATION,

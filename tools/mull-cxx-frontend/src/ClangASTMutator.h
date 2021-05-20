@@ -13,18 +13,18 @@ class IfStmt;
 class Stmt;
 } // namespace clang
 
+class ASTInstrumentation;
 class ASTNodeFactory;
 
 class ClangASTMutator {
   clang::ASTContext &_context;
   ASTNodeFactory &_factory;
-
-  clang::FunctionDecl *_getenvFuncDecl;
+  ASTInstrumentation &_instrumentation;
 
 public:
   ClangASTMutator(clang::ASTContext &context, ASTNodeFactory &factory,
-                  clang::FunctionDecl *getenvFuncDecl)
-      : _context(context), _factory(factory), _getenvFuncDecl(getenvFuncDecl) {}
+                  ASTInstrumentation &instrumentation)
+      : _context(context), _factory(factory), _instrumentation(instrumentation) {}
 
   void replaceExpression(clang::BinaryOperator *oldBinaryOperator,
                          clang::BinaryOperator *newBinaryOperator, std::string identifier);
