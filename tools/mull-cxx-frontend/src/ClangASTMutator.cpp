@@ -1,4 +1,4 @@
-#include "ASTMutator.h"
+#include "ClangASTMutator.h"
 
 #include "ASTNodeFactory.h"
 
@@ -16,9 +16,9 @@ struct ConditionalOperatorNastyCast : public clang::AbstractConditionalOperator 
 };
 static_assert(sizeof(ConditionalOperatorNastyCast) == sizeof(clang::ConditionalOperator));
 
-void ASTMutator::replaceExpression(clang::BinaryOperator *oldBinaryOperator,
-                                   clang::BinaryOperator *newBinaryOperator,
-                                   std::string identifier) {
+void ClangASTMutator::replaceExpression(clang::BinaryOperator *oldBinaryOperator,
+                                        clang::BinaryOperator *newBinaryOperator,
+                                        std::string identifier) {
   clang::ConditionalOperator *conditionalExpr =
       createMutatedExpression(oldBinaryOperator, newBinaryOperator, identifier);
 
@@ -94,8 +94,8 @@ void ASTMutator::replaceExpression(clang::BinaryOperator *oldBinaryOperator,
   //  }
 }
 
-void ASTMutator::replaceStatement(clang::Stmt *oldStmt, clang::Stmt *newStmt,
-                                  std::string identifier) {
+void ClangASTMutator::replaceStatement(clang::Stmt *oldStmt, clang::Stmt *newStmt,
+                                       std::string identifier) {
   clang::IfStmt *ifCondition = createMutatedStatement(oldStmt, newStmt, identifier);
 
   for (auto p : _context.getParents(*oldStmt)) {
@@ -113,8 +113,8 @@ void ASTMutator::replaceStatement(clang::Stmt *oldStmt, clang::Stmt *newStmt,
   return;
 }
 
-clang::IfStmt *ASTMutator::createMutatedStatement(clang::Stmt *oldStmt, clang::Stmt *newStmt,
-                                                  std::string identifier) {
+clang::IfStmt *ClangASTMutator::createMutatedStatement(clang::Stmt *oldStmt, clang::Stmt *newStmt,
+                                                       std::string identifier) {
   clang::CallExpr *getenvCallExpr = createGetenvCallExpr(identifier);
 
   clang::ImplicitCastExpr *implicitCastExpr =
@@ -143,9 +143,9 @@ clang::IfStmt *ASTMutator::createMutatedStatement(clang::Stmt *oldStmt, clang::S
   return ifStmt;
 }
 
-clang::ConditionalOperator *ASTMutator::createMutatedExpression(clang::Expr *oldExpr,
-                                                                clang::Expr *newExpr,
-                                                                std::string identifier) {
+clang::ConditionalOperator *ClangASTMutator::createMutatedExpression(clang::Expr *oldExpr,
+                                                                     clang::Expr *newExpr,
+                                                                     std::string identifier) {
   clang::CallExpr *mullShouldMutateCallExpr = createGetenvCallExpr(identifier);
 
   clang::ImplicitCastExpr *implicitCastExpr3 =
@@ -169,7 +169,7 @@ clang::ConditionalOperator *ASTMutator::createMutatedExpression(clang::Expr *old
   return conditionalOperator;
 }
 
-clang::CallExpr *ASTMutator::createGetenvCallExpr(std::string identifier) {
+clang::CallExpr *ClangASTMutator::createGetenvCallExpr(std::string identifier) {
   assert(_getenvFuncDecl);
   clang::DeclRefExpr *declRefExpr = clang::DeclRefExpr::Create(_context,
                                                                _getenvFuncDecl->getQualifierLoc(),

@@ -15,15 +15,15 @@ class Stmt;
 
 class ASTNodeFactory;
 
-class ASTMutator {
+class ClangASTMutator {
   clang::ASTContext &_context;
   ASTNodeFactory &_factory;
 
   clang::FunctionDecl *_getenvFuncDecl;
 
 public:
-  ASTMutator(clang::ASTContext &context, ASTNodeFactory &factory,
-             clang::FunctionDecl *getenvFuncDecl)
+  ClangASTMutator(clang::ASTContext &context, ASTNodeFactory &factory,
+                  clang::FunctionDecl *getenvFuncDecl)
       : _context(context), _factory(factory), _getenvFuncDecl(getenvFuncDecl) {}
 
   void replaceExpression(clang::BinaryOperator *oldBinaryOperator,

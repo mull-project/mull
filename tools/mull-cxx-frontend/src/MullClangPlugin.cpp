@@ -1,8 +1,8 @@
 #include "ASTInstrumentation.h"
 #include "ASTMutation.h"
 #include "ASTMutationsSearchVisitor.h"
-#include "ASTMutator.h"
 #include "ASTNodeFactory.h"
+#include "ClangASTMutator.h"
 
 #include <clang/AST/AST.h>
 #include <clang/AST/ASTConsumer.h>
@@ -21,7 +21,7 @@ class MullASTConsumer : public ASTConsumer {
   CompilerInstance &Instance;
   ASTNodeFactory _factory;
   std::unique_ptr<ASTInstrumentation> instrumentation;
-  std::unique_ptr<ASTMutator> astMutator;
+  std::unique_ptr<ClangASTMutator> astMutator;
   std::unordered_set<mull::MutatorKind> usedMutatorSet;
 
 public:
@@ -41,7 +41,7 @@ public:
           Instance.getASTContext(), Instance.getSema(), _factory);
       instrumentation->instrumentTranslationUnit();
 
-      astMutator = std::make_unique<ASTMutator>(
+      astMutator = std::make_unique<ClangASTMutator>(
           Instance.getASTContext(), _factory, instrumentation->getGetenvFuncDecl());
     }
 
@@ -89,8 +89,7 @@ public:
                                           oldBinaryOperator->getValueKind());
         astMutator->replaceExpression(
             oldBinaryOperator, newBinaryOperator, astMutation.mutationIdentifier);
-      }
-      else if (astMutation.mutationType == mull::MutatorKind::CXX_SubToAdd) {
+      } else if (astMutation.mutationType == mull::MutatorKind::CXX_SubToAdd) {
         clang::BinaryOperator *oldBinaryOperator =
             dyn_cast<clang::BinaryOperator>(astMutation.mutableStmt);
         clang::BinaryOperator *newBinaryOperator =
@@ -101,8 +100,7 @@ public:
                                           oldBinaryOperator->getValueKind());
         astMutator->replaceExpression(
             oldBinaryOperator, newBinaryOperator, astMutation.mutationIdentifier);
-      }
-      else if (astMutation.mutationType == mull::MutatorKind::CXX_Logical_OrToAnd) {
+      } else if (astMutation.mutationType == mull::MutatorKind::CXX_Logical_OrToAnd) {
         clang::BinaryOperator *oldBinaryOperator =
             dyn_cast<clang::BinaryOperator>(astMutation.mutableStmt);
         clang::BinaryOperator *newBinaryOperator =
