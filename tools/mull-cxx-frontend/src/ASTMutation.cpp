@@ -7,6 +7,7 @@
 
 static const std::unordered_map<mull::MutatorKind, std::string> KINDS_TO_STRINGS = {
   { mull::MutatorKind::CXX_AddToSub, "cxx_add_to_sub" },
+  { mull::MutatorKind::CXX_SubToAdd, "cxx_sub_to_add" },
   { mull::MutatorKind::CXX_Logical_OrToAnd, "cxx_logical_or_to_and" },
   { mull::MutatorKind::CXX_RemoveVoidCall, "cxx_remove_void_call" },
 };

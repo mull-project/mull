@@ -89,7 +89,20 @@ public:
                                           oldBinaryOperator->getValueKind());
         astMutator->replaceExpression(
             oldBinaryOperator, newBinaryOperator, astMutation.mutationIdentifier);
-      } else if (astMutation.mutationType == mull::MutatorKind::CXX_Logical_OrToAnd) {
+      }
+      else if (astMutation.mutationType == mull::MutatorKind::CXX_SubToAdd) {
+        clang::BinaryOperator *oldBinaryOperator =
+            dyn_cast<clang::BinaryOperator>(astMutation.mutableStmt);
+        clang::BinaryOperator *newBinaryOperator =
+            _factory.createBinaryOperator(BinaryOperator::Opcode::BO_Add,
+                                          oldBinaryOperator->getLHS(),
+                                          oldBinaryOperator->getRHS(),
+                                          oldBinaryOperator->getType(),
+                                          oldBinaryOperator->getValueKind());
+        astMutator->replaceExpression(
+            oldBinaryOperator, newBinaryOperator, astMutation.mutationIdentifier);
+      }
+      else if (astMutation.mutationType == mull::MutatorKind::CXX_Logical_OrToAnd) {
         clang::BinaryOperator *oldBinaryOperator =
             dyn_cast<clang::BinaryOperator>(astMutation.mutableStmt);
         clang::BinaryOperator *newBinaryOperator =
@@ -126,6 +139,7 @@ protected:
   bool ParseArgs(const CompilerInstance &CI, const std::vector<std::string> &args) override {
     const std::unordered_map<std::string, mull::MutatorKind> argsToMutatorsMap = {
       { "cxx_add_to_sub", mull::MutatorKind::CXX_AddToSub },
+      { "cxx_sub_to_add", mull::MutatorKind::CXX_SubToAdd },
       { "cxx_logical_or_to_and", mull::MutatorKind::CXX_Logical_OrToAnd },
       { "cxx_remove_void_call", mull::MutatorKind::CXX_RemoveVoidCall },
     };
