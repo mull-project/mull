@@ -56,8 +56,10 @@ public:
       ASTMutationsSearchVisitor visitor(Instance.getASTContext(), usedMutatorSet);
       errs() << "HandleTopLevelDecl: Looking at function: " << f->getDeclName() << "\n";
       visitor.TraverseFunctionDecl(f);
-      std::vector<ASTMutation> foundMutations = visitor.getAstMutations();
-      astMutator->performMutations(foundMutations);
+
+      for (auto &foundMutation : visitor.getAstMutations()) {
+        foundMutation->mutator->performMutation(*foundMutation, *astMutator);
+      }
     }
 
     return true;
@@ -82,6 +84,7 @@ protected:
     const std::unordered_map<std::string, mull::MutatorKind> argsToMutatorsMap = {
       { "cxx_add_to_sub", mull::MutatorKind::CXX_AddToSub },
       { "cxx_sub_to_add", mull::MutatorKind::CXX_SubToAdd },
+      { "cxx_mul_to_div", mull::MutatorKind::CXX_MulToDiv },
       { "cxx_logical_or_to_and", mull::MutatorKind::CXX_Logical_OrToAnd },
       { "cxx_remove_void_call", mull::MutatorKind::CXX_RemoveVoidCall },
     };
@@ -108,6 +111,8 @@ protected:
     }
     if (usedMutatorSet.empty()) {
       usedMutatorSet.insert(mull::MutatorKind::CXX_AddToSub);
+      usedMutatorSet.insert(mull::MutatorKind::CXX_SubToAdd);
+      usedMutatorSet.insert(mull::MutatorKind::CXX_MulToDiv);
       usedMutatorSet.insert(mull::MutatorKind::CXX_Logical_OrToAnd);
       usedMutatorSet.insert(mull::MutatorKind::CXX_RemoveVoidCall);
     }

@@ -62,11 +62,11 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
   /// Binary Operators
   if (clang::BinaryOperator *binaryOperator = clang::dyn_cast<clang::BinaryOperator>(expr)) {
     clang::SourceLocation binaryOperatorLocation = binaryOperator->getOperatorLoc();
-    for (const std::pair<clang::BinaryOperator::Opcode, mull::MutatorKind> &mutation :
+    for (const std::tuple<clang::BinaryOperator::Opcode, mull::MutatorKind, clang::BinaryOperator::Opcode> &mutation :
          BINARY_MUTATIONS) {
-      if (binaryOperator->getOpcode() == mutation.first &&
-          mutatorKindSet.includesMutator(mutation.second)) {
-        saveMutationPoint(mutation.second, binaryOperator, binaryOperatorLocation);
+      if (binaryOperator->getOpcode() == std::get<0>(mutation) &&
+          mutatorKindSet.includesMutator(std::get<1>(mutation))) {
+        saveMutationPoint(std::get<1>(mutation), binaryOperator, binaryOperatorLocation);
       }
     }
     return true;

@@ -6,7 +6,7 @@
 
 #include <clang/Basic/SourceManager.h>
 
-std::vector<ASTMutation> ASTMutationsSearchVisitor::getAstMutations() {
+std::vector<std::unique_ptr<ASTMutation>> &ASTMutationsSearchVisitor::getAstMutations() {
   return astMutations;
 }
 
@@ -17,11 +17,16 @@ bool ASTMutationsSearchVisitor::VisitFunctionDecl(clang::FunctionDecl *FD) {
 }
 
 bool ASTMutationsSearchVisitor::VisitBinaryOperator(clang::BinaryOperator *binaryOperator) {
-  for (const std::pair<clang::BinaryOperator::Opcode, mull::MutatorKind> &mutation :
-       mull::BINARY_MUTATIONS) {
-    if (binaryOperator->getOpcode() == mutation.first && isValidMutation(mutation.second)) {
+  for (const std::tuple<clang::BinaryOperator::Opcode,
+                        mull::MutatorKind,
+                        clang::BinaryOperator::Opcode> &mutation : mull::BINARY_MUTATIONS) {
+    if (binaryOperator->getOpcode() == std::get<0>(mutation) &&
+        isValidMutation(std::get<1>(mutation))) {
       clang::SourceLocation binaryOperatorLocation = binaryOperator->getOperatorLoc();
-      recordMutationPoint(mutation.second, binaryOperator, binaryOperatorLocation);
+      std::unique_ptr<BinaryMutator> binaryMutator =
+          std::make_unique<BinaryMutator>(std::get<2>(mutation));
+      recordMutationPoint(
+          std::get<1>(mutation), std::move(binaryMutator), binaryOperator, binaryOperatorLocation);
     }
   }
   return true;
@@ -29,7 +34,12 @@ bool ASTMutationsSearchVisitor::VisitBinaryOperator(clang::BinaryOperator *binar
 
 bool ASTMutationsSearchVisitor::VisitCallExpr(clang::CallExpr *callExpr) {
   if (callExpr->getType() == _context.VoidTy) {
-    recordMutationPoint(mull::MutatorKind::CXX_RemoveVoidCall, callExpr, ClangCompatibilityStmtGetBeginLoc(*callExpr));
+    std::unique_ptr<RemoveVoidMutator> removeVoidMutator =
+        std::make_unique<RemoveVoidMutator>();
+    recordMutationPoint(mull::MutatorKind::CXX_RemoveVoidCall,
+                        std::move(removeVoidMutator),
+                        callExpr,
+                        ClangCompatibilityStmtGetBeginLoc(*callExpr));
   }
   return true;
 }
@@ -39,6 +49,7 @@ bool ASTMutationsSearchVisitor::isValidMutation(mull::MutatorKind mutatorKind) {
 }
 
 void ASTMutationsSearchVisitor::recordMutationPoint(mull::MutatorKind mutatorKind,
+                                                    std::unique_ptr<Mutator> mutation,
                                                     clang::Stmt *stmt,
                                                     clang::SourceLocation location) {
   if (sourceManager.isInSystemHeader(location)) {
@@ -61,8 +72,9 @@ void ASTMutationsSearchVisitor::recordMutationPoint(mull::MutatorKind mutatorKin
   int beginLine = sourceManager.getExpansionLineNumber(location, nullptr);
   int beginColumn = sourceManager.getExpansionColumnNumber(location);
 
-  ASTMutation astMutation(mutatorKind, stmt, sourceFilePath, beginLine, beginColumn);
+  std::unique_ptr<ASTMutation> astMutation = std::make_unique<ASTMutation>(
+      std::move(mutation), mutatorKind, stmt, sourceFilePath, beginLine, beginColumn);
 
-  llvm::errs() << "Recording mutation point: " << astMutation.mutationIdentifier << "\n";
-  astMutations.emplace_back(astMutation);
+  llvm::errs() << "Recording mutation point: " << astMutation->mutationIdentifier << "\n";
+  astMutations.emplace_back(std::move(astMutation));
 }

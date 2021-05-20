@@ -8,14 +8,17 @@
 static const std::unordered_map<mull::MutatorKind, std::string> KINDS_TO_STRINGS = {
   { mull::MutatorKind::CXX_AddToSub, "cxx_add_to_sub" },
   { mull::MutatorKind::CXX_SubToAdd, "cxx_sub_to_add" },
+  { mull::MutatorKind::CXX_MulToDiv, "cxx_mul_to_div" },
   { mull::MutatorKind::CXX_Logical_OrToAnd, "cxx_logical_or_to_and" },
   { mull::MutatorKind::CXX_RemoveVoidCall, "cxx_remove_void_call" },
 };
 
-ASTMutation::ASTMutation(mull::MutatorKind mutationType, clang::Stmt *toBeMutatedStmt,
-                         std::string sourceFilePath, int line, int column)
-    : mutationType(mutationType), mutableStmt(toBeMutatedStmt), sourceFilePath(sourceFilePath),
-      line(line), column(column) {
+ASTMutation::ASTMutation(std::unique_ptr<Mutator> mutator,
+                         mull::MutatorKind mutationType,
+                         clang::Stmt *toBeMutatedStmt, std::string sourceFilePath, int line,
+                         int column)
+    : mutator(std::move(mutator)), mutationType(mutationType), mutableStmt(toBeMutatedStmt),
+      sourceFilePath(sourceFilePath), line(line), column(column) {
   std::ostringstream mis;
 
   assert(KINDS_TO_STRINGS.count(mutationType) > 0);

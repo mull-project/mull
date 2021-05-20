@@ -1,18 +1,22 @@
 #pragma once
 
+#include "ASTMutator.h"
+
 #include "mull/Mutators/MutatorKind.h"
 
 namespace clang {
-  class Stmt;
+class Stmt;
 }
 
-struct ASTMutation {
+class ASTMutation {
+public:
+  std::unique_ptr<Mutator> mutator;
   mull::MutatorKind mutationType;
   clang::Stmt *mutableStmt;
   std::string sourceFilePath;
   int line;
   int column;
   std::string mutationIdentifier;
-  ASTMutation(mull::MutatorKind mutationType, clang::Stmt *toBeMutatedStmt,
-              std::string sourceFilePath, int line, int column);
+  ASTMutation(std::unique_ptr<Mutator> mutator, mull::MutatorKind mutationType,
+              clang::Stmt *toBeMutatedStmt, std::string sourceFilePath, int line, int column);
 };

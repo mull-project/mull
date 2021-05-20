@@ -7,7 +7,7 @@
 class ASTMutationsSearchVisitor : public clang::RecursiveASTVisitor<ASTMutationsSearchVisitor> {
   clang::ASTContext &_context;
   clang::SourceManager &sourceManager;
-  std::vector<ASTMutation> astMutations;
+  std::vector<std::unique_ptr<ASTMutation>> astMutations;
   std::unordered_set<mull::MutatorKind> mutationsChecklist;
 
 public:
@@ -16,7 +16,7 @@ public:
       : _context(context), sourceManager(context.getSourceManager()), astMutations(),
         mutationsChecklist(mutationsChecklist) {}
 
-  std::vector<ASTMutation> getAstMutations();
+  std::vector<std::unique_ptr<ASTMutation>> &getAstMutations();
 
   bool VisitFunctionDecl(clang::FunctionDecl *FD);
   bool VisitBinaryOperator(clang::BinaryOperator *binaryOperator);
@@ -24,6 +24,6 @@ public:
 
 private:
   bool isValidMutation(mull::MutatorKind mutatorKind);
-  void recordMutationPoint(mull::MutatorKind mutatorKind, clang::Stmt *stmt,
-                           clang::SourceLocation location);
+  void recordMutationPoint(mull::MutatorKind mutatorKind, std::unique_ptr<Mutator> mutation,
+                           clang::Stmt *stmt, clang::SourceLocation location);
 };
