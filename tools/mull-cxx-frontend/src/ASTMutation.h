@@ -18,5 +18,6 @@ public:
   int column;
   std::string mutationIdentifier;
   ASTMutation(std::unique_ptr<Mutator> mutator, mull::MutatorKind mutationType,
-              clang::Stmt *toBeMutatedStmt, std::string sourceFilePath, int line, int column);
+              std::string mutationIdentifier, clang::Stmt *toBeMutatedStmt,
+              std::string sourceFilePath, int line, int column);
 };

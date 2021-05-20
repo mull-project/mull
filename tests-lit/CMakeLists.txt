@@ -43,7 +43,7 @@ set(LIT_COMMAND
   ${LIT_EXEC}
   -vv
   --filter cxx-front
-  # --filter sandbox
+  # --filter supported-mutations/cxx_add_to
   ${CMAKE_CURRENT_SOURCE_DIR}/tests
   )
 

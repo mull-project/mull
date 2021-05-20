@@ -1,8 +1,8 @@
 #include "ASTInstrumentation.h"
-#include "ASTMutation.h"
 #include "ASTMutationsSearchVisitor.h"
 #include "ASTNodeFactory.h"
 #include "MullASTMutator.h"
+#include "MutationMap.h"
 
 #include <clang/AST/AST.h>
 #include <clang/AST/ASTConsumer.h>
@@ -20,11 +20,11 @@ namespace {
 class MullASTConsumer : public ASTConsumer {
   CompilerInstance &Instance;
   std::unique_ptr<MullASTMutator> astMutator;
-  std::unordered_set<mull::MutatorKind> usedMutatorSet;
+  MutationMap mutationMap;
 
 public:
-  MullASTConsumer(CompilerInstance &Instance, std::unordered_set<mull::MutatorKind> usedMutatorSet)
-      : Instance(Instance), astMutator(nullptr), usedMutatorSet(usedMutatorSet) {}
+  MullASTConsumer(CompilerInstance &Instance, const MutationMap mutationMap)
+      : Instance(Instance), astMutator(nullptr), mutationMap(mutationMap) {}
 
   void Initialize(ASTContext &Context) override {
     ASTConsumer::Initialize(Context);
@@ -53,7 +53,7 @@ public:
         continue;
       }
 
-      ASTMutationsSearchVisitor visitor(Instance.getASTContext(), usedMutatorSet);
+      ASTMutationsSearchVisitor visitor(Instance.getASTContext(), mutationMap);
       errs() << "HandleTopLevelDecl: Looking at function: " << f->getDeclName() << "\n";
       visitor.TraverseFunctionDecl(f);
 
@@ -73,21 +73,14 @@ public:
 };
 
 class MullAction : public PluginASTAction {
-  std::unordered_set<mull::MutatorKind> usedMutatorSet;
+  MutationMap mutationMap;
 
 protected:
   std::unique_ptr<ASTConsumer> CreateASTConsumer(CompilerInstance &CI, llvm::StringRef) override {
-    return std::make_unique<MullASTConsumer>(CI, usedMutatorSet);
+    return std::make_unique<MullASTConsumer>(CI, mutationMap);
   }
 
   bool ParseArgs(const CompilerInstance &CI, const std::vector<std::string> &args) override {
-    const std::unordered_map<std::string, mull::MutatorKind> argsToMutatorsMap = {
-      { "cxx_add_to_sub", mull::MutatorKind::CXX_AddToSub },
-      { "cxx_sub_to_add", mull::MutatorKind::CXX_SubToAdd },
-      { "cxx_mul_to_div", mull::MutatorKind::CXX_MulToDiv },
-      { "cxx_logical_or_to_and", mull::MutatorKind::CXX_Logical_OrToAnd },
-      { "cxx_remove_void_call", mull::MutatorKind::CXX_RemoveVoidCall },
-    };
     clang::ASTContext &astContext = CI.getASTContext();
     for (const auto &arg : args) {
       std::string delimiter = "=";
@@ -106,16 +99,9 @@ protected:
         astContext.getDiagnostics().Report(diagId);
       }
       assert(components.size() == 2);
-      assert(argsToMutatorsMap.count(components.at(1)) != 0);
-      usedMutatorSet.insert(argsToMutatorsMap.at(components[1]));
+      mutationMap.addMutation(components.at(1));
     }
-    if (usedMutatorSet.empty()) {
-      usedMutatorSet.insert(mull::MutatorKind::CXX_AddToSub);
-      usedMutatorSet.insert(mull::MutatorKind::CXX_SubToAdd);
-      usedMutatorSet.insert(mull::MutatorKind::CXX_MulToDiv);
-      usedMutatorSet.insert(mull::MutatorKind::CXX_Logical_OrToAnd);
-      usedMutatorSet.insert(mull::MutatorKind::CXX_RemoveVoidCall);
-    }
+    mutationMap.setDefaultMutationsIfNotSpecified();
     return true;
   }
 

@@ -7,6 +7,7 @@ add_library(mull-cxx-frontend
   src/ClangASTMutator.cpp
   src/MullASTMutator.cpp
   src/MullClangPlugin.cpp
+  src/MutationMap.cpp
 
   ${CMAKE_SOURCE_DIR}/lib/AST/ASTConstants.cpp
   ${CMAKE_SOURCE_DIR}/lib/AST/MullClangCompatibility.cpp

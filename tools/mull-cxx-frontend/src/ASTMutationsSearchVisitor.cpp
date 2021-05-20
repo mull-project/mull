@@ -1,5 +1,7 @@
 #include "ASTMutationsSearchVisitor.h"
 
+#include "MutationMap.h"
+
 #include "mull/AST/ASTConstants.h"
 
 #include "mull/AST/MullClangCompatibility.h"
@@ -21,7 +23,7 @@ bool ASTMutationsSearchVisitor::VisitBinaryOperator(clang::BinaryOperator *binar
                         mull::MutatorKind,
                         clang::BinaryOperator::Opcode> &mutation : mull::BINARY_MUTATIONS) {
     if (binaryOperator->getOpcode() == std::get<0>(mutation) &&
-        isValidMutation(std::get<1>(mutation))) {
+        mutationMap.isValidMutation(std::get<1>(mutation))) {
       clang::SourceLocation binaryOperatorLocation = binaryOperator->getOperatorLoc();
       std::unique_ptr<BinaryMutator> binaryMutator =
           std::make_unique<BinaryMutator>(std::get<2>(mutation));
@@ -33,19 +35,15 @@ bool ASTMutationsSearchVisitor::VisitBinaryOperator(clang::BinaryOperator *binar
 }
 
 bool ASTMutationsSearchVisitor::VisitCallExpr(clang::CallExpr *callExpr) {
-  if (callExpr->getType() == _context.VoidTy) {
-    std::unique_ptr<RemoveVoidMutator> removeVoidMutator =
-        std::make_unique<RemoveVoidMutator>();
+  if (callExpr->getType() == _context.VoidTy &&
+      mutationMap.isValidMutation(mull::MutatorKind::CXX_RemoveVoidCall)) {
+    std::unique_ptr<RemoveVoidMutator> removeVoidMutator = std::make_unique<RemoveVoidMutator>();
     recordMutationPoint(mull::MutatorKind::CXX_RemoveVoidCall,
                         std::move(removeVoidMutator),
                         callExpr,
                         ClangCompatibilityStmtGetBeginLoc(*callExpr));
   }
   return true;
-}
-
-bool ASTMutationsSearchVisitor::isValidMutation(mull::MutatorKind mutatorKind) {
-  return mutationsChecklist.count(mutatorKind) > 0;
 }
 
 void ASTMutationsSearchVisitor::recordMutationPoint(mull::MutatorKind mutatorKind,
@@ -72,8 +70,14 @@ void ASTMutationsSearchVisitor::recordMutationPoint(mull::MutatorKind mutatorKin
   int beginLine = sourceManager.getExpansionLineNumber(location, nullptr);
   int beginColumn = sourceManager.getExpansionColumnNumber(location);
 
-  std::unique_ptr<ASTMutation> astMutation = std::make_unique<ASTMutation>(
-      std::move(mutation), mutatorKind, stmt, sourceFilePath, beginLine, beginColumn);
+  std::unique_ptr<ASTMutation> astMutation =
+      std::make_unique<ASTMutation>(std::move(mutation),
+                                    mutatorKind,
+                                    mutationMap.getIdentifier(mutatorKind),
+                                    stmt,
+                                    sourceFilePath,
+                                    beginLine,
+                                    beginColumn);
 
   llvm::errs() << "Recording mutation point: " << astMutation->mutationIdentifier << "\n";
   astMutations.emplace_back(std::move(astMutation));

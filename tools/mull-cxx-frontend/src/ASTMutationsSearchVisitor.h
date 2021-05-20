@@ -4,17 +4,18 @@
 
 #include <clang/AST/RecursiveASTVisitor.h>
 
+class MutationMap;
+
 class ASTMutationsSearchVisitor : public clang::RecursiveASTVisitor<ASTMutationsSearchVisitor> {
   clang::ASTContext &_context;
   clang::SourceManager &sourceManager;
   std::vector<std::unique_ptr<ASTMutation>> astMutations;
-  std::unordered_set<mull::MutatorKind> mutationsChecklist;
+  MutationMap &mutationMap;
 
 public:
-  ASTMutationsSearchVisitor(clang::ASTContext &context,
-                            std::unordered_set<mull::MutatorKind> mutationsChecklist)
+  ASTMutationsSearchVisitor(clang::ASTContext &context, MutationMap &mutationMap)
       : _context(context), sourceManager(context.getSourceManager()), astMutations(),
-        mutationsChecklist(mutationsChecklist) {}
+        mutationMap(mutationMap) {}
 
   std::vector<std::unique_ptr<ASTMutation>> &getAstMutations();
 
