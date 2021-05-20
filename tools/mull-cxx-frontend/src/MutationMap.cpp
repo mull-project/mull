@@ -4,6 +4,7 @@ static const std::vector<MutationIdentifier>
     MUTATIONS_MAP({ { "cxx_add_to_sub", mull::MutatorKind::CXX_AddToSub },
                     { "cxx_sub_to_add", mull::MutatorKind::CXX_SubToAdd },
                     { "cxx_mul_to_div", mull::MutatorKind::CXX_MulToDiv },
+                    { "cxx_div_to_mul", mull::MutatorKind::CXX_DivToMul },
                     { "cxx_logical_or_to_and", mull::MutatorKind::CXX_Logical_OrToAnd },
                     { "cxx_remove_void_call", mull::MutatorKind::CXX_RemoveVoidCall } });
 
