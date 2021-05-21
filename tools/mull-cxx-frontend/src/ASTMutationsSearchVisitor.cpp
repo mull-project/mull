@@ -19,6 +19,16 @@ bool ASTMutationsSearchVisitor::VisitFunctionDecl(clang::FunctionDecl *FD) {
 }
 
 bool ASTMutationsSearchVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOperator) {
+  if (unaryOperator->getOpcode() == clang::UnaryOperator::Opcode::UO_LNot &&
+      mutationMap.isValidMutation(mull::MutatorKind::CXX_RemoveNegation)) {
+    std::unique_ptr<UnaryOperatorRemovalMutator> mutator = std::make_unique<UnaryOperatorRemovalMutator>(unaryOperator);
+    recordMutationPoint(mull::MutatorKind::CXX_RemoveNegation,
+                        std::move(mutator),
+                        unaryOperator,
+                        unaryOperator->getOperatorLoc());
+    return true;
+  }
+
   if (unaryOperator->getOpcode() == clang::UnaryOperator::Opcode::UO_Minus &&
       mutationMap.isValidMutation(mull::MutatorKind::CXX_UnaryMinusToNoop)) {
     std::unique_ptr<UnaryOperatorRemovalMutator> mutator = std::make_unique<UnaryOperatorRemovalMutator>(unaryOperator);
