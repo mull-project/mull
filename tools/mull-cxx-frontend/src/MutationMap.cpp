@@ -23,8 +23,10 @@ static const std::vector<MutationIdentifier>
                     { "cxx_rem_assign_to_div_assign", mull::MutatorKind::CXX_RemAssignToDivAssign },
                     { "cxx_and_to_or", mull::MutatorKind::CXX_Bitwise_AndToOr },
                     { "cxx_or_to_and", mull::MutatorKind::CXX_Bitwise_OrToAnd },
+                    { "cxx_xor_to_or", mull::MutatorKind::CXX_Bitwise_XorToOr },
                     { "cxx_and_assign_to_or_assign", mull::MutatorKind::CXX_Bitwise_AndAssignToOrAssign },
                     { "cxx_or_assign_to_and_assign", mull::MutatorKind::CXX_Bitwise_OrAssignToAndAssign },
+                    { "cxx_xor_assign_to_or_assign", mull::MutatorKind::CXX_Bitwise_XorAssignToOrAssign },
                     { "cxx_logical_and_to_or", mull::MutatorKind::CXX_Logical_AndToOr },
                     { "cxx_logical_or_to_and", mull::MutatorKind::CXX_Logical_OrToAnd },
                     { "cxx_remove_void_call", mull::MutatorKind::CXX_RemoveVoidCall } });
