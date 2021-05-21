@@ -52,7 +52,10 @@ public:
       if (Instance.getSourceManager().isInSystemHeader(functionLocation)) {
         continue;
       }
-
+      std::string sourceFilePath = Instance.getSourceManager().getFilename(functionLocation).str();
+      if (sourceFilePath.find("include/gtest") != std::string::npos) {
+        continue;
+      }
       ASTMutationsSearchVisitor visitor(Instance.getASTContext(), mutationMap);
       errs() << "HandleTopLevelDecl: Looking at function: " << f->getDeclName() << "\n";
       visitor.TraverseFunctionDecl(f);

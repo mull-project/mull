@@ -5,6 +5,8 @@ static const std::vector<MutationIdentifier>
                     { "cxx_sub_to_add", mull::MutatorKind::CXX_SubToAdd },
                     { "cxx_mul_to_div", mull::MutatorKind::CXX_MulToDiv },
                     { "cxx_div_to_mul", mull::MutatorKind::CXX_DivToMul },
+                    { "cxx_eq_to_ne", mull::MutatorKind::CXX_EqualToNotEqual },
+                    { "cxx_ne_to_eq", mull::MutatorKind::CXX_NotEqualToEqual },
                     { "cxx_logical_and_to_or", mull::MutatorKind::CXX_Logical_AndToOr },
                     { "cxx_logical_or_to_and", mull::MutatorKind::CXX_Logical_OrToAnd },
                     { "cxx_remove_void_call", mull::MutatorKind::CXX_RemoveVoidCall } });
