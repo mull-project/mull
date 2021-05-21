@@ -26,8 +26,7 @@ public:
                   ASTInstrumentation &instrumentation)
       : _context(context), _factory(factory), _instrumentation(instrumentation) {}
 
-  void replaceExpression(clang::BinaryOperator *oldBinaryOperator,
-                         clang::BinaryOperator *newBinaryOperator, std::string identifier);
+  void replaceExpression(clang::Expr *oldExpr, clang::Expr *newExpr, std::string identifier);
   void replaceStatement(clang::Stmt *oldStmt, clang::Stmt *newStmt, std::string identifier);
   clang::IfStmt *createMutatedStatement(clang::Stmt *oldStmt, clang::Stmt *newStmt,
                                         std::string identifier);

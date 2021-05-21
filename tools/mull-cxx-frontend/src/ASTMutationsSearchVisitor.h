@@ -20,6 +20,7 @@ public:
   std::vector<std::unique_ptr<ASTMutation>> &getAstMutations();
 
   bool VisitFunctionDecl(clang::FunctionDecl *FD);
+  bool VisitUnaryOperator(clang::UnaryOperator *unaryOperator);
   bool VisitBinaryOperator(clang::BinaryOperator *binaryOperator);
   bool VisitCallExpr(clang::CallExpr *callExpr);
 

@@ -6,6 +6,19 @@ void MullASTMutator::instrumentTranslationUnit() {
   _instrumentation.instrumentTranslationUnit();
 }
 
+void MullASTMutator::performUnaryNotToNoopMutator(ASTMutation &mutation,
+                                                  UnaryNotToNoopMutator &unaryNotToNoopMutator) {
+
+  _clangAstMutator.replaceExpression(unaryNotToNoopMutator.unaryOperator,
+                                     unaryNotToNoopMutator.unaryOperator->getSubExpr(),
+                                     mutation.mutationIdentifier);
+
+  _instrumentation.addMutantStringDefinition(mutation.mutationIdentifier,
+                                             static_cast<int>(mutation.mutationType),
+                                             mutation.line,
+                                             mutation.column);
+}
+
 void MullASTMutator::performBinaryMutation(ASTMutation &mutation, BinaryMutator &binaryMutator) {
   clang::BinaryOperator *oldBinaryOperator =
       clang::dyn_cast<clang::BinaryOperator>(mutation.mutableStmt);

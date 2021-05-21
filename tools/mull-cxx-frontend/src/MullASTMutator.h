@@ -19,7 +19,10 @@ public:
 
   void instrumentTranslationUnit();
   void performBinaryMutation(ASTMutation &mutation, BinaryMutator &binaryMutator) override;
-  void performRemoveVoidMutation(ASTMutation &mutation, RemoveVoidMutator &removeVoidMutator) override;
+  void performRemoveVoidMutation(ASTMutation &mutation,
+                                 RemoveVoidMutator &removeVoidMutator) override;
+  void performUnaryNotToNoopMutator(ASTMutation &mutation,
+                                    UnaryNotToNoopMutator &unaryNotToNoopMutator) override;
 
 private:
   ASTNodeFactory _factory;

@@ -18,6 +18,18 @@ bool ASTMutationsSearchVisitor::VisitFunctionDecl(clang::FunctionDecl *FD) {
   return true;
 }
 
+bool ASTMutationsSearchVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOperator) {
+  if (unaryOperator->getOpcode() == clang::UnaryOperator::Opcode::UO_Not &&
+      mutationMap.isValidMutation(mull::MutatorKind::CXX_BitwiseNotToNoop)) {
+    std::unique_ptr<UnaryNotToNoopMutator> mutator = std::make_unique<UnaryNotToNoopMutator>(unaryOperator);
+    recordMutationPoint(mull::MutatorKind::CXX_BitwiseNotToNoop,
+                        std::move(mutator),
+                        unaryOperator,
+                        unaryOperator->getOperatorLoc());
+  }
+  return true;
+}
+
 bool ASTMutationsSearchVisitor::VisitBinaryOperator(clang::BinaryOperator *binaryOperator) {
   for (const std::tuple<clang::BinaryOperator::Opcode,
                         mull::MutatorKind,

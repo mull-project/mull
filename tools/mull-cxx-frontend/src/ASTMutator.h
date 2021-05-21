@@ -4,6 +4,7 @@
 
 class BinaryMutator;
 class RemoveVoidMutator;
+class UnaryNotToNoopMutator;
 class ASTMutation;
 
 class ASTMutator {
@@ -11,6 +12,8 @@ public:
   virtual void performBinaryMutation(ASTMutation &mutation, BinaryMutator &binaryMutator) = 0;
   virtual void performRemoveVoidMutation(ASTMutation &mutation,
                                          RemoveVoidMutator &removeVoidMutator) = 0;
+  virtual void performUnaryNotToNoopMutator(ASTMutation &mutation,
+                                            UnaryNotToNoopMutator &unaryNotToNoopMutator) = 0;
   virtual ~ASTMutator() {}
 };
 
@@ -38,4 +41,15 @@ public:
     mutator.performRemoveVoidMutation(mutation, *this);
   }
   ~RemoveVoidMutator() {}
+};
+
+class UnaryNotToNoopMutator : public Mutator {
+public:
+  clang::UnaryOperator *unaryOperator;
+
+  UnaryNotToNoopMutator(clang::UnaryOperator *unaryOperator) : unaryOperator(unaryOperator) {}
+  void performMutation(ASTMutation &mutation, ASTMutator &mutator) {
+    mutator.performUnaryNotToNoopMutator(mutation, *this);
+  }
+  ~UnaryNotToNoopMutator() {}
 };

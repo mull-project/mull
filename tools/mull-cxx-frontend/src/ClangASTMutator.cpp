@@ -18,17 +18,16 @@ struct ConditionalOperatorNastyCast : public clang::AbstractConditionalOperator 
 };
 static_assert(sizeof(ConditionalOperatorNastyCast) == sizeof(clang::ConditionalOperator));
 
-void ClangASTMutator::replaceExpression(clang::BinaryOperator *oldBinaryOperator,
-                                        clang::BinaryOperator *newBinaryOperator,
+void ClangASTMutator::replaceExpression(clang::Expr *oldExpr, clang::Expr *newExpr,
                                         std::string identifier) {
   clang::ConditionalOperator *conditionalExpr =
-      createMutatedExpression(oldBinaryOperator, newBinaryOperator, identifier);
+      createMutatedExpression(oldExpr, newExpr, identifier);
 
-  for (auto p : _context.getParents(*oldBinaryOperator)) {
+  for (auto p : _context.getParents(*oldExpr)) {
     if (const clang::Stmt *constParentStmt = p.get<clang::Stmt>()) {
       clang::Stmt *parentStmt = (clang::Stmt *)constParentStmt;
       clang::Stmt::child_iterator parentChildrenIterator =
-          std::find(parentStmt->child_begin(), parentStmt->child_end(), oldBinaryOperator);
+          std::find(parentStmt->child_begin(), parentStmt->child_end(), oldExpr);
       assert(parentChildrenIterator != parentStmt->child_end() && "parent-child relation broken");
       *parentChildrenIterator = conditionalExpr;
     } else if (const clang::VarDecl *constVarDecl = p.get<clang::VarDecl>()) {
