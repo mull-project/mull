@@ -11,6 +11,10 @@ static const std::vector<MutationIdentifier>
                     { "cxx_ge_to_lt", mull::MutatorKind::CXX_GreaterOrEqualToLessThan },
                     { "cxx_gt_to_ge", mull::MutatorKind::CXX_GreaterThanToGreaterOrEqual },
                     { "cxx_gt_to_le", mull::MutatorKind::CXX_GreaterThanToLessOrEqual },
+                    { "cxx_le_to_gt", mull::MutatorKind::CXX_LessOrEqualToGreaterThan },
+                    { "cxx_le_to_lt", mull::MutatorKind::CXX_LessOrEqualToLessThan },
+                    { "cxx_lt_to_ge", mull::MutatorKind::CXX_LessThanToGreaterOrEqual },
+                    { "cxx_lt_to_le", mull::MutatorKind::CXX_LessThanToLessOrEqual },
                     { "cxx_logical_and_to_or", mull::MutatorKind::CXX_Logical_AndToOr },
                     { "cxx_logical_or_to_and", mull::MutatorKind::CXX_Logical_OrToAnd },
                     { "cxx_remove_void_call", mull::MutatorKind::CXX_RemoveVoidCall } });
