@@ -9,12 +9,27 @@ void MullASTMutator::instrumentTranslationUnit() {
 void MullASTMutator::performBinaryMutation(ASTMutation &mutation, BinaryMutator &binaryMutator) {
   clang::BinaryOperator *oldBinaryOperator =
       clang::dyn_cast<clang::BinaryOperator>(mutation.mutableStmt);
-  clang::BinaryOperator *newBinaryOperator =
-      _factory.createBinaryOperator(binaryMutator.replacementOpCode,
-                                    oldBinaryOperator->getLHS(),
-                                    oldBinaryOperator->getRHS(),
-                                    oldBinaryOperator->getType(),
-                                    oldBinaryOperator->getValueKind());
+
+  clang::BinaryOperator *newBinaryOperator;
+
+  if (clang::CompoundAssignOperator *compoundAssignOperator =
+          clang::dyn_cast_or_null<clang::CompoundAssignOperator>(oldBinaryOperator)) {
+    newBinaryOperator =
+        _factory.createCompoundAssignOperator(binaryMutator.replacementOpCode,
+                                              oldBinaryOperator->getLHS(),
+                                              oldBinaryOperator->getRHS(),
+                                              oldBinaryOperator->getType(),
+                                              oldBinaryOperator->getValueKind(),
+                                              compoundAssignOperator->getComputationLHSType(),
+                                              compoundAssignOperator->getComputationResultType());
+  } else {
+    newBinaryOperator = _factory.createBinaryOperator(binaryMutator.replacementOpCode,
+                                                      oldBinaryOperator->getLHS(),
+                                                      oldBinaryOperator->getRHS(),
+                                                      oldBinaryOperator->getType(),
+                                                      oldBinaryOperator->getValueKind());
+  }
+
   _clangAstMutator.replaceExpression(
       oldBinaryOperator, newBinaryOperator, mutation.mutationIdentifier);
   _instrumentation.addMutantStringDefinition(mutation.mutationIdentifier,

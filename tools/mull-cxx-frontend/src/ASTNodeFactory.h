@@ -8,7 +8,7 @@
 extern const clang::SourceLocation NULL_LOCATION;
 
 namespace clang {
-  class SectionAttr;
+class SectionAttr;
 }
 
 class ASTNodeFactory {
@@ -31,6 +31,13 @@ public:
                                               clang::Expr *lhs, clang::Expr *rhs,
                                               clang::QualType resultType,
                                               clang::ExprValueKind valueKind);
+  clang::CompoundAssignOperator *createCompoundAssignOperator(clang::BinaryOperator::Opcode opcode,
+                                                              clang::Expr *lhs, clang::Expr *rhs,
+                                                              clang::QualType resultType,
+                                                              clang::ExprValueKind valueKind,
+                                                              clang::QualType compLHSType,
+                                                              clang::QualType compResultType);
+
   clang::CallExpr *createCallExprSingleArg(clang::Expr *function, clang::Expr *argument,
                                            clang::QualType returnType,
                                            clang::ExprValueKind valueKind);

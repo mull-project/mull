@@ -127,6 +127,37 @@ clang::BinaryOperator *ASTNodeFactory::createBinaryOperator(clang::BinaryOperato
 #endif
 }
 
+clang::CompoundAssignOperator *ASTNodeFactory::createCompoundAssignOperator(
+    clang::BinaryOperator::Opcode opcode, clang::Expr *lhs, clang::Expr *rhs,
+    clang::QualType resultType, clang::ExprValueKind valueKind, clang::QualType compLHSType,
+    clang::QualType compResultType) {
+
+#if LLVM_VERSION_MAJOR >= 11
+  clang::FPOptionsOverride fpOptionsOverride;
+  return clang::BinaryOperator::Create(_context,
+                                       lhs,
+                                       rhs,
+                                       opcode,
+                                       resultType,
+                                       valueKind,
+                                       clang::ExprObjectKind::OK_Ordinary,
+                                       NULL_LOCATION,
+                                       fpOptionsOverride);
+#else
+  clang::FPOptions fpOptions;
+  return new (_context) clang::CompoundAssignOperator(lhs,
+                                                      rhs,
+                                                      opcode,
+                                                      resultType,
+                                                      valueKind,
+                                                      clang::ExprObjectKind::OK_Ordinary,
+                                                      compLHSType,
+                                                      compResultType,
+                                                      NULL_LOCATION,
+                                                      fpOptions);
+#endif
+}
+
 clang::CallExpr *ASTNodeFactory::createCallExprSingleArg(clang::Expr *function,
                                                          clang::Expr *argument,
                                                          clang::QualType returnType,
