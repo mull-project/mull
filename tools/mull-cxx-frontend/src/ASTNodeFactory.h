@@ -27,6 +27,11 @@ public:
   clang::ImplicitCastExpr *createImplicitCastExpr(clang::Expr *expr, clang::QualType qualType,
                                                   clang::CastKind castKind,
                                                   clang::ExprValueKind valueKind);
+
+  clang::UnaryOperator *createUnaryOperator(clang::UnaryOperator::Opcode opcode, clang::Expr *expr,
+                                            clang::QualType resultType,
+                                            clang::ExprValueKind valueKind);
+
   clang::BinaryOperator *createBinaryOperator(clang::BinaryOperator::Opcode opcode,
                                               clang::Expr *lhs, clang::Expr *rhs,
                                               clang::QualType resultType,

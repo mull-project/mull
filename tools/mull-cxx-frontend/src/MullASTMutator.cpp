@@ -6,6 +6,25 @@ void MullASTMutator::instrumentTranslationUnit() {
   _instrumentation.instrumentTranslationUnit();
 }
 
+void MullASTMutator::performUnaryOperatorOpcodeReplacementMutation(
+    ASTMutation &mutation,
+    UnaryOperatorOpcodeReplacementMutator &unaryOperatorOpcodeReplacementMutator) {
+  clang::UnaryOperator *oldUnaryOperator =
+      clang::dyn_cast_or_null<clang::UnaryOperator>(mutation.mutableStmt);
+  clang::UnaryOperator *newUnaryOperator =
+      _factory.createUnaryOperator(unaryOperatorOpcodeReplacementMutator.replacementOpCode,
+                                   oldUnaryOperator->getSubExpr(),
+                                   oldUnaryOperator->getType(),
+                                   oldUnaryOperator->getValueKind());
+
+  _clangAstMutator.replaceExpression(
+      oldUnaryOperator, newUnaryOperator, mutation.mutationIdentifier);
+  _instrumentation.addMutantStringDefinition(mutation.mutationIdentifier,
+                                             static_cast<int>(mutation.mutationType),
+                                             mutation.line,
+                                             mutation.column);
+}
+
 void MullASTMutator::performUnaryOperatorRemovalMutation(
     ASTMutation &mutation, UnaryOperatorRemovalMutator &unaryNotToNoopMutator) {
 

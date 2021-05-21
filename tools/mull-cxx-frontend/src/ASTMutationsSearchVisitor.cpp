@@ -19,9 +19,58 @@ bool ASTMutationsSearchVisitor::VisitFunctionDecl(clang::FunctionDecl *FD) {
 }
 
 bool ASTMutationsSearchVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOperator) {
+  if (unaryOperator->getOpcode() == clang::UnaryOperator::Opcode::UO_PostDec &&
+      mutationMap.isValidMutation(mull::MutatorKind::CXX_PostDecToPostInc)) {
+    std::unique_ptr<UnaryOperatorOpcodeReplacementMutator> mutator =
+        std::make_unique<UnaryOperatorOpcodeReplacementMutator>(
+            clang::UnaryOperator::Opcode::UO_PostInc);
+    recordMutationPoint(mull::MutatorKind::CXX_PostDecToPostInc,
+                        std::move(mutator),
+                        unaryOperator,
+                        unaryOperator->getOperatorLoc());
+    return true;
+  }
+
+  if (unaryOperator->getOpcode() == clang::UnaryOperator::Opcode::UO_PostInc &&
+      mutationMap.isValidMutation(mull::MutatorKind::CXX_PostIncToPostDec)) {
+    std::unique_ptr<UnaryOperatorOpcodeReplacementMutator> mutator =
+        std::make_unique<UnaryOperatorOpcodeReplacementMutator>(
+            clang::UnaryOperator::Opcode::UO_PostDec);
+    recordMutationPoint(mull::MutatorKind::CXX_PostIncToPostDec,
+                        std::move(mutator),
+                        unaryOperator,
+                        unaryOperator->getOperatorLoc());
+    return true;
+  }
+
+  if (unaryOperator->getOpcode() == clang::UnaryOperator::Opcode::UO_PreInc &&
+      mutationMap.isValidMutation(mull::MutatorKind::CXX_PreIncToPreDec)) {
+    std::unique_ptr<UnaryOperatorOpcodeReplacementMutator> mutator =
+        std::make_unique<UnaryOperatorOpcodeReplacementMutator>(
+            clang::UnaryOperator::Opcode::UO_PreDec);
+    recordMutationPoint(mull::MutatorKind::CXX_PreIncToPreDec,
+                        std::move(mutator),
+                        unaryOperator,
+                        unaryOperator->getOperatorLoc());
+    return true;
+  }
+
+  if (unaryOperator->getOpcode() == clang::UnaryOperator::Opcode::UO_PreDec &&
+      mutationMap.isValidMutation(mull::MutatorKind::CXX_PreDecToPreInc)) {
+    std::unique_ptr<UnaryOperatorOpcodeReplacementMutator> mutator =
+        std::make_unique<UnaryOperatorOpcodeReplacementMutator>(
+            clang::UnaryOperator::Opcode::UO_PreInc);
+    recordMutationPoint(mull::MutatorKind::CXX_PreDecToPreInc,
+                        std::move(mutator),
+                        unaryOperator,
+                        unaryOperator->getOperatorLoc());
+    return true;
+  }
+
   if (unaryOperator->getOpcode() == clang::UnaryOperator::Opcode::UO_LNot &&
       mutationMap.isValidMutation(mull::MutatorKind::CXX_RemoveNegation)) {
-    std::unique_ptr<UnaryOperatorRemovalMutator> mutator = std::make_unique<UnaryOperatorRemovalMutator>(unaryOperator);
+    std::unique_ptr<UnaryOperatorRemovalMutator> mutator =
+        std::make_unique<UnaryOperatorRemovalMutator>(unaryOperator);
     recordMutationPoint(mull::MutatorKind::CXX_RemoveNegation,
                         std::move(mutator),
                         unaryOperator,
@@ -31,7 +80,8 @@ bool ASTMutationsSearchVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOp
 
   if (unaryOperator->getOpcode() == clang::UnaryOperator::Opcode::UO_Minus &&
       mutationMap.isValidMutation(mull::MutatorKind::CXX_UnaryMinusToNoop)) {
-    std::unique_ptr<UnaryOperatorRemovalMutator> mutator = std::make_unique<UnaryOperatorRemovalMutator>(unaryOperator);
+    std::unique_ptr<UnaryOperatorRemovalMutator> mutator =
+        std::make_unique<UnaryOperatorRemovalMutator>(unaryOperator);
     recordMutationPoint(mull::MutatorKind::CXX_UnaryMinusToNoop,
                         std::move(mutator),
                         unaryOperator,
@@ -41,7 +91,8 @@ bool ASTMutationsSearchVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOp
 
   if (unaryOperator->getOpcode() == clang::UnaryOperator::Opcode::UO_Not &&
       mutationMap.isValidMutation(mull::MutatorKind::CXX_BitwiseNotToNoop)) {
-    std::unique_ptr<UnaryOperatorRemovalMutator> mutator = std::make_unique<UnaryOperatorRemovalMutator>(unaryOperator);
+    std::unique_ptr<UnaryOperatorRemovalMutator> mutator =
+        std::make_unique<UnaryOperatorRemovalMutator>(unaryOperator);
     recordMutationPoint(mull::MutatorKind::CXX_BitwiseNotToNoop,
                         std::move(mutator),
                         unaryOperator,

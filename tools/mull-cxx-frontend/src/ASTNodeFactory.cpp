@@ -99,6 +99,32 @@ clang::ImplicitCastExpr *ASTNodeFactory::createImplicitCastExpr(clang::Expr *exp
   return clang::ImplicitCastExpr::Create(_context, qualType, castKind, expr, nullptr, valueKind);
 }
 
+clang::UnaryOperator *ASTNodeFactory::createUnaryOperator(clang::UnaryOperator::Opcode opcode,
+                                                          clang::Expr *expr,
+                                                          clang::QualType resultType,
+                                                          clang::ExprValueKind valueKind) {
+#if LLVM_VERSION_MAJOR >= 11
+  clang::FPOptionsOverride fpOptionsOverride;
+  return clang::BinaryOperator::Create(_context,
+                                       lhs,
+                                       rhs,
+                                       opcode,
+                                       resultType,
+                                       valueKind,
+                                       clang::ExprObjectKind::OK_Ordinary,
+                                       NULL_LOCATION,
+                                       fpOptionsOverride);
+#else
+  return new (_context) clang::UnaryOperator(expr,
+                                             opcode,
+                                             resultType,
+                                             valueKind,
+                                             clang::ExprObjectKind::OK_Ordinary,
+                                             NULL_LOCATION,
+                                             false);
+#endif
+}
+
 clang::BinaryOperator *ASTNodeFactory::createBinaryOperator(clang::BinaryOperator::Opcode opcode,
                                                             clang::Expr *lhs, clang::Expr *rhs,
                                                             clang::QualType resultType,
