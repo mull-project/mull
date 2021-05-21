@@ -43,7 +43,7 @@ set(LIT_COMMAND
   ${LIT_EXEC}
   -vv
   --filter cxx-front
-  --filter cxx_bitwise_not_to_noop
+  # --filter cxx_minus_to_noop
   ${CMAKE_CURRENT_SOURCE_DIR}/tests
   )
 

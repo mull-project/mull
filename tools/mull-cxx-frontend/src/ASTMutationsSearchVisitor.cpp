@@ -19,13 +19,24 @@ bool ASTMutationsSearchVisitor::VisitFunctionDecl(clang::FunctionDecl *FD) {
 }
 
 bool ASTMutationsSearchVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOperator) {
+  if (unaryOperator->getOpcode() == clang::UnaryOperator::Opcode::UO_Minus &&
+      mutationMap.isValidMutation(mull::MutatorKind::CXX_UnaryMinusToNoop)) {
+    std::unique_ptr<UnaryOperatorRemovalMutator> mutator = std::make_unique<UnaryOperatorRemovalMutator>(unaryOperator);
+    recordMutationPoint(mull::MutatorKind::CXX_UnaryMinusToNoop,
+                        std::move(mutator),
+                        unaryOperator,
+                        unaryOperator->getOperatorLoc());
+    return true;
+  }
+
   if (unaryOperator->getOpcode() == clang::UnaryOperator::Opcode::UO_Not &&
       mutationMap.isValidMutation(mull::MutatorKind::CXX_BitwiseNotToNoop)) {
-    std::unique_ptr<UnaryNotToNoopMutator> mutator = std::make_unique<UnaryNotToNoopMutator>(unaryOperator);
+    std::unique_ptr<UnaryOperatorRemovalMutator> mutator = std::make_unique<UnaryOperatorRemovalMutator>(unaryOperator);
     recordMutationPoint(mull::MutatorKind::CXX_BitwiseNotToNoop,
                         std::move(mutator),
                         unaryOperator,
                         unaryOperator->getOperatorLoc());
+    return true;
   }
   return true;
 }

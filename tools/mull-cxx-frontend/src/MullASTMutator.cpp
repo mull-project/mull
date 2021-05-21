@@ -6,8 +6,8 @@ void MullASTMutator::instrumentTranslationUnit() {
   _instrumentation.instrumentTranslationUnit();
 }
 
-void MullASTMutator::performUnaryNotToNoopMutator(ASTMutation &mutation,
-                                                  UnaryNotToNoopMutator &unaryNotToNoopMutator) {
+void MullASTMutator::performUnaryOperatorRemovalMutation(
+    ASTMutation &mutation, UnaryOperatorRemovalMutator &unaryNotToNoopMutator) {
 
   _clangAstMutator.replaceExpression(unaryNotToNoopMutator.unaryOperator,
                                      unaryNotToNoopMutator.unaryOperator->getSubExpr(),

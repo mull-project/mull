@@ -21,8 +21,9 @@ public:
   void performBinaryMutation(ASTMutation &mutation, BinaryMutator &binaryMutator) override;
   void performRemoveVoidMutation(ASTMutation &mutation,
                                  RemoveVoidMutator &removeVoidMutator) override;
-  void performUnaryNotToNoopMutator(ASTMutation &mutation,
-                                    UnaryNotToNoopMutator &unaryNotToNoopMutator) override;
+  void
+  performUnaryOperatorRemovalMutation(ASTMutation &mutation,
+                                      UnaryOperatorRemovalMutator &unaryNotToNoopMutator) override;
 
 private:
   ASTNodeFactory _factory;
