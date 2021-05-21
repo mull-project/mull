@@ -41,8 +41,8 @@ static const std::vector<MutationIdentifier> MUTATIONS_MAP(
       { "cxx_minus_to_noop", mull::MutatorKind::CXX_UnaryMinusToNoop },
       { "cxx_bitwise_not_to_noop", mull::MutatorKind::CXX_BitwiseNotToNoop },
       { "cxx_remove_negation", mull::MutatorKind::CXX_RemoveNegation },
-      { "cxx_assign_const", mull::MutatorKind::CXX_AssignConst }
-    });
+      { "cxx_assign_const", mull::MutatorKind::CXX_AssignConst },
+      { "cxx_init_const", mull::MutatorKind::CXX_InitConst } });
 
 MutationMap::MutationMap() : _usedMutatorSet(), _mapKindsToIdentifiers(), _mapIdentifiersToKinds() {
   for (const MutationIdentifier &mutationIdentifier : MUTATIONS_MAP) {

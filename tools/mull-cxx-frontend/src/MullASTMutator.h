@@ -30,6 +30,9 @@ public:
   void performReplaceNumericAssignmentMutation(
       ASTMutation &mutation,
       ReplaceNumericAssignmentMutator &replaceNumericAssignmentMutator) override;
+  void performReplaceNumericInitAssignmentMutation(
+      ASTMutation &mutation,
+      ReplaceNumericInitAssignmentMutator &replaceNumericInitAssignmentMutator) override;
 
 private:
   clang::ASTContext &_context;

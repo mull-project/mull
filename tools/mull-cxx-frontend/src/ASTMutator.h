@@ -8,6 +8,7 @@ class RemoveVoidMutator;
 class UnaryOperatorOpcodeReplacementMutator;
 class UnaryOperatorRemovalMutator;
 class ReplaceNumericAssignmentMutator;
+class ReplaceNumericInitAssignmentMutator;
 
 class ASTMutator {
 public:
@@ -25,6 +26,10 @@ public:
                                       UnaryOperatorRemovalMutator &unaryNotToNoopMutator) = 0;
   virtual void performReplaceNumericAssignmentMutation(
       ASTMutation &mutation, ReplaceNumericAssignmentMutator &replaceNumericAssignmentMutator) = 0;
+
+  virtual void performReplaceNumericInitAssignmentMutation(
+      ASTMutation &mutation,
+      ReplaceNumericInitAssignmentMutator &replaceNumericInitAssignmentMutator) = 0;
 };
 
 class Mutator {
@@ -88,5 +93,17 @@ public:
 
   void performMutation(ASTMutation &mutation, ASTMutator &mutator) {
     mutator.performReplaceNumericAssignmentMutation(mutation, *this);
+  }
+};
+
+class ReplaceNumericInitAssignmentMutator : public Mutator {
+
+public:
+  clang::VarDecl *varDecl;
+
+  ReplaceNumericInitAssignmentMutator(clang::VarDecl *varDecl) : varDecl(varDecl) {}
+
+  void performMutation(ASTMutation &mutation, ASTMutator &mutator) {
+    mutator.performReplaceNumericInitAssignmentMutation(mutation, *this);
   }
 };

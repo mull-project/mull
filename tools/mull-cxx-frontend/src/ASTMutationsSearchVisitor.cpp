@@ -6,6 +6,7 @@
 
 #include "mull/AST/MullClangCompatibility.h"
 
+#include <clang/AST/Decl.h>
 #include <clang/Basic/SourceManager.h>
 
 std::vector<std::unique_ptr<ASTMutation>> &ASTMutationsSearchVisitor::getAstMutations() {
@@ -142,6 +143,25 @@ bool ASTMutationsSearchVisitor::VisitCallExpr(clang::CallExpr *callExpr) {
                         std::move(removeVoidMutator),
                         callExpr,
                         ClangCompatibilityStmtGetBeginLoc(*callExpr));
+  }
+  return true;
+}
+
+bool ASTMutationsSearchVisitor::VisitVarDecl(clang::VarDecl *D) {
+  if (clang::dyn_cast_or_null<clang::ParmVarDecl>(D)) {
+    return true;
+  }
+
+  if (mutationMap.isValidMutation(mull::MutatorKind::CXX_InitConst) &&
+      (D->getType() == _context.IntTy || D->getType() == _context.FloatTy ||
+       D->getType() == _context.DoubleTy)) {
+    std::unique_ptr<ReplaceNumericInitAssignmentMutator> mutator =
+        std::make_unique<ReplaceNumericInitAssignmentMutator>(D);
+    recordMutationPoint(mull::MutatorKind::CXX_InitConst,
+                        std::move(mutator),
+                        D->getInit(),
+                        D->getInit()->getExprLoc());
+    return true;
   }
   return true;
 }

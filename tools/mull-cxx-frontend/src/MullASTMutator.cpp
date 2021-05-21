@@ -94,8 +94,7 @@ void MullASTMutator::performReplaceNumericAssignmentMutation(
     replacementLiteral = _factory.createFloatLiteral(42.f);
   } else if (oldAssignedExpr->getType() == _context.DoubleTy) {
     replacementLiteral = _factory.createFloatLiteral(42.0);
-  }
-  else {
+  } else {
     assert(0 && "Not implemented");
   }
 
@@ -103,6 +102,32 @@ void MullASTMutator::performReplaceNumericAssignmentMutation(
       replaceNumericAssignmentMutator.assignmentBinaryOperator->getRHS(),
       replacementLiteral,
       mutation.mutationIdentifier);
+  _instrumentation.addMutantStringDefinition(mutation.mutationIdentifier,
+                                             static_cast<int>(mutation.mutationType),
+                                             mutation.line,
+                                             mutation.column);
+}
+
+void MullASTMutator::performReplaceNumericInitAssignmentMutation(
+    ASTMutation &mutation,
+    ReplaceNumericInitAssignmentMutator &replaceNumericInitAssignmentMutator) {
+  assert(replaceNumericInitAssignmentMutator.varDecl->getKind() == clang::VarDecl::Kind::Var);
+
+  clang::Expr *oldAssignedExpr = replaceNumericInitAssignmentMutator.varDecl->getInit();
+
+  clang::Expr *replacementLiteral;
+  if (oldAssignedExpr->getType() == _context.IntTy) {
+    replacementLiteral = _factory.createIntegerLiteral(42);
+  } else if (oldAssignedExpr->getType() == _context.FloatTy) {
+    replacementLiteral = _factory.createFloatLiteral(42.f);
+  } else if (oldAssignedExpr->getType() == _context.DoubleTy) {
+    replacementLiteral = _factory.createFloatLiteral(42.0);
+  } else {
+    assert(0 && "Not implemented");
+  }
+
+  _clangAstMutator.replaceExpression(
+      oldAssignedExpr, replacementLiteral, mutation.mutationIdentifier);
   _instrumentation.addMutantStringDefinition(mutation.mutationIdentifier,
                                              static_cast<int>(mutation.mutationType),
                                              mutation.line,

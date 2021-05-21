@@ -23,7 +23,7 @@ public:
   bool VisitUnaryOperator(clang::UnaryOperator *unaryOperator);
   bool VisitBinaryOperator(clang::BinaryOperator *binaryOperator);
   bool VisitCallExpr(clang::CallExpr *callExpr);
-
+  bool VisitVarDecl(clang::VarDecl *D);
 private:
   bool isValidMutation(mull::MutatorKind mutatorKind);
   void recordMutationPoint(mull::MutatorKind mutatorKind, std::unique_ptr<Mutator> mutation,
