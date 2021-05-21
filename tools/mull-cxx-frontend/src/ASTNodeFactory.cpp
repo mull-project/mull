@@ -43,7 +43,23 @@ clang::FunctionDecl *ASTNodeFactory::createFunctionDecl(std::string name,
 
 clang::IntegerLiteral *ASTNodeFactory::createIntegerLiteral(int value) {
   return clang::IntegerLiteral::Create(
-      _context, llvm::APInt(32, 0, true), _context.IntTy, NULL_LOCATION);
+      _context, llvm::APInt(32, value, true), _context.IntTy, NULL_LOCATION);
+}
+
+clang::FloatingLiteral *ASTNodeFactory::createFloatLiteral(float value) {
+  return clang::FloatingLiteral::Create(_context,
+                                        llvm::APFloat(value),
+                                        true,
+                                        _context.FloatTy,
+                                        NULL_LOCATION);
+}
+
+clang::FloatingLiteral *ASTNodeFactory::createFloatLiteral(double value) {
+  return clang::FloatingLiteral::Create(_context,
+                                        llvm::APFloat(value),
+                                        true,
+                                        _context.DoubleTy,
+                                        NULL_LOCATION);
 }
 
 clang::StringLiteral *ASTNodeFactory::createStringLiteral(std::string value) {

@@ -103,16 +103,32 @@ bool ASTMutationsSearchVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOp
 }
 
 bool ASTMutationsSearchVisitor::VisitBinaryOperator(clang::BinaryOperator *binaryOperator) {
+  if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Assign &&
+      mutationMap.isValidMutation(mull::MutatorKind::CXX_AssignConst)) {
+    if (binaryOperator->getRHS()->getType() == _context.IntTy ||
+        binaryOperator->getRHS()->getType() == _context.FloatTy ||
+        binaryOperator->getRHS()->getType() == _context.DoubleTy) {
+      std::unique_ptr<ReplaceNumericAssignmentMutator> mutator =
+          std::make_unique<ReplaceNumericAssignmentMutator>(binaryOperator);
+      recordMutationPoint(mull::MutatorKind::CXX_AssignConst,
+                          std::move(mutator),
+                          binaryOperator,
+                          binaryOperator->getOperatorLoc());
+    }
+    return true;
+  }
+
   for (const std::tuple<clang::BinaryOperator::Opcode,
                         mull::MutatorKind,
                         clang::BinaryOperator::Opcode> &mutation : mull::BINARY_MUTATIONS) {
     if (binaryOperator->getOpcode() == std::get<0>(mutation) &&
         mutationMap.isValidMutation(std::get<1>(mutation))) {
-      clang::SourceLocation binaryOperatorLocation = binaryOperator->getOperatorLoc();
       std::unique_ptr<BinaryMutator> binaryMutator =
           std::make_unique<BinaryMutator>(std::get<2>(mutation));
-      recordMutationPoint(
-          std::get<1>(mutation), std::move(binaryMutator), binaryOperator, binaryOperatorLocation);
+      recordMutationPoint(std::get<1>(mutation),
+                          std::move(binaryMutator),
+                          binaryOperator,
+                          binaryOperator->getOperatorLoc());
     }
   }
   return true;

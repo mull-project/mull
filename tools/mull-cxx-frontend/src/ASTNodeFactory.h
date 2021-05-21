@@ -21,6 +21,8 @@ public:
   clang::FunctionDecl *createFunctionDecl(std::string name, clang::DeclContext *declContext,
                                           clang::QualType functionType);
   clang::IntegerLiteral *createIntegerLiteral(int value);
+  clang::FloatingLiteral *createFloatLiteral(float value);
+  clang::FloatingLiteral *createFloatLiteral(double value);
   clang::StringLiteral *createStringLiteral(std::string value);
   clang::IfStmt *createIfStmt(clang::Expr *condExpr, clang::Stmt *thenStmt, clang::Stmt *elseStmt);
   clang::ReturnStmt *createReturnStmt(clang::Expr *expr);

@@ -43,7 +43,7 @@ set(LIT_COMMAND
   ${LIT_EXEC}
   -vv
   --filter cxx-front
-#  --filter cxx_post_inc_to_post_dec
+  --filter cxx_assign_const_double
   ${CMAKE_CURRENT_SOURCE_DIR}/tests
   )
 

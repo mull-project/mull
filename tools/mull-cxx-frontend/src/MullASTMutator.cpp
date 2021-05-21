@@ -1,5 +1,6 @@
 #include "MullASTMutator.h"
 
+#include <clang/AST/ASTContext.h>
 #include <clang/AST/Expr.h>
 
 void MullASTMutator::instrumentTranslationUnit() {
@@ -75,6 +76,33 @@ void MullASTMutator::performRemoveVoidMutation(ASTMutation &mutation,
   clang::CallExpr *callExpr = clang::dyn_cast<clang::CallExpr>(mutation.mutableStmt);
   _clangAstMutator.replaceStatement(callExpr, nullptr, mutation.mutationIdentifier);
 
+  _instrumentation.addMutantStringDefinition(mutation.mutationIdentifier,
+                                             static_cast<int>(mutation.mutationType),
+                                             mutation.line,
+                                             mutation.column);
+}
+
+void MullASTMutator::performReplaceNumericAssignmentMutation(
+    ASTMutation &mutation, ReplaceNumericAssignmentMutator &replaceNumericAssignmentMutator) {
+
+  clang::Expr *oldAssignedExpr = replaceNumericAssignmentMutator.assignmentBinaryOperator->getRHS();
+
+  clang::Expr *replacementLiteral;
+  if (oldAssignedExpr->getType() == _context.IntTy) {
+    replacementLiteral = _factory.createIntegerLiteral(42);
+  } else if (oldAssignedExpr->getType() == _context.FloatTy) {
+    replacementLiteral = _factory.createFloatLiteral(42.f);
+  } else if (oldAssignedExpr->getType() == _context.DoubleTy) {
+    replacementLiteral = _factory.createFloatLiteral(42.0);
+  }
+  else {
+    assert(0 && "Not implemented");
+  }
+
+  _clangAstMutator.replaceExpression(
+      replaceNumericAssignmentMutator.assignmentBinaryOperator->getRHS(),
+      replacementLiteral,
+      mutation.mutationIdentifier);
   _instrumentation.addMutantStringDefinition(mutation.mutationIdentifier,
                                              static_cast<int>(mutation.mutationType),
                                              mutation.line,

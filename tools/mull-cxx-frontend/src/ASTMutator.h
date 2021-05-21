@@ -2,14 +2,17 @@
 
 #include <clang/AST/Expr.h>
 
+class ASTMutation;
 class BinaryMutator;
 class RemoveVoidMutator;
 class UnaryOperatorOpcodeReplacementMutator;
 class UnaryOperatorRemovalMutator;
-class ASTMutation;
+class ReplaceNumericAssignmentMutator;
 
 class ASTMutator {
 public:
+  virtual ~ASTMutator() {}
+
   virtual void performBinaryMutation(ASTMutation &mutation, BinaryMutator &binaryMutator) = 0;
   virtual void performRemoveVoidMutation(ASTMutation &mutation,
                                          RemoveVoidMutator &removeVoidMutator) = 0;
@@ -20,7 +23,8 @@ public:
   virtual void
   performUnaryOperatorRemovalMutation(ASTMutation &mutation,
                                       UnaryOperatorRemovalMutator &unaryNotToNoopMutator) = 0;
-  virtual ~ASTMutator() {}
+  virtual void performReplaceNumericAssignmentMutation(
+      ASTMutation &mutation, ReplaceNumericAssignmentMutator &replaceNumericAssignmentMutator) = 0;
 };
 
 class Mutator {
@@ -72,4 +76,17 @@ public:
     mutator.performUnaryOperatorRemovalMutation(mutation, *this);
   }
   ~UnaryOperatorRemovalMutator() {}
+};
+
+class ReplaceNumericAssignmentMutator : public Mutator {
+
+public:
+  clang::BinaryOperator *assignmentBinaryOperator;
+
+  ReplaceNumericAssignmentMutator(clang::BinaryOperator *assignmentBinaryOperator)
+      : assignmentBinaryOperator(assignmentBinaryOperator) {}
+
+  void performMutation(ASTMutation &mutation, ASTMutator &mutator) {
+    mutator.performReplaceNumericAssignmentMutation(mutation, *this);
+  }
 };
