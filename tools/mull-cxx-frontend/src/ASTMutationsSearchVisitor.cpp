@@ -60,7 +60,7 @@ void ASTMutationsSearchVisitor::recordMutationPoint(mull::MutatorKind mutatorKin
   if (sourceFilePath.empty()) {
     /// we reach here because of asserts()
     /// TODO: maybe there are more cases.
-    assert(0);
+    /// assert(0);
     return;
   }
   if (sourceFilePath.find("include/gtest") != std::string::npos) {
