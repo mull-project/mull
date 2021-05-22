@@ -42,7 +42,6 @@ set(LIT_COMMAND
   TEST_CXX_FLAGS="${TEST_CXX_FLAGS}"
   ${LIT_EXEC}
   -vv
-  --filter cxx-front
   ${CMAKE_CURRENT_SOURCE_DIR}/tests
   )
 
