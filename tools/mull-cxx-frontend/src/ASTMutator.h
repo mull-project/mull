@@ -5,6 +5,7 @@
 class ASTMutation;
 class BinaryMutator;
 class RemoveVoidMutator;
+class ReplaceScalarCallMutator;
 class UnaryOperatorOpcodeReplacementMutator;
 class UnaryOperatorRemovalMutator;
 class ReplaceNumericAssignmentMutator;
@@ -17,6 +18,8 @@ public:
   virtual void performBinaryMutation(ASTMutation &mutation, BinaryMutator &binaryMutator) = 0;
   virtual void performRemoveVoidMutation(ASTMutation &mutation,
                                          RemoveVoidMutator &removeVoidMutator) = 0;
+  virtual void performReplaceScalarMutation(ASTMutation &mutation,
+                                            ReplaceScalarCallMutator &replaceScalarCallMutator) = 0;
   virtual void performUnaryOperatorOpcodeReplacementMutation(
       ASTMutation &mutation,
       UnaryOperatorOpcodeReplacementMutator &unaryOperatorOpcodeReplacementMutator) = 0;
@@ -56,6 +59,17 @@ public:
     mutator.performRemoveVoidMutation(mutation, *this);
   }
   ~RemoveVoidMutator() {}
+};
+
+class ReplaceScalarCallMutator : public Mutator {
+public:
+  clang::CallExpr *callExpr;
+
+  ReplaceScalarCallMutator(clang::CallExpr *callExpr) : callExpr(callExpr) {}
+  ~ReplaceScalarCallMutator() {}
+  void performMutation(ASTMutation &mutation, ASTMutator &mutator) {
+    mutator.performReplaceScalarMutation(mutation, *this);
+  }
 };
 
 class UnaryOperatorOpcodeReplacementMutator : public Mutator {

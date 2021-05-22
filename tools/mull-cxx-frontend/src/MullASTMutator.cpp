@@ -82,6 +82,28 @@ void MullASTMutator::performRemoveVoidMutation(ASTMutation &mutation,
                                              mutation.column);
 }
 
+void MullASTMutator::performReplaceScalarMutation(
+    ASTMutation &mutation, ReplaceScalarCallMutator &replaceScalarCallMutator) {
+  clang::CallExpr *callExpr = replaceScalarCallMutator.callExpr;
+
+  clang::Expr *replacementLiteral;
+  if (callExpr->getType() == _context.IntTy) {
+    replacementLiteral = _factory.createIntegerLiteral(42);
+  } else if (callExpr->getType() == _context.FloatTy) {
+    replacementLiteral = _factory.createFloatLiteral(42.f);
+  } else if (callExpr->getType() == _context.DoubleTy) {
+    replacementLiteral = _factory.createFloatLiteral(42.0);
+  } else {
+    assert(0 && "Not implemented");
+  }
+
+  _clangAstMutator.replaceExpression(callExpr, replacementLiteral, mutation.mutationIdentifier);
+  _instrumentation.addMutantStringDefinition(mutation.mutationIdentifier,
+                                             static_cast<int>(mutation.mutationType),
+                                             mutation.line,
+                                             mutation.column);
+}
+
 void MullASTMutator::performReplaceNumericAssignmentMutation(
     ASTMutation &mutation, ReplaceNumericAssignmentMutator &replaceNumericAssignmentMutator) {
 

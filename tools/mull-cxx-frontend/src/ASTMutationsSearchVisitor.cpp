@@ -144,6 +144,16 @@ bool ASTMutationsSearchVisitor::VisitCallExpr(clang::CallExpr *callExpr) {
                         callExpr,
                         ClangCompatibilityStmtGetBeginLoc(*callExpr));
   }
+
+  if (callExpr->getType() == _context.IntTy &&
+      mutationMap.isValidMutation(mull::MutatorKind::CXX_ReplaceScalarCall)) {
+    std::unique_ptr<ReplaceScalarCallMutator> mutator = std::make_unique<ReplaceScalarCallMutator>(callExpr);
+    recordMutationPoint(mull::MutatorKind::CXX_ReplaceScalarCall,
+                        std::move(mutator),
+                        callExpr,
+                        ClangCompatibilityStmtGetBeginLoc(*callExpr));
+  }
+
   return true;
 }
 

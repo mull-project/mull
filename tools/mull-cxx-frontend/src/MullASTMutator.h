@@ -21,6 +21,8 @@ public:
   void performBinaryMutation(ASTMutation &mutation, BinaryMutator &binaryMutator) override;
   void performRemoveVoidMutation(ASTMutation &mutation,
                                  RemoveVoidMutator &removeVoidMutator) override;
+  void performReplaceScalarMutation(ASTMutation &mutation,
+                                    ReplaceScalarCallMutator &replaceScalarCallMutator) override;
   void performUnaryOperatorOpcodeReplacementMutation(
       ASTMutation &mutation,
       UnaryOperatorOpcodeReplacementMutator &unaryOperatorOpcodeReplacementMutator) override;
