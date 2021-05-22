@@ -74,10 +74,12 @@ public:
 
 class UnaryOperatorOpcodeReplacementMutator : public Mutator {
 public:
+  clang::UnaryOperator *unaryOperator;
   clang::UnaryOperator::Opcode replacementOpCode;
 
-  UnaryOperatorOpcodeReplacementMutator(clang::UnaryOperator::Opcode replacementOpCode)
-      : replacementOpCode(replacementOpCode) {}
+  UnaryOperatorOpcodeReplacementMutator(clang::UnaryOperator *unaryOperator,
+                                        clang::UnaryOperator::Opcode replacementOpCode)
+      : unaryOperator(unaryOperator), replacementOpCode(replacementOpCode) {}
 
   void performMutation(ASTMutation &mutation, ASTMutator &mutator) {
     mutator.performUnaryOperatorOpcodeReplacementMutation(mutation, *this);

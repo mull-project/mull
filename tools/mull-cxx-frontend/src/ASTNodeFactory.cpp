@@ -47,19 +47,13 @@ clang::IntegerLiteral *ASTNodeFactory::createIntegerLiteral(int value) {
 }
 
 clang::FloatingLiteral *ASTNodeFactory::createFloatLiteral(float value) {
-  return clang::FloatingLiteral::Create(_context,
-                                        llvm::APFloat(value),
-                                        true,
-                                        _context.FloatTy,
-                                        NULL_LOCATION);
+  return clang::FloatingLiteral::Create(
+      _context, llvm::APFloat(value), true, _context.FloatTy, NULL_LOCATION);
 }
 
 clang::FloatingLiteral *ASTNodeFactory::createFloatLiteral(double value) {
-  return clang::FloatingLiteral::Create(_context,
-                                        llvm::APFloat(value),
-                                        true,
-                                        _context.DoubleTy,
-                                        NULL_LOCATION);
+  return clang::FloatingLiteral::Create(
+      _context, llvm::APFloat(value), true, _context.DoubleTy, NULL_LOCATION);
 }
 
 clang::StringLiteral *ASTNodeFactory::createStringLiteral(std::string value) {
@@ -121,16 +115,16 @@ clang::UnaryOperator *ASTNodeFactory::createUnaryOperator(clang::UnaryOperator::
                                                           clang::ExprValueKind valueKind) {
 #if LLVM_VERSION_MAJOR >= 11
   clang::FPOptionsOverride fpOptionsOverride;
-  return clang::BinaryOperator::Create(_context,
-                                       lhs,
-                                       rhs,
-                                       opcode,
-                                       resultType,
-                                       valueKind,
-                                       clang::ExprObjectKind::OK_Ordinary,
-                                       NULL_LOCATION,
-                                       fpOptionsOverride);
-#else
+  return clang::UnaryOperator::Create(_context,
+                                      expr,
+                                      opcode,
+                                      resultType,
+                                      valueKind,
+                                      clang::ExprObjectKind::OK_Ordinary,
+                                      NULL_LOCATION,
+                                      false,
+                                      fpOptionsOverride);
+#elif LLVM_VERSION_MAJOR >= 7
   return new (_context) clang::UnaryOperator(expr,
                                              opcode,
                                              resultType,
@@ -138,6 +132,9 @@ clang::UnaryOperator *ASTNodeFactory::createUnaryOperator(clang::UnaryOperator::
                                              clang::ExprObjectKind::OK_Ordinary,
                                              NULL_LOCATION,
                                              false);
+#else
+  return new (_context) clang::UnaryOperator(
+      expr, opcode, resultType, valueKind, clang::ExprObjectKind::OK_Ordinary, NULL_LOCATION);
 #endif
 }
 
@@ -176,15 +173,17 @@ clang::CompoundAssignOperator *ASTNodeFactory::createCompoundAssignOperator(
 
 #if LLVM_VERSION_MAJOR >= 11
   clang::FPOptionsOverride fpOptionsOverride;
-  return clang::BinaryOperator::Create(_context,
-                                       lhs,
-                                       rhs,
-                                       opcode,
-                                       resultType,
-                                       valueKind,
-                                       clang::ExprObjectKind::OK_Ordinary,
-                                       NULL_LOCATION,
-                                       fpOptionsOverride);
+  return clang::CompoundAssignOperator::Create(_context,
+                                               lhs,
+                                               rhs,
+                                               opcode,
+                                               resultType,
+                                               valueKind,
+                                               clang::ExprObjectKind::OK_Ordinary,
+                                               NULL_LOCATION,
+                                               fpOptionsOverride,
+                                               compLHSType,
+                                               compResultType);
 #else
   clang::FPOptions fpOptions;
   return new (_context) clang::CompoundAssignOperator(lhs,

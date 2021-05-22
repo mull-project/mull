@@ -24,7 +24,7 @@ bool ASTMutationsSearchVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOp
       mutationMap.isValidMutation(mull::MutatorKind::CXX_PostDecToPostInc)) {
     std::unique_ptr<UnaryOperatorOpcodeReplacementMutator> mutator =
         std::make_unique<UnaryOperatorOpcodeReplacementMutator>(
-            clang::UnaryOperator::Opcode::UO_PostInc);
+            unaryOperator, clang::UnaryOperator::Opcode::UO_PostInc);
     recordMutationPoint(mull::MutatorKind::CXX_PostDecToPostInc,
                         std::move(mutator),
                         unaryOperator,
@@ -36,7 +36,7 @@ bool ASTMutationsSearchVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOp
       mutationMap.isValidMutation(mull::MutatorKind::CXX_PostIncToPostDec)) {
     std::unique_ptr<UnaryOperatorOpcodeReplacementMutator> mutator =
         std::make_unique<UnaryOperatorOpcodeReplacementMutator>(
-            clang::UnaryOperator::Opcode::UO_PostDec);
+            unaryOperator, clang::UnaryOperator::Opcode::UO_PostDec);
     recordMutationPoint(mull::MutatorKind::CXX_PostIncToPostDec,
                         std::move(mutator),
                         unaryOperator,
@@ -48,7 +48,7 @@ bool ASTMutationsSearchVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOp
       mutationMap.isValidMutation(mull::MutatorKind::CXX_PreIncToPreDec)) {
     std::unique_ptr<UnaryOperatorOpcodeReplacementMutator> mutator =
         std::make_unique<UnaryOperatorOpcodeReplacementMutator>(
-            clang::UnaryOperator::Opcode::UO_PreDec);
+            unaryOperator, clang::UnaryOperator::Opcode::UO_PreDec);
     recordMutationPoint(mull::MutatorKind::CXX_PreIncToPreDec,
                         std::move(mutator),
                         unaryOperator,
@@ -60,7 +60,7 @@ bool ASTMutationsSearchVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOp
       mutationMap.isValidMutation(mull::MutatorKind::CXX_PreDecToPreInc)) {
     std::unique_ptr<UnaryOperatorOpcodeReplacementMutator> mutator =
         std::make_unique<UnaryOperatorOpcodeReplacementMutator>(
-            clang::UnaryOperator::Opcode::UO_PreInc);
+            unaryOperator, clang::UnaryOperator::Opcode::UO_PreInc);
     recordMutationPoint(mull::MutatorKind::CXX_PreDecToPreInc,
                         std::move(mutator),
                         unaryOperator,
@@ -147,7 +147,8 @@ bool ASTMutationsSearchVisitor::VisitCallExpr(clang::CallExpr *callExpr) {
 
   if (callExpr->getType() == _context.IntTy &&
       mutationMap.isValidMutation(mull::MutatorKind::CXX_ReplaceScalarCall)) {
-    std::unique_ptr<ReplaceScalarCallMutator> mutator = std::make_unique<ReplaceScalarCallMutator>(callExpr);
+    std::unique_ptr<ReplaceScalarCallMutator> mutator =
+        std::make_unique<ReplaceScalarCallMutator>(callExpr);
     recordMutationPoint(mull::MutatorKind::CXX_ReplaceScalarCall,
                         std::move(mutator),
                         callExpr,
