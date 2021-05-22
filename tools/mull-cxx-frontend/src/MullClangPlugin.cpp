@@ -30,9 +30,18 @@ public:
     ASTConsumer::Initialize(Context);
   }
 
+  /// This function can be considered a main() function of the
+  /// mull-cxx-frontend plugin. This method is called multiple times by
+  /// clang::ParseAST() for each declaration when it's finished being parsed.
+  /// For each found function declaration below, a two-pass approach is used:
+  /// 1) First all mutation points are found in the function declaration by the
+  /// recursive AST visitor class ASTMutationsSearchVisitor.
+  /// 2) For each mutation point, the mutations are performed on the Clang AST
+  /// level. The mutation is performed by the higher-level MullASTMutator class
+  /// which class to the lower-level ClangASTMutator class.
   bool HandleTopLevelDecl(DeclGroupRef DG) override {
-    /// Should be a better place to create this. But at Initialize(), getSema() hits an internal
-    /// assert.
+    /// Could be a better place to create this. But at Initialize(), getSema()
+    /// hits an internal assert because it is not initialized yet at that time.
     if (!astMutator) {
       astMutator = std::make_unique<MullASTMutator>(Instance.getASTContext(), Instance.getSema());
       astMutator->instrumentTranslationUnit();
@@ -68,7 +77,11 @@ public:
     return true;
   }
 
+  // This method is the last to be called when all declarations have already
+  // been called on with HandleTopLevelDecl(). At this point, it is possible to
+  // visualize the final mutated AST tree.
   void HandleTranslationUnit(ASTContext &context) override {
+    // The following is useful for debugging mutations:
     // context.getTranslationUnitDecl()->print(llvm::errs(), 2);
     // context.getTranslationUnitDecl()->dump();
     // exit(1);
@@ -108,8 +121,8 @@ protected:
     return true;
   }
 
-  // Automatically run the plugin after the main AST action
   PluginASTAction::ActionType getActionType() override {
+    /// Note: AddBeforeMainAction is the only option when mutations have effect.
     return AddBeforeMainAction;
   }
 };

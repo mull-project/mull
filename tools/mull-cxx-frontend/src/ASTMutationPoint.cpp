@@ -9,7 +9,6 @@ ASTMutationPoint::ASTMutationPoint(std::unique_ptr<ASTMutation> mutation,
     : mutation(std::move(mutation)), mutationType(mutationType), mutableStmt(toBeMutatedStmt),
       sourceFilePath(sourceFilePath), line(line), column(column) {
   std::ostringstream mis;
-
   /// mutator:file:line:col:1
   mis << mutationIdentifier << ":" << sourceFilePath << ":" << line << ":" << column;
   this->mutationIdentifier = mis.str();

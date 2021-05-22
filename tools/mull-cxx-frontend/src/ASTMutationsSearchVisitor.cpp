@@ -14,8 +14,7 @@ std::vector<std::unique_ptr<ASTMutationPoint>> &ASTMutationsSearchVisitor::getAs
 }
 
 bool ASTMutationsSearchVisitor::VisitFunctionDecl(clang::FunctionDecl *FD) {
-  /// llvm::errs() << "visit function: " << FD->getNameInfo().getAsString() << "\n";
-  /// FD->dump();
+  /// No-op. Useful for debugging.
   return true;
 }
 
@@ -159,6 +158,7 @@ bool ASTMutationsSearchVisitor::VisitCallExpr(clang::CallExpr *callExpr) {
 }
 
 bool ASTMutationsSearchVisitor::VisitVarDecl(clang::VarDecl *D) {
+  /// Function parameter declarations are not mutated.
   if (clang::dyn_cast_or_null<clang::ParmVarDecl>(D)) {
     return true;
   }
