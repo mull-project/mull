@@ -61,7 +61,7 @@ public:
       visitor.TraverseFunctionDecl(f);
 
       for (auto &foundMutation : visitor.getAstMutations()) {
-        foundMutation->mutator->performMutation(*foundMutation, *astMutator);
+        foundMutation->performMutation(*astMutator);
       }
     }
 
@@ -69,9 +69,9 @@ public:
   }
 
   void HandleTranslationUnit(ASTContext &context) override {
-     // context.getTranslationUnitDecl()->print(llvm::errs(), 2);
-     // context.getTranslationUnitDecl()->dump();
-     // exit(1);
+    // context.getTranslationUnitDecl()->print(llvm::errs(), 2);
+    // context.getTranslationUnitDecl()->dump();
+    // exit(1);
   }
 };
 

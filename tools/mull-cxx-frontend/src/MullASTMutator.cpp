@@ -7,13 +7,12 @@ void MullASTMutator::instrumentTranslationUnit() {
   _instrumentation.instrumentTranslationUnit();
 }
 
-void MullASTMutator::performUnaryOperatorOpcodeReplacementMutation(
-    ASTMutation &mutation,
-    UnaryOperatorOpcodeReplacementMutator &unaryOperatorOpcodeReplacementMutator) {
+void MullASTMutator::performUnaryOperatorOpcodeMutation(
+    ASTMutationPoint &mutation, UnaryOperatorOpcodeMutation &unaryOperatorOpcodeMutator) {
   clang::UnaryOperator *oldUnaryOperator =
       clang::dyn_cast_or_null<clang::UnaryOperator>(mutation.mutableStmt);
   clang::UnaryOperator *newUnaryOperator =
-      _factory.createUnaryOperator(unaryOperatorOpcodeReplacementMutator.replacementOpCode,
+      _factory.createUnaryOperator(unaryOperatorOpcodeMutator.replacementOpCode,
                                    oldUnaryOperator->getSubExpr(),
                                    oldUnaryOperator->getType(),
                                    oldUnaryOperator->getValueKind());
@@ -27,7 +26,7 @@ void MullASTMutator::performUnaryOperatorOpcodeReplacementMutation(
 }
 
 void MullASTMutator::performUnaryOperatorRemovalMutation(
-    ASTMutation &mutation, UnaryOperatorRemovalMutator &unaryNotToNoopMutator) {
+    ASTMutationPoint &mutation, UnaryOperatorRemovalMutation &unaryNotToNoopMutator) {
 
   _clangAstMutator.replaceExpression(unaryNotToNoopMutator.unaryOperator,
                                      unaryNotToNoopMutator.unaryOperator->getSubExpr(),
@@ -39,7 +38,8 @@ void MullASTMutator::performUnaryOperatorRemovalMutation(
                                              mutation.column);
 }
 
-void MullASTMutator::performBinaryMutation(ASTMutation &mutation, BinaryMutator &binaryMutator) {
+void MullASTMutator::performBinaryMutation(ASTMutationPoint &mutation,
+                                           BinaryMutation &binaryMutator) {
   clang::BinaryOperator *oldBinaryOperator =
       clang::dyn_cast<clang::BinaryOperator>(mutation.mutableStmt);
 
@@ -71,8 +71,8 @@ void MullASTMutator::performBinaryMutation(ASTMutation &mutation, BinaryMutator 
                                              mutation.column);
 }
 
-void MullASTMutator::performRemoveVoidMutation(ASTMutation &mutation,
-                                               RemoveVoidMutator &removeVoidMutator) {
+void MullASTMutator::performRemoveVoidMutation(ASTMutationPoint &mutation,
+                                               RemoveVoidMutation &removeVoidMutator) {
   clang::CallExpr *callExpr = clang::dyn_cast<clang::CallExpr>(mutation.mutableStmt);
   _clangAstMutator.replaceStatement(callExpr, nullptr, mutation.mutationIdentifier);
 
@@ -83,7 +83,7 @@ void MullASTMutator::performRemoveVoidMutation(ASTMutation &mutation,
 }
 
 void MullASTMutator::performReplaceScalarMutation(
-    ASTMutation &mutation, ReplaceScalarCallMutator &replaceScalarCallMutator) {
+    ASTMutationPoint &mutation, ReplaceScalarCallMutation &replaceScalarCallMutator) {
   clang::CallExpr *callExpr = replaceScalarCallMutator.callExpr;
 
   clang::Expr *replacementLiteral;
@@ -105,7 +105,7 @@ void MullASTMutator::performReplaceScalarMutation(
 }
 
 void MullASTMutator::performReplaceNumericAssignmentMutation(
-    ASTMutation &mutation, ReplaceNumericAssignmentMutator &replaceNumericAssignmentMutator) {
+    ASTMutationPoint &mutation, ReplaceNumericAssignmentMutation &replaceNumericAssignmentMutator) {
 
   clang::Expr *oldAssignedExpr = replaceNumericAssignmentMutator.assignmentBinaryOperator->getRHS();
 
@@ -131,8 +131,8 @@ void MullASTMutator::performReplaceNumericAssignmentMutation(
 }
 
 void MullASTMutator::performReplaceNumericInitAssignmentMutation(
-    ASTMutation &mutation,
-    ReplaceNumericInitAssignmentMutator &replaceNumericInitAssignmentMutator) {
+    ASTMutationPoint &mutation,
+    ReplaceNumericInitAssignmentMutation &replaceNumericInitAssignmentMutator) {
   assert(replaceNumericInitAssignmentMutator.varDecl->getKind() == clang::VarDecl::Kind::Var);
 
   clang::Expr *oldAssignedExpr = replaceNumericInitAssignmentMutator.varDecl->getInit();

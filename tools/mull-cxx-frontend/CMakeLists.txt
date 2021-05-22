@@ -2,7 +2,7 @@ add_library(mull-cxx-frontend
   SHARED
   src/ASTInstrumentation.cpp
   src/ASTMutationsSearchVisitor.cpp
-  src/ASTMutation.cpp
+  src/ASTMutationPoint.cpp
   src/ASTNodeFactory.cpp
   src/ClangASTMutator.cpp
   src/MullASTMutator.cpp

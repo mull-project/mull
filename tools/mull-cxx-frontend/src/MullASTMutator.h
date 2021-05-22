@@ -1,7 +1,7 @@
 #pragma once
 
 #include "ASTInstrumentation.h"
-#include "ASTMutation.h"
+#include "ASTMutationPoint.h"
 #include "ASTMutator.h"
 #include "ASTNodeFactory.h"
 #include "ClangASTMutator.h"
@@ -18,23 +18,22 @@ public:
         _clangAstMutator(context, _factory, _instrumentation) {}
 
   void instrumentTranslationUnit();
-  void performBinaryMutation(ASTMutation &mutation, BinaryMutator &binaryMutator) override;
-  void performRemoveVoidMutation(ASTMutation &mutation,
-                                 RemoveVoidMutator &removeVoidMutator) override;
-  void performReplaceScalarMutation(ASTMutation &mutation,
-                                    ReplaceScalarCallMutator &replaceScalarCallMutator) override;
-  void performUnaryOperatorOpcodeReplacementMutation(
-      ASTMutation &mutation,
-      UnaryOperatorOpcodeReplacementMutator &unaryOperatorOpcodeReplacementMutator) override;
+  void performBinaryMutation(ASTMutationPoint &mutation, BinaryMutation &binaryMutator) override;
+  void performRemoveVoidMutation(ASTMutationPoint &mutation,
+                                 RemoveVoidMutation &removeVoidMutator) override;
+  void performReplaceScalarMutation(ASTMutationPoint &mutation,
+                                    ReplaceScalarCallMutation &replaceScalarCallMutator) override;
+  void performUnaryOperatorOpcodeMutation(
+      ASTMutationPoint &mutation, UnaryOperatorOpcodeMutation &unaryOperatorOpcodeMutator) override;
   void
-  performUnaryOperatorRemovalMutation(ASTMutation &mutation,
-                                      UnaryOperatorRemovalMutator &unaryNotToNoopMutator) override;
+  performUnaryOperatorRemovalMutation(ASTMutationPoint &mutation,
+                                      UnaryOperatorRemovalMutation &unaryNotToNoopMutator) override;
   void performReplaceNumericAssignmentMutation(
-      ASTMutation &mutation,
-      ReplaceNumericAssignmentMutator &replaceNumericAssignmentMutator) override;
+      ASTMutationPoint &mutation,
+      ReplaceNumericAssignmentMutation &replaceNumericAssignmentMutator) override;
   void performReplaceNumericInitAssignmentMutation(
-      ASTMutation &mutation,
-      ReplaceNumericInitAssignmentMutator &replaceNumericInitAssignmentMutator) override;
+      ASTMutationPoint &mutation,
+      ReplaceNumericInitAssignmentMutation &replaceNumericInitAssignmentMutator) override;
 
 private:
   clang::ASTContext &_context;
