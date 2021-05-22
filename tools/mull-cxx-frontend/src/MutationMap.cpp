@@ -1,5 +1,7 @@
 #include "MutationMap.h"
 
+#include <cassert>
+
 static const std::vector<MutationIdentifier> MUTATIONS_MAP({
     { "cxx_add_to_sub", mull::MutatorKind::CXX_AddToSub },
     { "cxx_sub_to_add", mull::MutatorKind::CXX_SubToAdd },
