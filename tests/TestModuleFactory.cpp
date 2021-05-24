@@ -13,8 +13,7 @@
 
 namespace mull {
 
-std::unique_ptr<Bitcode> loadBitcodeFromIR(const char *path,
-                                           LLVMContext &context) {
+std::unique_ptr<Bitcode> loadBitcodeFromIR(const char *path) {
   ///  I cannot recall why it is implemented the way it is implemented
   ///  Sorry about that
   std::ifstream file(path);
@@ -24,9 +23,9 @@ std::unique_ptr<Bitcode> loadBitcodeFromIR(const char *path,
     file_contents += str;
     file_contents.push_back('\n');
   }
-
+  auto context = std::make_unique<llvm::LLVMContext>();
   SMDiagnostic error;
-  auto module = parseAssemblyString(file_contents, error, context);
+  auto module = parseAssemblyString(file_contents, error, *context);
 
   /// FIXME: is there another way to check for errors?
   if (!error.getMessage().empty()) {
@@ -37,7 +36,7 @@ std::unique_ptr<Bitcode> loadBitcodeFromIR(const char *path,
 
   assert(!llvm::verifyModule(*module, &dbgs()));
 
-  return std::make_unique<Bitcode>(std::move(module));
+  return std::make_unique<Bitcode>(std::move(context), std::move(module));
 }
 
 } // namespace mull

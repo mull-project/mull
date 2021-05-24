@@ -15,10 +15,9 @@ using namespace llvm;
 
 TEST(ScalarValueMutator, getMutationPoint) {
   Diagnostics diagnostics;
-  LLVMContext context;
   BitcodeLoader loader;
-  auto bitcode = loader.loadBitcodeAtPath(
-      fixtures::mutators_scalar_value_module_bc_path(), context, diagnostics);
+  auto bitcode =
+      loader.loadBitcodeAtPath(fixtures::mutators_scalar_value_module_bc_path(), diagnostics);
 
   ScalarValueMutator mutator;
   FunctionUnderTest functionUnderTest(bitcode->getModule()->getFunction("scalar_value"),

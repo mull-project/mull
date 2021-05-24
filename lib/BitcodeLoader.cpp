@@ -45,7 +45,6 @@ std::unique_ptr<Module> mull::loadModuleFromBuffer(LLVMContext &context, MemoryB
 }
 
 std::unique_ptr<Bitcode> BitcodeLoader::loadBitcodeAtPath(const std::string &path,
-                                                          llvm::LLVMContext &context,
                                                           Diagnostics &diagnostics) {
   auto buffer = MemoryBuffer::getFile(path);
   if (!buffer) {
@@ -55,8 +54,9 @@ std::unique_ptr<Bitcode> BitcodeLoader::loadBitcodeAtPath(const std::string &pat
     return nullptr;
   }
 
+  auto context = std::make_unique<LLVMContext>();
   MemoryBuffer *b = buffer.get().get();
-  std::unique_ptr<llvm::Module> module(loadModuleFromBuffer(context, *b, diagnostics));
+  std::unique_ptr<llvm::Module> module(loadModuleFromBuffer(*context, *b, diagnostics));
 
   if (module == nullptr) {
     std::stringstream message;
@@ -65,7 +65,7 @@ std::unique_ptr<Bitcode> BitcodeLoader::loadBitcodeAtPath(const std::string &pat
     return nullptr;
   }
 
-  return std::make_unique<Bitcode>(std::move(module));
+  return std::make_unique<Bitcode>(std::move(context), std::move(module));
 }
 
 std::vector<std::unique_ptr<Bitcode>> BitcodeLoader::loadBitcode(const Configuration &config,
@@ -73,10 +73,9 @@ std::vector<std::unique_ptr<Bitcode>> BitcodeLoader::loadBitcode(const Configura
   std::vector<std::unique_ptr<Bitcode>> bitcode;
 
   std::vector<BitcodeLoadingTask> tasks;
+  tasks.reserve(config.parallelization.workers);
   for (int i = 0; i < config.parallelization.workers; i++) {
-    auto context = std::make_unique<LLVMContext>();
-    tasks.emplace_back(diagnostics, *context, *this);
-    contexts.push_back(std::move(context));
+    tasks.emplace_back(diagnostics, *this);
   }
 
   TaskExecutor<BitcodeLoadingTask> loader(

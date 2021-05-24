@@ -37,7 +37,7 @@ std::unique_ptr<MutationArtefact> MutationTestBed::generate(const std::string &s
 
   /// 2. Finding mutations in IR
 
-  std::unique_ptr<Bitcode> bitcode(new Bitcode(std::move(module)));
+  std::unique_ptr<Bitcode> bitcode(new Bitcode(std::move(context), std::move(module)));
 
   std::vector<MutationPoint *> points;
   for (auto &function : bitcode->getModule()->functions()) {

@@ -10,10 +10,9 @@ using namespace llvm;
 
 TEST(Relational, LessThanToLessOrEqual) {
   Diagnostics diagnostics;
-  LLVMContext context;
   BitcodeLoader loader;
   auto bitcode =
-      loader.loadBitcodeAtPath(fixtures::mutators_boundary_module_bc_path(), context, diagnostics);
+      loader.loadBitcodeAtPath(fixtures::mutators_boundary_module_bc_path(), diagnostics);
 
   cxx::LessThanToLessOrEqual mutator;
   std::vector<MutationPoint *> mutants;
@@ -29,10 +28,9 @@ TEST(Relational, LessThanToLessOrEqual) {
 
 TEST(Relational, LessOrEqualToLessThan) {
   Diagnostics diagnostics;
-  LLVMContext context;
   BitcodeLoader loader;
   auto bitcode =
-      loader.loadBitcodeAtPath(fixtures::mutators_boundary_module_bc_path(), context, diagnostics);
+      loader.loadBitcodeAtPath(fixtures::mutators_boundary_module_bc_path(), diagnostics);
 
   cxx::LessOrEqualToLessThan mutator;
   std::vector<MutationPoint *> mutants;
@@ -48,10 +46,9 @@ TEST(Relational, LessOrEqualToLessThan) {
 
 TEST(Relational, GreaterThanToGreaterOrEqual) {
   Diagnostics diagnostics;
-  LLVMContext context;
   BitcodeLoader loader;
   auto bitcode =
-      loader.loadBitcodeAtPath(fixtures::mutators_boundary_module_bc_path(), context, diagnostics);
+      loader.loadBitcodeAtPath(fixtures::mutators_boundary_module_bc_path(), diagnostics);
 
   cxx::GreaterThanToGreaterOrEqual mutator;
   std::vector<MutationPoint *> mutants;
@@ -67,10 +64,9 @@ TEST(Relational, GreaterThanToGreaterOrEqual) {
 
 TEST(Relational, GreaterOrEqualToGreaterThan) {
   Diagnostics diagnostics;
-  LLVMContext context;
   BitcodeLoader loader;
   auto bitcode =
-      loader.loadBitcodeAtPath(fixtures::mutators_boundary_module_bc_path(), context, diagnostics);
+      loader.loadBitcodeAtPath(fixtures::mutators_boundary_module_bc_path(), diagnostics);
 
   cxx::GreaterOrEqualToGreaterThan mutator;
   std::vector<MutationPoint *> mutants;

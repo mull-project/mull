@@ -43,9 +43,8 @@ class CXXJunkDetectorTest : public TestWithParam<CXXJunkDetectorTestParameter> {
 TEST_P(CXXJunkDetectorTest, detectJunk) {
   Diagnostics diagnostics;
   auto &parameter = GetParam();
-  LLVMContext context;
   BitcodeLoader loader;
-  auto bitcode = loader.loadBitcodeAtPath(parameter.bitcodePath, context, diagnostics);
+  auto bitcode = loader.loadBitcodeAtPath(parameter.bitcodePath, diagnostics);
 
   std::vector<MutationPoint *> points;
   for (auto &function : bitcode->getModule()->functions()) {
@@ -179,10 +178,9 @@ INSTANTIATE_TEST_CASE_P(CXXJunkDetection, CXXJunkDetectorTest, testing::ValuesIn
 
 TEST(CXXJunkDetector, compdb_absolute_paths) {
   Diagnostics diagnostics;
-  LLVMContext context;
   BitcodeLoader loader;
   auto path = fixtures::junk_detection_compdb_main_bc_path();
-  auto bitcode = loader.loadBitcodeAtPath(path, context, diagnostics);
+  auto bitcode = loader.loadBitcodeAtPath(path, diagnostics);
 
   std::vector<MutationPoint *> points;
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -220,10 +218,9 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
 
 TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
   Diagnostics diagnostics;
-  LLVMContext context;
   BitcodeLoader loader;
-  auto bitcode = loader.loadBitcodeAtPath(
-      fixtures::junk_detection_compdb_main_bc_path(), context, diagnostics);
+  auto bitcode =
+      loader.loadBitcodeAtPath(fixtures::junk_detection_compdb_main_bc_path(), diagnostics);
 
   std::vector<MutationPoint *> points;
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -261,10 +258,9 @@ TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
 
 TEST(CXXJunkDetector, no_compdb) {
   Diagnostics diagnostics;
-  LLVMContext context;
   BitcodeLoader loader;
   auto path = fixtures::junk_detection_compdb_main_bc_path();
-  auto bitcode = loader.loadBitcodeAtPath(path, context, diagnostics);
+  auto bitcode = loader.loadBitcodeAtPath(path, diagnostics);
 
   std::vector<MutationPoint *> points;
   std::vector<std::unique_ptr<Mutator>> mutators;

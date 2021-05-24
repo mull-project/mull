@@ -28,12 +28,11 @@ TEST(SQLiteReporter, integrationTest) {
   /// - 1 test execution result which includes 1 normal test execution and 1
   /// mutated test execution.
   Diagnostics diagnostics;
-  LLVMContext context;
   BitcodeLoader loader;
   auto bitcodeWithTests = loader.loadBitcodeAtPath(
-      fixtures::simple_test_count_letters_test_count_letters_bc_path(), context, diagnostics);
+      fixtures::simple_test_count_letters_test_count_letters_bc_path(), diagnostics);
   auto bitcodeWithTestees = loader.loadBitcodeAtPath(
-      fixtures::simple_test_count_letters_count_letters_bc_path(), context, diagnostics);
+      fixtures::simple_test_count_letters_count_letters_bc_path(), diagnostics);
 
   Function *reachableFunction = bitcodeWithTestees->getModule()->getFunction("count_letters");
 
