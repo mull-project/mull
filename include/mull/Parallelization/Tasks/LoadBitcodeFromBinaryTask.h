@@ -20,13 +20,11 @@ public:
   using Out = std::vector<std::unique_ptr<mull::Bitcode>>;
   using iterator = In::iterator;
 
-  LoadBitcodeFromBinaryTask(Diagnostics &diagnostics, llvm::LLVMContext &context)
-      : diagnostics(diagnostics), context(context) {}
+  explicit LoadBitcodeFromBinaryTask(Diagnostics &diagnostics) : diagnostics(diagnostics) {}
 
   void operator()(iterator begin, iterator end, Out &storage, mull::progress_counter &counter);
 
 private:
   Diagnostics &diagnostics;
-  llvm::LLVMContext &context;
 };
 } // namespace mull

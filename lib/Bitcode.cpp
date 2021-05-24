@@ -14,8 +14,8 @@ using namespace mull;
 using namespace llvm;
 using namespace std;
 
-Bitcode::Bitcode(std::unique_ptr<llvm::Module> module)
-    : module(std::move(module)),
+Bitcode::Bitcode(std::unique_ptr<llvm::LLVMContext> context, std::unique_ptr<llvm::Module> module)
+    : context(std::move(context)), module(std::move(module)),
       uniqueIdentifier(llvm::sys::path::stem(this->module->getModuleIdentifier()).str()) {}
 
 llvm::Module *Bitcode::getModule() {

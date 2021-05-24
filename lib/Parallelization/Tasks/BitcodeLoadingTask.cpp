@@ -6,14 +6,13 @@
 using namespace mull;
 using namespace llvm;
 
-BitcodeLoadingTask::BitcodeLoadingTask(Diagnostics &diagnostics, LLVMContext &context,
-                                       BitcodeLoader &loader)
-    : diagnostics(diagnostics), context(context), loader(loader) {}
+BitcodeLoadingTask::BitcodeLoadingTask(Diagnostics &diagnostics, BitcodeLoader &loader)
+    : diagnostics(diagnostics), loader(loader) {}
 
 void BitcodeLoadingTask::operator()(iterator begin, iterator end, Out &storage,
                                     progress_counter &counter) {
   for (auto it = begin; it != end; ++it, counter.increment()) {
-    auto bitcode = loader.loadBitcodeAtPath(*it, context, diagnostics);
+    auto bitcode = loader.loadBitcodeAtPath(*it, diagnostics);
     if (bitcode != nullptr) {
       storage.push_back(std::move(bitcode));
     }

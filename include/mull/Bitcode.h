@@ -17,7 +17,8 @@ class Diagnostics;
 
 class Bitcode {
 public:
-  explicit Bitcode(std::unique_ptr<llvm::Module> module);
+  explicit Bitcode(std::unique_ptr<llvm::LLVMContext> context,
+                   std::unique_ptr<llvm::Module> module);
 
   llvm::Module *getModule();
   llvm::Module *getModule() const;
@@ -29,6 +30,7 @@ public:
   std::map<llvm::Function *, std::vector<MutationPoint *>> &getMutationPointsMap();
 
 private:
+  std::unique_ptr<llvm::LLVMContext> context;
   std::unique_ptr<llvm::Module> module;
   std::string uniqueIdentifier;
 

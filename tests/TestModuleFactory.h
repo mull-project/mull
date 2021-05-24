@@ -4,6 +4,5 @@ using namespace llvm;
 using namespace mull;
 
 namespace mull {
-std::unique_ptr<Bitcode> loadBitcodeFromIR(const char *path,
-                                           LLVMContext &context);
+std::unique_ptr<Bitcode> loadBitcodeFromIR(const char *path);
 }
