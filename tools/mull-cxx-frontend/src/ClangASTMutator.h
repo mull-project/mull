@@ -17,14 +17,14 @@ class ASTInstrumentation;
 class ASTNodeFactory;
 
 class ClangASTMutator {
-  clang::ASTContext &_context;
-  ASTNodeFactory &_factory;
-  ASTInstrumentation &_instrumentation;
+  clang::ASTContext &context;
+  ASTNodeFactory &factory;
+  ASTInstrumentation &instrumentation;
 
 public:
   ClangASTMutator(clang::ASTContext &context, ASTNodeFactory &factory,
                   ASTInstrumentation &instrumentation)
-      : _context(context), _factory(factory), _instrumentation(instrumentation) {}
+      : context(context), factory(factory), instrumentation(instrumentation) {}
 
   void replaceExpression(clang::Expr *oldExpr, clang::Expr *newExpr, std::string identifier);
   void replaceStatement(clang::Stmt *oldStmt, clang::Stmt *newStmt, std::string identifier);

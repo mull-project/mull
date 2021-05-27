@@ -12,10 +12,10 @@ class SectionAttr;
 }
 
 class ASTNodeFactory {
-  clang::ASTContext &_context;
+  clang::ASTContext &context;
 
 public:
-  ASTNodeFactory(clang::ASTContext &context) : _context(context) {}
+  ASTNodeFactory(clang::ASTContext &context) : context(context) {}
 
   /// AST Nodes
   clang::FunctionDecl *createFunctionDecl(std::string name, clang::DeclContext *declContext,

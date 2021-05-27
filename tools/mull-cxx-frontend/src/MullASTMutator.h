@@ -14,8 +14,8 @@ class FunctionDecl;
 class MullASTMutator : public ASTMutator {
 public:
   MullASTMutator(clang::ASTContext &context, clang::Sema &sema)
-      : _context(context), _factory(context), _instrumentation(context, sema, _factory),
-        _clangAstMutator(context, _factory, _instrumentation) {}
+      : context(context), factory(context), instrumentation(context, sema, factory),
+        clangAstMutator(context, factory, instrumentation) {}
 
   void instrumentTranslationUnit();
   void performBinaryMutation(ASTMutationPoint &mutation, BinaryMutation &binaryMutator) override;
@@ -36,8 +36,8 @@ public:
       ReplaceNumericInitAssignmentMutation &replaceNumericInitAssignmentMutator) override;
 
 private:
-  clang::ASTContext &_context;
-  ASTNodeFactory _factory;
-  ASTInstrumentation _instrumentation;
-  ClangASTMutator _clangAstMutator;
+  clang::ASTContext &context;
+  ASTNodeFactory factory;
+  ASTInstrumentation instrumentation;
+  ClangASTMutator clangAstMutator;
 };

@@ -1,5 +1,5 @@
-#include "mull/AST/ASTConstants.h"
 #include "mull/AST/ASTVisitor.h"
+#include "mull/AST/ASTConstants.h"
 #include "mull/AST/MullClangCompatibility.h"
 
 #include "mull/Program/Program.h"
@@ -62,8 +62,9 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
   /// Binary Operators
   if (clang::BinaryOperator *binaryOperator = clang::dyn_cast<clang::BinaryOperator>(expr)) {
     clang::SourceLocation binaryOperatorLocation = binaryOperator->getOperatorLoc();
-    for (const std::tuple<clang::BinaryOperator::Opcode, mull::MutatorKind, clang::BinaryOperator::Opcode> &mutation :
-         BINARY_MUTATIONS) {
+    for (const std::tuple<clang::BinaryOperator::Opcode,
+                          mull::MutatorKind,
+                          clang::BinaryOperator::Opcode> &mutation : BinaryMutations) {
       if (binaryOperator->getOpcode() == std::get<0>(mutation) &&
           mutatorKindSet.includesMutator(std::get<1>(mutation))) {
         saveMutationPoint(std::get<1>(mutation), binaryOperator, binaryOperatorLocation);
@@ -113,7 +114,7 @@ bool ASTVisitor::VisitExpr(clang::Expr *expr) {
   if (auto *unaryOperator = clang::dyn_cast<clang::UnaryOperator>(expr)) {
     clang::SourceLocation location = unaryOperator->getOperatorLoc();
     for (const std::pair<clang::UnaryOperator::Opcode, mull::MutatorKind> &mutation :
-         UNARY_MUTATIONS) {
+         UnaryMutations) {
       if (unaryOperator->getOpcode() == mutation.first &&
           mutatorKindSet.includesMutator(mutation.second)) {
         saveMutationPoint(mutation.second, unaryOperator, location);

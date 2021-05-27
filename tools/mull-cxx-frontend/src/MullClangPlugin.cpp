@@ -18,13 +18,13 @@ using namespace llvm;
 namespace {
 
 class MullASTConsumer : public ASTConsumer {
-  CompilerInstance &Instance;
+  CompilerInstance &instance;
   std::unique_ptr<MullASTMutator> astMutator;
   MutationMap mutationMap;
 
 public:
-  MullASTConsumer(CompilerInstance &Instance, const MutationMap mutationMap)
-      : Instance(Instance), astMutator(nullptr), mutationMap(mutationMap) {}
+  MullASTConsumer(CompilerInstance &instance, const MutationMap mutationMap)
+      : instance(instance), astMutator(nullptr), mutationMap(mutationMap) {}
 
   void Initialize(ASTContext &Context) override {
     ASTConsumer::Initialize(Context);
@@ -43,7 +43,7 @@ public:
     /// Could be a better place to create this. But at Initialize(), getSema()
     /// hits an internal assert because it is not initialized yet at that time.
     if (!astMutator) {
-      astMutator = std::make_unique<MullASTMutator>(Instance.getASTContext(), Instance.getSema());
+      astMutator = std::make_unique<MullASTMutator>(instance.getASTContext(), instance.getSema());
       astMutator->instrumentTranslationUnit();
     }
 
@@ -58,14 +58,14 @@ public:
       }
 
       clang::SourceLocation functionLocation = f->getLocation();
-      if (Instance.getSourceManager().isInSystemHeader(functionLocation)) {
+      if (instance.getSourceManager().isInSystemHeader(functionLocation)) {
         continue;
       }
-      std::string sourceFilePath = Instance.getSourceManager().getFilename(functionLocation).str();
+      std::string sourceFilePath = instance.getSourceManager().getFilename(functionLocation).str();
       if (sourceFilePath.find("include/gtest") != std::string::npos) {
         continue;
       }
-      ASTMutationsSearchVisitor visitor(Instance.getASTContext(), mutationMap);
+      ASTMutationsSearchVisitor visitor(instance.getASTContext(), mutationMap);
       errs() << "HandleTopLevelDecl: Looking at function: " << f->getDeclName() << "\n";
       visitor.TraverseFunctionDecl(f);
 

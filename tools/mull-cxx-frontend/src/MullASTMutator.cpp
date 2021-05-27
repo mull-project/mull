@@ -4,7 +4,7 @@
 #include <clang/AST/Expr.h>
 
 void MullASTMutator::instrumentTranslationUnit() {
-  _instrumentation.instrumentTranslationUnit();
+  instrumentation.instrumentTranslationUnit();
 }
 
 void MullASTMutator::performUnaryOperatorOpcodeMutation(
@@ -12,30 +12,30 @@ void MullASTMutator::performUnaryOperatorOpcodeMutation(
   clang::UnaryOperator *oldUnaryOperator =
       clang::dyn_cast_or_null<clang::UnaryOperator>(mutation.mutableStmt);
   clang::UnaryOperator *newUnaryOperator =
-      _factory.createUnaryOperator(unaryOperatorOpcodeMutator.replacementOpCode,
-                                   oldUnaryOperator->getSubExpr(),
-                                   oldUnaryOperator->getType(),
-                                   oldUnaryOperator->getValueKind());
+      factory.createUnaryOperator(unaryOperatorOpcodeMutator.replacementOpCode,
+                                  oldUnaryOperator->getSubExpr(),
+                                  oldUnaryOperator->getType(),
+                                  oldUnaryOperator->getValueKind());
 
-  _clangAstMutator.replaceExpression(
+  clangAstMutator.replaceExpression(
       oldUnaryOperator, newUnaryOperator, mutation.mutationIdentifier);
-  _instrumentation.addMutantStringDefinition(mutation.mutationIdentifier,
-                                             static_cast<int>(mutation.mutationType),
-                                             mutation.line,
-                                             mutation.column);
+  instrumentation.addMutantStringDefinition(mutation.mutationIdentifier,
+                                            static_cast<int>(mutation.mutationType),
+                                            mutation.line,
+                                            mutation.column);
 }
 
 void MullASTMutator::performUnaryOperatorRemovalMutation(
     ASTMutationPoint &mutation, UnaryOperatorRemovalMutation &unaryNotToNoopMutator) {
 
-  _clangAstMutator.replaceExpression(unaryNotToNoopMutator.unaryOperator,
-                                     unaryNotToNoopMutator.unaryOperator->getSubExpr(),
-                                     mutation.mutationIdentifier);
+  clangAstMutator.replaceExpression(unaryNotToNoopMutator.unaryOperator,
+                                    unaryNotToNoopMutator.unaryOperator->getSubExpr(),
+                                    mutation.mutationIdentifier);
 
-  _instrumentation.addMutantStringDefinition(mutation.mutationIdentifier,
-                                             static_cast<int>(mutation.mutationType),
-                                             mutation.line,
-                                             mutation.column);
+  instrumentation.addMutantStringDefinition(mutation.mutationIdentifier,
+                                            static_cast<int>(mutation.mutationType),
+                                            mutation.line,
+                                            mutation.column);
 }
 
 void MullASTMutator::performBinaryMutation(ASTMutationPoint &mutation,
@@ -48,38 +48,38 @@ void MullASTMutator::performBinaryMutation(ASTMutationPoint &mutation,
   if (clang::CompoundAssignOperator *compoundAssignOperator =
           clang::dyn_cast_or_null<clang::CompoundAssignOperator>(oldBinaryOperator)) {
     newBinaryOperator =
-        _factory.createCompoundAssignOperator(binaryMutator.replacementOpCode,
-                                              oldBinaryOperator->getLHS(),
-                                              oldBinaryOperator->getRHS(),
-                                              oldBinaryOperator->getType(),
-                                              oldBinaryOperator->getValueKind(),
-                                              compoundAssignOperator->getComputationLHSType(),
-                                              compoundAssignOperator->getComputationResultType());
+        factory.createCompoundAssignOperator(binaryMutator.replacementOpCode,
+                                             oldBinaryOperator->getLHS(),
+                                             oldBinaryOperator->getRHS(),
+                                             oldBinaryOperator->getType(),
+                                             oldBinaryOperator->getValueKind(),
+                                             compoundAssignOperator->getComputationLHSType(),
+                                             compoundAssignOperator->getComputationResultType());
   } else {
-    newBinaryOperator = _factory.createBinaryOperator(binaryMutator.replacementOpCode,
-                                                      oldBinaryOperator->getLHS(),
-                                                      oldBinaryOperator->getRHS(),
-                                                      oldBinaryOperator->getType(),
-                                                      oldBinaryOperator->getValueKind());
+    newBinaryOperator = factory.createBinaryOperator(binaryMutator.replacementOpCode,
+                                                     oldBinaryOperator->getLHS(),
+                                                     oldBinaryOperator->getRHS(),
+                                                     oldBinaryOperator->getType(),
+                                                     oldBinaryOperator->getValueKind());
   }
 
-  _clangAstMutator.replaceExpression(
+  clangAstMutator.replaceExpression(
       oldBinaryOperator, newBinaryOperator, mutation.mutationIdentifier);
-  _instrumentation.addMutantStringDefinition(mutation.mutationIdentifier,
-                                             static_cast<int>(mutation.mutationType),
-                                             mutation.line,
-                                             mutation.column);
+  instrumentation.addMutantStringDefinition(mutation.mutationIdentifier,
+                                            static_cast<int>(mutation.mutationType),
+                                            mutation.line,
+                                            mutation.column);
 }
 
 void MullASTMutator::performRemoveVoidMutation(ASTMutationPoint &mutation,
                                                RemoveVoidMutation &removeVoidMutator) {
   clang::CallExpr *callExpr = clang::dyn_cast<clang::CallExpr>(mutation.mutableStmt);
-  _clangAstMutator.replaceStatement(callExpr, nullptr, mutation.mutationIdentifier);
+  clangAstMutator.replaceStatement(callExpr, nullptr, mutation.mutationIdentifier);
 
-  _instrumentation.addMutantStringDefinition(mutation.mutationIdentifier,
-                                             static_cast<int>(mutation.mutationType),
-                                             mutation.line,
-                                             mutation.column);
+  instrumentation.addMutantStringDefinition(mutation.mutationIdentifier,
+                                            static_cast<int>(mutation.mutationType),
+                                            mutation.line,
+                                            mutation.column);
 }
 
 void MullASTMutator::performReplaceScalarMutation(
@@ -87,21 +87,21 @@ void MullASTMutator::performReplaceScalarMutation(
   clang::CallExpr *callExpr = replaceScalarCallMutator.callExpr;
 
   clang::Expr *replacementLiteral;
-  if (callExpr->getType() == _context.IntTy) {
-    replacementLiteral = _factory.createIntegerLiteral(42);
-  } else if (callExpr->getType() == _context.FloatTy) {
-    replacementLiteral = _factory.createFloatLiteral(42.f);
-  } else if (callExpr->getType() == _context.DoubleTy) {
-    replacementLiteral = _factory.createFloatLiteral(42.0);
+  if (callExpr->getType() == context.IntTy) {
+    replacementLiteral = factory.createIntegerLiteral(42);
+  } else if (callExpr->getType() == context.FloatTy) {
+    replacementLiteral = factory.createFloatLiteral(42.f);
+  } else if (callExpr->getType() == context.DoubleTy) {
+    replacementLiteral = factory.createFloatLiteral(42.0);
   } else {
     assert(0 && "Not implemented");
   }
 
-  _clangAstMutator.replaceExpression(callExpr, replacementLiteral, mutation.mutationIdentifier);
-  _instrumentation.addMutantStringDefinition(mutation.mutationIdentifier,
-                                             static_cast<int>(mutation.mutationType),
-                                             mutation.line,
-                                             mutation.column);
+  clangAstMutator.replaceExpression(callExpr, replacementLiteral, mutation.mutationIdentifier);
+  instrumentation.addMutantStringDefinition(mutation.mutationIdentifier,
+                                            static_cast<int>(mutation.mutationType),
+                                            mutation.line,
+                                            mutation.column);
 }
 
 void MullASTMutator::performReplaceNumericAssignmentMutation(
@@ -110,24 +110,24 @@ void MullASTMutator::performReplaceNumericAssignmentMutation(
   clang::Expr *oldAssignedExpr = replaceNumericAssignmentMutator.assignmentBinaryOperator->getRHS();
 
   clang::Expr *replacementLiteral;
-  if (oldAssignedExpr->getType() == _context.IntTy) {
-    replacementLiteral = _factory.createIntegerLiteral(42);
-  } else if (oldAssignedExpr->getType() == _context.FloatTy) {
-    replacementLiteral = _factory.createFloatLiteral(42.f);
-  } else if (oldAssignedExpr->getType() == _context.DoubleTy) {
-    replacementLiteral = _factory.createFloatLiteral(42.0);
+  if (oldAssignedExpr->getType() == context.IntTy) {
+    replacementLiteral = factory.createIntegerLiteral(42);
+  } else if (oldAssignedExpr->getType() == context.FloatTy) {
+    replacementLiteral = factory.createFloatLiteral(42.f);
+  } else if (oldAssignedExpr->getType() == context.DoubleTy) {
+    replacementLiteral = factory.createFloatLiteral(42.0);
   } else {
     assert(0 && "Not implemented");
   }
 
-  _clangAstMutator.replaceExpression(
+  clangAstMutator.replaceExpression(
       replaceNumericAssignmentMutator.assignmentBinaryOperator->getRHS(),
       replacementLiteral,
       mutation.mutationIdentifier);
-  _instrumentation.addMutantStringDefinition(mutation.mutationIdentifier,
-                                             static_cast<int>(mutation.mutationType),
-                                             mutation.line,
-                                             mutation.column);
+  instrumentation.addMutantStringDefinition(mutation.mutationIdentifier,
+                                            static_cast<int>(mutation.mutationType),
+                                            mutation.line,
+                                            mutation.column);
 }
 
 void MullASTMutator::performReplaceNumericInitAssignmentMutation(
@@ -138,20 +138,20 @@ void MullASTMutator::performReplaceNumericInitAssignmentMutation(
   clang::Expr *oldAssignedExpr = replaceNumericInitAssignmentMutator.varDecl->getInit();
 
   clang::Expr *replacementLiteral;
-  if (oldAssignedExpr->getType() == _context.IntTy) {
-    replacementLiteral = _factory.createIntegerLiteral(42);
-  } else if (oldAssignedExpr->getType() == _context.FloatTy) {
-    replacementLiteral = _factory.createFloatLiteral(42.f);
-  } else if (oldAssignedExpr->getType() == _context.DoubleTy) {
-    replacementLiteral = _factory.createFloatLiteral(42.0);
+  if (oldAssignedExpr->getType() == context.IntTy) {
+    replacementLiteral = factory.createIntegerLiteral(42);
+  } else if (oldAssignedExpr->getType() == context.FloatTy) {
+    replacementLiteral = factory.createFloatLiteral(42.f);
+  } else if (oldAssignedExpr->getType() == context.DoubleTy) {
+    replacementLiteral = factory.createFloatLiteral(42.0);
   } else {
     assert(0 && "Not implemented");
   }
 
-  _clangAstMutator.replaceExpression(
+  clangAstMutator.replaceExpression(
       oldAssignedExpr, replacementLiteral, mutation.mutationIdentifier);
-  _instrumentation.addMutantStringDefinition(mutation.mutationIdentifier,
-                                             static_cast<int>(mutation.mutationType),
-                                             mutation.line,
-                                             mutation.column);
+  instrumentation.addMutantStringDefinition(mutation.mutationIdentifier,
+                                            static_cast<int>(mutation.mutationType),
+                                            mutation.line,
+                                            mutation.column);
 }

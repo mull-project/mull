@@ -48,32 +48,32 @@ static const std::vector<MutationIdentifier> MUTATIONS_MAP({
     { "cxx_replace_scalar_call", mull::MutatorKind::CXX_ReplaceScalarCall },
 });
 
-MutationMap::MutationMap() : _usedMutatorSet(), _mapKindsToIdentifiers(), _mapIdentifiersToKinds() {
+MutationMap::MutationMap() : usedMutatorSet(), mapKindsToIdentifiers(), mapIdentifiersToKinds() {
   for (const MutationIdentifier &mutationIdentifier : MUTATIONS_MAP) {
-    _mapKindsToIdentifiers[mutationIdentifier.mutatorKind] = mutationIdentifier.identifier;
-    _mapIdentifiersToKinds[mutationIdentifier.identifier] = mutationIdentifier.mutatorKind;
+    mapKindsToIdentifiers[mutationIdentifier.mutatorKind] = mutationIdentifier.identifier;
+    mapIdentifiersToKinds[mutationIdentifier.identifier] = mutationIdentifier.mutatorKind;
   }
-  assert(_mapKindsToIdentifiers.count(mull::MutatorKind::CXX_AddToSub) > 0);
+  assert(mapKindsToIdentifiers.count(mull::MutatorKind::CXX_AddToSub) > 0);
 }
 
 bool MutationMap::isValidMutation(mull::MutatorKind mutatorKind) const {
-  return _usedMutatorSet.count(mutatorKind) > 0;
+  return usedMutatorSet.count(mutatorKind) > 0;
 }
 
 std::string MutationMap::getIdentifier(mull::MutatorKind mutatorKind) {
-  return _mapKindsToIdentifiers[mutatorKind];
+  return mapKindsToIdentifiers[mutatorKind];
 }
 
 void MutationMap::addMutation(std::string identifier) {
-  assert(_mapIdentifiersToKinds.count(identifier) != 0);
-  _usedMutatorSet.insert(_mapIdentifiersToKinds[identifier]);
+  assert(mapIdentifiersToKinds.count(identifier) != 0);
+  usedMutatorSet.insert(mapIdentifiersToKinds[identifier]);
 }
 
 void MutationMap::setDefaultMutationsIfNotSpecified() {
-  if (!_usedMutatorSet.empty()) {
+  if (!usedMutatorSet.empty()) {
     return;
   }
   for (const MutationIdentifier &mutationIdentifier : MUTATIONS_MAP) {
-    _usedMutatorSet.insert(mutationIdentifier.mutatorKind);
+    usedMutatorSet.insert(mutationIdentifier.mutatorKind);
   }
 }

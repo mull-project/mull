@@ -12,9 +12,9 @@ struct MutationIdentifier {
 };
 
 class MutationMap {
-  std::unordered_set<mull::MutatorKind> _usedMutatorSet;
-  std::unordered_map<mull::MutatorKind, std::string> _mapKindsToIdentifiers;
-  std::unordered_map<std::string, mull::MutatorKind> _mapIdentifiersToKinds;
+  std::unordered_set<mull::MutatorKind> usedMutatorSet;
+  std::unordered_map<mull::MutatorKind, std::string> mapKindsToIdentifiers;
+  std::unordered_map<std::string, mull::MutatorKind> mapIdentifiersToKinds;
 
 public:
   MutationMap();

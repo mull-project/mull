@@ -2,7 +2,7 @@
 
 std::vector<
     std::tuple<clang::BinaryOperator::Opcode, mull::MutatorKind, clang::BinaryOperator::Opcode>>
-    mull::BINARY_MUTATIONS = {
+    mull::BinaryMutations = {
       { clang::BO_Add, MutatorKind::CXX_AddToSub, clang::BO_Sub },
       { clang::BO_Sub, MutatorKind::CXX_SubToAdd, clang::BO_Add },
       { clang::BO_Mul, MutatorKind::CXX_MulToDiv, clang::BO_Div },
@@ -43,7 +43,7 @@ std::vector<
       { clang::BO_LOr, MutatorKind::CXX_Logical_OrToAnd, clang::BO_LAnd }
     };
 
-std::vector<std::pair<clang::UnaryOperator::Opcode, mull::MutatorKind>> mull::UNARY_MUTATIONS = {
+std::vector<std::pair<clang::UnaryOperator::Opcode, mull::MutatorKind>> mull::UnaryMutations = {
   { clang::UO_LNot, MutatorKind::CXX_RemoveNegation },
   { clang::UO_Minus, MutatorKind::CXX_UnaryMinusToNoop }
 };

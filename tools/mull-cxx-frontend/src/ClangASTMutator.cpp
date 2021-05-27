@@ -16,7 +16,7 @@ void ClangASTMutator::replaceExpression(clang::Expr *oldExpr, clang::Expr *newEx
   clang::ConditionalOperator *conditionalExpr =
       createMutatedExpression(oldExpr, newExpr, identifier);
 
-  for (auto p : _context.getParents(*oldExpr)) {
+  for (auto p : context.getParents(*oldExpr)) {
     if (const clang::Stmt *constParentStmt = p.get<clang::Stmt>()) {
       /// This is where the actual mutation of expression happens and this where
       /// things play against current Clang AST API.
@@ -42,7 +42,7 @@ void ClangASTMutator::replaceStatement(clang::Stmt *oldStmt, clang::Stmt *newStm
                                        std::string identifier) {
   clang::IfStmt *ifCondition = createMutatedStatement(oldStmt, newStmt, identifier);
 
-  for (auto p : _context.getParents(*oldStmt)) {
+  for (auto p : context.getParents(*oldStmt)) {
     const clang::Stmt *constParentStmt = p.get<clang::Stmt>();
     clang::Stmt *parentStmt = (clang::Stmt *)constParentStmt;
     assert(parentStmt);
@@ -62,8 +62,8 @@ clang::IfStmt *ClangASTMutator::createMutatedStatement(clang::Stmt *oldStmt, cla
   clang::CallExpr *getenvCallExpr = createGetenvCallExpr(identifier);
 
   clang::ImplicitCastExpr *implicitCastExpr =
-      clang::ImplicitCastExpr::Create(_context,
-                                      _context.BoolTy,
+      clang::ImplicitCastExpr::Create(context,
+                                      context.BoolTy,
                                       clang::CastKind::CK_PointerToBoolean,
                                       getenvCallExpr,
                                       nullptr,
@@ -75,14 +75,14 @@ clang::IfStmt *ClangASTMutator::createMutatedStatement(clang::Stmt *oldStmt, cla
   }
   llvm::ArrayRef<clang::Stmt *> thenStmts = thenStmtsVec;
   clang::CompoundStmt *compoundThenStmt =
-      clang::CompoundStmt::Create(_context, thenStmts, NULL_LOCATION, NULL_LOCATION);
+      clang::CompoundStmt::Create(context, thenStmts, NULL_LOCATION, NULL_LOCATION);
 
   llvm::MutableArrayRef<clang::Stmt *> elseStmts = { oldStmt };
   clang::CompoundStmt *compoundElseStmt =
-      clang::CompoundStmt::Create(_context, elseStmts, NULL_LOCATION, NULL_LOCATION);
+      clang::CompoundStmt::Create(context, elseStmts, NULL_LOCATION, NULL_LOCATION);
 
   clang::IfStmt *ifStmt =
-      _factory.createIfStmt(implicitCastExpr, compoundThenStmt, compoundElseStmt);
+      factory.createIfStmt(implicitCastExpr, compoundThenStmt, compoundElseStmt);
 
   return ifStmt;
 }
@@ -93,29 +93,29 @@ clang::ConditionalOperator *ClangASTMutator::createMutatedExpression(clang::Expr
   clang::CallExpr *mullShouldMutateCallExpr = createGetenvCallExpr(identifier);
 
   clang::ImplicitCastExpr *implicitCastExpr3 =
-      clang::ImplicitCastExpr::Create(_context,
-                                      _context.BoolTy,
+      clang::ImplicitCastExpr::Create(context,
+                                      context.BoolTy,
                                       clang::CastKind::CK_PointerToBoolean,
                                       mullShouldMutateCallExpr,
                                       nullptr,
                                       clang::VK_RValue);
 
   clang::ConditionalOperator *conditionalOperator =
-      new (_context) clang::ConditionalOperator(implicitCastExpr3,
-                                                NULL_LOCATION,
-                                                newExpr,
-                                                NULL_LOCATION,
-                                                oldExpr,
-                                                newExpr->getType(),
-                                                newExpr->getValueKind(),
-                                                newExpr->getObjectKind());
+      new (context) clang::ConditionalOperator(implicitCastExpr3,
+                                               NULL_LOCATION,
+                                               newExpr,
+                                               NULL_LOCATION,
+                                               oldExpr,
+                                               newExpr->getType(),
+                                               newExpr->getValueKind(),
+                                               newExpr->getObjectKind());
 
   return conditionalOperator;
 }
 
 clang::CallExpr *ClangASTMutator::createGetenvCallExpr(std::string identifier) {
-  clang::FunctionDecl *_getenvFuncDecl = _instrumentation.getGetenvFuncDecl();
-  clang::DeclRefExpr *declRefExpr = clang::DeclRefExpr::Create(_context,
+  clang::FunctionDecl *_getenvFuncDecl = instrumentation.getGetenvFuncDecl();
+  clang::DeclRefExpr *declRefExpr = clang::DeclRefExpr::Create(context,
                                                                _getenvFuncDecl->getQualifierLoc(),
                                                                NULL_LOCATION,
                                                                _getenvFuncDecl,
@@ -125,28 +125,28 @@ clang::CallExpr *ClangASTMutator::createGetenvCallExpr(std::string identifier) {
                                                                clang::VK_LValue);
 
   clang::ImplicitCastExpr *implicitCastExpr =
-      _factory.createImplicitCastExpr(declRefExpr,
-                                      _context.getPointerType(_getenvFuncDecl->getType()),
-                                      clang::CastKind::CK_FunctionToPointerDecay,
-                                      clang::VK_RValue);
+      factory.createImplicitCastExpr(declRefExpr,
+                                     context.getPointerType(_getenvFuncDecl->getType()),
+                                     clang::CastKind::CK_FunctionToPointerDecay,
+                                     clang::VK_RValue);
 
-  clang::StringLiteral *stringLiteral = clang::StringLiteral::Create(
-      _context,
-      identifier,
-      clang::StringLiteral::StringKind::Ascii,
-      false,
-      _factory.getConstantArrayType(_context.CharTy, identifier.size()),
-      clang::SourceLocation());
+  clang::StringLiteral *stringLiteral =
+      clang::StringLiteral::Create(context,
+                                   identifier,
+                                   clang::StringLiteral::StringKind::Ascii,
+                                   false,
+                                   factory.getConstantArrayType(context.CharTy, identifier.size()),
+                                   clang::SourceLocation());
 
   clang::ImplicitCastExpr *implicitCastExpr2 =
-      clang::ImplicitCastExpr::Create(_context,
-                                      _context.getPointerType(_context.CharTy),
+      clang::ImplicitCastExpr::Create(context,
+                                      context.getPointerType(context.CharTy),
                                       clang::CastKind::CK_ArrayToPointerDecay,
                                       stringLiteral,
                                       nullptr,
                                       clang::VK_RValue);
 
-  clang::CallExpr *callExpr = _factory.createCallExprSingleArg(
+  clang::CallExpr *callExpr = factory.createCallExprSingleArg(
       implicitCastExpr, implicitCastExpr2, _getenvFuncDecl->getReturnType(), clang::VK_RValue);
 
   return callExpr;

@@ -3,7 +3,6 @@
 #include "MutationMap.h"
 
 #include "mull/AST/ASTConstants.h"
-
 #include "mull/AST/MullClangCompatibility.h"
 
 #include <clang/AST/Decl.h>
@@ -105,9 +104,9 @@ bool ASTMutationsSearchVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOp
 bool ASTMutationsSearchVisitor::VisitBinaryOperator(clang::BinaryOperator *binaryOperator) {
   if (binaryOperator->getOpcode() == clang::BinaryOperator::Opcode::BO_Assign &&
       mutationMap.isValidMutation(mull::MutatorKind::CXX_AssignConst)) {
-    if (binaryOperator->getRHS()->getType() == _context.IntTy ||
-        binaryOperator->getRHS()->getType() == _context.FloatTy ||
-        binaryOperator->getRHS()->getType() == _context.DoubleTy) {
+    if (binaryOperator->getRHS()->getType() == context.IntTy ||
+        binaryOperator->getRHS()->getType() == context.FloatTy ||
+        binaryOperator->getRHS()->getType() == context.DoubleTy) {
       std::unique_ptr<ReplaceNumericAssignmentMutation> mutator =
           std::make_unique<ReplaceNumericAssignmentMutation>(binaryOperator);
       recordMutationPoint(mull::MutatorKind::CXX_AssignConst,
@@ -120,7 +119,7 @@ bool ASTMutationsSearchVisitor::VisitBinaryOperator(clang::BinaryOperator *binar
 
   for (const std::tuple<clang::BinaryOperator::Opcode,
                         mull::MutatorKind,
-                        clang::BinaryOperator::Opcode> &mutation : mull::BINARY_MUTATIONS) {
+                        clang::BinaryOperator::Opcode> &mutation : mull::BinaryMutations) {
     if (binaryOperator->getOpcode() == std::get<0>(mutation) &&
         mutationMap.isValidMutation(std::get<1>(mutation))) {
       std::unique_ptr<BinaryMutation> binaryMutator =
@@ -135,7 +134,7 @@ bool ASTMutationsSearchVisitor::VisitBinaryOperator(clang::BinaryOperator *binar
 }
 
 bool ASTMutationsSearchVisitor::VisitCallExpr(clang::CallExpr *callExpr) {
-  if (callExpr->getType() == _context.VoidTy &&
+  if (callExpr->getType() == context.VoidTy &&
       mutationMap.isValidMutation(mull::MutatorKind::CXX_RemoveVoidCall)) {
     std::unique_ptr<RemoveVoidMutation> removeVoidMutator = std::make_unique<RemoveVoidMutation>();
     recordMutationPoint(mull::MutatorKind::CXX_RemoveVoidCall,
@@ -144,7 +143,7 @@ bool ASTMutationsSearchVisitor::VisitCallExpr(clang::CallExpr *callExpr) {
                         ClangCompatibilityStmtGetBeginLoc(*callExpr));
   }
 
-  if (callExpr->getType() == _context.IntTy &&
+  if (callExpr->getType() == context.IntTy &&
       mutationMap.isValidMutation(mull::MutatorKind::CXX_ReplaceScalarCall)) {
     std::unique_ptr<ReplaceScalarCallMutation> mutator =
         std::make_unique<ReplaceScalarCallMutation>(callExpr);
@@ -164,8 +163,8 @@ bool ASTMutationsSearchVisitor::VisitVarDecl(clang::VarDecl *D) {
   }
 
   if (mutationMap.isValidMutation(mull::MutatorKind::CXX_InitConst) &&
-      (D->getType() == _context.IntTy || D->getType() == _context.FloatTy ||
-       D->getType() == _context.DoubleTy)) {
+      (D->getType() == context.IntTy || D->getType() == context.FloatTy ||
+       D->getType() == context.DoubleTy)) {
     std::unique_ptr<ReplaceNumericInitAssignmentMutation> mutator =
         std::make_unique<ReplaceNumericInitAssignmentMutation>(D);
     recordMutationPoint(mull::MutatorKind::CXX_InitConst,

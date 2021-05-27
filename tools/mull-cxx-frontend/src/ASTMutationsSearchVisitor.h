@@ -7,14 +7,14 @@
 class MutationMap;
 
 class ASTMutationsSearchVisitor : public clang::RecursiveASTVisitor<ASTMutationsSearchVisitor> {
-  clang::ASTContext &_context;
+  clang::ASTContext &context;
   clang::SourceManager &sourceManager;
   std::vector<std::unique_ptr<ASTMutationPoint>> astMutations;
   MutationMap &mutationMap;
 
 public:
   ASTMutationsSearchVisitor(clang::ASTContext &context, MutationMap &mutationMap)
-      : _context(context), sourceManager(context.getSourceManager()), astMutations(),
+      : context(context), sourceManager(context.getSourceManager()), astMutations(),
         mutationMap(mutationMap) {}
 
   std::vector<std::unique_ptr<ASTMutationPoint>> &getAstMutations();
