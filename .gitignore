@@ -18,4 +18,5 @@ cmake-build*
 *.retry
 tests-lit/tests/**/*.ll
 
+.DS_Store
 

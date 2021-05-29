@@ -32,6 +32,7 @@ set(LIT_COMMAND
   CURRENT_DIR=${CMAKE_CURRENT_SOURCE_DIR}
   MULL_EXEC=$<TARGET_FILE:mull-cxx>
   mull_runner=$<TARGET_FILE:mull-runner>
+  mull_frontend_cxx=$<TARGET_FILE:mull-cxx-frontend>
   CLANG_EXEC=${CLANG_EXEC}
   clang_cc=${clang_cc}
   clang_cxx=${clang_cxx}
