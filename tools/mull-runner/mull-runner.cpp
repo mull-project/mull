@@ -11,11 +11,19 @@
 #include <memory>
 #include <unistd.h>
 
-static void validateInputFile() {
-  if (access(tool::InputFile.getValue().c_str(), R_OK) != 0) {
-    perror(tool::InputFile.getValue().c_str());
-    exit(1);
+static std::string validateInputFile(const std::string &inputFile, mull::Diagnostics &diagnostics) {
+  if (access(inputFile.c_str(), R_OK) != 0) {
+    diagnostics.error(std::string("The provided path to an executable program is not valid: ") +
+                      inputFile.c_str());
+    return "";
   }
+  llvm::SmallString<256> inputRealPath;
+  if (llvm::sys::fs::real_path(inputFile, inputRealPath, false)) {
+    diagnostics.error(std::string("The provided path to an executable program is not valid: ") +
+                      inputFile.c_str());
+    return "";
+  }
+  return inputRealPath.str().str();
 }
 
 int main(int argc, char **argv) {
@@ -45,7 +53,7 @@ int main(int argc, char **argv) {
         "Diagnostics: Strict Mode enabled. Warning messages will be treated as fatal errors.");
   }
 
-  validateInputFile();
+  std::string inputFile = validateInputFile(tool::InputFile.getValue(), diagnostics);
 
   mull::MetricsMeasure totalExecutionTime;
   totalExecutionTime.start();
@@ -56,7 +64,7 @@ int main(int argc, char **argv) {
   configuration.timeout = tool::Timeout.getValue();
   configuration.includeNotCovered = tool::IncludeNotCovered.getValue();
 
-  configuration.executable = tool::InputFile.getValue();
+  configuration.executable = inputFile;
 
   if (tool::Workers) {
     mull::ParallelizationConfig parallelizationConfig;
@@ -82,7 +90,7 @@ int main(int argc, char **argv) {
                                    .IDEReporterShowKilled = tool::IDEReporterShowKilled };
   std::vector<std::unique_ptr<mull::Reporter>> reporters = reportersOption.reporters(params);
 
-  std::string executable = tool::InputFile.getValue();
+  std::string executable = inputFile;
   std::string testProgram = executable;
   if (!tool::TestProgram.empty()) {
     testProgram = tool::TestProgram.getValue();
