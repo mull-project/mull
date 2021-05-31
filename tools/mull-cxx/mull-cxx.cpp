@@ -33,11 +33,19 @@
 #include <sstream>
 #include <unistd.h>
 
-static void validateInputFile() {
-  if (access(tool::InputFile.getValue().c_str(), R_OK) != 0) {
-    perror(tool::InputFile.getValue().c_str());
-    exit(1);
+static std::string validateInputFile(const std::string &inputFile, mull::Diagnostics &diagnostics) {
+  if (access(inputFile.c_str(), R_OK) != 0) {
+    diagnostics.error(std::string("The provided path to an executable program is not valid: ") +
+                      inputFile.c_str());
+    return "";
   }
+  llvm::SmallString<256> inputRealPath;
+  if (llvm::sys::fs::real_path(inputFile, inputRealPath, false)) {
+    diagnostics.error(std::string("The provided path to an executable program is not valid: ") +
+                      inputFile.c_str());
+    return "";
+  }
+  return inputRealPath.str().str();
 }
 
 static std::vector<std::string> splitFlags(const std::string &flags) {
@@ -77,7 +85,7 @@ int main(int argc, char **argv) {
         "Diagnostics: Strict Mode enabled. Warning messages will be treated as fatal errors.");
   }
 
-  validateInputFile();
+  const std::string inputFile = validateInputFile(tool::InputFile.getValue(), diagnostics);
 
   mull::MetricsMeasure totalExecutionTime;
   totalExecutionTime.start();
@@ -101,7 +109,7 @@ int main(int argc, char **argv) {
   configuration.debugEnabled = tool::DebugEnabled;
   configuration.timeout = tool::Timeout.getValue();
 
-  configuration.executable = tool::InputFile.getValue();
+  configuration.executable = inputFile;
   configuration.outputFile = tool::OutputFile.getValue();
   configuration.coverageInfo = tool::CoverageInfo.getValue();
   configuration.includeNotCovered = tool::IncludeNotCovered.getValue();
@@ -128,7 +136,7 @@ int main(int argc, char **argv) {
   std::vector<std::unique_ptr<ebc::EmbeddedFile>> embeddedFiles;
   mull::SingleTaskExecutor extractBitcodeBuffers(diagnostics);
   extractBitcodeBuffers.execute("Extracting bitcode from executable", [&] {
-    ebc::BitcodeRetriever bitcodeRetriever(tool::InputFile.getValue());
+    ebc::BitcodeRetriever bitcodeRetriever(inputFile);
     for (auto &bitcodeInfo : bitcodeRetriever.GetBitcodeInfo()) {
       auto &container = bitcodeInfo.bitcodeContainer;
       if (container) {
