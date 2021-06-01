@@ -23,7 +23,7 @@ CHECK:[info] Applying filter: AST mutation filter (threads: 1)
 CHECK:[debug] ASTMutationFilter: whitelisting mutation "Unary Minus to Noop": {{.*}}sample.cpp:2:10
 
 CHECK:[info] Applying filter: junk (threads: 1)
-CHECK:[debug] ASTMutationStorage: recording mutation "Unary Minus to Noop": {{.*}}sample.cpp:2:10
+CHECK:[debug] CXXJunkDetector: mutation "Unary Minus to Noop": {{.*}}sample.cpp:2:10 (end: 2:12)
 
 CHECK:[info] Killed mutants (1/1):
 CHECK:{{^.*}}sample.cpp:2:10: warning: Killed: Replaced -x with x [cxx_minus_to_noop]{{$}}

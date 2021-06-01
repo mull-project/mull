@@ -4,7 +4,6 @@
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Metrics/MetricsMeasure.h"
 #include "mull/MutantRunner.h"
-#include "mull/Reporters/ASTSourceInfoProvider.h"
 #include "mull/Result.h"
 #include "mull/Version.h"
 
@@ -82,10 +81,8 @@ int main(int argc, char **argv) {
     configuration.captureMutantOutput = false;
   }
 
-  mull::NullSourceInfoProvider sourceInfoProvider;
   tool::ReporterParameters params{ .reporterName = tool::ReportName.getValue(),
                                    .reporterDirectory = tool::ReportDirectory.getValue(),
-                                   .sourceInfoProvider = sourceInfoProvider,
                                    .compilationDatabaseAvailable = false,
                                    .IDEReporterShowKilled = tool::IDEReporterShowKilled };
   std::vector<std::unique_ptr<mull::Reporter>> reporters = reportersOption.reporters(params);

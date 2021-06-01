@@ -23,7 +23,7 @@ CHECK:[info] Applying filter: AST mutation filter (threads: 1)
 CHECK:[debug] ASTMutationFilter: whitelisting mutation "Sub to Add": {{.*}}sample.cpp:2:12
 
 CHECK:[info] Applying filter: junk (threads: 1)
-CHECK:[debug] ASTMutationStorage: recording mutation "Sub to Add": {{.*}}sample.cpp:2:12
+CHECK:[debug] CXXJunkDetector: mutation "Sub to Add": {{.*}}sample.cpp:2:12 (end: 2:13)
 
 CHECK:[info] Killed mutants (1/1):
 CHECK:{{^.*}}sample.cpp:2:12: warning: Killed: Replaced - with + [cxx_sub_to_add]{{$}}

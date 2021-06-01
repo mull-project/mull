@@ -29,7 +29,7 @@ CHECK:[info] Applying filter: AST mutation filter (threads: 1)
 CHECK:[debug] ASTMutationFilter: whitelisting mutation "Remove Void": {{.*}}sample.cpp:7:3
 
 CHECK:[info] Applying filter: junk (threads: 1)
-CHECK:[debug] ASTMutationStorage: recording mutation "Remove Void": {{.*}}sample.cpp:7:3
+CHECK:[debug] CXXJunkDetector: mutation "Remove Void": {{.*}}sample.cpp:7:3 (end: 7:17)
 
 CHECK:[info] Killed mutants (1/1):
 CHECK:{{^.*}}sample.cpp:7:3: warning: Killed: Removed the call to the function [cxx_remove_void_call]{{$}}

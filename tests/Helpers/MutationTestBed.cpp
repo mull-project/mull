@@ -52,7 +52,7 @@ std::unique_ptr<MutationArtefact> MutationTestBed::generate(const std::string &s
   ASTStorage astStorage(diagnostics, "", "", {});
   astStorage.setAST("/in-memory-file.cc", std::move(threadSafeAstUnit));
 
-  CXXJunkDetector detector(astStorage);
+  CXXJunkDetector detector(diagnostics, astStorage);
 
   std::vector<MutationPoint *> nonJunkMutationPoints;
   std::vector<MutationPoint *> junkMutationPoints;

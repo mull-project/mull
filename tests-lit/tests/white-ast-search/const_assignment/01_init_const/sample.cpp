@@ -26,7 +26,7 @@ CHECK:[info] Applying filter: AST mutation filter (threads: 1)
 CHECK:[debug] ASTMutationFilter: whitelisting mutation "Init Const": {{.*}}sample.cpp:4:7
 
 CHECK:[info] Applying filter: junk (threads: 1)
-CHECK:[debug] ASTMutationStorage: recording mutation "Init Const": {{.*}}sample.cpp:4:7
+CHECK:[debug] CXXJunkDetector: mutation "Init Const": {{.*}}sample.cpp:4:7 (end: 4:10)
 
 CHECK:[info] Killed mutants (1/1):
 CHECK:{{^.*}}sample.cpp:4:7: warning: Killed: Replaced 'T a = b' with 'T a = 42' [cxx_init_const]{{$}}

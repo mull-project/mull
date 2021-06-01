@@ -41,7 +41,6 @@ set(mull_sources
 
   JunkDetection/CXX/CXXJunkDetector.cpp
 
-  Reporters/ASTSourceInfoProvider.cpp
   Reporters/SourceCodeReader.cpp
   Reporters/SourceManager.cpp
   Reporters/SQLiteReporter.cpp

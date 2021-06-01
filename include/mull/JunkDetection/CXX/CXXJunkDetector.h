@@ -9,12 +9,13 @@ class MutationPoint;
 
 class CXXJunkDetector : public JunkDetector {
 public:
-  explicit CXXJunkDetector(ASTStorage &storage);
+  CXXJunkDetector(Diagnostics &diagnostics, ASTStorage &storage);
   ~CXXJunkDetector() override = default;
 
   bool isJunk(MutationPoint *point) override;
 
 private:
+  Diagnostics &diagnostics;
   ASTStorage &astStorage;
 };
 

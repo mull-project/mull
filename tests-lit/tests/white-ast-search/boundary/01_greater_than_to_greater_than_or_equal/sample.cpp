@@ -23,7 +23,7 @@ CHECK:[info] Applying filter: AST mutation filter (threads: 1)
 CHECK:[debug] ASTMutationFilter: whitelisting mutation "Greater Than to Greater or Equal": {{.*}}sample.cpp:2:12
 
 CHECK:[info] Applying filter: junk (threads: 1)
-CHECK:[debug] ASTMutationStorage: recording mutation "Greater Than to Greater or Equal": {{.*}}sample.cpp:2:12
+CHECK:[debug] CXXJunkDetector: mutation "Greater Than to Greater or Equal": {{.*}}sample.cpp:2:12 (end: 2:13)
 
 CHECK:[info] Killed mutants (1/1):
 CHECK:{{^.*}}sample.cpp:2:12: warning: Killed: Replaced > with >= [cxx_gt_to_ge]{{$}}

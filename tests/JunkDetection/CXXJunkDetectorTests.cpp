@@ -56,7 +56,7 @@ TEST_P(CXXJunkDetectorTest, detectJunk) {
 
   ASTStorage astStorage(diagnostics, "", "", {});
 
-  CXXJunkDetector detector(astStorage);
+  CXXJunkDetector detector(diagnostics, astStorage);
 
   std::vector<MutationPoint *> nonJunkMutationPoints;
   for (auto point : points) {
@@ -204,7 +204,7 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
 
   ASTStorage astStorage(diagnostics, cxxCompilationDatabasePath, "", {});
 
-  CXXJunkDetector detector(astStorage);
+  CXXJunkDetector detector(diagnostics, astStorage);
 
   std::vector<MutationPoint *> nonJunkMutationPoints;
   for (auto point : points) {
@@ -244,7 +244,7 @@ TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
 
   ASTStorage astStorage(diagnostics, cxxCompilationDatabasePath, "", {});
 
-  CXXJunkDetector detector(astStorage);
+  CXXJunkDetector detector(diagnostics, astStorage);
 
   std::vector<MutationPoint *> nonJunkMutationPoints;
   for (auto point : points) {
@@ -285,7 +285,7 @@ TEST(CXXJunkDetector, no_compdb) {
 
   ASTStorage astStorage(diagnostics, "", cxxCompilationFlags, {});
 
-  CXXJunkDetector detector(astStorage);
+  CXXJunkDetector detector(diagnostics, astStorage);
 
   std::vector<MutationPoint *> nonJunkMutationPoints;
   for (auto point : points) {

@@ -28,5 +28,6 @@ public:
 private:
   bool isValidMutation(mull::MutatorKind mutatorKind);
   void recordMutationPoint(mull::MutatorKind mutatorKind, std::unique_ptr<ASTMutation> mutation,
-                           clang::Stmt *stmt, clang::SourceLocation location);
+                           clang::Stmt *stmt, clang::SourceLocation beginLocation,
+                           bool locationIsExpression);
 };

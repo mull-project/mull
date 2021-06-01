@@ -27,14 +27,13 @@ void ASTInstrumentation::addMutantStringDefinition(std::string identifier, int m
   mis << "mull_mutation_" << mutator << "_" << line << "_" << column;
   std::string variableName = mis.str();
 
-  std::string identifierWithCoverage = identifier + ":1";
   clang::IdentifierInfo &varDeclIdentifierInfo = context.Idents.get(variableName);
 
-  clang::StringLiteral *literal = factory.createStringLiteral(identifierWithCoverage);
+  clang::StringLiteral *literal = factory.createStringLiteral(identifier);
   literal->setValueKind(clang::VK_RValue);
 
-  clang::QualType qualType = factory.getStringLiteralArrayType(context.getConstType(context.CharTy),
-                                                               identifierWithCoverage.size());
+  clang::QualType qualType =
+      factory.getStringLiteralArrayType(context.getConstType(context.CharTy), identifier.size());
 
   clang::VarDecl *varDecl = clang::VarDecl::Create(context,
                                                    context.getTranslationUnitDecl(),

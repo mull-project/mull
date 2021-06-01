@@ -14,7 +14,8 @@
 
 using namespace mull;
 
-CXXJunkDetector::CXXJunkDetector(ASTStorage &astStorage) : astStorage(astStorage) {}
+CXXJunkDetector::CXXJunkDetector(Diagnostics &diagnostics, ASTStorage &astStorage)
+    : diagnostics(diagnostics), astStorage(astStorage) {}
 
 static const clang::Stmt *findMutantExpression(MutationPoint *point,
                                                VisitorParameters &visitorParameters,
@@ -215,11 +216,42 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     return true;
   }
 
-  const std::string &sourceFile = point->getSourceLocation().filePath;
-  int beginLine = sourceManager.getExpansionLineNumber(location, nullptr);
-  int beginColumn = sourceManager.getExpansionColumnNumber(location);
+  clang::SourceLocation mutantExpressionBeginLoc = mutantExpression->getSourceRange().getBegin();
+  int beginLine = sourceManager.getExpansionLineNumber(mutantExpressionBeginLoc, nullptr);
+  int beginColumn = sourceManager.getExpansionColumnNumber(mutantExpressionBeginLoc);
 
-  astStorage.saveMutation(
-      sourceFile, point->getMutator()->mutatorKind(), mutantExpression, beginLine, beginColumn);
+  int mutationLocationBeginLine = sourceManager.getExpansionLineNumber(location, nullptr);
+  int mutationLocationBeginColumn = sourceManager.getExpansionColumnNumber(location);
+
+  clang::ASTContext &astContext = ast->getASTContext();
+
+  /// There are two types of mutated expressions:
+  /// 1) Remove-Void, CallExpr example: its mutation location and its getStart() are the same.
+  /// 2) Binary Mutation, BinaryOperator example: its mutation location is
+  /// BinaryOperator's getOperatorLoc(), i.e. "+", while the
+  /// [getSourceRange().getBegin()(), getSourceRange().getEnd()] range is the whole "a + b"
+  /// expression.
+  clang::SourceLocation sourceLocationEnd =
+      (beginLine == mutationLocationBeginLine && beginColumn == mutationLocationBeginColumn)
+          ? mutantExpression->getSourceRange().getEnd()
+          : location;
+
+  /// Clang AST: how to get more precise debug information in certain cases?
+  /// http://clang-developers.42468.n3.nabble.com/Clang-AST-how-to-get-more-precise-debug-information-in-certain-cases-td4065195.html
+  /// https://stackoverflow.com/questions/11083066/getting-the-source-behind-clangs-ast
+  clang::SourceLocation sourceLocationEndActual = clang::Lexer::getLocForEndOfToken(
+      sourceLocationEnd, 0, sourceManager, astContext.getLangOpts());
+
+  int endLine = sourceManager.getExpansionLineNumber(sourceLocationEndActual, nullptr);
+  int endColumn = sourceManager.getExpansionColumnNumber(sourceLocationEndActual);
+
+  const std::string &sourceFile = point->getSourceLocation().filePath;
+  std::string description = MutationKindToString(point->getMutator()->mutatorKind());
+  diagnostics.debug(std::string("CXXJunkDetector: mutation \"") + description + "\": " + sourceFile + ":" +
+                    std::to_string(mutationLocationBeginLine) + ":" +
+                    std::to_string(mutationLocationBeginColumn) +
+                    " (end: " + std::to_string(endLine) + ":" + std::to_string(endColumn) + ")");
+
+  point->setEndLocation(endLine, endColumn);
   return false;
 }

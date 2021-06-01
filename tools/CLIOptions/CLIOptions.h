@@ -4,7 +4,6 @@
 #include <mull/Config/Configuration.h>
 #include <mull/Mutators/Mutator.h>
 #include <mull/Mutators/MutatorsFactory.h>
-#include <mull/Reporters/ASTSourceInfoProvider.h>
 #include <mull/Reporters/Reporter.h>
 #include <mull/Toolchain/Toolchain.h>
 #include <sstream>
@@ -318,7 +317,6 @@ private:
 struct ReporterParameters {
   std::string reporterName;
   std::string reporterDirectory;
-  mull::SourceInfoProvider &sourceInfoProvider;
   bool compilationDatabaseAvailable;
   bool IDEReporterShowKilled;
 };

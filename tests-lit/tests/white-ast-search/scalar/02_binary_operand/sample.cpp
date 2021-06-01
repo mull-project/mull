@@ -25,7 +25,7 @@ CHECK:[info] Applying filter: AST mutation filter (threads: 1)
 CHECK:[debug] ASTMutationFilter: whitelisting mutation "Scalar Value": {{.*}}sample.cpp:4:12
 
 CHECK:[info] Applying filter: junk (threads: 1)
-CHECK:[debug] ASTMutationStorage: recording mutation "Scalar Value": {{.*}}sample.cpp:4:12
+CHECK:[debug] CXXJunkDetector: mutation "Scalar Value": {{.*}}sample.cpp:4:12 (end: 4:13)
 
 CHECK:[info] Killed mutants (1/1):
 CHECK:{{^.*}}sample.cpp:4:12: warning: Killed: Replaced scalar with 0 or 42 [scalar_value_mutator]{{$}}

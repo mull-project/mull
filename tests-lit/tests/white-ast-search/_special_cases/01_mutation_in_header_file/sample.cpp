@@ -21,7 +21,7 @@ CHECK:[info] Applying filter: AST mutation filter (threads: 1)
 CHECK:[debug] ASTMutationFilter: whitelisting mutation "Add to Sub": {{.*}}sum.h:4:12
 
 CHECK:[info] Applying filter: junk (threads: 1)
-CHECK:[debug] ASTMutationStorage: recording mutation "Add to Sub": {{.*}}sum.h:4:12
+CHECK:[debug] CXXJunkDetector: mutation "Add to Sub": {{.*}}sum.h:4:12 (end: 4:13)
 
 CHECK:[info] Killed mutants (1/1):
 CHECK:{{^.*}}sum.h:4:12: warning: Killed: Replaced + with - [cxx_add_to_sub]{{$}}
