@@ -7,6 +7,7 @@
 
 #include <clang/AST/Decl.h>
 #include <clang/Basic/SourceManager.h>
+#include <clang/Lex/Lexer.h>
 
 std::vector<std::unique_ptr<ASTMutationPoint>> &ASTMutationsSearchVisitor::getAstMutations() {
   return astMutations;
@@ -26,7 +27,8 @@ bool ASTMutationsSearchVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOp
     recordMutationPoint(mull::MutatorKind::CXX_PostDecToPostInc,
                         std::move(mutator),
                         unaryOperator,
-                        unaryOperator->getOperatorLoc());
+                        unaryOperator->getOperatorLoc(),
+                        false);
     return true;
   }
 
@@ -38,7 +40,8 @@ bool ASTMutationsSearchVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOp
     recordMutationPoint(mull::MutatorKind::CXX_PostIncToPostDec,
                         std::move(mutator),
                         unaryOperator,
-                        unaryOperator->getOperatorLoc());
+                        unaryOperator->getOperatorLoc(),
+                        false);
     return true;
   }
 
@@ -50,7 +53,8 @@ bool ASTMutationsSearchVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOp
     recordMutationPoint(mull::MutatorKind::CXX_PreIncToPreDec,
                         std::move(mutator),
                         unaryOperator,
-                        unaryOperator->getOperatorLoc());
+                        unaryOperator->getOperatorLoc(),
+                        false);
     return true;
   }
 
@@ -62,7 +66,8 @@ bool ASTMutationsSearchVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOp
     recordMutationPoint(mull::MutatorKind::CXX_PreDecToPreInc,
                         std::move(mutator),
                         unaryOperator,
-                        unaryOperator->getOperatorLoc());
+                        unaryOperator->getOperatorLoc(),
+                        false);
     return true;
   }
 
@@ -73,7 +78,8 @@ bool ASTMutationsSearchVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOp
     recordMutationPoint(mull::MutatorKind::CXX_RemoveNegation,
                         std::move(mutator),
                         unaryOperator,
-                        unaryOperator->getOperatorLoc());
+                        unaryOperator->getOperatorLoc(),
+                        false);
     return true;
   }
 
@@ -84,7 +90,8 @@ bool ASTMutationsSearchVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOp
     recordMutationPoint(mull::MutatorKind::CXX_UnaryMinusToNoop,
                         std::move(mutator),
                         unaryOperator,
-                        unaryOperator->getOperatorLoc());
+                        unaryOperator->getOperatorLoc(),
+                        false);
     return true;
   }
 
@@ -95,7 +102,8 @@ bool ASTMutationsSearchVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOp
     recordMutationPoint(mull::MutatorKind::CXX_BitwiseNotToNoop,
                         std::move(mutator),
                         unaryOperator,
-                        unaryOperator->getOperatorLoc());
+                        unaryOperator->getOperatorLoc(),
+                        false);
     return true;
   }
   return true;
@@ -112,7 +120,8 @@ bool ASTMutationsSearchVisitor::VisitBinaryOperator(clang::BinaryOperator *binar
       recordMutationPoint(mull::MutatorKind::CXX_AssignConst,
                           std::move(mutator),
                           binaryOperator,
-                          binaryOperator->getOperatorLoc());
+                          binaryOperator->getOperatorLoc(),
+                          true);
     }
     return true;
   }
@@ -127,7 +136,8 @@ bool ASTMutationsSearchVisitor::VisitBinaryOperator(clang::BinaryOperator *binar
       recordMutationPoint(std::get<1>(mutation),
                           std::move(binaryMutator),
                           binaryOperator,
-                          binaryOperator->getOperatorLoc());
+                          binaryOperator->getOperatorLoc(),
+                          false);
     }
   }
   return true;
@@ -140,7 +150,8 @@ bool ASTMutationsSearchVisitor::VisitCallExpr(clang::CallExpr *callExpr) {
     recordMutationPoint(mull::MutatorKind::CXX_RemoveVoidCall,
                         std::move(removeVoidMutator),
                         callExpr,
-                        ClangCompatibilityStmtGetBeginLoc(*callExpr));
+                        ClangCompatibilityStmtGetBeginLoc(*callExpr),
+                        true);
   }
 
   if (callExpr->getType() == context.IntTy &&
@@ -150,7 +161,8 @@ bool ASTMutationsSearchVisitor::VisitCallExpr(clang::CallExpr *callExpr) {
     recordMutationPoint(mull::MutatorKind::CXX_ReplaceScalarCall,
                         std::move(mutator),
                         callExpr,
-                        ClangCompatibilityStmtGetBeginLoc(*callExpr));
+                        ClangCompatibilityStmtGetBeginLoc(*callExpr),
+                        true);
   }
 
   return true;
@@ -170,7 +182,8 @@ bool ASTMutationsSearchVisitor::VisitVarDecl(clang::VarDecl *D) {
     recordMutationPoint(mull::MutatorKind::CXX_InitConst,
                         std::move(mutator),
                         D->getInit(),
-                        D->getInit()->getExprLoc());
+                        D->getInit()->getExprLoc(),
+                        true);
     return true;
   }
   return true;
@@ -179,14 +192,15 @@ bool ASTMutationsSearchVisitor::VisitVarDecl(clang::VarDecl *D) {
 void ASTMutationsSearchVisitor::recordMutationPoint(mull::MutatorKind mutatorKind,
                                                     std::unique_ptr<ASTMutation> mutation,
                                                     clang::Stmt *stmt,
-                                                    clang::SourceLocation location) {
-  if (sourceManager.isInSystemHeader(location)) {
+                                                    clang::SourceLocation beginLocation,
+                                                    bool locationIsExpression) {
+  if (sourceManager.isInSystemHeader(beginLocation)) {
     return;
   }
-  if (sourceManager.isInSystemMacro(location)) {
+  if (sourceManager.isInSystemMacro(beginLocation)) {
     return;
   }
-  std::string sourceFilePath = sourceManager.getFilename(location).str();
+  std::string sourceFilePath = sourceManager.getFilename(beginLocation).str();
   if (sourceFilePath.empty()) {
     /// we reach here because of asserts()
     /// TODO: maybe there are more cases.
@@ -197,8 +211,20 @@ void ASTMutationsSearchVisitor::recordMutationPoint(mull::MutatorKind mutatorKin
     return;
   }
 
-  int beginLine = sourceManager.getExpansionLineNumber(location, nullptr);
-  int beginColumn = sourceManager.getExpansionColumnNumber(location);
+  clang::SourceLocation endLocation =
+      locationIsExpression ? stmt->getSourceRange().getEnd() : beginLocation;
+
+  /// Clang AST: how to get more precise debug information in certain cases?
+  /// http://clang-developers.42468.n3.nabble.com/Clang-AST-how-to-get-more-precise-debug-information-in-certain-cases-td4065195.html
+  /// https://stackoverflow.com/questions/11083066/getting-the-source-behind-clangs-ast
+  clang::SourceLocation sourceLocationEndActual =
+      clang::Lexer::getLocForEndOfToken(endLocation, 0, sourceManager, context.getLangOpts());
+
+  int beginLine = sourceManager.getExpansionLineNumber(beginLocation, nullptr);
+  int beginColumn = sourceManager.getExpansionColumnNumber(beginLocation);
+
+  int endLine = sourceManager.getExpansionLineNumber(sourceLocationEndActual, nullptr);
+  int endColumn = sourceManager.getExpansionColumnNumber(sourceLocationEndActual);
 
   std::unique_ptr<ASTMutationPoint> astMutation =
       std::make_unique<ASTMutationPoint>(std::move(mutation),
@@ -207,8 +233,11 @@ void ASTMutationsSearchVisitor::recordMutationPoint(mull::MutatorKind mutatorKin
                                          stmt,
                                          sourceFilePath,
                                          beginLine,
-                                         beginColumn);
+                                         beginColumn,
+                                         endLine,
+                                         endColumn);
 
-  llvm::errs() << "Recording mutation point: " << astMutation->mutationIdentifier << "\n";
+  llvm::outs() << "Recording mutation point: " << astMutation->mutationIdentifier << " (end: "
+               << std::to_string(endLine) << ":" << std::to_string(endColumn) << ")\n";
   astMutations.emplace_back(std::move(astMutation));
 }

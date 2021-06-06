@@ -27,7 +27,7 @@ CHECK:[info] Applying filter: AST mutation filter (threads: 1)
 CHECK:[debug] ASTMutationFilter: whitelisting mutation "Logical Or to And": {{.*}}sample.cpp:2:9
 
 CHECK:[info] Applying filter: junk (threads: 1)
-CHECK:[debug] ASTMutationStorage: recording mutation "Logical Or to And": {{.*}}sample.cpp:2:9
+CHECK:[debug] CXXJunkDetector: mutation "Logical Or to And": {{.*}}sample.cpp:2:9 (end: 2:11)
 
 CHECK:[info] Killed mutants (1/1):
 CHECK:{{^.*}}sample.cpp:2:9: warning: Killed: Replaced || with && [cxx_logical_or_to_and]{{$}}

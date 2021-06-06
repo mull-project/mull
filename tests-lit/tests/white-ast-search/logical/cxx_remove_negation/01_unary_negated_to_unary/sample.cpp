@@ -23,7 +23,9 @@ CHECK:[info] Applying filter: AST mutation filter (threads: 1)
 CHECK:[debug] ASTMutationFilter: whitelisting mutation "Remove Unary Negation": {{.*}}sample.cpp:2:10
 
 CHECK:[info] Applying filter: junk (threads: 1)
-CHECK:[debug] ASTMutationStorage: recording mutation "Remove Unary Negation": {{.*}}sample.cpp:2:10
+
+TODO: IDE reporter reports location "!a" but we would rather want to see the location of '!'.
+CHECK:[debug] CXXJunkDetector: mutation "Remove Unary Negation": {{.*}}sample.cpp:2:10 (end: 2:12)
 
 CHECK:[info] Killed mutants (1/1):
 CHECK:{{^.*}}sample.cpp:2:10: warning: Killed: Replaced !a with a [cxx_remove_negation]{{$}}

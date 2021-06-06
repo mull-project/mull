@@ -64,6 +64,8 @@ class MutationPoint {
   std::string userIdentifier;
   bool covered;
 
+  SourceLocation endLocation;
+
 public:
   MutationPoint(Mutator *mutator, irm::IRMutation *irMutator, llvm::Instruction *instruction,
                 Bitcode *m);
@@ -72,6 +74,8 @@ public:
 
   void setCovered(bool isCovered);
   bool isCovered();
+
+  void setEndLocation(int line, int column);
 
   Mutator *getMutator();
   Mutator *getMutator() const;
@@ -87,6 +91,7 @@ public:
   llvm::Function *getMutatedFunction() const;
 
   const SourceLocation &getSourceLocation() const;
+  const SourceLocation &getEndLocation() const;
 
   void applyMutation();
   void recordMutation();

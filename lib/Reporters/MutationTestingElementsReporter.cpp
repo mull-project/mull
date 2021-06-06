@@ -5,7 +5,6 @@
 #include "mull/MutationResult.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Mutators/MutatorsFactory.h"
-#include "mull/Reporters/ASTSourceInfoProvider.h"
 #include "mull/Reporters/SourceManager.h"
 #include "mull/Result.h"
 
@@ -28,8 +27,7 @@ static bool mutantSurvived(const ExecutionStatus &status) {
 
 static json11::Json createFiles(Diagnostics &diagnostics, const Result &result,
                                 const std::set<Mutant *> &killedMutants,
-                                const std::set<Mutant *> &notCoveredMutants,
-                                SourceInfoProvider &sourceInfoProvider) {
+                                const std::set<Mutant *> &notCoveredMutants) {
   SourceManager sourceManager;
 
   Json::object filesJSON;
@@ -64,7 +62,10 @@ static json11::Json createFiles(Diagnostics &diagnostics, const Result &result,
     Json::array mutantsEntries;
 
     for (Mutant *mutant : fileMutationPoints.second) {
-      MutationPointSourceInfo sourceInfo = sourceInfoProvider.getSourceInfo(mutant);
+      int beginLine = mutant->getSourceLocation().line;
+      int beginColumn = mutant->getSourceLocation().column;
+      int endLine = mutant->getEndLocation().line;
+      int endColumn = mutant->getEndLocation().column;
 
       std::string status("Survived");
       if (killedMutants.count(mutant) != 0) {
@@ -75,18 +76,16 @@ static json11::Json createFiles(Diagnostics &diagnostics, const Result &result,
 
       auto mutator = factory.getMutator(mutant->getMutatorIdentifier());
 
-      Json mpJson =
-          Json::object{ { "id", mutant->getMutatorIdentifier() },
-                        { "mutatorName", mutator->getDiagnostics() },
-                        { "replacement", mutator->getReplacement() },
-                        { "location",
-                          Json::object{ { "start",
-                                          Json::object{ { "line", sourceInfo.beginLine },
-                                                        { "column", sourceInfo.beginColumn } } },
-                                        { "end",
-                                          Json::object{ { "line", sourceInfo.endLine },
-                                                        { "column", sourceInfo.endColumn } } } } },
-                        { "status", status } };
+      Json mpJson = Json::object{
+        { "id", mutant->getMutatorIdentifier() },
+        { "mutatorName", mutator->getDiagnostics() },
+        { "replacement", mutator->getReplacement() },
+        { "location",
+          Json::object{
+              { "start", Json::object{ { "line", beginLine }, { "column", beginColumn } } },
+              { "end", Json::object{ { "line", endLine }, { "column", endColumn } } } } },
+        { "status", status }
+      };
       mutantsEntries.push_back(mpJson);
     }
 
@@ -113,13 +112,12 @@ static std::string getReportDir(const std::string &dir) {
   return dir;
 }
 
-MutationTestingElementsReporter::MutationTestingElementsReporter(
-    Diagnostics &diagnostics, const std::string &reportDir, const std::string &reportName,
-    SourceInfoProvider &sourceInfoProvider)
+MutationTestingElementsReporter::MutationTestingElementsReporter(Diagnostics &diagnostics,
+                                                                 const std::string &reportDir,
+                                                                 const std::string &reportName)
     : diagnostics(diagnostics), filename(getFilename(reportName)),
       htmlPath(getReportDir(reportDir) + "/" + filename + ".html"),
-      jsonPath(getReportDir(reportDir) + "/" + filename + ".json"),
-      sourceInfoProvider(sourceInfoProvider) {
+      jsonPath(getReportDir(reportDir) + "/" + filename + ".json") {
   llvm::sys::fs::create_directories(reportDir);
 }
 
@@ -150,7 +148,7 @@ void MutationTestingElementsReporter::reportResults(const Result &result) {
     { "mutationScore", (int)score },
     { "thresholds", Json::object{ { "high", 80 }, { "low", 60 } } },
     { "files",
-      createFiles(diagnostics, result, killedMutants, notCoveredMutants, sourceInfoProvider) },
+      createFiles(diagnostics, result, killedMutants, notCoveredMutants) },
     { "schemaVersion", "1.1.1" },
   };
   std::string json_str = json.dump();

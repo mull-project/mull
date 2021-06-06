@@ -1,15 +1,14 @@
 #include "mull/Mutant.h"
 
-#include "mull/MutationPoint.h"
 #include "mull/SourceLocation.h"
 #include <utility>
 
 using namespace mull;
 
 Mutant::Mutant(std::string identifier, std::string mutatorIdentifier, SourceLocation sourceLocation,
-               bool covered)
+               SourceLocation endLocation, bool covered)
     : identifier(std::move(identifier)), mutatorIdentifier(std::move(mutatorIdentifier)),
-      sourceLocation(std::move(sourceLocation)), covered(covered),
+      sourceLocation(std::move(sourceLocation)), endLocation(endLocation), covered(covered),
       mutatorKind(MutatorKind::InvalidKind) {}
 
 const std::string &Mutant::getIdentifier() const {
@@ -18,6 +17,10 @@ const std::string &Mutant::getIdentifier() const {
 
 const SourceLocation &Mutant::getSourceLocation() const {
   return sourceLocation;
+}
+
+const SourceLocation &Mutant::getEndLocation() const {
+  return endLocation;
 }
 
 const std::string &Mutant::getMutatorIdentifier() const {

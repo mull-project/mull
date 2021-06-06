@@ -1,6 +1,7 @@
 #include "MutantExtractor.h"
 #include <LLVMCompatibility.h>
 #include <llvm/Object/ObjectFile.h>
+#include <iostream>
 #include <sstream>
 
 using namespace mull;
@@ -47,16 +48,27 @@ MutantExtractor::extractMutants(const std::string &executable) {
       std::vector<std::string> mutantEncodings = split(content.str(), '\0');
       for (auto &encoding : mutantEncodings) {
         std::vector<std::string> chunks = split(encoding, ':');
-        std::string identifier = encoding.substr(0, encoding.rfind(':'));
+
+        for (auto &chunk : chunks) {
+          std::cout << "chunk: " << chunk << "\n";
+        }
         std::string mutator = chunks[0];
         std::string location = chunks[1];
-        int line = std::stoi(chunks[2]);
-        int column = std::stoi(chunks[3]);
-        bool covered = std::stoi(chunks[4]);
+        int beginLine = std::stoi(chunks[2]);
+        int beginColumn = std::stoi(chunks[3]);
+        int endLine = std::stoi(chunks[4]);
+        int endColumn = std::stoi(chunks[5]);
+        bool covered = std::stoi(chunks[6]);
+
+        std::ostringstream mis;
+        mis << mutator << ":" << location << ":" << beginLine << ":" << beginColumn;
+        std::string identifier = mis.str();
+
         auto mutant =
             std::make_unique<Mutant>(identifier,
                                      mutator,
-                                     mull::SourceLocation("", location, "", location, line, column),
+                                     mull::SourceLocation("", location, "", location, beginLine, beginColumn),
+                                     mull::SourceLocation("", location, "", location, endLine, endColumn),
                                      covered);
         mutants.push_back(std::move(mutant));
       }

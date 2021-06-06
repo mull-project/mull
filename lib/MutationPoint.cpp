@@ -81,7 +81,7 @@ MutationPoint::MutationPoint(Mutator *mutator, irm::IRMutation *irMutator,
     : mutator(mutator), address(MutationPointAddress::addressFromInstruction(instruction)),
       bitcode(m), originalFunction(instruction->getFunction()), mutatedFunction(nullptr),
       sourceLocation(SourceLocation::locationFromInstruction(instruction)), irMutator(irMutator),
-      covered(true) {
+      covered(true), endLocation(SourceLocation::nullSourceLocation()) {
   userIdentifier = mutator->getUniqueIdentifier() + ':' + sourceLocation.filePath + ':' +
                    std::to_string(sourceLocation.line) + ':' +
                    std::to_string(sourceLocation.column);
@@ -125,10 +125,20 @@ void MutationPoint::applyMutation() {
   mutator->applyMutation(mutatedFunction, address, irMutator);
 }
 
+void MutationPoint::setEndLocation(int line, int column) {
+  endLocation = SourceLocation(sourceLocation.unitDirectory,
+                               sourceLocation.unitFilePath,
+                               sourceLocation.directory,
+                               sourceLocation.filePath,
+                               line,
+                               column);
+}
+
 void MutationPoint::recordMutation() {
   assert(originalFunction != nullptr);
   llvm::Module *module = originalFunction->getParent();
-  std::string encoding = getUserIdentifier() + ':' + std::to_string(isCovered());
+  std::string encoding = getUserIdentifier() + ':' + std::to_string(endLocation.line) + ':' +
+                         std::to_string(endLocation.column) + ':' + std::to_string(isCovered());
   llvm::Constant *constant =
       llvm::ConstantDataArray::getString(module->getContext(), llvm::StringRef(encoding));
   auto *global = new llvm::GlobalVariable(*module,
@@ -142,7 +152,7 @@ void MutationPoint::recordMutation() {
 #else
   global->setSection(".mull_mutants");
 #endif
-  llvm::appendToUsed(*module, {global});
+  llvm::appendToUsed(*module, { global });
 }
 
 std::string MutationPoint::getMutatorIdentifier() const {
@@ -151,6 +161,10 @@ std::string MutationPoint::getMutatorIdentifier() const {
 
 const SourceLocation &MutationPoint::getSourceLocation() const {
   return sourceLocation;
+}
+
+const SourceLocation &MutationPoint::getEndLocation() const {
+  return endLocation;
 }
 
 Function *MutationPoint::getOriginalFunction() {

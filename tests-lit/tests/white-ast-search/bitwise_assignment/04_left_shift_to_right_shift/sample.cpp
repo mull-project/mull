@@ -25,7 +25,7 @@ CHECK:[info] Applying filter: AST mutation filter (threads: 1)
 CHECK:[debug] ASTMutationFilter: whitelisting mutation "Left Shift-Assign to Right Shift-Assign": {{.*}}sample.cpp:3:5
 
 CHECK:[info] Applying filter: junk (threads: 1)
-CHECK:[debug] ASTMutationStorage: recording mutation "Left Shift-Assign to Right Shift-Assign": {{.*}}sample.cpp:3:5
+CHECK:[debug] CXXJunkDetector: mutation "Left Shift-Assign to Right Shift-Assign": {{.*}}sample.cpp:3:5 (end: 3:8)
 
 CHECK:[info] Killed mutants (1/1):
 CHECK:{{^.*}}sample.cpp:3:5: warning: Killed: Replaced <<= with >>= [cxx_lshift_assign_to_rshift_assign]{{$}}

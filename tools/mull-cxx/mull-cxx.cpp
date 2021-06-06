@@ -24,7 +24,6 @@
 #include "mull/Mutators/MutatorKind.h"
 #include "mull/Parallelization/Tasks/LoadBitcodeFromBinaryTask.h"
 #include "mull/Program/Program.h"
-#include "mull/Reporters/ASTSourceInfoProvider.h"
 #include "mull/Result.h"
 #include "mull/Version.h"
 
@@ -191,15 +190,13 @@ int main(int argc, char **argv) {
   mull::ASTStorage astStorage(
       diagnostics, cxxCompilationDatabasePath, cxxCompilationFlags, bitcodeCompilationFlags);
 
-  mull::ASTSourceInfoProvider sourceInfoProvider(diagnostics, astStorage);
   tool::ReporterParameters params{ .reporterName = tool::ReportName.getValue(),
                                    .reporterDirectory = tool::ReportDirectory.getValue(),
-                                   .sourceInfoProvider = sourceInfoProvider,
                                    .compilationDatabaseAvailable = compilationDatabaseInfoAvailable,
                                    .IDEReporterShowKilled = tool::IDEReporterShowKilled };
   std::vector<std::unique_ptr<mull::Reporter>> reporters = reportersOption.reporters(params);
 
-  mull::CXXJunkDetector junkDetector(astStorage);
+  mull::CXXJunkDetector junkDetector(diagnostics, astStorage);
 
   mull::MutationsFinder mutationsFinder(mutatorsOptions.mutators(), configuration);
 

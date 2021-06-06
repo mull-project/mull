@@ -27,7 +27,7 @@ CHECK:[info] Applying filter: AST mutation filter (threads: 1)
 CHECK:[debug] ASTMutationFilter: whitelisting mutation "Replace Call": {{.*}}sample.cpp:6:10
 
 CHECK:[info] Applying filter: junk (threads: 1)
-CHECK:[debug] ASTMutationStorage: recording mutation "Replace Call": {{.*}}sample.cpp:6:10
+CHECK:[debug] CXXJunkDetector: mutation "Replace Call": {{.*}}sample.cpp:6:10 (end: 6:18)
 
 CHECK:[info] Killed mutants (1/1):
 CHECK:{{^.*}}sample.cpp:6:10: warning: Killed: Replaced call to a function with 42 [cxx_replace_scalar_call]{{$}}

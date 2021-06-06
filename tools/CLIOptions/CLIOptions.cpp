@@ -57,7 +57,6 @@ std::vector<std::unique_ptr<Reporter>> ReportersCLIOptions::reporters(ReporterPa
   std::vector<std::unique_ptr<mull::Reporter>> reporters;
   std::string &name = params.reporterName;
   std::string &directory = params.reporterDirectory;
-  SourceInfoProvider &provider = params.sourceInfoProvider;
 
   // TODO: Move to a better place
   for (auto i = 0; i < parameter.getNumOccurrences(); i++) {
@@ -74,7 +73,7 @@ std::vector<std::unique_ptr<Reporter>> ReportersCLIOptions::reporters(ReporterPa
                             "database. Consider providing -compdb-path or -compilation-flags.");
       }
       reporters.emplace_back(
-          new mull::MutationTestingElementsReporter(diagnostics, directory, name, provider));
+          new mull::MutationTestingElementsReporter(diagnostics, directory, name));
     } break;
     }
   }

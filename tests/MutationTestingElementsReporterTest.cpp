@@ -11,40 +11,18 @@
 #include "mull/Metrics/MetricsMeasure.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Program/Program.h"
-#include "mull/Reporters/ASTSourceInfoProvider.h"
 #include "mull/Result.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 
 #include <fstream>
 #include <gtest/gtest.h>
 #include <json11/json11.hpp>
-#include <llvm/IR/LLVMContext.h>
-#include <llvm/IR/Type.h>
 #include <mull/Diagnostics/Diagnostics.h>
 #include <ostream>
 
 using namespace mull;
 using namespace llvm;
 using namespace json11;
-
-static const int beginColumnStub = 1;
-static const int beginLineStub = 2;
-static const int endColumnStub = 3;
-static const int endLineStub = 4;
-
-class MockASTSourceInfoProvider : public SourceInfoProvider {
-public:
-  virtual ~MockASTSourceInfoProvider() = default;
-
-  MutationPointSourceInfo getSourceInfo(Mutant *mutant) override {
-    MutationPointSourceInfo info;
-    info.beginColumn = beginColumnStub;
-    info.beginLine = beginLineStub;
-    info.endColumn = endColumnStub;
-    info.endLine = endLineStub;
-    return info;
-  }
-};
 
 TEST(MutationTestingElementsReporterTest, integrationTest) {
 
@@ -98,6 +76,7 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   auto mutant = std::make_unique<Mutant>(mutationPoint->getUserIdentifier(),
                                          anyPoint->getMutatorIdentifier(),
                                          anyPoint->getSourceLocation(),
+                                         anyPoint->getEndLocation(),
                                          anyPoint->isCovered());
   auto mutationResult = std::make_unique<MutationResult>(mutatedTestExecutionResult, mutant.get());
 
@@ -112,8 +91,7 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   Result result(std::move(mutants), std::move(mutationResults));
 
   /// STEP2. Reporting results to JSON
-  MockASTSourceInfoProvider sourceInfoProvider;
-  MutationTestingElementsReporter reporter(diagnostics, "", "", sourceInfoProvider);
+  MutationTestingElementsReporter reporter(diagnostics, "", "");
   reporter.reportResults(result);
 
   /// STEP3. Making assertions.
@@ -152,14 +130,14 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   const Json &endLocationJSON = locationJSON["end"].object_items();
 
   const int &startLine = startLocationJSON["line"].int_value();
-  ASSERT_EQ(beginLineStub, startLine);
+  ASSERT_EQ(9, startLine);
 
   const int &startColumn = startLocationJSON["column"].int_value();
-  ASSERT_EQ(beginColumnStub, startColumn);
+  ASSERT_EQ(19, startColumn);
 
   const int &endLine = endLocationJSON["line"].int_value();
-  ASSERT_EQ(endLineStub, endLine);
+  ASSERT_EQ(0, endLine);
 
   const int &endColumn = endLocationJSON["column"].int_value();
-  ASSERT_EQ(endColumnStub, endColumn);
+  ASSERT_EQ(0, endColumn);
 }

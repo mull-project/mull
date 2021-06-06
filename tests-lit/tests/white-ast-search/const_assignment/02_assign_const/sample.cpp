@@ -27,7 +27,7 @@ CHECK:[info] Applying filter: AST mutation filter (threads: 1)
 CHECK:[debug] ASTMutationFilter: whitelisting mutation "Assign Const": {{.*}}sample.cpp:5:7
 
 CHECK:[info] Applying filter: junk (threads: 1)
-CHECK:[debug] ASTMutationStorage: recording mutation "Assign Const": {{.*}}sample.cpp:5:7
+CHECK:[debug] CXXJunkDetector: mutation "Assign Const": {{.*}}sample.cpp:5:7 (end: 5:8)
 
 CHECK:[info] Killed mutants (1/1):
 CHECK:{{^.*}}sample.cpp:5:7: warning: Killed: Replaced 'a = b' with 'a = 42' [cxx_assign_const]{{$}}

@@ -24,7 +24,7 @@ CHECK:[info] Applying filter: AST mutation filter (threads: 1)
 CHECK:[debug] ASTMutationFilter: whitelisting mutation "Div-Assign to Mul-Assign": {{.*}}sample.cpp:2:5
 
 CHECK:[info] Applying filter: junk (threads: 1)
-CHECK:[debug] ASTMutationStorage: recording mutation "Div-Assign to Mul-Assign": {{.*}}sample.cpp:2:5
+CHECK:[debug] CXXJunkDetector: mutation "Div-Assign to Mul-Assign": {{.*}}sample.cpp:2:5 (end: 2:7)
 
 CHECK:[info] Killed mutants (1/1):
 CHECK:{{^.*}}sample.cpp:2:5: warning: Killed: Replaced /= with *= [cxx_div_assign_to_mul_assign]{{$}}
