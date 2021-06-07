@@ -192,39 +192,37 @@ bool ASTMutationsSearchVisitor::VisitVarDecl(clang::VarDecl *D) {
 void ASTMutationsSearchVisitor::recordMutationPoint(mull::MutatorKind mutatorKind,
                                                     std::unique_ptr<ASTMutation> mutation,
                                                     clang::Stmt *stmt,
-                                                    clang::SourceLocation beginLocation,
+                                                    clang::SourceLocation mutationLocation,
                                                     bool locationIsExpression) {
-  if (sourceManager.isInSystemHeader(beginLocation)) {
+  if (sourceManager.isInSystemHeader(mutationLocation)) {
     return;
   }
-  if (sourceManager.isInSystemMacro(beginLocation)) {
+  if (sourceManager.isInSystemMacro(mutationLocation)) {
     return;
   }
-  std::string sourceFilePath = sourceManager.getFilename(beginLocation).str();
+
+  const std::pair<clang::SourceLocation, clang::SourceLocation> mutationLocationPair =
+      getBeginEndMutationLocation(stmt, mutationLocation, locationIsExpression);
+  const clang::SourceLocation &mutationBeginLocation = mutationLocationPair.first;
+  const clang::SourceLocation &mutationEndLocation = mutationLocationPair.second;
+
+  std::string sourceFilePath = sourceManager.getFilename(mutationBeginLocation).str();
+
   if (sourceFilePath.empty()) {
-    /// we reach here because of asserts()
-    /// TODO: maybe there are more cases.
-    /// assert(0);
+    llvm::errs() << "ASTMutationsSearchVisitor: Not implemented: A mutation location has no source "
+                    "file path. Parent AST statement dump:\n";
+    stmt->dump();
     return;
   }
   if (sourceFilePath.find("include/gtest") != std::string::npos) {
     return;
   }
 
-  clang::SourceLocation endLocation =
-      locationIsExpression ? stmt->getSourceRange().getEnd() : beginLocation;
+  int beginLine = sourceManager.getExpansionLineNumber(mutationBeginLocation, nullptr);
+  int beginColumn = sourceManager.getExpansionColumnNumber(mutationBeginLocation);
 
-  /// Clang AST: how to get more precise debug information in certain cases?
-  /// http://clang-developers.42468.n3.nabble.com/Clang-AST-how-to-get-more-precise-debug-information-in-certain-cases-td4065195.html
-  /// https://stackoverflow.com/questions/11083066/getting-the-source-behind-clangs-ast
-  clang::SourceLocation sourceLocationEndActual =
-      clang::Lexer::getLocForEndOfToken(endLocation, 0, sourceManager, context.getLangOpts());
-
-  int beginLine = sourceManager.getExpansionLineNumber(beginLocation, nullptr);
-  int beginColumn = sourceManager.getExpansionColumnNumber(beginLocation);
-
-  int endLine = sourceManager.getExpansionLineNumber(sourceLocationEndActual, nullptr);
-  int endColumn = sourceManager.getExpansionColumnNumber(sourceLocationEndActual);
+  int endLine = sourceManager.getExpansionLineNumber(mutationEndLocation, nullptr);
+  int endColumn = sourceManager.getExpansionColumnNumber(mutationEndLocation);
 
   std::unique_ptr<ASTMutationPoint> astMutation =
       std::make_unique<ASTMutationPoint>(std::move(mutation),
@@ -237,7 +235,39 @@ void ASTMutationsSearchVisitor::recordMutationPoint(mull::MutatorKind mutatorKin
                                          endLine,
                                          endColumn);
 
-  llvm::outs() << "Recording mutation point: " << astMutation->mutationIdentifier << " (end: "
-               << std::to_string(endLine) << ":" << std::to_string(endColumn) << ")\n";
+  llvm::outs() << "Recording mutation point: " << astMutation->mutationIdentifier
+               << " (end: " << std::to_string(endLine) << ":" << std::to_string(endColumn) << ")\n";
   astMutations.emplace_back(std::move(astMutation));
+}
+
+std::pair<clang::SourceLocation, clang::SourceLocation>
+ASTMutationsSearchVisitor::getBeginEndMutationLocation(clang::Stmt *stmt,
+                                                       clang::SourceLocation mutationLocation,
+                                                       bool locationIsExpression) {
+  /// There are two known types of mutated expressions:
+  /// 1) Remove-Void, CallExpr example: its mutation location and its getBegin() are the same, so
+  ///    [getBegin(), getEnd()] is what we need to get the mutation's AST information.
+  /// 2) Binary Mutation, BinaryOperator example: its mutation location is
+  ///    BinaryOperator's getOperatorLoc(), i.e. "+", while the
+  ///    [getBegin(), getEnd()] range is the whole "a + b" expression.
+  ///    In this case the mutation's AST information is obtained as:
+  ///    [getOperatorLoc(), "end of the token of getOperatorLoc()"]
+  clang::SourceLocation endLocation =
+      locationIsExpression ? stmt->getSourceRange().getEnd() : mutationLocation;
+
+  clang::SourceLocation updatedMutationLocation;
+  if (!mutationLocation.isMacroID()) {
+    updatedMutationLocation = mutationLocation;
+  } else {
+    updatedMutationLocation = sourceManager.getSpellingLoc(mutationLocation);
+    endLocation = sourceManager.getSpellingLoc(endLocation);
+  }
+
+  /// Clang AST: how to get more precise debug information in certain cases?
+  /// http://clang-developers.42468.n3.nabble.com/Clang-AST-how-to-get-more-precise-debug-information-in-certain-cases-td4065195.html
+  /// https://stackoverflow.com/questions/11083066/getting-the-source-behind-clangs-ast
+  clang::SourceLocation sourceLocationEndActual =
+      clang::Lexer::getLocForEndOfToken(endLocation, 0, sourceManager, context.getLangOpts());
+
+  return std::make_pair(updatedMutationLocation, sourceLocationEndActual);
 }
