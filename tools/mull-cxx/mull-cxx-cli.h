@@ -36,7 +36,6 @@ ExcludePaths_();
 IncludePaths_();
 GitDiffRef_();
 GitProjectRoot_();
-EnableAST_();
 DisableJunkDetection_();
 IDEReporterShowKilled_();
 MutateOnly_();
@@ -55,7 +54,6 @@ void dumpCLIInterface(Diagnostics &diagnostics) {
 
       &ReportName,
       &ReportDirectory,
-      &EnableAST,
       reporters,
       &IDEReporterShowKilled,
       &DebugEnabled,

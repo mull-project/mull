@@ -5,8 +5,6 @@
 #include <llvm/Support/TargetSelect.h>
 
 #include "mull-cxx-cli.h"
-#include "mull/AST/ASTFinder.h"
-#include "mull/AST/ASTMutationFilter.h"
 #include "mull/BitcodeMetadataReader.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Config/ConfigurationOptions.h"
@@ -259,21 +257,6 @@ int main(int argc, char **argv) {
             gitProjectRoot);
       }
     }
-  }
-
-  if (tool::EnableAST && compilationDatabaseInfoAvailable) {
-    std::vector<mull::MutatorKind> mutationKinds;
-    for (auto &mutator : mutatorsOptions.mutators()) {
-      mutationKinds.push_back(mutator->mutatorKind());
-    }
-
-    mull::MutatorKindSet mutatorKindSet = mull::MutatorKindSet::create(mutationKinds);
-
-    mull::ASTFinder astFinder(mutatorKindSet);
-    astFinder.findMutations(diagnostics, configuration, program, *filePathFilter, astStorage);
-
-    auto *astMutationFilter = new mull::ASTMutationFilter(diagnostics, astStorage);
-    filters.mutationFilters.push_back(astMutationFilter);
   }
 
   if (!tool::DisableJunkDetection.getValue()) {
