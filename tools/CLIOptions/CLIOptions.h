@@ -179,12 +179,6 @@ list<std::string> IncludePaths( \
     value_desc("regex"), \
     cat(MullCategory))
 
-#define EnableAST_() \
-opt<bool> EnableAST( \
-    "enable-ast", llvm::cl::Optional, \
-    llvm::cl::desc("Enable \"white\" AST search (disabled by default)"), \
-    llvm::cl::cat(MullCategory), llvm::cl::init(false))
-
 #define KeepObjectFiles_() \
 opt<bool> KeepObjectFiles( \
     "keep-object-files", llvm::cl::Optional, \

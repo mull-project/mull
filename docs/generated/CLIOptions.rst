@@ -4,13 +4,13 @@
 
 --timeout number		Timeout per test run (milliseconds)
 
---dry-run		Skips real mutants execution. Disabled by default
+--dry-run		Skips mutant execution and generation. Disabled by default
+
+--mutate-only		Skips mutant execution. Unlike -dry-run generates mutants. Disabled by default
 
 --report-name filename		Filename for the report (only for supported reporters). Defaults to <timestamp>.<extension>
 
 --report-dir directory		Where to store report (defaults to '.')
-
---enable-ast		Enable "white" AST search (disabled by default)
 
 --reporters reporter		Choose reporters:
 

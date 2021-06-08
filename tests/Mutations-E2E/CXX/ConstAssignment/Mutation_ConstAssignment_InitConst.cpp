@@ -34,19 +34,6 @@ TEST(Mutation_ConstAssignment_InitConst, End_2_End) {
 
   std::unique_ptr<MutationArtefact> artefact = mutationTestBed.generate(testCode, mutator);
 
-  /// 1. AST Assertions
-  LineColumnHash locationHash = lineColumnHash(3, 7);
-
-  SingleASTUnitMutations singleUnitMutations = artefact->getASTMutations();
-  ASSERT_EQ(singleUnitMutations.size(), 1U);
-
-  SingleFileMutations &singleFileMutations = singleUnitMutations["/in-memory-file.cc"];
-  ASSERT_EQ(singleFileMutations.count(MutatorKind::CXX_InitConst), 1U);
-
-  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_InitConst].size(), 1U);
-  ASSERT_EQ(singleFileMutations[MutatorKind::CXX_InitConst].count(locationHash), 1U);
-
-  /// 2. IR and Junk Detection Assertions
   std::vector<MutationPoint *> nonJunkMutationPoints = artefact->getNonJunkMutationPoints();
   std::vector<MutationPoint *> junkMutationPoints = artefact->getJunkMutationPoints();
 
@@ -76,11 +63,6 @@ int foo() {
 
   std::unique_ptr<MutationArtefact> artefact = mutationTestBed.generate(constTestCode, mutator);
 
-  /// 1. AST Assertions
-  SingleASTUnitMutations singleUnitMutations = artefact->getASTMutations();
-  ASSERT_EQ(singleUnitMutations.size(), 0U);
-
-  /// 2. IR and Junk Detection Assertions
   std::vector<MutationPoint *> nonJunkMutationPoints = artefact->getNonJunkMutationPoints();
   std::vector<MutationPoint *> junkMutationPoints = artefact->getJunkMutationPoints();
 
@@ -102,11 +84,6 @@ int foo() {
 
   std::unique_ptr<MutationArtefact> artefact = mutationTestBed.generate(constTestCode, mutator);
 
-  /// 1. AST Assertions
-  SingleASTUnitMutations singleUnitMutations = artefact->getASTMutations();
-  ASSERT_EQ(singleUnitMutations.size(), 0U);
-
-  /// 2. IR and Junk Detection Assertions
   std::vector<MutationPoint *> nonJunkMutationPoints = artefact->getNonJunkMutationPoints();
   std::vector<MutationPoint *> junkMutationPoints = artefact->getJunkMutationPoints();
 

@@ -3,7 +3,6 @@
 #include "InMemoryFixture.h"
 #include "MutationArtefact.h"
 
-#include "mull/AST/ASTMutationStorage.h"
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Filters/FilePathFilter.h"
 

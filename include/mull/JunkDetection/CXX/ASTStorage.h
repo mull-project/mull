@@ -1,6 +1,5 @@
 #pragma once
 
-#include "mull/AST/ASTMutationStorage.h"
 #include "mull/JunkDetection/CXX/CompilationDatabase.h"
 #include "mull/SourceLocation.h"
 
@@ -50,18 +49,6 @@ public:
   ThreadSafeASTUnit *findAST(const std::string &sourceFile);
 
   void setAST(const std::string &sourceFile, std::unique_ptr<ThreadSafeASTUnit> astUnit);
-
-  const ASTMutation &getMutation(const std::string &sourceFile, mull::MutatorKind mutatorKind,
-                                 int line, int column) const;
-
-  void saveMutation(const std::string &sourceFile, mull::MutatorKind mutatorKind,
-                    const clang::Stmt *const expression, int line, int column);
-
-  void saveMutations(std::unordered_map<SourceFilePath, SingleFileMutations> &storage);
-
-  bool mutationExists(const std::string &sourceFile, mull::MutatorKind mutatorKind, int line,
-                      int column);
-
 private:
   Diagnostics &diagnostics;
   std::mutex mutex;
@@ -69,7 +56,6 @@ private:
 
   CompilationDatabase compilationDatabase;
   std::map<std::string, std::unique_ptr<ThreadSafeASTUnit>> astUnits;
-  ASTMutationStorage mutations;
 };
 
 } // namespace mull
