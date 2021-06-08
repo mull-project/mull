@@ -4,4 +4,4 @@ RUN: cp %S/sample.cpp.modified $TEMPDIR/sample.cpp
 RUN: cd / && %CLANG_EXEC -fembed-bitcode -g -O0 $TEMPDIR/sample.cpp -o $TEMPDIR/sample.cpp.exe
 RUN: cd $TEMPDIR && (unset TERM; %MULL_EXEC -git-diff-ref=master -git-project-root=$TEMPDIR -linker=%clang_cxx -mutators=cxx_ge_to_lt -mutators=cxx_ge_to_gt -ide-reporter-show-killed $TEMPDIR/sample.cpp.exe 2>&1; test $? = 0) | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines
 
-CHECK:[warning] GitDiffReader: cannot get git diff information. Received output: {{.*}}Not a git repository
+CHECK:[warning] GitDiffReader: cannot get git diff information. Received output: {{.*}}Not a git repository{{.*}}

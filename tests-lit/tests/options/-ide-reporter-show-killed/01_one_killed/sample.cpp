@@ -20,7 +20,7 @@ RUN: (unset TERM; %MULL_EXEC -linker=%clang_cxx -mutators=cxx_add_to_sub -report
 WITH-OPTION:[info] Running mutants (threads: 1)
 WITH-OPTION:{{^       \[################################\] 1/1\. Finished .*}}
 WITH-OPTION:[info] Killed mutants (1/1):
-WITH-OPTION-NEXT:{{^.*}}sample.cpp:31:18: warning: Killed: Replaced + with -
+WITH-OPTION-NEXT:{{^.*}}sample.cpp:31:18: warning: Killed: Replaced + with - [cxx_add_to_sub]
 WITH-OPTION-NEXT:  int result = a + b;
 WITH-OPTION-NEXT:                 ^
 WITH-OPTION-NEXT:[info] All mutations have been killed
