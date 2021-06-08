@@ -15,7 +15,8 @@
 using namespace clang;
 using namespace llvm;
 
-namespace {
+namespace mull {
+namespace cxx {
 
 class MullASTConsumer : public ASTConsumer {
   CompilerInstance &instance;
@@ -127,6 +128,8 @@ protected:
   }
 };
 
-} // namespace
+} // namespace cxx
+} // namespace mull
 
-static FrontendPluginRegistry::Add<MullAction> X("mull-cxx-frontend", "Mull: Prepare mutations");
+static FrontendPluginRegistry::Add<mull::cxx::MullAction> X("mull-cxx-frontend",
+                                                            "Mull: Prepare mutations");

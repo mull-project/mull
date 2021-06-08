@@ -5,11 +5,14 @@
 #include <clang/AST/Type.h>
 #include <clang/Basic/Specifiers.h>
 
-extern const clang::SourceLocation NULL_LOCATION;
-
 namespace clang {
 class SectionAttr;
 }
+
+namespace mull {
+namespace cxx {
+
+extern const clang::SourceLocation NULL_LOCATION;
 
 class ASTNodeFactory {
   clang::ASTContext &context;
@@ -55,3 +58,6 @@ public:
   clang::QualType getStringLiteralArrayType(clang::QualType type, unsigned size);
   clang::QualType getConstantArrayType(clang::QualType type, unsigned size);
 };
+
+} // namespace cxx
+} // namespace mull

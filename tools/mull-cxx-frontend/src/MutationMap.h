@@ -4,6 +4,9 @@
 
 #include <unordered_map>
 
+namespace mull {
+namespace cxx {
+
 struct MutationIdentifier {
   std::string identifier;
   mull::MutatorKind mutatorKind;
@@ -23,3 +26,6 @@ public:
   void addMutation(std::string identifier);
   void setDefaultMutationsIfNotSpecified();
 };
+
+} // namespace cxx
+} // namespace mull

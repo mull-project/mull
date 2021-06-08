@@ -4,6 +4,9 @@
 
 #include <clang/AST/Expr.h>
 
+namespace mull {
+namespace cxx {
+
 class ASTMutation {
 public:
   virtual void performMutation(ASTMutationPoint &mutation, ASTMutator &mutator) = 0;
@@ -93,3 +96,6 @@ public:
     mutator.performReplaceNumericInitAssignmentMutation(mutation, *this);
   }
 };
+
+} // namespace cxx
+} // namespace mull

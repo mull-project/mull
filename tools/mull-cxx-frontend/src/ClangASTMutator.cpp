@@ -11,6 +11,9 @@
 #include <clang/Basic/SourceLocation.h>
 #include <llvm/Support/Casting.h>
 
+namespace mull {
+namespace cxx {
+
 void ClangASTMutator::replaceExpression(clang::Expr *oldExpr, clang::Expr *newExpr,
                                         std::string identifier) {
   clang::ConditionalOperator *conditionalExpr =
@@ -151,3 +154,6 @@ clang::CallExpr *ClangASTMutator::createGetenvCallExpr(std::string identifier) {
 
   return callExpr;
 }
+
+} // namespace cxx
+} // namespace mull

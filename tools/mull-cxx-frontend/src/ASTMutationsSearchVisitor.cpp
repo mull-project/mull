@@ -9,6 +9,9 @@
 #include <clang/Basic/SourceManager.h>
 #include <clang/Lex/Lexer.h>
 
+namespace mull {
+namespace cxx {
+
 std::vector<std::unique_ptr<ASTMutationPoint>> &ASTMutationsSearchVisitor::getAstMutations() {
   return astMutations;
 }
@@ -271,3 +274,6 @@ ASTMutationsSearchVisitor::getBeginEndMutationLocation(clang::Stmt *stmt,
 
   return std::make_pair(updatedMutationLocation, sourceLocationEndActual);
 }
+
+} // namespace cxx
+} // namespace mull

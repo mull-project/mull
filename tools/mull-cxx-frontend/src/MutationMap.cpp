@@ -2,6 +2,9 @@
 
 #include <cassert>
 
+namespace mull {
+namespace cxx {
+
 static const std::vector<MutationIdentifier> MUTATIONS_MAP({
     { "cxx_add_to_sub", mull::MutatorKind::CXX_AddToSub },
     { "cxx_sub_to_add", mull::MutatorKind::CXX_SubToAdd },
@@ -77,3 +80,6 @@ void MutationMap::setDefaultMutationsIfNotSpecified() {
     usedMutatorSet.insert(mutationIdentifier.mutatorKind);
   }
 }
+
+} // namespace cxx
+} // namespace mull

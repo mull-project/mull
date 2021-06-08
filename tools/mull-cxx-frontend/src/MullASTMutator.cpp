@@ -3,6 +3,9 @@
 #include <clang/AST/ASTContext.h>
 #include <clang/AST/Expr.h>
 
+namespace mull {
+namespace cxx {
+
 void MullASTMutator::instrumentTranslationUnit() {
   instrumentation.instrumentTranslationUnit();
 }
@@ -155,3 +158,6 @@ void MullASTMutator::performReplaceNumericInitAssignmentMutation(
                                             mutation.beginLine,
                                             mutation.beginColumn);
 }
+
+} // namespace cxx
+} // namespace mull
