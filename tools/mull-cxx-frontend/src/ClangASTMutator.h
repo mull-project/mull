@@ -13,6 +13,9 @@ class IfStmt;
 class Stmt;
 } // namespace clang
 
+namespace mull {
+namespace cxx {
+
 class ASTInstrumentation;
 class ASTNodeFactory;
 
@@ -34,3 +37,6 @@ public:
                                                       std::string identifier);
   clang::CallExpr *createGetenvCallExpr(std::string identifier);
 };
+
+} // namespace cxx
+} // namespace mull

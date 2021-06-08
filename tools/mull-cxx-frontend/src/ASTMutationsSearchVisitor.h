@@ -4,6 +4,9 @@
 
 #include <clang/AST/RecursiveASTVisitor.h>
 
+namespace mull {
+namespace cxx {
+
 class MutationMap;
 
 class ASTMutationsSearchVisitor : public clang::RecursiveASTVisitor<ASTMutationsSearchVisitor> {
@@ -34,3 +37,6 @@ private:
   getBeginEndMutationLocation(clang::Stmt *stmt, clang::SourceLocation mutationLocation,
                               bool locationIsExpression);
 };
+
+} // namespace cxx
+} // namespace mull

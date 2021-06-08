@@ -1,5 +1,8 @@
 #pragma once
 
+namespace mull {
+namespace cxx {
+
 class ASTMutationPoint;
 class BinaryMutation;
 class RemoveVoidMutation;
@@ -34,3 +37,6 @@ public:
       ASTMutationPoint &mutation,
       ReplaceNumericInitAssignmentMutation &replaceNumericInitAssignmentMutation) = 0;
 };
+
+} // namespace cxx
+} // namespace mull

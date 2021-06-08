@@ -3,6 +3,9 @@
 #include <clang/AST/ASTContext.h>
 #include <clang/AST/Attr.h>
 
+namespace mull {
+namespace cxx {
+
 const clang::SourceLocation NULL_LOCATION;
 
 clang::FunctionDecl *ASTNodeFactory::createFunctionDecl(std::string name,
@@ -230,3 +233,6 @@ clang::QualType ASTNodeFactory::getConstantArrayType(clang::QualType type, unsig
       type, llvm::APInt(32, size + 1), clang::ArrayType::Normal, /*IndexTypeQuals*/ 0);
 #endif
 }
+
+} // namespace cxx
+} // namespace mull

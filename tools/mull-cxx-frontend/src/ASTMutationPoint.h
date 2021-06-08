@@ -8,6 +8,9 @@ namespace clang {
 class Stmt;
 }
 
+namespace mull {
+namespace cxx {
+
 class ASTMutationPoint {
 public:
   std::unique_ptr<ASTMutation> mutation;
@@ -27,3 +30,6 @@ public:
 
   void performMutation(ASTMutator &mutator);
 };
+
+} // namespace cxx
+} // namespace mull

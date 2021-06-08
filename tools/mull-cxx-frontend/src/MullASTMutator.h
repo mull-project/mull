@@ -11,6 +11,9 @@ class ASTContext;
 class FunctionDecl;
 } // namespace clang
 
+namespace mull {
+namespace cxx {
+
 class MullASTMutator : public ASTMutator {
 public:
   MullASTMutator(clang::ASTContext &context, clang::Sema &sema)
@@ -41,3 +44,6 @@ private:
   ASTInstrumentation instrumentation;
   ClangASTMutator clangAstMutator;
 };
+
+} // namespace cxx
+} // namespace mull

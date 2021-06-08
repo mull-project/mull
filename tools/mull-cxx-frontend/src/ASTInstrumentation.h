@@ -9,6 +9,9 @@ class FunctionDecl;
 class Sema;
 } // namespace clang
 
+namespace mull {
+namespace cxx {
+
 class ASTNodeFactory;
 
 class ASTInstrumentation {
@@ -27,3 +30,6 @@ public:
 private:
   clang::FunctionDecl *createGetEnvFuncDecl(clang::DeclContext *declContext);
 };
+
+} // namespace cxx
+} // namespace mull

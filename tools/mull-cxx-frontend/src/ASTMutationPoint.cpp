@@ -2,6 +2,9 @@
 
 #include <sstream>
 
+namespace mull {
+namespace cxx {
+
 ASTMutationPoint::ASTMutationPoint(std::unique_ptr<ASTMutation> mutation,
                                    mull::MutatorKind mutationType, std::string mutationIdentifier,
                                    clang::Stmt *toBeMutatedStmt, std::string sourceFilePath,
@@ -25,3 +28,6 @@ ASTMutationPoint::ASTMutationPoint(std::unique_ptr<ASTMutation> mutation,
 void ASTMutationPoint::performMutation(ASTMutator &mutator) {
   mutation->performMutation(*this, mutator);
 }
+
+} // namespace cxx
+} // namespace mull

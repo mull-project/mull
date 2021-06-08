@@ -6,6 +6,9 @@
 
 #include <sstream>
 
+namespace mull {
+namespace cxx {
+
 void ASTInstrumentation::instrumentTranslationUnit() {
   /// Create an external getenv() declaration within extern "C" {} block.
   clang::LinkageSpecDecl *cLinkageSpecDecl =
@@ -115,3 +118,6 @@ clang::FunctionDecl *ASTInstrumentation::createGetEnvFuncDecl(clang::DeclContext
 
   return getEnvFuncDecl;
 }
+
+} // namespace cxx
+} // namespace mull
