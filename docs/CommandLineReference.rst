@@ -1,4 +1,8 @@
 Command Line Reference
 ======================
 
-.. include:: generated/CLIOptions.rst
+.. toctree::
+   :maxdepth: 2
+
+   command-line/mull-cxx
+   command-line/mull-runner

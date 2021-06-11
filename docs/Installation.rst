@@ -22,8 +22,8 @@ Setup apt-repository:
 
     curl -1sLf 'https://dl.cloudsmith.io/public/mull-project/mull-stable/setup.deb.sh' | sudo -E bash
 
-_Note: Mull uses [Cloudsmith](https://cloudsmith.io) for package distribution.
-The above script detects your OS and sets up the apt repo automagically._
+*Note*: Mull uses `Cloudsmith <https://cloudsmith.io>`_ for package distribution.
+The above script detects your OS and sets up the apt repo automagically.
 
 Install the package:
 
@@ -49,6 +49,11 @@ You can also get the latest "nightly" build using the corresponding source:
 .. code-block:: bash
 
     curl -1sLf 'https://dl.cloudsmith.io/public/mull-project/mull-nightly/setup.deb.sh' | sudo -E bash
+
+Links:
+
+  - `Mull Stable <https://cloudsmith.io/~mull-project/repos/mull-stable/packages/>`_
+  - `Mull Nightly <https://cloudsmith.io/~mull-project/repos/mull-stable/packages/>`_
 
 Install on macOS
 ****************
