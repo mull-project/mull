@@ -1,8 +1,17 @@
-add_custom_target(generate-cli-options-doc
-  COMMAND $<TARGET_FILE:mull-cxx> --dump-cli > generated/CLIOptions.rst
+file(MAKE_DIRECTORY generated)
+file(MAKE_DIRECTORY command-line/generated)
+
+add_custom_target(generate-mull-cxx-cli-options-doc
+  COMMAND $<TARGET_FILE:mull-cxx> --dump-cli > command-line/generated/mull-cxx-cli-options.rst
   DEPENDS mull-cxx
   WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
+
+add_custom_target(generate-mull-runner-cli-options-doc
+  COMMAND $<TARGET_FILE:mull-runner> --dump-cli > command-line/generated/mull-runner-cli-options.rst
+  DEPENDS mull-runner
+  WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
+  )
 
 add_custom_target(generate-mutators-doc
   COMMAND $<TARGET_FILE:mull-cxx> --dump-mutators > generated/Mutators.rst
@@ -24,5 +33,9 @@ add_custom_target(generate-html-docs
 )
 
 add_custom_target(build-docs
-  DEPENDS generate-mutators-doc generate-cli-options-doc generate-html-docs
+  DEPENDS
+    generate-mutators-doc
+    generate-mull-cxx-cli-options-doc
+    generate-mull-runner-cli-options-doc
+    generate-html-docs
 )
