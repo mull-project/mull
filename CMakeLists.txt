@@ -184,8 +184,13 @@ if ("LLVM" IN_LIST LLVM_AVAILABLE_LIBS)
   )
 else()
   set (MULL_LLVM_COMPATIBILITY_LIBRARIES
+    clangAST
+    clangBasic
+    clangFrontend
+    clangLex
     LLVMSupport
     LLVMCore
+    LLVMTarget
   )
 endif()
 

@@ -9,7 +9,21 @@ if ("LLVM" IN_LIST LLVM_AVAILABLE_LIBS)
   )
 else()
   set (MULL_CXX_LLVM_LIBRARIES
+    clangAST
+    clangBasic
+    clangFrontend
+    clangLex
+    LLVMBitReader
+    LLVMBitWriter
+    LLVMDemangle
     LLVMObject
+    LLVMSupport
+    LLVMTarget
+    LLVM${LLVM_NATIVE_ARCH}CodeGen
+    LLVM${LLVM_NATIVE_ARCH}AsmParser
+    LLVM${LLVM_NATIVE_ARCH}Desc
+    LLVM${LLVM_NATIVE_ARCH}Info
+    LLVMTransformUtils
   )
 endif()
 

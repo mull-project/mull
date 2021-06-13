@@ -125,14 +125,16 @@ if ("LLVM" IN_LIST LLVM_AVAILABLE_LIBS)
     )
 else ()
   set(MULL_LLVM_LIBRARIES
+    clangSerialization
     LLVMAsmParser
     LLVMSupport
     LLVMOption
+    LLVMMC
     LLVM${LLVM_NATIVE_ARCH}CodeGen
     LLVM${LLVM_NATIVE_ARCH}AsmParser
     LLVMCoverage
     LLVMProfileData
-    )
+  )
 endif ()
 
 find_package(Threads REQUIRED)

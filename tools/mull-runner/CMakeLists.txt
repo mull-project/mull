@@ -7,6 +7,6 @@ set (SOURCES
 add_mull_executable(
   NAME mull-runner
   SOURCES ${SOURCES}
-  LINK_WITH mull json11
+  LINK_WITH mull json11 LLVMBitWriter LLVMTransformUtils LLVMObject LLVMDemangle
 )
 target_include_directories(mull-runner PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../CLIOptions)

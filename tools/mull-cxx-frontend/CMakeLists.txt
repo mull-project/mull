@@ -45,6 +45,8 @@ if (APPLE)
     clangEdit
     clangDriver
     clangTooling
+    LLVMSupport
+    LLVMOption
   )
 else()
   target_link_libraries(mull-cxx-frontend PRIVATE

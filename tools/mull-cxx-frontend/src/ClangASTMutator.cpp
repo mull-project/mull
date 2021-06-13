@@ -138,12 +138,12 @@ clang::CallExpr *ClangASTMutator::createGetenvCallExpr(std::string identifier) {
                                    identifier,
                                    clang::StringLiteral::StringKind::Ascii,
                                    false,
-                                   factory.getConstantArrayType(context.CharTy, identifier.size()),
+                                   factory.getStringLiteralArrayType(context.CharTy, identifier.size()),
                                    clang::SourceLocation());
 
   clang::ImplicitCastExpr *implicitCastExpr2 =
       clang::ImplicitCastExpr::Create(context,
-                                      context.getPointerType(context.CharTy),
+                                      context.getPointerType(context.getConstType(context.CharTy)),
                                       clang::CastKind::CK_ArrayToPointerDecay,
                                       stringLiteral,
                                       nullptr,
