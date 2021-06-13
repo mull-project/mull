@@ -19,7 +19,6 @@
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
 #include "mull/Metrics/MetricsMeasure.h"
 #include "mull/MutationsFinder.h"
-#include "mull/Mutators/MutatorKind.h"
 #include "mull/Parallelization/Tasks/LoadBitcodeFromBinaryTask.h"
 #include "mull/Program/Program.h"
 #include "mull/Result.h"
