@@ -4,7 +4,8 @@ Tutorials
 .. toctree::
    :maxdepth: 1
 
-   HelloWorld
-   CompilationDatabaseAndJunk
-   ControlMutationsTutorial
-   SQLiteReport
+   tutorials/HelloWorld
+   tutorials/CompilationDatabaseAndJunk
+   tutorials/ControlMutationsTutorial
+   tutorials/NonStandardTestSuite
+   tutorials/SQLiteReport

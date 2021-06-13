@@ -22,7 +22,7 @@ Database Schema
 
 The following picture describes part of the existing database:
 
-.. image:: generated/db-schema.svg
+.. image:: ../generated/db-schema.svg
 
 *Some fields and tables irrelevant for this document are omitted.*
 
