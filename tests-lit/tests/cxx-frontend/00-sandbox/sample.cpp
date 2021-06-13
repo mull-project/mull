@@ -2,12 +2,18 @@ extern "C" {
 extern int printf(const char *, ...);
 }
 
+void voidSum(int a, int b, int *result) {
+  *result = a + b;
+}
+
 int sum(int a, int b) {
-  return a + b;
+  int result = 0;
+  voidSum(a, b, &result);
+  return result;
 }
 
 int main() {
-  if (sum(-2, 2) == 0) {
+  if (sum(2, 2) == 4) {
     printf("NORMAL\n");
     return 0;
   } else {
@@ -16,14 +22,16 @@ int main() {
   }
 }
 
-// clang-format off
-
 /**
-RUN: %CLANG_EXEC -fplugin=%mull_frontend_cxx -Xclang -plugin-arg-mull-cxx-frontend -Xclang mutators=cxx_add_to_sub -S -emit-llvm %s
-RUN: %CLANG_EXEC -fplugin=%mull_frontend_cxx -Xclang -plugin-arg-mull-cxx-frontend -Xclang mutators=cxx_add_to_sub %s -o %s.exe
+WIP WIP WIP: DOES NOT WORK WITH COVERAGE (when _UN -> RUN)
+_UN: %CLANG_EXEC -fplugin=%mull_frontend_cxx -Xclang -plugin-arg-mull-cxx-frontend -Xclang mutators=cxx_remove_void_call -fprofile-instr-generate -fcoverage-mapping %s -o %s.exe
+RUN: %CLANG_EXEC -fplugin=%mull_frontend_cxx -Xclang -plugin-arg-mull-cxx-frontend -Xclang mutators=cxx_remove_void_call %s -o %s.exe
 
-RUN: %s.exe | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STANDALONE_WITHOUT_MUTATION
-RUN: (env "cxx_add_to_sub:%s:6:12"=1 %s.exe || true) | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STANDALONE_WITH_MUTATION
+RUN: env LLVM_PROFILE_FILE="%s.profraw" %s.exe | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STANDALONE_WITHOUT_MUTATION
+_UN: %llvm_profdata merge %s.profraw -o %s.profdata
+_UN: /opt/llvm-9.0.0/bin/llvm-cov show %s.exe -instr-profile=%s.profdata %S -use-color --format html > %S/coverage.html
+
+RUN: (env "cxx_remove_void_call:%s:11:3"=1 LLVM_PROFILE_FILE="%s.profraw" %s.exe || true) | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STANDALONE_WITH_MUTATION
 
 STANDALONE_WITHOUT_MUTATION:NORMAL
 STANDALONE_WITH_MUTATION:MUTATED
@@ -31,5 +39,5 @@ STANDALONE_WITH_MUTATION:MUTATED
 RUN: %mull_runner %s.exe -ide-reporter-show-killed | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=MULL_RUNNER
 
 MULL_RUNNER:[info] Killed mutants (1/1):
-MULL_RUNNER:{{.*}}sample.cpp:6:12: warning: Killed: Replaced + with - [cxx_add_to_sub]
+MULL_RUNNER:{{.*}}sample.cpp:11:3: warning: Killed: Removed the call to the function [cxx_remove_void_call]
 */

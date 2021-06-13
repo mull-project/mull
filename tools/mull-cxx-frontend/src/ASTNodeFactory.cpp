@@ -6,7 +6,7 @@
 namespace mull {
 namespace cxx {
 
-const clang::SourceLocation NULL_LOCATION;
+clang::SourceLocation NULL_LOCATION;
 
 clang::FunctionDecl *ASTNodeFactory::createFunctionDecl(std::string name,
                                                         clang::DeclContext *declContext,

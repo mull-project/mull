@@ -44,6 +44,8 @@ public:
     /// Could be a better place to create this. But at Initialize(), getSema()
     /// hits an internal assert because it is not initialized yet at that time.
     if (!astMutator) {
+      assert(instance.getASTContext().getTranslationUnitDecl() && "WIP");
+
       astMutator = std::make_unique<MullASTMutator>(instance.getASTContext(), instance.getSema());
       astMutator->instrumentTranslationUnit();
     }
@@ -72,7 +74,12 @@ public:
 
       for (auto &foundMutation : visitor.getAstMutations()) {
         foundMutation->performMutation(*astMutator);
+        // The following is useful for debugging mutations:
+        instance.getASTContext().getTranslationUnitDecl()->print(llvm::errs(), 2);
+        instance.getASTContext().getTranslationUnitDecl()->dump();
+//        exit(3);
       }
+
     }
 
     return true;
@@ -82,10 +89,7 @@ public:
   // been called on with HandleTopLevelDecl(). At this point, it is possible to
   // visualize the final mutated AST tree.
   void HandleTranslationUnit(ASTContext &context) override {
-    // The following is useful for debugging mutations:
-    // context.getTranslationUnitDecl()->print(llvm::errs(), 2);
-    // context.getTranslationUnitDecl()->dump();
-    // exit(1);
+
   }
 };
 

@@ -12,7 +12,7 @@ class SectionAttr;
 namespace mull {
 namespace cxx {
 
-extern const clang::SourceLocation NULL_LOCATION;
+extern clang::SourceLocation NULL_LOCATION;
 
 class ASTNodeFactory {
   clang::ASTContext &context;
