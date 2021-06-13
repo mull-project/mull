@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.11.0] - 13 Jun 2021
+
+**Important note**: AST-based mutations are [in the works](https://github.com/mull-project/mull/issues/867),
+but not yet available in the pre-built packages.
+
+- Fixed a bug when mutants may be eliminated from the mutated program (by [Yuta Saito](https://github.com/kateinoigakukun)) [863](https://github.com/mull-project/mull/pull/863)
+- Fixed a bug when `test-program` vs `./test-program` changed Mull behavior [868](https://github.com/mull-project/mull/pull/868)
+- Fixed a multi-threading-related bug [865](https://github.com/mull-project/mull/pull/865)
+- Mull uses `grep -E` compatible regular expressions [850](https://github.com/mull-project/mull/pull/850)
+- Introduced `mull-runner` [854](https://github.com/mull-project/mull/pull/854)
+- Incremental mutation testing using `git diff` filter [#833](https://github.com/mull-project/mull/pull/833)
+- Dropped the package size by ~3.5-4Mb [884](https://github.com/mull-project/mull/pull/884)
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2021-03-08..2021-06-13)
+
 ## [0.10.0] - 07 Mar 2021
 
 **Important note**: Bintray is shutting down, so Mull moved to [Cloudsmith](https://cloudsmith.io/~mull-project/repos/)!
