@@ -125,13 +125,15 @@ if ("LLVM" IN_LIST LLVM_AVAILABLE_LIBS)
     )
 else ()
   set(MULL_LLVM_LIBRARIES
+    LLVMSupport
+    LLVMOption
+    LLVMCoverage
+    LLVMProfileData
     LLVMAsmParser
     LLVMSupport
     LLVMOption
     LLVM${LLVM_NATIVE_ARCH}CodeGen
     LLVM${LLVM_NATIVE_ARCH}AsmParser
-    LLVMCoverage
-    LLVMProfileData
     )
 endif ()
 
@@ -157,5 +159,4 @@ target_include_directories(mull SYSTEM PRIVATE
 
 set_target_properties(mull PROPERTIES
   COMPILE_FLAGS ${MULL_CXX_FLAGS}
-  LINK_FLAGS ${MULL_LINK_FLAGS}
-  )
+)

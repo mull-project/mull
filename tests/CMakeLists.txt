@@ -65,7 +65,6 @@ target_include_directories(mull-tests SYSTEM PRIVATE
 )
 set_target_properties(mull-tests PROPERTIES
   COMPILE_FLAGS ${MULL_CXX_FLAGS}
-  LINK_FLAGS ${MULL_LINK_FLAGS}
   )
 get_property(dependencies GLOBAL PROPERTY TEST_FIXTURES_DEPENDENCIES)
 add_dependencies(mull-tests ${dependencies})

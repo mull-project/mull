@@ -159,11 +159,6 @@ if (MULL_BUILD_32_BITS)
   set(MULL_CXX_FLAGS "${MULL_CXX_FLAGS} -m32")
 endif()
 
-set (MULL_LINK_FLAGS "-rdynamic")
-if (MULL_BUILD_32_BITS)
-  set(MULL_LINK_FLAGS "${MULL_LINK_FLAGS} -m32")
-endif()
-
 add_subdirectory(vendor)
 
 set (MULL_DEFINITIONS ${LLVM_DEFINITIONS})
