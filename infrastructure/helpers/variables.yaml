@@ -6,6 +6,9 @@ SDKROOT: /
 
 llvm_mapping:
   macos:
+    12.0.0:
+      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.0/clang+llvm-12.0.0-x86_64-apple-darwin.tar.xz
+      path: clang+llvm-12.0.0-x86_64-apple-darwin
     11.0.0:
       url: https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.0/clang+llvm-11.0.0-x86_64-apple-darwin.tar.xz
       path: clang+llvm-11.0.0-x86_64-apple-darwin
@@ -31,6 +34,9 @@ llvm_mapping:
       path: clang+llvm-6.0.0-x86_64-linux-gnu-debian8
 
   ubuntu:
+    12.0.0:
+      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.0/clang+llvm-12.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz
+      path: clang+llvm-12.0.0-x86_64-linux-gnu-ubuntu-20.04
     11.0.0:
       url: https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.0/clang+llvm-11.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz
       path: clang+llvm-11.0.0-x86_64-linux-gnu-ubuntu-20.04

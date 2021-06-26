@@ -2,6 +2,7 @@
 
 #include <clang/AST/ASTContext.h>
 #include <clang/AST/Attr.h>
+#include <clang/Basic/Specifiers.h>
 
 namespace mull {
 namespace cxx {
@@ -15,18 +16,22 @@ clang::FunctionDecl *ASTNodeFactory::createFunctionDecl(std::string name,
   clang::DeclarationName declarationName(&getenvFuncIdentifierInfo);
 
 #if LLVM_VERSION_MAJOR >= 9
-  return clang::FunctionDecl::Create(
-      context,
-      declContext,
-      NULL_LOCATION,
-      NULL_LOCATION,
-      declarationName,
-      functionType,
-      context.getTrivialTypeSourceInfo(functionType),
-      clang::StorageClass::SC_Extern,
-      false,                 /// bool isInlineSpecified = false,
-      true,                  /// bool hasWrittenPrototype = true,
-      clang::CSK_unspecified /// ConstexprSpecKind ConstexprKind = CSK_unspecified
+  return clang::FunctionDecl::Create(context,
+                                     declContext,
+                                     NULL_LOCATION,
+                                     NULL_LOCATION,
+                                     declarationName,
+                                     functionType,
+                                     context.getTrivialTypeSourceInfo(functionType),
+                                     clang::StorageClass::SC_Extern,
+                                     false, /// bool isInlineSpecified = false,
+                                     true,  /// bool hasWrittenPrototype = true,
+#if LLVM_VERSION_MAJOR >= 12
+                                     clang::ConstexprSpecKind::Unspecified
+#else
+                                     clang::CSK_unspecified /// ConstexprSpecKind ConstexprKind =
+                                                            /// CSK_unspecified
+#endif
   );
 #else
   return clang::FunctionDecl::Create(context,
@@ -73,7 +78,19 @@ clang::IfStmt *ASTNodeFactory::createIfStmt(clang::Expr *condExpr, clang::Stmt *
                                             clang::Stmt *elseStmt) {
   assert(condExpr);
   assert(thenStmt);
-#if LLVM_VERSION_MAJOR >= 8
+#if LLVM_VERSION_MAJOR >= 12
+  clang::IfStmt *ifStmt = clang::IfStmt::Create(context,
+                                                NULL_LOCATION,
+                                                false,
+                                                nullptr,
+                                                nullptr,
+                                                condExpr,
+                                                NULL_LOCATION,
+                                                NULL_LOCATION,
+                                                thenStmt,
+                                                NULL_LOCATION,
+                                                elseStmt);
+#elif LLVM_VERSION_MAJOR >= 8
   clang::IfStmt *ifStmt = clang::IfStmt::Create(
       context, NULL_LOCATION, false, nullptr, nullptr, condExpr, thenStmt, NULL_LOCATION, elseStmt);
 #else
@@ -95,7 +112,17 @@ clang::ImplicitCastExpr *ASTNodeFactory::createImplicitCastExpr(clang::Expr *exp
                                                                 clang::QualType qualType,
                                                                 clang::CastKind castKind,
                                                                 clang::ExprValueKind valueKind) {
-  return clang::ImplicitCastExpr::Create(context, qualType, castKind, expr, nullptr, valueKind);
+  return clang::ImplicitCastExpr::Create(context,
+                                         qualType,
+                                         castKind,
+                                         expr,
+                                         nullptr,
+                                         valueKind
+#if LLVM_VERSION_MAJOR >= 12
+                                         ,
+                                         clang::FPOptionsOverride()
+#endif
+  );
 }
 
 clang::UnaryOperator *ASTNodeFactory::createUnaryOperator(clang::UnaryOperator::Opcode opcode,
@@ -193,8 +220,17 @@ clang::CallExpr *ASTNodeFactory::createCallExprSingleArg(clang::Expr *function,
                                                          clang::QualType returnType,
                                                          clang::ExprValueKind valueKind) {
 #if LLVM_VERSION_MAJOR >= 8
-  clang::CallExpr *callExpr = clang::CallExpr::Create(
-      context, function, { argument }, returnType, valueKind, NULL_LOCATION);
+  clang::CallExpr *callExpr = clang::CallExpr::Create(context,
+                                                      function,
+                                                      { argument },
+                                                      returnType,
+                                                      valueKind,
+                                                      NULL_LOCATION
+#if LLVM_VERSION_MAJOR >= 12
+                                                      ,
+                                                      clang::FPOptionsOverride()
+#endif
+  );
 #else
   clang::CallExpr *callExpr = new (context)
       clang::CallExpr(context, function, { argument }, returnType, valueKind, NULL_LOCATION);

@@ -2,7 +2,7 @@ name: CI Ubuntu 20.04
 
 env:
   DISTR_REPO: "ubuntu/focal"
-  LLVM_RELEASE: "11.0"
+  LLVM_RELEASE: "12.0"
   CLOUDSMITH_API_KEY: ${{ secrets.CLOUDSMITH_API_KEY }}
 
 on:
@@ -20,7 +20,7 @@ jobs:
     container: ubuntu:20.04
     strategy:
       matrix:
-        LLVM_VERSION: ["11.0"]
+        LLVM_VERSION: ["11.0", "12.0"]
 
     steps:
       - name: Install software
