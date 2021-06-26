@@ -70,7 +70,12 @@ clang::IfStmt *ClangASTMutator::createMutatedStatement(clang::Stmt *oldStmt, cla
                                       clang::CastKind::CK_PointerToBoolean,
                                       getenvCallExpr,
                                       nullptr,
-                                      clang::VK_RValue);
+                                      clang::VK_RValue
+#if LLVM_VERSION_MAJOR >= 12
+                                      ,
+                                      clang::FPOptionsOverride()
+#endif
+      );
 
   std::vector<clang::Stmt *> thenStmtsVec = {};
   if (newStmt) {
@@ -101,7 +106,12 @@ clang::ConditionalOperator *ClangASTMutator::createMutatedExpression(clang::Expr
                                       clang::CastKind::CK_PointerToBoolean,
                                       mullShouldMutateCallExpr,
                                       nullptr,
-                                      clang::VK_RValue);
+                                      clang::VK_RValue
+#if LLVM_VERSION_MAJOR >= 12
+                                      ,
+                                      clang::FPOptionsOverride()
+#endif
+      );
 
   clang::ConditionalOperator *conditionalOperator =
       new (context) clang::ConditionalOperator(implicitCastExpr3,
@@ -133,13 +143,13 @@ clang::CallExpr *ClangASTMutator::createGetenvCallExpr(std::string identifier) {
                                      clang::CastKind::CK_FunctionToPointerDecay,
                                      clang::VK_RValue);
 
-  clang::StringLiteral *stringLiteral =
-      clang::StringLiteral::Create(context,
-                                   identifier,
-                                   clang::StringLiteral::StringKind::Ascii,
-                                   false,
-                                   factory.getStringLiteralArrayType(context.CharTy, identifier.size()),
-                                   clang::SourceLocation());
+  clang::StringLiteral *stringLiteral = clang::StringLiteral::Create(
+      context,
+      identifier,
+      clang::StringLiteral::StringKind::Ascii,
+      false,
+      factory.getStringLiteralArrayType(context.CharTy, identifier.size()),
+      clang::SourceLocation());
 
   clang::ImplicitCastExpr *implicitCastExpr2 =
       clang::ImplicitCastExpr::Create(context,
@@ -147,7 +157,12 @@ clang::CallExpr *ClangASTMutator::createGetenvCallExpr(std::string identifier) {
                                       clang::CastKind::CK_ArrayToPointerDecay,
                                       stringLiteral,
                                       nullptr,
-                                      clang::VK_RValue);
+                                      clang::VK_RValue
+#if LLVM_VERSION_MAJOR >= 12
+                                      ,
+                                      clang::FPOptionsOverride()
+#endif
+      );
 
   clang::CallExpr *callExpr = factory.createCallExprSingleArg(
       implicitCastExpr, implicitCastExpr2, _getenvFuncDecl->getReturnType(), clang::VK_RValue);

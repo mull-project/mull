@@ -15,12 +15,13 @@
 
 using namespace mull_test;
 
-std::unique_ptr<llvm::Module> InMemoryCompiler::compile(std::string code,
-                                                        std::string inMemoryFileName,
+std::unique_ptr<llvm::Module> InMemoryCompiler::compile(const std::string &code,
+                                                        const std::string &inMemoryFileName,
                                                         llvm::LLVMContext &context) {
   /// The following code is based on the following sources:
   /// 1. http://blog.audio-tk.com/2018/09/18/compiling-c-code-in-memory-with-clang/
-  /// 2. https://stackoverflow.com/questions/34828480/generate-assembly-from-c-code-in-memory-using-libclang/34866053#34866053
+  /// 2.
+  /// https://stackoverflow.com/questions/34828480/generate-assembly-from-c-code-in-memory-using-libclang/34866053#34866053
 
   llvm::InitializeNativeTarget();
   llvm::InitializeNativeTargetAsmPrinter();
@@ -30,24 +31,18 @@ std::unique_ptr<llvm::Module> InMemoryCompiler::compile(std::string code,
   std::vector<const char *> args;
   args.push_back(inMemoryFileName.c_str());
 
-  /// Prepare DiagnosticEngine
-  clang::DiagnosticOptions DiagOpts;
-  std::unique_ptr<clang::TextDiagnosticPrinter> textDiagPrinter(new clang::TextDiagnosticPrinter(llvm::errs(), &DiagOpts));
-  llvm::IntrusiveRefCntPtr<clang::DiagnosticIDs> pDiagIDs;
-  std::unique_ptr<clang::DiagnosticsEngine> pDiagnosticsEngine(new clang::DiagnosticsEngine(pDiagIDs, &DiagOpts, textDiagPrinter.get()));
-
   /// Create and initialize CompilerInstance
   clang::CompilerInstance clangCompilerInstance;
-  clangCompilerInstance.createDiagnostics(textDiagPrinter.get(), false);
+  clangCompilerInstance.createDiagnostics();
 
   /// Initialize CompilerInvocation
   clang::CompilerInvocation &compilerInvocation = clangCompilerInstance.getInvocation();
 #if LLVM_VERSION_MAJOR > 9
   clang::CompilerInvocation::CreateFromArgs(
-      compilerInvocation, args, *pDiagnosticsEngine.release());
+      compilerInvocation, args, clangCompilerInstance.getDiagnostics());
 #else
   clang::CompilerInvocation::CreateFromArgs(
-      compilerInvocation, &args[0], &args[0] + args.size(), *pDiagnosticsEngine.release());
+      compilerInvocation, &args[0], &args[0] + args.size(), clangCompilerInstance.getDiagnostics());
 #endif
   /// Configure options
 
@@ -79,12 +74,14 @@ std::unique_ptr<llvm::Module> InMemoryCompiler::compile(std::string code,
       std::make_shared<clang::TargetOptions>();
   targetOptions->Triple = llvm::sys::getDefaultTargetTriple();
   clang::TargetInfo *pTargetInfo =
-      clang::TargetInfo::CreateTargetInfo(*pDiagnosticsEngine, targetOptions);
+      clang::TargetInfo::CreateTargetInfo(clangCompilerInstance.getDiagnostics(), targetOptions);
   clangCompilerInstance.setTarget(pTargetInfo);
 
   /// Create and execute action
   std::unique_ptr<clang::CodeGenAction> compilerAction(new clang::EmitLLVMOnlyAction(&context));
-  assert(clangCompilerInstance.ExecuteAction(*compilerAction));
+  bool actionResult = clangCompilerInstance.ExecuteAction(*compilerAction);
+  (void)actionResult;
+  assert(actionResult);
 
   /// Obtain LLVM Module
   std::unique_ptr<llvm::Module> module = compilerAction->takeModule();
