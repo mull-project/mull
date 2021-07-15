@@ -49,9 +49,6 @@ MutantExtractor::extractMutants(const std::string &executable) {
       for (auto &encoding : mutantEncodings) {
         std::vector<std::string> chunks = split(encoding, ':');
 
-        for (auto &chunk : chunks) {
-          std::cout << "chunk: " << chunk << "\n";
-        }
         std::string mutator = chunks[0];
         std::string location = chunks[1];
         int beginLine = std::stoi(chunks[2]);
