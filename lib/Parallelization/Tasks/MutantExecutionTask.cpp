@@ -25,7 +25,7 @@ void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
       result = runner.runProgram(executable,
                                  extraArgs,
                                  { mutant->getIdentifier() },
-                                 baseline.runningTime * 10,
+                                 std::max(30LL, baseline.runningTime * 10),
                                  configuration.captureMutantOutput,
                                  std::nullopt);
     } else {
