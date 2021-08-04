@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.11.1] - 04 Aug 2021
+
+- Switched to `main` instead of `master` for the main branch [#892](https://github.com/mull-project/mull/pull/892)
+- Added LLVM 12 support [#886](https://github.com/mull-project/mull/pull/886)
+- Dropped debug output from `mull-runner` [#889](https://github.com/mull-project/mull/pull/889)
+- Fixed a bug leading to non-deterministic results [#890](https://github.com/mull-project/mull/pull/890) [#891](https://github.com/mull-project/mull/pull/891)
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2021-06-14..2021-08-04)
+
 ## [0.11.0] - 13 Jun 2021
 
 **Important note**: AST-based mutations are [in the works](https://github.com/mull-project/mull/issues/867),
