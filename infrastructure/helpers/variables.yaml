@@ -1,5 +1,5 @@
 ---
-gitref: master
+gitref: main
 repo_url: https://github.com/mull-project/mull.git
 working_dir: /opt
 SDKROOT: /
