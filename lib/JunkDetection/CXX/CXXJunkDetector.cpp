@@ -224,8 +224,6 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
   int mutationLocationBeginLine = sourceManager.getExpansionLineNumber(location, nullptr);
   int mutationLocationBeginColumn = sourceManager.getExpansionColumnNumber(location);
 
-  clang::ASTContext &astContext = ast->getASTContext();
-
   /// There are two types of mutated expressions:
   /// 1) Remove-Void, CallExpr example: its mutation location and its getStart() are the same.
   /// 2) Binary Mutation, BinaryOperator example: its mutation location is
@@ -240,8 +238,7 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
   /// Clang AST: how to get more precise debug information in certain cases?
   /// http://clang-developers.42468.n3.nabble.com/Clang-AST-how-to-get-more-precise-debug-information-in-certain-cases-td4065195.html
   /// https://stackoverflow.com/questions/11083066/getting-the-source-behind-clangs-ast
-  clang::SourceLocation sourceLocationEndActual = clang::Lexer::getLocForEndOfToken(
-      sourceLocationEnd, 0, sourceManager, astContext.getLangOpts());
+  clang::SourceLocation sourceLocationEndActual = ast->getLocForEndOfToken(sourceLocationEnd);
 
   int endLine = sourceManager.getExpansionLineNumber(sourceLocationEndActual, nullptr);
   int endColumn = sourceManager.getExpansionColumnNumber(sourceLocationEndActual);

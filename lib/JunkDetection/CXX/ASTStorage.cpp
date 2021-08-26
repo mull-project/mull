@@ -103,6 +103,19 @@ clang::SourceLocation ThreadSafeASTUnit::getLocation(const mull::SourceLocation 
   return location;
 }
 
+clang::SourceLocation ThreadSafeASTUnit::getLocForEndOfToken(const clang::SourceLocation sourceLocationEnd) {
+  /// clang::Lexer::getLocForEndOfToken internally calls getLocation, which is known for not beeing thread safe.
+  /// therefore we need to protect it within the ThreadSafeASTUnit
+  std::lock_guard<std::mutex> lock(mutex);
+  clang::SourceManager &sourceManager = ast->getSourceManager();
+  /// Clang AST: how to get more precise debug information in certain cases?
+  /// http://clang-developers.42468.n3.nabble.com/Clang-AST-how-to-get-more-precise-debug-information-in-certain-cases-td4065195.html
+  /// https://stackoverflow.com/questions/11083066/getting-the-source-behind-clangs-ast
+  auto sourceLocationEndActual = clang::Lexer::getLocForEndOfToken(
+      sourceLocationEnd, 0, sourceManager, ast->getASTContext().getLangOpts());
+  return sourceLocationEndActual;
+}
+
 struct SortLocationComparator {
   explicit SortLocationComparator(clang::SourceManager &sourceManager)
       : sourceManager(sourceManager), cmp(sourceManager) {}
