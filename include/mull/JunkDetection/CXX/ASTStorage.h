@@ -24,6 +24,7 @@ public:
   clang::ASTContext &getASTContext();
 
   clang::SourceLocation getLocation(const mull::SourceLocation &sourceLocation);
+  clang::SourceLocation getLocForEndOfToken(const clang::SourceLocation sourceLocationEnd);
   bool isInSystemHeader(clang::SourceLocation &location);
 
   clang::Decl *getDecl(clang::SourceLocation &location);
