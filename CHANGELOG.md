@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.11.2] - 26 Aug 2021
+
+- Fixed segfault caused by a data race (by [Matthias Bilger](https://github.com/m42e)) [#895](https://github.com/mull-project/mull/pull/895)
+
 ## [0.11.1] - 04 Aug 2021
 
 - Switched to `main` instead of `master` for the main branch [#892](https://github.com/mull-project/mull/pull/892)
