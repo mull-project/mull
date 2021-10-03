@@ -4,15 +4,15 @@
 help: ## Show this help message.
 	@grep -E '^[a-zA-Z0-9_\.-\%]+:.*?## .*$$' $(MAKEFILE_LIST) | sort | awk 'BEGIN {FS = ":.*?## "}; {printf "\033[36m%-20s\033[0m %s\n", $$1, $$2}'
 
-MULL_EXEC ?= $(shell which mull-cxx)
-CLANG_EXEC ?= /opt/llvm-8.0.0/bin/clang++
-FILECHECK_EXEC=$(shell which filecheck)
+mull_cxx ?= $(shell which mull-cxx)
+clang_cxx ?= /opt/llvm-8.0.0/bin/clang++
+filecheck=$(shell which filecheck)
 LIT=$(shell which lit)
 test: ## Run integration tests
 	CURRENT_DIR=$(PWD) \
-		MULL_EXEC=$(MULL_EXEC) \
-		CLANG_EXEC=$(CLANG_EXEC) \
-		FILECHECK_EXEC=$(FILECHECK_EXEC) \
+		mull_cxx=$(mull_cxx) \
+		clang_cxx=$(clang_cxx) \
+		filecheck=$(filecheck) \
 		PATH=$(PWD)/tools:$$PATH \
 		$(LIT) \
 		--threads 1 \
