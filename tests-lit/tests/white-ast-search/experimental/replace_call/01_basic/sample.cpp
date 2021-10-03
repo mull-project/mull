@@ -15,10 +15,10 @@ int main() {
 // clang-format off
 
 /**
-RUN: cd / && %CLANG_EXEC -fembed-bitcode -g %s -o %s.exe
+RUN: cd / && %clang_cxx %sysroot -fembed-bitcode -g %s -o %s.exe
 RUN: cd %CURRENT_DIR
 RUN: sed -e "s:%PWD:%S:g" %S/compile_commands.json.template > %S/compile_commands.json
-RUN: (unset TERM; %MULL_EXEC -linker=%clang_cxx -workers=1 -debug -mutators=cxx_replace_scalar_call -reporters=IDE -ide-reporter-show-killed -compdb-path %S/compile_commands.json %s.exe 2>&1; test $? = 0) | %FILECHECK_EXEC %s --dump-input=fail --strict-whitespace --match-full-lines
+RUN: (unset TERM; %mull_cxx -linker=%clang_cxx -linker-flags="%sysroot" -workers=1 -debug -mutators=cxx_replace_scalar_call -reporters=IDE -ide-reporter-show-killed -compdb-path %S/compile_commands.json %s.exe 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 CHECK-NOT:{{^.*[Ee]rror.*$}}
 CHECK-NOT:{{^.*[Ww]arning.*$}}
 
