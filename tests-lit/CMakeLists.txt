@@ -1,9 +1,7 @@
 set(clang_cc ${PATH_TO_LLVM}/bin/clang)
 set(clang_cxx ${PATH_TO_LLVM}/bin/clang++)
 set(llvm_profdata ${PATH_TO_LLVM}/bin/llvm-profdata)
-set(CLANG_EXEC ${PATH_TO_LLVM}/bin/clang++)
 set(LIT_EXEC lit)
-set(FILECHECK_EXEC filecheck)
 
 find_package(Python3 COMPONENTS Interpreter)
 
@@ -13,32 +11,28 @@ if(APPLE)
     OUTPUT_VARIABLE SDKROOT
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
-  set (SYSROOT "--sysroot ${SDKROOT}")
+  set (sysroot "--sysroot ${SDKROOT}")
 else()
-  set (SYSROOT)
+  set (sysroot)
 endif()
 
 set(TEST_CXX_FLAGS
   "-stdlib=libc++ -isystem ${PATH_TO_LLVM}/include/c++/v1 -isystem ${PATH_TO_LLVM}/lib/clang/${LLVM_VERSION}/include"
 )
 
-if (SYSROOT)
-  set(TEST_CXX_FLAGS "${TEST_CXX_FLAGS} ${SYSROOT}")
-endif()
-
 set(LIT_COMMAND
   PATH_TO_LLVM=${PATH_TO_LLVM}
   LLVM_VERSION_MAJOR=${LLVM_VERSION_MAJOR}
   CURRENT_DIR=${CMAKE_CURRENT_SOURCE_DIR}
-  MULL_EXEC=$<TARGET_FILE:mull-cxx>
+  mull_cxx=$<TARGET_FILE:mull-cxx>
   mull_runner=$<TARGET_FILE:mull-runner>
   mull_frontend_cxx=$<TARGET_FILE:mull-cxx-frontend>
-  CLANG_EXEC=${CLANG_EXEC}
   clang_cc=${clang_cc}
   clang_cxx=${clang_cxx}
+  sysroot=${sysroot}
   llvm_profdata=${llvm_profdata}
   python3=${Python3_EXECUTABLE}
-  FILECHECK_EXEC=${FILECHECK_EXEC}
+  filecheck=filecheck
   TEST_CXX_FLAGS="${TEST_CXX_FLAGS}"
   ${LIT_EXEC}
   -vv

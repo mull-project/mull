@@ -19,10 +19,10 @@ int main() {
 
 // clang-format off
 
-// RUN: cd / && %clang_cc -fembed-bitcode -g -O0 %s -o %s.exe
+// RUN: cd / && %clang_cc %sysroot -fembed-bitcode -g -O0 %s -o %s.exe
 // RUN: cd %CURRENT_DIR
-// RUN: unset TERM; %MULL_EXEC -keep-executable -output=%s.mutated.exe -linker=%clang_cc -mutators=cxx_lt_to_ge -ide-reporter-show-killed -reporters=IDE %s.exe | %FILECHECK_EXEC %s --dump-input=fail
-// RUN: unset TERM; %mull_runner -ide-reporter-show-killed -reporters=IDE %s.mutated.exe | %FILECHECK_EXEC %s --dump-input=fail
+// RUN: unset TERM; %mull_cxx -keep-executable -output=%s.mutated.exe -linker=%clang_cc -linker-flags="%sysroot" -mutators=cxx_lt_to_ge -ide-reporter-show-killed -reporters=IDE %s.exe | %filecheck %s --dump-input=fail
+// RUN: unset TERM; %mull_runner -ide-reporter-show-killed -reporters=IDE %s.mutated.exe | %filecheck %s --dump-input=fail
 // CHECK:[info] Killed mutants (1/1):
 // CHECK:{{.*}}main.c:2:9: warning: Killed: Replaced < with >= [cxx_lt_to_ge]
 // CHECK:  if (a < b) {

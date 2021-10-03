@@ -39,14 +39,14 @@ int main(int argc, char **argv) {
 
 // clang-format off
 
-// RUN: %clang_cc %s -fembed-bitcode -g -o %s.exe
+// RUN: %clang_cc %sysroot %s -fembed-bitcode -g -o %s.exe
 
-// RUN: %mull_cxx -linker=%clang_cc -keep-executable -mutate-only -output=%s.mutated.exe -mutators=cxx_add_to_sub -mutators=cxx_mul_to_div %s.exe | %FILECHECK_EXEC %s --dump-input=fail --match-full-lines --check-prefix=CHECK-MUTATE
+// RUN: %mull_cxx -linker=%clang_cc -linker-flags="%sysroot" -keep-executable -mutate-only -output=%s.mutated.exe -mutators=cxx_add_to_sub -mutators=cxx_mul_to_div %s.exe | %filecheck %s --dump-input=fail --match-full-lines --check-prefix=CHECK-MUTATE
 // CHECK-MUTATE: [info] Mutate-only mode on:{{.*}}
 // CHECK-MUTATE-NOT: [info] Sanity check run{{.*}}
 // CHECK-MUTATE-NOT: Running mutants
 
-// RUN: %mull_runner %s.mutated.exe -ide-reporter-show-killed -test-program %python3 -- %S/test.py %s.mutated.exe "first test case" | %FILECHECK_EXEC %s --dump-input=fail --match-full-lines --check-prefix=CHECK-TEST1
+// RUN: %mull_runner %s.mutated.exe -ide-reporter-show-killed -test-program %python3 -- %S/test.py %s.mutated.exe "first test case" | %filecheck %s --dump-input=fail --match-full-lines --check-prefix=CHECK-TEST1
 // CHECK-TEST1: [info] Killed mutants (1/2):
 // CHECK-TEST1: {{.*}}/main.c:5:12: warning: Killed: Replaced + with - [cxx_add_to_sub]
 // CHECK-TEST1:   return a + b;
@@ -56,7 +56,7 @@ int main(int argc, char **argv) {
 // CHECK-TEST1:   return a * b;
 // CHECK-TEST1:            ^
 
-// RUN: %mull_runner %s.mutated.exe -ide-reporter-show-killed -test-program %python3 -- %S/test.py %s.mutated.exe "second test case" | %FILECHECK_EXEC %s --dump-input=fail --match-full-lines --check-prefix=CHECK-TEST2
+// RUN: %mull_runner %s.mutated.exe -ide-reporter-show-killed -test-program %python3 -- %S/test.py %s.mutated.exe "second test case" | %filecheck %s --dump-input=fail --match-full-lines --check-prefix=CHECK-TEST2
 // CHECK-TEST2: [info] Killed mutants (1/2):
 // CHECK-TEST2: {{.*}}/main.c:9:12: warning: Killed: Replaced * with / [cxx_mul_to_div]
 // CHECK-TEST2:   return a * b;
