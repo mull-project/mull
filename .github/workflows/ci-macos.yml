@@ -1,7 +1,6 @@
 name: CI macOS
 
 env:
-  LLVM_RELEASE: "12.0"
   CLOUDSMITH_API_KEY: ${{ secrets.CLOUDSMITH_API_KEY }}
 
 on:
@@ -70,7 +69,7 @@ jobs:
             -e mull_version=${{ steps.settings.outputs.version }}${{ steps.settings.outputs.suffix }} \
             --verbose
       - name: Publish package
-        if: matrix.LLVM_VERSION == env.LLVM_RELEASE && env.CLOUDSMITH_API_KEY != null
+        if: env.CLOUDSMITH_API_KEY != null
         run: |
           cloudsmith push raw mull-project/mull-${{ steps.settings.outputs.channel }} infrastructure/packages/`cat infrastructure/PACKAGE_FILE_NAME`.zip
       - name: Move package
@@ -78,7 +77,7 @@ jobs:
           mkdir -p /tmp/packages
           mv infrastructure/packages/`cat infrastructure/PACKAGE_FILE_NAME`.zip /tmp/packages/`cat infrastructure/PACKAGE_FILE_NAME`.zip
       - name: Attach package to the tag
-        if: matrix.LLVM_VERSION == env.LLVM_RELEASE && contains(github.ref, 'refs/tags/')
+        if: contains(github.ref, 'refs/tags/')
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}

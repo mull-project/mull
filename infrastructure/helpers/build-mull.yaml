@@ -32,7 +32,7 @@
     - MullVersion
     - LLVMCompatibility
     - mull
-    - mull-cxx
+    - mull-cxx-{{ llvm_major }}
 
 - name: Build Tests (Debug)
   command: ninja mull-tests
@@ -68,7 +68,7 @@
     - MullVersion
     - LLVMCompatibility
     - mull
-    - mull-cxx
+    - mull-cxx-{{llvm_major}}
 
 - name: Build Tests (Release)
   command: ninja mull-tests
@@ -104,6 +104,6 @@
   with_items: "{{ package_extensions }}"
 
 - name: Print Mull version
-  command: mull-cxx -version
+  command: mull-cxx-{{ llvm_major }} -version
   args:
     chdir: "{{ release_build_dir }}"
