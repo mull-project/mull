@@ -70,6 +70,7 @@ llvm_mapping:
 llvm_url: "{{ llvm_mapping[platform][llvm_version].url }}"
 llvm_path: "{{ llvm_mapping[platform][llvm_version].path }}"
 llvm_dir: "{{ working_dir }}/llvm-{{ llvm_version }}"
+llvm_major: "{{ llvm_version.split('.')[0] }}"
 
 source_dir: "{{ working_dir }}/mull"
 debug_build_dir: "{{ working_dir }}/build.mull.debug.dir"

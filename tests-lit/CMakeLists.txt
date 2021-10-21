@@ -24,9 +24,9 @@ set(LIT_COMMAND
   PATH_TO_LLVM=${PATH_TO_LLVM}
   LLVM_VERSION_MAJOR=${LLVM_VERSION_MAJOR}
   CURRENT_DIR=${CMAKE_CURRENT_SOURCE_DIR}
-  mull_cxx=$<TARGET_FILE:mull-cxx>
-  mull_runner=$<TARGET_FILE:mull-runner>
-  mull_frontend_cxx=$<TARGET_FILE:mull-cxx-frontend>
+  mull_cxx=$<TARGET_FILE:mull-cxx-${LLVM_VERSION_MAJOR}>
+  mull_runner=$<TARGET_FILE:mull-runner-${LLVM_VERSION_MAJOR}>
+  mull_frontend_cxx=$<TARGET_FILE:mull-cxx-frontend-${LLVM_VERSION_MAJOR}>
   clang_cc=${clang_cc}
   clang_cxx=${clang_cxx}
   sysroot=${sysroot}
@@ -42,5 +42,5 @@ set(LIT_COMMAND
 add_custom_target(tests-lit
   COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && make clean
   COMMAND ${LIT_COMMAND}
-  DEPENDS mull-cxx mull-runner
+  DEPENDS mull-cxx-${LLVM_VERSION_MAJOR} mull-runner-${LLVM_VERSION_MAJOR}
 )

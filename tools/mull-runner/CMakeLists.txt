@@ -5,8 +5,8 @@ set (SOURCES
 )
 
 add_mull_executable(
-  NAME mull-runner
+  NAME mull-runner-${LLVM_VERSION_MAJOR}
   SOURCES ${SOURCES}
   LINK_WITH mull json11
 )
-target_include_directories(mull-runner PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../CLIOptions)
+target_include_directories(mull-runner-${LLVM_VERSION_MAJOR} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../CLIOptions)

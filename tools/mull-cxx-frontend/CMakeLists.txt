@@ -1,4 +1,4 @@
-add_library(mull-cxx-frontend
+add_library(mull-cxx-frontend-${LLVM_VERSION_MAJOR}
   SHARED
   src/ASTInstrumentation.cpp
   src/ASTMutationsSearchVisitor.cpp
@@ -13,15 +13,15 @@ add_library(mull-cxx-frontend
   ${CMAKE_SOURCE_DIR}/lib/AST/MullClangCompatibility.cpp
 )
 
-target_link_libraries(mull-cxx-frontend ${MULL_CXX_LLVM_LIBRARIES})
+target_link_libraries(mull-cxx-frontend-${LLVM_VERSION_MAJOR} ${MULL_CXX_LLVM_LIBRARIES})
 
-set_target_properties(mull-cxx-frontend PROPERTIES
+set_target_properties(mull-cxx-frontend-${LLVM_VERSION_MAJOR} PROPERTIES
   COMPILE_FLAGS ${MULL_CXX_FLAGS}
 )
-target_include_directories(mull-cxx-frontend PRIVATE
+target_include_directories(mull-cxx-frontend-${LLVM_VERSION_MAJOR} PRIVATE
   ${MULL_INCLUDE_DIRS}
   )
-target_include_directories(mull-cxx-frontend SYSTEM PRIVATE
+target_include_directories(mull-cxx-frontend-${LLVM_VERSION_MAJOR} SYSTEM PRIVATE
   ${THIRD_PARTY_INCLUDE_DIRS}
 )
 
@@ -30,7 +30,7 @@ target_include_directories(mull-cxx-frontend SYSTEM PRIVATE
 #)
 
 if (APPLE)
-  target_link_libraries(mull-cxx-frontend PRIVATE
+  target_link_libraries(mull-cxx-frontend-${LLVM_VERSION_MAJOR} PRIVATE
     clangAnalysis
     clangAST
     clangASTMatchers
@@ -46,7 +46,7 @@ if (APPLE)
     clangTooling
   )
 else()
-  target_link_libraries(mull-cxx-frontend PRIVATE
+  target_link_libraries(mull-cxx-frontend-${LLVM_VERSION_MAJOR} PRIVATE
     clang
   )
 endif()
