@@ -55,7 +55,14 @@ std::string Compiler::compileBitcode(const Bitcode &bitcode) {
 
   std::string result = tempFile(diagnostics, "o");
   std::error_code errorCode;
-  llvm::raw_fd_ostream dest(result, errorCode, llvm::sys::fs::OpenFlags::F_None);
+  llvm::raw_fd_ostream dest(result,
+                            errorCode,
+#if LLVM_VERSION_MAJOR >= 13
+                            llvm::sys::fs::OpenFlags::OF_None
+#else
+                            llvm::sys::fs::OpenFlags::F_None
+#endif
+  );
 
   if (errorCode) {
     diagnostics.error("Could not open file: "s + errorCode.message());
@@ -72,7 +79,14 @@ std::string Compiler::compileBitcode(const Bitcode &bitcode) {
 
   if (configuration.debugEnabled) {
     std::string bitcodePath = tempFile(diagnostics, "bc");
-    llvm::raw_fd_ostream bcStream(bitcodePath, errorCode, llvm::sys::fs::OpenFlags::F_None);
+    llvm::raw_fd_ostream bcStream(bitcodePath,
+                                  errorCode,
+#if LLVM_VERSION_MAJOR >= 13
+                                  llvm::sys::fs::OpenFlags::OF_None
+#else
+                                  llvm::sys::fs::OpenFlags::F_None
+#endif
+    );
     if (errorCode) {
       diagnostics.warning("Could not open temp bc file: "s + errorCode.message());
       return std::string();
