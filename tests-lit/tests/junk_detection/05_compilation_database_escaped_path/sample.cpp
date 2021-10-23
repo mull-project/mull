@@ -19,7 +19,6 @@ int main() {
 RUN: cd / && %clang_cxx %sysroot -fembed-bitcode %TEST_CXX_FLAGS -g -O0 -DESCAPED_DEFINITION_STUB=/src/builds/amd64-mull %s -o %s.exe
 RUN: sed -e "s:%PWD:%S:g" -e "s:#TEST_CXX_FLAGS:%TEST_CXX_FLAGS %sysroot:g" %S/compile_commands.json.template > %S/compile_commands.json
 RUN: cd %CURRENT_DIR
-RUN: %mull_cxx -linker=%clang_cxx -linker-flags="%sysroot" -mutators=cxx_add_to_sub -mutators=cxx_remove_void_call -reporters=IDE -ide-reporter-show-killed -compdb-path %S/compile_commands.json %s.exe 2>&1 | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
+RUN: %mull_cxx -linker=%clang_cxx -linker-flags="%sysroot" -mutators=cxx_add_to_sub -mutators=cxx_remove_void_call -reporters=IDE -ide-reporter-show-killed -compdb-path %S/compile_commands.json %s.exe
 
-CHECK-NOT:{{^.*[Ww]arning.*$}}
 **/

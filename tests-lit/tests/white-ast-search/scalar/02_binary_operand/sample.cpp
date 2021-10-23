@@ -16,7 +16,6 @@ RUN: cd %CURRENT_DIR
 RUN: sed -e "s:%PWD:%S:g" %S/compile_commands.json.template > %S/compile_commands.json
 RUN: (unset TERM; %mull_cxx -linker=%clang_cxx -linker-flags="%sysroot" -workers=1 -debug -mutators=scalar_value_mutator -reporters=IDE -ide-reporter-show-killed -compdb-path %S/compile_commands.json %s.exe 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 CHECK-NOT:{{^.*[Ee]rror.*$}}
-CHECK-NOT:{{^.*[Ww]arning.*$}}
 
 CHECK:[info] Applying filter: junk (threads: 1)
 CHECK:[debug] CXXJunkDetector: mutation "Scalar Value": {{.*}}sample.cpp:4:12 (end: 4:13)
