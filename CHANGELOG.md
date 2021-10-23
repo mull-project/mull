@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.12.0] - 23 Oct 2021
+
+**Important note**: The `mull` package is now replaced with a separate package for each
+supported LLVM version, e.g. `mull-8`, `mull-13`, etc.
+**The `mull` package won't be updated!**
+
+**Important note**: The binaries `mull-cxx` and `mull-runner` are now named after
+the corresponding LLVM version, e.g. `mull-cxx-8`, `mull-runner-13`, etc.
+
+- Publish mull-${LLVM_VERSION} package instead of mull package [904](https://github.com/mull-project/mull/pull/904)
+- Include LLVM version into the package/binary name [904](https://github.com/mull-project/mull/pull/904)
+- Added LLVM 13 support [#905](https://github.com/mull-project/mull/pull/905)
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2021-08-27..2021-10-23)
+
 ## [0.11.2] - 26 Aug 2021
 
 - Fixed segfault caused by a data race (by [Matthias Bilger](https://github.com/m42e)) [#895](https://github.com/mull-project/mull/pull/895)
