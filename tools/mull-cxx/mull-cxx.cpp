@@ -51,6 +51,8 @@ static std::vector<std::string> splitFlags(const std::string &flags) {
 
 int main(int argc, char **argv) {
   mull::Diagnostics diagnostics;
+  diagnostics.warning("THIS PACKAGE IS DEPRECATED! Learn more "
+                      "https://github.com/mull-project/mull/releases/tag/0.12.0");
   llvm::cl::SetVersionPrinter(mull::printVersionInformation);
 
   tool::MutatorsCLIOptions mutatorsOptions(diagnostics, tool::Mutators);
