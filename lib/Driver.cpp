@@ -16,6 +16,7 @@
 
 #include <llvm/ProfileData/Coverage/CoverageMapping.h>
 #include <llvm/Support/DynamicLibrary.h>
+#include <llvm/Support/FileSystem.h>
 #include <llvm/Support/Path.h>
 
 #include <algorithm>

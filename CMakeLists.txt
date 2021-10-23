@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 
 if (NOT MULL_VERSION)
-set (MULL_VERSION 0.11.2)
+set (MULL_VERSION 0.12.0)
 endif()
 
 project(Mull
@@ -85,8 +85,8 @@ if (${BUILD_AGAINST_PRECOMPILED_LLVM})
   find_package(Clang REQUIRED CONFIG PATHS ${search_paths} NO_DEFAULT_PATH)
 
   if (APPLE)
-    if (LLVM_VERSION_MAJOR EQUAL 12)
-      # Precompiled LLVM 12 for macOS contains a hardcoded dependency on a very
+    if (LLVM_VERSION_MAJOR GREATER_EQUAL 12)
+      # Precompiled LLVM 12 and 13 for macOS contains a hardcoded dependency on a very
       # specific version of libcurses:
       #
       #   set_target_properties(LLVMSupport PROPERTIES

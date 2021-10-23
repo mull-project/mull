@@ -3,7 +3,10 @@
 #include "mull/Config/Configuration.h"
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Parallelization/Progress.h"
+#include "mull/SourceLocation.h"
 #include "mull/Toolchain/Runner.h"
+
+#include <sstream>
 
 using namespace mull;
 using namespace std::string_literals;
@@ -18,6 +21,7 @@ MutantExecutionTask::MutantExecutionTask(const Configuration &configuration,
 void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
                                      progress_counter &counter) {
   Runner runner(diagnostics);
+  std::stringstream debugMessage;
   for (auto it = begin; it != end; ++it, counter.increment()) {
     auto &mutant = *it;
     ExecutionResult result;
@@ -32,5 +36,10 @@ void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
       result.status = NotCovered;
     }
     storage.push_back(std::make_unique<MutationResult>(result, mutant.get()));
+    SourceLocation sourceLocation = mutant->getSourceLocation();
+    debugMessage << sourceLocation.filePath << ":";
+    debugMessage << sourceLocation.line << ":" << sourceLocation.column;
+    debugMessage << result.status;
+    diagnostics.debug(debugMessage.str());
   }
 }

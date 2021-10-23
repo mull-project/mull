@@ -6,6 +6,9 @@ SDKROOT: /
 
 llvm_mapping:
   macos:
+    13.0.0:
+      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/clang+llvm-13.0.0-x86_64-apple-darwin.tar.xz
+      path: clang+llvm-13.0.0-x86_64-apple-darwin
     12.0.0:
       url: https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.0/clang+llvm-12.0.0-x86_64-apple-darwin.tar.xz
       path: clang+llvm-12.0.0-x86_64-apple-darwin
@@ -34,6 +37,9 @@ llvm_mapping:
       path: clang+llvm-6.0.0-x86_64-linux-gnu-debian8
 
   ubuntu:
+    13.0.0:
+      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz
+      path: clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04
     12.0.0:
       url: https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.0/clang+llvm-12.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz
       path: clang+llvm-12.0.0-x86_64-linux-gnu-ubuntu-20.04
@@ -70,6 +76,7 @@ llvm_mapping:
 llvm_url: "{{ llvm_mapping[platform][llvm_version].url }}"
 llvm_path: "{{ llvm_mapping[platform][llvm_version].path }}"
 llvm_dir: "{{ working_dir }}/llvm-{{ llvm_version }}"
+llvm_major: "{{ llvm_version.split('.')[0] }}"
 
 source_dir: "{{ working_dir }}/mull"
 debug_build_dir: "{{ working_dir }}/build.mull.debug.dir"

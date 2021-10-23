@@ -14,8 +14,8 @@ else()
 endif()
 
 add_mull_executable(
-  NAME mull-cxx
+  NAME mull-cxx-${LLVM_VERSION_MAJOR}
   SOURCES ${SOURCES}
   LINK_WITH ebc mull ${MULL_CXX_LLVM_LIBRARIES} json11
 )
-target_include_directories(mull-cxx PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../CLIOptions)
+target_include_directories(mull-cxx-${LLVM_VERSION_MAJOR} PRIVATE ${CMAKE_CURRENT_LIST_DIR}/../CLIOptions)
