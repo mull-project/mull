@@ -6,6 +6,7 @@
 #include "mull/MutantRunner.h"
 #include "mull/Result.h"
 #include "mull/Version.h"
+#include <llvm/Support/FileSystem.h>
 
 #include <memory>
 #include <unistd.h>

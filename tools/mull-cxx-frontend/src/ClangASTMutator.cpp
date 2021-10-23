@@ -70,7 +70,11 @@ clang::IfStmt *ClangASTMutator::createMutatedStatement(clang::Stmt *oldStmt, cla
                                       clang::CastKind::CK_PointerToBoolean,
                                       getenvCallExpr,
                                       nullptr,
+#if LLVM_VERSION_MAJOR >= 13
+                                      clang::VK_PRValue
+#else
                                       clang::VK_RValue
+#endif
 #if LLVM_VERSION_MAJOR >= 12
                                       ,
                                       clang::FPOptionsOverride()
@@ -106,7 +110,11 @@ clang::ConditionalOperator *ClangASTMutator::createMutatedExpression(clang::Expr
                                       clang::CastKind::CK_PointerToBoolean,
                                       mullShouldMutateCallExpr,
                                       nullptr,
+#if LLVM_VERSION_MAJOR >= 13
+                                      clang::VK_PRValue
+#else
                                       clang::VK_RValue
+#endif
 #if LLVM_VERSION_MAJOR >= 12
                                       ,
                                       clang::FPOptionsOverride()
@@ -141,7 +149,12 @@ clang::CallExpr *ClangASTMutator::createGetenvCallExpr(std::string identifier) {
       factory.createImplicitCastExpr(declRefExpr,
                                      context.getPointerType(_getenvFuncDecl->getType()),
                                      clang::CastKind::CK_FunctionToPointerDecay,
-                                     clang::VK_RValue);
+#if LLVM_VERSION_MAJOR >= 13
+                                     clang::VK_PRValue
+#else
+                                     clang::VK_RValue
+#endif
+      );
 
   clang::StringLiteral *stringLiteral = clang::StringLiteral::Create(
       context,
@@ -157,15 +170,26 @@ clang::CallExpr *ClangASTMutator::createGetenvCallExpr(std::string identifier) {
                                       clang::CastKind::CK_ArrayToPointerDecay,
                                       stringLiteral,
                                       nullptr,
+#if LLVM_VERSION_MAJOR >= 13
+                                      clang::VK_PRValue
+#else
                                       clang::VK_RValue
+#endif
 #if LLVM_VERSION_MAJOR >= 12
                                       ,
                                       clang::FPOptionsOverride()
 #endif
       );
 
-  clang::CallExpr *callExpr = factory.createCallExprSingleArg(
-      implicitCastExpr, implicitCastExpr2, _getenvFuncDecl->getReturnType(), clang::VK_RValue);
+  clang::CallExpr *callExpr = factory.createCallExprSingleArg(implicitCastExpr,
+                                                              implicitCastExpr2,
+                                                              _getenvFuncDecl->getReturnType(),
+#if LLVM_VERSION_MAJOR >= 13
+                                                              clang::VK_PRValue
+#else
+                                                              clang::VK_RValue
+#endif
+  );
 
   return callExpr;
 }

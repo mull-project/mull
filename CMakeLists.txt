@@ -85,8 +85,8 @@ if (${BUILD_AGAINST_PRECOMPILED_LLVM})
   find_package(Clang REQUIRED CONFIG PATHS ${search_paths} NO_DEFAULT_PATH)
 
   if (APPLE)
-    if (LLVM_VERSION_MAJOR EQUAL 12)
-      # Precompiled LLVM 12 for macOS contains a hardcoded dependency on a very
+    if (LLVM_VERSION_MAJOR GREATER_EQUAL 12)
+      # Precompiled LLVM 12 and 13 for macOS contains a hardcoded dependency on a very
       # specific version of libcurses:
       #
       #   set_target_properties(LLVMSupport PROPERTIES
