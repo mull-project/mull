@@ -71,7 +71,12 @@ jobs:
       - name: Publish package
         if: env.CLOUDSMITH_API_KEY != null
         run: |
-          cloudsmith push raw mull-project/mull-${{ steps.settings.outputs.channel }} infrastructure/packages/`cat infrastructure/PACKAGE_FILE_NAME`.zip
+          cloudsmith push raw \
+            --name mull-`echo ${{ matrix.LLVM_VERSION }} | awk -F. ' { print $1 } '` \
+            --version ${{ steps.settings.outputs.version }}${{ steps.settings.outputs.suffix }} \
+            mull-project/mull-${{ steps.settings.outputs.channel }} \
+            --tags macos \
+            infrastructure/packages/`cat infrastructure/PACKAGE_FILE_NAME`.zip
       - name: Move package
         run: |
           mkdir -p /tmp/packages
