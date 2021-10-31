@@ -16,6 +16,8 @@
 
     :Elements:	Generates mutation-testing-elements compatible JSON file
 
+    :Patches:	Generates a unified patchfile for each mutation
+
 --ide-reporter-show-killed		Makes IDEReporter to also report killed mutations (disabled by default)
 
 --debug		Enables Debug Mode: more logs are printed

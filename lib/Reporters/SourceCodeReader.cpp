@@ -91,3 +91,13 @@ std::string SourceCodeReader::getSourceLineWithCaret(const SourceLocation &sourc
   ss << line << caret << "\n";
   return ss.str();
 }
+
+std::string SourceCodeReader::getSourceLine(const SourceLocation &sourceLocation) {
+  std::stringstream ss;
+
+  auto line = sourceManager.getLine(sourceLocation);
+  assert(sourceLocation.column < line.size());
+
+  ss << line;
+  return ss.str();
+}

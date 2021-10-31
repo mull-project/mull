@@ -39,6 +39,7 @@ set(mull_sources
   Reporters/SourceCodeReader.cpp
   Reporters/SourceManager.cpp
   Reporters/SQLiteReporter.cpp
+  Reporters/PatchesReporter.cpp
 
   SourceLocation.cpp
 
