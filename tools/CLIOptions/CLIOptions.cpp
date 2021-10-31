@@ -70,7 +70,7 @@ std::vector<std::unique_ptr<Reporter>> ReportersCLIOptions::reporters(ReporterPa
       reporters.emplace_back(new mull::SQLiteReporter(diagnostics, directory, name));
     } break;
     case ReporterKind::Patches: {
-      reporters.emplace_back(new mull::PatchesReporter(diagnostics, directory, name));
+      reporters.emplace_back(new mull::PatchesReporter(diagnostics, directory, name, params.gitDir));
     } break;
     case ReporterKind::Elements: {
       if (!params.compilationDatabaseAvailable) {

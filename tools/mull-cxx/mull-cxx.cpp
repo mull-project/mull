@@ -190,6 +190,7 @@ int main(int argc, char **argv) {
   tool::ReporterParameters params{ .reporterName = tool::ReportName.getValue(),
                                    .reporterDirectory = tool::ReportDirectory.getValue(),
                                    .compilationDatabaseAvailable = compilationDatabaseInfoAvailable,
+                                   .gitDir = tool::GitProjectRoot.getValue(),
                                    .IDEReporterShowKilled = tool::IDEReporterShowKilled };
   std::vector<std::unique_ptr<mull::Reporter>> reporters = reportersOption.reporters(params);
 

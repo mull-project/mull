@@ -311,6 +311,7 @@ private:
 struct ReporterParameters {
   std::string reporterName;
   std::string reporterDirectory;
+  std::string gitDir;
   bool compilationDatabaseAvailable;
   bool IDEReporterShowKilled;
 };
