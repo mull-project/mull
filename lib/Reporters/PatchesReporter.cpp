@@ -19,6 +19,7 @@
 #include <fstream>
 #include <sstream>
 #include <string>
+#include <regex>
 #include <unistd.h>
 
 using namespace mull;
@@ -43,9 +44,10 @@ static std::string getReportDir(const std::string &reportDir) {
 }
 
 PatchesReporter::PatchesReporter(Diagnostics &diagnostics, const std::string &reportDir,
-                               const std::string &reportName)
+                               const std::string &reportName, const std::string basePath)
     : diagnostics(diagnostics),
       patchesPath(getReportDir(reportDir) + "/" + getReportName(reportName)) ,
+      basePathRegex("^" + getReportDir(basePath)),
       sourceCodeReader() {
   llvm::sys::fs::create_directories(patchesPath, true);
 }
@@ -61,13 +63,14 @@ void mull::PatchesReporter::reportResults(const Result &result) {
 
     const ExecutionResult mutationExecutionResult = mutationResult->getExecutionResult();
 
-    std::stringstream filename;
+    std::stringstream filenamebuilder;
     auto mutant = *mutationResult->getMutant();
     auto& sourceLocation = mutant.getSourceLocation();
     auto& sourceEndLocation = mutant.getEndLocation();
-    std::string sourceBasename = sourceLocation.filePath.substr(sourceLocation.directory.size()+1);
+    const std::string sourceBasename = std::regex_replace(sourceLocation.filePath.substr(sourceLocation.directory.size()+1), std::regex("([/]|\\.(?!patch))"), "_");;
     auto mutator = factory.getMutator(mutant.getMutatorIdentifier());
-    std::string sourceLine = sourceCodeReader.getSourceLine(sourceLocation);
+    const std::string sourceLine = sourceCodeReader.getSourceLine(sourceLocation);
+    const std::string sourcePath = std::regex_replace(sourceLocation.filePath, basePathRegex, "");
 
     auto prefix = [&mutationExecutionResult](){
       switch(mutationExecutionResult.status){
@@ -81,21 +84,30 @@ void mull::PatchesReporter::reportResults(const Result &result) {
           return "killed-";
       }
     };
-
-    filename << patchesPath << "/" << prefix() << "-"
-             << sourceBasename << mutant.getMutatorIdentifier()
+    filenamebuilder << patchesPath << "/" << prefix()
+             << sourceBasename  << "-" << mutant.getMutatorIdentifier()
              << "-L" << sourceLocation.line << "-C" << sourceLocation.column
              << ".patch";
 
-    std::ofstream myfile{filename.str()};
-    myfile << "--- a" << sourceLocation.filePath << " 0" << "\n"
-           << "+++ b" << sourceLocation.filePath << " 0" << "\n"
+    const std::string filename = filenamebuilder.str();
+
+    std::ofstream myfile{filename};
+    if(!myfile.good())
+      diagnostics.warning(std::string("Writing File failed") + filename.c_str());
+    myfile << "--- a" << sourcePath << " 0" << "\n"
+           << "+++ b" << sourcePath << " 0" << "\n"
            << "@@ -" << sourceLocation.line << ",1 +" << sourceLocation.line << ",1 @@\n"
            << "-" << sourceLine
            << "+" << sourceLine.substr(0, sourceLocation.column-1)
            << mutator->getReplacement() << sourceLine.substr(sourceEndLocation.column-1) ;
+    if(!myfile.good())
+      diagnostics.warning(std::string("Writing File failed"));
+    myfile.flush();
+    if(!myfile.good())
+      diagnostics.warning(std::string("Writing File failed") + filename.c_str());
     myfile.close();
+    diagnostics.debug(std::string("Writing Patchfile: ") + filename.c_str());
   }
 
-  diagnostics.info(std::string("Patchefiles can be found at '") + patchesPath + "'");
+  diagnostics.info(std::string("Patchfiles can be found at '") + patchesPath + "'");
 }
