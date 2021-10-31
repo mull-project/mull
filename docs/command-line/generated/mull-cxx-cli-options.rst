@@ -20,6 +20,8 @@
 
     :Elements:	Generates mutation-testing-elements compatible JSON file
 
+    :Patches:	Generates a patchfile for each mutation. uses `--git-project-root` as base dir.
+
 --ide-reporter-show-killed		Makes IDEReporter to also report killed mutations (disabled by default)
 
 --debug		Enables Debug Mode: more logs are printed
