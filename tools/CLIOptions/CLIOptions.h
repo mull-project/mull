@@ -79,6 +79,15 @@ opt<std::string> ReportName( \
     init(""), \
     cat(MullCategory))
 
+#define ReportPatchBaseDirectory_() \
+opt<std::string> ReportPatchBaseDirectory( \
+    "report-patch-base", \
+    desc("Create Patches relative to this directory (defaults to git-project-root if available, else absolute path will be used)"), \
+    Optional, \
+    value_desc("directory"), \
+    init("."), \
+    cat(MullCategory))
+
 #define DisableJunkDetection_() \
 opt<bool> DisableJunkDetection( \
     "disable-junk-detection", \
@@ -311,7 +320,7 @@ private:
 struct ReporterParameters {
   std::string reporterName;
   std::string reporterDirectory;
-  std::string gitDir;
+  std::string patchBasePathDir;
   bool compilationDatabaseAvailable;
   bool IDEReporterShowKilled;
 };

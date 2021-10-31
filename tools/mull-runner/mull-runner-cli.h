@@ -19,6 +19,7 @@ NoTestOutput_();
 NoMutantOutput_();
 ReportName_();
 ReportDirectory_();
+ReportPatchBaseDirectory_();
 IDEReporterShowKilled_();
 IncludeNotCovered_();
 RunnerArgs_();
