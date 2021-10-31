@@ -189,9 +189,12 @@ int main(int argc, char **argv) {
 
   tool::ReporterParameters params{ .reporterName = tool::ReportName.getValue(),
                                    .reporterDirectory = tool::ReportDirectory.getValue(),
+                                   .patchBasePathDir = tool::ReportPatchBaseDirectory.getValue(),
                                    .compilationDatabaseAvailable = compilationDatabaseInfoAvailable,
-                                   .gitDir = tool::GitProjectRoot.getValue(),
                                    .IDEReporterShowKilled = tool::IDEReporterShowKilled };
+  if(tool::ReportPatchBaseDirectory.getValue() == "." && tool::GitProjectRoot.getValue() != "."){
+    params.patchBasePathDir = tool::GitProjectRoot.getValue();
+  }
   std::vector<std::unique_ptr<mull::Reporter>> reporters = reportersOption.reporters(params);
 
   mull::CXXJunkDetector junkDetector(diagnostics, astStorage);

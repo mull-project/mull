@@ -21,6 +21,7 @@ NoTestOutput_();
 NoMutantOutput_();
 ReportName_();
 ReportDirectory_();
+ReportPatchBaseDirectory_();
 Mutators_();
 DryRunOption_();
 Linker_();
@@ -54,6 +55,7 @@ void dumpCLIInterface(Diagnostics &diagnostics) {
 
       &ReportName,
       &ReportDirectory,
+      &ReportPatchBaseDirectory,
       reporters,
       &IDEReporterShowKilled,
       &DebugEnabled,
