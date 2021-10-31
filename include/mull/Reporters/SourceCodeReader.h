@@ -13,6 +13,7 @@ public:
   SourceCodeReader();
   std::string getContext(const mull::SourceLocation &sourceLocation);
   std::string getSourceLineWithCaret(const SourceLocation &sourceLocation);
+  std::string getSourceLine(const SourceLocation &sourceLocation);
 private:
   SourceManager sourceManager;
 };

@@ -4,6 +4,7 @@
 #include <mull/Reporters/IDEReporter.h>
 #include <mull/Reporters/MutationTestingElementsReporter.h>
 #include <mull/Reporters/SQLiteReporter.h>
+#include <mull/Reporters/PatchesReporter.h>
 
 using namespace mull;
 using namespace tool;
@@ -44,6 +45,7 @@ static std::vector<ReporterDefinition> reporterOptions({
     { "Elements",
       "Generates mutation-testing-elements compatible JSON file",
       ReporterKind::Elements },
+    { "Patches", "Saves results into Patchfiles", ReporterKind::Patches },
 });
 
 ReportersCLIOptions::ReportersCLIOptions(Diagnostics &diagnostics, list<ReporterKind> &parameter)
@@ -66,6 +68,9 @@ std::vector<std::unique_ptr<Reporter>> ReportersCLIOptions::reporters(ReporterPa
     } break;
     case ReporterKind::SQLite: {
       reporters.emplace_back(new mull::SQLiteReporter(diagnostics, directory, name));
+    } break;
+    case ReporterKind::Patches: {
+      reporters.emplace_back(new mull::PatchesReporter(diagnostics, directory, name));
     } break;
     case ReporterKind::Elements: {
       if (!params.compilationDatabaseAvailable) {
