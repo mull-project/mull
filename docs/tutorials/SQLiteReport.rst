@@ -95,8 +95,7 @@ It is also recommended to specify the report name via ``-report-name``, e.g.:
 
 .. code-block::
 
-    mull-cxx -test-framework=GoogleTest \
-      -mutators=cxx_add_to_sub \
+    mull-cxx -mutators=cxx_add_to_sub \
       -compdb-path compile_commands.json \
       -compilation-flags="\
         -isystem /opt/llvm/5.0.0/include/c++/v1 \
