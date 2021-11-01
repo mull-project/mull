@@ -82,13 +82,11 @@ int main(int argc, char **argv) {
     configuration.captureMutantOutput = false;
   }
 
-
   tool::ReporterParameters params{ .reporterName = tool::ReportName.getValue(),
                                    .reporterDirectory = tool::ReportDirectory.getValue(),
                                    .patchBasePathDir = tool::ReportPatchBaseDirectory.getValue(),
                                    .compilationDatabaseAvailable = false,
                                    .IDEReporterShowKilled = tool::IDEReporterShowKilled };
-
   std::vector<std::unique_ptr<mull::Reporter>> reporters = reportersOption.reporters(params);
 
   std::string executable = inputFile;
