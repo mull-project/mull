@@ -45,7 +45,7 @@ static std::vector<ReporterDefinition> reporterOptions({
     { "Elements",
       "Generates mutation-testing-elements compatible JSON file",
       ReporterKind::Elements },
-    { "Patches", "Saves results into Patchfiles", ReporterKind::Patches },
+    { "Patches", "Generates patch file for each mutation", ReporterKind::Patches },
 });
 
 ReportersCLIOptions::ReportersCLIOptions(Diagnostics &diagnostics, list<ReporterKind> &parameter)

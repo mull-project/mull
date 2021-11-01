@@ -36,6 +36,7 @@ void dumpCLIInterface(mull::Diagnostics &diagnostics) {
 
       &ReportName,
       &ReportDirectory,
+      &ReportPatchBaseDirectory,
       reporters,
       &IDEReporterShowKilled,
       &DebugEnabled,
