@@ -5,8 +5,6 @@
 namespace mull {
 namespace cxx {
 
-#pragma mark - Shifts
-
 class LShiftToRShift : public TrivialCXXMutator {
 public:
   static std::string ID();
@@ -30,8 +28,6 @@ public:
   static std::string ID();
   RShiftAssignToLShiftAssign();
 };
-
-#pragma mark - Bit operations
 
 class BitwiseOrToAnd : public TrivialCXXMutator {
 public:

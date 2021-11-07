@@ -4,8 +4,6 @@
 using namespace mull;
 using namespace mull::cxx;
 
-#pragma mark - Add to sub
-
 /// All add to sub mutators share the same set of low level mutators
 static std::vector<std::unique_ptr<irm::IRMutation>> getAddToSub() {
   std::vector<std::unique_ptr<irm::IRMutation>> mutators;
@@ -47,8 +45,6 @@ std::string PreIncToPreDec::ID() {
 PreIncToPreDec::PreIncToPreDec()
     : TrivialCXXMutator(getAddToSub(), MutatorKind::CXX_PreIncToPreDec, PreIncToPreDec::ID(),
                         "Replaces ++x with --x", "--", "Replaced ++x with --x") {}
-
-#pragma mark - Sub to add
 
 static std::vector<std::unique_ptr<irm::IRMutation>> getSubToAdd() {
   std::vector<std::unique_ptr<irm::IRMutation>> mutators;
@@ -108,8 +104,6 @@ PreDecToPreInc::PreDecToPreInc()
     : TrivialCXXMutator(getDecToInc(), MutatorKind::CXX_PreDecToPreInc, PreDecToPreInc::ID(),
                         "Replaces --x with ++x", "++", "Replaced --x with ++x") {}
 
-#pragma mark - Mul to div
-
 static std::vector<std::unique_ptr<irm::IRMutation>> getMulToDiv() {
   std::vector<std::unique_ptr<irm::IRMutation>> mutators;
   mutators.emplace_back(new irm::MulToSDiv());
@@ -133,8 +127,6 @@ MulAssignToDivAssign::MulAssignToDivAssign()
     : TrivialCXXMutator(getMulToDiv(), MutatorKind::CXX_MulAssignToDivAssign,
                         MulAssignToDivAssign::ID(),
                         "Replaces *= with /=", "/=", "Replaced *= with /=") {}
-
-#pragma mark - Div to mul
 
 static std::vector<std::unique_ptr<irm::IRMutation>> getDivToMul() {
   std::vector<std::unique_ptr<irm::IRMutation>> mutators;
@@ -160,8 +152,6 @@ DivAssignToMulAssign::DivAssignToMulAssign()
     : TrivialCXXMutator(getDivToMul(), MutatorKind::CXX_DivAssignToMulAssign,
                         DivAssignToMulAssign::ID(),
                         "Replaces /= with *=", "*=", "Replaced /= with *=") {}
-
-#pragma mark - Rem to div
 
 static std::vector<std::unique_ptr<irm::IRMutation>> getRemToDiv() {
   std::vector<std::unique_ptr<irm::IRMutation>> mutators;

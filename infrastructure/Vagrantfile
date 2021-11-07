@@ -5,8 +5,8 @@ Vagrant.require_version ">= 1.7.0"
 
 def configure_vm(name, config)
   config.vm.provider "virtualbox" do |v|
-    v.memory = ENV['VM_MEM'].to_i || 4096
-    v.cpus = ENV['VM_CPU'].to_i || 2
+    v.memory = 8192
+    v.cpus = 4
     v.name = "mull-#{name}"
   end
 end
@@ -59,7 +59,7 @@ Vagrant.configure(2) do |config|
       ansible.verbose = "v"
       ansible.playbook = "ubuntu-playbook.yaml"
       ansible.extra_vars = {
-        llvm_version: ENV['LLVM_VERSION'] || '6.0.0',
+        llvm_version: ENV['LLVM_VERSION'] || '8.0.0',
         gitref: ENV['GITREF'] || 'main',
       }
     end

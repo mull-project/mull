@@ -19,8 +19,6 @@ using namespace llvm;
 using namespace mull;
 using namespace std;
 
-#pragma mark - MutationPointAddress
-
 Instruction &MutationPointAddress::findInstruction(Module *module) const {
   llvm::Function &function = *(std::next(module->begin(), getFnIndex()));
   llvm::BasicBlock &bb = *(std::next(function.begin(), getBBIndex()));
@@ -73,8 +71,6 @@ MutationPointAddress::addressFromInstruction(const llvm::Instruction *instructio
       getIndex(instruction->getFunction()->getBasicBlockList(), instruction->getParent()),
       getIndex(instruction->getParent()->getInstList(), instruction));
 }
-
-#pragma mark - MutationPoint
 
 MutationPoint::MutationPoint(Mutator *mutator, irm::IRMutation *irMutator,
                              llvm::Instruction *instruction, Bitcode *m)
