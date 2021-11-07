@@ -1,6 +1,6 @@
 #include "mull/SourceLocation.h"
 
-#import "mull/Path.h"
+#include "mull/Path.h"
 
 #include <string>
 #include <utility>
@@ -14,7 +14,7 @@
 namespace mull {
 
 SourceLocation::SourceLocation(std::string unitDirectory, std::string unitFilePath,
-                               std::string directory, std::string filePath, int line, int column)
+                               std::string directory, std::string filePath, size_t line, size_t column)
     : unitDirectory(std::move(unitDirectory)), unitFilePath(std::move(unitFilePath)),
       directory(std::move(directory)), filePath(std::move(filePath)), line(line), column(column) {}
 

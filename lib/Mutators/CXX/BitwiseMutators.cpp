@@ -3,8 +3,6 @@
 using namespace mull;
 using namespace mull::cxx;
 
-#pragma mark - Shifts
-
 static std::vector<std::unique_ptr<irm::IRMutation>> getLLShiftToLRShift() {
   std::vector<std::unique_ptr<irm::IRMutation>> mutators;
   mutators.emplace_back(new irm::ShlToLShr());
@@ -52,8 +50,6 @@ RShiftAssignToLShiftAssign::RShiftAssignToLShiftAssign()
     : TrivialCXXMutator(getRShiftToLShift(), MutatorKind::CXX_RShiftAssignToLShiftAssign,
                         RShiftAssignToLShiftAssign::ID(),
                         "Replaces >>= with <<=", "<<=", "Replaced >>= with <<=") {}
-
-#pragma mark - Bit operations
 
 static std::vector<std::unique_ptr<irm::IRMutation>> getOrToAnd() {
   std::vector<std::unique_ptr<irm::IRMutation>> mutators;

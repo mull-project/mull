@@ -175,8 +175,6 @@ Driver::runMutations(std::vector<std::unique_ptr<Mutant>> &mutants) {
   return normalRunMutations(mutants);
 }
 
-#pragma mark -
-
 std::vector<std::unique_ptr<MutationResult>>
 Driver::dryRunMutations(std::vector<std::unique_ptr<Mutant>> &mutants) {
   std::vector<std::unique_ptr<MutationResult>> mutationResults;

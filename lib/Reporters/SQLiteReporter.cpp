@@ -144,8 +144,6 @@ void mull::SQLiteReporter::reportResults(const Result &result) {
   diagnostics.info(std::string("Results can be found at '") + databasePath + "'");
 }
 
-#pragma mark - Database Schema
-
 static const char *CreateTables = R"CreateTables(
 CREATE TABLE execution_result (
   mutation_point_id TEXT,

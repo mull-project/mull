@@ -25,10 +25,10 @@ struct SourceLocation {
 
   /// Line and columns numbers are 1-based.
   /// 0 value indicates missing (junk mutation) or broken information.
-  int line;
-  int column;
+  size_t line;
+  size_t column;
   SourceLocation(std::string unitDirectory, std::string unitFilePath, std::string directory,
-                 std::string filePath, int line, int column);
+                 std::string filePath, size_t line, size_t column);
   bool isNull() const;
 
   static SourceLocation locationFromInstruction(const llvm::Instruction *instruction);

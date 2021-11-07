@@ -115,6 +115,6 @@ void IDEReporter::reportResults(const Result &result) {
   }
 
   auto rawScore = double(killedMutants.size()) / double(result.getMutants().size());
-  auto score = uint(rawScore * 100);
+  auto score = int(rawScore * 100);
   diagnostics.info(std::string("Mutation score: ") + std::to_string(score) + '%');
 }

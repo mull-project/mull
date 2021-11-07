@@ -22,7 +22,7 @@ std::string SourceManager::getLine(const SourceLocation &location) {
   fread(buffer, sizeof(char), lineLength, lineOffset.file);
   buffer[lineLength] = '\0';
   auto line = std::string(buffer);
-  free(buffer);
+  delete[] buffer;
   return line;
 }
 
