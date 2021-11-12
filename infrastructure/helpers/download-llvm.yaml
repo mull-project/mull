@@ -4,10 +4,11 @@
     url: "{{ llvm_url }}"
     dest: "{{ working_dir }}/{{ llvm_version }}.tar.gz"
     timeout: 30
+  register: download_llvm
   retries: 5
   delay: 10
-  until: result.status == 200
-  register: download_llvm
+  until: download_llvm.status == 200
+  
 
 - name: Extract LLVM ({{ llvm_version }})
   unarchive:
