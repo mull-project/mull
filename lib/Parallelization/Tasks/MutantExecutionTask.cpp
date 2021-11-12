@@ -41,5 +41,6 @@ void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
     debugMessage << sourceLocation.line << ":" << sourceLocation.column;
     debugMessage << result.status;
     diagnostics.debug(debugMessage.str());
+    debugMessage.str(std::string());
   }
 }
