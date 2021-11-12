@@ -68,6 +68,8 @@ ExecutionResult Runner::runProgram(const std::string &program,
   }
 
   int status;
+
+  auto outputs = drainProcess(process, captureOutput);
   std::tie(status, ec) = process.wait(reproc::milliseconds(timeout));
   ExecutionStatus executionStatus = Failed;
   if (ec == std::errc::timed_out) {
@@ -78,8 +80,6 @@ ExecutionResult Runner::runProgram(const std::string &program,
   } else {
     executionStatus = Failed;
   }
-
-  auto outputs = drainProcess(process, captureOutput);
 
   auto elapsed = std::chrono::high_resolution_clock::now() - start;
   ExecutionResult result;
