@@ -4,7 +4,7 @@ namespace mull {
 
 class Result;
 
-enum class ReporterKind { IDE, SQLite, Elements, Patches };
+enum class ReporterKind { IDE, SQLite, Elements, Patches, GithubAnnotations };
 
 class Reporter {
 public:
