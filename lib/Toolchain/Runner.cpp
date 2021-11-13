@@ -41,6 +41,9 @@ ExecutionResult Runner::runProgram(const std::string &program,
   reproc::options options;
   options.env.extra = reproc::env(env);
   options.redirect.err.type = reproc::redirect::type::pipe;
+  options.stop.first.action = reproc::stop::kill;
+  options.stop.first.timeout = std::chrono::milliseconds(100);
+  options.deadline = std::chrono::milliseconds(timeout);
   if (auto &workingDirectory = optionalWorkingDirectory) {
     options.working_directory = workingDirectory->c_str();
   }
