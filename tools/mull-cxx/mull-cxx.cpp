@@ -218,10 +218,20 @@ int main(int argc, char **argv) {
   filters.functionFilters.push_back(filePathFilter);
 
   for (const auto &regex : tool::ExcludePaths) {
-    filePathFilter->exclude(regex);
+    auto added = filePathFilter->exclude(regex);
+    if (!added.first){
+      std::stringstream warningMessage;
+      warningMessage << "Invalid regex for path exlusion: '" << regex << "' has been ignored. Error: " << added.second;
+      diagnostics.warning(warningMessage.str());
+    }
   }
   for (const auto &regex : tool::IncludePaths) {
-    filePathFilter->include(regex);
+    auto added = filePathFilter->include(regex);
+    if (!added.first){
+      std::stringstream warningMessage;
+      warningMessage << "Invalid regex for path inclusion '" << regex << "' has been ignored. Error: " << added.second;
+      diagnostics.warning(warningMessage.str());
+    }
   }
 
   if (!tool::GitDiffRef.getValue().empty()) {

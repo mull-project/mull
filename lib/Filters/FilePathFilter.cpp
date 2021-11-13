@@ -17,8 +17,7 @@ bool FilePathFilter::shouldSkip(llvm::Function *function) {
 }
 
 bool FilePathFilter::shouldSkip(llvm::Instruction *instruction) const {
-  SourceLocation location =
-      SourceLocation::locationFromInstruction(instruction);
+  SourceLocation location = SourceLocation::locationFromInstruction(instruction);
   return shouldSkip(location);
 }
 
@@ -29,6 +28,7 @@ bool FilePathFilter::shouldSkip(const mull::SourceLocation &location) const {
 
 bool FilePathFilter::shouldSkip(const std::string &sourceFilePath) const {
   std::lock_guard<std::mutex> lock(cacheMutex);
+  std::string sourceFilePathCopy{sourceFilePath};
 
   if (cache.count(sourceFilePath) == 0) {
     bool allow = true;
@@ -36,16 +36,16 @@ bool FilePathFilter::shouldSkip(const std::string &sourceFilePath) const {
     if (!includeFilters.empty()) {
       allow = false;
 
-      for (const auto &r : includeFilters) {
-        if (std::regex_search(sourceFilePath, r)) {
+      for (auto &r : includeFilters) {
+        if (r.match(sourceFilePathCopy)) {
           allow = true;
           break;
         }
       }
     }
     if (allow) {
-      for (const auto &r : excludeFilters) {
-        if (std::regex_search(sourceFilePath, r)) {
+      for (auto &r : excludeFilters) {
+        if (r.match(sourceFilePathCopy)) {
           allow = false;
           break;
         }
@@ -55,15 +55,30 @@ bool FilePathFilter::shouldSkip(const std::string &sourceFilePath) const {
     cache[sourceFilePath] = allow;
   }
 
-  return (! cache[sourceFilePath]);
+  return (!cache[sourceFilePath]);
 }
 
-std::string FilePathFilter::name() { return "file path"; }
-
-void FilePathFilter::exclude(const std::string &filter) {
-  excludeFilters.emplace_back(filter, std::regex::egrep);
+std::string FilePathFilter::name() {
+  return "file path";
 }
 
-void FilePathFilter::include(const std::string &filter) {
-  includeFilters.emplace_back(filter, std::regex::egrep);
+std::pair<bool, std::string> FilePathFilter::exclude(const std::string &filter) {
+
+  auto regex_filter = llvm::Regex(filter);
+  std::string error;
+  if (!regex_filter.isValid(error)) {
+    return std::make_pair(false, std::move(error));
+  }
+  excludeFilters.emplace_back(filter);
+  return std::make_pair(true, std::string());
+}
+
+std::pair<bool, std::string> FilePathFilter::include(const std::string &filter) {
+  auto regex_filter = llvm::Regex(filter);
+  std::string error;
+  if (!regex_filter.isValid(error)) {
+    return std::make_pair(false, std::move(error));
+  }
+  includeFilters.emplace_back(filter);
+  return std::make_pair(true, std::string());
 }
