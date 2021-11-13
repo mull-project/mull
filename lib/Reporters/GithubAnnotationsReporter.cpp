@@ -30,6 +30,7 @@ void mull::GithubAnnotationsReporter::reportResults(const Result &result) {
 
     const auto mutant = *mutationResult->getMutant();
     const auto& sourceLocation = mutant.getSourceLocation();
+    const auto& sourceEndLocation = mutant.getEndLocation();
     const auto mutator = factory.getMutator(mutant.getMutatorIdentifier());
 
     if (mutationExecutionResult.status != ExecutionStatus::Passed){
@@ -40,7 +41,9 @@ void mull::GithubAnnotationsReporter::reportResults(const Result &result) {
     stringstream << "::" << level << " "
                  << "file=" << sourceLocation.filePath << ","
                  << "line=" << sourceLocation.line << ","
-                 << "col=" << sourceLocation.column
+                 << "col=" << sourceLocation.column << ","
+                 << "endLine=" << sourceEndLocation.line << ","
+                 << "endColumn=" << sourceEndLocation.column
                  << "::"
                  << "[" << mutant.getMutatorIdentifier() << "] "
                  << mutator->getDiagnostics()
