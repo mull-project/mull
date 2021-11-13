@@ -24,7 +24,7 @@ void mull::GithubAnnotationsReporter::reportResults(const Result &result) {
   MutatorsFactory factory(diagnostics);
   factory.init();
   std::string level="warning";
-  fprintf(stdout, "\nGithub Annotations:\n");
+  diagnostics.info("Github Annotations:");
   for (auto &mutationResult : result.getMutationResults()) {
     const ExecutionResult mutationExecutionResult = mutationResult->getExecutionResult();
 
