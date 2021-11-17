@@ -7,6 +7,7 @@
 #include "Helpers/MutationTestBed.h"
 
 #include <gtest/gtest.h>
+#include <regex>
 
 using namespace mull;
 using namespace mull_test;
