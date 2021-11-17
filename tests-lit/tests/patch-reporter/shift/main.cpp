@@ -22,7 +22,8 @@ RUN: cd %S/Output && echo $PATH; (unset TERM; %mull_cxx -mutators=cxx_bitwise -l
 CHECK:[debug] Writing Patchfile: {{.*}}
 CHECK:[info] Patchfiles can be found at './test-patches'
 CHECK:killed-{{.*}}main_cpp{{.*}}
-CHECK:--- a{{.*}}/Output/sandbox/main.cpp 0
+CHECK:--- a/{{.*}}/Output/sandbox/main.cpp 0
+CHECK:+++ b/{{.*}}/Output/sandbox/main.cpp 0
 CHECK:+{{\s+}}return a >> b;
 
 */

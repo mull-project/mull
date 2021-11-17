@@ -73,7 +73,8 @@ void mull::PatchesReporter::reportResults(const Result &result) {
                            "_");
     ;
     const auto mutator = factory.getMutator(mutant.getMutatorIdentifier());
-    const std::vector<std::string> sourceLines = sourceCodeReader.getSourceLines(sourceLocation, sourceEndLocation);
+    const std::vector<std::string> sourceLines =
+        sourceCodeReader.getSourceLines(sourceLocation, sourceEndLocation);
     const std::string sourcePath = std::regex_replace(sourceLocation.filePath, basePathRegex, "");
 
     const std::string prefix = [&mutationExecutionResult]() {
@@ -99,21 +100,19 @@ void mull::PatchesReporter::reportResults(const Result &result) {
 
     diagnostics.debug(std::string("Writing Patchfile: ") + filename.c_str());
     const int lines = sourceEndLocation.line - sourceLocation.line + 1;
-    std::ofstream myfile{filename};
-    myfile << "--- a" << sourcePath << " 0" << "\n"
-           << "+++ b" << sourcePath << " 0" << "\n"
+    myfile << "--- a" << (sourcePath[0] != '/' ? "/" : "") << sourcePath << " 0" << "\n"
+           << "+++ b" << (sourcePath[0] != '/' ? "/" : "") << sourcePath << " 0" << "\n"
            << "@@ -" << sourceLocation.line << "," << lines << " +" << sourceLocation.line << ",1 @@\n";
-    for (auto& currentLine : sourceLines){
+    for (auto &currentLine : sourceLines) {
       myfile << "-" << currentLine;
     }
-    myfile << "+" << sourceLines.front().substr(0, sourceLocation.column-1)
-           << mutator->getReplacement() << sourceLines.back().substr(sourceEndLocation.column-1) ;
+    myfile << "+" << sourceLines.front().substr(0, sourceLocation.column - 1)
+           << mutator->getReplacement() << sourceLines.back().substr(sourceEndLocation.column - 1);
     myfile << std::accumulate(
         mullInformation.begin(),
         mullInformation.end(),
         std::string("--\n"),
         [](std::string in, auto &s) { return std::move(in) + s.first + ": " + s.second + "\n"; });
-
     myfile.flush();
     if (!myfile.good())
       diagnostics.warning(std::string("Writing Patchfile failed") + filename.c_str());
