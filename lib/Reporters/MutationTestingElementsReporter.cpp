@@ -154,8 +154,8 @@ void MutationTestingElementsReporter::reportResults(const Result &result) {
     { "schemaVersion", "1.7" },
     { "framework", Json::object {
                                   { "name", "Mull" },
-                                  { "version", mullInformation.at("Mull Version") + ", LLVM " + mullInformation.at("LLVM Version") },
-                                  { "brandingInformation", Json::object { {"homepageUrl", mullInformation.at("URL") }, }
+                                  { "version", mullInformation["Mull Version"] + ", LLVM " + mullInformation["LLVM Version"] },
+                                  { "brandingInformation", Json::object { {"homepageUrl", mullInformation["URL"] }, }
                                 } },
     }
   };
