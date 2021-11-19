@@ -24,5 +24,9 @@ CHECK:[info] Patchfiles can be found at './test-patches'
 CHECK:{{.*}}main_cpp{{.*}}
 CHECK:--- a{{.*}}/Output/sandbox/main.cpp 0
 CHECK:+{{\s+}}return a != b;
+CHECK:--
+CHECK:LLVM Version: {{.*}}
+CHECK:Build Date: {{.*}}
+CHECK:Mull Version: {{.*}}
 
 */
