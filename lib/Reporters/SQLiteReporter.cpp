@@ -62,9 +62,11 @@ static std::string getReportDir(const std::string &reportDir) {
 }
 
 SQLiteReporter::SQLiteReporter(Diagnostics &diagnostics, const std::string &reportDir,
-                               const std::string &reportName)
+                               const std::string &reportName,
+                               const std::unordered_map<std::string, std::string> &mullInformation)
     : diagnostics(diagnostics),
-      databasePath(getReportDir(reportDir) + "/" + getReportName(reportName)) {
+      databasePath(getReportDir(reportDir) + "/" + getReportName(reportName)),
+      mullInformation(mullInformation) {
   llvm::sys::fs::create_directories(reportDir, true);
 }
 
@@ -79,6 +81,19 @@ void mull::SQLiteReporter::reportResults(const Result &result) {
   createTables(diagnostics, database);
 
   sqlite_exec(diagnostics, database, "BEGIN TRANSACTION");
+
+  const char *insertInformationQuery =
+      "INSERT INTO information VALUES (?1, ?2)";
+  sqlite3_stmt *insertInformationStmt;
+  sqlite3_prepare(database, insertInformationQuery, -1, &insertInformationStmt, nullptr);
+
+  for (auto &info : mullInformation) {
+    sqlite3_bind_text(insertInformationStmt, 1, info.first.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(insertInformationStmt, 2, info.second.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_step(insertInformationStmt);
+    sqlite3_clear_bindings(insertInformationStmt);
+    sqlite3_reset(insertInformationStmt);
+  }
 
   const char *insertExecutionResultQuery =
       "INSERT INTO execution_result VALUES (?1, ?2, ?3, ?4, ?5)";
@@ -160,6 +175,11 @@ CREATE TABLE mutant (
   line_number INT,
   column_number INT,
   unique_id TEXT
+);
+
+CREATE TABLE information (
+  key TEXT,
+  value TEXT
 );
 )CreateTables";
 

@@ -7,6 +7,9 @@
 #include <mull/Reporters/Reporter.h>
 #include <mull/Toolchain/Toolchain.h>
 #include <sstream>
+#include <unordered_map>
+#include <vector>
+#include <string>
 
 // clang-format off
 
@@ -323,6 +326,7 @@ struct ReporterParameters {
   std::string patchBasePathDir;
   bool compilationDatabaseAvailable;
   bool IDEReporterShowKilled;
+  std::unordered_map<std::string, std::string> mullInformation;
 };
 
 class ReportersCLIOptions {
