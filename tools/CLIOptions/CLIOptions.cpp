@@ -67,10 +67,10 @@ std::vector<std::unique_ptr<Reporter>> ReportersCLIOptions::reporters(ReporterPa
       reporters.emplace_back(new mull::IDEReporter(diagnostics, params.IDEReporterShowKilled));
     } break;
     case ReporterKind::SQLite: {
-      reporters.emplace_back(new mull::SQLiteReporter(diagnostics, directory, name));
+      reporters.emplace_back(new mull::SQLiteReporter(diagnostics, directory, name, params.mullInformation));
     } break;
     case ReporterKind::Patches: {
-      reporters.emplace_back(new mull::PatchesReporter(diagnostics, directory, name, params.patchBasePathDir));
+      reporters.emplace_back(new mull::PatchesReporter(diagnostics, directory, name, params.patchBasePathDir, params.mullInformation));
     } break;
     case ReporterKind::Elements: {
       if (!params.compilationDatabaseAvailable) {
@@ -78,7 +78,7 @@ std::vector<std::unique_ptr<Reporter>> ReportersCLIOptions::reporters(ReporterPa
                             "database. Consider providing -compdb-path or -compilation-flags.");
       }
       reporters.emplace_back(
-          new mull::MutationTestingElementsReporter(diagnostics, directory, name));
+          new mull::MutationTestingElementsReporter(diagnostics, directory, name, params.mullInformation));
     } break;
     }
   }

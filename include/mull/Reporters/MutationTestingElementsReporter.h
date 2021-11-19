@@ -2,6 +2,7 @@
 
 #include "Reporter.h"
 #include <string>
+#include <unordered_map>
 
 namespace mull {
 
@@ -12,7 +13,7 @@ class Diagnostics;
 class MutationTestingElementsReporter : public Reporter {
 public:
   MutationTestingElementsReporter(Diagnostics &diagnostics, const std::string &reportDir,
-                                  const std::string &reportName);
+                                  const std::string &reportName, const std::unordered_map<std::string, std::string> &mullInformation = {});
   void reportResults(const Result &result) override;
 
   const std::string &getJSONPath();
@@ -25,6 +26,7 @@ private:
   std::string filename;
   std::string htmlPath;
   std::string jsonPath;
+  std::unordered_map<std::string, std::string> mullInformation;
 };
 
 } // namespace mull
