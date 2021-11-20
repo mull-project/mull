@@ -36,7 +36,11 @@ bool FilePathFilter::shouldSkip(const std::string &sourceFilePath) const {
     if (!includeFilters.empty()) {
       allow = false;
 
+#if LLVM_VERSION_MAJOR >= 10
+      for (const auto &r : includeFilters) {
+#else
       for (auto &r : includeFilters) {
+#endif
         if (r.match(sourceFilePathCopy)) {
           allow = true;
           break;
@@ -44,7 +48,11 @@ bool FilePathFilter::shouldSkip(const std::string &sourceFilePath) const {
       }
     }
     if (allow) {
+#if LLVM_VERSION_MAJOR >= 10
+      for (const auto &r : excludeFilters) {
+#else
       for (auto &r : excludeFilters) {
+#endif
         if (r.match(sourceFilePathCopy)) {
           allow = false;
           break;
@@ -69,7 +77,7 @@ std::pair<bool, std::string> FilePathFilter::exclude(const std::string &filter) 
   if (!regex_filter.isValid(error)) {
     return std::make_pair(false, std::move(error));
   }
-  excludeFilters.emplace_back(regex_filter);
+  excludeFilters.emplace_back(std::move(regex_filter));
   return std::make_pair(true, std::string());
 }
 
@@ -79,6 +87,6 @@ std::pair<bool, std::string> FilePathFilter::include(const std::string &filter) 
   if (!regex_filter.isValid(error)) {
     return std::make_pair(false, std::move(error));
   }
-  includeFilters.emplace_back(regex_filter);
+  includeFilters.emplace_back(std::move(regex_filter));
   return std::make_pair(true, std::string());
 }

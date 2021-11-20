@@ -28,8 +28,14 @@ public:
 private:
   bool shouldSkip(const mull::SourceLocation &location) const;
 
+// The API of llvm::Regex support const match starting from 10.0.0
+#if LLVM_VERSION_MAJOR >= 10
+  std::vector<llvm::Regex> includeFilters;
+  std::vector<llvm::Regex> excludeFilters;
+#else
   mutable std::vector<llvm::Regex> includeFilters;
   mutable std::vector<llvm::Regex> excludeFilters;
+#endif
 
   mutable std::unordered_map<std::string, bool> cache;
   mutable std::mutex cacheMutex;
