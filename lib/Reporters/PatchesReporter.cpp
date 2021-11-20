@@ -100,6 +100,7 @@ void mull::PatchesReporter::reportResults(const Result &result) {
 
     diagnostics.debug(std::string("Writing Patchfile: ") + filename.c_str());
     const int lines = sourceEndLocation.line - sourceLocation.line + 1;
+    std::ofstream myfile{filename};
     myfile << "--- a" << (sourcePath[0] != '/' ? "/" : "") << sourcePath << " 0" << "\n"
            << "+++ b" << (sourcePath[0] != '/' ? "/" : "") << sourcePath << " 0" << "\n"
            << "@@ -" << sourceLocation.line << "," << lines << " +" << sourceLocation.line << ",1 @@\n";
