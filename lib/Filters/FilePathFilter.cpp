@@ -69,7 +69,7 @@ std::pair<bool, std::string> FilePathFilter::exclude(const std::string &filter) 
   if (!regex_filter.isValid(error)) {
     return std::make_pair(false, std::move(error));
   }
-  excludeFilters.emplace_back(filter);
+  excludeFilters.emplace_back(regex_filter);
   return std::make_pair(true, std::string());
 }
 
@@ -79,6 +79,6 @@ std::pair<bool, std::string> FilePathFilter::include(const std::string &filter) 
   if (!regex_filter.isValid(error)) {
     return std::make_pair(false, std::move(error));
   }
-  includeFilters.emplace_back(filter);
+  includeFilters.emplace_back(regex_filter);
   return std::make_pair(true, std::string());
 }
