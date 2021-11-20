@@ -27,6 +27,8 @@
 #include <iterator>
 #include <memory>
 #include <sstream>
+#include <numeric>
+#include <unordered_map>
 #include <unistd.h>
 
 static std::string validateInputFile(const std::string &inputFile, mull::Diagnostics &diagnostics) {
@@ -186,12 +188,26 @@ int main(int argc, char **argv) {
 
   mull::ASTStorage astStorage(
       diagnostics, cxxCompilationDatabasePath, cxxCompilationFlags, bitcodeCompilationFlags);
-
+  std::vector<std::string> commandLineOptions {argv, argv + argc};
+  std::string commandLine = std::accumulate(commandLineOptions.begin(),
+                              commandLineOptions.end(),
+                              std::string(),
+                              [](std::string in, auto &s) { return std::move(in) + s + ' '; });
   tool::ReporterParameters params{ .reporterName = tool::ReportName.getValue(),
                                    .reporterDirectory = tool::ReportDirectory.getValue(),
                                    .patchBasePathDir = tool::ReportPatchBaseDirectory.getValue(),
                                    .compilationDatabaseAvailable = compilationDatabaseInfoAvailable,
-                                   .IDEReporterShowKilled = tool::IDEReporterShowKilled };
+                                   .IDEReporterShowKilled = tool::IDEReporterShowKilled,
+                                   .mullInformation = std::unordered_map<std::string, std::string>{
+                                     std::make_pair("CommandLine", commandLine),
+                                     std::make_pair("URL", mull::mullHomepageString()),
+                                     std::make_pair("Mull Version", mull::mullVersionString()),
+                                     std::make_pair("Commit", mull::mullCommitString() ),
+                                     std::make_pair("Build Date", mull::mullBuildDateString()),
+                                     std::make_pair("LLVM Version", mull::llvmVersionString()),
+                                   },
+  };
+
   if(tool::ReportPatchBaseDirectory.getValue() == "." && tool::GitProjectRoot.getValue() != "."){
     params.patchBasePathDir = tool::GitProjectRoot.getValue();
   }

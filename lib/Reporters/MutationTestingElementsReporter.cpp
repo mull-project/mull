@@ -13,6 +13,7 @@
 
 #include <fstream>
 #include <map>
+#include <numeric>
 #include <set>
 #include <sstream>
 #include <string>
@@ -112,12 +113,13 @@ static std::string getReportDir(const std::string &dir) {
   return dir;
 }
 
-MutationTestingElementsReporter::MutationTestingElementsReporter(Diagnostics &diagnostics,
-                                                                 const std::string &reportDir,
-                                                                 const std::string &reportName)
+MutationTestingElementsReporter::MutationTestingElementsReporter(
+    Diagnostics &diagnostics, const std::string &reportDir, const std::string &reportName,
+    const std::unordered_map<std::string, std::string> &mullInformation)
     : diagnostics(diagnostics), filename(getFilename(reportName)),
       htmlPath(getReportDir(reportDir) + "/" + filename + ".html"),
-      jsonPath(getReportDir(reportDir) + "/" + filename + ".json") {
+      jsonPath(getReportDir(reportDir) + "/" + filename + ".json"),
+      mullInformation(mullInformation) {
   llvm::sys::fs::create_directories(reportDir);
 }
 
@@ -145,11 +147,17 @@ void MutationTestingElementsReporter::reportResults(const Result &result) {
   auto score = uint(rawScore * 100);
 
   Json json = Json::object{
+    { "config", mullInformation },
     { "mutationScore", (int)score },
     { "thresholds", Json::object{ { "high", 80 }, { "low", 60 } } },
-    { "files",
-      createFiles(diagnostics, result, killedMutants, notCoveredMutants) },
-    { "schemaVersion", "1.1.1" },
+    { "files", createFiles(diagnostics, result, killedMutants, notCoveredMutants) },
+    { "schemaVersion", "1.7" },
+    { "framework", Json::object {
+                                  { "name", "Mull" },
+                                  { "version", mullInformation["Mull Version"] + ", LLVM " + mullInformation["LLVM Version"] },
+                                  { "brandingInformation", Json::object { {"homepageUrl", mullInformation["URL"] }, }
+                                } },
+    }
   };
   std::string json_str = json.dump();
 

@@ -2,6 +2,7 @@
 
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace mull {
@@ -12,7 +13,8 @@ class Diagnostics;
 class SQLiteReporter : public Reporter {
 public:
   explicit SQLiteReporter(Diagnostics &diagnostics, const std::string &reportDir = "",
-                          const std::string &reportName = "");
+                          const std::string &reportName = "",
+                          const std::unordered_map<std::string, std::string> &mullInformation={});
 
   void reportResults(const Result &result) override;
 
@@ -21,6 +23,7 @@ public:
 private:
   Diagnostics &diagnostics;
   std::string databasePath;
+  std::unordered_map<std::string, std::string> mullInformation;
 };
 
 } // namespace mull

@@ -106,7 +106,7 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   ASSERT_FALSE(object.is_null());
 
   const std::string &schemaJSON = object["schemaVersion"].string_value();
-  ASSERT_EQ(std::string("1.1.1"), schemaJSON);
+  ASSERT_EQ(std::string("1.7"), schemaJSON);
 
   const std::map<std::string, Json> &filesJSON = object["files"].object_items();
   ASSERT_EQ(1, filesJSON.size());
