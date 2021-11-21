@@ -17,9 +17,9 @@ Features
 
   - SQLite Reporter: SQLite database file.
 
-  - JSON file that conforms `mutation-testing-elements schema <https://github.com/stryker-mutator/mutation-testing-elements/tree/master/packages/mutation-testing-report-schema>`_
+  - JSON file that conforms `mutation-testing-elements schema <https://github.com/stryker-mutator/mutation-testing-elements/tree/master/packages/report-schema>`_
 
-  - `Mutation Testing Elements HTML Reporter <https://github.com/stryker-mutator/mutation-testing-elements/tree/master/packages/mutation-testing-elements>`_
+  - `Mutation Testing Elements HTML Reporter <https://github.com/stryker-mutator/mutation-testing-elements/tree/master/packages/elements>`_
 
 - Parallelized execution of tests
 
