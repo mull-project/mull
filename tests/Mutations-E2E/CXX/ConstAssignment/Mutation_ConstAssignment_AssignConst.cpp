@@ -7,6 +7,7 @@
 #include <clang/Frontend/ASTUnit.h>
 #include <clang/Tooling/Tooling.h>
 #include <llvm/IR/Module.h>
+#include <regex>
 
 #include "Helpers/MutationTestBed.h"
 

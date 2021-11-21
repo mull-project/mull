@@ -8,6 +8,8 @@
 
 #include <gtest/gtest.h>
 
+#include <regex>
+
 using namespace mull;
 using namespace mull_test;
 using namespace llvm;

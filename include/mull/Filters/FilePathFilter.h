@@ -4,17 +4,17 @@
 #include "mull/Filters/InstructionFilter.h"
 #include "mull/Filters/MutationFilter.h"
 
+#include <llvm/Support/Regex.h>
 #include <mutex>
-#include <regex>
+#include <string>
+#include <utility>
 #include <unordered_map>
 #include <vector>
 
 namespace mull {
 struct SourceLocation;
 
-class FilePathFilter : public MutationFilter,
-                       public FunctionFilter,
-                       public InstructionFilter {
+class FilePathFilter : public MutationFilter, public FunctionFilter, public InstructionFilter {
 public:
   bool shouldSkip(MutationPoint *point) override;
   bool shouldSkip(llvm::Function *function) override;
@@ -22,14 +22,20 @@ public:
   bool shouldSkip(const std::string &sourceFilePath) const;
 
   std::string name() override;
-  void exclude(const std::string &filter);
-  void include(const std::string &filter);
+  std::pair<bool, std::string> exclude(const std::string &filter);
+  std::pair<bool, std::string> include(const std::string &filter);
 
 private:
   bool shouldSkip(const mull::SourceLocation &location) const;
 
-  std::vector<std::regex> includeFilters;
-  std::vector<std::regex> excludeFilters;
+// The API of llvm::Regex support const match starting from 10.0.0
+#if LLVM_VERSION_MAJOR >= 10
+  std::vector<llvm::Regex> includeFilters;
+  std::vector<llvm::Regex> excludeFilters;
+#else
+  mutable std::vector<llvm::Regex> includeFilters;
+  mutable std::vector<llvm::Regex> excludeFilters;
+#endif
 
   mutable std::unordered_map<std::string, bool> cache;
   mutable std::mutex cacheMutex;

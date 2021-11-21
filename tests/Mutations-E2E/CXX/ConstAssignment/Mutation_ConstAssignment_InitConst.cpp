@@ -13,6 +13,8 @@
 
 #include <gtest/gtest.h>
 
+#include <regex>
+
 using namespace mull;
 using namespace mull::cxx;
 using namespace mull_test;
