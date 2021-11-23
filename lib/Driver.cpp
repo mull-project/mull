@@ -316,8 +316,8 @@ std::vector<FunctionUnderTest> Driver::getFunctionsUnderTest() {
       /// to avoid collisions
       /// TODO: check case when filename:functionName is not enough to resolve collisions
       /// TODO: pick a proper data structure
-      std::unordered_map<std::string, std::unordered_set<std::string>> scopedFunctions;
-      std::unordered_set<std::string> unscopedFunctions;
+      std::unordered_map<std::string, std::unordered_map<std::string, std::vector<llvm::coverage::CountedRegion>>> scopedFunctions;
+      std::unordered_map<std::string, std::vector<llvm::coverage::CountedRegion>> unscopedFunctions;
       for (auto &it : coverage->getCoveredFunctions()) {
         if (!it.ExecutionCount) {
           continue;
@@ -330,28 +330,31 @@ std::vector<FunctionUnderTest> Driver::getFunctionsUnderTest() {
           name = name.substr(idx + 1);
         }
         if (scope.empty()) {
-          unscopedFunctions.insert(name);
+          unscopedFunctions[name] = it.CountedRegions;
         } else {
-          scopedFunctions[scope].insert(name);
+          scopedFunctions[scope][name] = it.CountedRegions;
         }
       }
       for (auto &bitcode : program.bitcode()) {
         for (llvm::Function &function : *bitcode->getModule()) {
           bool covered = false;
+          std::vector<llvm::coverage::CountedRegion> linecoverage = {};
           std::string name = function.getName().str();
           if (unscopedFunctions.count(name)) {
             covered = true;
+            std::swap(linecoverage, unscopedFunctions[name]);
           } else {
             std::string filepath = SourceLocation::locationFromFunction(&function).unitFilePath;
             std::string scope = llvm::sys::path::filename(filepath).str();
             if (scopedFunctions[scope].count(name)) {
               covered = true;
+            std::swap(linecoverage, scopedFunctions[scope][name]);
             }
           }
           if (covered) {
-            functionsUnderTest.emplace_back(&function, bitcode.get());
+            functionsUnderTest.emplace_back(&function, bitcode.get(), true, linecoverage);
           } else if (config.includeNotCovered) {
-            functionsUnderTest.emplace_back(&function, bitcode.get(), false);
+            functionsUnderTest.emplace_back(&function, bitcode.get());
           }
         }
       }
@@ -361,7 +364,7 @@ std::vector<FunctionUnderTest> Driver::getFunctionsUnderTest() {
       }
       for (auto &bitcode : program.bitcode()) {
         for (llvm::Function &function : *bitcode->getModule()) {
-          functionsUnderTest.emplace_back(&function, bitcode.get());
+          functionsUnderTest.emplace_back(&function, bitcode.get(), true);
         }
       }
     }
