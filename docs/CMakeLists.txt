@@ -3,19 +3,19 @@ file(MAKE_DIRECTORY command-line/generated)
 
 add_custom_target(generate-mull-cxx-cli-options-doc
   COMMAND $<TARGET_FILE:mull-cxx-${LLVM_VERSION_MAJOR}> --dump-cli > command-line/generated/mull-cxx-cli-options.rst
-  DEPENDS mull-cxx
+  DEPENDS mull-cxx-${LLVM_VERSION_MAJOR}
   WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
 
 add_custom_target(generate-mull-runner-cli-options-doc
   COMMAND $<TARGET_FILE:mull-runner-${LLVM_VERSION_MAJOR}> --dump-cli > command-line/generated/mull-runner-cli-options.rst
-  DEPENDS mull-runner
+  DEPENDS mull-runner-${LLVM_VERSION_MAJOR}
   WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
   )
 
 add_custom_target(generate-mutators-doc
   COMMAND $<TARGET_FILE:mull-cxx-${LLVM_VERSION_MAJOR}> --dump-mutators > generated/Mutators.rst
-  DEPENDS mull-cxx
+  DEPENDS mull-cxx-${LLVM_VERSION_MAJOR}
   WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR}
 )
 
