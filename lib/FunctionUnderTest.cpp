@@ -4,6 +4,7 @@
 #include <llvm/IR/InstIterator.h>
 #include <llvm/ProfileData/Coverage/CoverageMapping.h>
 
+#include <algorithm>
 
 using namespace mull;
 
@@ -31,15 +32,17 @@ bool FunctionUnderTest::isCovered(const SourceLocation& location) const {
     return covered;
   }
   bool iscovered = true;
-  for (auto& cov:linecoverage){
-    if ((cov.LineStart < location.line
-          || (cov.LineStart == location.line && cov.ColumnStart <= location.column))
-        && (cov.LineEnd > location.line
-          || (cov.LineEnd == location.line && cov.ColumnEnd >= location.column))
-          ){
+  auto after_start = [&location](auto LineStart, auto ColumnStart){
+    return (LineStart < location.line || (LineStart == location.line && ColumnStart <= location.column));
+  };
+  auto before_end = [&location](auto LineEnd, auto ColumnEnd){
+    return (LineEnd > location.line || (LineEnd == location.line && ColumnEnd >= location.column));
+  };
+  for_each(linecoverage.begin(), linecoverage.end(), [&](const auto & cov){
+    if (after_start(cov.LineStart, cov.ColumnStart) && before_end(cov.LineEnd, cov.ColumnEnd)){
       iscovered &= cov.ExecutionCount > 0;
     }
-  }
+  });
   return iscovered;
 }
 
