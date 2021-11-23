@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.13.0] - 23 Nov 2021
+
+This release happens solely due to [m42e](https://github.com/m42e)'s efforts. Thank you, Matthias!
+
+- Added patch reporter (by [Matthias Bilger](https://github.com/m42e)) [#911](https://github.com/mull-project/mull/pull/911) [#587](https://github.com/mull-project/mull/issues/587)
+- Added GithubAnnotations reporter (by [Matthias Bilger](https://github.com/m42e)) [#917](https://github.com/mull-project/mull/pull/917) [#738](https://github.com/mull-project/mull/issues/738)
+- `Elements` and `SQLite` reports now include information about the Mull invocation (by [Matthias Bilger](https://github.com/m42e)) [#921](https://github.com/mull-project/mull/pull/921) [#920](https://github.com/mull-project/mull/issues/920)
+- Code coverage now cuts off more unreachable mutants (by [Matthias Bilger](https://github.com/m42e)) [#923](https://github.com/mull-project/mull/pull/923)
+- Fixed a bug with child-process handling causing incorrect test results (by [Matthias Bilger](https://github.com/m42e)) [#915](https://github.com/mull-project/mull/pull/915)
+- Fixed a bug when Mull terminates when invalid regex passed to filters (by [Matthias Bilger](https://github.com/m42e)) [#918](https://github.com/mull-project/mull/pull/918) [#845](https://github.com/mull-project/mull/issues/845)
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2021-10-23..2021-11-23)
+
 ## [0.12.0] - 23 Oct 2021
 
 **Important note**: The `mull` package is now replaced with a separate package for each

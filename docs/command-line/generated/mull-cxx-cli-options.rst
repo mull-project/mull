@@ -12,6 +12,8 @@
 
 --report-dir directory		Where to store report (defaults to '.')
 
+--report-patch-base directory		Create Patches relative to this directory (defaults to git-project-root if available, else absolute path will be used)
+
 --reporters reporter		Choose reporters:
 
     :IDE:	Prints compiler-like warnings into stdout
@@ -20,7 +22,9 @@
 
     :Elements:	Generates mutation-testing-elements compatible JSON file
 
-    :Patches:	Generates a patchfile for each mutation. uses `--git-project-root` as base dir.
+    :Patches:	Generates patch file for each mutation
+
+    :GithubAnnotations:	Print GithubAnnotations for mutants
 
 --ide-reporter-show-killed		Makes IDEReporter to also report killed mutations (disabled by default)
 
