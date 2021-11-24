@@ -97,4 +97,7 @@ jobs:
           tag: ${{ github.ref }}
           overwrite: true
           file_glob: true
+        # This step fails sometimes (with ECONNRESET), but I'm not willing to
+        # debug it as the main source of packages is Cloudsmith
+        continue-on-error: true
 

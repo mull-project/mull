@@ -7,8 +7,7 @@
   register: download_llvm
   retries: 5
   delay: 10
-  until: download_llvm.status_code == 200
-  
+  until: download_llvm.failed == false
 
 - name: Extract LLVM ({{ llvm_version }})
   unarchive:
