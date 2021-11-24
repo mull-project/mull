@@ -9,27 +9,35 @@ llvm_mapping:
     13.0.0:
       url: https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/clang+llvm-13.0.0-x86_64-apple-darwin.tar.xz
       path: clang+llvm-13.0.0-x86_64-apple-darwin
+      precompiled: true
     12.0.0:
       url: https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.0/clang+llvm-12.0.0-x86_64-apple-darwin.tar.xz
       path: clang+llvm-12.0.0-x86_64-apple-darwin
+      precompiled: true
     11.0.0:
       url: https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.0/clang+llvm-11.0.0-x86_64-apple-darwin.tar.xz
       path: clang+llvm-11.0.0-x86_64-apple-darwin
+      precompiled: true
     10.0.0:
       url: https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
       path: clang+llvm-10.0.0-x86_64-apple-darwin
+      precompiled: true
     9.0.0:
       url: http://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-darwin-apple.tar.xz
       path: clang+llvm-9.0.0-x86_64-darwin-apple
+      precompiled: true
     8.0.0:
       url: https://releases.llvm.org/8.0.0/clang+llvm-8.0.0-x86_64-apple-darwin.tar.xz
       path: clang+llvm-8.0.0-x86_64-apple-darwin
+      precompiled: true
     7.0.0:
       url: https://releases.llvm.org/7.0.0/clang+llvm-7.0.0-x86_64-apple-darwin.tar.xz
       path: clang+llvm-7.0.0-x86_64-apple-darwin
+      precompiled: true
     6.0.0:
       url: https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-apple-darwin.tar.xz
       path: clang+llvm-6.0.0-x86_64-apple-darwin
+      precompiled: true
 
   debian:
     6.0.0:
@@ -40,27 +48,82 @@ llvm_mapping:
     13.0.0:
       url: https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz
       path: clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04
+      precompiled: true
     12.0.0:
       url: https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.0/clang+llvm-12.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz
       path: clang+llvm-12.0.0-x86_64-linux-gnu-ubuntu-20.04
+      precompiled: false
+      packages:
+        - llvm-12-dev
+        - libclang-12-dev
+        - libc++-12-dev
+        - libc++abi-12-dev
+        - clang-12
+      cmake_cc: clang-12
+      cmake_cxx: clang++-12
     11.0.0:
       url: https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.0/clang+llvm-11.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz
       path: clang+llvm-11.0.0-x86_64-linux-gnu-ubuntu-20.04
+      precompiled: false
+      packages:
+        - llvm-11-dev
+        - libclang-11-dev
+        - libc++-11-dev
+        - libc++abi-11-dev
+        - clang-11
+      cmake_cc: clang-11
+      cmake_cxx: clang++-11
     10.0.0:
       url: https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
       path: clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04
+      precompiled: false
+      packages:
+        - llvm-10-dev
+        - libclang-10-dev
+        - libc++-10-dev
+        - libc++abi-10-dev
+        - clang-10
+      cmake_cc: clang-10
+      cmake_cxx: clang++-10
     9.0.0:
       url: http://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
       path: clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04
+      precompiled: false
+      packages:
+        - llvm-9-dev
+        - libclang-9-dev
+        - libc++-9-dev
+        - libc++abi-9-dev
+        - clang-9
+      cmake_cc: clang-9
+      cmake_cxx: clang++-9
     8.0.0:
       url: https://releases.llvm.org/8.0.0/clang+llvm-8.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz
       path: clang+llvm-8.0.0-x86_64-linux-gnu-ubuntu-16.04
+      precompiled: false
+      packages:
+        - llvm-8-dev
+        - libclang-8-dev
+        - libc++-8-dev
+        - libc++abi-8-dev
+        - clang-8
+      cmake_cc: clang-8
+      cmake_cxx: clang++-8
     7.0.0:
       url: https://releases.llvm.org/7.0.0/clang+llvm-7.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz
       path: clang+llvm-7.0.0-x86_64-linux-gnu-ubuntu-16.04
+      precompiled: true
+      packages:
+        - llvm-7-dev
+        - libclang-7-dev
+        - libc++-7-dev
+        - clang-7
+      cmake_cc: clang-7
+      cmake_cxx: clang++-7
     6.0.0:
       url: https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz
       path: clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-16.04
+      precompiled: true
 
   fedora:
     6.0.0:
@@ -86,3 +149,12 @@ checkout: false
 
 # Overriden by FreeBSD playbook
 make_program: make
+
+build_against_precompiled_llvm: "{{ llvm_mapping[platform][llvm_version].precompiled }}"
+llvm_packages: "{{ llvm_mapping[platform][llvm_version].packages }}"
+_path_to_precompiled_llvm: "-DPATH_TO_LLVM={{ llvm_dir }}"
+additional_cmake_flags: "{{ _path_to_precompiled_llvm if build_against_precompiled_llvm else '-DNO_PRECOMPILED_LLVM=ON' }}"
+_precompiled_clang: "{{ llvm_dir }}/bin/clang"
+_precompiled_clangxx: "{{ llvm_dir }}/bin/clang++"
+cmake_c_compiler: "{{ _precompiled_clang if build_against_precompiled_llvm else llvm_mapping[platform][llvm_version].cmake_cc }}"
+cmake_cxx_compiler: "{{ _precompiled_clangxx if build_against_precompiled_llvm else llvm_mapping[platform][llvm_version].cmake_cxx }}"

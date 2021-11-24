@@ -22,16 +22,15 @@
       - cmake
       - -G
       - Ninja
-      - -DCMAKE_CXX_FLAGS=-fembed-bitcode --sysroot={{ SDKROOT }} -nostdinc++ -isystem {{ llvm_dir }}/include/c++/v1 -isystem {{ llvm_dir }}/lib/clang/{{ llvm_version }}/include
+      - -DCMAKE_CXX_FLAGS=-fembed-bitcode --sysroot={{ SDKROOT }}
       - -DCMAKE_EXE_LINKER_FLAGS=-lc++ -L {{ llvm_dir }}/lib
       - -DCMAKE_BUILD_TYPE=Debug
       - -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+      - -DCMAKE_C_COMPILER={{ cmake_c_compiler }}
+      - -DCMAKE_CXX_COMPILER={{ cmake_cxx_compiler }}
       - "{{ working_dir }}/integration/fmt"
     chdir: "{{ working_dir }}/integration/fmt.build.dir"
     creates: "{{ working_dir }}/integration/fmt.build.dir/CMakeCache.txt"
-  environment:
-    CC: "{{ llvm_dir }}/bin/clang"
-    CXX: "{{ llvm_dir }}/bin/clang++"
 
 - name: Build fmt
   command: ninja core-test
@@ -53,7 +52,7 @@
       - -mutators=cxx_add_to_sub
       - -compilation-flags=--sysroot={{ SDKROOT }} -isystem {{ llvm_dir }}/include/c++/v1 -isystem {{ llvm_dir }}/lib/clang/{{ llvm_version }}/include
       - -compdb-path={{ working_dir }}/integration/fmt.build.dir/compile_commands.json
-      - -linker={{ llvm_dir }}/bin/clang++
+      - -linker={{ cmake_cxx_compiler }}
       - -linker-flags=-lc++ -lpthread
       - "{{ working_dir }}/integration/fmt.build.dir/bin/core-test"
   environment:
@@ -76,7 +75,7 @@
     chdir: "{{ working_dir }}/integration/openssl-no-shared"
     creates: "{{ working_dir }}/integration/openssl-no-shared/Makefile"
   environment:
-    CC: "{{ llvm_dir }}/bin/clang"
+    CC: "{{ cmake_c_compiler }}"
 
 - name: Build OpenSSL (no-shared)
   command: make all
@@ -90,7 +89,7 @@
       - mull-cxx-{{ llvm_major }}
       - -mutators=cxx_add_to_sub
       - -compilation-flags=--sysroot={{ SDKROOT }} -isystem {{ llvm_dir }}/lib/clang/{{ llvm_version }}/include -I{{ working_dir }}/integration/openssl-no-shared/include -I{{ working_dir }}/integration/openssl-no-shared/crypto/include -I{{ working_dir }}/integration/openssl-no-shared
-      - -linker={{ llvm_dir }}/bin/clang
+      - -linker={{ cmake_cxx_compiler }}
       - -linker-flags=-lc++ -ldl -lpthread
       - "{{ working_dir }}/integration/openssl-no-shared/test/bio_enc_test"
   environment:

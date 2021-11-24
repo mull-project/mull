@@ -12,13 +12,23 @@
     state: directory
 
 - name: Prepare Build System (Debug)
-  command: cmake -G Ninja -DCMAKE_BUILD_TYPE=Debug -DPATH_TO_LLVM={{ llvm_dir }} -DCMAKE_CXX_FLAGS="{{ mull_cxx_flags }}" {{ source_dir }}
+  command:
   args:
+    argv:
+      - cmake
+      - -G
+      - Ninja
+      - -DCMAKE_BUILD_TYPE=Debug
+      - -DCMAKE_C_COMPILER={{ cmake_c_compiler }}
+      - -DCMAKE_CXX_COMPILER={{ cmake_cxx_compiler }}
+      - -DCMAKE_CXX_FLAGS="{{ mull_cxx_flags }}"
+      - "{{ additional_cmake_flags }}"
+      - "{{ source_dir }}"
     chdir: "{{ debug_build_dir }}"
     creates: "{{ debug_build_dir }}/CMakeCache.txt"
-  environment:
-    CC: "{{ llvm_dir }}/bin/clang"
-    CXX: "{{ llvm_dir }}/bin/clang++"
+#  environment:
+#    CC: "{{ llvm_dir }}/bin/clang"
+#    CXX: "{{ llvm_dir }}/bin/clang++"
 
 - name: Build Mull (Debug)
   command: ninja {{ item }}
@@ -48,13 +58,24 @@
     state: directory
 
 - name: Prepare Build System (Release)
-  command: cmake -G Ninja -DMULL_VERSION={{ mull_version }} -DCMAKE_BUILD_TYPE=Release -DPATH_TO_LLVM={{ llvm_dir }} -DCMAKE_CXX_FLAGS="{{ mull_cxx_flags }}" {{ source_dir }}
+  command:
   args:
+    argv:
+      - cmake
+      - -G
+      - Ninja
+      - -DCMAKE_BUILD_TYPE=Release
+      - -DCMAKE_C_COMPILER={{ cmake_c_compiler }}
+      - -DCMAKE_CXX_COMPILER={{ cmake_cxx_compiler }}
+      - -DCMAKE_CXX_FLAGS="{{ mull_cxx_flags }}"
+      - -DMULL_VERSION={{ mull_version }}
+      - "{{ additional_cmake_flags }}"
+      - "{{ source_dir }}"
     chdir: "{{ release_build_dir }}"
     creates: "{{ release_build_dir }}/CMakeCache.txt"
-  environment:
-    CC: "{{ llvm_dir }}/bin/clang"
-    CXX: "{{ llvm_dir }}/bin/clang++"
+#  environment:
+#    CC: "{{ llvm_dir }}/bin/clang"
+#    CXX: "{{ llvm_dir }}/bin/clang++"
 
 - name: Build Mull (Release)
   command: ninja {{ item }}

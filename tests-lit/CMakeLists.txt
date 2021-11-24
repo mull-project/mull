@@ -1,6 +1,3 @@
-set(clang_cc ${PATH_TO_LLVM}/bin/clang)
-set(clang_cxx ${PATH_TO_LLVM}/bin/clang++)
-set(llvm_profdata ${PATH_TO_LLVM}/bin/llvm-profdata)
 set(LIT_EXEC lit)
 
 find_package(Python3 COMPONENTS Interpreter)
@@ -17,7 +14,7 @@ else()
 endif()
 
 set(TEST_CXX_FLAGS
-  "-stdlib=libc++ -isystem ${PATH_TO_LLVM}/include/c++/v1 -isystem ${PATH_TO_LLVM}/lib/clang/${LLVM_VERSION}/include"
+  "-stdlib=libc++ -isystem ${CLANG_INSTALL_PREFIX}/include/c++/v1 -isystem ${CLANG_INSTALL_PREFIX}/lib/clang/${LLVM_VERSION}/include"
 )
 
 set(LIT_COMMAND
@@ -27,10 +24,10 @@ set(LIT_COMMAND
   mull_cxx=$<TARGET_FILE:mull-cxx-${LLVM_VERSION_MAJOR}>
   mull_runner=$<TARGET_FILE:mull-runner-${LLVM_VERSION_MAJOR}>
   mull_frontend_cxx=$<TARGET_FILE:mull-cxx-frontend-${LLVM_VERSION_MAJOR}>
-  clang_cc=${clang_cc}
-  clang_cxx=${clang_cxx}
+  clang_cc=${LIT_CLANG}
+  clang_cxx=${LIT_CLANGXX}
   sysroot=${sysroot}
-  llvm_profdata=${llvm_profdata}
+  llvm_profdata=${LIT_LLVM_PROFDATA}
   python3=${Python3_EXECUTABLE}
   filecheck=filecheck
   TEST_CXX_FLAGS="${TEST_CXX_FLAGS}"
