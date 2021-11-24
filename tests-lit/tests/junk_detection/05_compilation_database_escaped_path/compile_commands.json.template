@@ -1,6 +1,6 @@
 [
   {
-    "command": "#LLVM_PATH/bin/clang++ #TEST_CXX_FLAGS -c -fembed-bitcode -g -O0 -DESCAPED_DEFINITION_STUB=\\\"/src/builds/amd64-linux-mull\\\" -o %PWD/sample.cpp.exe %PWD/sample.cpp",
+    "command": "clang++ #TEST_CXX_FLAGS -c -fembed-bitcode -g -O0 -DESCAPED_DEFINITION_STUB=\\\"/src/builds/amd64-linux-mull\\\" -o %PWD/sample.cpp.exe %PWD/sample.cpp",
     "directory": "/",
     "file": "%PWD/sample.cpp"
   }

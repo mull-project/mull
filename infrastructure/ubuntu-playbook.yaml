@@ -61,8 +61,13 @@
       when: download_cmake.changed
       become: true
 
-    - name: Install LLVM
+    - name: Download LLVM
       include: helpers/download-llvm.yaml
+      when: build_against_precompiled_llvm
+
+    - name: Install LLVM
+      include: helpers/install-llvm.yaml
+      when: not build_against_precompiled_llvm
 
     - name: Build Mull
       include: helpers/build-mull.yaml
@@ -72,3 +77,4 @@
 
     - name: Integration Tests
       include: helpers/integration-tests.yaml
+
