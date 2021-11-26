@@ -5,6 +5,7 @@
 #include "mull/Parallelization/Progress.h"
 #include "mull/SourceLocation.h"
 #include "mull/Toolchain/Runner.h"
+#include "mull/ExecutionResult.h"
 
 #include <sstream>
 
@@ -38,8 +39,8 @@ void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
     storage.push_back(std::make_unique<MutationResult>(result, mutant.get()));
     SourceLocation sourceLocation = mutant->getSourceLocation();
     debugMessage << sourceLocation.filePath << ":";
-    debugMessage << sourceLocation.line << ":" << sourceLocation.column;
-    debugMessage << result.status;
+    debugMessage << sourceLocation.line << ":" << sourceLocation.column << " ExecutionResult: ";
+    debugMessage << result.getStatusAsString();
     diagnostics.debug(debugMessage.str());
     debugMessage.str(std::string());
   }
