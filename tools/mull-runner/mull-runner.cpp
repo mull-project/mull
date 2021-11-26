@@ -70,6 +70,9 @@ int main(int argc, char **argv) {
     mull::ParallelizationConfig parallelizationConfig;
     parallelizationConfig.workers = tool::Workers;
     parallelizationConfig.normalize();
+    if (parallelizationConfig.exceedsHardware()){
+      diagnostics.warning("You choose a number of workers that exceeds your number of cores. This may lead to timeouts and incorrect results");
+    }
     configuration.parallelization = parallelizationConfig;
   } else {
     configuration.parallelization = mull::ParallelizationConfig::defaultConfig();
