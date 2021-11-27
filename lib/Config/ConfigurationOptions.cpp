@@ -28,6 +28,10 @@ void ParallelizationConfig::normalize() {
   }
 }
 
+bool ParallelizationConfig::exceedsHardware(){
+  return workers > std::thread::hardware_concurrency();
+}
+
 ParallelizationConfig ParallelizationConfig::defaultConfig() {
   ParallelizationConfig config;
   config.normalize();

@@ -14,6 +14,7 @@ struct ParallelizationConfig {
   ParallelizationConfig();
   static ParallelizationConfig defaultConfig();
   void normalize();
+  bool exceedsHardware();
 };
 
 } // namespace mull
