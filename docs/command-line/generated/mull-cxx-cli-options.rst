@@ -8,6 +8,8 @@
 
 --mutate-only		Skips mutant execution. Unlike -dry-run generates mutants. Disabled by default
 
+--lower-bitcode		Lower bitcode into machine code for linking. Disabled by default
+
 --report-name filename		Filename for the report (only for supported reporters). Defaults to <timestamp>.<extension>
 
 --report-dir directory		Where to store report (defaults to '.')

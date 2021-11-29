@@ -18,8 +18,8 @@ unsigned MullDefaultLinkerTimeoutMilliseconds = 30000;
 Configuration::Configuration()
     : debugEnabled(false), dryRunEnabled(false), captureTestOutput(true), captureMutantOutput(true),
       skipSanityCheckRun(false), includeNotCovered(false), keepObjectFiles(false),
-      keepExecutable(false), mutateOnly(false), timeout(MullDefaultTimeoutMilliseconds),
-      linkerTimeout(MullDefaultLinkerTimeoutMilliseconds), diagnostics(IDEDiagnosticsKind::None),
-      parallelization(singleThreadParallelization()) {}
+      keepExecutable(false), mutateOnly(false), lowerBitcode(false),
+      timeout(MullDefaultTimeoutMilliseconds), linkerTimeout(MullDefaultLinkerTimeoutMilliseconds),
+      diagnostics(IDEDiagnosticsKind::None), parallelization(singleThreadParallelization()) {}
 
 } // namespace mull
