@@ -7,9 +7,9 @@
 #include <mull/Reporters/Reporter.h>
 #include <mull/Toolchain/Toolchain.h>
 #include <sstream>
+#include <string>
 #include <unordered_map>
 #include <vector>
-#include <string>
 
 // clang-format off
 
@@ -163,6 +163,14 @@ opt<bool> DryRunOption( \
 opt<bool> MutateOnly( \
     "mutate-only", \
     desc("Skips mutant execution. Unlike -dry-run generates mutants. Disabled by default"), \
+    Optional, \
+    init(false), \
+    cat(MullCategory))
+
+#define LowerBitcode_() \
+opt<bool> LowerBitcode( \
+    "lower-bitcode", \
+    desc("Lower bitcode into machine code for linking. Disabled by default"), \
     Optional, \
     init(false), \
     cat(MullCategory))

@@ -20,6 +20,7 @@ struct Configuration {
   bool keepObjectFiles;
   bool keepExecutable;
   bool mutateOnly;
+  bool lowerBitcode;
 
   int timeout;
   unsigned linkerTimeout;

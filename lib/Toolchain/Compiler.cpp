@@ -39,21 +39,7 @@ std::string Compiler::compileBitcode(const Bitcode &bitcode) {
     diagnostics.error(error);
   }
 
-  const std::string &targetTriple = bitcode.getModule()->getTargetTriple();
-  const llvm::Target *target = llvm::TargetRegistry::lookupTarget(targetTriple, error);
-  if (!target) {
-    diagnostics.error("Cannot lookup target: "s + error + '\n');
-    return std::string();
-  }
-
-  auto CPU = "generic";
-  auto features = "";
-  llvm::TargetOptions opt;
-  llvm::Optional<llvm::Reloc::Model> relocationModel;
-  llvm::TargetMachine *targetMachine =
-      target->createTargetMachine(targetTriple, CPU, features, opt, relocationModel);
-
-  std::string result = tempFile(diagnostics, "o");
+  std::string result = tempFile(diagnostics, configuration.lowerBitcode ? "o" : "bc");
   std::error_code errorCode;
   llvm::raw_fd_ostream dest(result,
                             errorCode,
@@ -68,6 +54,25 @@ std::string Compiler::compileBitcode(const Bitcode &bitcode) {
     diagnostics.error("Could not open file: "s + errorCode.message());
     return std::string();
   }
+
+  if (!configuration.lowerBitcode) {
+    llvm_compat::writeBitcodeToFile(*bitcode.getModule(), dest);
+    return result;
+  }
+
+  const std::string &targetTriple = bitcode.getModule()->getTargetTriple();
+  const llvm::Target *target = llvm::TargetRegistry::lookupTarget(targetTriple, error);
+  if (!target) {
+    diagnostics.error("Cannot lookup target: "s + error + '\n');
+    return std::string();
+  }
+
+  auto CPU = "generic";
+  auto features = "";
+  llvm::TargetOptions opt;
+  llvm::Optional<llvm::Reloc::Model> relocationModel(llvm::Reloc::Model::PIC_);
+  llvm::TargetMachine *targetMachine =
+      target->createTargetMachine(targetTriple, CPU, features, opt, relocationModel);
 
   llvm::legacy::PassManager pass;
   if (llvm_compat::addPassesToEmitObjectFile(targetMachine, pass, dest)) {
@@ -92,7 +97,6 @@ std::string Compiler::compileBitcode(const Bitcode &bitcode) {
       return std::string();
     }
     llvm_compat::writeBitcodeToFile(*bitcode.getModule(), bcStream);
-    //    llvm_compat::writeBitcodeToFile(*bitcode.getModule(), dest);
     diagnostics.debug("Emitted object file: "s + result + " for bitcode file: "s + bitcodePath);
   }
   return result;

@@ -94,6 +94,7 @@ int main(int argc, char **argv) {
 
   mull::Configuration configuration;
   configuration.dryRunEnabled = tool::DryRunOption.getValue();
+  configuration.lowerBitcode = tool::LowerBitcode.getValue();
   if (tool::MutateOnly) {
     diagnostics.info("Mutate-only mode on: Mull will generate mutants, but won't run them\n");
     configuration.mutateOnly = true;
