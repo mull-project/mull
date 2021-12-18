@@ -34,3 +34,5 @@
 
 --no-output		Combines -no-test-output and -no-mutant-output
 
+--ld-search-path directory		Library search path
+

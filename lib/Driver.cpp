@@ -166,6 +166,7 @@ Driver::runMutations(std::vector<std::unique_ptr<Mutant>> &mutants) {
     if (config.keepExecutable && !config.outputFile.empty()) {
       llvm::sys::fs::copy_file(config.executable, config.outputFile);
     }
+    diagnostics.info("No mutants. Skipping execution.");
     return std::vector<std::unique_ptr<MutationResult>>();
   }
   if (config.dryRunEnabled) {

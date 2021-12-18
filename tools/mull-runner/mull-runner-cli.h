@@ -24,6 +24,7 @@ IDEReporterShowKilled_();
 IncludeNotCovered_();
 RunnerArgs_();
 TestProgram_();
+LDSearchPaths_();
 
 void dumpCLIInterface(mull::Diagnostics &diagnostics) {
   // Enumerating CLI options explicitly to control the order and what to show
@@ -45,6 +46,8 @@ void dumpCLIInterface(mull::Diagnostics &diagnostics) {
       &NoTestOutput,
       &NoMutantOutput,
       &NoOutput,
+
+      &(Option &)LDSearchPaths,
   });
   dumpCLIInterface(diagnostics, mullOptions, reporters, nullptr);
 }
