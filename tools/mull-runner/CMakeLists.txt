@@ -1,6 +1,7 @@
 set (SOURCES
   ${CMAKE_CURRENT_LIST_DIR}/mull-runner.cpp
   ${CMAKE_CURRENT_LIST_DIR}/MutantExtractor.cpp
+  ${CMAKE_CURRENT_LIST_DIR}/DynamicLibraries.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../CLIOptions/CLIOptions.cpp
 )
 

@@ -1,7 +1,7 @@
 #include "MutantExtractor.h"
 #include <LLVMCompatibility.h>
-#include <llvm/Object/ObjectFile.h>
 #include <iostream>
+#include <llvm/Object/ObjectFile.h>
 #include <sstream>
 
 using namespace mull;
@@ -28,7 +28,8 @@ MutantExtractor::extractMutants(const std::string &executable) {
   llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> maybeBuffer =
       llvm::MemoryBuffer::getFile(executable);
   if (!maybeBuffer) {
-    diagnostics.error("Cannot read executable:"s + maybeBuffer.getError().message());
+    diagnostics.error("Cannot read executable: "s + maybeBuffer.getError().message() + ": " +
+                      executable);
     return mutants;
   }
   llvm::MemoryBuffer *buffer = maybeBuffer->get();
@@ -36,7 +37,14 @@ MutantExtractor::extractMutants(const std::string &executable) {
       llvm::object::ObjectFile::createObjectFile(buffer->getMemBufferRef());
   if (!maybeObject) {
     llvm::Error error = maybeObject.takeError();
-    diagnostics.error("Executable is not an object file: "s + llvm::toString(std::move(error)));
+    /// On older versions of macOS we fail to load certain system libraries because they are fat
+    /// libraries On newer versions of macOS we never reach this line because the system libraries
+    /// live in cache and cannot be read from FS This should be an error, but we relax it to a
+    /// warning to not fail on macOS
+    /// TODO: we should probably add support for universal binaries at some point
+    /// https://github.com/mull-project/mull/issues/932
+    diagnostics.warning("Skipping. Executable is not an object file: "s +
+                        llvm::toString(std::move(error)) + ": " + executable);
     return mutants;
   }
 
@@ -61,16 +69,26 @@ MutantExtractor::extractMutants(const std::string &executable) {
         mis << mutator << ":" << location << ":" << beginLine << ":" << beginColumn;
         std::string identifier = mis.str();
 
-        auto mutant =
-            std::make_unique<Mutant>(identifier,
-                                     mutator,
-                                     mull::SourceLocation("", location, "", location, beginLine, beginColumn),
-                                     mull::SourceLocation("", location, "", location, endLine, endColumn),
-                                     covered);
+        auto mutant = std::make_unique<Mutant>(
+            identifier,
+            mutator,
+            mull::SourceLocation("", location, "", location, beginLine, beginColumn),
+            mull::SourceLocation("", location, "", location, endLine, endColumn),
+            covered);
         mutants.push_back(std::move(mutant));
       }
     }
   }
 
   return mutants;
+}
+
+std::vector<std::unique_ptr<Mutant>>
+MutantExtractor::extractMutants(const std::vector<std::string> &mutantHolders) {
+  std::vector<std::unique_ptr<Mutant>> result;
+  for (auto &holder : mutantHolders) {
+    auto mutants = extractMutants(holder);
+    std::move(std::begin(mutants), std::end(mutants), std::back_inserter(result));
+  }
+  return result;
 }

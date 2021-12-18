@@ -1,3 +1,4 @@
+#include "DynamicLibraries.h"
 #include "MutantExtractor.h"
 #include "mull-runner-cli.h"
 #include "mull/Config/Configuration.h"
@@ -70,8 +71,9 @@ int main(int argc, char **argv) {
     mull::ParallelizationConfig parallelizationConfig;
     parallelizationConfig.workers = tool::Workers;
     parallelizationConfig.normalize();
-    if (parallelizationConfig.exceedsHardware()){
-      diagnostics.warning("You choose a number of workers that exceeds your number of cores. This may lead to timeouts and incorrect results");
+    if (parallelizationConfig.exceedsHardware()) {
+      diagnostics.warning("You choose a number of workers that exceeds your number of cores. This "
+                          "may lead to timeouts and incorrect results");
     }
     configuration.parallelization = parallelizationConfig;
   } else {
@@ -92,8 +94,7 @@ int main(int argc, char **argv) {
                                    .IDEReporterShowKilled = tool::IDEReporterShowKilled };
   std::vector<std::unique_ptr<mull::Reporter>> reporters = reportersOption.reporters(params);
 
-  std::string executable = inputFile;
-  std::string testProgram = executable;
+  std::string testProgram = configuration.executable;
   if (!tool::TestProgram.empty()) {
     testProgram = tool::TestProgram.getValue();
   }
@@ -103,8 +104,19 @@ int main(int argc, char **argv) {
     extraArgs.push_back(tool::RunnerArgs[argIndex]);
   }
 
+  std::vector<std::string> librarySearchPaths(std::begin(tool::LDSearchPaths),
+                                              std::end(tool::LDSearchPaths));
+
+  std::vector<std::string> mutantHolders({ configuration.executable });
+  // resolve any dynamic libraries listed as DT_NEEDED
+  mull::resolveLibraries(diagnostics,
+                         mutantHolders,
+                         mull::getDynamicLibraryDependencies(diagnostics, configuration.executable),
+                         librarySearchPaths);
+
   mull::MutantExtractor mutantExtractor(diagnostics);
-  std::vector<std::unique_ptr<mull::Mutant>> mutants = mutantExtractor.extractMutants(executable);
+  std::vector<std::unique_ptr<mull::Mutant>> mutants =
+      mutantExtractor.extractMutants(mutantHolders);
 
   mull::MutantRunner mutantRunner(diagnostics, configuration);
   std::vector<std::unique_ptr<mull::MutationResult>> mutationResults =

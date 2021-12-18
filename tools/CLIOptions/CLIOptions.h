@@ -309,6 +309,14 @@ opt<bool> DumpMutators( \
     cat(MullCategory), \
     Hidden)
 
+#define LDSearchPaths_() \
+list<std::string> LDSearchPaths( \
+    "ld-search-path", \
+    desc("Library search path"), \
+    ZeroOrMore, \
+    value_desc("directory"), \
+    cat(MullCategory))
+
 // clang-format on
 
 namespace tool {
