@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.14.0] - 20 Dec 2021
+
+- Mutants are now also extracted from dependent dynamic libraries [#903](https://github.com/mull-project/mull/issues/903) [#931](https://github.com/mull-project/mull/pull/931)
+- Fixed linking by deferring object code lowering to external compiler instead of using (mostly) incorrect defaults [#929](https://github.com/mull-project/mull/pull/929) 
+- Added warning if number of workers specified exceeds available CPU cores (by [Matthias Bilger](https://github.com/m42e)) [#928](https://github.com/mull-project/mull/pull/928)
+- Most of the Ubuntu packages now built against the official LLVM/Clang instead of precompiled ones [#926](https://github.com/mull-project/mull/pull/926)
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2021-11-24..2021-12-18)
+
 ## [0.13.0] - 23 Nov 2021
 
 This release happens solely due to [m42e](https://github.com/m42e)'s efforts. Thank you, Matthias!
