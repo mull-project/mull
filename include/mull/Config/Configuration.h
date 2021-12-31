@@ -10,6 +10,8 @@ namespace mull {
 extern int MullDefaultTimeoutMilliseconds;
 extern unsigned MullDefaultLinkerTimeoutMilliseconds;
 
+class Diagnostics;
+
 struct Configuration {
   bool debugEnabled;
   bool dryRunEnabled;
@@ -22,12 +24,13 @@ struct Configuration {
   bool mutateOnly;
   bool lowerBitcode;
 
-  int timeout;
+  unsigned timeout;
   unsigned linkerTimeout;
 
   IDEDiagnosticsKind diagnostics;
 
   std::vector<std::string> bitcodePaths;
+  std::vector<std::string> mutators;
 
   std::string executable;
   std::string outputFile;
@@ -39,6 +42,9 @@ struct Configuration {
   ParallelizationConfig parallelization;
 
   Configuration();
+
+  static std::string findConfig(Diagnostics &diagnostics);
+  static Configuration loadFromDisk(Diagnostics &diagnostics, const std::string &path);
 };
 
 } // namespace mull

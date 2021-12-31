@@ -8,9 +8,9 @@ namespace mull {
 enum class IDEDiagnosticsKind { None, Survived, Killed, All };
 
 struct ParallelizationConfig {
-  int workers;
-  int testExecutionWorkers;
-  int mutantExecutionWorkers;
+  unsigned workers;
+  unsigned testExecutionWorkers;
+  unsigned mutantExecutionWorkers;
   ParallelizationConfig();
   static ParallelizationConfig defaultConfig();
   void normalize();

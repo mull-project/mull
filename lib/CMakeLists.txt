@@ -1,5 +1,6 @@
 add_subdirectory(Mutators/CXX)
 add_subdirectory(Diagnostics)
+add_subdirectory(Config)
 
 set(mull_sources
   AST/ASTConstants.cpp
@@ -60,8 +61,6 @@ set(mull_sources
 
   Path.cpp
 
-  Config/ConfigurationOptions.cpp
-  Config/Configuration.cpp
   Program/Program.cpp
   JunkDetection/CXX/Visitors/InstructionRangeVisitor.cpp
   JunkDetection/CXX/Visitors/NegateConditionVisitor.cpp
@@ -149,6 +148,7 @@ target_link_libraries(mull
   Threads::Threads
   irm
   mull-cxx-mutators
+  mull-configuration
   Diagnostics
   reproc++
   )

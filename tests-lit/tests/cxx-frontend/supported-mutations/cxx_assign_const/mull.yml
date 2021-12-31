@@ -1,0 +1,2 @@
+mutators:
+  - cxx_assign_const

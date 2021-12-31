@@ -3,6 +3,8 @@
 #include "ASTNodeFactory.h"
 #include "MullASTMutator.h"
 #include "MutationMap.h"
+#include "mull/Config/Configuration.h"
+#include "mull/Diagnostics/Diagnostics.h"
 
 #include <clang/AST/AST.h>
 #include <clang/AST/ASTConsumer.h>
@@ -98,25 +100,14 @@ protected:
   }
 
   bool ParseArgs(const CompilerInstance &CI, const std::vector<std::string> &args) override {
-    clang::ASTContext &astContext = CI.getASTContext();
-    for (const auto &arg : args) {
-      std::string delimiter = "=";
-      std::vector<std::string> components;
-      size_t last = 0;
-      size_t next = 0;
-      while ((next = arg.find(delimiter, last)) != std::string::npos) {
-        components.push_back(arg.substr(last, next - last));
-        last = next + 1;
-      }
-      components.push_back(arg.substr(last));
-      if (components[0] != "mutators") {
-        clang::DiagnosticsEngine &diag = astContext.getDiagnostics();
-        unsigned diagId = diag.getCustomDiagID(clang::DiagnosticsEngine::Error,
-                                               "Only 'mutator=' argument is supported.");
-        astContext.getDiagnostics().Report(diagId);
-      }
-      assert(components.size() == 2);
-      mutationMap.addMutation(components.at(1));
+    mull::Diagnostics diagnostics;
+    std::string configPath = mull::Configuration::findConfig(diagnostics);
+    Configuration configuration;
+    if (!configPath.empty()) {
+      configuration = mull::Configuration::loadFromDisk(diagnostics, configPath);
+    }
+    for (const std::string &mutator : configuration.mutators) {
+      mutationMap.addMutation(mutator);
     }
     mutationMap.setDefaultMutationsIfNotSpecified();
     return true;
