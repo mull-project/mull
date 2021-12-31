@@ -32,6 +32,8 @@ include(${CMAKE_CURRENT_LIST_DIR}/cmake/properties.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/fixtures.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/functions.cmake)
 
+set (CMAKE_POSITION_INDEPENDENT_CODE ON)
+
 if (NO_PRECOMPILED_LLVM)
   find_package(LLVM CONFIG REQUIRED)
   find_package(Clang CONFIG REQUIRED)
