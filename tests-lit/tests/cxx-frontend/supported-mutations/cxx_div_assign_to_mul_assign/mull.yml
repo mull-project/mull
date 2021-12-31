@@ -1,0 +1,2 @@
+mutators:
+  - cxx_div_assign_to_mul_assign

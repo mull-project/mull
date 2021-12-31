@@ -31,16 +31,16 @@
 #include <unordered_map>
 #include <unistd.h>
 
+using namespace std::string_literals;
+
 static std::string validateInputFile(const std::string &inputFile, mull::Diagnostics &diagnostics) {
   if (access(inputFile.c_str(), R_OK) != 0) {
-    diagnostics.error(std::string("The provided path to an executable program is not valid: ") +
-                      inputFile.c_str());
+    diagnostics.error("The provided path to an executable program is not valid: "s + inputFile);
     return "";
   }
-  llvm::SmallString<256> inputRealPath;
+  llvm::SmallString<PATH_MAX> inputRealPath;
   if (llvm::sys::fs::real_path(inputFile, inputRealPath, false)) {
-    diagnostics.error(std::string("The provided path to an executable program is not valid: ") +
-                      inputFile.c_str());
+    diagnostics.error("The provided path to an executable program is not valid: "s + inputFile);
     return "";
   }
   return inputRealPath.str().str();
