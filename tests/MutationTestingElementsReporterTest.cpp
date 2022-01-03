@@ -56,7 +56,7 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   functionsUnderTest.back().selectInstructions({});
 
   std::vector<MutationPoint *> mutationPoints =
-      mutationsFinder.getMutationPoints(diagnostics, program, functionsUnderTest);
+      mutationsFinder.getMutationPoints(diagnostics, functionsUnderTest);
 
   ASSERT_EQ(1U, mutationPoints.size());
 

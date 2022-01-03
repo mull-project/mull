@@ -1,0 +1,6 @@
+mutators:
+  - cxx_eq_to_ne
+includePaths:
+  - "*cpp"
+excludePaths:
+  - "Output/.***"

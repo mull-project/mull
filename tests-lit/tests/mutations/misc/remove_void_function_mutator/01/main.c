@@ -18,9 +18,11 @@ int main() {
 
 // clang-format off
 
+// RUN: %clang_cc %sysroot -O0 %pass_mull_ir_frontend -g %s -o %s-ir.exe
 // RUN: cd / && %clang_cc %sysroot -fembed-bitcode -g -O0 %s -o %s.exe
 // RUN: cd %CURRENT_DIR
 // RUN: unset TERM; %mull_cxx -linker=%clang_cc -linker-flags="%sysroot" -mutators=cxx_remove_void_call -ide-reporter-show-killed -reporters=IDE %s.exe | %filecheck %s --dump-input=fail
+// RUN: unset TERM; %mull_runner -ide-reporter-show-killed -reporters=IDE %s-ir.exe | %filecheck %s --dump-input=fail
 // CHECK:[info] Killed mutants (1/1):
 // CHECK:{{.*}}8:3: warning: Killed: Removed the call to the function [cxx_remove_void_call]
 // CHECK:  void_function();

@@ -66,11 +66,9 @@ void InsertMutationTrampolinesTask::operator()(iterator begin, iterator end, Out
 void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode) {
   llvm::Module *module = bitcode.getModule();
   llvm::LLVMContext &context = module->getContext();
-
   llvm::Type *charPtr = llvm::Type::getInt8Ty(context)->getPointerTo();
   llvm::FunctionType *getEnvType = llvm::FunctionType::get(charPtr, { charPtr }, false);
   llvm::Value *getenv = module->getOrInsertFunction("getenv", getEnvType).getCallee();
-
   for (auto pair : bitcode.getMutationPointsMap()) {
     bool hasCoveredMutants = false;
     for (auto point : pair.second) {
@@ -88,7 +86,6 @@ void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode) {
     llvm::BasicBlock *originalBlock = llvm::BasicBlock::Create(context, "original", original);
     llvm::BasicBlock *trampolineCall =
         llvm::BasicBlock::Create(context, "trampoline_call", original);
-
     auto anyPoint = pair.second.front();
     llvm::Type *trampolineType = original->getFunctionType()->getPointerTo();
     auto trampoline = new llvm::AllocaInst(trampolineType, 0, "trampoline", entry);
@@ -96,7 +93,6 @@ void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode) {
                         trampoline,
                         originalBlock);
     llvm::BranchInst::Create(trampolineCall, originalBlock);
-
     llvm::BasicBlock *head = originalBlock;
 
     for (auto &point : pair.second) {
@@ -133,18 +129,15 @@ void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode) {
     }
 
     llvm::BranchInst::Create(head, entry);
-
     std::vector<llvm::Value *> args;
     for (auto &arg : original->args()) {
       args.push_back(&arg);
     }
-
     auto retType = original->getFunctionType()->getReturnType();
     llvm::Constant *dummy = nullptr;
     if (!retType->isVoidTy()) {
       dummy = llvm::Constant::getNullValue(retType);
     }
-
     auto retVal = llvm::ReturnInst::Create(context, dummy, trampolineCall);
     auto loadValue = new llvm::LoadInst(trampoline->getType()->getPointerElementType(),
                                         trampoline,

@@ -68,4 +68,6 @@ private:
   std::vector<FunctionUnderTest> getFunctionsUnderTest();
 };
 
+void mutateBitcode(llvm::Module &module);
+
 } // namespace mull

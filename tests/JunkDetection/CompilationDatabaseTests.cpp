@@ -51,8 +51,7 @@ TEST(CompilationDatabaseFromFile, loadsFromValidFiles) {
       { "/foo/bar/foobar.cpp", "/foo/bar/./foobar.cpp", "/foo/bar/buzz/../foobar.cpp" });
   for (const std::string &file : files) {
     for (auto &path : databasePaths) {
-      const CompilationDatabase database =
-          CompilationDatabase::fromFile(diagnostics, path, "", {});
+      const CompilationDatabase database = CompilationDatabase::fromFile(diagnostics, path, "", {});
 
       auto compilationFlags = database.compilationFlagsForFile(file);
       ASSERT_EQ(compilationFlags.size(), size_t(5));

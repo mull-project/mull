@@ -54,6 +54,7 @@ add_subdirectory(vendor)
 set (MULL_DEFINITIONS ${LLVM_DEFINITIONS})
 set (THIRD_PARTY_INCLUDE_DIRS
   ${LLVM_INCLUDE_DIRS}
+  ${CLANG_INCLUDE_DIRS}
   ${CMAKE_CURRENT_LIST_DIR}/vendor/LibEBC/lib/include
   ${CMAKE_CURRENT_LIST_DIR}/vendor/libirm/include
   ${CMAKE_SOURCE_DIR}/vendor

@@ -1,0 +1,3 @@
+mutators:
+  - cxx_mul_to_div
+debugEnabled: true

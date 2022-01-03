@@ -1,0 +1,3 @@
+mutators:
+  - cxx_xor_to_or
+debugEnabled: true

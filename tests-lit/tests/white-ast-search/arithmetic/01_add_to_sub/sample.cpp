@@ -9,15 +9,18 @@ int main() {
 // clang-format off
 
 /**
-RUN: cd / && %clang_cxx %sysroot -fembed-bitcode -g %s -o %s.exe
 RUN: cd %CURRENT_DIR
 RUN: sed -e "s:%PWD:%S:g" %S/compile_commands.json.template > %S/compile_commands.json
-RUN: (unset TERM; %mull_cxx -linker=%clang_cxx -linker-flags="%sysroot" -debug -mutators=cxx_add_to_sub -reporters=IDE -ide-reporter-show-killed -compdb-path %S/compile_commands.json %s.exe 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
-CHECK-NOT:{{^.*[Ee]rror.*$}}
-CHECK-NOT:{{^.*[Ww]arning.*$}}
+RUN: cd / && %clang_cxx %sysroot -fembed-bitcode -g %s -o %s.exe
+RUN: cd %S && %clang_cxx %sysroot %pass_mull_ir_frontend -g %s -o %s-ir.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=CHECK-MUTATE
+RUN: (unset TERM; %mull_cxx -mutate-only -output %s-mutated.exe -linker=%clang_cxx -linker-flags="%sysroot" -debug -mutators=cxx_add_to_sub -reporters=IDE -ide-reporter-show-killed -compdb-path %S/compile_commands.json %s.exe 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=CHECK-MUTATE
+RUN: (unset TERM; %mull_runner -debug -reporters=IDE -ide-reporter-show-killed %s-mutated.exe 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
+RUN: (unset TERM; %mull_runner -debug -reporters=IDE -ide-reporter-show-killed %s-ir.exe 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
+CHECK-MUTATE-NOT:{{^.*[Ee]rror.*$}}
+CHECK-MUTATE-NOT:{{^.*[Ww]arning.*$}}
 
-CHECK:[info] Applying filter: junk (threads: 1)
-CHECK:[debug] CXXJunkDetector: mutation "Add to Sub": {{.*}}sample.cpp:2:12 (end: 2:13)
+CHECK-MUTATE:[info] Applying filter: junk (threads: 1)
+CHECK-MUTATE:[debug] CXXJunkDetector: mutation "Add to Sub": {{.*}}sample.cpp:2:12 (end: 2:13)
 
 CHECK:[info] Killed mutants (1/1):
 CHECK:{{^.*}}sample.cpp:2:12: warning: Killed: Replaced + with - [cxx_add_to_sub]{{$}}

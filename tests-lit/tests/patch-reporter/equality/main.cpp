@@ -16,11 +16,13 @@ RUN: cd %S/Output/sandbox
 
 /// We cd to the the test directory and compile using relative paths.
 RUN: cd %S; %clang_cxx %sysroot -fembed-bitcode -g -O0 Output/sandbox/main.cpp -o Output/main.cpp.exe
+RUN: cd %S; %clang_cxx %sysroot -O0 %pass_mull_ir_frontend -g Output/sandbox/main.cpp -o Output/main.cpp-ir.exe
 
-RUN: cd %S/Output && echo $PATH; (unset TERM; %mull_cxx -mutators=cxx_eq_to_ne -linker-flags="%sysroot" --linker=%clang_cxx -debug main.cpp.exe --report-name test --reporters Patches --reporters IDE; test $? = 0; ls -R %S/Output/test-patches; cat %S/Output/test-patches/killed-Output_sandbox_main_cpp-cxx_eq_to_ne-L2-C12.patch) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
+RUN: cd %S/Output; (unset TERM; %mull_cxx -mutators=cxx_eq_to_ne -linker-flags="%sysroot" --linker=%clang_cxx -debug ./main.cpp.exe --report-name test --reporters Patches --reporters IDE; test $? = 0; ls -R %S/Output/test-patches; cat %S/Output/test-patches/`ls %S/Output/test-patches/`) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
+RU: cd %S/Output; (unset TERM; %mull_runner ./main.cpp-ir.exe -debug --report-name test-ir --reporters Patches --reporters IDE; test $? = 0; ls -R %S/Output/test-ir-patches; cat %S/Output/test-ir-patches/`ls %S/Output/test-ir-patches/`) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 
 CHECK:[debug] Writing Patchfile: {{.*}}
-CHECK:[info] Patchfiles can be found at './test-patches'
+CHECK:[info] Patchfiles can be found at './test{{.*}}-patches'
 CHECK:{{.*}}main_cpp{{.*}}
 CHECK:--- a{{.*}}/Output/sandbox/main.cpp 0
 CHECK:+{{\s+}}return a != b;
