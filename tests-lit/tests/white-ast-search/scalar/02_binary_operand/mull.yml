@@ -1,0 +1,3 @@
+mutators:
+  - scalar_value_mutator
+debugEnabled: true

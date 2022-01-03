@@ -1,0 +1,3 @@
+mutators:
+  - cxx_remove_void_call
+compilationDatabasePath: compile_commands.json

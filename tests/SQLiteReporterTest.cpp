@@ -52,7 +52,7 @@ TEST(SQLiteReporter, integrationTest) {
       { FunctionUnderTest(reachableFunction, program.bitcode().front().get()) });
   functionsUnderTest.back().selectInstructions({});
   std::vector<MutationPoint *> mutationPoints =
-      mutationsFinder.getMutationPoints(diagnostics, program, functionsUnderTest);
+      mutationsFinder.getMutationPoints(diagnostics, functionsUnderTest);
 
   ASSERT_EQ(1U, mutationPoints.size());
 

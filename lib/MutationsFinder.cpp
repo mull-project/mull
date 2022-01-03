@@ -13,7 +13,7 @@ MutationsFinder::MutationsFinder(std::vector<std::unique_ptr<Mutator>> mutators,
     : mutators(std::move(mutators)), config(config) {}
 
 std::vector<MutationPoint *>
-MutationsFinder::getMutationPoints(Diagnostics &diagnostics, const Program &program,
+MutationsFinder::getMutationPoints(Diagnostics &diagnostics,
                                    std::vector<FunctionUnderTest> &functions) {
   std::vector<SearchMutationPointsTask> tasks;
   tasks.reserve(config.parallelization.workers);

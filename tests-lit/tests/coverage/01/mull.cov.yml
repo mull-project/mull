@@ -1,0 +1,4 @@
+mutators:
+  - cxx_add_to_sub
+coverageInfo: ./main.c.profdata
+executable: ./main.c.exe

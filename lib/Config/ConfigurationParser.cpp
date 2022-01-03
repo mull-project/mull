@@ -47,10 +47,20 @@ template <> struct llvm::yaml::MappingTraits<Configuration> {
     io.mapOptional("linker", config.linker);
     io.mapOptional("linkerFlags", config.linkerFlags);
     io.mapOptional("parallelization", config.parallelization);
+    io.mapOptional("compilationDatabasePath", config.compilationDatabasePath);
+    io.mapOptional("compilerFlags", config.compilerFlags);
+    io.mapOptional("junkDetectionDisabled", config.junkDetectionDisabled);
+    io.mapOptional("gitDiffRef", config.gitDiffRef);
+    io.mapOptional("gitProjectRoot", config.gitProjectRoot);
+    io.mapOptional("includePaths", config.includePaths);
+    io.mapOptional("excludePaths", config.excludePaths);
   }
 };
 
 std::string Configuration::findConfig(Diagnostics &diagnostics) {
+  if (getenv("MULL_CONFIG") != nullptr) {
+    return getenv("MULL_CONFIG");
+  }
   llvm::SmallString<PATH_MAX> cwd;
   std::error_code ec = llvm::sys::fs::current_path(cwd);
   if (ec) {

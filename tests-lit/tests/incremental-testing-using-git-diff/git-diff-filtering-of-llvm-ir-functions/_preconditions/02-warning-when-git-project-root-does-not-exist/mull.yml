@@ -1,0 +1,6 @@
+gitDiffRef: master
+gitProjectRoot: /tmp/does-not-exist
+mutators:
+  - cxx_ge_to_lt
+  - cxx_ge_to_gt
+debugEnabled: true

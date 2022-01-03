@@ -8,8 +8,8 @@ using namespace mull;
 Mutant::Mutant(std::string identifier, std::string mutatorIdentifier, SourceLocation sourceLocation,
                SourceLocation endLocation, bool covered)
     : identifier(std::move(identifier)), mutatorIdentifier(std::move(mutatorIdentifier)),
-      sourceLocation(std::move(sourceLocation)), endLocation(endLocation), covered(covered),
-      mutatorKind(MutatorKind::InvalidKind) {}
+      sourceLocation(std::move(sourceLocation)), endLocation(std::move(endLocation)),
+      covered(covered), mutatorKind(MutatorKind::InvalidKind) {}
 
 const std::string &Mutant::getIdentifier() const {
   return identifier;

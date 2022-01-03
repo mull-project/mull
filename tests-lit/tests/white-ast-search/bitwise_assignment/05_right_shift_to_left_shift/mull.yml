@@ -1,0 +1,3 @@
+mutators:
+  - cxx_rshift_assign_to_lshift_assign
+debugEnabled: true

@@ -1,0 +1,3 @@
+mutators:
+  - cxx_remove_negation
+debugEnabled: true

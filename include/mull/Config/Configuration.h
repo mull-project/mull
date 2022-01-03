@@ -23,13 +23,14 @@ struct Configuration {
   bool keepExecutable;
   bool mutateOnly;
   bool lowerBitcode;
+  bool junkDetectionDisabled;
 
   unsigned timeout;
   unsigned linkerTimeout;
 
   IDEDiagnosticsKind diagnostics;
 
-  std::vector<std::string> bitcodePaths;
+  std::vector<std::string> bitcodePaths; // TODO: Drop this one
   std::vector<std::string> mutators;
 
   std::string executable;
@@ -39,7 +40,16 @@ struct Configuration {
   std::string linker;
   std::vector<std::string> linkerFlags;
 
+  std::string compilationDatabasePath;
+  std::vector<std::string> compilerFlags;
+
+  std::vector<std::string> includePaths;
+  std::vector<std::string> excludePaths;
+
   ParallelizationConfig parallelization;
+
+  std::string gitDiffRef;
+  std::string gitProjectRoot;
 
   Configuration();
 

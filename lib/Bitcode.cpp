@@ -13,17 +13,27 @@ using namespace mull;
 using namespace llvm;
 using namespace std;
 
+Bitcode::Bitcode(llvm::Module *unownedModule)
+    : context(nullptr), module(nullptr), unownedModule(unownedModule),
+      uniqueIdentifier(llvm::sys::path::stem(this->unownedModule->getModuleIdentifier()).str()) {}
+
 Bitcode::Bitcode(std::unique_ptr<llvm::LLVMContext> context, std::unique_ptr<llvm::Module> module)
-    : context(std::move(context)), module(std::move(module)),
+    : context(std::move(context)), module(std::move(module)), unownedModule(nullptr),
       uniqueIdentifier(llvm::sys::path::stem(this->module->getModuleIdentifier()).str()) {}
 
 llvm::Module *Bitcode::getModule() {
-  assert(module);
+  assert(module || unownedModule);
+  if (unownedModule) {
+    return unownedModule;
+  }
   return module.get();
 }
 
 llvm::Module *Bitcode::getModule() const {
-  assert(module);
+  assert(module || unownedModule);
+  if (unownedModule) {
+    return unownedModule;
+  }
   return module.get();
 }
 

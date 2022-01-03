@@ -91,10 +91,12 @@ int main() {
 
 // clang-format off
 
+// RUN: %clang_cc %sysroot -O0 %pass_mull_ir_frontend -g %s -o %s-ir.exe
 // RUN: cd / && %clang_cc %sysroot -fembed-bitcode -g -O0 %s -o %s.exe
 // RUN: cd %CURRENT_DIR
 // RUN: unset TERM; %mull_cxx -keep-executable -output=%s.mutated.exe -linker=%clang_cc -linker-flags="%sysroot" -mutators=cxx_logical_or_to_and -ide-reporter-show-killed -reporters=IDE %s.exe | %filecheck %s --dump-input=fail
 // RUN: unset TERM; %mull_runner -ide-reporter-show-killed -reporters=IDE %s.mutated.exe | %filecheck %s --dump-input=fail
+// RUN: unset TERM; %mull_runner -ide-reporter-show-killed -reporters=IDE %s-ir.exe | %filecheck %s --dump-input=fail
 // CHECK:[info] Killed mutants (2/5):
 // CHECK:{{.*}}8:13: warning: Killed: Replaced || with && [cxx_logical_or_to_and]
 // CHECK:  if (a < b || b < c) {

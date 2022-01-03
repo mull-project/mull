@@ -24,6 +24,7 @@ set(LIT_COMMAND
   mull_cxx=$<TARGET_FILE:mull-cxx-${LLVM_VERSION_MAJOR}>
   mull_runner=$<TARGET_FILE:mull-runner-${LLVM_VERSION_MAJOR}>
   mull_frontend_cxx=$<TARGET_FILE:mull-cxx-frontend-${LLVM_VERSION_MAJOR}>
+  mull_ir_frontend=$<TARGET_FILE:mull-cxx-ir-frontend-${LLVM_VERSION_MAJOR}>
   clang_cc=${LIT_CLANG}
   clang_cxx=${LIT_CLANGXX}
   sysroot=${sysroot}
