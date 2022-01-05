@@ -8,8 +8,6 @@
     llvm_version: 6.0.0
     platform: macos
 
-    package_maker_path: PackageMaker.app
-
     package_extensions:
       - zip
 
@@ -40,15 +38,11 @@
       homebrew:
         name: "{{ packages }}"
         state: present
-      environment:
-        HOMEBREW_NO_AUTO_UPDATE: 1
 
     - name: Install LLVM
       homebrew:
-        name: "{{ brew_llvm_package }}"
+        name: "{{ llvm_packages }}"
         state: present
-      environment:
-        HOMEBREW_NO_AUTO_UPDATE: 1
 
     - name: Install Python dependencies
       pip:

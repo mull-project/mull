@@ -7,41 +7,39 @@ SDKROOT: /
 llvm_mapping:
   macos:
     13.0.0:
-      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/clang+llvm-13.0.0-x86_64-apple-darwin.tar.xz
-      precompiled: true
-      path: /usr/local/opt/llvm
-      brew_llvm_package: llvm
+      cmake_search_paths: "/usr/local/opt/llvm/lib/cmake/llvm/;/usr/local/opt/llvm/lib/cmake/clang/"
+      packages:
+        - llvm
+      cmake_cc: /usr/local/opt/llvm/bin/clang
+      cmake_cxx: /usr/local/opt/llvm/bin/clang++
     12.0.0:
-      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.0/clang+llvm-12.0.0-x86_64-apple-darwin.tar.xz
-      precompiled: true
-      path: /usr/local/opt/llvm@12
-      brew_llvm_package: llvm@12
+      cmake_search_paths: "/usr/local/opt/llvm@12/lib/cmake/llvm/;/usr/local/opt/llvm@12/lib/cmake/clang/"
+      packages:
+        - llvm@12
+      cmake_cc: /usr/local/opt/llvm@12/bin/clang
+      cmake_cxx: /usr/local/opt/llvm@12/bin/clang++
     11.0.0:
-      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.0/clang+llvm-11.0.0-x86_64-apple-darwin.tar.xz
-      precompiled: true
-      path: /usr/local/opt/llvm@11
-      brew_llvm_package: llvm@11
+      cmake_search_paths: "/usr/local/opt/llvm@11/lib/cmake/llvm/;/usr/local/opt/llvm@11/lib/cmake/clang/"
+      packages:
+        - llvm@11
+      cmake_cc: /usr/local/opt/llvm@11/bin/clang
+      cmake_cxx: /usr/local/opt/llvm@11/bin/clang++
     9.0.0:
-      url: http://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-darwin-apple.tar.xz
-      precompiled: true
-      path: /usr/local/opt/llvm@9
-      brew_llvm_package: llvm@9
+      cmake_search_paths: "/usr/local/opt/llvm@9/lib/cmake/llvm/;/usr/local/opt/llvm@9/lib/cmake/clang/"
+      packages:
+        - llvm@9
+      cmake_cc: /usr/local/opt/llvm@9/bin/clang
+      cmake_cxx: /usr/local/opt/llvm@9/bin/clang++
     8.0.0:
-      url: https://releases.llvm.org/8.0.0/clang+llvm-8.0.0-x86_64-apple-darwin.tar.xz
-      precompiled: true
-      path: /usr/local/opt/llvm@8
-      brew_llvm_package: llvm@8
-
-  debian:
-    6.0.0:
-      url: https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-debian8.tar.xz
-      path: clang+llvm-6.0.0-x86_64-linux-gnu-debian8
+      cmake_search_paths: "/usr/local/opt/llvm@8/lib/cmake/llvm/;/usr/local/opt/llvm@8/lib/cmake/clang/"
+      packages:
+        - llvm@8
+      cmake_cc: /usr/local/opt/llvm@8/bin/clang
+      cmake_cxx: /usr/local/opt/llvm@8/bin/clang++
 
   ubuntu:
     13.0.0:
-      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz
-      path: clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04
-      precompiled: false
+      cmake_search_paths: "/usr/lib/llvm-13/cmake/;/usr/lib/cmake/clang-13/"
       packages:
         - llvm-13-dev
         - libclang-13-dev
@@ -51,9 +49,7 @@ llvm_mapping:
       cmake_cc: clang-13
       cmake_cxx: clang++-13
     12.0.0:
-      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.0/clang+llvm-12.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz
-      path: clang+llvm-12.0.0-x86_64-linux-gnu-ubuntu-20.04
-      precompiled: false
+      cmake_search_paths: "/usr/lib/llvm-12/cmake/;/usr/lib/cmake/clang-12/"
       packages:
         - llvm-12-dev
         - libclang-12-dev
@@ -63,9 +59,7 @@ llvm_mapping:
       cmake_cc: clang-12
       cmake_cxx: clang++-12
     11.0.0:
-      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.0/clang+llvm-11.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz
-      path: clang+llvm-11.0.0-x86_64-linux-gnu-ubuntu-20.04
-      precompiled: false
+      cmake_search_paths: "/usr/lib/llvm-11/cmake/;/usr/lib/cmake/clang-11/"
       packages:
         - llvm-11-dev
         - libclang-11-dev
@@ -75,9 +69,7 @@ llvm_mapping:
       cmake_cc: clang-11
       cmake_cxx: clang++-11
     10.0.0:
-      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
-      path: clang+llvm-10.0.0-x86_64-linux-gnu-ubuntu-18.04
-      precompiled: false
+      cmake_search_paths: "/usr/lib/llvm-10/cmake/;/usr/lib/cmake/clang-10/"
       packages:
         - llvm-10-dev
         - libclang-10-dev
@@ -87,9 +79,7 @@ llvm_mapping:
       cmake_cc: clang-10
       cmake_cxx: clang++-10
     9.0.0:
-      url: http://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04.tar.xz
-      path: clang+llvm-9.0.0-x86_64-linux-gnu-ubuntu-18.04
-      precompiled: false
+      cmake_search_paths: "/usr/lib/llvm-9/cmake/;/usr/lib/cmake/clang-9/"
       packages:
         - llvm-9-dev
         - libclang-9-dev
@@ -99,9 +89,7 @@ llvm_mapping:
       cmake_cc: clang-9
       cmake_cxx: clang++-9
     8.0.0:
-      url: https://releases.llvm.org/8.0.0/clang+llvm-8.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz
-      path: clang+llvm-8.0.0-x86_64-linux-gnu-ubuntu-16.04
-      precompiled: false
+      cmake_search_paths: "/usr/lib/llvm-8/cmake/;/usr/lib/cmake/clang-8/"
       packages:
         - llvm-8-dev
         - libclang-8-dev
@@ -110,25 +98,6 @@ llvm_mapping:
         - clang-8
       cmake_cc: clang-8
       cmake_cxx: clang++-8
-
-  fedora:
-    6.0.0:
-      url: http://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-Fedora27.tar.xz
-      path: clang+llvm-6.0.0-x86_64-linux-gnu-Fedora27
-
-  freebsd:
-    8.0.0:
-      url: http://releases.llvm.org/8.0.0/clang+llvm-8.0.0-amd64-unknown-freebsd11.tar.xz
-      path: clang+llvm-8.0.0-amd64-unknown-freebsd11
-
-
-llvm_url: "{{ llvm_mapping[platform][llvm_version].url }}"
-llvm_path: "{{ llvm_mapping[platform][llvm_version].path }}"
-build_on_macos: "{{ platform == 'macos' }}"
-_macos_llvm_dir: "{{ llvm_mapping[platform][llvm_version].path }}"
-_linux_llvm_path: "{{ working_dir }}/llvm-{{ llvm_version }}"
-llvm_dir: "{{ _macos_llvm_dir if build_on_macos else _linux_llvm_path }}"
-llvm_major: "{{ llvm_version.split('.')[0] }}"
 
 source_dir: "{{ working_dir }}/mull"
 debug_build_dir: "{{ working_dir }}/build.mull.debug.dir"
@@ -139,12 +108,8 @@ checkout: false
 # Overriden by FreeBSD playbook
 make_program: make
 
-build_against_precompiled_llvm: "{{ llvm_mapping[platform][llvm_version].precompiled }}"
+cmake_search_paths: "{{ llvm_mapping[platform][llvm_version].cmake_search_paths }}"
+llvm_major: "{{ llvm_version.split('.')[0] }}"
 llvm_packages: "{{ llvm_mapping[platform][llvm_version].packages }}"
-_path_to_precompiled_llvm: "-DPATH_TO_LLVM={{ llvm_dir }}"
-additional_cmake_flags: "{{ _path_to_precompiled_llvm if build_against_precompiled_llvm else '-DNO_PRECOMPILED_LLVM=ON' }}"
-_precompiled_clang: "{{ llvm_dir }}/bin/clang"
-_precompiled_clangxx: "{{ llvm_dir }}/bin/clang++"
-cmake_c_compiler: "{{ _precompiled_clang if build_against_precompiled_llvm else llvm_mapping[platform][llvm_version].cmake_cc }}"
-cmake_cxx_compiler: "{{ _precompiled_clangxx if build_against_precompiled_llvm else llvm_mapping[platform][llvm_version].cmake_cxx }}"
-brew_llvm_package: "{{ llvm_mapping[platform][llvm_version].brew_llvm_package }}"
+cmake_c_compiler: "{{ llvm_mapping[platform][llvm_version].cmake_cc }}"
+cmake_cxx_compiler: "{{ llvm_mapping[platform][llvm_version].cmake_cxx }}"

@@ -3,12 +3,8 @@
   command: ninja tests-lit
   args:
     chdir: "{{ debug_build_dir }}"
-  environment:
-    LD_LIBRARY_PATH: "{{ llvm_dir }}/lib"
 
 - name: Run LIT tests (Release)
   command: ninja tests-lit
   args:
     chdir: "{{ release_build_dir }}"
-  environment:
-    LD_LIBRARY_PATH: "{{ llvm_dir }}/lib"
