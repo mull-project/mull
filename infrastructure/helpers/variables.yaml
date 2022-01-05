@@ -31,11 +31,6 @@ llvm_mapping:
       precompiled: true
       path: /usr/local/opt/llvm@8
       brew_llvm_package: llvm@8
-    7.0.0:
-      url: https://releases.llvm.org/7.0.0/clang+llvm-7.0.0-x86_64-apple-darwin.tar.xz
-      precompiled: true
-      path: /usr/local/opt/llvm@7
-      brew_llvm_package: llvm@7
 
   debian:
     6.0.0:
@@ -46,7 +41,15 @@ llvm_mapping:
     13.0.0:
       url: https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz
       path: clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04
-      precompiled: true
+      precompiled: false
+      packages:
+        - llvm-13-dev
+        - libclang-13-dev
+        - libc++-13-dev
+        - libc++abi-13-dev
+        - clang-13
+      cmake_cc: clang-13
+      cmake_cxx: clang++-13
     12.0.0:
       url: https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.0/clang+llvm-12.0.0-x86_64-linux-gnu-ubuntu-20.04.tar.xz
       path: clang+llvm-12.0.0-x86_64-linux-gnu-ubuntu-20.04
@@ -107,17 +110,6 @@ llvm_mapping:
         - clang-8
       cmake_cc: clang-8
       cmake_cxx: clang++-8
-    7.0.0:
-      url: https://releases.llvm.org/7.0.0/clang+llvm-7.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz
-      path: clang+llvm-7.0.0-x86_64-linux-gnu-ubuntu-16.04
-      precompiled: true
-      packages:
-        - llvm-7-dev
-        - libclang-7-dev
-        - libc++-7-dev
-        - clang-7
-      cmake_cc: clang-7
-      cmake_cxx: clang++-7
 
   fedora:
     6.0.0:
