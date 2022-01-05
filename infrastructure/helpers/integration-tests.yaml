@@ -23,7 +23,7 @@
       - -G
       - Ninja
       - -DCMAKE_CXX_FLAGS=-fembed-bitcode --sysroot={{ SDKROOT }}
-      - -DCMAKE_EXE_LINKER_FLAGS=-lc++ -L {{ llvm_dir }}/lib
+      - -DCMAKE_EXE_LINKER_FLAGS=-lc++
       - -DCMAKE_BUILD_TYPE=Debug
       - -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
       - -DCMAKE_C_COMPILER={{ cmake_c_compiler }}
@@ -41,8 +41,6 @@
   command: ./bin/core-test
   args:
     chdir: "{{ working_dir }}/integration/fmt.build.dir"
-  environment:
-    LD_LIBRARY_PATH: "{{ llvm_dir }}/lib"
 
 - name: Run Mull against fmt
   command:
@@ -50,13 +48,11 @@
     argv:
       - mull-cxx-{{ llvm_major }}
       - -mutators=cxx_add_to_sub
-      - -compilation-flags=--sysroot={{ SDKROOT }} -isystem {{ llvm_dir }}/include/c++/v1 -isystem {{ llvm_dir }}/lib/clang/{{ llvm_version }}/include
+      - -compilation-flags=--sysroot={{ SDKROOT }}
       - -compdb-path={{ working_dir }}/integration/fmt.build.dir/compile_commands.json
       - -linker={{ cmake_cxx_compiler }}
       - -linker-flags=-lc++ -lpthread
       - "{{ working_dir }}/integration/fmt.build.dir/bin/core-test"
-  environment:
-    LD_LIBRARY_PATH: "{{ llvm_dir }}/lib"
 
 - name: Clone OpenSSL (no-shared)
   git:
@@ -88,9 +84,7 @@
     argv:
       - mull-cxx-{{ llvm_major }}
       - -mutators=cxx_add_to_sub
-      - -compilation-flags=--sysroot={{ SDKROOT }} -isystem {{ llvm_dir }}/lib/clang/{{ llvm_version }}/include -I{{ working_dir }}/integration/openssl-no-shared/include -I{{ working_dir }}/integration/openssl-no-shared/crypto/include -I{{ working_dir }}/integration/openssl-no-shared
+      - -compilation-flags=--sysroot={{ SDKROOT }} -I{{ working_dir }}/integration/openssl-no-shared/include -I{{ working_dir }}/integration/openssl-no-shared/crypto/include -I{{ working_dir }}/integration/openssl-no-shared
       - -linker={{ cmake_cxx_compiler }}
       - -linker-flags=-lc++ -ldl -lpthread
       - "{{ working_dir }}/integration/openssl-no-shared/test/bio_enc_test"
-  environment:
-    LD_LIBRARY_PATH: "{{ llvm_dir }}/lib"

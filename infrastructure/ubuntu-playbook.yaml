@@ -40,6 +40,12 @@
         state: present
       become: true
 
+    - name: Install LLVM Packages
+      apt:
+        name: "{{ llvm_packages }}"
+        state: present
+      become: true
+
     - name: Install Python dependencies
       pip:
         name:
@@ -60,14 +66,6 @@
         creates: /usr/local/bin/cmake
       when: download_cmake.changed
       become: true
-
-    - name: Download LLVM
-      include: helpers/download-llvm.yaml
-      when: build_against_precompiled_llvm
-
-    - name: Install LLVM
-      include: helpers/install-llvm.yaml
-      when: not build_against_precompiled_llvm
 
     - name: Build Mull
       include: helpers/build-mull.yaml
