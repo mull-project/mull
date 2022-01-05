@@ -8,36 +8,34 @@ llvm_mapping:
   macos:
     13.0.0:
       url: https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/clang+llvm-13.0.0-x86_64-apple-darwin.tar.xz
-      path: clang+llvm-13.0.0-x86_64-apple-darwin
       precompiled: true
+      path: /usr/local/opt/llvm
+      brew_llvm_package: llvm
     12.0.0:
       url: https://github.com/llvm/llvm-project/releases/download/llvmorg-12.0.0/clang+llvm-12.0.0-x86_64-apple-darwin.tar.xz
-      path: clang+llvm-12.0.0-x86_64-apple-darwin
       precompiled: true
+      path: /usr/local/opt/llvm@12
+      brew_llvm_package: llvm@12
     11.0.0:
       url: https://github.com/llvm/llvm-project/releases/download/llvmorg-11.0.0/clang+llvm-11.0.0-x86_64-apple-darwin.tar.xz
-      path: clang+llvm-11.0.0-x86_64-apple-darwin
       precompiled: true
-    10.0.0:
-      url: https://github.com/llvm/llvm-project/releases/download/llvmorg-10.0.0/clang+llvm-10.0.0-x86_64-apple-darwin.tar.xz
-      path: clang+llvm-10.0.0-x86_64-apple-darwin
-      precompiled: true
+      path: /usr/local/opt/llvm@11
+      brew_llvm_package: llvm@11
     9.0.0:
       url: http://releases.llvm.org/9.0.0/clang+llvm-9.0.0-x86_64-darwin-apple.tar.xz
-      path: clang+llvm-9.0.0-x86_64-darwin-apple
       precompiled: true
+      path: /usr/local/opt/llvm@9
+      brew_llvm_package: llvm@9
     8.0.0:
       url: https://releases.llvm.org/8.0.0/clang+llvm-8.0.0-x86_64-apple-darwin.tar.xz
-      path: clang+llvm-8.0.0-x86_64-apple-darwin
       precompiled: true
+      path: /usr/local/opt/llvm@8
+      brew_llvm_package: llvm@8
     7.0.0:
       url: https://releases.llvm.org/7.0.0/clang+llvm-7.0.0-x86_64-apple-darwin.tar.xz
-      path: clang+llvm-7.0.0-x86_64-apple-darwin
       precompiled: true
-    6.0.0:
-      url: https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-apple-darwin.tar.xz
-      path: clang+llvm-6.0.0-x86_64-apple-darwin
-      precompiled: true
+      path: /usr/local/opt/llvm@7
+      brew_llvm_package: llvm@7
 
   debian:
     6.0.0:
@@ -120,10 +118,6 @@ llvm_mapping:
         - clang-7
       cmake_cc: clang-7
       cmake_cxx: clang++-7
-    6.0.0:
-      url: https://releases.llvm.org/6.0.0/clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-16.04.tar.xz
-      path: clang+llvm-6.0.0-x86_64-linux-gnu-ubuntu-16.04
-      precompiled: true
 
   fedora:
     6.0.0:
@@ -138,7 +132,10 @@ llvm_mapping:
 
 llvm_url: "{{ llvm_mapping[platform][llvm_version].url }}"
 llvm_path: "{{ llvm_mapping[platform][llvm_version].path }}"
-llvm_dir: "{{ working_dir }}/llvm-{{ llvm_version }}"
+build_on_macos: "{{ platform == 'macos' }}"
+_macos_llvm_dir: "{{ llvm_mapping[platform][llvm_version].path }}"
+_linux_llvm_path: "{{ working_dir }}/llvm-{{ llvm_version }}"
+llvm_dir: "{{ _macos_llvm_dir if build_on_macos else _linux_llvm_path }}"
 llvm_major: "{{ llvm_version.split('.')[0] }}"
 
 source_dir: "{{ working_dir }}/mull"
@@ -158,3 +155,4 @@ _precompiled_clang: "{{ llvm_dir }}/bin/clang"
 _precompiled_clangxx: "{{ llvm_dir }}/bin/clang++"
 cmake_c_compiler: "{{ _precompiled_clang if build_against_precompiled_llvm else llvm_mapping[platform][llvm_version].cmake_cc }}"
 cmake_cxx_compiler: "{{ _precompiled_clangxx if build_against_precompiled_llvm else llvm_mapping[platform][llvm_version].cmake_cxx }}"
+brew_llvm_package: "{{ llvm_mapping[platform][llvm_version].brew_llvm_package }}"
