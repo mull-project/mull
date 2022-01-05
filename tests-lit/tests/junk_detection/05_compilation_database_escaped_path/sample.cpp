@@ -16,6 +16,8 @@ int main() {
 // clang-format off
 
 /**
+Failing on macos due to incompatibility with clang-9 (and earlier) and new libc++ coming with Xcode
+REQUIRES: LINUX
 RUN: cd / && %clang_cxx %sysroot -fembed-bitcode %TEST_CXX_FLAGS -g -O0 -DESCAPED_DEFINITION_STUB=/src/builds/amd64-mull %s -o %s.exe
 RUN: sed -e "s:%PWD:%S:g" -e "s:#TEST_CXX_FLAGS:%TEST_CXX_FLAGS %sysroot:g" %S/compile_commands.json.template > %S/compile_commands.json
 RUN: cd %CURRENT_DIR

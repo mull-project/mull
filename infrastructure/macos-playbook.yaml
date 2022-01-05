@@ -29,12 +29,23 @@
     - helpers/variables.yaml
 
   tasks:
+    - name: Change Xcode
+      command: xcode-select --switch /Applications/Xcode_13.0.app/Contents/Developer
+      become: true
+
     - name: Prepare Working Directory
       include: helpers/working-directory.yaml
 
     - name: Install Required Packages
       homebrew:
         name: "{{ packages }}"
+        state: present
+      environment:
+        HOMEBREW_NO_AUTO_UPDATE: 1
+
+    - name: Install LLVM
+      homebrew:
+        name: "{{ brew_llvm_package }}"
         state: present
       environment:
         HOMEBREW_NO_AUTO_UPDATE: 1
@@ -52,9 +63,6 @@
         src: /usr/local/bin/gtar
         dest: /usr/local/bin/tar
         state: link
-
-    - name: Install LLVM
-      include: helpers/download-llvm.yaml
 
     - name: Build Mull
       include: helpers/build-mull.yaml
