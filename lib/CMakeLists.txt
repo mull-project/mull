@@ -120,29 +120,11 @@ add_library(mull
 
 set_source_files_properties(${mull_header_dirs} PROPERTIES HEADER_FILE_ONLY ON)
 
-if ("LLVM" IN_LIST LLVM_AVAILABLE_LIBS)
-  set(MULL_LLVM_LIBRARIES
-    LLVM
-    )
-else ()
-  set(MULL_LLVM_LIBRARIES
-    LLVMSupport
-    LLVMOption
-    LLVMCoverage
-    LLVMProfileData
-    LLVMAsmParser
-    LLVMSupport
-    LLVMOption
-    LLVM${LLVM_NATIVE_ARCH}CodeGen
-    LLVM${LLVM_NATIVE_ARCH}AsmParser
-    )
-endif ()
-
 find_package(Threads REQUIRED)
 find_package(SQLite3 REQUIRED)
 
 target_link_libraries(mull
-  ${MULL_LLVM_LIBRARIES}
+  LLVM
   SQLite::SQLite3
   clangTooling
   Threads::Threads

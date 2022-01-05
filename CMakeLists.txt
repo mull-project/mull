@@ -202,17 +202,6 @@ set (MULL_INCLUDE_DIRS
   ${CMAKE_CURRENT_LIST_DIR}/LLVMCompatibility/${LLVM_COMPATIBILITY_DIR}
 )
 
-if ("LLVM" IN_LIST LLVM_AVAILABLE_LIBS)
-  set (MULL_LLVM_COMPATIBILITY_LIBRARIES
-    LLVM
-  )
-else()
-  set (MULL_LLVM_COMPATIBILITY_LIBRARIES
-    LLVMSupport
-    LLVMCore
-  )
-endif()
-
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/cpack.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/version.cmake)
 
