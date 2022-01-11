@@ -182,7 +182,7 @@ clang::Decl *ThreadSafeASTUnit::getDecl(clang::SourceLocation &location) {
 
 ASTStorage::ASTStorage(Diagnostics &diagnostics, const std::string &cxxCompilationDatabasePath,
                        const std::string &cxxCompilationFlags,
-                       const std::map<std::string, std::string> &bitcodeCompilationFlags)
+                       const std::unordered_map<std::string, std::string> &bitcodeCompilationFlags)
     : diagnostics(diagnostics),
       compilationDatabase(CompilationDatabase::fromFile(
           diagnostics, cxxCompilationDatabasePath, cxxCompilationFlags, bitcodeCompilationFlags)) {}

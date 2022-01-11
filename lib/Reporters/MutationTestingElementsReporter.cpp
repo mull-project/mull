@@ -17,6 +17,7 @@
 #include <set>
 #include <sstream>
 #include <string>
+#include <utility>
 #include <vector>
 
 using namespace mull;
@@ -115,11 +116,11 @@ static std::string getReportDir(const std::string &dir) {
 
 MutationTestingElementsReporter::MutationTestingElementsReporter(
     Diagnostics &diagnostics, const std::string &reportDir, const std::string &reportName,
-    const std::unordered_map<std::string, std::string> &mullInformation)
+    std::unordered_map<std::string, std::string> mullInformation)
     : diagnostics(diagnostics), filename(getFilename(reportName)),
       htmlPath(getReportDir(reportDir) + "/" + filename + ".html"),
       jsonPath(getReportDir(reportDir) + "/" + filename + ".json"),
-      mullInformation(mullInformation) {
+      mullInformation(std::move(mullInformation)) {
   llvm::sys::fs::create_directories(reportDir);
 }
 

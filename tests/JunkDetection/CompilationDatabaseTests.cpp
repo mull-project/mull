@@ -126,7 +126,7 @@ TEST(CompilationDatabaseFromFile, parsesCompilationFlagsObtainedFromBitcode) {
 
   Diagnostics diagnostics;
 
-  std::map<std::string, std::string> bitcodeFlags;
+  std::unordered_map<std::string, std::string> bitcodeFlags;
   bitcodeFlags[fakeFile] = "clang -DBITCODE_FLAG=1 -g";
 
   const CompilationDatabase database =

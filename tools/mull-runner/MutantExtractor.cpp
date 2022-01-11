@@ -3,6 +3,7 @@
 #include <iostream>
 #include <llvm/Object/ObjectFile.h>
 #include <sstream>
+#include <unordered_map>
 
 using namespace mull;
 using namespace std::string_literals;

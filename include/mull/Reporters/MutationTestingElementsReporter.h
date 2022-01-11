@@ -12,8 +12,9 @@ class Diagnostics;
 
 class MutationTestingElementsReporter : public Reporter {
 public:
-  MutationTestingElementsReporter(Diagnostics &diagnostics, const std::string &reportDir,
-                                  const std::string &reportName, const std::unordered_map<std::string, std::string> &mullInformation = {});
+  MutationTestingElementsReporter(
+      Diagnostics &diagnostics, const std::string &reportDir, const std::string &reportName,
+      std::unordered_map<std::string, std::string> mullInformation = {});
   void reportResults(const Result &result) override;
 
   const std::string &getJSONPath();

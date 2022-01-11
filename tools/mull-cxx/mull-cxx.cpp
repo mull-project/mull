@@ -26,10 +26,10 @@
 
 #include <iterator>
 #include <memory>
-#include <sstream>
 #include <numeric>
-#include <unordered_map>
+#include <sstream>
 #include <unistd.h>
+#include <unordered_map>
 
 using namespace std::string_literals;
 
@@ -148,7 +148,6 @@ int main(int argc, char **argv) {
     }
   });
 
-  std::vector<std::unique_ptr<llvm::LLVMContext>> contexts;
   std::vector<mull::LoadBitcodeFromBinaryTask> tasks;
   for (int i = 0; i < configuration.parallelization.workers; i++) {
     tasks.emplace_back(mull::LoadBitcodeFromBinaryTask(diagnostics));
@@ -159,7 +158,7 @@ int main(int argc, char **argv) {
   executor.execute();
 
   mull::BitcodeMetadataReader bitcodeCompilationDatabaseLoader;
-  std::map<std::string, std::string> bitcodeCompilationFlags =
+  std::unordered_map<std::string, std::string> bitcodeCompilationFlags =
       bitcodeCompilationDatabaseLoader.getCompilationDatabase(bitcode);
 
   mull::Program program(std::move(bitcode));
@@ -189,27 +188,30 @@ int main(int argc, char **argv) {
 
   mull::ASTStorage astStorage(
       diagnostics, cxxCompilationDatabasePath, cxxCompilationFlags, bitcodeCompilationFlags);
-  std::vector<std::string> commandLineOptions {argv, argv + argc};
-  std::string commandLine = std::accumulate(commandLineOptions.begin(),
-                              commandLineOptions.end(),
-                              std::string(),
-                              [](std::string in, auto &s) { return std::move(in) + s + ' '; });
-  tool::ReporterParameters params{ .reporterName = tool::ReportName.getValue(),
-                                   .reporterDirectory = tool::ReportDirectory.getValue(),
-                                   .patchBasePathDir = tool::ReportPatchBaseDirectory.getValue(),
-                                   .compilationDatabaseAvailable = compilationDatabaseInfoAvailable,
-                                   .IDEReporterShowKilled = tool::IDEReporterShowKilled,
-                                   .mullInformation = std::unordered_map<std::string, std::string>{
-                                     std::make_pair("CommandLine", commandLine),
-                                     std::make_pair("URL", mull::mullHomepageString()),
-                                     std::make_pair("Mull Version", mull::mullVersionString()),
-                                     std::make_pair("Commit", mull::mullCommitString() ),
-                                     std::make_pair("Build Date", mull::mullBuildDateString()),
-                                     std::make_pair("LLVM Version", mull::llvmVersionString()),
-                                   },
+  std::vector<std::string> commandLineOptions{ argv, argv + argc };
+  std::string commandLine =
+      std::accumulate(commandLineOptions.begin(),
+                      commandLineOptions.end(),
+                      std::string(),
+                      [](std::string in, auto &s) { return std::move(in) + s + ' '; });
+  tool::ReporterParameters params{
+    .reporterName = tool::ReportName.getValue(),
+    .reporterDirectory = tool::ReportDirectory.getValue(),
+    .patchBasePathDir = tool::ReportPatchBaseDirectory.getValue(),
+    .compilationDatabaseAvailable = compilationDatabaseInfoAvailable,
+    .IDEReporterShowKilled = tool::IDEReporterShowKilled,
+    .mullInformation =
+        std::unordered_map<std::string, std::string>{
+            std::make_pair("CommandLine", commandLine),
+            std::make_pair("URL", mull::mullHomepageString()),
+            std::make_pair("Mull Version", mull::mullVersionString()),
+            std::make_pair("Commit", mull::mullCommitString()),
+            std::make_pair("Build Date", mull::mullBuildDateString()),
+            std::make_pair("LLVM Version", mull::llvmVersionString()),
+        },
   };
 
-  if(tool::ReportPatchBaseDirectory.getValue() == "." && tool::GitProjectRoot.getValue() != "."){
+  if (tool::ReportPatchBaseDirectory.getValue() == "." && tool::GitProjectRoot.getValue() != ".") {
     params.patchBasePathDir = tool::GitProjectRoot.getValue();
   }
   std::vector<std::unique_ptr<mull::Reporter>> reporters = reportersOption.reporters(params);
@@ -236,17 +238,19 @@ int main(int argc, char **argv) {
 
   for (const auto &regex : tool::ExcludePaths) {
     auto added = filePathFilter->exclude(regex);
-    if (!added.first){
+    if (!added.first) {
       std::stringstream warningMessage;
-      warningMessage << "Invalid regex for exclude-path: '" << regex << "' has been ignored. Error: " << added.second;
+      warningMessage << "Invalid regex for exclude-path: '" << regex
+                     << "' has been ignored. Error: " << added.second;
       diagnostics.warning(warningMessage.str());
     }
   }
   for (const auto &regex : tool::IncludePaths) {
     auto added = filePathFilter->include(regex);
-    if (!added.first){
+    if (!added.first) {
       std::stringstream warningMessage;
-      warningMessage << "Invalid regex for include-path: '" << regex << "' has been ignored. Error: " << added.second;
+      warningMessage << "Invalid regex for include-path: '" << regex
+                     << "' has been ignored. Error: " << added.second;
       diagnostics.warning(warningMessage.str());
     }
   }

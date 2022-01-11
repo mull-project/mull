@@ -1,7 +1,7 @@
 #pragma once
 
-#include <map>
 #include <string>
+#include <unordered_map>
 #include <utility>
 #include <vector>
 
@@ -12,7 +12,7 @@ class Diagnostics;
 class CompilationDatabase {
 public:
   using Flags = std::vector<std::string>;
-  using Database = std::map<std::string, Flags>;
+  using Database = std::unordered_map<std::string, Flags>;
 
   CompilationDatabase() = default;
   CompilationDatabase(const CompilationDatabase &) = default;
@@ -22,12 +22,12 @@ public:
 
   CompilationDatabase(Database database, Flags extraFlags, Database bitcodeFlags);
 
-  static CompilationDatabase fromFile(Diagnostics &diagnostics, const std::string &path,
-                                      const std::string& extraFlags,
-                                      const std::map<std::string, std::string>& bitcodeFlags);
-  static CompilationDatabase fromBuffer(Diagnostics &diagnostics, const std::string &buffer,
-                                        const std::string& extraFlags,
-                                        const std::map<std::string, std::string>& bitcodeFlags);
+  static CompilationDatabase
+  fromFile(Diagnostics &diagnostics, const std::string &path, const std::string &extraFlags,
+           const std::unordered_map<std::string, std::string> &bitcodeFlags);
+  static CompilationDatabase
+  fromBuffer(Diagnostics &diagnostics, const std::string &buffer, const std::string &extraFlags,
+             const std::unordered_map<std::string, std::string> &bitcodeFlags);
 
   const CompilationDatabase::Flags &compilationFlagsForFile(const std::string &filepath) const;
 

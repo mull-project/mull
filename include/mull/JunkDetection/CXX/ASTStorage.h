@@ -5,10 +5,10 @@
 
 #include <clang/Frontend/ASTUnit.h>
 
-#include <map>
 #include <memory>
 #include <mutex>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace mull {
@@ -44,19 +44,20 @@ class ASTStorage {
 public:
   ASTStorage(Diagnostics &diagnostics, const std::string &cxxCompilationDatabasePath,
              const std::string &cxxCompilationFlags,
-             const std::map<std::string, std::string> &bitcodeCompilationFlags);
+             const std::unordered_map<std::string, std::string> &bitcodeCompilationFlags);
 
   ThreadSafeASTUnit *findAST(const mull::SourceLocation &sourceLocation);
   ThreadSafeASTUnit *findAST(const std::string &sourceFile);
 
   void setAST(const std::string &sourceFile, std::unique_ptr<ThreadSafeASTUnit> astUnit);
+
 private:
   Diagnostics &diagnostics;
   std::mutex mutex;
   std::mutex mutantNodesMutex;
 
   CompilationDatabase compilationDatabase;
-  std::map<std::string, std::unique_ptr<ThreadSafeASTUnit>> astUnits;
+  std::unordered_map<std::string, std::unique_ptr<ThreadSafeASTUnit>> astUnits;
 };
 
 } // namespace mull
