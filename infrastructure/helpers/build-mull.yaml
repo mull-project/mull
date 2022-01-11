@@ -37,7 +37,6 @@
     - spdlog
     - mull-cxx-mutators
     - MullVersion
-    - LLVMCompatibility
     - mull
     - mull-cxx-{{ llvm_major }}
 
@@ -81,7 +80,6 @@
     - spdlog
     - mull-cxx-mutators
     - MullVersion
-    - LLVMCompatibility
     - mull
     - mull-cxx-{{llvm_major}}
 

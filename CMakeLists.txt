@@ -42,25 +42,6 @@ set(LIT_CLANG ${CLANG_INSTALL_PREFIX}/bin/clang)
 set(LIT_CLANGXX ${CLANG_INSTALL_PREFIX}/bin/clang++)
 set(LIT_LLVM_PROFDATA ${CLANG_INSTALL_PREFIX}/bin/llvm-profdata)
 
-set (llvm_patch_version "${LLVM_VERSION_MAJOR}.${LLVM_VERSION_MINOR}.${LLVM_VERSION_PATCH}")
-set (llvm_minor_version "${LLVM_VERSION_MAJOR}.${LLVM_VERSION_MINOR}.x")
-set (llvm_major_version "${LLVM_VERSION_MAJOR}.x.x")
-
-set (full_llvm_version ${llvm_patch_version})
-
-if (EXISTS ${CMAKE_CURRENT_LIST_DIR}/LLVMCompatibility/${llvm_patch_version})
-  set (LLVM_COMPATIBILITY_DIR ${llvm_patch_version})
-
-elseif(EXISTS ${CMAKE_CURRENT_LIST_DIR}/LLVMCompatibility/${llvm_minor_version})
-  set (LLVM_COMPATIBILITY_DIR ${llvm_minor_version})
-
-elseif(EXISTS ${CMAKE_CURRENT_LIST_DIR}/LLVMCompatibility/${llvm_major_version})
-  set (LLVM_COMPATIBILITY_DIR ${llvm_major_version})
-
-else()
-  message(FATAL_ERROR "LLVM-${full_llvm_version} is not supported")
-endif()
-
 set(MULL_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
 set (MULL_CXX_FLAGS "-fPIC -fvisibility-inlines-hidden -fno-exceptions -Wunused -Wall")
@@ -79,7 +60,6 @@ set (THIRD_PARTY_INCLUDE_DIRS
 )
 set (MULL_INCLUDE_DIRS
   ${MULL_SOURCE_DIR}/include
-  ${CMAKE_CURRENT_LIST_DIR}/LLVMCompatibility/${LLVM_COMPATIBILITY_DIR}
 )
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/cpack.cmake)
@@ -94,7 +74,6 @@ SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
 SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib" "${LLVM_LIB_PATH}")
 SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-add_subdirectory(LLVMCompatibility/${LLVM_COMPATIBILITY_DIR})
 add_subdirectory(lib)
 add_subdirectory(tools)
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)

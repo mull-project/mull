@@ -5,13 +5,20 @@
 #include <string>
 #include <utility>
 
-#include <LLVMCompatibility.h>
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/DebugLoc.h>
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Instruction.h>
 
 namespace mull {
+
+static llvm::DICompileUnit *getUnit(const llvm::DebugLoc &debugLocation) {
+  llvm::DIScope *scope = debugLocation->getScope();
+  while (!llvm::isa<llvm::DISubprogram>(scope) && scope != nullptr) {
+    scope = scope->getScope();
+  }
+  return scope ? llvm::cast<llvm::DISubprogram>(scope)->getUnit() : nullptr;
+}
 
 SourceLocation::SourceLocation(std::string unitDirectory, std::string unitFilePath,
                                std::string directory, std::string filePath, size_t line, size_t column)
@@ -38,7 +45,7 @@ SourceLocation SourceLocation::locationFromInstruction(const llvm::Instruction *
 
   std::string unitDirectory;
   std::string unitFilePath;
-  llvm::DICompileUnit *unit = llvm_compat::getUnit(debugInfo);
+  llvm::DICompileUnit *unit = getUnit(debugInfo);
   if (unit) {
     unitDirectory = unit->getDirectory();
     unitFilePath = unit->getFilename();

@@ -1,6 +1,5 @@
 #include "mull/Bitcode.h"
 
-#include "LLVMCompatibility.h"
 #include "mull/MutationPoint.h"
 #include "mull/Parallelization/Parallelization.h"
 

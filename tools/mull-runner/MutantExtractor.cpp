@@ -1,5 +1,4 @@
 #include "MutantExtractor.h"
-#include <LLVMCompatibility.h>
 #include <iostream>
 #include <llvm/Object/ObjectFile.h>
 #include <sstream>
@@ -7,6 +6,20 @@
 
 using namespace mull;
 using namespace std::string_literals;
+
+static llvm::StringRef getSectionName(const llvm::object::SectionRef &section) {
+#if LLVM_VERSION_MAJOR == 9
+  llvm::StringRef name;
+  section.getName(name);
+  return name;
+#else
+  llvm::Expected<llvm::StringRef> name = section.getName();
+  if (!name) {
+    return {};
+  }
+  return name.get();
+#endif
+}
 
 static std::vector<std::string> split(const std::string &input, char delimiter) {
   std::vector<std::string> output;
@@ -48,10 +61,13 @@ std::vector<std::string> MutantExtractor::extractMutants(const std::string &exec
 
   llvm::object::ObjectFile *objectFile = maybeObject->get();
   for (auto &section : objectFile->sections()) {
-    llvm::StringRef name = llvm_compat::getSectionName(section);
+    llvm::StringRef name = getSectionName(section);
     if (name.equals(".mull_mutants")) {
-      llvm::StringRef content = llvm_compat::getSectionContent(section);
-      return split(content.str(), '\0');
+      llvm::Expected<llvm::StringRef> content = section.getContents();
+      if (!content) {
+        return {};
+      }
+      return split(content.get().str(), '\0');
     }
   }
 
