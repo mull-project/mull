@@ -66,11 +66,12 @@ prepareDatabase(Diagnostics &diagnostics,
   return database;
 }
 
-static std::map<std::string, std::vector<std::string>>
-createBitcodeFlags(Diagnostics &diagnostics, const std::map<std::string, std::string> &bitcodeFlagsMap,
+static std::unordered_map<std::string, std::vector<std::string>>
+createBitcodeFlags(Diagnostics &diagnostics,
+                   const std::unordered_map<std::string, std::string> &bitcodeFlagsMap,
                    const CompilationDatabase::Flags &extraFlags) {
 
-  std::map<std::string, std::vector<std::string>> mergedBitcodeFlags;
+  std::unordered_map<std::string, std::vector<std::string>> mergedBitcodeFlags;
 
   for (auto const &[filename, commandline] : bitcodeFlagsMap) {
     CompilationDatabase::Flags fileFlags = flagsFromString(commandline);
@@ -78,8 +79,7 @@ createBitcodeFlags(Diagnostics &diagnostics, const std::map<std::string, std::st
     fileFlags = filterFlags(fileFlags, true);
 
     /// Remove file name from the list of flags
-    fileFlags.erase(std::remove(fileFlags.begin(), fileFlags.end(), filename),
-                    fileFlags.end());
+    fileFlags.erase(std::remove(fileFlags.begin(), fileFlags.end(), filename), fileFlags.end());
 
     for (const auto &extraFlag : extraFlags) {
       fileFlags.push_back(extraFlag);
@@ -91,9 +91,11 @@ createBitcodeFlags(Diagnostics &diagnostics, const std::map<std::string, std::st
   return mergedBitcodeFlags;
 }
 
-static CompilationDatabase createFromClangCompDB(
-    Diagnostics &diagnostics, std::unique_ptr<clang::tooling::JSONCompilationDatabase> jsondb,
-    const std::string &extraFlags, const std::map<std::string, std::string> &bitcodeFlags) {
+static CompilationDatabase
+createFromClangCompDB(Diagnostics &diagnostics,
+                      std::unique_ptr<clang::tooling::JSONCompilationDatabase> jsondb,
+                      const std::string &extraFlags,
+                      const std::unordered_map<std::string, std::string> &bitcodeFlags) {
   auto _extraFlags = flagsFromString(extraFlags);
   auto _bitcodeFlags = createBitcodeFlags(diagnostics, bitcodeFlags, _extraFlags);
   std::vector<clang::tooling::CompileCommand> commands;
@@ -107,7 +109,7 @@ static CompilationDatabase createFromClangCompDB(
 CompilationDatabase
 CompilationDatabase::fromFile(Diagnostics &diagnostics, const std::string &path,
                               const std::string &extraFlags,
-                              const std::map<std::string, std::string> &bitcodeFlags) {
+                              const std::unordered_map<std::string, std::string> &bitcodeFlags) {
   Database database;
   std::unique_ptr<clang::tooling::JSONCompilationDatabase> jsondb{ nullptr };
   if (!path.empty()) {
@@ -124,7 +126,7 @@ CompilationDatabase::fromFile(Diagnostics &diagnostics, const std::string &path,
 CompilationDatabase
 CompilationDatabase::fromBuffer(Diagnostics &diagnostics, const std::string &buffer,
                                 const std::string &extraFlags,
-                                const std::map<std::string, std::string> &bitcodeFlags) {
+                                const std::unordered_map<std::string, std::string> &bitcodeFlags) {
   std::string errorMessage;
   auto jsondb = clang::tooling::JSONCompilationDatabase::loadFromBuffer(
       buffer, errorMessage, clang::tooling::JSONCommandLineSyntax::AutoDetect);

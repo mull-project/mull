@@ -12,16 +12,16 @@
 #include <memory>
 #include <unistd.h>
 
+using namespace std::string_literals;
+
 static std::string validateInputFile(const std::string &inputFile, mull::Diagnostics &diagnostics) {
   if (access(inputFile.c_str(), R_OK) != 0) {
-    diagnostics.error(std::string("The provided path to an executable program is not valid: ") +
-                      inputFile.c_str());
+    diagnostics.error("The provided path to an executable program is not valid: "s + inputFile);
     return "";
   }
   llvm::SmallString<256> inputRealPath;
   if (llvm::sys::fs::real_path(inputFile, inputRealPath, false)) {
-    diagnostics.error(std::string("The provided path to an executable program is not valid: ") +
-                      inputFile.c_str());
+    diagnostics.error("The provided path to an executable program is not valid: "s + inputFile);
     return "";
   }
   return inputRealPath.str().str();
@@ -90,8 +90,16 @@ int main(int argc, char **argv) {
   tool::ReporterParameters params{ .reporterName = tool::ReportName.getValue(),
                                    .reporterDirectory = tool::ReportDirectory.getValue(),
                                    .patchBasePathDir = tool::ReportPatchBaseDirectory.getValue(),
-                                   .compilationDatabaseAvailable = false,
-                                   .IDEReporterShowKilled = tool::IDEReporterShowKilled };
+                                   // we should not need the database at this point
+                                   .compilationDatabaseAvailable = true,
+                                   .IDEReporterShowKilled = tool::IDEReporterShowKilled,
+                                   .mullInformation = std::unordered_map<std::string, std::string>{
+                                       std::make_pair("URL", mull::mullHomepageString()),
+                                       std::make_pair("Mull Version", mull::mullVersionString()),
+                                       std::make_pair("Commit", mull::mullCommitString()),
+                                       std::make_pair("Build Date", mull::mullBuildDateString()),
+                                       std::make_pair("LLVM Version", mull::llvmVersionString()),
+                                   } };
   std::vector<std::unique_ptr<mull::Reporter>> reporters = reportersOption.reporters(params);
 
   std::string testProgram = configuration.executable;

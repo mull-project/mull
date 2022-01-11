@@ -71,7 +71,7 @@ void mull::PatchesReporter::reportResults(const Result &result) {
         std::regex_replace(sourceLocation.filePath.substr(sourceLocation.directory.size() + 1),
                            std::regex("([/]|\\.(?!patch))"),
                            "_");
-    ;
+
     const auto mutator = factory.getMutator(mutant.getMutatorIdentifier());
     const std::vector<std::string> sourceLines =
         sourceCodeReader.getSourceLines(sourceLocation, sourceEndLocation);
