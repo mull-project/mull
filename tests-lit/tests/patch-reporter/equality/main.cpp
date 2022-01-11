@@ -25,8 +25,8 @@ CHECK:{{.*}}main_cpp{{.*}}
 CHECK:--- a{{.*}}/Output/sandbox/main.cpp 0
 CHECK:+{{\s+}}return a != b;
 CHECK:--
-CHECK:LLVM Version: {{.*}}
 CHECK:Build Date: {{.*}}
+CHECK:LLVM Version: {{.*}}
 CHECK:Mull Version: {{.*}}
 
 */

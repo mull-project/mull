@@ -3,12 +3,9 @@
 #include "mull/Bitcode.h"
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/ExecutionResult.h"
-#include "mull/Mutant.h"
-#include "mull/Mutators/Mutator.h"
 #include "mull/Mutators/MutatorsFactory.h"
 #include "mull/Reporters/SourceCodeReader.h"
 #include "mull/Result.h"
-#include "mull/SourceLocation.h"
 
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/Function.h>
@@ -22,9 +19,11 @@
 #include <sstream>
 #include <string>
 #include <unistd.h>
+#include <utility>
 
 using namespace mull;
 using namespace llvm;
+using namespace std::string_literals;
 
 static std::string getReportName(const std::string &name) {
   std::string reportName = name;
@@ -43,13 +42,13 @@ static std::string getReportDir(const std::string &reportDir) {
   return reportDir;
 }
 
-PatchesReporter::PatchesReporter(
-    Diagnostics &diagnostics, const std::string &reportDir, const std::string &reportName,
-    const std::string basePath, const std::unordered_map<std::string, std::string> &mullInformation)
+PatchesReporter::PatchesReporter(Diagnostics &diagnostics, const std::string &reportDir,
+                                 const std::string &reportName, const std::string &basePath,
+                                 std::unordered_map<std::string, std::string> mullInformation)
     : diagnostics(diagnostics),
       patchesPath(getReportDir(reportDir) + "/" + getReportName(reportName)),
       basePathRegex("^" + getReportDir(basePath)), sourceCodeReader(),
-      mullInformation(mullInformation) {
+      mullInformation(std::move(mullInformation)) {
   llvm::sys::fs::create_directories(patchesPath, true);
 }
 
@@ -60,6 +59,21 @@ std::string mull::PatchesReporter::getPatchesPath() {
 void mull::PatchesReporter::reportResults(const Result &result) {
   MutatorsFactory factory(diagnostics);
   factory.init();
+
+  std::string mullInfo;
+  {
+    std::stringstream mullInfoStream;
+    std::vector<std::string> keys;
+    for (auto &info : mullInformation) {
+      keys.push_back(info.first);
+    }
+    std::sort(std::begin(keys), std::end(keys));
+    for (auto &key : keys) {
+      mullInfoStream << key << ": " << mullInformation[key] << "\n";
+    }
+    mullInfo = mullInfoStream.str();
+  }
+
   for (auto &mutationResult : result.getMutationResults()) {
 
     const ExecutionResult mutationExecutionResult = mutationResult->getExecutionResult();
@@ -98,27 +112,27 @@ void mull::PatchesReporter::reportResults(const Result &result) {
       return filenamebuilder.str();
     }();
 
-    diagnostics.debug(std::string("Writing Patchfile: ") + filename.c_str());
-    const int lines = sourceEndLocation.line - sourceLocation.line + 1;
-    std::ofstream myfile{filename};
-    myfile << "--- a" << (sourcePath[0] != '/' ? "/" : "") << sourcePath << " 0" << "\n"
-           << "+++ b" << (sourcePath[0] != '/' ? "/" : "") << sourcePath << " 0" << "\n"
-           << "@@ -" << sourceLocation.line << "," << lines << " +" << sourceLocation.line << ",1 @@\n";
+    diagnostics.debug("Writing Patchfile: "s + filename);
+    const size_t lines = sourceEndLocation.line - sourceLocation.line + 1;
+    std::ofstream myfile{ filename };
+    myfile << "--- a" << (sourcePath[0] != '/' ? "/" : "") << sourcePath << " 0"
+           << "\n"
+           << "+++ b" << (sourcePath[0] != '/' ? "/" : "") << sourcePath << " 0"
+           << "\n"
+           << "@@ -" << sourceLocation.line << "," << lines << " +" << sourceLocation.line
+           << ",1 @@\n";
     for (auto &currentLine : sourceLines) {
       myfile << "-" << currentLine;
     }
     myfile << "+" << sourceLines.front().substr(0, sourceLocation.column - 1)
            << mutator->getReplacement() << sourceLines.back().substr(sourceEndLocation.column - 1);
-    myfile << std::accumulate(
-        mullInformation.begin(),
-        mullInformation.end(),
-        std::string("--\n"),
-        [](std::string in, auto &s) { return std::move(in) + s.first + ": " + s.second + "\n"; });
+    myfile << "--\n" << mullInfo;
     myfile.flush();
-    if (!myfile.good())
-      diagnostics.warning(std::string("Writing Patchfile failed") + filename.c_str());
+    if (!myfile.good()) {
+      diagnostics.warning("Writing Patchfile failed"s + filename);
+    }
     myfile.close();
   }
 
-  diagnostics.info(std::string("Patchfiles can be found at '") + patchesPath + "'");
+  diagnostics.info("Patchfiles can be found at '"s + patchesPath + "'");
 }
