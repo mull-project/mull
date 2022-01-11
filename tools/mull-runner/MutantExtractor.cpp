@@ -3,6 +3,7 @@
 #include <iostream>
 #include <llvm/Object/ObjectFile.h>
 #include <sstream>
+#include <unordered_map>
 
 using namespace mull;
 using namespace std::string_literals;
@@ -21,16 +22,13 @@ static std::vector<std::string> split(const std::string &input, char delimiter) 
 
 MutantExtractor::MutantExtractor(Diagnostics &diagnostics) : diagnostics(diagnostics) {}
 
-std::vector<std::unique_ptr<Mutant>>
-MutantExtractor::extractMutants(const std::string &executable) {
-  std::vector<std::unique_ptr<Mutant>> mutants;
-
+std::vector<std::string> MutantExtractor::extractMutants(const std::string &executable) {
   llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> maybeBuffer =
       llvm::MemoryBuffer::getFile(executable);
   if (!maybeBuffer) {
     diagnostics.error("Cannot read executable: "s + maybeBuffer.getError().message() + ": " +
                       executable);
-    return mutants;
+    return {};
   }
   llvm::MemoryBuffer *buffer = maybeBuffer->get();
   llvm::Expected<std::unique_ptr<llvm::object::ObjectFile>> maybeObject =
@@ -45,7 +43,7 @@ MutantExtractor::extractMutants(const std::string &executable) {
     /// https://github.com/mull-project/mull/issues/932
     diagnostics.warning("Skipping. Executable is not an object file: "s +
                         llvm::toString(std::move(error)) + ": " + executable);
-    return mutants;
+    return {};
   }
 
   llvm::object::ObjectFile *objectFile = maybeObject->get();
@@ -53,42 +51,56 @@ MutantExtractor::extractMutants(const std::string &executable) {
     llvm::StringRef name = llvm_compat::getSectionName(section);
     if (name.equals(".mull_mutants")) {
       llvm::StringRef content = llvm_compat::getSectionContent(section);
-      std::vector<std::string> mutantEncodings = split(content.str(), '\0');
-      for (auto &encoding : mutantEncodings) {
-        std::vector<std::string> chunks = split(encoding, ':');
-
-        std::string mutator = chunks[0];
-        std::string location = chunks[1];
-        int beginLine = std::stoi(chunks[2]);
-        int beginColumn = std::stoi(chunks[3]);
-        int endLine = std::stoi(chunks[4]);
-        int endColumn = std::stoi(chunks[5]);
-        bool covered = std::stoi(chunks[6]);
-
-        std::ostringstream mis;
-        mis << mutator << ":" << location << ":" << beginLine << ":" << beginColumn;
-        std::string identifier = mis.str();
-
-        auto mutant = std::make_unique<Mutant>(
-            identifier,
-            mutator,
-            mull::SourceLocation("", location, "", location, beginLine, beginColumn),
-            mull::SourceLocation("", location, "", location, endLine, endColumn),
-            covered);
-        mutants.push_back(std::move(mutant));
-      }
+      return split(content.str(), '\0');
     }
   }
 
-  return mutants;
+  return {};
 }
 
 std::vector<std::unique_ptr<Mutant>>
 MutantExtractor::extractMutants(const std::vector<std::string> &mutantHolders) {
-  std::vector<std::unique_ptr<Mutant>> result;
+  std::vector<std::string> encodings;
   for (auto &holder : mutantHolders) {
     auto mutants = extractMutants(holder);
-    std::move(std::begin(mutants), std::end(mutants), std::back_inserter(result));
+    std::move(std::begin(mutants), std::end(mutants), std::back_inserter(encodings));
   }
-  return result;
+
+  std::unordered_map<std::string, bool> deduplicatedEncodings;
+  for (auto &encoding : encodings) {
+    // mutants encoded as follows:
+    // mutator:file:line_begin:column_begin:line_end:column_end:covered
+    bool covered = encoding[encoding.size() - 1] == '1';
+    if (deduplicatedEncodings.count(encoding) == 0 || covered) {
+      deduplicatedEncodings[encoding] = covered;
+    }
+  }
+  std::vector<std::unique_ptr<Mutant>> mutants;
+  for (auto &encoding : deduplicatedEncodings) {
+    std::vector<std::string> chunks = split(encoding.first, ':');
+
+    std::string mutator = chunks[0];
+    std::string location = chunks[1];
+    int beginLine = std::stoi(chunks[2]);
+    int beginColumn = std::stoi(chunks[3]);
+    int endLine = std::stoi(chunks[4]);
+    int endColumn = std::stoi(chunks[5]);
+    bool covered = encoding.second;
+
+    std::ostringstream mis;
+    mis << mutator << ":" << location << ":" << beginLine << ":" << beginColumn;
+    std::string identifier = mis.str();
+
+    auto mutant = std::make_unique<Mutant>(
+        identifier,
+        mutator,
+        mull::SourceLocation("", location, "", location, beginLine, beginColumn),
+        mull::SourceLocation("", location, "", location, endLine, endColumn),
+        covered);
+    mutants.push_back(std::move(mutant));
+  }
+
+  std::sort(std::begin(mutants), std::end(mutants), MutantComparator());
+
+  return mutants;
 }
