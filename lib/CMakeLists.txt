@@ -115,7 +115,6 @@ file(GLOB_RECURSE mull_header_files ${MULL_INCLUDE_DIR}/*.h)
 add_library(mull
   ${mull_sources}
   ${mull_header_files}
-  $<TARGET_OBJECTS:LLVMCompatibility>
   )
 
 set_source_files_properties(${mull_header_dirs} PROPERTIES HEADER_FILE_ONLY ON)

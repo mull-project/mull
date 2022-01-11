@@ -1,5 +1,4 @@
 #include "DynamicLibraries.h"
-#include "LLVMCompatibility.h"
 #include "mull/Diagnostics/Diagnostics.h"
 
 #include <llvm/Object/ELFObjectFile.h>
@@ -13,6 +12,28 @@
 using namespace llvm::object;
 using namespace std::string_literals;
 
+static llvm::StringRef getSectionName(const llvm::object::SectionRef &section) {
+#if LLVM_VERSION_MAJOR == 9
+  llvm::StringRef name;
+  section.getName(name);
+  return name;
+#else
+  llvm::Expected<llvm::StringRef> name = section.getName();
+  if (!name) {
+    return {};
+  }
+  return name.get();
+#endif
+}
+
+static llvm::StringRef getSectionContent(const llvm::object::SectionRef &section) {
+  llvm::Expected<llvm::StringRef> content = section.getContents();
+  if (!content) {
+    return {};
+  }
+  return content.get();
+}
+
 template <typename T>
 void librariesFromElf(const ELFObjectFile<T> &file, std::vector<std::string> &libraries) {
   SectionRef nullSection;
@@ -21,7 +42,7 @@ void librariesFromElf(const ELFObjectFile<T> &file, std::vector<std::string> &li
 
   for (auto it = file.section_begin(); it != file.section_end(); ++it) {
     ELFSectionRef elfSection(*it);
-    llvm::StringRef name = llvm_compat::getSectionName(elfSection);
+    llvm::StringRef name = getSectionName(elfSection);
     // FIXME: the dynamic string table should be taken based on .dynamic
     // section's sh_link value
     if (elfSection.getType() == llvm::ELF::SHT_STRTAB && name.equals(".dynstr")) {
@@ -35,8 +56,8 @@ void librariesFromElf(const ELFObjectFile<T> &file, std::vector<std::string> &li
   assert((*stringTableIterator) != nullSection && "Could not find string table");
   assert((*dynamicSectionIterator) != nullSection && "Could not find .dynamic section");
 
-  llvm::StringRef stringTable = llvm_compat::getSectionContent(*stringTableIterator);
-  llvm::StringRef dynamicSection = llvm_compat::getSectionContent(*dynamicSectionIterator);
+  llvm::StringRef stringTable = getSectionContent(*stringTableIterator);
+  llvm::StringRef dynamicSection = getSectionContent(*dynamicSectionIterator);
 
   Elf_Dyn_Base<T> dynamicEntry{};
   uint64_t sectionSize = dynamicSectionIterator->getSize();

@@ -1,5 +1,4 @@
 #include "mull/Parallelization/Tasks/MutantPreparationTasks.h"
-#include "LLVMCompatibility.h"
 #include "mull/MutationPoint.h"
 #include "mull/Parallelization/Progress.h"
 #include <llvm/IR/Constant.h>
@@ -70,7 +69,7 @@ void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode) {
 
   llvm::Type *charPtr = llvm::Type::getInt8Ty(context)->getPointerTo();
   llvm::FunctionType *getEnvType = llvm::FunctionType::get(charPtr, { charPtr }, false);
-  llvm::Value *getenv = llvm_compat::getOrInsertFunction(module, "getenv", getEnvType);
+  llvm::Value *getenv = module->getOrInsertFunction("getenv", getEnvType).getCallee();
 
   for (auto pair : bitcode.getMutationPointsMap()) {
     bool hasCoveredMutants = false;

@@ -1,16 +1,17 @@
 #include "mull/Toolchain/Compiler.h"
 
-#include "LLVMCompatibility.h"
 #include "mull/Bitcode.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Diagnostics/Diagnostics.h"
 
+#include <llvm/Bitcode/BitcodeWriter.h>
 #include <llvm/IR/LegacyPassManager.h>
 #include <llvm/IR/Module.h>
 #include <llvm/IR/Verifier.h>
 #include <llvm/Support/DynamicLibrary.h>
 #include <llvm/Support/FileSystem.h>
 #include <llvm/Support/TargetRegistry.h>
+#include <llvm/Target/TargetMachine.h>
 #include <llvm/Target/TargetOptions.h>
 
 using namespace llvm;
@@ -26,7 +27,7 @@ static std::string tempFile(Diagnostics &diagnostics, const std::string &extensi
   llvm::SmallString<128> resultPath;
   if (std::error_code err = llvm::sys::fs::createTemporaryFile(prefix, extension, resultPath)) {
     diagnostics.error("Cannot create temporary file"s + err.message());
-    return std::string();
+    return {};
   }
   return resultPath.str().str();
 }
@@ -52,11 +53,11 @@ std::string Compiler::compileBitcode(const Bitcode &bitcode) {
 
   if (errorCode) {
     diagnostics.error("Could not open file: "s + errorCode.message());
-    return std::string();
+    return {};
   }
 
   if (!configuration.lowerBitcode) {
-    llvm_compat::writeBitcodeToFile(*bitcode.getModule(), dest);
+    llvm::WriteBitcodeToFile(*bitcode.getModule(), dest);
     return result;
   }
 
@@ -64,7 +65,7 @@ std::string Compiler::compileBitcode(const Bitcode &bitcode) {
   const llvm::Target *target = llvm::TargetRegistry::lookupTarget(targetTriple, error);
   if (!target) {
     diagnostics.error("Cannot lookup target: "s + error + '\n');
-    return std::string();
+    return {};
   }
 
   auto CPU = "generic";
@@ -75,9 +76,15 @@ std::string Compiler::compileBitcode(const Bitcode &bitcode) {
       target->createTargetMachine(targetTriple, CPU, features, opt, relocationModel);
 
   llvm::legacy::PassManager pass;
-  if (llvm_compat::addPassesToEmitObjectFile(targetMachine, pass, dest)) {
+#if LLVM_VERSION_MAJOR == 9
+  llvm::LLVMTargetMachine::CodeGenFileType fileType = llvm::TargetMachine::CGFT_ObjectFile;
+#else
+  llvm::CodeGenFileType fileType = llvm::CGFT_ObjectFile;
+#endif
+
+  if (targetMachine->addPassesToEmitFile(pass, dest, nullptr, fileType)) {
     diagnostics.error("TargetMachine can not emit object file");
-    return std::string();
+    return {};
   }
   pass.run(*bitcode.getModule());
   dest.flush();
@@ -94,9 +101,9 @@ std::string Compiler::compileBitcode(const Bitcode &bitcode) {
     );
     if (errorCode) {
       diagnostics.warning("Could not open temp bc file: "s + errorCode.message());
-      return std::string();
+      return {};
     }
-    llvm_compat::writeBitcodeToFile(*bitcode.getModule(), bcStream);
+    llvm::WriteBitcodeToFile(*bitcode.getModule(), bcStream);
     diagnostics.debug("Emitted object file: "s + result + " for bitcode file: "s + bitcodePath);
   }
   return result;
