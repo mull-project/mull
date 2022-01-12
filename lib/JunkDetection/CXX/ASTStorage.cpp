@@ -81,7 +81,9 @@ const clang::FileEntry *ThreadSafeASTUnit::findFileEntry(const std::string &file
     if (!llvm::sys::path::is_absolute(currentSourceFilePath)) {
       currentSourceFilePath = it->first->tryGetRealPathName();
     }
-    if (currentSourceFilePath.equals(filePath)) {
+    llvm::SmallString<PATH_MAX> realFilePath;
+    llvm::sys::fs::real_path(filePath, realFilePath);
+    if (currentSourceFilePath.equals(filePath) || currentSourceFilePath.equals(realFilePath)) {
       file = it->first;
       break;
     }
@@ -181,6 +183,10 @@ clang::Decl *ThreadSafeASTUnit::getDecl(clang::SourceLocation &location) {
   return nullptr;
 }
 
+bool ThreadSafeASTUnit::hasAST() const {
+  return ast != nullptr;
+}
+
 ASTStorage::ASTStorage(Diagnostics &diagnostics, const std::string &cxxCompilationDatabasePath,
                        const std::string &cxxCompilationFlags,
                        const std::unordered_map<std::string, std::string> &bitcodeCompilationFlags)
@@ -214,7 +220,9 @@ ThreadSafeASTUnit *ASTStorage::findAST(const std::string &sourceFile) {
   for (auto &flag : compilationFlags) {
     args.push_back(flag.c_str());
   }
-  args.push_back(sourceFile.c_str());
+  if (args.size() == 1) {
+    args.push_back(sourceFile.c_str());
+  }
 
   clang::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diagnosticsEngine(
       clang::CompilerInstance::createDiagnostics(new clang::DiagnosticOptions));

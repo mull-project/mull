@@ -6,3 +6,6 @@ set_target_properties(mull-cxx-ir-frontend-${LLVM_VERSION_MAJOR} PROPERTIES COMP
 set_target_properties(mull-cxx-ir-frontend-${LLVM_VERSION_MAJOR} PROPERTIES LIBRARY_OUTPUT_NAME mull-ir-frontend-${LLVM_VERSION_MAJOR})
 set_target_properties(mull-cxx-ir-frontend-${LLVM_VERSION_MAJOR} PROPERTIES PREFIX "")
 set_target_properties(mull-cxx-ir-frontend-${LLVM_VERSION_MAJOR} PROPERTIES SUFFIX "")
+install(TARGETS mull-cxx-ir-frontend-${LLVM_VERSION_MAJOR}
+  RUNTIME DESTINATION lib
+)

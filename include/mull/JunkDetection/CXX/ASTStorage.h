@@ -28,6 +28,7 @@ public:
   bool isInSystemHeader(clang::SourceLocation &location);
 
   clang::Decl *getDecl(clang::SourceLocation &location);
+  bool hasAST() const;
 
 private:
   void recordDeclarations();

@@ -39,12 +39,6 @@ static CompilationDatabase::Flags flagsFromCommand(const clang::tooling::Compile
   CompilationDatabase::Flags flags(command.CommandLine);
   flags = filterFlags(flags, true);
 
-  // The compilation database produced from running
-  // clang ... -MJ <comp.database.json>
-  // contains a file name in the "arguments" array. Since the file name
-  // itself is not a compilation flag we filter it out.
-  flags.erase(std::remove(flags.begin(), flags.end(), command.Filename), flags.end());
-
   // append extraFlags
   std::copy(std::begin(extraFlags), std::end(extraFlags), std::back_inserter(flags));
 
@@ -77,9 +71,6 @@ createBitcodeFlags(Diagnostics &diagnostics,
     CompilationDatabase::Flags fileFlags = flagsFromString(commandline);
 
     fileFlags = filterFlags(fileFlags, true);
-
-    /// Remove file name from the list of flags
-    fileFlags.erase(std::remove(fileFlags.begin(), fileFlags.end(), filename), fileFlags.end());
 
     for (const auto &extraFlag : extraFlags) {
       fileFlags.push_back(extraFlag);
