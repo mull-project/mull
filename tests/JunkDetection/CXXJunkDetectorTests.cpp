@@ -280,8 +280,9 @@ TEST(CXXJunkDetector, no_compdb) {
 
   ASSERT_EQ(points.size(), 8U);
 
-  std::string cxxCompilationFlags =
-      std::string("-I ") + fixtures::junk_detection_compdb_include__path();
+  std::string cxxCompilationFlags = std::string("-I ") +
+                                    fixtures::junk_detection_compdb_include__path() + " " +
+                                    bitcode->getModule()->getSourceFileName();
 
   ASTStorage astStorage(diagnostics, "", cxxCompilationFlags, {});
 

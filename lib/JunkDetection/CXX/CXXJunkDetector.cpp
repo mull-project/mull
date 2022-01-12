@@ -192,7 +192,7 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
   }
 
   ThreadSafeASTUnit *ast = astStorage.findAST(point->getSourceLocation());
-  if (!ast) {
+  if (!ast->hasAST()) {
     return true;
   }
   clang::SourceLocation location = ast->getLocation(point->getSourceLocation());

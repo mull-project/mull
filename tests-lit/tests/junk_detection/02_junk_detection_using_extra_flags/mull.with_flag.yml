@@ -3,3 +3,4 @@ mutators:
   - cxx_remove_void_call
 compilerFlags:
   - -DFLAG=1
+  - ./sample.cpp

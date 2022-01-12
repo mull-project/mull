@@ -397,6 +397,7 @@ void mull::mutateBitcode(llvm::Module &module) {
     diagnostics.info("Using configuration "s + configPath);
     configuration = Configuration::loadFromDisk(diagnostics, configPath);
   }
+  configuration.parallelization.normalize();
 
   if (configuration.debugEnabled) {
     diagnostics.enableDebugMode();
