@@ -83,7 +83,9 @@ const clang::FileEntry *ThreadSafeASTUnit::findFileEntry(const std::string &file
     }
     llvm::SmallString<PATH_MAX> realFilePath;
     llvm::sys::fs::real_path(filePath, realFilePath);
-    if (currentSourceFilePath.equals(filePath) || currentSourceFilePath.equals(realFilePath)) {
+    llvm::SmallString<PATH_MAX> realSourceFilePath;
+    llvm::sys::fs::real_path(currentSourceFilePath, realSourceFilePath);
+    if (realSourceFilePath.equals(realFilePath)) {
       file = it->first;
       break;
     }

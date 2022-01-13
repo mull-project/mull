@@ -22,10 +22,8 @@
       - cmake
       - -G
       - Ninja
-      - -DCMAKE_CXX_FLAGS=-fembed-bitcode --sysroot={{ SDKROOT }}
-      - -DCMAKE_EXE_LINKER_FLAGS=-lc++
+      - -DCMAKE_CXX_FLAGS={{ test_opt_level }} -grecord-command-line -fexperimental-new-pass-manager -fpass-plugin=/usr/local/lib/mull-ir-frontend-{{ llvm_major }} --sysroot={{ SDKROOT }}
       - -DCMAKE_BUILD_TYPE=Debug
-      - -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
       - -DCMAKE_C_COMPILER={{ cmake_c_compiler }}
       - -DCMAKE_CXX_COMPILER={{ cmake_cxx_compiler }}
       - "{{ working_dir }}/integration/fmt"
@@ -36,6 +34,8 @@
   command: ninja core-test
   args:
     chdir: "{{ working_dir }}/integration/fmt.build.dir"
+  environment:
+    MULL_CONFIG: "{{ test_mull_config }}"
 
 - name: Run fmt
   command: ./bin/core-test
@@ -43,48 +43,57 @@
     chdir: "{{ working_dir }}/integration/fmt.build.dir"
 
 - name: Run Mull against fmt
+  command: mull-cxx-{{ llvm_major }} {{ working_dir }}/integration/fmt.build.dir/bin/core-test
+
+- name: Clone OpenSSL
+  git:
+    repo: https://github.com/openssl/openssl.git
+    dest: "{{ working_dir }}/integration/openssl"
+    version: a4e01187d3648d9ce99507097400902cf21f9b55
+
+- name: Prepare build system for OpenSSL (no-shared)
   command:
   args:
     argv:
-      - mull-cxx-{{ llvm_major }}
-      - -mutators=cxx_add_to_sub
-      - -compilation-flags=--sysroot={{ SDKROOT }}
-      - -compdb-path={{ working_dir }}/integration/fmt.build.dir/compile_commands.json
-      - -linker={{ cmake_cxx_compiler }}
-      - -linker-flags=-lc++ -lpthread
-      - "{{ working_dir }}/integration/fmt.build.dir/bin/core-test"
-
-- name: Clone OpenSSL (no-shared)
-  git:
-    repo: https://github.com/openssl/openssl.git
-    dest: "{{ working_dir }}/integration/openssl-no-shared"
-    version: d4e4bd2a8163f355fa8a3884077eaec7adc75ff7
-
-- name: Create build directory for OpenSSL (no-shared)
-  file:
-    path: "{{ working_dir }}/integration/openssl-no-shared.build.dir"
-    state: directory
-
-- name: Prepare build system for OpenSSL (no-shared)
-  command: ./config -no-asm -no-shared -g -O0 -fembed-bitcode --sysroot={{ SDKROOT }}
-  args:
-    chdir: "{{ working_dir }}/integration/openssl-no-shared"
-    creates: "{{ working_dir }}/integration/openssl-no-shared/Makefile"
+      - ./config
+      - -g
+      - -O0
+      - "{{ test_opt_level }}"
+      - -grecord-command-line
+      - -fexperimental-new-pass-manager
+      - -fpass-plugin=/usr/local/lib/mull-ir-frontend-{{ llvm_major }}
+      - --sysroot={{ SDKROOT }}
+    chdir: "{{ working_dir }}/integration/openssl"
+    creates: "{{ working_dir }}/integration/openssl/Makefile"
   environment:
     CC: "{{ cmake_c_compiler }}"
 
-- name: Build OpenSSL (no-shared)
-  command: make all
+- name: Build OpenSSL (generated)
+  command: make build_generated -j
   args:
-    chdir: "{{ working_dir }}/integration/openssl-no-shared"
+    chdir: "{{ working_dir }}/integration/openssl"
+  environment:
+    MULL_CONFIG: "{{ test_mull_config }}"
 
-- name: Run Mull against OpenSSL (no-shared)
-  command:
+- name: Build OpenSSL (bio_enc_test)
+  command: make ./test/bio_enc_test
   args:
-    argv:
-      - mull-cxx-{{ llvm_major }}
-      - -mutators=cxx_add_to_sub
-      - -compilation-flags=--sysroot={{ SDKROOT }} -I{{ working_dir }}/integration/openssl-no-shared/include -I{{ working_dir }}/integration/openssl-no-shared/crypto/include -I{{ working_dir }}/integration/openssl-no-shared
-      - -linker={{ cmake_cxx_compiler }}
-      - -linker-flags=-lc++ -ldl -lpthread
-      - "{{ working_dir }}/integration/openssl-no-shared/test/bio_enc_test"
+    chdir: "{{ working_dir }}/integration/openssl"
+  environment:
+    MULL_CONFIG: "{{ test_mull_config }}"
+
+- name: Patch OpenSSL on macOS (bio_enc_test)
+  command: install_name_tool -change /usr/local/lib/libcrypto.3.dylib "{{ working_dir }}/integration/openssl/libcrypto.3.dylib" ./test/bio_enc_test
+  args:
+    chdir: "{{ working_dir }}/integration/openssl"
+  when: platform == 'macos'
+
+- name: Run OpenSSL (bio_enc_test)
+  command: ./test/bio_enc_test
+  args:
+    chdir: "{{ working_dir }}/integration/openssl"
+  environment:
+    LD_LIBRARY_PATH: "{{ working_dir }}/integration/openssl"
+
+- name: Run Mull against OpenSSL
+  command: mull-runner-{{ llvm_major }} {{ working_dir }}/integration/openssl/test/bio_enc_test
