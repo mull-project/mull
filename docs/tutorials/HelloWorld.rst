@@ -9,29 +9,35 @@ mutants and generate mutation testing reports.
 **TL;DR version**: if you want to run a single copy and paste example, scroll
 down to ``Killing mutants again, all killed`` below.
 
+__Note: Clang 9 or newer is required!__
+
 ----
 
 Step 1: Checking version
 ------------------------
 
-The tutorial assumes that you have `installed <Installation.html>`_ Mull on your system and
-have the `mull-cxx` executable available:
+Mull comes in a form of a compiler plugin and therefore tied to specific versions
+of Clang and LLVM. As a consequence of that, tools and plugins have a suffix with
+the actual Clang/LLVM version.
+
+This tutorial assumes that you are using Clang 12 and that you have
+`installed <Installation.html>`_ Mull on your system and have the ``mull-runner-12``
+executable available:
 
 .. code-block:: bash
 
-    $ mull-cxx -version
+    $ mull-runner-12 -version
     Mull: LLVM-based mutation testing
     https://github.com/mull-project/mull
-    Version: 0.8.0
-    Commit: f94f38ed
-    Date: 04 Jan 2021
-    LLVM: 9.0.0
+    Version: 0.15.0
+    Commit: a4be349e
+    Date: 18 Jan 2022
+    LLVM: 12.0.1
 
-Step 2: Enabling Bitcode
-------------------------
+Step 2: Enabling compiler plugin
+--------------------------------
 
-The most important thing that Mull needs to know is the path to your program
-which must be a valid C or C++ executable. Let's create a C program:
+Let's create a C++ program:
 
 .. code-block:: c
 
@@ -43,61 +49,53 @@ and compile it:
 
 .. code-block:: bash
 
-    $ clang main.cpp -o hello-world
+    $ clang-12 main.cpp -o hello-world
 
-We can already try running ``mull-cxx`` and see what happens:
-
-.. code-block:: text
-
-    $ mull-cxx hello-world
-    [info] Extracting bitcode from executable (threads: 1)
-    [warning] No bitcode: x86_64
-           [################################] 1/1. Finished in 3ms
-    [info] Sanity check run (threads: 1)
-           [################################] 1/1. Finished in 409ms
-    [info] Gathering functions under test (threads: 1)
-           [################################] 1/1. Finished in 0ms
-    [info] No mutants found. Mutation score: infinitely high
-    [info] Total execution time: 413ms
-
-Notice the ``No bitcode: x86_64`` warning! Now Mull is already trying to work
-with our executable but there is still one important detail that is missing: we
-haven't compiled the program with a special option that embeds LLVM bitcode
-into our executable.
-
-Mull works on a level of LLVM Bitcode relying on debug information to show
-results, therefore you should build your project with ``-fembed-bitcode`` and
-``-g`` flags enabled.
-
-Let's try again:
+We can already try using ``mull-runner`` and see what happens:
 
 .. code-block:: text
 
-    $ clang -fembed-bitcode -g main.cpp -o hello-world
-    $ mull-cxx hello-world
-    [info] Extracting bitcode from executable (threads: 1)
+    $ mull-runner-12 ./hello-world
+    [info] Warm up run (threads: 1)
            [################################] 1/1. Finished in 5ms
-    [info] Loading bitcode files (threads: 1)
-           [################################] 1/1. Finished in 11ms
-    [info] Sanity check run (threads: 1)
-           [################################] 1/1. Finished in 336ms
-    [info] Gathering functions under test (threads: 1)
-           [################################] 1/1. Finished in 1ms
-    [info] Applying function filter: no debug info (threads: 1)
-           [################################] 1/1. Finished in 10ms
-    [info] Applying function filter: file path (threads: 1)
-           [################################] 1/1. Finished in 10ms
-    [info] Instruction selection (threads: 1)
-           [################################] 1/1. Finished in 13ms
-    [info] Searching mutants across functions (threads: 1)
-           [################################] 1/1. Finished in 11ms
+    [info] Baseline run (threads: 1)
+           [################################] 1/1. Finished in 4ms
     [info] No mutants found. Mutation score: infinitely high
-    [info] Total execution time: 400ms
+    [info] Total execution time: 10ms
 
-The ``No bitcode: x86_64`` warning has gone and now we can focus on another
-important part of the output: ``No mutants found. Mutation score: infinitely
-high``. We have our executable but we don't have any code so there is nothing
-Mull could work on.
+Notice the ``No mutants found`` message! Now, Mull is ready to work with the executable
+but there are no mutants: we haven't compiled the program with the compiler plugin that embeds
+mutants into our executable.
+
+Let's fix that!
+To pass the plugin to Clang, you need to add a few compiler flags.
+
+.. code-block:: text
+
+    $ clang-12 -fexperimental-new-pass-manager \
+      -fpass-plugin=/usr/local/lib/mull-ir-frontend-12 \
+      -g -grecord-command-line \
+      main.cpp -o hello-world
+    [warning] Mull cannot find config (mull.yml). Using some defaults.
+
+Notice the warning: Mull needs a config.
+However, in this tutorial we can ignore the warning and rely on the defaults.
+
+You can learn more about the config `here <TODO>`_.
+
+Let's run ``mull-runner`` again:
+
+.. code-block:: text
+
+    $ mull-runner-12 ./hello-world
+    [info] Warm up run (threads: 1)
+           [################################] 1/1. Finished in 4ms
+    [info] Baseline run (threads: 1)
+           [################################] 1/1. Finished in 6ms
+    [info] No mutants found. Mutation score: infinitely high
+    [info] Total execution time: 12ms
+
+Still no mutants, but this time it is because we don't have any code Mull can mutate.
 
 Step 3: Killing mutants, one survived
 -------------------------------------
@@ -114,13 +112,13 @@ Let's add some code:
     }
 
     int main() {
-      int test1 = valid_age(25) == true;
+      bool test1 = valid_age(25) == true;
       if (!test1) {
         /// test failed
         return 1;
       }
 
-      int test2 = valid_age(20) == false;
+      bool test2 = valid_age(20) == false;
       if (!test2) {
         /// test failed
         return 1;
@@ -130,74 +128,41 @@ Let's add some code:
       return 0;
     }
 
-We compile this new code using the bitcode flags and run the Mull again. This
-time we also want to add additional flag ``-ide-reporter-show-killed`` which
+We re-compile this new code using the plugin and run the Mull again. This
+time we also want to add an additional flag ``-ide-reporter-show-killed`` which
 tells Mull to print killed mutations. Normally we are not interested in seeing
-killed mutations in console output but in this tutorial we want to be more
+killed mutants in console output but in this tutorial we want to be more
 verbose.
 
 .. code-block:: text
 
-    $ clang -fembed-bitcode -g main.cpp -o hello-world
-    $ mull-cxx -ide-reporter-show-killed hello-world
-    [info] Extracting bitcode from executable (threads: 1)
-           [################################] 1/1. Finished in 6ms
-    [info] Loading bitcode files (threads: 1)
-           [################################] 1/1. Finished in 11ms
-    [info] Sanity check run (threads: 1)
-           [################################] 1/1. Finished in 341ms
-    [info] Gathering functions under test (threads: 1)
-           [################################] 1/1. Finished in 0ms
-    [info] Applying function filter: no debug info (threads: 3)
-           [################################] 3/3. Finished in 0ms
-    [info] Applying function filter: file path (threads: 2)
-           [################################] 2/2. Finished in 0ms
-    [info] Instruction selection (threads: 2)
-           [################################] 2/2. Finished in 11ms
-    [info] Searching mutants across functions (threads: 2)
-           [################################] 2/2. Finished in 10ms
-    [info] Applying filter: no debug info (threads: 6)
-           [################################] 6/6. Finished in 1ms
-    [info] Applying filter: file path (threads: 6)
-           [################################] 6/6. Finished in 0ms
-    [info] Applying filter: junk (threads: 6)
-           [################################] 6/6. Finished in 11ms
-    [info] Prepare mutations (threads: 1)
-           [################################] 1/1. Finished in 0ms
-    [info] Cloning functions for mutation (threads: 1)
-           [################################] 1/1. Finished in 11ms
-    [info] Removing original functions (threads: 1)
-           [################################] 1/1. Finished in 10ms
-    [info] Redirect mutated functions (threads: 1)
-           [################################] 1/1. Finished in 10ms
-    [info] Applying mutations (threads: 1)
-           [################################] 4/4. Finished in 12ms
-    [info] Compiling original code (threads: 1)
-           [################################] 1/1. Finished in 11ms
-    [info] Link mutated program (threads: 1)
-           [################################] 1/1. Finished in 109ms
+    $ clang-12 -fexperimental-new-pass-manager \
+            -fpass-plugin=/usr/local/lib/mull-ir-frontend-12 \
+            -g -grecord-command-line \
+            main.cpp -o hello-world
+    $ mull-runner-12 -ide-reporter-show-killed hello-world
     [info] Warm up run (threads: 1)
-           [################################] 1/1. Finished in 360ms
+           [################################] 1/1. Finished in 151ms
     [info] Baseline run (threads: 1)
-           [################################] 1/1. Finished in 18ms
+           [################################] 1/1. Finished in 3ms
     [info] Running mutants (threads: 4)
-           [################################] 4/4. Finished in 63ms
+           [################################] 4/4. Finished in 10ms
     [info] Killed mutants (3/4):
-    /tmp/sc-PzmaCNIRu/main.cpp:2:15: warning: Killed: Replaced >= with < [cxx_ge_to_lt]
-          if (age >= 21) {
-                  ^
-    /tmp/sc-PzmaCNIRu/main.cpp:9:33: warning: Killed: Replaced == with != [cxx_eq_to_ne]
-          int test1 = valid_age(25) == true;
-                                    ^
-    /tmp/sc-PzmaCNIRu/main.cpp:15:33: warning: Killed: Replaced == with != [cxx_eq_to_ne]
-          int test2 = valid_age(20) == false;
-                                    ^
+    /tmp/sc-tTV8a84lL/main.cpp:2:11: warning: Killed: Replaced >= with < [cxx_ge_to_lt]
+      if (age >= 21) {
+              ^
+    /tmp/sc-tTV8a84lL/main.cpp:9:30: warning: Killed: Replaced == with != [cxx_eq_to_ne]
+      bool test1 = valid_age(25) == true;
+                                 ^
+    /tmp/sc-tTV8a84lL/main.cpp:15:30: warning: Killed: Replaced == with != [cxx_eq_to_ne]
+      bool test2 = valid_age(20) == false;
+                                 ^
     [info] Survived mutants (1/4):
-    /tmp/sc-PzmaCNIRu/main.cpp:2:15: warning: Survived: Replaced >= with > [cxx_ge_to_gt]
-          if (age >= 21) {
-                  ^
+    /tmp/sc-tTV8a84lL/main.cpp:2:11: warning: Survived: Replaced >= with > [cxx_ge_to_gt]
+      if (age >= 21) {
+              ^
     [info] Mutation score: 75%
-    [info] Total execution time: 996ms
+    [info] Total execution time: 167ms
 
 What we are seeing now is four mutations: three mutations are ``Killed``, another
 one is ``Survived``. If we take a closer look at the code and the contents
@@ -247,69 +212,36 @@ The code:
 
 .. code-block:: text
 
-    $ clang -fembed-bitcode -g main.cpp -o hello-world
-    $ mull-cxx -ide-reporter-show-killed hello-world
-    [info] Extracting bitcode from executable (threads: 1)
-           [################################] 1/1. Finished in 4ms
-    [info] Loading bitcode files (threads: 1)
-           [################################] 1/1. Finished in 11ms
-    [info] Sanity check run (threads: 1)
-           [################################] 1/1. Finished in 7ms
-    [info] Gathering functions under test (threads: 1)
-           [################################] 1/1. Finished in 0ms
-    [info] Applying function filter: no debug info (threads: 3)
-           [################################] 3/3. Finished in 0ms
-    [info] Applying function filter: file path (threads: 2)
-           [################################] 2/2. Finished in 0ms
-    [info] Instruction selection (threads: 2)
-           [################################] 2/2. Finished in 12ms
-    [info] Searching mutants across functions (threads: 2)
-           [################################] 2/2. Finished in 10ms
-    [info] Applying filter: no debug info (threads: 5)
-           [################################] 5/5. Finished in 0ms
-    [info] Applying filter: file path (threads: 5)
-           [################################] 5/5. Finished in 1ms
-    [info] Applying filter: junk (threads: 5)
-           [################################] 5/5. Finished in 12ms
-    [info] Prepare mutations (threads: 1)
-           [################################] 1/1. Finished in 0ms
-    [info] Cloning functions for mutation (threads: 1)
-           [################################] 1/1. Finished in 10ms
-    [info] Removing original functions (threads: 1)
-           [################################] 1/1. Finished in 11ms
-    [info] Redirect mutated functions (threads: 1)
-           [################################] 1/1. Finished in 10ms
-    [info] Applying mutations (threads: 1)
-           [################################] 5/5. Finished in 0ms
-    [info] Compiling original code (threads: 1)
-           [################################] 1/1. Finished in 11ms
-    [info] Link mutated program (threads: 1)
-           [################################] 1/1. Finished in 62ms
+    $ clang-12 -fexperimental-new-pass-manager \
+                  -fpass-plugin=/usr/local/lib/mull-ir-frontend-12 \
+                  -g -grecord-command-line \
+                  main.cpp -o hello-world
+    $ mull-runner-12 -ide-reporter-show-killed hello-world
     [info] Warm up run (threads: 1)
-           [################################] 1/1. Finished in 311ms
+           [################################] 1/1. Finished in 469ms
     [info] Baseline run (threads: 1)
-           [################################] 1/1. Finished in 19ms
+           [################################] 1/1. Finished in 4ms
     [info] Running mutants (threads: 5)
-           [################################] 5/5. Finished in 63ms
+           [################################] 5/5. Finished in 12ms
     [info] Killed mutants (5/5):
-    /tmp/sc-PzmaCNIRu/main.cpp:2:15: warning: Killed: Replaced >= with > [cxx_ge_to_gt]
-          if (age >= 21) {
-                  ^
-    /tmp/sc-PzmaCNIRu/main.cpp:2:15: warning: Killed: Replaced >= with < [cxx_ge_to_lt]
-          if (age >= 21) {
-                  ^
-    /tmp/sc-PzmaCNIRu/main.cpp:9:34: warning: Killed: Replaced == with != [cxx_eq_to_ne]
-          bool test1 = valid_age(25) == true;
-                                     ^
-    /tmp/sc-PzmaCNIRu/main.cpp:15:34: warning: Killed: Replaced == with != [cxx_eq_to_ne]
-          bool test2 = valid_age(20) == false;
-                                     ^
-    /tmp/sc-PzmaCNIRu/main.cpp:21:34: warning: Killed: Replaced == with != [cxx_eq_to_ne]
-          bool test3 = valid_age(21) == true;
-                                     ^
+    /tmp/sc-tTV8a84lL/main.cpp:2:11: warning: Killed: Replaced >= with > [cxx_ge_to_gt]
+      if (age >= 21) {
+              ^
+    /tmp/sc-tTV8a84lL/main.cpp:2:11: warning: Killed: Replaced >= with < [cxx_ge_to_lt]
+      if (age >= 21) {
+              ^
+    /tmp/sc-tTV8a84lL/main.cpp:9:30: warning: Killed: Replaced == with != [cxx_eq_to_ne]
+      bool test1 = valid_age(25) == true;
+                                 ^
+    /tmp/sc-tTV8a84lL/main.cpp:15:30: warning: Killed: Replaced == with != [cxx_eq_to_ne]
+      bool test2 = valid_age(20) == false;
+                                 ^
+    /tmp/sc-tTV8a84lL/main.cpp:21:30: warning: Killed: Replaced == with != [cxx_eq_to_ne]
+      bool test3 = valid_age(21) == true;
+                                 ^
     [info] All mutations have been killed
     [info] Mutation score: 100%
-    [info] Total execution time: 554ms
+    [info] Total execution time: 487ms
 
 In this last run, we see that all mutants were killed since we covered with tests
 all cases around the ``<=``.
@@ -317,14 +249,16 @@ all cases around the ``<=``.
 Summary
 -------
 
-This is a short summary of what we have learned in the tutorial.
-Your code has to be compiled with ``-fembed-bitcode -g`` compile flags:
+As a summary, all you need to enable Mull is to add a few compiler flags to the
+build system and then run ``mull-runner`` against the resulting executable.
+Just to recap:
 
-  - Mull expects embedded bitcode files to be present in a binary executable
-    (ensured by ``-fembed-bitcode``).
+.. code-block:: text
 
-  - Mull needs debug information to be included by the compiler (enabled by
-    ``-g``). Mull uses this information to find mutations in bitcode and source
-    code.
+    $ clang-12 -fexperimental-new-pass-manager \
+                  -fpass-plugin=/usr/local/lib/mull-ir-frontend-12 \
+                  -g -grecord-command-line \
+                  main.cpp -o hello-world
+    $ mull-runner-12 hello-world
 
 The next step is to learn about `Compilation Database and Junk Mutations <CompilationDatabaseAndJunk.html>`_

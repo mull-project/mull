@@ -394,7 +394,6 @@ void mull::mutateBitcode(llvm::Module &module) {
   if (configPath.empty()) {
     diagnostics.warning("Mull cannot find config (mull.yml). Using some defaults.");
   } else {
-    diagnostics.info("Using configuration "s + configPath);
     configuration = Configuration::loadFromDisk(diagnostics, configPath);
   }
   configuration.parallelization.normalize();
@@ -407,6 +406,10 @@ void mull::mutateBitcode(llvm::Module &module) {
   }
   if (configuration.silent) {
     diagnostics.makeSilent();
+  }
+
+  if (!configPath.empty()) {
+    diagnostics.info("Using configuration "s + configPath);
   }
 
   std::vector<std::unique_ptr<mull::Filter>> filterStorage;
