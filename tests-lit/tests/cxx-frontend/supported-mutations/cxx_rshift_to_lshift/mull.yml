@@ -1,2 +1,4 @@
 mutators:
   - cxx_rshift_to_lshift
+
+quiet: false

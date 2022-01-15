@@ -1,2 +1,3 @@
 mutators:
   - cxx_bitwise
+quiet: false

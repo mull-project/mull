@@ -8,6 +8,9 @@
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/Path.h>
 #include <unistd.h>
+#ifdef __APPLE__
+#include <dlfcn.h>
+#endif
 
 using namespace llvm::object;
 using namespace std::string_literals;
@@ -112,7 +115,21 @@ void mull::resolveLibraries(mull::Diagnostics &diagnostics,
     if (llvm::sys::fs::exists(libraryPath)) {
       resolvedLibraries.push_back(std::move(libraryPath));
     } else {
-      diagnostics.warning("Could not find dynamic library: "s + library);
+      /// on macOS, system dylibs are not present on disk, but still valid and available
+      /// through the dyld cache.
+      /// In this case, we don't care about the libraries (system libraries won't have mutants)
+      /// but we don't want to show useless warnings
+      bool showWarning = true;
+#ifdef __APPLE__
+      void *handle = dlopen(library.c_str(), RTLD_LAZY);
+      if (handle != nullptr) {
+        /// dyld cache
+        showWarning = false;
+      }
+#endif
+      if (showWarning) {
+        diagnostics.warning("Could not find dynamic library: "s + library);
+      }
     }
   }
 }

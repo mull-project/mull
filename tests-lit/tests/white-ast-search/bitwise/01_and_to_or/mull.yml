@@ -1,3 +1,4 @@
 mutators:
   - cxx_and_to_or
 debugEnabled: true
+quiet: false

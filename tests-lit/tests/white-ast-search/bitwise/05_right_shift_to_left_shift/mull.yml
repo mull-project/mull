@@ -1,3 +1,4 @@
 mutators:
   - cxx_rshift_to_lshift
 debugEnabled: true
+quiet: false

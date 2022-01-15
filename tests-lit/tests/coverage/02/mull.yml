@@ -3,3 +3,4 @@ mutators:
 coverageInfo: ./main.c.profdata
 executable: ./main.c.exe
 includeNotCovered: true
+quiet: false

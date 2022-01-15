@@ -28,6 +28,8 @@ template <> struct llvm::yaml::MappingTraits<ParallelizationConfig> {
 template <> struct llvm::yaml::MappingTraits<Configuration> {
   static void mapping(llvm::yaml::IO &io, Configuration &config) {
     io.mapOptional("debugEnabled", config.debugEnabled);
+    io.mapOptional("quiet", config.quiet);
+    io.mapOptional("silent", config.silent);
     io.mapOptional("dryRunEnabled", config.dryRunEnabled);
     io.mapOptional("captureTestOutput", config.captureTestOutput);
     io.mapOptional("captureMutantOutput", config.captureMutantOutput);

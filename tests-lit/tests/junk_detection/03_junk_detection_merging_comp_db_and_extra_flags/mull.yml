@@ -4,3 +4,5 @@ mutators:
 compilationDatabasePath: compile_commands.json
 compilaerFlags:
   - -DFLAG_VIA_EXTRA_FLAGS=1
+
+quiet: false

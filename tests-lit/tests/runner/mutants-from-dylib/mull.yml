@@ -3,3 +3,4 @@ mutators:
 compilerFlags:
   - "-DSHARED_LIB"
   - ./test.c
+quiet: false

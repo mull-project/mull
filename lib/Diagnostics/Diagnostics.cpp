@@ -8,8 +8,8 @@ using namespace mull;
 class mull::DiagnosticsImpl {
 public:
   DiagnosticsImpl() {
-    logger = std::unique_ptr<spdlog::logger>(new spdlog::logger(
-        "default", spdlog::sink_ptr(new spdlog::sinks::ansicolor_stdout_sink_st)));
+    logger = std::make_unique<spdlog::logger>(
+        "default", spdlog::sink_ptr(new spdlog::sinks::ansicolor_stdout_sink_st));
     logger->set_pattern("[%^%l%$] %v");
   }
   spdlog::logger &log() {
@@ -18,12 +18,14 @@ public:
   void enableDebugMode() {
     log().set_level(spdlog::level::level_enum::debug);
   }
+
 private:
   std::unique_ptr<spdlog::logger> logger;
 };
 
 Diagnostics::Diagnostics()
-    : impl(new DiagnosticsImpl()), seenProgress(false), debugModeEnabled(false), strictModeEnabled(false) {}
+    : impl(new DiagnosticsImpl()), seenProgress(false), debugModeEnabled(false),
+      strictModeEnabled(false), quiet(false), silent(false) {}
 
 Diagnostics::~Diagnostics() {
   delete impl;
@@ -40,14 +42,30 @@ void Diagnostics::enableStrictMode() {
   strictModeEnabled = true;
 }
 
+void Diagnostics::makeQuiet() {
+  std::lock_guard<std::mutex> guard(mutex);
+  quiet = true;
+}
+
+void Diagnostics::makeSilent() {
+  std::lock_guard<std::mutex> guard(mutex);
+  silent = true;
+}
+
 void Diagnostics::info(const std::string &message) {
   std::lock_guard<std::mutex> guard(mutex);
+  if (quiet) {
+    return;
+  }
   prepare();
   impl->log().info(message);
 }
 
 void Diagnostics::warning(const std::string &message) {
   std::lock_guard<std::mutex> guard(mutex);
+  if (silent && !strictModeEnabled) {
+    return;
+  }
   prepare();
   impl->log().warn(message);
   if (strictModeEnabled) {
@@ -67,6 +85,9 @@ void Diagnostics::error(const std::string &message) {
 
 void Diagnostics::progress(const std::string &message) {
   std::lock_guard<std::mutex> guard(mutex);
+  if (quiet) {
+    return;
+  }
   seenProgress = true;
   fprintf(stdout, "%s", message.c_str());
   fflush(stdout);
