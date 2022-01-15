@@ -14,6 +14,8 @@ class Diagnostics;
 
 struct Configuration {
   bool debugEnabled;
+  bool quiet;
+  bool silent;
   bool dryRunEnabled;
   bool captureTestOutput;
   bool captureMutantOutput;

@@ -1,2 +1,4 @@
 mutators:
   - cxx_xor_assign_to_or_assign
+
+quiet: false

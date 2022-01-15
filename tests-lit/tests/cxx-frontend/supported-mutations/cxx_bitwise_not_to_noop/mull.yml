@@ -1,2 +1,4 @@
 mutators:
   - cxx_bitwise_not_to_noop
+
+quiet: false

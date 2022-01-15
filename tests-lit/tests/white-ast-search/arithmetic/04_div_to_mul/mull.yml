@@ -1,3 +1,4 @@
 mutators:
   - cxx_div_to_mul
 debugEnabled: true
+quiet: false

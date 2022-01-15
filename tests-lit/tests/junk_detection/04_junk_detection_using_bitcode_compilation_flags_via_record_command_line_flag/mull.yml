@@ -1,3 +1,5 @@
 mutators:
   - cxx_add_to_sub
   - cxx_remove_void_call
+
+quiet: false

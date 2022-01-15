@@ -2,3 +2,4 @@ mutators:
   - cxx_remove_void_call
   - cxx_add_to_sub
 compilationDatabasePath: compile_commands.no_flag.json
+quiet: false

@@ -1,2 +1,4 @@
 mutators:
   - cxx_mul_assign_to_div_assign
+
+quiet: false

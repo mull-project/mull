@@ -4,3 +4,4 @@ includePaths:
   - ".*cpp"
 excludePaths:
   - "Output/.*"
+quiet: false

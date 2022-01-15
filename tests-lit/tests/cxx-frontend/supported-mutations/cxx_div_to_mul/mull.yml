@@ -1,2 +1,4 @@
 mutators:
   - cxx_div_to_mul
+
+quiet: false

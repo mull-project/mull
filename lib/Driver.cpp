@@ -402,6 +402,12 @@ void mull::mutateBitcode(llvm::Module &module) {
   if (configuration.debugEnabled) {
     diagnostics.enableDebugMode();
   }
+  if (configuration.quiet) {
+    diagnostics.makeQuiet();
+  }
+  if (configuration.silent) {
+    diagnostics.makeSilent();
+  }
 
   std::vector<std::unique_ptr<mull::Filter>> filterStorage;
   mull::Filters filters;

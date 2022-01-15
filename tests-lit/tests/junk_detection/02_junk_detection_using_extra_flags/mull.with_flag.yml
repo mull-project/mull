@@ -4,3 +4,5 @@ mutators:
 compilerFlags:
   - -DFLAG=1
   - ./sample.cpp
+
+quiet: false
