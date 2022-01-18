@@ -16,7 +16,6 @@ RUN: cd %S && %clang_cxx %sysroot %pass_mull_ir_frontend -g %s -o %s-ir.exe | %f
 
 RUN: (unset TERM; %mull_cxx -linker=%clang_cxx -linker-flags="%sysroot" -debug -mutators=cxx_eq_to_ne -mutate-only -output=%s-mutated.exe -reporters=IDE -ide-reporter-show-killed -compdb-path %S/compile_commands.json %s.exe 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=CHECK-MUTATE
 CHECK-MUTATE-NOT:{{^.*[Ee]rror.*$}}
-CHECK-MUTATE-NOT:{{^.*[Ww]arning.*$}}
 
 CHECK-MUTATE:[info] Applying filter: junk (threads: 1)
 CHECK-MUTATE:[debug] CXXJunkDetector: mutation "Equal to Not Equal": {{.*}}sample.cpp:2:12 (end: 2:14)

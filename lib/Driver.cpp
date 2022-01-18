@@ -392,7 +392,7 @@ void mull::mutateBitcode(llvm::Module &module) {
   std::string configPath = Configuration::findConfig(diagnostics);
   Configuration configuration;
   if (configPath.empty()) {
-    diagnostics.warning("Config not found. Using some defaults.");
+    diagnostics.warning("Mull cannot find config (mull.yml). Using some defaults.");
   } else {
     diagnostics.info("Using configuration "s + configPath);
     configuration = Configuration::loadFromDisk(diagnostics, configPath);
@@ -505,6 +505,17 @@ void mull::mutateBitcode(llvm::Module &module) {
   SingleTaskExecutor singleTask(diagnostics);
 
   /// Actual Work
+
+  /// How can I check that -g flag (debug info enable) was set, from llvm pass
+  /// https://stackoverflow.com/a/21713717/598057
+  if (module.getNamedMetadata("llvm.dbg.cu") == nullptr) {
+    diagnostics.warning("Mull cannot find debug information. Recompile with `-g` flag.");
+  }
+
+  if (bitcodeCompilationFlags.empty()) {
+    diagnostics.warning(
+        "Mull cannot find compiler flags. Recompile with `-grecord-command-line` flag.");
+  }
 
   Bitcode bitcode(&module);
   std::vector<FunctionUnderTest> functionsUnderTest;

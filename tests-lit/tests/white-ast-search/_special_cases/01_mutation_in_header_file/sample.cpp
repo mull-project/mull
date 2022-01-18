@@ -15,7 +15,6 @@ RUN: (unset TERM; %mull_cxx -mutate-only -output=%s-mutated.exe -linker=%clang_c
 RUN: (unset TERM; %mull_runner -debug -reporters=IDE -ide-reporter-show-killed %s-mutated.exe 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 RUN: (unset TERM; %mull_runner -debug -reporters=IDE -ide-reporter-show-killed %s-ir.exe 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 CHECK-MUTATE-NOT:{{^.*[Ee]rror.*$}}
-CHECK-MUTATE-NOT:{{^.*[Ww]arning.*$}}
 
 CHECK-MUTATE:[info] Applying filter: junk (threads: 1)
 CHECK-MUTATE:[debug] CXXJunkDetector: mutation "Add to Sub": {{.*}}sum.h:4:12 (end: 4:13)
