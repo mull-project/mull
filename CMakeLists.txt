@@ -25,8 +25,9 @@ endif()
 
 set (PROJECT_VERSION ${MULL_VERSION})
 
-set (PROJECT_DESCRIPTION "LLVM-based mutation testing")
+set (PROJECT_DESCRIPTION "Practical mutation testing for C and C++")
 set (PROJECT_HOMEPAGE_URL "https://github.com/mull-project/mull")
+set (PROJECT_DOCS_URL "https://mull.readthedocs.io")
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/properties.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/fixtures.cmake)

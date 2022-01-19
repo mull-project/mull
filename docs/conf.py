@@ -15,6 +15,7 @@
 # sys.path.insert(0, os.path.abspath('.'))
 
 import re
+import datetime
 import guzzle_sphinx_theme
 
 # -- Project information -----------------------------------------------------
@@ -27,7 +28,7 @@ def project_version():
                 return m.group(1)
 
 project = 'Mull'
-copyright = '2019, Mull Project'
+copyright = '2016-' + str(datetime.datetime.now().year) + ', Mull Project'
 author = 'Alex Denisov <alex@lowlevelbits.org>, Stanislav Pankevich <s.pankevich@gmail.com>'
 
 version = project_version()
