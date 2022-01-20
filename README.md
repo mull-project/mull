@@ -1,8 +1,8 @@
 # Mull
 
-Mull is a tool for Mutation Testing based on LLVM/Clang with a strong focus on C and C++ languages.
+Mull is a practical [mutation testing](https://mull.readthedocs.io/en/latest/MutationTestingIntro.html) tool for C and C++.
 
-For installation and usage please refer to the latest documentation: https://mull.readthedocs.io/en/latest/
+For installation and usage please refer to the latest documentation: https://mull.readthedocs.io
 
 ## Join us in Discord
 
@@ -39,4 +39,4 @@ Hosting for precompiled packages is graciously provided by  [Cloudsmith](https:/
 
 ## Copyright
 
-Copyright (c) 2016-2020 Alex Denisov <alex@lowlevelbits.org> and Stanislav Pankevich <s.pankevich@gmail.com>. See LICENSE for details.
+Copyright (c) 2016-2022 Alex Denisov <alex@lowlevelbits.org> and Stanislav Pankevich <s.pankevich@gmail.com>. See LICENSE for details.

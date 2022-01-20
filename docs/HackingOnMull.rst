@@ -62,29 +62,17 @@ You can replicate all the steps managed by Vagrant/Ansible manually.
 Required packages
 -----------------
 
-Please, look at the corresponding Ansible playbook (``debian-playbook.yaml``,
-``macos-playbook.yaml``, etc.) for the list of packages required on your OS.
+Please, look at the corresponding `Ansible playbook <https://github.com/mull-project/mull/tree/main/infrastructure>`_
+(``debian-playbook.yaml``, ``macos-playbook.yaml``, etc.) for the list of packages required on your OS.
 
 LLVM
 ----
 
 You need LLVM to build and debug Mull.
-You can use any LLVM version between 7.0 and 13.0.
+You can use any LLVM version between 9.0 and 13.0.
 
-There are several options:
-
-1. Download precompiled version of LLVM from the official website: http://releases.llvm.org/
-   This is a recommended option. Use it whenever possible. Simply download the
-   tarball and unpack it somewhere.
-
-2. Build LLVM from scratch on your own
-   This option also works. Use it whenever you cannot or do not want to use precompiled version.
-
-3. Ask Mull to build LLVM for you
-   This is recommended only if you need to debug some issue in Mull that
-   requires deep dive into the LLVM itself.
-
-**If you are going for an option 2 or 3 - make sure you also include Clang.**
+As of the version 0.14.0, Mull can be compiled against LLVM/Clang available
+through your package manager (e.g. apt or homebrew).
 
 Build Mull
 ----------
@@ -97,26 +85,19 @@ Create a build folder and initialize build system:
     cd mull
     mkdir build.dir
     cd build.dir
-    cmake -DPATH_TO_LLVM=path/to/llvm ..
-    make mull-cxx
+    cmake -DCMAKE_PREFIX=<cmake search paths> ..
+    make mull-runner-12
     make mull-tests
 
-The ``PATH_TO_LLVM`` depends on which option you picked in previous section:
+The ``cmake search paths`` should point to the LLVM/Clang CMake config folders.
+Some examples:
 
-1. Path to extracted tarball.
-2. Path to a build directory.
-3. Path to a source directory.
+ - llvm\@12 installed via homebrew on macOS: ``"/usr/local/opt/llvm@12/lib/cmake/llvm/;/usr/local/opt/llvm@12/lib/cmake/clang/"``
+ - llvm-12 installed via apt on Ubuntu: ``"/usr/lib/llvm-13/cmake/;/usr/lib/cmake/clang-13/"``
 
 If you are getting linker errors, then it is very likely related to the C++
 ABI. Depending on your OS/setup you may need to tweak the ``_GLIBCXX_USE_CXX11_ABI`` (0 or 1):
 
 .. code-block:: bash
 
-    cmake -DPATH_TO_LLVM=some-path -DCMAKE_CXX_FLAGS=-D_GLIBCXX_USE_CXX11_ABI=0 ..
-
-If the linker error you get is something like ``undefined reference to `typeinfo for irm::CmpInstPredicateReplacement'``,
-try to pass the ``-fno-rtti`` flag:
-
-.. code-block:: bash
-
-    cmake -DPATH_TO_LLVM=some-path -DCMAKE_CXX_FLAGS=-fno-rtti ..
+    cmake -DCMAKE_PREFIX=<cmake search paths> -DCMAKE_CXX_FLAGS=-D_GLIBCXX_USE_CXX11_ABI=0 ..

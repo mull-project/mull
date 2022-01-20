@@ -1,6 +1,13 @@
 Non-standard test suites
 ========================
 
+.. warning::
+   Since the version 0.15.0, ``mull-cxx`` tool `is deprecated <https://github.com/mull-project/mull/issues/945>`_
+   in favour of a compiler plugin: `Mull IR Frontend <https://github.com/mull-project/mull/pull/938>`_.
+
+   This tutorial covers ``mull-cxx`` tool and will be updated in the future.
+
+
 The goal of this tutorial is to demonstrate how to use Mull with 'non-standard'
 test suites, such as when the test suite is a separate program. The best example
 is integration tests written in interpreted languages.
@@ -130,7 +137,7 @@ The process is two-step.
 
 1. Generate mutated executable
 
-.. code-block:: shell
+.. code-block:: text
 
     $ clang -fembed-bitcode -g main.c -o test
     $ mull-cxx -mutate-only \

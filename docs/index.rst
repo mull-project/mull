@@ -12,6 +12,7 @@ Welcome to Mull's documentation!
    SupportedMutations
    IncrementalMutationTesting
    CommandLineReference
+   MullConfig
    HowMullWorks
    HackingOnMull
 
