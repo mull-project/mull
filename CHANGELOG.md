@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.15.0] - 20 Jan 2022
+
+🚨 With this release, the `mull-cxx` tool is [deprecated](https://github.com/mull-project/mull/issues/945) and will be removed in the future.
+
+Mull switches to the new model - compiler plugin called [Mull IR Frontend](https://github.com/mull-project/mull/pull/938).
+[The tutorial](https://mull.readthedocs.io/en/0.15.0/tutorials/HelloWorld.html) showing how to use it was updated.
+
+- Introduce Mull IR Frontend [#938](https://github.com/mull-project/mull/pull/938)
+- Introduce YAML-based configuration [#934](https://github.com/mull-project/mull/pull/934)
+- Drop LLVM 7 [#936](https://github.com/mull-project/mull/pull/936)
+- Drop LLVM 8 [#942](https://github.com/mull-project/mull/pull/942)
+- Fix a bug in `mull-runner` with duplicated mutants from templates [#940](https://github.com/mull-project/mull/pull/940)
+- Fix a bug with junk detection when the code is located in symlinked folders [#943](https://github.com/mull-project/mull/pull/943) 
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2021-12-21..2022-01-20)
+
 ## [0.14.0] - 20 Dec 2021
 
 - Mutants are now also extracted from dependent dynamic libraries [#903](https://github.com/mull-project/mull/issues/903) [#931](https://github.com/mull-project/mull/pull/931)
