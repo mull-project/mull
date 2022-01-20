@@ -1,6 +1,15 @@
 Keeping mutants under control
 =============================
 
+.. warning::
+   Since the version 0.15.0, ``mull-cxx`` tool `is deprecated <https://github.com/mull-project/mull/issues/945>`_
+   in favour of a compiler plugin: `Mull IR Frontend <https://github.com/mull-project/mull/pull/938>`_.
+
+   This tutorial covers ``mull-cxx`` tool and will be removed in the future.
+
+   It is recommended that you use the new :doc:`Mull IR Frontend <./HelloWorld>`.
+
+
 This tutorial shows you how to keep the number of mutants under control.
 It builds on top of the `Compilation Database and Junk Mutations <CompilationDatabaseAndJunk.html>`_
 tutorial so make sure you go through that one first.
@@ -49,7 +58,7 @@ around ~4000 mutants, ~3300 of which survive.
 Going through all of them to see which ones deserve your attention is
 simply impractical.
 
-The easiest way to decrease this number is to pick one or two `mutation operators <SupportedMutations.html>`_.
+The easiest way to decrease this number is to pick one or two :doc:`mutation operators </../SupportedMutations>`.
 
 Let's see how the numbers change if we only use ``cxx_add_to_sub`` that replaces
 all the ``a + b`` to ``a - b``.

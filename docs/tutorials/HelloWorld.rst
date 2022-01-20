@@ -1,6 +1,19 @@
 Hello World Example
 ===================
 
+.. note::
+   Since the version 0.15.0, ``mull-cxx`` tool `is deprecated <https://github.com/mull-project/mull/issues/945>`_
+   in favour of a compiler plugin: `Mull IR Frontend <https://github.com/mull-project/mull/pull/938>`_.
+
+   If you are looking for ``mull-cxx`` tutorial, refer to `this page instead <https://mull.readthedocs.io/en/0.14.0/tutorials/HelloWorld.html>`_.
+
+.. note::
+   We would love to hear from you! ❤️
+
+   Please, `report any issues <https://github.com/mull-project/mull/issues>`_ on GitHub, or
+   bring your questions to the `#mull channel <https://discord.gg/Hphp7dW>`_ on Discord.
+
+
 The goal of this tutorial is to demonstrate how to run Mull on minimal C
 programs. After reading it you should have a basic understanding of what
 arguments Mull needs in order to create mutations in your programs, run the
@@ -9,7 +22,8 @@ mutants and generate mutation testing reports.
 **TL;DR version**: if you want to run a single copy and paste example, scroll
 down to ``Killing mutants again, all killed`` below.
 
-__Note: Clang 9 or newer is required!__
+.. note::
+   Clang 9 or newer is required!
 
 ----
 
@@ -21,7 +35,7 @@ of Clang and LLVM. As a consequence of that, tools and plugins have a suffix wit
 the actual Clang/LLVM version.
 
 This tutorial assumes that you are using Clang 12 and that you have
-`installed <Installation.html>`_ Mull on your system and have the ``mull-runner-12``
+:doc:`installed <../Installation>` Mull on your system and have the ``mull-runner-12``
 executable available:
 
 .. code-block:: bash
@@ -70,6 +84,9 @@ mutants into our executable.
 Let's fix that!
 To pass the plugin to Clang, you need to add a few compiler flags.
 
+.. note::
+   For Clang 9, 10, and 11 also pass ``-O1``, otherwise the plugin won't be called.
+
 .. code-block:: text
 
     $ clang-12 -fexperimental-new-pass-manager \
@@ -81,7 +98,7 @@ To pass the plugin to Clang, you need to add a few compiler flags.
 Notice the warning: Mull needs a config.
 However, in this tutorial we can ignore the warning and rely on the defaults.
 
-You can learn more about the config `here <TODO>`_.
+You can learn more about the config :doc:`here </../MullConfig>`.
 
 Let's run ``mull-runner`` again:
 
@@ -260,5 +277,3 @@ Just to recap:
                   -g -grecord-command-line \
                   main.cpp -o hello-world
     $ mull-runner-12 hello-world
-
-The next step is to learn about `Compilation Database and Junk Mutations <CompilationDatabaseAndJunk.html>`_

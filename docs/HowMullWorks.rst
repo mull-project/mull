@@ -1,6 +1,9 @@
 How Mull works
 ==============
 
+.. note::
+   This document is slightly dated and needs to include the new `Mull IR Frontend <https://github.com/mull-project/mull/pull/938>`_.
+
 This page contains a short summary of the design and features of Mull. Also
 the advantages of Mull are highlighted as well as some known issues.
 
