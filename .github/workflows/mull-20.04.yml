@@ -1,0 +1,53 @@
+name: Mull (20.04)
+
+env:
+  DISTR_REPO: "ubuntu/focal"
+
+on:
+  pull_request:
+
+jobs:
+  test:
+    name: Mutation testing
+    runs-on: ubuntu-latest
+    container: ubuntu:20.04
+
+    steps:
+      - name: Install software
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive TZ=Europe/Berlin apt-get install -y tzdata
+          apt-get install -y git curl cmake ninja-build libz-dev libsqlite3-dev ncurses-dev libxml2-dev uuid-dev liblzma-dev
+          curl -1sLf 'https://dl.cloudsmith.io/public/mull-project/mull-stable/setup.deb.sh' | bash
+          apt-get install -y clang-12 libclang-12-dev mull-12=0.15.0
+      - uses: actions/checkout@v2
+        with:
+          submodules: true
+      - name: For debugging
+        run: |
+          env | sort
+      - name: For debugging
+        run: |
+          cat $GITHUB_EVENT_PATH
+      - name: Prepare Mull
+        run: |
+          mkdir build.dir
+          cd build.dir
+          cmake -G Ninja \
+            -DCMAKE_PREFIX_PATH="/usr/lib/llvm-12/cmake/;/usr/lib/cmake/clang-12/" \
+            -DCMAKE_C_COMPILER=clang-12 \
+            -DCMAKE_CXX_COMPILER=clang++-12 \
+            -DCMAKE_C_FLAGS="-fpass-plugin=/usr/lib/mull-ir-frontend-12 -fexperimental-new-pass-manager -g -grecord-command-line" \
+            -DCMAKE_CXX_FLAGS="-fpass-plugin=/usr/lib/mull-ir-frontend-12 -fexperimental-new-pass-manager -g -grecord-command-line" \
+            ..
+      - name: Build Mull
+        run: |
+          cd build.dir
+          MULL_CONFIG=../mull-ci.yml ninja mull-tests
+          ./tests/mull-tests
+
+      - name: Run Mull
+        run: |
+          cd build.dir
+          mull-runner-12 -reporters=IDE -reporters=GithubAnnotations ./tests/mull-tests
+
