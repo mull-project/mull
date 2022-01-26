@@ -1,8 +1,0 @@
-REQUIRES: LLVM_10_OR_LOWER
-REQUIRES: MACOS
-
-RUN: cd %CURRENT_DIR
-RUN: (unset TERM; %mull_cxx -linker=%clang_cc -linker-flags="%sysroot" %S/llvm-11-macos-bitcode-sample.exe 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
-CHECK:[warning] parseBitcodeFile failed: "Invalid record". The bitcode file was created with LLVM version: LLVM11.0.0
-CHECK:[warning] Bitcode module could not be loaded. Possible reason: the bitcode file could be built with a newer version of LLVM than is used by Mull.
-CHECK:[info] No mutants found. Mutation score: infinitely high
