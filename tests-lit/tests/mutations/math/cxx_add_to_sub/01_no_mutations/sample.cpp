@@ -2,9 +2,6 @@
 
 /**
 RUN: %clang_cxx %sysroot %pass_mull_ir_frontend -g -O0 %s -o %s-ir.exe
-RUN: cd / && %clang_cxx %sysroot -fembed-bitcode -g -O0 %s -o %s.exe
-RUN: cd %CURRENT_DIR
-RUN: %mull_cxx -linker=%clang_cxx -linker-flags="%sysroot" -mutators=cxx_add_to_sub -compdb-path %S/compile_commands.json -compilation-flags="" -reporters=Elements -report-dir=%S -report-name=01_no_mutations %s.exe | %filecheck %s --dump-input=fail
 RUN: %mull_runner -reporters=Elements -report-dir=%S -report-name=01_no_mutations %s-ir.exe | %filecheck %s --dump-input=fail
 CHECK:[info] No mutants found. Mutation score: infinitely high
 **/

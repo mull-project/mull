@@ -2,13 +2,10 @@
 
 /**
 RUN: cd %S && %clang_cc %sysroot -O0 %pass_mull_ir_frontend -g %s -o %s-ir.exe
-RUN: cd / && %clang_cc %sysroot -fembed-bitcode -g -O0 %s -o %s.exe
-RUN: cd %CURRENT_DIR
-RUN: (unset TERM; %mull_cxx -linker=%clang_cxx -linker-flags="%sysroot" -mutators=cxx_ge_to_lt -mutators=cxx_ge_to_gt -ide-reporter-show-killed %s.exe 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 RUN: (unset TERM; %mull_runner -ide-reporter-show-killed %s-ir.exe 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 CHECK:[info] Killed mutants (2/2):
-CHECK:{{^.*}}sample.cpp:17:11: warning: Killed: Replaced >= with > [cxx_ge_to_gt]{{$}}
-CHECK:{{^.*}}sample.cpp:17:11: warning: Killed: Replaced >= with < [cxx_ge_to_lt]{{$}}
+CHECK:{{^.*}}sample.cpp:14:11: warning: Killed: Replaced >= with > [cxx_ge_to_gt]{{$}}
+CHECK:{{^.*}}sample.cpp:14:11: warning: Killed: Replaced >= with < [cxx_ge_to_lt]{{$}}
 CHECK:[info] All mutations have been killed
 CHECK:[info] Mutation score: 100%
 **/

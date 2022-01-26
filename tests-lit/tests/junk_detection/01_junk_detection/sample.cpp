@@ -9,15 +9,12 @@ int main() {
 // clang-format off
 
 /**
-RUN: cd / && %clang_cxx %sysroot -fembed-bitcode -g -O0 %s -o %s.exe
 RUN: sed -e "s:%PWD:%s:g" %S/compile_commands.json.template > %S/compile_commands.json
 RUN: cd %CURRENT_DIR
 RUN: env MULL_CONFIG=%S/mull.no_junk.yml %clang_cxx %sysroot -O0 %pass_mull_ir_frontend -g %s -o %s-ir-no-junk.exe
-RUN: %mull_cxx -linker=%clang_cxx -linker-flags="%sysroot" -workers=1 -disable-junk-detection -mutators=cxx_add_to_sub -mutators=cxx_remove_void_call -reporters=IDE %s.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITHOUT-JUNK-DETECTION
 RUN: %mull_runner -workers=1 -reporters=IDE %s-ir-no-junk.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITHOUT-JUNK-DETECTION
 
 RUN: env MULL_CONFIG=%S/mull.yml %clang_cxx %sysroot -O0 %pass_mull_ir_frontend -g %s -o %s-ir.exe
-RUN: %mull_cxx -linker=%clang_cxx -linker-flags="%sysroot" -workers=1 -mutators=cxx_add_to_sub -mutators=cxx_remove_void_call -reporters=IDE -ide-reporter-show-killed -compdb-path %S/compile_commands.json %s.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-JUNK-DETECTION
 RUN: %mull_runner -workers=1 -reporters=IDE -ide-reporter-show-killed %s-ir.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-JUNK-DETECTION
 
 WITHOUT-JUNK-DETECTION:{{^.*}}[info] Running mutants (threads: 1){{$}}
