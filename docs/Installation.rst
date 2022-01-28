@@ -30,19 +30,21 @@ Install the package:
 .. code-block:: bash
 
     sudo apt-get update
-    sudo apt-get install mull
+    sudo apt-get install mull-10 # Ubuntu 18.04
+    sudo apt-get install mull-12 # Ubuntu 20.04
 
 Check if everything works:
 
 .. code-block:: bash
 
-    $ mull-cxx --version
-    Mull: LLVM-based mutation testing
-    https://github.com/mull-project/mull
-    Version: 0.9.0
-    Commit: 9f2d43c
-    Date: 07 Jan 2021
-    LLVM: 11.0.0
+    $ mull-runner-10 --version
+    Mull: Practical mutation testing for C and C++
+    Home: https://github.com/mull-project/mull
+    Docs: https://mull.readthedocs.io
+    Version: 0.15.0
+    Commit: ab159cd
+    Date: 20 Jan 2022
+    LLVM: 10.0.0
 
 You can also get the latest "nightly" build using the corresponding source:
 
@@ -58,24 +60,19 @@ Links:
 Install on macOS
 ****************
 
-Get the latest version here `Github Releases <https://github.com/mull-project/mull/releases/latest>`_.
-
-Or install via Homebrew:
-
-.. code-block:: bash
-
-    brew install mull-project/mull/mull-stable
+Download the latest version from `Github Releases <https://github.com/mull-project/mull/releases/latest>`_.
 
 Check the installation:
 
 .. code-block:: bash
 
-    $ mull-cxx --version
-    Mull: LLVM-based mutation testing
-    https://github.com/mull-project/mull
-    Version: 0.9.0
-    Commit: 9f2d43c
-    Date: 07 Jan 2020
-    LLVM: 11.0.0
+    $ mull-runner-13 --version
+    Mull: Practical mutation testing for C and C++
+    Home: https://github.com/mull-project/mull
+    Docs: https://mull.readthedocs.io
+    Version: 0.15.0
+    Commit: 0252a4cf
+    Date: 28 Jan 2022
+    LLVM: 13.0.0
 
 You can also get the latest "nightly" build from `here <https://cloudsmith.io/~mull-project/repos/mull-nightly/packages/>`_.
