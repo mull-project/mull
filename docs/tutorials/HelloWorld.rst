@@ -87,6 +87,10 @@ To pass the plugin to Clang, you need to add a few compiler flags.
 .. note::
    For Clang 9, 10, and 11 also pass ``-O1``, otherwise the plugin won't be called.
 
+.. note::
+   ``-grecord-command-line`` doesn't currently work if you compile several files in one go,
+   e.g. ``clang a.c b.c c.c``. In this case, please remove the flag.
+
 .. code-block:: text
 
     $ clang-12 -fexperimental-new-pass-manager \
