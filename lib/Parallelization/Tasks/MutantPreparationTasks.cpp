@@ -1,4 +1,5 @@
 #include "mull/Parallelization/Tasks/MutantPreparationTasks.h"
+#include "mull/Config/Configuration.h"
 #include "mull/MutationPoint.h"
 #include "mull/Parallelization/Progress.h"
 #include <llvm/IR/Constant.h>
@@ -59,11 +60,37 @@ void InsertMutationTrampolinesTask::operator()(iterator begin, iterator end, Out
                                                progress_counter &counter) {
   for (auto it = begin; it != end; it++, counter.increment()) {
     Bitcode &bitcode = **it;
-    insertTrampolines(bitcode);
+    insertTrampolines(bitcode, configuration);
   }
 }
+// declare i32 @printf(i8*, ...)
+// call i32 (i8*, ...) @printf(i8* getelementptr inbounds ([3 x i8], [3 x i8]* @.str, i64 0, i64 0))
+static void insertTrace(llvm::BasicBlock *basicBlock, const std::string &format,
+                        const std::string &message) {
+  auto module = basicBlock->getParent()->getParent();
+  auto &context = module->getContext();
+  llvm::Type *intType = llvm::Type::getInt32Ty(context);
+  llvm::Type *charPtr = llvm::Type::getInt8Ty(context)->getPointerTo();
+  llvm::FunctionType *printfType = llvm::FunctionType::get(intType, { charPtr }, true);
+  auto print = module->getOrInsertFunction("printf", printfType).getCallee();
 
-void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode) {
+  auto formatArray = llvm::ConstantDataArray::getString(context, format);
+  auto messageArray = llvm::ConstantDataArray::getString(context, message);
+  auto *fmt = new llvm::GlobalVariable(
+      *module, formatArray->getType(), true, llvm::GlobalValue::PrivateLinkage, formatArray);
+  auto *msg = new llvm::GlobalVariable(
+      *module, messageArray->getType(), true, llvm::GlobalValue::PrivateLinkage, messageArray);
+
+  llvm::Value *zero = llvm::Constant::getNullValue(llvm::Type::getInt64Ty(context));
+  auto fmtGEP =
+      llvm::ConstantExpr::getInBoundsGetElementPtr(formatArray->getType(), fmt, { zero, zero });
+  auto msgGEP =
+      llvm::ConstantExpr::getInBoundsGetElementPtr(messageArray->getType(), msg, { zero, zero });
+  llvm::CallInst::Create(printfType, print, { fmtGEP, msgGEP }, "trace", basicBlock);
+}
+
+void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode,
+                                                      const Configuration &configuration) {
   llvm::Module *module = bitcode.getModule();
   llvm::LLVMContext &context = module->getContext();
   llvm::Type *charPtr = llvm::Type::getInt8Ty(context)->getPointerTo();
@@ -84,11 +111,22 @@ void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode) {
 
     llvm::BasicBlock *entry = llvm::BasicBlock::Create(context, "entry", original);
     llvm::BasicBlock *originalBlock = llvm::BasicBlock::Create(context, "original", original);
+    if (configuration.debug.traceMutants) {
+      insertTrace(
+          originalBlock, "mull-trace: jumping over to original %s\n", original->getName().str());
+    }
     llvm::BasicBlock *trampolineCall =
         llvm::BasicBlock::Create(context, "trampoline_call", original);
+
+    if (configuration.debug.traceMutants) {
+      insertTrace(trampolineCall, "mull-trace: trampoline call %s\n", original->getName().str());
+    }
     auto anyPoint = pair.second.front();
     llvm::Type *trampolineType = original->getFunctionType()->getPointerTo();
     auto trampoline = new llvm::AllocaInst(trampolineType, 0, "trampoline", entry);
+    if (configuration.debug.traceMutants) {
+      insertTrace(entry, "mull-trace: entering %s\n", original->getName().str());
+    }
     new llvm::StoreInst(bitcode.getModule()->getFunction(anyPoint->getOriginalFunctionName()),
                         trampoline,
                         originalBlock);
@@ -105,6 +143,10 @@ void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode) {
 
       llvm::BasicBlock *mutationCheckBlock =
           llvm::BasicBlock::Create(context, point->getUserIdentifier() + "_check", original);
+      if (configuration.debug.traceMutants) {
+        insertTrace(
+            mutationCheckBlock, "mull-trace: checking for %s\n", point->getUserIdentifier());
+      }
       llvm::Value *nullPtr = llvm::Constant::getNullValue(charPtr);
       llvm::CmpInst *predicate = llvm::CmpInst::Create(llvm::Instruction::ICmp,
                                                        llvm::ICmpInst::ICMP_NE,
@@ -121,6 +163,9 @@ void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode) {
 
       llvm::BasicBlock *mutationBlock =
           llvm::BasicBlock::Create(context, point->getUserIdentifier(), original);
+      if (configuration.debug.traceMutants) {
+        insertTrace(mutationBlock, "mull-trace: jumping over to %s\n", point->getUserIdentifier());
+      }
       new llvm::StoreInst(point->getMutatedFunction(), trampoline, mutationBlock);
 
       llvm::BranchInst::Create(mutationBlock, head, predicate, mutationCheckBlock);

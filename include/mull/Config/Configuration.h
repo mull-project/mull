@@ -53,6 +53,8 @@ struct Configuration {
   std::string gitDiffRef;
   std::string gitProjectRoot;
 
+  DebugConfig debug{};
+
   Configuration();
 
   static std::string findConfig(Diagnostics &diagnostics);

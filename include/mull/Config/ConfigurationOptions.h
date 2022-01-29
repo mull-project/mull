@@ -17,4 +17,11 @@ struct ParallelizationConfig {
   bool exceedsHardware();
 };
 
+struct DebugConfig {
+  bool printIR = false;
+  bool printIRBefore = false;
+  bool printIRAfter = false;
+  bool traceMutants = false;
+};
+
 } // namespace mull

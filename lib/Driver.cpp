@@ -234,7 +234,7 @@ void Driver::prepareMutations(std::vector<MutationPoint *> mutationPoints) {
       "Redirect mutated functions",
       program.bitcode(),
       Nothing,
-      std::vector<InsertMutationTrampolinesTask>(workers));
+      std::vector<InsertMutationTrampolinesTask>(workers, InsertMutationTrampolinesTask{ config }));
   redirectFunctions.execute();
 
   TaskExecutor<ApplyMutationTask> applyMutations(
@@ -520,6 +520,10 @@ void mull::mutateBitcode(llvm::Module &module) {
         "Mull cannot find compiler flags. Recompile with `-grecord-command-line` flag.");
   }
 
+  if (configuration.debug.printIR || configuration.debug.printIRBefore) {
+    module.print(llvm::errs(), nullptr);
+  }
+
   Bitcode bitcode(&module);
   std::vector<FunctionUnderTest> functionsUnderTest;
   singleTask.execute("Gathering functions under test", [&]() {
@@ -632,10 +636,15 @@ void mull::mutateBitcode(llvm::Module &module) {
   singleTask.execute("Removing original functions",
                      [&]() { DeleteOriginalFunctionsTask::deleteFunctions(bitcode); });
 
-  singleTask.execute("Redirect mutated functions",
-                     [&]() { InsertMutationTrampolinesTask::insertTrampolines(bitcode); });
+  singleTask.execute("Redirect mutated functions", [&]() {
+    InsertMutationTrampolinesTask::insertTrampolines(bitcode, configuration);
+  });
 
   TaskExecutor<ApplyMutationTask> applyMutations(
       diagnostics, "Applying mutations", mutations, Nothing, { ApplyMutationTask() });
   applyMutations.execute();
+
+  if (configuration.debug.printIR || configuration.debug.printIRAfter) {
+    module.print(llvm::errs(), nullptr);
+  }
 }

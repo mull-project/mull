@@ -25,6 +25,15 @@ template <> struct llvm::yaml::MappingTraits<ParallelizationConfig> {
   }
 };
 
+template <> struct llvm::yaml::MappingTraits<DebugConfig> {
+  static void mapping(llvm::yaml::IO &io, DebugConfig &config) {
+    io.mapOptional("printIR", config.printIR);
+    io.mapOptional("printIRAfter", config.printIRAfter);
+    io.mapOptional("printIRBefore", config.printIRBefore);
+    io.mapOptional("traceMutants", config.traceMutants);
+  }
+};
+
 template <> struct llvm::yaml::MappingTraits<Configuration> {
   static void mapping(llvm::yaml::IO &io, Configuration &config) {
     io.mapOptional("debugEnabled", config.debugEnabled);
@@ -56,6 +65,7 @@ template <> struct llvm::yaml::MappingTraits<Configuration> {
     io.mapOptional("gitProjectRoot", config.gitProjectRoot);
     io.mapOptional("includePaths", config.includePaths);
     io.mapOptional("excludePaths", config.excludePaths);
+    io.mapOptional("debug", config.debug);
   }
 };
 
