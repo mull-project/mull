@@ -7,6 +7,7 @@ namespace mull {
 
 class MutationPoint;
 class progress_counter;
+struct Configuration;
 
 class CloneMutatedFunctionsTask {
 public:
@@ -44,13 +45,15 @@ public:
   using Out = std::vector<int>;
   using iterator = In::const_iterator;
 
-  InsertMutationTrampolinesTask() = default;
+  explicit InsertMutationTrampolinesTask(const Configuration &configuration)
+      : configuration(configuration) {}
 
   void operator()(iterator begin, iterator end, Out &storage,
                   progress_counter &counter);
-  static void insertTrampolines(Bitcode &bitcode);
+  static void insertTrampolines(Bitcode &bitcode, const Configuration &configuration);
 
 private:
+  const Configuration &configuration;
 };
 
 } // namespace mull

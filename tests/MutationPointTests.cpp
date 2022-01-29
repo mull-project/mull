@@ -91,6 +91,7 @@ TEST(MutationPoint, ReplaceCallMutator_applyMutation) {
 TEST(MutationPoint, OriginalValuePresent) {
   Diagnostics diagnostics;
   BitcodeLoader loader;
+  Configuration configuration{};
   auto bitcode =
       loader.loadBitcodeAtPath(fixtures::mutators_replace_assignment_module_bc_path(), diagnostics);
 
@@ -116,7 +117,7 @@ TEST(MutationPoint, OriginalValuePresent) {
 
   CloneMutatedFunctionsTask::cloneFunctions(*bitcode);
   DeleteOriginalFunctionsTask::deleteFunctions(*bitcode);
-  InsertMutationTrampolinesTask::insertTrampolines(*bitcode);
+  InsertMutationTrampolinesTask::insertTrampolines(*bitcode, configuration);
 
   for (auto *mutation : mutationPoints) {
     mutation->applyMutation();
