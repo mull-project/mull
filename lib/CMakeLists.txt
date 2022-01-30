@@ -80,6 +80,7 @@ set(mull_sources
   Filters/FilePathFilter.cpp
   Filters/GitDiffReader.cpp
   Filters/GitDiffFilter.cpp
+  Filters/BlockAddressFunctionFilter.cpp
 
   JunkDetection/CXX/Visitors/ScalarValueVisitor.cpp
   MutantRunner.cpp

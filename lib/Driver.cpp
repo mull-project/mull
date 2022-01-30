@@ -3,6 +3,7 @@
 #include "mull/BitcodeMetadataReader.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Diagnostics/Diagnostics.h"
+#include "mull/Filters/BlockAddressFunctionFilter.h"
 #include "mull/Filters/FilePathFilter.h"
 #include "mull/Filters/Filters.h"
 #include "mull/Filters/FunctionFilter.h"
@@ -437,11 +438,15 @@ void mull::mutateBitcode(llvm::Module &module) {
     }
   }
 
+  auto blockAddressFilter = new mull::BlockAddressFunctionFilter;
+
   filterStorage.emplace_back(noDebugInfoFilter);
   filterStorage.emplace_back(filePathFilter);
+  filterStorage.emplace_back(blockAddressFilter);
 
   filters.mutationFilters.push_back(noDebugInfoFilter);
   filters.functionFilters.push_back(noDebugInfoFilter);
+  filters.functionFilters.push_back(blockAddressFilter);
   filters.instructionFilters.push_back(noDebugInfoFilter);
 
   filters.mutationFilters.push_back(filePathFilter);
@@ -588,6 +593,20 @@ void mull::mutateBitcode(llvm::Module &module) {
     }
   });
 
+  std::vector<FunctionUnderTest> filteredFunctions;
+  for (const auto &function : functionsUnderTest) {
+    bool skip = false;
+    for (auto filter : filters.functionFilters) {
+      if (filter->shouldSkip(function.getFunction())) {
+        skip = true;
+        break;
+      }
+    }
+    if (!skip) {
+      filteredFunctions.emplace_back(function);
+    }
+  }
+
   MutatorsFactory mutatorsFactory(diagnostics);
   MutationsFinder mutationsFinder(mutatorsFactory.mutators(configuration.mutators), configuration);
 
@@ -600,13 +619,13 @@ void mull::mutateBitcode(llvm::Module &module) {
   std::vector<int> Nothing;
   TaskExecutor<InstructionSelectionTask> selectionRunner(diagnostics,
                                                          "Instruction selection",
-                                                         functionsUnderTest,
+                                                         filteredFunctions,
                                                          Nothing,
                                                          std::move(instructionSelectionTasks));
   selectionRunner.execute();
 
   std::vector<MutationPoint *> mutationPoints =
-      mutationsFinder.getMutationPoints(diagnostics, functionsUnderTest);
+      mutationsFinder.getMutationPoints(diagnostics, filteredFunctions);
   std::vector<MutationPoint *> mutations = std::move(mutationPoints);
 
   for (auto filter : filters.mutationFilters) {
