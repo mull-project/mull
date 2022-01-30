@@ -22,6 +22,7 @@
 #include "mull/Result.h"
 #include "mull/Toolchain/Runner.h"
 
+#include <llvm/IR/Verifier.h>
 #include <llvm/ProfileData/Coverage/CoverageMapping.h>
 #include <llvm/Support/DynamicLibrary.h>
 #include <llvm/Support/FileSystem.h>
@@ -524,6 +525,20 @@ void mull::mutateBitcode(llvm::Module &module) {
     module.print(llvm::errs(), nullptr);
   }
 
+  {
+    std::string error;
+    llvm::raw_string_ostream errorStream(error);
+    if (llvm::verifyModule(module, &errorStream)) {
+      std::stringstream message;
+      message << "Mull encountered broken LLVM module.\n"
+              << "Please, report the following error message here "
+                 "https://github.com/mull-project/mull/issues\n"
+              << "Underlying error message:\n"
+              << errorStream.str();
+      diagnostics.error(message.str());
+    }
+  }
+
   Bitcode bitcode(&module);
   std::vector<FunctionUnderTest> functionsUnderTest;
   singleTask.execute("Gathering functions under test", [&]() {
@@ -646,5 +661,19 @@ void mull::mutateBitcode(llvm::Module &module) {
 
   if (configuration.debug.printIR || configuration.debug.printIRAfter) {
     module.print(llvm::errs(), nullptr);
+  }
+
+  {
+    std::string error;
+    llvm::raw_string_ostream errorStream(error);
+    if (llvm::verifyModule(module, &errorStream)) {
+      std::stringstream message;
+      message << "Uh oh! Mull corrupted LLVM module.\n"
+              << "Please, report the following error message here "
+                 "https://github.com/mull-project/mull/issues\n"
+              << "Underlying error message:\n"
+              << errorStream.str();
+      diagnostics.error(message.str());
+    }
   }
 }
