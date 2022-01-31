@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.15.1] - 31 Jan 2022
+
+- Added a workaround to not miscompile functions that use "jump-tables" [#963](https://github.com/mull-project/mull/pull/963)
+- Added module verification [#964](https://github.com/mull-project/mull/pull/964)
+- Added more debugging facilities [#962](https://github.com/mull-project/mull/pull/962)
+- Mull is using itself for testing [#952](https://github.com/mull-project/mull/pull/952)
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2022-01-21..2022-01-31)
+
 ## [0.15.0] - 20 Jan 2022
 
 🚨 With this release, the `mull-cxx` tool is [deprecated](https://github.com/mull-project/mull/issues/945) and will be removed in the future.
@@ -209,4 +217,3 @@ Actual changelog:
 ## [0.0.0] - 16 Apr 2016
 
  - Initial commit
-
