@@ -21,9 +21,6 @@ void CloneMutatedFunctionsTask::cloneFunctions(Bitcode &bitcode) {
   for (auto &pair : bitcode.getMutationPointsMap()) {
     llvm::Function *original = pair.first;
     for (MutationPoint *point : pair.second) {
-      if (!point->isCovered()) {
-        continue;
-      }
       llvm::ValueToValueMapTy map;
       llvm::Function *mutatedFunction = llvm::CloneFunction(original, map);
       mutatedFunction->setLinkage(llvm::GlobalValue::InternalLinkage);
@@ -45,13 +42,11 @@ void DeleteOriginalFunctionsTask::deleteFunctions(Bitcode &bitcode) {
     auto original = pair.first;
     /// Remove the original function if at least one mutant is covered
     for (MutationPoint *point : pair.second) {
-      if (point->isCovered()) {
-        llvm::ValueToValueMapTy map;
-        auto originalCopy = CloneFunction(original, map);
-        originalCopy->setName(point->getOriginalFunctionName());
-        original->dropAllReferences();
-        break;
-      }
+      llvm::ValueToValueMapTy map;
+      auto originalCopy = CloneFunction(original, map);
+      originalCopy->setName(point->getOriginalFunctionName());
+      original->dropAllReferences();
+      break;
     }
   }
 }
@@ -97,16 +92,6 @@ void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode,
   llvm::FunctionType *getEnvType = llvm::FunctionType::get(charPtr, { charPtr }, false);
   llvm::Value *getenv = module->getOrInsertFunction("getenv", getEnvType).getCallee();
   for (auto pair : bitcode.getMutationPointsMap()) {
-    bool hasCoveredMutants = false;
-    for (auto point : pair.second) {
-      if (point->isCovered()) {
-        hasCoveredMutants = true;
-        break;
-      }
-    }
-    if (!hasCoveredMutants) {
-      continue;
-    }
     llvm::Function *original = pair.first;
 
     llvm::BasicBlock *entry = llvm::BasicBlock::Create(context, "entry", original);
@@ -134,9 +119,6 @@ void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode,
     llvm::BasicBlock *head = originalBlock;
 
     for (auto &point : pair.second) {
-      if (!point->isCovered()) {
-        continue;
-      }
       auto name = llvm::ConstantDataArray::getString(context, point->getUserIdentifier());
       auto *global = new llvm::GlobalVariable(
           *module, name->getType(), true, llvm::GlobalValue::PrivateLinkage, name);

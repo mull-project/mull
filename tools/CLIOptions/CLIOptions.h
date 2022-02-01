@@ -317,6 +317,14 @@ list<std::string> LDSearchPaths( \
     value_desc("directory"), \
     cat(MullCategory))
 
+#define DebugCoverage_() \
+  opt<bool> DebugCoverage( \
+  "debug-coverage", \
+  desc("Print coverage ranges"), \
+  Optional, \
+  init(false), \
+  cat(MullCategory))
+
 // clang-format on
 
 namespace tool {

@@ -6,10 +6,10 @@
 using namespace mull;
 
 Mutant::Mutant(std::string identifier, std::string mutatorIdentifier, SourceLocation sourceLocation,
-               SourceLocation endLocation, bool covered)
+               SourceLocation endLocation)
     : identifier(std::move(identifier)), mutatorIdentifier(std::move(mutatorIdentifier)),
       sourceLocation(std::move(sourceLocation)), endLocation(std::move(endLocation)),
-      covered(covered), mutatorKind(MutatorKind::InvalidKind) {}
+      covered(false), mutatorKind(MutatorKind::InvalidKind) {}
 
 const std::string &Mutant::getIdentifier() const {
   return identifier;
@@ -37,6 +37,10 @@ void Mutant::setMutatorKind(MutatorKind kind) {
 
 MutatorKind Mutant::getMutatorKind() const {
   return mutatorKind;
+}
+
+void Mutant::setCovered(bool cover) {
+  covered = cover;
 }
 
 bool MutantComparator::operator()(std::unique_ptr<Mutant> &lhs, std::unique_ptr<Mutant> &rhs) {

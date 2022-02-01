@@ -22,6 +22,7 @@ struct DebugConfig {
   bool printIRBefore = false;
   bool printIRAfter = false;
   bool traceMutants = false;
+  bool coverage = false;
 };
 
 } // namespace mull

@@ -3,6 +3,7 @@
 #include <llvm/Object/ObjectFile.h>
 #include <sstream>
 #include <unordered_map>
+#include <unordered_set>
 
 using namespace mull;
 using namespace std::string_literals;
@@ -82,18 +83,13 @@ MutantExtractor::extractMutants(const std::vector<std::string> &mutantHolders) {
     std::move(std::begin(mutants), std::end(mutants), std::back_inserter(encodings));
   }
 
-  std::unordered_map<std::string, bool> deduplicatedEncodings;
+  std::unordered_set<std::string> deduplicatedEncodings;
   for (auto &encoding : encodings) {
-    // mutants encoded as follows:
-    // mutator:file:line_begin:column_begin:line_end:column_end:covered
-    bool covered = encoding[encoding.size() - 1] == '1';
-    if (deduplicatedEncodings.count(encoding) == 0 || covered) {
-      deduplicatedEncodings[encoding] = covered;
-    }
+    deduplicatedEncodings.insert(encoding);
   }
   std::vector<std::unique_ptr<Mutant>> mutants;
   for (auto &encoding : deduplicatedEncodings) {
-    std::vector<std::string> chunks = split(encoding.first, ':');
+    std::vector<std::string> chunks = split(encoding, ':');
 
     std::string mutator = chunks[0];
     std::string location = chunks[1];
@@ -101,7 +97,6 @@ MutantExtractor::extractMutants(const std::vector<std::string> &mutantHolders) {
     int beginColumn = std::stoi(chunks[3]);
     int endLine = std::stoi(chunks[4]);
     int endColumn = std::stoi(chunks[5]);
-    bool covered = encoding.second;
 
     std::ostringstream mis;
     mis << mutator << ":" << location << ":" << beginLine << ":" << beginColumn;
@@ -111,8 +106,7 @@ MutantExtractor::extractMutants(const std::vector<std::string> &mutantHolders) {
         identifier,
         mutator,
         mull::SourceLocation("", location, "", location, beginLine, beginColumn),
-        mull::SourceLocation("", location, "", location, endLine, endColumn),
-        covered);
+        mull::SourceLocation("", location, "", location, endLine, endColumn));
     mutants.push_back(std::move(mutant));
   }
 

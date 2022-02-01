@@ -62,7 +62,6 @@ class MutationPoint {
   const SourceLocation sourceLocation;
   irm::IRMutation *irMutator;
   std::string userIdentifier;
-  bool covered;
 
   SourceLocation endLocation;
 
@@ -71,9 +70,6 @@ public:
                 Bitcode *m);
 
   ~MutationPoint() = default;
-
-  void setCovered(bool isCovered);
-  bool isCovered();
 
   void setEndLocation(int line, int column);
 
