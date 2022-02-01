@@ -37,7 +37,6 @@ struct Configuration {
 
   std::string executable;
   std::string outputFile;
-  std::string coverageInfo;
 
   std::string linker;
   std::vector<std::string> linkerFlags;

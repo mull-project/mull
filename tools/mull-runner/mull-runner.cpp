@@ -1,3 +1,4 @@
+#include "CoverageChecker.h"
 #include "DynamicLibraries.h"
 #include "MutantExtractor.h"
 #include "mull-runner-cli.h"
@@ -7,6 +8,7 @@
 #include "mull/MutantRunner.h"
 #include "mull/Result.h"
 #include "mull/Version.h"
+
 #include <llvm/Support/FileSystem.h>
 
 #include <memory>
@@ -87,6 +89,8 @@ int main(int argc, char **argv) {
     configuration.captureMutantOutput = false;
   }
 
+  configuration.debug.coverage = tool::DebugCoverage.getValue();
+
   tool::ReporterParameters params{ .reporterName = tool::ReportName.getValue(),
                                    .reporterDirectory = tool::ReportDirectory.getValue(),
                                    .patchBasePathDir = tool::ReportPatchBaseDirectory.getValue(),
@@ -126,11 +130,23 @@ int main(int argc, char **argv) {
   std::vector<std::unique_ptr<mull::Mutant>> mutants =
       mutantExtractor.extractMutants(mutantHolders);
 
+  std::vector<std::unique_ptr<mull::Mutant>> filteredMutants;
+  mull::CoverageChecker coverage(
+      configuration, diagnostics, tool::CoverageInfo.getValue(), mutantHolders);
+  for (auto &mutant : mutants) {
+    bool covered = coverage.covered(mutant.get());
+    mutant->setCovered(covered);
+    if (covered || configuration.includeNotCovered) {
+      filteredMutants.push_back(std::move(mutant));
+    }
+  }
+
   mull::MutantRunner mutantRunner(diagnostics, configuration);
   std::vector<std::unique_ptr<mull::MutationResult>> mutationResults =
-      mutantRunner.runMutants(testProgram, extraArgs, mutants);
+      mutantRunner.runMutants(testProgram, extraArgs, filteredMutants);
 
-  auto result = std::make_unique<mull::Result>(std::move(mutants), std::move(mutationResults));
+  auto result =
+      std::make_unique<mull::Result>(std::move(filteredMutants), std::move(mutationResults));
   for (auto &reporter : reporters) {
     reporter->reportResults(*result);
   }

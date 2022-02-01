@@ -25,6 +25,8 @@ IncludeNotCovered_();
 RunnerArgs_();
 TestProgram_();
 LDSearchPaths_();
+CoverageInfo_();
+DebugCoverage_();
 
 void dumpCLIInterface(mull::Diagnostics &diagnostics) {
   // Enumerating CLI options explicitly to control the order and what to show
@@ -48,6 +50,8 @@ void dumpCLIInterface(mull::Diagnostics &diagnostics) {
       &NoOutput,
 
       &(Option &)LDSearchPaths,
+      &CoverageInfo,
+      &DebugCoverage,
   });
   dumpCLIInterface(diagnostics, mullOptions, reporters, nullptr);
 }

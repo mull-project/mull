@@ -52,9 +52,7 @@ template <> struct llvm::yaml::MappingTraits<Configuration> {
     io.mapOptional("linkerTimeout", config.linkerTimeout);
     io.mapOptional("diagnostics", config.diagnostics);
     io.mapOptional("mutators", config.mutators);
-    io.mapOptional("executable", config.executable);
     io.mapOptional("outputFile", config.outputFile);
-    io.mapOptional("coverageInfo", config.coverageInfo);
     io.mapOptional("linker", config.linker);
     io.mapOptional("linkerFlags", config.linkerFlags);
     io.mapOptional("parallelization", config.parallelization);

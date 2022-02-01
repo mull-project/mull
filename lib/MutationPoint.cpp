@@ -77,18 +77,10 @@ MutationPoint::MutationPoint(Mutator *mutator, irm::IRMutation *irMutator,
     : mutator(mutator), address(MutationPointAddress::addressFromInstruction(instruction)),
       bitcode(m), originalFunction(instruction->getFunction()), mutatedFunction(nullptr),
       sourceLocation(SourceLocation::locationFromInstruction(instruction)), irMutator(irMutator),
-      covered(true), endLocation(SourceLocation::nullSourceLocation()) {
+      endLocation(SourceLocation::nullSourceLocation()) {
   userIdentifier = mutator->getUniqueIdentifier() + ':' + sourceLocation.filePath + ':' +
                    std::to_string(sourceLocation.line) + ':' +
                    std::to_string(sourceLocation.column);
-}
-
-void MutationPoint::setCovered(bool isCovered) {
-  covered = isCovered;
-}
-
-bool MutationPoint::isCovered() {
-  return covered;
 }
 
 Mutator *MutationPoint::getMutator() {
@@ -134,7 +126,7 @@ void MutationPoint::recordMutation() {
   assert(originalFunction != nullptr);
   llvm::Module *module = originalFunction->getParent();
   std::string encoding = getUserIdentifier() + ':' + std::to_string(endLocation.line) + ':' +
-                         std::to_string(endLocation.column) + ':' + std::to_string(isCovered());
+                         std::to_string(endLocation.column);
   llvm::Constant *constant =
       llvm::ConstantDataArray::getString(module->getContext(), llvm::StringRef(encoding));
   auto *global = new llvm::GlobalVariable(*module,

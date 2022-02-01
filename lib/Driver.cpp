@@ -24,10 +24,8 @@
 #include "mull/Toolchain/Runner.h"
 
 #include <llvm/IR/Verifier.h>
-#include <llvm/ProfileData/Coverage/CoverageMapping.h>
 #include <llvm/Support/DynamicLibrary.h>
 #include <llvm/Support/FileSystem.h>
-#include <llvm/Support/Path.h>
 
 #include <algorithm>
 #include <sstream>
@@ -60,17 +58,8 @@ std::unique_ptr<Result> Driver::run() {
       std::string mutatorIdentifier = anyPoint->getMutatorIdentifier();
       const SourceLocation &sourceLocation = anyPoint->getSourceLocation();
       const SourceLocation &endLocation = anyPoint->getEndLocation();
-      bool covered = false;
-      for (MutationPoint *point : pair.second) {
-        /// Consider a mutant covered if at least one of the mutation points is covered
-        if (point->isCovered()) {
-          covered = true;
-          break;
-        }
-      }
-
-      mutants.push_back(std::make_unique<Mutant>(
-          identifier, mutatorIdentifier, sourceLocation, endLocation, covered));
+      mutants.push_back(
+          std::make_unique<Mutant>(identifier, mutatorIdentifier, sourceLocation, endLocation));
       mutants.back()->setMutatorKind(anyPoint->getMutator()->mutatorKind());
     }
     std::sort(std::begin(mutants), std::end(mutants), MutantComparator());
@@ -299,87 +288,13 @@ Driver::Driver(Diagnostics &diagnostics, const Configuration &config, Program &p
   }
 }
 
-static std::unique_ptr<llvm::coverage::CoverageMapping>
-loadCoverage(const Configuration &configuration, Diagnostics &diagnostics) {
-  if (configuration.coverageInfo.empty()) {
-    return nullptr;
-  }
-  llvm::Expected<std::unique_ptr<llvm::coverage::CoverageMapping>> maybeMapping =
-      llvm::coverage::CoverageMapping::load({ configuration.executable },
-                                            configuration.coverageInfo);
-  if (!maybeMapping) {
-    std::string error;
-    llvm::raw_string_ostream os(error);
-    llvm::logAllUnhandledErrors(maybeMapping.takeError(), os, "Cannot read coverage info: ");
-    diagnostics.warning(os.str());
-    return nullptr;
-  }
-  return std::move(maybeMapping.get());
-}
-
 std::vector<FunctionUnderTest> Driver::getFunctionsUnderTest() {
   std::vector<FunctionUnderTest> functionsUnderTest;
 
   singleTask.execute("Gathering functions under test", [&]() {
-    std::unique_ptr<llvm::coverage::CoverageMapping> coverage = loadCoverage(config, diagnostics);
-    if (coverage) {
-      /// Some of the function records contain just name, the others are prefixed with the filename
-      /// to avoid collisions
-      /// TODO: check case when filename:functionName is not enough to resolve collisions
-      /// TODO: pick a proper data structure
-      std::unordered_map<
-          std::string,
-          std::unordered_map<std::string, std::vector<llvm::coverage::CountedRegion>>>
-          scopedFunctions;
-      std::unordered_map<std::string, std::vector<llvm::coverage::CountedRegion>> unscopedFunctions;
-      for (auto &it : coverage->getCoveredFunctions()) {
-        if (!it.ExecutionCount) {
-          continue;
-        }
-        std::string scope;
-        std::string name = it.Name;
-        size_t idx = name.find(':');
-        if (idx != std::string::npos) {
-          scope = name.substr(0, idx);
-          name = name.substr(idx + 1);
-        }
-        if (scope.empty()) {
-          unscopedFunctions[name] = it.CountedRegions;
-        } else {
-          scopedFunctions[scope][name] = it.CountedRegions;
-        }
-      }
-      for (auto &bitcode : program.bitcode()) {
-        for (llvm::Function &function : *bitcode->getModule()) {
-          bool covered = false;
-          std::vector<llvm::coverage::CountedRegion> linecoverage = {};
-          std::string name = function.getName().str();
-          if (unscopedFunctions.count(name)) {
-            covered = true;
-            std::swap(linecoverage, unscopedFunctions[name]);
-          } else {
-            std::string filepath = SourceLocation::locationFromFunction(&function).unitFilePath;
-            std::string scope = llvm::sys::path::filename(filepath).str();
-            if (scopedFunctions[scope].count(name)) {
-              covered = true;
-              std::swap(linecoverage, scopedFunctions[scope][name]);
-            }
-          }
-          if (covered) {
-            functionsUnderTest.emplace_back(&function, bitcode.get(), true, linecoverage);
-          } else if (config.includeNotCovered) {
-            functionsUnderTest.emplace_back(&function, bitcode.get());
-          }
-        }
-      }
-    } else {
-      if (config.includeNotCovered) {
-        diagnostics.warning("-include-not-covered is enabled, but there is no coverage info!");
-      }
-      for (auto &bitcode : program.bitcode()) {
-        for (llvm::Function &function : *bitcode->getModule()) {
-          functionsUnderTest.emplace_back(&function, bitcode.get(), true);
-        }
+    for (auto &bitcode : program.bitcode()) {
+      for (llvm::Function &function : *bitcode->getModule()) {
+        functionsUnderTest.emplace_back(&function, bitcode.get());
       }
     }
   });
@@ -547,64 +462,8 @@ void mull::mutateBitcode(llvm::Module &module) {
   Bitcode bitcode(&module);
   std::vector<FunctionUnderTest> functionsUnderTest;
   singleTask.execute("Gathering functions under test", [&]() {
-    std::unique_ptr<llvm::coverage::CoverageMapping> coverage =
-        loadCoverage(configuration, diagnostics);
-    if (coverage) {
-      /// Some of the function records contain just name, the others are prefixed with the filename
-      /// to avoid collisions
-      /// TODO: check case when filename:functionName is not enough to resolve collisions
-      /// TODO: pick a proper data structure
-      std::unordered_map<
-          std::string,
-          std::unordered_map<std::string, std::vector<llvm::coverage::CountedRegion>>>
-          scopedFunctions;
-      std::unordered_map<std::string, std::vector<llvm::coverage::CountedRegion>> unscopedFunctions;
-      for (auto &it : coverage->getCoveredFunctions()) {
-        if (!it.ExecutionCount) {
-          continue;
-        }
-        std::string scope;
-        std::string name = it.Name;
-        size_t idx = name.find(':');
-        if (idx != std::string::npos) {
-          scope = name.substr(0, idx);
-          name = name.substr(idx + 1);
-        }
-        if (scope.empty()) {
-          unscopedFunctions[name] = it.CountedRegions;
-        } else {
-          scopedFunctions[scope][name] = it.CountedRegions;
-        }
-      }
-
-      for (llvm::Function &function : module) {
-        bool covered = false;
-        std::vector<llvm::coverage::CountedRegion> linecoverage = {};
-        std::string name = function.getName().str();
-        if (unscopedFunctions.count(name)) {
-          covered = true;
-          std::swap(linecoverage, unscopedFunctions[name]);
-        } else {
-          std::string filepath = SourceLocation::locationFromFunction(&function).unitFilePath;
-          std::string scope = llvm::sys::path::filename(filepath).str();
-          if (scopedFunctions[scope].count(name)) {
-            covered = true;
-            std::swap(linecoverage, scopedFunctions[scope][name]);
-          }
-        }
-        if (covered) {
-          functionsUnderTest.emplace_back(&function, &bitcode, true, linecoverage);
-        } else if (configuration.includeNotCovered) {
-          functionsUnderTest.emplace_back(&function, &bitcode);
-        }
-      }
-    } else {
-      if (configuration.includeNotCovered) {
-        diagnostics.warning("-include-not-covered is enabled, but there is no coverage info!");
-      }
-      for (llvm::Function &function : module) {
-        functionsUnderTest.emplace_back(&function, &bitcode, true);
-      }
+    for (llvm::Function &function : module) {
+      functionsUnderTest.emplace_back(&function, &bitcode);
     }
   });
 

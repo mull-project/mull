@@ -19,9 +19,9 @@ ASTMutationPoint::ASTMutationPoint(std::unique_ptr<ASTMutation> mutation,
 
   std::ostringstream mbis;
 
-  /// mutator:file:begin_line:begin_col:end_line:end_col:1
+  /// mutator:file:begin_line:begin_col:end_line:end_col
   mbis << mutationIdentifier << ":" << sourceFilePath << ":" << beginLine << ":" << beginColumn
-       << ":" << endLine << ":" << endColumn << ":1";
+       << ":" << endLine << ":" << endColumn;
   this->mutationBinaryRecord = mbis.str();
 }
 

@@ -14,12 +14,13 @@ struct SourceLocation;
 class Mutant {
 public:
   Mutant(std::string identifier, std::string mutatorIdentifier, SourceLocation sourceLocation,
-         SourceLocation endLocation, bool covered);
+         SourceLocation endLocation);
 
   const std::string &getIdentifier() const;
   const SourceLocation &getSourceLocation() const;
   const SourceLocation &getEndLocation() const;
   const std::string &getMutatorIdentifier() const;
+  void setCovered(bool covered);
   bool isCovered() const;
 
   /// needed by AST search

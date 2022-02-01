@@ -10,8 +10,6 @@ void ApplyMutationTask::operator()(iterator begin, iterator end, Out &storage,
   for (auto it = begin; it != end; ++it, counter.increment()) {
     auto point = *it;
     point->recordMutation();
-    if (point->isCovered()) {
-      point->applyMutation();
-    }
+    point->applyMutation();
   }
 }

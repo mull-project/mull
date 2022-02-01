@@ -110,7 +110,6 @@ int main(int argc, char **argv) {
 
   configuration.executable = inputFile;
   configuration.outputFile = tool::OutputFile.getValue();
-  configuration.coverageInfo = tool::CoverageInfo.getValue();
   configuration.includeNotCovered = tool::IncludeNotCovered.getValue();
 
   configuration.keepObjectFiles = tool::KeepObjectFiles.getValue();
