@@ -34,7 +34,6 @@
   with_items:
     - ebc
     - json11
-    - spdlog
     - mull-cxx-mutators
     - MullVersion
     - mull
@@ -77,7 +76,6 @@
   with_items:
     - ebc
     - json11
-    - spdlog
     - mull-cxx-mutators
     - MullVersion
     - mull

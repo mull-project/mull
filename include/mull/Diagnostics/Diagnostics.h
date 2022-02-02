@@ -5,12 +5,9 @@
 
 namespace mull {
 
-class DiagnosticsImpl;
-
 class Diagnostics {
 public:
   Diagnostics();
-  ~Diagnostics();
 
   void enableDebugMode();
   void enableStrictMode();
@@ -26,7 +23,6 @@ public:
 private:
   void prepare();
 
-  DiagnosticsImpl *impl;
   std::mutex mutex;
   bool seenProgress;
   bool debugModeEnabled;
