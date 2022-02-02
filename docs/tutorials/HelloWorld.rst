@@ -281,3 +281,8 @@ Just to recap:
                   -g -grecord-command-line \
                   main.cpp -o hello-world
     $ mull-runner-12 hello-world
+
+Next Steps
+----------
+
+Take a look at :doc:`makefile <./MakefileIntegration>` or :doc:`CMake <./CMakeIntegration>` integrations.
