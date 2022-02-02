@@ -29,17 +29,11 @@ Runner::Runner(Diagnostics &diagnostics) : diagnostics(diagnostics) {}
 
 ExecutionResult Runner::runProgram(const std::string &program,
                                    const std::vector<std::string> &arguments,
-                                   const std::vector<std::string> &environment,
+                                   const std::unordered_map<std::string, std::string> &environment,
                                    long long int timeout, bool captureOutput,
                                    std::optional<std::string> optionalWorkingDirectory) {
-  std::vector<std::pair<std::string, std::string>> env;
-  env.reserve(environment.size());
-  for (auto &e : environment) {
-    env.emplace_back(e, "1");
-  }
-
   reproc::options options;
-  options.env.extra = reproc::env(env);
+  options.env.extra = reproc::env(environment);
   options.redirect.err.type = reproc::redirect::type::pipe;
   options.stop.first.action = reproc::stop::kill;
   options.stop.first.timeout = std::chrono::milliseconds(100);

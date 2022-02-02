@@ -2,10 +2,10 @@
 
 #include "mull/Config/Configuration.h"
 #include "mull/Diagnostics/Diagnostics.h"
+#include "mull/ExecutionResult.h"
 #include "mull/Parallelization/Progress.h"
 #include "mull/SourceLocation.h"
 #include "mull/Toolchain/Runner.h"
-#include "mull/ExecutionResult.h"
 
 #include <sstream>
 
@@ -29,7 +29,7 @@ void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
     if (mutant->isCovered()) {
       result = runner.runProgram(executable,
                                  extraArgs,
-                                 { mutant->getIdentifier() },
+                                 { { mutant->getIdentifier(), "1" } },
                                  std::max(30LL, baseline.runningTime * 10),
                                  configuration.captureMutantOutput,
                                  std::nullopt);

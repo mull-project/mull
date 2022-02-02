@@ -2,7 +2,6 @@
 #include <iostream>
 #include <llvm/Object/ObjectFile.h>
 #include <sstream>
-#include <unordered_map>
 #include <unordered_set>
 
 using namespace mull;
