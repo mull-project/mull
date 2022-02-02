@@ -36,3 +36,7 @@
 
 --ld-search-path directory		Library search path
 
+--coverage-info string		Path to the coverage info file (LLVM's profdata)
+
+--debug-coverage		Print coverage ranges
+

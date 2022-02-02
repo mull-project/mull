@@ -13,4 +13,7 @@ void resolveLibraries(mull::Diagnostics &diagnostics, std::vector<std::string> &
 
 std::vector<std::string> getDynamicLibraryDependencies(mull::Diagnostics &diagnostics,
                                                        const std::string &executablePath);
+
+bool hasCoverage(mull::Diagnostics &diagnostics, const std::string &path);
+
 } // namespace mull

@@ -1,5 +1,6 @@
 #include "CoverageChecker.h"
 #include "DynamicLibraries.h"
+#include "MergeInstProfile.h"
 #include "MutantExtractor.h"
 #include "mull-runner-cli.h"
 #include "mull/Config/Configuration.h"
@@ -12,6 +13,7 @@
 #include "mull/Version.h"
 
 #include <llvm/Support/FileSystem.h>
+#include <llvm/Support/Path.h>
 
 #include <memory>
 #include <unistd.h>
@@ -132,7 +134,27 @@ int main(int argc, char **argv) {
   mull::MutantExtractor mutantExtractor(diagnostics);
   std::vector<std::unique_ptr<mull::Mutant>> mutants =
       mutantExtractor.extractMutants(mutantHolders);
+  std::string coverageInfo = tool::CoverageInfo.getValue();
 
+  std::string rawCoverageData;
+
+  std::unordered_map<std::string, std::string> env;
+  if (coverageInfo.empty() && mull::hasCoverage(diagnostics, configuration.executable)) {
+    llvm::SmallString<PATH_MAX> rawPath;
+    llvm::sys::fs::getPotentiallyUniqueTempFileName("mull", "raw-coverage", rawPath);
+    rawCoverageData = rawPath.str().str();
+
+    llvm::SmallString<PATH_MAX> indexedPath;
+    llvm::sys::fs::getPotentiallyUniqueTempFileName("mull", "indexed-coverage", indexedPath);
+    coverageInfo = indexedPath.str().str();
+
+    if (configuration.debug.coverage) {
+      llvm::errs() << "rawCoverageFile: " << rawCoverageData << "\n";
+      llvm::errs() << "indexedCoverageFile: " << coverageInfo << "\n";
+    }
+
+    env["LLVM_PROFILE_FILE"] = rawCoverageData;
+  }
   mull::Runner runner(diagnostics);
   mull::SingleTaskExecutor singleTask(diagnostics);
   /// On macOS, sometimes newly compiled programs take more time to execute for the first run
@@ -142,7 +164,7 @@ int main(int argc, char **argv) {
   singleTask.execute("Warm up run", [&]() {
     warmUpResult = runner.runProgram(testProgram,
                                      extraArgs,
-                                     {},
+                                     env,
                                      configuration.timeout,
                                      configuration.captureMutantOutput,
                                      std::nullopt);
@@ -151,9 +173,15 @@ int main(int argc, char **argv) {
     diagnostics.warning(warmUpResult.debugDescription());
   }
 
+  if (!rawCoverageData.empty()) {
+    singleTask.execute("Extracting coverage information", [&]() {
+      mull::mergeRawInstProfile(diagnostics, rawCoverageData, coverageInfo);
+      llvm::sys::fs::remove(rawCoverageData);
+    });
+  }
+
   std::vector<std::unique_ptr<mull::Mutant>> filteredMutants;
-  mull::CoverageChecker coverage(
-      configuration, diagnostics, tool::CoverageInfo.getValue(), mutantHolders);
+  mull::CoverageChecker coverage(configuration, diagnostics, coverageInfo, mutantHolders);
   for (auto &mutant : mutants) {
     bool covered = coverage.covered(mutant.get());
     mutant->setCovered(covered);

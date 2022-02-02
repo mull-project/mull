@@ -169,3 +169,34 @@ std::vector<std::string> mull::getDynamicLibraryDependencies(mull::Diagnostics &
   }
   return libraries;
 }
+
+bool mull::hasCoverage(mull::Diagnostics &diagnostics, const std::string &path) {
+  llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> maybeBuffer =
+      llvm::MemoryBuffer::getFile(path);
+  if (!maybeBuffer) {
+    diagnostics.error("Cannot read executable: "s + maybeBuffer.getError().message() + ": " + path);
+  }
+  llvm::MemoryBuffer *buffer = maybeBuffer->get();
+  llvm::Expected<std::unique_ptr<llvm::object::ObjectFile>> maybeObject =
+      llvm::object::ObjectFile::createObjectFile(buffer->getMemBufferRef());
+  if (!maybeObject) {
+    llvm::Error error = maybeObject.takeError();
+    /// On older versions of macOS we fail to load certain system libraries because they are fat
+    /// libraries On newer versions of macOS we never reach this line because the system libraries
+    /// live in cache and cannot be read from FS This should be an error, but we relax it to a
+    /// warning to not fail on macOS
+    /// TODO: we should probably add support for universal binaries at some point
+    /// https://github.com/mull-project/mull/issues/932
+    diagnostics.warning("Skipping. Executable is not an object file: "s +
+                        llvm::toString(std::move(error)) + ": " + path);
+    return false;
+  }
+
+  for (auto &section : (*maybeObject)->sections()) {
+    if (getSectionName(section).endswith("llvm_covmap")) {
+      return true;
+    }
+  }
+
+  return false;
+}
