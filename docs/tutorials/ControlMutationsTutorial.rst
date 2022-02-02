@@ -1,18 +1,11 @@
 Keeping mutants under control
 =============================
 
-.. warning::
-   Since the version 0.15.0, ``mull-cxx`` tool `is deprecated <https://github.com/mull-project/mull/issues/945>`_
-   in favour of a compiler plugin: `Mull IR Frontend <https://github.com/mull-project/mull/pull/938>`_.
+This tutorial shows how to control the amount of mutatns.
 
-   This tutorial covers ``mull-cxx`` tool and will be removed in the future.
+It builds on top of the :doc:`Makefile Integration: OpenSSL <./MakefileIntegration>` and :doc:`CMake Integration: libfmt <./CMakeIntegration>` tutorials.
 
-   It is recommended that you use the new :doc:`Mull IR Frontend <./HelloWorld>`.
-
-
-This tutorial shows you how to keep the number of mutants under control.
-It builds on top of the `Compilation Database and Junk Mutations <CompilationDatabaseAndJunk.html>`_
-tutorial so make sure you go through that one first.
+---
 
 When you apply mutation testing for the first time, you might be overwhelmed by
 the number of mutants - what do you do when you see that several hundred or thousands of mutants survived?
@@ -20,128 +13,57 @@ the number of mutants - what do you do when you see that several hundred or thou
 The right way to go about it is to put the number of mutants under control and
 work through them incrementally.
 
-Mutation Operators
-------------------
+*Scroll down past the ``OpenSSL`` part if you are coming from the ``CMake tutorial``.*
 
-If you apply Mull with the default set of mutation operators on fmtlib, you will get
-around ~4000 mutants, ~3300 of which survive.
+OpenSSL Example
+---------------
 
-.. code-block:: bash
-
-    $ mull-cxx \
-        -linker=clang++ \
-        -compdb-path compile_commands.json \
-        -compilation-flags="\
-          -isystem /opt/llvm/10.0.0/include/c++/v1 \
-          -isystem /opt/llvm/10.0.0/lib/clang/10.0.0/include \
-          -isystem /usr/include \
-          -isystem /usr/local/include" \
-        ./bin/core-test
-
-    /// skipped
-
-    [info] Survived mutants (3397/3946):
-    /tmp/sc-0Puh0WBoL/fmt/include/fmt/core.h:734:19: warning: Survived: Replaced <= with < [cxx_le_to_lt]
-        size_ = count <= capacity_ ? count : capacity_;
-                      ^
-    /tmp/sc-0Puh0WBoL/fmt/include/fmt/core.h:1716:12: warning: Survived: Replaced >= with > [cxx_ge_to_gt]
-        if (id >= detail::max_packed_args) return arg;
-               ^
-    /// skipped
-
-    /tmp/sc-0Puh0WBoL/fmt/include/fmt/format-inl.h:1283:51: warning: Survived: Replaced ++x with --x [cxx_pre_inc_to_pre_dec]
-        for (size_t i = 0, n = bigits_.size(); i < n; ++i) {
-                                                      ^
-    [info] Mutation score: 13%
-    [info] Total execution time: 89999ms
-
-Going through all of them to see which ones deserve your attention is
-simply impractical.
-
-The easiest way to decrease this number is to pick one or two :doc:`mutation operators </../SupportedMutations>`.
-
-Let's see how the numbers change if we only use ``cxx_add_to_sub`` that replaces
-all the ``a + b`` to ``a - b``.
-
-.. code-block:: bash
-
-    $ mull-cxx \
-        -linker=clang++ \
-        -mutators=cxx_add_to_sub \
-        -compdb-path compile_commands.json \
-        -compilation-flags="\
-          -isystem /opt/llvm/10.0.0/include/c++/v1 \
-          -isystem /opt/llvm/10.0.0/lib/clang/10.0.0/include \
-          -isystem /usr/include \
-          -isystem /usr/local/include" \
-        ./bin/core-test
-
-    /// skipped
-
-    [info] Survived mutants (305/350):
-    /tmp/sc-0Puh0WBoL/fmt/test/gmock-gtest-all.cc:1758:34: warning: Survived: Replaced + with - [cxx_add_to_sub]
-      state_ = (1103515245U * state_ + 12345U) % kMaxRange;
-                                     ^
-    /tmp/sc-0Puh0WBoL/fmt/test/gmock-gtest-all.cc:2275:55: warning: Survived: Replaced + with - [cxx_add_to_sub]
-      return static_cast<TimeInMillis>(now.tv_sec) * 1000 + now.tv_usec / 1000;
-                                                          ^
-    /// skipped
-    /tmp/sc-0Puh0WBoL/fmt/include/fmt/format-inl.h:1334:68: warning: Survived: Replaced + with - [cxx_add_to_sub]
-      int num_bigits() const { return static_cast<int>(bigits_.size()) + exp_; }
-                                                                       ^
-    /tmp/sc-0Puh0WBoL/fmt/include/fmt/format-inl.h:1284:53: warning: Survived: Replaced + with - [cxx_add_to_sub]
-          double_bigit result = bigits_[i] * wide_value + carry;
-                                                        ^
-    [info] Mutation score: 12%
-    [info] Total execution time: 18481ms
-
-You are still getting plenty - 305 survived out of 350 total, but this is much more
-manageable.
-
+-------
 Filters
 -------
 
-You may notice that the last run had, among others, the following mutants survived:
+In the last run of the OpenSSL tutorial, you may notice that, among the others, the following mutants survived:
 
 .. code-block:: text
 
-    /tmp/sc-0Puh0WBoL/fmt/test/gmock-gtest-all.cc:1758:34: warning: Survived: Replaced + with - [cxx_add_to_sub]
-      state_ = (1103515245U * state_ + 12345U) % kMaxRange;
-                                     ^
-    /tmp/sc-0Puh0WBoL/fmt/test/gmock-gtest-all.cc:2275:55: warning: Survived: Replaced + with - [cxx_add_to_sub]
-      return static_cast<TimeInMillis>(now.tv_sec) * 1000 + now.tv_usec / 1000;
-                                                          ^
+    /private/tmp/sc-yOzi9P1sJ/openssl/test/testutil/format_output.c:301:32: warning: Survived: Replaced + with - [cxx_add_to_sub]
+        len = ((l1 > l2 ? l1 : l2) + bytes - 1) / bytes * bytes;
+                                   ^
+    /private/tmp/sc-yOzi9P1sJ/openssl/test/testutil/random.c:24:54: warning: Survived: Replaced + with - [cxx_add_to_sub]
+        test_random_state[pos] += test_random_state[(pos + 28) % 31];
+                                                         ^
 
-Looking at the paths, it is clear that these mutants are part of the GoogleTest
-framework (``gmock-gtest-all.cc``). It is very unlikely that you are interested
-in seeing these in the result.
-Mull comes with two path-based filters ``--exclude-path`` and ``--include-path``.
+Looking at the paths, it is clear that these mutants are part of the test framework
+framework (``test/testutil/random.c``, ``test/testutil/format_output.c``).
+It is very unlikely that you are interested in seeing these in the result.
+
+Mull comes with two path-based filters ``excludePaths`` and ``includePaths``.
 You can use these to either exclude or include mutations based on their file-system location.
-Let's exclude everything related to GoogleTest:
+Let's exclude everything related to the ``testutil``.
 
+Your ``mull.yml`` should look like this:
+
+.. code-block:: yaml
+
+    mutators:
+      - cxx_add_to_sub
+    excludePaths:
+      - .*testutil.*
+
+Now, rebuild OpenSSL:
 
 .. code-block:: bash
 
-    $ mull-cxx \
-        -linker=clang++ \
-        -mutators=cxx_add_to_sub \
-        -exclude-path=".*gtest.*" \
-        -exclude-path=".*gmock.*" \
-        -compdb-path compile_commands.json \
-        -compilation-flags="\
-          -isystem /opt/llvm/10.0.0/include/c++/v1 \
-          -isystem /opt/llvm/10.0.0/lib/clang/10.0.0/include \
-          -isystem /usr/include \
-          -isystem /usr/local/include" \
-        ./bin/core-test
-    /// skipped
+    make clean
+    make build_generated -j
+    make ./test/bio_enc_test -j
 
-    [info] Survived mutants (275/320):
-    /tmp/sc-0Puh0WBoL/fmt/include/fmt/format-inl.h:228:35: warning: Survived: Replaced + with - [cxx_add_to_sub]
-      return i >= 0 ? i * char_digits + count_digits<4, unsigned>(n.value[i]) : 1;
-                                      ^
+And rerun Mull:
 
-275/320 vs. 305/350. Better, but still too much.
+.. code-block:: bash
+
+    mull-runner-12 ./test/bio_enc_test
+
 
 Code Coverage
 -------------

@@ -5,7 +5,7 @@ Tutorials
    :maxdepth: 1
 
    tutorials/HelloWorld
-   tutorials/CompilationDatabaseAndJunk
+   tutorials/MakefileIntegration
    tutorials/ControlMutationsTutorial
    tutorials/NonStandardTestSuite
    tutorials/SQLiteReport
