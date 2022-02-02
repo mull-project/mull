@@ -1,5 +1,6 @@
 #pragma once
 
+#include <sstream>
 #include <string>
 
 namespace mull {
@@ -46,11 +47,18 @@ struct ExecutionResult {
   long long runningTime;
   std::string stdoutOutput;
   std::string stderrOutput;
-  ExecutionResult()
-      : status(ExecutionStatus::Invalid), exitStatus(0), runningTime(0) {}
+  ExecutionResult() : status(ExecutionStatus::Invalid), exitStatus(0), runningTime(0) {}
 
   std::string getStatusAsString() {
     return executionStatusAsString(this->status);
+  }
+  std::string debugDescription() {
+    std::stringstream message;
+    message << "Original test failed\n";
+    message << "status: " << getStatusAsString() << "\n";
+    message << "stdout: '" << stdoutOutput << "'\n";
+    message << "stderr: '" << stderrOutput << "'\n";
+    return message.str();
   }
 };
 } // namespace mull

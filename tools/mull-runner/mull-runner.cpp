@@ -6,7 +6,9 @@
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Metrics/MetricsMeasure.h"
 #include "mull/MutantRunner.h"
+#include "mull/Parallelization/TaskExecutor.h"
 #include "mull/Result.h"
+#include "mull/Toolchain/Runner.h"
 #include "mull/Version.h"
 
 #include <llvm/Support/FileSystem.h>
@@ -30,6 +32,7 @@ static std::string validateInputFile(const std::string &inputFile, mull::Diagnos
 }
 
 int main(int argc, char **argv) {
+  llvm::llvm_shutdown_obj llvmShutdownObj;
   mull::Diagnostics diagnostics;
   llvm::cl::SetVersionPrinter(mull::printVersionInformation);
 
@@ -130,6 +133,24 @@ int main(int argc, char **argv) {
   std::vector<std::unique_ptr<mull::Mutant>> mutants =
       mutantExtractor.extractMutants(mutantHolders);
 
+  mull::Runner runner(diagnostics);
+  mull::SingleTaskExecutor singleTask(diagnostics);
+  /// On macOS, sometimes newly compiled programs take more time to execute for the first run
+  /// As we take the execution time as a baseline for timeout it makes sense to have an additional
+  /// warm up run so that the next runs will be a bit faster
+  mull::ExecutionResult warmUpResult{};
+  singleTask.execute("Warm up run", [&]() {
+    warmUpResult = runner.runProgram(testProgram,
+                                     extraArgs,
+                                     {},
+                                     configuration.timeout,
+                                     configuration.captureMutantOutput,
+                                     std::nullopt);
+  });
+  if (warmUpResult.status != mull::ExecutionStatus::Passed) {
+    diagnostics.warning(warmUpResult.debugDescription());
+  }
+
   std::vector<std::unique_ptr<mull::Mutant>> filteredMutants;
   mull::CoverageChecker coverage(
       configuration, diagnostics, tool::CoverageInfo.getValue(), mutantHolders);
@@ -141,7 +162,7 @@ int main(int argc, char **argv) {
     }
   }
 
-  mull::MutantRunner mutantRunner(diagnostics, configuration);
+  mull::MutantRunner mutantRunner(diagnostics, configuration, runner);
   std::vector<std::unique_ptr<mull::MutationResult>> mutationResults =
       mutantRunner.runMutants(testProgram, extraArgs, filteredMutants);
 
@@ -150,7 +171,7 @@ int main(int argc, char **argv) {
   for (auto &reporter : reporters) {
     reporter->reportResults(*result);
   }
-  llvm::llvm_shutdown();
+
   totalExecutionTime.finish();
   std::stringstream stringstream;
   stringstream << "Total execution time: " << totalExecutionTime.duration()

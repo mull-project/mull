@@ -264,8 +264,8 @@ Driver::normalRunMutations(std::vector<std::unique_ptr<Mutant>> &mutants) {
   if (config.mutateOnly) {
     return std::vector<std::unique_ptr<MutationResult>>();
   }
-
-  MutantRunner mutantRunner(diagnostics, config);
+  Runner runner(diagnostics);
+  MutantRunner mutantRunner(diagnostics, config, runner);
   std::vector<std::unique_ptr<MutationResult>> mutationResults =
       mutantRunner.runMutants(executable, mutants);
 

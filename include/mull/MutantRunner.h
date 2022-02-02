@@ -12,7 +12,7 @@ namespace mull {
 
 class MutantRunner {
 public:
-  MutantRunner(Diagnostics &diagnostics, const Configuration &configuration);
+  MutantRunner(Diagnostics &diagnostics, const Configuration &configuration, Runner &runner);
   std::vector<std::unique_ptr<MutationResult>>
   runMutants(const std::string &executable, std::vector<std::unique_ptr<Mutant>> &mutants);
   std::vector<std::unique_ptr<MutationResult>>
@@ -22,7 +22,7 @@ public:
 private:
   Diagnostics &diagnostics;
   const Configuration &configuration;
-  Runner runner;
+  Runner &runner;
 };
 
 } // namespace mull
