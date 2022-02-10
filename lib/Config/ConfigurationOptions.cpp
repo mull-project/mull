@@ -4,24 +4,20 @@
 
 namespace mull {
 
-ParallelizationConfig::ParallelizationConfig()
-    : workers(0), testExecutionWorkers(0), mutantExecutionWorkers(0) {}
+ParallelizationConfig::ParallelizationConfig() : workers(0), executionWorkers(0) {}
 
 void ParallelizationConfig::normalize() {
   unsigned defaultWorkers = std::max(std::thread::hardware_concurrency(), unsigned(1));
   if (workers == 0) {
     workers = defaultWorkers;
   }
-  if (testExecutionWorkers == 0) {
-    testExecutionWorkers = workers;
-  }
 
-  if (mutantExecutionWorkers == 0) {
-    mutantExecutionWorkers = workers;
+  if (executionWorkers == 0) {
+    executionWorkers = workers;
   }
 }
 
-bool ParallelizationConfig::exceedsHardware(){
+bool ParallelizationConfig::exceedsHardware() {
   return workers > std::thread::hardware_concurrency();
 }
 

@@ -2,3 +2,5 @@ mutators:
   - cxx_xor_to_or
 debugEnabled: true
 quiet: false
+parallelization:
+  workers: 1

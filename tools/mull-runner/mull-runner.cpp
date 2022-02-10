@@ -13,7 +13,6 @@
 #include "mull/Version.h"
 
 #include <llvm/Support/FileSystem.h>
-#include <llvm/Support/Path.h>
 
 #include <memory>
 #include <unistd.h>
@@ -67,14 +66,26 @@ int main(int argc, char **argv) {
   totalExecutionTime.start();
 
   mull::Configuration configuration;
+  auto configPath = mull::Configuration::findConfig(diagnostics);
+  if (!configPath.empty()) {
+    configuration = mull::Configuration::loadFromDisk(diagnostics, configPath);
+    diagnostics.info("Using config "s + configPath);
+  }
 
-  configuration.debugEnabled = tool::DebugEnabled;
-  configuration.timeout = tool::Timeout.getValue();
-  configuration.includeNotCovered = tool::IncludeNotCovered.getValue();
+  if (tool::DebugEnabled.getNumOccurrences()) {
+    configuration.debugEnabled = tool::DebugEnabled;
+  }
+  if (tool::Timeout.getNumOccurrences()) {
+    configuration.timeout = tool::Timeout.getValue();
+  }
+
+  if (tool::IncludeNotCovered.getNumOccurrences()) {
+    configuration.includeNotCovered = tool::IncludeNotCovered.getValue();
+  }
 
   configuration.executable = inputFile;
 
-  if (tool::Workers) {
+  if (tool::Workers.getNumOccurrences()) {
     mull::ParallelizationConfig parallelizationConfig;
     parallelizationConfig.workers = tool::Workers;
     parallelizationConfig.normalize();
@@ -87,10 +98,10 @@ int main(int argc, char **argv) {
     configuration.parallelization = mull::ParallelizationConfig::defaultConfig();
   }
 
-  if (tool::NoTestOutput.getValue() || tool::NoOutput.getValue()) {
+  if (tool::NoTestOutput.getNumOccurrences() || tool::NoOutput.getNumOccurrences()) {
     configuration.captureTestOutput = false;
   }
-  if (tool::NoMutantOutput.getValue() || tool::NoOutput.getValue()) {
+  if (tool::NoMutantOutput.getNumOccurrences() || tool::NoOutput.getNumOccurrences()) {
     configuration.captureMutantOutput = false;
   }
 
