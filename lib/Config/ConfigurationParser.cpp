@@ -20,8 +20,7 @@ template <> struct llvm::yaml::ScalarEnumerationTraits<IDEDiagnosticsKind> {
 template <> struct llvm::yaml::MappingTraits<ParallelizationConfig> {
   static void mapping(llvm::yaml::IO &io, ParallelizationConfig &config) {
     io.mapOptional("workers", config.workers);
-    io.mapOptional("testExecutionWorkers", config.testExecutionWorkers);
-    io.mapOptional("mutantExecutionWorkers", config.mutantExecutionWorkers);
+    io.mapOptional("executionWorkers", config.executionWorkers);
   }
 };
 
@@ -39,22 +38,11 @@ template <> struct llvm::yaml::MappingTraits<Configuration> {
     io.mapOptional("debugEnabled", config.debugEnabled);
     io.mapOptional("quiet", config.quiet);
     io.mapOptional("silent", config.silent);
-    io.mapOptional("dryRunEnabled", config.dryRunEnabled);
     io.mapOptional("captureTestOutput", config.captureTestOutput);
     io.mapOptional("captureMutantOutput", config.captureMutantOutput);
-    io.mapOptional("skipSanityCheckRun", config.skipSanityCheckRun);
     io.mapOptional("includeNotCovered", config.includeNotCovered);
-    io.mapOptional("keepObjectFiles", config.keepObjectFiles);
-    io.mapOptional("keepExecutable", config.keepExecutable);
-    io.mapOptional("mutateOnly", config.mutateOnly);
-    io.mapOptional("lowerBitcode", config.lowerBitcode);
     io.mapOptional("timeout", config.timeout);
-    io.mapOptional("linkerTimeout", config.linkerTimeout);
-    io.mapOptional("diagnostics", config.diagnostics);
     io.mapOptional("mutators", config.mutators);
-    io.mapOptional("outputFile", config.outputFile);
-    io.mapOptional("linker", config.linker);
-    io.mapOptional("linkerFlags", config.linkerFlags);
     io.mapOptional("parallelization", config.parallelization);
     io.mapOptional("compilationDatabasePath", config.compilationDatabasePath);
     io.mapOptional("compilerFlags", config.compilerFlags);

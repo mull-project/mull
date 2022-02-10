@@ -2,16 +2,6 @@
 
 namespace mull {
 
-ParallelizationConfig singleThreadParallelization() {
-  ParallelizationConfig config;
-
-  config.workers = 1;
-  config.mutantExecutionWorkers = 1;
-  config.testExecutionWorkers = 1;
-
-  return config;
-}
-
 int MullDefaultTimeoutMilliseconds = 3000;
 unsigned MullDefaultLinkerTimeoutMilliseconds = 30000;
 
@@ -21,6 +11,6 @@ Configuration::Configuration()
       includeNotCovered(false), keepObjectFiles(false), keepExecutable(false), mutateOnly(false),
       lowerBitcode(false), junkDetectionDisabled(false), timeout(MullDefaultTimeoutMilliseconds),
       linkerTimeout(MullDefaultLinkerTimeoutMilliseconds), diagnostics(IDEDiagnosticsKind::None),
-      parallelization(singleThreadParallelization()) {}
+      parallelization(ParallelizationConfig::defaultConfig()) {}
 
 } // namespace mull
