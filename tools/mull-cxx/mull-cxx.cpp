@@ -235,6 +235,7 @@ int main(int argc, char **argv) {
   filters.enableNoDebugFilter();
   filters.enableFilePathFilter();
   filters.enableGitDiffFilter();
+  filters.enableBlockAddressFilter();
 
   if (!tool::DisableJunkDetection.getValue()) {
     auto *junkFilter = new mull::JunkMutationFilter(junkDetector);
