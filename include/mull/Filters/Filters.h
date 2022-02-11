@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Filter.h"
+#include <memory>
 #include <vector>
 
 namespace mull {

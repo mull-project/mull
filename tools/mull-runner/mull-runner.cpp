@@ -146,6 +146,7 @@ int main(int argc, char **argv) {
 
   mull::Filters filters(configuration, diagnostics);
   filters.enableGitDiffFilter();
+  filters.enableFilePathFilter();
 
   mull::MutantExtractor mutantExtractor(diagnostics);
   std::vector<std::unique_ptr<mull::Mutant>> mutants =

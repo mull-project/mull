@@ -29,7 +29,7 @@ TEST(Driver, RunningWithNoTests) {
   Toolchain toolchain(diagnostics, configuration);
 
   Program program({});
-  Filters filters;
+  Filters filters(configuration, diagnostics);
   Driver driver(diagnostics, configuration, program, toolchain, filters, finder);
 
   auto result = driver.run();
