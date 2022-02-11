@@ -330,11 +330,7 @@ void mull::mutateBitcode(llvm::Module &module) {
   filters.enableNoDebugFilter();
   filters.enableFilePathFilter();
   filters.enableGitDiffFilter();
-
-  auto blockAddressFilter = new mull::BlockAddressFunctionFilter;
-
-  filterStorage.emplace_back(blockAddressFilter);
-  filters.functionFilters.push_back(blockAddressFilter);
+  filters.enableBlockAddressFilter();
 
   std::string cxxCompilationFlags;
   for (auto &flag : configuration.compilerFlags) {

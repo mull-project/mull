@@ -1,6 +1,7 @@
 #include "mull/Filters/Filters.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Diagnostics/Diagnostics.h"
+#include "mull/Filters/BlockAddressFunctionFilter.h"
 #include "mull/Filters/CoverageFilter.h"
 #include "mull/Filters/FilePathFilter.h"
 #include "mull/Filters/GitDiffFilter.h"
@@ -100,4 +101,10 @@ CoverageFilter *Filters::enableCoverageFilter(const std::string &profileName,
   storage.emplace_back(filter);
   mutantFilters.push_back(filter);
   return filter;
+}
+
+void Filters::enableBlockAddressFilter() {
+  auto filter = new mull::BlockAddressFunctionFilter;
+  storage.emplace_back(filter);
+  functionFilters.push_back(filter);
 }
