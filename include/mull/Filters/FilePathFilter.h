@@ -2,23 +2,28 @@
 
 #include "mull/Filters/FunctionFilter.h"
 #include "mull/Filters/InstructionFilter.h"
-#include "mull/Filters/MutationFilter.h"
+#include "mull/Filters/MutantFilter.h"
+#include "mull/Filters/MutationPointFilter.h"
 
 #include <llvm/Support/Regex.h>
 #include <mutex>
 #include <string>
-#include <utility>
 #include <unordered_map>
+#include <utility>
 #include <vector>
 
 namespace mull {
 struct SourceLocation;
 
-class FilePathFilter : public MutationFilter, public FunctionFilter, public InstructionFilter {
+class FilePathFilter : public MutationPointFilter,
+                       public FunctionFilter,
+                       public InstructionFilter,
+                       public MutantFilter {
 public:
   bool shouldSkip(MutationPoint *point) override;
+  bool shouldSkip(Mutant *point) override;
   bool shouldSkip(llvm::Function *function) override;
-  bool shouldSkip(llvm::Instruction *instruction) const override;
+  bool shouldSkip(llvm::Instruction *instruction) override;
   bool shouldSkip(const std::string &sourceFilePath) const;
 
   std::string name() override;

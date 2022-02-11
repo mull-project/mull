@@ -10,12 +10,10 @@
 #include "mull/Config/ConfigurationOptions.h"
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Driver.h"
-#include "mull/Filters/FilePathFilter.h"
 #include "mull/Filters/Filter.h"
 #include "mull/Filters/Filters.h"
 #include "mull/Filters/GitDiffFilter.h"
 #include "mull/Filters/JunkMutationFilter.h"
-#include "mull/Filters/NoDebugInfoFilter.h"
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
 #include "mull/Metrics/MetricsMeasure.h"
 #include "mull/MutationsFinder.h"
@@ -219,78 +217,24 @@ int main(int argc, char **argv) {
 
   mull::MutationsFinder mutationsFinder(mutatorsOptions.mutators(), configuration);
 
-  std::vector<std::unique_ptr<mull::Filter>> filterStorage;
-  mull::Filters filters;
-
-  auto *noDebugInfoFilter = new mull::NoDebugInfoFilter;
-  auto *filePathFilter = new mull::FilePathFilter;
-
-  filterStorage.emplace_back(noDebugInfoFilter);
-  filterStorage.emplace_back(filePathFilter);
-
-  filters.mutationFilters.push_back(noDebugInfoFilter);
-  filters.functionFilters.push_back(noDebugInfoFilter);
-  filters.instructionFilters.push_back(noDebugInfoFilter);
-
-  filters.mutationFilters.push_back(filePathFilter);
-  filters.functionFilters.push_back(filePathFilter);
-
   for (const auto &regex : tool::ExcludePaths) {
-    auto added = filePathFilter->exclude(regex);
-    if (!added.first) {
-      std::stringstream warningMessage;
-      warningMessage << "Invalid regex for exclude-path: '" << regex
-                     << "' has been ignored. Error: " << added.second;
-      diagnostics.warning(warningMessage.str());
-    }
+    configuration.excludePaths.push_back(regex);
   }
   for (const auto &regex : tool::IncludePaths) {
-    auto added = filePathFilter->include(regex);
-    if (!added.first) {
-      std::stringstream warningMessage;
-      warningMessage << "Invalid regex for include-path: '" << regex
-                     << "' has been ignored. Error: " << added.second;
-      diagnostics.warning(warningMessage.str());
-    }
+    configuration.includePaths.push_back(regex);
+  }
+  if (tool::GitDiffRef.getNumOccurrences()) {
+    configuration.gitDiffRef = tool::GitDiffRef.getValue();
+  }
+  if (tool::GitProjectRoot.getNumOccurrences()) {
+    configuration.gitProjectRoot = tool::GitProjectRoot.getValue();
   }
 
-  if (!tool::GitDiffRef.getValue().empty()) {
-    if (tool::GitProjectRoot.getValue().empty()) {
-      std::stringstream debugMessage;
-      debugMessage
-          << "-git-diff-ref option has been provided but the path to the Git project root has not "
-             "been specified via -git-project-root. The incremental testing will be disabled.";
-      diagnostics.warning(debugMessage.str());
-    } else if (!llvm::sys::fs::is_directory(tool::GitProjectRoot.getValue())) {
-      std::stringstream debugMessage;
-      debugMessage << "directory provided by -git-project-root does not exist, ";
-      debugMessage << "the incremental testing will be disabled: ";
-      debugMessage << tool::GitProjectRoot.getValue();
-      diagnostics.warning(debugMessage.str());
-    } else {
-      std::string gitProjectRoot = tool::GitProjectRoot.getValue();
-      llvm::SmallString<256> tmpGitProjectRoot;
-      if (!llvm::sys::fs::real_path(gitProjectRoot, tmpGitProjectRoot)) {
-        gitProjectRoot = tmpGitProjectRoot.str();
-
-        std::string gitDiffBranch = tool::GitDiffRef.getValue();
-        diagnostics.info(std::string("Incremental testing using Git Diff is enabled.\n") +
-                         "- Git ref: " + gitDiffBranch + "\n" +
-                         "- Git project root: " + gitProjectRoot);
-        mull::GitDiffFilter *gitDiffFilter =
-            mull::GitDiffFilter::createFromGitDiff(diagnostics, gitProjectRoot, gitDiffBranch);
-
-        if (gitDiffFilter) {
-          filterStorage.emplace_back(gitDiffFilter);
-          filters.instructionFilters.push_back(gitDiffFilter);
-        }
-      } else {
-        diagnostics.warning(
-            std::string("could not expand -git-project-root to an absolute path: ") +
-            gitProjectRoot);
-      }
-    }
-  }
+  std::vector<std::unique_ptr<mull::Filter>> filterStorage;
+  mull::Filters filters(configuration, diagnostics);
+  filters.enableNoDebugFilter();
+  filters.enableFilePathFilter();
+  filters.enableGitDiffFilter();
 
   if (!tool::DisableJunkDetection.getValue()) {
     auto *junkFilter = new mull::JunkMutationFilter(junkDetector);

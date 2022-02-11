@@ -1,0 +1,39 @@
+RUN: cd %S
+RUN: mkdir -p %S/Output/sandbox
+RUN: cp %S/sample.cpp.original %S/Output/sandbox/sample.cpp
+RUN: cd %S/Output/sandbox
+RUN: git init .
+RUN: git add sample.cpp
+RUN: git -c user.name='Mull' -c user.email=alex@lowlevelbits.org commit -m "Impersonation is evil."
+RUN: cp %S/sample.cpp.modified %S/Output/sandbox/sample.cpp
+RUN: cd %S && env MULL_CONFIG=mull-ir-frontend.yml %clang_cxx %sysroot -O0 %pass_mull_ir_frontend -g %S/Output/sandbox/sample.cpp -o %S/Output/sample.cpp-ir.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines  --check-prefix=CHECK_FRONTEND
+RUN: cd %S/Output/sandbox && (unset TERM; %mull_runner %S/Output/sample.cpp-ir.exe -ide-reporter-show-killed 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
+
+CHECK_FRONTEND:[info] Incremental testing using Git Diff is enabled.
+CHECK_FRONTEND:- Git ref: master
+CHECK_FRONTEND:- Git project root: {{.*}}/Output/sandbox
+
+CHECK_FRONTEND:[debug] GitDiffFilter: allowing instruction: {{.*}}/sample.cpp:4:7
+CHECK_FRONTEND:[debug] GitDiffFilter: allowing instruction: {{.*}}/sample.cpp:4:11
+CHECK_FRONTEND:[debug] GitDiffFilter: skipping instruction: {{.*}}/sample.cpp:7:7
+CHECK_FRONTEND:[debug] GitDiffFilter: skipping instruction: {{.*}}/sample.cpp:7:11
+
+CHECK:[info] Killed mutants (2/2):
+CHECK:{{^.*}}sample.cpp:4:11: warning: Killed: Replaced >= with > [cxx_ge_to_gt]{{$}}
+CHECK:{{^.*}}sample.cpp:4:11: warning: Killed: Replaced >= with < [cxx_ge_to_lt]{{$}}
+CHECK:[info] All mutations have been killed
+CHECK:[info] Mutation score: 100%
+
+RUN: cd %S && %clang_cxx %sysroot -O0 %pass_mull_ir_frontend -g %S/Output/sandbox/sample.cpp -o %S/Output/sample.cpp-ir.exe
+RUN: cd %S/Output/sandbox && (unset TERM; env MULL_CONFIG=%S/mull-runner.yml %mull_runner %S/Output/sample.cpp-ir.exe -ide-reporter-show-killed 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=CHECK_RUNNER
+
+CHECK_RUNNER:[info] Incremental testing using Git Diff is enabled.
+CHECK_RUNNER:- Git ref: master
+CHECK_RUNNER:- Git project root: {{.*}}/Output/sandbox
+CHECK_RUNNER:[debug] GitDiffFilter: allowing mutant: {{.*}}/sample.cpp:4:11
+CHECK_RUNNER:[debug] GitDiffFilter: skipping mutant: {{.*}}/sample.cpp:7:11
+CHECK_RUNNER:[info] Killed mutants (2/2):
+CHECK_RUNNER:{{^.*}}sample.cpp:4:11: warning: Killed: Replaced >= with > [cxx_ge_to_gt]{{$}}
+CHECK_RUNNER:{{^.*}}sample.cpp:4:11: warning: Killed: Replaced >= with < [cxx_ge_to_lt]{{$}}
+CHECK_RUNNER:[info] All mutations have been killed
+CHECK_RUNNER:[info] Mutation score: 100%

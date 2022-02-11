@@ -1,7 +1,8 @@
-#include "CoverageChecker.h"
+#include "mull/Filters/CoverageFilter.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Mutant.h"
+#include <llvm/ProfileData/Coverage/CoverageMapping.h>
 
 using namespace mull;
 
@@ -28,9 +29,10 @@ loadCoverage(const Configuration &configuration, Diagnostics &diagnostics,
   return std::move(maybeMapping.get());
 }
 
-CoverageChecker::CoverageChecker(const Configuration &configuration, Diagnostics &diagnostics,
-                                 const std::string &profileName,
-                                 const std::vector<std::string> &objects) {
+CoverageFilter::CoverageFilter(const Configuration &configuration, Diagnostics &diagnostics,
+                               const std::string &profileName,
+                               const std::vector<std::string> &objects)
+    : configuration(configuration) {
   std::unique_ptr<llvm::coverage::CoverageMapping> coverage =
       loadCoverage(configuration, diagnostics, profileName, objects);
   if (coverage != nullptr) {
@@ -59,7 +61,7 @@ CoverageChecker::CoverageChecker(const Configuration &configuration, Diagnostics
   }
 }
 
-bool CoverageChecker::covered(Mutant *mutant) {
+bool CoverageFilter::covered(Mutant *mutant) {
   // TODO: optimize lookup
   assert(mutant);
   if (uncoveredRanges.empty()) {
@@ -80,4 +82,15 @@ bool CoverageChecker::covered(Mutant *mutant) {
     }
   }
   return true;
+}
+
+bool CoverageFilter::shouldSkip(Mutant *mutant) {
+  if (covered(mutant) || configuration.includeNotCovered) {
+    return false;
+  }
+  return true;
+}
+
+std::string CoverageFilter::name() {
+  return "coverage";
 }

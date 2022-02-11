@@ -5,7 +5,7 @@ RUN: cd %S/Output/sandbox
 RUN: git init .
 RUN: git add sample.cpp
 RUN: git -c user.name='Mull' -c user.email=alex@lowlevelbits.org commit -m "Impersonation is evil."
-RUN: cd %S && %clang_cxx %sysroot -O0 %pass_mull_ir_frontend -g %S/Output/sandbox/sample.cpp -o %S/Output/sample.cpp-ir.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=CHECK_MUTATE
+RUN: cd %S && env MULL_CONFIG=mull-ir-frontend.yml %clang_cxx %sysroot -O0 %pass_mull_ir_frontend -g %S/Output/sandbox/sample.cpp -o %S/Output/sample.cpp-ir.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=CHECK_MUTATE
 
 RUN: cd %S/Output/sandbox && (unset TERM; %mull_runner -ide-reporter-show-killed %S/Output/sample.cpp-ir.exe 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 

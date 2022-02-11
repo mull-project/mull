@@ -12,7 +12,7 @@ bool NoDebugInfoFilter::shouldSkip(llvm::Function *function) {
   return SourceLocation::locationFromFunction(function).isNull();
 }
 
-bool NoDebugInfoFilter::shouldSkip(llvm::Instruction *instruction) const {
+bool NoDebugInfoFilter::shouldSkip(llvm::Instruction *instruction) {
   return SourceLocation::locationFromInstruction(instruction).isNull();
 }
 

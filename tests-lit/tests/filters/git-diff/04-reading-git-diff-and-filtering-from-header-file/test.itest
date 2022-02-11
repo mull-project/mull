@@ -11,8 +11,8 @@ RUN: cd %S && %clang_cxx %sysroot -O0 %pass_mull_ir_frontend -g %S/Output/sandbo
 
 RUN: cd %S/Output/sandbox && (unset TERM; %mull_runner %S/Output/sample.cpp-ir.exe -ide-reporter-show-killed 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 
-CHECK_MUTATE:[debug] GitDiffFilter: whitelisting instruction: {{.*}}/valid_age.h:4:7
-CHECK_MUTATE:[debug] GitDiffFilter: whitelisting instruction: {{.*}}/valid_age.h:4:11
+CHECK_MUTATE:[debug] GitDiffFilter: allowing instruction: {{.*}}/valid_age.h:4:7
+CHECK_MUTATE:[debug] GitDiffFilter: allowing instruction: {{.*}}/valid_age.h:4:11
 
 CHECK:[info] Killed mutants (2/2):
 CHECK:{{^.*}}valid_age.h:4:11: warning: Killed: Replaced >= with > [cxx_ge_to_gt]{{$}}

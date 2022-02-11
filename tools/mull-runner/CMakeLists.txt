@@ -3,7 +3,6 @@ set (SOURCES
   ${CMAKE_CURRENT_LIST_DIR}/MutantExtractor.cpp
   ${CMAKE_CURRENT_LIST_DIR}/DynamicLibraries.cpp
   ${CMAKE_CURRENT_LIST_DIR}/../CLIOptions/CLIOptions.cpp
-  ${CMAKE_CURRENT_LIST_DIR}/CoverageChecker.cpp
   ${CMAKE_CURRENT_LIST_DIR}/MergeInstProfile.cpp
 
 )

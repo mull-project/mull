@@ -1,12 +1,11 @@
 #include "mull/Parallelization/Tasks/MutationFilterTask.h"
 
-#include "mull/Filters/MutationFilter.h"
+#include "mull/Filters/MutationPointFilter.h"
 #include "mull/Parallelization/Progress.h"
 
 using namespace mull;
 
-MutationFilterTask::MutationFilterTask(MutationFilter &filter)
-    : filter(filter) {}
+MutationFilterTask::MutationFilterTask(MutationPointFilter &filter) : filter(filter) {}
 
 void MutationFilterTask::operator()(iterator begin, iterator end, Out &storage,
                                     progress_counter &counter) {

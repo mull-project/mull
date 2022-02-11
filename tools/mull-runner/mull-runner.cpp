@@ -1,10 +1,11 @@
-#include "CoverageChecker.h"
 #include "DynamicLibraries.h"
 #include "MergeInstProfile.h"
 #include "MutantExtractor.h"
 #include "mull-runner-cli.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Diagnostics/Diagnostics.h"
+#include "mull/Filters/CoverageFilter.h"
+#include "mull/Filters/Filters.h"
 #include "mull/Metrics/MetricsMeasure.h"
 #include "mull/MutantRunner.h"
 #include "mull/Parallelization/TaskExecutor.h"
@@ -49,17 +50,6 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  if (tool::DebugEnabled) {
-    diagnostics.enableDebugMode();
-    diagnostics.debug("Diagnostics: Debug Mode enabled. Debug-level messages will be printed.");
-  }
-
-  if (tool::StrictModeEnabled) {
-    diagnostics.enableStrictMode();
-    diagnostics.info(
-        "Diagnostics: Strict Mode enabled. Warning messages will be treated as fatal errors.");
-  }
-
   std::string inputFile = validateInputFile(tool::InputFile.getValue(), diagnostics);
 
   mull::MetricsMeasure totalExecutionTime;
@@ -75,6 +65,17 @@ int main(int argc, char **argv) {
   if (tool::DebugEnabled.getNumOccurrences()) {
     configuration.debugEnabled = tool::DebugEnabled;
   }
+  if (configuration.debugEnabled) {
+    diagnostics.enableDebugMode();
+    diagnostics.debug("Diagnostics: Debug Mode enabled. Debug-level messages will be printed.");
+  }
+
+  if (tool::StrictModeEnabled) {
+    diagnostics.enableStrictMode();
+    diagnostics.info(
+        "Diagnostics: Strict Mode enabled. Warning messages will be treated as fatal errors.");
+  }
+
   if (tool::Timeout.getNumOccurrences()) {
     configuration.timeout = tool::Timeout.getValue();
   }
@@ -105,7 +106,9 @@ int main(int argc, char **argv) {
     configuration.captureMutantOutput = false;
   }
 
-  configuration.debug.coverage = tool::DebugCoverage.getValue();
+  if (tool::DebugCoverage.getNumOccurrences()) {
+    configuration.debug.coverage = tool::DebugCoverage.getValue();
+  }
 
   tool::ReporterParameters params{ .reporterName = tool::ReportName.getValue(),
                                    .reporterDirectory = tool::ReportDirectory.getValue(),
@@ -131,7 +134,6 @@ int main(int argc, char **argv) {
   for (size_t argIndex = 0; argIndex < tool::RunnerArgs.getNumOccurrences(); argIndex++) {
     extraArgs.push_back(tool::RunnerArgs[argIndex]);
   }
-
   std::vector<std::string> librarySearchPaths(std::begin(tool::LDSearchPaths),
                                               std::end(tool::LDSearchPaths));
 
@@ -141,6 +143,9 @@ int main(int argc, char **argv) {
                          mutantHolders,
                          mull::getDynamicLibraryDependencies(diagnostics, configuration.executable),
                          librarySearchPaths);
+
+  mull::Filters filters(configuration, diagnostics);
+  filters.enableGitDiffFilter();
 
   mull::MutantExtractor mutantExtractor(diagnostics);
   std::vector<std::unique_ptr<mull::Mutant>> mutants =
@@ -191,12 +196,27 @@ int main(int argc, char **argv) {
     });
   }
 
-  std::vector<std::unique_ptr<mull::Mutant>> filteredMutants;
-  mull::CoverageChecker coverage(configuration, diagnostics, coverageInfo, mutantHolders);
+  auto coverage = filters.enableCoverageFilter(coverageInfo, mutantHolders);
   for (auto &mutant : mutants) {
-    bool covered = coverage.covered(mutant.get());
-    mutant->setCovered(covered);
-    if (covered || configuration.includeNotCovered) {
+    if (coverage->covered(mutant.get())) {
+      mutant->setCovered(true);
+    }
+  }
+
+  std::vector<std::unique_ptr<mull::Mutant>> filteredMutants;
+  for (auto &mutant : mutants) {
+    bool skip = false;
+    for (auto filter : filters.mutantFilters) {
+      if (filter->shouldSkip(mutant.get())) {
+        skip = true;
+        if (configuration.debug.filters) {
+          diagnostics.debug("Skipping "s + mutant->getIdentifier() + " due to " + filter->name() +
+                            " filter");
+        }
+        break;
+      }
+    }
+    if (!skip) {
       filteredMutants.push_back(std::move(mutant));
     }
   }
