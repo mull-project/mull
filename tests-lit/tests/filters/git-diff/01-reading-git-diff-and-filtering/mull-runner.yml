@@ -1,0 +1,10 @@
+gitDiffRef: master
+gitProjectRoot: .
+mutators:
+  - cxx_ge_to_lt
+  - cxx_ge_to_gt
+debugEnabled: true
+debug:
+  gitDiff: true
+  filters: true
+quiet: false

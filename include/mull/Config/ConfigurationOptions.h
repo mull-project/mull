@@ -19,6 +19,8 @@ struct DebugConfig {
   bool printIRAfter = false;
   bool traceMutants = false;
   bool coverage = false;
+  bool gitDiff = false;
+  bool filters = false;
 };
 
 } // namespace mull

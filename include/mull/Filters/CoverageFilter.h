@@ -1,6 +1,6 @@
 #pragma once
 
-#include <llvm/ProfileData/Coverage/CoverageMapping.h>
+#include "mull/Filters/MutantFilter.h"
 #include <memory>
 #include <string>
 #include <unordered_map>
@@ -12,10 +12,13 @@ struct Configuration;
 class Mutant;
 class Diagnostics;
 
-class CoverageChecker {
+class CoverageFilter : public MutantFilter {
 public:
-  CoverageChecker(const Configuration &configuration, Diagnostics &diagnostics,
-                  const std::string &profileName, const std::vector<std::string> &objects);
+  CoverageFilter(const Configuration &configuration, Diagnostics &diagnostics,
+                 const std::string &profileName, const std::vector<std::string> &objects);
+
+  bool shouldSkip(Mutant *point) override;
+  std::string name() override;
 
   bool covered(Mutant *point);
 
@@ -26,6 +29,7 @@ private:
     unsigned lineEnd;
     unsigned columnEnd;
   };
+  const Configuration &configuration;
   std::unordered_map<std::string, std::vector<CoverageRange>> uncoveredRanges;
 };
 

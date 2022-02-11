@@ -1,7 +1,7 @@
 #pragma once
 
 #include "mull/ExecutionResult.h"
-#include "mull/Filters/MutationFilter.h"
+#include "mull/Filters/MutationPointFilter.h"
 #include "mull/IDEDiagnostics.h"
 #include "mull/MutationResult.h"
 #include "mull/Mutators/Mutator.h"
@@ -27,7 +27,7 @@ class Result;
 class MutationsFinder;
 class JunkDetector;
 class FunctionFilter;
-struct Filters;
+class Filters;
 class Diagnostics;
 
 class Driver {
@@ -38,7 +38,7 @@ class Driver {
   IDEDiagnostics *ideDiagnostics;
   Diagnostics &diagnostics;
 
-  struct Filters &filters;
+  Filters &filters;
   SingleTaskExecutor singleTask;
 
 public:

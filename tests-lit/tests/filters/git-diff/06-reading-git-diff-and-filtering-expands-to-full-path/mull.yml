@@ -1,7 +1,9 @@
 gitDiffRef: master
-gitProjectRoot: ./Output/sandbox
+gitProjectRoot: .
 mutators:
   - cxx_ge_to_lt
   - cxx_ge_to_gt
 debugEnabled: true
+debug:
+  gitDiff: true
 quiet: false

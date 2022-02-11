@@ -5,7 +5,7 @@
 namespace mull {
 
 class MutationPoint;
-class MutationFilter;
+class MutationPointFilter;
 class progress_counter;
 
 class MutationFilterTask {
@@ -14,13 +14,13 @@ public:
   using Out = std::vector<MutationPoint *>;
   using iterator = In::const_iterator;
 
-  MutationFilterTask(MutationFilter &filter);
+  MutationFilterTask(MutationPointFilter &filter);
 
   void operator()(iterator begin, iterator end, Out &storage,
                   progress_counter &counter);
 
 private:
-  MutationFilter &filter;
+  MutationPointFilter &filter;
 };
 
 } // namespace mull

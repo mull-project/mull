@@ -4,12 +4,8 @@
 #include "mull/Config/Configuration.h"
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Filters/BlockAddressFunctionFilter.h"
-#include "mull/Filters/FilePathFilter.h"
 #include "mull/Filters/Filters.h"
-#include "mull/Filters/FunctionFilter.h"
-#include "mull/Filters/GitDiffFilter.h"
 #include "mull/Filters/JunkMutationFilter.h"
-#include "mull/Filters/NoDebugInfoFilter.h"
 #include "mull/FunctionUnderTest.h"
 #include "mull/JunkDetection/CXX/ASTStorage.h"
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
@@ -330,43 +326,15 @@ void mull::mutateBitcode(llvm::Module &module) {
   }
 
   std::vector<std::unique_ptr<mull::Filter>> filterStorage;
-  mull::Filters filters;
-
-  auto noDebugInfoFilter = new mull::NoDebugInfoFilter;
-  auto filePathFilter = new mull::FilePathFilter;
-
-  for (const auto &regex : configuration.excludePaths) {
-    auto added = filePathFilter->exclude(regex);
-    if (!added.first) {
-      std::stringstream warningMessage;
-      warningMessage << "Invalid regex for exclude-path: '" << regex
-                     << "' has been ignored. Error: " << added.second;
-      diagnostics.warning(warningMessage.str());
-    }
-  }
-  for (const auto &regex : configuration.includePaths) {
-    auto added = filePathFilter->include(regex);
-    if (!added.first) {
-      std::stringstream warningMessage;
-      warningMessage << "Invalid regex for include-path: '" << regex
-                     << "' has been ignored. Error: " << added.second;
-      diagnostics.warning(warningMessage.str());
-    }
-  }
+  mull::Filters filters(configuration, diagnostics);
+  filters.enableNoDebugFilter();
+  filters.enableFilePathFilter();
+  filters.enableGitDiffFilter();
 
   auto blockAddressFilter = new mull::BlockAddressFunctionFilter;
 
-  filterStorage.emplace_back(noDebugInfoFilter);
-  filterStorage.emplace_back(filePathFilter);
   filterStorage.emplace_back(blockAddressFilter);
-
-  filters.mutationFilters.push_back(noDebugInfoFilter);
-  filters.functionFilters.push_back(noDebugInfoFilter);
   filters.functionFilters.push_back(blockAddressFilter);
-  filters.instructionFilters.push_back(noDebugInfoFilter);
-
-  filters.mutationFilters.push_back(filePathFilter);
-  filters.functionFilters.push_back(filePathFilter);
 
   std::string cxxCompilationFlags;
   for (auto &flag : configuration.compilerFlags) {
@@ -389,41 +357,6 @@ void mull::mutateBitcode(llvm::Module &module) {
     auto *junkFilter = new mull::JunkMutationFilter(junkDetector);
     filters.mutationFilters.push_back(junkFilter);
     filterStorage.emplace_back(junkFilter);
-  }
-
-  if (!configuration.gitDiffRef.empty()) {
-    if (configuration.gitProjectRoot.empty()) {
-      std::stringstream debugMessage;
-      debugMessage
-          << "-git-diff-ref option has been provided but the path to the Git project root has not "
-             "been specified via -git-project-root. The incremental testing will be disabled.";
-      diagnostics.warning(debugMessage.str());
-    } else if (!llvm::sys::fs::is_directory(configuration.gitProjectRoot)) {
-      std::stringstream debugMessage;
-      debugMessage << "directory provided by -git-project-root does not exist, ";
-      debugMessage << "the incremental testing will be disabled: ";
-      debugMessage << configuration.gitProjectRoot;
-      diagnostics.warning(debugMessage.str());
-    } else {
-      llvm::SmallString<256> tmpGitProjectRoot;
-      std::string gitProjectRoot = configuration.gitProjectRoot;
-      if (!llvm::sys::fs::real_path(gitProjectRoot, tmpGitProjectRoot)) {
-        gitProjectRoot = tmpGitProjectRoot.str();
-
-        diagnostics.info("Incremental testing using Git Diff is enabled.\n"s + "- Git ref: " +
-                         configuration.gitDiffRef + "\n" + "- Git project root: " + gitProjectRoot);
-        mull::GitDiffFilter *gitDiffFilter = mull::GitDiffFilter::createFromGitDiff(
-            diagnostics, gitProjectRoot, configuration.gitDiffRef);
-
-        if (gitDiffFilter) {
-          filterStorage.emplace_back(gitDiffFilter);
-          filters.instructionFilters.push_back(gitDiffFilter);
-        }
-      } else {
-        diagnostics.warning("could not expand -git-project-root to an absolute path: "s +
-                            gitProjectRoot);
-      }
-    }
   }
 
   SingleTaskExecutor singleTask(diagnostics);

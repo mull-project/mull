@@ -16,8 +16,8 @@ CHECK_MUTATE:[info] Incremental testing using Git Diff is enabled.
 CHECK_MUTATE:- Git ref: master
 CHECK_MUTATE:- Git project root: {{.*}}/Output/sandbox
 
-CHECK_MUTATE:[debug] GitDiffFilter: whitelisting instruction: {{.*}}/sample.cpp:4:7
-CHECK_MUTATE:[debug] GitDiffFilter: whitelisting instruction: {{.*}}/sample.cpp:4:11
+CHECK_MUTATE:[debug] GitDiffFilter: allowing instruction: {{.*}}/sample.cpp:4:7
+CHECK_MUTATE:[debug] GitDiffFilter: allowing instruction: {{.*}}/sample.cpp:4:11
 CHECK_MUTATE:[debug] GitDiffFilter: skipping instruction: {{.*}}/sample.cpp:7:7
 CHECK_MUTATE:[debug] GitDiffFilter: skipping instruction: {{.*}}/sample.cpp:7:11
 
