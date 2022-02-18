@@ -29,6 +29,7 @@ template <> struct llvm::yaml::MappingTraits<DebugConfig> {
     io.mapOptional("printIR", config.printIR);
     io.mapOptional("printIRAfter", config.printIRAfter);
     io.mapOptional("printIRBefore", config.printIRBefore);
+    io.mapOptional("printIRToFile", config.printIRToFile);
     io.mapOptional("traceMutants", config.traceMutants);
     io.mapOptional("coverage", config.coverage);
     io.mapOptional("gitDiff", config.gitDiff);

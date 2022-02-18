@@ -298,6 +298,21 @@ std::vector<FunctionUnderTest> Driver::getFunctionsUnderTest() {
   return functionsUnderTest;
 }
 
+static void printIR(llvm::Module &module, Diagnostics &diagnostics, bool toFile,
+                    const std::string &suffix) {
+  if (toFile) {
+    std::error_code ec;
+    auto filename = module.getSourceFileName() + suffix;
+    llvm::raw_fd_ostream out(filename, ec);
+    if (ec) {
+      diagnostics.warning("Cannot create file for debugging: "s + filename + ": " + ec.message());
+    }
+    module.print(out, nullptr);
+  } else {
+    module.print(llvm::errs(), nullptr);
+  }
+}
+
 void mull::mutateBitcode(llvm::Module &module) {
   /// Setup
 
@@ -371,7 +386,7 @@ void mull::mutateBitcode(llvm::Module &module) {
   }
 
   if (configuration.debug.printIR || configuration.debug.printIRBefore) {
-    module.print(llvm::errs(), nullptr);
+    printIR(module, diagnostics, configuration.debug.printIRToFile, ".before.ll");
   }
 
   {
@@ -469,7 +484,7 @@ void mull::mutateBitcode(llvm::Module &module) {
   applyMutations.execute();
 
   if (configuration.debug.printIR || configuration.debug.printIRAfter) {
-    module.print(llvm::errs(), nullptr);
+    printIR(module, diagnostics, configuration.debug.printIRToFile, ".after.ll");
   }
 
   {
