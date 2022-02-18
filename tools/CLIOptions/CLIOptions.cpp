@@ -27,7 +27,7 @@ std::vector<std::unique_ptr<Mutator>> MutatorsCLIOptions::mutators() {
     selectedGroups.push_back(options[name].first);
   }
 
-  return factory.mutators(selectedGroups);
+  return factory.mutators(selectedGroups, {});
 }
 
 std::vector<std::pair<std::string, std::string>> &MutatorsCLIOptions::getOptions() {

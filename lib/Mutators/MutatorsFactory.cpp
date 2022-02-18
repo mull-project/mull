@@ -13,8 +13,8 @@
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "mull/Mutators/ScalarValueMutator.h"
 #include <llvm/ADT/STLExtras.h>
-#include <set>
 #include <sstream>
+#include <unordered_set>
 
 using namespace mull;
 using namespace std;
@@ -70,7 +70,7 @@ static string CXX_Default() {
 }
 
 static void expandGroups(const vector<string> &groups, const map<string, vector<string>> &mapping,
-                         set<string> &expandedGroups) {
+                         unordered_set<string> &expandedGroups) {
   for (const string &group : groups) {
     if (mapping.count(group) == 0) {
       expandedGroups.insert(group);
@@ -241,13 +241,19 @@ Mutator *MutatorsFactory::getMutator(const string &mutatorId) {
   return mutatorsMapping[mutatorId].get();
 }
 
-vector<unique_ptr<Mutator>> MutatorsFactory::mutators(const vector<string> &groups) {
+vector<unique_ptr<Mutator>>
+MutatorsFactory::mutators(const vector<string> &groups,
+                          const std::vector<std::string> &ignoreGroups) {
   /// We need to recreate all mutators in case this method called
   /// more than once. It does not happen during normal program execution,
   /// but happens a lot during testing
   init();
 
-  set<string> expandedGroups;
+  std::unordered_set<std::string> expandedGroups;
+  std::unordered_set<std::string> expandedIgnoreGroups;
+  if (!ignoreGroups.empty()) {
+    expandGroups(ignoreGroups, groupsMapping, expandedIgnoreGroups);
+  }
 
   if (groups.empty()) {
     expandGroups({ CXX_Default() }, groupsMapping, expandedGroups);
@@ -255,9 +261,16 @@ vector<unique_ptr<Mutator>> MutatorsFactory::mutators(const vector<string> &grou
     expandGroups(groups, groupsMapping, expandedGroups);
   }
 
-  vector<unique_ptr<Mutator>> mutators;
+  for (auto &ignoreGroup : expandedIgnoreGroups) {
+    expandedGroups.erase(ignoreGroup);
+  }
 
-  for (const string &group : expandedGroups) {
+  std::vector<std::unique_ptr<Mutator>> mutators;
+  std::vector<std::string> sortedGroups;
+  std::copy(expandedGroups.begin(), expandedGroups.end(), std::back_inserter(sortedGroups));
+  std::sort(sortedGroups.begin(), sortedGroups.end());
+
+  for (const std::string &group : sortedGroups) {
     if (mutatorsMapping.count(group) == 0) {
       diagnostics.warning(std::string("Unknown mutator: ") + group);
       continue;
@@ -277,7 +290,7 @@ vector<unique_ptr<Mutator>> MutatorsFactory::mutators(const vector<string> &grou
 
 std::string MutatorsFactory::descriptionForGroup(const std::vector<std::string> &groupMembers) {
   if (groupMembers.empty()) {
-    return std::string("empty group?");
+    return "empty group?";
   }
 
   std::stringstream members;
@@ -295,11 +308,11 @@ std::vector<std::pair<std::string, std::string>> MutatorsFactory::commandLineOpt
     options.emplace_back(group.first, descriptionForGroup(group.second));
   }
 
-  std::set<std::string> mutatorsSet;
+  std::unordered_set<std::string> mutatorsSet;
   std::vector<std::string> groups({ AllMutatorsGroup() });
   expandGroups({ AllMutatorsGroup() }, groupsMapping, mutatorsSet);
 
-  auto allMutators = mutators({ AllMutatorsGroup() });
+  auto allMutators = mutators({ AllMutatorsGroup() }, {});
 
   for (auto &mutator : allMutators) {
     options.emplace_back(mutator->getUniqueIdentifier(), mutator->getDescription());

@@ -34,6 +34,7 @@ struct Configuration {
 
   std::vector<std::string> bitcodePaths; // TODO: Drop this one
   std::vector<std::string> mutators;
+  std::vector<std::string> ignoreMutators;
 
   std::string executable;
   std::string outputFile;
