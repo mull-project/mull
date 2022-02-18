@@ -14,7 +14,8 @@ class Diagnostics;
 class MutatorsFactory {
 public:
   explicit MutatorsFactory(Diagnostics &diagnostics);
-  std::vector<std::unique_ptr<Mutator>> mutators(const std::vector<std::string> &groups);
+  std::vector<std::unique_ptr<Mutator>> mutators(const std::vector<std::string> &groups,
+                                                 const std::vector<std::string> &ignoreGroups);
   void init();
   static std::string descriptionForGroup(const std::vector<std::string> &groupMembers);
   std::vector<std::pair<std::string, std::string>> commandLineOptions();

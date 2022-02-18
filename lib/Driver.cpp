@@ -411,7 +411,9 @@ void mull::mutateBitcode(llvm::Module &module) {
   }
 
   MutatorsFactory mutatorsFactory(diagnostics);
-  MutationsFinder mutationsFinder(mutatorsFactory.mutators(configuration.mutators), configuration);
+  MutationsFinder mutationsFinder(
+      mutatorsFactory.mutators(configuration.mutators, configuration.ignoreMutators),
+      configuration);
 
   std::vector<InstructionSelectionTask> instructionSelectionTasks;
   instructionSelectionTasks.reserve(configuration.parallelization.workers);

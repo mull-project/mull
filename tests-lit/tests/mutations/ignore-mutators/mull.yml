@@ -1,0 +1,4 @@
+mutators:
+  - cxx_arithmetic
+ignoreMutators:
+  - cxx_add_to_sub

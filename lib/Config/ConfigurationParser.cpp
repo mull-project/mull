@@ -46,6 +46,7 @@ template <> struct llvm::yaml::MappingTraits<Configuration> {
     io.mapOptional("includeNotCovered", config.includeNotCovered);
     io.mapOptional("timeout", config.timeout);
     io.mapOptional("mutators", config.mutators);
+    io.mapOptional("ignoreMutators", config.ignoreMutators);
     io.mapOptional("parallelization", config.parallelization);
     io.mapOptional("compilationDatabasePath", config.compilationDatabasePath);
     io.mapOptional("compilerFlags", config.compilerFlags);
