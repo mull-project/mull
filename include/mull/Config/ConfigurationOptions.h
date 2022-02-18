@@ -17,6 +17,7 @@ struct DebugConfig {
   bool printIR = false;
   bool printIRBefore = false;
   bool printIRAfter = false;
+  bool printIRToFile = false;
   bool traceMutants = false;
   bool coverage = false;
   bool gitDiff = false;
