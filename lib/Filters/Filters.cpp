@@ -6,6 +6,7 @@
 #include "mull/Filters/FilePathFilter.h"
 #include "mull/Filters/GitDiffFilter.h"
 #include "mull/Filters/NoDebugInfoFilter.h"
+#include "mull/Filters/VariadicFunctionFilter.h"
 #include <llvm/Support/FileSystem.h>
 #include <sstream>
 
@@ -105,6 +106,12 @@ CoverageFilter *Filters::enableCoverageFilter(const std::string &profileName,
 
 void Filters::enableBlockAddressFilter() {
   auto filter = new mull::BlockAddressFunctionFilter;
+  storage.emplace_back(filter);
+  functionFilters.push_back(filter);
+}
+
+void Filters::enableVariadicFunctionFilter() {
+  auto filter = new mull::VariadicFunctionFilter;
   storage.emplace_back(filter);
   functionFilters.push_back(filter);
 }

@@ -346,6 +346,7 @@ void mull::mutateBitcode(llvm::Module &module) {
   filters.enableFilePathFilter();
   filters.enableGitDiffFilter();
   filters.enableBlockAddressFilter();
+  filters.enableVariadicFunctionFilter();
 
   std::string cxxCompilationFlags;
   for (auto &flag : configuration.compilerFlags) {

@@ -17,5 +17,5 @@ out:
 // RUN: %clang_cc %pass_mull_ir_frontend -g %s -o %s.exe
 // RUN: %s.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=CHECK1
 // CHECK1:label1
-// RUN: %s.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=CHECK2
-// CHECK2:label1
+// RUN: %s.exe x | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=CHECK2
+// CHECK2:label2
