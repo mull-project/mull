@@ -29,6 +29,7 @@ public:
   void enableFilePathFilter();
   void enableGitDiffFilter();
   void enableBlockAddressFilter();
+  void enableVariadicFunctionFilter();
   CoverageFilter *enableCoverageFilter(const std::string &profileName,
                                        const std::vector<std::string> &objects);
 

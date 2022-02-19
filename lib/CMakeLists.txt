@@ -83,6 +83,7 @@ set(mull_sources
   Filters/BlockAddressFunctionFilter.cpp
   Filters/Filters.cpp
   Filters/CoverageFilter.cpp
+  Filters/VariadicFunctionFilter.cpp
 
   JunkDetection/CXX/Visitors/ScalarValueVisitor.cpp
   MutantRunner.cpp
