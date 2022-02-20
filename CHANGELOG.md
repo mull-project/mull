@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.16.0] - 21 Feb 2022
+
+- Added a workaround to not miscompile functions that use variadic arguments [#977](https://github.com/mull-project/mull/pull/977) [#978](https://github.com/mull-project/mull/issues/978)
+- Fixed an issue when `mull-ir-frontend` could not find Clang's headers (such as `stdarg.h`) [#979](https://github.com/mull-project/mull/pull/979)
+- `mull-runner` uses code coverage automatically [#971](https://github.com/mull-project/mull/pull/971) [#967](https://github.com/mull-project/mull/pull/967)
+- Added tutorials on CMake and Makefile integration [#980](https://github.com/mull-project/mull/pull/980)
+- `mull-ir-frontend` and `mull-runner` share the config [#972](https://github.com/mull-project/mull/pull/972)
+- Added more debugging facilities [#975](https://github.com/mull-project/mull/pull/975) [#976](https://github.com/mull-project/mull/pull/976)
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2022-02-01..2022-02-20)
+
 ## [0.15.1] - 31 Jan 2022
 
 - Added a workaround to not miscompile functions that use "jump-tables" [#963](https://github.com/mull-project/mull/pull/963)
