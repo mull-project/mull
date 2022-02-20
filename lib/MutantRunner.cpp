@@ -25,6 +25,7 @@ MutantRunner::runMutants(const std::string &executable, const std::vector<std::s
                                  {},
                                  configuration.timeout,
                                  configuration.captureMutantOutput,
+                                 false,
                                  std::nullopt);
   });
 

@@ -1,5 +1,7 @@
 #include "mull/JunkDetection/CXX/CompilationDatabase.h"
+#include "mull/Config/Configuration.h"
 #include "mull/Diagnostics/Diagnostics.h"
+#include "mull/Toolchain/Runner.h"
 #include <clang/Tooling/CompilationDatabase.h>
 #include <clang/Tooling/JSONCompilationDatabase.h>
 #include <llvm/ADT/SmallString.h>
@@ -7,26 +9,16 @@
 
 #include <algorithm>
 #include <iterator>
-#include <sstream>
 #include <string>
 
 using namespace mull;
 using namespace std::string_literals;
 
-static std::vector<std::string> filterFlags(const std::vector<std::string> &flags,
-                                            bool stripCompiler) {
+static CompilationDatabase::CompilerAndFlags filterFlags(const std::vector<std::string> &flags) {
   if (flags.empty()) {
-    return flags;
+    return {};
   }
-  auto it = flags.begin();
-  auto end = flags.end();
-
-  if (stripCompiler) {
-    // Skip past the compiler command
-    ++it;
-  }
-
-  return CompilationDatabase::Flags(it, end);
+  return { flags.front(), { ++flags.begin(), flags.end() } };
 }
 
 static CompilationDatabase::Flags flagsFromString(const std::string &s) {
@@ -34,15 +26,12 @@ static CompilationDatabase::Flags flagsFromString(const std::string &s) {
   return CompilationDatabase::Flags(std::istream_iterator<std::string>{ iss }, {});
 }
 
-static CompilationDatabase::Flags flagsFromCommand(const clang::tooling::CompileCommand &command,
-                                                   const CompilationDatabase::Flags &extraFlags) {
-  CompilationDatabase::Flags flags(command.CommandLine);
-  flags = filterFlags(flags, true);
-
-  // append extraFlags
+static CompilationDatabase::CompilerAndFlags
+flagsFromCommand(const clang::tooling::CompileCommand &command,
+                 const CompilationDatabase::Flags &extraFlags) {
+  auto [compiler, flags] = filterFlags(command.CommandLine);
   std::copy(std::begin(extraFlags), std::end(extraFlags), std::back_inserter(flags));
-
-  return flags;
+  return { compiler, flags };
 }
 
 static CompilationDatabase::Database
@@ -60,26 +49,64 @@ prepareDatabase(Diagnostics &diagnostics,
   return database;
 }
 
-static std::unordered_map<std::string, std::vector<std::string>>
+static CompilationDatabase::Database
 createBitcodeFlags(Diagnostics &diagnostics,
                    const std::unordered_map<std::string, std::string> &bitcodeFlagsMap,
                    const CompilationDatabase::Flags &extraFlags) {
 
-  std::unordered_map<std::string, std::vector<std::string>> mergedBitcodeFlags;
-
+  CompilationDatabase::Database mergedBitcodeFlags;
   for (auto const &[filename, commandline] : bitcodeFlagsMap) {
     CompilationDatabase::Flags fileFlags = flagsFromString(commandline);
 
-    fileFlags = filterFlags(fileFlags, true);
+    auto [compiler, flags] = filterFlags(fileFlags);
 
     for (const auto &extraFlag : extraFlags) {
-      fileFlags.push_back(extraFlag);
+      flags.push_back(extraFlag);
     }
 
-    mergedBitcodeFlags[filename] = fileFlags;
+    mergedBitcodeFlags[filename] = { compiler, flags };
   }
 
   return mergedBitcodeFlags;
+}
+
+static void resolveResourceDir(Diagnostics &diagnostics, CompilationDatabase::Database &database,
+                               std::unordered_map<std::string, std::string> &resourceDirs) {
+  for (auto &[filename, compilerAndFlags] : database) {
+    auto &[compiler, flags] = compilerAndFlags;
+    if (compiler.empty()) {
+      continue;
+    }
+    bool needsResourceDir = true;
+    for (auto &flag : flags) {
+      if (llvm::StringRef(flag).endswith("-resource-dir")) {
+        needsResourceDir = false;
+      }
+    }
+    if (!needsResourceDir) {
+      continue;
+    }
+    if (resourceDirs.count(compiler) == 0) {
+      Runner runner(diagnostics);
+      auto result = runner.runProgram(compiler,
+                                      { "-print-resource-dir" },
+                                      {},
+                                      mull::MullDefaultTimeoutMilliseconds,
+                                      true,
+                                      true,
+                                      std::nullopt);
+      if (!result.stdoutOutput.empty()) {
+        // strip trailing \n
+        result.stdoutOutput[result.stdoutOutput.size() - 1] = '\0';
+      }
+      resourceDirs[compiler] = result.stdoutOutput;
+    }
+
+    if (!resourceDirs[compiler].empty()) {
+      flags.push_back("-resource-dir");
+      flags.push_back(resourceDirs[compiler]);
+    }
+  }
 }
 
 static CompilationDatabase
@@ -87,14 +114,18 @@ createFromClangCompDB(Diagnostics &diagnostics,
                       std::unique_ptr<clang::tooling::JSONCompilationDatabase> jsondb,
                       const std::string &extraFlags,
                       const std::unordered_map<std::string, std::string> &bitcodeFlags) {
-  auto _extraFlags = flagsFromString(extraFlags);
-  auto _bitcodeFlags = createBitcodeFlags(diagnostics, bitcodeFlags, _extraFlags);
+  auto extra = flagsFromString(extraFlags);
+  auto bitcodeDatabase = createBitcodeFlags(diagnostics, bitcodeFlags, extra);
   std::vector<clang::tooling::CompileCommand> commands;
   if (jsondb) {
     commands = jsondb->getAllCompileCommands();
   }
-  auto database = prepareDatabase(diagnostics, commands, _extraFlags);
-  return CompilationDatabase(database, _extraFlags, _bitcodeFlags);
+  auto database = prepareDatabase(diagnostics, commands, extra);
+
+  std::unordered_map<std::string, std::string> resourceDirs;
+  resolveResourceDir(diagnostics, database, resourceDirs);
+  resolveResourceDir(diagnostics, bitcodeDatabase, resourceDirs);
+  return CompilationDatabase(database, extra, bitcodeDatabase);
 }
 
 CompilationDatabase
@@ -131,12 +162,12 @@ CompilationDatabase::CompilationDatabase(CompilationDatabase::Database database,
                                          CompilationDatabase::Flags extraFlags,
                                          CompilationDatabase::Database bitcodeFlags)
     : extraFlags(std::move(extraFlags)), database(std::move(database)),
-      bitcodeFlags(std::move(bitcodeFlags)) {}
+      bitcodeFlags(std::move(bitcodeFlags)), fallback({ "mull", this->extraFlags }) {}
 
-const CompilationDatabase::Flags &
+const CompilationDatabase::CompilerAndFlags &
 CompilationDatabase::compilationFlagsForFile(const std::string &filepath) const {
   if (database.empty() && bitcodeFlags.empty()) {
-    return extraFlags;
+    return fallback;
   }
 
   /// Look in bitcode flags
@@ -174,5 +205,5 @@ CompilationDatabase::compilationFlagsForFile(const std::string &filepath) const 
     return it->second;
   }
 
-  return extraFlags;
+  return fallback;
 }

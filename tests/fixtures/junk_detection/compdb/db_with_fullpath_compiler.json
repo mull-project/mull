@@ -1,8 +1,8 @@
 [
-{
-  "directory": "/foo/bar",
-  "command": "/opt/bin/clang++ -I foo -I bar -c foobar.cpp",
-  "file": "foobar.cpp",
-  "output" : "foobar.exe"
-}
+  {
+    "directory": "/foo/bar",
+    "command": "fake_compiler -I foo -I bar -c foobar.cpp",
+    "file": "foobar.cpp",
+    "output": "foobar.exe"
+  }
 ]

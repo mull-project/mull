@@ -30,7 +30,7 @@ Runner::Runner(Diagnostics &diagnostics) : diagnostics(diagnostics) {}
 ExecutionResult Runner::runProgram(const std::string &program,
                                    const std::vector<std::string> &arguments,
                                    const std::unordered_map<std::string, std::string> &environment,
-                                   long long int timeout, bool captureOutput,
+                                   long long int timeout, bool captureOutput, bool failSilently,
                                    std::optional<std::string> optionalWorkingDirectory) {
   reproc::options options;
   options.env.extra = reproc::env(environment);
@@ -48,20 +48,22 @@ ExecutionResult Runner::runProgram(const std::string &program,
 
   reproc::process process;
   std::error_code ec = process.start(allArguments, options);
-  if (ec == std::errc::no_such_file_or_directory) {
-    diagnostics.error("Executable not found: "s + program);
-  } else if (ec) {
-    std::stringstream errorMessage;
-    errorMessage << "Cannot run executable: " << ec.message() << '\n';
-    auto outputs = drainProcess(process, true);
-    errorMessage << "stdout: " << outputs.first << '\n';
-    errorMessage << "stderr: " << outputs.second << '\n';
-    errorMessage << "command: ";
-    for (auto &arg : allArguments) {
-      errorMessage << arg << " ";
+  if (!failSilently) {
+    if (ec == std::errc::no_such_file_or_directory) {
+      diagnostics.error("Executable not found: "s + program);
+    } else if (ec) {
+      std::stringstream errorMessage;
+      errorMessage << "Cannot run executable: " << ec.message() << '\n';
+      auto outputs = drainProcess(process, true);
+      errorMessage << "stdout: " << outputs.first << '\n';
+      errorMessage << "stderr: " << outputs.second << '\n';
+      errorMessage << "command: ";
+      for (auto &arg : allArguments) {
+        errorMessage << arg << " ";
+      }
+      errorMessage << '\n';
+      diagnostics.error(errorMessage.str());
     }
-    errorMessage << '\n';
-    diagnostics.error(errorMessage.str());
   }
 
   int status;

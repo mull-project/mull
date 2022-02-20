@@ -184,6 +184,7 @@ int main(int argc, char **argv) {
                                      env,
                                      configuration.timeout,
                                      configuration.captureMutantOutput,
+                                     false,
                                      std::nullopt);
   });
   if (warmUpResult.status != mull::ExecutionStatus::Passed) {

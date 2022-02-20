@@ -71,7 +71,7 @@ std::vector<MutationPoint *> Driver::findMutationPoints() {
     Runner runner(diagnostics);
     singleTask.execute("Sanity check run", [&]() {
       ExecutionResult result = runner.runProgram(
-          config.executable, {}, {}, config.timeout, config.captureTestOutput, std::nullopt);
+          config.executable, {}, {}, config.timeout, config.captureTestOutput, false, std::nullopt);
       if (result.status != Passed) {
         std::stringstream failureMessage;
         failureMessage << "Original test failed\n";

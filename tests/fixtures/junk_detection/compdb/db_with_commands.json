@@ -1,8 +1,7 @@
 [
-{
-  "directory": "/foo/bar",
-  "command": "clang++ -I foo -I bar -c foobar.cpp",
-  "file": "foobar.cpp"
-}
+  {
+    "directory": "/foo/bar",
+    "command": "fake_compiler -I foo -I bar -c foobar.cpp",
+    "file": "foobar.cpp"
+  }
 ]
-

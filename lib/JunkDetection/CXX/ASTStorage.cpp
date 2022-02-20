@@ -217,9 +217,9 @@ ThreadSafeASTUnit *ASTStorage::findAST(const std::string &sourceFile) {
     return astUnits.at(sourceFile).get();
   }
 
-  auto compilationFlags = compilationDatabase.compilationFlagsForFile(sourceFile);
-  std::vector<const char *> args({ "mull-cxx" });
-  for (auto &flag : compilationFlags) {
+  auto &[compiler, flags] = compilationDatabase.compilationFlagsForFile(sourceFile);
+  std::vector<const char *> args({ compiler.c_str() });
+  for (auto &flag : flags) {
     args.push_back(flag.c_str());
   }
   if (args.size() == 1) {

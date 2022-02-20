@@ -12,7 +12,8 @@ class Diagnostics;
 class CompilationDatabase {
 public:
   using Flags = std::vector<std::string>;
-  using Database = std::unordered_map<std::string, Flags>;
+  using CompilerAndFlags = std::pair<std::string, std::vector<std::string>>;
+  using Database = std::unordered_map<std::string, CompilerAndFlags>;
 
   CompilationDatabase() = default;
   CompilationDatabase(const CompilationDatabase &) = default;
@@ -29,12 +30,13 @@ public:
   fromBuffer(Diagnostics &diagnostics, const std::string &buffer, const std::string &extraFlags,
              const std::unordered_map<std::string, std::string> &bitcodeFlags);
 
-  const CompilationDatabase::Flags &compilationFlagsForFile(const std::string &filepath) const;
+  const CompilationDatabase::CompilerAndFlags &compilationFlagsForFile(const std::string &filepath) const;
 
 private:
   Flags extraFlags;
   Database database;
   Database bitcodeFlags;
+  CompilationDatabase::CompilerAndFlags fallback;
 };
 
 } // namespace mull
