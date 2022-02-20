@@ -1,7 +1,8 @@
 [
   {
     "directory": "/src/builds/amd64-linux-mull",
-    "command": "/usr/bin/clang++-9  -DQT_CORE_LIB -DQT_TESTCASE_BUILDDIR=\\\"/src/builds/amd64-linux-mull\\\" -o tests/TestingUnitTests/CMakeFiles/TestingUnitTests.dir/ModuleTestSuite.cpp.o -c /tmp/main.cpp",
+    "command":
+        "fake_compiler  -DQT_CORE_LIB -DQT_TESTCASE_BUILDDIR=\\\"/src/builds/amd64-linux-mull\\\" -o tests/TestingUnitTests/CMakeFiles/TestingUnitTests.dir/ModuleTestSuite.cpp.o -c /tmp/main.cpp",
     "file": "/tmp/main.cpp"
   }
 ]

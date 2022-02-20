@@ -20,8 +20,7 @@ GitDiffInfo GitDiffReader::readGitDiff(const std::string &gitBranch) {
 
   std::vector<std::string> args = { "diff", "-U0", gitBranch };
 
-  ExecutionResult result =
-      runner.runProgram("git", args, {}, 5000, true, gitRepoPath);
+  ExecutionResult result = runner.runProgram("git", args, {}, 5000, true, false, gitRepoPath);
   if (result.exitStatus != 0) {
     diagnostics.warning(
         std::string("GitDiffReader: cannot get git diff information. Received output: ") +

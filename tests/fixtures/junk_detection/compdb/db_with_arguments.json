@@ -1,7 +1,15 @@
 [
-{
-  "directory": "/foo/bar",
-  "arguments": [ "clang++", "-I", "foo", "-I", "bar", "-c", "foobar.cpp"],
-  "file": "foobar.cpp"
-}
+  {
+    "directory": "/foo/bar",
+    "arguments": [
+      "fake_compiler",
+      "-I",
+      "foo",
+      "-I",
+      "bar",
+      "-c",
+      "foobar.cpp"
+    ],
+    "file": "foobar.cpp"
+  }
 ]

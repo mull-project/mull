@@ -26,7 +26,7 @@ WITH-JUNK-DETECTION-NO-FLAG-MUTATE:{{^.*}}sample.cpp:2:2: error: "FLAG is not de
 WITH-JUNK-DETECTION-NO-FLAG-MUTATE:#error "FLAG is not defined"
 WITH-JUNK-DETECTION-NO-FLAG-MUTATE: ^
 WITH-JUNK-DETECTION-NO-FLAG-MUTATE:[warning] Cannot parse file: '{{.*}}sample.cpp':
-WITH-JUNK-DETECTION-NO-FLAG-MUTATE:mull-cxx {{.*}}sample.cpp{{$}}
+WITH-JUNK-DETECTION-NO-FLAG-MUTATE:mull {{.*}}sample.cpp{{$}}
 WITH-JUNK-DETECTION-NO-FLAG-MUTATE:Make sure that the flags provided to Mull are the same flags that are used for normal compilation.
 TODO: It is interesting why there is no junk even if we have the error above.
 WITH-JUNK-DETECTION-NO-FLAG:[info] Killed mutants (1/1):
