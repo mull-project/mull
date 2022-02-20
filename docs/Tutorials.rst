@@ -6,6 +6,7 @@ Tutorials
 
    tutorials/HelloWorld
    tutorials/MakefileIntegration
+   tutorials/CMakeIntegration
    tutorials/ControlMutationsTutorial
    tutorials/NonStandardTestSuite
    tutorials/SQLiteReport

@@ -1,7 +1,7 @@
 Makefile Integration: OpenSSL
 =============================
 
-This tutorial demonstrates how integrate Mull into a custom Makefile-based build system.
+This tutorial demonstrates how to integrate Mull into a custom Makefile-based build system.
 
 We use OpenSSL as an example.
 
@@ -55,49 +55,43 @@ You should see similar (and pretty long) output:
 
 .. code-block:: bash
 
+    [info] Using config /tmp/sc-g6cD7gfN4/openssl/mull.yml
     [info] Warm up run (threads: 1)
-           [################################] 1/1. Finished in 276ms
+           [################################] 1/1. Finished in 638ms
     [info] Baseline run (threads: 1)
-           [################################] 1/1. Finished in 273ms
+           [################################] 1/1. Finished in 281ms
     [info] Running mutants (threads: 8)
-           [################################] 1605/1605. Finished in 155543ms
-    [info] Survived mutants (1587/1605):
-    /private/tmp/sc-yOzi9P1sJ/openssl/apps/lib/opt.c:1126:15: warning: Survived: Replaced + with - [cxx_add_to_sub]
+           [################################] 1606/1606. Finished in 147786ms
+    [info] Survived mutants (1588/1606):
+    /tmp/sc-g6cD7gfN4/openssl/apps/lib/opt.c:1126:15: warning: Survived: Replaced + with - [cxx_add_to_sub]
             i = 2 + (int)strlen(o->name);
                   ^
-    /private/tmp/sc-yOzi9P1sJ/openssl/apps/lib/opt.c:1128:20: warning: Survived: Replaced + with - [cxx_add_to_sub]
+    /tmp/sc-g6cD7gfN4/openssl/apps/lib/opt.c:1128:20: warning: Survived: Replaced + with - [cxx_add_to_sub]
                 i += 1 + strlen(valtype2param(o));
                        ^
-    /private/tmp/sc-yOzi9P1sJ/openssl/crypto/aria/aria.c:546:20: warning: Survived: Replaced + with - [cxx_add_to_sub]
+    /tmp/sc-g6cD7gfN4/openssl/crypto/aria/aria.c:546:20: warning: Survived: Replaced + with - [cxx_add_to_sub]
         int Nr = (bits + 256) / 32;
                        ^
+    /tmp/sc-g6cD7gfN4/openssl/crypto/asn1/a_bitstr.c:62:13: warning: Survived: Replaced + with - [cxx_add_to_sub]
+        ret = 1 + len;
+                ^
     <truncated>
-    /private/tmp/sc-yOzi9P1sJ/openssl/test/testutil/driver.c:443:54: warning: Survived: Replaced + with - [cxx_add_to_sub]
-        size_t len = dirlen + strlen(sep) + strlen(file) + 1;
-                                                         ^
-    /private/tmp/sc-yOzi9P1sJ/openssl/test/testutil/format_output.c:282:47: warning: Survived: Replaced + with - [cxx_add_to_sub]
+    /tmp/sc-g6cD7gfN4/openssl/test/testutil/format_output.c:282:47: warning: Survived: Replaced + with - [cxx_add_to_sub]
         l1 = bn1 == NULL ? 0 : (BN_num_bytes(bn1) + (BN_is_negative(bn1) ? 1 : 0));
                                                   ^
-    /private/tmp/sc-yOzi9P1sJ/openssl/test/testutil/format_output.c:283:47: warning: Survived: Replaced + with - [cxx_add_to_sub]
+    /tmp/sc-g6cD7gfN4/openssl/test/testutil/format_output.c:283:47: warning: Survived: Replaced + with - [cxx_add_to_sub]
         l2 = bn2 == NULL ? 0 : (BN_num_bytes(bn2) + (BN_is_negative(bn2) ? 1 : 0));
                                                   ^
-    /private/tmp/sc-yOzi9P1sJ/openssl/test/testutil/format_output.c:301:32: warning: Survived: Replaced + with - [cxx_add_to_sub]
+    /tmp/sc-g6cD7gfN4/openssl/test/testutil/format_output.c:301:32: warning: Survived: Replaced + with - [cxx_add_to_sub]
         len = ((l1 > l2 ? l1 : l2) + bytes - 1) / bytes * bytes;
                                    ^
-    /private/tmp/sc-yOzi9P1sJ/openssl/test/testutil/random.c:24:54: warning: Survived: Replaced + with - [cxx_add_to_sub]
+    /tmp/sc-g6cD7gfN4/openssl/test/testutil/random.c:24:54: warning: Survived: Replaced + with - [cxx_add_to_sub]
         test_random_state[pos] += test_random_state[(pos + 28) % 31];
                                                          ^
     [info] Mutation score: 1%
-    [info] Total execution time: 156720ms
+    [info] Total execution time: 149344ms
 
-Next Steps
-----------
+Mull says that 1588 out of 1606 mutants survived. That's a lot.
+Why so many and how do we handle this?
 
-Mull says that 1587 out of 1605 mutants survived. That's a lot.
-
-There are two reasons behind such a big number:
-
-- some mutations are unreachable: the test suite cannot detect them
-- some mutations are not interesting: e.g., we probably don't care about mutants under ``testutil``
-
-Follow this tutorial to learn how to control the amount of mutations: :doc:`Keeping mutants under control <./ControlMutationsTutorial>`
+The answer is in the next tutorial :doc:`Keeping mutants under control <./ControlMutationsTutorial>`.
