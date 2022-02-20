@@ -206,22 +206,24 @@ int main(int argc, char **argv) {
   }
 
   std::vector<std::unique_ptr<mull::Mutant>> filteredMutants;
-  for (auto &mutant : mutants) {
-    bool skip = false;
-    for (auto filter : filters.mutantFilters) {
-      if (filter->shouldSkip(mutant.get())) {
-        skip = true;
-        if (configuration.debug.filters) {
-          diagnostics.debug("Skipping "s + mutant->getIdentifier() + " due to " + filter->name() +
-                            " filter");
+  singleTask.execute("Filter mutants", [&]() {
+    for (auto &mutant : mutants) {
+      bool skip = false;
+      for (auto filter : filters.mutantFilters) {
+        if (filter->shouldSkip(mutant.get())) {
+          skip = true;
+          if (configuration.debug.filters) {
+            diagnostics.debug("Skipping "s + mutant->getIdentifier() + " due to " + filter->name() +
+                              " filter");
+          }
+          break;
         }
-        break;
+      }
+      if (!skip) {
+        filteredMutants.push_back(std::move(mutant));
       }
     }
-    if (!skip) {
-      filteredMutants.push_back(std::move(mutant));
-    }
-  }
+  });
 
   mull::MutantRunner mutantRunner(diagnostics, configuration, runner);
   std::vector<std::unique_ptr<mull::MutationResult>> mutationResults =

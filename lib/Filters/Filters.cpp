@@ -11,6 +11,7 @@
 #include <sstream>
 
 using namespace mull;
+using namespace std::string_literals;
 
 Filters::Filters(const Configuration &configuration, Diagnostics &diagnostics)
     : functionFilters(), mutationFilters(), instructionFilters(), configuration(configuration),
@@ -27,15 +28,22 @@ void Filters::enableNoDebugFilter() {
 
 void Filters::enableFilePathFilter() {
   if (configuration.includePaths.empty() && configuration.excludePaths.empty()) {
+    if (configuration.debug.filters) {
+      diagnostics.debug("FilePath: both includePaths and excludePaths are empty");
+    }
     return;
   }
 
   auto *filter = new mull::FilePathFilter;
   storage.emplace_back(filter);
   mutationFilters.push_back(filter);
+  mutantFilters.push_back(filter);
   functionFilters.push_back(filter);
 
   for (const auto &regex : configuration.excludePaths) {
+    if (configuration.debug.filters) {
+      diagnostics.debug("FilePath: excluding: "s + regex);
+    }
     auto added = filter->exclude(regex);
     if (!added.first) {
       std::stringstream warningMessage;
@@ -45,6 +53,9 @@ void Filters::enableFilePathFilter() {
     }
   }
   for (const auto &regex : configuration.includePaths) {
+    if (configuration.debug.filters) {
+      diagnostics.debug("FilePath: including: "s + regex);
+    }
     auto added = filter->include(regex);
     if (!added.first) {
       std::stringstream warningMessage;
