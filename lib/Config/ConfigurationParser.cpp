@@ -33,7 +33,7 @@ template <> struct llvm::yaml::MappingTraits<DebugConfig> {
     io.mapOptional("traceMutants", config.traceMutants);
     io.mapOptional("coverage", config.coverage);
     io.mapOptional("gitDiff", config.gitDiff);
-    io.mapOptional("filters", config.gitDiff);
+    io.mapOptional("filters", config.filters);
   }
 };
 
