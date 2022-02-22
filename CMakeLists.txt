@@ -36,12 +36,22 @@ include(${CMAKE_CURRENT_LIST_DIR}/cmake/functions.cmake)
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 find_package(LLVM CONFIG REQUIRED)
+message("Using LLVM_CONFIG: ${LLVM_CONFIG}")
 find_package(Clang CONFIG REQUIRED)
+message("Using Clang_CONFIG: ${Clang_CONFIG}")
 
-set(MULL_CC ${CLANG_INSTALL_PREFIX}/bin/clang)
-set(LIT_CLANG ${CLANG_INSTALL_PREFIX}/bin/clang)
-set(LIT_CLANGXX ${CLANG_INSTALL_PREFIX}/bin/clang++)
-set(LIT_LLVM_PROFDATA ${CLANG_INSTALL_PREFIX}/bin/llvm-profdata)
+set (clang_binary_dir ${CLANG_INSTALL_PREFIX})
+if (NOT clang_binary_dir)
+  # Building against built tree?
+  set (clang_binary_dir ${LLVM_BINARY_DIR})
+endif()
+
+message("Using LLVM/Clang from: ${clang_binary_dir}")
+
+set(MULL_CC ${clang_binary_dir}/bin/clang)
+set(LIT_CLANG ${clang_binary_dir}/bin/clang)
+set(LIT_CLANGXX ${clang_binary_dir}/bin/clang++)
+set(LIT_LLVM_PROFDATA ${clang_binary_dir}/bin/llvm-profdata)
 
 set(MULL_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
