@@ -14,7 +14,8 @@ public:
   }
 };
 
-extern "C" LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo llvmGetPassPluginInfo() {
+extern "C" __attribute__((visibility("default"))) LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
+llvmGetPassPluginInfo() {
   return { LLVM_PLUGIN_API_VERSION,
            "mull-ir-frontend",
            LLVM_VERSION_STRING,
