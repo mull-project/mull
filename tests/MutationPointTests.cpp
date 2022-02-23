@@ -1,6 +1,6 @@
 #include "FixturePaths.h"
 #include "TestModuleFactory.h"
-#include "mull/BitcodeLoader.h"
+#include "BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
 #include "mull/FunctionUnderTest.h"
 #include "mull/MutationPoint.h"

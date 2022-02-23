@@ -1,5 +1,5 @@
 #include "FixturePaths.h"
-#include "mull/BitcodeLoader.h"
+#include "BitcodeLoader.h"
 #include "mull/FunctionUnderTest.h"
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
 #include "mull/MutationPoint.h"
