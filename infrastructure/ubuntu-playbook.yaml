@@ -20,9 +20,6 @@
       - libsqlite3-dev
       - ncurses-dev
       - libstdc++6
-      - pkg-config
-      - libxml2-dev
-      - uuid-dev
       - binutils
       - liblzma-dev
       - python3-pip
@@ -75,4 +72,3 @@
 
     - name: Integration Tests
       include: helpers/integration-tests.yaml
-
