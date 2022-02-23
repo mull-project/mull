@@ -20,7 +20,6 @@
       - sqlite
       - ninja
       - gnu-tar
-      - pkg-config
       - python3
 
   vars_files:

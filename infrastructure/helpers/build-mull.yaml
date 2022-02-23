@@ -37,7 +37,6 @@
     - mull-cxx-mutators
     - MullVersion
     - mull
-    - mull-cxx-{{ llvm_major }}
 
 - name: Build Tests (Debug)
   command: ninja mull-tests
@@ -79,7 +78,6 @@
     - mull-cxx-mutators
     - MullVersion
     - mull
-    - mull-cxx-{{llvm_major}}
 
 - name: Build Tests (Release)
   command: ninja mull-tests
