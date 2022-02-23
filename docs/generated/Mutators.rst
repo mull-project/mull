@@ -139,3 +139,38 @@ Operator Name Operator Semantics
 |op43|        |desc43|
 |op44|        |desc44|
 ============= ==================
+
+
+Groups:
+    :all:	cxx_all, experimental
+
+    :cxx_all:	cxx_assignment, cxx_increment, cxx_decrement, cxx_arithmetic, cxx_comparison, cxx_boundary, cxx_bitwise, cxx_calls
+
+    :cxx_arithmetic:	cxx_minus_to_noop, cxx_add_to_sub, cxx_sub_to_add, cxx_mul_to_div, cxx_div_to_mul, cxx_rem_to_div
+
+    :cxx_arithmetic_assignment:	cxx_add_assign_to_sub_assign, cxx_sub_assign_to_add_assign, cxx_mul_assign_to_div_assign, cxx_div_assign_to_mul_assign, cxx_rem_assign_to_div_assign
+
+    :cxx_assignment:	cxx_bitwise_assignment, cxx_arithmetic_assignment, cxx_const_assignment
+
+    :cxx_bitwise:	cxx_bitwise_not_to_noop, cxx_and_to_or, cxx_or_to_and, cxx_xor_to_or, cxx_lshift_to_rshift, cxx_rshift_to_lshift
+
+    :cxx_bitwise_assignment:	cxx_and_assign_to_or_assign, cxx_or_assign_to_and_assign, cxx_xor_assign_to_or_assign, cxx_lshift_assign_to_rshift_assign, cxx_rshift_assign_to_lshift_assign
+
+    :cxx_boundary:	cxx_le_to_lt, cxx_lt_to_le, cxx_ge_to_gt, cxx_gt_to_ge
+
+    :cxx_calls:	cxx_remove_void_call, cxx_replace_scalar_call
+
+    :cxx_comparison:	cxx_eq_to_ne, cxx_ne_to_eq, cxx_le_to_gt, cxx_lt_to_ge, cxx_ge_to_lt, cxx_gt_to_le
+
+    :cxx_const_assignment:	cxx_assign_const, cxx_init_const
+
+    :cxx_decrement:	cxx_pre_dec_to_pre_inc, cxx_post_dec_to_post_inc
+
+    :cxx_default:	cxx_increment, cxx_arithmetic, cxx_comparison, cxx_boundary
+
+    :cxx_increment:	cxx_pre_inc_to_pre_dec, cxx_post_inc_to_post_dec
+
+    :cxx_logical:	cxx_logical_and_to_or, cxx_logical_or_to_and, cxx_remove_negation
+
+    :experimental:	negate_mutator, scalar_value_mutator, cxx_logical
+

@@ -47,6 +47,10 @@ int main(int argc, char **argv) {
       tool::dumpCLIInterface(diagnostics);
       return 0;
     }
+    if (tool::DumpMutators) {
+      tool::dumpMutators(diagnostics);
+      return 0;
+    }
     return 1;
   }
 

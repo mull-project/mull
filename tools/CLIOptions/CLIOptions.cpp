@@ -1,11 +1,11 @@
 #include "CLIOptions.h"
 #include <mull/Diagnostics/Diagnostics.h>
 #include <mull/Mutators/Mutator.h>
+#include <mull/Reporters/GithubAnnotationsReporter.h>
 #include <mull/Reporters/IDEReporter.h>
 #include <mull/Reporters/MutationTestingElementsReporter.h>
-#include <mull/Reporters/SQLiteReporter.h>
 #include <mull/Reporters/PatchesReporter.h>
-#include <mull/Reporters/GithubAnnotationsReporter.h>
+#include <mull/Reporters/SQLiteReporter.h>
 
 using namespace mull;
 using namespace tool;
@@ -69,10 +69,12 @@ std::vector<std::unique_ptr<Reporter>> ReportersCLIOptions::reporters(ReporterPa
       reporters.emplace_back(new mull::IDEReporter(diagnostics, params.IDEReporterShowKilled));
     } break;
     case ReporterKind::SQLite: {
-      reporters.emplace_back(new mull::SQLiteReporter(diagnostics, directory, name, params.mullInformation));
+      reporters.emplace_back(
+          new mull::SQLiteReporter(diagnostics, directory, name, params.mullInformation));
     } break;
     case ReporterKind::Patches: {
-      reporters.emplace_back(new mull::PatchesReporter(diagnostics, directory, name, params.patchBasePathDir, params.mullInformation));
+      reporters.emplace_back(new mull::PatchesReporter(
+          diagnostics, directory, name, params.patchBasePathDir, params.mullInformation));
     } break;
     case ReporterKind::GithubAnnotations: {
       reporters.emplace_back(new mull::GithubAnnotationsReporter(diagnostics));
@@ -82,8 +84,8 @@ std::vector<std::unique_ptr<Reporter>> ReportersCLIOptions::reporters(ReporterPa
         diagnostics.warning("Mutation Testing Elements Reporter may not work without compilation "
                             "database. Consider providing -compdb-path or -compilation-flags.");
       }
-      reporters.emplace_back(
-          new mull::MutationTestingElementsReporter(diagnostics, directory, name, params.mullInformation));
+      reporters.emplace_back(new mull::MutationTestingElementsReporter(
+          diagnostics, directory, name, params.mullInformation));
     } break;
     }
   }
@@ -177,14 +179,14 @@ void tool::dumpMutators(Diagnostics &diagnostics) {
   std::stringstream replacements;
   std::stringstream table;
 
-  std::string firstHeaderName("Operator Name");
-  std::string firstHeader(firstHeaderName.size(), '=');
-  std::string secondHeaderName("Operator Semantics");
-  std::string secondHeader(secondHeaderName.size(), '=');
+  std::string operatorHeaderName("Operator Name");
+  std::string operatorHeader(operatorHeaderName.size(), '=');
+  std::string semanticsHeaderName("Operator Semantics");
+  std::string semanticsHeader(semanticsHeaderName.size(), '=');
 
-  table << firstHeader << " " << secondHeader << "\n";
-  table << firstHeaderName << " " << secondHeaderName << "\n";
-  table << firstHeader << " " << secondHeader << "\n";
+  table << operatorHeader << " " << semanticsHeader << "\n";
+  table << operatorHeaderName << " " << semanticsHeaderName << "\n";
+  table << operatorHeader << " " << semanticsHeader << "\n";
 
   for (size_t i = 0; i < availableMutators.size(); i++) {
     Mutator *mutator = availableMutators[i];
@@ -192,7 +194,7 @@ void tool::dumpMutators(Diagnostics &diagnostics) {
     std::string name("op" + n);
     std::string description("desc" + n);
 
-    std::string padding(firstHeader.size() - name.size() - 1, ' ');
+    std::string padding(operatorHeader.size() - name.size() - 1, ' ');
     table << "|" << name << "|" << padding << "|" << description << "|\n";
 
     replacements << ".. |" << name << "| replace:: " << mutator->getUniqueIdentifier() << "\n";
@@ -201,7 +203,14 @@ void tool::dumpMutators(Diagnostics &diagnostics) {
   }
 
   replacements << "\n\n";
-  table << firstHeader << " " << secondHeader << "\n";
+  table << operatorHeader << " " << semanticsHeader << "\n";
+
+  table << "\n\n";
+  table << "Groups:\n";
+  for (const auto &pair : factory.getGroupsMapping()) {
+    table << "    :" << pair.first << ":\t" << MutatorsFactory::descriptionForGroup(pair.second)
+          << "\n\n";
+  }
 
   llvm::outs() << replacements.str();
   llvm::outs() << table.str();
