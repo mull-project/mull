@@ -39,14 +39,6 @@ opt<std::string> InputFile( \
     value_desc("path"), \
     cat(MullCategory))
 
-#define OutputFile_() \
-opt<std::string> OutputFile( \
-    "output", \
-    desc("output file"), \
-    value_desc("path"), \
-    init(""), \
-    cat(MullCategory))\
-
 #define Workers_() \
 opt<unsigned> Workers( \
     "workers", \
@@ -91,57 +83,6 @@ opt<std::string> ReportPatchBaseDirectory( \
     init("."), \
     cat(MullCategory))
 
-#define DisableJunkDetection_() \
-opt<bool> DisableJunkDetection( \
-    "disable-junk-detection", \
-    desc("Do not remove junk mutations"), \
-    Optional, \
-    init(false), \
-    cat(MullCategory))
-
-#define CompilationDatabasePath_() \
-opt<std::string> CompilationDatabasePath( \
-    "compdb-path", \
-    desc("Path to a compilation database (compile_commands.json) for junk detection"), \
-    value_desc("filename"), \
-    Optional, \
-    cat(MullCategory))
-
-#define CompilationFlags_() \
-opt<std::string> CompilationFlags( \
-    "compilation-flags", \
-    desc("Extra compilation flags for junk detection"), \
-    value_desc("string"), \
-    Optional, \
-    cat(MullCategory))
-
-#define Linker_() \
-opt<std::string> Linker( \
-    "linker", \
-    desc("Linker program"), \
-    value_desc("string"), \
-    Optional, \
-    init("clang"), \
-    cat(MullCategory))
-
-#define LinkerFlags_() \
-opt<std::string> LinkerFlags( \
-    "linker-flags", \
-    desc("Extra linker flags to produce final executable"), \
-    value_desc("string"), \
-    Optional, \
-    init(std::string()), \
-    cat(MullCategory))
-
-#define LinkerTimeout_() \
-opt<unsigned> LinkerTimeout( \
-    "linker-timeout", \
-    desc("Timeout for the linking job (milliseconds)"), \
-    Optional, \
-    value_desc("number"), \
-    init(MullDefaultLinkerTimeoutMilliseconds), \
-    cat(MullCategory))
-
 #define CoverageInfo_() \
 opt<std::string> CoverageInfo( \
     "coverage-info", \
@@ -157,74 +98,6 @@ opt<bool> DryRunOption( \
     desc("Skips mutant execution and generation. Disabled by default"), \
     Optional, \
     init(false), \
-    cat(MullCategory))
-
-#define MutateOnly_() \
-opt<bool> MutateOnly( \
-    "mutate-only", \
-    desc("Skips mutant execution. Unlike -dry-run generates mutants. Disabled by default"), \
-    Optional, \
-    init(false), \
-    cat(MullCategory))
-
-#define LowerBitcode_() \
-opt<bool> LowerBitcode( \
-    "lower-bitcode", \
-    desc("Lower bitcode into machine code for linking. Disabled by default"), \
-    Optional, \
-    init(false), \
-    cat(MullCategory))
-
-#define Mutators_() \
-list<MutatorsOptionIndex> Mutators( \
-    "mutators", \
-    desc("Choose mutators:"), \
-    ZeroOrMore, \
-    value_desc("mutator"), \
-    cat(MullCategory))
-
-#define ExcludePaths_() \
-list<std::string> ExcludePaths( \
-    "exclude-path", \
-    desc("File/directory paths to ignore (supports regex, equivalent to \"grep -E\")"), \
-    ZeroOrMore, \
-    value_desc("regex"), \
-    cat(MullCategory))
-
-#define IncludePaths_() \
-list<std::string> IncludePaths( \
-    "include-path", \
-    desc("File/directory paths to whitelist (supports regex, equivalent to \"grep -E\")"), \
-    ZeroOrMore, \
-    value_desc("regex"), \
-    cat(MullCategory))
-
-#define KeepObjectFiles_() \
-opt<bool> KeepObjectFiles( \
-    "keep-object-files", llvm::cl::Optional, \
-    llvm::cl::desc("Keep temporary object files"), \
-    llvm::cl::cat(MullCategory), llvm::cl::init(false))
-
-#define KeepExecutable_() \
-opt<bool> KeepExecutable( \
-    "keep-executable", llvm::cl::Optional, \
-    llvm::cl::desc("Keep temporary executable file"), \
-    llvm::cl::cat(MullCategory), llvm::cl::init(false))
-
-#define GitDiffRef_() \
-opt<std::string> GitDiffRef( \
-    "git-diff-ref", \
-    desc("Git branch, commit, or tag to run diff against (enables incremental testing)"), \
-    Optional, \
-    value_desc("ref"), \
-    cat(MullCategory))
-
-#define GitProjectRoot_() \
-opt<std::string> GitProjectRoot( \
-    "git-project-root", \
-    desc("Path to project's Git root (used together with -git-diff-ref)"), \
-    Optional, \
-    value_desc("path"), \
     cat(MullCategory))
 
 #define IncludeNotCovered_() \
@@ -329,21 +202,6 @@ list<std::string> LDSearchPaths( \
 
 namespace tool {
 
-enum MutatorsOptionIndex : int { _mutatorsOptionIndex_unused };
-
-class MutatorsCLIOptions {
-public:
-  MutatorsCLIOptions(mull::Diagnostics &diagnostics,
-                     llvm::cl::list<MutatorsOptionIndex> &parameter);
-  std::vector<std::unique_ptr<mull::Mutator>> mutators();
-  std::vector<std::pair<std::string, std::string>> &getOptions();
-
-private:
-  mull::MutatorsFactory factory;
-  std::vector<std::pair<std::string, std::string>> options;
-  llvm::cl::list<MutatorsOptionIndex> &parameter;
-};
-
 struct ReporterParameters {
   std::string reporterName;
   std::string reporterDirectory;
@@ -366,8 +224,7 @@ private:
 
 void dumpCLIInterface(mull::Diagnostics &diagnostics);
 void dumpCLIInterface(mull::Diagnostics &diagnostics,
-                      const std::vector<llvm::cl::Option *> &options, llvm::cl::Option *reporters,
-                      llvm::cl::Option *mutators);
+                      const std::vector<llvm::cl::Option *> &options, llvm::cl::Option *reporters);
 void dumpMutators(mull::Diagnostics &diagnostics);
 
 } // namespace tool

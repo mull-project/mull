@@ -54,7 +54,7 @@ void dumpCLIInterface(mull::Diagnostics &diagnostics) {
       &CoverageInfo,
       &DebugCoverage,
   });
-  dumpCLIInterface(diagnostics, mullOptions, reporters, nullptr);
+  dumpCLIInterface(diagnostics, mullOptions, reporters);
 }
 
 } // namespace tool
