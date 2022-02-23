@@ -8,7 +8,6 @@
 namespace mull {
 
 extern int MullDefaultTimeoutMilliseconds;
-extern unsigned MullDefaultLinkerTimeoutMilliseconds;
 
 class Diagnostics;
 
@@ -19,28 +18,17 @@ struct Configuration {
   bool dryRunEnabled;
   bool captureTestOutput;
   bool captureMutantOutput;
-  bool skipSanityCheckRun;
   bool includeNotCovered;
-  bool keepObjectFiles;
-  bool keepExecutable;
-  bool mutateOnly;
-  bool lowerBitcode;
   bool junkDetectionDisabled;
 
   unsigned timeout;
-  unsigned linkerTimeout;
 
   IDEDiagnosticsKind diagnostics;
 
-  std::vector<std::string> bitcodePaths; // TODO: Drop this one
   std::vector<std::string> mutators;
   std::vector<std::string> ignoreMutators;
 
   std::string executable;
-  std::string outputFile;
-
-  std::string linker;
-  std::vector<std::string> linkerFlags;
 
   std::string compilationDatabasePath;
   std::vector<std::string> compilerFlags;
