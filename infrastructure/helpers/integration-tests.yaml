@@ -43,7 +43,7 @@
     chdir: "{{ working_dir }}/integration/fmt.build.dir"
 
 - name: Run Mull against fmt
-  command: mull-cxx-{{ llvm_major }} {{ working_dir }}/integration/fmt.build.dir/bin/core-test
+  command: mull-runner-{{ llvm_major }} {{ working_dir }}/integration/fmt.build.dir/bin/core-test
 
 - name: Clone OpenSSL
   git:
