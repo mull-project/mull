@@ -4,8 +4,8 @@
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/ExecutionResult.h"
 #include "mull/Parallelization/Progress.h"
+#include "mull/Runner.h"
 #include "mull/SourceLocation.h"
-#include "mull/Toolchain/Runner.h"
 
 #include <sstream>
 

@@ -10,7 +10,7 @@
 #include "mull/MutantRunner.h"
 #include "mull/Parallelization/TaskExecutor.h"
 #include "mull/Result.h"
-#include "mull/Toolchain/Runner.h"
+#include "mull/Runner.h"
 #include "mull/Version.h"
 
 #include <llvm/Support/FileSystem.h>

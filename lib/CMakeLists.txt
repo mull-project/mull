@@ -19,16 +19,11 @@ set(mull_sources
   Mutators/NegateConditionMutator.cpp
   Mutators/ScalarValueMutator.cpp
 
-  Toolchain/Compiler.cpp
-  Toolchain/Toolchain.cpp
-  Toolchain/Linker.cpp
-  Toolchain/Runner.cpp
+  Runner.cpp
 
   Bitcode.cpp
   MutationPoint.cpp
   FunctionUnderTest.cpp
-
-  IDEDiagnostics.cpp
 
   Metrics/MetricsMeasure.cpp
 
@@ -45,12 +40,10 @@ set(mull_sources
   Parallelization/Progress.cpp
   Parallelization/TaskExecutor.cpp
   Parallelization/Tasks/SearchMutationPointsTask.cpp
-  Parallelization/Tasks/LoadObjectFilesTask.cpp
   Parallelization/Tasks/DryRunMutantExecutionTask.cpp
   Parallelization/Tasks/MutantExecutionTask.cpp
   Parallelization/Tasks/MutantPreparationTasks.cpp
   Parallelization/Tasks/MutationFilterTask.cpp
-  Parallelization/Tasks/OriginalCompilationTask.cpp
   Parallelization/Tasks/ApplyMutationTask.cpp
   Parallelization/Tasks/FunctionFilterTask.cpp
   Parallelization/Tasks/InstructionSelectionTask.cpp

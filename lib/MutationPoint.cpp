@@ -2,8 +2,6 @@
 
 #include "mull/Mutators/Mutator.h"
 #include "mull/Reporters/SourceCodeReader.h"
-#include "mull/Reporters/SourceManager.h"
-#include "mull/Toolchain/Compiler.h"
 
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/Function.h>

@@ -1,4 +1,4 @@
-#include "mull/Toolchain/Runner.h"
+#include "mull/Runner.h"
 
 #include "mull/Config/Configuration.h"
 #include "mull/Diagnostics/Diagnostics.h"
