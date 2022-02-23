@@ -24,22 +24,12 @@ using namespace llvm;
 
 static void createTables(Diagnostics &diagnostics, sqlite3 *database);
 
-void sqlite_exec(Diagnostics &diagnostics, sqlite3 *database, const char *sql) {
+static void sqlite_exec(Diagnostics &diagnostics, sqlite3 *database, const char *sql) {
   char *errorMessage;
   int result = sqlite3_exec(database, sql, nullptr, nullptr, &errorMessage);
   if (result != SQLITE_OK) {
     std::stringstream stringstream;
     stringstream << "Cannot execute " << sql << '\n' << "Reason: '" << errorMessage << "'\n";
-    diagnostics.error(stringstream.str());
-  }
-}
-
-void sqlite_step(Diagnostics &diagnostics, sqlite3 *database, sqlite3_stmt *stmt) {
-  int result = sqlite3_step(stmt);
-  if (result != SQLITE_DONE) {
-    std::stringstream stringstream;
-    stringstream << "Error inserting data: \n"
-                 << "Reason: '" << sqlite3_errmsg(database) << "'\n";
     diagnostics.error(stringstream.str());
   }
 }
@@ -82,8 +72,7 @@ void mull::SQLiteReporter::reportResults(const Result &result) {
 
   sqlite_exec(diagnostics, database, "BEGIN TRANSACTION");
 
-  const char *insertInformationQuery =
-      "INSERT INTO information VALUES (?1, ?2)";
+  const char *insertInformationQuery = "INSERT INTO information VALUES (?1, ?2)";
   sqlite3_stmt *insertInformationStmt;
   sqlite3_prepare(database, insertInformationQuery, -1, &insertInformationStmt, nullptr);
 

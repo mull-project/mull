@@ -9,6 +9,7 @@ using namespace llvm::cl;
 OptionCategory MullCategory("mull-runner");
 InputFile_();
 DumpCLIInterface_();
+DumpMutators_();
 ReportersOption_();
 DebugEnabled_();
 StrictModeEnabled_();
