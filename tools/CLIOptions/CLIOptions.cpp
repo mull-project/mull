@@ -11,29 +11,6 @@ using namespace mull;
 using namespace tool;
 using namespace llvm::cl;
 
-MutatorsCLIOptions::MutatorsCLIOptions(Diagnostics &diagnostics,
-                                       list<MutatorsOptionIndex> &parameter)
-    : factory(diagnostics), options(factory.commandLineOptions()), parameter(parameter) {
-  int index = 0;
-  for (auto &option : options) {
-    parameter.getParser().addLiteralOption(option.first.c_str(), index++, option.second.c_str());
-  }
-}
-
-std::vector<std::unique_ptr<Mutator>> MutatorsCLIOptions::mutators() {
-  std::vector<std::string> selectedGroups;
-  for (int i = 0; i < parameter.size(); i++) {
-    auto &name = parameter[i];
-    selectedGroups.push_back(options[name].first);
-  }
-
-  return factory.mutators(selectedGroups, {});
-}
-
-std::vector<std::pair<std::string, std::string>> &MutatorsCLIOptions::getOptions() {
-  return options;
-}
-
 struct ReporterDefinition {
   std::string name;
   std::string description;
@@ -127,33 +104,12 @@ void dumpCLIReporters(std::stringstream &stream) {
   }
 }
 
-void dumpCLIMutators(std::stringstream &stream, mull::Diagnostics &diagnostics) {
-  MutatorsFactory factory(diagnostics);
-  factory.init();
-
-  stream << "    Groups:\n";
-  for (const auto &pair : factory.getGroupsMapping()) {
-    stream << "      :" << pair.first << ":\t" << MutatorsFactory::descriptionForGroup(pair.second)
-           << "\n\n";
-  }
-
-  stream << "    Single mutators:\n";
-  for (const auto &pair : factory.getMutatorsMapping()) {
-    stream << "      :" << pair.first << ":\t" << sanitizeString(pair.second->getDescription())
-           << "\n\n";
-  }
-}
-
 void tool::dumpCLIInterface(mull::Diagnostics &diagnostics,
                             const std::vector<llvm::cl::Option *> &options,
-                            llvm::cl::Option *reporters, llvm::cl::Option *mutators) {
+                            llvm::cl::Option *reporters) {
   std::stringstream help;
   for (llvm::cl::Option *option : options) {
     dumpCLIOption(help, option);
-
-    if (option == mutators) {
-      dumpCLIMutators(help, diagnostics);
-    }
 
     if (option == reporters) {
       dumpCLIReporters(help);
