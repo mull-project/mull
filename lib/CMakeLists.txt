@@ -13,8 +13,6 @@ set(mull_sources
   MutationsFinder.cpp
   Mutant.cpp
 
-  Parallelization/Tasks/LoadBitcodeFromBinaryTask.cpp
-
   Mutators/CXX/LogicalAndToOr.cpp
   Mutators/CXX/LogicalOrToAnd.cpp
   Mutators/MutatorKind.cpp

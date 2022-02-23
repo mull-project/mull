@@ -1,2 +1,1 @@
 add_subdirectory(json11 EXCLUDE_FROM_ALL)
-add_subdirectory(LibEBC EXCLUDE_FROM_ALL)

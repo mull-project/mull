@@ -32,7 +32,6 @@
   args:
     chdir: "{{ debug_build_dir }}"
   with_items:
-    - ebc
     - json11
     - spdlog
     - mull-cxx-mutators
@@ -75,7 +74,6 @@
   args:
     chdir: "{{ release_build_dir }}"
   with_items:
-    - ebc
     - json11
     - spdlog
     - mull-cxx-mutators
