@@ -1,6 +1,5 @@
 #include "mull/MutationPoint.h"
 
-#include "mull/BitcodeLoader.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Reporters/SourceCodeReader.h"
 #include "mull/Reporters/SourceManager.h"

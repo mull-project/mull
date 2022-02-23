@@ -1,7 +1,7 @@
 #include "mull/Mutators/ScalarValueMutator.h"
 #include "FixturePaths.h"
 #include "TestModuleFactory.h"
-#include "mull/BitcodeLoader.h"
+#include "BitcodeLoader.h"
 #include "mull/FunctionUnderTest.h"
 #include "mull/MutationPoint.h"
 

@@ -4,7 +4,6 @@
 #include "mull/Parallelization/TaskExecutor.h"
 
 #include "mull/Parallelization/Tasks/ApplyMutationTask.h"
-#include "mull/Parallelization/Tasks/BitcodeLoadingTask.h"
 #include "mull/Parallelization/Tasks/DryRunMutantExecutionTask.h"
 #include "mull/Parallelization/Tasks/FunctionFilterTask.h"
 #include "mull/Parallelization/Tasks/InstructionSelectionTask.h"

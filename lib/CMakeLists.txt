@@ -8,7 +8,6 @@ set(mull_sources
   AST/MullClangCompatibility.cpp
 
   Driver.cpp
-  BitcodeLoader.cpp
   BitcodeMetadataReader.cpp
   MutationsFinder.cpp
   Mutant.cpp
@@ -45,7 +44,6 @@ set(mull_sources
 
   Parallelization/Progress.cpp
   Parallelization/TaskExecutor.cpp
-  Parallelization/Tasks/BitcodeLoadingTask.cpp
   Parallelization/Tasks/SearchMutationPointsTask.cpp
   Parallelization/Tasks/LoadObjectFilesTask.cpp
   Parallelization/Tasks/DryRunMutantExecutionTask.cpp

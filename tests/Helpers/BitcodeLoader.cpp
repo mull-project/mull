@@ -1,18 +1,14 @@
-#include "mull/BitcodeLoader.h"
+#include "BitcodeLoader.h"
 
 #include "mull/Config/Configuration.h"
 #include "mull/Diagnostics/Diagnostics.h"
-#include "mull/Parallelization/Parallelization.h"
 
-#include <llvm/AsmParser/Parser.h>
 #include <llvm/Bitcode/BitcodeReader.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
-#include <llvm/Support/MD5.h>
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/SourceMgr.h>
 
-#include <fstream>
 #include <sstream>
 
 using namespace llvm;
@@ -66,21 +62,4 @@ std::unique_ptr<Bitcode> BitcodeLoader::loadBitcodeAtPath(const std::string &pat
   }
 
   return std::make_unique<Bitcode>(std::move(context), std::move(module));
-}
-
-std::vector<std::unique_ptr<Bitcode>> BitcodeLoader::loadBitcode(const Configuration &config,
-                                                                 Diagnostics &diagnostics) {
-  std::vector<std::unique_ptr<Bitcode>> bitcode;
-
-  std::vector<BitcodeLoadingTask> tasks;
-  tasks.reserve(config.parallelization.workers);
-  for (int i = 0; i < config.parallelization.workers; i++) {
-    tasks.emplace_back(diagnostics, *this);
-  }
-
-  TaskExecutor<BitcodeLoadingTask> loader(
-      diagnostics, "Loading bitcode", config.bitcodePaths, bitcode, tasks);
-  loader.execute();
-
-  return bitcode;
 }

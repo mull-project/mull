@@ -1,6 +1,6 @@
 #pragma once
 
-#include "Bitcode.h"
+#include "mull/Bitcode.h"
 
 #include <string>
 #include <vector>
@@ -29,9 +29,6 @@ public:
   ~BitcodeLoader() = default;
 
   std::unique_ptr<Bitcode> loadBitcodeAtPath(const std::string &path, Diagnostics &diagnostics);
-
-  std::vector<std::unique_ptr<Bitcode>> loadBitcode(const Configuration &config,
-                                                    Diagnostics &diagnostics);
 };
 
 } // namespace mull
