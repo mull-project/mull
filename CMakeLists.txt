@@ -55,7 +55,7 @@ set(LIT_LLVM_PROFDATA ${clang_binary_dir}/bin/llvm-profdata)
 
 set(MULL_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-set (MULL_CXX_FLAGS "-fPIC -fvisibility-inlines-hidden -fno-exceptions -Wunused -Wall")
+set (MULL_CXX_FLAGS "-fPIC -fvisibility-inlines-hidden -fno-exceptions -Wunused -Wall -fvisibility=hidden")
 if (NOT LLVM_ENABLE_RTTI)
   set(MULL_CXX_FLAGS "${MULL_CXX_FLAGS} -fno-rtti")
 endif()
