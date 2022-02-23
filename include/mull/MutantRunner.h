@@ -1,9 +1,9 @@
 #pragma once
 
+#include "Runner.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/MutationResult.h"
-#include "mull/Toolchain/Runner.h"
 
 #include <memory>
 #include <vector>

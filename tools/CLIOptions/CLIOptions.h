@@ -5,7 +5,6 @@
 #include <mull/Mutators/Mutator.h>
 #include <mull/Mutators/MutatorsFactory.h>
 #include <mull/Reporters/Reporter.h>
-#include <mull/Toolchain/Toolchain.h>
 #include <sstream>
 #include <string>
 #include <unordered_map>

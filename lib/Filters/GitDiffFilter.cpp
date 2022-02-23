@@ -3,8 +3,8 @@
 #include "mull/Config/Configuration.h"
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Mutant.h"
+#include "mull/Runner.h"
 #include "mull/SourceLocation.h"
-#include "mull/Toolchain/Runner.h"
 
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/Function.h>
