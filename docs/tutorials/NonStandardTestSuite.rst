@@ -1,50 +1,9 @@
 Non-standard test suites
 ========================
 
-.. warning::
-   Since the version 0.15.0, ``mull-cxx`` tool `is deprecated <https://github.com/mull-project/mull/issues/945>`_
-   in favour of a compiler plugin: `Mull IR Frontend <https://github.com/mull-project/mull/pull/938>`_.
-
-   This tutorial covers ``mull-cxx`` tool and will be updated in the future.
-
-
 The goal of this tutorial is to demonstrate how to use Mull with 'non-standard'
 test suites, such as when the test suite is a separate program. The best example
 is integration tests written in interpreted languages.
-
-Two-step analysis process
--------------------------
-
-The typical process of applying Mull is a one-step action: run `mull-cxx` and wait
-for the results. Here is what `mull-cxx` does under the hood:
-
-1. Generates a mutated version of the original program
-2. Runs all the mutants
-3. Generates report(s)
-
-Since version 0.11.0, there is a way to split this process into a two-step
-action: run `mull-cxx` to generate mutated program, and then run `mull-runner`
-to assess all the mutants and generate reports.
-
-Given the program from the `Hello World Example <HelloWorld.html>`_ the following
-two runs are identical:
-
-One-step process:
-
-.. code-block:: shell
-
-    $ clang -fembed-bitcode -g main.cpp -o hello-world
-    $ mull-cxx -ide-reporter-show-killed hello-world
-
-Two-step process:
-
-.. code-block:: shell
-
-    $ clang -fembed-bitcode -g main.cpp -o hello-world
-    $ mull-cxx -mutate-only -output=hello-world-mutated hello-world
-    $ mull-runner -ide-reporter-show-killed hello-world-mutated
-
-While this is useful, let's look into a slightly more complex example.
 
 Tests in interpreted languages
 ------------------------------
@@ -131,46 +90,51 @@ that program.
     first test passed
     second test passed
 
-In this case, simply using `mull-cxx` is not enough: Mull doesn't know how to run
-the "external" test suite (`test.py`), so we must be using `mull-runner` for this.
-The process is two-step.
+Usage of Mull in this case is very similar to a "typical" use-case (see :doc:`Hello World tutorial <./HelloWorld>`).
 
-1. Generate mutated executable
+1. Create config file ``mull.yml``:
+
+.. code-block:: yaml
+
+    mutators:
+     - cxx_add_to_sub
+     - cxx_mul_to_div
+
+2. Generate mutated executable
 
 .. code-block:: text
 
-    $ clang -fembed-bitcode -g main.c -o test
-    $ mull-cxx -mutate-only \
-      -mutators=cxx_add_to_sub -mutators=cxx_mul_to_div \
-      -output=test.mutated ./test
-    [info] Mutate-only mode on: Mull will generate mutants, but won't run them
-    ...
-    [info] Mutated executable: test.mutated
-    [info] Total execution time: 182ms
+    $ clang-12 -fexperimental-new-pass-manager \
+      -fpass-plugin=/usr/local/lib/mull-ir-frontend-12 \
+      -g -grecord-command-line \
+      main.c -o test.exe
 
-2. Run analysis using `mull-runner`:
+3. Run analysis using `mull-runner`:
 
 .. code-block:: shell
 
-    $ mull-runner test.mutated -ide-reporter-show-killed \
-      -test-program=python3 -- test.py test.mutated
+    $ mull-runner-12 ./test.exe -ide-reporter-show-killed \
+      -test-program=python3 -- test.py ./test.exe
+    [info] Using config /tmp/sc-kGN35Gr1f/mull.yml
     [info] Warm up run (threads: 1)
-           [################################] 1/1. Finished in 398ms
+           [################################] 1/1. Finished in 347ms
+    [info] Filter mutants (threads: 1)
+           [################################] 1/1. Finished in 0ms
     [info] Baseline run (threads: 1)
-           [################################] 1/1. Finished in 60ms
+           [################################] 1/1. Finished in 76ms
     [info] Running mutants (threads: 2)
-           [################################] 2/2. Finished in 76ms
+           [################################] 2/2. Finished in 81ms
     [info] Killed mutants (2/2):
-    main.c:5:16: warning: Killed: Replaced + with - [cxx_add_to_sub]
-          return a + b;
-                   ^
-    main.c:9:16: warning: Killed: Replaced * with / [cxx_mul_to_div]
-          return a * b;
-                   ^
+    /tmp/sc-kGN35Gr1f/main.c:5:12: warning: Killed: Replaced + with - [cxx_add_to_sub]
+      return a + b;
+               ^
+    /tmp/sc-kGN35Gr1f/main.c:9:12: warning: Killed: Replaced * with / [cxx_mul_to_div]
+      return a * b;
+               ^
     [info] All mutations have been killed
     [info] Mutation score: 100%
-    [info] Total execution time: 535ms
+    [info] Total execution time: 509ms
 
-Note, `test.mutated` appears twice in the arguments list: the first appearance
-is required for `mull-runner` to extract the mutants generated at the first step.
-The second appearance is passed to the test program.
+Note, `test.exe` appears twice in the arguments list: the first appearance
+is required for `mull-runner` to extract the mutants generated at the second step.
+The second appearance is passed as an argument to the test program ``test.py``.
