@@ -85,7 +85,7 @@ Create a build folder and initialize build system:
     cd mull
     mkdir build.dir
     cd build.dir
-    cmake -DCMAKE_PREFIX=<cmake search paths> ..
+    cmake -DCMAKE_PREFIX_PATH=<cmake search paths> ..
     make mull-runner-12
     make mull-tests
 
@@ -100,4 +100,4 @@ ABI. Depending on your OS/setup you may need to tweak the ``_GLIBCXX_USE_CXX11_A
 
 .. code-block:: bash
 
-    cmake -DCMAKE_PREFIX=<cmake search paths> -DCMAKE_CXX_FLAGS=-D_GLIBCXX_USE_CXX11_ABI=0 ..
+    cmake -DCMAKE_PREFIX_PATH=<cmake search paths> -DCMAKE_CXX_FLAGS=-D_GLIBCXX_USE_CXX11_ABI=0 ..
