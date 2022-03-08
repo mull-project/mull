@@ -29,7 +29,6 @@ set(mull_unittests_sources
 
   JunkDetection/CXXJunkDetectorTests.cpp
 
-  SQLiteReporterTest.cpp
   MutationTestingElementsReporterTest.cpp
 
   TestModuleFactory.cpp

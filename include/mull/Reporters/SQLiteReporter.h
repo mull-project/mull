@@ -14,7 +14,7 @@ class SQLiteReporter : public Reporter {
 public:
   explicit SQLiteReporter(Diagnostics &diagnostics, const std::string &reportDir = "",
                           const std::string &reportName = "",
-                          const std::unordered_map<std::string, std::string> &mullInformation={});
+                          std::unordered_map<std::string, std::string> mullInformation = {});
 
   void reportResults(const Result &result) override;
 
