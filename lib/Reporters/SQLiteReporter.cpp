@@ -3,10 +3,7 @@
 #include "mull/Bitcode.h"
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/ExecutionResult.h"
-#include "mull/Mutant.h"
-#include "mull/Mutators/Mutator.h"
 #include "mull/Result.h"
-#include "mull/SourceLocation.h"
 
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/Function.h>
@@ -18,6 +15,7 @@
 #include <sstream>
 #include <string>
 #include <unistd.h>
+#include <utility>
 
 using namespace mull;
 using namespace llvm;
@@ -46,17 +44,17 @@ static std::string getReportName(const std::string &name) {
 
 static std::string getReportDir(const std::string &reportDir) {
   if (reportDir.empty()) {
-    return std::string(".");
+    return ".";
   }
   return reportDir;
 }
 
 SQLiteReporter::SQLiteReporter(Diagnostics &diagnostics, const std::string &reportDir,
                                const std::string &reportName,
-                               const std::unordered_map<std::string, std::string> &mullInformation)
+                               std::unordered_map<std::string, std::string> mullInformation)
     : diagnostics(diagnostics),
       databasePath(getReportDir(reportDir) + "/" + getReportName(reportName)),
-      mullInformation(mullInformation) {
+      mullInformation(std::move(mullInformation)) {
   llvm::sys::fs::create_directories(reportDir, true);
 }
 
@@ -84,61 +82,32 @@ void mull::SQLiteReporter::reportResults(const Result &result) {
     sqlite3_reset(insertInformationStmt);
   }
 
-  const char *insertExecutionResultQuery =
-      "INSERT INTO execution_result VALUES (?1, ?2, ?3, ?4, ?5)";
-  sqlite3_stmt *insertExecutionResultStmt;
-  sqlite3_prepare(database, insertExecutionResultQuery, -1, &insertExecutionResultStmt, nullptr);
+  const char *query = "INSERT INTO mutant VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10)";
+  sqlite3_stmt *stmt;
+  sqlite3_prepare(database, query, -1, &stmt, nullptr);
 
   for (auto &mutationResult : result.getMutationResults()) {
-    const std::string &mutantId = mutationResult->getMutant()->getIdentifier();
+    auto mutant = mutationResult->getMutant();
+    auto &location = mutant->getSourceLocation();
 
-    ExecutionResult mutationExecutionResult = mutationResult->getExecutionResult();
-
-    int executionResultIndex = 1;
-    sqlite3_bind_text(
-        insertExecutionResultStmt, executionResultIndex++, mutantId.c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_int(
-        insertExecutionResultStmt, executionResultIndex++, mutationExecutionResult.status);
-    sqlite3_bind_int64(
-        insertExecutionResultStmt, executionResultIndex++, mutationExecutionResult.runningTime);
-    sqlite3_bind_text(insertExecutionResultStmt,
-                      executionResultIndex++,
-                      mutationExecutionResult.stdoutOutput.c_str(),
-                      -1,
-                      SQLITE_TRANSIENT);
-    sqlite3_bind_text(insertExecutionResultStmt,
-                      executionResultIndex++,
-                      mutationExecutionResult.stderrOutput.c_str(),
-                      -1,
-                      SQLITE_TRANSIENT);
-
-    sqlite3_step(insertExecutionResultStmt);
-    sqlite3_clear_bindings(insertExecutionResultStmt);
-    sqlite3_reset(insertExecutionResultStmt);
-  }
-
-  const char *insertMutantQuery = "INSERT INTO mutant VALUES (?1, ?2, ?3, ?4, ?5, ?6)";
-  sqlite3_stmt *insertMutantStmt;
-  sqlite3_prepare(database, insertMutantQuery, -1, &insertMutantStmt, nullptr);
-
-  for (auto &mutant : result.getMutants()) {
-    SourceLocation location = mutant->getSourceLocation();
+    ExecutionResult execution = mutationResult->getExecutionResult();
 
     int index = 1;
-    sqlite3_bind_text(
-        insertMutantStmt, index++, mutant->getMutatorIdentifier().c_str(), -1, SQLITE_TRANSIENT);
 
-    sqlite3_bind_text(insertMutantStmt, index++, location.filePath.c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_text(insertMutantStmt, index++, location.directory.c_str(), -1, SQLITE_TRANSIENT);
-    sqlite3_bind_int(insertMutantStmt, index++, location.line);
-    sqlite3_bind_int(insertMutantStmt, index++, location.column);
+    sqlite3_bind_text(stmt, index++, mutant->getIdentifier().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, index++, mutant->getMutatorIdentifier().c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, index++, location.filePath.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, index++, location.directory.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_int(stmt, index++, location.line);
+    sqlite3_bind_int(stmt, index++, location.column);
+    sqlite3_bind_int(stmt, index++, execution.status);
+    sqlite3_bind_int64(stmt, index++, execution.runningTime);
+    sqlite3_bind_text(stmt, index++, execution.stdoutOutput.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, index++, execution.stderrOutput.c_str(), -1, SQLITE_TRANSIENT);
 
-    sqlite3_bind_text(
-        insertMutantStmt, index++, mutant->getIdentifier().c_str(), -1, SQLITE_TRANSIENT);
-
-    sqlite3_step(insertMutantStmt);
-    sqlite3_clear_bindings(insertMutantStmt);
-    sqlite3_reset(insertMutantStmt);
+    sqlite3_step(stmt);
+    sqlite3_clear_bindings(stmt);
+    sqlite3_reset(stmt);
   }
 
   sqlite_exec(diagnostics, database, "END TRANSACTION");
@@ -149,21 +118,17 @@ void mull::SQLiteReporter::reportResults(const Result &result) {
 }
 
 static const char *CreateTables = R"CreateTables(
-CREATE TABLE execution_result (
-  mutation_point_id TEXT,
-  status INT,
-  duration INT,
-  stdout TEXT,
-  stderr TEXT
-);
-
 CREATE TABLE mutant (
+  mutant_id TEXT,
   mutator TEXT,
   filename TEXT,
   directory TEXT,
   line_number INT,
   column_number INT,
-  unique_id TEXT
+  status INT,
+  duration INT,
+  stdout TEXT,
+  stderr TEXT
 );
 
 CREATE TABLE information (
