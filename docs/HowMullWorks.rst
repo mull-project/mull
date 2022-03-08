@@ -1,9 +1,6 @@
 How Mull works
 ==============
 
-.. note::
-   This document is slightly dated and needs to include the new `Mull IR Frontend <https://github.com/mull-project/mull/pull/938>`_.
-
 This page contains a short summary of the design and features of Mull. Also
 the advantages of Mull are highlighted as well as some known issues.
 
@@ -46,23 +43,23 @@ Mutations search
 The default search algorithm simply finds all mutations that can be found on the
 level of LLVM bitcode.
 
-The **"black search" algorithm** called Junk Detection uses source code information
+The **"IR search" algorithm** called Junk Detection uses source code information
 provided by Clang AST to filter out invalid mutations from a set of all possible
-mutations that are found in LLVM bitcode by the default search algorithm.
+mutations that are found in LLVM IR by the default search algorithm.
 
-The **"white search" algorithm** starts with collecting source code information
+The **"AST search" algorithm** starts with collecting source code information
 via Clang AST and then feeds this information to the default search algorithm
 which allows finding valid mutations and filtering out invalid mutations
 at the same time.
 
-The black and white search algorithms are very similar in the reasoning that
-they do. The only difference is that the white search filters out invalid
-mutations just in time as they are found in LLVM bitcode, while the black search
+The IR and AST search algorithms are very similar in the reasoning that
+they do. The only difference is that the AST search filters out invalid
+mutations just in time as they are found in LLVM bitcode, while the IR search
 does this after the fact on the raw set of mutations that consists of both valid
 and invalid mutations.
 
-The black search algorithm appeared earlier and is expected to be more
-stable. The white search algorithm is currently in development.
+The IR search algorithm appeared earlier and is expected to be more
+stable. The AST search algorithm is currently in development.
 
 Supported mutation operators
 ----------------------------
@@ -86,9 +83,8 @@ Platform support
 ----------------
 
 Mull has a great support of macOS and various Linux systems across all modern
-versions of LLVM from 3.9.0 to 9.0.0.
-
-Mull supports FreeBSD with minor known issues.
+versions of LLVM from 9.0 to 13.0. All the new versions of LLVM are supported as
+soon as they released.
 
 Mull is reported to work on Windows Subsystem for Linux, but no official support
 yet.
@@ -171,4 +167,3 @@ Additional information about Mull
 - `Mutation testing for Swift with Mull: how it could work. Looking for contributors <https://stanislaw.github.io/2018/09/03/mull-and-swift-how-it-almost-works.html>`_
 
 - `Mull meets Rust (LLVM Social Berlin #6, 23.02.2017) <https://www.youtube.com/watch?v=VasSufnFswc&feature=youtu.be>`_
-
