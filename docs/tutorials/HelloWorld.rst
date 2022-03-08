@@ -2,17 +2,10 @@ Hello World Example
 ===================
 
 .. note::
-   Since the version 0.15.0, ``mull-cxx`` tool `is deprecated <https://github.com/mull-project/mull/issues/945>`_
-   in favour of a compiler plugin: `Mull IR Frontend <https://github.com/mull-project/mull/pull/938>`_.
-
-   If you are looking for ``mull-cxx`` tutorial, refer to `this page instead <https://mull.readthedocs.io/en/0.14.0/tutorials/HelloWorld.html>`_.
-
-.. note::
    We would love to hear from you! ❤️
 
    Please, `report any issues <https://github.com/mull-project/mull/issues>`_ on GitHub, or
    bring your questions to the `#mull channel <https://discord.gg/Hphp7dW>`_ on Discord.
-
 
 The goal of this tutorial is to demonstrate how to run Mull on minimal C
 programs. After reading it you should have a basic understanding of what
