@@ -1,6 +1,6 @@
 #include "mull/Mutators/NegateConditionMutator.h"
-#include "mull/FunctionUnderTest.h"
-#include "mull/MutationPoint.h"
+#include "mull/Mutation/FunctionUnderTest.h"
+#include "mull/Mutation/MutationPoint.h"
 #include <cassert>
 #include <irm/irm.h>
 

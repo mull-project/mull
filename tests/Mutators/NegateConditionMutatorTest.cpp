@@ -1,9 +1,9 @@
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "FixturePaths.h"
 #include "TestModuleFactory.h"
-#include "mull/FunctionUnderTest.h"
-#include "mull/MutationPoint.h"
-#include "mull/Program/Program.h"
+#include "mull/Mutation/FunctionUnderTest.h"
+#include "mull/Mutation/MutationPoint.h"
+#include "mull/Mutation/Program.h"
 
 #include <cassert>
 #include <llvm/IR/Function.h>

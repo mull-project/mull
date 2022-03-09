@@ -2,7 +2,7 @@
 
 #include <utility>
 
-#include "mull/Bitcode.h"
+#include "mull/Mutation/Bitcode.h"
 
 using namespace mull;
 using namespace mull_test;

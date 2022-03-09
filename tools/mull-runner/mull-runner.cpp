@@ -3,15 +3,15 @@
 #include "MutantExtractor.h"
 #include "mull-runner-cli.h"
 #include "mull/Config/Configuration.h"
+#include "mull/Core/Result.h"
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Filters/CoverageFilter.h"
 #include "mull/Filters/Filters.h"
-#include "mull/Metrics/MetricsMeasure.h"
-#include "mull/MutantRunner.h"
+#include "mull/Misc/MetricsMeasure.h"
+#include "mull/Misc/Version.h"
 #include "mull/Parallelization/TaskExecutor.h"
-#include "mull/Result.h"
-#include "mull/Runner.h"
-#include "mull/Version.h"
+#include "mull/Runner/MutantRunner.h"
+#include "mull/Runner/Runner.h"
 
 #include <llvm/Support/FileSystem.h>
 

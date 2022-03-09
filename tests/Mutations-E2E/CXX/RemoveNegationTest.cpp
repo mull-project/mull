@@ -1,7 +1,7 @@
 #include "FixturePaths.h"
 
-#include "mull/Bitcode.h"
-#include "mull/MutationPoint.h"
+#include "mull/Mutation/Bitcode.h"
+#include "mull/Mutation/MutationPoint.h"
 #include "mull/Mutators/CXX/RemoveNegation.h"
 
 #include "Helpers/MutationTestBed.h"

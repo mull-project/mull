@@ -1,7 +1,7 @@
 #include "mull/JunkDetection/CXX/CompilationDatabase.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Diagnostics/Diagnostics.h"
-#include "mull/Runner.h"
+#include "mull/Runner/Runner.h"
 #include <clang/Tooling/CompilationDatabase.h>
 #include <clang/Tooling/JSONCompilationDatabase.h>
 #include <llvm/ADT/SmallString.h>

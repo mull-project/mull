@@ -1,10 +1,10 @@
 #include "mull/Filters/GitDiffFilter.h"
 
 #include "mull/Config/Configuration.h"
+#include "mull/Core/Mutant.h"
+#include "mull/Core/SourceLocation.h"
 #include "mull/Diagnostics/Diagnostics.h"
-#include "mull/Mutant.h"
-#include "mull/Runner.h"
-#include "mull/SourceLocation.h"
+#include "mull/Runner/Runner.h"
 
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/Function.h>

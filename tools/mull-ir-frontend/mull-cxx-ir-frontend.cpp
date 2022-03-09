@@ -2,7 +2,7 @@
 #include <llvm/Passes/PassBuilder.h>
 #include <llvm/Passes/PassPlugin.h>
 #include <llvm/Support/raw_ostream.h>
-#include <mull/Driver.h>
+#include <mull/IRFrontend/Driver.h>
 
 namespace {
 

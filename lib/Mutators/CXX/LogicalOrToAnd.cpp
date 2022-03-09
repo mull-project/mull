@@ -1,8 +1,8 @@
 #include "mull/Mutators/CXX/LogicalOrToAnd.h"
 
-#include "mull/FunctionUnderTest.h"
-#include "mull/MutationPoint.h"
-#include "mull/SourceLocation.h"
+#include "mull/Core/SourceLocation.h"
+#include "mull/Mutation/FunctionUnderTest.h"
+#include "mull/Mutation/MutationPoint.h"
 
 #include <iterator>
 #include <llvm/IR/Constants.h>

@@ -1,5 +1,5 @@
 #include "mull/Mutators/CXX/RelationalMutators.h"
-#include "mull/MutationPoint.h"
+#include "mull/Mutation/MutationPoint.h"
 #include <irm/irm.h>
 #include <llvm/IR/InstIterator.h>
 

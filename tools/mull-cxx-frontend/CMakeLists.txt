@@ -13,17 +13,7 @@ add_library(mull-cxx-frontend-${LLVM_VERSION_MAJOR}
   ${CMAKE_SOURCE_DIR}/lib/AST/MullClangCompatibility.cpp
 )
 
-target_link_libraries(mull-cxx-frontend-${LLVM_VERSION_MAJOR} PRIVATE ${MULL_CXX_LLVM_LIBRARIES} mull-configuration Diagnostics)
-
-set_target_properties(mull-cxx-frontend-${LLVM_VERSION_MAJOR} PROPERTIES
-  COMPILE_FLAGS ${MULL_CXX_FLAGS}
-)
-target_include_directories(mull-cxx-frontend-${LLVM_VERSION_MAJOR} PRIVATE
-  ${MULL_INCLUDE_DIRS}
-  )
-target_include_directories(mull-cxx-frontend-${LLVM_VERSION_MAJOR} SYSTEM PRIVATE
-  ${THIRD_PARTY_INCLUDE_DIRS}
-)
+target_link_libraries(mull-cxx-frontend-${LLVM_VERSION_MAJOR} PRIVATE ${MULL_CXX_LLVM_LIBRARIES} mull-configuration mull-diagnostics)
 
 #INSTALL(TARGETS mull-cxx-frontend
 #  RUNTIME DESTINATION lib

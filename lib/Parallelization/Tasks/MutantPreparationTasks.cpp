@@ -1,6 +1,6 @@
 #include "mull/Parallelization/Tasks/MutantPreparationTasks.h"
 #include "mull/Config/Configuration.h"
-#include "mull/MutationPoint.h"
+#include "mull/Mutation/MutationPoint.h"
 #include "mull/Parallelization/Progress.h"
 #include <llvm/IR/Constant.h>
 #include <llvm/IR/Constants.h>

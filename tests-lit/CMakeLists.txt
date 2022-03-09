@@ -41,3 +41,8 @@ add_custom_target(tests-lit
   COMMAND ${LIT_COMMAND}
   DEPENDS mull-runner-${LLVM_VERSION_MAJOR}
 )
+
+add_custom_target(check-compile
+  COMMAND echo "compiles"
+  DEPENDS mull-runner-${LLVM_VERSION_MAJOR} mull-cxx-frontend-${LLVM_VERSION_MAJOR} mull-cxx-ir-frontend-${LLVM_VERSION_MAJOR} mull-tests
+)

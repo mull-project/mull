@@ -1,5 +1,5 @@
 #include "mull/Parallelization/Tasks/InstructionSelectionTask.h"
-#include "mull/FunctionUnderTest.h"
+#include "mull/Mutation/FunctionUnderTest.h"
 #include "mull/Parallelization/Progress.h"
 #include <cassert>
 

@@ -1,7 +1,7 @@
 #include "mull/Filters/FilePathFilter.h"
-#include "mull/Mutant.h"
-#include "mull/MutationPoint.h"
-#include "mull/SourceLocation.h"
+#include "mull/Core/Mutant.h"
+#include "mull/Core/SourceLocation.h"
+#include "mull/Mutation/MutationPoint.h"
 
 #include <cassert>
 #include <llvm/Support/raw_ostream.h>

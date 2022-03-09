@@ -1,14 +1,14 @@
 #include "mull/Reporters/GithubAnnotationsReporter.h"
 
-#include "mull/Bitcode.h"
+#include "mull/Core/ExecutionResult.h"
+#include "mull/Core/Mutant.h"
+#include "mull/Core/Result.h"
+#include "mull/Core/SourceLocation.h"
 #include "mull/Diagnostics/Diagnostics.h"
-#include "mull/ExecutionResult.h"
-#include "mull/Mutant.h"
+#include "mull/Mutation/Bitcode.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Mutators/MutatorsFactory.h"
-#include "mull/Result.h"
-#include "mull/SourceLocation.h"
-#include "mull/Reporters/SourceCodeReader.h"
+#include "mull/SourceManager/SourceCodeReader.h"
 
 #include <sstream>
 #include <string>

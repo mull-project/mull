@@ -1,7 +1,7 @@
 #pragma once
 
 #include "mull/Reporters/Reporter.h"
-#include "mull/Reporters/SourceCodeReader.h"
+#include "mull/SourceManager/SourceCodeReader.h"
 
 namespace mull {
 

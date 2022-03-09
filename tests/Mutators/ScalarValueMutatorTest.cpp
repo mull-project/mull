@@ -1,9 +1,9 @@
 #include "mull/Mutators/ScalarValueMutator.h"
+#include "BitcodeLoader.h"
 #include "FixturePaths.h"
 #include "TestModuleFactory.h"
-#include "BitcodeLoader.h"
-#include "mull/FunctionUnderTest.h"
-#include "mull/MutationPoint.h"
+#include "mull/Mutation/FunctionUnderTest.h"
+#include "mull/Mutation/MutationPoint.h"
 
 #include <gtest/gtest.h>
 #include <irm/irm.h>

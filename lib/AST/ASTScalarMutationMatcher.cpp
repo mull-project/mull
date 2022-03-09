@@ -1,7 +1,7 @@
 #include "mull/AST/ASTScalarMutationMatcher.h"
 
 #include "mull/AST/MullClangCompatibility.h"
-#include "mull/Program/Program.h"
+#include "mull/Mutation/Program.h"
 
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/Basic/SourceLocation.h>

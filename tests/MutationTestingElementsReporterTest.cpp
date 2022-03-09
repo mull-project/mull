@@ -3,15 +3,15 @@
 #include "FixturePaths.h"
 #include "TestModuleFactory.h"
 
-#include "mull/Bitcode.h"
 #include "BitcodeLoader.h"
 #include "mull/Config/Configuration.h"
-#include "mull/FunctionUnderTest.h"
+#include "mull/Core/Result.h"
 #include "mull/JunkDetection/CXX/ASTStorage.h"
-#include "mull/Metrics/MetricsMeasure.h"
-#include "mull/MutationsFinder.h"
-#include "mull/Program/Program.h"
-#include "mull/Result.h"
+#include "mull/Misc/MetricsMeasure.h"
+#include "mull/Mutation/Bitcode.h"
+#include "mull/Mutation/FunctionUnderTest.h"
+#include "mull/Mutation/MutationsFinder.h"
+#include "mull/Mutation/Program.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 
 #include <fstream>

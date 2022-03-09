@@ -1,9 +1,9 @@
 #include "mull/Reporters/SQLiteReporter.h"
 
-#include "mull/Bitcode.h"
+#include "mull/Core/ExecutionResult.h"
+#include "mull/Core/Result.h"
 #include "mull/Diagnostics/Diagnostics.h"
-#include "mull/ExecutionResult.h"
-#include "mull/Result.h"
+#include "mull/Mutation/Bitcode.h"
 
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/Function.h>

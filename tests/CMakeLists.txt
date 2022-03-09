@@ -46,24 +46,33 @@ get_filename_component(factory_include_dir ${FACTORY_HEADER} DIRECTORY)
 add_executable(mull-tests EXCLUDE_FROM_ALL ${mull_unittests_sources})
 gtest_discover_tests(mull-tests)
 target_link_libraries(mull-tests
-  mull
+  mull-core
+  mull-configuration
+  mull-diagnostics
+  mull-filters
+  mull-junk-detection
+  mull-cxx-mutators
+  mull-reporters
+  mull-mutation
+  mull-source-manager
+  mull-ast
+  mull-parallelization
+  mull-runner
+  mull-ir-frontend
+  mull-misc
   google-test
   json11
   clangCodeGen
+  clangTooling
 )
 
 target_include_directories(mull-tests PUBLIC
   ${CMAKE_CURRENT_SOURCE_DIR}
-  ${MULL_INCLUDE_DIRS}
   Helpers
   ${factory_include_dir}
   )
 target_include_directories(mull-tests SYSTEM PRIVATE
   ${MULL_SOURCE_DIR}/vendor/googletest/include
-  ${THIRD_PARTY_INCLUDE_DIRS}
 )
-set_target_properties(mull-tests PROPERTIES
-  COMPILE_FLAGS ${MULL_CXX_FLAGS}
-  )
 get_property(dependencies GLOBAL PROPERTY TEST_FIXTURES_DEPENDENCIES)
 add_dependencies(mull-tests ${dependencies})

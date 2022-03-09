@@ -1,7 +1,7 @@
 #include "mull/JunkDetection/CXX/ASTStorage.h"
 
 #include "mull/Diagnostics/Diagnostics.h"
-#include "mull/MutationPoint.h"
+#include "mull/Mutation/MutationPoint.h"
 
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/Basic/FileManager.h>

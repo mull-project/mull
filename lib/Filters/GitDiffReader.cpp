@@ -1,8 +1,8 @@
 #include "mull/Filters/GitDiffReader.h"
 
 #include "mull/Diagnostics/Diagnostics.h"
-#include "mull/Runner.h"
-#include <mull/Path.h>
+#include "mull/Runner/Runner.h"
+#include <mull/Misc/Path.h>
 
 #include <iostream>
 #include <regex>

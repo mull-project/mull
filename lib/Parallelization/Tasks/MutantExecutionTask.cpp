@@ -1,11 +1,11 @@
 #include "mull/Parallelization/Tasks/MutantExecutionTask.h"
 
 #include "mull/Config/Configuration.h"
+#include "mull/Core/ExecutionResult.h"
+#include "mull/Core/SourceLocation.h"
 #include "mull/Diagnostics/Diagnostics.h"
-#include "mull/ExecutionResult.h"
 #include "mull/Parallelization/Progress.h"
-#include "mull/Runner.h"
-#include "mull/SourceLocation.h"
+#include "mull/Runner/Runner.h"
 
 #include <sstream>
 

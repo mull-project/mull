@@ -1,6 +1,6 @@
 #include "Reporter.h"
 
-#include "mull/Reporters/SourceCodeReader.h"
+#include "mull/SourceManager/SourceCodeReader.h"
 #include <memory>
 #include <regex>
 #include <string>

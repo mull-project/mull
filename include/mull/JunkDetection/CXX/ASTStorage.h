@@ -1,7 +1,7 @@
 #pragma once
 
+#include "mull/Core/SourceLocation.h"
 #include "mull/JunkDetection/CXX/CompilationDatabase.h"
-#include "mull/SourceLocation.h"
 
 #include <clang/Frontend/ASTUnit.h>
 

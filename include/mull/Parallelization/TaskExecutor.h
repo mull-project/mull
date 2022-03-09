@@ -8,7 +8,7 @@
 #include <vector>
 
 #include "Progress.h"
-#include "mull/Metrics/MetricsMeasure.h"
+#include "mull/Misc/MetricsMeasure.h"
 
 namespace mull {
 

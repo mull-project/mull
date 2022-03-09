@@ -1,7 +1,7 @@
 #pragma once
 
-#include "mull/Mutant.h"
-#include "mull/MutationResult.h"
+#include "mull/Core/Mutant.h"
+#include "mull/Core/MutationResult.h"
 
 namespace mull {
 

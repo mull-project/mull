@@ -1,5 +1,5 @@
 #include "mull/Mutators/CXX/ArithmeticMutators.h"
-#include "mull/MutationPoint.h"
+#include "mull/Mutation/MutationPoint.h"
 
 using namespace mull;
 using namespace mull::cxx;

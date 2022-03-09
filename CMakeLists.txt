@@ -31,7 +31,6 @@ set (PROJECT_DOCS_URL "https://mull.readthedocs.io")
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/properties.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/fixtures.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/cmake/functions.cmake)
 
 set (CMAKE_POSITION_INDEPENDENT_CODE ON)
 
@@ -42,7 +41,7 @@ message("Using Clang_CONFIG: ${Clang_CONFIG}")
 
 set (clang_binary_dir ${CLANG_INSTALL_PREFIX})
 if (NOT clang_binary_dir)
-  # Building against built tree?
+  # Building against build tree?
   set (clang_binary_dir ${LLVM_BINARY_DIR})
 endif()
 
@@ -59,22 +58,18 @@ set (MULL_CXX_FLAGS "-fPIC -fvisibility-inlines-hidden -fno-exceptions -Wunused 
 if (NOT LLVM_ENABLE_RTTI)
   set(MULL_CXX_FLAGS "${MULL_CXX_FLAGS} -fno-rtti")
 endif()
-
+set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${MULL_CXX_FLAGS}")
 add_subdirectory(vendor)
 
-set (MULL_DEFINITIONS ${LLVM_DEFINITIONS})
-set (THIRD_PARTY_INCLUDE_DIRS
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/include)
+include_directories(SYSTEM
   ${LLVM_INCLUDE_DIRS}
   ${CLANG_INCLUDE_DIRS}
   ${CMAKE_CURRENT_LIST_DIR}/vendor/libirm/include
-  ${CMAKE_SOURCE_DIR}/vendor
-)
-set (MULL_INCLUDE_DIRS
-  ${MULL_SOURCE_DIR}/include
+  ${CMAKE_CURRENT_LIST_DIR}/vendor
 )
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/cpack.cmake)
-include(${CMAKE_CURRENT_LIST_DIR}/cmake/version.cmake)
 
 # Needed by FreeBSD
 link_directories(/usr/local/lib)
@@ -93,6 +88,7 @@ if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
   add_subdirectory(vendor/googletest EXCLUDE_FROM_ALL)
 endif()
 add_subdirectory(vendor/libirm EXCLUDE_FROM_ALL)
+set (SPDLOG_NO_EXCEPTIONS ON)
 add_subdirectory(vendor/spdlog EXCLUDE_FROM_ALL)
 set(REPROC++ ON)
 add_subdirectory(vendor/reproc EXCLUDE_FROM_ALL)

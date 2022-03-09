@@ -1,8 +1,8 @@
 #pragma once
 
 #include <memory>
+#include <mull/Core/Mutant.h>
 #include <mull/Diagnostics/Diagnostics.h>
-#include <mull/Mutant.h>
 #include <vector>
 
 namespace mull {

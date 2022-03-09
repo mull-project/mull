@@ -1,7 +1,7 @@
 #pragma once
 
-#include "mull/FunctionUnderTest.h"
-#include "mull/MutationPoint.h"
+#include "mull/Mutation/FunctionUnderTest.h"
+#include "mull/Mutation/MutationPoint.h"
 #include "mull/Mutators/Mutator.h"
 
 namespace mull {

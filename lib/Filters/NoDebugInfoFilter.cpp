@@ -1,6 +1,6 @@
 #include "mull/Filters/NoDebugInfoFilter.h"
 
-#include "mull/MutationPoint.h"
+#include "mull/Mutation/MutationPoint.h"
 
 using namespace mull;
 

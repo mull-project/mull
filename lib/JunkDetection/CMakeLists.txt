@@ -1,0 +1,12 @@
+add_library(mull-junk-detection
+  CXX/Visitors/InstructionRangeVisitor.cpp
+  CXX/Visitors/NegateConditionVisitor.cpp
+  CXX/Visitors/RemoveVoidFunctionVisitor.cpp
+  CXX/Visitors/ReplaceCallVisitor.cpp
+  CXX/Visitors/BinaryVisitor.cpp
+  CXX/Visitors/UnaryVisitor.cpp
+  CXX/Visitors/ScalarValueVisitor.cpp
+  CXX/ASTStorage.cpp
+  CXX/CompilationDatabase.cpp
+  CXX/CXXJunkDetector.cpp
+)

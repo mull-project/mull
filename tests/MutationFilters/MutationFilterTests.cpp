@@ -1,10 +1,10 @@
-#include "FixturePaths.h"
 #include "BitcodeLoader.h"
+#include "FixturePaths.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Filters/FilePathFilter.h"
 #include "mull/Filters/NoDebugInfoFilter.h"
-#include "mull/MutationsFinder.h"
-#include "mull/Program/Program.h"
+#include "mull/Mutation/MutationsFinder.h"
+#include "mull/Mutation/Program.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 
 #include <gtest/gtest.h>

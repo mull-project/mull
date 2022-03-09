@@ -1,7 +1,7 @@
 #include "mull/Filters/CoverageFilter.h"
 #include "mull/Config/Configuration.h"
+#include "mull/Core/Mutant.h"
 #include "mull/Diagnostics/Diagnostics.h"
-#include "mull/Mutant.h"
 #include <llvm/ProfileData/Coverage/CoverageMapping.h>
 
 using namespace mull;

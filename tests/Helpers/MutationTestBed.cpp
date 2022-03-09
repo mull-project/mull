@@ -1,10 +1,10 @@
 #include "MutationTestBed.h"
 
-#include "mull/Bitcode.h"
 #include "mull/Diagnostics/Diagnostics.h"
-#include "mull/FunctionUnderTest.h"
 #include "mull/JunkDetection/CXX/ASTStorage.h"
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
+#include "mull/Mutation/Bitcode.h"
+#include "mull/Mutation/FunctionUnderTest.h"
 #include "mull/Mutators/Mutator.h"
 
 using namespace mull;

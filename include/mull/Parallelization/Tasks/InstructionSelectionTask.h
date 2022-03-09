@@ -1,6 +1,6 @@
 #pragma once
 
-#include "mull/FunctionUnderTest.h"
+#include "mull/Mutation/FunctionUnderTest.h"
 #include <vector>
 
 namespace mull {

@@ -1,10 +1,6 @@
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
 
 #include "mull/Diagnostics/Diagnostics.h"
-#include "mull/Mutators/CXX/RemoveNegation.h"
-#include "mull/Mutators/CXX/RemoveNegation.h"
-#include "mull/MutationPoint.h"
-#include "mull/Mutators/Mutator.h"
 #include "mull/JunkDetection/CXX/Visitors/BinaryVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/NegateConditionVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/RemoveVoidFunctionVisitor.h"
@@ -12,6 +8,9 @@
 #include "mull/JunkDetection/CXX/Visitors/ScalarValueVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/UnaryVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/VarDeclVisitor.h"
+#include "mull/Mutation/MutationPoint.h"
+#include "mull/Mutators/CXX/RemoveNegation.h"
+#include "mull/Mutators/Mutator.h"
 
 using namespace mull;
 

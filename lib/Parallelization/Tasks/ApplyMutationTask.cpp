@@ -1,6 +1,6 @@
 #include "mull/Parallelization/Tasks/ApplyMutationTask.h"
 
-#include "mull/MutationPoint.h"
+#include "mull/Mutation/MutationPoint.h"
 #include "mull/Parallelization/Progress.h"
 
 using namespace mull;
