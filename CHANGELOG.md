@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.17.0] - 09 Mar 2022
+
+🚨 With this release, the `mull-cxx` tool is [removed](https://github.com/mull-project/mull/pull/984).
+
+- Fixed 'inconsistency in registered CommandLine options' when building against certain configs of LLVM [#983](https://github.com/mull-project/mull/pull/983)
+- Removed `mull-cxx` [#984](https://github.com/mull-project/mull/pull/984)
+- Simplified database schema for SQLite reporter [#987](https://github.com/mull-project/mull/pull/987)
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2022-02-21..2022-03-09)
+
 ## [0.16.0] - 21 Feb 2022
 
 - Added a workaround to not miscompile functions that use variadic arguments [#977](https://github.com/mull-project/mull/pull/977) [#978](https://github.com/mull-project/mull/issues/978)
