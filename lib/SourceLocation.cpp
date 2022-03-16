@@ -1,14 +1,12 @@
 #include "mull/SourceLocation.h"
 
 #include "mull/Path.h"
-
-#include <string>
-#include <utility>
-
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/DebugLoc.h>
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Instruction.h>
+#include <unistd.h>
+#include <utility>
 
 namespace mull {
 
@@ -21,7 +19,8 @@ static llvm::DICompileUnit *getUnit(const llvm::DebugLoc &debugLocation) {
 }
 
 SourceLocation::SourceLocation(std::string unitDirectory, std::string unitFilePath,
-                               std::string directory, std::string filePath, size_t line, size_t column)
+                               std::string directory, std::string filePath, size_t line,
+                               size_t column)
     : unitDirectory(std::move(unitDirectory)), unitFilePath(std::move(unitFilePath)),
       directory(std::move(directory)), filePath(std::move(filePath)), line(line), column(column) {}
 
@@ -87,6 +86,13 @@ bool SourceLocation::isNull() const {
          // https://github.com/mull-project/mull/issues/519
          // https://github.com/mull-project/mull/issues/520
          (line == 0 && column == 0);
+}
+
+bool SourceLocation::canRead() const {
+  if (access(filePath.c_str(), R_OK) != 0) {
+    return false;
+  }
+  return true;
 }
 
 } // namespace mull
