@@ -52,7 +52,6 @@ LineOffset &SourceManager::getLineOffset(const SourceLocation &location) {
   offsets.push_back(offset);
 
   LineOffset lineOffset(file, offsets);
-  auto inserted =
-      lineOffsets.insert(std::make_pair(location.filePath, lineOffset));
+  auto inserted = lineOffsets.insert(std::make_pair(location.filePath, lineOffset));
   return inserted.first->second;
 }

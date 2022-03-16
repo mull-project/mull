@@ -15,6 +15,7 @@
 #include <utility>
 
 using namespace mull;
+using namespace std::string_literals;
 
 static bool mutantSurvived(const ExecutionStatus &status) {
   return status == ExecutionStatus::Passed;
@@ -28,7 +29,11 @@ static void printMutant(Diagnostics &diagnostics, MutatorsFactory &factory,
                         SourceCodeReader &sourceCodeReader, const Mutant &mutant,
                         const std::string &status) {
   auto &sourceLocation = mutant.getSourceLocation();
-  assert(!sourceLocation.isNull() && "Debug information is missing?");
+  if (sourceLocation.isNull() || !sourceLocation.canRead()) {
+    diagnostics.warning("IDEReporter: Cannot report '"s + mutant.getIdentifier() +
+                        "': cannot read "s + sourceLocation.filePath);
+    return;
+  }
 
   auto mutator = factory.getMutator(mutant.getMutatorIdentifier());
   std::stringstream stringstream;

@@ -92,9 +92,10 @@ std::string SourceCodeReader::getSourceLineWithCaret(const SourceLocation &sourc
   return ss.str();
 }
 
-std::vector<std::string> SourceCodeReader::getSourceLines(const SourceLocation &sourceLocation, const SourceLocation &sourceEndLocation) {
+std::vector<std::string> SourceCodeReader::getSourceLines(const SourceLocation &sourceLocation,
+                                                          const SourceLocation &sourceEndLocation) {
   std::vector<std::string> lines;
-  for (SourceLocation temp{sourceLocation}; temp.line <= sourceEndLocation.line; temp.line++){
+  for (SourceLocation temp{ sourceLocation }; temp.line <= sourceEndLocation.line; temp.line++) {
     lines.push_back(sourceManager.getLine(temp));
   }
   return lines;

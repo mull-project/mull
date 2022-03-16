@@ -30,6 +30,7 @@ struct SourceLocation {
   SourceLocation(std::string unitDirectory, std::string unitFilePath, std::string directory,
                  std::string filePath, size_t line, size_t column);
   bool isNull() const;
+  bool canRead() const;
 
   static SourceLocation locationFromInstruction(const llvm::Instruction *instruction);
   static SourceLocation locationFromFunction(const llvm::Function *function);

@@ -22,6 +22,7 @@
 
 using namespace mull;
 using namespace json11;
+using namespace std::string_literals;
 
 static bool mutantSurvived(const ExecutionStatus &status) {
   return status == ExecutionStatus::Passed;
@@ -40,6 +41,11 @@ static json11::Json createFiles(Diagnostics &diagnostics, const Result &result,
   std::map<std::string, std::vector<Mutant *>> mutationPointsPerFile;
   for (auto &mutant : result.getMutants()) {
     auto &sourceLocation = mutant->getSourceLocation();
+    if (sourceLocation.isNull() || !sourceLocation.canRead()) {
+      diagnostics.warning("ElementsReporter: Cannot report '"s + mutant->getIdentifier() +
+                          "': cannot read "s + sourceLocation.filePath);
+      continue;
+    }
     auto sourceCodeLine = sourceManager.getLine(sourceLocation);
     assert(sourceLocation.column < sourceCodeLine.size());
 
@@ -147,19 +153,23 @@ void MutationTestingElementsReporter::reportResults(const Result &result) {
   auto rawScore = double(killedMutants.size()) / double(result.getMutants().size());
   auto score = uint(rawScore * 100);
 
-  Json json = Json::object{
-    { "config", mullInformation },
-    { "mutationScore", (int)score },
-    { "thresholds", Json::object{ { "high", 80 }, { "low", 60 } } },
-    { "files", createFiles(diagnostics, result, killedMutants, notCoveredMutants) },
-    { "schemaVersion", "1.7" },
-    { "framework", Json::object {
-                                  { "name", "Mull" },
-                                  { "version", mullInformation["Mull Version"] + ", LLVM " + mullInformation["LLVM Version"] },
-                                  { "brandingInformation", Json::object { {"homepageUrl", mullInformation["URL"] }, }
-                                } },
-    }
-  };
+  Json json =
+      Json::object{ { "config", mullInformation },
+                    { "mutationScore", (int)score },
+                    { "thresholds", Json::object{ { "high", 80 }, { "low", 60 } } },
+                    { "files", createFiles(diagnostics, result, killedMutants, notCoveredMutants) },
+                    { "schemaVersion", "1.7" },
+                    {
+                        "framework",
+                        Json::object{ { "name", "Mull" },
+                                      { "version",
+                                        mullInformation["Mull Version"] + ", LLVM " +
+                                            mullInformation["LLVM Version"] },
+                                      { "brandingInformation",
+                                        Json::object{
+                                            { "homepageUrl", mullInformation["URL"] },
+                                        } } },
+                    } };
   std::string json_str = json.dump();
 
   diagnostics.info(std::string("Mutation Testing Elements reporter: generating report to ") +

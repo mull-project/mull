@@ -80,6 +80,11 @@ void mull::PatchesReporter::reportResults(const Result &result) {
 
     const auto mutant = *mutationResult->getMutant();
     const auto &sourceLocation = mutant.getSourceLocation();
+    if (sourceLocation.isNull() || !sourceLocation.canRead()) {
+      diagnostics.warning("PatchesReporter: Cannot report '"s + mutant.getIdentifier() +
+                          "': cannot read "s + sourceLocation.filePath);
+      return;
+    }
     const auto &sourceEndLocation = mutant.getEndLocation();
     const std::string sourceBasename =
         std::regex_replace(sourceLocation.filePath.substr(sourceLocation.directory.size() + 1),

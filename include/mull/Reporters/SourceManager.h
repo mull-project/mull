@@ -11,8 +11,7 @@ namespace mull {
 struct LineOffset {
   FILE *file;
   std::vector<uint32_t> offsets;
-  LineOffset(FILE *file, std::vector<uint32_t> offsets)
-      : file(file), offsets(std::move(offsets)) {}
+  LineOffset(FILE *file, std::vector<uint32_t> offsets) : file(file), offsets(std::move(offsets)) {}
 };
 
 class SourceManager {
