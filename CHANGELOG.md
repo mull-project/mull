@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.17.1] - 17 Mar 2022
+
+- Fixed a bug when reporters crash if a source file cannot be opened [#991](https://github.com/mull-project/mull/pull/991)
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2022-03-10..2022-03-17)
+
 ## [0.17.0] - 09 Mar 2022
 
 🚨 With this release, the `mull-cxx` tool is [removed](https://github.com/mull-project/mull/pull/984).
