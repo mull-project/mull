@@ -37,6 +37,9 @@ jobs:
       - name: For debugging
         run: |
           cat $GITHUB_EVENT_PATH
+      - name: Fix git config
+        run: |
+          git config --global --add safe.directory $PWD
       - name: Set build settings
         id: settings
         run: |
@@ -100,4 +103,3 @@ jobs:
         # This step fails sometimes (with ECONNRESET), but I'm not willing to
         # debug it as the main source of packages is Cloudsmith
         continue-on-error: true
-

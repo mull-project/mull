@@ -37,6 +37,9 @@ jobs:
           add-apt-repository ppa:git-core/ppa
           apt-get update && apt-get install -y python-pip curl git
           pip install ansible
+      - name: Fix git config
+        run: |
+          git config --global --add safe.directory $PWD
       - uses: actions/checkout@v2
         with:
           submodules: true
@@ -103,4 +106,3 @@ jobs:
         # This step fails sometimes (with ECONNRESET), but I'm not willing to
         # debug it as the main source of packages is Cloudsmith
         continue-on-error: true
-
