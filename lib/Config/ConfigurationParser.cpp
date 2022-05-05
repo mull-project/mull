@@ -34,6 +34,7 @@ template <> struct llvm::yaml::MappingTraits<DebugConfig> {
     io.mapOptional("coverage", config.coverage);
     io.mapOptional("gitDiff", config.gitDiff);
     io.mapOptional("filters", config.filters);
+    io.mapOptional("slowIRVerification", config.slowIRVerification);
   }
 };
 
@@ -94,5 +95,6 @@ Configuration Configuration::loadFromDisk(Diagnostics &diagnostics, const std::s
   llvm::yaml::Input input(bufferOrError.get()->getMemBufferRef());
   Configuration configuration;
   input >> configuration;
+  configuration.pathOnDisk = path;
   return configuration;
 }

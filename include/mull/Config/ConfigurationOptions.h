@@ -22,6 +22,7 @@ struct DebugConfig {
   bool coverage = false;
   bool gitDiff = false;
   bool filters = false;
+  bool slowIRVerification = false;
 };
 
 } // namespace mull
