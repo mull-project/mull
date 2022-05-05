@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 
 if (NOT MULL_VERSION)
-set (MULL_VERSION 0.17.1)
+set (MULL_VERSION 0.18.0)
 endif()
 
 project(Mull

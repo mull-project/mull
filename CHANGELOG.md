@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.18.0] - 05 May 2022
+
+- Fixed a phi-node miscompilation caused by `cxx_logical_and_to_or` and `cxx_logical_or_to_and` [#994](https://github.com/mull-project/mull/pull/994) [#998](https://github.com/mull-project/mull/pull/998)
+- Improved diagnostics to track and workaround miscompilations [#1000](https://github.com/mull-project/mull/pull/1000)
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2022-03-18..2022-05-05)
+
 ## [0.17.1] - 17 Mar 2022
 
 - Fixed a bug when reporters crash if a source file cannot be opened [#991](https://github.com/mull-project/mull/pull/991)
