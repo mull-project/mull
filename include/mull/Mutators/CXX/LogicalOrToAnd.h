@@ -15,6 +15,7 @@ namespace llvm {
 class BasicBlock;
 class BranchInst;
 class Instruction;
+class PHINode;
 } // namespace llvm
 
 using namespace llvm;
@@ -24,10 +25,9 @@ namespace mull {
 class Bitcode;
 class MutationPoint;
 class MutationPointAddress;
-class ReachableFunction;
 
 namespace cxx {
-
+void cleanupIncomingValues(llvm::PHINode &phi);
 class LogicalOrToAnd : public Mutator {
 
   static OR_AND_MutationType findPossibleMutation(Value &V);

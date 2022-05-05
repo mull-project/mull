@@ -5,6 +5,7 @@
 #include "mull/SourceLocation.h"
 
 #include <iterator>
+#include <llvm/IR/CFG.h>
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/InstIterator.h>
@@ -20,6 +21,24 @@ std::string LogicalAndToOr::ID() {
 }
 std::string LogicalAndToOr::description() {
   return "Replaces && with ||";
+}
+
+void mull::cxx::cleanupIncomingValues(llvm::PHINode &phi) {
+  std::unordered_set<llvm::BasicBlock *> preds;
+  for (auto pred : predecessors(phi.getParent())) {
+    preds.insert(pred);
+  }
+  std::unordered_set<llvm::BasicBlock *> toRemove;
+  for (auto &incoming : phi.incoming_values()) {
+    auto basicBlock = phi.getIncomingBlock(incoming);
+    if (!preds.count(basicBlock)) {
+      toRemove.insert(basicBlock);
+    }
+  }
+
+  for (auto basicBlock : toRemove) {
+    phi.removeIncomingValue(basicBlock);
+  }
 }
 
 AND_OR_MutationType LogicalAndToOr::findPossibleMutation(Value &V) {
@@ -53,15 +72,21 @@ void LogicalAndToOr::applyMutation(llvm::Function *function, const MutationPoint
       findPossibleMutationInBranch(branchInst, &secondBranch);
 
   if (possibleMutationType == AND_OR_MutationType_AND_to_OR_Pattern1) {
-    return applyMutationANDToOR_Pattern1(branchInst, secondBranch);
+    applyMutationANDToOR_Pattern1(branchInst, secondBranch);
   }
 
   if (possibleMutationType == AND_OR_MutationType_AND_to_OR_Pattern2) {
-    return applyMutationANDToOR_Pattern2(branchInst, secondBranch);
+    applyMutationANDToOR_Pattern2(branchInst, secondBranch);
   }
 
   if (possibleMutationType == AND_OR_MutationType_AND_to_OR_Pattern3) {
-    return applyMutationANDToOR_Pattern3(branchInst, secondBranch);
+    applyMutationANDToOR_Pattern3(branchInst, secondBranch);
+  }
+
+  for (auto &instruction : llvm::instructions(function)) {
+    if (llvm::isa<llvm::PHINode>(instruction)) {
+      cleanupIncomingValues(llvm::cast<llvm::PHINode>(instruction));
+    }
   }
 }
 
