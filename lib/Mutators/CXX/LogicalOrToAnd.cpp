@@ -53,15 +53,20 @@ void LogicalOrToAnd::applyMutation(llvm::Function *function, const MutationPoint
       findPossibleMutationInBranch(branchInst, &secondBranch);
 
   if (possibleMutationType == OR_AND_MutationType_OR_to_AND_Pattern1) {
-    return applyMutationORToAND_Pattern1(branchInst, secondBranch);
+    applyMutationORToAND_Pattern1(branchInst, secondBranch);
   }
 
   if (possibleMutationType == OR_AND_MutationType_OR_to_AND_Pattern2) {
-    return applyMutationORToAND_Pattern2(branchInst, secondBranch);
+    applyMutationORToAND_Pattern2(branchInst, secondBranch);
   }
 
   if (possibleMutationType == OR_AND_MutationType_OR_to_AND_Pattern3) {
-    return applyMutationORToAND_Pattern3(branchInst, secondBranch);
+    applyMutationORToAND_Pattern3(branchInst, secondBranch);
+  }
+  for (auto &instruction : llvm::instructions(function)) {
+    if (llvm::isa<llvm::PHINode>(instruction)) {
+      cleanupIncomingValues(llvm::cast<llvm::PHINode>(instruction));
+    }
   }
 }
 
