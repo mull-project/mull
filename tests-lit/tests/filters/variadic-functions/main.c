@@ -43,7 +43,7 @@ int main() {
   return 0;
 }
 
-// RUN: %clang_cc %pass_mull_ir_frontend -g %s -o %s.exe
+// RUN: %clang_cc %sysroot %pass_mull_ir_frontend -g %s -o %s.exe
 // RUN: %s.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 // CHECK:_est
 // CHECK-NEXT:t_st
