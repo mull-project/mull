@@ -12,6 +12,7 @@ extern int MullDefaultTimeoutMilliseconds;
 class Diagnostics;
 
 struct Configuration {
+  std::string pathOnDisk;
   bool debugEnabled;
   bool quiet;
   bool silent;

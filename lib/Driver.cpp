@@ -210,8 +210,11 @@ void mull::mutateBitcode(llvm::Module &module) {
     InsertMutationTrampolinesTask::insertTrampolines(bitcode, configuration);
   });
 
-  TaskExecutor<ApplyMutationTask> applyMutations(
-      diagnostics, "Applying mutations", mutations, Nothing, { ApplyMutationTask() });
+  TaskExecutor<ApplyMutationTask> applyMutations(diagnostics,
+                                                 "Applying mutations",
+                                                 mutations,
+                                                 Nothing,
+                                                 { ApplyMutationTask(configuration, diagnostics) });
   applyMutations.execute();
 
   if (configuration.debug.printIR || configuration.debug.printIRAfter) {
@@ -224,7 +227,15 @@ void mull::mutateBitcode(llvm::Module &module) {
     if (llvm::verifyModule(module, &errorStream)) {
       std::stringstream message;
       message << "Uh oh! Mull corrupted LLVM module.\n"
-              << "Please, report the following error message here "
+              << "Please, add the following lines:\n"
+              << "debug:\n"
+              << " slowIRVerification: true\n"
+              << "to the config file ";
+      if (!configuration.pathOnDisk.empty()) {
+        message << "(" << configuration.pathOnDisk << ") ";
+      }
+      message << "and re-run the failing command.\n\n";
+      message << "Otherwise, report the following error message here "
                  "https://github.com/mull-project/mull/issues\n"
               << "Underlying error message:\n"
               << errorStream.str();
