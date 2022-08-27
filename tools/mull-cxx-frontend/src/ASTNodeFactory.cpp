@@ -217,15 +217,11 @@ clang::CallExpr *ASTNodeFactory::createCallExprSingleArg(clang::Expr *function,
 }
 
 clang::SectionAttr *ASTNodeFactory::createSectionAttr(std::string sectionName) {
-#if LLVM_VERSION_MAJOR >= 10
   return clang::SectionAttr::Create(context,
                                     sectionName,
                                     clang::SourceRange(),
                                     clang::AttributeCommonInfo::Syntax::AS_GNU,
                                     clang::SectionAttr::Spelling::SpellingNotCalculated);
-#else
-  return new (context) clang::SectionAttr(clang::SourceRange(), context, sectionName, 0);
-#endif
 }
 
 clang::QualType ASTNodeFactory::getStringLiteralArrayType(clang::QualType type, unsigned size) {
@@ -233,13 +229,8 @@ clang::QualType ASTNodeFactory::getStringLiteralArrayType(clang::QualType type, 
 }
 
 clang::QualType ASTNodeFactory::getConstantArrayType(clang::QualType type, unsigned size) {
-#if LLVM_VERSION_MAJOR >= 10
   return context.getConstantArrayType(
       type, llvm::APInt(8, size + 1), nullptr, clang::ArrayType::ArraySizeModifier::Normal, 0);
-#else
-  return context.getConstantArrayType(
-      type, llvm::APInt(32, size + 1), clang::ArrayType::Normal, /*IndexTypeQuals*/ 0);
-#endif
 }
 
 } // namespace cxx

@@ -19,7 +19,7 @@ jobs:
           DEBIAN_FRONTEND=noninteractive TZ=Europe/Berlin apt-get install -y tzdata
           apt-get install -y git curl cmake ninja-build libz-dev libsqlite3-dev ncurses-dev liblzma-dev
           curl -1sLf 'https://dl.cloudsmith.io/public/mull-project/mull-stable/setup.deb.sh' | bash
-          apt-get install -y clang-12 libclang-12-dev mull-12=0.15.0
+          apt-get install -y clang-12 libclang-12-dev mull-12=0.18.0
       - uses: actions/checkout@v2
         with:
           submodules: true

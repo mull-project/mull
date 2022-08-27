@@ -30,18 +30,6 @@ llvm_mapping:
         - llvm@11
       cmake_cc: /usr/local/opt/llvm@11/bin/clang
       cmake_cxx: /usr/local/opt/llvm@11/bin/clang++
-    9.0.0:
-      cmake_search_paths: "/usr/local/opt/llvm@9/lib/cmake/llvm/;/usr/local/opt/llvm@9/lib/cmake/clang/"
-      packages:
-        - llvm@9
-      cmake_cc: /usr/local/opt/llvm@9/bin/clang
-      cmake_cxx: /usr/local/opt/llvm@9/bin/clang++
-    8.0.0:
-      cmake_search_paths: "/usr/local/opt/llvm@8/lib/cmake/llvm/;/usr/local/opt/llvm@8/lib/cmake/clang/"
-      packages:
-        - llvm@8
-      cmake_cc: /usr/local/opt/llvm@8/bin/clang
-      cmake_cxx: /usr/local/opt/llvm@8/bin/clang++
 
   ubuntu:
     13.0.0:
@@ -84,26 +72,6 @@ llvm_mapping:
         - clang-10
       cmake_cc: clang-10
       cmake_cxx: clang++-10
-    9.0.0:
-      cmake_search_paths: "/usr/lib/llvm-9/cmake/;/usr/lib/cmake/clang-9/"
-      packages:
-        - llvm-9-dev
-        - libclang-9-dev
-        - libc++-9-dev
-        - libc++abi-9-dev
-        - clang-9
-      cmake_cc: clang-9
-      cmake_cxx: clang++-9
-    8.0.0:
-      cmake_search_paths: "/usr/lib/llvm-8/cmake/;/usr/lib/cmake/clang-8/"
-      packages:
-        - llvm-8-dev
-        - libclang-8-dev
-        - libc++-8-dev
-        - libc++abi-8-dev
-        - clang-8
-      cmake_cc: clang-8
-      cmake_cxx: clang++-8
 
 source_dir: "{{ working_dir }}/mull"
 debug_build_dir: "{{ working_dir }}/build.mull.debug.dir"
