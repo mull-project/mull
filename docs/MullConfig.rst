@@ -1,6 +1,8 @@
 Configuring Mull
 =================
 
+.. include:: ./_support.rst
+
 Mull's IR frontend is configured via a text file in the ``yaml`` format.
 
 By default, Mull is looking for ``mull.yml`` file in the current directory.

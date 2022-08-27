@@ -1,6 +1,8 @@
 Incremental mutation testing
 ============================
 
+.. include:: ./_support.rst
+
 Normally, Mull looks for mutations in all files of a project. Depending on a
 project's size, a number of mutations can be very large, so running Mull
 against all of them might be a rather slow process. Speed aside, an analysis of

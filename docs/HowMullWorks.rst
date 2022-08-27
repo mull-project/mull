@@ -1,6 +1,8 @@
 How Mull works
 ==============
 
+.. include:: ./_support.rst
+
 This page contains a short summary of the design and features of Mull. Also
 the advantages of Mull are highlighted as well as some known issues.
 

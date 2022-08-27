@@ -1,6 +1,8 @@
 Non-standard test suites
 ========================
 
+.. include:: ./_support.rst
+
 The goal of this tutorial is to demonstrate how to use Mull with 'non-standard'
 test suites, such as when the test suite is a separate program. The best example
 is integration tests written in interpreted languages.

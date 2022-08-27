@@ -1,6 +1,8 @@
 Welcome to Mull's documentation!
 ================================
 
+.. include:: ./_support.rst
+
 .. toctree::
    :maxdepth: 2
 
@@ -15,6 +17,7 @@ Welcome to Mull's documentation!
    MullConfig
    HowMullWorks
    HackingOnMull
+   Support
 
 .. Indices and tables
    ==================

@@ -1,6 +1,8 @@
 Introduction to Mutation Testing
 ================================
 
+.. include:: ./_support.rst
+
 Mutation Testing is a *fault-based* software testing technique. It evaluates the quality of a test suite by
 calculating *mutation score* and showing gaps in *semantic coverage*. It does so by creating several
 slightly modified versions of the original program, *mutants*, and running the test suite against each of them.

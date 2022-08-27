@@ -1,11 +1,7 @@
 Hello World Example
 ===================
 
-.. note::
-   We would love to hear from you! ❤️
-
-   Please, `report any issues <https://github.com/mull-project/mull/issues>`_ on GitHub, or
-   bring your questions to the `#mull channel <https://discord.gg/Hphp7dW>`_ on Discord.
+.. include:: ./_support.rst
 
 The goal of this tutorial is to demonstrate how to run Mull on minimal C
 programs. After reading it you should have a basic understanding of what

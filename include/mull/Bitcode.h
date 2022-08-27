@@ -6,6 +6,7 @@
 
 #include <llvm/IR/Module.h>
 #include <llvm/Support/MemoryBuffer.h>
+#include <map>
 
 namespace llvm {
 class LLVMContext;

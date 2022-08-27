@@ -1,6 +1,8 @@
 Tutorials
 =========
 
+.. include:: ./_support.rst
+
 .. toctree::
    :maxdepth: 1
 
