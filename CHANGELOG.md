@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.19.0] - 28 Aug 2022
+
+- Removed LLVM 9 support [#1009](https://github.com/mull-project/mull/pull/1009)
+- Added LLVM 14 support [#1007](https://github.com/mull-project/mull/pull/1007)
+- Added explicit support page [#1010](https://github.com/mull-project/mull/pull/1010)
+- Deprecated `all` group (replaced with `cxx_all`) [#1008](https://github.com/mull-project/mull/pull/1008)
+
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2022-05-06..2022-08-28)
+
 ## [0.18.0] - 05 May 2022
 
 - Fixed a phi-node miscompilation caused by `cxx_logical_and_to_or` and `cxx_logical_or_to_and` [#994](https://github.com/mull-project/mull/pull/994) [#998](https://github.com/mull-project/mull/pull/998)
