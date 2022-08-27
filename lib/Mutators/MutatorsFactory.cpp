@@ -22,9 +22,6 @@ using namespace std;
 static string Experimental() {
   return "experimental";
 }
-static string AllMutatorsGroup() {
-  return "all";
-}
 
 static string CXX_Assignment() {
   return "cxx_assignment";
@@ -69,14 +66,21 @@ static string CXX_Default() {
   return "cxx_default";
 }
 
-static void expandGroups(const vector<string> &groups, const map<string, vector<string>> &mapping,
+static void expandGroups(Diagnostics &diagnostics, const vector<string> &groups,
+                         const map<string, vector<string>> &mapping,
                          unordered_set<string> &expandedGroups) {
   for (const string &group : groups) {
-    if (mapping.count(group) == 0) {
-      expandedGroups.insert(group);
+    std::string tempGroup = group;
+    if (tempGroup == "all") {
+      diagnostics.warning(
+          "Group 'all' is replaced with 'cxx_all' and will be removed in a future release.");
+      tempGroup = "cxx_all";
+    }
+    if (mapping.count(tempGroup) == 0) {
+      expandedGroups.insert(tempGroup);
       continue;
     }
-    expandGroups(mapping.at(group), mapping, expandedGroups);
+    expandGroups(diagnostics, mapping.at(tempGroup), mapping, expandedGroups);
   }
 }
 
@@ -173,7 +177,6 @@ MutatorsFactory::MutatorsFactory(Diagnostics &diagnostics) : diagnostics(diagnos
   groupsMapping[Experimental()] = { NegateConditionMutator::ID(),
                                     ScalarValueMutator::ID(),
                                     CXX_Logical() };
-  groupsMapping[AllMutatorsGroup()] = { CXX_All(), Experimental() };
 }
 
 template <typename MutatorClass>
@@ -252,13 +255,13 @@ MutatorsFactory::mutators(const vector<string> &groups,
   std::unordered_set<std::string> expandedGroups;
   std::unordered_set<std::string> expandedIgnoreGroups;
   if (!ignoreGroups.empty()) {
-    expandGroups(ignoreGroups, groupsMapping, expandedIgnoreGroups);
+    expandGroups(diagnostics, ignoreGroups, groupsMapping, expandedIgnoreGroups);
   }
 
   if (groups.empty()) {
-    expandGroups({ CXX_Default() }, groupsMapping, expandedGroups);
+    expandGroups(diagnostics, { CXX_Default() }, groupsMapping, expandedGroups);
   } else {
-    expandGroups(groups, groupsMapping, expandedGroups);
+    expandGroups(diagnostics, groups, groupsMapping, expandedGroups);
   }
 
   for (auto &ignoreGroup : expandedIgnoreGroups) {
@@ -309,10 +312,10 @@ std::vector<std::pair<std::string, std::string>> MutatorsFactory::commandLineOpt
   }
 
   std::unordered_set<std::string> mutatorsSet;
-  std::vector<std::string> groups({ AllMutatorsGroup() });
-  expandGroups({ AllMutatorsGroup() }, groupsMapping, mutatorsSet);
+  std::vector<std::string> groups({ CXX_All() });
+  expandGroups(diagnostics, { CXX_All() }, groupsMapping, mutatorsSet);
 
-  auto allMutators = mutators({ AllMutatorsGroup() }, {});
+  auto allMutators = mutators({ CXX_All() }, {});
 
   for (auto &mutator : allMutators) {
     options.emplace_back(mutator->getUniqueIdentifier(), mutator->getDescription());

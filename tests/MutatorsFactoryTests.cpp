@@ -85,11 +85,6 @@ TEST(MutatorsFactory, CompositeMutators) {
     searchResult = find_if(mutators.begin(), mutators.end(), predicate("scalar_value_mutator"));
     ASSERT_NE(searchResult, mutators.end());
   }
-
-  {
-    mutators = factory.mutators({ "all" }, {});
-    ASSERT_EQ(mutators.size(), 45UL);
-  }
 }
 
 TEST(MutatorsFactory, UniqueMutators) {
