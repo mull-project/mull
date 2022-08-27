@@ -1,6 +1,8 @@
 Working with SQLite report
 ==========================
 
+.. include:: ./_support.rst
+
 From the very beginning, we didn't want to impose our vision on treating the
 results of mutation testing. Some people do not care about the mutation score,
 while others do care, but want to calculate it slightly differently.

@@ -4,6 +4,8 @@ Mull is a practical [mutation testing](https://mull.readthedocs.io/en/latest/Mut
 
 For installation and usage please refer to the latest documentation: https://mull.readthedocs.io
 
+For support visit [this page](https://mull.readthedocs.io/en/latest/Support.html).
+
 ## Join us in Discord
 
 Here is the invitation link to the Discord channel: https://discord.gg/Hphp7dW

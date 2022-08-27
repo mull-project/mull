@@ -1,6 +1,8 @@
 CMake Integration: fmtlib
 =========================
 
+.. include:: ./_support.rst
+
 This tutorial demonstrates how to integrate Mull into a CMake-based project.
 
 We use `fmtlib <https://github.com/fmtlib/fmt/blob/master/LICENSE.rst>`_ as an example.

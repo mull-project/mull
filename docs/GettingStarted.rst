@@ -1,6 +1,8 @@
 Getting Started
 ===============
 
+.. include:: ./_support.rst
+
 Hello there, we are glad to have you here!
 
 If you are new to the subject, then we recommend you start with the little `Introduction into Mutation Testing <MutationTestingIntro.html>`_.

@@ -1,6 +1,8 @@
 Makefile Integration: OpenSSL
 =============================
 
+.. include:: ./_support.rst
+
 This tutorial demonstrates how to integrate Mull into a custom Makefile-based build system.
 
 We use OpenSSL as an example.

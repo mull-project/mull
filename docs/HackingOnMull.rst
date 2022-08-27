@@ -1,6 +1,8 @@
 Hacking On Mull
 ===============
 
+.. include:: ./_support.rst
+
 Internals
 *********
 

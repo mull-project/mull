@@ -1,6 +1,8 @@
 Installation
 ============
 
+.. include:: ./_support.rst
+
 Mull comes with a number of precompiled binaries for macOS and Ubuntu.
 There are two flavors of packages:
 

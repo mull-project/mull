@@ -1,6 +1,8 @@
 Features
 ========
 
+.. include:: ./_support.rst
+
 - Mull enables mutation testing of C and C++ projects.
 
 - Mull expects a passing test suite to exit with 0. If the test suite fails, it

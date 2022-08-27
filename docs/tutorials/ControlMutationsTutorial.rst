@@ -1,6 +1,8 @@
 Keeping mutants under control
 =============================
 
+.. include:: ./_support.rst
+
 This tutorial shows how to control the amount of mutants.
 
 ---
