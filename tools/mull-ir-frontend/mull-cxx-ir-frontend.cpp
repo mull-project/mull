@@ -16,17 +16,22 @@ public:
 
 extern "C" __attribute__((visibility("default"))) LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
 llvmGetPassPluginInfo() {
+#if LLVM_VERSION_MAJOR > 13
+  using OptimizationLevel = llvm::OptimizationLevel;
+#else
+  using OptimizationLevel = llvm::PassBuilder::OptimizationLevel;
+#endif
+
   return { LLVM_PLUGIN_API_VERSION,
            "mull-ir-frontend",
            LLVM_VERSION_STRING,
            [](llvm::PassBuilder &PB) {
-             PB.registerPipelineStartEPCallback(
-                 [](llvm::ModulePassManager &modulePassManager
+             PB.registerPipelineStartEPCallback([](llvm::ModulePassManager &modulePassManager
 #if LLVM_VERSION_MAJOR > 11
-                    ,
-                    llvm::PassBuilder::OptimizationLevel optimizationLevel
+                                                   ,
+                                                   OptimizationLevel optimizationLevel
 #endif
-                 ) { modulePassManager.addPass(MullIRFrontend()); });
+                                                ) { modulePassManager.addPass(MullIRFrontend()); });
            } };
 }
 

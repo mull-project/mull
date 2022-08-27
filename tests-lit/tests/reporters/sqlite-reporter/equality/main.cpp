@@ -26,7 +26,7 @@ RUN: sqlite3 ./test.sqlite -line "select * from mutant" | %filecheck %s --dump-i
 CHECK-MUTANT:    mutant_id = cxx_eq_to_ne:{{.*}}
 CHECK-MUTANT:      mutator = cxx_eq_to_ne
 CHECK-MUTANT:     filename = {{.*}}main.cpp
-CHECK-MUTANT:    directory =
+CHECK-MUTANT:    directory ={{.*}}
 CHECK-MUTANT:  line_number = 4
 CHECK-MUTANT:column_number = 12
 CHECK-MUTANT:       status = 2

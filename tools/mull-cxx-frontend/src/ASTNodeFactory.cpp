@@ -15,7 +15,6 @@ clang::FunctionDecl *ASTNodeFactory::createFunctionDecl(std::string name,
   clang::IdentifierInfo &getenvFuncIdentifierInfo = context.Idents.get(name);
   clang::DeclarationName declarationName(&getenvFuncIdentifierInfo);
 
-#if LLVM_VERSION_MAJOR >= 9
   return clang::FunctionDecl::Create(context,
                                      declContext,
                                      NULL_LOCATION,
@@ -24,6 +23,9 @@ clang::FunctionDecl *ASTNodeFactory::createFunctionDecl(std::string name,
                                      functionType,
                                      context.getTrivialTypeSourceInfo(functionType),
                                      clang::StorageClass::SC_Extern,
+#if LLVM_VERSION_MAJOR > 13
+                                     false, /// bool UsesFPIntrin = false,
+#endif
                                      false, /// bool isInlineSpecified = false,
                                      true,  /// bool hasWrittenPrototype = true,
 #if LLVM_VERSION_MAJOR >= 12
@@ -33,20 +35,6 @@ clang::FunctionDecl *ASTNodeFactory::createFunctionDecl(std::string name,
                                                             /// CSK_unspecified
 #endif
   );
-#else
-  return clang::FunctionDecl::Create(context,
-                                     declContext,
-                                     NULL_LOCATION,
-                                     NULL_LOCATION,
-                                     declarationName,
-                                     functionType,
-                                     context.getTrivialTypeSourceInfo(functionType),
-                                     clang::StorageClass::SC_Extern,
-                                     false, /// bool isInlineSpecified = false,
-                                     true,  /// bool hasWrittenPrototype = true,
-                                     false  /// bool isConstexprSpecified = false,
-  );
-#endif
 }
 
 clang::IntegerLiteral *ASTNodeFactory::createIntegerLiteral(int value) {
@@ -81,7 +69,11 @@ clang::IfStmt *ASTNodeFactory::createIfStmt(clang::Expr *condExpr, clang::Stmt *
 #if LLVM_VERSION_MAJOR >= 12
   clang::IfStmt *ifStmt = clang::IfStmt::Create(context,
                                                 NULL_LOCATION,
+#if LLVM_VERSION_MAJOR > 13
+                                                clang::IfStatementKind::Ordinary,
+#else
                                                 false,
+#endif
                                                 nullptr,
                                                 nullptr,
                                                 condExpr,
@@ -90,22 +82,15 @@ clang::IfStmt *ASTNodeFactory::createIfStmt(clang::Expr *condExpr, clang::Stmt *
                                                 thenStmt,
                                                 NULL_LOCATION,
                                                 elseStmt);
-#elif LLVM_VERSION_MAJOR >= 8
-  clang::IfStmt *ifStmt = clang::IfStmt::Create(
-      context, NULL_LOCATION, false, nullptr, nullptr, condExpr, thenStmt, NULL_LOCATION, elseStmt);
 #else
-  clang::IfStmt *ifStmt = new (context) clang::IfStmt(
+  clang::IfStmt *ifStmt = clang::IfStmt::Create(
       context, NULL_LOCATION, false, nullptr, nullptr, condExpr, thenStmt, NULL_LOCATION, elseStmt);
 #endif
   return ifStmt;
 }
 
 clang::ReturnStmt *ASTNodeFactory::createReturnStmt(clang::Expr *expr) {
-#if LLVM_VERSION_MAJOR >= 8
   return clang::ReturnStmt::Create(context, NULL_LOCATION, expr, NULL);
-#else
-  return new (context) clang::ReturnStmt(NULL_LOCATION, expr, NULL);
-#endif
 }
 
 clang::ImplicitCastExpr *ASTNodeFactory::createImplicitCastExpr(clang::Expr *expr,
@@ -140,7 +125,7 @@ clang::UnaryOperator *ASTNodeFactory::createUnaryOperator(clang::UnaryOperator::
                                       NULL_LOCATION,
                                       false,
                                       fpOptionsOverride);
-#elif LLVM_VERSION_MAJOR >= 7
+#else
   return new (context) clang::UnaryOperator(expr,
                                             opcode,
                                             resultType,
@@ -148,9 +133,6 @@ clang::UnaryOperator *ASTNodeFactory::createUnaryOperator(clang::UnaryOperator::
                                             clang::ExprObjectKind::OK_Ordinary,
                                             NULL_LOCATION,
                                             false);
-#else
-  return new (context) clang::UnaryOperator(
-      expr, opcode, resultType, valueKind, clang::ExprObjectKind::OK_Ordinary, NULL_LOCATION);
 #endif
 }
 
@@ -219,7 +201,6 @@ clang::CallExpr *ASTNodeFactory::createCallExprSingleArg(clang::Expr *function,
                                                          clang::Expr *argument,
                                                          clang::QualType returnType,
                                                          clang::ExprValueKind valueKind) {
-#if LLVM_VERSION_MAJOR >= 8
   clang::CallExpr *callExpr = clang::CallExpr::Create(context,
                                                       function,
                                                       { argument },
@@ -231,10 +212,6 @@ clang::CallExpr *ASTNodeFactory::createCallExprSingleArg(clang::Expr *function,
                                                       clang::FPOptionsOverride()
 #endif
   );
-#else
-  clang::CallExpr *callExpr = new (context)
-      clang::CallExpr(context, function, { argument }, returnType, valueKind, NULL_LOCATION);
-#endif
 
   return callExpr;
 }
@@ -252,12 +229,7 @@ clang::SectionAttr *ASTNodeFactory::createSectionAttr(std::string sectionName) {
 }
 
 clang::QualType ASTNodeFactory::getStringLiteralArrayType(clang::QualType type, unsigned size) {
-#if LLVM_VERSION_MAJOR >= 9
   return context.getStringLiteralArrayType(type, size);
-#else
-  return context.getConstantArrayType(
-      type, llvm::APInt(32, size + 1), clang::ArrayType::Normal, /*IndexTypeQuals*/ 0);
-#endif
 }
 
 clang::QualType ASTNodeFactory::getConstantArrayType(clang::QualType type, unsigned size) {

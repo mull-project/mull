@@ -201,9 +201,7 @@ std::string UnaryMinusToNoop::ID() {
 UnaryMinusToNoop::UnaryMinusToNoop() {
   lowLevelMutators.emplace_back(new irm::SwapSubOperands);
   lowLevelMutators.emplace_back(new irm::SwapFSubOperands);
-#if LLVM_VERSION_MAJOR > 7
   lowLevelMutators.emplace_back(new irm::SwapFNegWithOperand);
-#endif
 }
 
 std::string UnaryMinusToNoop::getUniqueIdentifier() {
