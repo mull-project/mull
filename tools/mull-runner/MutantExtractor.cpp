@@ -8,17 +8,11 @@ using namespace mull;
 using namespace std::string_literals;
 
 static llvm::StringRef getSectionName(const llvm::object::SectionRef &section) {
-#if LLVM_VERSION_MAJOR == 9
-  llvm::StringRef name;
-  section.getName(name);
-  return name;
-#else
   llvm::Expected<llvm::StringRef> name = section.getName();
   if (!name) {
     return {};
   }
   return name.get();
-#endif
 }
 
 static std::vector<std::string> split(const std::string &input, char delimiter) {

@@ -16,17 +16,11 @@ using namespace llvm::object;
 using namespace std::string_literals;
 
 static llvm::StringRef getSectionName(const llvm::object::SectionRef &section) {
-#if LLVM_VERSION_MAJOR == 9
-  llvm::StringRef name;
-  section.getName(name);
-  return name;
-#else
   llvm::Expected<llvm::StringRef> name = section.getName();
   if (!name) {
     return {};
   }
   return name.get();
-#endif
 }
 
 static llvm::StringRef getSectionContent(const llvm::object::SectionRef &section) {
