@@ -19,7 +19,7 @@ jobs:
     container: ubuntu:18.04
     strategy:
       matrix:
-        LLVM_VERSION: ["9.0", "10.0"]
+        LLVM_VERSION: ["10.0"]
 
     steps:
       - name: For debugging
