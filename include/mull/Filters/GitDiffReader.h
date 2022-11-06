@@ -9,7 +9,7 @@
 namespace mull {
 class Diagnostics;
 
-typedef std::pair<int, int> GitDiffSourceFileRange;
+typedef std::pair<unsigned, unsigned> GitDiffSourceFileRange;
 typedef std::vector<GitDiffSourceFileRange> GitDiffSourceFileRanges;
 typedef std::map<std::string, GitDiffSourceFileRanges> GitDiffInfo;
 

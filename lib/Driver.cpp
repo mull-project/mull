@@ -163,7 +163,7 @@ void mull::mutateBitcode(llvm::Module &module) {
 
   std::vector<InstructionSelectionTask> instructionSelectionTasks;
   instructionSelectionTasks.reserve(configuration.parallelization.workers);
-  for (int i = 0; i < configuration.parallelization.workers; i++) {
+  for (unsigned i = 0; i < configuration.parallelization.workers; i++) {
     instructionSelectionTasks.emplace_back(filters.instructionFilters);
   }
 
@@ -182,7 +182,7 @@ void mull::mutateBitcode(llvm::Module &module) {
   for (auto filter : filters.mutationFilters) {
     std::vector<MutationFilterTask> tasks;
     tasks.reserve(configuration.parallelization.workers);
-    for (int i = 0; i < configuration.parallelization.workers; i++) {
+    for (unsigned i = 0; i < configuration.parallelization.workers; i++) {
       tasks.emplace_back(*filter);
     }
 

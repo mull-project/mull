@@ -135,7 +135,7 @@ int main(int argc, char **argv) {
   }
 
   std::vector<std::string> extraArgs;
-  for (size_t argIndex = 0; argIndex < tool::RunnerArgs.getNumOccurrences(); argIndex++) {
+  for (int argIndex = 0; argIndex < tool::RunnerArgs.getNumOccurrences(); argIndex++) {
     extraArgs.push_back(tool::RunnerArgs[argIndex]);
   }
   std::vector<std::string> librarySearchPaths(std::begin(tool::LDSearchPaths),

@@ -17,7 +17,7 @@ MutationsFinder::getMutationPoints(Diagnostics &diagnostics,
                                    std::vector<FunctionUnderTest> &functions) {
   std::vector<SearchMutationPointsTask> tasks;
   tasks.reserve(config.parallelization.workers);
-  for (int i = 0; i < config.parallelization.workers; i++) {
+  for (unsigned i = 0; i < config.parallelization.workers; i++) {
     tasks.emplace_back(mutators);
   }
 
