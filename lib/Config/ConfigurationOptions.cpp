@@ -1,5 +1,6 @@
 #include "mull/Config/ConfigurationOptions.h"
 
+#include <algorithm>
 #include <thread>
 
 namespace mull {
