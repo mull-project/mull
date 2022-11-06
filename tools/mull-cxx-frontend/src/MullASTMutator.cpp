@@ -1,3 +1,6 @@
+#include <cstdlib>
+#include <iostream>
+
 #include "MullASTMutator.h"
 
 #include <clang/AST/ASTContext.h>
@@ -89,7 +92,7 @@ void MullASTMutator::performReplaceScalarMutation(
     ASTMutationPoint &mutation, ReplaceScalarCallMutation &replaceScalarCallMutator) {
   clang::CallExpr *callExpr = replaceScalarCallMutator.callExpr;
 
-  clang::Expr *replacementLiteral;
+  clang::Expr *replacementLiteral = nullptr;
   if (callExpr->getType() == context.IntTy) {
     replacementLiteral = factory.createIntegerLiteral(42);
   } else if (callExpr->getType() == context.FloatTy) {
@@ -97,7 +100,7 @@ void MullASTMutator::performReplaceScalarMutation(
   } else if (callExpr->getType() == context.DoubleTy) {
     replacementLiteral = factory.createFloatLiteral(42.0);
   } else {
-    assert(0 && "Not implemented");
+    notImplemented();
   }
 
   clangAstMutator.replaceExpression(callExpr, replacementLiteral, mutation.mutationIdentifier);
@@ -112,7 +115,7 @@ void MullASTMutator::performReplaceNumericAssignmentMutation(
 
   clang::Expr *oldAssignedExpr = replaceNumericAssignmentMutator.assignmentBinaryOperator->getRHS();
 
-  clang::Expr *replacementLiteral;
+  clang::Expr *replacementLiteral = nullptr;
   if (oldAssignedExpr->getType() == context.IntTy) {
     replacementLiteral = factory.createIntegerLiteral(42);
   } else if (oldAssignedExpr->getType() == context.FloatTy) {
@@ -120,7 +123,7 @@ void MullASTMutator::performReplaceNumericAssignmentMutation(
   } else if (oldAssignedExpr->getType() == context.DoubleTy) {
     replacementLiteral = factory.createFloatLiteral(42.0);
   } else {
-    assert(0 && "Not implemented");
+    notImplemented();
   }
 
   clangAstMutator.replaceExpression(
@@ -140,7 +143,7 @@ void MullASTMutator::performReplaceNumericInitAssignmentMutation(
 
   clang::Expr *oldAssignedExpr = replaceNumericInitAssignmentMutator.varDecl->getInit();
 
-  clang::Expr *replacementLiteral;
+  clang::Expr *replacementLiteral = nullptr;
   if (oldAssignedExpr->getType() == context.IntTy) {
     replacementLiteral = factory.createIntegerLiteral(42);
   } else if (oldAssignedExpr->getType() == context.FloatTy) {
@@ -148,7 +151,7 @@ void MullASTMutator::performReplaceNumericInitAssignmentMutation(
   } else if (oldAssignedExpr->getType() == context.DoubleTy) {
     replacementLiteral = factory.createFloatLiteral(42.0);
   } else {
-    assert(0 && "Not implemented");
+    notImplemented();
   }
 
   clangAstMutator.replaceExpression(
@@ -157,6 +160,11 @@ void MullASTMutator::performReplaceNumericInitAssignmentMutation(
                                             static_cast<int>(mutation.mutationType),
                                             mutation.beginLine,
                                             mutation.beginColumn);
+}
+
+[[noreturn]] void MullASTMutator::notImplemented() noexcept {
+    std::cerr << "Not implemented\n";
+    std::abort();
 }
 
 } // namespace cxx
