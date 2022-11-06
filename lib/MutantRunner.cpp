@@ -32,7 +32,7 @@ MutantRunner::runMutants(const std::string &executable, const std::vector<std::s
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
   std::vector<MutantExecutionTask> tasks;
   tasks.reserve(configuration.parallelization.executionWorkers);
-  for (int i = 0; i < configuration.parallelization.executionWorkers; i++) {
+  for (unsigned i = 0; i < configuration.parallelization.executionWorkers; i++) {
     tasks.emplace_back(configuration, diagnostics, executable, baseline, extraArgs);
   }
   TaskExecutor<MutantExecutionTask> mutantRunner(

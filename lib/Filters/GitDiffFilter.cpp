@@ -72,7 +72,7 @@ bool GitDiffFilter::shouldSkip(const SourceLocation &sourceLocation, const std::
 
   GitDiffSourceFileRanges ranges = gitDiffInfo.at(sourceLocation.filePath);
   for (auto &range : ranges) {
-    int rangeEnd = range.first + range.second - 1;
+    unsigned rangeEnd = range.first + range.second - 1;
     if (range.first <= sourceLocation.line && sourceLocation.line <= rangeEnd) {
       if (configuration.debug.gitDiff) {
         std::stringstream debugMessage;
