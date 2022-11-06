@@ -43,6 +43,8 @@ private:
   ASTNodeFactory factory;
   ASTInstrumentation instrumentation;
   ClangASTMutator clangAstMutator;
+
+  [[noreturn]] static void notImplemented() noexcept;
 };
 
 } // namespace cxx
