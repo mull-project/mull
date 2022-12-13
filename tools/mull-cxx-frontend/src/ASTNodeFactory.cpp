@@ -56,7 +56,11 @@ clang::StringLiteral *ASTNodeFactory::createStringLiteral(std::string value) {
   return clang::StringLiteral::Create(
       context,
       value,
+#if LLVM_VERSION_MAJOR >= 15
+      clang::StringLiteral::StringKind::Ordinary,
+#else
       clang::StringLiteral::StringKind::Ascii,
+#endif
       false,
       getConstantArrayType(context.getConstType(context.CharTy), value.size()),
       NULL_LOCATION);

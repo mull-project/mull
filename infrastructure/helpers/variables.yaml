@@ -6,6 +6,12 @@ SDKROOT: /
 
 llvm_mapping:
   macos:
+    15.0.0:
+      cmake_search_paths: "/usr/local/opt/llvm/lib/cmake/llvm/;/usr/local/opt/llvm/lib/cmake/clang/"
+      packages:
+        - llvm
+      cmake_cc: /usr/local/opt/llvm/bin/clang
+      cmake_cxx: /usr/local/opt/llvm/bin/clang++
     14.0.0:
       cmake_search_paths: "/usr/local/opt/llvm@14/lib/cmake/llvm/;/usr/local/opt/llvm@14/lib/cmake/clang/"
       packages:

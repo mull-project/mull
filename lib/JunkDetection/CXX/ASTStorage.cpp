@@ -97,7 +97,6 @@ const clang::FileEntry *ThreadSafeASTUnit::findFileEntry(const std::string &file
 clang::SourceLocation ThreadSafeASTUnit::getLocation(const mull::SourceLocation &sourceLocation) {
   auto file = findFileEntry(sourceLocation);
   assert(file);
-  assert(file->isValid());
   assert(!sourceLocation.isNull());
 
   /// getLocation from the ASTUnit it not thread safe

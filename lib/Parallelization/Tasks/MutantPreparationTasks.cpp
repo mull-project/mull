@@ -166,11 +166,8 @@ void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode,
       dummy = llvm::Constant::getNullValue(retType);
     }
     auto retVal = llvm::ReturnInst::Create(context, dummy, trampolineCall);
-    auto loadValue = new llvm::LoadInst(trampoline->getType()->getPointerElementType(),
-                                        trampoline,
-                                        "trampoline_pointer",
-                                        false,
-                                        retVal);
+    auto loadValue =
+        new llvm::LoadInst(trampolineType, trampoline, "trampoline_pointer", false, retVal);
     auto callInst =
         llvm::CallInst::Create(original->getFunctionType(), loadValue, args, "", retVal);
     callInst->setAttributes(original->getAttributes());
