@@ -12,7 +12,7 @@ mutants and generate mutation testing reports.
 down to ``Killing mutants again, all killed`` below.
 
 .. note::
-   Clang 10 or newer is required!
+   Clang 11 or newer is required!
 
 ----
 
@@ -74,7 +74,7 @@ Let's fix that!
 To pass the plugin to Clang, you need to add a few compiler flags.
 
 .. note::
-   For Clang 10 and 11 also pass ``-O1``, otherwise the plugin won't be called.
+   For Clang 11 also pass ``-O1``, otherwise the plugin won't be called.
 
 .. note::
    ``-grecord-command-line`` doesn't currently work if you compile several files in one go,

@@ -13,8 +13,6 @@ int main() {
 }
 
 // clang-format off
-// Runs infinitely on LLVM 10 or lower
-// REQUIRES: LLVM_11_OR_HIGHER
 // RUN: %clang_cxx %sysroot %pass_mull_ir_frontend %s -g -o %s-ir.exe
 // RUN: unset TERM; %mull_runner -ide-reporter-show-killed %s-ir.exe 2>&1 | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 // CHECK:[info] Killed mutants (1/1):

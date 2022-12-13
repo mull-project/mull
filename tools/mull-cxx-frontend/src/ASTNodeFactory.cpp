@@ -118,7 +118,6 @@ clang::UnaryOperator *ASTNodeFactory::createUnaryOperator(clang::UnaryOperator::
                                                           clang::Expr *expr,
                                                           clang::QualType resultType,
                                                           clang::ExprValueKind valueKind) {
-#if LLVM_VERSION_MAJOR >= 11
   clang::FPOptionsOverride fpOptionsOverride;
   return clang::UnaryOperator::Create(context,
                                       expr,
@@ -129,22 +128,12 @@ clang::UnaryOperator *ASTNodeFactory::createUnaryOperator(clang::UnaryOperator::
                                       NULL_LOCATION,
                                       false,
                                       fpOptionsOverride);
-#else
-  return new (context) clang::UnaryOperator(expr,
-                                            opcode,
-                                            resultType,
-                                            valueKind,
-                                            clang::ExprObjectKind::OK_Ordinary,
-                                            NULL_LOCATION,
-                                            false);
-#endif
 }
 
 clang::BinaryOperator *ASTNodeFactory::createBinaryOperator(clang::BinaryOperator::Opcode opcode,
                                                             clang::Expr *lhs, clang::Expr *rhs,
                                                             clang::QualType resultType,
                                                             clang::ExprValueKind valueKind) {
-#if LLVM_VERSION_MAJOR >= 11
   clang::FPOptionsOverride fpOptionsOverride;
   return clang::BinaryOperator::Create(context,
                                        lhs,
@@ -155,17 +144,6 @@ clang::BinaryOperator *ASTNodeFactory::createBinaryOperator(clang::BinaryOperato
                                        clang::ExprObjectKind::OK_Ordinary,
                                        NULL_LOCATION,
                                        fpOptionsOverride);
-#else
-  clang::FPOptions fpOptions;
-  return new (context) clang::BinaryOperator(lhs,
-                                             rhs,
-                                             opcode,
-                                             resultType,
-                                             valueKind,
-                                             clang::ExprObjectKind::OK_Ordinary,
-                                             NULL_LOCATION,
-                                             fpOptions);
-#endif
 }
 
 clang::CompoundAssignOperator *ASTNodeFactory::createCompoundAssignOperator(
@@ -173,7 +151,6 @@ clang::CompoundAssignOperator *ASTNodeFactory::createCompoundAssignOperator(
     clang::QualType resultType, clang::ExprValueKind valueKind, clang::QualType compLHSType,
     clang::QualType compResultType) {
 
-#if LLVM_VERSION_MAJOR >= 11
   clang::FPOptionsOverride fpOptionsOverride;
   return clang::CompoundAssignOperator::Create(context,
                                                lhs,
@@ -186,19 +163,6 @@ clang::CompoundAssignOperator *ASTNodeFactory::createCompoundAssignOperator(
                                                fpOptionsOverride,
                                                compLHSType,
                                                compResultType);
-#else
-  clang::FPOptions fpOptions;
-  return new (context) clang::CompoundAssignOperator(lhs,
-                                                     rhs,
-                                                     opcode,
-                                                     resultType,
-                                                     valueKind,
-                                                     clang::ExprObjectKind::OK_Ordinary,
-                                                     compLHSType,
-                                                     compResultType,
-                                                     NULL_LOCATION,
-                                                     fpOptions);
-#endif
 }
 
 clang::CallExpr *ASTNodeFactory::createCallExprSingleArg(clang::Expr *function,

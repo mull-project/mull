@@ -5,9 +5,7 @@
 #include "ASTNodeFactory.h"
 
 #include <clang/AST/ASTContext.h>
-#if LLVM_VERSION_MAJOR >= 11
 #include <clang/AST/ParentMapContext.h>
-#endif
 #include <clang/Basic/SourceLocation.h>
 #include <llvm/Support/Casting.h>
 
