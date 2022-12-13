@@ -86,12 +86,22 @@ clang::IfStmt *ClangASTMutator::createMutatedStatement(clang::Stmt *oldStmt, cla
     thenStmtsVec.push_back(newStmt);
   }
   llvm::ArrayRef<clang::Stmt *> thenStmts = thenStmtsVec;
-  clang::CompoundStmt *compoundThenStmt =
-      clang::CompoundStmt::Create(context, thenStmts, NULL_LOCATION, NULL_LOCATION);
+  clang::CompoundStmt *compoundThenStmt = clang::CompoundStmt::Create(context,
+                                                                      thenStmts,
+#if LLVM_VERSION_MAJOR >= 15
+                                                                      clang::FPOptionsOverride(),
+#endif
+                                                                      NULL_LOCATION,
+                                                                      NULL_LOCATION);
 
   llvm::MutableArrayRef<clang::Stmt *> elseStmts = { oldStmt };
-  clang::CompoundStmt *compoundElseStmt =
-      clang::CompoundStmt::Create(context, elseStmts, NULL_LOCATION, NULL_LOCATION);
+  clang::CompoundStmt *compoundElseStmt = clang::CompoundStmt::Create(context,
+                                                                      elseStmts,
+#if LLVM_VERSION_MAJOR >= 15
+                                                                      clang::FPOptionsOverride(),
+#endif
+                                                                      NULL_LOCATION,
+                                                                      NULL_LOCATION);
 
   clang::IfStmt *ifStmt =
       factory.createIfStmt(implicitCastExpr, compoundThenStmt, compoundElseStmt);
@@ -159,7 +169,11 @@ clang::CallExpr *ClangASTMutator::createGetenvCallExpr(std::string identifier) {
   clang::StringLiteral *stringLiteral = clang::StringLiteral::Create(
       context,
       identifier,
+#if LLVM_VERSION_MAJOR >= 15
+      clang::StringLiteral::StringKind::Ordinary,
+#else
       clang::StringLiteral::StringKind::Ascii,
+#endif
       false,
       factory.getStringLiteralArrayType(context.CharTy, identifier.size()),
       clang::SourceLocation());
