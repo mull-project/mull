@@ -68,16 +68,6 @@ llvm_mapping:
         - clang-11
       cmake_cc: clang-11
       cmake_cxx: clang++-11
-    10.0.0:
-      cmake_search_paths: "/usr/lib/llvm-10/cmake/;/usr/lib/cmake/clang-10/"
-      packages:
-        - llvm-10-dev
-        - libclang-10-dev
-        - libc++-10-dev
-        - libc++abi-10-dev
-        - clang-10
-      cmake_cc: clang-10
-      cmake_cxx: clang++-10
 
 source_dir: "{{ working_dir }}/mull"
 debug_build_dir: "{{ working_dir }}/build.mull.debug.dir"

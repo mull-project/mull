@@ -85,7 +85,7 @@ Platform support
 ----------------
 
 Mull has a great support of macOS and various Linux systems across all modern
-versions of LLVM from 10.0 to 14.0. All the new versions of LLVM are supported as
+versions of LLVM from 11.0 to 15.0. All the new versions of LLVM are supported as
 soon as they released.
 
 Mull is reported to work on Windows Subsystem for Linux, but no official support

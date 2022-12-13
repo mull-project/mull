@@ -71,7 +71,7 @@ LLVM
 ----
 
 You need LLVM to build and debug Mull.
-You can use any LLVM version between 10.0 and 14.0.
+You can use any LLVM version between 11.0 and 15.0.
 
 As of the version 0.14.0, Mull can be compiled against LLVM/Clang available
 through your package manager (e.g. apt or homebrew).

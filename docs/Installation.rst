@@ -32,21 +32,20 @@ Install the package:
 .. code-block:: bash
 
     sudo apt-get update
-    sudo apt-get install mull-10 # Ubuntu 18.04
     sudo apt-get install mull-12 # Ubuntu 20.04
 
 Check if everything works:
 
 .. code-block:: bash
 
-    $ mull-runner-10 --version
+    $ mull-runner-12 --version
     Mull: Practical mutation testing for C and C++
     Home: https://github.com/mull-project/mull
     Docs: https://mull.readthedocs.io
     Version: 0.15.0
     Commit: ab159cd
     Date: 20 Jan 2022
-    LLVM: 10.0.0
+    LLVM: 12.0.0
 
 You can also get the latest "nightly" build using the corresponding source:
 
