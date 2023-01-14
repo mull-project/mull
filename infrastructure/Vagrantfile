@@ -29,24 +29,6 @@ Vagrant.configure(2) do |config|
     end
   end
 
-  config.vm.define "ubuntu16" do |cfg|
-    cfg.vm.box = "ubuntu/xenial64"
-    cfg.ssh.insert_key = false
-
-    configure_vm("ubuntu16", cfg)
-
-    cfg.vm.provision "shell", inline: "apt-get update && apt-get install -y python"
-
-    cfg.vm.provision "ansible" do |ansible|
-      ansible.verbose = "v"
-      ansible.playbook = "ubuntu-playbook.yaml"
-      ansible.extra_vars = {
-        llvm_version: ENV['LLVM_VERSION'] || '6.0.0',
-        gitref: ENV['GITREF'] || 'main',
-      }
-    end
-  end
-
   config.vm.define "ubuntu18" do |cfg|
     cfg.vm.box = "ubuntu/bionic64"
     cfg.ssh.insert_key = false
