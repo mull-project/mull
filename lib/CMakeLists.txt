@@ -115,10 +115,12 @@ set_source_files_properties(${mull_header_dirs} PROPERTIES HEADER_FILE_ONLY ON)
 find_package(Threads REQUIRED)
 find_package(SQLite3 REQUIRED)
 
+determine_clang_component_lib(clang_tooling_lib clangTooling)
+
 target_link_libraries(mull
   LLVM
   SQLite::SQLite3
-  clangTooling
+  "${clang_tooling_lib}"
   Threads::Threads
   irm
   mull-cxx-mutators
