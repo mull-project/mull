@@ -123,7 +123,7 @@ TEST(MutationPoint, OriginalValuePresent) {
     mutation->applyMutation();
   }
 
-  for (auto i = 0; i < mutationPoints.size(); i++) {
+  for (auto i = 0u; i < mutationPoints.size(); i++) {
     auto mutation = mutationPoints[i];
     std::string s;
     llvm::raw_string_ostream stream(s);
