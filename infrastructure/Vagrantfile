@@ -61,6 +61,7 @@ Vagrant.configure(2) do |config|
       ansible.extra_vars = {
         llvm_version: ENV['LLVM_VERSION'] || '10.0.0',
         gitref: ENV['GITREF'] || 'main',
+        checkout: ENV['checkout'] || 'true'
       }
     end
   end
@@ -79,6 +80,7 @@ Vagrant.configure(2) do |config|
       ansible.extra_vars = {
         llvm_version: ENV['LLVM_VERSION'] || '12.0.0',
         gitref: ENV['gitref'] || 'main',
+        checkout: ENV['checkout'] || 'true'
       }
     end
   end
