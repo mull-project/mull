@@ -45,11 +45,14 @@ get_filename_component(factory_include_dir ${FACTORY_HEADER} DIRECTORY)
 
 add_executable(mull-tests EXCLUDE_FROM_ALL ${mull_unittests_sources})
 gtest_discover_tests(mull-tests)
+
+determine_clang_component_lib(clang_codegen_lib clangCodeGen)
+
 target_link_libraries(mull-tests
   mull
   google-test
   json11
-  clangCodeGen
+  "${clang_codegen_lib}"
 )
 
 target_include_directories(mull-tests PUBLIC
