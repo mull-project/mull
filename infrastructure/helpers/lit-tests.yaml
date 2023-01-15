@@ -3,8 +3,12 @@
   command: ninja tests-lit
   args:
     chdir: "{{ debug_build_dir }}"
+  environment:
+    PATH: /home/vagrant/.local/bin:{{ ansible_env.PATH }}
 
 - name: Run LIT tests (Release)
   command: ninja tests-lit
   args:
     chdir: "{{ release_build_dir }}"
+  environment:
+    PATH: /home/vagrant/.local/bin:{{ ansible_env.PATH }}
