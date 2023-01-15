@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
 
 // RUN: %clang_cc %sysroot %s %pass_mull_ir_frontend -g -o %s-ir.exe
 
-// RUN: %mull_runner %s-ir.exe -ide-reporter-show-killed -test-program %python3 -- %S/test.py %s-ir.exe "first test case" | %filecheck %s --dump-input=fail --match-full-lines --check-prefix=CHECK-TEST1
+// RUN: %mull_runner %s-ir.exe --allow-surviving -ide-reporter-show-killed -test-program %python3 -- %S/test.py %s-ir.exe "first test case" | %filecheck %s --dump-input=fail --match-full-lines --check-prefix=CHECK-TEST1
 // CHECK-TEST1: [info] Killed mutants (1/2):
 // CHECK-TEST1: {{.*}}/main.c:5:12: warning: Killed: Replaced + with - [cxx_add_to_sub]
 // CHECK-TEST1:   return a + b;
@@ -51,7 +51,7 @@ int main(int argc, char **argv) {
 // CHECK-TEST1:   return a * b;
 // CHECK-TEST1:            ^
 
-// RUN: %mull_runner %s-ir.exe -ide-reporter-show-killed -test-program %python3 -- %S/test.py %s-ir.exe "second test case" | %filecheck %s --dump-input=fail --match-full-lines --check-prefix=CHECK-TEST2
+// RUN: %mull_runner %s-ir.exe --allow-surviving -ide-reporter-show-killed -test-program %python3 -- %S/test.py %s-ir.exe "second test case" | %filecheck %s --dump-input=fail --match-full-lines --check-prefix=CHECK-TEST2
 // CHECK-TEST2: [info] Killed mutants (1/2):
 // CHECK-TEST2: {{.*}}/main.c:9:12: warning: Killed: Replaced * with / [cxx_mul_to_div]
 // CHECK-TEST2:   return a * b;

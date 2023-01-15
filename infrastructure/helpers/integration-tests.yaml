@@ -43,7 +43,7 @@
     chdir: "{{ working_dir }}/integration/fmt.build.dir"
 
 - name: Run Mull against fmt
-  command: mull-runner-{{ llvm_major }} {{ working_dir }}/integration/fmt.build.dir/bin/core-test
+  command: mull-runner-{{ llvm_major }} --allow-surviving {{ working_dir }}/integration/fmt.build.dir/bin/core-test
 
 - name: Clone OpenSSL
   git:
@@ -96,4 +96,4 @@
     LD_LIBRARY_PATH: "{{ working_dir }}/integration/openssl"
 
 - name: Run Mull against OpenSSL
-  command: mull-runner-{{ llvm_major }} {{ working_dir }}/integration/openssl/test/bio_enc_test
+  command: mull-runner-{{ llvm_major }} --allow-surviving {{ working_dir }}/integration/openssl/test/bio_enc_test
