@@ -9,7 +9,7 @@ int main() {
 }
 
 // RUN: %clang_cc %sysroot -O0 %pass_mull_ir_frontend -g %s -o %s.exe
-// RUN: unset TERM; %mull_runner -reporters=IDE %s.exe | %filecheck %s --dump-input=fail
+// RUN: unset TERM; %mull_runner --allow-surviving -reporters=IDE %s.exe | %filecheck %s --dump-input=fail
 // CHECK:[info] Survived mutants (3/3):
 // CHECK-NEXT:{{.*}}main.c:5:9: warning: Survived: Replaced && with || [cxx_logical_and_to_or]
 // CHECK-NEXT:  a = a && a && a;

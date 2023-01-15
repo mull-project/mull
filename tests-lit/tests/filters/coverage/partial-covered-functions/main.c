@@ -23,7 +23,7 @@ int main(){
 }
 // clang-format off
 // RUN: %clang_cc %sysroot %s %pass_mull_ir_frontend -g -o %s.exe
-// RUN: unset TERM; %mull_runner %s.exe 2>&1 | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=CHECK-NO-COVERAGE
+// RUN: unset TERM; %mull_runner --allow-surviving %s.exe 2>&1 | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=CHECK-NO-COVERAGE
 // CHECK-NO-COVERAGE:[info] Survived mutants (4/4):
 // CHECK-NO-COVERAGE:{{^.*}}main.c:5:16: warning: Survived: Replaced + with - [cxx_add_to_sub]
 // CHECK-NO-COVERAGE:{{^.*}}main.c:10:11: warning: Survived: Replaced + with - [cxx_add_to_sub]
@@ -32,10 +32,10 @@ int main(){
 // CHECK-NO-COVERAGE:[info] Mutation score: 0%
 
 // RUN: %clang_cc %sysroot %s %pass_mull_ir_frontend -g -fprofile-instr-generate -fcoverage-mapping -o %s-cov.exe
-// RUN: unset TERM; %mull_runner -include-not-covered %s-cov.exe 2>&1 | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=CHECK-COVERAGE
+// RUN: unset TERM; %mull_runner --allow-surviving -include-not-covered %s-cov.exe 2>&1 | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=CHECK-COVERAGE
 // RUN: env LLVM_PROFILE_FILE=%s.profraw %s-cov.exe
 // RUN: %llvm_profdata merge %s.profraw -o %s.profdata
-// RUN: unset TERM; %mull_runner -coverage-info %s.profdata -include-not-covered %s-cov.exe 2>&1 | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=CHECK-COVERAGE
+// RUN: unset TERM; %mull_runner --allow-surviving -coverage-info %s.profdata -include-not-covered %s-cov.exe 2>&1 | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=CHECK-COVERAGE
 // CHECK-COVERAGE:[info] Survived mutants (2/4):
 // CHECK-COVERAGE:{{^.*}}main.c:10:11: warning: Survived: Replaced + with - [cxx_add_to_sub]
 // CHECK-COVERAGE:{{^.*}}main.c:14:21: warning: Survived: Replaced + with - [cxx_add_to_sub]

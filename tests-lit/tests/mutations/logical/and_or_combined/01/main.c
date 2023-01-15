@@ -86,7 +86,7 @@ int main() {
 // clang-format off
 
 // RUN: %clang_cc %sysroot -O0 %pass_mull_ir_frontend -g %s -o %s-ir.exe
-// RUN: unset TERM; %mull_runner -ide-reporter-show-killed -reporters=IDE %s-ir.exe | %filecheck %s --dump-input=fail
+// RUN: unset TERM; %mull_runner --allow-surviving -ide-reporter-show-killed -reporters=IDE %s-ir.exe | %filecheck %s --dump-input=fail
 // CHECK:[info] Killed mutants (4/8):
 // CHECK:{{.*}}main.c:6:23: warning: Killed: Replaced || with && [cxx_logical_or_to_and]
 // CHECK:  if (a < b && (b < c || a < c)) {

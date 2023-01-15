@@ -13,6 +13,7 @@ DumpMutators_();
 ReportersOption_();
 DebugEnabled_();
 StrictModeEnabled_();
+AllowSurvivingEnabled_();
 Timeout_();
 Workers_();
 NoOutput_();
@@ -45,6 +46,7 @@ void dumpCLIInterface(mull::Diagnostics &diagnostics) {
       &IDEReporterShowKilled,
       &DebugEnabled,
       &StrictModeEnabled,
+      &AllowSurvivingEnabled,
 
       &NoTestOutput,
       &NoMutantOutput,

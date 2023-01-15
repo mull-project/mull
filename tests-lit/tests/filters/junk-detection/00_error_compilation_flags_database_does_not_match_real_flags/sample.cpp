@@ -18,10 +18,10 @@ RUN: sed -e "s:%PWD:%S:g" %S/compile_commands.with_flag.json.template > %S/compi
 
 RUN: cd %CURRENT_DIR
 RUN: cd / && env MULL_CONFIG=%S/mull.no_junk.yml %clang_cxx -O0 %sysroot %pass_mull_ir_frontend -g -DFLAG=1 %s -o %s-ir-no-junk.exe
-RUN: %mull_runner -reporters=IDE %s-ir-no-junk.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITHOUT-JUNK-DETECTION
+RUN: %mull_runner --allow-surviving -reporters=IDE %s-ir-no-junk.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITHOUT-JUNK-DETECTION
 
 RUN: cd %S && env MULL_CONFIG=%S/mull.no_flag.yml %clang_cxx %sysroot -O0 %pass_mull_ir_frontend -g -DFLAG=1 %s -o %s-ir-no-flag.exe 2>&1 | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-JUNK-DETECTION-NO-FLAG-MUTATE
-RUN: %mull_runner %s-ir-no-flag.exe -reporters=IDE -ide-reporter-show-killed 2>&1 | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-JUNK-DETECTION-NO-FLAG
+RUN: %mull_runner --allow-surviving %s-ir-no-flag.exe -reporters=IDE -ide-reporter-show-killed 2>&1 | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-JUNK-DETECTION-NO-FLAG
 
 RUN: cd %S && env MULL_CONFIG=%S/mull.with_flag.yml %clang_cxx %sysroot -O0 %pass_mull_ir_frontend -g -DFLAG=1 %s -o %s-ir-with-flag.exe 2>&1 | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-JUNK-DETECTION-WITH-FLAG-MUTATE
 RUN: %mull_runner %s-ir-with-flag.exe -reporters=IDE -ide-reporter-show-killed 2>&1 | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-JUNK-DETECTION-WITH-FLAG

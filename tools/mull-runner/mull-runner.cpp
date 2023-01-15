@@ -15,8 +15,11 @@
 
 #include <llvm/Support/FileSystem.h>
 
+#include <algorithm>
 #include <memory>
+#include <string>
 #include <unistd.h>
+#include <utility>
 
 using namespace std::string_literals;
 
@@ -233,6 +236,12 @@ int main(int argc, char **argv) {
   std::vector<std::unique_ptr<mull::MutationResult>> mutationResults =
       mutantRunner.runMutants(testProgram, extraArgs, filteredMutants);
 
+  // Count surviving mutants, for later
+  std::size_t surviving =
+    std::count_if(std::cbegin(mutationResults), std::cend(mutationResults), [](auto const& resPtr) {
+      return resPtr->getExecutionResult().status == mull::ExecutionStatus::Passed;
+    });
+
   auto result =
       std::make_unique<mull::Result>(std::move(filteredMutants), std::move(mutationResults));
   for (auto &reporter : reporters) {
@@ -244,6 +253,16 @@ int main(int argc, char **argv) {
   stringstream << "Total execution time: " << totalExecutionTime.duration()
                << mull::MetricsMeasure::precision();
   diagnostics.info(stringstream.str());
+
+  if (surviving) {
+    stringstream.str(""s);
+    stringstream << "Surviving mutants: " << surviving;
+    diagnostics.info(stringstream.str());
+
+    if (!tool::AllowSurvivingEnabled) {
+      return 1;
+    }
+  }
 
   return 0;
 }

@@ -7,8 +7,8 @@ RUN: %clang_cxx %sysroot %pass_mull_ir_frontend -g %s -o %s.exe
 /// 1) when -reporters=IDE is not provided
 /// 2) when -reporters=IDE is provided
 
-RUN: (unset TERM; %mull_runner %s.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITHOUT-OPTION)
-RUN: (unset TERM; %mull_runner -reporters=IDE %s.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITHOUT-OPTION)
+RUN: (unset TERM; %mull_runner --allow-surviving %s.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITHOUT-OPTION)
+RUN: (unset TERM; %mull_runner --allow-surviving -reporters=IDE %s.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITHOUT-OPTION)
 WITHOUT-OPTION:[info] Running mutants (threads: 1)
 WITHOUT-OPTION:{{^       \[################################\] 1/1\. Finished .*}}
 WITHOUT-OPTION:[info] Survived mutants (1/1):
@@ -17,8 +17,8 @@ WITHOUT-OPTION-NEXT:  int result = a + b;
 WITHOUT-OPTION-NEXT:                 ^
 WITHOUT-OPTION-NEXT:[info] Mutation score: 0%
 
-RUN: (unset TERM; %mull_runner -ide-reporter-show-killed %s.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-OPTION)
-RUN: (unset TERM; %mull_runner -reporters=IDE -ide-reporter-show-killed %s.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-OPTION)
+RUN: (unset TERM; %mull_runner --allow-surviving -ide-reporter-show-killed %s.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-OPTION)
+RUN: (unset TERM; %mull_runner --allow-surviving -reporters=IDE -ide-reporter-show-killed %s.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-OPTION)
 WITH-OPTION:[info] Running mutants (threads: 1)
 WITH-OPTION:{{^       \[################################\] 1/1\. Finished .*}}
 WITH-OPTION:[info] Survived mutants (1/1):

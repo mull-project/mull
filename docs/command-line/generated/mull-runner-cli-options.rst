@@ -28,6 +28,8 @@
 
 --strict		Enables Strict Mode: all warning messages are treated as fatal errors
 
+--allow-surviving	Do not treat mutants surviving as an error
+
 --no-test-output		Does not capture output from test runs
 
 --no-mutant-output		Does not capture output from mutant runs

@@ -18,7 +18,7 @@ RUN: cd %S/Output/sandbox
 /// We cd to the the test directory and compile using relative paths.
 RUN: cd %S; %clang_cxx %sysroot -O0 %pass_mull_ir_frontend -g Output/sandbox/main.cpp -o Output/main.cpp-ir.exe
 
-RUN: cd %S/Output && echo $PATH; (unset TERM; %mull_runner main.cpp-ir.exe --report-name test --reporters GithubAnnotations --reporters IDE; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
+RUN: cd %S/Output && echo $PATH; (unset TERM; %mull_runner --allow-surviving main.cpp-ir.exe --report-name test --reporters GithubAnnotations --reporters IDE; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 
 CHECK:[info] Github Annotations:
 CHECK:{{::}}warning file={{.*}}/main.cpp,line=2,col=12,endLine=2,endColumn=14::[cxx_lshift_to_rshift] Replaced << with >>

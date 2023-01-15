@@ -2,7 +2,7 @@
 
 /**
 RUN: cd %S && %clang_cxx %sysroot -O0 %pass_mull_ir_frontend -g %s -o %s-ir.exe
-RUN: (unset TERM; %mull_runner -ide-reporter-show-killed %s-ir.exe 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
+RUN: (unset TERM; %mull_runner --allow-surviving -ide-reporter-show-killed %s-ir.exe 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 CHECK:[info] Killed mutants (1/2):
 CHECK:{{^.*}}sample.cpp:14:11: warning: Killed: Replaced >= with < [cxx_ge_to_lt]{{$}}
 CHECK:[info] Survived mutants (1/2):

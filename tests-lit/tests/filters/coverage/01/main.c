@@ -11,7 +11,7 @@ int main(int argc, char **argv) {
 
 // clang-format off
 // RUN: %clang_cc %sysroot %s %pass_mull_ir_frontend -g -o %s.exe
-// RUN: unset TERM; %mull_runner %s.exe 2>&1 | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=CHECK-NO-COVERAGE
+// RUN: unset TERM; %mull_runner --allow-surviving %s.exe 2>&1 | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=CHECK-NO-COVERAGE
 // CHECK-NO-COVERAGE:[info] Survived mutants (1/1):
 // CHECK-NO-COVERAGE:{{^.*}}main.c:2:5: warning: Survived: Replaced + with - [cxx_add_to_sub]
 // CHECK-NO-COVERAGE:[info] Mutation score: 0%

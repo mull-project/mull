@@ -139,6 +139,14 @@ opt<bool> StrictModeEnabled( \
     init(false), \
     cat(MullCategory)) \
 
+#define AllowSurvivingEnabled_() \
+opt<bool> AllowSurvivingEnabled( \
+    "allow-surviving", \
+    desc("Do not treat mutants surviving as an error"), \
+    Optional, \
+    init(false), \
+    cat(MullCategory)) \
+
 #define NoTestOutput_() \
 opt<bool> NoTestOutput( \
     "no-test-output", \
