@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.20.0] - 17 Jan 2023
+
+🚨 Breaking change: Mull now exits with an error if mutants survive. Use `--allow-surviving` to preserve old behavior.
+
+- Exit with error if mutants survive (by [Vilhelm Engström](https://github.com/vengaer)) [#1017](https://github.com/mull-project/mull/pull/1017)
+- Removed LLVM 10, added LLVM 15 [#1014](https://github.com/mull-project/mull/pull/1014)
+
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2022-08-29..2023-01-17)
+
 ## [0.19.0] - 28 Aug 2022
 
 - Removed LLVM 9 support [#1009](https://github.com/mull-project/mull/pull/1009)
