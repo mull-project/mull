@@ -1,0 +1,48 @@
+name: Mull metadata
+description: Mull metadata
+outputs:
+  version:
+    description: "version"
+    value: ${{ steps.metadata.outputs.version }}
+  version-suffix:
+    description: "version suffix"
+    value: ${{ steps.metadata.outputs.suffix }}
+  channel:
+    description: "release channel"
+    value: ${{ steps.metadata.outputs.channel }}
+runs:
+  using: "composite"
+  steps:
+    - id: metadata
+      name: Detect version and release channel
+      shell: bash
+      run: |
+        echo "version=$(grep -Eo "MULL_VERSION [0-9.]+" CMakeLists.txt | awk ' { print $2 } ')" >> $GITHUB_OUTPUT
+        case $GITHUB_EVENT_NAME in
+          "pull_request")
+            echo "suffix=-pr$(grep -Eo "\"number\": [0-9]+" $GITHUB_EVENT_PATH | awk ' { print $2; exit } ')" >> $GITHUB_OUTPUT
+            echo "channel=nightly" >> $GITHUB_OUTPUT
+          ;;
+          "push")
+            case $GITHUB_REF in
+              "refs/heads/"*)
+                echo "suffix=-trunk(git rev-list HEAD --count)" >> $GITHUB_OUTPUT
+                echo "channel=nightly" >> $GITHUB_OUTPUT
+              ;;
+              "refs/tags/"*)
+                echo "suffix=" >> $GITHUB_OUTPUT
+                echo "channel=stable" >> $GITHUB_OUTPUT
+                if [ `echo $GITHUB_REF | awk -F/ ' { print $3 } '` != `grep -Eo "MULL_VERSION [0-9.]+" CMakeLists.txt | awk ' { print $2 } '` ];
+                then
+                  false
+                fi
+              ;;
+              *)
+                false
+              ;;
+            esac
+          ;;
+          *)
+            false
+          ;;
+        esac
