@@ -6,31 +6,31 @@ SDKROOT: /
 
 llvm_mapping:
   macos:
-    15.0.0:
+    "15":
       cmake_search_paths: "/usr/local/opt/llvm/lib/cmake/llvm/;/usr/local/opt/llvm/lib/cmake/clang/"
       packages:
         - llvm
       cmake_cc: /usr/local/opt/llvm/bin/clang
       cmake_cxx: /usr/local/opt/llvm/bin/clang++
-    14.0.0:
+    "14":
       cmake_search_paths: "/usr/local/opt/llvm@14/lib/cmake/llvm/;/usr/local/opt/llvm@14/lib/cmake/clang/"
       packages:
         - llvm@14
       cmake_cc: /usr/local/opt/llvm@14/bin/clang
       cmake_cxx: /usr/local/opt/llvm@14/bin/clang++
-    13.0.0:
+    "13":
       cmake_search_paths: "/usr/local/opt/llvm@13/lib/cmake/llvm/;/usr/local/opt/llvm@13/lib/cmake/clang/"
       packages:
         - llvm@13
       cmake_cc: /usr/local/opt/llvm@13/bin/clang
       cmake_cxx: /usr/local/opt/llvm@13/bin/clang++
-    12.0.0:
+    "12":
       cmake_search_paths: "/usr/local/opt/llvm@12/lib/cmake/llvm/;/usr/local/opt/llvm@12/lib/cmake/clang/"
       packages:
         - llvm@12
       cmake_cc: /usr/local/opt/llvm@12/bin/clang
       cmake_cxx: /usr/local/opt/llvm@12/bin/clang++
-    11.0.0:
+    "11":
       cmake_search_paths: "/usr/local/opt/llvm@11/lib/cmake/llvm/;/usr/local/opt/llvm@11/lib/cmake/clang/"
       packages:
         - llvm@11
@@ -38,7 +38,7 @@ llvm_mapping:
       cmake_cxx: /usr/local/opt/llvm@11/bin/clang++
 
   ubuntu:
-    13.0.0:
+    "13":
       cmake_search_paths: "/usr/lib/llvm-13/cmake/;/usr/lib/cmake/clang-13/"
       packages:
         - llvm-13-dev
@@ -48,7 +48,7 @@ llvm_mapping:
         - clang-13
       cmake_cc: clang-13
       cmake_cxx: clang++-13
-    12.0.0:
+    "12":
       cmake_search_paths: "/usr/lib/llvm-12/cmake/;/usr/lib/cmake/clang-12/"
       packages:
         - llvm-12-dev
@@ -58,7 +58,7 @@ llvm_mapping:
         - clang-12
       cmake_cc: clang-12
       cmake_cxx: clang++-12
-    11.0.0:
+    "11":
       cmake_search_paths: "/usr/lib/llvm-11/cmake/;/usr/lib/cmake/clang-11/"
       packages:
         - llvm-11-dev
@@ -79,9 +79,8 @@ checkout: false
 make_program: make
 
 cmake_search_paths: "{{ llvm_mapping[platform][llvm_version].cmake_search_paths }}"
-llvm_major: "{{ llvm_version.split('.')[0] }}"
 llvm_packages: "{{ llvm_mapping[platform][llvm_version].packages }}"
 cmake_c_compiler: "{{ llvm_mapping[platform][llvm_version].cmake_cc }}"
 cmake_cxx_compiler: "{{ llvm_mapping[platform][llvm_version].cmake_cxx }}"
-test_opt_level: "{{ '-O0' if llvm_major | int > 11 else '-O1' }}"
+test_opt_level: "{{ '-O0' if llvm_version | int > 11 else '-O1' }}"
 test_mull_config: "{{ source_dir }}/infrastructure/helpers/mull.yml"

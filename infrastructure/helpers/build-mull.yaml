@@ -113,6 +113,6 @@
   with_items: "{{ package_extensions }}"
 
 - name: Print Mull version
-  command: mull-runner-{{ llvm_major }} -version
+  command: mull-runner-{{ llvm_version }} -version
   args:
     chdir: "{{ release_build_dir }}"

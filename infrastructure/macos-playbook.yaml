@@ -46,9 +46,9 @@
     - name: Install Python dependencies
       pip:
         name:
-          - lit==0.9.0
-          - filecheck==0.0.18
-          - cloudsmith-cli==0.26.0
+          - lit==16.0.1
+          - filecheck==0.0.23
+          - cloudsmith-cli==0.37.0
         executable: pip3
 
     - name: Create a symbolic link for gnu-tar
