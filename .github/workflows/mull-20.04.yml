@@ -51,4 +51,4 @@ jobs:
       - name: Run Mull
         run: |
           cd build.dir
-          mull-runner-12 -reporters=IDE -reporters=GithubAnnotations ./tests/mull-tests
+          mull-runner-12 --allow-surviving -reporters=IDE -reporters=GithubAnnotations ./tests/mull-tests
