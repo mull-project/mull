@@ -97,7 +97,7 @@ static void resolveResourceDir(Diagnostics &diagnostics, CompilationDatabase::Da
                                       std::nullopt);
       if (!result.stdoutOutput.empty()) {
         // strip trailing \n
-        result.stdoutOutput[result.stdoutOutput.size() - 1] = '\0';
+        result.stdoutOutput[result.stdoutOutput.size()   - 1] = '\0';
       }
       resourceDirs[compiler] = result.stdoutOutput;
     }
