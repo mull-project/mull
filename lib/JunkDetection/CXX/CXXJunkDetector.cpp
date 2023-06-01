@@ -228,12 +228,18 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
   /// 1) Remove-Void, CallExpr example: its mutation location and its getStart() are the same.
   /// 2) Binary Mutation, BinaryOperator example: its mutation location is
   /// BinaryOperator's getOperatorLoc(), i.e. "+", while the
-  /// [getSourceRange().getBegin()(), getSourceRange().getEnd()] range is the whole "a + b"
+  /// [getSourceRange().getBegin(), getSourceRange().getEnd()] range is the whole "a + b"
   /// expression.
   clang::SourceLocation sourceLocationEnd =
       (beginLine == mutationLocationBeginLine && beginColumn == mutationLocationBeginColumn)
           ? mutantExpression->getSourceRange().getEnd()
           : location;
+
+  // For unary operators we shouldn't consider the location of the whole expression, but only
+  // the operator, otherwise it breaks patch reporter in weird ways
+  if (auto unary = llvm::dyn_cast<clang::UnaryOperator>(mutantExpression)) {
+    sourceLocationEnd = unary->getOperatorLoc();
+  }
 
   /// Clang AST: how to get more precise debug information in certain cases?
   /// http://clang-developers.42468.n3.nabble.com/Clang-AST-how-to-get-more-precise-debug-information-in-certain-cases-td4065195.html
