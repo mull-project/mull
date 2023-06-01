@@ -18,7 +18,7 @@ CHECK-MUTATE-NOT:{{^.*[Ee]rror.*$}}
 CHECK-MUTATE:[info] Applying filter: junk (threads: 1)
 
 TODO: IDE reporter reports location "!a" but we would rather want to see the location of '!'.
-CHECK-MUTATE:[debug] CXXJunkDetector: mutation "Remove Unary Negation": {{.*}}sample.cpp:2:10 (end: 2:12)
+CHECK-MUTATE:[debug] CXXJunkDetector: mutation "Remove Unary Negation": {{.*}}sample.cpp:2:10 (end: 2:11)
 
 RUN: (unset TERM; %mull_runner -debug -reporters=IDE -ide-reporter-show-killed %s-ir.exe 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 
