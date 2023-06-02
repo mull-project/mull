@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.21.0] - 02 Jun 2023
+
+- Fixed wrong diff generation [#1025](https://github.com/mull-project/mull/issues/1025) [#1023](https://github.com/mull-project/mull/issues/1023)
+- Fixed GitHub annotations for relative paths [#1028](https://github.com/mull-project/mull/pull/1028) [#738](https://github.com/mull-project/mull/issues/738)
+
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2023-01-18..2023-06-02)
+
 ## [0.20.0] - 17 Jan 2023
 
 🚨 Breaking change: Mull now exits with an error if mutants survive. Use `--allow-surviving` to preserve old behavior.
