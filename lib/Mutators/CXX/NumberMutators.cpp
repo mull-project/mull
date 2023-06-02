@@ -19,7 +19,8 @@ std::string NumberAssignConst::ID() {
 
 NumberAssignConst::NumberAssignConst()
     : TrivialCXXMutator(getNumberMutators(), MutatorKind::CXX_AssignConst, NumberAssignConst::ID(),
-                        "Replaces 'a = b' with 'a = 42'", "42", "Replaced 'a = b' with 'a = 42'") {}
+                        "Replaces 'a = b' with 'a = 42'", "= 42;",
+                        "Replaced 'a = b' with 'a = 42'") {}
 
 std::string NumberInitConst::ID() {
   return "cxx_init_const";
