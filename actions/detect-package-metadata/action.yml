@@ -17,6 +17,8 @@ runs:
       name: Detect version and release channel
       shell: bash
       run: |
+        echo $GITHUB_EVENT_NAME
+        env | sort
         echo "version=$(grep -Eo "MULL_VERSION [0-9.]+" CMakeLists.txt | awk ' { print $2 } ')" >> $GITHUB_OUTPUT
         case $GITHUB_EVENT_NAME in
           "pull_request")

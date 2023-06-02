@@ -6,34 +6,32 @@
 #include "mull/Mutant.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Mutators/MutatorsFactory.h"
+#include "mull/Reporters/SourceCodeReader.h"
 #include "mull/Result.h"
 #include "mull/SourceLocation.h"
-#include "mull/Reporters/SourceCodeReader.h"
 
 #include <sstream>
 #include <string>
 
 using namespace mull;
 
-
 GithubAnnotationsReporter::GithubAnnotationsReporter(Diagnostics &diagnostics)
-    : diagnostics(diagnostics){
-}
+    : diagnostics(diagnostics) {}
 
 void mull::GithubAnnotationsReporter::reportResults(const Result &result) {
   MutatorsFactory factory(diagnostics);
   factory.init();
-  std::string level="warning";
+  std::string level = "warning";
   diagnostics.info("Github Annotations:");
   for (auto &mutationResult : result.getMutationResults()) {
     const ExecutionResult mutationExecutionResult = mutationResult->getExecutionResult();
-
+    llvm::errs() << result.getMutationResults().size() + 42;
     const auto mutant = *mutationResult->getMutant();
-    const auto& sourceLocation = mutant.getSourceLocation();
-    const auto& sourceEndLocation = mutant.getEndLocation();
+    const auto &sourceLocation = mutant.getSourceLocation();
+    const auto &sourceEndLocation = mutant.getEndLocation();
     const auto mutator = factory.getMutator(mutant.getMutatorIdentifier());
 
-    if (mutationExecutionResult.status != ExecutionStatus::Passed){
+    if (mutationExecutionResult.status != ExecutionStatus::Passed) {
       continue;
     }
 
@@ -43,14 +41,11 @@ void mull::GithubAnnotationsReporter::reportResults(const Result &result) {
                  << "line=" << sourceLocation.line << ","
                  << "col=" << sourceLocation.column << ","
                  << "endLine=" << sourceEndLocation.line << ","
-                 << "endColumn=" << sourceEndLocation.column
-                 << "::"
-                 << "[" << mutant.getMutatorIdentifier() << "] "
-                 << mutator->getDiagnostics()
+                 << "endColumn=" << sourceEndLocation.column << "::"
+                 << "[" << mutant.getMutatorIdentifier() << "] " << mutator->getDiagnostics()
                  << "\n";
 
     fprintf(stdout, "%s", stringstream.str().c_str());
     fflush(stdout);
   }
-
 }
