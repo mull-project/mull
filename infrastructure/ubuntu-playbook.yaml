@@ -48,7 +48,7 @@
         name:
           - lit==16.0.1
           - filecheck==0.0.23
-          - cloudsmith-cli==0.37.0
+          - cloudsmith-cli==0.42.0
         executable: pip3
 
     - name: Download CMake
