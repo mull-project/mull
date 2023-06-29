@@ -1,0 +1,79 @@
+name: Ubuntu 22.04 CI
+
+env:
+  CLOUDSMITH_API_KEY: ${{ secrets.CLOUDSMITH_API_KEY }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+    tags:
+      - "**"
+
+jobs:
+  ubuntu-20-04:
+    name: LLVM ${{ matrix.LLVM_VERSION }}
+    runs-on: ubuntu-latest
+    container: ubuntu:22.04
+    strategy:
+      matrix:
+        LLVM_VERSION: [11, 13, 14, 15]
+    env:
+      DISTR_REPO: "ubuntu/jammy"
+      DEBIAN_FRONTEND: noninteractive
+
+    steps:
+      - name: Debugging
+        run: |
+          env | sort
+          cat $GITHUB_EVENT_PATH
+
+      - name: Install software
+        run: |
+          apt-get update && apt-get install -y software-properties-common
+          add-apt-repository ppa:git-core/ppa
+          apt-get update && apt-get install -y python3-pip curl git libunwind8
+          pip3 install ansible
+
+      - name: Install git
+        run: |
+          apt-get update
+          apt-get install -y git
+          git config --global --add safe.directory $PWD
+
+      - name: Checkout sources
+        uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - uses: ./actions/detect-package-metadata
+        id: metadata
+
+      - name: Run CI task
+        run: |
+          cd infrastructure && \
+          ansible-playbook ubuntu-playbook.yaml \
+            -e llvm_version="${{ matrix.LLVM_VERSION }}" \
+            -e source_dir=$PWD/.. \
+            -e gitref=$GITHUB_SHA \
+            -e host=localhost \
+            -e mull_version=${{ steps.metadata.outputs.version }}${{ steps.metadata.outputs.suffix }} \
+            --verbose
+
+      - name: Publish package
+        if: env.CLOUDSMITH_API_KEY != null
+        run: |
+          cloudsmith push deb \
+            mull-project/mull-${{ steps.metadata.outputs.channel }}/${{ env.DISTR_REPO }} \
+            infrastructure/packages/`cat infrastructure/PACKAGE_FILE_NAME`.deb
+
+      - name: Move package
+        run: |
+          mkdir -p /tmp/packages
+          mv infrastructure/packages/`cat infrastructure/PACKAGE_FILE_NAME`.deb /tmp/packages/`cat infrastructure/PACKAGE_FILE_NAME`.deb
+
+      - uses: ./actions/attach-package
+        with:
+          GH_API_KEY: ${{ secrets.GITHUB_TOKEN }}
