@@ -6,12 +6,18 @@ SDKROOT: /
 
 llvm_mapping:
   macos:
-    "15":
+    "16":
       cmake_search_paths: "/usr/local/opt/llvm/lib/cmake/llvm/;/usr/local/opt/llvm/lib/cmake/clang/"
       packages:
         - llvm
       cmake_cc: /usr/local/opt/llvm/bin/clang
       cmake_cxx: /usr/local/opt/llvm/bin/clang++
+    "15":
+      cmake_search_paths: "/usr/local/opt/llvm@15/lib/cmake/llvm/;/usr/local/opt/llvm@15/lib/cmake/clang/"
+      packages:
+        - llvm@15
+      cmake_cc: /usr/local/opt/llvm@15/bin/clang
+      cmake_cxx: /usr/local/opt/llvm@15/bin/clang++
     "14":
       cmake_search_paths: "/usr/local/opt/llvm@14/lib/cmake/llvm/;/usr/local/opt/llvm@14/lib/cmake/clang/"
       packages:
@@ -38,6 +44,26 @@ llvm_mapping:
       cmake_cxx: /usr/local/opt/llvm@11/bin/clang++
 
   ubuntu:
+    "15":
+      cmake_search_paths: "/usr/lib/llvm-15/cmake/;/usr/lib/cmake/clang-15/"
+      packages:
+        - llvm-15-dev
+        - libclang-15-dev
+        - libc++-15-dev
+        - libc++abi-15-dev
+        - clang-15
+      cmake_cc: clang-15
+      cmake_cxx: clang++-15
+    "14":
+      cmake_search_paths: "/usr/lib/llvm-14/cmake/;/usr/lib/cmake/clang-14/"
+      packages:
+        - llvm-14-dev
+        - libclang-14-dev
+        - libc++-14-dev
+        - libc++abi-14-dev
+        - clang-14
+      cmake_cc: clang-14
+      cmake_cxx: clang++-14
     "13":
       cmake_search_paths: "/usr/lib/llvm-13/cmake/;/usr/lib/cmake/clang-13/"
       packages:
