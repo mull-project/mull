@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.21.1] - 30 Jun 2023
+
+- No real changes, just added Ubuntu 22.04 packages [#1015](https://github.com/mull-project/mull/pull/1015)
+
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2023-06-03..2023-06-30)
+
 ## [0.21.0] - 02 Jun 2023
 
 - Fixed wrong diff generation [#1025](https://github.com/mull-project/mull/issues/1025) [#1023](https://github.com/mull-project/mull/issues/1023)
