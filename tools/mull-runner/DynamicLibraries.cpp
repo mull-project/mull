@@ -1,4 +1,5 @@
 #include "DynamicLibraries.h"
+#include "ObjectFile.h"
 #include "mull/Diagnostics/Diagnostics.h"
 
 #include <llvm/Object/ELFObjectFile.h>
@@ -77,7 +78,6 @@ void librariesFromMachO(const MachOObjectFile &file, std::vector<std::string> &l
     if (loadCommand.C.cmd != llvm::MachO::LC_LOAD_DYLIB) {
       continue;
     }
-
     auto dylib = file.getDylibIDLoadCommand(loadCommand);
     libraries.emplace_back(loadCommand.Ptr + dylib.dylib.name);
   }
@@ -131,25 +131,15 @@ void mull::resolveLibraries(mull::Diagnostics &diagnostics,
 std::vector<std::string> mull::getDynamicLibraryDependencies(mull::Diagnostics &diagnostics,
                                                              const std::string &executablePath) {
   std::vector<std::string> libraries;
-
-  auto bufferOr = llvm::MemoryBuffer::getFile(executablePath);
-  if (!bufferOr) {
-    diagnostics.error("Cannot open executable: "s + executablePath);
+  auto [buffer, objectFile] = mull::loadObjectFile(diagnostics, executablePath);
+  if (!objectFile) {
+    return libraries;
   }
-  std::unique_ptr<llvm::MemoryBuffer> buffer(std::move(bufferOr.get()));
-
-  auto symbolicOr = SymbolicFile::createSymbolicFile(buffer->getMemBufferRef());
-  if (!symbolicOr) {
-    diagnostics.error("Cannot create SymbolicFile from: "s + executablePath);
-  }
-
-  std::unique_ptr<SymbolicFile> symbolicFile(std::move(symbolicOr.get()));
-
-  if (symbolicFile->isMachO()) {
-    auto machOFile = llvm::dyn_cast<MachOObjectFile>(symbolicFile.get());
+  if (objectFile->isMachO()) {
+    auto machOFile = llvm::dyn_cast<MachOObjectFile>(objectFile.get());
     librariesFromMachO(*machOFile, libraries);
-  } else if (symbolicFile->isELF()) {
-    SymbolicFile *elfPtr = symbolicFile.get();
+  } else if (objectFile->isELF()) {
+    ObjectFile *elfPtr = objectFile.get();
 
     if (auto elf32LEFile = llvm::dyn_cast<ELF32LEObjectFile>(elfPtr)) {
       librariesFromElf(*elf32LEFile, libraries);
@@ -165,28 +155,12 @@ std::vector<std::string> mull::getDynamicLibraryDependencies(mull::Diagnostics &
 }
 
 bool mull::hasCoverage(mull::Diagnostics &diagnostics, const std::string &path) {
-  llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> maybeBuffer =
-      llvm::MemoryBuffer::getFile(path);
-  if (!maybeBuffer) {
-    diagnostics.error("Cannot read executable: "s + maybeBuffer.getError().message() + ": " + path);
-  }
-  llvm::MemoryBuffer *buffer = maybeBuffer->get();
-  llvm::Expected<std::unique_ptr<llvm::object::ObjectFile>> maybeObject =
-      llvm::object::ObjectFile::createObjectFile(buffer->getMemBufferRef());
-  if (!maybeObject) {
-    llvm::Error error = maybeObject.takeError();
-    /// On older versions of macOS we fail to load certain system libraries because they are fat
-    /// libraries On newer versions of macOS we never reach this line because the system libraries
-    /// live in cache and cannot be read from FS This should be an error, but we relax it to a
-    /// warning to not fail on macOS
-    /// TODO: we should probably add support for universal binaries at some point
-    /// https://github.com/mull-project/mull/issues/932
-    diagnostics.warning("Skipping. Executable is not an object file: "s +
-                        llvm::toString(std::move(error)) + ": " + path);
+  auto [buffer, objectFile] = loadObjectFile(diagnostics, path);
+  if (!objectFile) {
     return false;
   }
 
-  for (auto &section : (*maybeObject)->sections()) {
+  for (auto &section : objectFile->sections()) {
     if (getSectionName(section).endswith("llvm_covmap")) {
       return true;
     }

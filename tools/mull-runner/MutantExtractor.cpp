@@ -1,5 +1,5 @@
 #include "MutantExtractor.h"
-#include <iostream>
+#include "ObjectFile.h"
 #include <llvm/Object/ObjectFile.h>
 #include <sstream>
 #include <unordered_set>
@@ -30,30 +30,11 @@ static std::vector<std::string> split(const std::string &input, char delimiter) 
 MutantExtractor::MutantExtractor(Diagnostics &diagnostics) : diagnostics(diagnostics) {}
 
 std::vector<std::string> MutantExtractor::extractMutants(const std::string &executable) {
-  llvm::ErrorOr<std::unique_ptr<llvm::MemoryBuffer>> maybeBuffer =
-      llvm::MemoryBuffer::getFile(executable);
-  if (!maybeBuffer) {
-    diagnostics.error("Cannot read executable: "s + maybeBuffer.getError().message() + ": " +
-                      executable);
+  auto [buffer, objectFile] = loadObjectFile(diagnostics, executable);
+  if (!objectFile) {
+    diagnostics.warning("Skipping: "s + executable);
     return {};
   }
-  llvm::MemoryBuffer *buffer = maybeBuffer->get();
-  llvm::Expected<std::unique_ptr<llvm::object::ObjectFile>> maybeObject =
-      llvm::object::ObjectFile::createObjectFile(buffer->getMemBufferRef());
-  if (!maybeObject) {
-    llvm::Error error = maybeObject.takeError();
-    /// On older versions of macOS we fail to load certain system libraries because they are fat
-    /// libraries On newer versions of macOS we never reach this line because the system libraries
-    /// live in cache and cannot be read from FS This should be an error, but we relax it to a
-    /// warning to not fail on macOS
-    /// TODO: we should probably add support for universal binaries at some point
-    /// https://github.com/mull-project/mull/issues/932
-    diagnostics.warning("Skipping. Executable is not an object file: "s +
-                        llvm::toString(std::move(error)) + ": " + executable);
-    return {};
-  }
-
-  llvm::object::ObjectFile *objectFile = maybeObject->get();
   for (auto &section : objectFile->sections()) {
     llvm::StringRef name = getSectionName(section);
     if (name.equals(".mull_mutants")) {
