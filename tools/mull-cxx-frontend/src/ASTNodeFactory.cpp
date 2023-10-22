@@ -28,13 +28,7 @@ clang::FunctionDecl *ASTNodeFactory::createFunctionDecl(std::string name,
 #endif
                                      false, /// bool isInlineSpecified = false,
                                      true,  /// bool hasWrittenPrototype = true,
-#if LLVM_VERSION_MAJOR >= 12
-                                     clang::ConstexprSpecKind::Unspecified
-#else
-                                     clang::CSK_unspecified /// ConstexprSpecKind ConstexprKind =
-                                                            /// CSK_unspecified
-#endif
-  );
+                                     clang::ConstexprSpecKind::Unspecified);
 }
 
 clang::IntegerLiteral *ASTNodeFactory::createIntegerLiteral(int value) {
@@ -70,7 +64,6 @@ clang::IfStmt *ASTNodeFactory::createIfStmt(clang::Expr *condExpr, clang::Stmt *
                                             clang::Stmt *elseStmt) {
   assert(condExpr);
   assert(thenStmt);
-#if LLVM_VERSION_MAJOR >= 12
   clang::IfStmt *ifStmt = clang::IfStmt::Create(context,
                                                 NULL_LOCATION,
 #if LLVM_VERSION_MAJOR > 13
@@ -86,10 +79,6 @@ clang::IfStmt *ASTNodeFactory::createIfStmt(clang::Expr *condExpr, clang::Stmt *
                                                 thenStmt,
                                                 NULL_LOCATION,
                                                 elseStmt);
-#else
-  clang::IfStmt *ifStmt = clang::IfStmt::Create(
-      context, NULL_LOCATION, false, nullptr, nullptr, condExpr, thenStmt, NULL_LOCATION, elseStmt);
-#endif
   return ifStmt;
 }
 
@@ -101,17 +90,8 @@ clang::ImplicitCastExpr *ASTNodeFactory::createImplicitCastExpr(clang::Expr *exp
                                                                 clang::QualType qualType,
                                                                 clang::CastKind castKind,
                                                                 clang::ExprValueKind valueKind) {
-  return clang::ImplicitCastExpr::Create(context,
-                                         qualType,
-                                         castKind,
-                                         expr,
-                                         nullptr,
-                                         valueKind
-#if LLVM_VERSION_MAJOR >= 12
-                                         ,
-                                         clang::FPOptionsOverride()
-#endif
-  );
+  return clang::ImplicitCastExpr::Create(
+      context, qualType, castKind, expr, nullptr, valueKind, clang::FPOptionsOverride());
 }
 
 clang::UnaryOperator *ASTNodeFactory::createUnaryOperator(clang::UnaryOperator::Opcode opcode,
@@ -174,12 +154,8 @@ clang::CallExpr *ASTNodeFactory::createCallExprSingleArg(clang::Expr *function,
                                                       { argument },
                                                       returnType,
                                                       valueKind,
-                                                      NULL_LOCATION
-#if LLVM_VERSION_MAJOR >= 12
-                                                      ,
-                                                      clang::FPOptionsOverride()
-#endif
-  );
+                                                      NULL_LOCATION,
+                                                      clang::FPOptionsOverride());
 
   return callExpr;
 }

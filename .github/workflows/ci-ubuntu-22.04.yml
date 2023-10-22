@@ -19,7 +19,7 @@ jobs:
     container: ubuntu:22.04
     strategy:
       matrix:
-        LLVM_VERSION: [11, 13, 14, 15]
+        LLVM_VERSION: [13, 14, 15]
     env:
       DISTR_REPO: "ubuntu/jammy"
       DEBIAN_FRONTEND: noninteractive

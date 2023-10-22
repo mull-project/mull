@@ -7,11 +7,11 @@ SDKROOT: /
 llvm_mapping:
   macos:
     "16":
-      cmake_search_paths: "/usr/local/opt/llvm/lib/cmake/llvm/;/usr/local/opt/llvm/lib/cmake/clang/"
+      cmake_search_paths: "/usr/local/opt/llvm@16/lib/cmake/llvm/;/usr/local/opt/llvm@16/lib/cmake/clang/"
       packages:
-        - llvm
-      cmake_cc: /usr/local/opt/llvm/bin/clang
-      cmake_cxx: /usr/local/opt/llvm/bin/clang++
+        - llvm@16
+      cmake_cc: /usr/local/opt/llvm@16/bin/clang
+      cmake_cxx: /usr/local/opt/llvm@16/bin/clang++
     "15":
       cmake_search_paths: "/usr/local/opt/llvm@15/lib/cmake/llvm/;/usr/local/opt/llvm@15/lib/cmake/clang/"
       packages:
@@ -36,12 +36,6 @@ llvm_mapping:
         - llvm@12
       cmake_cc: /usr/local/opt/llvm@12/bin/clang
       cmake_cxx: /usr/local/opt/llvm@12/bin/clang++
-    "11":
-      cmake_search_paths: "/usr/local/opt/llvm@11/lib/cmake/llvm/;/usr/local/opt/llvm@11/lib/cmake/clang/"
-      packages:
-        - llvm@11
-      cmake_cc: /usr/local/opt/llvm@11/bin/clang
-      cmake_cxx: /usr/local/opt/llvm@11/bin/clang++
 
   ubuntu:
     "15":
@@ -84,16 +78,6 @@ llvm_mapping:
         - clang-12
       cmake_cc: clang-12
       cmake_cxx: clang++-12
-    "11":
-      cmake_search_paths: "/usr/lib/llvm-11/cmake/;/usr/lib/cmake/clang-11/"
-      packages:
-        - llvm-11-dev
-        - libclang-11-dev
-        - libc++-11-dev
-        - libc++abi-11-dev
-        - clang-11
-      cmake_cc: clang-11
-      cmake_cxx: clang++-11
 
 source_dir: "{{ working_dir }}/mull"
 debug_build_dir: "{{ working_dir }}/build.mull.debug.dir"
@@ -108,5 +92,5 @@ cmake_search_paths: "{{ llvm_mapping[platform][llvm_version].cmake_search_paths 
 llvm_packages: "{{ llvm_mapping[platform][llvm_version].packages }}"
 cmake_c_compiler: "{{ llvm_mapping[platform][llvm_version].cmake_cc }}"
 cmake_cxx_compiler: "{{ llvm_mapping[platform][llvm_version].cmake_cxx }}"
-test_opt_level: "{{ '-O0' if llvm_version | int > 11 else '-O1' }}"
+pass_manager_flag: "{{ '' if llvm_version | int > 15 else '-fexperimental-new-pass-manager' }}"
 test_mull_config: "{{ source_dir }}/infrastructure/helpers/mull.yml"

@@ -22,7 +22,7 @@
       - cmake
       - -G
       - Ninja
-      - -DCMAKE_CXX_FLAGS={{ test_opt_level }} -grecord-command-line -fexperimental-new-pass-manager -fpass-plugin=/usr/local/lib/mull-ir-frontend-{{ llvm_version }} --sysroot={{ SDKROOT }}
+      - -DCMAKE_CXX_FLAGS={{ pass_manager_flag }} -grecord-command-line -fpass-plugin=/usr/local/lib/mull-ir-frontend-{{ llvm_version }} --sysroot={{ SDKROOT }}
       - -DCMAKE_BUILD_TYPE=Debug
       - -DCMAKE_C_COMPILER={{ cmake_c_compiler }}
       - -DCMAKE_CXX_COMPILER={{ cmake_cxx_compiler }}
@@ -58,9 +58,8 @@
       - ./config
       - -g
       - -O0
-      - "{{ test_opt_level }}"
       - -grecord-command-line
-      - -fexperimental-new-pass-manager
+      - "{{ pass_manager_flag }}"
       - -fpass-plugin=/usr/local/lib/mull-ir-frontend-{{ llvm_version }}
       - --sysroot={{ SDKROOT }}
     chdir: "{{ working_dir }}/integration/openssl"

@@ -69,15 +69,11 @@ clang::IfStmt *ClangASTMutator::createMutatedStatement(clang::Stmt *oldStmt, cla
                                       getenvCallExpr,
                                       nullptr,
 #if LLVM_VERSION_MAJOR >= 13
-                                      clang::VK_PRValue
+                                      clang::VK_PRValue,
 #else
-                                      clang::VK_RValue
+                                      clang::VK_RValue,
 #endif
-#if LLVM_VERSION_MAJOR >= 12
-                                      ,
-                                      clang::FPOptionsOverride()
-#endif
-      );
+                                      clang::FPOptionsOverride());
 
   std::vector<clang::Stmt *> thenStmtsVec = {};
   if (newStmt) {
@@ -119,15 +115,11 @@ clang::ConditionalOperator *ClangASTMutator::createMutatedExpression(clang::Expr
                                       mullShouldMutateCallExpr,
                                       nullptr,
 #if LLVM_VERSION_MAJOR >= 13
-                                      clang::VK_PRValue
+                                      clang::VK_PRValue,
 #else
-                                      clang::VK_RValue
+                                      clang::VK_RValue,
 #endif
-#if LLVM_VERSION_MAJOR >= 12
-                                      ,
-                                      clang::FPOptionsOverride()
-#endif
-      );
+                                      clang::FPOptionsOverride());
 
   clang::ConditionalOperator *conditionalOperator =
       new (context) clang::ConditionalOperator(implicitCastExpr3,
@@ -183,15 +175,11 @@ clang::CallExpr *ClangASTMutator::createGetenvCallExpr(std::string identifier) {
                                       stringLiteral,
                                       nullptr,
 #if LLVM_VERSION_MAJOR >= 13
-                                      clang::VK_PRValue
+                                      clang::VK_PRValue,
 #else
-                                      clang::VK_RValue
+                                      clang::VK_RValue,
 #endif
-#if LLVM_VERSION_MAJOR >= 12
-                                      ,
-                                      clang::FPOptionsOverride()
-#endif
-      );
+                                      clang::FPOptionsOverride());
 
   clang::CallExpr *callExpr = factory.createCallExprSingleArg(implicitCastExpr,
                                                               implicitCastExpr2,
