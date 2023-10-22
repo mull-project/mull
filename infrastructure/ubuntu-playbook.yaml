@@ -23,6 +23,7 @@
       - binutils
       - liblzma-dev
       - python3-pip
+      - cmake
 
   vars_files:
     - helpers/variables.yaml
@@ -50,19 +51,6 @@
           - filecheck==0.0.23
           - cloudsmith-cli==0.42.0
         executable: pip3
-
-    - name: Download CMake
-      get_url:
-        url: https://github.com/Kitware/CMake/releases/download/v3.16.9/cmake-3.16.9-Linux-x86_64.sh
-        dest: "{{ working_dir }}/cmake.sh"
-      register: download_cmake
-
-    - name: Install CMake
-      shell: sh {{ working_dir }}/cmake.sh --prefix=/usr/local --skip-license
-      args:
-        creates: /usr/local/bin/cmake
-      when: download_cmake.changed
-      become: true
 
     - name: Build Mull
       include: helpers/build-mull.yaml
