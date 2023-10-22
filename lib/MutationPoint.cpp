@@ -49,24 +49,24 @@ int MutationPointAddress::getIIndex() const {
 }
 
 template <typename Container, typename Value>
-static size_t getIndex(Container &container, Value *value) {
+static size_t getIndex(const Container &container, Value *value) {
+  // LLVM's begin/end don't play well with std::find, so handcrafting the find here
   size_t index = 0;
-  auto begin = container.begin();
-  auto end = container.end();
-  for (; begin != end; begin++, index++) {
-    if (&*begin == value) {
+  for (auto &val : *container) {
+    if (&val == value) {
       break;
     }
+    index++;
   }
+  assert(index < container->size() && "Value not found in the container");
   return index;
 }
 
 MutationPointAddress
 MutationPointAddress::addressFromInstruction(const llvm::Instruction *instruction) {
-  return MutationPointAddress(
-      getIndex(instruction->getModule()->getFunctionList(), instruction->getFunction()),
-      getIndex(instruction->getFunction()->getBasicBlockList(), instruction->getParent()),
-      getIndex(instruction->getParent()->getInstList(), instruction));
+  return MutationPointAddress(getIndex(instruction->getModule(), instruction->getFunction()),
+                              getIndex(instruction->getFunction(), instruction->getParent()),
+                              getIndex(instruction->getParent(), instruction));
 }
 
 MutationPoint::MutationPoint(Mutator *mutator, irm::IRMutation *irMutator,

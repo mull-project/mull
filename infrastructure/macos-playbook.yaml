@@ -26,10 +26,6 @@
     - helpers/variables.yaml
 
   tasks:
-    - name: Change Xcode
-      command: xcode-select --switch /Applications/Xcode_13.0.app/Contents/Developer
-      become: true
-
     - name: Prepare Working Directory
       include: helpers/working-directory.yaml
 

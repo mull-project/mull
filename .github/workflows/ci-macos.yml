@@ -15,10 +15,10 @@ on:
 jobs:
   macos-11:
     name: LLVM ${{ matrix.LLVM_VERSION }}
-    runs-on: macos-11
+    runs-on: macos-12
     strategy:
       matrix:
-        LLVM_VERSION: [11, 12, 13, 14]
+        LLVM_VERSION: [12, 13, 14, 16]
 
     steps:
       - name: Debugging

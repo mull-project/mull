@@ -19,7 +19,7 @@ jobs:
     container: ubuntu:20.04
     strategy:
       matrix:
-        LLVM_VERSION: [11, 12]
+        LLVM_VERSION: [12]
     env:
       DISTR_REPO: "ubuntu/focal"
       DEBIAN_FRONTEND: noninteractive

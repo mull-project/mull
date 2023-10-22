@@ -26,12 +26,10 @@ llvmGetPassPluginInfo() {
            "mull-ir-frontend",
            LLVM_VERSION_STRING,
            [](llvm::PassBuilder &PB) {
-             PB.registerPipelineStartEPCallback([](llvm::ModulePassManager &modulePassManager
-#if LLVM_VERSION_MAJOR > 11
-                                                   ,
-                                                   OptimizationLevel optimizationLevel
-#endif
-                                                ) { modulePassManager.addPass(MullIRFrontend()); });
+             PB.registerPipelineStartEPCallback([](llvm::ModulePassManager &modulePassManager,
+                                                   OptimizationLevel optimizationLevel) {
+               modulePassManager.addPass(MullIRFrontend());
+             });
            } };
 }
 
