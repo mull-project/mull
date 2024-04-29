@@ -250,7 +250,7 @@ ThreadSafeASTUnit *ASTStorage::findAST(const std::string &sourceFile) {
     diagnostics.warning(message.str());
   }
 
-  auto threadSafeAST = new ThreadSafeASTUnit(std::unique_ptr<clang::ASTUnit>(ast));
+  auto threadSafeAST = new ThreadSafeASTUnit(std::unique_ptr<clang::ASTUnit>(std::move(ast)));
   astUnits[sourceFile] = std::unique_ptr<ThreadSafeASTUnit>(threadSafeAST);
   return threadSafeAST;
 }

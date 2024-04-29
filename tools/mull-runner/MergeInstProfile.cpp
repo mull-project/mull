@@ -5,11 +5,19 @@
 #include <llvm/ProfileData/InstrProfWriter.h>
 #include <llvm/Support/raw_ostream.h>
 
+#if LLVM_VERSION_MAJOR >= 17
+#include <llvm/Support/VirtualFileSystem.h>
+#endif
+
 using namespace std::string_literals;
 
 bool mull::mergeRawInstProfile(Diagnostics &diagnostics, const std::string &input,
                                const std::string &output) {
-  auto maybeReader = llvm::InstrProfReader::create(input);
+  auto maybeReader = llvm::InstrProfReader::create(input
+#if LLVM_VERSION_MAJOR >= 17
+      , *llvm::vfs::getRealFileSystem()
+#endif
+  );
   if (!maybeReader) {
     diagnostics.warning("cannot read raw profile data: "s +
                         llvm::toString(maybeReader.takeError()));
