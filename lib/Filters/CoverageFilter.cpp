@@ -4,6 +4,10 @@
 #include "mull/Mutant.h"
 #include <llvm/ProfileData/Coverage/CoverageMapping.h>
 
+#if LLVM_VERSION_MAJOR >= 17
+#include <llvm/Support/VirtualFileSystem.h>
+#endif
+
 using namespace mull;
 
 static std::unique_ptr<llvm::coverage::CoverageMapping>
@@ -17,8 +21,13 @@ loadCoverage(const Configuration &configuration, Diagnostics &diagnostics,
   for (auto &object : objects) {
     objectFiles.emplace_back(object);
   }
+
   llvm::Expected<std::unique_ptr<llvm::coverage::CoverageMapping>> maybeMapping =
-      llvm::coverage::CoverageMapping::load(objectFiles, profileName);
+    llvm::coverage::CoverageMapping::load(objectFiles, profileName
+#if LLVM_VERSION_MAJOR >= 17
+      , *llvm::vfs::getRealFileSystem()
+#endif
+    );
   if (!maybeMapping) {
     std::string error;
     llvm::raw_string_ostream os(error);

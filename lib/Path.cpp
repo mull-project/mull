@@ -1,5 +1,6 @@
 #include "mull/Path.h"
 
+#include <limits.h>
 #include <llvm/Support/Path.h>
 #include <llvm/Support/FileSystem.h>
 

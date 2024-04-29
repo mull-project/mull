@@ -164,7 +164,9 @@ clang::SectionAttr *ASTNodeFactory::createSectionAttr(std::string sectionName) {
   return clang::SectionAttr::Create(context,
                                     sectionName,
                                     clang::SourceRange(),
+#if LLVM_VERSION_MAJOR < 17
                                     clang::AttributeCommonInfo::Syntax::AS_GNU,
+#endif
                                     clang::SectionAttr::Spelling::SpellingNotCalculated);
 }
 
