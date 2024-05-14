@@ -14,20 +14,17 @@
     mull_cxx_flags: ""
 
     packages:
-      - cmake
       - zlib
       - ncurses
       - sqlite
       - ninja
-      - gnu-tar
-      - python3
 
   vars_files:
     - helpers/variables.yaml
 
   tasks:
     - name: Prepare Working Directory
-      include: helpers/working-directory.yaml
+      include_tasks: helpers/working-directory.yaml
 
     - name: Install Required Packages
       homebrew:
@@ -39,25 +36,11 @@
         name: "{{ llvm_packages }}"
         state: present
 
-    - name: Install Python dependencies
-      pip:
-        name:
-          - lit==16.0.1
-          - filecheck==0.0.23
-          - cloudsmith-cli==0.42.0
-        executable: pip3
-
-    - name: Create a symbolic link for gnu-tar
-      file:
-        src: /usr/local/bin/gtar
-        dest: /usr/local/bin/tar
-        state: link
-
     - name: Build Mull
-      include: helpers/build-mull.yaml
+      include_tasks: helpers/build-mull.yaml
 
     - name: LIT Tests
-      include: helpers/lit-tests.yaml
+      include_tasks: helpers/lit-tests.yaml
 
     - name: Integration Tests
-      include: helpers/integration-tests.yaml
+      include_tasks: helpers/integration-tests.yaml

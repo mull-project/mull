@@ -7,35 +7,35 @@ SDKROOT: /
 llvm_mapping:
   macos:
     "16":
-      cmake_search_paths: "/usr/local/opt/llvm@16/lib/cmake/llvm/;/usr/local/opt/llvm@16/lib/cmake/clang/"
+      cmake_search_paths: "/opt/homebrew/opt/llvm@16/lib/cmake/llvm/;/opt/homebrew/opt/llvm@16/lib/cmake/clang/"
       packages:
         - llvm@16
-      cmake_cc: /usr/local/opt/llvm@16/bin/clang
-      cmake_cxx: /usr/local/opt/llvm@16/bin/clang++
+      cmake_cc: /opt/homebrew/opt/llvm@16/bin/clang
+      cmake_cxx: /opt/homebrew/opt/llvm@16/bin/clang++
     "15":
-      cmake_search_paths: "/usr/local/opt/llvm@15/lib/cmake/llvm/;/usr/local/opt/llvm@15/lib/cmake/clang/"
+      cmake_search_paths: "/opt/homebrew/opt/llvm@15/lib/cmake/llvm/;/opt/homebrew/opt/llvm@15/lib/cmake/clang/"
       packages:
         - llvm@15
-      cmake_cc: /usr/local/opt/llvm@15/bin/clang
-      cmake_cxx: /usr/local/opt/llvm@15/bin/clang++
+      cmake_cc: /opt/homebrew/opt/llvm@15/bin/clang
+      cmake_cxx: /opt/homebrew/opt/llvm@15/bin/clang++
     "14":
-      cmake_search_paths: "/usr/local/opt/llvm@14/lib/cmake/llvm/;/usr/local/opt/llvm@14/lib/cmake/clang/"
+      cmake_search_paths: "/opt/homebrew/opt/llvm@14/lib/cmake/llvm/;/opt/homebrew/opt/llvm@14/lib/cmake/clang/"
       packages:
         - llvm@14
-      cmake_cc: /usr/local/opt/llvm@14/bin/clang
-      cmake_cxx: /usr/local/opt/llvm@14/bin/clang++
+      cmake_cc: /opt/homebrew/opt/llvm@14/bin/clang
+      cmake_cxx: /opt/homebrew/opt/llvm@14/bin/clang++
     "13":
-      cmake_search_paths: "/usr/local/opt/llvm@13/lib/cmake/llvm/;/usr/local/opt/llvm@13/lib/cmake/clang/"
+      cmake_search_paths: "/opt/homebrew/opt/llvm@13/lib/cmake/llvm/;/opt/homebrew/opt/llvm@13/lib/cmake/clang/"
       packages:
         - llvm@13
-      cmake_cc: /usr/local/opt/llvm@13/bin/clang
-      cmake_cxx: /usr/local/opt/llvm@13/bin/clang++
+      cmake_cc: /opt/homebrew/opt/llvm@13/bin/clang
+      cmake_cxx: /opt/homebrew/opt/llvm@13/bin/clang++
     "12":
-      cmake_search_paths: "/usr/local/opt/llvm@12/lib/cmake/llvm/;/usr/local/opt/llvm@12/lib/cmake/clang/"
+      cmake_search_paths: "/opt/homebrew/opt/llvm@12/lib/cmake/llvm/;/opt/homebrew/opt/llvm@12/lib/cmake/clang/"
       packages:
         - llvm@12
-      cmake_cc: /usr/local/opt/llvm@12/bin/clang
-      cmake_cxx: /usr/local/opt/llvm@12/bin/clang++
+      cmake_cc: /opt/homebrew/opt/llvm@12/bin/clang
+      cmake_cxx: /opt/homebrew/opt/llvm@12/bin/clang++
 
   ubuntu:
     "15":
