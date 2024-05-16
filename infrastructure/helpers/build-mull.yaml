@@ -1,4 +1,9 @@
 ---
+- name: Install Python dependencies
+  pip:
+    requirements: "{{ source_dir }}/requirements.txt"
+    executable: pip3
+
 - name: Clone Mull's sources
   git:
     repo: "{{ repo_url }}"

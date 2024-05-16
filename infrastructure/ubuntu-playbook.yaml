@@ -30,7 +30,7 @@
 
   tasks:
     - name: Prepare Working Directory
-      include: helpers/working-directory.yaml
+      include_tasks: helpers/working-directory.yaml
 
     - name: Install Required Packages
       apt:
@@ -44,19 +44,11 @@
         state: present
       become: true
 
-    - name: Install Python dependencies
-      pip:
-        name:
-          - lit==16.0.1
-          - filecheck==0.0.23
-          - cloudsmith-cli==0.42.0
-        executable: pip3
-
     - name: Build Mull
-      include: helpers/build-mull.yaml
+      include_tasks: helpers/build-mull.yaml
 
     - name: LIT Tests
-      include: helpers/lit-tests.yaml
+      include_tasks: helpers/lit-tests.yaml
 
     - name: Integration Tests
-      include: helpers/integration-tests.yaml
+      include_tasks: helpers/integration-tests.yaml
