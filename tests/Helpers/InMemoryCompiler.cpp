@@ -52,7 +52,13 @@ std::unique_ptr<llvm::Module> InMemoryCompiler::compile(const std::string &code,
   auto &headerSearchOptions = compilerInvocation.getHeaderSearchOpts();
   headerSearchOptions.Verbose = false;
   auto &codeGenOptions = compilerInvocation.getCodeGenOpts();
-  codeGenOptions.setDebugInfo(llvm::codegenoptions::FullDebugInfo);
+  codeGenOptions.setDebugInfo(
+#if LLVM_VERSION_MAJOR >= 17
+    llvm::codegenoptions::FullDebugInfo
+#else
+    clang::codegenoptions::FullDebugInfo
+#endif
+  );
   codeGenOptions.DebugColumnInfo = 1;
   codeGenOptions.DebugCompilationDir = "/";
   codeGenOptions.MainFileName = "/in-memory-file.cc";
