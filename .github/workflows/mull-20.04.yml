@@ -1,8 +1,5 @@
 name: Mull (20.04)
 
-env:
-  DISTR_REPO: "ubuntu/focal"
-
 on:
   pull_request:
 

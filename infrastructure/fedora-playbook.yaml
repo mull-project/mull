@@ -52,4 +52,3 @@
 
     - name: Integration Tests
       include: helpers/integration-tests.yaml
-

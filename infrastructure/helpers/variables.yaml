@@ -38,6 +38,26 @@ llvm_mapping:
       cmake_cxx: /opt/homebrew/opt/llvm@12/bin/clang++
 
   ubuntu:
+    "17":
+      cmake_search_paths: "/usr/lib/llvm-17/cmake/;/usr/lib/cmake/clang-17/"
+      packages:
+        - llvm-17-dev
+        - libclang-17-dev
+        - libc++-17-dev
+        - libc++abi-17-dev
+        - clang-17
+      cmake_cc: clang-17
+      cmake_cxx: clang++-17
+    "16":
+      cmake_search_paths: "/usr/lib/llvm-16/cmake/;/usr/lib/cmake/clang-16/"
+      packages:
+        - llvm-16-dev
+        - libclang-16-dev
+        - libc++-16-dev
+        - libc++abi-16-dev
+        - clang-16
+      cmake_cc: clang-16
+      cmake_cxx: clang++-16
     "15":
       cmake_search_paths: "/usr/lib/llvm-15/cmake/;/usr/lib/cmake/clang-15/"
       packages:
