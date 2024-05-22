@@ -23,8 +23,8 @@ RUN: cd %S && env MULL_CONFIG=%S/mull.no_flag.yml %clang_cxx %sysroot -O0 %pass_
 RUN: %mull_runner -ide-reporter-show-killed %s-ir-no-flag.exe 2>&1 | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-JUNK-DETECTION-NO-FLAG
 
 WITH-JUNK-DETECTION-NO-FLAG-MUTATE:{{^.*}}sample.cpp:2:2: error: "FLAG is not defined"
-WITH-JUNK-DETECTION-NO-FLAG-MUTATE:#error "FLAG is not defined"
-WITH-JUNK-DETECTION-NO-FLAG-MUTATE: ^
+WITH-JUNK-DETECTION-NO-FLAG-MUTATE:{{^.*}}#error "FLAG is not defined"
+WITH-JUNK-DETECTION-NO-FLAG-MUTATE:{{^.*}} ^
 WITH-JUNK-DETECTION-NO-FLAG-MUTATE:[warning] Cannot parse file: '{{.*}}sample.cpp':
 WITH-JUNK-DETECTION-NO-FLAG-MUTATE:mull {{.*}}sample.cpp{{.*}}
 WITH-JUNK-DETECTION-NO-FLAG-MUTATE:Make sure that the flags provided to Mull are the same flags that are used for normal compilation.

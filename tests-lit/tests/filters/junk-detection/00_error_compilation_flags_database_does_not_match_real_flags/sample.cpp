@@ -30,8 +30,8 @@ RUN: %mull_runner %s-ir-with-flag.exe -reporters=IDE -ide-reporter-show-killed 2
 WITHOUT-JUNK-DETECTION:{{^.*}}sample.cpp:5:13: warning: Survived: Removed the call to the function [cxx_remove_void_call]{{$}}
 
 WITH-JUNK-DETECTION-NO-FLAG-MUTATE:{{^.*}}sample.cpp:2:2: error: "FLAG is not defined"
-WITH-JUNK-DETECTION-NO-FLAG-MUTATE:#error "FLAG is not defined"
-WITH-JUNK-DETECTION-NO-FLAG-MUTATE: ^
+WITH-JUNK-DETECTION-NO-FLAG-MUTATE:{{^.*}}#error "FLAG is not defined"
+WITH-JUNK-DETECTION-NO-FLAG-MUTATE:{{^.*}} ^
 WITH-JUNK-DETECTION-NO-FLAG-MUTATE:[warning] Cannot parse file: '{{.*}}sample.cpp':
 WITH-JUNK-DETECTION-NO-FLAG-MUTATE:cc {{.*}}sample.cpp{{.*}}
 WITH-JUNK-DETECTION-NO-FLAG-MUTATE:Make sure that the flags provided to Mull are the same flags that are used for normal compilation.
