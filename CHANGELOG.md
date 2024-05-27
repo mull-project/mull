@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.22.0] - 27 May 2024
+
+- LLVM 17 support (by [rjaegers](https://github.com/rjaegers)) [#1045](https://github.com/mull-project/mull/pull/1045)
+- Packages for Ubuntu 24.04 (by [rjaegers](https://github.com/rjaegers)) [#1048](https://github.com/mull-project/mull/pull/1048)
+- Better support for universal binaries on macOS [#1038](https://github.com/mull-project/mull/pull/1038)
+
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2023-07-01..2024-05-27)
+
 ## [0.21.1] - 30 Jun 2023
 
 - No real changes, just added Ubuntu 22.04 packages [#1015](https://github.com/mull-project/mull/pull/1015)
@@ -81,13 +89,13 @@ Mull switches to the new model - compiler plugin called [Mull IR Frontend](https
 - Drop LLVM 7 [#936](https://github.com/mull-project/mull/pull/936)
 - Drop LLVM 8 [#942](https://github.com/mull-project/mull/pull/942)
 - Fix a bug in `mull-runner` with duplicated mutants from templates [#940](https://github.com/mull-project/mull/pull/940)
-- Fix a bug with junk detection when the code is located in symlinked folders [#943](https://github.com/mull-project/mull/pull/943) 
+- Fix a bug with junk detection when the code is located in symlinked folders [#943](https://github.com/mull-project/mull/pull/943)
 - [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2021-12-21..2022-01-20)
 
 ## [0.14.0] - 20 Dec 2021
 
 - Mutants are now also extracted from dependent dynamic libraries [#903](https://github.com/mull-project/mull/issues/903) [#931](https://github.com/mull-project/mull/pull/931)
-- Fixed linking by deferring object code lowering to external compiler instead of using (mostly) incorrect defaults [#929](https://github.com/mull-project/mull/pull/929) 
+- Fixed linking by deferring object code lowering to external compiler instead of using (mostly) incorrect defaults [#929](https://github.com/mull-project/mull/pull/929)
 - Added warning if number of workers specified exceeds available CPU cores (by [Matthias Bilger](https://github.com/m42e)) [#928](https://github.com/mull-project/mull/pull/928)
 - Most of the Ubuntu packages now built against the official LLVM/Clang instead of precompiled ones [#926](https://github.com/mull-project/mull/pull/926)
 - [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2021-11-24..2021-12-18)
@@ -227,7 +235,7 @@ Actual changelog:
  - Removed the old driver (`mull-driver`) #612
  - Added LLVM 9 support #609
  - Fixed a bug when even junk mutations were applied, resulting in a longer execution time #595
- - Sped up junk detection by an order of magnitude #582 
+ - Sped up junk detection by an order of magnitude #582
  - [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2019-08-29..2019-12-04)
 
 ## [0.5.0] - 28 Aug 2019

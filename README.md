@@ -19,17 +19,17 @@ Here is the starting point: [CONTRIBUTING.md](CONTRIBUTING.md)
 [Mull it over: mutation testing based on LLVM (preprint)](https://lowlevelbits.org/pdfs/Mull_Mutation_2018.pdf)
 
 ```
-@INPROCEEDINGS{8411727, 
-author={A. Denisov and S. Pankevich}, 
-booktitle={2018 IEEE International Conference on Software Testing, Verification and Validation Workshops (ICSTW)}, 
-title={Mull It Over: Mutation Testing Based on LLVM}, 
-year={2018}, 
-volume={}, 
-number={}, 
-pages={25-31}, 
-keywords={just-in-time;program compilers;program testing;program verification;mutations;Mull;LLVM IR;mutated programs;compiled programming languages;LLVM framework;LLVM JIT;tested program;mutation testing tool;Testing;Tools;Computer languages;Instruments;Runtime;Computer crashes;Open source software;mutation testing;llvm}, 
-doi={10.1109/ICSTW.2018.00024}, 
-ISSN={}, 
+@INPROCEEDINGS{8411727,
+author={A. Denisov and S. Pankevich},
+booktitle={2018 IEEE International Conference on Software Testing, Verification and Validation Workshops (ICSTW)},
+title={Mull It Over: Mutation Testing Based on LLVM},
+year={2018},
+volume={},
+number={},
+pages={25-31},
+keywords={just-in-time;program compilers;program testing;program verification;mutations;Mull;LLVM IR;mutated programs;compiled programming languages;LLVM framework;LLVM JIT;tested program;mutation testing tool;Testing;Tools;Computer languages;Instruments;Runtime;Computer crashes;Open source software;mutation testing;llvm},
+doi={10.1109/ICSTW.2018.00024},
+ISSN={},
 month={April},}
 ```
 
@@ -41,4 +41,4 @@ Hosting for precompiled packages is graciously provided by  [Cloudsmith](https:/
 
 ## Copyright
 
-Copyright (c) 2016-2022 Alex Denisov <alex@lowlevelbits.org> and Stanislav Pankevich <s.pankevich@gmail.com>. See LICENSE for details.
+Copyright (c) 2016-2024 Alex Denisov <alex@lowlevelbits.org> and Stanislav Pankevich <s.pankevich@gmail.com>. See LICENSE for details.

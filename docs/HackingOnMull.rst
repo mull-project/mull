@@ -71,7 +71,7 @@ LLVM
 ----
 
 You need LLVM to build and debug Mull.
-You can use any LLVM version between 12.0 and 16.0.
+You can use any LLVM version between 12.0 and 17.0.
 
 As of the version 0.14.0, Mull can be compiled against LLVM/Clang available
 through your package manager (e.g. apt or homebrew).
@@ -95,7 +95,7 @@ The ``cmake search paths`` should point to the LLVM/Clang CMake config folders.
 Some examples:
 
  - llvm\@12 installed via homebrew on macOS: ``"/usr/local/opt/llvm@12/lib/cmake/llvm/;/usr/local/opt/llvm@12/lib/cmake/clang/"``
- - llvm-12 installed via apt on Ubuntu: ``"/usr/lib/llvm-13/cmake/;/usr/lib/cmake/clang-13/"``
+ - llvm-12 installed via apt on Ubuntu: ``"/usr/lib/llvm-12/cmake/;/usr/lib/cmake/clang-12/"``
 
 If you are getting linker errors, then it is very likely related to the C++
 ABI. Depending on your OS/setup you may need to tweak the ``_GLIBCXX_USE_CXX11_ABI`` (0 or 1):

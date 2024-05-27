@@ -16,7 +16,7 @@ Please, refer to the `Hacking on Mull <HackingOnMull.html>`_ to build Mull from 
 Install on Ubuntu
 *****************
 
-Mull supports Ubuntu 18.04 and 20.04.
+Mull supports Ubuntu 20.04, 22.04 and 24.04.
 
 Setup apt-repository:
 
