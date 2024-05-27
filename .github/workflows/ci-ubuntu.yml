@@ -77,7 +77,7 @@ jobs:
             --verbose
 
       - name: Publish package
-        #if: env.CLOUDSMITH_API_KEY != null
+        if: env.CLOUDSMITH_API_KEY != null
         shell: bash
         run: |
           UBUNTU_CODENAME=$(. /etc/os-release; echo "${UBUNTU_CODENAME/*, /}")
