@@ -14,6 +14,7 @@ ReportersOption_();
 DebugEnabled_();
 StrictModeEnabled_();
 AllowSurvivingEnabled_();
+MutationScoreThreshold_();
 Timeout_();
 Workers_();
 NoOutput_();
