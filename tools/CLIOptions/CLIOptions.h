@@ -147,6 +147,14 @@ opt<bool> AllowSurvivingEnabled( \
     init(false), \
     cat(MullCategory)) \
 
+#define MutationScoreThreshold_() \
+opt<unsigned> MutationScoreThreshold( \
+    "mutation-score-threshold", \
+    desc("If mutation score falls under this threshold, and allow-surviving is not enabled, an error result code is returned"), \
+    Optional, \
+    init(100), \
+    cat(MullCategory)) \
+
 #define NoTestOutput_() \
 opt<bool> NoTestOutput( \
     "no-test-output", \

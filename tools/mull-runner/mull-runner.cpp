@@ -242,6 +242,22 @@ int main(int argc, char **argv) {
       return resPtr->getExecutionResult().status == mull::ExecutionStatus::Passed;
     });
 
+  // Calculate mutation score for later threshold comparison
+    int killedMutantsCount = 0;
+    int totalMutantsCount = 0;
+
+  for (auto &mutationResult : mutationResults) {
+    auto &executionResult = mutationResult->getExecutionResult();
+
+    totalMutantsCount++;
+    if ((executionResult.status != mull::ExecutionStatus::NotCovered) && (executionResult.status != mull::ExecutionStatus::Passed)) {
+      killedMutantsCount++;
+    }
+  }
+
+  auto rawScore = double(killedMutantsCount) / double(totalMutantsCount);
+  auto score = int(rawScore * 100);
+
   auto result =
       std::make_unique<mull::Result>(std::move(filteredMutants), std::move(mutationResults));
   for (auto &reporter : reporters) {
@@ -259,7 +275,11 @@ int main(int argc, char **argv) {
     stringstream << "Surviving mutants: " << surviving;
     diagnostics.info(stringstream.str());
 
-    if (!tool::AllowSurvivingEnabled) {
+    std::stringstream mutationScoreMsg;
+    mutationScoreMsg << "Mutation score threshold: " << tool::MutationScoreThreshold;
+    diagnostics.info(mutationScoreMsg.str());
+
+    if ((!tool::AllowSurvivingEnabled) && (tool::MutationScoreThreshold > score)) {
       return 1;
     }
   }
