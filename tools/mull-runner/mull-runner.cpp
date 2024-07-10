@@ -275,10 +275,6 @@ int main(int argc, char **argv) {
     stringstream << "Surviving mutants: " << surviving;
     diagnostics.info(stringstream.str());
 
-    std::stringstream mutationScoreMsg;
-    mutationScoreMsg << "Mutation score threshold: " << tool::MutationScoreThreshold;
-    diagnostics.info(mutationScoreMsg.str());
-
     if ((!tool::AllowSurvivingEnabled) && (tool::MutationScoreThreshold > score)) {
       return 1;
     }
