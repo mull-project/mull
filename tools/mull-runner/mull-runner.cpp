@@ -237,20 +237,21 @@ int main(int argc, char **argv) {
       mutantRunner.runMutants(testProgram, extraArgs, filteredMutants);
 
   // Count surviving mutants, for later
-  std::size_t surviving =
-    std::count_if(std::cbegin(mutationResults), std::cend(mutationResults), [](auto const& resPtr) {
-      return resPtr->getExecutionResult().status == mull::ExecutionStatus::Passed;
-    });
+  std::size_t surviving = std::count_if(
+      std::cbegin(mutationResults), std::cend(mutationResults), [](auto const &resPtr) {
+        return resPtr->getExecutionResult().status == mull::ExecutionStatus::Passed;
+      });
 
   // Calculate mutation score for later threshold comparison
-    int killedMutantsCount = 0;
-    int totalMutantsCount = 0;
+  int killedMutantsCount = 0;
+  int totalMutantsCount = 0;
 
   for (auto &mutationResult : mutationResults) {
     auto &executionResult = mutationResult->getExecutionResult();
 
     totalMutantsCount++;
-    if ((executionResult.status != mull::ExecutionStatus::NotCovered) && (executionResult.status != mull::ExecutionStatus::Passed)) {
+    if ((executionResult.status != mull::ExecutionStatus::NotCovered) &&
+        (executionResult.status != mull::ExecutionStatus::Passed)) {
       killedMutantsCount++;
     }
   }
