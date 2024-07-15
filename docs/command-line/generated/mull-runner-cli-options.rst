@@ -28,7 +28,9 @@
 
 --strict		Enables Strict Mode: all warning messages are treated as fatal errors
 
---allow-surviving	Do not treat mutants surviving as an error
+--allow-surviving		Do not treat mutants surviving as an error
+
+--mutation-score-threshold		If mutation score falls under this threshold, and allow-surviving is not enabled, an error result code is returned
 
 --no-test-output		Does not capture output from test runs
 
