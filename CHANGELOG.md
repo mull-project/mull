@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.23.0] - 15 Jul 2024
+
+- New CLI option `--mutation-score-threshold` (by [mpownby](https://github.com/mpownby)) [#1045](https://github.com/mull-project/mull/pull/1052)
+
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2024-05-28..2024-07-15)
+
 ## [0.22.0] - 27 May 2024
 
 - LLVM 17 support (by [rjaegers](https://github.com/rjaegers)) [#1045](https://github.com/mull-project/mull/pull/1045)
