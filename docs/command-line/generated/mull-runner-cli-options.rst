@@ -32,8 +32,6 @@
 
 --mutation-score-threshold		If mutation score falls under this threshold, and allow-surviving is not enabled, an error result code is returned
 
---no-test-output		Does not capture output from test runs
-
 --no-mutant-output		Does not capture output from mutant runs
 
 --no-output		Combines -no-test-output and -no-mutant-output

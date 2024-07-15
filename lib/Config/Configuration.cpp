@@ -5,10 +5,8 @@ namespace mull {
 int MullDefaultTimeoutMilliseconds = 3000;
 
 Configuration::Configuration()
-    : pathOnDisk(), debugEnabled(false), quiet(true), silent(false), dryRunEnabled(false),
-      captureTestOutput(true), captureMutantOutput(true), includeNotCovered(false),
-      junkDetectionDisabled(false), timeout(MullDefaultTimeoutMilliseconds),
-      diagnostics(IDEDiagnosticsKind::None),
-      parallelization(ParallelizationConfig::defaultConfig()) {}
+    : pathOnDisk(), captureMutantOutput(true), timeout(MullDefaultTimeoutMilliseconds) {
+  this->parallelization = ParallelizationConfig::defaultConfig();
+}
 
 } // namespace mull

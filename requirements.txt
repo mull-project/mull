@@ -1,3 +1,4 @@
 lit==18.1.4
 filecheck==0.0.24
 cloudsmith-cli==1.2.3
+dacite=1.8.1

@@ -155,14 +155,6 @@ opt<unsigned> MutationScoreThreshold( \
     init(100), \
     cat(MullCategory)) \
 
-#define NoTestOutput_() \
-opt<bool> NoTestOutput( \
-    "no-test-output", \
-    desc("Does not capture output from test runs"), \
-    Optional, \
-    init(false), \
-    cat(MullCategory)) \
-
 #define NoMutantOutput_() \
 opt<bool> NoMutantOutput( \
     "no-mutant-output", \

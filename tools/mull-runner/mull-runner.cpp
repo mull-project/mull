@@ -106,9 +106,6 @@ int main(int argc, char **argv) {
     configuration.parallelization = mull::ParallelizationConfig::defaultConfig();
   }
 
-  if (tool::NoTestOutput.getNumOccurrences() || tool::NoOutput.getNumOccurrences()) {
-    configuration.captureTestOutput = false;
-  }
   if (tool::NoMutantOutput.getNumOccurrences() || tool::NoOutput.getNumOccurrences()) {
     configuration.captureMutantOutput = false;
   }

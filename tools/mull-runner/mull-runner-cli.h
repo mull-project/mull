@@ -18,7 +18,6 @@ MutationScoreThreshold_();
 Timeout_();
 Workers_();
 NoOutput_();
-NoTestOutput_();
 NoMutantOutput_();
 ReportName_();
 ReportDirectory_();
@@ -50,7 +49,6 @@ void dumpCLIInterface(mull::Diagnostics &diagnostics) {
       &AllowSurvivingEnabled,
       &MutationScoreThreshold,
 
-      &NoTestOutput,
       &NoMutantOutput,
       &NoOutput,
 
