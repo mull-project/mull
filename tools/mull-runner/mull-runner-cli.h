@@ -48,6 +48,7 @@ void dumpCLIInterface(mull::Diagnostics &diagnostics) {
       &DebugEnabled,
       &StrictModeEnabled,
       &AllowSurvivingEnabled,
+      &MutationScoreThreshold,
 
       &NoTestOutput,
       &NoMutantOutput,
