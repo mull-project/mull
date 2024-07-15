@@ -1,0 +1,153 @@
+[
+  {
+    "type": "struct",
+    "name": "ParallelizationConfig",
+    "description": "Controls parallelization",
+    "fields": [
+      {
+        "name": "workers",
+        "type": "unsigned",
+        "description": "How many threads to use for mutation and execution"
+      },
+      {
+        "name": "executionWorkers",
+        "type": "unsigned",
+        "description": "How many threads to use for execution"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "DebugConfig",
+    "description": "Enables certain debug features",
+    "fields": [
+      {
+        "name": "printIR",
+        "type": "bool",
+        "description": "Prints LLVM IR before/after mutations into stderr"
+      },
+      {
+        "name": "printIRBefore",
+        "type": "bool",
+        "description": "Prints LLVM IR before mutations into stderr"
+      },
+      {
+        "name": "printIRAfter",
+        "type": "bool",
+        "description": "Prints LLVM IR after mutations into stderr"
+      },
+      {
+        "name": "printIRToFile",
+        "type": "bool",
+        "description": "Prints LLVM IR (before or after) into a file instead of stderr"
+      },
+      {
+        "name": "traceMutants",
+        "type": "bool",
+        "description": "Adds debug `printf`s into generated LLVM IR around mutations"
+      },
+      {
+        "name": "coverage",
+        "type": "bool",
+        "description": "Prints more debug output when `coverage` filter is enabled"
+      },
+      {
+        "name": "gitDiff",
+        "type": "bool",
+        "description": "Prints more debug output when `gitDiff` filter is enabled"
+      },
+      {
+        "name": "filters",
+        "type": "bool",
+        "description": "Prints more debug output for various filters"
+      },
+      {
+        "name": "slowIRVerification",
+        "type": "bool",
+        "description": "Turns on LLVM IR verification after each mutation is applied"
+      }
+    ]
+  },
+  {
+    "type": "struct",
+    "name": "Configuration",
+    "description": "Mull config",
+    "fields": [
+      {
+        "name": "debugEnabled",
+        "type": "bool",
+        "description": "Turns on debug output"
+      },
+      {
+        "name": "quiet",
+        "type": "bool",
+        "description": "Turns off any output except of warnings and errors"
+      },
+      {
+        "name": "silent",
+        "type": "bool",
+        "description": "Turns off any output"
+      },
+      {
+        "name": "includeNotCovered",
+        "type": "bool",
+        "description": "Controls whether `coverage` filter should skip mutants that are not covered. Disabled by default."
+      },
+      {
+        "name": "junkDetectionDisabled",
+        "type": "bool",
+        "description": "Controls whether `junk detection` filter is enabled or not. Enabled by default."
+      },
+      {
+        "name": "mutators",
+        "type": "std::vector<std::string>",
+        "description": "Controls which mutators to turn on"
+      },
+      {
+        "name": "ignoreMutators",
+        "type": "std::vector<std::string>",
+        "description": "Controls which mutators to turn off"
+      },
+      {
+        "name": "compilationDatabasePath",
+        "type": "std::string",
+        "description": "Path to the compilation database (compile_commands.json)"
+      },
+      {
+        "name": "compilerFlags",
+        "type": "std::vector<std::string>",
+        "description": "Additional compiler flags used for junk detection"
+      },
+      {
+        "name": "includePaths",
+        "type": "std::vector<std::string>",
+        "description": "Controls behavior of `file path` filter"
+      },
+      {
+        "name": "excludePaths",
+        "type": "std::vector<std::string>",
+        "description": "Controls behavior of `file path` filter"
+      },
+      {
+        "name": "parallelization",
+        "type": "ParallelizationConfig",
+        "description": "Controls parallelization (both mutation and mutant execution)"
+      },
+      {
+        "name": "gitDiffRef",
+        "type": "std::string",
+        "description": "Controls the git ref for `git diff` filter"
+      },
+      {
+        "name": "gitProjectRoot",
+        "type": "std::string",
+        "description": "Controls the git repo location for `git diff` filter"
+      },
+      {
+        "name": "debug",
+        "type": "DebugConfig",
+        "description": "Controls various debug options"
+      }
+    ]
+  }
+]
