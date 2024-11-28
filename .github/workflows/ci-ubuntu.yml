@@ -41,6 +41,9 @@ jobs:
           - OS_NAME: "ubuntu"
             OS_VERSION: "24.04"
             LLVM_VERSION: 17
+          - OS_NAME: "ubuntu"
+            OS_VERSION: "24.04"
+            LLVM_VERSION: 18
     name: Ubuntu ${{ matrix.OS_VERSION }} - LLVM ${{ matrix.LLVM_VERSION }}
     steps:
       - uses: actions/checkout@v4
