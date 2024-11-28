@@ -79,9 +79,15 @@ static void resolveResourceDir(Diagnostics &diagnostics, CompilationDatabase::Da
     }
     bool needsResourceDir = true;
     for (auto &flag : flags) {
-      if (llvm::StringRef(flag).endswith("-resource-dir")) {
+#if LLVM_VERSION_MAJOR < 19
+#define ends_with endswith
+#endif
+      if (llvm::StringRef(flag).ends_with("-resource-dir")) {
         needsResourceDir = false;
       }
+#if LLVM_VERSION_MAJOR < 19
+#undef ends_with
+#endif
     }
     if (!needsResourceDir) {
       continue;
