@@ -1,0 +1,18 @@
+{
+    "version": 8,
+    "configurePresets": [
+        {
+            "name": "Mull",
+            "displayName": "Mull",
+            "description": "Sets Ninja generator, build and install directory",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build.debug.dir/build",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_C_COMPILER" : "clang-12",
+                "CMAKE_CXX_COMPILER" : "clang++-12",
+                "CMAKE_INSTALL_PREFIX": "${sourceDir}/build.debug.dir/install"
+            }
+        }
+    ]
+}
