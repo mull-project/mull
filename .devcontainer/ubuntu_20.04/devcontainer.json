@@ -8,7 +8,8 @@
 		"ghcr.io/devcontainers/features/git:1": {},
 		"ghcr.io/devcontainers/features/python": {
 			"version": "3.11"
-		}
+		},
+		"ghcr.io/devcontainers-community/features/cmake": {}
 	},
 	"postCreateCommand": "infrastructure/devcontainer_post_create.sh 12",
 	"customizations": {
