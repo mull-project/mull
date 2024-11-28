@@ -159,7 +159,9 @@ clang::CallExpr *ClangASTMutator::createGetenvCallExpr(std::string identifier) {
   clang::StringLiteral *stringLiteral = clang::StringLiteral::Create(
       context,
       identifier,
-#if LLVM_VERSION_MAJOR >= 15
+#if LLVM_VERSION_MAJOR >= 18
+      clang::StringLiteralKind::Ordinary,
+#elif LLVM_VERSION_MAJOR >= 15
       clang::StringLiteral::StringKind::Ordinary,
 #else
       clang::StringLiteral::StringKind::Ascii,

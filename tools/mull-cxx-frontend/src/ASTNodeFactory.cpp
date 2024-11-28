@@ -50,7 +50,9 @@ clang::StringLiteral *ASTNodeFactory::createStringLiteral(std::string value) {
   return clang::StringLiteral::Create(
       context,
       value,
-#if LLVM_VERSION_MAJOR >= 15
+#if LLVM_VERSION_MAJOR >= 18
+      clang::StringLiteralKind::Ordinary,
+#elif LLVM_VERSION_MAJOR >= 15
       clang::StringLiteral::StringKind::Ordinary,
 #else
       clang::StringLiteral::StringKind::Ascii,
@@ -175,8 +177,12 @@ clang::QualType ASTNodeFactory::getStringLiteralArrayType(clang::QualType type, 
 }
 
 clang::QualType ASTNodeFactory::getConstantArrayType(clang::QualType type, unsigned size) {
-  return context.getConstantArrayType(
-      type, llvm::APInt(8, size + 1), nullptr, clang::ArrayType::ArraySizeModifier::Normal, 0);
+#if LLVM_VERSION_MAJOR >= 18
+  auto sizeModifier = clang::ArraySizeModifier::Normal;
+#else
+  auto sizeModifier = clang::ArrayType::ArraySizeModifier::Normal;
+#endif
+  return context.getConstantArrayType(type, llvm::APInt(8, size + 1), nullptr, sizeModifier, 0);
 }
 
 } // namespace cxx

@@ -8,7 +8,11 @@
 #include <clang/Lex/PreprocessorOptions.h>
 
 #include <llvm/IR/Module.h>
+#if LLVM_VERSION_MAJOR >= 18
+#include <llvm/TargetParser/Host.h>
+#else
 #include <llvm/Support/Host.h>
+#endif
 #include <llvm/Support/TargetSelect.h>
 
 using namespace mull_test;
@@ -39,10 +43,16 @@ std::unique_ptr<llvm::Module> InMemoryCompiler::compile(const std::string &code,
       compilerInvocation, args, clangCompilerInstance.getDiagnostics());
   /// Configure options
 
-  const auto languageOptions = compilerInvocation.getLangOpts();
+  auto languageOptions = compilerInvocation.getLangOpts();
+#if LLVM_VERSION_MAJOR >= 18
+  languageOptions.CPlusPlus = 1;
+  languageOptions.CPlusPlus11 = 1;
+  languageOptions.Bool = 1;
+#else
   languageOptions->CPlusPlus = 1;
   languageOptions->CPlusPlus11 = 1;
   languageOptions->Bool = 1;
+#endif
 
   /// auto& preprocessorOptions = compilerInvocation->getPreprocessorOpts();
   /// auto& targetOptions = compilerInvocation->getTargetOpts();

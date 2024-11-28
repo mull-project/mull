@@ -6,6 +6,12 @@ SDKROOT: /
 
 llvm_mapping:
   macos:
+    "18":
+      cmake_search_paths: "/opt/homebrew/opt/llvm@18/lib/cmake/llvm/;/opt/homebrew/opt/llvm@18/lib/cmake/clang/"
+      packages:
+        - llvm@18
+      cmake_cc: /opt/homebrew/opt/llvm@18/bin/clang
+      cmake_cxx: /opt/homebrew/opt/llvm@18/bin/clang++
     "17":
       cmake_search_paths: "/opt/homebrew/opt/llvm@17/lib/cmake/llvm/;/opt/homebrew/opt/llvm@17/lib/cmake/clang/"
       packages:
