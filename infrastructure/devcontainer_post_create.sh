@@ -3,7 +3,7 @@
 set -e
 set -x
 
-git submodules update --init --recursive
+git submodule update --init --recursive
 
 mkdir -p build.debug.dir
 cd build.debug.dir
