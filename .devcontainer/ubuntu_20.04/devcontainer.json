@@ -1,13 +1,8 @@
-// For format details, see https://aka.ms/devcontainer.json. For config options, see the
-// README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
 {
 	"name": "ubuntu:20.04-LLVM:12",
-	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
-	// "image": "mcr.microsoft.com/devcontainers/base:focal",
 	"build": {
 		"dockerfile": "Dockerfile"
 	},
-	// Features to add to the dev container. More info: https://containers.dev/features.
 	"features": {
 		"ghcr.io/devcontainers-extra/features/fish-apt-get:1": {},
 		"ghcr.io/devcontainers/features/git:1": {},
@@ -15,9 +10,7 @@
 			"version": "3.11"
 		}
 	},
-	// Use 'postCreateCommand' to run commands after the container is created.
 	"postCreateCommand": "infrastructure/devcontainer_post_create.sh 12",
-	// Configure tool-specific properties.
 	"customizations": {
 		"vscode": {
 			"extensions": [
