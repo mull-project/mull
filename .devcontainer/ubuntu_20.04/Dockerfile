@@ -6,3 +6,5 @@ RUN apt-get install -y vim wget ninja-build \
   ncurses-dev libstdc++6 \
   binutils liblzma-dev \
   cmake
+RUN llvm-12-dev libclang-12-dev libc++-12-dev \
+  libc++abi-12-dev clang-12
