@@ -30,6 +30,8 @@ jobs:
             LLVM_VERSION: 16
           - UBUNTU_VERSION: "24.04"
             LLVM_VERSION: 17
+          - UBUNTU_VERSION: "24.04"
+            LLVM_VERSION: 18
     env:
       DEBIAN_FRONTEND: noninteractive
       # Necessary for Ubuntu 24.04 since PEP 668
