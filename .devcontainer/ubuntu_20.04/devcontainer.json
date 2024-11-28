@@ -9,7 +9,12 @@
 		"ghcr.io/devcontainers/features/python": {
 			"version": "3.11"
 		},
-		"ghcr.io/devcontainers-community/features/cmake": {}
+		// Switch to the "official" version as soon as
+		// https://github.com/devcontainers-community/features-cmake/pull/2
+		// merged
+		"ghcr.io/alexdenisov/features/feature-cmake": {
+			"version": "3.31.1"
+		}
 	},
 	"postCreateCommand": "infrastructure/devcontainer_post_create.sh 12",
 	"customizations": {
