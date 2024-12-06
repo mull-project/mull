@@ -2,17 +2,55 @@
     "version": 8,
     "configurePresets": [
         {
-            "name": "Mull",
-            "displayName": "Mull",
-            "description": "Sets Ninja generator, build and install directory",
+            "name": "mull",
+            "displayName": "mull",
             "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build.debug.dir/build",
+            "binaryDir": "${sourceDir}/build.dir",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Debug",
-                "CMAKE_C_COMPILER" : "clang-12",
-                "CMAKE_CXX_COMPILER" : "clang++-12",
-                "CMAKE_INSTALL_PREFIX": "${sourceDir}/build.debug.dir/install"
+                "CMAKE_C_COMPILER": "clang-12",
+                "CMAKE_CXX_COMPILER": "clang++-12",
+                "CMAKE_PREFIX_PATH": "/usr/lib/llvm-12/cmake/;/usr/lib/cmake/clang-12/"
             }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "build-debug",
+            "configurePreset": "mull"
+        },
+        {
+            "name": "tests-lit",
+            "configurePreset": "mull",
+            "targets": "tests-lit"
+        },
+        {
+            "name": "run-mull-tests",
+            "configurePreset": "mull",
+            "targets": "run-mull-tests"
+        }
+    ],
+    "workflowPresets": [
+        {
+            "name": "build",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "mull"
+                },
+                {
+                    "type": "build",
+                    "name": "build-debug"
+                },
+                {
+                    "type": "build",
+                    "name": "run-mull-tests"
+                },
+                {
+                    "type": "build",
+                    "name": "tests-lit"
+                }
+            ]
         }
     ]
 }

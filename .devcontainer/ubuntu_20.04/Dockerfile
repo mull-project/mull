@@ -8,3 +8,5 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y vim wget ninja-build \
   openssh-client
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y llvm-12-dev libclang-12-dev libc++-12-dev \
   libc++abi-12-dev clang-12
+
+RUN pip install -r requirements.txt
