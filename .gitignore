@@ -22,3 +22,4 @@ tests-lit/tests/**/*.ll
 
 tags
 build*dir
+CMakePresets.json

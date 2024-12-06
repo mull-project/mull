@@ -21,7 +21,8 @@
 		"vscode": {
 			"extensions": [
 				"ms-vscode.cmake-tools",
-				"ms-vscode.cpptools"
+				"ms-vscode.cpptools",
+				"imgildev.vscode-mustache-snippets"
 			]
 		}
 	}
