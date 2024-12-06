@@ -36,7 +36,7 @@ set(LIT_COMMAND
   ${CMAKE_CURRENT_SOURCE_DIR}/tests
   )
 
-add_custom_target(tests-lit
+add_custom_target(run-integration-tests
   COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && make clean
   COMMAND ${LIT_COMMAND}
   DEPENDS mull-runner-${LLVM_VERSION_MAJOR}

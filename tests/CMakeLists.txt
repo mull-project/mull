@@ -71,6 +71,6 @@ set_target_properties(mull-tests PROPERTIES
 get_property(dependencies GLOBAL PROPERTY TEST_FIXTURES_DEPENDENCIES)
 add_dependencies(mull-tests ${dependencies})
 
-add_custom_target(run-mull-tests
+add_custom_target(run-unit-tests
   COMMAND $<TARGET_FILE:mull-tests>
 )

@@ -3,11 +3,10 @@
     "configurePresets": [
         {
             "name": "mull",
-            "displayName": "mull",
             "generator": "Ninja",
             "binaryDir": "${sourceDir}/build.dir",
             "cacheVariables": {
-                "CMAKE_BUILD_TYPE": "Debug",
+                "CMAKE_BUILD_TYPE": "Release",
                 "CMAKE_C_COMPILER": "clang-12",
                 "CMAKE_CXX_COMPILER": "clang++-12",
                 "CMAKE_PREFIX_PATH": "/usr/lib/llvm-12/cmake/;/usr/lib/cmake/clang-12/"
@@ -16,23 +15,24 @@
     ],
     "buildPresets": [
         {
-            "name": "build-debug",
-            "configurePreset": "mull"
+            "name": "unit-tests",
+            "configurePreset": "mull",
+            "targets": "run-unit-tests"
         },
         {
-            "name": "tests-lit",
+            "name": "integration-tests",
             "configurePreset": "mull",
-            "targets": "tests-lit"
+            "targets": "run-integration-tests"
         },
         {
-            "name": "run-mull-tests",
+            "name": "package",
             "configurePreset": "mull",
-            "targets": "run-mull-tests"
+            "targets": "package"
         }
     ],
     "workflowPresets": [
         {
-            "name": "build",
+            "name": "build-and-test",
             "steps": [
                 {
                     "type": "configure",
@@ -40,15 +40,24 @@
                 },
                 {
                     "type": "build",
-                    "name": "build-debug"
+                    "name": "unit-tests"
                 },
                 {
                     "type": "build",
-                    "name": "run-mull-tests"
+                    "name": "integration-tests"
+                }
+            ]
+        },
+        {
+            "name": "package",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "mull"
                 },
                 {
                     "type": "build",
-                    "name": "tests-lit"
+                    "name": "package"
                 }
             ]
         }
