@@ -5,12 +5,12 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 on:
-  pull_request:
+  # pull_request:
   push:
     branches:
       - main
-    tags:
-      - "**"
+  #   tags:
+  #     - "**"
 
 jobs:
   ubuntu:
