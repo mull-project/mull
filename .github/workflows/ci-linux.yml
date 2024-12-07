@@ -29,6 +29,7 @@ jobs:
           runCmd: |
             cmake --workflow --preset build-and-test
             cmake --workflow --preset package
+            ls ./build.dir/
             ./end2end-tests/run_end2end_tests.sh 12
 
 
