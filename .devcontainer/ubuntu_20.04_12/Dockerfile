@@ -9,6 +9,5 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y vim wget ninja-build \
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
   llvm-12-dev \
   libclang-12-dev \
-  libc++-12-dev \
-  libc++abi-12-dev \
+  libc++-12-dev libc++abi-12-dev \
   clang-12
