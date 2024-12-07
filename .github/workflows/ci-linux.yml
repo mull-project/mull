@@ -32,6 +32,22 @@ jobs:
             ls ./build.dir/
             ./end2end-tests/run_end2end_tests.sh 12
 
+      - name: Publish package
+        shell: bash
+        run: |
+          pwd
+          ls
+          ls build.dir
+
+      - name: Publish package
+        if: env.CLOUDSMITH_API_KEY != null
+        shell: bash
+        run: |
+          UBUNTU_CODENAME=$(. /etc/os-release; echo "${UBUNTU_CODENAME/*, /}")
+          cloudsmith push deb \
+            mull-project/mull-${{ steps.metadata.outputs.channel }}/ubuntu/${UBUNTU_CODENAME} \
+            build.dir/*.deb
+
 
 # jobs:
 #   ubuntu:
@@ -68,7 +84,7 @@ jobs:
 #           pip3 install ansible
 
 #       - name: Add git ppa
-#         if: matrix.UBUNTU_VERSION != '24.04'
+#         i f: matrix.UBUNTU_VERSION != '24.04'
 #         run: |
 #           apt-get update && apt-get install --no-install-recommends -y gpg-agent software-properties-common
 #           add-apt-repository ppa:git-core/ppa
