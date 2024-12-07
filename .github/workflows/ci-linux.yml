@@ -17,6 +17,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: ./actions/detect-package-metadata
+        id: metadata
       - uses: docker/login-action@v2
         with:
           registry: ghcr.io
@@ -39,14 +41,16 @@ jobs:
           ls
           ls build.dir
 
-      - name: Publish package
+      - uses: devcontainers/ci@v0.3
         if: env.CLOUDSMITH_API_KEY != null
-        shell: bash
-        run: |
-          UBUNTU_CODENAME=$(. /etc/os-release; echo "${UBUNTU_CODENAME/*, /}")
-          cloudsmith push deb \
-            mull-project/mull-${{ steps.metadata.outputs.channel }}/ubuntu/${UBUNTU_CODENAME} \
-            build.dir/*.deb
+        with:
+          imageName: ghcr.io/mull-project/internal-linux-ci
+          configFile: ./.devcontainer/ubuntu_20.04_12/devcontainer.json
+          runCmd: |
+            UBUNTU_CODENAME=$(. /etc/os-release; echo "${UBUNTU_CODENAME/*, /}")
+            cloudsmith push deb \
+              mull-project/mull-${{ steps.metadata.outputs.channel }}/ubuntu/${UBUNTU_CODENAME} \
+              build.dir/*.deb
 
 
 # jobs:
