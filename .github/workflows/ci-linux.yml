@@ -28,9 +28,9 @@ jobs:
         with:
           imageName: ghcr.io/mull-project/internal-linux-ci
           configFile: ./.devcontainer/ubuntu_20.04_12/devcontainer.json
-          push: always
+          push: always # TODO: remove
           runCmd: |
-            cmake --workflow --preset build-and-test
+            cmake --workflow --preset build-and-test -DMULL_VERSION=${{ steps.metadata.outputs.version }}${{ steps.metadata.outputs.suffix }}
             cmake --workflow --preset package
             ls ./build.dir/
             ./end2end-tests/run_end2end_tests.sh 12
@@ -47,6 +47,7 @@ jobs:
         with:
           imageName: ghcr.io/mull-project/internal-linux-ci
           configFile: ./.devcontainer/ubuntu_20.04_12/devcontainer.json
+          push: never
           runCmd: |
             UBUNTU_CODENAME=$(. /etc/os-release; echo "${UBUNTU_CODENAME/*, /}")
             env CLOUDSMITH_API_KEY=${{ secrets.CLOUDSMITH_API_KEY }} cloudsmith push deb \
