@@ -28,6 +28,7 @@ jobs:
         with:
           imageName: ghcr.io/mull-project/internal-linux-ci
           configFile: ./.devcontainer/ubuntu_20.04_12/devcontainer.json
+          push: always
           runCmd: |
             cmake --workflow --preset build-and-test
             cmake --workflow --preset package
