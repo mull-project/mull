@@ -1,4 +1,4 @@
-FROM ubuntu:20.04
+FROM ubuntu:24.04
 
 RUN apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y vim wget ninja-build \
@@ -7,8 +7,8 @@ RUN DEBIAN_FRONTEND=noninteractive apt-get install -y vim wget ninja-build \
   binutils liblzma-dev \
   openssh-client
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y \
-  llvm-12-dev \
-  libclang-12-dev \
-  libc++-12-dev \
-  libc++abi-12-dev \
-  clang-12
+  llvm-16-dev \
+  libclang-16-dev \
+  libc++-16-dev \
+  libc++abi-16-dev \
+  clang-16

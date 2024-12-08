@@ -4,68 +4,59 @@ import argparse
 import pystache
 import os
 
+SUPPORTED_PLATFORMS = {
+    "ubuntu": {
+        "20.04": [12],
+        "22.04": [13, 14, 15],
+        "24.04": [14, 15, 16, 17]
+    }
+}
+
 
 def cmake(args):
     template_name = f"infrastructure/templates/cmake-presets/{args.os}.mustache"
     template_args = {"LLVM_VERSION": args.llvm_version}
+    renderer = pystache.Renderer(missing_tags="strict")
     with open(template_name, "r") as t:
-        result = pystache.render(t.read(), template_args)
+        result = renderer.render(t.read(), template_args)
         with open('CMakePresets.json', "w") as f:
             f.write(result)
 
 
-def devcontainers(os_name, os_version, llvm_version):
-    template_folder = f"infrastructure/templates/devcontainers/{os_name}"
-    container_folder = f".devcontainer/{os_name}_{os_version}_{llvm_version}"
-    os.makedirs(container_folder, exist_ok=True)
+def devcontainers(args):
+    for (os_name, platform) in SUPPORTED_PLATFORMS.items():
+        template_folder = f"infrastructure/templates/devcontainers/{os_name}"
+        for (os_version, llvm_versions) in platform.items():
+            for llvm_version in llvm_versions:
+                container_folder = f".devcontainer/{os_name}_{os_version}_{llvm_version}"
+                os.makedirs(container_folder, exist_ok=True)
 
-    template_args = {"LLVM_VERSION": llvm_version,
-                     "OS": os_name, "OS_VERSION": os_version}
+                template_args = {"LLVM_VERSION": llvm_version,
+                                 "OS": os_name, "OS_VERSION": os_version}
 
-    for template in ['devcontainer.json', "Dockerfile"]:
-        template_name = f"{template_folder}/{template}.mustache"
-        result_filename = f"{container_folder}/{template}"
-        with open(template_name, "r") as t:
-            result = pystache.render(t.read(), template_args)
-            with open(result_filename, "w") as f:
-                f.write(result)
-
-
-def devcontainer(args):
-    devcontainers(args.os, args.os_version, args.llvm_version)
-
-    # UBUNTU_VERSION: ["22.04", "24.04"]
-    # LLVM_VERSION: [14, 15]
-    # include:
-    #   - UBUNTU_VERSION: "20.04"
-    #     LLVM_VERSION: 12
-    #   - UBUNTU_VERSION: "22.04"
-    #     LLVM_VERISON: 13
-    #   - UBUNTU_VERSION: "24.04"
-    #     LLVM_VERSION: 16
-    #   - UBUNTU_VERSION: "24.04"
-    #     LLVM_VERSION: 17
+                renderer = pystache.Renderer(missing_tags="strict")
+                for template in ['devcontainer.json', "Dockerfile"]:
+                    template_name = f"{template_folder}/{template}.mustache"
+                    result_filename = f"{container_folder}/{template}"
+                    with open(template_name, "r") as t:
+                        result = renderer.render(t.read(), template_args)
+                        with open(result_filename, "w") as f:
+                            f.write(result)
 
 
 def gh_workflows(args):
-    supported_platforms = {
-        "ubuntu": {
-            "20.04": [12],
-            "22.04": [13]
-        }
-    }
     template_folder = f"infrastructure/templates/github-actions/"
     workflow_folder = f".github/workflows/"
 
     strategies = []
-    for os_version in sorted(supported_platforms["ubuntu"].keys()):
-        for llvm_version in supported_platforms["ubuntu"][os_version]:
+    for os_version in sorted(SUPPORTED_PLATFORMS["ubuntu"].keys()):
+        for llvm_version in SUPPORTED_PLATFORMS["ubuntu"][os_version]:
             arg = {"OS_VERSION": os_version, "LLVM_VERSION": llvm_version}
             strategies.append(arg)
 
     template_args = {"strategy": strategies}
     renderer = pystache.Renderer(missing_tags="strict")
-    for template in ['ci-linux.yml']:
+    for template in ['ci-ubuntu.yml']:
         template_name = f"{template_folder}/{template}.mustache"
         result_filename = f"{workflow_folder}/{template}"
         with open(template_name, "r") as t:
@@ -86,23 +77,22 @@ def main():
                               help='Select OS for which to generate preset', type=str)
     parser_cmake.add_argument("--llvm_version", type=int)
 
-    parser_devcontainer = subparsers.add_parser(
-        'devcontainer', help='Generates devcontainer files')
-    parser_devcontainer.add_argument('--os', choices=('ubuntu',),
-                                     help='Select OS for which to generate preset', type=str)
-    parser_devcontainer.add_argument("--os_version", type=str)
-    parser_devcontainer.add_argument("--llvm_version", type=int)
-
-    gh_workflow_parser = subparsers.add_parser(
-        'github_workflows', help='Generates GitHub workflow files')
+    subparsers.add_parser('devcontainers', help='Generates devcontainer files')
+    subparsers.add_parser('github_workflows',
+                          help='Generates GitHub workflow files')
+    subparsers.add_parser('all',
+                          help='Combines devcontainers and github_workflows')
 
     args = parser.parse_args()
     if args.cmd == "cmake":
         cmake(args)
-    if args.cmd == "devcontainer":
-        devcontainer(args)
+    if args.cmd == "devcontainers":
+        devcontainers(args)
     if args.cmd == "github_workflows":
         gh_workflows(args)
+    if args.cmd == "all":
+        gh_workflows(args)
+        devcontainers(args)
 
 
 if __name__ == "__main__":
