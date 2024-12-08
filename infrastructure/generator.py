@@ -3,6 +3,7 @@
 import argparse
 import pystache
 import os
+import shutil
 
 SUPPORTED_PLATFORMS = {
     "ubuntu": {
@@ -24,6 +25,7 @@ def cmake(args):
 
 
 def devcontainers(args):
+    shutil.rmtree(".devcontainer")
     for (os_name, platform) in SUPPORTED_PLATFORMS.items():
         template_folder = f"infrastructure/templates/devcontainers/{os_name}"
         for (os_version, llvm_versions) in platform.items():

@@ -37,7 +37,6 @@ jobs:
         with:
           imageName: ghcr.io/mull-project/internal-${{ matrix.OS_NAME }}_${{ matrix.OS_VERSION }}_${{ matrix.LLVM_VERSION }}-ci
           configFile: ./.devcontainer/${{ matrix.OS_NAME }}_${{ matrix.OS_VERSION }}_${{ matrix.LLVM_VERSION }}/devcontainer.json
-          push: always # TODO: remove
           runCmd: |
             cmake --preset mull -DMULL_VERSION=${{ steps.metadata.outputs.version }}${{ steps.metadata.outputs.suffix }}
             cmake --workflow --preset build-and-test
