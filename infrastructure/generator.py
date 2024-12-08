@@ -51,10 +51,11 @@ def gh_workflows(args):
     strategies = []
     for os_version in sorted(SUPPORTED_PLATFORMS["ubuntu"].keys()):
         for llvm_version in SUPPORTED_PLATFORMS["ubuntu"][os_version]:
-            arg = {"OS_VERSION": os_version, "LLVM_VERSION": llvm_version}
+            arg = {"OS_NAME": "ubuntu", "OS_VERSION": os_version,
+                   "LLVM_VERSION": llvm_version}
             strategies.append(arg)
 
-    template_args = {"strategy": strategies}
+    template_args = {"strategy": strategies, "OS_NAME": "Ubuntu"}
     renderer = pystache.Renderer(missing_tags="strict")
     for template in ['ci-ubuntu.yml']:
         template_name = f"{template_folder}/{template}.mustache"
