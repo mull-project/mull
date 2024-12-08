@@ -30,7 +30,8 @@ jobs:
           configFile: ./.devcontainer/ubuntu_20.04_12/devcontainer.json
           push: always # TODO: remove
           runCmd: |
-            cmake --workflow --preset build-and-test -DMULL_VERSION=${{ steps.metadata.outputs.version }}${{ steps.metadata.outputs.suffix }}
+            cmake --preset mull -DMULL_VERSION=${{ steps.metadata.outputs.version }}${{ steps.metadata.outputs.suffix }}
+            cmake --workflow --preset build-and-test
             cmake --workflow --preset package
             ls ./build.dir/
             ./end2end-tests/run_end2end_tests.sh 12
