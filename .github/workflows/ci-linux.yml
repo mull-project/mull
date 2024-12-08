@@ -1,7 +1,6 @@
 name: Ubuntu CI
 
 env:
-  CLOUDSMITH_API_KEY: ${{ secrets.CLOUDSMITH_API_KEY }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
 on:
@@ -15,6 +14,13 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - OS_VERSION: "20.04"
+            LLVM_VERSION: 12
+          - OS_VERSION: "22.04"
+            LLVM_VERSION: 13
     steps:
       - uses: actions/checkout@v4
       - uses: ./actions/detect-package-metadata
@@ -27,27 +33,20 @@ jobs:
       - uses: devcontainers/ci@v0.3
         with:
           imageName: ghcr.io/mull-project/internal-linux-ci
-          configFile: ./.devcontainer/ubuntu_20.04_12/devcontainer.json
+          configFile: ./.devcontainer/ubuntu_${{ matrix.OS_VERSION }}_${{ matrix.LLVM_VERSION }}/devcontainer.json
           push: always # TODO: remove
           runCmd: |
             cmake --preset mull -DMULL_VERSION=${{ steps.metadata.outputs.version }}${{ steps.metadata.outputs.suffix }}
             cmake --workflow --preset build-and-test
             cmake --workflow --preset package
             ls ./build.dir/
-            ./end2end-tests/run_end2end_tests.sh 12
-
-      - name: Publish package
-        shell: bash
-        run: |
-          pwd
-          ls
-          ls build.dir
+            ./end2end-tests/run_end2end_tests.sh ${{ matrix.LLVM_VERSION }}
 
       - uses: devcontainers/ci@v0.3
         if: env.CLOUDSMITH_API_KEY != null
         with:
           imageName: ghcr.io/mull-project/internal-linux-ci
-          configFile: ./.devcontainer/ubuntu_20.04_12/devcontainer.json
+          configFile: ./.devcontainer/ubuntu_${{ matrix.OS_VERSION }}_${{ matrix.LLVM_VERSION }}/devcontainer.json
           push: never
           runCmd: |
             UBUNTU_CODENAME=$(. /etc/os-release; echo "${UBUNTU_CODENAME/*, /}")
