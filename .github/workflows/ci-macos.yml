@@ -16,7 +16,7 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        LLVM_VERSION: [12, 13, 14, 16]
+        LLVM_VERSION: [13, 14, 15, 16, 17]
 
     steps:
       - name: Debugging

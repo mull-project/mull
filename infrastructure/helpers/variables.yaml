@@ -6,6 +6,12 @@ SDKROOT: /
 
 llvm_mapping:
   macos:
+    "17":
+      cmake_search_paths: "/opt/homebrew/opt/llvm@17/lib/cmake/llvm/;/opt/homebrew/opt/llvm@17/lib/cmake/clang/"
+      packages:
+        - llvm@17
+      cmake_cc: /opt/homebrew/opt/llvm@17/bin/clang
+      cmake_cxx: /opt/homebrew/opt/llvm@17/bin/clang++
     "16":
       cmake_search_paths: "/opt/homebrew/opt/llvm@16/lib/cmake/llvm/;/opt/homebrew/opt/llvm@16/lib/cmake/clang/"
       packages:
@@ -30,12 +36,6 @@ llvm_mapping:
         - llvm@13
       cmake_cc: /opt/homebrew/opt/llvm@13/bin/clang
       cmake_cxx: /opt/homebrew/opt/llvm@13/bin/clang++
-    "12":
-      cmake_search_paths: "/opt/homebrew/opt/llvm@12/lib/cmake/llvm/;/opt/homebrew/opt/llvm@12/lib/cmake/clang/"
-      packages:
-        - llvm@12
-      cmake_cc: /opt/homebrew/opt/llvm@12/bin/clang
-      cmake_cxx: /opt/homebrew/opt/llvm@12/bin/clang++
 
 source_dir: "{{ working_dir }}/mull"
 debug_build_dir: "{{ working_dir }}/build.mull.debug.dir"
