@@ -41,7 +41,7 @@ jobs:
           - OS_NAME: "ubuntu"
             OS_VERSION: "24.04"
             LLVM_VERSION: 17
-    name: ${{ matrix.OS_NAME }} ${{ matrix.OS_VERSION }} - LLVM ${{ matrix.LLVM_VERSION }}
+    name: Ubuntu ${{ matrix.OS_VERSION }} - LLVM ${{ matrix.LLVM_VERSION }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./actions/detect-package-metadata

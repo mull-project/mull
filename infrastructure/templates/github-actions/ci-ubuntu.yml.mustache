@@ -22,7 +22,7 @@ jobs:
             OS_VERSION: "[[ OS_VERSION ]]"
             LLVM_VERSION: [[ LLVM_VERSION ]]
           [[/strategy]]
-    name: ${{ matrix.OS_NAME }} ${{ matrix.OS_VERSION }} - LLVM ${{ matrix.LLVM_VERSION }}
+    name: [[ OS_NAME ]] ${{ matrix.OS_VERSION }} - LLVM ${{ matrix.LLVM_VERSION }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./actions/detect-package-metadata

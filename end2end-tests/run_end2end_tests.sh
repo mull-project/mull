@@ -5,7 +5,7 @@ set -x
 
 LLVM_VERSION=$1
 
-if (( $LLVM_VERSION > 15 )); then
+if (( $LLVM_VERSION < 16 )); then
   EXTRA_FLAGS=-fexperimental-new-pass-manager
 fi
 
