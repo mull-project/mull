@@ -6,6 +6,12 @@ SDKROOT: /
 
 llvm_mapping:
   macos:
+    "17":
+      cmake_search_paths: "/opt/homebrew/opt/llvm@17/lib/cmake/llvm/;/opt/homebrew/opt/llvm@17/lib/cmake/clang/"
+      packages:
+        - llvm@17
+      cmake_cc: /opt/homebrew/opt/llvm@17/bin/clang
+      cmake_cxx: /opt/homebrew/opt/llvm@17/bin/clang++
     "16":
       cmake_search_paths: "/opt/homebrew/opt/llvm@16/lib/cmake/llvm/;/opt/homebrew/opt/llvm@16/lib/cmake/clang/"
       packages:
@@ -30,83 +36,12 @@ llvm_mapping:
         - llvm@13
       cmake_cc: /opt/homebrew/opt/llvm@13/bin/clang
       cmake_cxx: /opt/homebrew/opt/llvm@13/bin/clang++
-    "12":
-      cmake_search_paths: "/opt/homebrew/opt/llvm@12/lib/cmake/llvm/;/opt/homebrew/opt/llvm@12/lib/cmake/clang/"
-      packages:
-        - llvm@12
-      cmake_cc: /opt/homebrew/opt/llvm@12/bin/clang
-      cmake_cxx: /opt/homebrew/opt/llvm@12/bin/clang++
-
-  ubuntu:
-    "17":
-      cmake_search_paths: "/usr/lib/llvm-17/cmake/;/usr/lib/cmake/clang-17/"
-      packages:
-        - llvm-17-dev
-        - libclang-17-dev
-        - libc++-17-dev
-        - libc++abi-17-dev
-        - clang-17
-      cmake_cc: clang-17
-      cmake_cxx: clang++-17
-    "16":
-      cmake_search_paths: "/usr/lib/llvm-16/cmake/;/usr/lib/cmake/clang-16/"
-      packages:
-        - llvm-16-dev
-        - libclang-16-dev
-        - libc++-16-dev
-        - libc++abi-16-dev
-        - clang-16
-      cmake_cc: clang-16
-      cmake_cxx: clang++-16
-    "15":
-      cmake_search_paths: "/usr/lib/llvm-15/cmake/;/usr/lib/cmake/clang-15/"
-      packages:
-        - llvm-15-dev
-        - libclang-15-dev
-        - libc++-15-dev
-        - libc++abi-15-dev
-        - clang-15
-      cmake_cc: clang-15
-      cmake_cxx: clang++-15
-    "14":
-      cmake_search_paths: "/usr/lib/llvm-14/cmake/;/usr/lib/cmake/clang-14/"
-      packages:
-        - llvm-14-dev
-        - libclang-14-dev
-        - libc++-14-dev
-        - libc++abi-14-dev
-        - clang-14
-      cmake_cc: clang-14
-      cmake_cxx: clang++-14
-    "13":
-      cmake_search_paths: "/usr/lib/llvm-13/cmake/;/usr/lib/cmake/clang-13/"
-      packages:
-        - llvm-13-dev
-        - libclang-13-dev
-        - libc++-13-dev
-        - libc++abi-13-dev
-        - clang-13
-      cmake_cc: clang-13
-      cmake_cxx: clang++-13
-    "12":
-      cmake_search_paths: "/usr/lib/llvm-12/cmake/;/usr/lib/cmake/clang-12/"
-      packages:
-        - llvm-12-dev
-        - libclang-12-dev
-        - libc++-12-dev
-        - libc++abi-12-dev
-        - clang-12
-      cmake_cc: clang-12
-      cmake_cxx: clang++-12
 
 source_dir: "{{ working_dir }}/mull"
 debug_build_dir: "{{ working_dir }}/build.mull.debug.dir"
 release_build_dir: "{{ working_dir }}/build.mull.release.dir"
 
 checkout: false
-
-# Overriden by FreeBSD playbook
-make_program: make
 
 cmake_search_paths: "{{ llvm_mapping[platform][llvm_version].cmake_search_paths }}"
 llvm_packages: "{{ llvm_mapping[platform][llvm_version].packages }}"

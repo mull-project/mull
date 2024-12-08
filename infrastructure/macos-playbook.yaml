@@ -11,8 +11,6 @@
     package_extensions:
       - zip
 
-    mull_cxx_flags: ""
-
     packages:
       - zlib
       - ncurses

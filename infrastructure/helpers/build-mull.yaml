@@ -26,7 +26,6 @@
       - -DCMAKE_BUILD_TYPE=Debug
       - -DCMAKE_C_COMPILER={{ cmake_c_compiler }}
       - -DCMAKE_CXX_COMPILER={{ cmake_cxx_compiler }}
-      - -DCMAKE_CXX_FLAGS="{{ mull_cxx_flags }}"
       - -DCMAKE_PREFIX_PATH={{ cmake_search_paths }}
       - "{{ source_dir }}"
     chdir: "{{ debug_build_dir }}"
@@ -66,7 +65,6 @@
       - -DCMAKE_BUILD_TYPE=Release
       - -DCMAKE_C_COMPILER={{ cmake_c_compiler }}
       - -DCMAKE_CXX_COMPILER={{ cmake_cxx_compiler }}
-      - -DCMAKE_CXX_FLAGS="{{ mull_cxx_flags }}"
       - -DMULL_VERSION={{ mull_version }}
       - -DCMAKE_PREFIX_PATH={{ cmake_search_paths }}
       - "{{ source_dir }}"

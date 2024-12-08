@@ -4,7 +4,7 @@ outputs:
   version:
     description: "version"
     value: ${{ steps.metadata.outputs.version }}
-  version-suffix:
+  suffix:
     description: "version suffix"
     value: ${{ steps.metadata.outputs.suffix }}
   channel:
@@ -21,7 +21,7 @@ runs:
         case $GITHUB_EVENT_NAME in
           "pull_request")
             echo "suffix=-pr$(grep -Eo "\"number\": [0-9]+" $GITHUB_EVENT_PATH | awk ' { print $2; exit } ')" >> $GITHUB_OUTPUT
-            echo "channel=nightly" >> $GITHUB_OUTPUT
+            echo "channel=testing" >> $GITHUB_OUTPUT
           ;;
           "push")
             case $GITHUB_REF in

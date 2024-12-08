@@ -1,0 +1,30 @@
+{
+	"name": "ubuntu:22.04-LLVM:14",
+	"build": {
+		"dockerfile": "Dockerfile"
+	},
+	"features": {
+		"ghcr.io/devcontainers-extra/features/fish-apt-get:1": {},
+		"ghcr.io/devcontainers/features/git:1": {},
+		"ghcr.io/devcontainers/features/python": {
+			"version": "3.11"
+		},
+		// Switch to the "official" version as soon as
+		// https://github.com/devcontainers-community/features-cmake/pull/2
+		// merged
+		"ghcr.io/alexdenisov/features/feature-cmake": {
+			"version": "3.31.1"
+		}
+	},
+	"postCreateCommand": "infrastructure/devcontainer_post_create.sh ubuntu 14",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"ms-vscode.cmake-tools",
+				"ms-vscode.cpptools",
+				"imgildev.vscode-mustache-snippets",
+				"github.vscode-github-actions"
+			]
+		}
+	}
+}

@@ -1,0 +1,65 @@
+{
+    "version": 8,
+    "configurePresets": [
+        {
+            "name": "mull",
+            "generator": "Ninja",
+            "binaryDir": "${sourceDir}/build.dir",
+            "cacheVariables": {
+                "CMAKE_BUILD_TYPE": "Release",
+                "CMAKE_C_COMPILER": "clang-{{LLVM_VERSION}}",
+                "CMAKE_CXX_COMPILER": "clang++-{{LLVM_VERSION}}",
+                "CMAKE_PREFIX_PATH": "/usr/lib/llvm-{{LLVM_VERSION}}/cmake/;/usr/lib/cmake/clang-{{LLVM_VERSION}}/"
+            }
+        }
+    ],
+    "buildPresets": [
+        {
+            "name": "unit-tests",
+            "configurePreset": "mull",
+            "targets": "run-unit-tests"
+        },
+        {
+            "name": "integration-tests",
+            "configurePreset": "mull",
+            "targets": "run-integration-tests"
+        },
+        {
+            "name": "package",
+            "configurePreset": "mull",
+            "targets": "package"
+        }
+    ],
+    "workflowPresets": [
+        {
+            "name": "build-and-test",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "mull"
+                },
+                {
+                    "type": "build",
+                    "name": "unit-tests"
+                },
+                {
+                    "type": "build",
+                    "name": "integration-tests"
+                }
+            ]
+        },
+        {
+            "name": "package",
+            "steps": [
+                {
+                    "type": "configure",
+                    "name": "mull"
+                },
+                {
+                    "type": "build",
+                    "name": "package"
+                }
+            ]
+        }
+    ]
+}

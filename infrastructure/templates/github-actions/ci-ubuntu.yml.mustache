@@ -1,4 +1,4 @@
-name: Ubuntu CI
+{{=[[ ]]=}}name: [[ OS_NAME ]] CI
 
 env:
   CLOUDSMITH_API_KEY: ${{ secrets.CLOUDSMITH_API_KEY }}
@@ -17,31 +17,12 @@ jobs:
     strategy:
       matrix:
         include:
-          - OS_NAME: "ubuntu"
-            OS_VERSION: "20.04"
-            LLVM_VERSION: 12
-          - OS_NAME: "ubuntu"
-            OS_VERSION: "22.04"
-            LLVM_VERSION: 13
-          - OS_NAME: "ubuntu"
-            OS_VERSION: "22.04"
-            LLVM_VERSION: 14
-          - OS_NAME: "ubuntu"
-            OS_VERSION: "22.04"
-            LLVM_VERSION: 15
-          - OS_NAME: "ubuntu"
-            OS_VERSION: "24.04"
-            LLVM_VERSION: 14
-          - OS_NAME: "ubuntu"
-            OS_VERSION: "24.04"
-            LLVM_VERSION: 15
-          - OS_NAME: "ubuntu"
-            OS_VERSION: "24.04"
-            LLVM_VERSION: 16
-          - OS_NAME: "ubuntu"
-            OS_VERSION: "24.04"
-            LLVM_VERSION: 17
-    name: Ubuntu ${{ matrix.OS_VERSION }} - LLVM ${{ matrix.LLVM_VERSION }}
+          [[#strategy]]
+          - OS_NAME: "[[ OS_NAME ]]"
+            OS_VERSION: "[[ OS_VERSION ]]"
+            LLVM_VERSION: [[ LLVM_VERSION ]]
+          [[/strategy]]
+    name: [[ OS_NAME ]] ${{ matrix.OS_VERSION }} - LLVM ${{ matrix.LLVM_VERSION }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./actions/detect-package-metadata

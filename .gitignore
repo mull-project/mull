@@ -21,3 +21,5 @@ tests-lit/tests/**/*.ll
 .DS_Store
 
 tags
+build*dir
+CMakePresets.json

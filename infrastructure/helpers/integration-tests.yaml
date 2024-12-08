@@ -91,8 +91,6 @@
   command: ./test/bio_enc_test
   args:
     chdir: "{{ working_dir }}/integration/openssl"
-  environment:
-    LD_LIBRARY_PATH: "{{ working_dir }}/integration/openssl"
 
 - name: Run Mull against OpenSSL
   command: mull-runner-{{ llvm_version }} --allow-surviving {{ working_dir }}/integration/openssl/test/bio_enc_test
