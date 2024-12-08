@@ -13,10 +13,6 @@ outputs:
 runs:
   using: "composite"
   steps:
-    - name: Debug
-      shell: bash
-      run: |
-        env | sort
     - id: metadata
       name: Detect version and release channel
       shell: bash

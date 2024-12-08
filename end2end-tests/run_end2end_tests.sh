@@ -5,6 +5,10 @@ set -x
 
 LLVM_VERSION=$1
 
+if (( $LLVM_VERSION > 15 )); then
+  EXTRA_FLAGS=-fexperimental-new-pass-manager
+fi
+
 # Install mull system-wide
 dpkg -i build.dir/*.deb
 
@@ -19,7 +23,7 @@ function test_fmt() {
   pushd fmt.build.dir
 
   cmake -G Ninja \
-    -DCMAKE_CXX_FLAGS="-fexperimental-new-pass-manager -grecord-command-line -fpass-plugin=/usr/lib/mull-ir-frontend-$LLVM_VERSION" \
+    -DCMAKE_CXX_FLAGS="-grecord-command-line -fpass-plugin=/usr/lib/mull-ir-frontend-$LLVM_VERSION $EXTRA_FLAGS" \
     -DCMAKE_BUILD_TYPE=Debug \
     -DCMAKE_C_COMPILER=clang-$LLVM_VERSION \
     -DCMAKE_CXX_COMPILER=clang++-$LLVM_VERSION \
@@ -39,8 +43,8 @@ function test_openssl() {
   pushd openssl
 
   env CC=clang-$LLVM_VERSION ./config -g -O0 \
+     $EXTRA_FLAGS \
     -grecord-command-line \
-    -fexperimental-new-pass-manager \
     -fpass-plugin=/usr/lib/mull-ir-frontend-$LLVM_VERSION
 
   make build_generated -j
