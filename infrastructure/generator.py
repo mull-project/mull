@@ -34,7 +34,7 @@ def devcontainers(args):
                 os.makedirs(container_folder, exist_ok=True)
 
                 template_args = {"LLVM_VERSION": llvm_version,
-                                 "OS": os_name, "OS_VERSION": os_version}
+                                 "OS_NAME": os_name, "OS_VERSION": os_version}
 
                 renderer = pystache.Renderer(missing_tags="strict")
                 for template in ['devcontainer.json', "Dockerfile"]:

@@ -16,7 +16,7 @@
 			"version": "3.31.1"
 		}
 	},
-	"postCreateCommand": "infrastructure/devcontainer_post_create.sh 15",
+	"postCreateCommand": "infrastructure/devcontainer_post_create.sh ubuntu 15",
 	"customizations": {
 		"vscode": {
 			"extensions": [

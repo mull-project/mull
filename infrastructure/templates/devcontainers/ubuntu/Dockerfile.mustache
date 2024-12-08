@@ -1,4 +1,4 @@
-FROM {{OS}}:{{OS_VERSION}}
+FROM {{OS_NAME}}:{{OS_VERSION}}
 
 RUN apt-get update
 RUN DEBIAN_FRONTEND=noninteractive apt-get install -y vim wget ninja-build \
