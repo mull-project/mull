@@ -1,4 +1,5 @@
 name: Ubuntu CI
+{{=[[ ]]=}}
 
 env:
   CLOUDSMITH_API_KEY: ${{ secrets.CLOUDSMITH_API_KEY }}
@@ -17,10 +18,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - OS_VERSION: "20.04"
-            LLVM_VERSION: 12
-          - OS_VERSION: "22.04"
-            LLVM_VERSION: 13
+          [[#strategy]]
+          - OS_VERSION: "[[ OS_VERSION ]]"
+            LLVM_VERSION: [[ LLVM_VERSION ]]
+          [[/strategy]]
     name: Ubuntu ${{ matrix.OS_VERSION }} - LLVM ${{ matrix.LLVM_VERSION }}
     steps:
       - uses: actions/checkout@v4

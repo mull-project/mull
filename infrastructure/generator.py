@@ -34,6 +34,45 @@ def devcontainers(os_name, os_version, llvm_version):
 def devcontainer(args):
     devcontainers(args.os, args.os_version, args.llvm_version)
 
+    # UBUNTU_VERSION: ["22.04", "24.04"]
+    # LLVM_VERSION: [14, 15]
+    # include:
+    #   - UBUNTU_VERSION: "20.04"
+    #     LLVM_VERSION: 12
+    #   - UBUNTU_VERSION: "22.04"
+    #     LLVM_VERISON: 13
+    #   - UBUNTU_VERSION: "24.04"
+    #     LLVM_VERSION: 16
+    #   - UBUNTU_VERSION: "24.04"
+    #     LLVM_VERSION: 17
+
+
+def gh_workflows(args):
+    supported_platforms = {
+        "ubuntu": {
+            "20.04": [12],
+            "22.04": [13]
+        }
+    }
+    template_folder = f"infrastructure/templates/github-actions/"
+    workflow_folder = f".github/workflows/"
+
+    strategies = []
+    for os_version in sorted(supported_platforms["ubuntu"].keys()):
+        for llvm_version in supported_platforms["ubuntu"][os_version]:
+            arg = {"OS_VERSION": os_version, "LLVM_VERSION": llvm_version}
+            strategies.append(arg)
+
+    template_args = {"strategy": strategies}
+    renderer = pystache.Renderer(missing_tags="strict")
+    for template in ['ci-linux.yml']:
+        template_name = f"{template_folder}/{template}.mustache"
+        result_filename = f"{workflow_folder}/{template}"
+        with open(template_name, "r") as t:
+            result = renderer.render(t.read(), template_args)
+            with open(result_filename, "w") as f:
+                f.write(result)
+
 
 def main():
     parser = argparse.ArgumentParser(
@@ -54,11 +93,16 @@ def main():
     parser_devcontainer.add_argument("--os_version", type=str)
     parser_devcontainer.add_argument("--llvm_version", type=int)
 
+    gh_workflow_parser = subparsers.add_parser(
+        'github_workflows', help='Generates GitHub workflow files')
+
     args = parser.parse_args()
     if args.cmd == "cmake":
         cmake(args)
     if args.cmd == "devcontainer":
         devcontainer(args)
+    if args.cmd == "github_workflows":
+        gh_workflows(args)
 
 
 if __name__ == "__main__":
