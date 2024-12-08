@@ -79,7 +79,7 @@ jobs:
       - name: Move package
         run: |
           mkdir -p /tmp/packages
-          mv build.dir/*.deb /tmp/packages/
+          sudo mv build.dir/*.deb /tmp/packages/
 
       - uses: ./actions/attach-package
         with:
