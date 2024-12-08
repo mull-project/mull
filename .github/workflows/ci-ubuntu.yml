@@ -35,9 +35,6 @@ jobs:
             LLVM_VERSION: 17
     name: Ubuntu ${{ matrix.OS_VERSION }} - LLVM ${{ matrix.LLVM_VERSION }}
     steps:
-      - name: Fix git stuff
-        run: |
-          git config --global --add safe.directory '*'
       - uses: actions/checkout@v4
       - uses: ./actions/detect-package-metadata
         id: metadata
