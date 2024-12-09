@@ -26,7 +26,7 @@ runs:
           "push")
             case $GITHUB_REF in
               "refs/heads/"*)
-                echo "suffix=-trunk`git rev-list HEAD --count`" >> $GITHUB_OUTPUT
+                echo "suffix=-trunk$GITHUB_RUN_NUMBER" >> $GITHUB_OUTPUT
                 echo "channel=nightly" >> $GITHUB_OUTPUT
               ;;
               "refs/tags/"*)
