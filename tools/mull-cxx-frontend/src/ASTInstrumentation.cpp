@@ -11,13 +11,13 @@ namespace cxx {
 
 void ASTInstrumentation::instrumentTranslationUnit() {
   /// Create an external getenv() declaration within extern "C" {} block.
-  clang::LinkageSpecDecl *cLinkageSpecDecl =
-      clang::LinkageSpecDecl::Create(context,
-                                     context.getTranslationUnitDecl(),
-                                     NULL_LOCATION,
-                                     NULL_LOCATION,
-                                     clang::LinkageSpecDecl::LanguageIDs::lang_c,
-                                     true);
+#if LLVM_VERSION_MAJOR >= 18
+  auto langID = clang::LinkageSpecLanguageIDs::C;
+#else
+  auto langID = clang::LinkageSpecDecl::LanguageIDs::lang_c;
+#endif
+  clang::LinkageSpecDecl *cLinkageSpecDecl = clang::LinkageSpecDecl::Create(
+      context, context.getTranslationUnitDecl(), NULL_LOCATION, NULL_LOCATION, langID, true);
   getenvFuncDecl = createGetEnvFuncDecl(cLinkageSpecDecl);
   cLinkageSpecDecl->addDecl(getenvFuncDecl);
   context.getTranslationUnitDecl()->addDecl(cLinkageSpecDecl);
