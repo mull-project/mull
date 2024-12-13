@@ -64,6 +64,7 @@ jobs:
             cmake --workflow --preset build-and-test
             cmake --workflow --preset package
             ./end2end-tests/run_end2end_tests.sh ${{ matrix.LLVM_VERSION }}
+            mull-runner-${{ matrix.LLVM_VERSION }} --version
 
       - name: Publish package
         uses: devcontainers/ci@v0.3
