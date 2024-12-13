@@ -10,7 +10,7 @@ if (( $LLVM_VERSION < 16 )); then
 fi
 
 # Install mull system-wide
-dpkg -i build.dir/*.deb
+dpkg -i build.${LLVM_VERSION}.dir/*.deb
 
 pushd `dirname "$0"`
 

@@ -77,12 +77,12 @@ jobs:
             UBUNTU_CODENAME=$(. /etc/os-release; echo "${UBUNTU_CODENAME/*, /}")
             env CLOUDSMITH_API_KEY=${{ secrets.CLOUDSMITH_API_KEY }} cloudsmith push deb \
               mull-project/mull-${{ steps.metadata.outputs.channel }}/${{ matrix.OS_NAME }}/${UBUNTU_CODENAME} \
-              build.dir/*.deb
+              build.${{ matrix.LLVM_VERSION }}.dir/*.deb
 
       - name: Move package
         run: |
           mkdir -p /tmp/packages
-          sudo mv build.dir/*.deb /tmp/packages/
+          sudo mv build.${{ matrix.LLVM_VERSION }}.dir/*.deb /tmp/packages/
 
       - uses: ./actions/attach-package
         with:
