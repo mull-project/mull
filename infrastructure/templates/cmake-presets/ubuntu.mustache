@@ -4,7 +4,7 @@
         {
             "name": "mull",
             "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build.dir",
+            "binaryDir": "${sourceDir}/build.{{{LLVM_VERSION}}}.dir",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
                 "CMAKE_C_COMPILER": "clang-{{LLVM_VERSION}}",
