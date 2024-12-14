@@ -9,6 +9,9 @@
 		"ghcr.io/devcontainers/features/python": {
 			"version": "3.11"
 		},
+		"ghcr.io/devcontainers/features/sshd:1": {
+        "version": "latest"
+    },
 		// Switch to the "official" version as soon as
 		// https://github.com/devcontainers-community/features-cmake/pull/2
 		// merged
