@@ -4,12 +4,12 @@
         {
             "name": "mull",
             "generator": "Ninja",
-            "binaryDir": "${sourceDir}/build.{{{LLVM_VERSION}}}.dir",
+            "binaryDir": "${sourceDir}/build.{{OS_NAME}}.{{{LLVM_VERSION}}}.dir",
             "cacheVariables": {
                 "CMAKE_BUILD_TYPE": "Release",
-                "CMAKE_C_COMPILER": "clang-{{LLVM_VERSION}}",
-                "CMAKE_CXX_COMPILER": "clang++-{{LLVM_VERSION}}",
-                "CMAKE_PREFIX_PATH": "/usr/lib/llvm-{{LLVM_VERSION}}/cmake/;/usr/lib/cmake/clang-{{LLVM_VERSION}}/"
+                "CMAKE_C_COMPILER": "{{CC}}",
+                "CMAKE_CXX_COMPILER": "{{CXX}}",
+                "CMAKE_PREFIX_PATH": "{{CMAKE_PREFIX_PATH}}"
             }
         }
     ],

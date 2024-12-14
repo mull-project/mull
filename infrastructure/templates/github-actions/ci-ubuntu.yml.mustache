@@ -41,7 +41,7 @@ jobs:
             cmake --preset mull -DMULL_VERSION=${{ steps.metadata.outputs.version }}${{ steps.metadata.outputs.suffix }}
             cmake --workflow --preset build-and-test
             cmake --workflow --preset package
-            ./end2end-tests/run_end2end_tests.sh ${{ matrix.LLVM_VERSION }}
+            ./end2end-tests/run_end2end_tests.sh ${{ matrix.OS_NAME }} ${{ matrix.LLVM_VERSION }}
             mull-runner-${{ matrix.LLVM_VERSION }} --version
 
       - name: Publish package
@@ -55,12 +55,12 @@ jobs:
             UBUNTU_CODENAME=$(. /etc/os-release; echo "${UBUNTU_CODENAME/*, /}")
             env CLOUDSMITH_API_KEY=${{ secrets.CLOUDSMITH_API_KEY }} cloudsmith push deb \
               mull-project/mull-${{ steps.metadata.outputs.channel }}/${{ matrix.OS_NAME }}/${UBUNTU_CODENAME} \
-              build.${{ matrix.LLVM_VERSION }}.dir/*.deb
+              build.${{ matrix.OS_NAME }}.${{ matrix.LLVM_VERSION }}.dir/*.deb
 
       - name: Move package
         run: |
           mkdir -p /tmp/packages
-          sudo mv build.${{ matrix.LLVM_VERSION }}.dir/*.deb /tmp/packages/
+          sudo mv build.${{ matrix.OS_NAME }}.${{ matrix.LLVM_VERSION }}.dir/*.deb /tmp/packages/
 
       - uses: ./actions/attach-package
         with:
