@@ -83,7 +83,7 @@ To pass the plugin to Clang, you need to add a few compiler flags.
 .. code-block:: text
 
     $ clang-12 -fexperimental-new-pass-manager \
-      -fpass-plugin=/usr/local/lib/mull-ir-frontend-12 \
+      -fpass-plugin=/usr/lib/mull-ir-frontend-12 \
       -g -grecord-command-line \
       main.cpp -o hello-world
     [warning] Mull cannot find config (mull.yml). Using some defaults.
@@ -147,7 +147,7 @@ verbose.
 .. code-block:: text
 
     $ clang-12 -fexperimental-new-pass-manager \
-            -fpass-plugin=/usr/local/lib/mull-ir-frontend-12 \
+            -fpass-plugin=/usr/lib/mull-ir-frontend-12 \
             -g -grecord-command-line \
             main.cpp -o hello-world
     $ mull-runner-12 -ide-reporter-show-killed hello-world
@@ -223,7 +223,7 @@ The code:
 .. code-block:: text
 
     $ clang-12 -fexperimental-new-pass-manager \
-                  -fpass-plugin=/usr/local/lib/mull-ir-frontend-12 \
+                  -fpass-plugin=/usr/lib/mull-ir-frontend-12 \
                   -g -grecord-command-line \
                   main.cpp -o hello-world
     $ mull-runner-12 -ide-reporter-show-killed hello-world
@@ -266,7 +266,7 @@ Just to recap:
 .. code-block:: text
 
     $ clang-12 -fexperimental-new-pass-manager \
-                  -fpass-plugin=/usr/local/lib/mull-ir-frontend-12 \
+                  -fpass-plugin=/usr/lib/mull-ir-frontend-12 \
                   -g -grecord-command-line \
                   main.cpp -o hello-world
     $ mull-runner-12 hello-world
