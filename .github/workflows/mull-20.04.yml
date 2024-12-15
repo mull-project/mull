@@ -44,10 +44,10 @@ jobs:
       - name: Build Mull
         run: |
           cd build.dir
-          MULL_CONFIG=../mull-ci.yml ninja mull-tests
-          ./tests/mull-tests
+          MULL_CONFIG=../mull-ci.yml ninja unit-tests
+          ./tests/unit/unit-tests
 
       - name: Run Mull
         run: |
           cd build.dir
-          mull-runner-12 --allow-surviving -reporters=IDE -reporters=GithubAnnotations ./tests/mull-tests
+          mull-runner-12 --allow-surviving -reporters=IDE -reporters=GithubAnnotations ./tests/unit/unit-tests
