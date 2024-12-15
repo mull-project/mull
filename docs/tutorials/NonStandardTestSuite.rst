@@ -107,7 +107,7 @@ Usage of Mull in this case is very similar to a "typical" use-case (see :doc:`He
 .. code-block:: text
 
     $ clang-12 -fexperimental-new-pass-manager \
-      -fpass-plugin=/usr/local/lib/mull-ir-frontend-12 \
+      -fpass-plugin=/usr/lib/mull-ir-frontend-12 \
       -g -grecord-command-line \
       main.c -o test.exe
 
