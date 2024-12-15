@@ -52,6 +52,3 @@ int main() {
   CPlusPlus cpp;
   return cpp.foobar(44);
 }
-
-
-

@@ -11,4 +11,3 @@ public:
     return x * 14;
   }
 };
-

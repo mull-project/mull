@@ -12,4 +12,3 @@ int count_letters(const char *string, char ch) {
 
   return count;
 }
-

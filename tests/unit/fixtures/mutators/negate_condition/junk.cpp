@@ -82,4 +82,3 @@ int f_float() {
   float b = 33;
   return foo(a, b);
 }
-

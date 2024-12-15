@@ -13,4 +13,3 @@ add_subdirectory(replace_assignment)
 add_subdirectory(replace_call)
 add_subdirectory(scalar_value)
 add_subdirectory(remove_negation)
-

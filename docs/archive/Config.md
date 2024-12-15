@@ -279,4 +279,3 @@ junk_detection:
   enabled: yes
   cxx_compilation_flags: -DDSO_DLFCN -DHAVE_DLFCN_H -DNDEBUG -DOPENSSL_THREADS -DOPENSSL_NO_STATIC_ENGINE -DOPENSSL_PIC -DOPENSSLDIR="/usr/local/ssl" -DENGINESDIR="/usr/local/lib/engines-1.1" -D_REENTRANT -arch x86_64 -DL_ENDIAN -Wall  -flto -g -O0 -I include -I /opt/examples/openssl -I /opt/examples/openssl/crypto/include -I /opt/examples/openssl/crypto/modes
 ```
-

@@ -171,4 +171,3 @@ Groups:
     :cxx_logical:	cxx_logical_and_to_or, cxx_logical_or_to_and, cxx_remove_negation
 
     :experimental:	negate_mutator, scalar_value_mutator, cxx_logical
-
