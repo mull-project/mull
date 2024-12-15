@@ -4,9 +4,7 @@ if(NOT MULL_VERSION)
   set(MULL_VERSION 0.23.0)
 endif()
 
-project(Mull
-  LANGUAGES C CXX
-)
+project(Mull LANGUAGES C CXX)
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME)
   include(CTest)
@@ -18,9 +16,11 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # -DRECORD_TIMING=ON
 if(RECORD_TIMING)
-  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "\"${CMAKE_COMMAND}\" -E time")
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE
+                               "\"${CMAKE_COMMAND}\" -E time")
   set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "\"${CMAKE_COMMAND}\" -E time")
-  set_property(GLOBAL PROPERTY RULE_LAUNCH_CUSTOM "\"${CMAKE_COMMAND}\" -E time")
+  set_property(GLOBAL PROPERTY RULE_LAUNCH_CUSTOM
+                               "\"${CMAKE_COMMAND}\" -E time")
 endif()
 
 set(PROJECT_VERSION ${MULL_VERSION})
@@ -57,7 +57,9 @@ set(LIT_LLVM_PROFDATA ${clang_binary_dir}/bin/llvm-profdata)
 
 set(MULL_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 
-set(MULL_CXX_FLAGS "-fPIC -fvisibility-inlines-hidden -fno-exceptions -Wunused -Wall -fvisibility=hidden")
+set(MULL_CXX_FLAGS
+    "-fPIC -fvisibility-inlines-hidden -fno-exceptions -Wunused -Wall -fvisibility=hidden"
+)
 
 if(NOT LLVM_ENABLE_RTTI)
   set(MULL_CXX_FLAGS "${MULL_CXX_FLAGS} -fno-rtti")
@@ -67,14 +69,9 @@ add_subdirectory(vendor)
 
 set(MULL_DEFINITIONS ${LLVM_DEFINITIONS})
 set(THIRD_PARTY_INCLUDE_DIRS
-  ${LLVM_INCLUDE_DIRS}
-  ${CLANG_INCLUDE_DIRS}
-  ${CMAKE_CURRENT_LIST_DIR}/vendor/libirm/include
-  ${CMAKE_SOURCE_DIR}/vendor
-)
-set(MULL_INCLUDE_DIRS
-  ${MULL_SOURCE_DIR}/include
-)
+    ${LLVM_INCLUDE_DIRS} ${CLANG_INCLUDE_DIRS}
+    ${CMAKE_CURRENT_LIST_DIR}/vendor/libirm/include ${CMAKE_SOURCE_DIR}/vendor)
+set(MULL_INCLUDE_DIRS ${MULL_SOURCE_DIR}/include)
 
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/cpack.cmake)
 include(${CMAKE_CURRENT_LIST_DIR}/cmake/version.cmake)
@@ -83,10 +80,10 @@ include(${CMAKE_CURRENT_LIST_DIR}/cmake/version.cmake)
 link_directories(/usr/local/lib)
 
 # https://cmake.org/Wiki/CMake_RPATH_handling#Always_full_RPATH
-SET(CMAKE_SKIP_BUILD_RPATH FALSE)
-SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
-SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib" "${LLVM_LIB_PATH}")
-SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+set(CMAKE_SKIP_BUILD_RPATH FALSE)
+set(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib" "${LLVM_LIB_PATH}")
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 add_subdirectory(lib)
 add_subdirectory(tools)
