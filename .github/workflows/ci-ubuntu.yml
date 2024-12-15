@@ -63,7 +63,7 @@ jobs:
             cmake --preset mull -DMULL_VERSION=${{ steps.metadata.outputs.version }}${{ steps.metadata.outputs.suffix }}
             cmake --workflow --preset build-and-test
             cmake --workflow --preset package
-            ./end2end-tests/run_end2end_tests.sh ${{ matrix.OS_NAME }} ${{ matrix.LLVM_VERSION }}
+            ./tests/end2end/run_end2end_tests.sh ${{ matrix.OS_NAME }} ${{ matrix.LLVM_VERSION }}
             mull-runner-${{ matrix.LLVM_VERSION }} --version
 
       - name: Publish package

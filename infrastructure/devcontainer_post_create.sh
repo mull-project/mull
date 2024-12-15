@@ -10,4 +10,4 @@ pip3 install -r requirements.txt
 
 ./infrastructure/generator.py cmake --os $1 --llvm_version $2
 
-./end2end-tests/setup_end2end_tests.sh
+./tests/end2end/setup_end2end_tests.sh
