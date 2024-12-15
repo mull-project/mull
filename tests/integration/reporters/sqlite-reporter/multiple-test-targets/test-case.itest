@@ -1,0 +1,16 @@
+RUN: %clang_cc -grecord-command-line -g -O0 %pass_mull_ir_frontend %S/add.c -o %t.add.exe
+RUN: %mull_runner -ide-reporter-show-killed -allow-surviving -reporters=IDE %t.add.exe | %filecheck %s --dump-input=fail --check-prefix=CHECK_ADD
+CHECK_ADD:{{.*}}/math.h:2:12: warning: Killed: Replaced + with - [cxx_add_to_sub]
+CHECK_ADD:{{.*}}/math.h:6:12: warning: Survived: Replaced - with + [cxx_sub_to_add]
+
+RUN: %clang_cc -grecord-command-line -g -O0 %pass_mull_ir_frontend %S/sub.c -o %t.sub.exe
+RUN: %mull_runner -ide-reporter-show-killed -allow-surviving -reporters=IDE %t.sub.exe | %filecheck %s --dump-input=fail --check-prefix=CHECK_SUB
+CHECK_SUB:{{.*}}/math.h:6:12: warning: Killed: Replaced - with + [cxx_sub_to_add]
+CHECK_SUB:{{.*}}/math.h:2:12: warning: Survived: Replaced + with - [cxx_add_to_sub]
+
+RUN: rm -f %T/report.sqlite
+RUN: %mull_runner -allow-surviving -reporters=SQLite -report-dir %T -report-name report %t.sub.exe
+RUN: %mull_runner -allow-surviving -reporters=SQLite -report-dir %T -report-name report %t.add.exe
+RUN: %mull_reporter -ide-reporter-show-killed -allow-surviving -reporters=IDE %T/report.sqlite | %filecheck %s --dump-input=fail --check-prefix=CHECK_COMBINED
+CHECK_COMBINED:{{.*}}/math.h:2:12: warning: Killed: Replaced + with - [cxx_add_to_sub]
+CHECK_COMBINED:{{.*}}/math.h:6:12: warning: Killed: Replaced - with + [cxx_sub_to_add]

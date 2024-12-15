@@ -14,7 +14,8 @@ ASTMutationPoint::ASTMutationPoint(std::unique_ptr<ASTMutation> mutation,
       endLine(endLine), endColumn(endColumn) {
   std::ostringstream mis;
   /// mutator:file:line:col:1
-  mis << mutationIdentifier << ":" << sourceFilePath << ":" << beginLine << ":" << beginColumn;
+  mis << mutationIdentifier << ":" << sourceFilePath << ":" << beginLine << ":" << beginColumn
+      << ":" << endLine << ":" << endColumn;
   this->mutationIdentifier = mis.str();
 
   std::ostringstream mbis;

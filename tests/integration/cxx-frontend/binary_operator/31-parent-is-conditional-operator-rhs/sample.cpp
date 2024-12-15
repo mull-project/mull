@@ -22,7 +22,7 @@ int main() {
 RUN: %clang_cxx %sysroot -fplugin=%mull_frontend_cxx %s -o %s.exe
 
 RUN: %s.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STANDALONE_WITHOUT_MUTATION
-RUN: (env "cxx_logical_or_to_and:%s:6:28"=1 %s.exe || true) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STANDALONE_WITH_MUTATION
+RUN: (env "cxx_logical_or_to_and:%s:6:28:6:30"=1 %s.exe || true) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STANDALONE_WITH_MUTATION
 
 STANDALONE_WITHOUT_MUTATION:NORMAL
 STANDALONE_WITH_MUTATION:MUTATED

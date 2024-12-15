@@ -30,6 +30,16 @@ opt<std::string> TestProgram( \
     value_desc("path"), \
     cat(MullCategory))
 
+#define SQLiteReport_() \
+opt<std::string> SQLiteReport( \
+    Positional, \
+    "<sqlite-report>", \
+    desc("Path to the sqlite report"), \
+    Required, \
+    init(""), \
+    value_desc("path"), \
+    cat(MullCategory))
+
 #define InputFile_() \
 opt<std::string> InputFile( \
     Positional, \

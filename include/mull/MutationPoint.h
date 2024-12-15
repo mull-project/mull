@@ -72,6 +72,7 @@ public:
   ~MutationPoint() = default;
 
   void setEndLocation(int line, int column);
+  void updateIdentifier();
 
   Mutator *getMutator();
   Mutator *getMutator() const;
