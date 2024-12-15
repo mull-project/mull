@@ -3,7 +3,7 @@ int greater_than(int a, int b) {
 }
 
 int main() {
-  return ! (greater_than(3, 3) == 0);
+  return !(greater_than(3, 3) == 0);
 }
 
 // clang-format off

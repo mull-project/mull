@@ -7,8 +7,7 @@
 
 namespace mull {
 
-class NegateConditionVisitor
-    : public clang::RecursiveASTVisitor<NegateConditionVisitor> {
+class NegateConditionVisitor : public clang::RecursiveASTVisitor<NegateConditionVisitor> {
 public:
   NegateConditionVisitor(const VisitorParameters &parameters);
 

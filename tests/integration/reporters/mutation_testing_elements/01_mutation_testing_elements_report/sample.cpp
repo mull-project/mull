@@ -8,7 +8,7 @@ int sum(int a, int b) {
 }
 
 int main() {
-  return ! (sum(2, 3) == 5);
+  return !(sum(2, 3) == 5);
 }
 
 // clang-format off

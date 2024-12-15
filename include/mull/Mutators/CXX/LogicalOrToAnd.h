@@ -69,5 +69,5 @@ public:
                                             const FunctionUnderTest &function) override;
 };
 
-}
+} // namespace cxx
 } // namespace mull

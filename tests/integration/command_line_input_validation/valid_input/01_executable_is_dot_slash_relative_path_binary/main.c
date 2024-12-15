@@ -3,7 +3,7 @@ int test(int a, int b) {
 }
 
 int main(int argc, char **argv) {
-  return !( test(2, 3) == 5 );
+  return !(test(2, 3) == 5);
 }
 
 // clang-format off

@@ -7,8 +7,7 @@
 
 namespace mull {
 
-class RemoveVoidFunctionVisitor
-    : public clang::RecursiveASTVisitor<RemoveVoidFunctionVisitor> {
+class RemoveVoidFunctionVisitor : public clang::RecursiveASTVisitor<RemoveVoidFunctionVisitor> {
 public:
   RemoveVoidFunctionVisitor(const VisitorParameters &parameters);
 
@@ -18,8 +17,7 @@ public:
   clang::Expr *foundMutant();
 
 private:
-  bool validCallExpr(clang::CallExpr *callExpression,
-                     clang::SourceLocation location);
+  bool validCallExpr(clang::CallExpr *callExpression, clang::SourceLocation location);
 
   const VisitorParameters &parameters;
   clang::Expr *matchingExpression;

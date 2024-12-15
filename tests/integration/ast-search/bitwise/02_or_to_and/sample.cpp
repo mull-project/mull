@@ -3,7 +3,7 @@ int bitwise_or(int a, int b) {
 }
 
 int main() {
-  return ! (bitwise_or(1, 2) == 3);
+  return !(bitwise_or(1, 2) == 3);
 }
 
 // clang-format off

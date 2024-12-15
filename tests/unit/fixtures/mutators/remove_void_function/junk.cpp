@@ -24,9 +24,16 @@ class FooBar {
 public:
   FooBar(int x) : i(x) {}
 
-  int getValue() { return i; }
-  void increment() { i++; }
-  void decrement() { i--; }
+  int getValue() {
+    return i;
+  }
+  void increment() {
+    i++;
+  }
+  void decrement() {
+    i--;
+  }
+
 private:
   int i;
 };

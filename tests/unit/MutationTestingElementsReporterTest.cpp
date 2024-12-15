@@ -3,8 +3,8 @@
 #include "FixturePaths.h"
 #include "TestModuleFactory.h"
 
-#include "mull/Bitcode.h"
 #include "BitcodeLoader.h"
+#include "mull/Bitcode.h"
 #include "mull/Config/Configuration.h"
 #include "mull/FunctionUnderTest.h"
 #include "mull/JunkDetection/CXX/ASTStorage.h"

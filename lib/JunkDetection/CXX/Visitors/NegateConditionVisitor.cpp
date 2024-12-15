@@ -2,12 +2,10 @@
 
 using namespace mull;
 
-NegateConditionVisitor::NegateConditionVisitor(
-    const VisitorParameters &parameters)
+NegateConditionVisitor::NegateConditionVisitor(const VisitorParameters &parameters)
     : visitor(parameters) {}
 
-bool NegateConditionVisitor::VisitUnaryOperator(
-    clang::UnaryOperator *unaryOperator) {
+bool NegateConditionVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOperator) {
   if (unaryOperator->getOpcode() == clang::UnaryOperatorKind::UO_LNot) {
     visitor.visitRangeWithASTExpr(unaryOperator);
   }

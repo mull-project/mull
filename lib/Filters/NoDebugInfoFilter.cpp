@@ -16,4 +16,6 @@ bool NoDebugInfoFilter::shouldSkip(llvm::Instruction *instruction) {
   return SourceLocation::locationFromInstruction(instruction).isNull();
 }
 
-std::string NoDebugInfoFilter::name() { return "no debug info"; }
+std::string NoDebugInfoFilter::name() {
+  return "no debug info";
+}

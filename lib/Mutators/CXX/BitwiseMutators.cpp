@@ -22,8 +22,7 @@ std::string LShiftAssignToRShiftAssign::ID() {
 }
 
 LShiftAssignToRShiftAssign::LShiftAssignToRShiftAssign()
-    : TrivialCXXMutator(getLLShiftToLRShift(),
-                        MutatorKind::CXX_LShiftAssignToRShiftAssign,
+    : TrivialCXXMutator(getLLShiftToLRShift(), MutatorKind::CXX_LShiftAssignToRShiftAssign,
                         LShiftAssignToRShiftAssign::ID(),
                         "Replaces <<= with >>=", ">>=", "Replaced <<= with >>=") {}
 
@@ -39,8 +38,8 @@ std::string RShiftToLShift::ID() {
 }
 
 RShiftToLShift::RShiftToLShift()
-    : TrivialCXXMutator(getRShiftToLShift(), MutatorKind::CXX_RShiftToLShift,
-                        RShiftToLShift::ID(), "Replaces << with >>", ">>", "Replaced >> with <<") {}
+    : TrivialCXXMutator(getRShiftToLShift(), MutatorKind::CXX_RShiftToLShift, RShiftToLShift::ID(),
+                        "Replaces << with >>", ">>", "Replaced >> with <<") {}
 
 std::string RShiftAssignToLShiftAssign::ID() {
   return "cxx_rshift_assign_to_lshift_assign";
@@ -62,8 +61,8 @@ std::string BitwiseOrToAnd::ID() {
 }
 
 BitwiseOrToAnd::BitwiseOrToAnd()
-    : TrivialCXXMutator(getOrToAnd(), MutatorKind::CXX_Bitwise_OrToAnd,
-                        BitwiseOrToAnd::ID(), "Replaces | with &", "&", "Replaced | with &") {}
+    : TrivialCXXMutator(getOrToAnd(), MutatorKind::CXX_Bitwise_OrToAnd, BitwiseOrToAnd::ID(),
+                        "Replaces | with &", "&", "Replaced | with &") {}
 
 std::string OrAssignToAndAssign::ID() {
   return "cxx_or_assign_to_and_assign";
@@ -85,8 +84,8 @@ std::string BitwiseAndToOr::ID() {
 }
 
 BitwiseAndToOr::BitwiseAndToOr()
-    : TrivialCXXMutator(getAndToOr(), MutatorKind::CXX_Bitwise_AndToOr,
-                        BitwiseAndToOr::ID(), "Replaces & with |", "|", "Replaced & with |") {}
+    : TrivialCXXMutator(getAndToOr(), MutatorKind::CXX_Bitwise_AndToOr, BitwiseAndToOr::ID(),
+                        "Replaces & with |", "|", "Replaced & with |") {}
 
 std::string AndAssignToOrAssign::ID() {
   return "cxx_and_assign_to_or_assign";

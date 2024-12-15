@@ -1,10 +1,6 @@
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
 
 #include "mull/Diagnostics/Diagnostics.h"
-#include "mull/Mutators/CXX/RemoveNegation.h"
-#include "mull/Mutators/CXX/RemoveNegation.h"
-#include "mull/MutationPoint.h"
-#include "mull/Mutators/Mutator.h"
 #include "mull/JunkDetection/CXX/Visitors/BinaryVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/NegateConditionVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/RemoveVoidFunctionVisitor.h"
@@ -12,6 +8,9 @@
 #include "mull/JunkDetection/CXX/Visitors/ScalarValueVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/UnaryVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/VarDeclVisitor.h"
+#include "mull/MutationPoint.h"
+#include "mull/Mutators/CXX/RemoveNegation.h"
+#include "mull/Mutators/Mutator.h"
 
 using namespace mull;
 
@@ -251,8 +250,8 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
 
   const std::string &sourceFile = point->getSourceLocation().filePath;
   std::string description = MutationKindToString(point->getMutator()->mutatorKind());
-  diagnostics.debug(std::string("CXXJunkDetector: mutation \"") + description + "\": " + sourceFile + ":" +
-                    std::to_string(mutationLocationBeginLine) + ":" +
+  diagnostics.debug(std::string("CXXJunkDetector: mutation \"") + description +
+                    "\": " + sourceFile + ":" + std::to_string(mutationLocationBeginLine) + ":" +
                     std::to_string(mutationLocationBeginColumn) +
                     " (end: " + std::to_string(endLine) + ":" + std::to_string(endColumn) + ")");
 

@@ -64,9 +64,9 @@ std::unique_ptr<llvm::Module> InMemoryCompiler::compile(const std::string &code,
   auto &codeGenOptions = compilerInvocation.getCodeGenOpts();
   codeGenOptions.setDebugInfo(
 #if LLVM_VERSION_MAJOR >= 17
-    llvm::codegenoptions::FullDebugInfo
+      llvm::codegenoptions::FullDebugInfo
 #else
-    clang::codegenoptions::FullDebugInfo
+      clang::codegenoptions::FullDebugInfo
 #endif
   );
   codeGenOptions.DebugColumnInfo = 1;

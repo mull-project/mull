@@ -92,8 +92,9 @@ class MutatorKindSet {
 public:
   static MutatorKindSet create(std::vector<MutatorKind> mutators);
   bool includesMutator(mull::MutatorKind mutatorKind) const;
+
 private:
   MutatorKindSet(std::unordered_set<mull::MutatorKind> mutators);
   std::unordered_set<mull::MutatorKind> mutators;
 };
-}
+} // namespace mull

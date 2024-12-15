@@ -12,12 +12,16 @@ public:
 
 class NullJunkDetector : public JunkDetector {
 public:
-  bool isJunk(MutationPoint *point) override { return false; }
+  bool isJunk(MutationPoint *point) override {
+    return false;
+  }
 };
 
 class AllJunkDetector : public JunkDetector {
 public:
-  bool isJunk(MutationPoint *point) override { return true; }
+  bool isJunk(MutationPoint *point) override {
+    return true;
+  }
 };
 
 } // namespace mull

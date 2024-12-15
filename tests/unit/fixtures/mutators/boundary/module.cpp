@@ -39,7 +39,7 @@ int ff(int x, int g) {
     r += mem[i];
   }
 
-  delete [] mem;
+  delete[] mem;
 
   return r;
 }

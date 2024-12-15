@@ -163,8 +163,8 @@ void MullASTMutator::performReplaceNumericInitAssignmentMutation(
 }
 
 [[noreturn]] void MullASTMutator::notImplemented() noexcept {
-    std::cerr << "Not implemented\n";
-    std::abort();
+  std::cerr << "Not implemented\n";
+  std::abort();
 }
 
 } // namespace cxx

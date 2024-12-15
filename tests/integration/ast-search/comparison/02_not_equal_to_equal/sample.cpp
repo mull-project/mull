@@ -3,7 +3,7 @@ int not_equal(int a, int b) {
 }
 
 int main() {
-  return ! not_equal(2, 3);
+  return !not_equal(2, 3);
 }
 
 // clang-format off

@@ -24,7 +24,9 @@ public:
 
   NegateConditionMutator();
 
-  MutatorKind mutatorKind() override { return MutatorKind::NegateMutator; }
+  MutatorKind mutatorKind() override {
+    return MutatorKind::NegateMutator;
+  }
   std::string getUniqueIdentifier() override {
     return ID();
   }
@@ -41,12 +43,11 @@ public:
     return "x or !x";
   }
 
-  void applyMutation(llvm::Function *function,
-                     const MutationPointAddress &address,
+  void applyMutation(llvm::Function *function, const MutationPointAddress &address,
                      irm::IRMutation *lowLevelMutation) override;
 
-  std::vector<MutationPoint *>
-  getMutations(Bitcode *bitcode, const FunctionUnderTest &function) override;
+  std::vector<MutationPoint *> getMutations(Bitcode *bitcode,
+                                            const FunctionUnderTest &function) override;
 
 private:
   std::vector<std::unique_ptr<irm::IRMutation>> lowLevelMutators;

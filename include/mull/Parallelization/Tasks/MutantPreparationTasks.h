@@ -17,8 +17,7 @@ public:
 
   CloneMutatedFunctionsTask() = default;
 
-  void operator()(iterator begin, iterator end, Out &storage,
-                  progress_counter &counter);
+  void operator()(iterator begin, iterator end, Out &storage, progress_counter &counter);
   static void cloneFunctions(Bitcode &bitcode);
 
 private:
@@ -32,8 +31,7 @@ public:
 
   DeleteOriginalFunctionsTask() = default;
 
-  void operator()(iterator begin, iterator end, Out &storage,
-                  progress_counter &counter);
+  void operator()(iterator begin, iterator end, Out &storage, progress_counter &counter);
   static void deleteFunctions(Bitcode &bitcode);
 
 private:
@@ -48,8 +46,7 @@ public:
   explicit InsertMutationTrampolinesTask(const Configuration &configuration)
       : configuration(configuration) {}
 
-  void operator()(iterator begin, iterator end, Out &storage,
-                  progress_counter &counter);
+  void operator()(iterator begin, iterator end, Out &storage, progress_counter &counter);
   static void insertTrampolines(Bitcode &bitcode, const Configuration &configuration);
 
 private:

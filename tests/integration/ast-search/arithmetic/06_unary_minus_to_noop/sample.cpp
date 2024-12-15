@@ -3,7 +3,7 @@ int unary_minus(int x) {
 }
 
 int main() {
-  return ! (unary_minus(1) == -1);
+  return !(unary_minus(1) == -1);
 }
 
 // clang-format off

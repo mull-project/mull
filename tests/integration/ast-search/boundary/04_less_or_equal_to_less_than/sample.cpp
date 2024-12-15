@@ -3,7 +3,7 @@ int less_than_or_equal(int a, int b) {
 }
 
 int main() {
-  return ! (less_than_or_equal(3, 3) == 1);
+  return !(less_than_or_equal(3, 3) == 1);
 }
 
 // clang-format off

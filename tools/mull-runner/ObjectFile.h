@@ -9,4 +9,4 @@ namespace mull {
 typedef std::pair<std::unique_ptr<llvm::MemoryBuffer>, std::unique_ptr<llvm::object::ObjectFile>>
     OwnedObjectFile;
 OwnedObjectFile loadObjectFile(mull::Diagnostics &diagnostics, const std::string &executablePath);
-}
+} // namespace mull

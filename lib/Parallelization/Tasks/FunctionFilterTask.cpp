@@ -6,8 +6,7 @@
 
 using namespace mull;
 
-FunctionFilterTask::FunctionFilterTask(FunctionFilter &filter)
-    : filter(filter) {}
+FunctionFilterTask::FunctionFilterTask(FunctionFilter &filter) : filter(filter) {}
 
 void FunctionFilterTask::operator()(iterator begin, iterator end, Out &storage,
                                     progress_counter &counter) {

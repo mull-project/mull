@@ -16,8 +16,7 @@ public:
 
   MutationFilterTask(MutationPointFilter &filter);
 
-  void operator()(iterator begin, iterator end, Out &storage,
-                  progress_counter &counter);
+  void operator()(iterator begin, iterator end, Out &storage, progress_counter &counter);
 
 private:
   MutationPointFilter &filter;

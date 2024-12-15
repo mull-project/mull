@@ -40,14 +40,15 @@ public:
   std::string getReplacement() const override {
     return "0 or 42";
   }
-  MutatorKind mutatorKind() override { return MutatorKind::ScalarValueMutator; }
+  MutatorKind mutatorKind() override {
+    return MutatorKind::ScalarValueMutator;
+  }
 
-  void applyMutation(llvm::Function *function,
-                     const MutationPointAddress &address,
+  void applyMutation(llvm::Function *function, const MutationPointAddress &address,
                      irm::IRMutation *lowLevelMutation) override;
 
-  std::vector<MutationPoint *>
-  getMutations(Bitcode *bitcode, const FunctionUnderTest &function) override;
+  std::vector<MutationPoint *> getMutations(Bitcode *bitcode,
+                                            const FunctionUnderTest &function) override;
 
 private:
   std::vector<std::unique_ptr<irm::IRMutation>> lowLevelMutators;

@@ -23,11 +23,13 @@ loadCoverage(const Configuration &configuration, Diagnostics &diagnostics,
   }
 
   llvm::Expected<std::unique_ptr<llvm::coverage::CoverageMapping>> maybeMapping =
-    llvm::coverage::CoverageMapping::load(objectFiles, profileName
+      llvm::coverage::CoverageMapping::load(objectFiles,
+                                            profileName
 #if LLVM_VERSION_MAJOR >= 17
-      , *llvm::vfs::getRealFileSystem()
+                                            ,
+                                            *llvm::vfs::getRealFileSystem()
 #endif
-    );
+      );
   if (!maybeMapping) {
     std::string error;
     llvm::raw_string_ostream os(error);

@@ -43,7 +43,7 @@ TEST(Mutation_Scalar_Return_Value, End_2_End) {
     MutationPoint &mutationPoint = *nonJunkMutationPoints.at(0);
 
     auto const dumpRegex =
-      std::regex("Mutation Point: scalar_value_mutator /in-memory-file.cc:3:3");
+        std::regex("Mutation Point: scalar_value_mutator /in-memory-file.cc:3:3");
     ASSERT_TRUE(std::regex_search(mutationPoint.dump(), dumpRegex));
   }
 }

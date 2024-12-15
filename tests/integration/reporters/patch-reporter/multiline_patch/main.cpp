@@ -1,9 +1,9 @@
 void foobar(int b, bool x) {
-  b += x?4:5;
+  b += x ? 4 : 5;
 }
 
 int main() {
-// clang-format off
+  // clang-format off
   foobar (4,
       false);
   foobar (4 +
@@ -11,7 +11,7 @@ int main() {
       9 +
       10,
       false);
-// clang-format on
+  // clang-format on
   return 0;
 }
 
