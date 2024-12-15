@@ -1,4 +1,3 @@
 mutators:
   - cxx_replace_scalar_call
-
 quiet: false

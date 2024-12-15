@@ -1,4 +1,3 @@
 mutators:
   - cxx_sub_assign_to_add_assign
-
 quiet: false

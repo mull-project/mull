@@ -1,5 +1,4 @@
 mutators:
   - cxx_minus_to_noop
 debugEnabled: true
-
 quiet: false

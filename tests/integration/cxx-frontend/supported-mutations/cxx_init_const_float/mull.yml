@@ -1,4 +1,3 @@
 mutators:
   - cxx_init_const
-
 quiet: false

@@ -1,4 +1,3 @@
 mutators:
   - cxx_and_to_or
-
 quiet: false

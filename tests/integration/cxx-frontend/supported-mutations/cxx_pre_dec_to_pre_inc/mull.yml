@@ -1,4 +1,3 @@
 mutators:
   - cxx_pre_dec_to_pre_inc
-
 quiet: false

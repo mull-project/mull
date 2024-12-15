@@ -1,4 +1,3 @@
 mutators:
   - cxx_rem_to_div
-
 quiet: false
