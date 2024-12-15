@@ -1,4 +1,3 @@
----
 BasedOnStyle: LLVM
 Cpp11BracedListStyle: false
 AllowShortBlocksOnASingleLine: false

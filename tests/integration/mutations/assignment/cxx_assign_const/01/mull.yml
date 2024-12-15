@@ -1,5 +1,4 @@
 mutators:
   - cxx_assign_const
 junkDetectionDisabled: true
-
 quiet: false

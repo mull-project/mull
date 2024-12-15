@@ -1,16 +1,13 @@
 name: Ubuntu CI
-
 env:
   CLOUDSMITH_API_KEY: ${{ secrets.CLOUDSMITH_API_KEY }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
 on:
   push:
     branches: ["main"]
     tags: ["**"]
   pull_request:
     branches: ["main"]
-
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -65,7 +62,6 @@ jobs:
             cmake --workflow --preset package
             ./tests/end2end/run_end2end_tests.sh ${{ matrix.OS_NAME }} ${{ matrix.LLVM_VERSION }}
             mull-runner-${{ matrix.LLVM_VERSION }} --version
-
       - name: Publish package
         uses: devcontainers/ci@v0.3
         if: env.CLOUDSMITH_API_KEY != null
@@ -78,12 +74,10 @@ jobs:
             env CLOUDSMITH_API_KEY=${{ secrets.CLOUDSMITH_API_KEY }} cloudsmith push deb \
               mull-project/mull-${{ steps.metadata.outputs.channel }}/${{ matrix.OS_NAME }}/${UBUNTU_CODENAME} \
               build.${{ matrix.OS_NAME }}.${{ matrix.LLVM_VERSION }}.dir/*.deb
-
       - name: Move package
         run: |
           mkdir -p /tmp/packages
           sudo mv build.${{ matrix.OS_NAME }}.${{ matrix.LLVM_VERSION }}.dir/*.deb /tmp/packages/
-
       - uses: ./.github/actions/attach-package
         with:
           GH_API_KEY: ${{ secrets.GITHUB_TOKEN }}

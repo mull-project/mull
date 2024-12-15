@@ -1,4 +1,3 @@
 mutators:
   - cxx_post_inc_to_post_dec
-
 quiet: false
