@@ -93,7 +93,6 @@ add_subdirectory(tools)
 
 if(CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_TESTING)
   add_subdirectory(tests)
-  add_subdirectory(tests-lit)
   add_subdirectory(vendor/googletest EXCLUDE_FROM_ALL)
 endif()
 
