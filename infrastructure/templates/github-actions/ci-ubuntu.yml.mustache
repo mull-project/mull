@@ -25,7 +25,7 @@ jobs:
     name: [[ OS_NAME ]] ${{ matrix.OS_VERSION }} - LLVM ${{ matrix.LLVM_VERSION }}
     steps:
       - uses: actions/checkout@v4
-      - uses: .github/actions/detect-package-metadata
+      - uses: ./.github/actions/detect-package-metadata
         id: metadata
       - uses: docker/login-action@v2
         with:
@@ -62,6 +62,6 @@ jobs:
           mkdir -p /tmp/packages
           sudo mv build.${{ matrix.OS_NAME }}.${{ matrix.LLVM_VERSION }}.dir/*.deb /tmp/packages/
 
-      - uses: .github/actions/attach-package
+      - uses: ./.github/actions/attach-package
         with:
           GH_API_KEY: ${{ secrets.GITHUB_TOKEN }}

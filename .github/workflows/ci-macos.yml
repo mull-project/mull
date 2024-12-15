@@ -37,7 +37,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           submodules: true
-      - uses: .github/actions/detect-package-metadata
+      - uses: ./.github/actions/detect-package-metadata
         id: metadata
 
       - name: Run CI task
@@ -67,6 +67,6 @@ jobs:
           mkdir -p /tmp/packages
           mv build.${{ matrix.OS_NAME }}.${{ matrix.LLVM_VERSION }}.dir/*.zip /tmp/packages/
 
-      - uses: .github/actions/attach-package
+      - uses: ./.github/actions/attach-package
         with:
           GH_API_KEY: ${{ secrets.GITHUB_TOKEN }}
