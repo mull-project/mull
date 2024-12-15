@@ -43,10 +43,19 @@ function test_fmt() {
     -DCMAKE_CXX_COMPILER=$MULL_CXX \
     ..
 
-  ninja core-test
-  ./bin/core-test
+  ninja
+  for test_case in $(ctest --show-only | grep 'Test .*:' | awk ' { print $3} ');
+  do
+    if [ "$test_case" == "posix-mock-test" ]
+    then
+      echo "Skipping $test_case"
+      continue
+    fi
+    echo "Testing $test_case"
+    mull-runner-$LLVM_VERSION --allow-surviving --reporters SQLite --report-name fmt ./bin/$test_case
+  done
 
-  mull-runner-$LLVM_VERSION --allow-surviving ./bin/core-test
+  mull-reporter-$LLVM_VERSION --allow-surviving ./fmt.sqlite
 
   popd # fmt.build.dir
   popd # fmt
