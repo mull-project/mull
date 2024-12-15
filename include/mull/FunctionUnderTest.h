@@ -1,8 +1,8 @@
 #pragma once
 
 #include "mull/SourceLocation.h"
-#include <vector>
 #include <llvm/ProfileData/Coverage/CoverageMapping.h>
+#include <vector>
 
 namespace llvm {
 class Function;

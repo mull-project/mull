@@ -1,4 +1,4 @@
-#define ff(x, y) ( (x) < (y) )
+#define ff(x, y) ((x) < (y))
 
 extern "C" void buzz(int x);
 
@@ -10,8 +10,7 @@ void bar(bool x) {
   }
 }
 
-template<typename T>
-T foo(T a, T b) {
+template <typename T> T foo(T a, T b) {
   if (ff(a, b)) {
     return a;
   }

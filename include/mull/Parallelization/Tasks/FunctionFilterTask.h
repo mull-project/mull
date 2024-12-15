@@ -16,8 +16,7 @@ public:
 
   explicit FunctionFilterTask(FunctionFilter &filter);
 
-  void operator()(iterator begin, iterator end, Out &storage,
-                  progress_counter &counter);
+  void operator()(iterator begin, iterator end, Out &storage, progress_counter &counter);
 
 private:
   FunctionFilter &filter;

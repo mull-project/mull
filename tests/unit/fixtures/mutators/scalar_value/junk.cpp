@@ -1,4 +1,6 @@
-int main(int argc, char **argv) { return argc + 42 + 122.f; }
+int main(int argc, char **argv) {
+  return argc + 42 + 122.f;
+}
 
 int f1(int x) {
   const int C = 136;

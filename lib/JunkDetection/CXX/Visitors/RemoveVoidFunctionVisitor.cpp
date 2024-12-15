@@ -11,12 +11,10 @@ RemoveVoidFunctionVisitor::RemoveVoidFunctionVisitor(const VisitorParameters &pa
     : parameters(parameters), matchingExpression(nullptr) {}
 
 bool RemoveVoidFunctionVisitor::VisitCallExpr(clang::CallExpr *callExpression) {
-  return !validCallExpr(callExpression,
-                        callExpression->getSourceRange().getBegin());
+  return !validCallExpr(callExpression, callExpression->getSourceRange().getBegin());
 }
 
-bool RemoveVoidFunctionVisitor::VisitCXXMemberCallExpr(
-    clang::CXXMemberCallExpr *callExpression) {
+bool RemoveVoidFunctionVisitor::VisitCXXMemberCallExpr(clang::CXXMemberCallExpr *callExpression) {
   return !validCallExpr(callExpression, callExpression->getExprLoc());
 }
 

@@ -1,6 +1,6 @@
+#include "BitcodeLoader.h"
 #include "FixturePaths.h"
 #include <gtest/gtest.h>
-#include "BitcodeLoader.h"
 #include <mull/Diagnostics/Diagnostics.h>
 #include <mull/FunctionUnderTest.h>
 #include <mull/Mutators/CXX/RelationalMutators.h>

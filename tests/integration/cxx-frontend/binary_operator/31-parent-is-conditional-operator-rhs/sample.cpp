@@ -3,7 +3,7 @@ extern int printf(const char *, ...);
 }
 
 bool orFunc(bool a, bool b) {
-  return (false ? true : a || b );
+  return (false ? true : a || b);
 }
 
 int main() {

@@ -7,7 +7,7 @@ bool foo(bool a, bool b) {
 }
 
 int main() {
-  return ! (foo(false, true) == true);
+  return !(foo(false, true) == true);
 }
 
 // clang-format off

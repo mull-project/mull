@@ -3,7 +3,7 @@ int bitwise_and(int a, int b) {
 }
 
 int main() {
-  return ! (bitwise_and(1, 2) == 0);
+  return !(bitwise_and(1, 2) == 0);
 }
 
 // clang-format off

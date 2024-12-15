@@ -33,7 +33,7 @@ bool FilePathFilter::shouldSkip(const mull::SourceLocation &location) const {
 
 bool FilePathFilter::shouldSkip(const std::string &sourceFilePath) const {
   std::lock_guard<std::mutex> lock(cacheMutex);
-  std::string sourceFilePathCopy{sourceFilePath};
+  std::string sourceFilePathCopy{ sourceFilePath };
 
   if (cache.count(sourceFilePath) == 0) {
     bool allow = true;

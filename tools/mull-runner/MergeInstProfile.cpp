@@ -15,7 +15,8 @@ bool mull::mergeRawInstProfile(Diagnostics &diagnostics, const std::string &inpu
                                const std::string &output) {
   auto maybeReader = llvm::InstrProfReader::create(input
 #if LLVM_VERSION_MAJOR >= 17
-      , *llvm::vfs::getRealFileSystem()
+                                                   ,
+                                                   *llvm::vfs::getRealFileSystem()
 #endif
   );
   if (!maybeReader) {

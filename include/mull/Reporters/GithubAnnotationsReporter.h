@@ -2,9 +2,9 @@
 
 #include "mull/Reporters/SourceCodeReader.h"
 #include <memory>
+#include <regex>
 #include <string>
 #include <vector>
-#include <regex>
 
 namespace mull {
 

@@ -7,5 +7,5 @@ int double_negate(int a) {
 }
 
 int main() {
-  return ! (negate(15) == 0);
+  return !(negate(15) == 0);
 }

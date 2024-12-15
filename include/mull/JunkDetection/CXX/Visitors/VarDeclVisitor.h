@@ -32,7 +32,9 @@ public:
     return true;
   }
 
-  clang::Expr *foundMutant() { return matchingExpression; }
+  clang::Expr *foundMutant() {
+    return matchingExpression;
+  }
 
 private:
   const VisitorParameters &parameters;

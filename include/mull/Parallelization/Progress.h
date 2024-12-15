@@ -29,8 +29,8 @@ public:
                     size_t workers);
 
   void operator()();
-  void printProgress(progress_counter::CounterType current,
-                     progress_counter::CounterType total, bool force);
+  void printProgress(progress_counter::CounterType current, progress_counter::CounterType total,
+                     bool force);
 
 private:
   Diagnostics &diagnostics;

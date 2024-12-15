@@ -5,7 +5,7 @@ public:
     return x + 1;
   }
 
-  CPlusPlus& operator++(int) {
+  CPlusPlus &operator++(int) {
     x++;
     return *this;
   }
@@ -14,7 +14,7 @@ public:
     t.x = x++;
     return t;
   }
-  CPlusPlus& operator--(int) {
+  CPlusPlus &operator--(int) {
     x--;
     return *this;
   }
@@ -23,6 +23,7 @@ public:
     t.x = x--;
     return t;
   }
+
 private:
   int x;
 };
@@ -51,7 +52,7 @@ int f(int a, int b) {
 }
 
 int ff(int x, int g) {
-  CPlusPlus **classes = new CPlusPlus*[18];
+  CPlusPlus **classes = new CPlusPlus *[18];
   for (int i = 18; i > 0; i -= 1) {
     classes[i] = new CPlusPlus(i - x, i + g, m(x - g));
   }
@@ -75,7 +76,7 @@ int ff(int x, int g) {
     delete classes[i];
   }
 
-  delete [] classes;
+  delete[] classes;
 
   return sumX;
 }

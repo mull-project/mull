@@ -1,7 +1,7 @@
 #pragma once
 
-#include <string>
 #include <mutex>
+#include <string>
 
 namespace mull {
 
@@ -17,11 +17,11 @@ public:
   void makeQuiet();
   void makeSilent();
 
-  void info(const std::string& message);
-  void warning(const std::string& message);
-  void error(const std::string& message);
-  void progress(const std::string& message);
-  void debug(const std::string& message);
+  void info(const std::string &message);
+  void warning(const std::string &message);
+  void error(const std::string &message);
+  void progress(const std::string &message);
+  void debug(const std::string &message);
 
 private:
   void prepare();
@@ -35,4 +35,4 @@ private:
   bool silent;
 };
 
-}
+} // namespace mull

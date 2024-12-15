@@ -5,7 +5,7 @@ int bitwise_left_shift_assign(int a, int b) {
 }
 
 int main() {
-  return ! (bitwise_left_shift_assign(2, 1) == 4);
+  return !(bitwise_left_shift_assign(2, 1) == 4);
 }
 
 // clang-format off

@@ -1,7 +1,9 @@
 class CPlusPlus {
 public:
   CPlusPlus(int a, int b, int c) : x(a | (b & c)) {}
-  int get_X() { return x | 1; }
+  int get_X() {
+    return x | 1;
+  }
 
   CPlusPlus &operator++(int) {
     x <<= 5;

@@ -3,7 +3,7 @@ int bitwise_right_shift(int a, int b) {
 }
 
 int main() {
-  return ! (bitwise_right_shift(4, 1) == 2);
+  return !(bitwise_right_shift(4, 1) == 2);
 }
 
 // clang-format off

@@ -5,7 +5,7 @@ int bitwise_or_assign(int a, int b) {
 }
 
 int main() {
-  return ! (bitwise_or_assign(1, 2) == 3);
+  return !(bitwise_or_assign(1, 2) == 3);
 }
 
 // clang-format off

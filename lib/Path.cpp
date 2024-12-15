@@ -1,8 +1,8 @@
 #include "mull/Path.h"
 
 #include <limits.h>
-#include <llvm/Support/Path.h>
 #include <llvm/Support/FileSystem.h>
+#include <llvm/Support/Path.h>
 
 std::string mull::absoluteFilePath(const std::string &directory, const std::string &filePath) {
   auto path = filePath;

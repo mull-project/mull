@@ -17,8 +17,7 @@ public:
   using Out = std::vector<int>;
   using iterator = In::const_iterator;
 
-  void operator()(iterator begin, iterator end, Out &storage,
-                  progress_counter &counter);
+  void operator()(iterator begin, iterator end, Out &storage, progress_counter &counter);
 
 private:
   const Configuration &config;

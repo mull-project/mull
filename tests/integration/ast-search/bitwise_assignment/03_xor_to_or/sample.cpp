@@ -5,7 +5,7 @@ int bitwise_xor_assign(int a, int b) {
 }
 
 int main() {
-  return ! (bitwise_xor_assign(1, 1) == 0);
+  return !(bitwise_xor_assign(1, 1) == 0);
 }
 
 // clang-format off

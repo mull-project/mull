@@ -44,8 +44,7 @@ TEST(Mutation_ConstAssignment_AssignConst, End_2_End) {
   {
     MutationPoint &mutationPoint = *nonJunkMutationPoints.at(0);
 
-    auto const dumpRegex =
-      std::regex("Mutation Point: cxx_assign_const /in-memory-file.cc:4:7");
+    auto const dumpRegex = std::regex("Mutation Point: cxx_assign_const /in-memory-file.cc:4:7");
     ASSERT_TRUE(std::regex_search(mutationPoint.dump(), dumpRegex));
   }
 }

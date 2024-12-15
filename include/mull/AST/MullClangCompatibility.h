@@ -2,7 +2,7 @@
 #include <clang/Basic/SourceLocation.h>
 
 namespace clang {
-  class Stmt;
+class Stmt;
 };
 
 clang::SourceLocation ClangCompatibilityStmtGetBeginLoc(const clang::Stmt &stmt);

@@ -55,10 +55,8 @@ std::unique_ptr<MutationArtefact> MutationTestBed::generate(const std::string &s
     }
   }
 
-  std::unique_ptr<MutationArtefact> artefact(new MutationArtefact(nonJunkMutationPoints,
-                                                                  junkMutationPoints,
-                                                                  std::move(context),
-                                                                  std::move(bitcode)));
+  std::unique_ptr<MutationArtefact> artefact(new MutationArtefact(
+      nonJunkMutationPoints, junkMutationPoints, std::move(context), std::move(bitcode)));
 
   return artefact;
 }

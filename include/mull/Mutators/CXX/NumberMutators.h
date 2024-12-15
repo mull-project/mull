@@ -18,5 +18,5 @@ public:
   NumberInitConst();
 };
 
-}
+} // namespace cxx
 } // namespace mull
