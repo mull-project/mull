@@ -173,7 +173,7 @@ When running tests, Mull reuses one JIT stack across several threads. Though,
 when executing mutants, it creates a JIT stack per-thread, which may consume a significant amount of RAM. In this case, it may make sense to use fewer threads
 for mutant execution to prevent slowdown because of memory swapping.
 
-By default Mull uses [`std::thread::hardware_concurrency()`](https://en.cppreference.com/w/cpp/thread/thread/hardware_concurrency) 
+By default Mull uses [`std::thread::hardware_concurrency()`](https://en.cppreference.com/w/cpp/thread/thread/hardware_concurrency)
 number of threads.
 
 ---

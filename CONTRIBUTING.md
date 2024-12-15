@@ -4,7 +4,7 @@ There are several ways you can help the project.
 
 ### Spread the word
 
-We have found that not many people are aware of Mutation Testing. You can help 
+We have found that not many people are aware of Mutation Testing. You can help
 by simply asking your colleagues or friends about their opinion on mutation testing.
 
 ### Give it a try
