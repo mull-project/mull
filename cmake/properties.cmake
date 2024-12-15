@@ -15,4 +15,3 @@ endfunction()
 function(add_fixture_dependency dependency)
   set_property(GLOBAL APPEND PROPERTY TEST_FIXTURES_DEPENDENCIES ${dependency})
 endfunction()
-

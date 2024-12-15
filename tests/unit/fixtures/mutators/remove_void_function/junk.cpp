@@ -53,4 +53,3 @@ void buzz() {
   Buzz c;
   c = a;
 }
-

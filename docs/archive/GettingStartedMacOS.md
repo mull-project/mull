@@ -70,4 +70,3 @@ Alternatively, choose a different location use the following command:
 ```bash
 make install INSTALL_DIR=/foo/bar
 ```
-

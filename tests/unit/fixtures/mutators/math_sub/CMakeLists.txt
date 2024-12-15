@@ -3,4 +3,3 @@ compile_fixture(
   OUTPUT_EXTENSION bc
   FLAGS -g -c -emit-llvm
 )
-

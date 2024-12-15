@@ -33,4 +33,3 @@ of planned features. Feel free to implement any of them, or come up with some
 features you think would be beneficial for the project.
 
 Here is the starting point: [Hacking on Mull](https://mull.readthedocs.io/en/latest/HackingOnMull.html).
-

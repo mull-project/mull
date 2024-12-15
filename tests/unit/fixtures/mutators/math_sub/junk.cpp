@@ -83,4 +83,3 @@ int ff(int x, int g) {
 int main() {
   return 0;
 }
-

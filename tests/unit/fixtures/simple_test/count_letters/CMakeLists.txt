@@ -10,4 +10,3 @@ foreach(source ${SOURCES})
     FLAGS -g -c -emit-llvm
   )
 endforeach()
-

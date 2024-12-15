@@ -6,5 +6,3 @@ set (HARDCODED_FILES
 foreach(file ${HARDCODED_FILES})
   add_fixture(${file})
 endforeach()
-
-

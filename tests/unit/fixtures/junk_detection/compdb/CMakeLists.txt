@@ -41,4 +41,3 @@ set (databases
 foreach(database ${databases})
   add_fixture(${database})
 endforeach()
-

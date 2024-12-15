@@ -14,4 +14,3 @@ set_target_properties(google-test
 target_include_directories(google-test PUBLIC
   ${google_test_include_dirs}
 )
-

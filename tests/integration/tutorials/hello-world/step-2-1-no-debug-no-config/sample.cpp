@@ -10,5 +10,3 @@ CHECK:[warning] Mull cannot find config (mull.yml). Using some defaults.
 CHECK:[warning] Mull cannot find debug information. Recompile with `-g` flag.
 CHECK:[warning] Mull cannot find compiler flags. Recompile with `-grecord-command-line` flag.
 **/
-
-

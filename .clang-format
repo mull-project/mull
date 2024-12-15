@@ -6,4 +6,3 @@ AllowShortFunctionsOnASingleLine: Empty
 AllowShortLoopsOnASingleLine: false
 BinPackArguments: false
 ColumnLimit: 100
-
