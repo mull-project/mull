@@ -23,14 +23,16 @@ CHECK-INFO:  key = LLVM Version
 CHECK-INFO:  key = Mull Version
 
 RUN: sqlite3 ./test.sqlite -line "select * from mutant" | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=CHECK-MUTANT
-CHECK-MUTANT:    mutant_id = cxx_eq_to_ne:{{.*}}
-CHECK-MUTANT:      mutator = cxx_eq_to_ne
-CHECK-MUTANT:     filename = {{.*}}main.cpp
-CHECK-MUTANT:    directory ={{.*}}
-CHECK-MUTANT:  line_number = 4
-CHECK-MUTANT:column_number = 12
-CHECK-MUTANT:       status = 2
-CHECK-MUTANT:     duration = {{.*}}
-CHECK-MUTANT:       stdout = stdout
-CHECK-MUTANT:       stderr = stderr
+CHECK-MUTANT:        mutant_id = cxx_eq_to_ne:{{.*}}
+CHECK-MUTANT:          mutator = cxx_eq_to_ne
+CHECK-MUTANT:         filename = {{.*}}main.cpp
+CHECK-MUTANT:        directory ={{.*}}
+CHECK-MUTANT:      line_number = 4
+CHECK-MUTANT:    column_number = 12
+CHECK-MUTANT:  end_line_number = 4
+CHECK-MUTANT:end_column_number = 14
+CHECK-MUTANT:           status = 2
+CHECK-MUTANT:         duration = {{.*}}
+CHECK-MUTANT:           stdout = stdout
+CHECK-MUTANT:           stderr = stderr
 */

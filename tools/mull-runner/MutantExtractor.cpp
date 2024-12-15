@@ -72,12 +72,8 @@ MutantExtractor::extractMutants(const std::vector<std::string> &mutantHolders) {
     int endLine = std::stoi(chunks[4]);
     int endColumn = std::stoi(chunks[5]);
 
-    std::ostringstream mis;
-    mis << mutator << ":" << location << ":" << beginLine << ":" << beginColumn;
-    std::string identifier = mis.str();
-
     auto mutant = std::make_unique<Mutant>(
-        identifier,
+        encoding,
         mutator,
         mull::SourceLocation("", location, "", location, beginLine, beginColumn),
         mull::SourceLocation("", location, "", location, endLine, endColumn));

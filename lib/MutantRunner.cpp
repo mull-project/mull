@@ -39,5 +39,7 @@ MutantRunner::runMutants(const std::string &executable, const std::vector<std::s
       diagnostics, "Running mutants", mutants, mutationResults, std::move(tasks));
   mutantRunner.execute();
 
+  diagnostics.debug("Done running mutants");
+
   return mutationResults;
 }

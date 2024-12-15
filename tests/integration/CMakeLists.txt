@@ -17,8 +17,9 @@ set(TEST_CXX_FLAGS
 )
 
 set(LIT_COMMAND
-    PATH_TO_LLVM=${PATH_TO_LLVM} LLVM_VERSION_MAJOR=${LLVM_VERSION_MAJOR}
+    LLVM_VERSION_MAJOR=${LLVM_VERSION_MAJOR}
     CURRENT_DIR=${CMAKE_CURRENT_SOURCE_DIR}
+    mull_reporter=$<TARGET_FILE:mull-reporter-${LLVM_VERSION_MAJOR}>
     mull_runner=$<TARGET_FILE:mull-runner-${LLVM_VERSION_MAJOR}>
     mull_frontend_cxx=$<TARGET_FILE:mull-cxx-frontend-${LLVM_VERSION_MAJOR}>
     mull_ir_frontend=$<TARGET_FILE:mull-cxx-ir-frontend-${LLVM_VERSION_MAJOR}>

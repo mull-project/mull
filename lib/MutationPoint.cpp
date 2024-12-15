@@ -75,9 +75,7 @@ MutationPoint::MutationPoint(Mutator *mutator, irm::IRMutation *irMutator,
       bitcode(m), originalFunction(instruction->getFunction()), mutatedFunction(nullptr),
       sourceLocation(SourceLocation::locationFromInstruction(instruction)), irMutator(irMutator),
       endLocation(SourceLocation::nullSourceLocation()) {
-  userIdentifier = mutator->getUniqueIdentifier() + ':' + sourceLocation.filePath + ':' +
-                   std::to_string(sourceLocation.line) + ':' +
-                   std::to_string(sourceLocation.column);
+  updateIdentifier();
 }
 
 Mutator *MutationPoint::getMutator() {
@@ -117,13 +115,20 @@ void MutationPoint::setEndLocation(int line, int column) {
                                sourceLocation.filePath,
                                line,
                                column);
+  updateIdentifier();
+}
+
+void MutationPoint::updateIdentifier() {
+  userIdentifier = mutator->getUniqueIdentifier() + ':' + sourceLocation.filePath + ':' +
+                   std::to_string(sourceLocation.line) + ':' +
+                   std::to_string(sourceLocation.column) + ':' + std::to_string(endLocation.line) +
+                   ':' + std::to_string(endLocation.column);
 }
 
 void MutationPoint::recordMutation() {
   assert(originalFunction != nullptr);
   llvm::Module *module = originalFunction->getParent();
-  std::string encoding = getUserIdentifier() + ':' + std::to_string(endLocation.line) + ':' +
-                         std::to_string(endLocation.column);
+  std::string encoding = getUserIdentifier();
   llvm::Constant *constant =
       llvm::ConstantDataArray::getString(module->getContext(), llvm::StringRef(encoding));
   auto *global = new llvm::GlobalVariable(*module,
@@ -131,7 +136,7 @@ void MutationPoint::recordMutation() {
                                           true,
                                           llvm::GlobalVariable::InternalLinkage,
                                           constant,
-                                          this->getUserIdentifier());
+                                          encoding);
 #if defined __APPLE__
   global->setSection("__mull,.mull_mutants");
 #else

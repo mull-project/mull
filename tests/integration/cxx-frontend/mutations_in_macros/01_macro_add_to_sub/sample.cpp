@@ -21,10 +21,10 @@ int main() {
 
 /**
 RUN: %clang_cxx %sysroot -fplugin=%mull_frontend_cxx %s -o %s.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=FRONTEND
-FRONTEND:Recording mutation point: cxx_add_to_sub:{{.*}}/sample.cpp:5:21 (end: 5:22)
+FRONTEND:Recording mutation point: cxx_add_to_sub:{{.*}}/sample.cpp:5:21:5:22 (end: 5:22)
 
 RUN: %s.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STANDALONE_WITHOUT_MUTATION
-RUN: (env "cxx_add_to_sub:%s:5:21"=1 %s.exe || true) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STANDALONE_WITH_MUTATION
+RUN: (env "cxx_add_to_sub:%s:5:21:5:22"=1 %s.exe || true) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STANDALONE_WITH_MUTATION
 
 STANDALONE_WITHOUT_MUTATION:NORMAL
 STANDALONE_WITH_MUTATION:MUTATED

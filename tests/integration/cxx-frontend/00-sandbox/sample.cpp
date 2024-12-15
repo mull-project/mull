@@ -24,9 +24,9 @@ RUN: %clang_cxx %sysroot -fplugin=%mull_frontend_cxx %s -o %s-ast.exe
 RUN: %clang_cxx %sysroot -g %pass_mull_ir_frontend %s -o %s-ir.exe
 
 RUN: %s-ast.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STANDALONE_WITHOUT_MUTATION
-RUN: (env "cxx_add_to_sub:%s:6:12"=1 %s-ast.exe || true) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STANDALONE_WITH_MUTATION
+RUN: (env "cxx_add_to_sub:%s:6:12:6:13"=1 %s-ast.exe || true) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STANDALONE_WITH_MUTATION
 RUN: %s-ir.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STANDALONE_WITHOUT_MUTATION
-RUN: (env "cxx_add_to_sub:%s:6:12"=1 %s-ir.exe || true) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STANDALONE_WITH_MUTATION
+RUN: (env "cxx_add_to_sub:%s:6:12:6:13"=1 %s-ir.exe || true) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STANDALONE_WITH_MUTATION
 
 STANDALONE_WITHOUT_MUTATION:NORMAL
 STANDALONE_WITH_MUTATION:MUTATED

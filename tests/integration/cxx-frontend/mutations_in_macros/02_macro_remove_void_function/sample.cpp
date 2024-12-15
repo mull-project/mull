@@ -28,10 +28,10 @@ int main() {
 
 /**
 RUN: %clang_cxx %sysroot -fplugin=%mull_frontend_cxx %s -o %s.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=FRONTEND
-FRONTEND:Recording mutation point: cxx_remove_void_call:{{.*}}/sample.cpp:9:32 (end: 9:53)
+FRONTEND:Recording mutation point: cxx_remove_void_call:{{.*}}/sample.cpp:9:32:9:53 (end: 9:53)
 
 RUN: %s.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STANDALONE_WITHOUT_MUTATION
-RUN: (env "cxx_remove_void_call:%s:9:32"=1 %s.exe || true) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STANDALONE_WITH_MUTATION
+RUN: (env "cxx_remove_void_call:%s:9:32:9:53"=1 %s.exe || true) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STANDALONE_WITH_MUTATION
 
 STANDALONE_WITHOUT_MUTATION:NORMAL
 STANDALONE_WITH_MUTATION:MUTATED
