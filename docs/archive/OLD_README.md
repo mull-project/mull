@@ -94,21 +94,21 @@ mull-cxx --help
 
 #### Generating HTML report (Mutation Testing Elements)
 
-Mull supports 
-[Mutation Testing Elements](https://github.com/stryker-mutator/mutation-testing-elements) 
-which is an HTML reporter for a number of mutation testing tools. 
+Mull supports
+[Mutation Testing Elements](https://github.com/stryker-mutator/mutation-testing-elements)
+which is an HTML reporter for a number of mutation testing tools.
 
 Mull only generates a JSON file with a mutation testing report. The JSON file
-can then be read by the Mutation Testing Elements's HTML/Javascript code and 
-rendered in a browser. See the mutation-testing-elements's 
+can then be read by the Mutation Testing Elements's HTML/Javascript code and
+rendered in a browser. See the mutation-testing-elements's
 [simple-example](https://github.com/stryker-mutator/mutation-testing-elements/tree/059732743f75ea1abfcc2f093cef7a8db8798739/packages/mutation-testing-elements/testResources/simple-example).
- 
+
 The option `-reporters=Elements` enables reporting to Mutation Testing Elements,
 the optional option `-report-dir` and `-report-name` specifies the output path.
 
-**Note:** Reporting to Mutation Testing Elements requires presence of the 
-`-compdb-path` and `-compilation-flags` (see Junk Mutations above) because Mull 
-needs the compilation database/flags information to reason about the source code 
+**Note:** Reporting to Mutation Testing Elements requires presence of the
+`-compdb-path` and `-compilation-flags` (see Junk Mutations above) because Mull
+needs the compilation database/flags information to reason about the source code
 in which the mutations are found.
 
 ```
@@ -117,8 +117,8 @@ mull-cxx --help
   -elements-output-path=<string>   - Where to store the Mutation Testing Elements JSON report (defaults to /tmp/mull.mutation-testing-elements.json)
   -reporter-elements               - Enables Mutation Testing Elements Reporter
 ...
-``` 
- 
+```
+
 ### Examples: OpenSSL
 
 Build OpenSSL:
@@ -321,17 +321,17 @@ Here is the starting point: [CONTRIBUTING.md](CONTRIBUTING.md)
 [Mull it over: mutation testing based on LLVM (preprint)](https://lowlevelbits.org/pdfs/Mull_Mutation_2018.pdf)
 
 ```
-@INPROCEEDINGS{8411727, 
-author={A. Denisov and S. Pankevich}, 
-booktitle={2018 IEEE International Conference on Software Testing, Verification and Validation Workshops (ICSTW)}, 
-title={Mull It Over: Mutation Testing Based on LLVM}, 
-year={2018}, 
-volume={}, 
-number={}, 
-pages={25-31}, 
-keywords={just-in-time;program compilers;program testing;program verification;mutations;Mull;LLVM IR;mutated programs;compiled programming languages;LLVM framework;LLVM JIT;tested program;mutation testing tool;Testing;Tools;Computer languages;Instruments;Runtime;Computer crashes;Open source software;mutation testing;llvm}, 
-doi={10.1109/ICSTW.2018.00024}, 
-ISSN={}, 
+@INPROCEEDINGS{8411727,
+author={A. Denisov and S. Pankevich},
+booktitle={2018 IEEE International Conference on Software Testing, Verification and Validation Workshops (ICSTW)},
+title={Mull It Over: Mutation Testing Based on LLVM},
+year={2018},
+volume={},
+number={},
+pages={25-31},
+keywords={just-in-time;program compilers;program testing;program verification;mutations;Mull;LLVM IR;mutated programs;compiled programming languages;LLVM framework;LLVM JIT;tested program;mutation testing tool;Testing;Tools;Computer languages;Instruments;Runtime;Computer crashes;Open source software;mutation testing;llvm},
+doi={10.1109/ICSTW.2018.00024},
+ISSN={},
 month={April},}
 ```
 
