@@ -13,7 +13,6 @@ tmp/
 *.sqlite
 
 cmake-build*
-.vagrant
 *.log
 *.retry
 tests-lit/tests/**/*.ll
