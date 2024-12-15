@@ -8,9 +8,9 @@ if(APPLE)
     OUTPUT_VARIABLE SDKROOT
     OUTPUT_STRIP_TRAILING_WHITESPACE
   )
-  set (sysroot "--sysroot ${SDKROOT}")
+  set(sysroot "--sysroot ${SDKROOT}")
 else()
-  set (sysroot)
+  set(sysroot)
 endif()
 
 set(TEST_CXX_FLAGS
@@ -33,8 +33,8 @@ set(LIT_COMMAND
   TEST_CXX_FLAGS="${TEST_CXX_FLAGS}"
   ${LIT_EXEC}
   -vv
-  ${CMAKE_CURRENT_SOURCE_DIR}/tests
-  )
+  ${CMAKE_CURRENT_SOURCE_DIR}
+)
 
 add_custom_target(run-integration-tests
   COMMAND cd ${CMAKE_CURRENT_SOURCE_DIR} && make clean
