@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.24.0] - 18 Dec 2024
+
+- Added LLVM 18 support [#1061](https://github.com/mull-project/mull/pull/1061)
+- Introduced `mull-reporter` to handle multiple test targets and offline analysis [#1072](https://github.com/mull-project/mull/pull/1072)
+- Fixed ubuntu packages (missing `libclang-cpp` dependency) [#1063](https://github.com/mull-project/mull/pull/1063) [#1043](https://github.com/mull-project/mull/issues/1043)
+- Switched from Ansible to Codespaces/devcontainers to ease development environment setup (TODO add docs link)
+
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2024-07-16..2024-12-18)
+
+
 ## [0.23.0] - 15 Jul 2024
 
 - New CLI option `--mutation-score-threshold` (by [mpownby](https://github.com/mpownby)) [#1045](https://github.com/mull-project/mull/pull/1052)
