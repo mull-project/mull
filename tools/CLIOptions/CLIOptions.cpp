@@ -90,11 +90,20 @@ static std::string sanitizeString(const std::string &input) {
 }
 
 void dumpCLIOption(std::stringstream &stream, llvm::cl::Option *option) {
-  stream << "--" << option->ArgStr.str();
+  stream << "--";
+  if (option->isPositional()) {
+    // Stripping <>
+    stream << option->ArgStr.substr(1, option->ArgStr.size() - 2).str();
+  } else {
+    stream << option->ArgStr.str();
+  }
   if (!option->ValueStr.empty()) {
     stream << " " << option->ValueStr.str();
   }
   stream << "\t\t" << option->HelpStr.str();
+  if (option->isPositional()) {
+    stream << ", positional argument";
+  }
   stream << "\n\n";
 }
 

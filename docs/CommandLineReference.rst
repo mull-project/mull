@@ -7,3 +7,4 @@ Command Line Reference
    :maxdepth: 2
 
    command-line/mull-runner
+   command-line/mull-reporter

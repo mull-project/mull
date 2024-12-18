@@ -9,6 +9,13 @@ add_custom_target(
   WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
 
 add_custom_target(
+  generate-mull-reporter-cli-options-doc
+  COMMAND $<TARGET_FILE:mull-reporter-${LLVM_VERSION_MAJOR}> --dump-cli >
+          command-line/generated/mull-reporter-cli-options.rst
+  DEPENDS mull-runner-${LLVM_VERSION_MAJOR}
+  WORKING_DIRECTORY ${CMAKE_CURRENT_LIST_DIR})
+
+add_custom_target(
   generate-mutators-doc
   COMMAND $<TARGET_FILE:mull-runner-${LLVM_VERSION_MAJOR}> --dump-mutators >
           generated/Mutators.rst
@@ -22,4 +29,4 @@ add_custom_target(
 
 add_custom_target(
   build-docs DEPENDS generate-mutators-doc generate-mull-runner-cli-options-doc
-                     generate-html-docs)
+                     generate-mull-reporter-cli-options-doc generate-html-docs)
