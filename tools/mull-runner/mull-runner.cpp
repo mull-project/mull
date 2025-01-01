@@ -195,7 +195,7 @@ int main(int argc, char **argv) {
                                      std::nullopt);
   });
   if (warmUpResult.status != mull::ExecutionStatus::Passed) {
-    diagnostics.warning(warmUpResult.debugDescription());
+    diagnostics.error(warmUpResult.debugDescription());
   }
 
   if (!rawCoverageData.empty()) {
