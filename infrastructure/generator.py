@@ -7,7 +7,7 @@ import shutil
 
 SUPPORTED_PLATFORMS = {
     "ubuntu": {"20.04": [12], "22.04": [13, 14, 15], "24.04": [14, 15, 16, 17, 18]},
-    "macos": {"latest": [13, 14, 15, 16, 17, 18]},
+    "macos": {"latest": [14, 15, 16, 17, 18]},
 }
 
 
