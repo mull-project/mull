@@ -16,8 +16,6 @@ jobs:
       matrix:
         include:
           - OS_NAME: "macos"
-            LLVM_VERSION: 13
-          - OS_NAME: "macos"
             LLVM_VERSION: 14
           - OS_NAME: "macos"
             LLVM_VERSION: 15
