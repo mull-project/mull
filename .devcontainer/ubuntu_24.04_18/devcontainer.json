@@ -25,8 +25,11 @@
       "extensions": [
         "ms-vscode.cmake-tools",
         "ms-vscode.cpptools",
+        "ms-vscode.cpptools-extension-pack",
         "imgildev.vscode-mustache-snippets",
-        "github.vscode-github-actions"
+        "github.vscode-github-actions",
+        "revng.llvm-ir",
+        "rreverser.llvm"
       ]
     }
   }
