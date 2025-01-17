@@ -11,7 +11,7 @@ on:
 jobs:
   macos:
     name: LLVM ${{ matrix.LLVM_VERSION }}
-    runs-on: macos-latest
+    runs-on: [[ OS_RUNNER ]]
     strategy:
       matrix:
         include:

@@ -1,4 +1,4 @@
-{{=[[ ]]=}}name: [[ OS_NAME ]] CI
+name: Ubuntu-arm64 CI
 env:
   CLOUDSMITH_API_KEY: ${{ secrets.CLOUDSMITH_API_KEY }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -10,16 +10,26 @@ on:
     branches: ["main"]
 jobs:
   build-and-test:
-    runs-on: [[ OS_RUNNER ]]
+    runs-on: ubuntu-24.04-arm
     strategy:
       matrix:
         include:
-          [[#strategy]]
-          - OS_NAME: "[[ OS_NAME ]]"
-            OS_VERSION: "[[ OS_VERSION ]]"
-            LLVM_VERSION: [[ LLVM_VERSION ]]
-          [[/strategy]]
-    name: [[ OS_NAME ]] ${{ matrix.OS_VERSION }} - LLVM ${{ matrix.LLVM_VERSION }}
+          - OS_NAME: "ubuntu-arm64"
+            OS_VERSION: "24.04"
+            LLVM_VERSION: 14
+          - OS_NAME: "ubuntu-arm64"
+            OS_VERSION: "24.04"
+            LLVM_VERSION: 15
+          - OS_NAME: "ubuntu-arm64"
+            OS_VERSION: "24.04"
+            LLVM_VERSION: 16
+          - OS_NAME: "ubuntu-arm64"
+            OS_VERSION: "24.04"
+            LLVM_VERSION: 17
+          - OS_NAME: "ubuntu-arm64"
+            OS_VERSION: "24.04"
+            LLVM_VERSION: 18
+    name: Ubuntu-arm64 ${{ matrix.OS_VERSION }} - LLVM ${{ matrix.LLVM_VERSION }}
     steps:
       - uses: actions/checkout@v4
       - uses: ./.github/actions/detect-package-metadata

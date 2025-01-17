@@ -6,8 +6,27 @@ import os
 import shutil
 
 SUPPORTED_PLATFORMS = {
-    "ubuntu": {"20.04": [12], "22.04": [13, 14, 15], "24.04": [14, 15, 16, 17, 18]},
-    "macos": {"latest": [14, 15, 16, 17, 18]},
+    "ubuntu": {
+        "versions": {
+            "20.04": [12],
+            "22.04": [13, 14, 15],
+            "24.04": [14, 15, 16, 17, 18],
+        },
+        "template": "ubuntu",
+        "runner": "ubuntu-latest",
+    },
+    "ubuntu-arm64": {
+        "versions": {
+            "24.04": [14, 15, 16, 17, 18],
+        },
+        "template": "ubuntu",
+        "runner": "ubuntu-24.04-arm",
+    },
+    "macos": {
+        "versions": {"latest": [14, 15, 16, 17, 18]},
+        "template": "macos",
+        "runner": "macos-latest",
+    },
 }
 
 
@@ -37,11 +56,12 @@ def cmake(args):
 
 def devcontainers(args):
     shutil.rmtree(".devcontainer")
-    for os_name, platform in SUPPORTED_PLATFORMS.items():
-        if os_name.lower() == "macos":
-            continue
+    for os_name in SUPPORTED_PLATFORMS:
         template_folder = f"infrastructure/templates/devcontainers/{os_name}"
-        for os_version, llvm_versions in platform.items():
+        if not os.path.exists(template_folder):
+            continue
+        platform = SUPPORTED_PLATFORMS[os_name]
+        for os_version, llvm_versions in platform["versions"].items():
             for llvm_version in llvm_versions:
                 container_folder = (
                     f".devcontainer/{os_name}_{os_version}_{llvm_version}"
@@ -70,8 +90,9 @@ def gh_workflows(args):
 
     for os_name in SUPPORTED_PLATFORMS.keys():
         strategies = []
-        for os_version in sorted(SUPPORTED_PLATFORMS[os_name].keys()):
-            for llvm_version in SUPPORTED_PLATFORMS[os_name][os_version]:
+        os_versions = SUPPORTED_PLATFORMS[os_name]["versions"]
+        for os_version in sorted(os_versions):
+            for llvm_version in os_versions[os_version]:
                 arg = {
                     "OS_NAME": os_name,
                     "OS_VERSION": os_version,
@@ -79,15 +100,19 @@ def gh_workflows(args):
                 }
                 strategies.append(arg)
 
-        template_args = {"strategy": strategies, "OS_NAME": os_name.capitalize()}
+        template_args = {
+            "strategy": strategies,
+            "OS_NAME": os_name.capitalize(),
+            "OS_RUNNER": SUPPORTED_PLATFORMS[os_name]["runner"],
+        }
+        template_name = SUPPORTED_PLATFORMS[os_name]["template"]
         renderer = pystache.Renderer(missing_tags="strict")
-        for template in [f"ci-{os_name}.yml"]:
-            template_name = f"{template_folder}/{template}.mustache"
-            result_filename = f"{workflow_folder}/{template}"
-            with open(template_name, "r") as t:
-                result = renderer.render(t.read(), template_args)
-                with open(result_filename, "w") as f:
-                    f.write(result)
+        template_file = f"{template_folder}/ci-{template_name}.yml.mustache"
+        result_filename = f"{workflow_folder}/ci-{os_name}.yml"
+        with open(template_file, "r") as t:
+            result = renderer.render(t.read(), template_args)
+            with open(result_filename, "w") as f:
+                f.write(result)
 
 
 def main():
