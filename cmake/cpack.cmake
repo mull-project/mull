@@ -38,11 +38,13 @@ else()
 
     foreach(LINE ${LINES})
       string(REGEX MATCH "^ID=\"?([A-Za-z0-9._-]+)\"?" match ${LINE}})
+
       if(match)
         set(CPACK_SYSTEM_NAME ${CMAKE_MATCH_1})
       endif()
 
       string(REGEX MATCH "^VERSION_ID=\"?([A-Za-z0-9._-]+)\"?" match ${LINE}})
+
       if(match)
         set(CPACK_SYSTEM_VERSION ${CMAKE_MATCH_1})
       endif()
@@ -50,7 +52,6 @@ else()
 
   else()
     set(CPACK_SYSTEM_NAME "unknown")
-
   endif()
 endif()
 
@@ -69,7 +70,7 @@ else()
 endif()
 
 set(MULL_PACKAGE_FILE_NAME
-    "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-LLVM-${LLVM_VERSION_MAJOR}.${LLVM_VERSION_MINOR}-${CPACK_SYSTEM_NAME}-${CPACK_SYSTEM_VERSION}"
+    "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-LLVM-${LLVM_VERSION_MAJOR}.${LLVM_VERSION_MINOR}-${CPACK_SYSTEM_NAME}-${CMAKE_HOST_SYSTEM_PROCESSOR}-${CPACK_SYSTEM_VERSION}"
 )
 
 set(CPACK_PACKAGE_FILE_NAME ${MULL_PACKAGE_FILE_NAME})
