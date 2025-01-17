@@ -14,23 +14,25 @@ jobs:
     strategy:
       matrix:
         include:
-          - OS_NAME: "ubuntu-arm64"
+          - OS_NAME: "ubuntu"
             OS_VERSION: "24.04"
             LLVM_VERSION: 14
-          - OS_NAME: "ubuntu-arm64"
+          - OS_NAME: "ubuntu"
             OS_VERSION: "24.04"
             LLVM_VERSION: 15
-          - OS_NAME: "ubuntu-arm64"
+          - OS_NAME: "ubuntu"
             OS_VERSION: "24.04"
             LLVM_VERSION: 16
-          - OS_NAME: "ubuntu-arm64"
+          - OS_NAME: "ubuntu"
             OS_VERSION: "24.04"
             LLVM_VERSION: 17
-          - OS_NAME: "ubuntu-arm64"
+          - OS_NAME: "ubuntu"
             OS_VERSION: "24.04"
             LLVM_VERSION: 18
     name: Ubuntu-arm64 ${{ matrix.OS_VERSION }} - LLVM ${{ matrix.LLVM_VERSION }}
     steps:
+      - name: Fix environment for ARM64 Linux runners (actions/partner-runner-images#25)
+        run: for var in PATH XDG_CONFIG_HOME; do sed -Ee "s/^/${var}=/" -e 's/(runner)admin/\1/g' <<< "${!var}"; done | tee -a "$GITHUB_ENV"
       - uses: actions/checkout@v4
       - uses: ./.github/actions/detect-package-metadata
         id: metadata
@@ -42,7 +44,7 @@ jobs:
       - name: Build, test, package
         uses: devcontainers/ci@v0.3
         with:
-          imageName: ghcr.io/mull-project/internal-${{ matrix.OS_NAME }}_${{ matrix.OS_VERSION }}_${{ matrix.LLVM_VERSION }}-ci
+          imageName: ghcr.io/mull-project/internal-ubuntu-arm64_${{ matrix.OS_VERSION }}_${{ matrix.LLVM_VERSION }}-ci
           configFile: ./.devcontainer/${{ matrix.OS_NAME }}_${{ matrix.OS_VERSION }}_${{ matrix.LLVM_VERSION }}/devcontainer.json
           runCmd: |
             cmake --preset mull -DMULL_VERSION=${{ steps.metadata.outputs.version }}${{ steps.metadata.outputs.suffix }}
@@ -54,7 +56,7 @@ jobs:
         uses: devcontainers/ci@v0.3
         if: env.CLOUDSMITH_API_KEY != null
         with:
-          imageName: ghcr.io/mull-project/internal-${{ matrix.OS_NAME }}_${{ matrix.OS_VERSION }}_${{ matrix.LLVM_VERSION }}-ci
+          imageName: ghcr.io/mull-project/internal-ubuntu-arm64_${{ matrix.OS_VERSION }}_${{ matrix.LLVM_VERSION }}-ci
           configFile: ./.devcontainer/${{ matrix.OS_NAME }}_${{ matrix.OS_VERSION }}_${{ matrix.LLVM_VERSION }}/devcontainer.json
           push: never
           runCmd: |

@@ -91,10 +91,11 @@ def gh_workflows(args):
     for os_name in SUPPORTED_PLATFORMS.keys():
         strategies = []
         os_versions = SUPPORTED_PLATFORMS[os_name]["versions"]
+        template_name = SUPPORTED_PLATFORMS[os_name]["template"]
         for os_version in sorted(os_versions):
             for llvm_version in os_versions[os_version]:
                 arg = {
-                    "OS_NAME": os_name,
+                    "OS_NAME": template_name,
                     "OS_VERSION": os_version,
                     "LLVM_VERSION": llvm_version,
                 }
@@ -103,9 +104,9 @@ def gh_workflows(args):
         template_args = {
             "strategy": strategies,
             "OS_NAME": os_name.capitalize(),
+            "OS_NAME_LOWER": os_name,
             "OS_RUNNER": SUPPORTED_PLATFORMS[os_name]["runner"],
         }
-        template_name = SUPPORTED_PLATFORMS[os_name]["template"]
         renderer = pystache.Renderer(missing_tags="strict")
         template_file = f"{template_folder}/ci-{template_name}.yml.mustache"
         result_filename = f"{workflow_folder}/ci-{os_name}.yml"
