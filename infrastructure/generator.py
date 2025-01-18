@@ -17,6 +17,8 @@ SUPPORTED_PLATFORMS = {
     },
     "ubuntu-arm64": {
         "versions": {
+            "20.04": [12],
+            "22.04": [13, 14, 15],
             "24.04": [14, 15, 16, 17, 18],
         },
         "template": "ubuntu",

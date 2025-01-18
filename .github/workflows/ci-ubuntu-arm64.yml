@@ -15,6 +15,18 @@ jobs:
       matrix:
         include:
           - OS_NAME: "ubuntu"
+            OS_VERSION: "20.04"
+            LLVM_VERSION: 12
+          - OS_NAME: "ubuntu"
+            OS_VERSION: "22.04"
+            LLVM_VERSION: 13
+          - OS_NAME: "ubuntu"
+            OS_VERSION: "22.04"
+            LLVM_VERSION: 14
+          - OS_NAME: "ubuntu"
+            OS_VERSION: "22.04"
+            LLVM_VERSION: 15
+          - OS_NAME: "ubuntu"
             OS_VERSION: "24.04"
             LLVM_VERSION: 14
           - OS_NAME: "ubuntu"
