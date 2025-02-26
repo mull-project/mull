@@ -166,23 +166,23 @@ RawReport mull::SQLiteReporter::loadRawReport(const std::string &databasePath) {
   while (sqlite3_step(selectMutantsStmt) == SQLITE_ROW) {
     int index = 0;
     std::string mutant_id =
-        reinterpret_cast<char const *>(sqlite3_column_text(selectInfoStmt, index++));
+        reinterpret_cast<char const *>(sqlite3_column_text(selectMutantsStmt, index++));
     std::string mutator =
-        reinterpret_cast<char const *>(sqlite3_column_text(selectInfoStmt, index++));
+        reinterpret_cast<char const *>(sqlite3_column_text(selectMutantsStmt, index++));
     std::string filename =
-        reinterpret_cast<char const *>(sqlite3_column_text(selectInfoStmt, index++));
+        reinterpret_cast<char const *>(sqlite3_column_text(selectMutantsStmt, index++));
     std::string directory =
-        reinterpret_cast<char const *>(sqlite3_column_text(selectInfoStmt, index++));
-    auto line_number = sqlite3_column_int(selectInfoStmt, index++);
-    auto column_number = sqlite3_column_int(selectInfoStmt, index++);
-    auto end_line_number = sqlite3_column_int(selectInfoStmt, index++);
-    auto end_column_number = sqlite3_column_int(selectInfoStmt, index++);
-    auto status = sqlite3_column_int(selectInfoStmt, index++);
-    auto duration = sqlite3_column_int64(selectInfoStmt, index++);
+        reinterpret_cast<char const *>(sqlite3_column_text(selectMutantsStmt, index++));
+    auto line_number = sqlite3_column_int(selectMutantsStmt, index++);
+    auto column_number = sqlite3_column_int(selectMutantsStmt, index++);
+    auto end_line_number = sqlite3_column_int(selectMutantsStmt, index++);
+    auto end_column_number = sqlite3_column_int(selectMutantsStmt, index++);
+    auto status = sqlite3_column_int(selectMutantsStmt, index++);
+    auto duration = sqlite3_column_int64(selectMutantsStmt, index++);
     std::string stdout_string =
-        reinterpret_cast<char const *>(sqlite3_column_text(selectInfoStmt, index++));
+        reinterpret_cast<char const *>(sqlite3_column_text(selectMutantsStmt, index++));
     std::string stderr_string =
-        reinterpret_cast<char const *>(sqlite3_column_text(selectInfoStmt, index++));
+        reinterpret_cast<char const *>(sqlite3_column_text(selectMutantsStmt, index++));
 
     ExecutionResult executionResult;
     executionResult.runningTime = duration;
