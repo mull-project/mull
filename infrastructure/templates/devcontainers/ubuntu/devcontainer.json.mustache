@@ -3,6 +3,10 @@
   "build": {
     "dockerfile": "Dockerfile"
   },
+  "runArgs": [
+    "--name",
+    "mull-{{OS_NAME}}-{{OS_VERSION}}-LLVM-{{LLVM_VERSION}}"
+  ],
   "features": {
     "ghcr.io/devcontainers-extra/features/fish-apt-get:1": {},
     "ghcr.io/devcontainers/features/git:1": {},
