@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.25.0] - 01 Mar 2025
+
+- Fixed a bug/crash in the new `mull-reporter` (by [tvoskui](https://github.com/tvoskui)) [#1086](https://github.com/mull-project/mull/issues/1086) [#1087](https://github.com/mull-project/mull/pull/1087)
+- The original check run is now reports an error instead of a warning in case of failure [#1080](https://github.com/mull-project/mull/pull/1080)
+- Added precompiled `arm64` Ubuntu packages [#1084](https://github.com/mull-project/mull/pull/1084)
+
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2024-12-19..2025-03-01)
+
 ## [0.24.0] - 18 Dec 2024
 
 - Added LLVM 18 support [#1061](https://github.com/mull-project/mull/pull/1061)
