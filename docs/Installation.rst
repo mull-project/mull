@@ -3,7 +3,7 @@ Installation
 
 .. include:: ./_support.rst
 
-Mull comes with a number of precompiled binaries for macOS and Ubuntu.
+Mull comes with a number of precompiled binaries for macOS (`arm64`) and Ubuntu (`x86_64` and `arm64`).
 There are two flavors of packages:
 
  - `stable <https://cloudsmith.io/~mull-project/repos/mull-stable/packages/>`_ - tagged releases (0.8.0, 0.9.0, etc.)
