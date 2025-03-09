@@ -37,6 +37,16 @@ cc_library(
 )
 
 cc_binary(
+    name = "mull-cxx-ir-frontend-18.dylib",
+    srcs = glob(["tools/mull-ir-frontend/*.cpp"]),
+    linkshared = True,
+    deps = [
+        ":libmull_18",
+        "@llvm_18//:clang_18",
+    ],
+)
+
+cc_binary(
     name = "mull_runner_18",
     deps = [
         ":libmull_runner_18",
