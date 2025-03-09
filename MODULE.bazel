@@ -1,0 +1,37 @@
+"Mull's build system"
+
+module(
+    name = "mull",
+    version = "1.0",
+)
+
+bazel_dep(name = "rules_cc", version = "0.1.1")
+
+bazel_dep(name = "spdlog", version = "1.15.1")
+bazel_dep(name = "reproc", version = "14.2.5")
+bazel_dep(name = "sqlite3", version = "3.49.1")
+
+new_local_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:local.bzl", "new_local_repository")
+http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
+
+new_local_repository(
+    name = "llvm_18",
+    path = "/opt/homebrew/opt/llvm@18",
+    build_file = "//third_party/llvm_18:BUILD",
+)
+
+http_archive(
+    name = "irm",
+    integrity = "sha256-/UPOr/i+xfZEFv/oEVVIC0KhZxYRWVfzPdy7Ir7eNXU=",
+    urls = ["https://github.com/mull-project/libirm/archive/988a91877279c95bfe847994d006e3733a663962.zip"],
+    strip_prefix = "libirm-988a91877279c95bfe847994d006e3733a663962",
+    build_file = "//third_party/irm:BUILD",
+)
+
+http_archive(
+    name = "json11",
+    integrity = "sha256-bJGfxwlz+J5gZzjkrGT5Grph/r/LIwQA4wv9x9PBszI=",
+    urls = ["https://github.com/dropbox/json11/archive/402bcde713fbef0c67276fb09b07ffbe8ee13956.zip"],
+    strip_prefix = "json11-402bcde713fbef0c67276fb09b07ffbe8ee13956",
+    build_file = "//third_party/json11:BUILD",
+)

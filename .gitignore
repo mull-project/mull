@@ -21,3 +21,5 @@ cmake-build*
 tags
 build*dir
 CMakePresets.json
+bazel-*
+MODULE.bazel.lock
