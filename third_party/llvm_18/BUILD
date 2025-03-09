@@ -26,7 +26,7 @@ cc_import(
         "include/clang/**/*.def",
         "include/clang/**/*.inc",
     ]),
-    shared_library = "lib/libclang.dylib",
+    shared_library = "lib/libclang-cpp.dylib",
 )
 
 cc_library(
