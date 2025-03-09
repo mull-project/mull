@@ -1,4 +1,4 @@
-load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 
 cc_library(
     name = "libmull_18",
@@ -40,5 +40,19 @@ cc_binary(
     name = "mull_runner_18",
     deps = [
         ":libmull_runner_18",
+    ],
+)
+
+cc_test(
+    name = "mull_unit_tests",
+    size = "small",
+    srcs = [
+        "tests/unit/MutatorsFactoryTests.cpp",
+        "tests/unit/TaskExecutorTests.cpp",
+    ],
+    deps = [
+        ":libmull_18",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
     ],
 )
