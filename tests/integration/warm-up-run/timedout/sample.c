@@ -6,7 +6,6 @@ int main() {
 
 // clang-format off
 // RUN: cd / && %clang_cc %sysroot %pass_mull_ir_frontend %s -o %s.exe
-// RUN: cd %CURRENT_DIR
 // RUN: (unset TERM; %mull_runner -timeout=100 -workers=1 %s.exe 2>&1; test $? = 1) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 // CHECK:[error] Original test failed
 // CHECK-NEXT:status: Timedout

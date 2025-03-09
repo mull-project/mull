@@ -10,8 +10,8 @@ rm -rf fmt openssl
 mkdir fmt
 pushd fmt
 git init
-git fetch --depth 1 https://github.com/fmtlib/fmt.git 9e554999ce02cf86fcdfe74fe740c4fe3f5a56d5
-git checkout 9e554999ce02cf86fcdfe74fe740c4fe3f5a56d5
+git fetch --depth 1 https://github.com/fmtlib/fmt.git 123913715afeb8a437e6388b4473fcc4753e1c9a
+git checkout 123913715afeb8a437e6388b4473fcc4753e1c9a
 popd
 
 mkdir openssl

@@ -40,9 +40,9 @@ To recap, recreate the same setup.
 .. code-block:: bash
 
     cd openssl
-    export CC=clang-12
-    ./config -O0 -fexperimental-new-pass-manager \
-      -fpass-plugin=/usr/lib/mull-ir-frontend-12 \
+    export CC=clang-18
+    ./config -O0 \
+      -fpass-plugin=/usr/lib/mull-ir-frontend-18 \
       -g -grecord-command-line
     make build_generated -j
     make ./test/bio_enc_test -j
@@ -51,7 +51,7 @@ To recap, recreate the same setup.
 
 .. code-block:: bash
 
-    $ mull-runner-12 ./test/bio_enc_test
+    $ mull-runner-18 ./test/bio_enc_test
     [info] Using config /tmp/sc-g6cD7gfN4/openssl/mull.yml
     [info] Warm up run (threads: 1)
            [################################] 1/1. Finished in 638ms
@@ -121,7 +121,7 @@ Now, rerun Mull:
 
 .. code-block:: bash
 
-    $ mull-runner-12 ./test/bio_enc_test
+    $ mull-runner-18 ./test/bio_enc_test
     [info] Using config /tmp/sc-g6cD7gfN4/openssl/mull.yml
     [info] Warm up run (threads: 1)
            [################################] 1/1. Finished in 282ms
@@ -157,8 +157,8 @@ to include the instrumentation information:
 .. code-block:: bash
 
     make clean
-    ./config -O0 -fexperimental-new-pass-manager \
-      -fpass-plugin=/usr/lib/mull-ir-frontend-12 \
+    ./config -O0 \
+      -fpass-plugin=/usr/lib/mull-ir-frontend-18 \
       -g -grecord-command-line \
       -fprofile-instr-generate -fcoverage-mapping
     make build_generated -j
@@ -173,7 +173,7 @@ Rerun Mull:
 
 .. code-block:: bash
 
-    $ mull-runner-12 ./test/bio_enc_test
+    $ mull-runner-18 ./test/bio_enc_test
     [info] Using config /tmp/sc-g6cD7gfN4/openssl/mull.yml
     [info] Warm up run (threads: 1)
            [################################] 1/1. Finished in 1281ms

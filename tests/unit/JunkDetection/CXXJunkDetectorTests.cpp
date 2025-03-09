@@ -1,4 +1,3 @@
-#include "BitcodeLoader.h"
 #include "FixturePaths.h"
 #include "mull/FunctionUnderTest.h"
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
@@ -6,6 +5,7 @@
 #include "mull/Mutators/CXX/CallMutators.h"
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "mull/Mutators/ScalarValueMutator.h"
+#include "tests/unit/Helpers/BitcodeLoader.h"
 #include <mull/Diagnostics/Diagnostics.h>
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 #include <mull/Mutators/CXX/BitwiseMutators.h>
@@ -69,109 +69,132 @@ TEST_P(CXXJunkDetectorTest, detectJunk) {
 }
 
 static const CXXJunkDetectorTestParameter parameters[] = {
-  CXXJunkDetectorTestParameter(fixtures::mutators_boundary_module_bc_path(),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_boundary_module_cpp_bc_path(),
                                new cxx::LessThanToLessOrEqual, 3),
-  CXXJunkDetectorTestParameter(fixtures::mutators_boundary_module_bc_path(),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_boundary_module_cpp_bc_path(),
                                new cxx::LessOrEqualToLessThan, 1),
-  CXXJunkDetectorTestParameter(fixtures::mutators_boundary_module_bc_path(),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_boundary_module_cpp_bc_path(),
                                new cxx::GreaterThanToGreaterOrEqual, 1),
-  CXXJunkDetectorTestParameter(fixtures::mutators_boundary_module_bc_path(),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_boundary_module_cpp_bc_path(),
                                new cxx::GreaterOrEqualToGreaterThan, 1),
 
-  CXXJunkDetectorTestParameter(fixtures::mutators_math_add_module_bc_path(), new cxx::AddToSub, 6),
-  CXXJunkDetectorTestParameter(fixtures::mutators_math_add_module_bc_path(),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_math_add_module_cpp_bc_path(),
+                               new cxx::AddToSub, 6),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_math_add_module_cpp_bc_path(),
                                new cxx::AddAssignToSubAssign, 6),
-  CXXJunkDetectorTestParameter(fixtures::mutators_math_add_module_bc_path(),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_math_add_module_cpp_bc_path(),
                                new cxx::PreIncToPreDec, 1),
-  CXXJunkDetectorTestParameter(fixtures::mutators_math_add_module_bc_path(),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_math_add_module_cpp_bc_path(),
                                new cxx::PostIncToPostDec, 3),
 
-  CXXJunkDetectorTestParameter(fixtures::mutators_math_mul_junk_bc_path(), new cxx::MulToDiv, 8),
-  CXXJunkDetectorTestParameter(fixtures::mutators_math_mul_junk_bc_path(),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_math_mul_junk_cpp_bc_path(),
+                               new cxx::MulToDiv, 8),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_math_mul_junk_cpp_bc_path(),
                                new cxx::MulAssignToDivAssign, 2),
 
-  CXXJunkDetectorTestParameter(fixtures::mutators_math_div_junk_bc_path(), new cxx::DivToMul, 8),
-  CXXJunkDetectorTestParameter(fixtures::mutators_math_div_junk_bc_path(),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_math_div_junk_cpp_bc_path(),
+                               new cxx::DivToMul, 8),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_math_div_junk_cpp_bc_path(),
                                new cxx::DivAssignToMulAssign, 2),
 
-  CXXJunkDetectorTestParameter(fixtures::mutators_rem_to_div_junk_bc_path(), new cxx::RemToDiv, 5),
-  CXXJunkDetectorTestParameter(fixtures::mutators_rem_to_div_junk_bc_path(),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_rem_to_div_junk_cpp_bc_path(),
+                               new cxx::RemToDiv, 5),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_rem_to_div_junk_cpp_bc_path(),
                                new cxx::RemAssignToDivAssign, 3),
 
-  CXXJunkDetectorTestParameter(fixtures::mutators_math_sub_junk_bc_path(), new cxx::SubToAdd, 5),
-  CXXJunkDetectorTestParameter(fixtures::mutators_math_sub_junk_bc_path(),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_math_sub_junk_cpp_bc_path(),
+                               new cxx::SubToAdd, 5),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_math_sub_junk_cpp_bc_path(),
                                new cxx::SubAssignToAddAssign, 3),
-  CXXJunkDetectorTestParameter(fixtures::mutators_math_sub_junk_bc_path(), new cxx::PreDecToPreInc,
-                               1),
-  CXXJunkDetectorTestParameter(fixtures::mutators_math_sub_junk_bc_path(),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_math_sub_junk_cpp_bc_path(),
+                               new cxx::PreDecToPreInc, 1),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_math_sub_junk_cpp_bc_path(),
                                new cxx::PostDecToPostInc, 3),
 
-  CXXJunkDetectorTestParameter(fixtures::mutators_math_bitwise_not_bc_path(),
-                               new cxx::BitwiseNotToNoop, 2),
-  CXXJunkDetectorTestParameter(fixtures::mutators_math_unary_minus_bc_path(),
-                               new cxx::UnaryMinusToNoop, 4),
+  CXXJunkDetectorTestParameter(
+      fixtures::tests_unit_fixtures_mutators_math_bitwise_not_cpp_bc_path(),
+      new cxx::BitwiseNotToNoop, 2),
+  CXXJunkDetectorTestParameter(
+      fixtures::tests_unit_fixtures_mutators_math_unary_minus_cpp_bc_path(),
+      new cxx::UnaryMinusToNoop, 4),
 
   /// Shifts
-  CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_shifts_bc_path(), new cxx::LShiftToRShift,
-                               4),
-  CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_shifts_bc_path(),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_bitwise_shifts_cpp_bc_path(),
+                               new cxx::LShiftToRShift, 4),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_bitwise_shifts_cpp_bc_path(),
                                new cxx::LShiftAssignToRShiftAssign, 5),
-  CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_shifts_bc_path(), new cxx::RShiftToLShift,
-                               3),
-  CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_shifts_bc_path(),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_bitwise_shifts_cpp_bc_path(),
+                               new cxx::RShiftToLShift, 3),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_bitwise_shifts_cpp_bc_path(),
                                new cxx::RShiftAssignToLShiftAssign, 3),
   /// Bit operations
-  CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(), new cxx::BitwiseOrToAnd,
-                               2),
-  CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_bitwise_bitops_cpp_bc_path(),
+                               new cxx::BitwiseOrToAnd, 2),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_bitwise_bitops_cpp_bc_path(),
                                new cxx::OrAssignToAndAssign, 1),
-  CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(), new cxx::BitwiseAndToOr,
-                               2),
-  CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_bitwise_bitops_cpp_bc_path(),
+                               new cxx::BitwiseAndToOr, 2),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_bitwise_bitops_cpp_bc_path(),
                                new cxx::AndAssignToOrAssign, 2),
-  CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(), new cxx::XorToOr, 2),
-  CXXJunkDetectorTestParameter(fixtures::mutators_bitwise_bitops_bc_path(),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_bitwise_bitops_cpp_bc_path(),
+                               new cxx::XorToOr, 2),
+  CXXJunkDetectorTestParameter(fixtures::tests_unit_fixtures_mutators_bitwise_bitops_cpp_bc_path(),
                                new cxx::XorAssignToOrAssign, 3),
 
-  CXXJunkDetectorTestParameter(fixtures::mutators_remove_negation_main_bc_path(),
-                               new cxx::RemoveNegation, 4),
+  CXXJunkDetectorTestParameter(
+      fixtures::tests_unit_fixtures_mutators_remove_negation_main_c_bc_path(),
+      new cxx::RemoveNegation, 4),
 
-  CXXJunkDetectorTestParameter(fixtures::mutators_negate_condition_junk_bc_path(),
-                               new NegateConditionMutator, 6),
+  CXXJunkDetectorTestParameter(
+      fixtures::tests_unit_fixtures_mutators_negate_condition_junk_cpp_bc_path(),
+      new NegateConditionMutator, 6),
 
-  CXXJunkDetectorTestParameter(fixtures::mutators_negate_condition_junk_bc_path(),
-                               new cxx::EqualToNotEqual, 3),
-  CXXJunkDetectorTestParameter(fixtures::mutators_negate_condition_junk_bc_path(),
-                               new cxx::NotEqualToEqual, 6),
+  CXXJunkDetectorTestParameter(
+      fixtures::tests_unit_fixtures_mutators_negate_condition_junk_cpp_bc_path(),
+      new cxx::EqualToNotEqual, 3),
+  CXXJunkDetectorTestParameter(
+      fixtures::tests_unit_fixtures_mutators_negate_condition_junk_cpp_bc_path(),
+      new cxx::NotEqualToEqual, 6),
 
-  CXXJunkDetectorTestParameter(fixtures::mutators_negate_condition_junk_bc_path(),
-                               new cxx::GreaterThanToLessOrEqual, 6),
-  CXXJunkDetectorTestParameter(fixtures::mutators_negate_condition_junk_bc_path(),
-                               new cxx::GreaterOrEqualToLessThan, 3),
-  CXXJunkDetectorTestParameter(fixtures::mutators_negate_condition_junk_bc_path(),
-                               new cxx::LessThanToGreaterOrEqual, 3),
-  CXXJunkDetectorTestParameter(fixtures::mutators_negate_condition_junk_bc_path(),
-                               new cxx::LessOrEqualToGreaterThan, 3),
+  CXXJunkDetectorTestParameter(
+      fixtures::tests_unit_fixtures_mutators_negate_condition_junk_cpp_bc_path(),
+      new cxx::GreaterThanToLessOrEqual, 6),
+  CXXJunkDetectorTestParameter(
+      fixtures::tests_unit_fixtures_mutators_negate_condition_junk_cpp_bc_path(),
+      new cxx::GreaterOrEqualToLessThan, 3),
+  CXXJunkDetectorTestParameter(
+      fixtures::tests_unit_fixtures_mutators_negate_condition_junk_cpp_bc_path(),
+      new cxx::LessThanToGreaterOrEqual, 3),
+  CXXJunkDetectorTestParameter(
+      fixtures::tests_unit_fixtures_mutators_negate_condition_junk_cpp_bc_path(),
+      new cxx::LessOrEqualToGreaterThan, 3),
 
-  CXXJunkDetectorTestParameter(fixtures::mutators_replace_assignment_junk_bc_path(),
-                               new cxx::NumberAssignConst, 5),
-  CXXJunkDetectorTestParameter(fixtures::mutators_replace_assignment_junk_bc_path(),
-                               new cxx::NumberInitConst, 6),
+  CXXJunkDetectorTestParameter(
+      fixtures::tests_unit_fixtures_mutators_replace_assignment_junk_cpp_bc_path(),
+      new cxx::NumberAssignConst, 5),
+  CXXJunkDetectorTestParameter(
+      fixtures::tests_unit_fixtures_mutators_replace_assignment_junk_cpp_bc_path(),
+      new cxx::NumberInitConst, 6),
 
-  CXXJunkDetectorTestParameter(fixtures::mutators_and_or_and_to_or_replacement_cpp_junk_bc_path(),
-                               new cxx::LogicalAndToOr, 2),
+  CXXJunkDetectorTestParameter(
+      fixtures::tests_unit_fixtures_mutators_and_or_and_to_or_replacement_cpp_junk_cpp_bc_path(),
+      new cxx::LogicalAndToOr, 2),
 
-  CXXJunkDetectorTestParameter(fixtures::mutators_and_or_or_to_and_replacement_cpp_junk_bc_path(),
-                               new cxx::LogicalOrToAnd, 2),
+  CXXJunkDetectorTestParameter(
+      fixtures::tests_unit_fixtures_mutators_and_or_or_to_and_replacement_cpp_junk_cpp_bc_path(),
+      new cxx::LogicalOrToAnd, 2),
 
   /// TODO: Will be made obsolete by scalar mutation end-to-end tests.
-  CXXJunkDetectorTestParameter(fixtures::mutators_scalar_value_junk_bc_path(),
-                               new ScalarValueMutator, 2),
+  CXXJunkDetectorTestParameter(
+      fixtures::tests_unit_fixtures_mutators_scalar_value_junk_cpp_bc_path(),
+      new ScalarValueMutator, 2),
 
-  CXXJunkDetectorTestParameter(fixtures::mutators_remove_void_function_junk_bc_path(),
-                               new cxx::RemoveVoidCall, 6),
-  CXXJunkDetectorTestParameter(fixtures::mutators_replace_call_junk_bc_path(),
-                               new cxx::ReplaceScalarCall, 11),
+  CXXJunkDetectorTestParameter(
+      fixtures::tests_unit_fixtures_mutators_remove_void_function_junk_cpp_bc_path(),
+      new cxx::RemoveVoidCall, 6),
+  CXXJunkDetectorTestParameter(
+      fixtures::tests_unit_fixtures_mutators_replace_call_junk_cpp_bc_path(),
+      new cxx::ReplaceScalarCall, 11),
 };
 
 INSTANTIATE_TEST_CASE_P(CXXJunkDetection, CXXJunkDetectorTest, testing::ValuesIn(parameters));
@@ -179,7 +202,7 @@ INSTANTIATE_TEST_CASE_P(CXXJunkDetection, CXXJunkDetectorTest, testing::ValuesIn
 TEST(CXXJunkDetector, compdb_absolute_paths) {
   Diagnostics diagnostics;
   BitcodeLoader loader;
-  auto path = fixtures::junk_detection_compdb_main_bc_path();
+  auto path = fixtures::tests_unit_fixtures_junk_detection_compdb_main_cpp_bc_path();
   auto bitcode = loader.loadBitcodeAtPath(path, diagnostics);
 
   std::vector<MutationPoint *> points;
@@ -200,7 +223,7 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
   ASSERT_EQ(points.size(), 8U);
 
   std::string cxxCompilationDatabasePath =
-      fixtures::junk_detection_compdb_absolute_compile_commands_json_path();
+      fixtures::tests_unit_fixtures_junk_detection_compdb_absolute_compile_commands_json_path();
 
   ASTStorage astStorage(diagnostics, cxxCompilationDatabasePath, "", {});
 
@@ -219,8 +242,8 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
 TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
   Diagnostics diagnostics;
   BitcodeLoader loader;
-  auto bitcode =
-      loader.loadBitcodeAtPath(fixtures::junk_detection_compdb_main_bc_path(), diagnostics);
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::tests_unit_fixtures_junk_detection_compdb_main_cpp_bc_path(), diagnostics);
 
   std::vector<MutationPoint *> points;
   std::vector<std::unique_ptr<Mutator>> mutators;
@@ -240,7 +263,7 @@ TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
   ASSERT_EQ(points.size(), 8U);
 
   std::string cxxCompilationDatabasePath =
-      fixtures::junk_detection_compdb_relative_compile_commands_json_path();
+      fixtures::tests_unit_fixtures_junk_detection_compdb_relative_compile_commands_json_path();
 
   ASTStorage astStorage(diagnostics, cxxCompilationDatabasePath, "", {});
 
@@ -259,7 +282,7 @@ TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
 TEST(CXXJunkDetector, no_compdb) {
   Diagnostics diagnostics;
   BitcodeLoader loader;
-  auto path = fixtures::junk_detection_compdb_main_bc_path();
+  auto path = fixtures::tests_unit_fixtures_junk_detection_compdb_main_cpp_bc_path();
   auto bitcode = loader.loadBitcodeAtPath(path, diagnostics);
 
   std::vector<MutationPoint *> points;
@@ -280,9 +303,9 @@ TEST(CXXJunkDetector, no_compdb) {
 
   ASSERT_EQ(points.size(), 8U);
 
-  std::string cxxCompilationFlags = std::string("-I ") +
-                                    fixtures::junk_detection_compdb_include__path() + " " +
-                                    bitcode->getModule()->getSourceFileName();
+  std::string cxxCompilationFlags =
+      std::string("-I ") + fixtures::tests_unit_fixtures_junk_detection_compdb_include_path() +
+      " " + bitcode->getModule()->getSourceFileName();
 
   ASTStorage astStorage(diagnostics, "", cxxCompilationFlags, {});
 

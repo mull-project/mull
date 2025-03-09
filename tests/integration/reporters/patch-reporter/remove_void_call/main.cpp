@@ -28,8 +28,8 @@ RUN: cd %S/Output; (unset TERM; %mull_runner -debug ./main.cpp-ir.exe --report-n
 
 CHECK:[debug] Writing Patchfile: {{.*}}
 CHECK:[info] Patchfiles can be found at './test{{.*}}-patches'
-CHECK:{{.*}}main_cpp-cxx_remove_void{{.*}}
-CHECK:{{.*}}main_cpp-cxx_replace_scalar{{.*}}
+CHECK:{{.*}}cxx_remove_void{{.*}}
+CHECK:{{.*}}cxx_replace_scalar{{.*}}
 CHECK:--- a{{.*}}/Output/sandbox/main.cpp 0
 CHECK:+{{\s+}};
 CHECK:+{{\s+}}42;

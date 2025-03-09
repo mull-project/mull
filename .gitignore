@@ -21,3 +21,9 @@ cmake-build*
 tags
 build*dir
 CMakePresets.json
+bazel-*
+MODULE.bazel.lock
+.mull-ci-version-suffix
+.mull-ci-cs-repo
+.bazel.buildbuddy.rc
+.bazel.compilation_mode.bazelrc

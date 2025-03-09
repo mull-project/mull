@@ -19,7 +19,7 @@ Here is an example of how to use it with ``fmt``. The example is based on the :d
 
 .. code-block:: bash
 
-    > mull-runner-12 --reporters SQLite --reporters IDE --report-name fmt bin/core-test
+    > mull-runner-18 --reporters SQLite --reporters IDE --report-name fmt bin/core-test
     [info] Using config /workspaces/mull/tests/end2end/mull.yml
     [info] Warm up run (threads: 1)
           [################################] 1/1. Finished in 178ms
@@ -36,7 +36,7 @@ Here is an example of how to use it with ``fmt``. The example is based on the :d
     [info] Total execution time: 2432ms
     [info] Surviving mutants: 67
 
-    > mull-runner-12 --reporters SQLite --reporters IDE --report-name fmt bin/chrono-test
+    > mull-runner-18 --reporters SQLite --reporters IDE --report-name fmt bin/chrono-test
     [info] Using config /workspaces/mull/tests/end2end/mull.yml
     [info] Warm up run (threads: 1)
           [################################] 1/1. Finished in 170ms
@@ -63,7 +63,7 @@ To do so we will feed the combined results from ``fmt.sqlite`` (coming from the 
 
 .. code-block:: bash
 
-    > mull-reporter-12 --reporters IDE ./fmt.sqlite
+    > mull-reporter-18 --reporters IDE ./fmt.sqlite
     [info] Using config /workspaces/mull/tests/end2end/mull.yml
     [info] Survived mutants (62/72):
     <skipped>

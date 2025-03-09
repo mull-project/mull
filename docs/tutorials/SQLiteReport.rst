@@ -34,9 +34,9 @@ the :doc:`fmtlib tutorial <./CMakeIntegration>`.
 To enable SQLite reporter, add ``-reporters=SQLite`` to the CLI options.
 It is also recommended to specify the report name via ``-report-name``, e.g.:
 
-.. code-block::
+.. code-block:: bash
 
-     mull-runner-12 --reporters=SQLite --report-name=tutorial ./bin/core-test
+    mull-runner-18 --reporters=SQLite --report-name=tutorial ./bin/core-test
 
 In the end, you should see something like this:
 

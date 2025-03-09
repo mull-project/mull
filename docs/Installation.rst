@@ -16,7 +16,7 @@ Please, refer to the `Hacking on Mull <HackingOnMull.html>`_ to build Mull from 
 Install on Ubuntu
 *****************
 
-Mull supports Ubuntu 20.04, 22.04 and 24.04.
+Mull supports Ubuntu 22.04 and 24.04.
 
 Setup apt-repository:
 
@@ -32,20 +32,20 @@ Install the package:
 .. code-block:: bash
 
     sudo apt-get update
-    sudo apt-get install mull-12 # Ubuntu 20.04
+    sudo apt-get install mull-18 # Ubuntu 24.04
 
 Check if everything works:
 
 .. code-block:: bash
 
-    $ mull-runner-12 --version
+    $ mull-runner-18 --version
     Mull: Practical mutation testing for C and C++
     Home: https://github.com/mull-project/mull
     Docs: https://mull.readthedocs.io
     Version: 0.15.0
     Commit: ab159cd
     Date: 20 Jan 2022
-    LLVM: 12.0.0
+    LLVM: 14.0.0
 
 You can also get the latest "nightly" build using the corresponding source:
 
@@ -67,13 +67,14 @@ Check the installation:
 
 .. code-block:: bash
 
-    $ mull-runner-13 --version
+    $ mull-runner-18 --version
     Mull: Practical mutation testing for C and C++
     Home: https://github.com/mull-project/mull
     Docs: https://mull.readthedocs.io
-    Version: 0.15.0
-    Commit: 0252a4cf
-    Date: 28 Jan 2022
-    LLVM: 13.0.0
+    Support: https://mull.readthedocs.io/en/latest/Support.html
+    Version: 0.26.1
+    Commit: 859af43
+    Date: 06 Apr 2025
+    LLVM: 18.1.8
 
 You can also get the latest "nightly" build from `here <https://cloudsmith.io/~mull-project/repos/mull-nightly/packages/>`_.

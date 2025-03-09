@@ -1,0 +1,43 @@
+name: macOS CI
+env:
+  CLOUDSMITH_API_KEY: ${{ secrets.CLOUDSMITH_API_KEY }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+on:
+  push:
+    branches: ["main"]
+    tags: ["**"]
+  pull_request:
+    branches: ["main"]
+jobs:
+  macos:
+    name: macOS - LLVM ${{ matrix.LLVM_VERSION }}
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        LLVM_VERSION: [16, 17, 18]
+    steps:
+      - name: Fix git
+        run: |
+          git config --global --add safe.directory $PWD
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-bazel-cache
+        with:
+          BUILDBUDDY_API_KEY: ${{ secrets.BUILDBUDDY_API_KEY }}
+      - name: Run CI task
+        run: |
+          brew install bazelisk zlib ncurses sqlite ninja llvm@${{ matrix.LLVM_VERSION }}
+          mkdir -p packages
+          bazel build //...
+          bazel test //...
+          mv -v bazel-bin/Mull-*.zip packages/
+      - name: Publish package
+        if: env.CLOUDSMITH_API_KEY != null
+        run: |
+          bazel run publish
+      - name: Move package
+        run: |
+          mkdir -p /tmp/packages
+          sudo mv -v packages/Mull-*.zip /tmp/packages/
+      - uses: ./.github/actions/attach-package
+        with:
+          GH_API_KEY: ${{ secrets.GITHUB_TOKEN }}
