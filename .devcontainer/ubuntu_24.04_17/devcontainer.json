@@ -21,7 +21,8 @@
     // merged
     "ghcr.io/alexdenisov/features/feature-cmake": {
       "version": "3.31.1"
-    }
+    },
+    "ghcr.io/devcontainers-community/features/bazel": {}
   },
   "postCreateCommand": "infrastructure/devcontainer_post_create.sh ubuntu 17",
   "customizations": {
@@ -33,7 +34,8 @@
         "imgildev.vscode-mustache-snippets",
         "github.vscode-github-actions",
         "revng.llvm-ir",
-        "rreverser.llvm"
+        "rreverser.llvm",
+        "bazelbuild.vscode-bazel"
       ]
     }
   }
