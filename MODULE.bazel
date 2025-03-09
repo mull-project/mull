@@ -5,6 +5,23 @@ module(
     version = "1.0",
 )
 
+bazel_dep(name = "toolchains_llvm", version = "1.3.0")
+git_override(
+    module_name = "toolchains_llvm",
+    commit = "14eb90172b3c5f35bdb2699d006fe0f70e76aa24",
+    remote = "https://github.com/bazel-contrib/toolchains_llvm",
+)
+
+# Configure and register the toolchain.
+llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm")
+llvm.toolchain(
+    llvm_version = "20.1.0",
+)
+
+use_repo(llvm, "llvm_toolchain")
+
+register_toolchains("@llvm_toolchain//:all")
+
 bazel_dep(name = "rules_cc", version = "0.1.1")
 
 bazel_dep(name = "spdlog", version = "1.15.1")
