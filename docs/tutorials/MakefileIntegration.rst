@@ -38,9 +38,9 @@ Step 3. Configure and build OpenSSL
 .. code-block:: bash
 
     cd openssl
-    export CC=clang-12
-    ./config -O0 -fexperimental-new-pass-manager \
-      -fpass-plugin=/usr/lib/mull-ir-frontend-12 \
+    export CC=clang-18
+    ./config -O0 \
+      -fpass-plugin=/usr/lib/mull-ir-frontend-18 \
       -g -grecord-command-line
     make build_generated -j
     make ./test/bio_enc_test -j
@@ -51,7 +51,7 @@ Step 4. Run Mull against OpenSSL's tests
 
 .. code-block:: bash
 
-    mull-runner-12 ./test/bio_enc_test
+    mull-runner-18 ./test/bio_enc_test
 
 You should see similar (and pretty long) output:
 

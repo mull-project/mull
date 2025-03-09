@@ -11,7 +11,6 @@ const char *mullCommitString();
 const char *mullDescriptionString();
 const char *mullHomepageString();
 const char *mullDocsPageString();
-const char *mullBuildDateString();
 
 const char *llvmVersionString();
 

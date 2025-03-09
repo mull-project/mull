@@ -1,0 +1,14 @@
+diff --git test/CMakeLists.txt test/CMakeLists.txt
+index 70e19db..ea476db 100644
+--- test/CMakeLists.txt
++++ test/CMakeLists.txt
+@@ -202,3 +202,9 @@ if (FMT_PEDANTIC AND NOT WIN32)
+     "-DPEDANTIC_COMPILE_FLAGS=${PEDANTIC_COMPILE_FLAGS}"
+     "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
+ endif ()
++
++install(TARGETS chrono-test)
++install(TARGETS format-test)
++install(TARGETS ostream-test)
++install(TARGETS printf-test)
++install(TARGETS scan-test)

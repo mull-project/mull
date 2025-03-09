@@ -29,7 +29,7 @@ Features
   Working with mutations found in Git Diff changesets.
 
 - Mull requires test programs to be compiled with Clang/LLVM. Mull supports
-  all LLVM versions starting from LLVM 12 (older versions support older versions).
+  all LLVM versions starting from LLVM 13 (older versions of Mull support older versions of LLVM).
 
 For a more detailed description of Mull's architecture, see
 `How Mull works <HowMullWorks.html>`_.

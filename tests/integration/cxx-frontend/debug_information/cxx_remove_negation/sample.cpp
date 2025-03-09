@@ -26,8 +26,10 @@ FRONTEND:Recording mutation point: cxx_remove_negation:{{.*}}/sample.cpp:6:10:6:
 RUN: %s-ast.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STANDALONE_WITHOUT_MUTATION
 RUN: (env "cxx_remove_negation:%s:6:10:6:11"=1 %s-ast.exe || true) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STANDALONE_WITH_MUTATION
 
+RUN: FILEPATH=$(realpath %s)
+RUN: echo $FILEPATH
 RUN: %s-ir.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STANDALONE_WITHOUT_MUTATION
-RUN: (env "cxx_remove_negation:%s:6:10:6:11"=1 %s-ir.exe || true) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STANDALONE_WITH_MUTATION
+RUN: (env "cxx_remove_negation:$FILEPATH:6:10:6:11"=1 %s-ir.exe || true) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=STANDALONE_WITH_MUTATION
 
 STANDALONE_WITHOUT_MUTATION:NORMAL
 STANDALONE_WITH_MUTATION:MUTATED

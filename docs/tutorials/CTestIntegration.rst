@@ -53,14 +53,14 @@ In case of ``fmt``, you can do it as follows. The snippet relies on the knowledg
     for test_case in $(ctest --show-only | grep 'Test .*:' | awk ' { print $3} ');
     do
       echo "Testing $test_case"
-      mull-runner-12 --allow-surviving --reporters SQLite --report-name fmt ./bin/$test_case
+      mull-runner-18 --allow-surviving --reporters SQLite --report-name fmt ./bin/$test_case
     done
 
 After all the runs are completed, you can use ``mull-reporter`` to analyze :doc:`multiple test targets <./MultipleTestTargets>`:
 
 .. code-block:: bash
 
-    > mull-reporter-12 --reporters IDE ./fmt.sqlite
+    > mull-reporter-18 --reporters IDE ./fmt.sqlite
     [info] Using config /workspaces/mull/tests/end2end/mull.yml
     [info] Survived mutants (47/100):
     <skipped>

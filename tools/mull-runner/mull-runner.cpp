@@ -127,8 +127,6 @@ int main(int argc, char **argv) {
                                    .mullInformation = std::unordered_map<std::string, std::string>{
                                        std::make_pair("URL", mull::mullHomepageString()),
                                        std::make_pair("Mull Version", mull::mullVersionString()),
-                                       std::make_pair("Commit", mull::mullCommitString()),
-                                       std::make_pair("Build Date", mull::mullBuildDateString()),
                                        std::make_pair("LLVM Version", mull::llvmVersionString()),
                                    } };
   std::vector<std::unique_ptr<mull::Reporter>> reporters = reportersOption.reporters(params);

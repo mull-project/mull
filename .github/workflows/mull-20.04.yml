@@ -1,8 +1,8 @@
 name: Mull (20.04)
-on:
-  pull_request:
-  push:
-    branches: ["main"]
+# on:
+# pull_request:
+# push:
+#   branches: ["main"]
 jobs:
   test:
     name: Mutation testing

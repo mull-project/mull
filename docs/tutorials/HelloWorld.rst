@@ -23,19 +23,21 @@ Mull comes in a form of a compiler plugin and therefore tied to specific version
 of Clang and LLVM. As a consequence of that, tools and plugins have a suffix with
 the actual Clang/LLVM version.
 
-This tutorial assumes that you are using Clang 12 and that you have
-:doc:`installed <../Installation>` Mull on your system and have the ``mull-runner-12``
+This tutorial assumes that you are using Clang 18 and that you have
+:doc:`installed <../Installation>` Mull on your system and have the ``mull-runner-18``
 executable available:
 
 .. code-block:: bash
 
-    $ mull-runner-12 -version
-    Mull: LLVM-based mutation testing
-    https://github.com/mull-project/mull
-    Version: 0.15.0
-    Commit: a4be349e
-    Date: 18 Jan 2022
-    LLVM: 12.0.1
+    $ mull-runner-18 -version
+    Mull: Practical mutation testing for C and C++
+    Home: https://github.com/mull-project/mull
+    Docs: https://mull.readthedocs.io
+    Support: https://mull.readthedocs.io/en/latest/Support.html
+    Version: 0.26.1
+    Commit: 859af43
+    Date: 06 Apr 2025
+    LLVM: 18.1.8
 
 Step 2: Enabling compiler plugin
 --------------------------------
@@ -52,13 +54,13 @@ and compile it:
 
 .. code-block:: bash
 
-    $ clang-12 main.cpp -o hello-world
+    $ clang-18 main.cpp -o hello-world
 
 We can already try using ``mull-runner`` and see what happens:
 
 .. code-block:: text
 
-    $ mull-runner-12 ./hello-world
+    $ mull-runner-18 ./hello-world
     [info] Warm up run (threads: 1)
            [################################] 1/1. Finished in 5ms
     [info] Baseline run (threads: 1)
@@ -74,16 +76,13 @@ Let's fix that!
 To pass the plugin to Clang, you need to add a few compiler flags.
 
 .. note::
-   For Clang 11 also pass ``-O1``, otherwise the plugin won't be called.
-
-.. note::
    ``-grecord-command-line`` doesn't currently work if you compile several files in one go,
    e.g. ``clang a.c b.c c.c``. In this case, please remove the flag.
 
 .. code-block:: text
 
-    $ clang-12 -fexperimental-new-pass-manager \
-      -fpass-plugin=/usr/lib/mull-ir-frontend-12 \
+    $ clang-18 \
+      -fpass-plugin=/usr/lib/mull-ir-frontend-18 \
       -g -grecord-command-line \
       main.cpp -o hello-world
     [warning] Mull cannot find config (mull.yml). Using some defaults.
@@ -97,7 +96,7 @@ Let's run ``mull-runner`` again:
 
 .. code-block:: text
 
-    $ mull-runner-12 ./hello-world
+    $ mull-runner-18 ./hello-world
     [info] Warm up run (threads: 1)
            [################################] 1/1. Finished in 4ms
     [info] Baseline run (threads: 1)
@@ -146,11 +145,11 @@ verbose.
 
 .. code-block:: text
 
-    $ clang-12 -fexperimental-new-pass-manager \
-            -fpass-plugin=/usr/lib/mull-ir-frontend-12 \
+    $ clang-18 \
+            -fpass-plugin=/usr/lib/mull-ir-frontend-18 \
             -g -grecord-command-line \
             main.cpp -o hello-world
-    $ mull-runner-12 -ide-reporter-show-killed hello-world
+    $ mull-runner-18 -ide-reporter-show-killed hello-world
     [info] Warm up run (threads: 1)
            [################################] 1/1. Finished in 151ms
     [info] Baseline run (threads: 1)
@@ -222,11 +221,11 @@ The code:
 
 .. code-block:: text
 
-    $ clang-12 -fexperimental-new-pass-manager \
-                  -fpass-plugin=/usr/lib/mull-ir-frontend-12 \
+    $ clang-18 \
+                  -fpass-plugin=/usr/lib/mull-ir-frontend-18 \
                   -g -grecord-command-line \
                   main.cpp -o hello-world
-    $ mull-runner-12 -ide-reporter-show-killed hello-world
+    $ mull-runner-18 -ide-reporter-show-killed hello-world
     [info] Warm up run (threads: 1)
            [################################] 1/1. Finished in 469ms
     [info] Baseline run (threads: 1)
@@ -265,11 +264,11 @@ Just to recap:
 
 .. code-block:: text
 
-    $ clang-12 -fexperimental-new-pass-manager \
-                  -fpass-plugin=/usr/lib/mull-ir-frontend-12 \
+    $ clang-18 \
+                  -fpass-plugin=/usr/lib/mull-ir-frontend-18 \
                   -g -grecord-command-line \
                   main.cpp -o hello-world
-    $ mull-runner-12 hello-world
+    $ mull-runner-18 hello-world
 
 Next Steps
 ----------

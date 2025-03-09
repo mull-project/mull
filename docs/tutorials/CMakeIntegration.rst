@@ -35,9 +35,9 @@ Step 3. Configure and build fmtlib
 
     mkdir fmt/build.dir
     cd fmt/build.dir
-    export CXX=clang++-12
+    export CXX=clang++-18
     cmake \
-      -DCMAKE_CXX_FLAGS="-O0 -fexperimental-new-pass-manager -fpass-plugin=/usr/lib/mull-ir-frontend-12 -g -grecord-command-line" \
+      -DCMAKE_CXX_FLAGS="-O0 -fpass-plugin=/usr/lib/mull-ir-frontend-18 -g -grecord-command-line" \
       ..
     make core-test -j
 
@@ -47,7 +47,7 @@ Step 4. Run Mull against fmtlib tests
 
 .. code-block:: bash
 
-    mull-runner-12 ./bin/core-test
+    mull-runner-18 ./bin/core-test
 
 You should see similar output:
 
@@ -101,7 +101,7 @@ After rerunning Mull:
 
 .. code-block:: bash
 
-    $ mull-runner-12 ./bin/core-test
+    $ mull-runner-18 ./bin/core-test
     [info] Using config /tmp/sc-ySbkbNvt3/fmt/mull.yml
     [info] Warm up run (threads: 1)
            [################################] 1/1. Finished in 11ms

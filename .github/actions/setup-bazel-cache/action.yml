@@ -1,0 +1,23 @@
+name: Setup Bazel cache config
+description: Generates a file with bazel's remote cache configuration
+inputs:
+  BUILDBUDDY_API_KEY:
+    description: 'API key for buildbuddy.io'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Bazel cache
+      if: inputs.BUILDBUDDY_API_KEY != null
+      shell: bash
+      run: |
+        echo "" > .bazel.buildbuddy.rc
+        echo "common --bes_results_url=https://app.buildbuddy.io/invocation/" >> .bazel.buildbuddy.rc
+        echo "common --bes_backend=grpcs://remote.buildbuddy.io" >> .bazel.buildbuddy.rc
+        echo "common --remote_cache=grpcs://remote.buildbuddy.io" >> .bazel.buildbuddy.rc
+        echo "common --remote_timeout=10m" >> .bazel.buildbuddy.rc
+        echo "common --remote_header=x-buildbuddy-api-key=${{inputs.BUILDBUDDY_API_KEY}}" >> .bazel.buildbuddy.rc
+    - name: Enable optimized builds
+      shell: bash
+      run: |
+        echo "common --compilation_mode opt" > .bazel.compilation_mode.bazelrc

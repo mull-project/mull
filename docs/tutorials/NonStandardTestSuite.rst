@@ -106,8 +106,8 @@ Usage of Mull in this case is very similar to a "typical" use-case (see :doc:`He
 
 .. code-block:: text
 
-    $ clang-12 -fexperimental-new-pass-manager \
-      -fpass-plugin=/usr/lib/mull-ir-frontend-12 \
+    $ clang-18 \
+      -fpass-plugin=/usr/lib/mull-ir-frontend-18 \
       -g -grecord-command-line \
       main.c -o test.exe
 
@@ -115,7 +115,7 @@ Usage of Mull in this case is very similar to a "typical" use-case (see :doc:`He
 
 .. code-block:: shell
 
-    $ mull-runner-12 ./test.exe -ide-reporter-show-killed \
+    $ mull-runner-18 ./test.exe -ide-reporter-show-killed \
       -test-program=python3 -- test.py ./test.exe
     [info] Using config /tmp/sc-kGN35Gr1f/mull.yml
     [info] Warm up run (threads: 1)
