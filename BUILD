@@ -38,6 +38,16 @@ cc_library(
     ],
 )
 
+cc_library(
+    name = "libmull_reporter_18",
+    srcs = glob(["tools/mull-reporter/*.cpp"]),
+    hdrs = glob(["tools/mull-reporter/*.h"]),
+    deps = [
+        "libmull_18",
+        ":libmull_cli_options_18",
+    ],
+)
+
 cc_binary(
     name = "mull-cxx-ir-frontend-18",
     srcs = glob(["tools/mull-ir-frontend/*.cpp"]),
@@ -49,9 +59,29 @@ cc_binary(
 )
 
 genrule(
-    name = "mull-ir-frontend-18",
+    name = "mull-ir-frontend-18-gen",
     srcs = [":mull-cxx-ir-frontend-18"],
     outs = ["mull-ir-frontend-18"],
+    cmd = "cp $(SRCS) $(OUTS)",
+)
+
+cc_binary(
+    name = "mull-cxx-ast-frontend-18",
+    srcs = glob([
+        "tools/mull-cxx-frontend/src/*.cpp",
+        "tools/mull-cxx-frontend/src/*.h",
+    ]),
+    linkshared = True,
+    deps = [
+        ":libmull_18",
+        "@llvm_18//:libclang_18",
+    ],
+)
+
+genrule(
+    name = "mull-ast-frontend-18-gen",
+    srcs = [":mull-cxx-ast-frontend-18"],
+    outs = ["mull-ast-frontend-18"],
     cmd = "cp $(SRCS) $(OUTS)",
 )
 
@@ -59,6 +89,13 @@ cc_binary(
     name = "mull_runner_18",
     deps = [
         ":libmull_runner_18",
+    ],
+)
+
+cc_binary(
+    name = "mull_reporter_18",
+    deps = [
+        ":libmull_reporter_18",
     ],
 )
 
