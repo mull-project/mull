@@ -14,7 +14,6 @@ int main() {
 // clang-format off
 
 /**
-RUN: cd %CURRENT_DIR
 RUN: sed -e "s:%PWD:%S:g" %S/compile_commands.json.template > %S/compile_commands.json
 RUN: cd %S && %clang_cxx %sysroot %pass_mull_ir_frontend -g %s -o %s-ir.exe
 RUN: %mull_runner -debug -reporters=IDE -reporters=Elements --report-dir=%S/Output --report-name=sample-ir -ide-reporter-show-killed %s-ir.exe

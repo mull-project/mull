@@ -10,7 +10,11 @@ py_binary(
     ],
 )
 
-[mull_py_test(src = f) for f in glob(["**/*.cpp"])]
+[mull_py_test(src = f) for f in glob([
+    "**/*.cpp",
+    "**/*.c",
+    "**/*.itest",
+])]
 
 # mull_py_test(
 #     src = "ast-search/arithmetic/01_add_to_sub/sample.cpp",
