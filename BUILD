@@ -1,5 +1,7 @@
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 
+package(default_visibility = ["//visibility:public"])
+
 cc_library(
     name = "libmull_18",
     srcs = glob(["lib/**/*.cpp"]),
@@ -8,8 +10,8 @@ cc_library(
     deps = [
         "@irm",
         "@json11",
-        "@llvm_18",
-        "@llvm_18//:clang_18",
+        "@llvm_18//:libclang_18",
+        "@llvm_18//:libllvm_18",
         "@reproc//:reproc++",
         "@spdlog",
         "@sqlite3",
@@ -22,7 +24,7 @@ cc_library(
     hdrs = ["tools/CLIOptions/CLIOptions.h"],
     deps = [
         ":libmull_18",
-        "@llvm_18",
+        "@llvm_18//:libllvm_18",
     ],
 )
 
@@ -37,13 +39,20 @@ cc_library(
 )
 
 cc_binary(
-    name = "mull-cxx-ir-frontend-18.dylib",
+    name = "mull-cxx-ir-frontend-18",
     srcs = glob(["tools/mull-ir-frontend/*.cpp"]),
     linkshared = True,
     deps = [
         ":libmull_18",
-        "@llvm_18//:clang_18",
+        "@llvm_18//:libclang_18",
     ],
+)
+
+genrule(
+    name = "mull-ir-frontend-18",
+    srcs = [":mull-cxx-ir-frontend-18"],
+    outs = ["mull-ir-frontend-18"],
+    cmd = "cp $(SRCS) $(OUTS)",
 )
 
 cc_binary(
