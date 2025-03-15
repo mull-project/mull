@@ -31,9 +31,6 @@ config.test_format = lit.formats.ShTest("0")
 print(r.Rlocation("mull/tests/integration/filecheck_runner"))
 print(r.Rlocation("mull/mull-ir-frontend-18"))
 
-# LLVM LIT: Is it possible to pass user defined parameter into a test script?
-# https://stackoverflow.com/a/39861848/598057
-# current_dir = os.environ.get("CURRENT_DIR", "")
 clang_cc = r.Rlocation("llvm_18/clang")
 clang_cxx = r.Rlocation("llvm_18/clangxx")
 llvm_profdata = r.Rlocation("llvm_18/llvm-profdata")
@@ -51,7 +48,6 @@ assert test_cxx_flags
 
 test_cxx_flags = unescape_string(test_cxx_flags)
 
-# config.substitutions.append(("%CURRENT_DIR", current_dir))
 config.substitutions.append(("%clang_cc", clang_cc))
 config.substitutions.append(("%clang_cxx", clang_cxx))
 config.substitutions.append(("%sysroot", os.environ.get("sysroot", "")))
