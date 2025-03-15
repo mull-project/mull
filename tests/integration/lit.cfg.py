@@ -33,12 +33,12 @@ print(r.Rlocation("mull/mull-ir-frontend-18"))
 
 # LLVM LIT: Is it possible to pass user defined parameter into a test script?
 # https://stackoverflow.com/a/39861848/598057
-current_dir = os.environ.get("CURRENT_DIR", "")
+# current_dir = os.environ.get("CURRENT_DIR", "")
 clang_cc = r.Rlocation("llvm_18/clang")
 clang_cxx = r.Rlocation("llvm_18/clangxx")
 llvm_profdata = r.Rlocation("llvm_18/llvm-profdata")
-mull_runner = r.Rlocation("mull_runner_18")
-mull_reporter = r.Rlocation("mull_reporter_18")
+mull_runner = r.Rlocation("mull/mull_runner_18")
+mull_reporter = r.Rlocation("mull/mull_reporter_18")
 mull_frontend_cxx = r.Rlocation("mull/mull-ast-frontend-18")
 mull_ir_frontend = r.Rlocation("mull/mull-ir-frontend-18")
 filecheck = r.Rlocation("mull/tests/integration/filecheck_runner")
@@ -51,7 +51,7 @@ assert test_cxx_flags
 
 test_cxx_flags = unescape_string(test_cxx_flags)
 
-config.substitutions.append(("%CURRENT_DIR", current_dir))
+# config.substitutions.append(("%CURRENT_DIR", current_dir))
 config.substitutions.append(("%clang_cc", clang_cc))
 config.substitutions.append(("%clang_cxx", clang_cxx))
 config.substitutions.append(("%sysroot", os.environ.get("sysroot", "")))
