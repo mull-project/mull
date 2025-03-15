@@ -23,11 +23,15 @@ py_test(
         ":lit.cfg.py",
         requirement("lit"),
         ":filecheck_runner",
-        "//:mull-ir-frontend-18",
+        "//:mull-ast-frontend-18-gen",
+        "//:mull-ir-frontend-18-gen",
         "@llvm_18//:clang",
         "@llvm_18//:clangxx",
         "@llvm_18//:llvm-profdata",
     ],
+    env = {
+        "LLVM_VERSION_MAJOR": "18",
+    },
     main = "lit_runner.py",
     deps = [
         requirement("lit"),
