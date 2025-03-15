@@ -1,1 +1,2 @@
 common --keep_going
+common --test_output=errors

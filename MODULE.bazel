@@ -53,3 +53,21 @@ http_archive(
     strip_prefix = "json11-402bcde713fbef0c67276fb09b07ffbe8ee13956",
     build_file = "//third_party/json11:BUILD",
 )
+
+bazel_dep(name = "rules_python", version = "1.2.0")
+
+python = use_extension("@rules_python//python/extensions:python.bzl", "python")
+python.toolchain(
+    python_version = "3.13",
+)
+
+pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
+pip.parse(
+    hub_name = "pypi",
+    python_version = "3.13",
+    requirements_lock = "//:requirements.txt",
+)
+
+use_repo(pip, "pypi")
+
+bazel_dep(name = "bazel_skylib", version = "1.7.1")

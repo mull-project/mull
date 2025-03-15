@@ -3,6 +3,10 @@ import re
 import os
 import lit.formats
 
+from python.runfiles import Runfiles
+
+r = Runfiles.Create()
+
 
 # The paths passed by CMake as env variables to LIT get escaped so we have to
 # undo it to pass it down to the LIT tests.
@@ -20,23 +24,27 @@ def get_os_filename_string():
     return "Unknown"
 
 
-config = globals("config")
+config = globals()["config"]
 config.name = "Mull integration tests"
 config.test_format = lit.formats.ShTest("0")
+
+print(r.Rlocation("mull/tests/integration/filecheck_runner"))
+print(r.Rlocation("mull/mull-ir-frontend-18"))
 
 # LLVM LIT: Is it possible to pass user defined parameter into a test script?
 # https://stackoverflow.com/a/39861848/598057
 current_dir = os.environ.get("CURRENT_DIR", "")
-clang_cc = os.environ.get("clang_cc", "")
-clang_cxx = os.environ.get("clang_cxx", "")
-llvm_profdata = os.environ.get("llvm_profdata", "")
-mull_runner = os.environ.get("mull_runner", "")
+clang_cc = r.Rlocation("llvm_18/clang")
+clang_cxx = r.Rlocation("llvm_18/clangxx")
+llvm_profdata = r.Rlocation("llvm_18/llvm-profdata")
+mull_runner = r.Rlocation("mull_runner_18")
 mull_reporter = os.environ.get("mull_reporter", "")
 mull_frontend_cxx = os.environ.get("mull_frontend_cxx", "")
-mull_ir_frontend = os.environ.get("mull_ir_frontend", "")
-filecheck = os.environ.get("filecheck", "")
-llvm_major_version = os.environ.get("LLVM_VERSION_MAJOR", "")
-test_cxx_flags = os.environ.get("TEST_CXX_FLAGS", "")
+mull_ir_frontend = r.Rlocation("mull/mull-ir-frontend-18")
+# TODO: Fix _main
+filecheck = r.Rlocation("_main/tests/integration/filecheck_runner")
+llvm_major_version = "18"  # os.environ.get("LLVM_VERSION_MAJOR", "")
+test_cxx_flags = "-Wall"  # os.environ.get("TEST_CXX_FLAGS", "")
 python3 = os.environ.get("python3", "")
 
 assert llvm_major_version
