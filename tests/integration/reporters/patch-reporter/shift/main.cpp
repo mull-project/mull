@@ -21,7 +21,7 @@ RUN: cd %S/Output; (unset TERM; %mull_runner -debug ./main.cpp-ir.exe --report-n
 
 CHECK:[debug] Writing Patchfile: {{.*}}
 CHECK:[info] Patchfiles can be found at './test{{.*}}-patches'
-CHECK:killed-{{.*}}main_cpp{{.*}}
+CHECK:killed-{{.*}}
 CHECK:--- a/{{.*}}/Output/sandbox/main.cpp 0
 CHECK:+++ b/{{.*}}/Output/sandbox/main.cpp 0
 CHECK:+{{\s+}}return a >> b;
