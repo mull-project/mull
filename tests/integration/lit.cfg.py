@@ -28,25 +28,20 @@ config = globals()["config"]
 config.name = "Mull integration tests"
 config.test_format = lit.formats.ShTest("0")
 
-print(r.Rlocation("mull/tests/integration/python3"))
-print(r.Rlocation("mull/mull-ir-frontend-18"))
-
-clang_cc = r.Rlocation("llvm_18/clang")
-clang_cxx = r.Rlocation("llvm_18/clangxx")
-llvm_profdata = r.Rlocation("llvm_18/llvm-profdata")
-mull_runner = r.Rlocation("mull/mull_runner_18")
-mull_reporter = r.Rlocation("mull/mull_reporter_18")
-mull_frontend_cxx = r.Rlocation("mull/mull-ast-frontend-18")
-mull_ir_frontend = r.Rlocation("mull/mull-ir-frontend-18")
-filecheck = r.Rlocation("mull/tests/integration/filecheck_runner")
-llvm_major_version = os.environ.get("LLVM_VERSION_MAJOR", "")
-test_cxx_flags = "-Wall"  # os.environ.get("TEST_CXX_FLAGS", "")
-python3 = r.Rlocation("mull/tests/integration/python3")
+llvm_major_version = os.environ.get("LLVM_VERSION_MAJOR", None)
 
 assert llvm_major_version
-assert test_cxx_flags
 
-test_cxx_flags = unescape_string(test_cxx_flags)
+clang_cc = r.Rlocation(f"llvm_{llvm_major_version}/clang")
+clang_cxx = r.Rlocation(f"llvm_{llvm_major_version}/clangxx")
+llvm_profdata = r.Rlocation(f"llvm_{llvm_major_version}/llvm-profdata")
+mull_runner = r.Rlocation(f"mull/mull_runner_{llvm_major_version}")
+mull_reporter = r.Rlocation(f"mull/mull_reporter_{llvm_major_version}")
+mull_frontend_cxx = r.Rlocation(f"mull/mull-ast-frontend-{llvm_major_version}")
+mull_ir_frontend = r.Rlocation(f"mull/mull-ir-frontend-{llvm_major_version}")
+filecheck = r.Rlocation("mull/tests/integration/filecheck_runner")
+
+python3 = r.Rlocation("mull/tests/integration/python3")
 
 config.substitutions.append(("%clang_cc", clang_cc))
 config.substitutions.append(("%clang_cxx", clang_cxx))
@@ -57,7 +52,6 @@ config.substitutions.append(("%mull_reporter", mull_reporter))
 config.substitutions.append(("%mull_frontend_cxx", mull_frontend_cxx))
 config.substitutions.append(("%mull_ir_frontend", mull_ir_frontend))
 config.substitutions.append(("%filecheck", filecheck))
-config.substitutions.append(("%TEST_CXX_FLAGS", test_cxx_flags))
 config.substitutions.append(("%python3", python3))
 
 config.suffixes = [".cpp", ".c", ".itest"]

@@ -23,32 +23,33 @@ def mull_py_test(src):
         "%s/*.notest" % test_dir,
         "%s/*.itest" % test_dir,
     ]
-    py_test(
-        name = "%s_test" % src,
-        srcs = ["lit_runner.py"],
-        args = [
-            "-v",
-            src,
-        ],
-        data = [
-            requirement("lit"),
-            ":lit.cfg.py",
-            ":filecheck_runner",
-            ":python3",
-            "@llvm_18//:clang",
-            "@llvm_18//:clangxx",
-            "@llvm_18//:llvm-profdata",
-            "//:mull-ast-frontend-18-gen",
-            "//:mull-ir-frontend-18-gen",
-            "//:mull_runner_18",
-            "//:mull_reporter_18",
-        ] + native.glob(test_support_files, allow_empty = True),
-        env = {
-            "LLVM_VERSION_MAJOR": "18",
-        },
-        main = "lit_runner.py",
-        deps = [
-            requirement("lit"),
-            "@rules_python//python/runfiles",
-        ],
-    )
+    for version in ["17", "18"]:
+        py_test(
+            name = "%s_%s_test" % (src, version),
+            srcs = ["lit_runner.py"],
+            args = [
+                "-v",
+                src,
+            ],
+            data = [
+                requirement("lit"),
+                ":lit.cfg.py",
+                ":filecheck_runner",
+                ":python3",
+                "@llvm_%s//:clang" % version,
+                "@llvm_%s//:clangxx" % version,
+                "@llvm_%s//:llvm-profdata" % version,
+                "//:mull-ast-frontend-%s-gen" % version,
+                "//:mull-ir-frontend-%s-gen" % version,
+                "//:mull_runner_%s" % version,
+                "//:mull_reporter_%s" % version,
+            ] + native.glob(test_support_files, allow_empty = True),
+            env = {
+                "LLVM_VERSION_MAJOR": version,
+            },
+            main = "lit_runner.py",
+            deps = [
+                requirement("lit"),
+                "@rules_python//python/runfiles",
+            ],
+        )
