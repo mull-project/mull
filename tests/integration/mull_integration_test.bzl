@@ -23,8 +23,6 @@ def mull_py_test(src):
         "%s/*.notest" % test_dir,
         "%s/*.itest" % test_dir,
     ]
-
-    # test_support_files = () for f in test_support_files
     py_test(
         name = "%s_test" % src,
         srcs = ["lit_runner.py"],
