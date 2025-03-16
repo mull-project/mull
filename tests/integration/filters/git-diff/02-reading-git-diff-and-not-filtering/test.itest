@@ -1,7 +1,7 @@
 RUN: mkdir -p sandbox
 RUN: cp sample.cpp.original sandbox/sample.cpp
 RUN: cd sandbox
-RUN: git init .
+RUN: git init . -b main
 RUN: git add sample.cpp
 RUN: git -c user.name='Mull' -c user.email=alex@lowlevelbits.org commit -m "Impersonation is evil."
 RUN: cp ../sample.cpp.modified sample.cpp
