@@ -28,7 +28,7 @@ RUN: %clang_cxx %sysroot -O0 %pass_mull_ir_frontend -g sandbox/sample.cpp -o sam
 RUN: (unset TERM; env MULL_CONFIG=mull-runner.yml %mull_runner sample.cpp-ir.exe -ide-reporter-show-killed 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=CHECK_RUNNER
 
 CHECK_RUNNER:[info] Incremental testing using Git Diff is enabled.
-CHECK_RUNNER:- Git ref: master
+CHECK_RUNNER:- Git ref: main
 CHECK_RUNNER:- Git project root: {{.*}}/sandbox
 CHECK_RUNNER:[debug] GitDiffFilter: allowing mutant: {{.*}}/sample.cpp:4:11
 CHECK_RUNNER:[debug] GitDiffFilter: skipping mutant: {{.*}}/sample.cpp:7:11
