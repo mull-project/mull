@@ -2,7 +2,7 @@ load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
 load("@rules_cc//cc:defs.bzl", "cc_import", "cc_library")
 
 cc_import(
-    name = "llvm_18_private",
+    name = "llvm_private",
     hdrs = glob([
         "include/llvm/**/*.h",
         "include/llvm-c/**/*.h",
@@ -13,14 +13,14 @@ cc_import(
 )
 
 cc_library(
-    name = "libllvm_18",
+    name = "libllvm",
     includes = ["include"],
     visibility = ["//visibility:public"],
-    deps = [":llvm_18_private"],
+    deps = [":llvm_private"],
 )
 
 cc_import(
-    name = "libclang_18_private",
+    name = "libclang_private",
     hdrs = glob([
         "include/clang/**/*.h",
         "include/clang-c/**/*.h",
@@ -31,10 +31,10 @@ cc_import(
 )
 
 cc_library(
-    name = "libclang_18",
+    name = "libclang",
     includes = ["include"],
     visibility = ["//visibility:public"],
-    deps = [":libclang_18_private"],
+    deps = [":libclang_private"],
 )
 
 native_binary(
