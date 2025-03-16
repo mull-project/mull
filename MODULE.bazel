@@ -29,14 +29,7 @@ bazel_dep(name = "reproc", version = "14.2.5")
 bazel_dep(name = "sqlite3", version = "3.49.1")
 bazel_dep(name = "googletest", version = "1.16.0")
 
-new_local_repository = use_repo_rule("@bazel_tools//tools/build_defs/repo:local.bzl", "new_local_repository")
 http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
-new_local_repository(
-    name = "llvm_18",
-    path = "/opt/homebrew/opt/llvm@18",
-    build_file = ":third_party/llvm/llvm.BUILD",
-)
 
 http_archive(
     name = "irm",
@@ -72,3 +65,8 @@ pip.parse(
 use_repo(pip, "pypi")
 
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
+
+llvm_repos = use_extension(":llvm_repos.bzl", "llvm_repos")
+
+use_repo(llvm_repos, "llvm_17")
+use_repo(llvm_repos, "llvm_18")
