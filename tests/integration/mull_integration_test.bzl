@@ -9,6 +9,18 @@ def mull_py_test(src):
     """
     A wrapper around py_test to enforce conventions and add defaults.
     """
+    test_dir = _dirname(src)
+    test_support_files = [
+        "%s/*.yml" % test_dir,
+        "%s/*.json.template" % test_dir,
+        "%s/*.modified" % test_dir,
+        "%s/*.original" % test_dir,
+        "%s/*.py" % test_dir,
+        "%s/*.h" % test_dir,
+        "%s/*.notest" % test_dir,
+    ]
+
+    # test_support_files = () for f in test_support_files
     py_test(
         name = "%s_test" % src,
         srcs = ["lit_runner.py"],
@@ -17,23 +29,19 @@ def mull_py_test(src):
             src,
         ],
         data = [
-                   src,
-                   requirement("lit"),
-                   ":lit.cfg.py",
-                   ":filecheck_runner",
-                   "@llvm_18//:clang",
-                   "@llvm_18//:clangxx",
-                   "@llvm_18//:llvm-profdata",
-                   "//:mull-ast-frontend-18-gen",
-                   "//:mull-ir-frontend-18-gen",
-                   "//:mull_runner_18",
-                   "//:mull_reporter_18",
-               ] + native.glob(["%s/*.yml" % _dirname(src)], allow_empty = True) +
-               native.glob(["%s/*.json.template" % _dirname(src)], allow_empty = True) +
-               native.glob(["%s/*.modified" % _dirname(src)], allow_empty = True) +
-               native.glob(["%s/*.original" % _dirname(src)], allow_empty = True) +
-               native.glob(["%s/*.h" % _dirname(src)], allow_empty = True) +
-               native.glob(["%s/*.notest" % _dirname(src)], allow_empty = True),
+            src,
+            requirement("lit"),
+            ":lit.cfg.py",
+            ":filecheck_runner",
+            ":python3",
+            "@llvm_18//:clang",
+            "@llvm_18//:clangxx",
+            "@llvm_18//:llvm-profdata",
+            "//:mull-ast-frontend-18-gen",
+            "//:mull-ir-frontend-18-gen",
+            "//:mull_runner_18",
+            "//:mull_reporter_18",
+        ] + native.glob(test_support_files, allow_empty = True),
         env = {
             "LLVM_VERSION_MAJOR": "18",
         },

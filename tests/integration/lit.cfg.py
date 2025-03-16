@@ -28,7 +28,7 @@ config = globals()["config"]
 config.name = "Mull integration tests"
 config.test_format = lit.formats.ShTest("0")
 
-print(r.Rlocation("mull/tests/integration/filecheck_runner"))
+print(r.Rlocation("mull/tests/integration/python3"))
 print(r.Rlocation("mull/mull-ir-frontend-18"))
 
 clang_cc = r.Rlocation("llvm_18/clang")
@@ -41,7 +41,7 @@ mull_ir_frontend = r.Rlocation("mull/mull-ir-frontend-18")
 filecheck = r.Rlocation("mull/tests/integration/filecheck_runner")
 llvm_major_version = os.environ.get("LLVM_VERSION_MAJOR", "")
 test_cxx_flags = "-Wall"  # os.environ.get("TEST_CXX_FLAGS", "")
-python3 = os.environ.get("python3", "")
+python3 = r.Rlocation("mull/tests/integration/python3")
 
 assert llvm_major_version
 assert test_cxx_flags
