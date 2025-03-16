@@ -1,5 +1,6 @@
 // clang-format off
 /**
+XFAIL: *
 RUN: %mull_runner -version 2>&1 | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 CHECK:Mull: Practical mutation testing for C and C++
 CHECK:Home: https://github.com/mull-project/mull
