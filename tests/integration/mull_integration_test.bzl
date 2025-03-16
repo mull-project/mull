@@ -32,7 +32,8 @@ def mull_py_test(src):
                native.glob(["%s/*.json.template" % _dirname(src)], allow_empty = True) +
                native.glob(["%s/*.modified" % _dirname(src)], allow_empty = True) +
                native.glob(["%s/*.original" % _dirname(src)], allow_empty = True) +
-               native.glob(["%s/*.h" % _dirname(src)], allow_empty = True),
+               native.glob(["%s/*.h" % _dirname(src)], allow_empty = True) +
+               native.glob(["%s/*.notest" % _dirname(src)], allow_empty = True),
         env = {
             "LLVM_VERSION_MAJOR": "18",
         },

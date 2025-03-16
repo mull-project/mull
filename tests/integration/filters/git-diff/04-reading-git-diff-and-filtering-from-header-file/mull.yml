@@ -1,5 +1,5 @@
 gitDiffRef: master
-gitProjectRoot: ./Output/sandbox
+gitProjectRoot: ./sandbox
 mutators:
   - cxx_ge_to_lt
   - cxx_ge_to_gt
