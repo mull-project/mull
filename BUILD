@@ -10,8 +10,8 @@ cc_library(
     deps = [
         "@irm",
         "@json11",
-        "@llvm_18//:libclang_18",
-        "@llvm_18//:libllvm_18",
+        "@llvm_18//:libclang",
+        "@llvm_18//:libllvm",
         "@reproc//:reproc++",
         "@spdlog",
         "@sqlite3",
@@ -24,7 +24,7 @@ cc_library(
     hdrs = ["tools/CLIOptions/CLIOptions.h"],
     deps = [
         ":libmull_18",
-        "@llvm_18//:libllvm_18",
+        "@llvm_18//:libllvm",
     ],
 )
 
@@ -54,7 +54,7 @@ cc_binary(
     linkshared = True,
     deps = [
         ":libmull_18",
-        "@llvm_18//:libclang_18",
+        "@llvm_18//:libclang",
     ],
 )
 
@@ -74,7 +74,7 @@ cc_binary(
     linkshared = True,
     deps = [
         ":libmull_18",
-        "@llvm_18//:libclang_18",
+        "@llvm_18//:libclang",
     ],
 )
 
