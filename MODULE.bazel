@@ -35,7 +35,7 @@ http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "ht
 new_local_repository(
     name = "llvm_18",
     path = "/opt/homebrew/opt/llvm@18",
-    build_file = "//third_party/llvm_18:BUILD",
+    build_file = ":third_party/llvm/llvm.BUILD",
 )
 
 http_archive(
@@ -43,7 +43,7 @@ http_archive(
     integrity = "sha256-/UPOr/i+xfZEFv/oEVVIC0KhZxYRWVfzPdy7Ir7eNXU=",
     urls = ["https://github.com/mull-project/libirm/archive/988a91877279c95bfe847994d006e3733a663962.zip"],
     strip_prefix = "libirm-988a91877279c95bfe847994d006e3733a663962",
-    build_file = "//third_party/irm:BUILD",
+    build_file = ":third_party/irm/irm.BUILD",
 )
 
 http_archive(
@@ -51,7 +51,7 @@ http_archive(
     integrity = "sha256-bJGfxwlz+J5gZzjkrGT5Grph/r/LIwQA4wv9x9PBszI=",
     urls = ["https://github.com/dropbox/json11/archive/402bcde713fbef0c67276fb09b07ffbe8ee13956.zip"],
     strip_prefix = "json11-402bcde713fbef0c67276fb09b07ffbe8ee13956",
-    build_file = "//third_party/json11:BUILD",
+    build_file = ":third_party/json11/json11.BUILD",
 )
 
 bazel_dep(name = "rules_python", version = "1.2.0")

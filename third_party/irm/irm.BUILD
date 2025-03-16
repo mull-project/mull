@@ -11,6 +11,6 @@ cc_library(
     includes = ["include"],
     visibility = ["//visibility:public"],
     deps = [
-        "@llvm_18//:libllvm_18",
+        "@llvm_18//:libllvm",
     ],
 )
