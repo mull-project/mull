@@ -17,7 +17,11 @@ def mull_py_test(src):
         "%s/*.original" % test_dir,
         "%s/*.py" % test_dir,
         "%s/*.h" % test_dir,
+        "%s/*.hh" % test_dir,
+        "%s/*.cpp" % test_dir,
+        "%s/*.c" % test_dir,
         "%s/*.notest" % test_dir,
+        "%s/*.itest" % test_dir,
     ]
 
     # test_support_files = () for f in test_support_files
@@ -29,7 +33,6 @@ def mull_py_test(src):
             src,
         ],
         data = [
-            src,
             requirement("lit"),
             ":lit.cfg.py",
             ":filecheck_runner",
