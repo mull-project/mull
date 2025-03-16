@@ -1,7 +1,7 @@
 RUN: mkdir -p sandbox
 RUN: cp sample.cpp.original sandbox/sample.cpp
 RUN: cd sandbox
-RUN: git init .
+RUN: git init . -b main
 RUN: git add sample.cpp
 RUN: git -c user.name='Mull' -c user.email=alex@lowlevelbits.org commit -m "Impersonation is evil."
 RUN: cp ../sample.cpp.modified sample.cpp
@@ -12,7 +12,7 @@ RUN: %clang_cxx %sysroot -O0 %pass_mull_ir_frontend -g sample.cpp -o sample.cpp-
 RUN: (unset TERM; %mull_runner -ide-reporter-show-killed sample.cpp-ir.exe 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 
 CHECK_MUTATE:[info] Incremental testing using Git Diff is enabled.
-CHECK_MUTATE:- Git ref: master
+CHECK_MUTATE:- Git ref: main
 CHECK_MUTATE:- Git project root: {{.*}}/sandbox
 
 CHECK_MUTATE:[debug] GitDiffFilter: allowing instruction: {{.*}}/sample.cpp:4:7

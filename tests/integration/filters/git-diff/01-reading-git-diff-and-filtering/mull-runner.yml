@@ -1,4 +1,4 @@
-gitDiffRef: master
+gitDiffRef: main
 gitProjectRoot: ./sandbox
 mutators:
   - cxx_ge_to_lt
