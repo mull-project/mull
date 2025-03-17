@@ -68,5 +68,10 @@ bazel_dep(name = "bazel_skylib", version = "1.7.1")
 
 llvm_repos = use_extension(":llvm_repos.bzl", "llvm_repos")
 
+use_repo(llvm_repos, "llvm_12")
+use_repo(llvm_repos, "llvm_13")
+use_repo(llvm_repos, "llvm_14")
+use_repo(llvm_repos, "llvm_15")
+use_repo(llvm_repos, "llvm_16")
 use_repo(llvm_repos, "llvm_17")
 use_repo(llvm_repos, "llvm_18")
