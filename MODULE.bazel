@@ -32,14 +32,6 @@ bazel_dep(name = "googletest", version = "1.16.0")
 http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
 http_archive(
-    name = "irm",
-    integrity = "sha256-/UPOr/i+xfZEFv/oEVVIC0KhZxYRWVfzPdy7Ir7eNXU=",
-    urls = ["https://github.com/mull-project/libirm/archive/988a91877279c95bfe847994d006e3733a663962.zip"],
-    strip_prefix = "libirm-988a91877279c95bfe847994d006e3733a663962",
-    build_file = ":third_party/irm/irm.BUILD",
-)
-
-http_archive(
     name = "json11",
     integrity = "sha256-bJGfxwlz+J5gZzjkrGT5Grph/r/LIwQA4wv9x9PBszI=",
     urls = ["https://github.com/dropbox/json11/archive/402bcde713fbef0c67276fb09b07ffbe8ee13956.zip"],
@@ -66,12 +58,19 @@ use_repo(pip, "pypi")
 
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
 
-llvm_repos = use_extension(":llvm_repos.bzl", "llvm_repos")
+SUPPORTED_LLVM_VERSIONS = [
+    "12",
+    "13",
+    "14",
+    "15",
+    "16",
+    "17",
+    "18",
+]
 
-use_repo(llvm_repos, "llvm_12")
-use_repo(llvm_repos, "llvm_13")
-use_repo(llvm_repos, "llvm_14")
-use_repo(llvm_repos, "llvm_15")
-use_repo(llvm_repos, "llvm_16")
-use_repo(llvm_repos, "llvm_17")
-use_repo(llvm_repos, "llvm_18")
+mull_deps = use_extension(":mull_deps.bzl", "mull_deps")
+mull_deps.llvm(versions = SUPPORTED_LLVM_VERSIONS)
+mull_deps.irm(versions = SUPPORTED_LLVM_VERSIONS)
+
+[use_repo(mull_deps, "mull_irm_%s" % v) for v in SUPPORTED_LLVM_VERSIONS]
+[use_repo(mull_deps, "llvm_%s" % v) for v in SUPPORTED_LLVM_VERSIONS]
