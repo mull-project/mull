@@ -1,19 +1,17 @@
 load("@bazel_skylib//lib:modules.bzl", "modules")
 load("@bazel_tools//tools/build_defs/repo:local.bzl", "new_local_repository")
 
-def _detect_llvm_versions():
-    """Detects available LLVM versions and returns a list of installed versions."""
-    llvm_versions = ["17", "18"]
-
-    # for version in ["17", "18"]:
-    #     llvm_path = which("llvm-config-" + version)
-    #     if llvm_path:
-    #         llvm_versions.append(version)
-    return llvm_versions
-
 def _llvm_module_extension(module_ctx):
     """Module extension to dynamically declare local LLVM repositories."""
-    llvm_versions = _detect_llvm_versions()
+    llvm_versions = [
+        "12",
+        "13",
+        "14",
+        "15",
+        "16",
+        "17",
+        "18",
+    ]
 
     # Define each LLVM installation as a repository
     for version in llvm_versions:
