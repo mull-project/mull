@@ -8,7 +8,7 @@ def mull_build():
             hdrs = native.glob(["include/**/*.h"]),
             includes = ["include"],
             deps = [
-                "@irm//:irm%s" % llvm_version,
+                "@mull_irm_%s//:irm" % llvm_version,
                 "@json11",
                 "@llvm_%s//:libclang" % llvm_version,
                 "@llvm_%s//:libllvm" % llvm_version,
