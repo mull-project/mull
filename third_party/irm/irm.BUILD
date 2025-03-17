@@ -1,7 +1,7 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 
-cc_library(
-    name = "irm17",
+[cc_library(
+    name = "irm%s" % v,
     srcs = glob([
         "lib/**/*.cpp",
     ]),
@@ -11,21 +11,14 @@ cc_library(
     includes = ["include"],
     visibility = ["//visibility:public"],
     deps = [
-        "@llvm_17//:libllvm",
+        "@llvm_%s//:libllvm" % v,
     ],
-)
-
-cc_library(
-    name = "irm18",
-    srcs = glob([
-        "lib/**/*.cpp",
-    ]),
-    hdrs = glob([
-        "include/**/*.h",
-    ]),
-    includes = ["include"],
-    visibility = ["//visibility:public"],
-    deps = [
-        "@llvm_18//:libllvm",
-    ],
-)
+) for v in [
+    "12",
+    "13",
+    "14",
+    "15",
+    "16",
+    "17",
+    "18",
+]]
