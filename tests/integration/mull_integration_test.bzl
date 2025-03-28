@@ -1,3 +1,4 @@
+load("@available_llvm_versions//:mull_llvm_versions.bzl", "AVAILABLE_LLVM_VERSIONS")
 load("@pypi//:requirements.bzl", "requirement")
 load("@rules_python//python:defs.bzl", "py_test")
 
@@ -23,7 +24,7 @@ def mull_py_test(src):
         "%s/*.notest" % test_dir,
         "%s/*.itest" % test_dir,
     ]
-    for version in ["17", "18"]:
+    for version in AVAILABLE_LLVM_VERSIONS:
         py_test(
             name = "%s_%s_test" % (src, version),
             srcs = ["lit_runner.py"],
