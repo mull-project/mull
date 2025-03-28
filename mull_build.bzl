@@ -1,6 +1,7 @@
+# buildifier: disable=module-docstring
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 
-def mull_build():
+def mull_build(name):
     for llvm_version in ["17", "18"]:
         cc_library(
             name = "libmull_%s" % llvm_version,
