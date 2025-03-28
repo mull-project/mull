@@ -1,4 +1,6 @@
-UNSUPPORTED_MACOS_VERSIONS = ["12", "13", "15"]
+# buildifier: disable=module-docstring
+UNSUPPORTED_MACOS_VERSIONS = ["12", "13", "14", "15"]
+# clang-14 picks wrong -syslibroot for linking
 
 def _is_macos(repository_ctx):
     return repository_ctx.os.name.find("mac") != -1
