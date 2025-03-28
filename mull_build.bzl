@@ -1,8 +1,9 @@
 # buildifier: disable=module-docstring
+load("@available_llvm_versions//:mull_llvm_versions.bzl", "AVAILABLE_LLVM_VERSIONS")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
 
 def mull_build(name):
-    for llvm_version in ["17", "18"]:
+    for llvm_version in AVAILABLE_LLVM_VERSIONS:
         cc_library(
             name = "libmull_%s" % llvm_version,
             srcs = native.glob(["lib/**/*.cpp"]),

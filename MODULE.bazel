@@ -70,9 +70,12 @@ SUPPORTED_LLVM_VERSIONS = [
     "18",
 ]
 
+available_llvm_versions = use_extension("//:mull_available_llvm_versions.bzl", "available_llvm_versions")
+available_llvm_versions.detect_available(versions = SUPPORTED_LLVM_VERSIONS)
+use_repo(available_llvm_versions, "available_llvm_versions")
+
 mull_deps = use_extension(":mull_deps.bzl", "mull_deps")
-mull_deps.llvm(versions = SUPPORTED_LLVM_VERSIONS)
-mull_deps.irm(versions = SUPPORTED_LLVM_VERSIONS)
+mull_deps.configure(versions = SUPPORTED_LLVM_VERSIONS)
 
 [use_repo(mull_deps, "mull_irm_%s" % v) for v in SUPPORTED_LLVM_VERSIONS]
 [use_repo(mull_deps, "llvm_%s" % v) for v in SUPPORTED_LLVM_VERSIONS]
