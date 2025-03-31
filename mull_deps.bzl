@@ -22,6 +22,81 @@ cc_library(
 )
 """
 
+LLVM_BUILD_FILE = """
+load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
+load("@rules_cc//cc:defs.bzl", "cc_import", "cc_library")
+
+cc_import(
+    name = "llvm_private",
+    hdrs = glob([
+        "include/llvm/**/*.h",
+        "include/llvm-c/**/*.h",
+        "include/llvm/**/*.def",
+        "include/llvm/**/*.inc",
+    ]),
+    shared_library = "lib/libLLVM.{LIBLLVM_EXT}",
+)
+
+cc_library(
+    name = "libllvm",
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [":llvm_private"],
+)
+
+cc_import(
+    name = "libclang_private",
+    hdrs = glob([
+        "include/clang/**/*.h",
+        "include/clang-c/**/*.h",
+        "include/clang/**/*.def",
+        "include/clang/**/*.inc",
+    ]),
+    shared_library = "lib/libclang-cpp.{LIBCLANG_EXT}",
+)
+
+cc_library(
+    name = "libclang",
+    includes = ["include"],
+    visibility = ["//visibility:public"],
+    deps = [":libclang_private"],
+)
+
+native_binary(
+    name = "clang",
+    src = "bin/clang",
+    out = "clang",
+    visibility = ["//visibility:public"],
+)
+
+native_binary(
+    name = "clangxx",
+    src = "bin/clang++",
+    out = "clangxx",
+    visibility = ["//visibility:public"],
+)
+
+native_binary(
+    name = "llvm-profdata",
+    src = "bin/llvm-profdata",
+    out = "llvm-profdata",
+    visibility = ["//visibility:public"],
+)
+"""
+
+def _is_macos(repository_ctx):
+    return repository_ctx.os.name.find("mac") != -1
+
+def _libllvm_ext(repository_ctx, _version):
+    if _is_macos(repository_ctx):
+        return "dylib"
+    return "so"
+
+def _libclang_ext(repository_ctx, version):
+    if _is_macos(repository_ctx):
+        return "dylib"
+    return "so." + version
+
 def _empty_repo_impl(repository_ctx):
     repository_ctx.file(
         "BUILD",
@@ -45,12 +120,17 @@ def _mull_deps_extension(module_ctx):
                     empty_repo(name = irm_repo_name)
                     continue
 
-                # Define each LLVM installation as a repository
-                path = "/opt/homebrew/opt/llvm@" + version
+                if _is_macos(module_ctx):
+                    path = "/opt/homebrew/opt/llvm@" + version
+                else:
+                    path = "/usr/lib/llvm-" + version
                 new_local_repository(
                     name = llvm_repo_name,
                     path = path,
-                    build_file = ":third_party/llvm/llvm.BUILD",
+                    build_file_content = LLVM_BUILD_FILE.format(
+                        LIBLLVM_EXT = _libllvm_ext(module_ctx, version),
+                        LIBCLANG_EXT = _libclang_ext(module_ctx, version),
+                    ),
                 )
                 http_archive(
                     name = irm_repo_name,

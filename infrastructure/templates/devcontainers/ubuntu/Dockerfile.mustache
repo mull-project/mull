@@ -12,3 +12,5 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   libc++-{{LLVM_VERSION}}-dev \
   libc++abi-{{LLVM_VERSION}}-dev \
   clang-{{LLVM_VERSION}}
+
+USER ubuntu
