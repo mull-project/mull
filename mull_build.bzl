@@ -88,14 +88,14 @@ def mull_build(name):
         )
 
         cc_binary(
-            name = "mull_runner_%s" % llvm_version,
+            name = "mull-runner-%s" % llvm_version,
             deps = [
                 ":libmull_runner_%s" % llvm_version,
             ],
         )
 
         cc_binary(
-            name = "mull_reporter_%s" % llvm_version,
+            name = "mull-reporter-%s" % llvm_version,
             deps = [
                 ":libmull_reporter_%s" % llvm_version,
             ],

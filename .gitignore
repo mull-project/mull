@@ -23,3 +23,4 @@ build*dir
 CMakePresets.json
 bazel-*
 MODULE.bazel.lock
+.mull-ci-version-suffix
