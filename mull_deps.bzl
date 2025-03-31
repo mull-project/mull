@@ -34,7 +34,7 @@ cc_import(
         "include/llvm/**/*.def",
         "include/llvm/**/*.inc",
     ]),
-    shared_library = "lib/libLLVM.{LIBLLVM_EXT}",
+    shared_library = "lib/{LIBLLVM_DYLIB}",
 )
 
 cc_library(
@@ -52,7 +52,7 @@ cc_import(
         "include/clang/**/*.def",
         "include/clang/**/*.inc",
     ]),
-    shared_library = "lib/libclang-cpp.{LIBCLANG_EXT}",
+    shared_library = "lib/{LIBCLANG_CPP_DYLIB}",
 )
 
 cc_library(
@@ -87,16 +87,6 @@ native_binary(
 def _is_macos(repository_ctx):
     return repository_ctx.os.name.find("mac") != -1
 
-def _libllvm_ext(repository_ctx, _version):
-    if _is_macos(repository_ctx):
-        return "dylib"
-    return "so"
-
-def _libclang_ext(repository_ctx, version):
-    if _is_macos(repository_ctx):
-        return "dylib"
-    return "so." + version
-
 def _empty_repo_impl(repository_ctx):
     repository_ctx.file(
         "BUILD",
@@ -107,6 +97,26 @@ empty_repo = repository_rule(
     local = True,
     implementation = _empty_repo_impl,
 )
+
+def _dylib_ext(ctx):
+    if _is_macos(ctx):
+        return "dylib"
+    return "so"
+
+def _find_dylib(ctx, path, dylib):
+    libdir = path + "/lib"
+    dylib = "lib" + dylib + "." + _dylib_ext(ctx)
+    for f in ctx.path(libdir).readdir():
+        if f.basename.startswith(dylib):
+            return f.basename
+
+    return None
+
+def _find_clang_dylib(ctx, path):
+    return _find_dylib(ctx, path, "clang-cpp")
+
+def _find_llvm_dylib(ctx, path):
+    return _find_dylib(ctx, path, "LLVM")
 
 def _mull_deps_extension(module_ctx):
     """Module extension to dynamically declare local LLVM repositories."""
@@ -124,12 +134,14 @@ def _mull_deps_extension(module_ctx):
                     path = "/opt/homebrew/opt/llvm@" + version
                 else:
                     path = "/usr/lib/llvm-" + version
+                llvm_dylib = _find_llvm_dylib(module_ctx, path)
+                clang_dylib = _find_clang_dylib(module_ctx, path)
                 new_local_repository(
                     name = llvm_repo_name,
                     path = path,
                     build_file_content = LLVM_BUILD_FILE.format(
-                        LIBLLVM_EXT = _libllvm_ext(module_ctx, version),
-                        LIBCLANG_EXT = _libclang_ext(module_ctx, version),
+                        LIBLLVM_DYLIB = llvm_dylib,
+                        LIBCLANG_CPP_DYLIB = clang_dylib,
                     ),
                 )
                 http_archive(
