@@ -9,7 +9,8 @@ def _is_supported(repository_ctx, version):
     if _is_macos(repository_ctx):
         path = "/opt/homebrew/opt/llvm@" + version
         return (version not in UNSUPPORTED_MACOS_VERSIONS) and repository_ctx.path(path).exists
-    return False
+    path = "/usr/lib/llvm-" + version
+    return repository_ctx.path(path).exists
 
 def _llvm_versions_repo_impl(repository_ctx):
     available_versions = []
