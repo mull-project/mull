@@ -42,8 +42,8 @@ def mull_py_test(src):
                 "@llvm_%s//:llvm-profdata" % version,
                 "//:mull-ast-frontend-%s-gen" % version,
                 "//:mull-ir-frontend-%s-gen" % version,
-                "//:mull_runner_%s" % version,
-                "//:mull_reporter_%s" % version,
+                "//:mull-runner-%s" % version,
+                "//:mull-reporter-%s" % version,
             ] + native.glob(test_support_files, allow_empty = True),
             env = {
                 "LLVM_VERSION_MAJOR": version,
