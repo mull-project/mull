@@ -3,16 +3,26 @@
 def _is_macos(repository_ctx):
     return repository_ctx.os.name.find("mac") != -1
 
+def _os_release_kv(repository_ctx):
+    lines = repository_ctx.read("/etc/os-release").strip().split("\n")
+    kv = {}
+    for line in lines:
+        split = line.split("=", 1)
+        k = split[0]
+        v = split[1]
+        kv[k] = v.strip().strip('"')
+    return kv
+
 def _os_name(repository_ctx):
     if _is_macos(repository_ctx):
         return "macOS"
-    return "unsupported"
+    return _os_release_kv(repository_ctx)["ID"]
 
 def _os_version(repository_ctx):
     if _is_macos(repository_ctx):
         result = repository_ctx.execute(["sw_vers", "--productVersion"])
         return result.stdout.strip()
-    return "unsupported version"
+    return _os_release_kv(repository_ctx)["VERSION_ID"]
 
 def _mull_version(repository_ctx):
     version = repository_ctx.attr.mull_version
