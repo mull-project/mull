@@ -30,6 +30,7 @@ public:
   void enableGitDiffFilter();
   void enableBlockAddressFilter();
   void enableVariadicFunctionFilter();
+  void enableManualFilter();
   CoverageFilter *enableCoverageFilter(const std::string &profileName,
                                        const std::vector<std::string> &objects);
 

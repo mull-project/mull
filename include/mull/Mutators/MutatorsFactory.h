@@ -16,11 +16,13 @@ public:
   explicit MutatorsFactory(Diagnostics &diagnostics);
   std::vector<std::unique_ptr<Mutator>> mutators(const std::vector<std::string> &groups,
                                                  const std::vector<std::string> &ignoreGroups);
+
   void init();
   static std::string descriptionForGroup(const std::vector<std::string> &groupMembers);
   std::vector<std::pair<std::string, std::string>> commandLineOptions();
   std::map<std::string, std::unique_ptr<Mutator>> &getMutatorsMapping();
   std::map<std::string, std::vector<std::string>> &getGroupsMapping();
+  std::unordered_set<std::string> expandMutatorGroups(const std::vector<std::string> &groups);
 
   Mutator *getMutator(const std::string &mutatorId);
 
