@@ -3,6 +3,8 @@
 set -e
 set -x
 
+mkdir -p .vscode
+
 git config --global --add safe.directory '*'
 git submodule update --init --recursive
 
