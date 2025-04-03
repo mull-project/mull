@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.14)
 
 if(NOT MULL_VERSION)
-  set(MULL_VERSION 0.25.0)
+  set(MULL_VERSION 0.26.0)
 endif()
 
 project(Mull LANGUAGES C CXX)

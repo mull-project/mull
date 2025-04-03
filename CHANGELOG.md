@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.26.0] - 04 Apr 2025
+
+- Added a way to disable mutation using source code annotations [#791](https://github.com/mull-project/mull/issues/791) [#1092](https://github.com/mull-project/mull/pull/1092)
+
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2025-03-02..2025-04-04)
+
 ## [0.25.0] - 01 Mar 2025
 
 - Fixed a bug/crash in the new `mull-reporter` (by [tvoskui](https://github.com/tvoskui)) [#1086](https://github.com/mull-project/mull/issues/1086) [#1087](https://github.com/mull-project/mull/pull/1087)
