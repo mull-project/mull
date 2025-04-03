@@ -77,6 +77,7 @@ void mull::mutateBitcode(llvm::Module &module) {
   filters.enableGitDiffFilter();
   filters.enableBlockAddressFilter();
   filters.enableVariadicFunctionFilter();
+  filters.enableManualFilter();
 
   std::string cxxCompilationFlags;
   for (auto &flag : configuration.compilerFlags) {

@@ -5,6 +5,7 @@
 #include "mull/Filters/CoverageFilter.h"
 #include "mull/Filters/FilePathFilter.h"
 #include "mull/Filters/GitDiffFilter.h"
+#include "mull/Filters/ManualFilter.h"
 #include "mull/Filters/NoDebugInfoFilter.h"
 #include "mull/Filters/VariadicFunctionFilter.h"
 #include <llvm/Support/FileSystem.h>
@@ -125,4 +126,10 @@ void Filters::enableVariadicFunctionFilter() {
   auto filter = new mull::VariadicFunctionFilter;
   storage.emplace_back(filter);
   functionFilters.push_back(filter);
+}
+
+void Filters::enableManualFilter() {
+  auto filter = new mull::ManualFilter(diagnostics);
+  storage.emplace_back(filter);
+  mutationFilters.push_back(filter);
 }

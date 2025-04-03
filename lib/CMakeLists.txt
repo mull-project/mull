@@ -60,6 +60,7 @@ set(mull_sources
     Filters/Filters.cpp
     Filters/CoverageFilter.cpp
     Filters/VariadicFunctionFilter.cpp
+    Filters/ManualFilter.cpp
     JunkDetection/CXX/Visitors/ScalarValueVisitor.cpp
     MutantRunner.cpp)
 

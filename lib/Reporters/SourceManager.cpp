@@ -10,12 +10,12 @@ SourceManager::~SourceManager() {
   }
 }
 
-std::string SourceManager::getLine(const SourceLocation &location) {
-  LineOffset &lineOffset = getLineOffset(location);
-  assert(location.line < lineOffset.offsets.size());
+std::string SourceManager::getLine(const std::string &filePath, size_t lineNumber) {
+  LineOffset &lineOffset = getLineOffset(filePath);
+  assert(lineNumber < lineOffset.offsets.size());
 
-  uint32_t lineBegin = lineOffset.offsets[location.line - 1];
-  uint32_t lineEnd = lineOffset.offsets[location.line];
+  uint32_t lineBegin = lineOffset.offsets[lineNumber - 1];
+  uint32_t lineEnd = lineOffset.offsets[lineNumber];
   uint32_t lineLength = lineEnd - lineBegin;
   fseek(lineOffset.file, lineBegin, SEEK_SET);
   char *buffer = new char[lineLength + 1];
@@ -26,18 +26,30 @@ std::string SourceManager::getLine(const SourceLocation &location) {
   return line;
 }
 
+std::string SourceManager::getLine(const SourceLocation &location) {
+  return getLine(location.filePath, location.line);
+}
+
 size_t SourceManager::getNumberOfLines(const SourceLocation &location) {
-  const LineOffset &lineOffset = getLineOffset(location);
+  return getNumberOfLines(location.filePath);
+}
+
+size_t SourceManager::getNumberOfLines(const std::string &filePath) {
+  const LineOffset &lineOffset = getLineOffset(filePath);
   assert(lineOffset.offsets.size() > 0);
   return lineOffset.offsets.size() - 1;
 }
 
 LineOffset &SourceManager::getLineOffset(const SourceLocation &location) {
-  if (lineOffsets.count(location.filePath)) {
-    return lineOffsets.at(location.filePath);
+  return getLineOffset(location.filePath);
+}
+
+LineOffset &SourceManager::getLineOffset(const std::string &filePath) {
+  if (lineOffsets.count(filePath)) {
+    return lineOffsets.at(filePath);
   }
 
-  FILE *file = fopen(location.filePath.c_str(), "rb");
+  FILE *file = fopen(filePath.c_str(), "rb");
   if (!file) {
     perror("SourceManager");
   }
@@ -52,6 +64,6 @@ LineOffset &SourceManager::getLineOffset(const SourceLocation &location) {
   offsets.push_back(offset);
 
   LineOffset lineOffset(file, offsets);
-  auto inserted = lineOffsets.insert(std::make_pair(location.filePath, lineOffset));
+  auto inserted = lineOffsets.insert(std::make_pair(filePath, lineOffset));
   return inserted.first->second;
 }

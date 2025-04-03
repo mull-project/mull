@@ -244,6 +244,13 @@ Mutator *MutatorsFactory::getMutator(const string &mutatorId) {
   return mutatorsMapping[mutatorId].get();
 }
 
+std::unordered_set<std::string>
+MutatorsFactory::expandMutatorGroups(const std::vector<std::string> &groups) {
+  std::unordered_set<std::string> expandedGroups;
+  expandGroups(diagnostics, groups, groupsMapping, expandedGroups);
+  return expandedGroups;
+}
+
 vector<unique_ptr<Mutator>>
 MutatorsFactory::mutators(const vector<string> &groups,
                           const std::vector<std::string> &ignoreGroups) {

@@ -18,7 +18,9 @@ struct LineOffset {
 class SourceManager {
 public:
   std::string getLine(const SourceLocation &location);
+  std::string getLine(const std::string &filePath, size_t lineNumber);
   size_t getNumberOfLines(const SourceLocation &location);
+  size_t getNumberOfLines(const std::string &filePath);
 
   ~SourceManager();
 
@@ -26,6 +28,7 @@ private:
   std::map<std::string, LineOffset> lineOffsets;
 
   LineOffset &getLineOffset(const SourceLocation &location);
+  LineOffset &getLineOffset(const std::string &filePath);
 };
 
 } // namespace mull
