@@ -12,5 +12,6 @@ Tutorials
    tutorials/MultipleTestTargets
    tutorials/CTestIntegration
    tutorials/ControlMutationsTutorial
+   tutorials/DisableMutantsWithAnnotations
    tutorials/NonStandardTestSuite
    tutorials/SQLiteReport
