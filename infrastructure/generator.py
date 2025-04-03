@@ -56,6 +56,27 @@ def cmake(args):
             f.write(result)
 
 
+def vscode(args):
+    os_specific_args = {
+        "ubuntu": {
+            "INSTALL_PATH": f"/usr/lib/llvm-{args.llvm_version}",
+            "COMPILER": f"/usr/bin/clang-{args.llvm_version}"
+        },
+        "macos": {
+            "INSTALL_PATH": f"opt/homebrew/opt/llvm@{args.llvm_version}",
+            "COMPILER": f"/opt/homebrew/opt/llvm@{args.llvm_version}/bin/clang",
+        },
+    }
+
+    template_args = os_specific_args[args.os]
+    template_name = f"infrastructure/templates/vscode/c_cpp_properties.json.mustache"
+    renderer = pystache.Renderer(missing_tags="strict")
+    with open(template_name, "r") as t:
+        result = renderer.render(t.read(), template_args)
+        with open(".vscode/c_cpp_properties.json", "w") as f:
+            f.write(result)
+
+
 def devcontainers(args):
     shutil.rmtree(".devcontainer")
     for os_name in SUPPORTED_PLATFORMS:
@@ -126,7 +147,8 @@ def main():
         title="subcommands", help="available subcommands", dest="cmd"
     )
 
-    parser_cmake = subparsers.add_parser("cmake", help="Generates CMake preset file")
+    parser_cmake = subparsers.add_parser(
+        "cmake", help="Generates CMake preset file")
     parser_cmake.add_argument(
         "--os",
         choices=("ubuntu", "macos"),
@@ -135,13 +157,27 @@ def main():
     )
     parser_cmake.add_argument("--llvm_version", type=int)
 
+    parser_vscode = subparsers.add_parser(
+        "vscode", help="Generates VSCode settings")
+    parser_vscode.add_argument(
+        "--os",
+        choices=("ubuntu", "macos"),
+        help="Select OS for which to generate preset",
+        type=str,
+    )
+    parser_vscode.add_argument("--llvm_version", type=int)
+
     subparsers.add_parser("devcontainers", help="Generates devcontainer files")
-    subparsers.add_parser("github_workflows", help="Generates GitHub workflow files")
-    subparsers.add_parser("all", help="Combines devcontainers and github_workflows")
+    subparsers.add_parser("github_workflows",
+                          help="Generates GitHub workflow files")
+    subparsers.add_parser(
+        "all", help="Combines devcontainers and github_workflows")
 
     args = parser.parse_args()
     if args.cmd == "cmake":
         cmake(args)
+    if args.cmd == "vscode":
+        vscode(args)
     if args.cmd == "devcontainers":
         devcontainers(args)
     if args.cmd == "github_workflows":
