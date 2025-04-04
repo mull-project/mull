@@ -5,4 +5,4 @@ package(default_visibility = ["//visibility:public"])
 
 mull_build(name = "unused")
 
-mull_package(name = "unused")
+mull_package(name = "unused_2")

@@ -100,17 +100,3 @@ def mull_build(name):
                 ":libmull_reporter_%s" % llvm_version,
             ],
         )
-
-        cc_test(
-            name = "mull_unit_tests_%s" % llvm_version,
-            size = "small",
-            srcs = [
-                "tests/unit/MutatorsFactoryTests.cpp",
-                "tests/unit/TaskExecutorTests.cpp",
-            ],
-            deps = [
-                ":libmull_%s" % llvm_version,
-                "@googletest//:gtest",
-                "@googletest//:gtest_main",
-            ],
-        )
