@@ -1,8 +1,8 @@
+load("@available_llvm_versions//:mull_llvm_versions.bzl", "AVAILABLE_LLVM_VERSIONS")
+load("@bazel_itertools//lib:itertools.bzl", "itertools")
 load("//tests/unit:fixtures.bzl", "fixture")
 
 package(default_visibility = ["//visibility:public"])
-
-llvm_version = "18"
 
 [
     fixture(
@@ -15,5 +15,8 @@ llvm_version = "18"
         compiler = "@llvm_%s//:clang" % llvm_version,
         fixture = f,
     )
-    for f in glob(["*.c"])
+    for (f, llvm_version) in itertools.product(
+        glob(["*.c"]),
+        AVAILABLE_LLVM_VERSIONS,
+    )
 ]

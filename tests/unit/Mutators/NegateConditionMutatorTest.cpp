@@ -18,7 +18,7 @@ using namespace llvm;
 TEST(NegateConditionMutator, getMutationPoints_no_filter) {
   auto bitcode = loadBitcodeFromIR(
       fixtures::
-          tests_unit_fixtures_hardcode_APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutator_ll_path());
+          tests_unit_fixtures_hardcode_APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_negate_mutator_ll_path());
   Function *function = bitcode->getModule()->getFunction("_ZN4llvm5APInt12tcExtractBitEPKyj");
   assert(function);
 

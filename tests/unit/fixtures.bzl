@@ -42,7 +42,7 @@ __attribute__((used)) static const char* {NAME}_path() {{
 """
 
 def _fixtures_header_impl(ctx):
-    llvm_version = "18"
+    llvm_version = ctx.attr.llvm_version
     chunks = []
     for fixture in ctx.files.fixtures:
         name = fixture.short_path.replace("/", "_").replace(".", "_")
@@ -56,5 +56,6 @@ fixtures_header = rule(
     attrs = {
         "fixtures": attr.label_list(mandatory = True, allow_files = True),
         "header": attr.output(),
+        "llvm_version": attr.string(),
     },
 )
