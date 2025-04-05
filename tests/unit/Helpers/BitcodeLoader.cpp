@@ -9,6 +9,7 @@
 #include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/SourceMgr.h>
 
+#include <filesystem>
 #include <sstream>
 
 using namespace llvm;
@@ -42,6 +43,7 @@ std::unique_ptr<Module> mull::loadModuleFromBuffer(LLVMContext &context, MemoryB
 
 std::unique_ptr<Bitcode> BitcodeLoader::loadBitcodeAtPath(const std::string &path,
                                                           Diagnostics &diagnostics) {
+  llvm::errs() << std::filesystem::current_path() << "\n";
   auto buffer = MemoryBuffer::getFile(path);
   if (!buffer) {
     std::stringstream message;
