@@ -12,8 +12,24 @@ llvm_version = "18"
             "-c",
             "-emit-llvm",
         ],
+        compiler = "@llvm_%s//:clangxx" % llvm_version,
+        fixture = f,
+    )
+    for f in glob([
+        "**/*.cpp",
+    ])
+]
+
+[
+    fixture(
+        name = "%s.bc" % f,
+        args = [
+            "-g",
+            "-c",
+            "-emit-llvm",
+        ],
         compiler = "@llvm_%s//:clang" % llvm_version,
         fixture = f,
     )
-    for f in glob(["*.c"])
+    for f in glob(["**/*.c"])
 ]
