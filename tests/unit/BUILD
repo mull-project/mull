@@ -16,6 +16,8 @@ fixtures_header(
         "//tests/unit/fixtures/mutation_filters/no_debug_filter:with_debug.c.bc",
         "//tests/unit/fixtures/mutation_filters/no_debug_filter:without_debug.c.bc",
         "//tests/unit/fixtures/mutation_filters/file_path:some_test_file_name.c.bc",
+        "//tests/unit/fixtures/mutators/replace_call:module.c.bc",
+        "//tests/unit/fixtures/mutators/replace_assignment:module.c.bc",
     ],
     header = "FixturePaths.h",
 )
@@ -75,6 +77,16 @@ filegroup(
 
 filegroup(
     name = "TaskExecutorTests.cpp_18_fixtures",
+)
+
+filegroup(
+    name = "MutationPointTests.cpp_18_fixtures",
+    srcs = [
+        "//tests/unit/fixtures/mutators/replace_assignment:module.c",
+        "//tests/unit/fixtures/mutators/replace_assignment:module.c.bc",
+        "//tests/unit/fixtures/mutators/replace_call:module.c.bc",
+        "//tests/unit/fixtures/mutators/scalar_value:module.c.bc",
+    ],
 )
 
 [
