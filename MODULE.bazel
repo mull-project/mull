@@ -87,3 +87,10 @@ mull_deps.configure(versions = SUPPORTED_LLVM_VERSIONS)
 
 mull_package_info = use_extension("//:mull_package_info.bzl", "mull_package_info")
 use_repo(mull_package_info, "mull_package_info")
+
+http_archive(
+    name = "bazel_itertools",
+    url = "https://github.com/tillahoffmann/bazel-itertools/archive/refs/tags/0.2.1.tar.gz",
+    strip_prefix = "bazel-itertools-0.2.1",
+    integrity = "sha256-br2KkRgBtrgmOjrl7Y3nK4cR/tkomEw++udDyw9FbOE=",
+)
