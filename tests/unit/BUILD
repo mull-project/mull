@@ -12,6 +12,7 @@ fixtures_header(
         ":fixtures/hardcode/APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutator.ll",
         "//tests/unit/fixtures/mutators/scalar_value:junk.cpp.bc",
         "//tests/unit/fixtures/mutators/scalar_value:module.c.bc",
+        "//tests/unit/fixtures/mutators/boundary:module.cpp.bc",
     ],
     header = "FixturePaths.h",
 )
@@ -120,6 +121,24 @@ cc_test(
     ],
     data = [
         ":fixtures/hardcode/APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutator.ll",
+    ],
+    deps = [
+        "//:libmull_%s" % llvm_version,
+        ":unit_test_helpers_%s" % llvm_version,
+        ":FixturePaths",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "Mutators_ConditionalsBoundaryMutatorTests_%s" % llvm_version,
+    size = "small",
+    srcs = [
+        "Mutators/ConditionalsBoundaryMutatorTests.cpp",
+    ],
+    data = [
+        "//tests/unit/fixtures/mutators/boundary:module.cpp.bc",
     ],
     deps = [
         "//:libmull_%s" % llvm_version,
