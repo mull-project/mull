@@ -11,7 +11,7 @@
 #include "mull/MutationsFinder.h"
 #include "mull/Program/Program.h"
 #include "mull/Result.h"
-#include "tests/unit/Helpers/BitcodeLoader.h"
+#include "tests/unit/helpers/BitcodeLoader.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 
 #include <fstream>
