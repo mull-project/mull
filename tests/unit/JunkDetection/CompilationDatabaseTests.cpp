@@ -1,5 +1,5 @@
+#include "FixturePaths.h"
 #include "mull/JunkDetection/CXX/CompilationDatabase.h"
-#include "tests/unit/FixturePaths.h"
 #include <gtest/gtest.h>
 #include <mull/Diagnostics/Diagnostics.h>
 

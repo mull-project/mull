@@ -1,10 +1,10 @@
+#include "FixturePaths.h"
 #include "mull/FunctionUnderTest.h"
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
 #include "mull/MutationPoint.h"
 #include "mull/Mutators/CXX/CallMutators.h"
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "mull/Mutators/ScalarValueMutator.h"
-#include "tests/unit/FixturePaths.h"
 #include "tests/unit/helpers/BitcodeLoader.h"
 #include <mull/Diagnostics/Diagnostics.h>
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
