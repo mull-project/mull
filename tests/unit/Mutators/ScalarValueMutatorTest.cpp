@@ -1,9 +1,9 @@
 #include "mull/Mutators/ScalarValueMutator.h"
-#include "BitcodeLoader.h"
-#include "FixturePaths.h"
-#include "TestModuleFactory.h"
 #include "mull/FunctionUnderTest.h"
 #include "mull/MutationPoint.h"
+#include "tests/unit/FixturePaths.h"
+#include "tests/unit/TestModuleFactory.h"
+#include "tests/unit/helpers/BitcodeLoader.h"
 
 #include <gtest/gtest.h>
 #include <irm/irm.h>
@@ -16,8 +16,8 @@ using namespace llvm;
 TEST(ScalarValueMutator, getMutationPoint) {
   Diagnostics diagnostics;
   BitcodeLoader loader;
-  auto bitcode =
-      loader.loadBitcodeAtPath(fixtures::mutators_scalar_value_module_bc_path(), diagnostics);
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::tests_unit_fixtures_mutators_scalar_value_module_c_bc_path(), diagnostics);
 
   ScalarValueMutator mutator;
   FunctionUnderTest functionUnderTest(bitcode->getModule()->getFunction("scalar_value"),
