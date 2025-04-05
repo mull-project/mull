@@ -1,13 +1,13 @@
 def _fixture_impl(ctx):
     out = ctx.actions.declare_file(ctx.label.name)
-    args = ctx.attr.args + [ctx.file.fixture.path, "-o", out.path]
-    ctx.actions.run(
-        inputs = [ctx.file.fixture],
+    args = ctx.attr.args + ["-fdebug-prefix-map=$PWD=./"] + [ctx.file.fixture.path, "-o", out.path]
+    ctx.actions.run_shell(
+        inputs = [ctx.executable.compiler, ctx.file.fixture],
         outputs = [out],
-        arguments = args,
         progress_message = "Generating fixture %s" % out.short_path,
-        executable = ctx.executable.compiler,
+        command = "%s %s" % (ctx.executable.compiler.path, " ".join(args)),
     )
+
     return [DefaultInfo(files = depset([out]))]
 
 fixture = rule(
