@@ -23,7 +23,3 @@ native_binary(
     "**/*.c",
     "**/*.itest",
 ])]
-
-# mull_py_test(
-#     src = "ast-search/arithmetic/01_add_to_sub/sample.cpp",
-# )
