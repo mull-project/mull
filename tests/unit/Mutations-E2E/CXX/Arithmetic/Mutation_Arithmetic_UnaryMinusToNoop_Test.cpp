@@ -1,10 +1,8 @@
-#include "FixturePaths.h"
-
 #include "mull/Bitcode.h"
 #include "mull/MutationPoint.h"
 #include "mull/Mutators/CXX/ArithmeticMutators.h"
 
-#include "Helpers/MutationTestBed.h"
+#include "tests/unit/helpers/MutationTestBed.h"
 
 #include <gtest/gtest.h>
 
