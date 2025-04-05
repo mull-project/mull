@@ -172,30 +172,17 @@ cc_test(
     ],
 )
 
-cc_test(
-    name = "Mutations-E2E-Scalar_01_Mutation_Scalar_ReturnValue_Tests_%s" % llvm_version,
-    size = "small",
-    srcs = [
-        "Mutations-E2E/Scalar/01_Mutation_Scalar_ReturnValue_Test.cpp",
-    ],
-    deps = [
-        "//:libmull_%s" % llvm_version,
-        ":unit_test_helpers_%s" % llvm_version,
-        "@googletest//:gtest",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "Mutations-E2E-Scalar_02_Mutation_Scalar_BinaryOperand_Tests_%s" % llvm_version,
-    size = "small",
-    srcs = [
-        "Mutations-E2E/Scalar/02_Mutation_Scalar_BinaryOperand_Test.cpp",
-    ],
-    deps = [
-        "//:libmull_%s" % llvm_version,
-        ":unit_test_helpers_%s" % llvm_version,
-        "@googletest//:gtest",
-        "@googletest//:gtest_main",
-    ],
-)
+[
+    cc_test(
+        name = "%s_%s" % (f, llvm_version),
+        size = "small",
+        srcs = [f],
+        deps = [
+            "//:libmull_%s" % llvm_version,
+            ":unit_test_helpers_%s" % llvm_version,
+            "@googletest//:gtest",
+            "@googletest//:gtest_main",
+        ],
+    )
+    for f in glob(["Mutations-E2E/**/*.cpp"])
+]

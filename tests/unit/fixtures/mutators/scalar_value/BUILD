@@ -8,7 +8,6 @@ llvm_version = "18"
     fixture(
         name = "%s.bc" % f,
         args = [
-            # "-g",
             "-c",
             "-emit-llvm",
         ],
