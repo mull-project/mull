@@ -8,7 +8,7 @@ exports_files(glob(["*.json"]) + ["include"])
 llvm_version = "18"
 
 fixture(
-    name = "main.cpp.bc",
+    name = "%s_main.cpp.bc" % llvm_version,
     args = [
         "-g",
         "-c",

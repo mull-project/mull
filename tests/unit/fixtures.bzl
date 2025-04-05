@@ -1,4 +1,5 @@
 def _fixture_impl(ctx):
+    # llvm_version = "18"
     out = ctx.actions.declare_file(ctx.label.name)
 
     # this is a hack for a single test case
@@ -41,9 +42,11 @@ __attribute__((used)) static const char* {NAME}_path() {{
 """
 
 def _fixtures_header_impl(ctx):
+    llvm_version = "18"
     chunks = []
     for fixture in ctx.files.fixtures:
         name = fixture.short_path.replace("/", "_").replace(".", "_")
+        name = name.replace("_" + llvm_version, "")
         chunks.append(CODE.format(NAME = name, PATH = fixture.short_path))
     content = HEADER + "\n".join(chunks) + FOOTER
     ctx.actions.write(ctx.outputs.header, content)

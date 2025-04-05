@@ -5,22 +5,22 @@ package(default_visibility = ["//visibility:public"])
 llvm_version = "18"
 
 fixture(
-    name = "with_debug.c.bc",
+    name = "%s_with_debug.c.bc" % llvm_version,
     args = [
         "-g",
         "-c",
         "-emit-llvm",
     ],
-    compiler = "@llvm_%s//:clangxx" % llvm_version,
+    compiler = "@llvm_%s//:clang" % llvm_version,
     fixture = "with_debug.c",
 )
 
 fixture(
-    name = "without_debug.c.bc",
+    name = "%s_without_debug.c.bc" % llvm_version,
     args = [
         "-c",
         "-emit-llvm",
     ],
-    compiler = "@llvm_%s//:clangxx" % llvm_version,
+    compiler = "@llvm_%s//:clang" % llvm_version,
     fixture = "without_debug.c",
 )

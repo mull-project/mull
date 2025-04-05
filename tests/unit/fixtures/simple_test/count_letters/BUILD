@@ -6,7 +6,7 @@ llvm_version = "18"
 
 [
     fixture(
-        name = "%s.bc" % f,
+        name = "%s_%s.bc" % (llvm_version, f),
         args = [
             "-g",
             "-c",
