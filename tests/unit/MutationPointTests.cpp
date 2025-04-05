@@ -1,12 +1,12 @@
-#include "BitcodeLoader.h"
-#include "FixturePaths.h"
-#include "TestModuleFactory.h"
 #include "mull/Config/Configuration.h"
 #include "mull/FunctionUnderTest.h"
 #include "mull/MutationPoint.h"
 #include "mull/Mutators/CXX/CallMutators.h"
 #include "mull/Mutators/CXX/LogicalAndToOr.h"
 #include "mull/Mutators/ScalarValueMutator.h"
+#include "tests/unit/FixturePaths.h"
+#include "tests/unit/helpers/BitcodeLoader.h"
+#include "tests/unit/helpers/TestModuleFactory.h"
 
 #include <llvm/IR/InstrTypes.h>
 #include <llvm/IR/Instructions.h>
@@ -17,7 +17,7 @@
 #include <mull/Mutators/CXX/NumberMutators.h>
 #include <mull/Parallelization/Parallelization.h>
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 #include <regex>
 
@@ -27,8 +27,8 @@ using namespace llvm;
 TEST(MutationPoint, ScalarValueMutator_applyMutation) {
   Diagnostics diagnostics;
   BitcodeLoader loader;
-  auto bitcode =
-      loader.loadBitcodeAtPath(fixtures::mutators_scalar_value_module_bc_path(), diagnostics);
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::tests_unit_fixtures_mutators_scalar_value_module_c_bc_path(), diagnostics);
 
   ScalarValueMutator mutator;
   FunctionUnderTest functionUnderTest(bitcode->getModule()->getFunction("scalar_value"),
@@ -65,8 +65,8 @@ TEST(MutationPoint, ScalarValueMutator_applyMutation) {
 TEST(MutationPoint, ReplaceCallMutator_applyMutation) {
   Diagnostics diagnostics;
   BitcodeLoader loader;
-  auto bitcode =
-      loader.loadBitcodeAtPath(fixtures::mutators_replace_call_module_bc_path(), diagnostics);
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::tests_unit_fixtures_mutators_replace_call_module_c_bc_path(), diagnostics);
 
   cxx::ReplaceScalarCall mutator;
   FunctionUnderTest functionUnderTest(bitcode->getModule()->getFunction("replace_call"),
@@ -92,8 +92,8 @@ TEST(MutationPoint, OriginalValuePresent) {
   Diagnostics diagnostics;
   BitcodeLoader loader;
   Configuration configuration{};
-  auto bitcode =
-      loader.loadBitcodeAtPath(fixtures::mutators_replace_assignment_module_bc_path(), diagnostics);
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::tests_unit_fixtures_mutators_replace_assignment_module_c_bc_path(), diagnostics);
 
   cxx::NumberAssignConst mutator;
   FunctionUnderTest functionUnderTest(bitcode->getModule()->getFunction("replace_assignment"),
@@ -135,8 +135,8 @@ TEST(MutationPoint, OriginalValuePresent) {
 TEST(MutationPoint, dump) {
   Diagnostics diagnostics;
   BitcodeLoader loader;
-  auto bitcode =
-      loader.loadBitcodeAtPath(fixtures::mutators_replace_assignment_module_bc_path(), diagnostics);
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::tests_unit_fixtures_mutators_replace_assignment_module_c_bc_path(), diagnostics);
 
   cxx::NumberAssignConst mutator;
   FunctionUnderTest functionUnderTest(bitcode->getModule()->getFunction("replace_assignment"),
@@ -166,8 +166,8 @@ static std::string leftTrimmedString(const std::string &string) {
 TEST(MutationPoint, dumpSourceCodeContext) {
   Diagnostics diagnostics;
   BitcodeLoader loader;
-  auto bitcode =
-      loader.loadBitcodeAtPath(fixtures::mutators_replace_assignment_module_bc_path(), diagnostics);
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::tests_unit_fixtures_mutators_replace_assignment_module_c_bc_path(), diagnostics);
 
   cxx::NumberAssignConst mutator;
   FunctionUnderTest functionUnderTest(bitcode->getModule()->getFunction("replace_assignment"),
