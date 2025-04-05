@@ -34,17 +34,17 @@ TEST(ScalarValueMutator, getMutationPoint) {
 
   ASSERT_EQ(mutants[0]->getAddress().getFnIndex(), 0);
   ASSERT_EQ(mutants[0]->getAddress().getBBIndex(), 0);
-  ASSERT_EQ(mutants[0]->getAddress().getIIndex(), 4);
+  ASSERT_EQ(mutants[0]->getAddress().getIIndex(), 6);
 
   ASSERT_EQ(mutants[1]->getAddress().getFnIndex(), 0);
   ASSERT_EQ(mutants[1]->getAddress().getBBIndex(), 0);
-  ASSERT_EQ(mutants[1]->getAddress().getIIndex(), 5);
+  ASSERT_EQ(mutants[1]->getAddress().getIIndex(), 8);
 
   ASSERT_EQ(mutants[2]->getAddress().getFnIndex(), 0);
   ASSERT_EQ(mutants[2]->getAddress().getBBIndex(), 0);
-  ASSERT_EQ(mutants[2]->getAddress().getIIndex(), 9);
+  ASSERT_EQ(mutants[2]->getAddress().getIIndex(), 12);
 
   ASSERT_EQ(mutants[3]->getAddress().getFnIndex(), 0);
   ASSERT_EQ(mutants[3]->getAddress().getBBIndex(), 0);
-  ASSERT_EQ(mutants[3]->getAddress().getIIndex(), 12);
+  ASSERT_EQ(mutants[3]->getAddress().getIIndex(), 15);
 }
