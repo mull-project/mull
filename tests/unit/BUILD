@@ -13,6 +13,9 @@ fixtures_header(
         "//tests/unit/fixtures/mutators/scalar_value:junk.cpp.bc",
         "//tests/unit/fixtures/mutators/scalar_value:module.c.bc",
         "//tests/unit/fixtures/mutators/boundary:module.cpp.bc",
+        "//tests/unit/fixtures/mutation_filters/no_debug_filter:with_debug.c.bc",
+        "//tests/unit/fixtures/mutation_filters/no_debug_filter:without_debug.c.bc",
+        "//tests/unit/fixtures/mutation_filters/file_path:some_test_file_name.c.bc",
     ],
     header = "FixturePaths.h",
 )
@@ -80,20 +83,6 @@ cc_test(
 )
 
 cc_test(
-    name = "MutationFilters_GitDiffReaderTests_%s" % llvm_version,
-    size = "small",
-    srcs = [
-        "MutationFilters/GitDiffReaderTests.cpp",
-    ],
-    deps = [
-        "//:libmull_%s" % llvm_version,
-        ":unit_test_helpers_%s" % llvm_version,
-        "@googletest//:gtest",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
     name = "MutationTestingElementsReporterTests_%s" % llvm_version,
     size = "small",
     srcs = [
@@ -139,6 +128,40 @@ cc_test(
     ],
     data = [
         "//tests/unit/fixtures/mutators/boundary:module.cpp.bc",
+    ],
+    deps = [
+        "//:libmull_%s" % llvm_version,
+        ":unit_test_helpers_%s" % llvm_version,
+        ":FixturePaths",
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "MutationFilters_GitDiffReaderTests_%s" % llvm_version,
+    size = "small",
+    srcs = [
+        "MutationFilters/GitDiffReaderTests.cpp",
+    ],
+    deps = [
+        "//:libmull_%s" % llvm_version,
+        ":unit_test_helpers_%s" % llvm_version,
+        "@googletest//:gtest",
+        "@googletest//:gtest_main",
+    ],
+)
+
+cc_test(
+    name = "MutationFilters_MutationFilterTests_%s" % llvm_version,
+    size = "small",
+    srcs = [
+        "MutationFilters/MutationFilterTests.cpp",
+    ],
+    data = [
+        "//tests/unit/fixtures/mutation_filters/file_path:some_test_file_name.c.bc",
+        "//tests/unit/fixtures/mutation_filters/no_debug_filter:with_debug.c.bc",
+        "//tests/unit/fixtures/mutation_filters/no_debug_filter:without_debug.c.bc",
     ],
     deps = [
         "//:libmull_%s" % llvm_version,
