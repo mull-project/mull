@@ -1,7 +1,7 @@
 #include "mull/Reporters/MutationTestingElementsReporter.h"
 
 #include "tests/unit/FixturePaths.h"
-#include "tests/unit/TestModuleFactory.h"
+#include "tests/unit/helpers/TestModuleFactory.h"
 
 #include "mull/Bitcode.h"
 #include "mull/Config/Configuration.h"
