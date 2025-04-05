@@ -27,150 +27,78 @@ cc_library(
 
 cc_library(
     name = "unit_test_helpers_%s" % llvm_version,
-    srcs = [
-        "TestModuleFactory.cpp",
-    ] + glob(["helpers/*.cpp"]),
-    hdrs = [
-        "TestModuleFactory.h",
-    ] + glob(["helpers/*.h"]),
-    deps = [
-        "//:libmull_%s" % llvm_version,
-    ],
+    srcs = glob(["helpers/*.cpp"]),
+    hdrs = glob(["helpers/*.h"]),
+    deps = ["//:libmull_%s" % llvm_version],
 )
 
-cc_test(
-    name = "TaskExecutorTests_%s" % llvm_version,
-    size = "small",
-    srcs = ["TaskExecutorTests.cpp"],
-    deps = [
-        "//:libmull_%s" % llvm_version,
-        ":unit_test_helpers_%s" % llvm_version,
-        "@googletest//:gtest",
-        "@googletest//:gtest_main",
-    ],
+filegroup(
+    name = "MutationFilters/GitDiffReaderTests.cpp_%s_fixtures" % llvm_version,
 )
 
-cc_test(
-    name = "MutatorsFactoryTests_%s" % llvm_version,
-    size = "small",
+filegroup(
+    name = "MutationFilters/MutationFilterTests.cpp_%s_fixtures" % llvm_version,
     srcs = [
-        "MutatorsFactoryTests.cpp",
-    ],
-    deps = [
-        "//:libmull_%s" % llvm_version,
-        ":unit_test_helpers_%s" % llvm_version,
-        "@googletest//:gtest",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "Mutators_ScalarValueMutatorTests_%s" % llvm_version,
-    size = "small",
-    srcs = [
-        "Mutators/ScalarValueMutatorTest.cpp",
-    ],
-    data = [
-        "//tests/unit/fixtures/mutators/scalar_value:module.c.bc",
-    ],
-    deps = [
-        "//:libmull_%s" % llvm_version,
-        ":unit_test_helpers_%s" % llvm_version,
-        ":FixturePaths",
-        "@googletest//:gtest",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "MutationTestingElementsReporterTests_%s" % llvm_version,
-    size = "small",
-    srcs = [
-        "MutationTestingElementsReporterTest.cpp",
-    ],
-    data = [
-        "//tests/unit/fixtures/simple_test/count_letters:count_letters.c",
-        "//tests/unit/fixtures/simple_test/count_letters:count_letters.c.bc",
-        "//tests/unit/fixtures/simple_test/count_letters:test_count_letters.c.bc",
-    ],
-    deps = [
-        "//:libmull_%s" % llvm_version,
-        ":unit_test_helpers_%s" % llvm_version,
-        ":FixturePaths",
-        "@googletest//:gtest",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "Mutators_NegateConditionMutatorTests_%s" % llvm_version,
-    size = "small",
-    srcs = [
-        "Mutators/NegateConditionMutatorTest.cpp",
-    ],
-    data = [
-        ":fixtures/hardcode/APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutator.ll",
-    ],
-    deps = [
-        "//:libmull_%s" % llvm_version,
-        ":unit_test_helpers_%s" % llvm_version,
-        ":FixturePaths",
-        "@googletest//:gtest",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "Mutators_ConditionalsBoundaryMutatorTests_%s" % llvm_version,
-    size = "small",
-    srcs = [
-        "Mutators/ConditionalsBoundaryMutatorTests.cpp",
-    ],
-    data = [
-        "//tests/unit/fixtures/mutators/boundary:module.cpp.bc",
-    ],
-    deps = [
-        "//:libmull_%s" % llvm_version,
-        ":unit_test_helpers_%s" % llvm_version,
-        ":FixturePaths",
-        "@googletest//:gtest",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "MutationFilters_GitDiffReaderTests_%s" % llvm_version,
-    size = "small",
-    srcs = [
-        "MutationFilters/GitDiffReaderTests.cpp",
-    ],
-    deps = [
-        "//:libmull_%s" % llvm_version,
-        ":unit_test_helpers_%s" % llvm_version,
-        "@googletest//:gtest",
-        "@googletest//:gtest_main",
-    ],
-)
-
-cc_test(
-    name = "MutationFilters_MutationFilterTests_%s" % llvm_version,
-    size = "small",
-    srcs = [
-        "MutationFilters/MutationFilterTests.cpp",
-    ],
-    data = [
         "//tests/unit/fixtures/mutation_filters/file_path:some_test_file_name.c.bc",
         "//tests/unit/fixtures/mutation_filters/no_debug_filter:with_debug.c.bc",
         "//tests/unit/fixtures/mutation_filters/no_debug_filter:without_debug.c.bc",
     ],
-    deps = [
-        "//:libmull_%s" % llvm_version,
-        ":unit_test_helpers_%s" % llvm_version,
-        ":FixturePaths",
-        "@googletest//:gtest",
-        "@googletest//:gtest_main",
+)
+
+filegroup(
+    name = "Mutators/ConditionalsBoundaryMutatorTests.cpp_%s_fixtures" % llvm_version,
+    srcs = ["//tests/unit/fixtures/mutators/boundary:module.cpp.bc"],
+)
+
+filegroup(
+    name = "Mutators/NegateConditionMutatorTest.cpp_%s_fixtures" % llvm_version,
+    srcs = [":fixtures/hardcode/APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutator.ll"],
+)
+
+filegroup(
+    name = "Mutators/ScalarValueMutatorTest.cpp_%s_fixtures" % llvm_version,
+    srcs = ["//tests/unit/fixtures/mutators/scalar_value:module.c.bc"],
+)
+
+filegroup(
+    name = "MutationTestingElementsReporterTest.cpp_18_fixtures",
+    srcs = [
+        "//tests/unit/fixtures/simple_test/count_letters:count_letters.c",
+        "//tests/unit/fixtures/simple_test/count_letters:count_letters.c.bc",
+        "//tests/unit/fixtures/simple_test/count_letters:test_count_letters.c.bc",
     ],
 )
+
+filegroup(
+    name = "MutatorsFactoryTests.cpp_18_fixtures",
+)
+
+filegroup(
+    name = "TaskExecutorTests.cpp_18_fixtures",
+)
+
+[
+    cc_test(
+        name = "%s_%s" % (f, llvm_version),
+        size = "small",
+        srcs = [f],
+        data = [
+            "%s_%s_fixtures" % (f, llvm_version),
+        ],
+        deps = [
+            "//:libmull_%s" % llvm_version,
+            ":unit_test_helpers_%s" % llvm_version,
+            ":FixturePaths",
+            "@googletest//:gtest",
+            "@googletest//:gtest_main",
+        ],
+    )
+    for f in glob([
+        "MutationFilters/**/*.cpp",
+        "Mutators/**/*.cpp",
+        "*.cpp",
+    ])
+]
 
 [
     cc_test(
