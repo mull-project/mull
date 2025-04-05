@@ -9,6 +9,7 @@ fixtures_header(
     fixtures = [
         "//tests/unit/fixtures/simple_test/count_letters:test_count_letters.c.bc",
         "//tests/unit/fixtures/simple_test/count_letters:count_letters.c.bc",
+        ":fixtures/hardcode/APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutator.ll",
     ],
     header = "FixturePaths.h",
 )
@@ -18,47 +19,40 @@ cc_library(
     hdrs = [":FixturePaths.h"],
 )
 
+cc_library(
+    name = "unit_test_helpers_%s" % llvm_version,
+    srcs = [
+        "TestModuleFactory.cpp",
+    ] + glob(["helpers/*.cpp"]),
+    hdrs = [
+        "TestModuleFactory.h",
+    ] + glob(["helpers/*.h"]),
+    deps = [
+        "//:libmull_%s" % llvm_version,
+    ],
+)
+
 cc_test(
     name = "mull_unit_tests_%s" % llvm_version,
     size = "small",
     srcs = [
         "MutationFilters/GitDiffReaderTests.cpp",
         "MutationTestingElementsReporterTest.cpp",
+        "Mutators/NegateConditionMutatorTest.cpp",
         "MutatorsFactoryTests.cpp",
         "TaskExecutorTests.cpp",
-        "TestModuleFactory.cpp",
-        "TestModuleFactory.h",
-    ] + glob([
-        "Helpers/*.cpp",
-        "Helpers/*.h",
-    ]),
+    ],
     data = [
+        ":fixtures/hardcode/APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutator.ll",
         "//tests/unit/fixtures/simple_test/count_letters:count_letters.c",
         "//tests/unit/fixtures/simple_test/count_letters:count_letters.c.bc",
         "//tests/unit/fixtures/simple_test/count_letters:test_count_letters.c.bc",
     ],
     deps = [
         "//:libmull_%s" % llvm_version,
+        ":unit_test_helpers_%s" % llvm_version,
         ":FixturePaths",
         "@googletest//:gtest",
         "@googletest//:gtest_main",
     ],
 )
-
-# [
-#     cc_test(
-#         name = "mull_unit_tests_%s" % llvm_version,
-#         size = "small",
-#         srcs = [
-#             "MutationFilters/GitDiffReaderTests.cpp",
-#             "MutatorsFactoryTests.cpp",
-#             "TaskExecutorTests.cpp",
-#         ],
-#         deps = [
-#             "//:libmull_%s" % llvm_version,
-#             "@googletest//:gtest",
-#             "@googletest//:gtest_main",
-#         ],
-#     )
-#     for llvm_version in AVAILABLE_LLVM_VERSIONS
-# ]
