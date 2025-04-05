@@ -28,6 +28,7 @@ def mull_py_test(src):
         py_test(
             name = "%s_%s_test" % (src, version),
             srcs = ["lit_runner.py"],
+            size = "small",
             args = [
                 "-v",
                 src,
