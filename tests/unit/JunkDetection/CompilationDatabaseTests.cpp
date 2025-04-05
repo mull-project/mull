@@ -1,5 +1,5 @@
-#include "FixturePaths.h"
 #include "mull/JunkDetection/CXX/CompilationDatabase.h"
+#include "tests/unit/FixturePaths.h"
 #include <gtest/gtest.h>
 #include <mull/Diagnostics/Diagnostics.h>
 
@@ -42,9 +42,9 @@ TEST(CompilationDatabaseFromCompilationFlags, returnsAllFlagsForAnyFile) {
 TEST(CompilationDatabaseFromFile, loadsFromValidFiles) {
   Diagnostics diagnostics;
   const std::vector<std::string> databasePaths({
-      fixtures::junk_detection_compdb_db_with_arguments_json_path(),
-      fixtures::junk_detection_compdb_db_with_commands_json_path(),
-      fixtures::junk_detection_compdb_db_with_output_json_path(),
+      fixtures::tests_unit_fixtures_junk_detection_compdb_db_with_arguments_json_path(),
+      fixtures::tests_unit_fixtures_junk_detection_compdb_db_with_commands_json_path(),
+      fixtures::tests_unit_fixtures_junk_detection_compdb_db_with_output_json_path(),
   });
 
   std::vector<std::string> files(
@@ -68,7 +68,8 @@ TEST(CompilationDatabaseFromFile, loadsFromValidFiles) {
 
 TEST(CompilationDatabaseFromFile, includesCompilationFlagsPassedSeparately) {
   Diagnostics diagnostics;
-  auto path = fixtures::junk_detection_compdb_db_with_fullpath_compiler_json_path();
+  auto path =
+      fixtures::tests_unit_fixtures_junk_detection_compdb_db_with_fullpath_compiler_json_path();
   const CompilationDatabase database = CompilationDatabase::fromFile(
       diagnostics, path, "-isystem /usr/local/include -isystem /usr/include", {});
 
@@ -90,7 +91,8 @@ TEST(CompilationDatabaseFromFile, includesCompilationFlagsPassedSeparately) {
 
 TEST(CompilationDatabaseFromFile, parsesCompilationFlagsFromClangMJCommandValid) {
   Diagnostics diagnostics;
-  auto path = fixtures::junk_detection_compdb_db_produced_from_clang_MJ_valid_sequence_json_path();
+  auto path = fixtures::
+      tests_unit_fixtures_junk_detection_compdb_db_produced_from_clang_MJ_valid_sequence_json_path();
   const CompilationDatabase database = CompilationDatabase::fromFile(
       diagnostics, path, "-isystem /usr/local/include -isystem /usr/include", {});
 
@@ -108,7 +110,8 @@ TEST(CompilationDatabaseFromFile, parsesCompilationFlagsFromClangMJCommandValid)
 
 TEST(CompilationDatabaseFromFile, parsesCompilationDatabaseWithEscapedQuotes) {
   Diagnostics diagnostics;
-  auto path = fixtures::junk_detection_compdb_db_with_escaped_quotes_json_path();
+  auto path =
+      fixtures::tests_unit_fixtures_junk_detection_compdb_db_with_escaped_quotes_json_path();
   const CompilationDatabase database = CompilationDatabase::fromFile(diagnostics, path, "", {});
 
   const std::string file("/tmp/main.cpp");

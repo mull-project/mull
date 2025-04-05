@@ -10,13 +10,13 @@ filegroup(
         ":fixtures/hardcode/APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_213_0_17_negate_mutator.ll",
         "//tests/unit/fixtures/junk_detection/compdb:compdb_absolute",
         "//tests/unit/fixtures/junk_detection/compdb:compdb_relative",
+        "//tests/unit/fixtures/junk_detection/compdb:db_produced_from_clang_MJ_valid_sequence.json",
+        "//tests/unit/fixtures/junk_detection/compdb:db_with_arguments.json",
+        "//tests/unit/fixtures/junk_detection/compdb:db_with_commands.json",
+        "//tests/unit/fixtures/junk_detection/compdb:db_with_escaped_quotes.json",
+        "//tests/unit/fixtures/junk_detection/compdb:db_with_fullpath_compiler.json",
+        "//tests/unit/fixtures/junk_detection/compdb:db_with_output.json",
         "//tests/unit/fixtures/junk_detection/compdb:include",
-        # "//tests/unit/fixtures/junk_detection/compdb:db_produced_from_clang_MJ_valid_sequence.json",
-        # "//tests/unit/fixtures/junk_detection/compdb:db_with_arguments.json",
-        # "//tests/unit/fixtures/junk_detection/compdb:db_with_commands.json",
-        # "//tests/unit/fixtures/junk_detection/compdb:db_with_escaped_quotes.json",
-        # "//tests/unit/fixtures/junk_detection/compdb:db_with_fullpath_compiler.json",
-        # "//tests/unit/fixtures/junk_detection/compdb:db_with_output.json",
         "//tests/unit/fixtures/junk_detection/compdb:main.cpp.bc",
         "//tests/unit/fixtures/mutation_filters/file_path:some_test_file_name.c.bc",
         "//tests/unit/fixtures/mutation_filters/no_debug_filter:with_debug.c.bc",
@@ -167,19 +167,15 @@ filegroup(
     ],
 )
 
-cc_test(
-    name = "JunkDetection/CXXJunkDetectorTests.cpp_%s" % llvm_version,
-    size = "small",
-    srcs = ["JunkDetection/CXXJunkDetectorTests.cpp"],
-    data = [
-        "JunkDetection/CXXJunkDetectorTests.cpp_%s_fixtures" % llvm_version,
-    ],
-    deps = [
-        "//:libmull_%s" % llvm_version,
-        ":unit_test_helpers_%s" % llvm_version,
-        ":FixturePaths",
-        "@googletest//:gtest",
-        "@googletest//:gtest_main",
+filegroup(
+    name = "JunkDetection/CompilationDatabaseTests.cpp_%s_fixtures" % llvm_version,
+    srcs = [
+        "//tests/unit/fixtures/junk_detection/compdb:db_produced_from_clang_MJ_valid_sequence.json",
+        "//tests/unit/fixtures/junk_detection/compdb:db_with_arguments.json",
+        "//tests/unit/fixtures/junk_detection/compdb:db_with_commands.json",
+        "//tests/unit/fixtures/junk_detection/compdb:db_with_escaped_quotes.json",
+        "//tests/unit/fixtures/junk_detection/compdb:db_with_fullpath_compiler.json",
+        "//tests/unit/fixtures/junk_detection/compdb:db_with_output.json",
     ],
 )
 
@@ -202,6 +198,7 @@ cc_test(
     for f in glob([
         "MutationFilters/**/*.cpp",
         "Mutators/**/*.cpp",
+        "JunkDetection/**/*.cpp",
         "*.cpp",
     ])
 ]
