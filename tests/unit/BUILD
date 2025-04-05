@@ -179,6 +179,20 @@ filegroup(
     ],
 )
 
+filegroup(name = "Mutations-E2E/CXX/Arithmetic/Mutation_Arithmetic_Add_Test.cpp_%s_fixtures" % llvm_version)
+
+filegroup(name = "Mutations-E2E/CXX/Arithmetic/Mutation_Arithmetic_UnaryMinusToNoop_Test.cpp_%s_fixtures" % llvm_version)
+
+filegroup(name = "Mutations-E2E/CXX/ConstAssignment/Mutation_ConstAssignment_AssignConst.cpp_%s_fixtures" % llvm_version)
+
+filegroup(name = "Mutations-E2E/CXX/ConstAssignment/Mutation_ConstAssignment_InitConst.cpp_%s_fixtures" % llvm_version)
+
+filegroup(name = "Mutations-E2E/CXX/RemoveNegationTest.cpp_%s_fixtures" % llvm_version)
+
+filegroup(name = "Mutations-E2E/Scalar/01_Mutation_Scalar_ReturnValue_Test.cpp_%s_fixtures" % llvm_version)
+
+filegroup(name = "Mutations-E2E/Scalar/02_Mutation_Scalar_BinaryOperand_Test.cpp_%s_fixtures" % llvm_version)
+
 [
     cc_test(
         name = "%s_%s" % (f, llvm_version),
@@ -200,20 +214,6 @@ filegroup(
         "Mutators/**/*.cpp",
         "JunkDetection/**/*.cpp",
         "*.cpp",
+        "Mutations-E2E/**/*.cpp",
     ])
-]
-
-[
-    cc_test(
-        name = "%s_%s" % (f, llvm_version),
-        size = "small",
-        srcs = [f],
-        deps = [
-            "//:libmull_%s" % llvm_version,
-            ":unit_test_helpers_%s" % llvm_version,
-            "@googletest//:gtest",
-            "@googletest//:gtest_main",
-        ],
-    )
-    for f in glob(["Mutations-E2E/**/*.cpp"])
 ]
