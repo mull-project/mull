@@ -58,7 +58,9 @@ config.suffixes = [".cpp", ".c", ".itest"]
 
 if platform.system() == "Darwin":
     config.available_features.add("MACOS")
+    config.substitutions.append(("%libcxx", "-stdlib=libc++ -lc++"))
 else:
+    config.substitutions.append(("%libcxx", "-stdlib=libstdc++ -lstdc++"))
     config.available_features.add("LINUX")
 
 if int(llvm_major_version) >= 16:
