@@ -1,6 +1,6 @@
 # buildifier: disable=module-docstring
 load("@available_llvm_versions//:mull_llvm_versions.bzl", "AVAILABLE_LLVM_VERSIONS", "EXACT_VERSION_MAPPING")
-load("@mull_package_info//:mull_package_info.bzl", "MULL_VERSION", "OS_ARCH", "OS_NAME", "OS_VERSION")
+load("@mull_package_info//:mull_package_info.bzl", "MULL_DESCRIPTION", "MULL_HOMEPAGE", "MULL_VERSION", "OS_ARCH", "OS_NAME", "OS_VERSION")
 load("@rules_pkg//pkg:mappings.bzl", "pkg_attributes", "pkg_files")
 load("@rules_pkg//pkg/private/deb:deb.bzl", "pkg_deb")
 load("@rules_pkg//pkg/private/tar:tar.bzl", "pkg_tar")
@@ -72,8 +72,8 @@ def mull_package(name):
                 maintainer = "Alex Denisov <alex@lowlevelbits.org>",
                 package = "mull-%s" % llvm_version,
                 version = MULL_VERSION,
-                description = "Practical mutation testing and fault injection for C and C++",
-                homepage = "https://github.com/mull-project/mull",
+                description = MULL_DESCRIPTION,
+                homepage = MULL_HOMEPAGE,
                 license = "Apache-2.0",
                 depends = [
                     "libclang-cpp%s" % llvm_version,
