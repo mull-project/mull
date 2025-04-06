@@ -54,5 +54,5 @@ def mull_py_test(src):
                 requirement("lit"),
                 "@rules_python//python/runfiles",
             ],
-            tags = ["llvm_%s" % llvm_version],
+            tags = ["lit", "integration", "llvm_%s" % llvm_version],
         )
