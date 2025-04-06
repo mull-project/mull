@@ -77,7 +77,7 @@ int main() {
 
 // clang-format off
 
-// RUN: %clang_cxx -stdlib=libc++ -lc++ -O0 %pass_mull_ir_frontend -g %s -o %s-ir.exe
+// RUN: %clang_cxx %libcxx -O0 %pass_mull_ir_frontend -g %s -o %s-ir.exe
 // RUN: unset TERM; %mull_runner -ide-reporter-show-killed -reporters=IDE %s-ir.exe | %filecheck %s --dump-input=fail
 // CHECK:[info] Killed mutants (3/3):
 // CHECK:{{.*}}main.cpp:11:51: warning: Killed: Replaced && with || [cxx_logical_and_to_or]
