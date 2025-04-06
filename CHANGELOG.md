@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.26.1] - 06 Apr 2025
+
+- Fixed potential concurrency issue [#1094](https://github.com/mull-project/mull/pull/1094)
+
 ## [0.26.0] - 04 Apr 2025
 
 - Added a way to disable mutation using source code annotations [#791](https://github.com/mull-project/mull/issues/791) [#1092](https://github.com/mull-project/mull/pull/1092)
