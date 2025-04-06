@@ -226,5 +226,5 @@ def mull_unit_tests(name):
                     "@googletest//:gtest",
                     "@googletest//:gtest_main",
                 ],
-                tags = ["llvm_%s" % llvm_version],
+                tags = ["unit", "llvm_%s" % llvm_version],
             )
