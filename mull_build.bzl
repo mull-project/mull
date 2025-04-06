@@ -1,12 +1,28 @@
 # buildifier: disable=module-docstring
-load("@available_llvm_versions//:mull_llvm_versions.bzl", "AVAILABLE_LLVM_VERSIONS")
-load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library", "cc_test")
+load("@available_llvm_versions//:mull_llvm_versions.bzl", "AVAILABLE_LLVM_VERSIONS", "EXACT_VERSION_MAPPING")
+load("@bazel_skylib//rules:expand_template.bzl", "expand_template")
+load("@mull_package_info//:mull_package_info.bzl", "GIT_SHA", "MULL_DESCRIPTION", "MULL_DOCS_URL", "MULL_HOMEPAGE", "MULL_SUPPORT_URL", "MULL_VERSION")
+load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 
 def mull_build(name):
     for llvm_version in AVAILABLE_LLVM_VERSIONS:
+        expand_template(
+            name = "mull_version_%s" % llvm_version,
+            out = "Version.cpp",
+            substitutions = {
+                "@GIT_COMMIT@": GIT_SHA,
+                "@PROJECT_DESCRIPTION@": MULL_DESCRIPTION,
+                "@PROJECT_HOMEPAGE_URL@": MULL_HOMEPAGE,
+                "@PROJECT_DOCS_URL@": MULL_DOCS_URL,
+                "@PROJECT_SUPPORT_URL@": MULL_SUPPORT_URL,
+                "@PROJECT_VERSION@": MULL_VERSION,
+                "@LLVM_VERSION@": EXACT_VERSION_MAPPING[llvm_version],
+            },
+            template = ":lib/Version.cpp",
+        )
         cc_library(
             name = "libmull_%s" % llvm_version,
-            srcs = native.glob(["lib/**/*.cpp"]),
+            srcs = native.glob(["lib/**/*.cpp"], exclude = ["lib/Version.cpp"]) + [":mull_version_%s" % llvm_version],
             hdrs = native.glob(["include/**/*.h"]),
             includes = ["include"],
             deps = [

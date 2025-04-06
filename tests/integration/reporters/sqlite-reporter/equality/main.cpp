@@ -17,7 +17,6 @@ RUN: %clang_cxx %sysroot -g -O0 %pass_mull_ir_frontend %s -o Output/main.cpp.exe
 RUN: rm -f test.sqlite
 RUN: %mull_runner --allow-surviving Output/main.cpp.exe --report-name test --reporters SQLite
 RUN: sqlite3 ./test.sqlite -line "select * from information order by key" | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=CHECK-INFO
-CHECK-INFO:  key = Build Date
 CHECK-INFO:  key = Commit
 CHECK-INFO:  key = LLVM Version
 CHECK-INFO:  key = Mull Version
