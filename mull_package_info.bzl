@@ -34,11 +34,23 @@ def _mull_version(repository_ctx):
         version += "-" + content
     return version
 
+def _cs_repo(repository_ctx):
+    cs_repo = repository_ctx.path(str(repository_ctx.workspace_root) + "/.mull-ci-cs-repo")
+    if cs_repo.exists:
+        content = repository_ctx.read(cs_repo).strip()
+        if not content:
+            fail("empty cloudsmith repo file: %s" % cs_repo)
+        if content not in ["nightly", "stable", "testing"]:
+            fail("unsupported cloudsmith repo '%s'" % content)
+        return content
+    return "testing"
+
 PACKAGE_INFO = """
 MULL_VERSION = "{MULL_VERSION}"
 OS_NAME = "{OS_NAME}"
 OS_ARCH = "{OS_ARCH}"
 OS_VERSION = "{OS_VERSION}"
+CS_REPO = "{CS_REPO}"
 """
 
 def _mull_package_info_repo_impl(repository_ctx):
@@ -49,6 +61,7 @@ def _mull_package_info_repo_impl(repository_ctx):
             MULL_VERSION = _mull_version(repository_ctx),
             OS_ARCH = repository_ctx.os.arch,
             OS_VERSION = _os_version(repository_ctx),
+            CS_REPO = _cs_repo(repository_ctx),
         ),
     )
     repository_ctx.file(
