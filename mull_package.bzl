@@ -1,5 +1,5 @@
 # buildifier: disable=module-docstring
-load("@available_llvm_versions//:mull_llvm_versions.bzl", "AVAILABLE_LLVM_VERSIONS")
+load("@available_llvm_versions//:mull_llvm_versions.bzl", "AVAILABLE_LLVM_VERSIONS", "EXACT_VERSION_MAPPING")
 load("@mull_package_info//:mull_package_info.bzl", "MULL_VERSION", "OS_ARCH", "OS_NAME", "OS_VERSION")
 load("@rules_pkg//pkg:mappings.bzl", "pkg_attributes", "pkg_files")
 load("@rules_pkg//pkg/private/deb:deb.bzl", "pkg_deb")
@@ -12,13 +12,13 @@ def mull_package(name):
     package_names = []
     d = {}
     for llvm_version in AVAILABLE_LLVM_VERSIONS:
-        # TODO: Add full LLVM version
-        package_file_name = "Mull-{LLVM_VERSION}-{MULL_VERSION}-{OS_NAME}-{OS_ARCH}-{OS_VERSION}".format(
+        package_file_name = "Mull-{LLVM_VERSION}-{MULL_VERSION}-LLVM-{FULL_LLVM_VERSION}-{OS_NAME}-{OS_ARCH}-{OS_VERSION}".format(
             LLVM_VERSION = llvm_version,
             MULL_VERSION = MULL_VERSION,
             OS_ARCH = OS_ARCH,
             OS_NAME = OS_NAME,
             OS_VERSION = OS_VERSION,
+            FULL_LLVM_VERSION = EXACT_VERSION_MAPPING[llvm_version],
         )
         package_name = "mull-package-%s" % llvm_version
         package_names.append(package_name)
