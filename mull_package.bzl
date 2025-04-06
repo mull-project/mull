@@ -3,9 +3,12 @@ load("@available_llvm_versions//:mull_llvm_versions.bzl", "AVAILABLE_LLVM_VERSIO
 load("@mull_package_info//:mull_package_info.bzl", "MULL_VERSION", "OS_ARCH", "OS_NAME", "OS_VERSION")
 load("@rules_pkg//pkg:mappings.bzl", "pkg_attributes", "pkg_files")
 load("@rules_pkg//pkg/private/zip:zip.bzl", "pkg_zip")
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
+load(":mull_publish.bzl", "mull_publish_script")
 
 def mull_package(name):
     package_names = []
+    d = {}
     for llvm_version in AVAILABLE_LLVM_VERSIONS:
         # TODO: Add full LLVM version
         package_name = "Mull-{LLVM_VERSION}-{MULL_VERSION}-{OS_NAME}-{OS_ARCH}-{OS_VERSION}".format(
@@ -16,6 +19,7 @@ def mull_package(name):
             OS_VERSION = OS_VERSION,
         )
         package_names.append(package_name)
+        d[llvm_version] = package_name
 
         pkg_files(
             name = "%s-binaries" % package_name,
@@ -46,4 +50,15 @@ def mull_package(name):
     native.filegroup(
         name = "mull_packages",
         srcs = package_names,
+    )
+    mull_publish_script(
+        name = "publish.sh",
+        packages = d,
+    )
+    sh_binary(
+        name = "publish",
+        srcs = [":publish.sh"],
+        data = [
+            "//:cloudsmith_runner",
+        ] + package_names,
     )
