@@ -18,6 +18,11 @@ def _os_name(repository_ctx):
         return "macOS"
     return _os_release_kv(repository_ctx)["ID"]
 
+def _os_codename(repository_ctx):
+    if _is_macos(repository_ctx):
+        return "macOS, don't care"
+    return _os_release_kv(repository_ctx)["VERSION_CODENAME"]
+
 def _os_version(repository_ctx):
     if _is_macos(repository_ctx):
         result = repository_ctx.execute(["sw_vers", "--productVersion"])
@@ -48,6 +53,7 @@ def _cs_repo(repository_ctx):
 PACKAGE_INFO = """
 MULL_VERSION = "{MULL_VERSION}"
 OS_NAME = "{OS_NAME}"
+OS_CODENAME = "{OS_CODENAME}"
 OS_ARCH = "{OS_ARCH}"
 OS_VERSION = "{OS_VERSION}"
 CS_REPO = "{CS_REPO}"
@@ -58,6 +64,7 @@ def _mull_package_info_repo_impl(repository_ctx):
         "mull_package_info.bzl",
         content = PACKAGE_INFO.format(
             OS_NAME = _os_name(repository_ctx),
+            OS_CODENAME = _os_codename(repository_ctx),
             MULL_VERSION = _mull_version(repository_ctx),
             OS_ARCH = repository_ctx.os.arch,
             OS_VERSION = _os_version(repository_ctx),
