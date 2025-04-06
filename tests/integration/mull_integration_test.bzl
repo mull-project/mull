@@ -24,9 +24,9 @@ def mull_py_test(src):
         "%s/*.notest" % test_dir,
         "%s/*.itest" % test_dir,
     ]
-    for version in AVAILABLE_LLVM_VERSIONS:
+    for llvm_version in AVAILABLE_LLVM_VERSIONS:
         py_test(
-            name = "%s_%s_test" % (src, version),
+            name = "%s_%s_test" % (src, llvm_version),
             srcs = ["lit_runner.py"],
             size = "small",
             args = [
@@ -38,20 +38,21 @@ def mull_py_test(src):
                 ":lit.cfg.py",
                 ":filecheck_runner",
                 ":python3",
-                "@llvm_%s//:clang" % version,
-                "@llvm_%s//:clangxx" % version,
-                "@llvm_%s//:llvm-profdata" % version,
-                "//:mull-ast-frontend-%s-gen" % version,
-                "//:mull-ir-frontend-%s-gen" % version,
-                "//:mull-runner-%s" % version,
-                "//:mull-reporter-%s" % version,
+                "@llvm_%s//:clang" % llvm_version,
+                "@llvm_%s//:clangxx" % llvm_version,
+                "@llvm_%s//:llvm-profdata" % llvm_version,
+                "//:mull-ast-frontend-%s-gen" % llvm_version,
+                "//:mull-ir-frontend-%s-gen" % llvm_version,
+                "//:mull-runner-%s" % llvm_version,
+                "//:mull-reporter-%s" % llvm_version,
             ] + native.glob(test_support_files, allow_empty = True),
             env = {
-                "LLVM_VERSION_MAJOR": version,
+                "LLVM_VERSION_MAJOR": llvm_version,
             },
             main = "lit_runner.py",
             deps = [
                 requirement("lit"),
                 "@rules_python//python/runfiles",
             ],
+            tags = ["llvm_%s" % llvm_version],
         )

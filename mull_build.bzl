@@ -58,6 +58,7 @@ def mull_build(name):
                 ":libmull_%s" % llvm_version,
                 "@llvm_%s//:libclang" % llvm_version,
             ],
+            tags = ["llvm_%s" % llvm_version],
         )
 
         native.genrule(
@@ -78,6 +79,7 @@ def mull_build(name):
                 ":libmull_%s" % llvm_version,
                 "@llvm_%s//:libclang" % llvm_version,
             ],
+            tags = ["llvm_%s" % llvm_version],
         )
 
         native.genrule(
@@ -92,6 +94,7 @@ def mull_build(name):
             deps = [
                 ":libmull_runner_%s" % llvm_version,
             ],
+            tags = ["llvm_%s" % llvm_version],
         )
 
         cc_binary(
@@ -99,4 +102,5 @@ def mull_build(name):
             deps = [
                 ":libmull_reporter_%s" % llvm_version,
             ],
+            tags = ["llvm_%s" % llvm_version],
         )
