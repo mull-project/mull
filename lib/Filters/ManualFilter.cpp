@@ -25,10 +25,9 @@ bool ManualFilter::shouldSkip(MutationPoint *point) {
     scanFile(location);
   }
   auto range_it = ignoreRanges.find(location.filePath);
-  auto end = ignoreRanges.end();
   lock.unlock();
 
-  for (auto &range : ignoreRanges[location.filePath]) {
+  for (auto &range : range_it->second) {
     if (location.line >= range.begin && location.line <= range.end) {
       return range.ignoredMutators.count(point->getMutator()->getUniqueIdentifier()) != 0;
     }
