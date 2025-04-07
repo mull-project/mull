@@ -8,7 +8,7 @@ def mull_build(name):
     for llvm_version in AVAILABLE_LLVM_VERSIONS:
         expand_template(
             name = "mull_version_%s" % llvm_version,
-            out = "Version.cpp",
+            out = "Version-%s.cpp" % llvm_version,
             substitutions = {
                 "@GIT_COMMIT@": GIT_SHA,
                 "@PROJECT_DESCRIPTION@": MULL_DESCRIPTION,
