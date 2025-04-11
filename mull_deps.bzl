@@ -17,7 +17,7 @@ cc_library(
     includes = ["include"],
     visibility = ["//visibility:public"],
     deps = [
-        "@llvm_{llvm_version}//:libllvm",
+        "@llvm_{LLVM_VERSION}//:libllvm",
     ],
 )
 """
@@ -67,6 +67,8 @@ native_binary(
     src = "bin/clang",
     out = "clang",
     visibility = ["//visibility:public"],
+    # TODO: More files might be needed
+    #data = glob(["lib/clang/{LLVM_VERSION}/include/**/*.h"])
 )
 
 native_binary(
@@ -74,12 +76,20 @@ native_binary(
     src = "bin/clang++",
     out = "clangxx",
     visibility = ["//visibility:public"],
+    # TODO: More files might be needed
+    # data = glob(["lib/clang/{LLVM_VERSION}/include/**/*.h"])
 )
 
 native_binary(
     name = "llvm-profdata",
     src = "bin/llvm-profdata",
     out = "llvm-profdata",
+    visibility = ["//visibility:public"],
+)
+
+cc_import(
+    name = "builtin_headers",
+    hdrs = glob(["lib/clang/{LLVM_VERSION}/include/**/*.h"]),
     visibility = ["//visibility:public"],
 )
 """
@@ -142,6 +152,7 @@ def _mull_deps_extension(module_ctx):
                     build_file_content = LLVM_BUILD_FILE.format(
                         LIBLLVM_DYLIB = llvm_dylib,
                         LIBCLANG_CPP_DYLIB = clang_dylib,
+                        LLVM_VERSION = version,
                     ),
                 )
                 http_archive(
@@ -149,7 +160,7 @@ def _mull_deps_extension(module_ctx):
                     integrity = "sha256-/UPOr/i+xfZEFv/oEVVIC0KhZxYRWVfzPdy7Ir7eNXU=",
                     urls = ["https://github.com/mull-project/libirm/archive/988a91877279c95bfe847994d006e3733a663962.zip"],
                     strip_prefix = "libirm-988a91877279c95bfe847994d006e3733a663962",
-                    build_file_content = IRM_BUILD_FILE.format(llvm_version = version),
+                    build_file_content = IRM_BUILD_FILE.format(LLVM_VERSION = version),
                 )
 
     return modules.use_all_repos(module_ctx)

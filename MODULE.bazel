@@ -96,3 +96,24 @@ http_archive(
     strip_prefix = "bazel-itertools-0.2.1",
     integrity = "sha256-br2KkRgBtrgmOjrl7Y3nK4cR/tkomEw++udDyw9FbOE=",
 )
+
+bazel_dep(name = "rules_foreign_cc", version = "0.14.0")
+
+_ALL_CONTENT = """
+filegroup(
+    name = "all_srcs",
+    srcs = glob(["**"]),
+    visibility = ["//visibility:public"],
+)
+"""
+
+http_archive(
+    name = "e2e_test_fmt",
+    url = "https://github.com/fmtlib/fmt/archive/123913715afeb8a437e6388b4473fcc4753e1c9a.zip",
+    strip_prefix = "fmt-123913715afeb8a437e6388b4473fcc4753e1c9a",
+    build_file_content = _ALL_CONTENT,
+    patches = [
+        ":third_party/fmt/install_test_targets.patch",
+    ],
+    integrity = "sha256-Ogg56lnV/aNDhZxLt3lAdx17XVQe47zhnIcQRArU/1M=",
+)

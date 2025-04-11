@@ -21,23 +21,39 @@ def _exact_version(repository_ctx, version):
     result = repository_ctx.execute([path + "/bin/llvm-config", "--version"])
     return result.stdout.strip()
 
+def _clang_paths(repository_ctx, version):
+    path = _llvm_path(repository_ctx, version)
+    return [path + "/bin/clang", path + "/bin/clang++"]
+
 CONTENT = """
 AVAILABLE_LLVM_VERSIONS = {VERSIONS}
 EXACT_VERSION_MAPPING = {MAPPING}
+CC_PATHS = {CC_MAPPING}
+CXX_PATHS = {CXX_MAPPING}
 """
 
 def _llvm_versions_repo_impl(repository_ctx):
     available_versions = []
     mapping = {}
+    cc_paths = {}
+    cxx_paths = {}
     for version in repository_ctx.attr.versions:
         if _is_supported(repository_ctx, version):
             available_versions.append(version)
             mapping[version] = _exact_version(repository_ctx, version)
+            compiler_paths = _clang_paths(repository_ctx, version)
+            cc_paths[version] = compiler_paths[0]
+            cxx_paths[version] = compiler_paths[1]
     if len(available_versions) == 0:
         fail("Could not find any supported LLVM versions installed")
     repository_ctx.file(
         "mull_llvm_versions.bzl",
-        content = CONTENT.format(VERSIONS = str(available_versions), MAPPING = mapping),
+        content = CONTENT.format(
+            VERSIONS = str(available_versions),
+            MAPPING = mapping,
+            CC_MAPPING = cc_paths,
+            CXX_MAPPING = cxx_paths,
+        ),
     )
     repository_ctx.file(
         "BUILD",
