@@ -43,7 +43,8 @@ std::vector<std::unique_ptr<Reporter>> ReportersCLIOptions::reporters(ReporterPa
   for (auto i = 0; i < parameter.getNumOccurrences(); i++) {
     switch (parameter[i]) {
     case ReporterKind::IDE: {
-      reporters.emplace_back(new mull::IDEReporter(diagnostics, params.IDEReporterShowKilled));
+      reporters.emplace_back(
+          new mull::IDEReporter(diagnostics, params.IDEReporterShowKilled, directory, name));
     } break;
     case ReporterKind::SQLite: {
       reporters.emplace_back(
@@ -68,7 +69,8 @@ std::vector<std::unique_ptr<Reporter>> ReportersCLIOptions::reporters(ReporterPa
   }
 
   if (reporters.empty()) {
-    reporters.emplace_back(new mull::IDEReporter(diagnostics, params.IDEReporterShowKilled));
+    reporters.emplace_back(
+        new mull::IDEReporter(diagnostics, params.IDEReporterShowKilled, directory, name));
   }
 
   return reporters;
