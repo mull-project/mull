@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.XX.X] - XX XXX XXXX
+
+ - IDEReporter now prints to a file whenever `--report-name` specified instead of unconditionally writing to `stdout` [#1096](https://github.com/mull-project/mull/pull/1096)
+
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2025-04-05..XXXX-XX-XX)
+
 ## [0.26.1] - 06 Apr 2025
 
 - Fixed potential concurrency issue [#1094](https://github.com/mull-project/mull/pull/1094)
