@@ -9,10 +9,9 @@ std::string mull::absoluteFilePath(const std::string &directory, const std::stri
   if (!filePath.empty() && !llvm::sys::path::is_absolute(filePath)) {
     path = directory + llvm::sys::path::get_separator().str() + filePath;
   }
-  // TODO: This is perhaps required, hide behind a flag and turn off for certain tests
-  // llvm::SmallString<PATH_MAX> realPath;
-  // if (!llvm::sys::fs::real_path(path, realPath, true)) {
-  //   return realPath.str().str();
-  // }
+  llvm::SmallString<PATH_MAX> realPath;
+  if (!llvm::sys::fs::real_path(path, realPath, true)) {
+    return realPath.str().str();
+  }
   return path;
 }

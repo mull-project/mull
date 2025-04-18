@@ -1,21 +1,14 @@
 diff --git test/CMakeLists.txt test/CMakeLists.txt
-index e1ea260d..9aa1b29c 100644
+index 70e19db..ea476db 100644
 --- test/CMakeLists.txt
 +++ test/CMakeLists.txt
-@@ -28,6 +28,7 @@ function(add_fmt_test name)
-   endif ()
-   add_executable(${name} ${sources})
-   target_link_libraries(${name} ${libs})
-+  install(TARGETS ${name})
-
-   if (ADD_FMT_TEST_HEADER_ONLY AND NOT FMT_UNICODE)
-     target_compile_definitions(${name} PUBLIC FMT_UNICODE=0)
-@@ -58,7 +59,7 @@ if (MSVC)
-   target_compile_options(format-test PRIVATE /bigobj)
+@@ -202,3 +202,9 @@ if (FMT_PEDANTIC AND NOT WIN32)
+     "-DPEDANTIC_COMPILE_FLAGS=${PEDANTIC_COMPILE_FLAGS}"
+     "-DCMAKE_BUILD_TYPE=${CMAKE_BUILD_TYPE}")
  endif ()
- if (NOT (MSVC AND BUILD_SHARED_LIBS))
--  add_fmt_test(format-impl-test HEADER_ONLY header-only-test.cc)
-+  # add_fmt_test(format-impl-test HEADER_ONLY header-only-test.cc)
- endif ()
- add_fmt_test(ostream-test)
- add_fmt_test(compile-test)
++
++install(TARGETS chrono-test)
++install(TARGETS format-test)
++install(TARGETS ostream-test)
++install(TARGETS printf-test)
++install(TARGETS scan-test)
