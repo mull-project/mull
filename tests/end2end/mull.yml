@@ -1,7 +1,5 @@
 mutators:
   - cxx_add_to_sub
-debugEnabled: true
-quiet: false
 excludePaths:
   - gtest
   - gmock

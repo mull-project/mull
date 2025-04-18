@@ -1,5 +1,6 @@
 load("@available_llvm_versions//:mull_llvm_versions.bzl", "CC_PATHS", "CXX_PATHS")
 load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
+load(":end2end_test.bzl", "mull_fmtlib_sqlite_report")
 
 # Picking some tests, not all the tests within fmtlib
 FMT_TEST_TARGETS = [
@@ -37,7 +38,8 @@ cmake(
     targets = FMT_TEST_TARGETS,
 )
 
-# mull_end2end(
-#     name = "fmt_test",
-#     target = ":e2e_test_fmt",
-# )
+mull_fmtlib_sqlite_report(
+    name = "fmt_test_%s" % llvm_version,
+    mull_runner = "//:mull-runner-%s" % llvm_version,
+    target = ":fmt_e2e_test_%s" % llvm_version,
+)
