@@ -9,6 +9,7 @@
 #include "mull/Result.h"
 
 #include <cassert>
+#include <fstream>
 #include <map>
 #include <set>
 #include <sstream>
@@ -25,9 +26,9 @@ static bool mutantNotCovered(const ExecutionStatus &status) {
   return status == ExecutionStatus::NotCovered;
 }
 
-static void printMutant(Diagnostics &diagnostics, MutatorsFactory &factory,
-                        SourceCodeReader &sourceCodeReader, const Mutant &mutant,
-                        const std::string &status) {
+static void printMutant(Diagnostics &diagnostics, const std::string &reportFilePath,
+                        MutatorsFactory &factory, SourceCodeReader &sourceCodeReader,
+                        const Mutant &mutant, const std::string &status) {
   auto &sourceLocation = mutant.getSourceLocation();
   if (sourceLocation.isNull() || !sourceLocation.canRead()) {
     diagnostics.warning("IDEReporter: Cannot report '"s + mutant.getIdentifier() +
@@ -44,26 +45,51 @@ static void printMutant(Diagnostics &diagnostics, MutatorsFactory &factory,
 
   stringstream << sourceCodeReader.getSourceLineWithCaret(sourceLocation);
 
-  fprintf(stdout, "%s", stringstream.str().c_str());
-  fflush(stdout);
+  if (reportFilePath.empty()) {
+    fprintf(stdout, "%s", stringstream.str().c_str());
+    fflush(stdout);
+  } else {
+    std::ofstream s{ reportFilePath, std::ios::app };
+    s << stringstream.str();
+  }
 }
 
-static void printMutants(Diagnostics &diagnostics, MutatorsFactory &factory,
-                         SourceCodeReader &reader, const std::vector<Mutant *> &mutants,
-                         size_t totalSize, const std::string &status) {
+static void printMutants(Diagnostics &diagnostics, const std::string &reportFilePath,
+                         MutatorsFactory &factory, SourceCodeReader &reader,
+                         const std::vector<Mutant *> &mutants, size_t totalSize,
+                         const std::string &status) {
   if (mutants.empty()) {
     return;
   }
   std::stringstream stringstream;
   stringstream << status << " mutants (" << mutants.size() << "/" << totalSize << "):";
-  diagnostics.info(stringstream.str());
+  if (reportFilePath.empty()) {
+    diagnostics.info(stringstream.str());
+  } else {
+    std::ofstream s{ reportFilePath, std::ios::app };
+    s << stringstream.str() << "\n";
+  }
+
   for (auto mutant : mutants) {
-    printMutant(diagnostics, factory, reader, *mutant, status);
+    printMutant(diagnostics, reportFilePath, factory, reader, *mutant, status);
   }
 }
 
-IDEReporter::IDEReporter(Diagnostics &diagnostics, bool showKilled)
-    : diagnostics(diagnostics), showKilled(showKilled), sourceCodeReader() {}
+static std::string getReportDir(const std::string &reportDir) {
+  if (reportDir.empty()) {
+    return ".";
+  }
+  return reportDir;
+}
+
+IDEReporter::IDEReporter(Diagnostics &diagnostics, bool showKilled, const std::string &reportDir,
+                         const std::string &reportName)
+    : diagnostics(diagnostics), showKilled(showKilled), sourceCodeReader(), reportFilePath() {
+  if (!reportName.empty()) {
+    reportFilePath = getReportDir(reportDir) + "/" + reportName + ".txt";
+    std::fstream s{ reportFilePath, std::ios::trunc | std::ios::out };
+  }
+}
 
 void IDEReporter::reportResults(const Result &result) {
   if (result.getMutants().empty()) {
@@ -95,6 +121,7 @@ void IDEReporter::reportResults(const Result &result) {
 
   if (showKilled) {
     printMutants(diagnostics,
+                 reportFilePath,
                  factory,
                  sourceCodeReader,
                  killedMutants,
@@ -103,23 +130,35 @@ void IDEReporter::reportResults(const Result &result) {
   }
 
   printMutants(diagnostics,
+               reportFilePath,
                factory,
                sourceCodeReader,
                survivedMutants,
                result.getMutants().size(),
                "Survived");
   printMutants(diagnostics,
+               reportFilePath,
                factory,
                sourceCodeReader,
                notCoveredMutants,
                result.getMutants().size(),
                "Not Covered");
 
-  if (survivedMutants.empty() && notCoveredMutants.empty()) {
-    diagnostics.info("All mutations have been killed");
-  }
-
   auto rawScore = double(killedMutants.size()) / double(result.getMutants().size());
   auto score = int(rawScore * 100);
-  diagnostics.info(std::string("Mutation score: ") + std::to_string(score) + '%');
+  std::string scoreMsg = std::string("Mutation score: ") + std::to_string(score) + '%';
+
+  if (reportFilePath.empty()) {
+    if (survivedMutants.empty() && notCoveredMutants.empty()) {
+      diagnostics.info("All mutations have been killed");
+    }
+    diagnostics.info(scoreMsg);
+  } else {
+    std::ofstream s{ reportFilePath, std::ios::app };
+
+    if (survivedMutants.empty() && notCoveredMutants.empty()) {
+      s << "All mutations have been killed\n";
+    }
+    s << scoreMsg << "\n";
+  }
 }
