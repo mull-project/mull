@@ -16,6 +16,7 @@ llvm_version = "18"
 
 cmake(
     name = "fmt_e2e_%s" % llvm_version,
+    testonly = True,
     build_args = ["-v"],
     build_data = [
         ":mull.yml",
@@ -36,23 +37,29 @@ cmake(
     },
     lib_source = "@e2e_test_fmt//:all_srcs",
     out_binaries = FMT_TEST_TARGETS,
+    tags = ["llvm_%s" % llvm_version],
     targets = FMT_TEST_TARGETS,
 )
 
 mull_fmtlib_sqlite_report(
     name = "fmt_sqlite_report_%s" % llvm_version,
+    testonly = True,
     mull_runner = "//:mull-runner-%s" % llvm_version,
     target = ":fmt_e2e_%s" % llvm_version,
 )
 
 generate_ide_report(
     name = "fmt_ide_report_%s" % llvm_version,
+    testonly = True,
     mull_reporter = "//:mull-reporter-%s" % llvm_version,
     sqlite_report = "fmt_sqlite_report_%s" % llvm_version,
 )
 
 diff_test(
     name = "fmtlib_ide_report_test_%s" % llvm_version,
-    file1 = ":fmtlib_expected_ide_report.txt",
+    file1 = select({
+        "@platforms//os:linux": ":fmtlib_expected_ide_report_linux.txt",
+        "@platforms//os:macos": ":fmtlib_expected_ide_report_macos.txt",
+    }),
     file2 = "fmt_ide_report_%s" % llvm_version,
 )
