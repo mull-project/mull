@@ -117,3 +117,11 @@ http_archive(
     ],
     integrity = "sha256-Ogg56lnV/aNDhZxLt3lAdx17XVQe47zhnIcQRArU/1M=",
 )
+
+http_archive(
+    name = "e2e_test_openssl",
+    url = "https://github.com/openssl/openssl/archive/a4e01187d3648d9ce99507097400902cf21f9b55.zip",
+    strip_prefix = "openssl-a4e01187d3648d9ce99507097400902cf21f9b55",
+    build_file_content = _ALL_CONTENT,
+    integrity = "sha256-i7JycBZcKVR1rB3GcDVCr/Fdvz7/dhEtMB19R7F1mQw=",
+)

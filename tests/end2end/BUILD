@@ -1,5 +1,6 @@
 load("@available_llvm_versions//:mull_llvm_versions.bzl", "CC_PATHS", "CXX_PATHS")
 load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
+load("@rules_foreign_cc//foreign_cc:configure.bzl", "configure_make")
 load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
 load(":end2end_test.bzl", "generate_ide_report", "mull_fmtlib_sqlite_report")
 
@@ -62,4 +63,39 @@ diff_test(
         "@platforms//os:macos": ":fmtlib_expected_ide_report_macos.txt",
     }),
     file2 = "fmt_ide_report_%s" % llvm_version,
+)
+
+configure_make(
+    name = "openssl_e2e_%s" % llvm_version,
+    build_data = [
+        ":mull.yml",
+    ],
+    configure_command = "./config",
+    configure_in_place = True,
+    configure_options = [
+        "-g",
+        "-grecord-command-line",
+        "-xasd",
+    ],
+    data = [
+        "//:mull-cxx-ir-frontend-%s" % llvm_version,
+    ],
+    env = {
+        "CC": CC_PATHS[llvm_version],
+        "CXX": CXX_PATHS[llvm_version],
+        "CFLAGS": "-fpass-plugin=$(execpath //:mull-cxx-ir-frontend-%s)" % llvm_version,
+        "CXXFLAGS": "-fpass-plugin=$(execpath //:mull-cxx-ir-frontend-%s)" % llvm_version,
+        "MULL_CONFIG": "$(execpath :mull.yml)",
+    },
+    lib_source = "@e2e_test_openssl//:all_srcs",
+    # out_bin_dir = "",
+    out_binaries = [
+        # "./test/bio_enc_test",
+        "./bin/c_rehash",
+    ],
+    target_compatible_with = ["@platforms//os:linux"],
+    targets = [
+        "build_generated",
+        "./test/bio_enc_test",
+    ],
 )
