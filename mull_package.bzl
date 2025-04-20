@@ -162,6 +162,7 @@ def mull_package(name):
             name = "package_contents_%s_test" % llvm_version,
             file1 = "mull-expected-package-content-%s" % llvm_version,
             file2 = "mull-package-content-%s" % llvm_version,
+            size = "small",
         )
 
     native.filegroup(

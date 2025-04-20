@@ -128,4 +128,5 @@ def define_end2end_test_targets():
                 "@platforms//os:macos": ":fmtlib_expected_ide_report_macos.txt",
             }),
             file2 = "fmt_ide_report_%s" % llvm_version,
+            size = "small",
         )

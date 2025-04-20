@@ -25,3 +25,4 @@ bazel-*
 MODULE.bazel.lock
 .mull-ci-version-suffix
 .mull-ci-cs-repo
+.bazel.buildbuddy.rc
