@@ -5,7 +5,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   libz-dev sqlite3 libsqlite3-dev \
   ncurses-dev libstdc++6 \
   binutils liblzma-dev \
-  openssh-client sudo
+  openssh-client sudo tree file
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   llvm-18-dev \
   libclang-18-dev \
