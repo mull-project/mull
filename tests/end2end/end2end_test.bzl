@@ -1,3 +1,7 @@
+load("@available_llvm_versions//:mull_llvm_versions.bzl", "AVAILABLE_LLVM_VERSIONS", "CC_PATHS", "CXX_PATHS")
+load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
+load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
+
 def _mull_fmtlib_sqlite_report_impl(ctx):
     test_files = []
 
@@ -65,3 +69,63 @@ generate_ide_report = rule(
         "mull_reporter": attr.label(executable = True, mandatory = True, cfg = "exec"),
     },
 )
+
+FMT_TEST_TARGETS = [
+    "chrono-test",
+    "format-test",
+    "ostream-test",
+    "printf-test",
+    "scan-test",
+]
+
+def define_end2end_test_targets():
+    for llvm_version in AVAILABLE_LLVM_VERSIONS:
+        cmake(
+            name = "fmt_e2e_%s" % llvm_version,
+            testonly = True,
+            build_args = ["-v"],
+            build_data = [
+                ":mull.yml",
+            ],
+            copts = [
+                "-grecord-command-line",
+                "-g",
+            ],
+            data = [
+                "//:mull-cxx-ir-frontend-%s" % llvm_version,
+            ],
+            env = {
+                "CC": CC_PATHS[llvm_version],
+                "CXX": CXX_PATHS[llvm_version],
+                "CFLAGS": "-fpass-plugin=$(execpath //:mull-cxx-ir-frontend-%s)" % llvm_version,
+                "CXXFLAGS": "-fpass-plugin=$(execpath //:mull-cxx-ir-frontend-%s)" % llvm_version,
+                "MULL_CONFIG": "$(execpath :mull.yml)",
+            },
+            lib_source = "@e2e_test_fmt//:all_srcs",
+            out_binaries = FMT_TEST_TARGETS,
+            tags = ["llvm_%s" % llvm_version],
+            targets = FMT_TEST_TARGETS,
+        )
+
+        mull_fmtlib_sqlite_report(
+            name = "fmt_sqlite_report_%s" % llvm_version,
+            testonly = True,
+            mull_runner = "//:mull-runner-%s" % llvm_version,
+            target = ":fmt_e2e_%s" % llvm_version,
+        )
+
+        generate_ide_report(
+            name = "fmt_ide_report_%s" % llvm_version,
+            testonly = True,
+            mull_reporter = "//:mull-reporter-%s" % llvm_version,
+            sqlite_report = "fmt_sqlite_report_%s" % llvm_version,
+        )
+
+        diff_test(
+            name = "fmtlib_ide_report_test_%s" % llvm_version,
+            file1 = select({
+                "@platforms//os:linux": ":fmtlib_expected_ide_report_linux.txt",
+                "@platforms//os:macos": ":fmtlib_expected_ide_report_macos.txt",
+            }),
+            file2 = "fmt_ide_report_%s" % llvm_version,
+        )
