@@ -1,9 +1,16 @@
+"Generate devcontainer files"
+
 load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
 load("@bazel_skylib//rules:run_binary.bzl", "run_binary")
 load("@rules_multirun//:defs.bzl", "multirun")
 load("@supported_llvm_versions//:supported_llvm_versions.bzl", "OS_VERSION_MAPPING")
 
 def mull_devcontainers(name):
+    """Defines targets to generate devcontainer files
+
+    Args:
+      name: common target which generates all the files
+    """
     write_targets = []
     for os_key in OS_VERSION_MAPPING:
         if os_key == "macos":
@@ -27,7 +34,7 @@ def mull_devcontainers(name):
         run_binary(
             name = "dockerfile_%s" % container_name,
             srcs = [":templates/devcontainers/ubuntu/Dockerfile.mustache"],
-            outs = ["dockerfile_%s" % container_name],
+            outs = ["dockerfile_%s.dockerfile" % container_name],
             args = [
                 "--template",
                 "infrastructure/templates/devcontainers/ubuntu/Dockerfile.mustache",

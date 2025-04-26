@@ -80,6 +80,9 @@ mull_supported_llvm_versions.configure(
 )
 use_repo(mull_supported_llvm_versions, "supported_llvm_versions")
 
+mull_package_info = use_extension("//:mull_package_info.bzl", "mull_package_info")
+use_repo(mull_package_info, "mull_package_info")
+
 SUPPORTED_LLVM_VERSIONS = [
     "12",
     "13",
@@ -91,7 +94,7 @@ SUPPORTED_LLVM_VERSIONS = [
 ]
 
 available_llvm_versions = use_extension("//:mull_available_llvm_versions.bzl", "available_llvm_versions")
-available_llvm_versions.detect_available(versions = SUPPORTED_LLVM_VERSIONS)
+available_llvm_versions.detect_available()
 use_repo(available_llvm_versions, "available_llvm_versions")
 
 mull_deps = use_extension(":mull_deps.bzl", "mull_deps")
@@ -99,9 +102,6 @@ mull_deps.configure(versions = SUPPORTED_LLVM_VERSIONS)
 
 [use_repo(mull_deps, "mull_irm_%s" % v) for v in SUPPORTED_LLVM_VERSIONS]
 [use_repo(mull_deps, "llvm_%s" % v) for v in SUPPORTED_LLVM_VERSIONS]
-
-mull_package_info = use_extension("//:mull_package_info.bzl", "mull_package_info")
-use_repo(mull_package_info, "mull_package_info")
 
 http_archive(
     name = "bazel_itertools",
