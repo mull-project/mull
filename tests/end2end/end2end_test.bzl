@@ -1,6 +1,7 @@
+load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
 load("@available_llvm_versions//:mull_llvm_versions.bzl", "AVAILABLE_LLVM_VERSIONS", "CC_PATHS", "CXX_PATHS")
-load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
 load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
+load("@rules_multirun//:defs.bzl", "multirun")
 
 def _mull_fmtlib_sqlite_report_impl(ctx):
     test_files = []
@@ -78,7 +79,9 @@ FMT_TEST_TARGETS = [
     "scan-test",
 ]
 
-def define_end2end_test_targets():
+def define_end2end_test_targets(name):
+    linux_commands = []
+    macos_commands = []
     for llvm_version in AVAILABLE_LLVM_VERSIONS:
         cmake(
             name = "fmt_e2e_%s" % llvm_version,
@@ -120,13 +123,39 @@ def define_end2end_test_targets():
             mull_reporter = "//:mull-reporter-%s" % llvm_version,
             sqlite_report = "fmt_sqlite_report_%s" % llvm_version,
         )
-
-        diff_test(
-            name = "fmtlib_ide_report_test_%s" % llvm_version,
-            file1 = select({
-                "@platforms//os:linux": ":fmtlib_expected_ide_report_linux.txt",
-                "@platforms//os:macos": ":fmtlib_expected_ide_report_macos.txt",
-            }),
-            file2 = "fmt_ide_report_%s" % llvm_version,
-            size = "small",
+        write_source_files(
+            name = "update_end2end_fmtlib_test_files_linux_%s" % llvm_version,
+            files = {
+                ":fmtlib_expected_ide_report_linux.txt": "fmt_ide_report_%s" % llvm_version,
+            },
+            check_that_out_file_exists = False,
+            testonly = True,
+            target_compatible_with = ["@platforms//os:linux"],
+            suggested_update_target = "%s_linux" % name,
         )
+        write_source_files(
+            name = "update_end2end_fmtlib_test_files_macos_%s" % llvm_version,
+            files = {
+                ":fmtlib_expected_ide_report_macos.txt": "fmt_ide_report_%s" % llvm_version,
+            },
+            check_that_out_file_exists = False,
+            testonly = True,
+            target_compatible_with = ["@platforms//os:macos"],
+            suggested_update_target = "%s_macos" % name,
+        )
+        macos_commands.append("update_end2end_fmtlib_test_files_macos_%s" % llvm_version)
+        linux_commands.append("update_end2end_fmtlib_test_files_linux_%s" % llvm_version)
+    multirun(
+        name = "%s_macos" % name,
+        commands = macos_commands,
+        jobs = 0,
+        target_compatible_with = ["@platforms//os:macos"],
+        testonly = True,
+    )
+    multirun(
+        name = "%s_linux" % name,
+        commands = linux_commands,
+        jobs = 0,
+        target_compatible_with = ["@platforms//os:linux"],
+        testonly = True,
+    )
