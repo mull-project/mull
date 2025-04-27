@@ -67,8 +67,6 @@ native_binary(
     src = "bin/clang",
     out = "clang",
     visibility = ["//visibility:public"],
-    # TODO: More files might be needed
-    #data = glob(["lib/clang/{LLVM_VERSION}/include/**/*.h"])
 )
 
 native_binary(
@@ -76,20 +74,12 @@ native_binary(
     src = "bin/clang++",
     out = "clangxx",
     visibility = ["//visibility:public"],
-    # TODO: More files might be needed
-    # data = glob(["lib/clang/{LLVM_VERSION}/include/**/*.h"])
 )
 
 native_binary(
     name = "llvm-profdata",
     src = "bin/llvm-profdata",
     out = "llvm-profdata",
-    visibility = ["//visibility:public"],
-)
-
-cc_import(
-    name = "builtin_headers",
-    hdrs = glob(["lib/clang/{LLVM_VERSION}/include/**/*.h"]),
     visibility = ["//visibility:public"],
 )
 """
