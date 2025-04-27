@@ -43,8 +43,12 @@ jobs:
           configFile: ./.devcontainer/ubuntu_${{ matrix.OS_VERSION }}/devcontainer.json
           runCmd: |
             bazel build //...
-            bazel test //...
+            bazel test "//tests/unit:*"
+            bazel test "//tests/integration:*"
+            bazel test "//tests/end2end:*"
             bazel build mull_packages
+            mkdir -p packages
+            mv bazel-bin/Mull-*.deb packages/
       - name: Publish package
         uses: devcontainers/ci@v0.3
         if: env.CLOUDSMITH_API_KEY != null
@@ -56,10 +60,8 @@ jobs:
             # bazel run publish
       - name: Move package
         run: |
-          ls
-          ls bazel-bin
           mkdir -p /tmp/packages
-          sudo mv bazel-bin/Mull-*.deb /tmp/packages/
+          sudo mv packages/Mull-*.deb /tmp/packages/
       - uses: ./.github/actions/attach-package
         with:
           GH_API_KEY: ${{ secrets.GITHUB_TOKEN }}
