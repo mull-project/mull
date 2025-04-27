@@ -20,8 +20,11 @@ jobs:
       - uses: ./.github/actions/detect-package-metadata
       - name: Install dependencies
         run: |
-          brew install bazelisk
+          brew install bazelisk tree
           brew install llvm@16 llvm@17 llvm@18
+      - name: Debug
+        run: |
+          tree
       - name: Build, test, package
         run: |
           bazel build //...
