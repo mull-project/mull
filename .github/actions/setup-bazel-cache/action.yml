@@ -9,6 +9,7 @@ runs:
   steps:
     - name:
       if: inputs.BUILDBUDDY_API_KEY != null
+      shell: bash
       run: |
         echo "" > .bazel.buildbuddy.rc
         echo "common --bes_results_url=https://app.buildbuddy.io/invocation/" >> .bazel.buildbuddy.rc
