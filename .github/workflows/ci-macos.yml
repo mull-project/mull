@@ -18,11 +18,11 @@ jobs:
         with:
           BUILDBUDDY_API_KEY: ${{ secrets.BUILDBUDDY_API_KEY }}
       - uses: ./.github/actions/detect-package-metadata
-      - name: Run CI task
+      - name: Install dependencies
         run: |
           brew install bazelisk
           brew install llvm@16 llvm@17 llvm@18
-      - name: Run CI task
+      - name: Build, test, package
         run: |
           bazel build //...
           bazel test //...
