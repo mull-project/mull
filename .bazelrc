@@ -2,3 +2,4 @@ common --keep_going
 common --test_output=errors
 
 try-import .bazel.buildbuddy.rc
+try-import .bazel.compilation_mode.bazelrc
