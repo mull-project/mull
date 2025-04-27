@@ -1,11 +1,11 @@
 {
-  "name": "ubuntu:20.04",
+  "name": "ubuntu_20.04",
   "build": {
     "dockerfile": "Dockerfile"
   },
   "runArgs": [
     "--name",
-    "mull-ubuntu:20.04"
+    "mull-ubuntu_20.04"
   ],
   "features": {
     "ghcr.io/devcontainers-extra/features/fish-apt-get:1": {},

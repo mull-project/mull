@@ -1,11 +1,11 @@
 {
-  "name": "ubuntu:24.04",
+  "name": "ubuntu_24.04",
   "build": {
     "dockerfile": "Dockerfile"
   },
   "runArgs": [
     "--name",
-    "mull-ubuntu:24.04"
+    "mull-ubuntu_24.04"
   ],
   "features": {
     "ghcr.io/devcontainers-extra/features/fish-apt-get:1": {},

@@ -1,11 +1,11 @@
 {
-  "name": "ubuntu:22.04",
+  "name": "ubuntu_22.04",
   "build": {
     "dockerfile": "Dockerfile"
   },
   "runArgs": [
     "--name",
-    "mull-ubuntu:22.04"
+    "mull-ubuntu_22.04"
   ],
   "features": {
     "ghcr.io/devcontainers-extra/features/fish-apt-get:1": {},

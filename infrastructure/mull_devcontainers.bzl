@@ -39,7 +39,7 @@ def mull_devcontainers(name):
                 "--template",
                 "infrastructure/templates/devcontainers/ubuntu/Dockerfile.mustache",
                 "--output",
-                "$(location dockerfile_%s)" % container_name,
+                "$(location dockerfile_%s.dockerfile)" % container_name,
                 "--os-key",
                 os_key,
                 "--llvm-versions",
@@ -51,7 +51,7 @@ def mull_devcontainers(name):
             name = "write_devcontainer_%s_files" % container_name,
             files = {
                 "//.devcontainer:%s/devcontainer.json" % container_name: "devcontainer_json_%s.json" % container_name,
-                "//.devcontainer:%s/Dockerfile" % container_name: "dockerfile_%s" % container_name,
+                "//.devcontainer:%s/Dockerfile" % container_name: "dockerfile_%s.dockerfile" % container_name,
             },
             check_that_out_file_exists = False,
             suggested_update_target = name,

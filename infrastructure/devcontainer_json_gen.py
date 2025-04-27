@@ -26,7 +26,7 @@ def main():
     args = parser.parse_args()
 
     template_args = {
-        "OS_KEY" : args.os_key
+        "OS_KEY" : args.os_key.replace(":", "_")
     }
 
     renderer = pystache.Renderer(missing_tags="strict")
