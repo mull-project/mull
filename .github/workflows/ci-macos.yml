@@ -24,7 +24,7 @@ jobs:
           brew install llvm@16 llvm@17 llvm@18
       - name: Debug
         run: |
-          tree
+          tree tests/unit
       - name: Build, test, package
         run: |
           bazel build //...
