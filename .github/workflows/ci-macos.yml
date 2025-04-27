@@ -37,7 +37,7 @@ jobs:
       - name: Move package
         run: |
           mkdir -p /tmp/packages
-          mv bazel-bin/*.zip /tmp/packages/
+          mv bazel-bin/Mull-*.zip /tmp/packages/
       - uses: ./.github/actions/attach-package
         with:
           GH_API_KEY: ${{ secrets.GITHUB_TOKEN }}

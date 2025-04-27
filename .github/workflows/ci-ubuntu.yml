@@ -57,7 +57,7 @@ jobs:
       - name: Move package
         run: |
           mkdir -p /tmp/packages
-          sudo mv bazel-bin/*.deb /tmp/packages/
+          sudo mv bazel-bin/Mull-*.deb /tmp/packages/
       - uses: ./.github/actions/attach-package
         with:
           GH_API_KEY: ${{ secrets.GITHUB_TOKEN }}
