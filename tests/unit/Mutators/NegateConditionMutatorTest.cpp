@@ -3,7 +3,7 @@
 #include "mull/FunctionUnderTest.h"
 #include "mull/MutationPoint.h"
 #include "mull/Program/Program.h"
-#include "tests/unit/helpers/TestModuleFactory.h"
+#include "tests/unit/Helpers/TestModuleFactory.h"
 
 #include <cassert>
 #include <llvm/IR/Function.h>

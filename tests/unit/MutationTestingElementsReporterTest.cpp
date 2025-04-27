@@ -1,8 +1,6 @@
 #include "mull/Reporters/MutationTestingElementsReporter.h"
 
 #include "FixturePaths.h"
-#include "tests/unit/helpers/TestModuleFactory.h"
-
 #include "mull/Bitcode.h"
 #include "mull/Config/Configuration.h"
 #include "mull/FunctionUnderTest.h"
@@ -11,7 +9,8 @@
 #include "mull/MutationsFinder.h"
 #include "mull/Program/Program.h"
 #include "mull/Result.h"
-#include "tests/unit/helpers/BitcodeLoader.h"
+#include "tests/unit/Helpers/BitcodeLoader.h"
+#include "tests/unit/Helpers/TestModuleFactory.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 
 #include <fstream>

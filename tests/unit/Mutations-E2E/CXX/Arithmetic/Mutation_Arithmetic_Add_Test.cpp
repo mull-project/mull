@@ -2,7 +2,7 @@
 #include "mull/MutationPoint.h"
 #include "mull/Mutators/CXX/ArithmeticMutators.h"
 
-#include "tests/unit/helpers/MutationTestBed.h"
+#include "tests/unit/Helpers/MutationTestBed.h"
 
 #include <gtest/gtest.h>
 

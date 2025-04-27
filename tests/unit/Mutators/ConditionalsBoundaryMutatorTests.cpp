@@ -1,5 +1,5 @@
 #include "FixturePaths.h"
-#include "tests/unit/helpers/BitcodeLoader.h"
+#include "tests/unit/Helpers/BitcodeLoader.h"
 #include <gtest/gtest.h>
 #include <mull/Diagnostics/Diagnostics.h>
 #include <mull/FunctionUnderTest.h>

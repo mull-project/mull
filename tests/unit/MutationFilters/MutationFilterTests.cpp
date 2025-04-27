@@ -4,7 +4,7 @@
 #include "mull/Filters/NoDebugInfoFilter.h"
 #include "mull/MutationsFinder.h"
 #include "mull/Program/Program.h"
-#include "tests/unit/helpers/BitcodeLoader.h"
+#include "tests/unit/Helpers/BitcodeLoader.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 
 #include <gtest/gtest.h>

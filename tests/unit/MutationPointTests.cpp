@@ -5,8 +5,8 @@
 #include "mull/Mutators/CXX/CallMutators.h"
 #include "mull/Mutators/CXX/LogicalAndToOr.h"
 #include "mull/Mutators/ScalarValueMutator.h"
-#include "tests/unit/helpers/BitcodeLoader.h"
-#include "tests/unit/helpers/TestModuleFactory.h"
+#include "tests/unit/Helpers/BitcodeLoader.h"
+#include "tests/unit/Helpers/TestModuleFactory.h"
 
 #include <llvm/IR/InstrTypes.h>
 #include <llvm/IR/Instructions.h>

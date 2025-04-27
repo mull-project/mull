@@ -5,7 +5,7 @@
 #include "mull/Mutators/CXX/CallMutators.h"
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "mull/Mutators/ScalarValueMutator.h"
-#include "tests/unit/helpers/BitcodeLoader.h"
+#include "tests/unit/Helpers/BitcodeLoader.h"
 #include <mull/Diagnostics/Diagnostics.h>
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 #include <mull/Mutators/CXX/BitwiseMutators.h>

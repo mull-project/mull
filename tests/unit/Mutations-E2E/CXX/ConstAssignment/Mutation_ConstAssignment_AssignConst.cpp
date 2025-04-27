@@ -7,7 +7,7 @@
 #include <llvm/IR/Module.h>
 #include <regex>
 
-#include "tests/unit/helpers/MutationTestBed.h"
+#include "tests/unit/Helpers/MutationTestBed.h"
 
 #include <gtest/gtest.h>
 

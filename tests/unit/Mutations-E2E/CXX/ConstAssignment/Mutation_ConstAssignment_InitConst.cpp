@@ -7,7 +7,7 @@
 #include <clang/Tooling/Tooling.h>
 #include <llvm/IR/Module.h>
 
-#include "tests/unit/helpers/MutationTestBed.h"
+#include "tests/unit/Helpers/MutationTestBed.h"
 
 #include <gtest/gtest.h>
 

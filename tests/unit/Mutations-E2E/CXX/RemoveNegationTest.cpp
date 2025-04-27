@@ -2,7 +2,7 @@
 #include "mull/Bitcode.h"
 #include "mull/MutationPoint.h"
 
-#include "tests/unit/helpers/MutationTestBed.h"
+#include "tests/unit/Helpers/MutationTestBed.h"
 
 #include <gtest/gtest.h>
 #include <regex>

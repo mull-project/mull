@@ -72,8 +72,8 @@ def mull_unit_tests(name):
 
         cc_library(
             name = "unit_test_helpers_%s" % llvm_version,
-            srcs = native.glob(["helpers/*.cpp"]),
-            hdrs = native.glob(["helpers/*.h"]),
+            srcs = native.glob(["Helpers/*.cpp"]),
+            hdrs = native.glob(["Helpers/*.h"]),
             deps = ["//:libmull_%s" % llvm_version],
         )
 
