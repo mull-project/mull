@@ -29,15 +29,14 @@ jobs:
         run: |
           bazel build //...
           bazel test //...
-          bazel build mull_packages
       - name: Publish package
         if: env.CLOUDSMITH_API_KEY != null
         run: |
-          # bazel run publish
+          bazel run publish
       - name: Move package
         run: |
           mkdir -p /tmp/packages
-          mv bazel-bin/Mull-*.zip /tmp/packages/
+          mv -v bazel-bin/Mull-*.zip /tmp/packages/
       - uses: ./.github/actions/attach-package
         with:
           GH_API_KEY: ${{ secrets.GITHUB_TOKEN }}

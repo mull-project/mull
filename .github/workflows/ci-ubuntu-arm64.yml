@@ -40,9 +40,10 @@ jobs:
             bazel test "//tests/unit:*"
             bazel test "//tests/integration:*"
             bazel test "//tests/end2end:*"
+            bazel test //...
             bazel build mull_packages
             mkdir -p packages
-            mv bazel-bin/Mull-*.deb packages/
+            mv -v bazel-bin/Mull-*.deb packages/
       - name: Publish package
         uses: devcontainers/ci@v0.3
         if: env.CLOUDSMITH_API_KEY != null
@@ -55,7 +56,7 @@ jobs:
       - name: Move package
         run: |
           mkdir -p /tmp/packages
-          sudo mv packages/Mull-*.deb /tmp/packages/
+          sudo mv -v packages/Mull-*.deb /tmp/packages/
       - uses: ./.github/actions/attach-package
         with:
           GH_API_KEY: ${{ secrets.GITHUB_TOKEN }}
