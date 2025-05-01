@@ -35,13 +35,6 @@ jobs:
           imageName: ghcr.io/mull-project/internal-ubuntu_${{ matrix.OS_VERSION }}-ci
           configFile: ./.devcontainer/ubuntu_${{ matrix.OS_VERSION }}/devcontainer.json
           runCmd: |
-            tree tests/unit
-      - name: Build, test, package
-        uses: devcontainers/ci@v0.3
-        with:
-          imageName: ghcr.io/mull-project/internal-ubuntu_${{ matrix.OS_VERSION }}-ci
-          configFile: ./.devcontainer/ubuntu_${{ matrix.OS_VERSION }}/devcontainer.json
-          runCmd: |
             mkdir -p packages
 
             bazel build //... --build_tag_filters=llvm_14

@@ -106,7 +106,7 @@ def define_end2end_test_targets(name):
             },
             lib_source = "@e2e_test_fmt//:all_srcs",
             out_binaries = FMT_TEST_TARGETS,
-            tags = ["llvm_%s" % llvm_version],
+            tags = ["llvm_%s" % llvm_version, "end2end"],
             targets = FMT_TEST_TARGETS,
         )
 
@@ -132,6 +132,7 @@ def define_end2end_test_targets(name):
             testonly = True,
             target_compatible_with = ["@platforms//os:linux"],
             suggested_update_target = "%s_linux" % name,
+            tags = ["llvm_%s" % llvm_version, "end2end"],
         )
         write_source_files(
             name = "update_end2end_fmtlib_test_files_macos_%s" % llvm_version,
@@ -142,6 +143,7 @@ def define_end2end_test_targets(name):
             testonly = True,
             target_compatible_with = ["@platforms//os:macos"],
             suggested_update_target = "%s_macos" % name,
+            tags = ["llvm_%s" % llvm_version, "end2end"],
         )
         macos_commands.append("update_end2end_fmtlib_test_files_macos_%s" % llvm_version)
         linux_commands.append("update_end2end_fmtlib_test_files_linux_%s" % llvm_version)
