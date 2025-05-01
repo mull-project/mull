@@ -1,5 +1,3 @@
-#include "FixturePaths.h"
-
 #include "mull/Bitcode.h"
 #include "mull/MutationPoint.h"
 #include <mull/Mutators/ScalarValueMutator.h>
@@ -8,7 +6,7 @@
 #include <clang/Tooling/Tooling.h>
 #include <llvm/IR/Module.h>
 
-#include "Helpers/MutationTestBed.h"
+#include "tests/unit/Helpers/MutationTestBed.h"
 
 #include <gtest/gtest.h>
 

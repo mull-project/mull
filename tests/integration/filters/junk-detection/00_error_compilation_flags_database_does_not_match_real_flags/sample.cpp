@@ -16,7 +16,6 @@ int main() {
 RUN: sed -e "s:%PWD:%S:g" %S/compile_commands.no_flag.json.template > %S/compile_commands.no_flag.json
 RUN: sed -e "s:%PWD:%S:g" %S/compile_commands.with_flag.json.template > %S/compile_commands.with_flag.json
 
-RUN: cd %CURRENT_DIR
 RUN: cd / && env MULL_CONFIG=%S/mull.no_junk.yml %clang_cxx -O0 %sysroot %pass_mull_ir_frontend -g -DFLAG=1 %s -o %s-ir-no-junk.exe
 RUN: %mull_runner --allow-surviving -reporters=IDE %s-ir-no-junk.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITHOUT-JUNK-DETECTION
 

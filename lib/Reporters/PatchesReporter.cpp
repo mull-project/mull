@@ -7,12 +7,15 @@
 #include "mull/Reporters/SourceCodeReader.h"
 #include "mull/Result.h"
 
+#include <llvm/ADT/StringExtras.h>
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Instruction.h>
 #include <llvm/IR/Module.h>
 #include <llvm/Support/FileSystem.h>
+#include <llvm/Support/SHA256.h>
 
+#include <climits>
 #include <fstream>
 #include <numeric>
 #include <regex>
@@ -56,6 +59,54 @@ std::string mull::PatchesReporter::getPatchesPath() {
   return patchesPath;
 }
 
+static std::string patchFilename(const std::string patchesPath, const Mutant &mutant,
+                                 const ExecutionResult &executionResult) {
+  const std::string prefix = [&executionResult]() {
+    switch (executionResult.status) {
+    case ExecutionStatus::Passed:
+      return "survived-";
+      break;
+    case ExecutionStatus::NotCovered:
+      return "uncovered-";
+      break;
+    default:
+      return "killed-";
+    }
+  }();
+  auto sourceLocation = mutant.getSourceLocation();
+  const std::string sourceBasename =
+      std::regex_replace(sourceLocation.filePath.substr(sourceLocation.directory.size() + 1),
+                         std::regex("([/]|\\.(?!patch))"),
+                         "_");
+  {
+    std::stringstream ss;
+    ss << prefix << sourceBasename << "-" << mutant.getMutatorIdentifier() << "-L"
+       << sourceLocation.line << "-C" << sourceLocation.column << ".patch";
+    auto s = ss.str();
+    if (s.size() < NAME_MAX) {
+      return patchesPath + "/" + s;
+    }
+  }
+  {
+    std::stringstream ss;
+    ss << prefix << mutant.getMutatorIdentifier() << "-L" << sourceLocation.line << "-C"
+       << sourceLocation.column << ".patch";
+    auto s = ss.str();
+    if (s.size() < NAME_MAX) {
+      return patchesPath + "/" + s;
+    }
+  }
+  {
+    llvm::SHA256 sha;
+    sha.update(sourceBasename);
+    sha.update(mutant.getMutatorIdentifier());
+    std::stringstream ss;
+    ss << prefix << llvm::toHex(sha.final()) << "-L" << sourceLocation.line << "-C"
+       << sourceLocation.column << ".patch";
+    return patchesPath + "/" + ss.str();
+  }
+}
+
 void mull::PatchesReporter::reportResults(const Result &result) {
   MutatorsFactory factory(diagnostics);
   factory.init();
@@ -86,57 +137,37 @@ void mull::PatchesReporter::reportResults(const Result &result) {
       return;
     }
     const auto &sourceEndLocation = mutant.getEndLocation();
-    const std::string sourceBasename =
-        std::regex_replace(sourceLocation.filePath.substr(sourceLocation.directory.size() + 1),
-                           std::regex("([/]|\\.(?!patch))"),
-                           "_");
 
     const auto mutator = factory.getMutator(mutant.getMutatorIdentifier());
     const std::vector<std::string> sourceLines =
         sourceCodeReader.getSourceLines(sourceLocation, sourceEndLocation);
     const std::string sourcePath = std::regex_replace(sourceLocation.filePath, basePathRegex, "");
 
-    const std::string prefix = [&mutationExecutionResult]() {
-      switch (mutationExecutionResult.status) {
-      case ExecutionStatus::Passed:
-        return "survived-";
-        break;
-      case ExecutionStatus::NotCovered:
-        return "uncovered-";
-        break;
-      default:
-        return "killed-";
-      }
-    }();
-
-    const std::string filename = [&]() {
-      std::stringstream filenamebuilder;
-      filenamebuilder << patchesPath << "/" << prefix << sourceBasename << "-"
-                      << mutant.getMutatorIdentifier() << "-L" << sourceLocation.line << "-C"
-                      << sourceLocation.column << ".patch";
-      return filenamebuilder.str();
-    }();
+    const std::string filename = patchFilename(patchesPath, mutant, mutationExecutionResult);
 
     diagnostics.debug("Writing Patchfile: "s + filename);
     const size_t lines = sourceEndLocation.line - sourceLocation.line + 1;
-    std::ofstream myfile{ filename };
-    myfile << "--- a" << (sourcePath[0] != '/' ? "/" : "") << sourcePath << " 0"
+    std::error_code ec;
+    llvm::raw_fd_ostream output(filename, ec);
+    if (ec) {
+      diagnostics.warning("Cannot create patchfile: "s + std::to_string(ec.value()));
+      diagnostics.warning("Cannot create patchfile: "s + filename + ": " + ec.message());
+      return;
+    }
+    output << "--- a" << (sourcePath[0] != '/' ? "/" : "") << sourcePath << " 0"
            << "\n"
            << "+++ b" << (sourcePath[0] != '/' ? "/" : "") << sourcePath << " 0"
            << "\n"
            << "@@ -" << sourceLocation.line << "," << lines << " +" << sourceLocation.line
            << ",1 @@\n";
     for (auto &currentLine : sourceLines) {
-      myfile << "-" << currentLine;
+      output << "-" << currentLine;
     }
-    myfile << "+" << sourceLines.front().substr(0, sourceLocation.column - 1)
+    output << "+" << sourceLines.front().substr(0, sourceLocation.column - 1)
            << mutator->getReplacement() << sourceLines.back().substr(sourceEndLocation.column - 1);
-    myfile << "--\n" << mullInfo;
-    myfile.flush();
-    if (!myfile.good()) {
-      diagnostics.warning("Writing Patchfile failed"s + filename);
-    }
-    myfile.close();
+    output << "--\n" << mullInfo;
+    output.flush();
+    output.close();
   }
 
   diagnostics.info("Patchfiles can be found at '"s + patchesPath + "'");

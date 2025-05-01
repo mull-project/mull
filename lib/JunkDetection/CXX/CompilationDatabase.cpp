@@ -1,6 +1,7 @@
 #include "mull/JunkDetection/CXX/CompilationDatabase.h"
 #include "mull/Config/Configuration.h"
 #include "mull/Diagnostics/Diagnostics.h"
+#include "mull/Path.h"
 #include "mull/Runner.h"
 #include <clang/Tooling/CompilationDatabase.h>
 #include <clang/Tooling/JSONCompilationDatabase.h>
@@ -44,7 +45,10 @@ prepareDatabase(Diagnostics &diagnostics,
     if (!filePath.empty() && !llvm::sys::path::is_absolute(filePath)) {
       filePath = command.Directory + llvm::sys::path::get_separator().str() + filePath;
     }
-    database[filePath] = flagsFromCommand(command, extraFlags);
+    auto flags = flagsFromCommand(command, extraFlags);
+    database[filePath] = flags;
+    auto absoluteFilePath = mull::absoluteFilePath(command.Directory, command.Filename);
+    database[absoluteFilePath] = flags;
   }
   return database;
 }

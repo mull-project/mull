@@ -1,0 +1,390 @@
+Killed mutants (96/129):
+include/fmt/base.h:1273:74: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  return static_cast<int>((0x3a55000000000000ull >> (2 * (c >> 3))) & 3) + 1;
+                                                                         ^
+include/fmt/base.h:1286:24: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    value = value * 10 + unsigned(*p - '0');
+                       ^
+include/fmt/base.h:1296:31: warning: Killed: Replaced + with - [cxx_add_to_sub]
+                 prev * 10ull + unsigned(p[-1] - '0') <= max
+                              ^
+include/fmt/base.h:1790:23: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    try_reserve(size_ + 1);
+                      ^
+include/fmt/base.h:1805:25: warning: Killed: Replaced + with - [cxx_add_to_sub]
+      try_reserve(size_ + count);
+                        ^
+include/fmt/base.h:1993:19: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    return count_ + this->size();
+                  ^
+include/fmt/chrono.h:1152:62: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  auto tm_year() const noexcept -> long long { return 1900ll + tm_.tm_year; }
+                                                             ^
+include/fmt/chrono.h:1182:20: warning: Killed: Replaced + with - [cxx_add_to_sub]
+        (curr_year + curr_year / 4 - curr_year / 100 + curr_year / 400) %
+                   ^
+include/fmt/chrono.h:1182:54: warning: Killed: Replaced + with - [cxx_add_to_sub]
+        (curr_year + curr_year / 4 - curr_year / 100 + curr_year / 400) %
+                                                     ^
+include/fmt/chrono.h:1185:20: warning: Killed: Replaced + with - [cxx_add_to_sub]
+        (prev_year + prev_year / 4 - prev_year / 100 + prev_year / 400) %
+                   ^
+include/fmt/chrono.h:1185:54: warning: Killed: Replaced + with - [cxx_add_to_sub]
+        (prev_year + prev_year / 4 - prev_year / 100 + prev_year / 400) %
+                                                     ^
+include/fmt/chrono.h:1187:15: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    return 52 + ((curr_p == 4 || prev_p == 3) ? 1 : 0);
+              ^
+include/fmt/chrono.h:1190:21: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    return (tm_yday + 11 - (tm_wday == 0 ? days_per_week : tm_wday)) /
+                    ^
+include/fmt/chrono.h:1197:47: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    if (w > iso_year_weeks(year)) return year + 1;
+                                              ^
+include/fmt/chrono.h:1209:37: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    *out_++ = static_cast<char>('0' + to_unsigned(value) % 10);
+                                    ^
+include/fmt/chrono.h:1224:39: warning: Killed: Replaced + with - [cxx_add_to_sub]
+      *out_++ = static_cast<char>('0' + v);
+                                      ^
+include/fmt/chrono.h:1389:54: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    write_digit2_separated(buf, to_unsigned(tm_mon() + 1),
+                                                     ^
+include/fmt/chrono.h:1406:49: warning: Killed: Replaced + with - [cxx_add_to_sub]
+                           to_unsigned(tm_mon() + 1), to_unsigned(tm_mday()),
+                                                ^
+include/fmt/chrono.h:1449:30: warning: Killed: Replaced + with - [cxx_add_to_sub]
+      return write2(tm_mon() + 1, pad);
+                             ^
+include/fmt/chrono.h:1455:32: warning: Killed: Replaced + with - [cxx_add_to_sub]
+      return write2((tm_yday() + days_per_week - tm_wday()) / days_per_week,
+                               ^
+include/fmt/chrono.h:1462:25: warning: Killed: Replaced + with - [cxx_add_to_sub]
+      write2((tm_yday() + days_per_week -
+                        ^
+include/fmt/chrono.h:1484:27: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    auto yday = tm_yday() + 1;
+                          ^
+include/fmt/format-inl.h:1055:46: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    int kb = cache_index * compression_ratio + float_info<double>::min_k;
+                                             ^
+include/fmt/format-inl.h:1063:37: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    int alpha = floor_log2_pow10(kb + offset) - floor_log2_pow10(kb) - offset;
+                                    ^
+include/fmt/format-inl.h:1080:59: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    return {recovered_cache.high(), recovered_cache.low() + 1};
+                                                          ^
+include/fmt/format-inl.h:1274:36: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    exponent -= exponent_bias<T>() + num_significand_bits<T>();
+                                   ^
+include/fmt/format-inl.h:1295:29: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  const int beta = exponent + floor_log2_pow10(-minus_k);
+                            ^
+include/fmt/format-inl.h:1341:32: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  ret_value.exponent = minus_k + float_info<T>::kappa + 1;
+                               ^
+include/fmt/format-inl.h:1341:55: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  ret_value.exponent = minus_k + float_info<T>::kappa + 1;
+                                                      ^
+include/fmt/format-inl.h:1351:32: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  ret_value.exponent = minus_k + float_info<T>::kappa;
+                               ^
+include/fmt/format-inl.h:1353:36: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  uint32_t dist = r - (deltai / 2) + (float_info<T>::small_divisor / 2);
+                                   ^
+include/fmt/format-inl.h:1418:53: warning: Killed: Replaced + with - [cxx_add_to_sub]
+      buffer_.push_back(static_cast<wchar_t>(0xD800 + (cp >> 10)));
+                                                    ^
+include/fmt/format-inl.h:1419:53: warning: Killed: Replaced + with - [cxx_add_to_sub]
+      buffer_.push_back(static_cast<wchar_t>(0xDC00 + (cp & 0x3FF)));
+                                                    ^
+include/fmt/format.h:328:24: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    return {(hi >> 32) + (new_lo < lo ? 1 : 0), new_lo};
+                       ^
+include/fmt/format.h:348:27: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    uint64_t new_lo = lo_ + n.lo_;
+                          ^
+include/fmt/format.h:349:35: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    uint64_t new_hi = hi_ + n.hi_ + (new_lo < lo_ ? 1 : 0);
+                                  ^
+include/fmt/format.h:476:30: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  buf.try_reserve(buf.size() + n);
+                             ^
+include/fmt/format.h:496:30: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  buf.try_reserve(buf.size() + n);
+                             ^
+include/fmt/format.h:499:23: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  buf.try_resize(size + n);
+                      ^
+include/fmt/format.h:644:13: warning: Killed: Replaced + with - [cxx_add_to_sub]
+          1 +
+            ^
+include/fmt/format.h:1021:32: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    if (n < 1000) return count + 2;
+                               ^
+include/fmt/format.h:1022:33: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    if (n < 10000) return count + 3;
+                                ^
+include/fmt/format.h:1101:30: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  return static_cast<int>((n + inc) >> 32);
+                             ^
+include/fmt/format.h:1195:38: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    out[--n] = static_cast<Char>('0' + value);
+                                     ^
+include/fmt/format.h:1229:70: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    *--out = static_cast<Char>(base_bits < 4 ? static_cast<char>('0' + digit)
+                                                                     ^
+include/fmt/format.h:1643:31: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  auto it = reserve(out, size + padding * specs.fill_size());
+                              ^
+include/fmt/format.h:1671:39: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  auto size = to_unsigned(num_digits) + size_t(2);
+                                      ^
+include/fmt/format.h:1890:17: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  prefix += (1u + (value > 0xff ? 1 : 0)) << 24;
+                ^
+include/fmt/format.h:1932:52: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  unsigned size = (prefix != 0 ? prefix >> 24 : 0) + to_unsigned(num_digits) +
+                                                   ^
+include/fmt/format.h:1932:78: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  unsigned size = (prefix != 0 ? prefix >> 24 : 0) + to_unsigned(num_digits) +
+                                                                             ^
+include/fmt/format.h:2002:29: warning: Killed: Replaced + with - [cxx_add_to_sub]
+      : size((prefix >> 24) + to_unsigned(num_digits)), padding(0) {
+                            ^
+include/fmt/format.h:2010:29: warning: Killed: Replaced + with - [cxx_add_to_sub]
+      size = (prefix >> 24) + to_unsigned(specs.precision);
+                            ^
+include/fmt/format.h:2161:40: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  if (negative) abs_value = ~abs_value + 1;
+                                       ^
+include/fmt/format.h:2163:34: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  auto size = (negative ? 1 : 0) + static_cast<size_t>(num_digits);
+                                 ^
+include/fmt/format.h:2215:24: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  auto size = str_size + (s != sign::none ? 1 : 0);
+                       ^
+include/fmt/format.h:2272:27: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  out += significand_size + 1;
+                          ^
+include/fmt/format.h:2281:36: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    *--out = static_cast<Char>('0' + significand % 10);
+                                   ^
+include/fmt/format.h:2339:47: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  size_t size = to_unsigned(significand_size) + (s != sign::none ? 1 : 0);
+                                              ^
+include/fmt/format.h:2345:31: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  int output_exp = f.exponent + significand_size - 1;
+                              ^
+include/fmt/format.h:2368:49: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    size += to_unsigned((decimal_point ? 1 : 0) + 2 + exp_digits);
+                                                ^
+include/fmt/format.h:2368:53: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    size += to_unsigned((decimal_point ? 1 : 0) + 2 + exp_digits);
+                                                    ^
+include/fmt/format.h:2384:24: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  int exp = f.exponent + significand_size;
+                       ^
+include/fmt/format.h:2536:43: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    bigits_.resize(to_unsigned(num_bigits + 1));
+                                          ^
+include/fmt/format.h:2556:53: warning: Killed: Replaced + with - [cxx_add_to_sub]
+      double_bigit result = bigits_[i] * wide_value + carry;
+                                                    ^
+include/fmt/format.h:2573:40: warning: Killed: Replaced + with - [cxx_add_to_sub]
+      UInt result = lower * bigits_[i] + static_cast<bigit>(carry);
+                                       ^
+include/fmt/format.h:2574:45: warning: Killed: Replaced + with - [cxx_add_to_sub]
+      carry = (upper * bigits_[i] << shift) + (result >> bigit_bits) +
+                                            ^
+include/fmt/format.h:2574:70: warning: Killed: Replaced + with - [cxx_add_to_sub]
+      carry = (upper * bigits_[i] << shift) + (result >> bigit_bits) +
+                                                                     ^
+include/fmt/format.h:2617:45: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    return static_cast<int>(bigits_.size()) + exp_;
+                                            ^
+include/fmt/format.h:2628:42: warning: Killed: Replaced + with - [cxx_add_to_sub]
+      bigits_[i] = (bigits_[i] << shift) + carry;
+                                         ^
+include/fmt/format.h:2661:24: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    if (max_lhs_bigits + 1 < num_rhs_bigits) return -1;
+                       ^
+include/fmt/format.h:2666:58: warning: Killed: Replaced + with - [cxx_add_to_sub]
+      double_bigit sum = double_bigit(lhs1.get_bigit(i)) + lhs2.get_bigit(i);
+                                                         ^
+include/fmt/format.h:2668:27: warning: Killed: Replaced + with - [cxx_add_to_sub]
+      if (sum > rhs_bigit + borrow) return 1;
+                          ^
+include/fmt/format.h:2669:26: warning: Killed: Replaced + with - [cxx_add_to_sub]
+      borrow = rhs_bigit + borrow - sum;
+                         ^
+include/fmt/format.h:2728:43: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    bigits_.resize(to_unsigned(num_bigits + exp_difference));
+                                          ^
+include/fmt/format.h:2729:40: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    for (int i = num_bigits - 1, j = i + exp_difference; i >= 0; --i, --j)
+                                       ^
+include/fmt/format.h:2777:27: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    numerator <<= value.e + shift;
+                          ^
+include/fmt/format.h:2814:53: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    if (add_compare(numerator, *upper, denominator) + even <= 0) {
+                                                    ^
+include/fmt/format.h:2822:74: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    if ((flags & dragon::fixed) != 0) adjust_precision(num_digits, exp10 + 1);
+                                                                         ^
+include/fmt/format.h:2833:63: warning: Killed: Replaced + with - [cxx_add_to_sub]
+      bool high = add_compare(numerator, *upper, denominator) + even > 0;
+                                                              ^
+include/fmt/format.h:2834:50: warning: Killed: Replaced + with - [cxx_add_to_sub]
+      data[num_digits++] = static_cast<char>('0' + digit);
+                                                 ^
+include/fmt/format.h:2867:36: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    buf[i] = static_cast<char>('0' + digit);
+                                   ^
+include/fmt/format.h:2892:47: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  buf[num_digits - 1] = static_cast<char>('0' + digit);
+                                              ^
+include/fmt/format.h:2931:50: warning: Killed: Replaced + with - [cxx_add_to_sub]
+      const auto inc = carrier_uint(1) << (shift + 4);
+                                                 ^
+include/fmt/format.h:3023:19: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    auto e = (f.e + count_digits<1>(f.f) - 1) * inv_log2_10 - 1e-10;
+                  ^
+include/fmt/format.h:3039:43: warning: Killed: Replaced + with - [cxx_add_to_sub]
+      exponent -= exponent_bias<double>() + num_significand_bits<double>();
+                                          ^
+include/fmt/format.h:3060:31: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    const int beta = exponent + dragonbox::floor_log2_pow10(k);
+                              ^
+include/fmt/format.h:3082:48: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    if (fixed) adjust_precision(precision, exp + digits_in_the_first_segment);
+                                               ^
+include/fmt/format.h:3140:45: warning: Killed: Replaced + with - [cxx_add_to_sub]
+            *buffer = static_cast<char>('0' + digits);
+                                            ^
+include/fmt/format.h:4055:47: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    return detail::to_unsigned(buffer_ - str_ + buffer_size - 1);
+                                              ^
+test/format-test.cc:952:19: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  format_str[size + 1] = 0;
+                  ^
+test/format-test.cc:1110:19: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  format_str[size + 1] = 0;
+                  ^
+test/format-test.cc:1114:19: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  format_str[size + 2] = 0;
+                  ^
+test/scan.h:23:44: warning: Killed: Replaced + with - [cxx_add_to_sub]
+  if (c >= 'a' && c <= 'f') return c - 'a' + 10;
+                                           ^
+test/scan.h:392:16: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    n = n * 10 + static_cast<unsigned>(c - '0');
+               ^
+test/scan.h:406:20: warning: Killed: Replaced + with - [cxx_add_to_sub]
+      prev * 10ull + unsigned(prev_digit - '0') <= max) {
+                   ^
+test/scan.h:423:18: warning: Killed: Replaced + with - [cxx_add_to_sub]
+    n = (n << 4) + static_cast<unsigned>(digit);
+                 ^
+Survived mutants (33/129):
+include/fmt/base.h:1295:33: warning: Survived: Replaced + with - [cxx_add_to_sub]
+  return num_digits == digits10 + 1 &&
+                                ^
+include/fmt/base.h:1883:57: warning: Survived: Replaced + with - [cxx_add_to_sub]
+  auto count() const -> size_t { return Traits::count() + this->size(); }
+                                                        ^
+include/fmt/base.h:1927:41: warning: Survived: Replaced + with - [cxx_add_to_sub]
+    return fixed_buffer_traits::count() + this->size();
+                                        ^
+include/fmt/format-inl.h:200:16: warning: Survived: Replaced + with - [cxx_add_to_sub]
+  return {high + high_low.high(), high_low.low()};
+               ^
+include/fmt/format-inl.h:345:59: warning: Survived: Replaced + with - [cxx_add_to_sub]
+        (cache - (cache >> (num_significand_bits<float>() + 2))) >>
+                                                          ^
+include/fmt/format-inl.h:352:16: warning: Survived: Replaced + with - [cxx_add_to_sub]
+        (cache + (cache >> (num_significand_bits<float>() + 1))) >>
+               ^
+include/fmt/format-inl.h:352:59: warning: Survived: Replaced + with - [cxx_add_to_sub]
+        (cache + (cache >> (num_significand_bits<float>() + 1))) >>
+                                                          ^
+include/fmt/format-inl.h:359:75: warning: Survived: Replaced + with - [cxx_add_to_sub]
+                cache >> (64 - num_significand_bits<float>() - 2 - beta)) +
+                                                                          ^
+include/fmt/format-inl.h:1120:62: warning: Survived: Replaced + with - [cxx_add_to_sub]
+            (cache.high() >> (num_significand_bits<double>() + 2))) >>
+                                                             ^
+include/fmt/format-inl.h:1126:26: warning: Survived: Replaced + with - [cxx_add_to_sub]
+    return (cache.high() +
+                         ^
+include/fmt/format-inl.h:1127:62: warning: Survived: Replaced + with - [cxx_add_to_sub]
+            (cache.high() >> (num_significand_bits<double>() + 1))) >>
+                                                             ^
+include/fmt/format-inl.h:1133:80: warning: Survived: Replaced + with - [cxx_add_to_sub]
+    return ((cache.high() >> (64 - num_significand_bits<double>() - 2 - beta)) +
+                                                                               ^
+include/fmt/format-inl.h:1217:29: warning: Survived: Replaced + with - [cxx_add_to_sub]
+  const int beta = exponent + floor_log2_pow10(-minus_k);
+                            ^
+include/fmt/format-inl.h:1236:34: warning: Survived: Replaced + with - [cxx_add_to_sub]
+    ret_value.exponent = minus_k + 1;
+                                 ^
+include/fmt/format-inl.h:1772:34: warning: Survived: Replaced + with - [cxx_add_to_sub]
+    auto lower_end = lower_start + s.lower_count;
+                                 ^
+include/fmt/format.h:327:34: warning: Survived: Replaced + with - [cxx_add_to_sub]
+    uint64_t new_lo = (hi << 32) + lo;
+                                 ^
+include/fmt/format.h:349:27: warning: Survived: Replaced + with - [cxx_add_to_sub]
+    uint64_t new_hi = hi_ + n.hi_ + (new_lo < lo_ ? 1 : 0);
+                          ^
+include/fmt/format.h:498:29: warning: Survived: Replaced + with - [cxx_add_to_sub]
+  if (buf.capacity() < size + n) return nullptr;
+                            ^
+include/fmt/format.h:797:40: warning: Survived: Replaced + with - [cxx_add_to_sub]
+    size_t new_capacity = old_capacity + old_capacity / 2;
+                                       ^
+include/fmt/format.h:1020:31: warning: Survived: Replaced + with - [cxx_add_to_sub]
+    if (n < 100) return count + 1;
+                              ^
+include/fmt/format.h:1172:34: warning: Survived: Replaced + with - [cxx_add_to_sub]
+  *out++ = static_cast<Char>('0' + value / 10);
+                                 ^
+include/fmt/format.h:1173:32: warning: Survived: Replaced + with - [cxx_add_to_sub]
+  *out = static_cast<Char>('0' + value % 10);
+                               ^
+include/fmt/format.h:2063:39: warning: Survived: Replaced + with - [cxx_add_to_sub]
+  if ((specs.width | (specs.precision + 1)) == 0) {
+                                      ^
+include/fmt/format.h:2064:52: warning: Survived: Replaced + with - [cxx_add_to_sub]
+    auto it = reserve(out, to_unsigned(num_digits) + (prefix >> 24));
+                                                   ^
+include/fmt/format.h:2409:15: warning: Survived: Replaced + with - [cxx_add_to_sub]
+    size += 1 + static_cast<unsigned>(max_of(num_zeros, 0));
+              ^
+include/fmt/format.h:2426:13: warning: Survived: Replaced + with - [cxx_add_to_sub]
+  size += 1 + (pointy ? 1 : 0) + to_unsigned(num_zeros);
+            ^
+include/fmt/format.h:2426:32: warning: Survived: Replaced + with - [cxx_add_to_sub]
+  size += 1 + (pointy ? 1 : 0) + to_unsigned(num_zeros);
+                               ^
+include/fmt/format.h:2782:31: warning: Survived: Replaced + with - [cxx_add_to_sub]
+      upper_store <<= value.e + 1;
+                              ^
+include/fmt/format.h:3138:76: warning: Survived: Replaced + with - [cxx_add_to_sub]
+            prod = ((subsegment * static_cast<uint64_t>(720575941)) >> 24) + 1;
+                                                                           ^
+include/fmt/format.h:3151:76: warning: Survived: Replaced + with - [cxx_add_to_sub]
+            prod = ((subsegment * static_cast<uint64_t>(450359963)) >> 20) + 1;
+                                                                           ^
+test/format-test.cc:1113:19: warning: Survived: Replaced + with - [cxx_add_to_sub]
+  format_str[size + 1] = '}';
+                  ^
+test/printf-test.cc:385:61: warning: Survived: Replaced + with - [cxx_add_to_sub]
+    test_length<T>(length_spec, static_cast<long long>(max) + 1);
+                                                            ^
+test/scan.h:24:44: warning: Survived: Replaced + with - [cxx_add_to_sub]
+  if (c >= 'A' && c <= 'F') return c - 'A' + 10;
+                                           ^
+Mutation score: 74%

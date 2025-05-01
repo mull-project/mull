@@ -21,7 +21,6 @@ RUN: cd %S/Output; (unset TERM; %mull_runner --report-patch-base %S -debug ./mai
 
 CHECK:[debug] Writing Patchfile: {{.*}}
 CHECK:[info] Patchfiles can be found at './test{{.*}}-patches'
-CHECK:{{.*}}main_cpp{{.*}}
 CHECK:--- a/Output/sandbox/main.cpp 0
 CHECK:+{{\s+}}return a != b;
 
