@@ -15,7 +15,7 @@ jobs:
       matrix:
         include:
           # - OS_VERSION: "20.04"
-          - OS_VERSION: "22.04"
+          # - OS_VERSION: "22.04"
           - OS_VERSION: "24.04"
     name: Ubuntu ${{ matrix.OS_VERSION }}
     steps:
