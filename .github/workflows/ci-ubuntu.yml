@@ -42,14 +42,32 @@ jobs:
           imageName: ghcr.io/mull-project/internal-ubuntu_${{ matrix.OS_VERSION }}-ci
           configFile: ./.devcontainer/ubuntu_${{ matrix.OS_VERSION }}/devcontainer.json
           runCmd: |
-            bazel build //...
-            bazel test "//tests/unit:*"
-            bazel test "//tests/integration:*"
-            bazel test "//tests/end2end:*"
-            bazel test //...
-            bazel build mull_packages
             mkdir -p packages
+
+            bazel build //... --build_tag_filters=llvm_14
+            bazel test //... --test_tag_filters=llvm_14
             mv -v bazel-bin/Mull-*.deb packages/
+            bazel clean
+
+            bazel build //... --build_tag_filters=llvm_15
+            bazel test //... --test_tag_filters=llvm_15
+            mv -v bazel-bin/Mull-*.deb packages/
+            bazel clean
+
+            bazel build //... --build_tag_filters=llvm_16
+            bazel test //... --test_tag_filters=llvm_16
+            mv -v bazel-bin/Mull-*.deb packages/
+            bazel clean
+
+            bazel build //... --build_tag_filters=llvm_17
+            bazel test //... --test_tag_filters=llvm_17
+            mv -v bazel-bin/Mull-*.deb packages/
+            bazel clean
+
+            bazel build //... --build_tag_filters=llvm_18
+            bazel test //... --test_tag_filters=llvm_18
+            mv -v bazel-bin/Mull-*.deb packages/
+            bazel clean
       - name: Publish package
         uses: devcontainers/ci@v0.3
         if: env.CLOUDSMITH_API_KEY != null
