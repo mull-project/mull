@@ -37,28 +37,8 @@ jobs:
           runCmd: |
             mkdir -p packages
 
-            bazel build //... --build_tag_filters=llvm_14
-            bazel test //... --test_tag_filters=llvm_14,-llvm_15,-llvm_16,-llvm_17,-llvm_18
-            mv -v bazel-bin/Mull-*.deb packages/
-            bazel clean
-
-            bazel build //... --build_tag_filters=llvm_15
-            bazel test //... --test_tag_filters=llvm_15
-            mv -v bazel-bin/Mull-*.deb packages/
-            bazel clean
-
-            bazel build //... --build_tag_filters=llvm_16
-            bazel test //... --test_tag_filters=llvm_16
-            mv -v bazel-bin/Mull-*.deb packages/
-            bazel clean
-
-            bazel build //... --build_tag_filters=llvm_17
-            bazel test //... --test_tag_filters=llvm_17
-            mv -v bazel-bin/Mull-*.deb packages/
-            bazel clean
-
-            bazel build //... --build_tag_filters=llvm_18
-            bazel test //... --test_tag_filters=llvm_18
+            bazel build //... --build_tag_filters=+llvm_14
+            bazel test //... --test_tag_filters=+llvm_14
             mv -v bazel-bin/Mull-*.deb packages/
             bazel clean
       - name: Publish package
