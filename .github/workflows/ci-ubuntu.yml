@@ -38,29 +38,32 @@ jobs:
             mkdir -p packages
 
             bazel build //... --build_tag_filters=+llvm_14,-llvm_15,-llvm_16,-llvm_17,-llvm_18
-            bazel test //... --test_tag_filters=+llvm_14,-llvm_15,-llvm_16,-llvm_17,-llvm_18
+            bazel test //... --build_tag_filters=+llvm_14,-llvm_15,-llvm_16,-llvm_17,-llvm_18 --test_tag_filters=+llvm_14,-llvm_15,-llvm_16,-llvm_17,-llvm_18
             mv -v bazel-bin/Mull-*.deb packages/
             bazel clean
 
             bazel build //... --build_tag_filters=-llvm_14,+llvm_15,-llvm_16,-llvm_17,-llvm_18
-            bazel test //... --test_tag_filters=-llvm_14,+llvm_15,-llvm_16,-llvm_17,-llvm_18
+            bazel test //... --build_tag_filters=-llvm_14,+llvm_15,-llvm_16,-llvm_17,-llvm_18 --test_tag_filters=-llvm_14,+llvm_15,-llvm_16,-llvm_17,-llvm_18
             mv -v bazel-bin/Mull-*.deb packages/
             bazel clean
 
             bazel build //... --build_tag_filters=-llvm_14,-llvm_15,+llvm_16,-llvm_17,-llvm_18
-            bazel test //... --test_tag_filters=-llvm_14,-llvm_15,+llvm_16,-llvm_17,-llvm_18
+            bazel test //... --build_tag_filters=-llvm_14,-llvm_15,+llvm_16,-llvm_17,-llvm_18 --test_tag_filters=-llvm_14,-llvm_15,+llvm_16,-llvm_17,-llvm_18
             mv -v bazel-bin/Mull-*.deb packages/
             bazel clean
 
             bazel build //... --build_tag_filters=-llvm_14,-llvm_15,-llvm_16,+llvm_17,-llvm_18
-            bazel test //... --test_tag_filters=-llvm_14,-llvm_15,-llvm_16,+llvm_17,-llvm_18
+            bazel test //... --build_tag_filters=-llvm_14,-llvm_15,-llvm_16,+llvm_17,-llvm_18 --test_tag_filters=-llvm_14,-llvm_15,-llvm_16,+llvm_17,-llvm_18
             mv -v bazel-bin/Mull-*.deb packages/
             bazel clean
 
             bazel build //... --build_tag_filters=-llvm_14,-llvm_15,-llvm_16,-llvm_17,+llvm_18
-            bazel test //... --test_tag_filters=-llvm_14,-llvm_15,-llvm_16,-llvm_17,+llvm_18
+            bazel test //... --build_tag_filters=-llvm_14,-llvm_15,-llvm_16,-llvm_17,+llvm_18 --test_tag_filters=-llvm_14,-llvm_15,-llvm_16,-llvm_17,+llvm_18
             mv -v bazel-bin/Mull-*.deb packages/
             bazel clean
+
+            # most of the tests must be cached by now?
+            bazel test //...
       - name: Publish package
         uses: devcontainers/ci@v0.3
         if: env.CLOUDSMITH_API_KEY != null
