@@ -37,7 +37,7 @@ std::vector<std::string> MutantExtractor::extractMutants(const std::string &exec
   }
   for (auto &section : objectFile->sections()) {
     llvm::StringRef name = getSectionName(section);
-    if (name.equals(".mull_mutants")) {
+    if (name == ".mull_mutants") {
       llvm::Expected<llvm::StringRef> content = section.getContents();
       if (!content) {
         return {};
