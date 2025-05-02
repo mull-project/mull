@@ -43,7 +43,7 @@ void librariesFromElf(const ELFObjectFile<T> &file, std::vector<std::string> &li
     llvm::StringRef name = getSectionName(elfSection);
     // FIXME: the dynamic string table should be taken based on .dynamic
     // section's sh_link value
-    if (elfSection.getType() == llvm::ELF::SHT_STRTAB && name.equals(".dynstr")) {
+    if (elfSection.getType() == llvm::ELF::SHT_STRTAB && name == ".dynstr") {
       stringTableIterator = it;
     }
     if (elfSection.getType() == llvm::ELF::SHT_DYNAMIC) {
@@ -161,7 +161,12 @@ bool mull::hasCoverage(mull::Diagnostics &diagnostics, const std::string &path) 
   }
 
   for (auto &section : objectFile->sections()) {
+#if LLVM_VERSION_MAJOR < 18
     if (getSectionName(section).endswith("llvm_covmap")) {
+#else
+
+    if (getSectionName(section).ends_with("llvm_covmap")) {
+#endif
       return true;
     }
   }

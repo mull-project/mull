@@ -77,7 +77,7 @@ const clang::FileEntry *ThreadSafeASTUnit::findFileEntry(const std::string &file
   const clang::FileEntry *file = nullptr;
   for (auto it = begin; it != end; it++) {
 #if LLVM_VERSION_MAJOR >= 18
-    llvm::StringRef currentSourceFilePath = it->first.getFileEntry().getName();
+    llvm::StringRef currentSourceFilePath = it->first.getName();
 #else
     llvm::StringRef currentSourceFilePath = it->first->getName();
 #endif
