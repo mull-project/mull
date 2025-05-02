@@ -14,6 +14,7 @@
 #include "mull/Version.h"
 
 #include <llvm/Support/FileSystem.h>
+#include <llvm/Support/ManagedStatic.h>
 
 #include <algorithm>
 #include <memory>
