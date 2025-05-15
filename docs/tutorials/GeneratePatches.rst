@@ -40,8 +40,8 @@ Step 3. Configure and build fmtlib
     cmake --build build.dir/ -t core-test
 
 
-Step 4. Run Mull against fmtlib tests in a dry-run mode
--------------------------------------------------------
+Step 4. Run Mull against fmtlib tests
+-------------------------------------
 
 .. code-block:: bash
 
