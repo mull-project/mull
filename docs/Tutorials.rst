@@ -15,3 +15,4 @@ Tutorials
    tutorials/DisableMutantsWithAnnotations
    tutorials/NonStandardTestSuite
    tutorials/SQLiteReport
+   tutorials/GeneratePatches
