@@ -1,6 +1,6 @@
 #include "InMemoryFixture.h"
 
-#include "Helpers/InMemoryCompiler.h"
+#include "tests/unit/Helpers/InMemoryCompiler.h"
 
 #include <cassert>
 #include <clang/Frontend/ASTUnit.h>

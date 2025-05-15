@@ -10,9 +10,6 @@ const char *mullVersionString() {
 const char *mullCommitString() {
   return "@GIT_COMMIT@";
 }
-const char *mullBuildDateString() {
-  return "@BUILD_DATE@";
-}
 const char *mullDescriptionString() {
   return "@PROJECT_DESCRIPTION@";
 }
@@ -38,7 +35,6 @@ void printVersionInformation(llvm::raw_ostream &out) {
   out << "Support: " << mullSupportPageString() << "\n";
   out << "Version: " << mullVersionString() << "\n";
   out << "Commit: " << mullCommitString() << "\n";
-  out << "Date: " << mullBuildDateString() << "\n";
   out << "LLVM: " << llvmVersionString() << "\n";
 }
 

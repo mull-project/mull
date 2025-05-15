@@ -2,6 +2,7 @@
 #include "mull/Config/Configuration.h"
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Mutant.h"
+#include "mull/Path.h"
 #include <llvm/ProfileData/Coverage/CoverageMapping.h>
 
 #if LLVM_VERSION_MAJOR >= 17
@@ -56,8 +57,12 @@ CoverageFilter::CoverageFilter(const Configuration &configuration, Diagnostics &
         }
       }
       for (auto &path : it.Filenames) {
+        auto absolutePath = mull::absoluteFilePath(".", path);
         // TODO: merge adjacent ranges
         std::copy(std::begin(ranges), std::end(ranges), std::back_inserter(uncoveredRanges[path]));
+        std::copy(std::begin(ranges),
+                  std::end(ranges),
+                  std::back_inserter(uncoveredRanges[absolutePath]));
       }
     }
   }

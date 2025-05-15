@@ -182,7 +182,7 @@ clang::QualType ASTNodeFactory::getConstantArrayType(clang::QualType type, unsig
 #else
   auto sizeModifier = clang::ArrayType::ArraySizeModifier::Normal;
 #endif
-  return context.getConstantArrayType(type, llvm::APInt(8, size + 1), nullptr, sizeModifier, 0);
+  return context.getConstantArrayType(type, llvm::APInt(16, size + 1), nullptr, sizeModifier, 0);
 }
 
 } // namespace cxx
