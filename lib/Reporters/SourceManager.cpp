@@ -1,5 +1,7 @@
 #include "mull/Reporters/SourceManager.h"
 
+#include <string.h>
+
 #include <cassert>
 
 using namespace mull;
@@ -51,7 +53,7 @@ LineOffset &SourceManager::getLineOffset(const std::string &filePath) {
 
   FILE *file = fopen(filePath.c_str(), "rb");
   if (!file) {
-    perror("SourceManager");
+    fprintf(stderr, "SourceManager (path =  %s): %s\n", filePath.c_str(), strerror(errno));
   }
   std::vector<uint32_t> offsets;
   uint32_t offset = 0;
