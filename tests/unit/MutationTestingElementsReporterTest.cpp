@@ -1,9 +1,6 @@
 #include "mull/Reporters/MutationTestingElementsReporter.h"
 
 #include "FixturePaths.h"
-#include "TestModuleFactory.h"
-
-#include "BitcodeLoader.h"
 #include "mull/Bitcode.h"
 #include "mull/Config/Configuration.h"
 #include "mull/FunctionUnderTest.h"
@@ -12,6 +9,8 @@
 #include "mull/MutationsFinder.h"
 #include "mull/Program/Program.h"
 #include "mull/Result.h"
+#include "tests/unit/Helpers/BitcodeLoader.h"
+#include "tests/unit/Helpers/TestModuleFactory.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 
 #include <fstream>
@@ -33,9 +32,11 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   Diagnostics diagnostics;
   BitcodeLoader loader;
   auto bitcodeWithTests = loader.loadBitcodeAtPath(
-      fixtures::simple_test_count_letters_test_count_letters_bc_path(), diagnostics);
+      fixtures::tests_unit_fixtures_simple_test_count_letters_test_count_letters_c_bc_path(),
+      diagnostics);
   auto bitcodeWithTestees = loader.loadBitcodeAtPath(
-      fixtures::simple_test_count_letters_count_letters_bc_path(), diagnostics);
+      fixtures::tests_unit_fixtures_simple_test_count_letters_count_letters_c_bc_path(),
+      diagnostics);
 
   Function *reachableFunction = bitcodeWithTestees->getModule()->getFunction("count_letters");
 

@@ -1,5 +1,5 @@
-#include "BitcodeLoader.h"
 #include "FixturePaths.h"
+#include "tests/unit/Helpers/BitcodeLoader.h"
 #include <gtest/gtest.h>
 #include <mull/Diagnostics/Diagnostics.h>
 #include <mull/FunctionUnderTest.h>
@@ -11,8 +11,8 @@ using namespace llvm;
 TEST(Relational, LessThanToLessOrEqual) {
   Diagnostics diagnostics;
   BitcodeLoader loader;
-  auto bitcode =
-      loader.loadBitcodeAtPath(fixtures::mutators_boundary_module_bc_path(), diagnostics);
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::tests_unit_fixtures_mutators_boundary_module_cpp_bc_path(), diagnostics);
 
   cxx::LessThanToLessOrEqual mutator;
   std::vector<MutationPoint *> mutants;
@@ -29,8 +29,8 @@ TEST(Relational, LessThanToLessOrEqual) {
 TEST(Relational, LessOrEqualToLessThan) {
   Diagnostics diagnostics;
   BitcodeLoader loader;
-  auto bitcode =
-      loader.loadBitcodeAtPath(fixtures::mutators_boundary_module_bc_path(), diagnostics);
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::tests_unit_fixtures_mutators_boundary_module_cpp_bc_path(), diagnostics);
 
   cxx::LessOrEqualToLessThan mutator;
   std::vector<MutationPoint *> mutants;
@@ -47,8 +47,8 @@ TEST(Relational, LessOrEqualToLessThan) {
 TEST(Relational, GreaterThanToGreaterOrEqual) {
   Diagnostics diagnostics;
   BitcodeLoader loader;
-  auto bitcode =
-      loader.loadBitcodeAtPath(fixtures::mutators_boundary_module_bc_path(), diagnostics);
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::tests_unit_fixtures_mutators_boundary_module_cpp_bc_path(), diagnostics);
 
   cxx::GreaterThanToGreaterOrEqual mutator;
   std::vector<MutationPoint *> mutants;
@@ -65,8 +65,8 @@ TEST(Relational, GreaterThanToGreaterOrEqual) {
 TEST(Relational, GreaterOrEqualToGreaterThan) {
   Diagnostics diagnostics;
   BitcodeLoader loader;
-  auto bitcode =
-      loader.loadBitcodeAtPath(fixtures::mutators_boundary_module_bc_path(), diagnostics);
+  auto bitcode = loader.loadBitcodeAtPath(
+      fixtures::tests_unit_fixtures_mutators_boundary_module_cpp_bc_path(), diagnostics);
 
   cxx::GreaterOrEqualToGreaterThan mutator;
   std::vector<MutationPoint *> mutants;

@@ -6,44 +6,23 @@ on:
   push:
     branches: ["main"]
     tags: ["**"]
-  pull_request:
-    branches: ["main"]
+    # pull_request:
+    #   branches: ["main"]
 jobs:
   build-and-test:
     runs-on: ubuntu-24.04-arm
     strategy:
       matrix:
         include:
-          - OS_NAME: "ubuntu"
-            OS_VERSION: "20.04"
-            LLVM_VERSION: 12
-          - OS_NAME: "ubuntu"
-            OS_VERSION: "22.04"
-            LLVM_VERSION: 13
-          - OS_NAME: "ubuntu"
-            OS_VERSION: "22.04"
-            LLVM_VERSION: 14
-          - OS_NAME: "ubuntu"
-            OS_VERSION: "22.04"
-            LLVM_VERSION: 15
-          - OS_NAME: "ubuntu"
-            OS_VERSION: "24.04"
-            LLVM_VERSION: 14
-          - OS_NAME: "ubuntu"
-            OS_VERSION: "24.04"
-            LLVM_VERSION: 15
-          - OS_NAME: "ubuntu"
-            OS_VERSION: "24.04"
-            LLVM_VERSION: 16
-          - OS_NAME: "ubuntu"
-            OS_VERSION: "24.04"
-            LLVM_VERSION: 17
-          - OS_NAME: "ubuntu"
-            OS_VERSION: "24.04"
-            LLVM_VERSION: 18
-    name: Ubuntu-arm64 ${{ matrix.OS_VERSION }} - LLVM ${{ matrix.LLVM_VERSION }}
+          # - OS_VERSION: "20.04"
+          - OS_VERSION: "22.04"
+          - OS_VERSION: "24.04"
+    name: Ubuntu ${{ matrix.OS_VERSION }}
     steps:
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-bazel-cache
+        with:
+          BUILDBUDDY_API_KEY: ${{ secrets.BUILDBUDDY_API_KEY }}
       - uses: ./.github/actions/detect-package-metadata
         id: metadata
       - uses: docker/login-action@v2
@@ -54,30 +33,30 @@ jobs:
       - name: Build, test, package
         uses: devcontainers/ci@v0.3
         with:
-          imageName: ghcr.io/mull-project/internal-ubuntu-arm64_${{ matrix.OS_VERSION }}_${{ matrix.LLVM_VERSION }}-ci
-          configFile: ./.devcontainer/${{ matrix.OS_NAME }}_${{ matrix.OS_VERSION }}_${{ matrix.LLVM_VERSION }}/devcontainer.json
+          imageName: ghcr.io/mull-project/internal-ubuntu_${{ matrix.OS_VERSION }}-ci
+          configFile: ./.devcontainer/ubuntu_${{ matrix.OS_VERSION }}/devcontainer.json
           runCmd: |
-            cmake --preset mull -DMULL_VERSION=${{ steps.metadata.outputs.version }}${{ steps.metadata.outputs.suffix }}
-            cmake --workflow --preset build-and-test
-            cmake --workflow --preset package
-            ./tests/end2end/run_end2end_tests.sh ${{ matrix.OS_NAME }} ${{ matrix.LLVM_VERSION }}
-            mull-runner-${{ matrix.LLVM_VERSION }} --version
+            bazel build //...
+            bazel test "//tests/unit:*"
+            bazel test "//tests/integration:*"
+            bazel test "//tests/end2end:*"
+            bazel test //...
+            bazel build mull_packages
+            mkdir -p packages
+            mv -v bazel-bin/Mull-*.deb packages/
       - name: Publish package
         uses: devcontainers/ci@v0.3
         if: env.CLOUDSMITH_API_KEY != null
         with:
-          imageName: ghcr.io/mull-project/internal-ubuntu-arm64_${{ matrix.OS_VERSION }}_${{ matrix.LLVM_VERSION }}-ci
-          configFile: ./.devcontainer/${{ matrix.OS_NAME }}_${{ matrix.OS_VERSION }}_${{ matrix.LLVM_VERSION }}/devcontainer.json
+          imageName: ghcr.io/mull-project/internal-ubuntu_${{ matrix.OS_VERSION }}-ci
+          configFile: ./.devcontainer/ubuntu_${{ matrix.OS_VERSION }}/devcontainer.json
           push: never
           runCmd: |
-            UBUNTU_CODENAME=$(. /etc/os-release; echo "${UBUNTU_CODENAME/*, /}")
-            env CLOUDSMITH_API_KEY=${{ secrets.CLOUDSMITH_API_KEY }} cloudsmith push deb \
-              mull-project/mull-${{ steps.metadata.outputs.channel }}/${{ matrix.OS_NAME }}/${UBUNTU_CODENAME} \
-              build.${{ matrix.OS_NAME }}.${{ matrix.LLVM_VERSION }}.dir/*.deb
+            # bazel run publish
       - name: Move package
         run: |
           mkdir -p /tmp/packages
-          sudo mv build.${{ matrix.OS_NAME }}.${{ matrix.LLVM_VERSION }}.dir/*.deb /tmp/packages/
+          sudo mv -v packages/Mull-*.deb /tmp/packages/
       - uses: ./.github/actions/attach-package
         with:
           GH_API_KEY: ${{ secrets.GITHUB_TOKEN }}

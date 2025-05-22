@@ -6,58 +6,37 @@ on:
   push:
     branches: ["main"]
     tags: ["**"]
-  pull_request:
-    branches: ["main"]
+    # pull_request:
+    #   branches: ["main"]
 jobs:
   macos:
     name: LLVM ${{ matrix.LLVM_VERSION }}
     runs-on: macos-latest
-    strategy:
-      matrix:
-        include:
-          - OS_NAME: "macos"
-            LLVM_VERSION: 14
-          - OS_NAME: "macos"
-            LLVM_VERSION: 15
-          - OS_NAME: "macos"
-            LLVM_VERSION: 16
-          - OS_NAME: "macos"
-            LLVM_VERSION: 17
-          - OS_NAME: "macos"
-            LLVM_VERSION: 18
     steps:
-      - name: Fix git
-        run: |
-          git config --global --add safe.directory $PWD
       - uses: actions/checkout@v4
+      - uses: ./.github/actions/setup-bazel-cache
         with:
-          submodules: true
+          BUILDBUDDY_API_KEY: ${{ secrets.BUILDBUDDY_API_KEY }}
       - uses: ./.github/actions/detect-package-metadata
-        id: metadata
-      - name: Run CI task
+      - name: Install dependencies
         run: |
-          brew install zlib ncurses sqlite ninja llvm@${{ matrix.LLVM_VERSION }}
-          pip3 install -r requirements.txt --break-system-packages
-          ./infrastructure/generator.py cmake --os macos --llvm_version ${{ matrix.LLVM_VERSION }}
-          cmake --preset mull -DMULL_VERSION=${{ steps.metadata.outputs.version }}${{ steps.metadata.outputs.suffix }}
-          cmake --workflow --preset build-and-test
-          cmake --workflow --preset package
-          ./tests/end2end/setup_end2end_tests.sh
-          ./tests/end2end/run_end2end_tests.sh macos ${{ matrix.LLVM_VERSION }}
-          mull-runner-${{ matrix.LLVM_VERSION }} --version
+          brew install bazelisk tree
+          brew install llvm@16 llvm@17 llvm@18
+      - name: Debug
+        run: |
+          tree tests/unit
+      - name: Build, test, package
+        run: |
+          bazel build //...
+          bazel test //...
       - name: Publish package
         if: env.CLOUDSMITH_API_KEY != null
         run: |
-          cloudsmith push raw \
-            --name mull-`echo ${{ matrix.LLVM_VERSION }} | awk -F. ' { print $1 } '` \
-            --version ${{ steps.metadata.outputs.version }}${{ steps.metadata.outputs.suffix }} \
-            mull-project/mull-${{ steps.metadata.outputs.channel }} \
-            --tags macos \
-            build.${{ matrix.OS_NAME }}.${{ matrix.LLVM_VERSION }}.dir/*.zip
+          bazel run publish
       - name: Move package
         run: |
           mkdir -p /tmp/packages
-          mv build.${{ matrix.OS_NAME }}.${{ matrix.LLVM_VERSION }}.dir/*.zip /tmp/packages/
+          mv -v bazel-bin/Mull-*.zip /tmp/packages/
       - uses: ./.github/actions/attach-package
         with:
           GH_API_KEY: ${{ secrets.GITHUB_TOKEN }}
