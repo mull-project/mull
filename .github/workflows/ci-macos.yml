@@ -41,8 +41,8 @@ jobs:
           ./infrastructure/generator.py cmake --os macos --llvm_version ${{ matrix.LLVM_VERSION }}
           # new CMake rejects too old json library
           cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 --preset mull -DMULL_VERSION=${{ steps.metadata.outputs.version }}${{ steps.metadata.outputs.suffix }}
-          cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 --workflow --preset build-and-test
-          cmake -DCMAKE_POLICY_VERSION_MINIMUM=3.5 --workflow --preset package
+          cmake --workflow --preset build-and-test
+          cmake --workflow --preset package
           ./tests/end2end/setup_end2end_tests.sh
           ./tests/end2end/run_end2end_tests.sh macos ${{ matrix.LLVM_VERSION }}
           mull-runner-${{ matrix.LLVM_VERSION }} --version
