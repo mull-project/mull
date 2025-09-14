@@ -18,8 +18,6 @@ jobs:
           - OS_NAME: "macos"
             LLVM_VERSION: 14
           - OS_NAME: "macos"
-            LLVM_VERSION: 15
-          - OS_NAME: "macos"
             LLVM_VERSION: 16
           - OS_NAME: "macos"
             LLVM_VERSION: 17

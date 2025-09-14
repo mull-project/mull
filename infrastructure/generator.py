@@ -25,7 +25,7 @@ SUPPORTED_PLATFORMS = {
         "runner": "ubuntu-24.04-arm",
     },
     "macos": {
-        "versions": {"latest": [14, 15, 16, 17, 18]},
+        "versions": {"latest": [14, 16, 17, 18]},
         "template": "macos",
         "runner": "macos-latest",
     },
