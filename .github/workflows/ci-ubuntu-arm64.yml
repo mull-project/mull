@@ -43,7 +43,9 @@ jobs:
             LLVM_VERSION: 18
     name: Ubuntu-arm64 ${{ matrix.OS_VERSION }} - LLVM ${{ matrix.LLVM_VERSION }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
+        with:
+          submodules: "recursive"
       - uses: ./.github/actions/detect-package-metadata
         id: metadata
       - uses: docker/login-action@v2

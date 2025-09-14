@@ -23,9 +23,9 @@ jobs:
       - name: Fix git
         run: |
           git config --global --add safe.directory $PWD
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
-          submodules: true
+          submodules: "recursive"
       - uses: ./.github/actions/detect-package-metadata
         id: metadata
       - name: Run CI task
