@@ -16,9 +16,9 @@ jobs:
           apt-get install -y git curl cmake ninja-build libz-dev libsqlite3-dev ncurses-dev liblzma-dev
           curl -1sLf 'https://dl.cloudsmith.io/public/mull-project/mull-stable/setup.deb.sh' | bash
           apt-get install -y clang-12 libclang-12-dev mull-12=0.21.0
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v5
         with:
-          submodules: true
+          submodules: "recursive"
       - name: For debugging
         run: |
           env | sort
