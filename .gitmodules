@@ -12,3 +12,6 @@
 [submodule "vendor/reproc"]
 	path = vendor/reproc
 	url = https://github.com/DaanDeMeyer/reproc.git
+[submodule "vendor/googletest"]
+	path = vendor/googletest
+	url = https://github.com/google/googletest.git
