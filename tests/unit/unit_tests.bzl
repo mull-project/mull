@@ -120,6 +120,8 @@ def mull_unit_tests(name):
             srcs = [
                 "//tests/unit/fixtures/mutators:replace_assignment/module.c",
                 "//tests/unit/fixtures/mutators:%s_replace_assignment/module.c.bc" % llvm_version,
+                "//tests/unit/fixtures/mutators:%s_replace_call/junk.cpp.bc" % llvm_version,
+                "//tests/unit/fixtures/mutators:%s_replace_call/module.c.bc" % llvm_version,
             ],
         )
 
