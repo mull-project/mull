@@ -1,1 +1,0 @@
-set(CPACK_GENERATOR "ZIP")

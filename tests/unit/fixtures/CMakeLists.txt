@@ -1,5 +1,0 @@
-add_subdirectory(junk_detection)
-add_subdirectory(mutators)
-add_subdirectory(simple_test)
-add_subdirectory(hardcode)
-add_subdirectory(mutation_filters)
