@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-24.04-arm
     strategy:
       matrix:
-        LLVM_VERSION: [14, 15, 16, 17, 18]
+        LLVM_VERSION: [14, 15, 16, 17, 18, 19]
     name: Ubuntu-arm64 24.04 - LLVM ${{ matrix.LLVM_VERSION }}
     steps:
       - uses: actions/checkout@v5

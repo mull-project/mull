@@ -72,8 +72,8 @@ bazel_dep(name = "bazel_skylib", version = "1.7.1")
 mull_supported_llvm_versions = use_extension("//:mull_supported_llvm_versions.bzl", "mull_supported_llvm_versions")
 mull_supported_llvm_versions.configure(
     os_version_mapping = {
-        "macos": ["16", "17", "18"],
-        "ubuntu:24.04": ["14", "15", "16", "17", "18"],
+        "macos": ["16", "17", "18", "19"],
+        "ubuntu:24.04": ["14", "15", "16", "17", "18", "19"],
     },
 )
 use_repo(mull_supported_llvm_versions, "supported_llvm_versions")
@@ -87,6 +87,7 @@ SUPPORTED_LLVM_VERSIONS = [
     "16",
     "17",
     "18",
+    "19",
 ]
 
 available_llvm_versions = use_extension("//:mull_available_llvm_versions.bzl", "available_llvm_versions")
