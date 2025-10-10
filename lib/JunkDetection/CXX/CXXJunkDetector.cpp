@@ -5,7 +5,6 @@
 #include "mull/JunkDetection/CXX/Visitors/NegateConditionVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/RemoveVoidFunctionVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/ReplaceCallVisitor.h"
-#include "mull/JunkDetection/CXX/Visitors/ScalarValueVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/UnaryVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/VarDeclVisitor.h"
 #include "mull/MutationPoint.h"
@@ -33,11 +32,6 @@ static const clang::Stmt *findMutantExpression(MutationPoint *point,
   }
   case MutatorKind::NegateMutator: {
     NegateConditionVisitor visitor(visitorParameters);
-    visitor.TraverseDecl(decl);
-    return visitor.foundMutant();
-  }
-  case MutatorKind::ScalarValueMutator: {
-    ScalarValueVisitor visitor(visitorParameters);
     visitor.TraverseDecl(decl);
     return visitor.foundMutant();
   }

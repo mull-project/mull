@@ -4,7 +4,6 @@
 #include "mull/MutationPoint.h"
 #include "mull/Mutators/CXX/CallMutators.h"
 #include "mull/Mutators/CXX/LogicalAndToOr.h"
-#include "mull/Mutators/ScalarValueMutator.h"
 #include "tests/unit/Helpers/BitcodeLoader.h"
 #include "tests/unit/Helpers/TestModuleFactory.h"
 
@@ -23,44 +22,6 @@
 
 using namespace mull;
 using namespace llvm;
-
-TEST(MutationPoint, ScalarValueMutator_applyMutation) {
-  Diagnostics diagnostics;
-  BitcodeLoader loader;
-  auto bitcode = loader.loadBitcodeAtPath(
-      fixtures::tests_unit_fixtures_mutators_scalar_value_module_c_bc_path(), diagnostics);
-
-  ScalarValueMutator mutator;
-  FunctionUnderTest functionUnderTest(bitcode->getModule()->getFunction("scalar_value"),
-                                      bitcode.get());
-  functionUnderTest.selectInstructions({});
-  auto mutationPoints = mutator.getMutations(bitcode.get(), functionUnderTest);
-
-  ASSERT_EQ(4U, mutationPoints.size());
-
-  MutationPoint *mutationPoint1 = mutationPoints[0];
-  MutationPointAddress mutationPointAddress1 = mutationPoint1->getAddress();
-  ASSERT_TRUE(isa<StoreInst>(mutationPoint1->getOriginalValue()));
-
-  MutationPoint *mutationPoint2 = mutationPoints[1];
-  MutationPointAddress mutationPointAddress2 = mutationPoint2->getAddress();
-  ASSERT_TRUE(isa<StoreInst>(mutationPoint2->getOriginalValue()));
-
-  MutationPoint *mutationPoint3 = mutationPoints[2];
-  MutationPointAddress mutationPointAddress3 = mutationPoint3->getAddress();
-  ASSERT_TRUE(isa<BinaryOperator>(mutationPoint3->getOriginalValue()));
-
-  MutationPoint *mutationPoint4 = mutationPoints[3];
-  MutationPointAddress mutationPointAddress4 = mutationPoint4->getAddress();
-  ASSERT_TRUE(isa<BinaryOperator>(mutationPoint4->getOriginalValue()));
-
-  mutationPoint1->setMutatedFunction(mutationPoint1->getOriginalFunction());
-  mutationPoint1->applyMutation();
-
-  auto &mutatedInstruction =
-      mutationPoint1->getAddress().findInstruction(mutationPoint1->getOriginalFunction());
-  ASSERT_TRUE(isa<StoreInst>(mutatedInstruction));
-}
 
 TEST(MutationPoint, ReplaceCallMutator_applyMutation) {
   Diagnostics diagnostics;
