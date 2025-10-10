@@ -1,7 +1,6 @@
 #include "mull/Bitcode.h"
 #include "mull/MutationPoint.h"
 #include "mull/Mutators/CXX/NumberMutators.h"
-#include "mull/Mutators/ScalarValueMutator.h"
 
 #include <clang/Frontend/ASTUnit.h>
 #include <clang/Tooling/Tooling.h>

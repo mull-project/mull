@@ -45,8 +45,6 @@ def mull_unit_tests(name):
                 "//tests/unit/fixtures/mutators:%s_replace_assignment/module.c.bc" % llvm_version,
                 "//tests/unit/fixtures/mutators:%s_replace_call/junk.cpp.bc" % llvm_version,
                 "//tests/unit/fixtures/mutators:%s_replace_call/module.c.bc" % llvm_version,
-                "//tests/unit/fixtures/mutators:%s_scalar_value/junk.cpp.bc" % llvm_version,
-                "//tests/unit/fixtures/mutators:%s_scalar_value/module.c.bc" % llvm_version,
                 "//tests/unit/fixtures/simple_test/count_letters:%s_count_letters.c.bc" % llvm_version,
                 "//tests/unit/fixtures/simple_test/count_letters:%s_test_count_letters.c.bc" % llvm_version,
             ],
@@ -101,11 +99,6 @@ def mull_unit_tests(name):
         )
 
         native.filegroup(
-            name = "Mutators/ScalarValueMutatorTest.cpp_%s_fixtures" % llvm_version,
-            srcs = ["//tests/unit/fixtures/mutators:%s_scalar_value/module.c.bc" % llvm_version],
-        )
-
-        native.filegroup(
             name = "MutationTestingElementsReporterTest.cpp_%s_fixtures" % llvm_version,
             srcs = [
                 "//tests/unit/fixtures/simple_test/count_letters:count_letters.c",
@@ -127,8 +120,6 @@ def mull_unit_tests(name):
             srcs = [
                 "//tests/unit/fixtures/mutators:replace_assignment/module.c",
                 "//tests/unit/fixtures/mutators:%s_replace_assignment/module.c.bc" % llvm_version,
-                "//tests/unit/fixtures/mutators:%s_replace_call/module.c.bc" % llvm_version,
-                "//tests/unit/fixtures/mutators:%s_scalar_value/module.c.bc" % llvm_version,
             ],
         )
 
@@ -174,8 +165,6 @@ def mull_unit_tests(name):
                 "//tests/unit/fixtures/mutators:%s_replace_assignment/junk.cpp.bc" % llvm_version,
                 "//tests/unit/fixtures/mutators:replace_call/junk.cpp",
                 "//tests/unit/fixtures/mutators:%s_replace_call/junk.cpp.bc" % llvm_version,
-                "//tests/unit/fixtures/mutators:scalar_value/junk.cpp",
-                "//tests/unit/fixtures/mutators:%s_scalar_value/junk.cpp.bc" % llvm_version,
             ],
         )
 

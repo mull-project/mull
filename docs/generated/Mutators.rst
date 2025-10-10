@@ -86,8 +86,6 @@
 .. |desc42| replace:: Replaces ^ with |
 .. |op43| replace:: negate_mutator
 .. |desc43| replace:: Negates conditionals !x to x and x to !x
-.. |op44| replace:: scalar_value_mutator
-.. |desc44| replace:: Replaces zeros with 42, and non-zeros with 0
 
 
 ============= ==================
@@ -137,7 +135,6 @@ Operator Name Operator Semantics
 |op41|        |desc41|
 |op42|        |desc42|
 |op43|        |desc43|
-|op44|        |desc44|
 ============= ==================
 
 
@@ -170,4 +167,4 @@ Groups:
 
     :cxx_logical:	cxx_logical_and_to_or, cxx_logical_or_to_and, cxx_remove_negation
 
-    :experimental:	negate_mutator, scalar_value_mutator, cxx_logical
+    :experimental:	negate_mutator, cxx_logical

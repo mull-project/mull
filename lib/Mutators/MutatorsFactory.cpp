@@ -11,7 +11,6 @@
 #include "mull/Mutators/CXX/RemoveNegation.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Mutators/NegateConditionMutator.h"
-#include "mull/Mutators/ScalarValueMutator.h"
 #include <llvm/ADT/STLExtras.h>
 #include <sstream>
 #include <unordered_set>
@@ -174,9 +173,7 @@ MutatorsFactory::MutatorsFactory(Diagnostics &diagnostics) : diagnostics(diagnos
     CXX_Boundary(),
   };
 
-  groupsMapping[Experimental()] = { NegateConditionMutator::ID(),
-                                    ScalarValueMutator::ID(),
-                                    CXX_Logical() };
+  groupsMapping[Experimental()] = { NegateConditionMutator::ID(), CXX_Logical() };
 }
 
 template <typename MutatorClass>
@@ -186,7 +183,6 @@ void addMutator(std::map<std::string, std::unique_ptr<Mutator>> &mapping) {
 
 void MutatorsFactory::init() {
   addMutator<NegateConditionMutator>(mutatorsMapping);
-  addMutator<ScalarValueMutator>(mutatorsMapping);
 
   addMutator<cxx::RemoveVoidCall>(mutatorsMapping);
   addMutator<cxx::ReplaceScalarCall>(mutatorsMapping);

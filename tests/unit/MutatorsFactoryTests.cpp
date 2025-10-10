@@ -35,13 +35,6 @@ TEST(MutatorsFactory, SingleMutators) {
     mutator = mutators[0].get();
     ASSERT_EQ(mutator->getUniqueIdentifier(), "cxx_replace_scalar_call");
   }
-
-  {
-    mutators = factory.mutators({ "scalar_value_mutator" }, {});
-    ASSERT_EQ(mutators.size(), 1UL);
-    mutator = mutators[0].get();
-    ASSERT_EQ(mutator->getUniqueIdentifier(), "scalar_value_mutator");
-  }
 }
 
 static std::function<bool(unique_ptr<Mutator> &)> predicate(const char *name) {
@@ -80,10 +73,7 @@ TEST(MutatorsFactory, CompositeMutators) {
 
   {
     mutators = factory.mutators({ "experimental" }, {});
-    ASSERT_EQ(mutators.size(), 5UL);
-
-    searchResult = find_if(mutators.begin(), mutators.end(), predicate("scalar_value_mutator"));
-    ASSERT_NE(searchResult, mutators.end());
+    ASSERT_EQ(mutators.size(), 4UL);
   }
 }
 
