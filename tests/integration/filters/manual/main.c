@@ -27,6 +27,11 @@ int ignore_next_line_add(int a, int b, int c) {
   return a + b - c;
 }
 
+int ignore_next_line_add2(int a, int b, int c) {
+  /* mull-ignore-next: cxx_add_to_sub */
+  return a + b - c;
+}
+
 int main(int argc, char **argv) {
   ignored_block(2, 42);
   add_from_header(15, 22);
@@ -43,7 +48,7 @@ int main(int argc, char **argv) {
 
 // RUN: unset TERM; %mull_runner --allow-surviving --ide-reporter-show-killed %s.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 
-// CHECK:[info] Survived mutants (4/4):
+// CHECK:[info] Survived mutants (5/5):
 // CHECK-NEXT:{{.*}}/header.h:7:12: warning: Survived: Replaced - with + [cxx_sub_to_add]
 // CHECK-NEXT:  return a - b;
 // CHECK-NEXT:           ^
@@ -54,6 +59,9 @@ int main(int argc, char **argv) {
 // CHECK-NEXT:  return a + b - c; // mull-ignore: cxx_add_to_sub
 // CHECK-NEXT:               ^
 // CHECK-NEXT:{{.*}}/main.c:27:16: warning: Survived: Replaced - with + [cxx_sub_to_add]
+// CHECK-NEXT:  return a + b - c;
+// CHECK-NEXT:               ^
+// CHECK-NEXT:{{.*}}/main.c:32:16: warning: Survived: Replaced - with + [cxx_sub_to_add]
 // CHECK-NEXT:  return a + b - c;
 // CHECK-NEXT:               ^
 // CHECK-NEXT:[info] Mutation score: 0%
