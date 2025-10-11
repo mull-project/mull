@@ -48,8 +48,14 @@ static std::vector<std::string> split(const std::string &input, char delimiter) 
   return output;
 }
 
+static bool invalid_mutator_char(char c) {
+  if (c == '_' || isalpha(c))
+    return false;
+  return true;
+}
+
 static std::vector<std::string> parseMutators(std::string line) {
-  line.erase(std::remove_if(line.begin(), line.end(), isspace), line.end());
+  line.erase(std::remove_if(line.begin(), line.end(), invalid_mutator_char), line.end());
   return split(line, ',');
 }
 
