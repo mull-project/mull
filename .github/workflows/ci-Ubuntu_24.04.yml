@@ -44,7 +44,18 @@ jobs:
           push: never
           env: CLOUDSMITH_API_KEY
           runCmd: |
-            bazel run publish
+            bazel run publish && exit 0
+
+            max_attempts=3
+            attempt=1
+            until [ "$attempt" -ge "$max_attempts" ]
+            do
+              echo "Attempt $attempt failed. Retrying..."
+              attempt=$((attempt+1))
+              bazel run publish && exit 0
+            done
+            echo "All $max_attempts attempts failed."
+            exit 1
       - name: Move package
         run: |
           mkdir -p /tmp/packages
