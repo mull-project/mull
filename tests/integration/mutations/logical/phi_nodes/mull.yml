@@ -1,3 +1,0 @@
-mutators:
-  - cxx_logical_and_to_or
-  - cxx_logical_or_to_and

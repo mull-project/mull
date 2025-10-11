@@ -40,8 +40,6 @@ static const std::vector<MutationIdentifier> MUTATIONS_MAP({
     { "cxx_post_dec_to_post_inc", mull::MutatorKind::CXX_PostDecToPostInc },
     { "cxx_pre_inc_to_pre_dec", mull::MutatorKind::CXX_PreIncToPreDec },
     { "cxx_pre_dec_to_pre_inc", mull::MutatorKind::CXX_PreDecToPreInc },
-    { "cxx_logical_and_to_or", mull::MutatorKind::CXX_Logical_AndToOr },
-    { "cxx_logical_or_to_and", mull::MutatorKind::CXX_Logical_OrToAnd },
     { "cxx_remove_void_call", mull::MutatorKind::CXX_RemoveVoidCall },
     { "cxx_minus_to_noop", mull::MutatorKind::CXX_UnaryMinusToNoop },
     { "cxx_bitwise_not_to_noop", mull::MutatorKind::CXX_BitwiseNotToNoop },

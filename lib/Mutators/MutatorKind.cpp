@@ -77,12 +77,6 @@ std::string MutationKindToString(MutatorKind mutatorKind) {
   case MutatorKind::CXX_RShiftAssignToLShiftAssign: {
     return "Right Shift-Assign to Left Shift-Assign";
   }
-  case MutatorKind::CXX_Logical_AndToOr: {
-    return "Logical And to Or";
-  }
-  case MutatorKind::CXX_Logical_OrToAnd: {
-    return "Logical Or to And";
-  }
   case MutatorKind::CXX_Bitwise_OrToAnd: {
     return "Bitwise Or to And";
   }

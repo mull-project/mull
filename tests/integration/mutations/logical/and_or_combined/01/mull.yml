@@ -1,4 +1,0 @@
-mutators:
-  - cxx_logical_or_to_and
-  - cxx_logical_and_to_or
-quiet: false

@@ -61,12 +61,8 @@ TEST(MutatorsFactory, CompositeMutators) {
 
   {
     mutators = factory.mutators({ "cxx_logical" }, {});
-    ASSERT_EQ(mutators.size(), 3UL);
+    ASSERT_EQ(mutators.size(), 1UL);
 
-    searchResult = find_if(mutators.begin(), mutators.end(), predicate("cxx_logical_or_to_and"));
-    ASSERT_NE(searchResult, mutators.end());
-    searchResult = find_if(mutators.begin(), mutators.end(), predicate("cxx_logical_and_to_or"));
-    ASSERT_NE(searchResult, mutators.end());
     searchResult = find_if(mutators.begin(), mutators.end(), predicate("cxx_remove_negation"));
     ASSERT_NE(searchResult, mutators.end());
   }

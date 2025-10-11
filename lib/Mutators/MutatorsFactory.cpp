@@ -4,8 +4,6 @@
 #include "mull/Mutators/CXX/ArithmeticMutators.h"
 #include "mull/Mutators/CXX/BitwiseMutators.h"
 #include "mull/Mutators/CXX/CallMutators.h"
-#include "mull/Mutators/CXX/LogicalAndToOr.h"
-#include "mull/Mutators/CXX/LogicalOrToAnd.h"
 #include "mull/Mutators/CXX/NumberMutators.h"
 #include "mull/Mutators/CXX/RelationalMutators.h"
 #include "mull/Mutators/CXX/RemoveNegation.h"
@@ -136,8 +134,6 @@ MutatorsFactory::MutatorsFactory(Diagnostics &diagnostics) : diagnostics(diagnos
   };
 
   groupsMapping[CXX_Logical()] = {
-    cxx::LogicalAndToOr::ID(), // a && b | a || b
-    cxx::LogicalOrToAnd::ID(), // a || b | a && b
     cxx::RemoveNegation::ID(), // !a     | a
   };
 
@@ -219,8 +215,6 @@ void MutatorsFactory::init() {
   addMutator<cxx::LShiftToRShift>(mutatorsMapping);
   addMutator<cxx::RShiftToLShift>(mutatorsMapping);
 
-  addMutator<cxx::LogicalAndToOr>(mutatorsMapping);
-  addMutator<cxx::LogicalOrToAnd>(mutatorsMapping);
   addMutator<cxx::RemoveNegation>(mutatorsMapping);
 
   addMutator<cxx::EqualToNotEqual>(mutatorsMapping);

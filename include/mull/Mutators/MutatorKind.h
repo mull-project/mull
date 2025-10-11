@@ -43,9 +43,6 @@ enum class MutatorKind {
   CXX_RShiftToLShift,
   CXX_RShiftAssignToLShiftAssign,
 
-  CXX_Logical_AndToOr,
-  CXX_Logical_OrToAnd,
-
   CXX_Bitwise_OrToAnd,
   CXX_Bitwise_OrAssignToAndAssign,
   CXX_Bitwise_AndToOr,

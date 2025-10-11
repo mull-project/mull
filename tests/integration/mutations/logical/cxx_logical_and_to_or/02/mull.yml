@@ -1,4 +1,0 @@
-mutators:
-  - cxx_logical_and_to_or
-junkDetectionDisabled: true
-quiet: false
