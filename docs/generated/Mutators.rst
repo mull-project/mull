@@ -30,62 +30,58 @@
 .. |desc14| replace:: Replaces <= with >
 .. |op15| replace:: cxx_le_to_lt
 .. |desc15| replace:: Replaces <= with <
-.. |op16| replace:: cxx_logical_and_to_or
-.. |desc16| replace:: Replaces && with ||
-.. |op17| replace:: cxx_logical_or_to_and
-.. |desc17| replace:: Replaces || with &&
-.. |op18| replace:: cxx_lshift_assign_to_rshift_assign
-.. |desc18| replace:: Replaces <<= with >>=
-.. |op19| replace:: cxx_lshift_to_rshift
-.. |desc19| replace:: Replaces << with >>
-.. |op20| replace:: cxx_lt_to_ge
-.. |desc20| replace:: Replaces < with >=
-.. |op21| replace:: cxx_lt_to_le
-.. |desc21| replace:: Replaces < with <=
-.. |op22| replace:: cxx_minus_to_noop
-.. |desc22| replace:: Replaces -x with x
-.. |op23| replace:: cxx_mul_assign_to_div_assign
-.. |desc23| replace:: Replaces \*= with /=
-.. |op24| replace:: cxx_mul_to_div
-.. |desc24| replace:: Replaces * with /
-.. |op25| replace:: cxx_ne_to_eq
-.. |desc25| replace:: Replaces != with ==
-.. |op26| replace:: cxx_or_assign_to_and_assign
-.. |desc26| replace:: Replaces \|= with &=
-.. |op27| replace:: cxx_or_to_and
-.. |desc27| replace:: Replaces | with &
-.. |op28| replace:: cxx_post_dec_to_post_inc
-.. |desc28| replace:: Replaces x-- with x++
-.. |op29| replace:: cxx_post_inc_to_post_dec
-.. |desc29| replace:: Replaces x++ with x--
-.. |op30| replace:: cxx_pre_dec_to_pre_inc
-.. |desc30| replace:: Replaces --x with ++x
-.. |op31| replace:: cxx_pre_inc_to_pre_dec
-.. |desc31| replace:: Replaces ++x with --x
-.. |op32| replace:: cxx_rem_assign_to_div_assign
-.. |desc32| replace:: Replaces %= with /=
-.. |op33| replace:: cxx_rem_to_div
-.. |desc33| replace:: Replaces % with /
-.. |op34| replace:: cxx_remove_negation
-.. |desc34| replace:: Replaces !a with a
-.. |op35| replace:: cxx_remove_void_call
-.. |desc35| replace:: Removes calls to a function returning void
-.. |op36| replace:: cxx_replace_scalar_call
-.. |desc36| replace:: Replaces call to a function with 42
-.. |op37| replace:: cxx_rshift_assign_to_lshift_assign
-.. |desc37| replace:: Replaces >>= with <<=
-.. |op38| replace:: cxx_rshift_to_lshift
-.. |desc38| replace:: Replaces << with >>
-.. |op39| replace:: cxx_sub_assign_to_add_assign
-.. |desc39| replace:: Replaces -= with +=
-.. |op40| replace:: cxx_sub_to_add
-.. |desc40| replace:: Replaces - with +
-.. |op41| replace:: cxx_xor_assign_to_or_assign
-.. |desc41| replace:: Replaces ^= with \|=
-.. |op42| replace:: cxx_xor_to_or
-.. |desc42| replace:: Replaces ^ with |
-.. |op43| replace:: negate_mutator
-.. |desc43| replace:: Negates conditionals !x to x and x to !x
+.. |op16| replace:: cxx_lshift_assign_to_rshift_assign
+.. |desc16| replace:: Replaces <<= with >>=
+.. |op17| replace:: cxx_lshift_to_rshift
+.. |desc17| replace:: Replaces << with >>
+.. |op18| replace:: cxx_lt_to_ge
+.. |desc18| replace:: Replaces < with >=
+.. |op19| replace:: cxx_lt_to_le
+.. |desc19| replace:: Replaces < with <=
+.. |op20| replace:: cxx_minus_to_noop
+.. |desc20| replace:: Replaces -x with x
+.. |op21| replace:: cxx_mul_assign_to_div_assign
+.. |desc21| replace:: Replaces \*= with /=
+.. |op22| replace:: cxx_mul_to_div
+.. |desc22| replace:: Replaces * with /
+.. |op23| replace:: cxx_ne_to_eq
+.. |desc23| replace:: Replaces != with ==
+.. |op24| replace:: cxx_or_assign_to_and_assign
+.. |desc24| replace:: Replaces \|= with &=
+.. |op25| replace:: cxx_or_to_and
+.. |desc25| replace:: Replaces | with &
+.. |op26| replace:: cxx_post_dec_to_post_inc
+.. |desc26| replace:: Replaces x-- with x++
+.. |op27| replace:: cxx_post_inc_to_post_dec
+.. |desc27| replace:: Replaces x++ with x--
+.. |op28| replace:: cxx_pre_dec_to_pre_inc
+.. |desc28| replace:: Replaces --x with ++x
+.. |op29| replace:: cxx_pre_inc_to_pre_dec
+.. |desc29| replace:: Replaces ++x with --x
+.. |op30| replace:: cxx_rem_assign_to_div_assign
+.. |desc30| replace:: Replaces %= with /=
+.. |op31| replace:: cxx_rem_to_div
+.. |desc31| replace:: Replaces % with /
+.. |op32| replace:: cxx_remove_negation
+.. |desc32| replace:: Replaces !a with a
+.. |op33| replace:: cxx_remove_void_call
+.. |desc33| replace:: Removes calls to a function returning void
+.. |op34| replace:: cxx_replace_scalar_call
+.. |desc34| replace:: Replaces call to a function with 42
+.. |op35| replace:: cxx_rshift_assign_to_lshift_assign
+.. |desc35| replace:: Replaces >>= with <<=
+.. |op36| replace:: cxx_rshift_to_lshift
+.. |desc36| replace:: Replaces << with >>
+.. |op37| replace:: cxx_sub_assign_to_add_assign
+.. |desc37| replace:: Replaces -= with +=
+.. |op38| replace:: cxx_sub_to_add
+.. |desc38| replace:: Replaces - with +
+.. |op39| replace:: cxx_xor_assign_to_or_assign
+.. |desc39| replace:: Replaces ^= with \|=
+.. |op40| replace:: cxx_xor_to_or
+.. |desc40| replace:: Replaces ^ with |
+.. |op41| replace:: negate_mutator
+.. |desc41| replace:: Negates conditionals !x to x and x to !x
 
 
 ============= ==================
@@ -133,8 +129,6 @@ Operator Name Operator Semantics
 |op39|        |desc39|
 |op40|        |desc40|
 |op41|        |desc41|
-|op42|        |desc42|
-|op43|        |desc43|
 ============= ==================
 
 
@@ -165,6 +159,6 @@ Groups:
 
     :cxx_increment:	cxx_pre_inc_to_pre_dec, cxx_post_inc_to_post_dec
 
-    :cxx_logical:	cxx_logical_and_to_or, cxx_logical_or_to_and, cxx_remove_negation
+    :cxx_logical:	cxx_remove_negation
 
     :experimental:	negate_mutator, cxx_logical
