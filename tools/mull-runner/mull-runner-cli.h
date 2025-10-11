@@ -31,7 +31,7 @@ LDSearchPaths_();
 CoverageInfo_();
 DebugCoverage_();
 
-void dumpCLIInterface(mull::Diagnostics &diagnostics) {
+void dumpCLIInterface(mull::Diagnostics &diagnostics, std::string out) {
   // Enumerating CLI options explicitly to control the order and what to show
   Option *reporters = &(Option &)ReportersOption;
   std::vector<Option *> mullOptions({
@@ -58,7 +58,7 @@ void dumpCLIInterface(mull::Diagnostics &diagnostics) {
       &CoverageInfo,
       &DebugCoverage,
   });
-  dumpCLIInterface(diagnostics, mullOptions, reporters);
+  dumpCLIInterface(diagnostics, mullOptions, reporters, out);
 }
 
 } // namespace tool

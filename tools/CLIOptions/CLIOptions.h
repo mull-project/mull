@@ -190,20 +190,18 @@ opt<bool> NoOutput( \
     cat(MullCategory)) \
 
 #define DumpCLIInterface_() \
-opt<bool> DumpCLIInterface( \
+opt<std::string> DumpCLIInterface( \
     "dump-cli", \
     desc("Prints CLI options in the Sphinx/RST friendly format"), \
     Optional, \
-    init(false), \
     cat(MullCategory), \
     Hidden) \
 
 #define DumpMutators_() \
-opt<bool> DumpMutators( \
+opt<std::string> DumpMutators( \
     "dump-mutators", \
     desc("Prints available mutators in the Sphinx/RST friendly format"), \
     Optional, \
-    init(false), \
     cat(MullCategory), \
     Hidden)
 
@@ -247,9 +245,10 @@ private:
   llvm::cl::list<mull::ReporterKind> &parameter;
 };
 
-void dumpCLIInterface(mull::Diagnostics &diagnostics);
+void dumpCLIInterface(mull::Diagnostics &diagnostics, std::string out);
 void dumpCLIInterface(mull::Diagnostics &diagnostics,
-                      const std::vector<llvm::cl::Option *> &options, llvm::cl::Option *reporters);
-void dumpMutators(mull::Diagnostics &diagnostics);
+                      const std::vector<llvm::cl::Option *> &options, llvm::cl::Option *reporters,
+                      std::string out);
+void dumpMutators(mull::Diagnostics &diagnostics, std::string out);
 
 } // namespace tool

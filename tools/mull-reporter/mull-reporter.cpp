@@ -99,8 +99,8 @@ int main(int argc, char **argv) {
   llvm::cl::HideUnrelatedOptions(tool::MullCategory);
   bool validOptions = llvm::cl::ParseCommandLineOptions(argc, argv, "", &llvm::errs());
   if (!validOptions) {
-    if (tool::DumpCLIInterface) {
-      tool::dumpCLIInterface(diagnostics);
+    if (!tool::DumpCLIInterface.getValue().empty()) {
+      tool::dumpCLIInterface(diagnostics, tool::DumpCLIInterface.getValue());
       return 0;
     }
     return 1;
