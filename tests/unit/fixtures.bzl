@@ -1,5 +1,4 @@
 def _fixture_impl(ctx):
-    # llvm_version = "18"
     out = ctx.actions.declare_file(ctx.label.name)
 
     # this is a hack for a single test case

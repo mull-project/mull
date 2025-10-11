@@ -117,7 +117,7 @@ void dumpCLIReporters(std::stringstream &stream) {
 
 void tool::dumpCLIInterface(mull::Diagnostics &diagnostics,
                             const std::vector<llvm::cl::Option *> &options,
-                            llvm::cl::Option *reporters) {
+                            llvm::cl::Option *reporters, std::string out) {
   std::stringstream help;
   for (llvm::cl::Option *option : options) {
     dumpCLIOption(help, option);
@@ -126,11 +126,17 @@ void tool::dumpCLIInterface(mull::Diagnostics &diagnostics,
       dumpCLIReporters(help);
     }
   }
-
-  llvm::outs() << help.str();
+  std::error_code ec;
+  llvm::raw_fd_ostream os(out, ec);
+  if (ec) {
+    diagnostics.error(ec.message());
+  }
+  auto s = help.str();
+  // trim trailing newline
+  os << s.substr(0, s.size() - 1);
 }
 
-void tool::dumpMutators(Diagnostics &diagnostics) {
+void tool::dumpMutators(Diagnostics &diagnostics, std::string out) {
   MutatorsFactory factory(diagnostics);
   factory.init();
 
@@ -179,6 +185,13 @@ void tool::dumpMutators(Diagnostics &diagnostics) {
           << "\n\n";
   }
 
-  llvm::outs() << replacements.str();
-  llvm::outs() << table.str();
+  std::error_code ec;
+  llvm::raw_fd_ostream os(out, ec);
+  if (ec) {
+    diagnostics.error(ec.message());
+  }
+  os << replacements.str();
+  auto s = table.str();
+  // trim trailing newline
+  os << s.substr(0, s.size() - 1);
 }
