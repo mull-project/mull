@@ -38,9 +38,6 @@ std::vector<
       { clang::BO_XorAssign, MutatorKind::CXX_Bitwise_XorAssignToOrAssign, clang::BO_OrAssign },
       { clang::BO_ShlAssign, MutatorKind::CXX_LShiftAssignToRShiftAssign, clang::BO_ShrAssign },
       { clang::BO_ShrAssign, MutatorKind::CXX_RShiftAssignToLShiftAssign, clang::BO_ShlAssign },
-
-      { clang::BO_LAnd, MutatorKind::CXX_Logical_AndToOr, clang::BO_LOr },
-      { clang::BO_LOr, MutatorKind::CXX_Logical_OrToAnd, clang::BO_LAnd }
     };
 
 std::vector<std::pair<clang::UnaryOperator::Opcode, mull::MutatorKind>> mull::UnaryMutations = {

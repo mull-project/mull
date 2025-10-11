@@ -163,12 +163,6 @@ static const clang::Stmt *findMutantExpression(MutationPoint *point,
     visitor.TraverseDecl(decl);
     return visitor.foundMutant();
   }
-  case MutatorKind::CXX_Logical_AndToOr:
-    return cxx::BinaryVisitor::findMutant(
-        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_LAnd);
-  case MutatorKind::CXX_Logical_OrToAnd:
-    return cxx::BinaryVisitor::findMutant(
-        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_LOr);
 
   case MutatorKind::CXX_RemoveNegation:
     return cxx::UnaryVisitor::findMutant(

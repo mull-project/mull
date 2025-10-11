@@ -8,8 +8,6 @@
 #include <mull/Diagnostics/Diagnostics.h>
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 #include <mull/Mutators/CXX/BitwiseMutators.h>
-#include <mull/Mutators/CXX/LogicalAndToOr.h>
-#include <mull/Mutators/CXX/LogicalOrToAnd.h>
 #include <mull/Mutators/CXX/NumberMutators.h>
 #include <mull/Mutators/CXX/RelationalMutators.h>
 #include <mull/Mutators/CXX/RemoveNegation.h>
@@ -174,14 +172,6 @@ static const CXXJunkDetectorTestParameter parameters[] = {
   CXXJunkDetectorTestParameter(
       fixtures::tests_unit_fixtures_mutators_replace_assignment_junk_cpp_bc_path(),
       new cxx::NumberInitConst, 6),
-
-  CXXJunkDetectorTestParameter(
-      fixtures::tests_unit_fixtures_mutators_and_or_and_to_or_replacement_cpp_junk_cpp_bc_path(),
-      new cxx::LogicalAndToOr, 2),
-
-  CXXJunkDetectorTestParameter(
-      fixtures::tests_unit_fixtures_mutators_and_or_or_to_and_replacement_cpp_junk_cpp_bc_path(),
-      new cxx::LogicalOrToAnd, 2),
 
   CXXJunkDetectorTestParameter(
       fixtures::tests_unit_fixtures_mutators_remove_void_function_junk_cpp_bc_path(),

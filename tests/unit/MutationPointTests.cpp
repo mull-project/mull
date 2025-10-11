@@ -3,7 +3,6 @@
 #include "mull/FunctionUnderTest.h"
 #include "mull/MutationPoint.h"
 #include "mull/Mutators/CXX/CallMutators.h"
-#include "mull/Mutators/CXX/LogicalAndToOr.h"
 #include "tests/unit/Helpers/BitcodeLoader.h"
 #include "tests/unit/Helpers/TestModuleFactory.h"
 
