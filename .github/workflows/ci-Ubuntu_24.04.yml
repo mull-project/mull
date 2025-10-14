@@ -32,8 +32,10 @@ jobs:
           configFile: ./.devcontainer/ubuntu_24.04-llvm-${{ matrix.LLVM_VERSION }}/devcontainer.json
           runCmd: |
             mkdir -p packages
-            bazel build //...
-            bazel test //...
+            # https://arrdem.com/2024/01/11/bazel-glibc/
+            build_salt=`ldd --version | sha256sum | awk ' {print $1} '`
+            bazel build //... --copt=-DPLATFORM_FINGERPRINT=$build_salt --action_env=PLATFORM_FINGERPRINT=$build_salt
+            bazel test //... --copt=-DPLATFORM_FINGERPRINT=$build_salt --action_env=PLATFORM_FINGERPRINT=$build_salt
             mv -v bazel-bin/Mull-*.deb packages/
       - name: Publish package
         uses: devcontainers/ci@v0.3

@@ -4,6 +4,7 @@ def _fixture_impl(ctx):
     # this is a hack for a single test case
     inc = "-I" + ctx.file.fixture.dirname + "/include"
     args = ctx.attr.args + ["-fdebug-prefix-map=$PWD=./", inc] + [ctx.file.fixture.path, "-o", out.path]
+    args.append("-DPLATFORM_FINGERPRINT=%s" % ctx.configuration.default_shell_env.get("PLATFORM_FINGERPRINT", ""))
     ctx.actions.run_shell(
         inputs = [ctx.executable.compiler, ctx.file.fixture] + ctx.files.data,
         outputs = [out],
