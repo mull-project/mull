@@ -89,6 +89,7 @@ mull_supported_llvm_versions = use_extension("//:mull_supported_llvm_versions.bz
 mull_supported_llvm_versions.configure(
     os_version_mapping = {
         "macos": ["16", "17", "18", "19"],
+        "ubuntu:22.04": ["13", "14", "15"],
         "ubuntu:24.04": ["14", "15", "16", "17", "18", "19"],
     },
 )
@@ -98,6 +99,7 @@ mull_package_info = use_extension("//:mull_package_info.bzl", "mull_package_info
 use_repo(mull_package_info, "mull_package_info")
 
 SUPPORTED_LLVM_VERSIONS = [
+    "13",
     "14",
     "15",
     "16",
