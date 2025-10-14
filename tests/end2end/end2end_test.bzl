@@ -89,6 +89,8 @@ def define_end2end_test_targets(name):
             build_args = ["-v"],
             build_data = [
                 ":mull.yml",
+                # listing the dependency explicitly to ensure this get cached correctly
+                "@llvm_%s//:clang" % llvm_version,
             ],
             copts = [
                 "-grecord-command-line",
@@ -108,6 +110,7 @@ def define_end2end_test_targets(name):
             out_binaries = FMT_TEST_TARGETS,
             tags = ["llvm_%s" % llvm_version, "end2end"],
             targets = FMT_TEST_TARGETS,
+            generate_args = ["-GNinja"],
         )
 
         mull_fmtlib_sqlite_report(
