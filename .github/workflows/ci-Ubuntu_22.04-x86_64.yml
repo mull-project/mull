@@ -1,0 +1,72 @@
+name: Ubuntu 22.04 (x86_64) CI
+env:
+  CLOUDSMITH_API_KEY: ${{ secrets.CLOUDSMITH_API_KEY }}
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+on:
+  push:
+    branches: ["main"]
+    tags: ["**"]
+  pull_request:
+    branches: ["main"]
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        LLVM_VERSION: [13, 14, 15]
+    name: Ubuntu 22.04 - LLVM ${{ matrix.LLVM_VERSION }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ./.github/actions/setup-bazel-cache
+        with:
+          BUILDBUDDY_API_KEY: ${{ secrets.BUILDBUDDY_API_KEY }}
+      - uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build, test, package
+        uses: devcontainers/ci@v0.3
+        with:
+          imageName: ghcr.io/mull-project/internal-ubuntu-x86_64_22.04-llvm-${{ matrix.LLVM_VERSION }}-ci
+          configFile: ./.devcontainer/ubuntu_22.04-llvm-${{ matrix.LLVM_VERSION }}/devcontainer.json
+          runCmd: |
+            mkdir -p packages
+            # https://arrdem.com/2024/01/11/bazel-glibc/
+            build_salt=`ldd --version | sha256sum | awk ' {print $1} '`
+            bazel build //... --copt=-DPLATFORM_FINGERPRINT=$build_salt --action_env=PLATFORM_FINGERPRINT=$build_salt
+            bazel test //... --copt=-DPLATFORM_FINGERPRINT=$build_salt --action_env=PLATFORM_FINGERPRINT=$build_salt
+            mv -v bazel-bin/Mull-*.deb packages/
+      - name: Publish package
+        uses: devcontainers/ci@v0.3
+        if: env.CLOUDSMITH_API_KEY != null
+        with:
+          imageName: ghcr.io/mull-project/internal-ubuntu-x86_64_22.04-llvm-${{ matrix.LLVM_VERSION }}-ci
+          configFile: ./.devcontainer/ubuntu_22.04-llvm-${{ matrix.LLVM_VERSION }}/devcontainer.json
+          push: never
+          env: CLOUDSMITH_API_KEY
+          runCmd: |
+            build_salt=`ldd --version | sha256sum | awk ' {print $1} '`
+            bazel run publish \
+              --copt=-DPLATFORM_FINGERPRINT=$build_salt \
+              --action_env=PLATFORM_FINGERPRINT=$build_salt && exit 0
+
+            max_attempts=3
+            attempt=1
+            until [ "$attempt" -ge "$max_attempts" ]
+            do
+              echo "Attempt $attempt failed. Retrying..."
+              attempt=$((attempt+1))
+              bazel run publish \
+                --copt=-DPLATFORM_FINGERPRINT=$build_salt \
+                --action_env=PLATFORM_FINGERPRINT=$build_salt && exit 0
+            done
+            echo "All $max_attempts attempts failed."
+            exit 1
+      - name: Move package
+        run: |
+          mkdir -p /tmp/packages
+          sudo mv -v packages/Mull-*.deb /tmp/packages/
+      - uses: ./.github/actions/attach-package
+        with:
+          GH_API_KEY: ${{ secrets.GITHUB_TOKEN }}

@@ -3,78 +3,58 @@ Installation
 
 .. include:: ./_support.rst
 
-Mull comes with a number of precompiled binaries for macOS (`arm64`) and Ubuntu (`x86_64` and `arm64`).
-There are two flavors of packages:
-
- - `stable <https://cloudsmith.io/~mull-project/repos/mull-stable/packages/>`_ - tagged releases (0.8.0, 0.9.0, etc.)
- - `nightly <https://cloudsmith.io/~mull-project/repos/mull-nightly/packages/>`_ - built for each PR
-
-Alternatively, you can find packages on `Github <https://github.com/mull-project/mull/releases>`_.
+Precompiled packages (`arm64` and `x86_64`) are available on `Cloudsmith <https://cloudsmith.io/~mull-project/repos/mull-stable/packages/>`_
+and on `GitHub <https://github.com/mull-project/mull/releases>`_.
 
 Please, refer to the `Hacking on Mull <HackingOnMull.html>`_ to build Mull from sources.
 
-Install on Ubuntu
-*****************
+Install on Linux
+****************
 
-Mull supports Ubuntu 22.04 and 24.04.
-
-Setup apt-repository:
+The following examples setup mull repos on deb- and rpm-based systems, respectively:
 
 .. code-block:: bash
 
+    # Ubuntu
     curl -1sLf 'https://dl.cloudsmith.io/public/mull-project/mull-stable/setup.deb.sh' | sudo -E bash
+    # Red Hat
+    curl -1sLf 'https://dl.cloudsmith.io/public/mull-project/mull-stable/setup.rpm.sh' | sudo -E bash
 
-*Note*: Mull uses `Cloudsmith <https://cloudsmith.io>`_ for package distribution.
-The above script detects your OS and sets up the apt repo automagically.
 
 Install the package:
 
 .. code-block:: bash
 
-    sudo apt-get update
-    sudo apt-get install mull-18 # Ubuntu 24.04
+    # Ubuntu
+    sudo apt-get update && apt-get install mull-19
+    # Red Hat
+    sudo yum update && yum install mull-19
 
 Check if everything works:
 
 .. code-block:: bash
 
-    $ mull-runner-18 --version
-    Mull: Practical mutation testing for C and C++
+    $ mull-runner-19 --version
+    Mull: Practical mutation testing and fault injection for C and C++
     Home: https://github.com/mull-project/mull
     Docs: https://mull.readthedocs.io
-    Version: 0.15.0
-    Commit: ab159cd
-    Date: 20 Jan 2022
-    LLVM: 14.0.0
-
-You can also get the latest "nightly" build using the corresponding source:
-
-.. code-block:: bash
-
-    curl -1sLf 'https://dl.cloudsmith.io/public/mull-project/mull-nightly/setup.deb.sh' | sudo -E bash
-
-Links:
-
-  - `Mull Stable <https://cloudsmith.io/~mull-project/repos/mull-stable/packages/>`_
-  - `Mull Nightly <https://cloudsmith.io/~mull-project/repos/mull-stable/packages/>`_
+    Support: https://mull.readthedocs.io/en/latest/Support.html
+    Version: 0.26.1
+    LLVM: 19.1.7
 
 Install on macOS
 ****************
 
-Download the latest version from `Github Releases <https://github.com/mull-project/mull/releases/latest>`_.
+Download the latest version from `GitHub Releases <https://github.com/mull-project/mull/releases/latest>`_.
 
 Check the installation:
 
 .. code-block:: bash
 
-    $ mull-runner-18 --version
-    Mull: Practical mutation testing for C and C++
+    $ mull-runner-19 --version
+    Mull: Practical mutation testing and fault injection for C and C++
     Home: https://github.com/mull-project/mull
     Docs: https://mull.readthedocs.io
     Support: https://mull.readthedocs.io/en/latest/Support.html
     Version: 0.26.1
-    Commit: 859af43
-    Date: 06 Apr 2025
-    LLVM: 18.1.8
-
-You can also get the latest "nightly" build from `here <https://cloudsmith.io/~mull-project/repos/mull-nightly/packages/>`_.
+    LLVM: 19.1.7

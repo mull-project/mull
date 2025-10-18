@@ -3,6 +3,7 @@ load("@available_llvm_versions//:mull_llvm_versions.bzl", "AVAILABLE_LLVM_VERSIO
 load("@bazel_skylib//lib:modules.bzl", "modules")
 load("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 load("@bazel_tools//tools/build_defs/repo:local.bzl", "new_local_repository")
+load("//:bazel/os_detection.bzl", "is_macos", "is_redhat")
 
 IRM_BUILD_FILE = """
 load("@rules_cc//cc:defs.bzl", "cc_library")
@@ -34,7 +35,7 @@ cc_import(
         "include/llvm/**/*.def",
         "include/llvm/**/*.inc",
     ]),
-    shared_library = "lib/{LIBLLVM_DYLIB}",
+    shared_library = "{LIBDIR}/{LIBLLVM_DYLIB}",
 )
 
 cc_library(
@@ -52,7 +53,7 @@ cc_import(
         "include/clang/**/*.def",
         "include/clang/**/*.inc",
     ]),
-    shared_library = "lib/{LIBCLANG_CPP_DYLIB}",
+    shared_library = "{LIBDIR}/{LIBCLANG_CPP_DYLIB}",
 )
 
 cc_library(
@@ -84,9 +85,6 @@ native_binary(
 )
 """
 
-def _is_macos(repository_ctx):
-    return repository_ctx.os.name.find("mac") != -1
-
 def _empty_repo_impl(repository_ctx):
     repository_ctx.file(
         "BUILD",
@@ -99,12 +97,12 @@ empty_repo = repository_rule(
 )
 
 def _dylib_ext(ctx):
-    if _is_macos(ctx):
+    if is_macos(ctx):
         return "dylib"
     return "so"
 
-def _find_dylib(ctx, path, dylib):
-    libdir = path + "/lib"
+def _find_dylib(ctx, path, lib, dylib):
+    libdir = path + "/" + lib
     dylib = "lib" + dylib + "." + _dylib_ext(ctx)
     for f in ctx.path(libdir).readdir():
         if f.basename.startswith(dylib):
@@ -112,11 +110,11 @@ def _find_dylib(ctx, path, dylib):
 
     return None
 
-def _find_clang_dylib(ctx, path):
-    return _find_dylib(ctx, path, "clang-cpp")
+def _find_clang_dylib(ctx, path, lib):
+    return _find_dylib(ctx, path, lib, "clang-cpp")
 
-def _find_llvm_dylib(ctx, path):
-    return _find_dylib(ctx, path, "LLVM")
+def _find_llvm_dylib(ctx, path, lib):
+    return _find_dylib(ctx, path, lib, "LLVM")
 
 def _mull_deps_extension(module_ctx):
     """Module extension to dynamically declare local LLVM repositories."""
@@ -130,12 +128,16 @@ def _mull_deps_extension(module_ctx):
                     empty_repo(name = irm_repo_name)
                     continue
 
-                if _is_macos(module_ctx):
+                libdir = "lib"
+                if is_macos(module_ctx):
                     path = "/opt/homebrew/opt/llvm@" + version
+                elif is_redhat(module_ctx):
+                    path = "/usr"
+                    libdir = "lib64"
                 else:
                     path = "/usr/lib/llvm-" + version
-                llvm_dylib = _find_llvm_dylib(module_ctx, path)
-                clang_dylib = _find_clang_dylib(module_ctx, path)
+                llvm_dylib = _find_llvm_dylib(module_ctx, path, libdir)
+                clang_dylib = _find_clang_dylib(module_ctx, path, libdir)
                 new_local_repository(
                     name = llvm_repo_name,
                     path = path,
@@ -143,6 +145,7 @@ def _mull_deps_extension(module_ctx):
                         LIBLLVM_DYLIB = llvm_dylib,
                         LIBCLANG_CPP_DYLIB = clang_dylib,
                         LLVM_VERSION = version,
+                        LIBDIR = libdir,
                     ),
                 )
                 http_archive(

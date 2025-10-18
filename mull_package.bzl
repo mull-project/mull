@@ -3,6 +3,7 @@ load("@available_llvm_versions//:mull_llvm_versions.bzl", "AVAILABLE_LLVM_VERSIO
 load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
 load("@mull_package_info//:mull_package_info.bzl", "MULL_DESCRIPTION", "MULL_HOMEPAGE", "MULL_VERSION", "OS_ARCH", "OS_NAME", "OS_VERSION")
 load("@rules_pkg//pkg:mappings.bzl", "pkg_attributes", "pkg_files")
+load("@rules_pkg//pkg:rpm_pfg.bzl", "pkg_rpm")
 load("@rules_pkg//pkg/private/deb:deb.bzl", "pkg_deb")
 load("@rules_pkg//pkg/private/tar:tar.bzl", "pkg_tar")
 load("@rules_pkg//pkg/private/zip:zip.bzl", "pkg_zip")
@@ -18,12 +19,17 @@ usr/local/lib/
 usr/local/lib/mull-ir-frontend-{LLVM_VERSION}
 """
 
-EXPECTED_LINUX_PACKAGE_CONTENT = """usr/
+EXPECTED_DEB_PACKAGE_CONTENT = """usr/
 usr/bin/
 usr/bin/mull-reporter-{LLVM_VERSION}
 usr/bin/mull-runner-{LLVM_VERSION}
 usr/lib/
 usr/lib/mull-ir-frontend-{LLVM_VERSION}
+"""
+
+EXPECTED_RPM_PACKAGE_CONTENT = """/usr/bin/mull-reporter-{LLVM_VERSION}
+/usr/bin/mull-runner-{LLVM_VERSION}
+/usr/lib/mull-ir-frontend-{LLVM_VERSION}
 """
 
 def _package_contents_impl(ctx):
@@ -34,6 +40,8 @@ def _package_contents_impl(ctx):
         cmds.append("unzip -l %s | awk 'NR > 3 { if ($0 ~ /----/) exit; print $NF }' > %s" % (ctx.file.package.path, out.path))
     elif ctx.file.package.path.endswith(".deb"):
         cmds.append("dpkg -c %s | awk '{ print $NF }' > %s" % (ctx.file.package.path, out.path))
+    elif ctx.file.package.path.endswith(".rpm"):
+        cmds.append("rpm -qlp %s | grep -v build-id > %s" % (ctx.file.package.path, out.path))
     else:
         fail("Unsupported package format: %s" % ctx.file.package.path)
 
@@ -57,9 +65,11 @@ package_contents = rule(
 
 def _expected_package_contents_impl(ctx):
     out = ctx.actions.declare_file(ctx.attr.name + ".txt")
-    template = EXPECTED_LINUX_PACKAGE_CONTENT
+    template = EXPECTED_DEB_PACKAGE_CONTENT
     if ctx.file.package.path.endswith(".zip"):
         template = EXPECTED_MACOS_PACKAGE_CONTENT
+    if ctx.file.package.path.endswith(".rpm"):
+        template = EXPECTED_RPM_PACKAGE_CONTENT
 
     ctx.actions.write(out, template.format(LLVM_VERSION = ctx.attr.llvm_version))
 
@@ -121,6 +131,27 @@ def mull_package(name):
                 ],
                 stamp = 1,
                 out = "%s.zip" % package_file_name,
+            )
+        elif OS_NAME == "rhel":
+            pkg_rpm(
+                name = package_name,
+                srcs = [
+                    "%s-binaries" % package_name,
+                    "%s-libraries" % package_name,
+                ],
+                version = MULL_VERSION,
+                summary = MULL_DESCRIPTION,
+                description = MULL_DESCRIPTION,
+                url = MULL_HOMEPAGE,
+                license = "Apache-2.0",
+                requires = [
+                    "clang-libs",
+                    "llvm-libs",
+                    "libxml2",
+                ],
+                package_name = "mull-%s" % llvm_version,
+                release = "1",
+                package_file_name = "%s.rpm" % package_file_name,
             )
         else:
             pkg_tar(

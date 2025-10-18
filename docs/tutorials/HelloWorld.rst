@@ -82,9 +82,9 @@ To pass the plugin to Clang, you need to add a few compiler flags.
 .. code-block:: text
 
     $ clang-18 \
-      -fpass-plugin=/usr/lib/mull-ir-frontend-18 \
-      -g -grecord-command-line \
-      main.cpp -o hello-world
+        -fpass-plugin=/usr/lib/mull-ir-frontend-18 \
+        -g -grecord-command-line \
+        main.cpp -o hello-world
     [warning] Mull cannot find config (mull.yml). Using some defaults.
 
 Notice the warning: Mull needs a config.
@@ -146,9 +146,9 @@ verbose.
 .. code-block:: text
 
     $ clang-18 \
-            -fpass-plugin=/usr/lib/mull-ir-frontend-18 \
-            -g -grecord-command-line \
-            main.cpp -o hello-world
+        -fpass-plugin=/usr/lib/mull-ir-frontend-18 \
+        -g -grecord-command-line \
+        main.cpp -o hello-world
     $ mull-runner-18 -ide-reporter-show-killed hello-world
     [info] Warm up run (threads: 1)
            [################################] 1/1. Finished in 151ms
@@ -222,9 +222,9 @@ The code:
 .. code-block:: text
 
     $ clang-18 \
-                  -fpass-plugin=/usr/lib/mull-ir-frontend-18 \
-                  -g -grecord-command-line \
-                  main.cpp -o hello-world
+        -fpass-plugin=/usr/lib/mull-ir-frontend-18 \
+        -g -grecord-command-line \
+        main.cpp -o hello-world
     $ mull-runner-18 -ide-reporter-show-killed hello-world
     [info] Warm up run (threads: 1)
            [################################] 1/1. Finished in 469ms
@@ -265,9 +265,9 @@ Just to recap:
 .. code-block:: text
 
     $ clang-18 \
-                  -fpass-plugin=/usr/lib/mull-ir-frontend-18 \
-                  -g -grecord-command-line \
-                  main.cpp -o hello-world
+        -fpass-plugin=/usr/lib/mull-ir-frontend-18 \
+        -g -grecord-command-line \
+        main.cpp -o hello-world
     $ mull-runner-18 hello-world
 
 Next Steps

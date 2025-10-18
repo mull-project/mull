@@ -34,6 +34,16 @@ def main():
         type=str,
     )
     parser.add_argument(
+        "--package-extension",
+        help="Package file extension",
+        type=str,
+    )
+    parser.add_argument(
+        "--arch",
+        help="Target architecture",
+        type=str,
+    )
+    parser.add_argument(
         "--llvm-versions",
         help="Supported LLVM versions",
         nargs="+",
@@ -44,8 +54,10 @@ def main():
         "OS_VERSION": args.os_version,
         "OS_RUNNER": args.runner,
         "OS_NAME": args.os_name,
-        "OS_NAME_LOWER": args.os_name.lower(),
+        "OS_NAME_LOWER": args.os_name.lower().replace("-arm64", ""),
         "LLVM_VERSIONS": f"[{', '.join(args.llvm_versions)}]",
+        "PACKAGE_EXTENSION": args.package_extension,
+        "OS_ARCH": args.arch,
     }
 
     renderer = pystache.Renderer(missing_tags="strict")
