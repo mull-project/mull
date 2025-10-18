@@ -1,25 +1,32 @@
 # buildifier: disable=module-docstring
 load("@mull_package_info//:mull_package_info.bzl", "OS_NAME", "OS_VERSION")
 load("@supported_llvm_versions//:supported_llvm_versions.bzl", "OS_VERSION_MAPPING")
-
-def _is_macos(repository_ctx):
-    return repository_ctx.os.name.find("mac") != -1
+load("//:bazel/os_detection.bzl", "is_macos", "is_redhat")
 
 def _llvm_path(repository_ctx, version):
-    if _is_macos(repository_ctx):
+    if is_macos(repository_ctx):
         return "/opt/homebrew/opt/llvm@" + version
     return "/usr/lib/llvm-" + version
 
 def _is_supported(repository_ctx, version):
+    if is_redhat(repository_ctx):
+        return repository_ctx.path("/usr/bin/llvm-config-%s" % version).exists
     path = _llvm_path(repository_ctx, version)
     return repository_ctx.path(path).exists
 
-def _exact_version(repository_ctx, version):
+def _llvm_config(repository_ctx, version):
+    if is_redhat(repository_ctx):
+        return "/usr/bin/llvm-config-%s" % version
     path = _llvm_path(repository_ctx, version)
-    result = repository_ctx.execute([path + "/bin/llvm-config", "--version"])
+    return path + "/bin/llvm-config"
+
+def _exact_version(repository_ctx, version):
+    result = repository_ctx.execute([_llvm_config(repository_ctx, version), "--version"])
     return result.stdout.strip()
 
 def _clang_paths(repository_ctx, version):
+    if is_redhat(repository_ctx):
+        return ["/usr/bin/clang", "/usr/bin/clang++"]
     path = _llvm_path(repository_ctx, version)
     return [path + "/bin/clang", path + "/bin/clang++"]
 

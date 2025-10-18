@@ -1,4 +1,4 @@
-load("@mull_package_info//:mull_package_info.bzl", "CS_REPO", "MULL_VERSION", "OS_CODENAME", "OS_NAME")
+load("@mull_package_info//:mull_package_info.bzl", "CS_REPO", "MULL_VERSION", "OS_CODENAME", "OS_DIST_EXTENSION", "OS_NAME")
 
 MACOS_SCRIPT = """
 ./cloudsmith_runner push raw \\
@@ -9,14 +9,20 @@ MACOS_SCRIPT = """
   {PACKAGE_FILE}
 """
 
-UBUNTU_SCRIPT = """
-./cloudsmith_runner push deb \\
+LINUX_SCRIPT = """
+./cloudsmith_runner push {OS_DIST_EXTENSION} \\
   mull-project/mull-{CS_REPO}/{OS_NAME}/{OS_CODENAME} \\
   {PACKAGE_FILE}
 """
 
 PRE_SCRIPT = """
 """
+
+def _remap_os_name(os_name):
+    if os_name == "rhel":
+        # cloudsmith uses `el` for RHEL
+        return "el"
+    return os_name
 
 def _publish_impl(ctx):
     cmds = []
@@ -30,11 +36,12 @@ def _publish_impl(ctx):
                 PACKAGE_FILE = ctx.files.packages[idx].short_path,
             )
         else:
-            cmd = UBUNTU_SCRIPT.format(
+            cmd = LINUX_SCRIPT.format(
                 CS_REPO = CS_REPO,
                 PACKAGE_FILE = ctx.files.packages[idx].short_path,
-                OS_NAME = OS_NAME,
+                OS_NAME = _remap_os_name(OS_NAME),
                 OS_CODENAME = OS_CODENAME,
+                OS_DIST_EXTENSION = OS_DIST_EXTENSION,
             )
         cmds.append(cmd)
 

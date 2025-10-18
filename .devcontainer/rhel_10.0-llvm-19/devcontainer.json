@@ -1,0 +1,24 @@
+{
+  "name": "rhel_10.0-llvm-19",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "runArgs": [
+    "--name",
+    "mull-rhel_10.0-llvm-19"
+  ],
+  "postCreateCommand": "infrastructure/devcontainer_post_create.sh",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-vscode.cpptools",
+        "ms-vscode.cpptools-extension-pack",
+        "imgildev.vscode-mustache-snippets",
+        "github.vscode-github-actions",
+        "revng.llvm-ir",
+        "rreverser.llvm",
+        "bazelbuild.vscode-bazel"
+      ]
+    }
+  }
+}

@@ -1,6 +1,7 @@
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Mutators/MutatorsFactory.h"
 
+#include <algorithm>
 #include <functional>
 #include <gtest/gtest.h>
 #include <vector>
