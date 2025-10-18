@@ -1,7 +1,7 @@
 import argparse
 import pystache
 
-CMD = """
+UBUNTU_CMD = """
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \\
   llvm-{LLVM_VERSION}-dev \\
   libclang-{LLVM_VERSION}-dev \\
@@ -11,11 +11,18 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \\
   lld-{LLVM_VERSION}
 """
 
+REDHAT_CMD = """
+RUN yum update && yum install -y llvm-devel clang-devel clang lld
+"""
 
-def generate_llvm_install_cmds(llvm_versions):
+
+def generate_llvm_install_cmds(os_name, llvm_versions):
     cmds = []
+    cmd = UBUNTU_CMD
+    if os_name == "redhat":
+        cmd = REDHAT_CMD
     for llvm_version in llvm_versions:
-        cmds.append(CMD.format(LLVM_VERSION=llvm_version))
+        cmds.append(cmd.format(LLVM_VERSION=llvm_version))
     return "".join(cmds)
 
 
@@ -45,9 +52,13 @@ def main():
     )
     args = parser.parse_args()
 
+    os_name = args.os_key.split("/")[0].split(":")[0]
+
     template_args = {
         "OS_KEY": args.os_key,
-        "INSTALL_LLVM_COMMANDS": generate_llvm_install_cmds([args.llvm_version]),
+        "INSTALL_LLVM_COMMANDS": generate_llvm_install_cmds(
+            os_name, [args.llvm_version]
+        ),
     }
 
     renderer = pystache.Renderer(missing_tags="strict")

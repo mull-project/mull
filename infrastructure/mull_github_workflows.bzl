@@ -6,14 +6,15 @@ load("@rules_multirun//:defs.bzl", "multirun")
 load("@supported_llvm_versions//:supported_llvm_versions.bzl", "OS_VERSION_MAPPING")
 
 def _generate_github_workflow(runner, os_name, os_key):
+    print(os_name, os_key)
     if os_key == "macos":
         version = "latest"
         name = os_name
         template = "macos"
     else:
-        version = os_key.split(":")[-1]
+        os, version = os_key.split(":")
         name = os_name + "_" + version
-        template = "ubuntu"
+        template = os
 
     run_binary(
         name = "gh_workflow_%s" % name,
@@ -35,7 +36,7 @@ def _generate_github_workflow(runner, os_name, os_key):
         tool = ":gh_workflow_gen",
     )
 
-    target_name = "write_gh_workflow_%s_files" % name
+    target_name = "generate_gh_workflow_%s_files" % name
     write_source_files(
         name = target_name,
         files = {
@@ -56,6 +57,8 @@ def mull_github_workflows(name):
     for os_key in OS_VERSION_MAPPING:
         if os_key == "macos":
             write_targets.append(_generate_github_workflow("macos-latest", "macOS", os_key))
+        elif "rhel" in os_key:
+            write_targets.append(_generate_github_workflow("ubuntu-latest", "Redhat", os_key))
         else:
             write_targets.append(_generate_github_workflow("ubuntu-latest", "Ubuntu", os_key))
             write_targets.append(_generate_github_workflow("ubuntu-24.04-arm", "Ubuntu-arm64", os_key))

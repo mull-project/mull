@@ -3,6 +3,7 @@
 import argparse
 import pystache
 
+
 def main():
     parser = argparse.ArgumentParser(
         prog="generator", description="Generates devcontainer.json"
@@ -30,8 +31,8 @@ def main():
     args = parser.parse_args()
 
     template_args = {
-        "OS_KEY" : args.os_key.replace(":", "_"),
-        "LLVM_VERSION" : args.llvm_version,
+        "OS_KEY": args.os_key.replace(":", "_"),
+        "LLVM_VERSION": args.llvm_version,
     }
 
     renderer = pystache.Renderer(missing_tags="strict")
