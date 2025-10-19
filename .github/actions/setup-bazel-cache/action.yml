@@ -23,6 +23,7 @@ runs:
         echo "common --compilation_mode opt" > .bazel.compilation_mode.bazelrc
     # https://arrdem.com/2024/01/11/bazel-glibc/
     - name: Setup Bazel salt
+      if: runner.os == 'Linux'
       shell: bash
       run: |
         build_salt=`ldd --version | sha256sum | awk ' {print $1} '`
