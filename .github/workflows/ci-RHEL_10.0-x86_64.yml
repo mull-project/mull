@@ -17,6 +17,7 @@ jobs:
     name: RHEL 10.0 - LLVM ${{ matrix.LLVM_VERSION }}
     steps:
       - uses: actions/checkout@v5
+      - uses: ./.github/actions/detect-package-metadata
       - uses: ./.github/actions/setup-bazel-cache
         with:
           BUILDBUDDY_API_KEY: ${{ secrets.BUILDBUDDY_API_KEY }}
