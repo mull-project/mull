@@ -169,7 +169,7 @@ clang::SectionAttr *ASTNodeFactory::createSectionAttr(std::string sectionName) {
 #if LLVM_VERSION_MAJOR < 17
                                     clang::AttributeCommonInfo::Syntax::AS_GNU,
 #endif
-                                    clang::SectionAttr::Spelling::SpellingNotCalculated);
+                                    clang::SectionAttr::Spelling::GNU_section);
 }
 
 clang::QualType ASTNodeFactory::getStringLiteralArrayType(clang::QualType type, unsigned size) {
