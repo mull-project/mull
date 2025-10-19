@@ -9,7 +9,7 @@ def _mull_version(repository_ctx):
         content = repository_ctx.read(extra_path).strip()
         if not content:
             fail("empty version suffix file: %s" % extra_path)
-        version += "-" + content
+        version += content
     return version
 
 def _cs_repo(repository_ctx):

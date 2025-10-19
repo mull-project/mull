@@ -9,13 +9,13 @@ runs:
       run: |
         case $GITHUB_EVENT_NAME in
           "pull_request")
-            echo -pr$(grep -Eo "\"number\": [0-9]+" $GITHUB_EVENT_PATH | awk ' { print $2; exit } ') > .mull-ci-version-suffix
+            echo .pr$(grep -Eo "\"number\": [0-9]+" $GITHUB_EVENT_PATH | awk ' { print $2; exit } ') > .mull-ci-version-suffix
             echo testing > .mull-ci-cs-repo
           ;;
           "push")
             case $GITHUB_REF in
               "refs/heads/"*)
-                echo -trunk$GITHUB_RUN_NUMBER > .mull-ci-version-suffix
+                echo .trunk$GITHUB_RUN_NUMBER > .mull-ci-version-suffix
                 echo nightly > .mull-ci-cs-repo
               ;;
               "refs/tags/"*)
