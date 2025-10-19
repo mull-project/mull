@@ -1,4 +1,5 @@
 common --test_output=errors
 
+try-import .bazel.glibc-salt.rc
 try-import .bazel.buildbuddy.rc
 try-import .bazel.compilation_mode.bazelrc

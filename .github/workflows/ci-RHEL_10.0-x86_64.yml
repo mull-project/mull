@@ -32,10 +32,8 @@ jobs:
           configFile: ./.devcontainer/rhel_10.0-llvm-${{ matrix.LLVM_VERSION }}/devcontainer.json
           runCmd: |
             mkdir -p packages
-            # https://arrdem.com/2024/01/11/bazel-glibc/
-            build_salt=`ldd --version | sha256sum | awk ' {print $1} '`
-            bazel build //... --copt=-DPLATFORM_FINGERPRINT=$build_salt --action_env=PLATFORM_FINGERPRINT=$build_salt
-            bazel test //... --copt=-DPLATFORM_FINGERPRINT=$build_salt --action_env=PLATFORM_FINGERPRINT=$build_salt
+            bazel build //...
+            bazel test //...
             mv -v bazel-bin/Mull-*.rpm packages/
       - name: Publish package
         uses: devcontainers/ci@v0.3
@@ -46,10 +44,7 @@ jobs:
           push: never
           env: CLOUDSMITH_API_KEY
           runCmd: |
-            build_salt=`ldd --version | sha256sum | awk ' {print $1} '`
-            bazel run publish \
-              --copt=-DPLATFORM_FINGERPRINT=$build_salt \
-              --action_env=PLATFORM_FINGERPRINT=$build_salt && exit 0
+            bazel run publish && exit 0
 
             max_attempts=3
             attempt=1
@@ -57,9 +52,7 @@ jobs:
             do
               echo "Attempt $attempt failed. Retrying..."
               attempt=$((attempt+1))
-              bazel run publish \
-                --copt=-DPLATFORM_FINGERPRINT=$build_salt \
-                --action_env=PLATFORM_FINGERPRINT=$build_salt && exit 0
+              bazel run publish && exit 0
             done
             echo "All $max_attempts attempts failed."
             exit 1

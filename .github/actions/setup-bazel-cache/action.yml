@@ -1,5 +1,5 @@
 name: Setup Bazel cache config
-description: Generates a file with bazel's remote cache configuration
+description: Generates files with bazel's remote cache configuration
 inputs:
   BUILDBUDDY_API_KEY:
     description: 'API key for buildbuddy.io'
@@ -21,3 +21,11 @@ runs:
       shell: bash
       run: |
         echo "common --compilation_mode opt" > .bazel.compilation_mode.bazelrc
+    # https://arrdem.com/2024/01/11/bazel-glibc/
+    - name: Setup Bazel salt
+      shell: bash
+      run: |
+        build_salt=`ldd --version | sha256sum | awk ' {print $1} '`
+        echo "" > .bazel.glibc-salt.rc
+        echo "common --copt=-DPLATFORM_FINGERPRINT=$build_salt" >> .bazel.glibc-salt.rc
+        echo "common --action_env=PLATFORM_FINGERPRINT=$build_salt" >> .bazel.glibc-salt.rc

@@ -27,3 +27,4 @@ MODULE.bazel.lock
 .mull-ci-cs-repo
 .bazel.buildbuddy.rc
 .bazel.compilation_mode.bazelrc
+.bazel.glibc-salt.rc
