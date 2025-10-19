@@ -1,10 +1,29 @@
 # Changelog
 
-## [0.XX.X] - XX XXX XXXX
+## [0.27.0] - 19 Oct 2025
 
- - IDEReporter now prints to a file whenever `--report-name` specified instead of unconditionally writing to `stdout` [#1096](https://github.com/mull-project/mull/pull/1096)
+### Added
 
-- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2025-04-05..XXXX-XX-XX)
+- new tutorial: [Generate Patches](https://mull.readthedocs.io/en/0.27.0/tutorials/GeneratePatches.html) [#1100](https://github.com/mull-project/mull/pull/1100)
+- Red Hat packages [#1120](https://github.com/mull-project/mull/pull/1120)
+- LLVM 19 support (by [vengaer](https://github.com/vengaer)) [#1099](https://github.com/mull-project/mull/pull/1099) [#1109](https://github.com/mull-project/mull/pull/1109)
+
+### Removed
+
+- unstable/broken mutators:
+  - Scalar Value Mutator [#1109](https://github.com/mull-project/mull/pull/1109)
+  - Logical And/Or mutators [#1115](https://github.com/mull-project/mull/pull/1115)
+
+### Fixed
+
+- bug in a source code mutations filter [#1114](https://github.com/mull-project/mull/pull/1114) [#1107](https://github.com/mull-project/mull/issues/1107)
+- a crash in the experimental AST frontend [#1119](https://github.com/mull-project/mull/pull/1119)
+
+### Changed
+
+- Switched to [Bazel](https://bazel.build) [#1097](https://github.com/mull-project/mull/pull/1097) [#1111](https://github.com/mull-project/mull/pull/1111)
+
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2025-04-06..2025-10-19)
 
 ## [0.26.1] - 06 Apr 2025
 
