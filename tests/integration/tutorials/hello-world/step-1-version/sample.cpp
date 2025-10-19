@@ -4,7 +4,7 @@ RUN: %mull_runner -version 2>&1 | %filecheck %s --dump-input=fail --strict-white
 CHECK:Mull: Practical mutation testing and fault injection for C and C++
 CHECK:Home: https://github.com/mull-project/mull
 CHECK:Docs: https://mull.readthedocs.io
-CHECK:{{^Version: \d+\.\d+.\d+(-pr[0-9]+|-trunk[0-9]+|-\d+-g[a-zA-Z0-9]+(-dirty)?)?$}}
+CHECK:{{^Version: \d+\.\d+.\d+(.pr[0-9]+|.trunk[0-9]+)?$}}
 CHECK:{{^LLVM: \d+\.\d+.\d+$}}
 CHECK-EMPTY:
 */
