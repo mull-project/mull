@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.27.1] - 24 Oct 2025
+
+### Fixed
+
+- Broken deb package architecture [#1127](https://github.com/mull-project/mull/issues/1127) [#1128](https://github.com/mull-project/mull/pull/1128)
+
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2025-10-20..2025-10-24)
+
 ## [0.27.0] - 19 Oct 2025
 
 ### Added
