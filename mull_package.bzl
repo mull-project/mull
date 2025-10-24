@@ -178,7 +178,7 @@ def mull_package(name):
                     "libsqlite3-0",
                 ],
                 package_file_name = "%s.deb" % package_file_name,
-                architecture = OS_ARCH,
+                architecture = "any",
             )
 
         package_contents(
