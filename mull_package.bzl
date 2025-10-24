@@ -8,6 +8,7 @@ load("@rules_pkg//pkg/private/deb:deb.bzl", "pkg_deb")
 load("@rules_pkg//pkg/private/tar:tar.bzl", "pkg_tar")
 load("@rules_pkg//pkg/private/zip:zip.bzl", "pkg_zip")
 load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
 load(":mull_publish.bzl", "mull_publish_script")
 
 EXPECTED_MACOS_PACKAGE_CONTENT = """usr/
@@ -80,6 +81,18 @@ expected_package_contents = rule(
     attrs = {
         "package": attr.label(allow_single_file = True, mandatory = True),
         "llvm_version": attr.string(mandatory = True),
+    },
+)
+
+def _apt_dry_run_impl(ctx):
+    out = ctx.actions.declare_file(ctx.attr.name)
+    ctx.actions.write(out, "apt-get install --dry-run ./%s" % ctx.file.package.short_path)
+    return [DefaultInfo(files = depset([out]))]
+
+apt_dry_run_sh = rule(
+    implementation = _apt_dry_run_impl,
+    attrs = {
+        "package": attr.label(allow_single_file = True, mandatory = True),
     },
 )
 
@@ -178,7 +191,17 @@ def mull_package(name):
                     "libsqlite3-0",
                 ],
                 package_file_name = "%s.deb" % package_file_name,
-                architecture = "any",
+                architecture = "arm64" if OS_ARCH == "aarch64" else OS_ARCH,
+            )
+            apt_dry_run_sh(
+                name = package_name + ".sh",
+                package = package_name,
+            )
+            sh_test(
+                name = package_name + "_apt_test",
+                srcs = [package_name + ".sh"],
+                data = [package_name],
+                deps = ["@bazel_tools//tools/bash/runfiles"],
             )
 
         package_contents(
