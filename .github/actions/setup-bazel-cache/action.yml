@@ -4,6 +4,9 @@ inputs:
   BUILDBUDDY_API_KEY:
     description: 'API key for buildbuddy.io'
     required: true
+  PLATFORM:
+    description: 'Platform identifier for cache segregation (e.g., ubuntu-22.04-x86_64). If not provided, auto-detected from current OS.'
+    required: false
 runs:
   using: "composite"
   steps:
@@ -17,7 +20,18 @@ runs:
         echo "common --remote_cache=grpcs://remote.buildbuddy.io" >> .bazel.buildbuddy.rc
         echo "common --remote_timeout=10m" >> .bazel.buildbuddy.rc
         echo "common --remote_header=x-buildbuddy-api-key=${{inputs.BUILDBUDDY_API_KEY}}" >> .bazel.buildbuddy.rc
+        echo "common --remote_upload_local_results" >> .bazel.buildbuddy.rc
     - name: Enable optimized builds
       shell: bash
       run: |
         echo "common --compilation_mode opt" > .bazel.compilation_mode.bazelrc
+    - name: Add build salt
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.PLATFORM }}" ]; then
+          SALT="${{ inputs.PLATFORM }}"
+        else
+          SALT=$(./infrastructure/build_salt.sh)
+        fi
+        echo "common --remote_instance_name=$SALT" > .bazel.build_salt.bazelrc
+        cat .bazel.build_salt.bazelrc

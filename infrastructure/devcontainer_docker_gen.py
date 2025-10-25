@@ -12,7 +12,7 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \\
 """
 
 REDHAT_CMD = """
-RUN yum update && yum install -y llvm-devel clang-devel clang lld
+RUN yum install -y --nogpgcheck llvm-devel clang-devel clang lld
 """
 
 

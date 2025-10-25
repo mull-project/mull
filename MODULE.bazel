@@ -84,8 +84,8 @@ mull_supported_llvm_versions.configure(
         "macos": ["16", "17", "18", "19", "20"],
         "ubuntu:22.04": ["13", "14", "15"],
         "ubuntu:24.04": ["14", "15", "16", "17", "18", "19", "20"],
-        "rhel:9.6": ["19"],
-        "rhel:10.0": ["19"],
+        "rhel:9.6": ["20"],
+        "rhel:10.0": ["20"],
     },
 )
 use_repo(mull_supported_llvm_versions, "supported_llvm_versions")

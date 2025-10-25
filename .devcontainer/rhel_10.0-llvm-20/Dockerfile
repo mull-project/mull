@@ -1,11 +1,11 @@
 FROM redhat/ubi10:10.0
 
-RUN yum update && yum install -y \
-  vim wget sudo file libstdc++-static \
-  git sqlite rpmdevtools
+RUN yum install -y --nogpgcheck --allowerasing \
+  vim wget curl sudo file libstdc++-static \
+  git sqlite rpmdevtools ca-certificates
 
 
-RUN yum update && yum install -y llvm-devel clang-devel clang lld
+RUN yum install -y --nogpgcheck llvm-devel clang-devel clang lld
 
 
 ARG USERNAME=mull
