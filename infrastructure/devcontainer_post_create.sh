@@ -20,6 +20,6 @@ case "$arch" in
         ;;
 esac
 echo $PATH
-sudo wget https://github.com/bazelbuild/bazelisk/releases/download/$bazelisk_version/bazelisk-linux-$bazelisk_arch -O /usr/local/bin/bazel
+sudo curl -fsSL https://github.com/bazelbuild/bazelisk/releases/download/$bazelisk_version/bazelisk-linux-$bazelisk_arch -o /usr/local/bin/bazel
 sudo chmod +x /usr/local/bin/bazel
 fi

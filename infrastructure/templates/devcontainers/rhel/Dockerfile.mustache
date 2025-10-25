@@ -1,8 +1,8 @@
 FROM {{OS_KEY}}
 
-RUN yum update && yum install -y \
-  vim wget sudo file libstdc++-static \
-  git sqlite rpmdevtools
+RUN yum install -y --nogpgcheck --allowerasing \
+  vim wget curl sudo file libstdc++-static \
+  git sqlite rpmdevtools ca-certificates
 
 {{{INSTALL_LLVM_COMMANDS}}}
 
