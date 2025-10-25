@@ -26,6 +26,9 @@ runs:
       shell: bash
       run: |
         SALT=$(./infrastructure/build_salt.sh)
-        echo "common --copt=-DPLATFORM_FINGERPRINT=$SALT" > .bazel.build_salt.bazelrc
-        echo "common --action_env=-DPLATFORM_FINGERPRINT=$SALT" >> .bazel.build_salt.bazelrc
+        echo > .bazel.build_salt.bazelrc
+        echo "build --copt=-DPLATFORM_FINGERPRINT=$SALT" >> .bazel.build_salt.bazelrc
+        echo "build --action_env=PLATFORM_FINGERPRINT=$SALT" >> .bazel.build_salt.bazelrc
+        echo "common --copt=-DPLATFORM_FINGERPRINT=$SALT" >> .bazel.build_salt.bazelrc
+        echo "common --action_env=PLATFORM_FINGERPRINT=$SALT" >> .bazel.build_salt.bazelrc
         cat .bazel.build_salt.bazelrc
