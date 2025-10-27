@@ -17,7 +17,19 @@ runs:
         echo "common --remote_cache=grpcs://remote.buildbuddy.io" >> .bazel.buildbuddy.rc
         echo "common --remote_timeout=10m" >> .bazel.buildbuddy.rc
         echo "common --remote_header=x-buildbuddy-api-key=${{inputs.BUILDBUDDY_API_KEY}}" >> .bazel.buildbuddy.rc
+        echo "common --remote_upload_local_results" >> .bazel.buildbuddy.rc
     - name: Enable optimized builds
       shell: bash
       run: |
         echo "common --compilation_mode opt" > .bazel.compilation_mode.bazelrc
+    # https://arrdem.com/2024/01/11/bazel-glibc/
+    - name: Add build salt
+      shell: bash
+      run: |
+        SALT=$(./infrastructure/build_salt.sh)
+        echo > .bazel.build_salt.bazelrc
+        echo "build --copt=-DPLATFORM_FINGERPRINT=$SALT" >> .bazel.build_salt.bazelrc
+        echo "build --action_env=PLATFORM_FINGERPRINT=$SALT" >> .bazel.build_salt.bazelrc
+        echo "common --copt=-DPLATFORM_FINGERPRINT=$SALT" >> .bazel.build_salt.bazelrc
+        echo "common --action_env=PLATFORM_FINGERPRINT=$SALT" >> .bazel.build_salt.bazelrc
+        cat .bazel.build_salt.bazelrc
