@@ -5,7 +5,7 @@ CMake Integration: fmtlib
 
 This tutorial demonstrates how to integrate Mull into a CMake-based project.
 
-We use `fmtlib <https://github.com/fmtlib/fmt/blob/master/LICENSE.rst>`_ as an example.
+We use `fmtlib <https://github.com/fmtlib/fmt>`_ as an example.
 
 .. note::
    If you are new to Mull, then :doc:`Hello World example <./HelloWorld>` is a good starting point.
