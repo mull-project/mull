@@ -144,9 +144,9 @@ distlib==0.3.9 \
 filecheck==0.0.24 \
     --hash=sha256:3a0ab9c80c507cb141706e9dcb6d05fa978c4960cf472edf873b211e9397a038
     # via -r requirements.txt
-filelock==3.18.0 \
-    --hash=sha256:adbc88eabb99d2fec8c9c1b229b171f18afa655400173ddc653d5d01501fb9f2 \
-    --hash=sha256:c401f4f8377c4464e6db25fff06205fd89bdd83b65eb0488ed1b160f780e21de
+filelock==3.20.1 \
+    --hash=sha256:15d9e9a67306188a44baa72f569d2bfd803076269365fdea0934385da4dc361a \
+    --hash=sha256:b8360948b351b80f420878d8516519a2204b07aefcdcfd24912a5d33127f188c
     # via virtualenv
 identify==2.6.9 \
     --hash=sha256:c98b4322da415a8e5a70ff6e51fbc2d2932c015532d77e9f8537b4ba7813b150 \
