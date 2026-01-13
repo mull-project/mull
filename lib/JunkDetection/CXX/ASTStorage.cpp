@@ -4,10 +4,14 @@
 #include "mull/MutationPoint.h"
 
 #include <clang/AST/RecursiveASTVisitor.h>
+#include <clang/Basic/DiagnosticOptions.h>
 #include <clang/Basic/FileManager.h>
 #include <clang/Frontend/CompilerInstance.h>
 #include <llvm/Support/FileSystem.h>
 #include <llvm/Support/Path.h>
+#if LLVM_VERSION_MAJOR >= 20
+#include <llvm/Support/VirtualFileSystem.h>
+#endif
 #include <sstream>
 
 using namespace mull;
@@ -235,7 +239,13 @@ ThreadSafeASTUnit *ASTStorage::findAST(const std::string &sourceFile) {
   }
 
   clang::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diagnosticsEngine(
-      clang::CompilerInstance::createDiagnostics(new clang::DiagnosticOptions));
+    clang::CompilerInstance::createDiagnostics(
+#if LLVM_VERSION_MAJOR >= 20
+      *llvm::vfs::getRealFileSystem(),
+#endif
+      new clang::DiagnosticOptions
+    )
+  );
 
   auto ast = clang::ASTUnit::LoadFromCommandLine(args.data(),
                                                  args.data() + args.size(),
