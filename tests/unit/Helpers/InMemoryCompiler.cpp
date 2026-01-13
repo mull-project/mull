@@ -8,6 +8,9 @@
 #include <clang/Lex/PreprocessorOptions.h>
 
 #include <llvm/IR/Module.h>
+#if LLVM_VERSION_MAJOR >= 20
+#include <llvm/Support/VirtualFileSystem.h>
+#endif
 #if LLVM_VERSION_MAJOR >= 18
 #include <llvm/TargetParser/Host.h>
 #else
@@ -35,7 +38,11 @@ std::unique_ptr<llvm::Module> InMemoryCompiler::compile(const std::string &code,
 
   /// Create and initialize CompilerInstance
   clang::CompilerInstance clangCompilerInstance;
-  clangCompilerInstance.createDiagnostics();
+  clangCompilerInstance.createDiagnostics(
+#if LLVM_VERSION_MAJOR >= 20
+      *llvm::vfs::getRealFileSystem()
+#endif
+  );
 
   /// Initialize CompilerInvocation
   clang::CompilerInvocation &compilerInvocation = clangCompilerInstance.getInvocation();

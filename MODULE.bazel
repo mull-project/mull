@@ -81,9 +81,9 @@ use_repo(pip, "pypi")
 mull_supported_llvm_versions = use_extension("//:mull_supported_llvm_versions.bzl", "mull_supported_llvm_versions")
 mull_supported_llvm_versions.configure(
     os_version_mapping = {
-        "macos": ["16", "17", "18", "19"],
+        "macos": ["16", "17", "18", "19", "20"],
         "ubuntu:22.04": ["13", "14", "15"],
-        "ubuntu:24.04": ["14", "15", "16", "17", "18", "19"],
+        "ubuntu:24.04": ["14", "15", "16", "17", "18", "19", "20"],
         "rhel:9.6": ["19"],
         "rhel:10.0": ["19"],
     },
@@ -101,6 +101,7 @@ SUPPORTED_LLVM_VERSIONS = [
     "17",
     "18",
     "19",
+    "20",
 ]
 
 available_llvm_versions = use_extension("//:mull_available_llvm_versions.bzl", "available_llvm_versions")
