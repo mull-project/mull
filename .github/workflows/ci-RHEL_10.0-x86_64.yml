@@ -33,6 +33,7 @@ jobs:
           imageName: ghcr.io/mull-project/internal-rhel-x86_64_10.0-llvm-${{ matrix.LLVM_VERSION }}-ci
           configFile: ./.devcontainer/rhel_10.0-llvm-${{ matrix.LLVM_VERSION }}/devcontainer.json
           runCmd: |
+            set -e
             mkdir -p packages
             bazel build //...
             bazel test //...
