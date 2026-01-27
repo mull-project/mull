@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.28.0] - 27 Jan 2026
+
+- Added LLVM 20 support (by [rjaegers](https://github.com/rjaegers)) [#1143](https://github.com/mull-project/mull/pull/1143)
+- RHEL updated to LLVM 20 [#1129](https://github.com/mull-project/mull/pull/1129)
+
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2025-10-25..2026-01-27)
+
 ## [0.27.1] - 24 Oct 2025
 
 ### Fixed
