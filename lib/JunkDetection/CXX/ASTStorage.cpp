@@ -239,13 +239,11 @@ ThreadSafeASTUnit *ASTStorage::findAST(const std::string &sourceFile) {
   }
 
   clang::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diagnosticsEngine(
-    clang::CompilerInstance::createDiagnostics(
+      clang::CompilerInstance::createDiagnostics(
 #if LLVM_VERSION_MAJOR >= 20
-      *llvm::vfs::getRealFileSystem(),
+          *llvm::vfs::getRealFileSystem(),
 #endif
-      new clang::DiagnosticOptions
-    )
-  );
+          new clang::DiagnosticOptions));
 
   auto ast = clang::ASTUnit::LoadFromCommandLine(args.data(),
                                                  args.data() + args.size(),
