@@ -33,6 +33,7 @@ jobs:
           imageName: ghcr.io/mull-project/internal-ubuntu-x86_64_22.04-llvm-${{ matrix.LLVM_VERSION }}-ci
           configFile: ./.devcontainer/ubuntu_22.04-llvm-${{ matrix.LLVM_VERSION }}/devcontainer.json
           runCmd: |
+            set -e
             mkdir -p packages
             bazel build //...
             bazel test //...
