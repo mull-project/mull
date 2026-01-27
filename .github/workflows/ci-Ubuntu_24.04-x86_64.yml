@@ -34,6 +34,13 @@ jobs:
           configFile: ./.devcontainer/ubuntu_24.04-llvm-${{ matrix.LLVM_VERSION }}/devcontainer.json
           runCmd: |
             set -e
+            echo "=== Environment Debug ==="
+            uname -a
+            clang-${{ matrix.LLVM_VERSION }} --version
+            bazel --version
+            cat .bazel*.bazelrc .bazel*.rc 2>/dev/null || true
+            echo "=== End Debug ==="
+
             mkdir -p packages
             bazel build //...
             bazel test //...
