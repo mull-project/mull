@@ -15,7 +15,8 @@ def _mull_fmtlib_sqlite_report_impl(ctx):
 
     cmds = []
     for test_file in test_files:
-        cmds.append("%s --allow-surviving --reporters SQLite --report-name fmtlib %s" % (ctx.executable.mull_runner.path, test_file.path))
+        # Force single-threaded to ensure deterministic results across different machines
+        cmds.append("%s --workers 1 --allow-surviving --reporters SQLite --report-name fmtlib %s" % (ctx.executable.mull_runner.path, test_file.path))
 
     cmds.append("cp fmtlib.sqlite %s" % out.path)
 
