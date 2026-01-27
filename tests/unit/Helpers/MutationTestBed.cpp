@@ -23,7 +23,7 @@ std::unique_ptr<MutationArtefact> MutationTestBed::generate(const std::string &s
   std::unique_ptr<llvm::MemoryBuffer> testCodeAsBuffer =
       fixtureGenerator.createMemoryBuffer(sourceCode);
 
-  std::unique_ptr<ThreadSafeASTUnit> threadSafeAstUnit(new ThreadSafeASTUnit(std::move(astUnit)));
+  std::unique_ptr<ASTUnitWrapper> threadSafeAstUnit(new ASTUnitWrapper(std::move(astUnit)));
   ASTStorage storage(diagnostics, "", "", {});
 
   /// 1. Finding mutations in IR

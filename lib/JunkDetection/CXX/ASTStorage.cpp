@@ -48,33 +48,32 @@ private:
   std::vector<clang::Decl *> &declarations;
 };
 
-ThreadSafeASTUnit::ThreadSafeASTUnit(std::unique_ptr<clang::ASTUnit> ast) : ast(std::move(ast)) {
+ASTUnitWrapper::ASTUnitWrapper(std::unique_ptr<clang::ASTUnit> ast) : ast(std::move(ast)) {
   if (this->ast) {
     recordDeclarations();
   }
 }
 
-clang::SourceManager &ThreadSafeASTUnit::getSourceManager() {
+clang::SourceManager &ASTUnitWrapper::getSourceManager() {
   return ast->getSourceManager();
 }
 
-clang::ASTContext &ThreadSafeASTUnit::getASTContext() {
+clang::ASTContext &ASTUnitWrapper::getASTContext() {
   return ast->getASTContext();
 }
 
-bool ThreadSafeASTUnit::isInSystemHeader(clang::SourceLocation &location) {
+bool ASTUnitWrapper::isInSystemHeader(clang::SourceLocation &location) {
   return ast->getSourceManager().isInSystemHeader(location);
 }
 
-const clang::FileEntry *
-ThreadSafeASTUnit::findFileEntry(const mull::SourceLocation &sourceLocation) {
+const clang::FileEntry *ASTUnitWrapper::findFileEntry(const mull::SourceLocation &sourceLocation) {
   assert(!sourceLocation.isNull() && "Missing debug information?");
 
   const clang::FileEntry *file = findFileEntry(sourceLocation.filePath);
   return file ? file : findFileEntry(sourceLocation.unitFilePath);
 }
 
-const clang::FileEntry *ThreadSafeASTUnit::findFileEntry(const std::string &filePath) {
+const clang::FileEntry *ASTUnitWrapper::findFileEntry(const std::string &filePath) {
   auto &sourceManager = ast->getSourceManager();
   auto begin = sourceManager.fileinfo_begin();
   auto end = sourceManager.fileinfo_end();
@@ -107,23 +106,17 @@ const clang::FileEntry *ThreadSafeASTUnit::findFileEntry(const std::string &file
   return file;
 }
 
-clang::SourceLocation ThreadSafeASTUnit::getLocation(const mull::SourceLocation &sourceLocation) {
+clang::SourceLocation ASTUnitWrapper::getLocation(const mull::SourceLocation &sourceLocation) {
   auto file = findFileEntry(sourceLocation);
   assert(file);
   assert(!sourceLocation.isNull());
-
-  /// getLocation from the ASTUnit it not thread safe
-  std::lock_guard<std::mutex> lock(mutex);
   auto location = ast->getLocation(file, sourceLocation.line, sourceLocation.column);
   assert(location.isValid());
   return location;
 }
 
 clang::SourceLocation
-ThreadSafeASTUnit::getLocForEndOfToken(const clang::SourceLocation sourceLocationEnd) {
-  /// clang::Lexer::getLocForEndOfToken internally calls getLocation, which is known for not being
-  /// thread safe. therefore we need to protect it within the ThreadSafeASTUnit
-  std::lock_guard<std::mutex> lock(mutex);
+ASTUnitWrapper::getLocForEndOfToken(const clang::SourceLocation sourceLocationEnd) {
   clang::SourceManager &sourceManager = ast->getSourceManager();
   /// Clang AST: how to get more precise debug information in certain cases?
   /// http://clang-developers.42468.n3.nabble.com/Clang-AST-how-to-get-more-precise-debug-information-in-certain-cases-td4065195.html
@@ -157,7 +150,7 @@ struct UniqueLocationComparator {
   clang::BeforeThanCompare<clang::SourceLocation> cmp;
 };
 
-void ThreadSafeASTUnit::recordDeclarations() {
+void ASTUnitWrapper::recordDeclarations() {
   assert(ast);
   clang::SourceManager &sourceManager = ast->getSourceManager();
   DeclVisitor visitor(sourceManager, decls);
@@ -171,11 +164,10 @@ void ThreadSafeASTUnit::recordDeclarations() {
   decls.erase(last, decls.end());
 }
 
-clang::Decl *ThreadSafeASTUnit::getDecl(clang::SourceLocation &location) {
+clang::Decl *ASTUnitWrapper::getDecl(clang::SourceLocation &location) {
   if (decls.empty()) {
     return nullptr;
   }
-  std::lock_guard<std::mutex> lock(mutex);
   clang::BeforeThanCompare<clang::SourceLocation> comparator(ast->getSourceManager());
 
   auto lower = std::lower_bound(decls.begin(),
@@ -197,7 +189,7 @@ clang::Decl *ThreadSafeASTUnit::getDecl(clang::SourceLocation &location) {
   return nullptr;
 }
 
-bool ThreadSafeASTUnit::hasAST() const {
+bool ASTUnitWrapper::hasAST() const {
   return ast != nullptr;
 }
 
@@ -208,7 +200,7 @@ ASTStorage::ASTStorage(Diagnostics &diagnostics, const std::string &cxxCompilati
       compilationDatabase(CompilationDatabase::fromFile(
           diagnostics, cxxCompilationDatabasePath, cxxCompilationFlags, bitcodeCompilationFlags)) {}
 
-ThreadSafeASTUnit *ASTStorage::findAST(const mull::SourceLocation &sourceLocation) {
+ASTUnitWrapper *ASTStorage::findAST(const mull::SourceLocation &sourceLocation) {
   const std::string &sourceFile = sourceLocation.unitFilePath;
   if (llvm::sys::fs::exists(sourceFile)) {
     return findAST(sourceFile);
@@ -219,12 +211,11 @@ ThreadSafeASTUnit *ASTStorage::findAST(const mull::SourceLocation &sourceLocatio
     return findAST(unitSourceFile);
   }
 
-  diagnostics.warning("ThreadSafeASTUnit: source location does not exist: " + sourceFile);
+  diagnostics.warning("ASTUnitWrapper: source location does not exist: " + sourceFile);
   return nullptr;
 }
 
-ThreadSafeASTUnit *ASTStorage::findAST(const std::string &sourceFile) {
-  std::lock_guard<std::mutex> guard(mutex);
+ASTUnitWrapper *ASTStorage::findAST(const std::string &sourceFile) {
   if (astUnits.count(sourceFile)) {
     return astUnits.at(sourceFile).get();
   }
@@ -267,12 +258,11 @@ ThreadSafeASTUnit *ASTStorage::findAST(const std::string &sourceFile) {
     diagnostics.warning(message.str());
   }
 
-  auto threadSafeAST = new ThreadSafeASTUnit(std::unique_ptr<clang::ASTUnit>(std::move(ast)));
-  astUnits[sourceFile] = std::unique_ptr<ThreadSafeASTUnit>(threadSafeAST);
+  auto threadSafeAST = new ASTUnitWrapper(std::unique_ptr<clang::ASTUnit>(std::move(ast)));
+  astUnits[sourceFile] = std::unique_ptr<ASTUnitWrapper>(threadSafeAST);
   return threadSafeAST;
 }
 
-void ASTStorage::setAST(const std::string &sourceFile, std::unique_ptr<ThreadSafeASTUnit> astUnit) {
-  std::lock_guard<std::mutex> guard(mutex);
+void ASTStorage::setAST(const std::string &sourceFile, std::unique_ptr<ASTUnitWrapper> astUnit) {
   astUnits[sourceFile] = std::move(astUnit);
 }

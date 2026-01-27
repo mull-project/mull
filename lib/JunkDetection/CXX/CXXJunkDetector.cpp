@@ -178,7 +178,7 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     return true;
   }
 
-  ThreadSafeASTUnit *ast = astStorage.findAST(point->getSourceLocation());
+  ASTUnitWrapper *ast = astStorage.findAST(point->getSourceLocation());
   if (!ast->hasAST()) {
     return true;
   }

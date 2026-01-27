@@ -80,7 +80,8 @@ FMT_TEST_TARGETS = [
 ]
 
 def define_end2end_test_targets(name):
-    linux_commands = []
+    linux_x86_64_commands = []
+    linux_aarch64_commands = []
     macos_commands = []
     for llvm_version in AVAILABLE_LLVM_VERSIONS:
         cmake(
@@ -126,17 +127,34 @@ def define_end2end_test_targets(name):
             mull_reporter = "//:mull-reporter-%s" % llvm_version,
             sqlite_report = "fmt_sqlite_report_%s" % llvm_version,
         )
+
+        # Linux x86_64
         write_source_files(
-            name = "update_end2end_fmtlib_test_files_linux_%s" % llvm_version,
+            name = "update_end2end_fmtlib_test_files_linux_x86_64_%s" % llvm_version,
             files = {
-                ":fmtlib_expected_ide_report_linux.txt": "fmt_ide_report_%s" % llvm_version,
+                ":fmtlib_expected_ide_report_linux_x86_64.txt": "fmt_ide_report_%s" % llvm_version,
             },
             check_that_out_file_exists = False,
             testonly = True,
-            target_compatible_with = ["@platforms//os:linux"],
-            suggested_update_target = "%s_linux" % name,
+            target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
+            suggested_update_target = "%s_linux_x86_64" % name,
             tags = ["llvm_%s" % llvm_version, "end2end"],
         )
+
+        # Linux aarch64
+        write_source_files(
+            name = "update_end2end_fmtlib_test_files_linux_aarch64_%s" % llvm_version,
+            files = {
+                ":fmtlib_expected_ide_report_linux_aarch64.txt": "fmt_ide_report_%s" % llvm_version,
+            },
+            check_that_out_file_exists = False,
+            testonly = True,
+            target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:aarch64"],
+            suggested_update_target = "%s_linux_aarch64" % name,
+            tags = ["llvm_%s" % llvm_version, "end2end"],
+        )
+
+        # macOS, only tested on arm64
         write_source_files(
             name = "update_end2end_fmtlib_test_files_macos_%s" % llvm_version,
             files = {
@@ -149,7 +167,9 @@ def define_end2end_test_targets(name):
             tags = ["llvm_%s" % llvm_version, "end2end"],
         )
         macos_commands.append("update_end2end_fmtlib_test_files_macos_%s" % llvm_version)
-        linux_commands.append("update_end2end_fmtlib_test_files_linux_%s" % llvm_version)
+        linux_x86_64_commands.append("update_end2end_fmtlib_test_files_linux_x86_64_%s" % llvm_version)
+        linux_aarch64_commands.append("update_end2end_fmtlib_test_files_linux_aarch64_%s" % llvm_version)
+
     multirun(
         name = "%s_macos" % name,
         commands = macos_commands,
@@ -158,8 +178,24 @@ def define_end2end_test_targets(name):
         testonly = True,
     )
     multirun(
+        name = "%s_linux_x86_64" % name,
+        commands = linux_x86_64_commands,
+        jobs = 0,
+        target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
+        testonly = True,
+    )
+    multirun(
+        name = "%s_linux_aarch64" % name,
+        commands = linux_aarch64_commands,
+        jobs = 0,
+        target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:aarch64"],
+        testonly = True,
+    )
+
+    # Convenience target that runs the appropriate Linux architecture
+    multirun(
         name = "%s_linux" % name,
-        commands = linux_commands,
+        commands = linux_x86_64_commands + linux_aarch64_commands,
         jobs = 0,
         target_compatible_with = ["@platforms//os:linux"],
         testonly = True,
