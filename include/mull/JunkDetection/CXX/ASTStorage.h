@@ -25,6 +25,8 @@ public:
 
   clang::SourceLocation getLocation(const mull::SourceLocation &sourceLocation);
   clang::SourceLocation getLocForEndOfToken(const clang::SourceLocation sourceLocationEnd);
+  /// Thread-safe method to get end location line and column in one atomic operation
+  std::pair<int, int> getEndLocationLineAndColumn(const clang::SourceLocation sourceLocationEnd);
   bool isInSystemHeader(clang::SourceLocation &location);
 
   clang::Decl *getDecl(clang::SourceLocation &location);

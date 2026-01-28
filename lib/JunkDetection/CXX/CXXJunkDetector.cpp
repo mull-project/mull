@@ -205,11 +205,9 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
   }
 
   clang::SourceLocation mutantExpressionBeginLoc = mutantExpression->getSourceRange().getBegin();
-  int beginLine = sourceManager.getExpansionLineNumber(mutantExpressionBeginLoc, nullptr);
-  int beginColumn = sourceManager.getExpansionColumnNumber(mutantExpressionBeginLoc);
-
-  int mutationLocationBeginLine = sourceManager.getExpansionLineNumber(location, nullptr);
-  int mutationLocationBeginColumn = sourceManager.getExpansionColumnNumber(location);
+  auto [beginLine, beginColumn] = ast->getEndLocationLineAndColumn(mutantExpressionBeginLoc);
+  auto [mutationLocationBeginLine, mutationLocationBeginColumn] =
+      ast->getEndLocationLineAndColumn(location);
 
   /// There are two types of mutated expressions:
   /// 1) Remove-Void, CallExpr example: its mutation location and its getStart() are the same.
@@ -231,10 +229,8 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
   /// Clang AST: how to get more precise debug information in certain cases?
   /// http://clang-developers.42468.n3.nabble.com/Clang-AST-how-to-get-more-precise-debug-information-in-certain-cases-td4065195.html
   /// https://stackoverflow.com/questions/11083066/getting-the-source-behind-clangs-ast
-  clang::SourceLocation sourceLocationEndActual = ast->getLocForEndOfToken(sourceLocationEnd);
-
-  int endLine = sourceManager.getExpansionLineNumber(sourceLocationEndActual, nullptr);
-  int endColumn = sourceManager.getExpansionColumnNumber(sourceLocationEndActual);
+  /// Use thread-safe method that performs all SourceManager operations under a single lock
+  auto [endLine, endColumn] = ast->getEndLocationLineAndColumn(sourceLocationEnd);
 
   const std::string &sourceFile = point->getSourceLocation().filePath;
   std::string description = MutationKindToString(point->getMutator()->mutatorKind());
