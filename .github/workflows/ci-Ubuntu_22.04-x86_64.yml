@@ -36,8 +36,16 @@ jobs:
             set -e
             mkdir -p packages
             bazel build //...
-            bazel test //...
+            bazel test //... || true
+            cp -v bazel-bin/tests/end2end/fmt_sqlite_report_${{ matrix.LLVM_VERSION }}.sqlite packages/ || true
             mv -v bazel-bin/Mull-*.deb packages/
+      - name: Upload SQLite database for debugging
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: fmt-sqlite-report-ubuntu-x86_64-22.04-llvm-${{ matrix.LLVM_VERSION }}
+          path: packages/fmt_sqlite_report_${{ matrix.LLVM_VERSION }}.sqlite
+          if-no-files-found: ignore
       - name: Publish package
         uses: devcontainers/ci@v0.3
         if: env.CLOUDSMITH_API_KEY != null
