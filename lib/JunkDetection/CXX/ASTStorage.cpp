@@ -133,20 +133,6 @@ ThreadSafeASTUnit::getLocForEndOfToken(const clang::SourceLocation sourceLocatio
   return sourceLocationEndActual;
 }
 
-std::pair<int, int>
-ThreadSafeASTUnit::getEndLocationLineAndColumn(const clang::SourceLocation sourceLocationEnd) {
-  /// All operations on SourceManager must be protected by the mutex to avoid race conditions.
-  /// Previously, getLocForEndOfToken was protected but getExpansionLineNumber/ColumnNumber
-  /// were called outside the lock, causing non-deterministic end locations.
-  std::lock_guard<std::mutex> lock(mutex);
-  clang::SourceManager &sourceManager = ast->getSourceManager();
-  auto sourceLocationEndActual = clang::Lexer::getLocForEndOfToken(
-      sourceLocationEnd, 0, sourceManager, ast->getASTContext().getLangOpts());
-  int endLine = sourceManager.getExpansionLineNumber(sourceLocationEndActual, nullptr);
-  int endColumn = sourceManager.getExpansionColumnNumber(sourceLocationEndActual);
-  return std::make_pair(endLine, endColumn);
-}
-
 struct SortLocationComparator {
   explicit SortLocationComparator(clang::SourceManager &sourceManager)
       : sourceManager(sourceManager), cmp(sourceManager) {}

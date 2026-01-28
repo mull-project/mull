@@ -27,9 +27,9 @@ using namespace llvm;
 using namespace llvm::object;
 using namespace mull;
 using namespace std;
-
-static void printIR(llvm::Module &module, Diagnostics &diagnostics, bool toFile,
-                    const std::string &suffix) {
+namespace {
+void printIR(llvm::Module &module, Diagnostics &diagnostics, bool toFile,
+             const std::string &suffix) {
   if (toFile) {
     std::error_code ec;
     auto filename = module.getSourceFileName() + suffix;
@@ -42,6 +42,35 @@ static void printIR(llvm::Module &module, Diagnostics &diagnostics, bool toFile,
     module.print(llvm::errs(), nullptr);
   }
 }
+
+std::vector<MutationPoint *>
+filterOutJunk(Diagnostics &diagnostics, const Configuration &configuration,
+              std::vector<MutationPoint *> points,
+              std::unordered_map<std::string, std::string> bitcodeCompilationFlags) {
+  std::string cxxCompilationFlags;
+  for (auto &flag : configuration.compilerFlags) {
+    cxxCompilationFlags += flag + ' ';
+  }
+
+  mull::ASTStorage astStorage(diagnostics,
+                              configuration.compilationDatabasePath,
+                              cxxCompilationFlags,
+                              bitcodeCompilationFlags);
+
+  mull::CXXJunkDetector junkDetector(diagnostics, astStorage);
+
+  std::vector<MutationPoint *> out;
+  SingleTaskExecutor singleTask(diagnostics);
+  singleTask.execute("Applying filter: junk", [&]() {
+    for (auto point : points) {
+      if (!junkDetector.isJunk(point))
+        out.emplace_back(point);
+    }
+  });
+
+  return out;
+}
+} // namespace
 
 void mull::mutateBitcode(llvm::Module &module) {
   /// Setup
@@ -79,32 +108,16 @@ void mull::mutateBitcode(llvm::Module &module) {
   filters.enableVariadicFunctionFilter();
   filters.enableManualFilter();
 
-  std::string cxxCompilationFlags;
-  for (auto &flag : configuration.compilerFlags) {
-    cxxCompilationFlags += flag + ' ';
-  }
+  SingleTaskExecutor singleTask(diagnostics);
+
+  /// Actual Work
+
   mull::BitcodeMetadataReader bitcodeCompilationDatabaseLoader;
   std::unordered_map<std::string, std::string> bitcodeCompilationFlags =
       bitcodeCompilationDatabaseLoader.getCompilationDatabase(module);
   if (!bitcodeCompilationFlags.empty()) {
     diagnostics.info(std::string("Found compilation flags in the input bitcode"));
   }
-
-  mull::ASTStorage astStorage(diagnostics,
-                              configuration.compilationDatabasePath,
-                              cxxCompilationFlags,
-                              bitcodeCompilationFlags);
-
-  mull::CXXJunkDetector junkDetector(diagnostics, astStorage);
-  if (!configuration.junkDetectionDisabled) {
-    auto *junkFilter = new mull::JunkMutationFilter(junkDetector);
-    filters.mutationFilters.push_back(junkFilter);
-    filterStorage.emplace_back(junkFilter);
-  }
-
-  SingleTaskExecutor singleTask(diagnostics);
-
-  /// Actual Work
 
   /// How can I check that -g flag (debug info enable) was set, from llvm pass
   /// https://stackoverflow.com/a/21713717/598057
@@ -193,6 +206,11 @@ void mull::mutateBitcode(llvm::Module &module) {
         diagnostics, label, mutations, tmp, std::move(tasks));
     filterRunner.execute();
     mutations = std::move(tmp);
+  }
+
+  if (!configuration.junkDetectionDisabled) {
+    mutations =
+        filterOutJunk(diagnostics, configuration, std::move(mutations), bitcodeCompilationFlags);
   }
 
   singleTask.execute("Prepare mutations", [&]() {
