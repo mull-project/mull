@@ -5,7 +5,7 @@
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Filters/BlockAddressFunctionFilter.h"
 #include "mull/Filters/Filters.h"
-#include "mull/Filters/JunkMutationFilter.h"
+#include "mull/Filters/MutationPointFilter.h"
 #include "mull/FunctionUnderTest.h"
 #include "mull/JunkDetection/CXX/ASTStorage.h"
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
