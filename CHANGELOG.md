@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.29.0] - 29 Jan 2026
+
+- ‼️ Fixed a very old multithreading related bug leading to crashes and inconsistent results (once in a while) [#1064](https://github.com/mull-project/mull/issues/1064) [#1083](https://github.com/mull-project/mull/issues/1083) [#1149](https://github.com/mull-project/mull/pull/1149)
+
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2025-10-28..2026-01-29)
+
 ## [0.28.0] - 27 Jan 2026
 
 - Added LLVM 20 support (by [rjaegers](https://github.com/rjaegers)) [#1143](https://github.com/mull-project/mull/pull/1143)
