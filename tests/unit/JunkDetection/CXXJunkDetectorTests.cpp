@@ -181,7 +181,7 @@ static const CXXJunkDetectorTestParameter parameters[] = {
       new cxx::ReplaceScalarCall, 11),
 };
 
-INSTANTIATE_TEST_CASE_P(CXXJunkDetection, CXXJunkDetectorTest, testing::ValuesIn(parameters));
+INSTANTIATE_TEST_SUITE_P(CXXJunkDetection, CXXJunkDetectorTest, testing::ValuesIn(parameters));
 
 TEST(CXXJunkDetector, compdb_absolute_paths) {
   Diagnostics diagnostics;
