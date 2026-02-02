@@ -25,6 +25,7 @@ def _cs_repo(repository_ctx):
 
 PACKAGE_INFO = """
 MULL_VERSION = "{MULL_VERSION}"
+MULL_BASE_VERSION = "{MULL_BASE_VERSION}"
 OS_NAME = "{OS_NAME}"
 OS_CODENAME = "{OS_CODENAME}"
 OS_ARCH = "{OS_ARCH}"
@@ -38,6 +39,7 @@ MULL_DOCS_URL = "https://mull.readthedocs.io"
 """
 
 def _mull_package_info_repo_impl(repository_ctx):
+    base_version = repository_ctx.attr.mull_version
     repository_ctx.file(
         "mull_package_info.bzl",
         content = PACKAGE_INFO.format(
@@ -45,6 +47,7 @@ def _mull_package_info_repo_impl(repository_ctx):
             OS_CODENAME = os_codename(repository_ctx),
             OS_DIST_EXTENSION = os_dist_extension(repository_ctx),
             MULL_VERSION = _mull_version(repository_ctx),
+            MULL_BASE_VERSION = base_version,
             OS_ARCH = repository_ctx.os.arch,
             OS_VERSION = os_version(repository_ctx),
             CS_REPO = _cs_repo(repository_ctx),
