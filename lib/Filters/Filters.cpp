@@ -72,12 +72,12 @@ void Filters::enableGitDiffFilter() {
     if (configuration.gitProjectRoot.empty()) {
       std::stringstream debugMessage;
       debugMessage
-          << "-git-diff-ref option has been provided but the path to the Git project root has not "
-             "been specified via -git-project-root. The incremental testing will be disabled.";
+          << "gitDiffRef option has been provided but the path to the Git project root has not "
+             "been specified via gitProjectRoot. The incremental testing will be disabled.";
       diagnostics.warning(debugMessage.str());
     } else if (!llvm::sys::fs::is_directory(configuration.gitProjectRoot)) {
       std::stringstream debugMessage;
-      debugMessage << "directory provided by -git-project-root does not exist, ";
+      debugMessage << "directory provided by gitProjectRoot does not exist, ";
       debugMessage << "the incremental testing will be disabled: ";
       debugMessage << configuration.gitProjectRoot;
       diagnostics.warning(debugMessage.str());
@@ -100,9 +100,8 @@ void Filters::enableGitDiffFilter() {
           mutantFilters.push_back(gitDiffFilter);
         }
       } else {
-        diagnostics.warning(
-            std::string("could not expand -git-project-root to an absolute path: ") +
-            gitProjectRoot);
+        diagnostics.warning(std::string("could not expand gitProjectRoot to an absolute path: ") +
+                            gitProjectRoot);
       }
     }
   }

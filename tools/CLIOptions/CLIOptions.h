@@ -86,7 +86,7 @@ opt<std::string> ReportName( \
 #define ReportPatchBaseDirectory_() \
 opt<std::string> ReportPatchBaseDirectory( \
     "report-patch-base", \
-    desc("Create Patches relative to this directory (defaults to git-project-root if available, else absolute path will be used)"), \
+    desc("Create Patches relative to this directory (defaults to gitProjectRoot if available, else absolute path will be used)"), \
     Optional, \
     value_desc("directory"), \
     init("."), \
