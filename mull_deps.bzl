@@ -150,9 +150,9 @@ def _mull_deps_extension(module_ctx):
                 )
                 http_archive(
                     name = irm_repo_name,
-                    integrity = "sha256-/UPOr/i+xfZEFv/oEVVIC0KhZxYRWVfzPdy7Ir7eNXU=",
-                    urls = ["https://github.com/mull-project/libirm/archive/988a91877279c95bfe847994d006e3733a663962.zip"],
-                    strip_prefix = "libirm-988a91877279c95bfe847994d006e3733a663962",
+                    integrity = "sha256-8pmIPDJX0cgDlNljcIcWd73Wb2WB8cgK/086RxOyqrE=",
+                    urls = ["https://github.com/mull-project/libirm/archive/08eab0634575aeb721d07f05daf4a0aad8feba36.zip"],
+                    strip_prefix = "libirm-08eab0634575aeb721d07f05daf4a0aad8feba36",
                     build_file_content = IRM_BUILD_FILE.format(LLVM_VERSION = version),
                 )
 

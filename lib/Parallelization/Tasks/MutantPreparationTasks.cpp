@@ -9,6 +9,12 @@
 
 using namespace mull;
 
+#if LLVM_VERSION_MAJOR >= 20
+#define BB_WRAP_ITERATOR(inst) llvm::BasicBlock::iterator(inst)
+#else
+#define BB_WRAP_ITERATOR(inst) inst
+#endif
+
 void CloneMutatedFunctionsTask::operator()(iterator begin, iterator end, Out &storage,
                                            progress_counter &counter) {
   for (auto it = begin; it != end; it++, counter.increment()) {
@@ -65,7 +71,7 @@ static void insertTrace(llvm::BasicBlock *basicBlock, const std::string &format,
   auto module = basicBlock->getParent()->getParent();
   auto &context = module->getContext();
   llvm::Type *intType = llvm::Type::getInt32Ty(context);
-  llvm::Type *charPtr = llvm::Type::getInt8Ty(context)->getPointerTo();
+  llvm::Type *charPtr = llvm::PointerType::get(llvm::Type::getInt8Ty(context), 0);
   llvm::FunctionType *printfType = llvm::FunctionType::get(intType, { charPtr }, true);
   auto print = module->getOrInsertFunction("printf", printfType).getCallee();
 
@@ -88,7 +94,7 @@ void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode,
                                                       const Configuration &configuration) {
   llvm::Module *module = bitcode.getModule();
   llvm::LLVMContext &context = module->getContext();
-  llvm::Type *charPtr = llvm::Type::getInt8Ty(context)->getPointerTo();
+  llvm::Type *charPtr = llvm::PointerType::get(llvm::Type::getInt8Ty(context), 0);
   llvm::FunctionType *getEnvType = llvm::FunctionType::get(charPtr, { charPtr }, false);
   llvm::Value *getenv = module->getOrInsertFunction("getenv", getEnvType).getCallee();
   for (auto pair : bitcode.getMutationPointsMap()) {
@@ -107,7 +113,7 @@ void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode,
       insertTrace(trampolineCall, "mull-trace: trampoline call %s\n", original->getName().str());
     }
     auto anyPoint = pair.second.front();
-    llvm::Type *trampolineType = original->getFunctionType()->getPointerTo();
+    llvm::Type *trampolineType = llvm::PointerType::get(original->getFunctionType(), 0);
     auto trampoline = new llvm::AllocaInst(trampolineType, 0, "trampoline", entry);
     if (configuration.debug.traceMutants) {
       insertTrace(entry, "mull-trace: entering %s\n", original->getName().str());
@@ -139,8 +145,8 @@ void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode,
       llvm::Value *zero = llvm::Constant::getNullValue(llvm::Type::getInt64Ty(context));
       auto mutantName =
           llvm::ConstantExpr::getInBoundsGetElementPtr(name->getType(), global, { zero, zero });
-      auto getEnvCall =
-          llvm::CallInst::Create(getEnvType, getenv, { mutantName }, "check_mutation", predicate);
+      auto getEnvCall = llvm::CallInst::Create(
+          getEnvType, getenv, { mutantName }, "check_mutation", BB_WRAP_ITERATOR(predicate));
       predicate->setOperand(0, getEnvCall);
 
       llvm::BasicBlock *mutationBlock =
@@ -166,10 +172,10 @@ void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode,
       dummy = llvm::Constant::getNullValue(retType);
     }
     auto retVal = llvm::ReturnInst::Create(context, dummy, trampolineCall);
-    auto loadValue =
-        new llvm::LoadInst(trampolineType, trampoline, "trampoline_pointer", false, retVal);
-    auto callInst =
-        llvm::CallInst::Create(original->getFunctionType(), loadValue, args, "", retVal);
+    auto loadValue = new llvm::LoadInst(
+        trampolineType, trampoline, "trampoline_pointer", false, BB_WRAP_ITERATOR(retVal));
+    auto callInst = llvm::CallInst::Create(
+        original->getFunctionType(), loadValue, args, "", BB_WRAP_ITERATOR(retVal));
     callInst->setAttributes(original->getAttributes());
     callInst->setCallingConv(original->getCallingConv());
     if (!retType->isVoidTy()) {
