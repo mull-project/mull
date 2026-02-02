@@ -7,7 +7,7 @@ RUN: git -c user.name='Mull' -c user.email=alex@lowlevelbits.org commit -m "Impe
 RUN: cp ../sample.cpp.modified sample.cpp
 RUN: %clang_cxx %sysroot -O0 %pass_mull_ir_frontend -g sample.cpp -o sample.cpp-ir.exe  | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=CHECK_MUTATE
 
-/// The important part relevant to this test is -git-project-root=. (relative path is passed)
+/// The important part relevant to this test is gitProjectRoot=. (relative path is passed)
 
 RUN: (unset TERM; %mull_runner -ide-reporter-show-killed sample.cpp-ir.exe 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 
