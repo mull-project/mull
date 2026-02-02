@@ -14,7 +14,6 @@
 # import sys
 # sys.path.insert(0, os.path.abspath('.'))
 
-import re
 import datetime
 import guzzle_sphinx_theme
 
@@ -22,11 +21,8 @@ import guzzle_sphinx_theme
 
 
 def project_version():
-    with open("../MODULE.bazel") as f:
-        for line in f:
-            m = re.search(r'module\(name = "mull", version = "(\d+.\d+.\d+)"\)', line)
-            if m:
-                return m.group(1)
+    with open("mull-version.txt") as f:
+        return f.read().strip()
 
 
 project = "Mull"

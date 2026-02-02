@@ -1,7 +1,8 @@
-"Generate devcontainer files"
+"Generate documentation files"
 
 load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
 load("@available_llvm_versions//:mull_llvm_versions.bzl", "AVAILABLE_LLVM_VERSIONS")
+load("@mull_package_info//:mull_package_info.bzl", "MULL_BASE_VERSION")
 load("@rules_multirun//:defs.bzl", "multirun")
 
 def _generate_rst(ctx):
@@ -19,6 +20,21 @@ mull_rst = rule(
     attrs = {
         "binary": attr.label(mandatory = True, executable = True, cfg = "exec"),
         "arg": attr.string(mandatory = True),
+    },
+)
+
+def _generate_version_file(ctx):
+    out = ctx.actions.declare_file(ctx.attr.name + ".txt")
+    ctx.actions.write(
+        output = out,
+        content = ctx.attr.version + "\n",
+    )
+    return [DefaultInfo(files = depset([out]))]
+
+mull_version_file = rule(
+    implementation = _generate_version_file,
+    attrs = {
+        "version": attr.string(mandatory = True),
     },
 )
 
@@ -50,6 +66,20 @@ def mull_docs(name):
     write_targets.append(_generate_cli_docs("mull-runner", llvm_version, "dump-cli", "command-line/generated/mull-runner-cli-options.rst"))
     write_targets.append(_generate_cli_docs("mull-reporter", llvm_version, "dump-cli", "command-line/generated/mull-reporter-cli-options.rst"))
     write_targets.append(_generate_cli_docs("mull-runner", llvm_version, "dump-mutators", "generated/Mutators.rst"))
+
+    # Generate version file for Sphinx docs
+    mull_version_file(
+        name = "mull-version-generated",
+        version = MULL_BASE_VERSION,
+    )
+    write_source_files(
+        name = "write_mull_version",
+        files = {
+            "mull-version.txt": "mull-version-generated",
+        },
+    )
+    write_targets.append("write_mull_version")
+
     multirun(
         name = name,
         commands = write_targets,
