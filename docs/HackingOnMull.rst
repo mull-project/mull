@@ -50,7 +50,8 @@ The following commands setup a devcontainer using ``Ubuntu 24.04, LLVM 17`` and 
     npm install -g @devcontainers/cli
     devcontainer up --workspace-folder . --config ./.devcontainer/ubuntu_24.04_17/devcontainer.json
     devcontainer exec --workspace-folder . --config ./.devcontainer/ubuntu_24.04_17/devcontainer.json bash
-    cmake --workflow --preset build-and-test
+    bazel build ...
+    bazel test ...
 
 
 Follow these `instructions <https://code.visualstudio.com/docs/devcontainers/containers>`_

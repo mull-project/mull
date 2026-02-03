@@ -1,6 +1,5 @@
 #include "mull/Mutators/MutatorsFactory.h"
 
-#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Mutators/CXX/ArithmeticMutators.h"
 #include "mull/Mutators/CXX/BitwiseMutators.h"
 #include "mull/Mutators/CXX/CallMutators.h"
@@ -9,6 +8,7 @@
 #include "mull/Mutators/CXX/RemoveNegation.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Mutators/NegateConditionMutator.h"
+#include "rust/mull-core/core.rs.h"
 #include <llvm/ADT/STLExtras.h>
 #include <sstream>
 #include <unordered_set>
@@ -63,7 +63,7 @@ static string CXX_Default() {
   return "cxx_default";
 }
 
-static void expandGroups(Diagnostics &diagnostics, const vector<string> &groups,
+static void expandGroups(const MullDiagnostics &diagnostics, const vector<string> &groups,
                          const map<string, vector<string>> &mapping,
                          unordered_set<string> &expandedGroups) {
   for (const string &group : groups) {
@@ -81,7 +81,7 @@ static void expandGroups(Diagnostics &diagnostics, const vector<string> &groups,
   }
 }
 
-MutatorsFactory::MutatorsFactory(Diagnostics &diagnostics) : diagnostics(diagnostics) {
+MutatorsFactory::MutatorsFactory(const MullDiagnostics &diagnostics) : diagnostics(diagnostics) {
   groupsMapping[CXX_Calls()] = { cxx::RemoveVoidCall::ID(), cxx::ReplaceScalarCall::ID() };
 
   groupsMapping[CXX_Const_Assignment()] = {

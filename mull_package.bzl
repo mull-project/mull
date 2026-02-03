@@ -11,26 +11,43 @@ load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
 load(":mull_publish.bzl", "mull_publish_script")
 
-EXPECTED_MACOS_PACKAGE_CONTENT = """usr/
-usr/local/
-usr/local/bin/
-usr/local/bin/mull-reporter-{LLVM_VERSION}
+EXPECTED_MACOS_PACKAGE_CONTENT = """usr/local/bin/mull-reporter-{LLVM_VERSION}
 usr/local/bin/mull-runner-{LLVM_VERSION}
-usr/local/lib/
 usr/local/lib/mull-ir-frontend-{LLVM_VERSION}
+usr/local/share/bash-completion/completions/mull-reporter-{LLVM_VERSION}
+usr/local/share/bash-completion/completions/mull-runner-{LLVM_VERSION}
+usr/local/share/fish/vendor_completions.d/mull-reporter-{LLVM_VERSION}.fish
+usr/local/share/fish/vendor_completions.d/mull-runner-{LLVM_VERSION}.fish
+usr/local/share/man/man1/mull-reporter-{LLVM_VERSION}.1
+usr/local/share/man/man1/mull-runner-{LLVM_VERSION}.1
+usr/local/share/zsh/site-functions/_mull-reporter-{LLVM_VERSION}
+usr/local/share/zsh/site-functions/_mull-runner-{LLVM_VERSION}
 """
 
-EXPECTED_DEB_PACKAGE_CONTENT = """usr/
-usr/bin/
-usr/bin/mull-reporter-{LLVM_VERSION}
+EXPECTED_DEB_PACKAGE_CONTENT = """usr/bin/mull-reporter-{LLVM_VERSION}
 usr/bin/mull-runner-{LLVM_VERSION}
-usr/lib/
 usr/lib/mull-ir-frontend-{LLVM_VERSION}
+usr/share/bash-completion/completions/mull-reporter-{LLVM_VERSION}
+usr/share/bash-completion/completions/mull-runner-{LLVM_VERSION}
+usr/share/fish/vendor_completions.d/mull-reporter-{LLVM_VERSION}.fish
+usr/share/fish/vendor_completions.d/mull-runner-{LLVM_VERSION}.fish
+usr/share/man/man1/mull-reporter-{LLVM_VERSION}.1
+usr/share/man/man1/mull-runner-{LLVM_VERSION}.1
+usr/share/zsh/vendor-completions/_mull-reporter-{LLVM_VERSION}
+usr/share/zsh/vendor-completions/_mull-runner-{LLVM_VERSION}
 """
 
 EXPECTED_RPM_PACKAGE_CONTENT = """/usr/bin/mull-reporter-{LLVM_VERSION}
 /usr/bin/mull-runner-{LLVM_VERSION}
 /usr/lib/mull-ir-frontend-{LLVM_VERSION}
+/usr/share/bash-completion/completions/mull-reporter-{LLVM_VERSION}
+/usr/share/bash-completion/completions/mull-runner-{LLVM_VERSION}
+/usr/share/fish/vendor_completions.d/mull-reporter-{LLVM_VERSION}.fish
+/usr/share/fish/vendor_completions.d/mull-runner-{LLVM_VERSION}.fish
+/usr/share/man/man1/mull-reporter-{LLVM_VERSION}.1
+/usr/share/man/man1/mull-runner-{LLVM_VERSION}.1
+/usr/share/zsh/site-functions/_mull-reporter-{LLVM_VERSION}
+/usr/share/zsh/site-functions/_mull-runner-{LLVM_VERSION}
 """
 
 def _package_contents_impl(ctx):
@@ -38,9 +55,9 @@ def _package_contents_impl(ctx):
 
     cmds = []
     if ctx.file.package.path.endswith(".zip"):
-        cmds.append("unzip -l %s | awk 'NR > 3 { if ($0 ~ /----/) exit; print $NF }' > %s" % (ctx.file.package.path, out.path))
+        cmds.append("unzip -l %s | awk 'NR > 3 { if ($0 ~ /----/) exit; print $NF }' | grep mull > %s" % (ctx.file.package.path, out.path))
     elif ctx.file.package.path.endswith(".deb"):
-        cmds.append("dpkg -c %s | awk '{ print $NF }' > %s" % (ctx.file.package.path, out.path))
+        cmds.append("dpkg -c %s | awk '{ print $NF }' | grep mull > %s" % (ctx.file.package.path, out.path))
     elif ctx.file.package.path.endswith(".rpm"):
         cmds.append("rpm -qlp %s | grep -v build-id > %s" % (ctx.file.package.path, out.path))
     else:
@@ -134,6 +151,91 @@ def mull_package(name):
             prefix = "%slib" % prefix,
             attributes = pkg_attributes(mode = "755"),
         )
+        pkg_files(
+            name = "%s-manpages" % package_name,
+            srcs = [
+                "//rust/mull-docs:mull-runner.1",
+                "//rust/mull-docs:mull-reporter.1",
+            ],
+            prefix = "%sshare/man/man1" % prefix,
+            renames = {
+                "//rust/mull-docs:mull-runner.1": "mull-runner-%s.1" % llvm_version,
+                "//rust/mull-docs:mull-reporter.1": "mull-reporter-%s.1" % llvm_version,
+            },
+        )
+
+        # Generate versioned completions: replace command names in the content
+        # (e.g. "mull-runner" -> "mull-runner-19") so completions match the
+        # version-suffixed binary names.
+        native.genrule(
+            name = "%s-completions-gen" % package_name,
+            srcs = [
+                "//rust/mull-docs:mull-runner.bash",
+                "//rust/mull-docs:mull-reporter.bash",
+                "//rust/mull-docs:mull-runner.zsh",
+                "//rust/mull-docs:mull-reporter.zsh",
+                "//rust/mull-docs:mull-runner.fish",
+                "//rust/mull-docs:mull-reporter.fish",
+            ],
+            outs = [
+                "%s-mull-runner.bash" % package_name,
+                "%s-mull-reporter.bash" % package_name,
+                "%s-mull-runner.zsh" % package_name,
+                "%s-mull-reporter.zsh" % package_name,
+                "%s-mull-runner.fish" % package_name,
+                "%s-mull-reporter.fish" % package_name,
+            ],
+            cmd = " && ".join([
+                "sed 's/mull-runner/mull-runner-%s/g' $(location //rust/mull-docs:mull-runner.bash) > $(location %s-mull-runner.bash)" % (llvm_version, package_name),
+                "sed 's/mull-reporter/mull-reporter-%s/g' $(location //rust/mull-docs:mull-reporter.bash) > $(location %s-mull-reporter.bash)" % (llvm_version, package_name),
+                "sed 's/mull-runner/mull-runner-%s/g' $(location //rust/mull-docs:mull-runner.zsh) > $(location %s-mull-runner.zsh)" % (llvm_version, package_name),
+                "sed 's/mull-reporter/mull-reporter-%s/g' $(location //rust/mull-docs:mull-reporter.zsh) > $(location %s-mull-reporter.zsh)" % (llvm_version, package_name),
+                "sed 's/mull-runner/mull-runner-%s/g' $(location //rust/mull-docs:mull-runner.fish) > $(location %s-mull-runner.fish)" % (llvm_version, package_name),
+                "sed 's/mull-reporter/mull-reporter-%s/g' $(location //rust/mull-docs:mull-reporter.fish) > $(location %s-mull-reporter.fish)" % (llvm_version, package_name),
+            ]),
+        )
+        pkg_files(
+            name = "%s-bash-completions" % package_name,
+            srcs = [
+                "%s-mull-runner.bash" % package_name,
+                "%s-mull-reporter.bash" % package_name,
+            ],
+            prefix = "%sshare/bash-completion/completions" % prefix,
+            renames = {
+                "%s-mull-runner.bash" % package_name: "mull-runner-%s" % llvm_version,
+                "%s-mull-reporter.bash" % package_name: "mull-reporter-%s" % llvm_version,
+            },
+        )
+
+        # Deb uses vendor-completions, macOS/RPM use site-functions
+        if OS_NAME == "ubuntu" or OS_NAME == "debian":
+            zsh_prefix = "%sshare/zsh/vendor-completions" % prefix
+        else:
+            zsh_prefix = "%sshare/zsh/site-functions" % prefix
+        pkg_files(
+            name = "%s-zsh-completions" % package_name,
+            srcs = [
+                "%s-mull-runner.zsh" % package_name,
+                "%s-mull-reporter.zsh" % package_name,
+            ],
+            prefix = zsh_prefix,
+            renames = {
+                "%s-mull-runner.zsh" % package_name: "_mull-runner-%s" % llvm_version,
+                "%s-mull-reporter.zsh" % package_name: "_mull-reporter-%s" % llvm_version,
+            },
+        )
+        pkg_files(
+            name = "%s-fish-completions" % package_name,
+            srcs = [
+                "%s-mull-runner.fish" % package_name,
+                "%s-mull-reporter.fish" % package_name,
+            ],
+            prefix = "%sshare/fish/vendor_completions.d" % prefix,
+            renames = {
+                "%s-mull-runner.fish" % package_name: "mull-runner-%s.fish" % llvm_version,
+                "%s-mull-reporter.fish" % package_name: "mull-reporter-%s.fish" % llvm_version,
+            },
+        )
 
         if OS_NAME == "macOS":
             pkg_zip(
@@ -141,6 +243,10 @@ def mull_package(name):
                 srcs = [
                     "%s-binaries" % package_name,
                     "%s-libraries" % package_name,
+                    "%s-manpages" % package_name,
+                    "%s-bash-completions" % package_name,
+                    "%s-zsh-completions" % package_name,
+                    "%s-fish-completions" % package_name,
                 ],
                 stamp = 1,
                 out = "%s.zip" % package_file_name,
@@ -151,6 +257,10 @@ def mull_package(name):
                 srcs = [
                     "%s-binaries" % package_name,
                     "%s-libraries" % package_name,
+                    "%s-manpages" % package_name,
+                    "%s-bash-completions" % package_name,
+                    "%s-zsh-completions" % package_name,
+                    "%s-fish-completions" % package_name,
                 ],
                 version = MULL_VERSION,
                 summary = MULL_DESCRIPTION,
@@ -165,6 +275,7 @@ def mull_package(name):
                 package_name = "mull-%s" % llvm_version,
                 release = "1",
                 package_file_name = "%s.rpm" % package_file_name,
+                defines = {"__brp_compress": "%{nil}"},
             )
         else:
             pkg_tar(
@@ -172,6 +283,10 @@ def mull_package(name):
                 srcs = [
                     "%s-binaries" % package_name,
                     "%s-libraries" % package_name,
+                    "%s-manpages" % package_name,
+                    "%s-bash-completions" % package_name,
+                    "%s-zsh-completions" % package_name,
+                    "%s-fish-completions" % package_name,
                 ],
                 stamp = 1,
             )

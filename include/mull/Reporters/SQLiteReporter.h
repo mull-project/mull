@@ -7,10 +7,11 @@
 #include <unordered_map>
 #include <vector>
 
+struct MullDiagnostics;
+
 namespace mull {
 
 class Result;
-class Diagnostics;
 
 struct RawReport {
   std::unordered_map<std::string, std::string> info;
@@ -19,7 +20,7 @@ struct RawReport {
 
 class SQLiteReporter : public Reporter {
 public:
-  explicit SQLiteReporter(Diagnostics &diagnostics, const std::string &reportDir = "",
+  explicit SQLiteReporter(const MullDiagnostics &diagnostics, const std::string &reportDir = "",
                           const std::string &reportName = "",
                           std::unordered_map<std::string, std::string> mullInformation = {});
 
@@ -29,7 +30,7 @@ public:
   static RawReport loadRawReport(const std::string &databasePath);
 
 private:
-  Diagnostics &diagnostics;
+  const MullDiagnostics &diagnostics;
   std::string databasePath;
   std::unordered_map<std::string, std::string> mullInformation;
 };

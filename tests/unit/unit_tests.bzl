@@ -64,6 +64,7 @@ def mull_unit_tests(name):
                 "fixture_header_%s" % llvm_version,
             ],
             strip_include_prefix = llvm_version,
+            tags = ["unit", "llvm_%s" % llvm_version],
         )
 
         cc_library(
@@ -71,6 +72,7 @@ def mull_unit_tests(name):
             srcs = native.glob(["Helpers/*.cpp"]),
             hdrs = native.glob(["Helpers/*.h"]),
             deps = ["//:libmull_%s" % llvm_version],
+            tags = ["unit", "llvm_%s" % llvm_version],
         )
 
         native.filegroup(

@@ -28,3 +28,4 @@ MODULE.bazel.lock
 .bazel.buildbuddy.rc
 .bazel.compilation_mode.bazelrc
 .bazel.build_salt.bazelrc
+rust-project.json

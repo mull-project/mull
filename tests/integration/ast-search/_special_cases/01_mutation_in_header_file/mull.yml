@@ -2,3 +2,5 @@ mutators:
   - cxx_add_to_sub
 debugEnabled: true
 quiet: false
+debug:
+  filters: true

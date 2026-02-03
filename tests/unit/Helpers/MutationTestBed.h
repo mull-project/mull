@@ -3,7 +3,6 @@
 #include "InMemoryFixture.h"
 #include "MutationArtefact.h"
 
-#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Filters/FilePathFilter.h"
 
 #include <llvm/IR/LLVMContext.h>
@@ -24,7 +23,6 @@ public:
 private:
   InMemoryFixture fixtureGenerator;
   mull::FilePathFilter nullPathFilter;
-  mull::Diagnostics diagnostics;
 };
 
 } // namespace mull_test

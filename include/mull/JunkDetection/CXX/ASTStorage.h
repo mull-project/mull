@@ -10,10 +10,11 @@
 #include <unordered_map>
 #include <vector>
 
+struct MullDiagnostics;
+
 namespace mull {
 
 class MutationPoint;
-class Diagnostics;
 
 class ASTUnitWrapper {
 public:
@@ -41,7 +42,7 @@ private:
 
 class ASTStorage {
 public:
-  ASTStorage(Diagnostics &diagnostics, const std::string &cxxCompilationDatabasePath,
+  ASTStorage(const MullDiagnostics &diagnostics, const std::string &cxxCompilationDatabasePath,
              const std::string &cxxCompilationFlags,
              const std::unordered_map<std::string, std::string> &bitcodeCompilationFlags);
 
@@ -51,7 +52,7 @@ public:
   void setAST(const std::string &sourceFile, std::unique_ptr<ASTUnitWrapper> astUnit);
 
 private:
-  Diagnostics &diagnostics;
+  const MullDiagnostics &diagnostics;
   CompilationDatabase compilationDatabase;
   std::unordered_map<std::string, std::unique_ptr<ASTUnitWrapper>> astUnits;
 };

@@ -4,15 +4,16 @@
 
 #include <vector>
 
+struct MullConfig;
+struct MullDiagnostics;
+
 namespace mull {
 class progress_counter;
 class MutationPoint;
-struct Configuration;
-class Diagnostics;
 
 class ApplyMutationTask {
 public:
-  explicit ApplyMutationTask(const Configuration &config, Diagnostics &diagnostics);
+  explicit ApplyMutationTask(const MullConfig &config, const MullDiagnostics &diagnostics);
   using In = const std::vector<MutationPoint *>;
   using Out = std::vector<int>;
   using iterator = In::const_iterator;
@@ -20,7 +21,7 @@ public:
   void operator()(iterator begin, iterator end, Out &storage, progress_counter &counter);
 
 private:
-  const Configuration &config;
-  Diagnostics &diagnostics;
+  const MullConfig &config;
+  const MullDiagnostics &diagnostics;
 };
 } // namespace mull

@@ -1,5 +1,4 @@
 #include "FixturePaths.h"
-#include "mull/Config/Configuration.h"
 #include "mull/Filters/FilePathFilter.h"
 #include "mull/Filters/NoDebugInfoFilter.h"
 #include "mull/MutationsFinder.h"
@@ -7,14 +6,15 @@
 #include "tests/unit/Helpers/BitcodeLoader.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 
+#include "rust/mull-core/core.rs.h"
 #include <gtest/gtest.h>
 #include <llvm/IR/LLVMContext.h>
-#include <mull/Diagnostics/Diagnostics.h>
 
 using namespace mull;
 
 TEST(NoDebugInfoFilter, withDebugInfo) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   auto path = fixtures::tests_unit_fixtures_mutation_filters_no_debug_filter_with_debug_c_bc_path();
   auto bitcode = loader.loadBitcodeAtPath(path, diagnostics);
@@ -42,7 +42,8 @@ TEST(NoDebugInfoFilter, withDebugInfo) {
 }
 
 TEST(NoDebugInfoFilter, withouDebugInfo) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   auto path =
       fixtures::tests_unit_fixtures_mutation_filters_no_debug_filter_without_debug_c_bc_path();
@@ -71,7 +72,8 @@ TEST(NoDebugInfoFilter, withouDebugInfo) {
 }
 
 TEST(FilePathFilter, doesNotFilterEmpty) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   auto path =
       fixtures::tests_unit_fixtures_mutation_filters_file_path_some_test_file_name_c_bc_path();
@@ -100,7 +102,8 @@ TEST(FilePathFilter, doesNotFilterEmpty) {
 }
 
 TEST(FilePathFilter, doesNotFilterMismatch) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   auto path =
       fixtures::tests_unit_fixtures_mutation_filters_file_path_some_test_file_name_c_bc_path();
@@ -130,7 +133,8 @@ TEST(FilePathFilter, doesNotFilterMismatch) {
 }
 
 TEST(FilePathFilter, filtersPlainString) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   auto path =
       fixtures::tests_unit_fixtures_mutation_filters_file_path_some_test_file_name_c_bc_path();
@@ -160,7 +164,8 @@ TEST(FilePathFilter, filtersPlainString) {
 }
 
 TEST(FilePathFilter, filtersWithRegex) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   auto path =
       fixtures::tests_unit_fixtures_mutation_filters_file_path_some_test_file_name_c_bc_path();

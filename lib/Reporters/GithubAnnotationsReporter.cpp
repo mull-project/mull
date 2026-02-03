@@ -1,7 +1,6 @@
 #include "mull/Reporters/GithubAnnotationsReporter.h"
 
 #include "mull/Bitcode.h"
-#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/ExecutionResult.h"
 #include "mull/Mutant.h"
 #include "mull/Mutators/Mutator.h"
@@ -9,13 +8,14 @@
 #include "mull/Reporters/SourceCodeReader.h"
 #include "mull/Result.h"
 #include "mull/SourceLocation.h"
+#include "rust/mull-core/core.rs.h"
 
 #include <sstream>
 #include <string>
 
 using namespace mull;
 
-GithubAnnotationsReporter::GithubAnnotationsReporter(Diagnostics &diagnostics)
+GithubAnnotationsReporter::GithubAnnotationsReporter(const MullDiagnostics &diagnostics)
     : diagnostics(diagnostics) {}
 
 void mull::GithubAnnotationsReporter::reportResults(const Result &result) {

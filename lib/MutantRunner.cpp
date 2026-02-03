@@ -2,9 +2,11 @@
 #include "mull/Parallelization/TaskExecutor.h"
 #include "mull/Parallelization/Tasks/MutantExecutionTask.h"
 
+#include "rust/mull-core/core.rs.h"
+
 using namespace mull;
 
-MutantRunner::MutantRunner(Diagnostics &diagnostics, const Configuration &configuration,
+MutantRunner::MutantRunner(const MullDiagnostics &diagnostics, const MullConfig &configuration,
                            Runner &runner)
     : diagnostics(diagnostics), configuration(configuration), runner(runner) {}
 
@@ -24,15 +26,15 @@ MutantRunner::runMutants(const std::string &executable, const std::vector<std::s
                                  extraArgs,
                                  {},
                                  configuration.timeout,
-                                 configuration.captureMutantOutput,
+                                 configuration.capture_mutant_output,
                                  false,
                                  std::nullopt);
   });
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
   std::vector<MutantExecutionTask> tasks;
-  tasks.reserve(configuration.parallelization.executionWorkers);
-  for (unsigned i = 0; i < configuration.parallelization.executionWorkers; i++) {
+  tasks.reserve(configuration.execution_workers);
+  for (unsigned i = 0; i < configuration.execution_workers; i++) {
     tasks.emplace_back(configuration, diagnostics, executable, baseline, extraArgs);
   }
   TaskExecutor<MutantExecutionTask> mutantRunner(
