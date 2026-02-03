@@ -101,20 +101,23 @@ def _dylib_ext(ctx):
         return "dylib"
     return "so"
 
-def _find_dylib(ctx, path, lib, dylib):
+def _find_dylib(ctx, path, lib, dylib, version):
     libdir = path + "/" + lib
+    vdylib = "lib" + dylib + "-" + version + "." + _dylib_ext(ctx)
     dylib = "lib" + dylib + "." + _dylib_ext(ctx)
     for f in ctx.path(libdir).readdir():
         if f.basename.startswith(dylib):
             return f.basename
+        if f.basename.startswith(vdylib):
+            return f.basename
 
     return None
 
-def _find_clang_dylib(ctx, path, lib):
-    return _find_dylib(ctx, path, lib, "clang-cpp")
+def _find_clang_dylib(ctx, path, lib, version):
+    return _find_dylib(ctx, path, lib, "clang-cpp", version)
 
-def _find_llvm_dylib(ctx, path, lib):
-    return _find_dylib(ctx, path, lib, "LLVM")
+def _find_llvm_dylib(ctx, path, lib, version):
+    return _find_dylib(ctx, path, lib, "LLVM", version)
 
 def _mull_deps_extension(module_ctx):
     """Module extension to dynamically declare local LLVM repositories."""
@@ -136,8 +139,8 @@ def _mull_deps_extension(module_ctx):
                     libdir = "lib64"
                 else:
                     path = "/usr/lib/llvm-" + version
-                llvm_dylib = _find_llvm_dylib(module_ctx, path, libdir)
-                clang_dylib = _find_clang_dylib(module_ctx, path, libdir)
+                llvm_dylib = _find_llvm_dylib(module_ctx, path, libdir, version)
+                clang_dylib = _find_clang_dylib(module_ctx, path, libdir, version)
                 new_local_repository(
                     name = llvm_repo_name,
                     path = path,
