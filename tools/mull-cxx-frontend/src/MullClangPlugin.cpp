@@ -3,8 +3,9 @@
 #include "ASTNodeFactory.h"
 #include "MullASTMutator.h"
 #include "MutationMap.h"
-#include "mull/Config/Configuration.h"
 #include "mull/Diagnostics/Diagnostics.h"
+
+#include "rust/mull-config/lib.rs.h"
 
 #include <clang/AST/AST.h>
 #include <clang/AST/ASTConsumer.h>
@@ -100,14 +101,14 @@ protected:
   }
 
   bool ParseArgs(const CompilerInstance &CI, const std::vector<std::string> &args) override {
-    mull::Diagnostics diagnostics;
-    std::string configPath = mull::Configuration::findConfig(diagnostics);
-    Configuration configuration;
+    auto configPath = find_config_path();
     if (!configPath.empty()) {
-      configuration = mull::Configuration::loadFromDisk(diagnostics, configPath);
-    }
-    for (const std::string &mutator : configuration.mutators) {
-      mutationMap.addMutation(mutator);
+      auto result = load_config(std::string(configPath));
+      if (result.error_message.empty()) {
+        for (const auto &mutator : result.config.mutators) {
+          mutationMap.addMutation(std::string(mutator));
+        }
+      }
     }
     mutationMap.setDefaultMutationsIfNotSpecified();
     return true;

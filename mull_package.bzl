@@ -18,6 +18,10 @@ usr/local/bin/mull-reporter-{LLVM_VERSION}
 usr/local/bin/mull-runner-{LLVM_VERSION}
 usr/local/lib/
 usr/local/lib/mull-ir-frontend-{LLVM_VERSION}
+usr/local/share/
+usr/local/share/man/
+usr/local/share/man/man1/
+usr/local/share/man/man1/mull-runner-{LLVM_VERSION}.1
 """
 
 EXPECTED_DEB_PACKAGE_CONTENT = """usr/
@@ -26,11 +30,16 @@ usr/bin/mull-reporter-{LLVM_VERSION}
 usr/bin/mull-runner-{LLVM_VERSION}
 usr/lib/
 usr/lib/mull-ir-frontend-{LLVM_VERSION}
+usr/share/
+usr/share/man/
+usr/share/man/man1/
+usr/share/man/man1/mull-runner-{LLVM_VERSION}.1
 """
 
 EXPECTED_RPM_PACKAGE_CONTENT = """/usr/bin/mull-reporter-{LLVM_VERSION}
 /usr/bin/mull-runner-{LLVM_VERSION}
 /usr/lib/mull-ir-frontend-{LLVM_VERSION}
+/usr/share/man/man1/mull-runner-{LLVM_VERSION}.1
 """
 
 def _package_contents_impl(ctx):
@@ -134,6 +143,16 @@ def mull_package(name):
             prefix = "%slib" % prefix,
             attributes = pkg_attributes(mode = "755"),
         )
+        pkg_files(
+            name = "%s-manpages" % package_name,
+            srcs = [
+                "//rust/mull-docs:mull-runner.1",
+            ],
+            prefix = "%sshare/man/man1" % prefix,
+            renames = {
+                "//rust/mull-docs:mull-runner.1": "mull-runner-%s.1" % llvm_version,
+            },
+        )
 
         if OS_NAME == "macOS":
             pkg_zip(
@@ -141,6 +160,7 @@ def mull_package(name):
                 srcs = [
                     "%s-binaries" % package_name,
                     "%s-libraries" % package_name,
+                    "%s-manpages" % package_name,
                 ],
                 stamp = 1,
                 out = "%s.zip" % package_file_name,
@@ -151,6 +171,7 @@ def mull_package(name):
                 srcs = [
                     "%s-binaries" % package_name,
                     "%s-libraries" % package_name,
+                    "%s-manpages" % package_name,
                 ],
                 version = MULL_VERSION,
                 summary = MULL_DESCRIPTION,
@@ -172,6 +193,7 @@ def mull_package(name):
                 srcs = [
                     "%s-binaries" % package_name,
                     "%s-libraries" % package_name,
+                    "%s-manpages" % package_name,
                 ],
                 stamp = 1,
             )

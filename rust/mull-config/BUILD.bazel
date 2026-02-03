@@ -1,0 +1,62 @@
+load("@rules_rust//cargo:defs.bzl", "cargo_build_script")
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+cargo_build_script(
+    name = "build_script",
+    srcs = ["build.rs"],
+    data = ["src/lib.rs"],
+    deps = [
+        "@crates//:cxx-gen",
+        "@crates//:proc-macro2",
+    ],
+)
+
+filegroup(
+    name = "build_script_out_dir",
+    srcs = [":build_script"],
+    output_group = "out_dir",
+)
+
+genrule(
+    name = "bridge_header_gen",
+    srcs = [":build_script_out_dir"],
+    outs = ["lib.rs.h"],
+    cmd = "find $(SRCS) -name 'lib.rs.h' | head -1 | xargs -I{} cp {} $@",
+)
+
+genrule(
+    name = "bridge_source_gen",
+    srcs = [":build_script_out_dir"],
+    outs = ["lib.rs.cc"],
+    cmd = "find $(SRCS) -name 'lib.rs.cc' | head -1 | xargs -I{} cp {} $@",
+)
+
+cc_library(
+    name = "bridge",
+    srcs = [":bridge_source_gen"],
+    hdrs = [":bridge_header_gen"],
+    deps = ["@crates//:cxx_cc"],
+    visibility = ["//visibility:public"],
+)
+
+rust_library(
+    name = "mull-config",
+    srcs = [
+        "src/lib.rs",
+        "src/config.rs",
+    ],
+    deps = [
+        "@crates//:clap",
+        "@crates//:cxx",
+        "@crates//:serde",
+        "@crates//:serde_yaml",
+        ":build_script",
+    ],
+    visibility = ["//visibility:public"],
+)
+
+rust_test(
+    name = "mull-config-test",
+    crate = ":mull-config",
+    deps = [":bridge"],
+)

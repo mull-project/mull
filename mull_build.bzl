@@ -42,6 +42,8 @@ def mull_build(name):
             deps = [
                 ":libmull_%s" % llvm_version,
                 "@llvm_%s//:libllvm" % llvm_version,
+                "//rust/mull-config",
+                "//rust/mull-config:bridge",
             ],
         )
 
@@ -52,16 +54,19 @@ def mull_build(name):
             deps = [
                 "libmull_%s" % llvm_version,
                 ":libmull_cli_options_%s" % llvm_version,
+                "//rust/mull-config",
+                "//rust/mull-config:bridge",
             ],
         )
 
         cc_library(
             name = "libmull_reporter_%s" % llvm_version,
             srcs = native.glob(["tools/mull-reporter/*.cpp"]),
-            hdrs = native.glob(["tools/mull-reporter/*.h"]),
             deps = [
                 "libmull_%s" % llvm_version,
                 ":libmull_cli_options_%s" % llvm_version,
+                "//rust/mull-config",
+                "//rust/mull-config:bridge",
             ],
         )
 
@@ -93,6 +98,8 @@ def mull_build(name):
             deps = [
                 ":libmull_%s" % llvm_version,
                 "@llvm_%s//:libclang" % llvm_version,
+                "//rust/mull-config",
+                "//rust/mull-config:bridge",
             ],
             tags = ["llvm_%s" % llvm_version],
         )

@@ -1,139 +1,155 @@
 #include "CLIOptions.h"
-#include <mull/Diagnostics/Diagnostics.h>
 #include <mull/Mutators/Mutator.h>
+#include <mull/Mutators/MutatorsFactory.h>
 #include <mull/Reporters/GithubAnnotationsReporter.h>
 #include <mull/Reporters/IDEReporter.h>
 #include <mull/Reporters/MutationTestingElementsReporter.h>
 #include <mull/Reporters/PatchesReporter.h>
 #include <mull/Reporters/SQLiteReporter.h>
 
+#include <llvm/Support/FileSystem.h>
+#include <sstream>
+
 using namespace mull;
 using namespace tool;
-using namespace llvm::cl;
+using namespace std::string_literals;
 
-struct ReporterDefinition {
-  std::string name;
-  std::string description;
-  ReporterKind kind;
-};
+std::vector<std::string> tool::toStdVector(const rust::Vec<rust::String> &v) {
+  std::vector<std::string> out;
+  out.reserve(v.size());
+  for (const auto &s : v) {
+    out.emplace_back(std::string(s));
+  }
+  return out;
+}
 
-static std::vector<ReporterDefinition> reporterOptions({
-    { "IDE", "Prints compiler-like warnings into stdout", ReporterKind::IDE },
-    { "SQLite", "Saves results into an SQLite database", ReporterKind::SQLite },
-    { "Elements",
-      "Generates mutation-testing-elements compatible JSON file",
-      ReporterKind::Elements },
-    { "Patches", "Generates patch file for each mutation", ReporterKind::Patches },
-    { "GithubAnnotations", "Print GithubAnnotations for mutants", ReporterKind::GithubAnnotations },
-});
+void tool::populateConfiguration(Configuration &configuration, const CliConfig &cli,
+                                 Diagnostics &diagnostics) {
+  const auto &c = cli.config;
+  configuration.debugEnabled = c.debug_enabled;
+  configuration.timeout = c.timeout;
+  configuration.quiet = c.quiet;
+  configuration.silent = c.silent;
+  configuration.dryRunEnabled = c.dry_run_enabled;
+  configuration.captureTestOutput = c.capture_test_output;
+  configuration.captureMutantOutput = c.capture_mutant_output;
+  configuration.includeNotCovered = c.include_not_covered;
+  configuration.junkDetectionDisabled = c.junk_detection_disabled;
+  configuration.compilationDatabasePath = std::string(c.compilation_database_path);
+  configuration.gitDiffRef = std::string(c.git_diff_ref);
+  configuration.gitProjectRoot = std::string(c.git_project_root);
+  configuration.mutators = toStdVector(c.mutators);
+  configuration.ignoreMutators = toStdVector(c.ignore_mutators);
+  configuration.compilerFlags = toStdVector(c.compiler_flags);
+  configuration.includePaths = toStdVector(c.include_paths);
+  configuration.excludePaths = toStdVector(c.exclude_paths);
 
-ReportersCLIOptions::ReportersCLIOptions(Diagnostics &diagnostics, list<ReporterKind> &parameter)
-    : diagnostics(diagnostics), parameter(parameter) {
-  for (ReporterDefinition &opt : reporterOptions) {
-    parameter.getParser().addLiteralOption(opt.name.c_str(), opt.kind, opt.description.c_str());
+  configuration.debug.printIR = c.debug.print_ir;
+  configuration.debug.printIRBefore = c.debug.print_ir_before;
+  configuration.debug.printIRAfter = c.debug.print_ir_after;
+  configuration.debug.printIRToFile = c.debug.print_ir_to_file;
+  configuration.debug.traceMutants = c.debug.trace_mutants;
+  configuration.debug.coverage = c.debug.coverage;
+  configuration.debug.gitDiff = c.debug.git_diff;
+  configuration.debug.filters = c.debug.filters;
+  configuration.debug.slowIRVerification = c.debug.slow_ir_verification;
+
+  if (c.workers > 0) {
+    ParallelizationConfig parallelizationConfig;
+    parallelizationConfig.workers = c.workers;
+    parallelizationConfig.normalize();
+    if (parallelizationConfig.exceedsHardware()) {
+      diagnostics.warning("You choose a number of workers that exceeds your number of cores. "
+                          "This may lead to timeouts and incorrect results");
+    }
+    configuration.parallelization = parallelizationConfig;
+  } else {
+    configuration.parallelization = ParallelizationConfig::defaultConfig();
+  }
+  if (c.execution_workers > 0) {
+    configuration.parallelization.executionWorkers = c.execution_workers;
+  }
+
+  if (!std::string(cli.config_path).empty()) {
+    configuration.pathOnDisk = std::string(cli.config_path);
+    diagnostics.info("Using config "s + std::string(cli.config_path));
   }
 }
 
-std::vector<std::unique_ptr<Reporter>> ReportersCLIOptions::reporters(ReporterParameters params) {
-  std::vector<std::unique_ptr<mull::Reporter>> reporters;
-  std::string &name = params.reporterName;
-  std::string &directory = params.reporterDirectory;
+void tool::setupDiagnostics(Diagnostics &diagnostics, const CliConfig &cli) {
+  if (cli.config.debug_enabled) {
+    diagnostics.enableDebugMode();
+    diagnostics.debug("Diagnostics: Debug Mode enabled. Debug-level messages will be printed.");
+  }
+  if (cli.strict) {
+    diagnostics.enableStrictMode();
+    diagnostics.info("Diagnostics: Strict Mode enabled. Warning messages will be treated as "
+                     "fatal errors.");
+  }
+}
 
-  // TODO: Move to a better place
-  for (auto i = 0; i < parameter.getNumOccurrences(); i++) {
-    switch (parameter[i]) {
-    case ReporterKind::IDE: {
-      reporters.emplace_back(
-          new mull::IDEReporter(diagnostics, params.IDEReporterShowKilled, directory, name));
-    } break;
-    case ReporterKind::SQLite: {
-      reporters.emplace_back(
-          new mull::SQLiteReporter(diagnostics, directory, name, params.mullInformation));
-    } break;
-    case ReporterKind::Patches: {
-      reporters.emplace_back(new mull::PatchesReporter(
-          diagnostics, directory, name, params.patchBasePathDir, params.mullInformation));
-    } break;
-    case ReporterKind::GithubAnnotations: {
-      reporters.emplace_back(new mull::GithubAnnotationsReporter(diagnostics));
-    } break;
-    case ReporterKind::Elements: {
+ReporterParameters
+tool::buildReporterParameters(const CliConfig &cli,
+                              std::unordered_map<std::string, std::string> mullInformation) {
+  return ReporterParameters{
+    .reporters = toStdVector(cli.reporters),
+    .reporterName = std::string(cli.report_name),
+    .reporterDirectory = std::string(cli.report_dir),
+    .patchBasePathDir = std::string(cli.report_patch_base),
+    .compilationDatabaseAvailable = true,
+    .IDEReporterShowKilled = cli.ide_reporter_show_killed,
+    .mullInformation = std::move(mullInformation),
+  };
+}
+
+std::vector<std::unique_ptr<Reporter>> tool::createReporters(Diagnostics &diagnostics,
+                                                             const ReporterParameters &params) {
+  std::vector<std::unique_ptr<Reporter>> reporters;
+
+  for (const auto &r : params.reporters) {
+    if (r == "IDE") {
+      reporters.emplace_back(new IDEReporter(diagnostics,
+                                             params.IDEReporterShowKilled,
+                                             params.reporterDirectory,
+                                             params.reporterName));
+    } else if (r == "SQLite") {
+      reporters.emplace_back(new SQLiteReporter(
+          diagnostics, params.reporterDirectory, params.reporterName, params.mullInformation));
+    } else if (r == "Elements") {
       if (!params.compilationDatabaseAvailable) {
-        diagnostics.warning("Mutation Testing Elements Reporter may not work without compilation "
-                            "database. Consider providing -compdb-path or -compilation-flags.");
+        diagnostics.warning("Mutation Testing Elements Reporter may not work without "
+                            "compilation database. Consider providing -compdb-path or "
+                            "-compilation-flags.");
       }
-      reporters.emplace_back(new mull::MutationTestingElementsReporter(
-          diagnostics, directory, name, params.mullInformation));
-    } break;
+      reporters.emplace_back(new MutationTestingElementsReporter(
+          diagnostics, params.reporterDirectory, params.reporterName, params.mullInformation));
+    } else if (r == "Patches") {
+      reporters.emplace_back(new PatchesReporter(diagnostics,
+                                                 params.reporterDirectory,
+                                                 params.reporterName,
+                                                 params.patchBasePathDir,
+                                                 params.mullInformation));
+    } else if (r == "GithubAnnotations") {
+      reporters.emplace_back(new GithubAnnotationsReporter(diagnostics));
+    } else {
+      diagnostics.warning("Unknown reporter: " + r);
     }
   }
 
   if (reporters.empty()) {
-    reporters.emplace_back(
-        new mull::IDEReporter(diagnostics, params.IDEReporterShowKilled, directory, name));
+    reporters.emplace_back(new IDEReporter(
+        diagnostics, params.IDEReporterShowKilled, params.reporterDirectory, params.reporterName));
   }
 
   return reporters;
 }
 
-static void sanitizeString(std::string &input, const std::string &replacement) {
-  std::string escape("\\");
-  auto pos = input.find(replacement);
-  if (pos != std::string::npos) {
-    input.replace(pos, replacement.size(), escape + replacement);
+rust::Vec<rust::String> tool::argsFromArgv(int argc, char **argv) {
+  rust::Vec<rust::String> args;
+  for (int i = 0; i < argc; i++) {
+    args.push_back(rust::String(argv[i]));
   }
-}
-
-static std::string sanitizeString(const std::string &input) {
-  std::string result = input;
-  sanitizeString(result, "|=");
-  sanitizeString(result, "*=");
-  return result;
-}
-
-void dumpCLIOption(std::stringstream &stream, llvm::cl::Option *option) {
-  stream << "--";
-  if (option->isPositional()) {
-    // Stripping <>
-    stream << option->ArgStr.substr(1, option->ArgStr.size() - 2).str();
-  } else {
-    stream << option->ArgStr.str();
-  }
-  if (!option->ValueStr.empty()) {
-    stream << " " << option->ValueStr.str();
-  }
-  stream << "\t\t" << option->HelpStr.str();
-  if (option->isPositional()) {
-    stream << ", positional argument";
-  }
-  stream << "\n\n";
-}
-
-void dumpCLIReporters(std::stringstream &stream) {
-  for (ReporterDefinition &opt : reporterOptions) {
-    stream << "    :" << opt.name << ":\t" << opt.description << "\n\n";
-  }
-}
-
-void tool::dumpCLIInterface(mull::Diagnostics &diagnostics,
-                            const std::vector<llvm::cl::Option *> &options,
-                            llvm::cl::Option *reporters, std::string out) {
-  std::stringstream help;
-  for (llvm::cl::Option *option : options) {
-    dumpCLIOption(help, option);
-
-    if (option == reporters) {
-      dumpCLIReporters(help);
-    }
-  }
-  std::error_code ec;
-  llvm::raw_fd_ostream os(out, ec);
-  if (ec) {
-    diagnostics.error(ec.message());
-  }
-  auto s = help.str();
-  // trim trailing newline
-  os << s.substr(0, s.size() - 1);
+  return args;
 }
 
 void tool::dumpMutators(Diagnostics &diagnostics, std::string out) {
@@ -148,6 +164,20 @@ void tool::dumpMutators(Diagnostics &diagnostics, std::string out) {
   std::sort(availableMutators.begin(), availableMutators.end(), [&](Mutator *lhs, Mutator *rhs) {
     return lhs->getUniqueIdentifier() < rhs->getUniqueIdentifier();
   });
+
+  auto sanitizeString = [](const std::string &input) -> std::string {
+    std::string result = input;
+    auto replaceOne = [&](const std::string &replacement) {
+      std::string escape("\\");
+      auto pos = result.find(replacement);
+      if (pos != std::string::npos) {
+        result.replace(pos, replacement.size(), escape + replacement);
+      }
+    };
+    replaceOne("|=");
+    replaceOne("*=");
+    return result;
+  };
 
   std::stringstream replacements;
   std::stringstream table;

@@ -43,3 +43,7 @@
 --coverage-info string		Path to the coverage info file (LLVM's profdata)
 
 --debug-coverage		Print coverage ranges
+
+--include-not-covered		Include (but do not run) not covered mutants. Disabled by default
+
+--dry-run		Skips mutant execution and generation. Disabled by default
