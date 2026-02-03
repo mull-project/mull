@@ -104,6 +104,11 @@ mull_supported_llvm_versions.configure(
             "19",
             "20",
         ],
+        "debian:13": [
+            "17",
+            "18",
+            "19",
+        ],
         "rhel:9.6": ["20"],
         "rhel:10.0": ["20"],
     },

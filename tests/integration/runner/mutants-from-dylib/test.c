@@ -20,7 +20,7 @@ int main() {
 
 /*
 
-RUN: %clang_cc %sysroot -DSHARED_LIB -fPIC -shared %s %pass_mull_ir_frontend -g -o %S/shared-ir.lib
+RUN: %clang_cc %sysroot -DSHARED_LIB -fPIC -shared %s %pass_mull_ir_frontend -gno-record-command-line -g -o %S/shared-ir.lib
 RUN: cd %S; %clang_cc %sysroot -DTEST_BIN ./test.c %S/shared-ir.lib -o ./test-ir.exe
 
 RUN: cd /; unset TERM; %mull_runner -ld-search-path=%S -ide-reporter-show-killed %S/test-ir.exe | %filecheck %s --dump-input=fail --match-full-lines --check-prefix=CHECK
