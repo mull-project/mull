@@ -1,22 +1,24 @@
 #pragma once
 
-#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Filters/Filter.h"
 #include "mull/Filters/GitDiffReader.h"
 #include "mull/Filters/InstructionFilter.h"
 #include "mull/Filters/MutantFilter.h"
 
+struct MullConfig;
+struct MullDiagnostics;
+
 namespace mull {
 struct SourceLocation;
-struct Configuration;
+
 class GitDiffFilter : public InstructionFilter, public MutantFilter {
 public:
-  static GitDiffFilter *createFromGitDiff(const Configuration &configuration,
-                                          Diagnostics &diagnostics,
+  static GitDiffFilter *createFromGitDiff(const MullConfig &configuration,
+                                          const MullDiagnostics &diagnostics,
                                           const std::string &gitProjectRoot,
                                           const std::string &gitDiffBranch);
 
-  GitDiffFilter(const Configuration &configuration, Diagnostics &diagnostics,
+  GitDiffFilter(const MullConfig &configuration, const MullDiagnostics &diagnostics,
                 GitDiffInfo gitDiffInfo);
 
   std::string name() override;
@@ -26,8 +28,8 @@ public:
 private:
   bool shouldSkip(const SourceLocation &sourceLocation, const std::string &kind);
 
-  const Configuration &configuration;
-  Diagnostics &diagnostics;
+  const MullConfig &configuration;
+  const MullDiagnostics &diagnostics;
   const GitDiffInfo gitDiffInfo;
 };
 } // namespace mull

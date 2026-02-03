@@ -7,7 +7,7 @@ RUN: git -c user.name='Mull' -c user.email=alex@lowlevelbits.org commit -m "Impe
 RUN: cp ../sample.cpp.modified sample.cpp
 RUN: cd ..
 RUN: env MULL_CONFIG=mull-ir-frontend.yml %clang_cxx %sysroot -O0 %pass_mull_ir_frontend -g sandbox/sample.cpp -o sample.cpp-ir.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines  --check-prefix=CHECK_FRONTEND
-RUN: (unset TERM; %mull_runner sample.cpp-ir.exe -ide-reporter-show-killed 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
+RUN: (unset TERM; env MULL_CONFIG=mull-ir-frontend.yml %mull_runner sample.cpp-ir.exe -ide-reporter-show-killed 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 
 CHECK_FRONTEND:[info] Incremental testing using Git Diff is enabled.
 CHECK_FRONTEND:- Git ref: main

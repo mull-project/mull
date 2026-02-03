@@ -1,15 +1,14 @@
 #include "mull/Parallelization/Tasks/ApplyMutationTask.h"
 
-#include "mull/Config/Configuration.h"
-#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/MutationPoint.h"
 #include "mull/Parallelization/Progress.h"
+#include "rust/mull-core/core.rs.h"
 #include <llvm/IR/Verifier.h>
 #include <sstream>
 
 using namespace mull;
 
-ApplyMutationTask::ApplyMutationTask(const Configuration &config, Diagnostics &diagnostics)
+ApplyMutationTask::ApplyMutationTask(const MullConfig &config, const MullDiagnostics &diagnostics)
     : config(config), diagnostics(diagnostics) {}
 
 void ApplyMutationTask::operator()(iterator begin, iterator end, Out &storage,
@@ -18,7 +17,7 @@ void ApplyMutationTask::operator()(iterator begin, iterator end, Out &storage,
     auto point = *it;
     point->recordMutation();
     point->applyMutation();
-    if (config.debug.slowIRVerification) {
+    if (config.debug.slow_ir_verification) {
       auto module = point->getBitcode()->getModule();
       std::string error;
       llvm::raw_string_ostream errorStream(error);
@@ -35,8 +34,8 @@ void ApplyMutationTask::operator()(iterator begin, iterator end, Out &storage,
                    "ignoreMutators:\n"
                 << "  - " << mutator << "\n"
                 << "to the config file";
-        if (!config.pathOnDisk.empty()) {
-          message << " (" << config.pathOnDisk << ")";
+        if (!config.config_path.empty()) {
+          message << " (" << std::string(config.config_path) << ")";
         }
         message << "\n";
         diagnostics.error(message.str());

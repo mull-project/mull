@@ -1,20 +1,20 @@
 #include "mull/Parallelization/Tasks/MutantExecutionTask.h"
 
-#include "mull/Config/Configuration.h"
-#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/ExecutionResult.h"
 #include "mull/Parallelization/Progress.h"
 #include "mull/Runner.h"
 #include "mull/SourceLocation.h"
+
+#include "rust/mull-core/core.rs.h"
 
 #include <sstream>
 
 using namespace mull;
 using namespace std::string_literals;
 
-MutantExecutionTask::MutantExecutionTask(const Configuration &configuration,
-                                         Diagnostics &diagnostics, const std::string &executable,
-                                         ExecutionResult &baseline,
+MutantExecutionTask::MutantExecutionTask(const MullConfig &configuration,
+                                         const MullDiagnostics &diagnostics,
+                                         const std::string &executable, ExecutionResult &baseline,
                                          const std::vector<std::string> &extraArgs)
     : configuration(configuration), diagnostics(diagnostics), executable(executable),
       baseline(baseline), extraArgs(extraArgs) {}
@@ -31,7 +31,7 @@ void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
                                  extraArgs,
                                  { { mutant->getIdentifier(), "1" } },
                                  std::max(30LL, baseline.runningTime * 10),
-                                 configuration.captureMutantOutput,
+                                 configuration.capture_mutant_output,
                                  false,
                                  std::nullopt);
     } else {

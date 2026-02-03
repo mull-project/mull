@@ -2,7 +2,6 @@
 
 #include "FixturePaths.h"
 #include "mull/Bitcode.h"
-#include "mull/Config/Configuration.h"
 #include "mull/FunctionUnderTest.h"
 #include "mull/JunkDetection/CXX/ASTStorage.h"
 #include "mull/Metrics/MetricsMeasure.h"
@@ -13,10 +12,10 @@
 #include "tests/unit/Helpers/TestModuleFactory.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 
+#include "rust/mull-core/core.rs.h"
 #include <fstream>
 #include <gtest/gtest.h>
 #include <json11/json11.hpp>
-#include <mull/Diagnostics/Diagnostics.h>
 #include <ostream>
 
 using namespace mull;
@@ -29,7 +28,8 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   /// - 1 test with 1 testee with 1 mutation point.
   /// - 1 test execution result which includes 1 normal test execution and 1
   /// mutated test execution.
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   auto bitcodeWithTests = loader.loadBitcodeAtPath(
       fixtures::tests_unit_fixtures_simple_test_count_letters_test_count_letters_c_bc_path(),
@@ -44,7 +44,7 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   modules.push_back(std::move(bitcodeWithTests));
   modules.push_back(std::move(bitcodeWithTestees));
   Program program(std::move(modules));
-  Configuration configuration;
+  const auto &configuration = core->config();
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(std::make_unique<cxx::AddToSub>());

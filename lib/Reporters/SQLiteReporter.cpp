@@ -1,8 +1,9 @@
 #include "mull/Reporters/SQLiteReporter.h"
 
 #include "mull/Bitcode.h"
-#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Result.h"
+
+#include "rust/mull-core/core.rs.h"
 
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/Function.h>
@@ -19,9 +20,9 @@
 using namespace mull;
 using namespace llvm;
 
-static void createTables(Diagnostics &diagnostics, sqlite3 *database);
+static void createTables(const MullDiagnostics &diagnostics, sqlite3 *database);
 
-static void sqlite_exec(Diagnostics &diagnostics, sqlite3 *database, const char *sql) {
+static void sqlite_exec(const MullDiagnostics &diagnostics, sqlite3 *database, const char *sql) {
   char *errorMessage;
   int result = sqlite3_exec(database, sql, nullptr, nullptr, &errorMessage);
   if (result != SQLITE_OK) {
@@ -48,7 +49,7 @@ static std::string getReportDir(const std::string &reportDir) {
   return reportDir;
 }
 
-SQLiteReporter::SQLiteReporter(Diagnostics &diagnostics, const std::string &reportDir,
+SQLiteReporter::SQLiteReporter(const MullDiagnostics &diagnostics, const std::string &reportDir,
                                const std::string &reportName,
                                std::unordered_map<std::string, std::string> mullInformation)
     : diagnostics(diagnostics),
@@ -141,7 +142,7 @@ CREATE TABLE IF NOT EXISTS information (
 );
 )CreateTables";
 
-static void createTables(mull::Diagnostics &diagnostics, sqlite3 *database) {
+static void createTables(const MullDiagnostics &diagnostics, sqlite3 *database) {
   sqlite_exec(diagnostics, database, CreateTables);
 }
 

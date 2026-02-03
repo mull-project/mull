@@ -1,23 +1,24 @@
 #include "mull/MutationsFinder.h"
 
-#include "mull/Config/Configuration.h"
 #include "mull/FunctionUnderTest.h"
 #include "mull/Parallelization/Parallelization.h"
 #include "mull/Program/Program.h"
+
+#include "rust/mull-core/core.rs.h"
 
 using namespace mull;
 using namespace llvm;
 
 MutationsFinder::MutationsFinder(std::vector<std::unique_ptr<Mutator>> mutators,
-                                 const Configuration &config)
+                                 const MullConfig &config)
     : mutators(std::move(mutators)), config(config) {}
 
 std::vector<MutationPoint *>
-MutationsFinder::getMutationPoints(Diagnostics &diagnostics,
+MutationsFinder::getMutationPoints(const MullDiagnostics &diagnostics,
                                    std::vector<FunctionUnderTest> &functions) {
   std::vector<SearchMutationPointsTask> tasks;
-  tasks.reserve(config.parallelization.workers);
-  for (unsigned i = 0; i < config.parallelization.workers; i++) {
+  tasks.reserve(config.workers);
+  for (unsigned i = 0; i < config.workers; i++) {
     tasks.emplace_back(mutators);
   }
 

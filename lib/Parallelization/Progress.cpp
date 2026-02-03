@@ -1,6 +1,6 @@
 #include "mull/Parallelization/Progress.h"
 
-#include "mull/Diagnostics/Diagnostics.h"
+#include "rust/mull-core/core.rs.h"
 #include <llvm/Support/raw_ostream.h>
 #include <sstream>
 #include <unistd.h>
@@ -18,7 +18,7 @@ progress_counter::CounterType progress_counter::get() {
   return value.load();
 }
 
-progress_reporter::progress_reporter(Diagnostics &diagnostics, std::string &name,
+progress_reporter::progress_reporter(const MullDiagnostics &diagnostics, std::string &name,
                                      std::vector<progress_counter> &counters,
                                      progress_counter::CounterType total, size_t workers)
     : diagnostics(diagnostics), counters(counters), total(total), previousValue(0), name(name),

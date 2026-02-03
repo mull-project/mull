@@ -5,9 +5,9 @@
 #include <string>
 #include <vector>
 
-namespace mull {
+struct MullDiagnostics;
 
-class Diagnostics;
+namespace mull {
 
 class progress_counter {
 public:
@@ -24,7 +24,7 @@ private:
 
 class progress_reporter {
 public:
-  progress_reporter(Diagnostics &diagnostics, std::string &name,
+  progress_reporter(const MullDiagnostics &diagnostics, std::string &name,
                     std::vector<progress_counter> &counters, progress_counter::CounterType total,
                     size_t workers);
 
@@ -33,7 +33,7 @@ public:
                      bool force);
 
 private:
-  Diagnostics &diagnostics;
+  const MullDiagnostics &diagnostics;
   std::vector<progress_counter> &counters;
   progress_counter::CounterType total;
   progress_counter::CounterType previousValue;

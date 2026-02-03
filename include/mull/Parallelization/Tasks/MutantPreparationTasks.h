@@ -3,11 +3,11 @@
 #include "mull/Bitcode.h"
 #include <vector>
 
+struct MullConfig;
 namespace mull {
 
 class MutationPoint;
 class progress_counter;
-struct Configuration;
 
 class CloneMutatedFunctionsTask {
 public:
@@ -43,14 +43,14 @@ public:
   using Out = std::vector<int>;
   using iterator = In::const_iterator;
 
-  explicit InsertMutationTrampolinesTask(const Configuration &configuration)
+  explicit InsertMutationTrampolinesTask(const MullConfig &configuration)
       : configuration(configuration) {}
 
   void operator()(iterator begin, iterator end, Out &storage, progress_counter &counter);
-  static void insertTrampolines(Bitcode &bitcode, const Configuration &configuration);
+  static void insertTrampolines(Bitcode &bitcode, const MullConfig &configuration);
 
 private:
-  const Configuration &configuration;
+  const MullConfig &configuration;
 };
 
 } // namespace mull

@@ -11,16 +11,9 @@ until it finds the config file or reaches the root of the file system.
 
 Alternatively, you can set ``MULL_CONFIG`` to point to the config file.
 
-Here is an example config file:
+All mull tools (compiler plugin, runner, reporter) reuse the same config.
+Config of CLI tools (runner, reporter) can be overriden via the corresponding CLI flags.
 
-.. code-block:: yaml
+Here is an example config file containing all the supported fields.
 
-    mutators:
-     - cxx_add_to_sub
-     - cxx_logical
-    excludePaths: # support regex
-     - gtest
-     - gmock
-    timeout: # milliseconds
-     - 10000 # 10 seconds
-    quiet: false # enables additional logging
+.. include:: generated/mull-config-example.rst

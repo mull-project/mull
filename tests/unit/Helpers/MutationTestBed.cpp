@@ -1,21 +1,22 @@
 #include "MutationTestBed.h"
-
 #include "mull/Bitcode.h"
-#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/FunctionUnderTest.h"
 #include "mull/JunkDetection/CXX/ASTStorage.h"
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
 #include "mull/Mutators/Mutator.h"
+#include "rust/mull-core/core.rs.h"
 
 using namespace mull;
 using namespace mull_test;
 
-MutationTestBed::MutationTestBed() : fixtureGenerator(), nullPathFilter() {
-  diagnostics.enableDebugMode();
-}
+MutationTestBed::MutationTestBed() : fixtureGenerator(), nullPathFilter() {}
 
 std::unique_ptr<MutationArtefact> MutationTestBed::generate(const std::string &sourceCode,
                                                             mull::Mutator &mutator) {
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
+  diagnostics.enable_debug_mode();
+
   std::unique_ptr<llvm::LLVMContext> context(new llvm::LLVMContext);
 
   std::unique_ptr<clang::ASTUnit> astUnit = fixtureGenerator.createAST(sourceCode);

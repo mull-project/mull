@@ -3,18 +3,18 @@
 #include "mull/Reporters/Reporter.h"
 #include "mull/Reporters/SourceCodeReader.h"
 
-namespace mull {
+struct MullDiagnostics;
 
-class Diagnostics;
+namespace mull {
 
 class IDEReporter : public Reporter {
 public:
-  explicit IDEReporter(Diagnostics &diagnostics, bool showKilled = false,
+  explicit IDEReporter(const MullDiagnostics &diagnostics, bool showKilled = false,
                        const std::string &reportDir = "", const std::string &reportName = "");
   void reportResults(const Result &result) override;
 
 private:
-  Diagnostics &diagnostics;
+  const MullDiagnostics &diagnostics;
   bool showKilled;
   SourceCodeReader sourceCodeReader;
   std::string reportFilePath;

@@ -6,19 +6,20 @@
 #include <string>
 #include <vector>
 
+struct MullDiagnostics;
+
 namespace mull {
 
 class Result;
-class Diagnostics;
 
 class GithubAnnotationsReporter : public Reporter {
 public:
-  explicit GithubAnnotationsReporter(Diagnostics &diagnostics);
+  explicit GithubAnnotationsReporter(const MullDiagnostics &diagnostics);
 
   void reportResults(const Result &result) override;
 
 private:
-  Diagnostics &diagnostics;
+  const MullDiagnostics &diagnostics;
 };
 
 } // namespace mull

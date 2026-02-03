@@ -1,8 +1,7 @@
 #include "mull/JunkDetection/CXX/CompilationDatabase.h"
-#include "mull/Config/Configuration.h"
-#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Path.h"
 #include "mull/Runner.h"
+#include "rust/mull-core/core.rs.h"
 #include <clang/Tooling/CompilationDatabase.h>
 #include <clang/Tooling/JSONCompilationDatabase.h>
 #include <llvm/ADT/SmallString.h>
@@ -36,7 +35,7 @@ flagsFromCommand(const clang::tooling::CompileCommand &command,
 }
 
 static CompilationDatabase::Database
-prepareDatabase(Diagnostics &diagnostics,
+prepareDatabase(const MullDiagnostics &diagnostics,
                 const std::vector<clang::tooling::CompileCommand> &commands,
                 const CompilationDatabase::Flags &extraFlags) {
   CompilationDatabase::Database database;
@@ -54,7 +53,7 @@ prepareDatabase(Diagnostics &diagnostics,
 }
 
 static CompilationDatabase::Database
-createBitcodeFlags(Diagnostics &diagnostics,
+createBitcodeFlags(const MullDiagnostics &diagnostics,
                    const std::unordered_map<std::string, std::string> &bitcodeFlagsMap,
                    const CompilationDatabase::Flags &extraFlags) {
 
@@ -74,7 +73,8 @@ createBitcodeFlags(Diagnostics &diagnostics,
   return mergedBitcodeFlags;
 }
 
-static void resolveResourceDir(Diagnostics &diagnostics, CompilationDatabase::Database &database,
+static void resolveResourceDir(const MullDiagnostics &diagnostics,
+                               CompilationDatabase::Database &database,
                                std::unordered_map<std::string, std::string> &resourceDirs) {
   for (auto &[filename, compilerAndFlags] : database) {
     auto &[compiler, flags] = compilerAndFlags;
@@ -96,13 +96,8 @@ static void resolveResourceDir(Diagnostics &diagnostics, CompilationDatabase::Da
     }
     if (resourceDirs.count(compiler) == 0) {
       Runner runner(diagnostics);
-      auto result = runner.runProgram(compiler,
-                                      { "-print-resource-dir" },
-                                      {},
-                                      mull::MullDefaultTimeoutMilliseconds,
-                                      true,
-                                      true,
-                                      std::nullopt);
+      auto result = runner.runProgram(
+          compiler, { "-print-resource-dir" }, {}, 3000, true, true, std::nullopt);
       if (!result.stdoutOutput.empty()) {
         // strip trailing \n
         result.stdoutOutput[result.stdoutOutput.size() - 1] = '\0';
@@ -118,7 +113,7 @@ static void resolveResourceDir(Diagnostics &diagnostics, CompilationDatabase::Da
 }
 
 static CompilationDatabase
-createFromClangCompDB(Diagnostics &diagnostics,
+createFromClangCompDB(const MullDiagnostics &diagnostics,
                       std::unique_ptr<clang::tooling::JSONCompilationDatabase> jsondb,
                       const std::string &extraFlags,
                       const std::unordered_map<std::string, std::string> &bitcodeFlags) {
@@ -137,7 +132,7 @@ createFromClangCompDB(Diagnostics &diagnostics,
 }
 
 CompilationDatabase
-CompilationDatabase::fromFile(Diagnostics &diagnostics, const std::string &path,
+CompilationDatabase::fromFile(const MullDiagnostics &diagnostics, const std::string &path,
                               const std::string &extraFlags,
                               const std::unordered_map<std::string, std::string> &bitcodeFlags) {
   Database database;
@@ -154,7 +149,7 @@ CompilationDatabase::fromFile(Diagnostics &diagnostics, const std::string &path,
 }
 
 CompilationDatabase
-CompilationDatabase::fromBuffer(Diagnostics &diagnostics, const std::string &buffer,
+CompilationDatabase::fromBuffer(const MullDiagnostics &diagnostics, const std::string &buffer,
                                 const std::string &extraFlags,
                                 const std::unordered_map<std::string, std::string> &bitcodeFlags) {
   std::string errorMessage;

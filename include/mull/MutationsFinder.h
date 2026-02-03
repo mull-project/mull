@@ -7,22 +7,23 @@
 #include "MutationPoint.h"
 #include "mull/Mutators/Mutator.h"
 
+struct MullConfig;
+struct MullDiagnostics;
+
 namespace mull {
 
-struct Configuration;
 class Program;
-class Diagnostics;
 class Bitcode;
 
 class MutationsFinder {
 public:
-  MutationsFinder(std::vector<std::unique_ptr<Mutator>> mutators, const Configuration &config);
-  std::vector<MutationPoint *> getMutationPoints(Diagnostics &diagnostics,
+  MutationsFinder(std::vector<std::unique_ptr<Mutator>> mutators, const MullConfig &config);
+  std::vector<MutationPoint *> getMutationPoints(const MullDiagnostics &diagnostics,
                                                  std::vector<FunctionUnderTest> &functions);
 
 private:
   std::vector<std::unique_ptr<Mutator>> mutators;
   std::vector<std::unique_ptr<MutationPoint>> ownedPoints;
-  const Configuration &config;
+  const MullConfig &config;
 };
 } // namespace mull

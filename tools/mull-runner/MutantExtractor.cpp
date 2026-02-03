@@ -1,5 +1,6 @@
 #include "MutantExtractor.h"
 #include "ObjectFile.h"
+#include "rust/mull-core/core.rs.h"
 #include <llvm/Object/ObjectFile.h>
 #include <sstream>
 #include <unordered_set>
@@ -27,7 +28,7 @@ static std::vector<std::string> split(const std::string &input, char delimiter) 
   return output;
 }
 
-MutantExtractor::MutantExtractor(Diagnostics &diagnostics) : diagnostics(diagnostics) {}
+MutantExtractor::MutantExtractor(const MullDiagnostics &diagnostics) : diagnostics(diagnostics) {}
 
 std::vector<std::string> MutantExtractor::extractMutants(const std::string &executable) {
   auto [buffer, objectFile] = loadObjectFile(diagnostics, executable);

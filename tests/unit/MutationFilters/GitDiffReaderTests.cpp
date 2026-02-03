@@ -1,13 +1,13 @@
 #include "mull/Filters/GitDiffReader.h"
-
-#include "mull/Diagnostics/Diagnostics.h"
+#include "rust/mull-core/core.rs.h"
 
 #include <gtest/gtest.h>
 
 using namespace mull;
 
 TEST(GitDiffReaderTest, 01_SingleFile_SingleLine) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   GitDiffReader gitDiffReader(diagnostics, "/tmp/repo");
 
   const std::string diff = std::string(R"(
@@ -30,7 +30,8 @@ index 768daa6b..5ebc9315 100644
 }
 
 TEST(GitDiffReaderTest, 02_SingleFile_TwoLineDiff) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   GitDiffReader gitDiffReader(diagnostics, "/tmp/repo");
 
   const std::string diff = std::string(R"(
@@ -54,7 +55,8 @@ index 768daa6b..5ebc9315 100644
 }
 
 TEST(GitDiffReaderTest, 03_SingleFile_ThreeRanges) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   GitDiffReader gitDiffReader(diagnostics, "/tmp/repo");
 
   const std::string diff = std::string(R"(
@@ -88,7 +90,8 @@ index 768daa6b..045b1d03 100644
 }
 
 TEST(GitDiffReaderTest, 04_ThreeDifferentFilesOneRangeEach) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   GitDiffReader gitDiffReader(diagnostics, "/tmp/repo");
 
   const std::string diff = std::string(R"(

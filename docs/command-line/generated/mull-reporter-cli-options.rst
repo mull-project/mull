@@ -1,35 +1,25 @@
---sqlite-report path		Path to the sqlite report, positional argument
+--reporters REPORTER		Output reporters to use (IDE, SQLite, Elements, Patches, GithubAnnotations)
 
---report-name filename		Filename for the report (only for supported reporters). Defaults to <timestamp>.<extension>
+--report-dir DIR		Directory for report output files
 
---report-dir directory		Where to store report (defaults to '.')
+--report-name NAME		Filename for the report (only for supported reporters)
 
---report-patch-base directory		Create Patches relative to this directory (defaults to gitProjectRoot if available, else absolute path will be used)
+--report-patch-base DIR		Base directory for patch file paths
 
---reporters reporter		Choose reporters:
+--ide-reporter-show-killed		Show killed mutations in IDE reporter output
 
-    :IDE:	Prints compiler-like warnings into stdout
+--debug		Enable debug mode with additional diagnostic output
 
-    :SQLite:	Saves results into an SQLite database
+--strict		Treat warnings as fatal errors
 
-    :Elements:	Generates mutation-testing-elements compatible JSON file
+--allow-surviving		Do not treat surviving mutants as an error
 
-    :Patches:	Generates patch file for each mutation
-
-    :GithubAnnotations:	Print GithubAnnotations for mutants
-
---ide-reporter-show-killed		Makes IDEReporter to also report killed mutations (disabled by default)
-
---allow-surviving		Do not treat mutants surviving as an error
-
---mutation-score-threshold		If mutation score falls under this threshold, and allow-surviving is not enabled, an error result code is returned
+--mutation-score-threshold SCORE		Minimum mutation score (0-100) required for success
 
 --no-test-output		Does not capture output from test runs
 
 --no-mutant-output		Does not capture output from mutant runs
 
---no-output		Combines -no-test-output and -no-mutant-output
+--no-output		Combines --no-test-output and --no-mutant-output
 
---debug		Enables Debug Mode: more logs are printed
-
---strict		Enables Strict Mode: all warning messages are treated as fatal errors
+SQLITE-REPORT		Path to the sqlite report

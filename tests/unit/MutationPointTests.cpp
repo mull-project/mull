@@ -1,5 +1,4 @@
 #include "FixturePaths.h"
-#include "mull/Config/Configuration.h"
 #include "mull/FunctionUnderTest.h"
 #include "mull/MutationPoint.h"
 #include "mull/Mutators/CXX/CallMutators.h"
@@ -11,9 +10,10 @@
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Transforms/Utils/Cloning.h>
-#include <mull/Diagnostics/Diagnostics.h>
 #include <mull/Mutators/CXX/NumberMutators.h>
 #include <mull/Parallelization/Parallelization.h>
+
+#include "rust/mull-core/core.rs.h"
 
 #include <gtest/gtest.h>
 
@@ -23,7 +23,8 @@ using namespace mull;
 using namespace llvm;
 
 TEST(MutationPoint, ReplaceCallMutator_applyMutation) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
       fixtures::tests_unit_fixtures_mutators_replace_call_module_c_bc_path(), diagnostics);
@@ -49,9 +50,10 @@ TEST(MutationPoint, ReplaceCallMutator_applyMutation) {
 }
 
 TEST(MutationPoint, OriginalValuePresent) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
-  Configuration configuration{};
+  const auto &configuration = core->config();
   auto bitcode = loader.loadBitcodeAtPath(
       fixtures::tests_unit_fixtures_mutators_replace_assignment_module_c_bc_path(), diagnostics);
 
@@ -93,7 +95,8 @@ TEST(MutationPoint, OriginalValuePresent) {
 }
 
 TEST(MutationPoint, dump) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
       fixtures::tests_unit_fixtures_mutators_replace_assignment_module_c_bc_path(), diagnostics);
@@ -124,7 +127,8 @@ static std::string leftTrimmedString(const std::string &string) {
 }
 
 TEST(MutationPoint, dumpSourceCodeContext) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
       fixtures::tests_unit_fixtures_mutators_replace_assignment_module_c_bc_path(), diagnostics);
