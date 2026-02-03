@@ -1,224 +1,71 @@
 use clap::{Args, Parser};
 use serde::Deserialize;
 
-/// Mull: practical mutation testing for C and C++
-#[derive(Debug, Clone, Parser, Deserialize)]
-#[command(name = "mull-runner")]
-#[command(about = "Mull: practical mutation testing for C and C++")]
+/// YAML configuration for mull.yml files.
+#[derive(Debug, Clone, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
 pub struct MullConfigSpec {
-    // ─────────────────────────────────────────────────────────────
-    // Input/Output — CLI-only (mull-runner)
-    // ─────────────────────────────────────────────────────────────
-    /// Path to the executable under test.
-    #[arg(value_name = "EXECUTABLE")]
-    #[serde(skip)]
-    pub input_file: Option<String>,
-
-    /// Path to a test program (if different from input executable).
-    #[arg(long = "test-program", value_name = "PATH")]
-    #[serde(skip)]
-    pub test_program: Option<String>,
-
-    /// Arguments passed to the test runner.
-    #[arg(trailing_var_arg = true, allow_hyphen_values = true)]
-    #[serde(skip)]
-    pub runner_args: Vec<String>,
-
-    // ─────────────────────────────────────────────────────────────
-    // Execution Control — shared CLI + YAML
-    // ─────────────────────────────────────────────────────────────
+    // Execution Control
     /// Number of parallel workers for mutation search.
-    #[arg(long, value_name = "N")]
     pub workers: Option<u32>,
-
     /// Timeout per test run in milliseconds.
-    #[arg(long, value_name = "MS", default_value_t = 3000)]
     pub timeout: u32,
-
     /// Enable debug mode with additional diagnostic output.
-    #[arg(long = "debug")]
     pub debug_enabled: bool,
-
     /// Include mutants on lines not covered by tests.
-    #[arg(long = "include-not-covered")]
     pub include_not_covered: bool,
-
     /// Skip mutant execution, only discover and report mutants.
-    #[arg(long = "dry-run")]
     pub dry_run_enabled: bool,
 
-    // ─────────────────────────────────────────────────────────────
-    // Output Control — CLI flags (inverted from YAML equivalents)
-    // ─────────────────────────────────────────────────────────────
-    /// Does not capture output from test runs.
-    #[arg(long = "no-test-output")]
-    #[serde(skip)]
-    pub no_test_output: bool,
-
-    /// Does not capture output from mutant runs.
-    #[arg(long = "no-mutant-output")]
-    #[serde(skip)]
-    pub no_mutant_output: bool,
-
-    /// Combines --no-test-output and --no-mutant-output.
-    #[arg(long = "no-output")]
-    #[serde(skip)]
-    pub no_output: bool,
-
-    // ─────────────────────────────────────────────────────────────
-    // Output Control — YAML equivalents (not exposed as CLI flags)
-    // ─────────────────────────────────────────────────────────────
+    // Output Control
     /// Suppress informational messages (enabled by default).
-    #[arg(skip)]
     pub quiet: bool,
-
     /// Suppress all output except errors.
-    #[arg(skip)]
     pub silent: bool,
-
     /// Capture stdout/stderr from the original test run (enabled by default).
-    #[arg(skip)]
     pub capture_test_output: bool,
-
     /// Capture stdout/stderr from mutant test runs (enabled by default).
-    #[arg(skip)]
     pub capture_mutant_output: bool,
 
-    // ─────────────────────────────────────────────────────────────
-    // Mutators — shared CLI + YAML
-    // ─────────────────────────────────────────────────────────────
+    // Mutators
     /// Mutator IDs or groups to enable (e.g. cxx_add_to_sub, cxx_logical).
-    #[arg(long)]
     pub mutators: Vec<String>,
-
     /// Mutator IDs or groups to exclude.
-    #[arg(long = "ignore-mutators")]
     pub ignore_mutators: Vec<String>,
 
-    // ─────────────────────────────────────────────────────────────
-    // Junk Detection — YAML-only
-    // ─────────────────────────────────────────────────────────────
+    // Junk Detection
     /// Path to compilation database (compile_commands.json).
-    #[arg(skip)]
     pub compilation_database_path: String,
-
     /// Additional compiler flags for junk detection.
-    #[arg(skip)]
     pub compiler_flags: Vec<String>,
-
     /// Disable junk detection (AST-based mutant validation).
-    #[arg(skip)]
     pub junk_detection_disabled: bool,
 
-    // ─────────────────────────────────────────────────────────────
-    // Filtering — YAML-only
-    // ─────────────────────────────────────────────────────────────
+    // Filtering
     /// File path regex patterns to include in mutation testing.
-    #[arg(skip)]
     pub include_paths: Vec<String>,
-
     /// File path regex patterns to exclude from mutation testing.
-    #[arg(skip)]
     pub exclude_paths: Vec<String>,
-
     /// Git ref to diff against for incremental mutation testing.
-    #[arg(skip)]
     pub git_diff_ref: String,
-
     /// Root directory of the git project.
-    #[arg(skip)]
     pub git_project_root: String,
 
-    // ─────────────────────────────────────────────────────────────
-    // Reporting — shared CLI (runner + reporter)
-    // ─────────────────────────────────────────────────────────────
-    /// Output reporters to use (IDE, SQLite, Elements, Patches, GithubAnnotations).
-    #[arg(long, value_name = "REPORTER")]
-    #[serde(skip)]
-    pub reporters: Vec<String>,
-
-    /// Directory for report output files.
-    #[arg(long = "report-dir", value_name = "DIR", default_value = ".")]
-    #[serde(skip)]
-    pub report_dir: String,
-
-    /// Filename for the report (only for supported reporters).
-    #[arg(long = "report-name", value_name = "NAME")]
-    #[serde(skip)]
-    pub report_name: Option<String>,
-
-    /// Base directory for patch file paths.
-    #[arg(long = "report-patch-base", value_name = "DIR", default_value = ".")]
-    #[serde(skip)]
-    pub report_patch_base: String,
-
-    /// Show killed mutations in IDE reporter output.
-    #[arg(long = "ide-reporter-show-killed")]
-    #[serde(skip)]
-    pub ide_reporter_show_killed: bool,
-
-    // ─────────────────────────────────────────────────────────────
-    // Exit Behavior — shared CLI (runner + reporter)
-    // ─────────────────────────────────────────────────────────────
-    /// Treat warnings as fatal errors.
-    #[arg(long)]
-    #[serde(skip)]
-    pub strict: bool,
-
-    /// Do not treat surviving mutants as an error.
-    #[arg(long = "allow-surviving")]
-    #[serde(skip)]
-    pub allow_surviving: bool,
-
-    /// Minimum mutation score (0-100) required for success.
-    #[arg(
-        long = "mutation-score-threshold",
-        value_name = "SCORE",
-        default_value_t = 100
-    )]
-    #[serde(skip)]
-    pub mutation_score_threshold: u32,
-
-    // ─────────────────────────────────────────────────────────────
-    // Runner-only CLI options
-    // ─────────────────────────────────────────────────────────────
-    /// Library search path.
-    #[arg(long = "ld-search-path", value_name = "DIR")]
-    #[serde(skip)]
-    pub ld_search_paths: Vec<String>,
-
-    /// Path to the coverage info file (LLVM profdata).
-    #[arg(long = "coverage-info", value_name = "PATH")]
-    #[serde(skip)]
-    pub coverage_info: Option<String>,
-
-    // ─────────────────────────────────────────────────────────────
-    // Nested — YAML-only
-    // ─────────────────────────────────────────────────────────────
+    // Nested
     /// Parallelization settings.
-    #[command(flatten)]
     pub parallelization: ParallelizationSpec,
-
     /// Advanced debug options (set via config file).
-    #[command(flatten)]
     pub debug: DebugOptionsSpec,
 }
 
 impl Default for MullConfigSpec {
     fn default() -> Self {
         MullConfigSpec {
-            input_file: None,
-            test_program: None,
-            runner_args: Vec::new(),
             workers: None,
             timeout: 3000,
             debug_enabled: false,
             include_not_covered: false,
             dry_run_enabled: false,
-            no_test_output: false,
-            no_mutant_output: false,
-            no_output: false,
             quiet: true,
             silent: false,
             capture_test_output: true,
@@ -232,16 +79,6 @@ impl Default for MullConfigSpec {
             exclude_paths: Vec::new(),
             git_diff_ref: String::new(),
             git_project_root: String::new(),
-            reporters: Vec::new(),
-            report_dir: ".".to_string(),
-            report_name: None,
-            report_patch_base: ".".to_string(),
-            ide_reporter_show_killed: false,
-            strict: false,
-            allow_surviving: false,
-            mutation_score_threshold: 100,
-            ld_search_paths: Vec::new(),
-            coverage_info: None,
             parallelization: ParallelizationSpec::default(),
             debug: DebugOptionsSpec::default(),
         }
@@ -249,61 +86,41 @@ impl Default for MullConfigSpec {
 }
 
 /// Parallelization settings for mutation testing.
-#[derive(Debug, Clone, Default, Args, Deserialize)]
+#[derive(Debug, Clone, Default, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
 pub struct ParallelizationSpec {
     /// Number of worker threads for test discovery.
-    #[arg(skip)]
     pub workers: u32,
-
     /// Number of worker threads for mutant execution.
-    #[arg(skip)]
     pub execution_workers: u32,
 }
 
 /// Advanced debug options for diagnostic output.
-#[derive(Debug, Clone, Default, Args, Deserialize)]
+#[derive(Debug, Clone, Default, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
 pub struct DebugOptionsSpec {
     /// Print LLVM IR.
-    #[arg(skip)]
     #[serde(rename = "printIR")]
     pub print_ir: bool,
-
     /// Print LLVM IR before mutation.
-    #[arg(skip)]
     #[serde(rename = "printIRBefore")]
     pub print_ir_before: bool,
-
     /// Print LLVM IR after mutation.
-    #[arg(skip)]
     #[serde(rename = "printIRAfter")]
     pub print_ir_after: bool,
-
     /// Print LLVM IR to a file.
-    #[arg(skip)]
     #[serde(rename = "printIRToFile")]
     pub print_ir_to_file: bool,
-
     /// Trace mutant discovery and execution.
-    #[arg(skip)]
     pub trace_mutants: bool,
-
     /// Enable coverage debug output.
-    #[arg(long = "debug-coverage")]
     #[serde(alias = "coverage")]
     pub coverage: bool,
-
     /// Enable git diff debug output.
-    #[arg(skip)]
     pub git_diff: bool,
-
     /// Enable filter debug output.
-    #[arg(skip)]
     pub filters: bool,
-
     /// Enable slow IR verification.
-    #[arg(skip)]
     pub slow_ir_verification: bool,
 }
 

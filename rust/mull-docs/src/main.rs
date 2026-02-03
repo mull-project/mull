@@ -1,5 +1,5 @@
 use clap::CommandFactory;
-use mull_config::MullConfigSpec;
+use mull_config::config::RunnerCli;
 use std::path::Path;
 
 mod gen_example_yaml;
@@ -16,7 +16,7 @@ fn main() {
     let output_dir = Path::new(&args[1]);
     std::fs::create_dir_all(output_dir).expect("failed to create output directory");
 
-    let cmd = MullConfigSpec::command();
+    let cmd = RunnerCli::command();
 
     gen_manpage::generate(cmd, output_dir);
     gen_rst::generate(output_dir);

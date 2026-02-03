@@ -1,6 +1,6 @@
 pub mod config;
 
-pub use config::MullConfigSpec;
+use config::MullConfigSpec;
 
 use clap::{CommandFactory, FromArgMatches};
 use std::env;
@@ -244,6 +244,50 @@ fn load_yaml_config(config_path: &str) -> Result<ffi::MullConfig, String> {
 }
 
 // ═══════════════════════════════════════════════════════════════════
+// Helpers — shared between parse_runner_cli and parse_reporter_cli
+// ═══════════════════════════════════════════════════════════════════
+
+/// Find and load the YAML config, returning the merged config and the path found.
+/// Returns default config with an empty path if no config file exists.
+fn load_merged_yaml_config() -> Result<(ffi::MullConfig, String), String> {
+    match find_config() {
+        Some(path) => {
+            let config = load_yaml_config(&path)?;
+            Ok((config, path))
+        }
+        None => Ok((default_config(), String::new())),
+    }
+}
+
+/// Apply SharedCli fields to the yaml config (overrides) and cli config (copies).
+fn apply_shared_cli(
+    shared: &config::SharedCli,
+    yaml_config: &mut ffi::MullConfig,
+    cli_config: &mut ffi::CliConfig,
+) {
+    // Debug override
+    if shared.debug {
+        yaml_config.debug_enabled = true;
+    }
+    // Inverted flags
+    if shared.no_test_output || shared.no_output {
+        yaml_config.capture_test_output = false;
+    }
+    if shared.no_mutant_output || shared.no_output {
+        yaml_config.capture_mutant_output = false;
+    }
+    // Copy shared fields
+    cli_config.reporters = shared.reporters.clone();
+    cli_config.report_name = shared.report_name.clone().unwrap_or_default();
+    cli_config.report_dir = shared.report_dir.clone();
+    cli_config.report_patch_base = shared.report_patch_base.clone();
+    cli_config.ide_reporter_show_killed = shared.ide_reporter_show_killed;
+    cli_config.strict = shared.strict;
+    cli_config.allow_surviving = shared.allow_surviving;
+    cli_config.mutation_score_threshold = shared.mutation_score_threshold;
+}
+
+// ═══════════════════════════════════════════════════════════════════
 // CLI parsing + YAML merge
 // ═══════════════════════════════════════════════════════════════════
 
@@ -296,25 +340,17 @@ fn parse_runner_cli(args: Vec<String>) -> ffi::CliParseResult {
     };
     let cli = config::RunnerCli::from_arg_matches(&matches).unwrap();
 
-    // Find and load YAML config
-    let config_path = find_config();
-    let mut yaml_config = match &config_path {
-        Some(path) => match load_yaml_config(path) {
-            Ok(c) => c,
-            Err(e) => {
-                return ffi::CliParseResult {
-                    cli_config: default_cli_config(),
-                    error_message: e,
-                };
-            }
-        },
-        None => default_config(),
+    let (mut yaml_config, config_path) = match load_merged_yaml_config() {
+        Ok(pair) => pair,
+        Err(e) => {
+            return ffi::CliParseResult {
+                cli_config: default_cli_config(),
+                error_message: e,
+            };
+        }
     };
 
-    // Merge "both" fields: CLI overrides YAML when explicitly provided
-    if arg_present(&matches, "debug") && cli.shared.debug {
-        yaml_config.debug_enabled = true;
-    }
+    // Merge runner-specific "both" fields: CLI overrides YAML when explicitly provided
     if arg_present(&matches, "timeout") {
         if let Some(t) = cli.timeout {
             yaml_config.timeout = t;
@@ -335,13 +371,8 @@ fn parse_runner_cli(args: Vec<String>) -> ffi::CliParseResult {
         yaml_config.debug.coverage = true;
     }
 
-    // Inverted flags: override YAML capture settings
-    if cli.shared.no_test_output || cli.shared.no_output {
-        yaml_config.capture_test_output = false;
-    }
-    if cli.shared.no_mutant_output || cli.shared.no_output {
-        yaml_config.capture_mutant_output = false;
-    }
+    let mut cli_config = default_cli_config();
+    apply_shared_cli(&cli.shared, &mut yaml_config, &mut cli_config);
 
     // Validate merged config
     let errors = validate(&yaml_config);
@@ -352,25 +383,16 @@ fn parse_runner_cli(args: Vec<String>) -> ffi::CliParseResult {
         };
     }
 
+    cli_config.config = yaml_config;
+    cli_config.input_file = cli.input_file;
+    cli_config.test_program = cli.test_program.unwrap_or_default();
+    cli_config.runner_args = cli.runner_args;
+    cli_config.ld_search_paths = cli.ld_search_paths;
+    cli_config.coverage_info = cli.coverage_info.unwrap_or_default();
+    cli_config.config_path = config_path;
+
     ffi::CliParseResult {
-        cli_config: ffi::CliConfig {
-            config: yaml_config,
-            input_file: cli.input_file,
-            test_program: cli.test_program.unwrap_or_default(),
-            sqlite_report: String::new(),
-            runner_args: cli.runner_args,
-            reporters: cli.shared.reporters,
-            report_name: cli.shared.report_name.unwrap_or_default(),
-            report_dir: cli.shared.report_dir,
-            report_patch_base: cli.shared.report_patch_base,
-            ide_reporter_show_killed: cli.shared.ide_reporter_show_killed,
-            strict: cli.shared.strict,
-            allow_surviving: cli.shared.allow_surviving,
-            mutation_score_threshold: cli.shared.mutation_score_threshold,
-            ld_search_paths: cli.ld_search_paths,
-            coverage_info: cli.coverage_info.unwrap_or_default(),
-            config_path: config_path.unwrap_or_default(),
-        },
+        cli_config,
         error_message: String::new(),
     }
 }
@@ -388,33 +410,18 @@ fn parse_reporter_cli(args: Vec<String>) -> ffi::CliParseResult {
     };
     let cli = config::ReporterCli::from_arg_matches(&matches).unwrap();
 
-    // Find and load YAML config
-    let config_path = find_config();
-    let mut yaml_config = match &config_path {
-        Some(path) => match load_yaml_config(path) {
-            Ok(c) => c,
-            Err(e) => {
-                return ffi::CliParseResult {
-                    cli_config: default_cli_config(),
-                    error_message: e,
-                };
-            }
-        },
-        None => default_config(),
+    let (mut yaml_config, config_path) = match load_merged_yaml_config() {
+        Ok(pair) => pair,
+        Err(e) => {
+            return ffi::CliParseResult {
+                cli_config: default_cli_config(),
+                error_message: e,
+            };
+        }
     };
 
-    // Merge "both" fields: CLI overrides YAML when explicitly provided
-    if arg_present(&matches, "debug") && cli.shared.debug {
-        yaml_config.debug_enabled = true;
-    }
-
-    // Inverted flags: override YAML capture settings
-    if cli.shared.no_test_output || cli.shared.no_output {
-        yaml_config.capture_test_output = false;
-    }
-    if cli.shared.no_mutant_output || cli.shared.no_output {
-        yaml_config.capture_mutant_output = false;
-    }
+    let mut cli_config = default_cli_config();
+    apply_shared_cli(&cli.shared, &mut yaml_config, &mut cli_config);
 
     // Validate merged config
     let errors = validate(&yaml_config);
@@ -425,25 +432,12 @@ fn parse_reporter_cli(args: Vec<String>) -> ffi::CliParseResult {
         };
     }
 
+    cli_config.config = yaml_config;
+    cli_config.sqlite_report = cli.sqlite_report;
+    cli_config.config_path = config_path;
+
     ffi::CliParseResult {
-        cli_config: ffi::CliConfig {
-            config: yaml_config,
-            input_file: String::new(),
-            test_program: String::new(),
-            sqlite_report: cli.sqlite_report,
-            runner_args: Vec::new(),
-            reporters: cli.shared.reporters,
-            report_name: cli.shared.report_name.unwrap_or_default(),
-            report_dir: cli.shared.report_dir,
-            report_patch_base: cli.shared.report_patch_base,
-            ide_reporter_show_killed: cli.shared.ide_reporter_show_killed,
-            strict: cli.shared.strict,
-            allow_surviving: cli.shared.allow_surviving,
-            mutation_score_threshold: cli.shared.mutation_score_threshold,
-            ld_search_paths: Vec::new(),
-            coverage_info: String::new(),
-            config_path: config_path.unwrap_or_default(),
-        },
+        cli_config,
         error_message: String::new(),
     }
 }
