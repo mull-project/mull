@@ -25,55 +25,7 @@ std::vector<std::string> tool::toStdVector(const rust::Vec<rust::String> &v) {
 
 void tool::populateConfiguration(Configuration &configuration, const CliConfig &cli,
                                  Diagnostics &diagnostics) {
-  const auto &c = cli.config;
-  configuration.debugEnabled = c.debug_enabled;
-  configuration.timeout = c.timeout;
-  configuration.quiet = c.quiet;
-  configuration.silent = c.silent;
-  configuration.dryRunEnabled = c.dry_run_enabled;
-  configuration.captureTestOutput = c.capture_test_output;
-  configuration.captureMutantOutput = c.capture_mutant_output;
-  configuration.includeNotCovered = c.include_not_covered;
-  configuration.junkDetectionDisabled = c.junk_detection_disabled;
-  configuration.compilationDatabasePath = std::string(c.compilation_database_path);
-  configuration.gitDiffRef = std::string(c.git_diff_ref);
-  configuration.gitProjectRoot = std::string(c.git_project_root);
-  configuration.mutators = toStdVector(c.mutators);
-  configuration.ignoreMutators = toStdVector(c.ignore_mutators);
-  configuration.compilerFlags = toStdVector(c.compiler_flags);
-  configuration.includePaths = toStdVector(c.include_paths);
-  configuration.excludePaths = toStdVector(c.exclude_paths);
-
-  configuration.debug.printIR = c.debug.print_ir;
-  configuration.debug.printIRBefore = c.debug.print_ir_before;
-  configuration.debug.printIRAfter = c.debug.print_ir_after;
-  configuration.debug.printIRToFile = c.debug.print_ir_to_file;
-  configuration.debug.traceMutants = c.debug.trace_mutants;
-  configuration.debug.coverage = c.debug.coverage;
-  configuration.debug.gitDiff = c.debug.git_diff;
-  configuration.debug.filters = c.debug.filters;
-  configuration.debug.slowIRVerification = c.debug.slow_ir_verification;
-
-  if (c.workers > 0) {
-    ParallelizationConfig parallelizationConfig;
-    parallelizationConfig.workers = c.workers;
-    parallelizationConfig.normalize();
-    if (parallelizationConfig.exceedsHardware()) {
-      diagnostics.warning("You choose a number of workers that exceeds your number of cores. "
-                          "This may lead to timeouts and incorrect results");
-    }
-    configuration.parallelization = parallelizationConfig;
-  } else {
-    configuration.parallelization = ParallelizationConfig::defaultConfig();
-  }
-  if (c.execution_workers > 0) {
-    configuration.parallelization.executionWorkers = c.execution_workers;
-  }
-
-  if (!std::string(cli.config_path).empty()) {
-    configuration.pathOnDisk = std::string(cli.config_path);
-    diagnostics.info("Using config "s + std::string(cli.config_path));
-  }
+  configuration.populateFromRustConfig(cli.config, std::string(cli.config_path), diagnostics);
 }
 
 void tool::setupDiagnostics(Diagnostics &diagnostics, const CliConfig &cli) {

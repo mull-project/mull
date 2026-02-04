@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "mull/Config/ConfigurationOptions.h"
+#include "rust/mull-config/lib.rs.h"
 
 namespace mull {
 
@@ -46,8 +47,9 @@ struct Configuration {
 
   Configuration();
 
-  static std::string findConfig(Diagnostics &diagnostics);
-  static Configuration loadFromDisk(Diagnostics &diagnostics, const std::string &path);
+  /// Populate this Configuration from a Rust MullConfig loaded via the FFI bridge.
+  void populateFromRustConfig(const MullConfig &mullConfig, const std::string &configPath,
+                              Diagnostics &diagnostics);
 };
 
 } // namespace mull

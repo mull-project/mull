@@ -14,6 +14,8 @@
 #include "mull/Parallelization/Parallelization.h"
 #include "mull/Program/Program.h"
 
+#include "rust/mull-config/lib.rs.h"
+
 #include <llvm/IR/Verifier.h>
 #include <llvm/Support/DynamicLibrary.h>
 #include <llvm/Support/FileSystem.h>
@@ -76,12 +78,17 @@ void mull::mutateBitcode(llvm::Module &module) {
   /// Setup
 
   Diagnostics diagnostics;
-  std::string configPath = Configuration::findConfig(diagnostics);
+  std::string configPath = std::string(find_config_path());
   Configuration configuration;
   if (configPath.empty()) {
     diagnostics.warning("Mull cannot find config (mull.yml). Using some defaults.");
   } else {
-    configuration = Configuration::loadFromDisk(diagnostics, configPath);
+    auto loadResult = load_config(configPath);
+    if (!loadResult.error_message.empty()) {
+      diagnostics.warning(std::string(loadResult.error_message));
+    } else {
+      configuration.populateFromRustConfig(loadResult.config, configPath, diagnostics);
+    }
   }
   configuration.parallelization.normalize();
 
@@ -93,10 +100,6 @@ void mull::mutateBitcode(llvm::Module &module) {
   }
   if (configuration.silent) {
     diagnostics.makeSilent();
-  }
-
-  if (!configPath.empty()) {
-    diagnostics.info("Using configuration "s + configPath);
   }
 
   std::vector<std::unique_ptr<mull::Filter>> filterStorage;

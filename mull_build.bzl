@@ -32,6 +32,8 @@ def mull_build(name):
                 "@reproc//:reproc++",
                 "@spdlog",
                 "@sqlite3",
+                "//rust/mull-config",
+                "//rust/mull-config:bridge",
             ],
         )
 
