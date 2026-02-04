@@ -91,10 +91,6 @@ fn generate_config_reference(metadata: &[OptionMeta], output_dir: &Path) {
             if let Some(cli) = opt.cli_long {
                 out.push_str(&format!("   CLI equivalent: ``--{}``\n\n", cli));
             }
-
-            if !opt.default_display.is_empty() {
-                out.push_str(&format!("   Default: ``{}``\n\n", opt.default_display));
-            }
         }
     }
 

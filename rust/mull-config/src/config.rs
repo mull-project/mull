@@ -6,8 +6,6 @@ use serde::Deserialize;
 #[serde(default, rename_all = "camelCase")]
 pub struct MullConfigSpec {
     // Execution Control
-    /// Number of parallel workers for mutation search.
-    pub workers: Option<u32>,
     /// Timeout per test run in milliseconds.
     pub timeout: u32,
     /// Enable debug mode with additional diagnostic output.
@@ -61,7 +59,6 @@ pub struct MullConfigSpec {
 impl Default for MullConfigSpec {
     fn default() -> Self {
         MullConfigSpec {
-            workers: None,
             timeout: 3000,
             debug_enabled: false,
             include_not_covered: false,
@@ -135,18 +132,16 @@ pub enum OptionScope {
     ReporterCli,
     /// CLI flag on both mull-runner and mull-reporter.
     SharedCli,
-    /// Available in both CLI and mull.yml.
-    Both,
 }
 
 impl OptionScope {
     /// Whether this option appears in the mull-runner CLI.
     pub fn in_runner(self) -> bool {
-        matches!(self, Self::RunnerCli | Self::SharedCli | Self::Both)
+        matches!(self, Self::RunnerCli | Self::SharedCli)
     }
     /// Whether this option appears in the mull-reporter CLI.
     pub fn in_reporter(self) -> bool {
-        matches!(self, Self::ReporterCli | Self::SharedCli | Self::Both)
+        matches!(self, Self::ReporterCli | Self::SharedCli)
     }
 }
 
@@ -156,7 +151,6 @@ pub struct OptionMeta {
     pub yaml_key: Option<&'static str>,
     pub help: &'static str,
     pub scope: OptionScope,
-    pub default_display: &'static str,
     pub section: &'static str,
     /// Value hint shown in CLI docs (e.g. "path", "number", "reporter").
     /// Empty string means no value (boolean flag).
@@ -181,7 +175,6 @@ fn opt(
         yaml_key,
         help,
         scope,
-        default_display: "",
         section,
         value_hint: "",
         extra: "",

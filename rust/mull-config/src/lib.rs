@@ -191,16 +191,7 @@ fn find_config_path() -> String {
 }
 
 fn load_config(path: &str) -> ffi::LoadConfigResult {
-    let contents = match fs::read_to_string(path) {
-        Ok(c) => c,
-        Err(e) => {
-            return ffi::LoadConfigResult {
-                config: default_config(),
-                error_message: format!("Cannot read config: {}", e),
-            };
-        }
-    };
-    match parse_yaml(&contents) {
+    match load_yaml_config(path) {
         Ok(config) => ffi::LoadConfigResult {
             config,
             error_message: String::new(),
@@ -439,20 +430,6 @@ fn parse_reporter_cli(args: Vec<String>) -> ffi::CliParseResult {
     ffi::CliParseResult {
         cli_config,
         error_message: String::new(),
-    }
-}
-
-#[cfg(test)]
-fn load_config_from_yaml(yaml: &str) -> ffi::LoadConfigResult {
-    match parse_yaml(yaml) {
-        Ok(config) => ffi::LoadConfigResult {
-            config,
-            error_message: String::new(),
-        },
-        Err(e) => ffi::LoadConfigResult {
-            config: default_config(),
-            error_message: e,
-        },
     }
 }
 
@@ -711,9 +688,10 @@ anotherUnknown:
 
     #[test]
     fn invalid_yaml_returns_error() {
-        let result = load_config_from_yaml("{{invalid yaml");
-        assert!(!result.error_message.is_empty());
-        assert!(result.error_message.contains("Failed to parse YAML"));
+        match parse_yaml("{{invalid yaml") {
+            Err(e) => assert!(e.contains("Failed to parse YAML")),
+            Ok(_) => panic!("expected error"),
+        }
     }
 
     #[test]
@@ -725,18 +703,18 @@ anotherUnknown:
 
     #[test]
     fn load_config_success_has_empty_error() {
-        let result = load_config_from_yaml("timeout: 7000\n");
-        assert!(result.error_message.is_empty());
-        assert_eq!(result.config.timeout, 7000);
+        let config = parse_yaml("timeout: 7000\n").unwrap();
+        assert_eq!(config.timeout, 7000);
     }
 
     // --- Validation ---
 
     #[test]
     fn validation_catches_low_timeout() {
-        let result = load_config_from_yaml("timeout: 50\n");
-        assert!(!result.error_message.is_empty());
-        assert!(result.error_message.contains("timeout must be >= 100"));
+        match parse_yaml("timeout: 50\n") {
+            Err(e) => assert!(e.contains("timeout must be >= 100")),
+            Ok(_) => panic!("expected error"),
+        }
     }
 
     #[test]
