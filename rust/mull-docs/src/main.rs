@@ -2,6 +2,7 @@ use clap::CommandFactory;
 use mull_config::config::{ReporterCli, RunnerCli};
 use std::path::Path;
 
+mod gen_completions;
 mod gen_example_yaml;
 mod gen_manpage;
 mod gen_rst;
@@ -18,6 +19,8 @@ fn main() {
 
     gen_manpage::generate(RunnerCli::command(), "mull-runner.1", output_dir);
     gen_manpage::generate(ReporterCli::command(), "mull-reporter.1", output_dir);
+    gen_completions::generate_all(RunnerCli::command(), output_dir);
+    gen_completions::generate_all(ReporterCli::command(), output_dir);
     gen_rst::generate(output_dir);
     gen_example_yaml::generate(output_dir);
 

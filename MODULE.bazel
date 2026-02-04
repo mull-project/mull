@@ -114,6 +114,10 @@ crate.spec(
     version = "0.2",
 )
 crate.spec(
+    package = "clap_complete",
+    version = "4",
+)
+crate.spec(
     package = "cxx",
     version = "1",
 )
