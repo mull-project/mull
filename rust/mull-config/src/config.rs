@@ -237,10 +237,10 @@ pub struct SharedCli {
     pub no_output: bool,
 }
 
-/// Mull: practical mutation testing for C and C++
+/// Mull: Practical mutation testing and fault injection for C and C++
 #[derive(Debug, Clone, Parser)]
 #[command(name = "mull-runner")]
-#[command(about = "Mull: practical mutation testing for C and C++")]
+#[command(about = "Mull: Practical mutation testing and fault injection for C and C++")]
 #[command(version)]
 pub struct RunnerCli {
     /// Path to the executable under test.
@@ -741,7 +741,7 @@ pub fn option_metadata() -> Vec<OptionMeta> {
             yaml_default: "false",
             ..opt(
                 None,
-                Some("debug.slowIrVerification"),
+                Some("debug.slowIRVerification"),
                 "Enable slow IR verification",
                 YamlOnly,
                 "Debug",

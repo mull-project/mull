@@ -11,53 +11,28 @@ load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
 load(":mull_publish.bzl", "mull_publish_script")
 
-EXPECTED_MACOS_PACKAGE_CONTENT = """usr/
-usr/local/
-usr/local/bin/
-usr/local/bin/mull-reporter-{LLVM_VERSION}
+EXPECTED_MACOS_PACKAGE_CONTENT = """usr/local/bin/mull-reporter-{LLVM_VERSION}
 usr/local/bin/mull-runner-{LLVM_VERSION}
-usr/local/lib/
 usr/local/lib/mull-ir-frontend-{LLVM_VERSION}
-usr/local/share/
-usr/local/share/bash-completion/
-usr/local/share/bash-completion/completions/
 usr/local/share/bash-completion/completions/mull-reporter-{LLVM_VERSION}
 usr/local/share/bash-completion/completions/mull-runner-{LLVM_VERSION}
-usr/local/share/fish/
-usr/local/share/fish/vendor_completions.d/
 usr/local/share/fish/vendor_completions.d/mull-reporter-{LLVM_VERSION}.fish
 usr/local/share/fish/vendor_completions.d/mull-runner-{LLVM_VERSION}.fish
-usr/local/share/man/
-usr/local/share/man/man1/
 usr/local/share/man/man1/mull-reporter-{LLVM_VERSION}.1
 usr/local/share/man/man1/mull-runner-{LLVM_VERSION}.1
-usr/local/share/zsh/
-usr/local/share/zsh/site-functions/
 usr/local/share/zsh/site-functions/_mull-reporter-{LLVM_VERSION}
 usr/local/share/zsh/site-functions/_mull-runner-{LLVM_VERSION}
 """
 
-EXPECTED_DEB_PACKAGE_CONTENT = """usr/
-usr/bin/
-usr/bin/mull-reporter-{LLVM_VERSION}
+EXPECTED_DEB_PACKAGE_CONTENT = """usr/bin/mull-reporter-{LLVM_VERSION}
 usr/bin/mull-runner-{LLVM_VERSION}
-usr/lib/
 usr/lib/mull-ir-frontend-{LLVM_VERSION}
-usr/share/
-usr/share/bash-completion/
-usr/share/bash-completion/completions/
 usr/share/bash-completion/completions/mull-reporter-{LLVM_VERSION}
 usr/share/bash-completion/completions/mull-runner-{LLVM_VERSION}
-usr/share/fish/
-usr/share/fish/vendor_completions.d/
 usr/share/fish/vendor_completions.d/mull-reporter-{LLVM_VERSION}.fish
 usr/share/fish/vendor_completions.d/mull-runner-{LLVM_VERSION}.fish
-usr/share/man/
-usr/share/man/man1/
 usr/share/man/man1/mull-reporter-{LLVM_VERSION}.1
 usr/share/man/man1/mull-runner-{LLVM_VERSION}.1
-usr/share/zsh/
-usr/share/zsh/vendor-completions/
 usr/share/zsh/vendor-completions/_mull-reporter-{LLVM_VERSION}
 usr/share/zsh/vendor-completions/_mull-runner-{LLVM_VERSION}
 """
@@ -80,9 +55,9 @@ def _package_contents_impl(ctx):
 
     cmds = []
     if ctx.file.package.path.endswith(".zip"):
-        cmds.append("unzip -l %s | awk 'NR > 3 { if ($0 ~ /----/) exit; print $NF }' > %s" % (ctx.file.package.path, out.path))
+        cmds.append("unzip -l %s | awk 'NR > 3 { if ($0 ~ /----/) exit; print $NF }' | grep mull > %s" % (ctx.file.package.path, out.path))
     elif ctx.file.package.path.endswith(".deb"):
-        cmds.append("dpkg -c %s | awk '{ print $NF }' > %s" % (ctx.file.package.path, out.path))
+        cmds.append("dpkg -c %s | awk '{ print $NF }' | grep mull > %s" % (ctx.file.package.path, out.path))
     elif ctx.file.package.path.endswith(".rpm"):
         cmds.append("rpm -qlp %s | grep -v build-id > %s" % (ctx.file.package.path, out.path))
     else:
@@ -188,6 +163,7 @@ def mull_package(name):
                 "//rust/mull-docs:mull-reporter.1": "mull-reporter-%s.1" % llvm_version,
             },
         )
+
         # Generate versioned completions: replace command names in the content
         # (e.g. "mull-runner" -> "mull-runner-19") so completions match the
         # version-suffixed binary names.
@@ -232,7 +208,7 @@ def mull_package(name):
         )
 
         # Deb uses vendor-completions, macOS/RPM use site-functions
-        if OS_NAME == "Ubuntu":
+        if OS_NAME == "ubuntu" or OS_NAME == "debian":
             zsh_prefix = "%sshare/zsh/vendor-completions" % prefix
         else:
             zsh_prefix = "%sshare/zsh/site-functions" % prefix

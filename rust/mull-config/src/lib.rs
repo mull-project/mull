@@ -312,7 +312,7 @@ fn normalize_args(args: &[String]) -> Vec<String> {
 /// Build the rich multi-line version string shown for `--version` / `-version`.
 fn long_version_string(llvm_version: &str) -> &'static str {
     let s = format!(
-        "Mull: practical mutation testing for C and C++\n\
+        "Mull: Practical mutation testing and fault injection for C and C++\n\
          Home: https://github.com/mull-project/mull\n\
          Docs: https://mull.readthedocs.io\n\
          Support: https://mull.readthedocs.io/en/latest/Support.html\n\
@@ -338,10 +338,7 @@ fn parse_runner_cli(args: Vec<String>, llvm_version: String) -> ffi::CliParseRes
     let cmd = config::RunnerCli::command().long_version(long_version_string(&llvm_version));
     let matches = match cmd.try_get_matches_from(&args) {
         Ok(m) => m,
-        Err(e)
-            if e.kind() == ErrorKind::DisplayVersion
-                || e.kind() == ErrorKind::DisplayHelp =>
-        {
+        Err(e) if e.kind() == ErrorKind::DisplayVersion || e.kind() == ErrorKind::DisplayHelp => {
             return ffi::CliParseResult {
                 cli_config: default_cli_config(),
                 error_message: e.to_string(),
@@ -423,10 +420,7 @@ fn parse_reporter_cli(args: Vec<String>, llvm_version: String) -> ffi::CliParseR
     let cmd = config::ReporterCli::command().long_version(long_version_string(&llvm_version));
     let matches = match cmd.try_get_matches_from(&args) {
         Ok(m) => m,
-        Err(e)
-            if e.kind() == ErrorKind::DisplayVersion
-                || e.kind() == ErrorKind::DisplayHelp =>
-        {
+        Err(e) if e.kind() == ErrorKind::DisplayVersion || e.kind() == ErrorKind::DisplayHelp => {
             return ffi::CliParseResult {
                 cli_config: default_cli_config(),
                 error_message: e.to_string(),

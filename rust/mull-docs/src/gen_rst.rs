@@ -1,4 +1,4 @@
-use mull_config::config::{option_metadata, OptionMeta};
+use mull_config::config::{OptionMeta, option_metadata};
 use std::fs;
 use std::path::Path;
 

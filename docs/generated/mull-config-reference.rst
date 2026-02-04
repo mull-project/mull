@@ -124,5 +124,5 @@ Debug
 ``debug.filters``
    Enable filter debug output
 
-``debug.slowIrVerification``
+``debug.slowIRVerification``
    Enable slow IR verification

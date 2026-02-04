@@ -60,4 +60,4 @@ Full configuration example
      # Enable filter debug output
      filters: false
      # Enable slow IR verification
-     slowIrVerification: false
+     slowIRVerification: false
