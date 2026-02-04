@@ -15,6 +15,7 @@ genrule(
     name = "generate-docs",
     outs = [
         "mull-runner.1",
+        "mull-reporter.1",
         "mull.yml.example",
         "mull-runner-cli-options.rst",
         "mull-reporter-cli-options.rst",
