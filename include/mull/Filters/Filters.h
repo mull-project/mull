@@ -4,6 +4,8 @@
 #include <memory>
 #include <vector>
 
+struct MullConfig;
+
 namespace mull {
 
 class FunctionFilter;
@@ -11,13 +13,12 @@ class InstructionFilter;
 class MutationPointFilter;
 class MutantFilter;
 class Diagnostics;
-struct Configuration;
 
 class CoverageFilter;
 
 class Filters {
 public:
-  Filters(const Configuration &configuration, Diagnostics &diagnostics);
+  Filters(const MullConfig &configuration, Diagnostics &diagnostics);
 
   /// TODO: hide
   std::vector<FunctionFilter *> functionFilters;
@@ -35,7 +36,7 @@ public:
                                        const std::vector<std::string> &objects);
 
 private:
-  const Configuration &configuration;
+  const MullConfig &configuration;
   Diagnostics &diagnostics;
   std::vector<std::unique_ptr<Filter>> storage;
 };

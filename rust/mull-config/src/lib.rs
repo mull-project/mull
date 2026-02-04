@@ -375,6 +375,7 @@ fn parse_runner_cli(args: Vec<String>, llvm_version: String) -> ffi::CliParseRes
     if arg_present(&matches, "workers") {
         if let Some(w) = cli.workers {
             yaml_config.workers = w;
+            yaml_config.execution_workers = w;
         }
     }
     if arg_present(&matches, "include_not_covered") && cli.include_not_covered {

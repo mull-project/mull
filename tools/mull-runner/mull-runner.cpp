@@ -1,7 +1,6 @@
 #include "DynamicLibraries.h"
 #include "MergeInstProfile.h"
 #include "MutantExtractor.h"
-#include "mull/Config/Configuration.h"
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Filters/CoverageFilter.h"
 #include "mull/Filters/Filters.h"
@@ -60,15 +59,11 @@ int main(int argc, char **argv) {
     return parseResult.exit_code;
   }
   const auto &cli = parseResult.cli_config;
-
   std::string inputFile = validateInputFile(std::string(cli.input_file), diagnostics);
 
   mull::MetricsMeasure totalExecutionTime;
   totalExecutionTime.start();
 
-  mull::Configuration configuration;
-  tool::populateConfiguration(configuration, cli, diagnostics);
-  configuration.executable = inputFile;
   tool::setupDiagnostics(diagnostics, cli);
 
   auto params = tool::buildReporterParameters(cli,
@@ -77,7 +72,7 @@ int main(int argc, char **argv) {
                                                 { "LLVM Version", mull::llvmVersionString() } });
   auto reporters = tool::createReporters(diagnostics, params);
 
-  std::string testProgram = configuration.executable;
+  std::string testProgram = inputFile;
   if (!std::string(cli.test_program).empty()) {
     testProgram = std::string(cli.test_program);
   }
@@ -85,23 +80,24 @@ int main(int argc, char **argv) {
   auto extraArgs = tool::toStdVector(cli.runner_args);
   auto librarySearchPaths = tool::toStdVector(cli.ld_search_paths);
 
-  std::vector<std::string> mutantHolders({ configuration.executable });
+  std::vector<std::string> mutantHolders({ inputFile });
   mull::resolveLibraries(diagnostics,
                          mutantHolders,
-                         mull::getDynamicLibraryDependencies(diagnostics, configuration.executable),
+                         mull::getDynamicLibraryDependencies(diagnostics, inputFile),
                          librarySearchPaths);
 
-  mull::Filters filters(configuration, diagnostics);
+  mull::Filters filters(cli.config, diagnostics);
   filters.enableGitDiffFilter();
   filters.enableFilePathFilter();
 
   mull::MutantExtractor mutantExtractor(diagnostics);
   auto mutants = mutantExtractor.extractMutants(mutantHolders);
+  diagnostics.debug("Found "s + std::to_string(mutants.size()) + " mutant(s)");
   std::string coverageInfo = std::string(cli.coverage_info);
 
   std::string rawCoverageData;
   std::unordered_map<std::string, std::string> env;
-  if (coverageInfo.empty() && mull::hasCoverage(diagnostics, configuration.executable)) {
+  if (coverageInfo.empty() && mull::hasCoverage(diagnostics, inputFile)) {
     llvm::SmallString<PATH_MAX> rawPath;
     llvm::sys::fs::getPotentiallyUniqueTempFileName("mull", "raw-coverage", rawPath);
     rawCoverageData = rawPath.str().str();
@@ -110,9 +106,9 @@ int main(int argc, char **argv) {
     llvm::sys::fs::getPotentiallyUniqueTempFileName("mull", "indexed-coverage", indexedPath);
     coverageInfo = indexedPath.str().str();
 
-    if (configuration.debug.coverage) {
-      llvm::errs() << "rawCoverageFile: " << rawCoverageData << "\n";
-      llvm::errs() << "indexedCoverageFile: " << coverageInfo << "\n";
+    if (cli.config.debug.coverage) {
+      diagnostics.debug("rawCoverageFile: "s + rawCoverageData);
+      diagnostics.debug("indexedCoverageFile: "s + coverageInfo);
     }
 
     env["LLVM_PROFILE_FILE"] = rawCoverageData;
@@ -126,8 +122,8 @@ int main(int argc, char **argv) {
     warmUpResult = runner.runProgram(testProgram,
                                      extraArgs,
                                      env,
-                                     configuration.timeout,
-                                     configuration.captureMutantOutput,
+                                     cli.config.timeout,
+                                     cli.config.capture_mutant_output,
                                      false,
                                      std::nullopt);
   });
@@ -156,7 +152,7 @@ int main(int argc, char **argv) {
       for (auto filter : filters.mutantFilters) {
         if (filter->shouldSkip(mutant.get())) {
           skip = true;
-          if (configuration.debug.filters) {
+          if (cli.config.debug.filters) {
             diagnostics.debug("Skipping "s + mutant->getIdentifier() + " due to " + filter->name() +
                               " filter");
           }
@@ -168,8 +164,9 @@ int main(int argc, char **argv) {
       }
     }
   });
+  diagnostics.debug(std::to_string(filteredMutants.size()) + " mutant(s) after filter");
 
-  mull::MutantRunner mutantRunner(diagnostics, configuration, runner);
+  mull::MutantRunner mutantRunner(diagnostics, cli.config, runner);
   auto mutationResults = mutantRunner.runMutants(testProgram, extraArgs, filteredMutants);
 
   std::size_t surviving =

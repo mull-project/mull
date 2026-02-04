@@ -76,14 +76,25 @@ impl Default for MullConfigSpec {
     }
 }
 
-/// Parallelization settings for mutation testing.
-#[derive(Debug, Clone, Default, Deserialize)]
+/// Parallelization settings
+#[derive(Debug, Clone, Deserialize)]
 #[serde(default, rename_all = "camelCase")]
 pub struct ParallelizationSpec {
+    // TODO: Add normalization/validation
     /// Number of worker threads for test discovery.
     pub workers: u32,
     /// Number of worker threads for mutant execution.
     pub execution_workers: u32,
+}
+
+impl Default for ParallelizationSpec {
+    fn default() -> Self {
+    let max_workers = std::thread::available_parallelism().map(|n| n.get() as u32).unwrap_or(1);
+        ParallelizationSpec {
+            workers: max_workers,
+            execution_workers: max_workers,
+        }
+    }
 }
 
 /// Advanced debug options for diagnostic output.

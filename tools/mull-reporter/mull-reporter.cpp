@@ -1,4 +1,3 @@
-#include "mull/Config/Configuration.h"
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Metrics/MetricsMeasure.h"
 #include "mull/Reporters/SQLiteReporter.h"
@@ -105,8 +104,6 @@ int main(int argc, char **argv) {
   mull::MetricsMeasure totalExecutionTime;
   totalExecutionTime.start();
 
-  mull::Configuration configuration;
-  tool::populateConfiguration(configuration, cli, diagnostics);
   tool::setupDiagnostics(diagnostics, cli);
 
   std::vector<std::unique_ptr<mull::Mutant>> mutants;

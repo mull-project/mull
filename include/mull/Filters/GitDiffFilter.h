@@ -6,18 +6,18 @@
 #include "mull/Filters/InstructionFilter.h"
 #include "mull/Filters/MutantFilter.h"
 
+struct MullConfig;
+
 namespace mull {
 struct SourceLocation;
-struct Configuration;
+
 class GitDiffFilter : public InstructionFilter, public MutantFilter {
 public:
-  static GitDiffFilter *createFromGitDiff(const Configuration &configuration,
-                                          Diagnostics &diagnostics,
+  static GitDiffFilter *createFromGitDiff(const MullConfig &configuration, Diagnostics &diagnostics,
                                           const std::string &gitProjectRoot,
                                           const std::string &gitDiffBranch);
 
-  GitDiffFilter(const Configuration &configuration, Diagnostics &diagnostics,
-                GitDiffInfo gitDiffInfo);
+  GitDiffFilter(const MullConfig &configuration, Diagnostics &diagnostics, GitDiffInfo gitDiffInfo);
 
   std::string name() override;
   bool shouldSkip(llvm::Instruction *instruction) override;
@@ -26,7 +26,7 @@ public:
 private:
   bool shouldSkip(const SourceLocation &sourceLocation, const std::string &kind);
 
-  const Configuration &configuration;
+  const MullConfig &configuration;
   Diagnostics &diagnostics;
   const GitDiffInfo gitDiffInfo;
 };

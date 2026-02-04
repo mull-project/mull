@@ -80,6 +80,7 @@ void mull::mutateBitcode(llvm::Module &module) {
   Diagnostics diagnostics;
   std::string configPath = std::string(find_config_path());
   Configuration configuration;
+  MullConfig mullConfig;
   if (configPath.empty()) {
     diagnostics.warning("Mull cannot find config (mull.yml). Using some defaults.");
   } else {
@@ -88,6 +89,7 @@ void mull::mutateBitcode(llvm::Module &module) {
       diagnostics.warning(std::string(loadResult.error_message));
     } else {
       configuration.populateFromRustConfig(loadResult.config, configPath, diagnostics);
+      mullConfig = loadResult.config;
     }
   }
   configuration.parallelization.normalize();
@@ -103,7 +105,7 @@ void mull::mutateBitcode(llvm::Module &module) {
   }
 
   std::vector<std::unique_ptr<mull::Filter>> filterStorage;
-  mull::Filters filters(configuration, diagnostics);
+  mull::Filters filters(mullConfig, diagnostics);
   filters.enableNoDebugFilter();
   filters.enableFilePathFilter();
   filters.enableGitDiffFilter();
