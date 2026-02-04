@@ -1,3 +1,4 @@
+load("@mull_package_info//:mull_package_info.bzl", "MULL_VERSION")
 load("@rules_rust//cargo:defs.bzl", "cargo_build_script")
 load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
 
@@ -45,6 +46,9 @@ rust_library(
         "src/lib.rs",
         "src/config.rs",
     ],
+    rustc_env = {
+        "CARGO_PKG_VERSION": MULL_VERSION,
+    },
     deps = [
         "@crates//:clap",
         "@crates//:cxx",
