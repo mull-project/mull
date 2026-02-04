@@ -17,6 +17,7 @@
 #include <llvm/Support/ManagedStatic.h>
 
 #include <algorithm>
+#include <limits.h>
 #include <memory>
 #include <sstream>
 #include <string>

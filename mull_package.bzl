@@ -21,6 +21,7 @@ usr/local/lib/mull-ir-frontend-{LLVM_VERSION}
 usr/local/share/
 usr/local/share/man/
 usr/local/share/man/man1/
+usr/local/share/man/man1/mull-reporter-{LLVM_VERSION}.1
 usr/local/share/man/man1/mull-runner-{LLVM_VERSION}.1
 """
 
@@ -33,12 +34,14 @@ usr/lib/mull-ir-frontend-{LLVM_VERSION}
 usr/share/
 usr/share/man/
 usr/share/man/man1/
+usr/share/man/man1/mull-reporter-{LLVM_VERSION}.1
 usr/share/man/man1/mull-runner-{LLVM_VERSION}.1
 """
 
 EXPECTED_RPM_PACKAGE_CONTENT = """/usr/bin/mull-reporter-{LLVM_VERSION}
 /usr/bin/mull-runner-{LLVM_VERSION}
 /usr/lib/mull-ir-frontend-{LLVM_VERSION}
+/usr/share/man/man1/mull-reporter-{LLVM_VERSION}.1
 /usr/share/man/man1/mull-runner-{LLVM_VERSION}.1
 """
 
@@ -147,10 +150,12 @@ def mull_package(name):
             name = "%s-manpages" % package_name,
             srcs = [
                 "//rust/mull-docs:mull-runner.1",
+                "//rust/mull-docs:mull-reporter.1",
             ],
             prefix = "%sshare/man/man1" % prefix,
             renames = {
                 "//rust/mull-docs:mull-runner.1": "mull-runner-%s.1" % llvm_version,
+                "//rust/mull-docs:mull-reporter.1": "mull-reporter-%s.1" % llvm_version,
             },
         )
 

@@ -167,10 +167,7 @@ fn default_cli_config() -> ffi::CliConfig {
 fn validate(config: &ffi::MullConfig) -> Vec<String> {
     let mut errors = Vec::new();
     if config.timeout < 100 {
-        errors.push(format!(
-            "timeout must be >= 100, got {}",
-            config.timeout
-        ));
+        errors.push(format!("timeout must be >= 100, got {}", config.timeout));
     }
     errors
 }
@@ -447,10 +444,7 @@ mod tests {
 
     #[test]
     fn parse_workers_from_yaml() {
-        let config = parse_yaml(
-            "parallelization:\n  workers: 4\n  executionWorkers: 8\n",
-        )
-        .unwrap();
+        let config = parse_yaml("parallelization:\n  workers: 4\n  executionWorkers: 8\n").unwrap();
         assert_eq!(config.workers, 4);
         assert_eq!(config.execution_workers, 8);
     }
@@ -505,9 +499,11 @@ mod tests {
 
     #[test]
     fn parse_compilation_database_path() {
-        let config =
-            parse_yaml("compilationDatabasePath: /tmp/compile_commands.json\n").unwrap();
-        assert_eq!(config.compilation_database_path, "/tmp/compile_commands.json");
+        let config = parse_yaml("compilationDatabasePath: /tmp/compile_commands.json\n").unwrap();
+        assert_eq!(
+            config.compilation_database_path,
+            "/tmp/compile_commands.json"
+        );
     }
 
     #[test]
@@ -526,46 +522,31 @@ mod tests {
 
     #[test]
     fn parse_mutators() {
-        let config = parse_yaml(
-            "mutators:\n  - cxx_add_to_sub\n  - cxx_mul_to_div\n",
-        )
-        .unwrap();
+        let config = parse_yaml("mutators:\n  - cxx_add_to_sub\n  - cxx_mul_to_div\n").unwrap();
         assert_eq!(config.mutators, vec!["cxx_add_to_sub", "cxx_mul_to_div"]);
     }
 
     #[test]
     fn parse_ignore_mutators() {
-        let config = parse_yaml(
-            "ignoreMutators:\n  - cxx_add_to_sub\n",
-        )
-        .unwrap();
+        let config = parse_yaml("ignoreMutators:\n  - cxx_add_to_sub\n").unwrap();
         assert_eq!(config.ignore_mutators, vec!["cxx_add_to_sub"]);
     }
 
     #[test]
     fn parse_compiler_flags() {
-        let config = parse_yaml(
-            "compilerFlags:\n  - -std=c++17\n  - -O2\n",
-        )
-        .unwrap();
+        let config = parse_yaml("compilerFlags:\n  - -std=c++17\n  - -O2\n").unwrap();
         assert_eq!(config.compiler_flags, vec!["-std=c++17", "-O2"]);
     }
 
     #[test]
     fn parse_include_paths() {
-        let config = parse_yaml(
-            "includePaths:\n  - src/\n  - lib/\n",
-        )
-        .unwrap();
+        let config = parse_yaml("includePaths:\n  - src/\n  - lib/\n").unwrap();
         assert_eq!(config.include_paths, vec!["src/", "lib/"]);
     }
 
     #[test]
     fn parse_exclude_paths() {
-        let config = parse_yaml(
-            "excludePaths:\n  - third_party/\n",
-        )
-        .unwrap();
+        let config = parse_yaml("excludePaths:\n  - third_party/\n").unwrap();
         assert_eq!(config.exclude_paths, vec!["third_party/"]);
     }
 
@@ -583,7 +564,7 @@ debug:
   coverage: true
   gitDiff: true
   filters: true
-  slowIrVerification: true
+  slowIRVerification: true
 ";
         let config = parse_yaml(yaml).unwrap();
         assert!(config.debug.print_ir);
@@ -769,7 +750,10 @@ debug:
         assert!(!config.capture_mutant_output);
         assert!(config.include_not_covered);
         assert!(config.junk_detection_disabled);
-        assert_eq!(config.compilation_database_path, "/tmp/compile_commands.json");
+        assert_eq!(
+            config.compilation_database_path,
+            "/tmp/compile_commands.json"
+        );
         assert_eq!(config.git_diff_ref, "main");
         assert_eq!(config.git_project_root, "/home/user/project");
         assert_eq!(config.mutators, vec!["cxx_add_to_sub", "cxx_mul_to_div"]);
@@ -790,12 +774,13 @@ debug:
 
     #[test]
     fn parse_runner_cli_basic() {
-        let args = vec![
-            "mull-runner".to_string(),
-            "/tmp/test".to_string(),
-        ];
+        let args = vec!["mull-runner".to_string(), "/tmp/test".to_string()];
         let result = parse_runner_cli(args);
-        assert!(result.error_message.is_empty(), "error: {}", result.error_message);
+        assert!(
+            result.error_message.is_empty(),
+            "error: {}",
+            result.error_message
+        );
         assert_eq!(result.cli_config.input_file, "/tmp/test");
     }
 
@@ -820,7 +805,11 @@ debug:
             "/tmp/test".to_string(),
         ];
         let result = parse_runner_cli(args);
-        assert!(result.error_message.is_empty(), "error: {}", result.error_message);
+        assert!(
+            result.error_message.is_empty(),
+            "error: {}",
+            result.error_message
+        );
         assert_eq!(result.cli_config.input_file, "/tmp/test");
         assert!(result.cli_config.strict);
         assert_eq!(result.cli_config.reporters, vec!["IDE", "SQLite"]);
@@ -842,7 +831,11 @@ debug:
             "/tmp/report.sqlite".to_string(),
         ];
         let result = parse_reporter_cli(args);
-        assert!(result.error_message.is_empty(), "error: {}", result.error_message);
+        assert!(
+            result.error_message.is_empty(),
+            "error: {}",
+            result.error_message
+        );
         assert_eq!(result.cli_config.sqlite_report, "/tmp/report.sqlite");
     }
 
@@ -857,7 +850,11 @@ debug:
             "/tmp/report.sqlite".to_string(),
         ];
         let result = parse_reporter_cli(args);
-        assert!(result.error_message.is_empty(), "error: {}", result.error_message);
+        assert!(
+            result.error_message.is_empty(),
+            "error: {}",
+            result.error_message
+        );
         assert_eq!(result.cli_config.sqlite_report, "/tmp/report.sqlite");
         assert!(result.cli_config.strict);
         assert_eq!(result.cli_config.reporters, vec!["Elements"]);
@@ -878,7 +875,11 @@ debug:
             "/tmp/test".to_string(),
         ];
         let result = parse_runner_cli(args);
-        assert!(result.error_message.is_empty(), "error: {}", result.error_message);
+        assert!(
+            result.error_message.is_empty(),
+            "error: {}",
+            result.error_message
+        );
         assert!(!result.cli_config.config.capture_test_output);
         assert!(!result.cli_config.config.capture_mutant_output);
     }
@@ -893,59 +894,74 @@ debug:
             "-v".to_string(),
         ];
         let result = parse_runner_cli(args);
-        assert!(result.error_message.is_empty(), "error: {}", result.error_message);
-        assert_eq!(result.cli_config.runner_args, vec!["--gtest_filter=Foo*", "-v"]);
+        assert!(
+            result.error_message.is_empty(),
+            "error: {}",
+            result.error_message
+        );
+        assert_eq!(
+            result.cli_config.runner_args,
+            vec!["--gtest_filter=Foo*", "-v"]
+        );
     }
 
     // --- normalize_args tests ---
 
     #[test]
     fn normalize_args_converts_single_dash_long_opts() {
-        let args: Vec<String> = vec![
-            "mull-runner", "-reporters", "IDE", "-report-dir", "/tmp",
-        ].into_iter().map(String::from).collect();
+        let args: Vec<String> = vec!["mull-runner", "-reporters", "IDE", "-report-dir", "/tmp"]
+            .into_iter()
+            .map(String::from)
+            .collect();
         let normalized = normalize_args(&args);
-        assert_eq!(normalized, vec![
-            "mull-runner", "--reporters", "IDE", "--report-dir", "/tmp",
-        ]);
+        assert_eq!(
+            normalized,
+            vec!["mull-runner", "--reporters", "IDE", "--report-dir", "/tmp",]
+        );
     }
 
     #[test]
     fn normalize_args_preserves_double_dash_opts() {
-        let args: Vec<String> = vec![
-            "mull-runner", "--reporters", "IDE", "--debug",
-        ].into_iter().map(String::from).collect();
+        let args: Vec<String> = vec!["mull-runner", "--reporters", "IDE", "--debug"]
+            .into_iter()
+            .map(String::from)
+            .collect();
         let normalized = normalize_args(&args);
-        assert_eq!(normalized, vec![
-            "mull-runner", "--reporters", "IDE", "--debug",
-        ]);
+        assert_eq!(
+            normalized,
+            vec!["mull-runner", "--reporters", "IDE", "--debug",]
+        );
     }
 
     #[test]
     fn normalize_args_preserves_short_flags() {
-        let args: Vec<String> = vec![
-            "mull-runner", "-v",
-        ].into_iter().map(String::from).collect();
+        let args: Vec<String> = vec!["mull-runner", "-v"]
+            .into_iter()
+            .map(String::from)
+            .collect();
         let normalized = normalize_args(&args);
         assert_eq!(normalized, vec!["mull-runner", "-v"]);
     }
 
     #[test]
     fn normalize_args_stops_at_double_dash() {
-        let args: Vec<String> = vec![
-            "mull-runner", "-reporters", "IDE", "--", "-some-test-arg",
-        ].into_iter().map(String::from).collect();
+        let args: Vec<String> = vec!["mull-runner", "-reporters", "IDE", "--", "-some-test-arg"]
+            .into_iter()
+            .map(String::from)
+            .collect();
         let normalized = normalize_args(&args);
-        assert_eq!(normalized, vec![
-            "mull-runner", "--reporters", "IDE", "--", "-some-test-arg",
-        ]);
+        assert_eq!(
+            normalized,
+            vec!["mull-runner", "--reporters", "IDE", "--", "-some-test-arg",]
+        );
     }
 
     #[test]
     fn normalize_args_handles_equals_syntax() {
-        let args: Vec<String> = vec![
-            "mull-runner", "-timeout=5000",
-        ].into_iter().map(String::from).collect();
+        let args: Vec<String> = vec!["mull-runner", "-timeout=5000"]
+            .into_iter()
+            .map(String::from)
+            .collect();
         let normalized = normalize_args(&args);
         assert_eq!(normalized, vec!["mull-runner", "--timeout=5000"]);
     }
@@ -953,11 +969,25 @@ debug:
     #[test]
     fn parse_runner_cli_single_dash_options() {
         let args: Vec<String> = vec![
-            "mull-runner", "-debug", "-timeout", "5000", "-reporters", "IDE",
-            "-report-dir", "/tmp/reports", "/tmp/test",
-        ].into_iter().map(String::from).collect();
+            "mull-runner",
+            "-debug",
+            "-timeout",
+            "5000",
+            "-reporters",
+            "IDE",
+            "-report-dir",
+            "/tmp/reports",
+            "/tmp/test",
+        ]
+        .into_iter()
+        .map(String::from)
+        .collect();
         let result = parse_runner_cli(args);
-        assert!(result.error_message.is_empty(), "error: {}", result.error_message);
+        assert!(
+            result.error_message.is_empty(),
+            "error: {}",
+            result.error_message
+        );
         assert_eq!(result.cli_config.input_file, "/tmp/test");
         assert_eq!(result.cli_config.reporters, vec!["IDE"]);
         assert_eq!(result.cli_config.report_dir, "/tmp/reports");
@@ -966,11 +996,22 @@ debug:
     #[test]
     fn parse_reporter_cli_single_dash_options() {
         let args: Vec<String> = vec![
-            "mull-reporter", "-debug", "-strict", "-reporters", "Elements",
+            "mull-reporter",
+            "-debug",
+            "-strict",
+            "-reporters",
+            "Elements",
             "/tmp/report.sqlite",
-        ].into_iter().map(String::from).collect();
+        ]
+        .into_iter()
+        .map(String::from)
+        .collect();
         let result = parse_reporter_cli(args);
-        assert!(result.error_message.is_empty(), "error: {}", result.error_message);
+        assert!(
+            result.error_message.is_empty(),
+            "error: {}",
+            result.error_message
+        );
         assert_eq!(result.cli_config.sqlite_report, "/tmp/report.sqlite");
         assert!(result.cli_config.strict);
         assert_eq!(result.cli_config.reporters, vec!["Elements"]);
@@ -978,10 +1019,7 @@ debug:
 
     #[test]
     fn parse_runner_cli_defaults() {
-        let args = vec![
-            "mull-runner".to_string(),
-            "/tmp/test".to_string(),
-        ];
+        let args = vec!["mull-runner".to_string(), "/tmp/test".to_string()];
         let result = parse_runner_cli(args);
         assert!(result.error_message.is_empty());
         assert_eq!(result.cli_config.report_dir, ".");
