@@ -89,6 +89,14 @@ def mull_docs(name):
     )
     write_targets.append("write_config_reference_docs")
 
+    write_source_files(
+        name = "write_config_example_docs",
+        files = {
+            "generated/mull-config-example.rst": "//rust/mull-docs:mull-config-example.rst",
+        },
+    )
+    write_targets.append("write_config_example_docs")
+
     # Mutators doc still uses C++ binary
     write_targets.append(_generate_cli_docs("mull-runner", llvm_version, "dump-mutators", "generated/Mutators.rst"))
 

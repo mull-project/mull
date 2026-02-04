@@ -163,6 +163,9 @@ pub struct OptionMeta {
     pub value_hint: &'static str,
     /// Extra lines appended after the help text (e.g. reporter sub-options).
     pub extra: &'static str,
+    /// Default value as it should appear in a YAML example file.
+    /// Empty string means this option is not shown in the example config.
+    pub yaml_default: &'static str,
 }
 
 /// Helper to build an OptionMeta with common defaults.
@@ -182,6 +185,7 @@ fn opt(
         section,
         value_hint: "",
         extra: "",
+        yaml_default: "",
     }
 }
 
@@ -322,7 +326,7 @@ pub fn option_metadata() -> Vec<OptionMeta> {
 
         // ── Execution ──
         OptionMeta { value_hint: "number", ..opt(Some("workers"), Some("workers"), "How many threads to use", RunnerCli, "Execution") },
-        OptionMeta { value_hint: "number", ..opt(Some("timeout"), Some("timeout"), "Timeout per test run (milliseconds)", RunnerCli, "Execution") },
+        OptionMeta { value_hint: "number", yaml_default: "3000", ..opt(Some("timeout"), Some("timeout"), "Timeout per test run (milliseconds)", RunnerCli, "Execution") },
 
         // ── Reporting ──
         OptionMeta { value_hint: "filename", ..opt(Some("report-name"), None, "Filename for the report (only for supported reporters). Defaults to <timestamp>.<extension>", SharedCli, "Reporting") },
@@ -336,7 +340,7 @@ pub fn option_metadata() -> Vec<OptionMeta> {
         opt(Some("ide-reporter-show-killed"), None, "Makes IDEReporter to also report killed mutations (disabled by default)", SharedCli, "Reporting"),
 
         // ── Mode / behavior ──
-        opt(Some("debug"), Some("debugEnabled"), "Enables Debug Mode: more logs are printed", SharedCli, "Behavior"),
+        OptionMeta { yaml_default: "false", ..opt(Some("debug"), Some("debugEnabled"), "Enables Debug Mode: more logs are printed", SharedCli, "Behavior") },
         opt(Some("strict"), None, "Enables Strict Mode: all warning messages are treated as fatal errors", SharedCli, "Behavior"),
         opt(Some("allow-surviving"), None, "Do not treat mutants surviving as an error", SharedCli, "Behavior"),
         opt(Some("mutation-score-threshold"), None, "If mutation score falls under this threshold, and allow-surviving is not enabled, an error result code is returned", SharedCli, "Behavior"),
@@ -350,43 +354,43 @@ pub fn option_metadata() -> Vec<OptionMeta> {
         OptionMeta { value_hint: "directory", ..opt(Some("ld-search-path"), None, "Library search path", RunnerCli, "Runner") },
         OptionMeta { value_hint: "string", ..opt(Some("coverage-info"), None, "Path to the coverage info file (LLVM's profdata)", RunnerCli, "Runner") },
         opt(Some("debug-coverage"), Some("debug.coverage"), "Print coverage ranges", RunnerCli, "Runner"),
-        opt(Some("include-not-covered"), Some("includeNotCovered"), "Include (but do not run) not covered mutants. Disabled by default", RunnerCli, "Runner"),
-        opt(Some("dry-run"), Some("dryRunEnabled"), "Skips mutant execution and generation. Disabled by default", RunnerCli, "Runner"),
+        OptionMeta { yaml_default: "false", ..opt(Some("include-not-covered"), Some("includeNotCovered"), "Include (but do not run) not covered mutants. Disabled by default", RunnerCli, "Runner") },
+        OptionMeta { yaml_default: "false", ..opt(Some("dry-run"), Some("dryRunEnabled"), "Skips mutant execution and generation. Disabled by default", RunnerCli, "Runner") },
 
         // ── YAML-only: Output ──
-        opt(None, Some("quiet"), "Suppress informational messages", YamlOnly, "Output"),
-        opt(None, Some("silent"), "Suppress all output except errors", YamlOnly, "Output"),
-        opt(None, Some("captureTestOutput"), "Capture stdout/stderr from the original test run", YamlOnly, "Output"),
-        opt(None, Some("captureMutantOutput"), "Capture stdout/stderr from mutant test runs", YamlOnly, "Output"),
+        OptionMeta { yaml_default: "true", ..opt(None, Some("quiet"), "Suppress informational messages", YamlOnly, "Output") },
+        OptionMeta { yaml_default: "false", ..opt(None, Some("silent"), "Suppress all output except errors", YamlOnly, "Output") },
+        OptionMeta { yaml_default: "true", ..opt(None, Some("captureTestOutput"), "Capture stdout/stderr from the original test run", YamlOnly, "Output") },
+        OptionMeta { yaml_default: "true", ..opt(None, Some("captureMutantOutput"), "Capture stdout/stderr from mutant test runs", YamlOnly, "Output") },
 
         // ── YAML-only: Mutators ──
-        opt(None, Some("mutators"), "Mutator IDs or groups to enable", YamlOnly, "Mutators"),
-        opt(None, Some("ignoreMutators"), "Mutator IDs or groups to exclude", YamlOnly, "Mutators"),
+        OptionMeta { yaml_default: "[]", ..opt(None, Some("mutators"), "Mutator IDs or groups to enable", YamlOnly, "Mutators") },
+        OptionMeta { yaml_default: "[]", ..opt(None, Some("ignoreMutators"), "Mutator IDs or groups to exclude", YamlOnly, "Mutators") },
 
         // ── YAML-only: Junk Detection ──
-        opt(None, Some("compilationDatabasePath"), "Path to compilation database (compile_commands.json)", YamlOnly, "Junk Detection"),
-        opt(None, Some("compilerFlags"), "Additional compiler flags for junk detection", YamlOnly, "Junk Detection"),
-        opt(None, Some("junkDetectionDisabled"), "Disable junk detection (AST-based mutant validation)", YamlOnly, "Junk Detection"),
+        OptionMeta { yaml_default: "\"\"", ..opt(None, Some("compilationDatabasePath"), "Path to compilation database (compile_commands.json)", YamlOnly, "Junk Detection") },
+        OptionMeta { yaml_default: "[]", ..opt(None, Some("compilerFlags"), "Additional compiler flags for junk detection", YamlOnly, "Junk Detection") },
+        OptionMeta { yaml_default: "false", ..opt(None, Some("junkDetectionDisabled"), "Disable junk detection (AST-based mutant validation)", YamlOnly, "Junk Detection") },
 
         // ── YAML-only: Filtering ──
-        opt(None, Some("includePaths"), "File path regex patterns to include in mutation testing", YamlOnly, "Filtering"),
-        opt(None, Some("excludePaths"), "File path regex patterns to exclude from mutation testing", YamlOnly, "Filtering"),
-        opt(None, Some("gitDiffRef"), "Git ref to diff against for incremental mutation testing", YamlOnly, "Filtering"),
-        opt(None, Some("gitProjectRoot"), "Root directory of the git project", YamlOnly, "Filtering"),
+        OptionMeta { yaml_default: "[]", ..opt(None, Some("includePaths"), "File path regex patterns to include in mutation testing", YamlOnly, "Filtering") },
+        OptionMeta { yaml_default: "[]", ..opt(None, Some("excludePaths"), "File path regex patterns to exclude from mutation testing", YamlOnly, "Filtering") },
+        OptionMeta { yaml_default: "\"\"", ..opt(None, Some("gitDiffRef"), "Git ref to diff against for incremental mutation testing", YamlOnly, "Filtering") },
+        OptionMeta { yaml_default: "\"\"", ..opt(None, Some("gitProjectRoot"), "Root directory of the git project", YamlOnly, "Filtering") },
 
         // ── YAML-only: Parallelization ──
-        opt(None, Some("parallelization.workers"), "Number of worker threads for test discovery", YamlOnly, "Parallelization"),
-        opt(None, Some("parallelization.executionWorkers"), "Number of worker threads for mutant execution", YamlOnly, "Parallelization"),
+        OptionMeta { yaml_default: "0", ..opt(None, Some("parallelization.workers"), "Number of worker threads for test discovery", YamlOnly, "Parallelization") },
+        OptionMeta { yaml_default: "0", ..opt(None, Some("parallelization.executionWorkers"), "Number of worker threads for mutant execution", YamlOnly, "Parallelization") },
 
         // ── YAML-only: Debug ──
-        opt(None, Some("debug.printIR"), "Print LLVM IR", YamlOnly, "Debug"),
-        opt(None, Some("debug.printIRBefore"), "Print LLVM IR before mutation", YamlOnly, "Debug"),
-        opt(None, Some("debug.printIRAfter"), "Print LLVM IR after mutation", YamlOnly, "Debug"),
-        opt(None, Some("debug.printIRToFile"), "Print LLVM IR to a file", YamlOnly, "Debug"),
-        opt(None, Some("debug.traceMutants"), "Trace mutant discovery and execution", YamlOnly, "Debug"),
-        opt(None, Some("debug.coverage"), "Enable coverage debug output", YamlOnly, "Debug"),
-        opt(None, Some("debug.gitDiff"), "Enable git diff debug output", YamlOnly, "Debug"),
-        opt(None, Some("debug.filters"), "Enable filter debug output", YamlOnly, "Debug"),
-        opt(None, Some("debug.slowIrVerification"), "Enable slow IR verification", YamlOnly, "Debug"),
+        OptionMeta { yaml_default: "false", ..opt(None, Some("debug.printIR"), "Print LLVM IR", YamlOnly, "Debug") },
+        OptionMeta { yaml_default: "false", ..opt(None, Some("debug.printIRBefore"), "Print LLVM IR before mutation", YamlOnly, "Debug") },
+        OptionMeta { yaml_default: "false", ..opt(None, Some("debug.printIRAfter"), "Print LLVM IR after mutation", YamlOnly, "Debug") },
+        OptionMeta { yaml_default: "false", ..opt(None, Some("debug.printIRToFile"), "Print LLVM IR to a file", YamlOnly, "Debug") },
+        OptionMeta { yaml_default: "false", ..opt(None, Some("debug.traceMutants"), "Trace mutant discovery and execution", YamlOnly, "Debug") },
+        OptionMeta { yaml_default: "false", ..opt(None, Some("debug.coverage"), "Enable coverage debug output", YamlOnly, "Debug") },
+        OptionMeta { yaml_default: "false", ..opt(None, Some("debug.gitDiff"), "Enable git diff debug output", YamlOnly, "Debug") },
+        OptionMeta { yaml_default: "false", ..opt(None, Some("debug.filters"), "Enable filter debug output", YamlOnly, "Debug") },
+        OptionMeta { yaml_default: "false", ..opt(None, Some("debug.slowIrVerification"), "Enable slow IR verification", YamlOnly, "Debug") },
     ]
 }
