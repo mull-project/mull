@@ -21,6 +21,13 @@ bazel_dep(name = "googletest", version = "1.16.0")
 bazel_dep(name = "rules_python", version = "1.3.0")
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
 
+bazel_dep(name = "hedron_compile_commands", dev_dependency = True)
+git_override(
+    module_name = "hedron_compile_commands",
+    commit = "abb61a688167623088f8768cc9264798df6a9d10",
+    remote = "https://github.com/hedronvision/bazel-compile-commands-extractor.git",
+)
+
 TOOLCHAIN_VERSION = "18450561443"
 
 llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm", dev_dependency = True)
