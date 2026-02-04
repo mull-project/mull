@@ -2,6 +2,7 @@ pub mod config;
 
 use config::MullConfigSpec;
 
+use clap::error::ErrorKind;
 use clap::{CommandFactory, FromArgMatches};
 use std::env;
 use std::fs;
@@ -92,13 +93,14 @@ mod ffi {
     struct CliParseResult {
         cli_config: CliConfig,
         error_message: String,
+        exit_code: i32,
     }
 
     extern "Rust" {
         fn load_config(path: &str) -> LoadConfigResult;
         fn find_config_path() -> String;
-        fn parse_runner_cli(args: Vec<String>) -> CliParseResult;
-        fn parse_reporter_cli(args: Vec<String>) -> CliParseResult;
+        fn parse_runner_cli(args: Vec<String>, llvm_version: String) -> CliParseResult;
+        fn parse_reporter_cli(args: Vec<String>, llvm_version: String) -> CliParseResult;
     }
 }
 
@@ -307,6 +309,22 @@ fn normalize_args(args: &[String]) -> Vec<String> {
     out
 }
 
+/// Build the rich multi-line version string shown for `--version` / `-version`.
+fn long_version_string(llvm_version: &str) -> &'static str {
+    let s = format!(
+        "Mull: practical mutation testing for C and C++\n\
+         Home: https://github.com/mull-project/mull\n\
+         Docs: https://mull.readthedocs.io\n\
+         Support: https://mull.readthedocs.io/en/latest/Support.html\n\
+         Version: {}\n\
+         LLVM: {}",
+        env!("CARGO_PKG_VERSION"),
+        llvm_version
+    );
+    // Leak is fine: this runs once per CLI invocation then the process exits.
+    Box::leak(s.into_boxed_str())
+}
+
 /// Check if a particular clap argument was explicitly provided on the command line.
 fn arg_present(matches: &clap::ArgMatches, id: &str) -> bool {
     matches
@@ -315,14 +333,26 @@ fn arg_present(matches: &clap::ArgMatches, id: &str) -> bool {
         .unwrap_or(false)
 }
 
-fn parse_runner_cli(args: Vec<String>) -> ffi::CliParseResult {
+fn parse_runner_cli(args: Vec<String>, llvm_version: String) -> ffi::CliParseResult {
     let args = normalize_args(&args);
-    let matches = match config::RunnerCli::command().try_get_matches_from(&args) {
+    let cmd = config::RunnerCli::command().long_version(long_version_string(&llvm_version));
+    let matches = match cmd.try_get_matches_from(&args) {
         Ok(m) => m,
+        Err(e)
+            if e.kind() == ErrorKind::DisplayVersion
+                || e.kind() == ErrorKind::DisplayHelp =>
+        {
+            return ffi::CliParseResult {
+                cli_config: default_cli_config(),
+                error_message: e.to_string(),
+                exit_code: 0,
+            };
+        }
         Err(e) => {
             return ffi::CliParseResult {
                 cli_config: default_cli_config(),
                 error_message: e.to_string(),
+                exit_code: 1,
             };
         }
     };
@@ -334,6 +364,7 @@ fn parse_runner_cli(args: Vec<String>) -> ffi::CliParseResult {
             return ffi::CliParseResult {
                 cli_config: default_cli_config(),
                 error_message: e,
+                exit_code: 1,
             };
         }
     };
@@ -368,6 +399,7 @@ fn parse_runner_cli(args: Vec<String>) -> ffi::CliParseResult {
         return ffi::CliParseResult {
             cli_config: default_cli_config(),
             error_message: errors.join("; "),
+            exit_code: 1,
         };
     }
 
@@ -382,17 +414,30 @@ fn parse_runner_cli(args: Vec<String>) -> ffi::CliParseResult {
     ffi::CliParseResult {
         cli_config,
         error_message: String::new(),
+        exit_code: 0,
     }
 }
 
-fn parse_reporter_cli(args: Vec<String>) -> ffi::CliParseResult {
+fn parse_reporter_cli(args: Vec<String>, llvm_version: String) -> ffi::CliParseResult {
     let args = normalize_args(&args);
-    let matches = match config::ReporterCli::command().try_get_matches_from(&args) {
+    let cmd = config::ReporterCli::command().long_version(long_version_string(&llvm_version));
+    let matches = match cmd.try_get_matches_from(&args) {
         Ok(m) => m,
+        Err(e)
+            if e.kind() == ErrorKind::DisplayVersion
+                || e.kind() == ErrorKind::DisplayHelp =>
+        {
+            return ffi::CliParseResult {
+                cli_config: default_cli_config(),
+                error_message: e.to_string(),
+                exit_code: 0,
+            };
+        }
         Err(e) => {
             return ffi::CliParseResult {
                 cli_config: default_cli_config(),
                 error_message: e.to_string(),
+                exit_code: 1,
             };
         }
     };
@@ -404,6 +449,7 @@ fn parse_reporter_cli(args: Vec<String>) -> ffi::CliParseResult {
             return ffi::CliParseResult {
                 cli_config: default_cli_config(),
                 error_message: e,
+                exit_code: 1,
             };
         }
     };
@@ -417,6 +463,7 @@ fn parse_reporter_cli(args: Vec<String>) -> ffi::CliParseResult {
         return ffi::CliParseResult {
             cli_config: default_cli_config(),
             error_message: errors.join("; "),
+            exit_code: 1,
         };
     }
 
@@ -427,6 +474,7 @@ fn parse_reporter_cli(args: Vec<String>) -> ffi::CliParseResult {
     ffi::CliParseResult {
         cli_config,
         error_message: String::new(),
+        exit_code: 0,
     }
 }
 
@@ -772,10 +820,20 @@ debug:
 
     // --- CLI parsing tests ---
 
+    const TEST_LLVM_VERSION: &str = "19.0.0";
+
+    fn runner_cli(args: Vec<String>) -> ffi::CliParseResult {
+        parse_runner_cli(args, TEST_LLVM_VERSION.to_string())
+    }
+
+    fn reporter_cli(args: Vec<String>) -> ffi::CliParseResult {
+        parse_reporter_cli(args, TEST_LLVM_VERSION.to_string())
+    }
+
     #[test]
     fn parse_runner_cli_basic() {
         let args = vec!["mull-runner".to_string(), "/tmp/test".to_string()];
-        let result = parse_runner_cli(args);
+        let result = runner_cli(args);
         assert!(
             result.error_message.is_empty(),
             "error: {}",
@@ -804,7 +862,7 @@ debug:
             "/usr/lib".to_string(),
             "/tmp/test".to_string(),
         ];
-        let result = parse_runner_cli(args);
+        let result = runner_cli(args);
         assert!(
             result.error_message.is_empty(),
             "error: {}",
@@ -820,8 +878,9 @@ debug:
     #[test]
     fn parse_runner_cli_missing_input() {
         let args = vec!["mull-runner".to_string()];
-        let result = parse_runner_cli(args);
+        let result = runner_cli(args);
         assert!(!result.error_message.is_empty());
+        assert_ne!(result.exit_code, 0);
     }
 
     #[test]
@@ -830,7 +889,7 @@ debug:
             "mull-reporter".to_string(),
             "/tmp/report.sqlite".to_string(),
         ];
-        let result = parse_reporter_cli(args);
+        let result = reporter_cli(args);
         assert!(
             result.error_message.is_empty(),
             "error: {}",
@@ -849,7 +908,7 @@ debug:
             "Elements".to_string(),
             "/tmp/report.sqlite".to_string(),
         ];
-        let result = parse_reporter_cli(args);
+        let result = reporter_cli(args);
         assert!(
             result.error_message.is_empty(),
             "error: {}",
@@ -863,8 +922,9 @@ debug:
     #[test]
     fn parse_reporter_cli_missing_input() {
         let args = vec!["mull-reporter".to_string()];
-        let result = parse_reporter_cli(args);
+        let result = reporter_cli(args);
         assert!(!result.error_message.is_empty());
+        assert_ne!(result.exit_code, 0);
     }
 
     #[test]
@@ -874,7 +934,7 @@ debug:
             "--no-output".to_string(),
             "/tmp/test".to_string(),
         ];
-        let result = parse_runner_cli(args);
+        let result = runner_cli(args);
         assert!(
             result.error_message.is_empty(),
             "error: {}",
@@ -893,7 +953,7 @@ debug:
             "--gtest_filter=Foo*".to_string(),
             "-v".to_string(),
         ];
-        let result = parse_runner_cli(args);
+        let result = runner_cli(args);
         assert!(
             result.error_message.is_empty(),
             "error: {}",
@@ -903,6 +963,35 @@ debug:
             result.cli_config.runner_args,
             vec!["--gtest_filter=Foo*", "-v"]
         );
+    }
+
+    #[test]
+    fn parse_runner_cli_version_short() {
+        let args = vec!["mull-runner".to_string(), "-V".to_string()];
+        let result = runner_cli(args);
+        assert_eq!(result.exit_code, 0);
+        assert!(!result.error_message.is_empty());
+        assert!(result.error_message.contains(env!("CARGO_PKG_VERSION")));
+    }
+
+    #[test]
+    fn parse_runner_cli_version_long() {
+        let args = vec!["mull-runner".to_string(), "--version".to_string()];
+        let result = runner_cli(args);
+        assert_eq!(result.exit_code, 0);
+        assert!(result.error_message.contains("Mull:"));
+        assert!(result.error_message.contains("LLVM:"));
+        assert!(result.error_message.contains(TEST_LLVM_VERSION));
+    }
+
+    #[test]
+    fn parse_reporter_cli_version() {
+        let args = vec!["mull-reporter".to_string(), "--version".to_string()];
+        let result = reporter_cli(args);
+        assert_eq!(result.exit_code, 0);
+        assert!(result.error_message.contains("Mull:"));
+        assert!(result.error_message.contains("LLVM:"));
+        assert!(result.error_message.contains(TEST_LLVM_VERSION));
     }
 
     // --- normalize_args tests ---
@@ -982,7 +1071,7 @@ debug:
         .into_iter()
         .map(String::from)
         .collect();
-        let result = parse_runner_cli(args);
+        let result = runner_cli(args);
         assert!(
             result.error_message.is_empty(),
             "error: {}",
@@ -1006,7 +1095,7 @@ debug:
         .into_iter()
         .map(String::from)
         .collect();
-        let result = parse_reporter_cli(args);
+        let result = reporter_cli(args);
         assert!(
             result.error_message.is_empty(),
             "error: {}",
@@ -1020,7 +1109,7 @@ debug:
     #[test]
     fn parse_runner_cli_defaults() {
         let args = vec!["mull-runner".to_string(), "/tmp/test".to_string()];
-        let result = parse_runner_cli(args);
+        let result = runner_cli(args);
         assert!(result.error_message.is_empty());
         assert_eq!(result.cli_config.report_dir, ".");
         assert_eq!(result.cli_config.report_patch_base, ".");

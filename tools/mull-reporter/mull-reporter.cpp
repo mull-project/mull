@@ -88,18 +88,15 @@ int main(int argc, char **argv) {
   llvm::llvm_shutdown_obj llvmShutdownObj;
   mull::Diagnostics diagnostics;
 
-  for (int i = 1; i < argc; i++) {
-    std::string arg(argv[i]);
-    if (arg == "--version" || arg == "-version" || arg == "-V") {
-      mull::printVersionInformation(llvm::outs());
-      return 0;
-    }
-  }
-
-  auto parseResult = parse_reporter_cli(tool::argsFromArgv(argc, argv));
+  auto parseResult =
+      parse_reporter_cli(tool::argsFromArgv(argc, argv), rust::String(mull::llvmVersionString()));
   if (!parseResult.error_message.empty()) {
-    llvm::errs() << std::string(parseResult.error_message) << "\n";
-    return 1;
+    if (parseResult.exit_code != 0) {
+      llvm::errs() << std::string(parseResult.error_message) << "\n";
+    } else {
+      llvm::outs() << std::string(parseResult.error_message);
+    }
+    return parseResult.exit_code;
   }
   const auto &cli = parseResult.cli_config;
 
