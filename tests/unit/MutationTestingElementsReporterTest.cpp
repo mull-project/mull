@@ -2,7 +2,6 @@
 
 #include "FixturePaths.h"
 #include "mull/Bitcode.h"
-#include "mull/Config/Configuration.h"
 #include "mull/FunctionUnderTest.h"
 #include "mull/JunkDetection/CXX/ASTStorage.h"
 #include "mull/Metrics/MetricsMeasure.h"
@@ -12,6 +11,8 @@
 #include "tests/unit/Helpers/BitcodeLoader.h"
 #include "tests/unit/Helpers/TestModuleFactory.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
+
+#include "rust/mull-config/lib.rs.h"
 
 #include <fstream>
 #include <gtest/gtest.h>
@@ -44,7 +45,7 @@ TEST(MutationTestingElementsReporterTest, integrationTest) {
   modules.push_back(std::move(bitcodeWithTests));
   modules.push_back(std::move(bitcodeWithTestees));
   Program program(std::move(modules));
-  Configuration configuration;
+  MullConfig configuration = default_config();
 
   std::vector<std::unique_ptr<Mutator>> mutators;
   mutators.emplace_back(std::make_unique<cxx::AddToSub>());

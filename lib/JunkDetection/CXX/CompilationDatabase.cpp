@@ -1,5 +1,4 @@
 #include "mull/JunkDetection/CXX/CompilationDatabase.h"
-#include "mull/Config/Configuration.h"
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Path.h"
 #include "mull/Runner.h"
@@ -96,13 +95,8 @@ static void resolveResourceDir(Diagnostics &diagnostics, CompilationDatabase::Da
     }
     if (resourceDirs.count(compiler) == 0) {
       Runner runner(diagnostics);
-      auto result = runner.runProgram(compiler,
-                                      { "-print-resource-dir" },
-                                      {},
-                                      mull::MullDefaultTimeoutMilliseconds,
-                                      true,
-                                      true,
-                                      std::nullopt);
+      auto result = runner.runProgram(
+          compiler, { "-print-resource-dir" }, {}, 3000, true, true, std::nullopt);
       if (!result.stdoutOutput.empty()) {
         // strip trailing \n
         result.stdoutOutput[result.stdoutOutput.size() - 1] = '\0';

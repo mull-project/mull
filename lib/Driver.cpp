@@ -1,7 +1,6 @@
 #include "mull/Driver.h"
 
 #include "mull/BitcodeMetadataReader.h"
-#include "mull/Config/Configuration.h"
 #include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Filters/BlockAddressFunctionFilter.h"
 #include "mull/Filters/Filters.h"
@@ -46,16 +45,16 @@ void printIR(llvm::Module &module, Diagnostics &diagnostics, bool toFile,
 }
 
 std::vector<MutationPoint *>
-filterOutJunk(Diagnostics &diagnostics, const Configuration &configuration,
+filterOutJunk(Diagnostics &diagnostics, const MullConfig &configuration,
               std::vector<MutationPoint *> points,
               std::unordered_map<std::string, std::string> bitcodeCompilationFlags) {
   std::string cxxCompilationFlags;
-  for (auto &flag : configuration.compilerFlags) {
-    cxxCompilationFlags += flag + ' ';
+  for (auto &flag : configuration.compiler_flags) {
+    cxxCompilationFlags += std::string(flag) + ' ';
   }
 
   mull::ASTStorage astStorage(diagnostics,
-                              configuration.compilationDatabasePath,
+                              std::string(configuration.compilation_database_path),
                               cxxCompilationFlags,
                               bitcodeCompilationFlags);
 
@@ -72,6 +71,16 @@ filterOutJunk(Diagnostics &diagnostics, const Configuration &configuration,
 
   return out;
 }
+
+std::vector<std::string> toStdVector(const rust::Vec<rust::String> &v) {
+  std::vector<std::string> out;
+  out.reserve(v.size());
+  for (const auto &s : v) {
+    out.emplace_back(std::string(s));
+  }
+  return out;
+}
+
 } // namespace
 
 void mull::mutateBitcode(llvm::Module &module) {
@@ -79,8 +88,7 @@ void mull::mutateBitcode(llvm::Module &module) {
 
   Diagnostics diagnostics;
   std::string configPath = std::string(find_config_path());
-  Configuration configuration;
-  MullConfig mullConfig;
+  MullConfig configuration = default_config();
   if (configPath.empty()) {
     diagnostics.warning("Mull cannot find config (mull.yml). Using some defaults.");
   } else {
@@ -88,13 +96,11 @@ void mull::mutateBitcode(llvm::Module &module) {
     if (!loadResult.error_message.empty()) {
       diagnostics.warning(std::string(loadResult.error_message));
     } else {
-      configuration.populateFromRustConfig(loadResult.config, configPath, diagnostics);
-      mullConfig = loadResult.config;
+      configuration = loadResult.config;
     }
   }
-  configuration.parallelization.normalize();
 
-  if (configuration.debugEnabled) {
+  if (configuration.debug_enabled) {
     diagnostics.enableDebugMode();
   }
   if (configuration.quiet) {
@@ -105,7 +111,7 @@ void mull::mutateBitcode(llvm::Module &module) {
   }
 
   std::vector<std::unique_ptr<mull::Filter>> filterStorage;
-  mull::Filters filters(mullConfig, diagnostics);
+  mull::Filters filters(configuration, diagnostics);
   filters.enableNoDebugFilter();
   filters.enableFilePathFilter();
   filters.enableGitDiffFilter();
@@ -135,8 +141,8 @@ void mull::mutateBitcode(llvm::Module &module) {
         "Mull cannot find compiler flags. Recompile with `-grecord-command-line` flag.");
   }
 
-  if (configuration.debug.printIR || configuration.debug.printIRBefore) {
-    printIR(module, diagnostics, configuration.debug.printIRToFile, ".before.ll");
+  if (configuration.debug.print_ir || configuration.debug.print_ir_before) {
+    printIR(module, diagnostics, configuration.debug.print_ir_to_file, ".before.ll");
   }
 
   {
@@ -177,12 +183,13 @@ void mull::mutateBitcode(llvm::Module &module) {
 
   MutatorsFactory mutatorsFactory(diagnostics);
   MutationsFinder mutationsFinder(
-      mutatorsFactory.mutators(configuration.mutators, configuration.ignoreMutators),
+      mutatorsFactory.mutators(toStdVector(configuration.mutators),
+                               toStdVector(configuration.ignore_mutators)),
       configuration);
 
   std::vector<InstructionSelectionTask> instructionSelectionTasks;
-  instructionSelectionTasks.reserve(configuration.parallelization.workers);
-  for (unsigned i = 0; i < configuration.parallelization.workers; i++) {
+  instructionSelectionTasks.reserve(configuration.workers);
+  for (unsigned i = 0; i < configuration.workers; i++) {
     instructionSelectionTasks.emplace_back(filters.instructionFilters);
   }
 
@@ -200,8 +207,8 @@ void mull::mutateBitcode(llvm::Module &module) {
 
   for (auto filter : filters.mutationFilters) {
     std::vector<MutationFilterTask> tasks;
-    tasks.reserve(configuration.parallelization.workers);
-    for (unsigned i = 0; i < configuration.parallelization.workers; i++) {
+    tasks.reserve(configuration.workers);
+    for (unsigned i = 0; i < configuration.workers; i++) {
       tasks.emplace_back(*filter);
     }
 
@@ -213,7 +220,7 @@ void mull::mutateBitcode(llvm::Module &module) {
     mutations = std::move(tmp);
   }
 
-  if (!configuration.junkDetectionDisabled) {
+  if (!configuration.junk_detection_disabled) {
     mutations =
         filterOutJunk(diagnostics, configuration, std::move(mutations), bitcodeCompilationFlags);
   }
@@ -241,8 +248,8 @@ void mull::mutateBitcode(llvm::Module &module) {
                                                  { ApplyMutationTask(configuration, diagnostics) });
   applyMutations.execute();
 
-  if (configuration.debug.printIR || configuration.debug.printIRAfter) {
-    printIR(module, diagnostics, configuration.debug.printIRToFile, ".after.ll");
+  if (configuration.debug.print_ir || configuration.debug.print_ir_after) {
+    printIR(module, diagnostics, configuration.debug.print_ir_to_file, ".after.ll");
   }
 
   {
@@ -255,8 +262,8 @@ void mull::mutateBitcode(llvm::Module &module) {
               << "debug:\n"
               << " slowIRVerification: true\n"
               << "to the config file ";
-      if (!configuration.pathOnDisk.empty()) {
-        message << "(" << configuration.pathOnDisk << ") ";
+      if (!configuration.config_path.empty()) {
+        message << "(" << std::string(configuration.config_path) << ") ";
       }
       message << "and re-run the failing command.\n\n";
       message << "Otherwise, report the following error message here "

@@ -1,5 +1,4 @@
 #include "FixturePaths.h"
-#include "mull/Config/Configuration.h"
 #include "mull/Filters/FilePathFilter.h"
 #include "mull/Filters/NoDebugInfoFilter.h"
 #include "mull/MutationsFinder.h"

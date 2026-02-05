@@ -1,5 +1,4 @@
 #include "FixturePaths.h"
-#include "mull/Config/Configuration.h"
 #include "mull/FunctionUnderTest.h"
 #include "mull/MutationPoint.h"
 #include "mull/Mutators/CXX/CallMutators.h"
@@ -14,6 +13,8 @@
 #include <mull/Diagnostics/Diagnostics.h>
 #include <mull/Mutators/CXX/NumberMutators.h>
 #include <mull/Parallelization/Parallelization.h>
+
+#include "rust/mull-config/lib.rs.h"
 
 #include <gtest/gtest.h>
 
@@ -51,7 +52,7 @@ TEST(MutationPoint, ReplaceCallMutator_applyMutation) {
 TEST(MutationPoint, OriginalValuePresent) {
   Diagnostics diagnostics;
   BitcodeLoader loader;
-  Configuration configuration{};
+  MullConfig configuration = default_config();
   auto bitcode = loader.loadBitcodeAtPath(
       fixtures::tests_unit_fixtures_mutators_replace_assignment_module_c_bc_path(), diagnostics);
 

@@ -13,8 +13,6 @@ class MemoryBuffer;
 
 namespace mull {
 
-struct Configuration;
-
 std::unique_ptr<llvm::Module> loadModuleFromBuffer(llvm::LLVMContext &context,
                                                    llvm::MemoryBuffer &buffer,
                                                    Diagnostics &diagnostics);

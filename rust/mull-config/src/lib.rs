@@ -25,12 +25,10 @@ mod ffi {
     }
 
     struct MullConfig {
-        // Execution
         timeout: u32,
         workers: u32,
         execution_workers: u32,
 
-        // Flags
         debug_enabled: bool,
         quiet: bool,
         silent: bool,
@@ -40,20 +38,18 @@ mod ffi {
         include_not_covered: bool,
         junk_detection_disabled: bool,
 
-        // Strings (empty = not set)
         compilation_database_path: String,
         git_diff_ref: String,
         git_project_root: String,
 
-        // Vectors
         mutators: Vec<String>,
         ignore_mutators: Vec<String>,
         compiler_flags: Vec<String>,
         include_paths: Vec<String>,
         exclude_paths: Vec<String>,
 
-        // Nested
         debug: DebugOptions,
+        config_path: String,
     }
 
     struct LoadConfigResult {
@@ -64,30 +60,23 @@ mod ffi {
     struct CliConfig {
         config: MullConfig,
 
-        // CLI-only: tool input
         input_file: String,
         test_program: String,
         sqlite_report: String,
         runner_args: Vec<String>,
 
-        // CLI-only: reporting
         reporters: Vec<String>,
         report_name: String,
         report_dir: String,
         report_patch_base: String,
         ide_reporter_show_killed: bool,
 
-        // CLI-only: behavior
         strict: bool,
         allow_surviving: bool,
         mutation_score_threshold: u32,
 
-        // CLI-only: runner
         ld_search_paths: Vec<String>,
         coverage_info: String,
-
-        // Path to the config file that was loaded (empty if none)
-        config_path: String,
     }
 
     struct CliParseResult {
@@ -101,6 +90,7 @@ mod ffi {
         fn find_config_path() -> String;
         fn parse_runner_cli(args: Vec<String>, llvm_version: String) -> CliParseResult;
         fn parse_reporter_cli(args: Vec<String>, llvm_version: String) -> CliParseResult;
+        fn default_config() -> MullConfig;
     }
 }
 
@@ -126,6 +116,7 @@ impl MullConfigSpec {
             compiler_flags: self.compiler_flags.clone(),
             include_paths: self.include_paths.clone(),
             exclude_paths: self.exclude_paths.clone(),
+            config_path: String::new(),
             debug: ffi::DebugOptions {
                 print_ir: self.debug.print_ir,
                 print_ir_before: self.debug.print_ir_before,
@@ -162,7 +153,6 @@ fn default_cli_config() -> ffi::CliConfig {
         mutation_score_threshold: 100,
         ld_search_paths: Vec::new(),
         coverage_info: String::new(),
-        config_path: String::new(),
     }
 }
 
@@ -400,6 +390,7 @@ fn parse_runner_cli(args: Vec<String>, llvm_version: String) -> ffi::CliParseRes
             exit_code: 1,
         };
     }
+    yaml_config.config_path = config_path;
 
     cli_config.config = yaml_config;
     cli_config.input_file = cli.input_file;
@@ -407,7 +398,6 @@ fn parse_runner_cli(args: Vec<String>, llvm_version: String) -> ffi::CliParseRes
     cli_config.runner_args = cli.runner_args;
     cli_config.ld_search_paths = cli.ld_search_paths;
     cli_config.coverage_info = cli.coverage_info.unwrap_or_default();
-    cli_config.config_path = config_path;
 
     ffi::CliParseResult {
         cli_config,
@@ -462,9 +452,9 @@ fn parse_reporter_cli(args: Vec<String>, llvm_version: String) -> ffi::CliParseR
         };
     }
 
+    yaml_config.config_path = config_path;
     cli_config.config = yaml_config;
     cli_config.sqlite_report = cli.sqlite_report;
-    cli_config.config_path = config_path;
 
     ffi::CliParseResult {
         cli_config,

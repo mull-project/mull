@@ -1,6 +1,5 @@
 #include "BitcodeLoader.h"
 
-#include "mull/Config/Configuration.h"
 #include "mull/Diagnostics/Diagnostics.h"
 
 #include <llvm/Bitcode/BitcodeReader.h>

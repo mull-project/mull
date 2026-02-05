@@ -1,7 +1,6 @@
 #pragma once
 
 #include <memory>
-#include <mull/Config/Configuration.h>
 #include <mull/Diagnostics/Diagnostics.h>
 #include <mull/Reporters/Reporter.h>
 #include <string>
@@ -24,11 +23,6 @@ struct ReporterParameters {
 
 /// Convert rust::Vec<rust::String> to std::vector<std::string>.
 std::vector<std::string> toStdVector(const rust::Vec<rust::String> &v);
-
-/// Populate a mull::Configuration from the merged Rust CliConfig.
-/// Handles all field copying, parallelization setup, and config path.
-void populateConfiguration(mull::Configuration &configuration, const CliConfig &cli,
-                           mull::Diagnostics &diagnostics);
 
 /// Set up diagnostics modes from CLI flags.
 void setupDiagnostics(mull::Diagnostics &diagnostics, const CliConfig &cli);

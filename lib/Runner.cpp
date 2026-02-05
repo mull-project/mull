@@ -1,6 +1,5 @@
 #include "mull/Runner.h"
 
-#include "mull/Config/Configuration.h"
 #include "mull/Diagnostics/Diagnostics.h"
 
 #include <reproc++/drain.hpp>

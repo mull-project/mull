@@ -23,11 +23,6 @@ std::vector<std::string> tool::toStdVector(const rust::Vec<rust::String> &v) {
   return out;
 }
 
-void tool::populateConfiguration(Configuration &configuration, const CliConfig &cli,
-                                 Diagnostics &diagnostics) {
-  configuration.populateFromRustConfig(cli.config, std::string(cli.config_path), diagnostics);
-}
-
 void tool::setupDiagnostics(Diagnostics &diagnostics, const CliConfig &cli) {
   if (cli.config.debug_enabled) {
     diagnostics.enableDebugMode();
