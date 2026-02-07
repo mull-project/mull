@@ -1,6 +1,5 @@
 #include "mull/Filters/Filters.h"
-#include "mull/Config/Configuration.h"
-#include "mull/Diagnostics/Diagnostics.h"
+
 #include "mull/Filters/BlockAddressFunctionFilter.h"
 #include "mull/Filters/CoverageFilter.h"
 #include "mull/Filters/FilePathFilter.h"
@@ -8,13 +7,16 @@
 #include "mull/Filters/ManualFilter.h"
 #include "mull/Filters/NoDebugInfoFilter.h"
 #include "mull/Filters/VariadicFunctionFilter.h"
+
+#include "rust/mull-core/core.rs.h"
+
 #include <llvm/Support/FileSystem.h>
 #include <sstream>
 
 using namespace mull;
 using namespace std::string_literals;
 
-Filters::Filters(const Configuration &configuration, Diagnostics &diagnostics)
+Filters::Filters(const MullConfig &configuration, const MullDiagnostics &diagnostics)
     : functionFilters(), mutationFilters(), instructionFilters(), configuration(configuration),
       diagnostics(diagnostics) {}
 
@@ -28,7 +30,7 @@ void Filters::enableNoDebugFilter() {
 }
 
 void Filters::enableFilePathFilter() {
-  if (configuration.includePaths.empty() && configuration.excludePaths.empty()) {
+  if (configuration.include_paths.empty() && configuration.exclude_paths.empty()) {
     if (configuration.debug.filters) {
       diagnostics.debug("FilePath: both includePaths and excludePaths are empty");
     }
@@ -41,26 +43,28 @@ void Filters::enableFilePathFilter() {
   mutantFilters.push_back(filter);
   functionFilters.push_back(filter);
 
-  for (const auto &regex : configuration.excludePaths) {
+  for (const auto &regex : configuration.exclude_paths) {
+    auto std_regex = std::string(regex);
     if (configuration.debug.filters) {
-      diagnostics.debug("FilePath: excluding: "s + regex);
+      diagnostics.debug("FilePath: excluding: "s + std_regex);
     }
-    auto added = filter->exclude(regex);
+    auto added = filter->exclude(std_regex);
     if (!added.first) {
       std::stringstream warningMessage;
-      warningMessage << "Invalid regex for exclude-path: '" << regex
+      warningMessage << "Invalid regex for exclude-path: '" << std_regex
                      << "' has been ignored. Error: " << added.second;
       diagnostics.warning(warningMessage.str());
     }
   }
-  for (const auto &regex : configuration.includePaths) {
+  for (const auto &regex : configuration.include_paths) {
+    auto std_regex = std::string(regex);
     if (configuration.debug.filters) {
-      diagnostics.debug("FilePath: including: "s + regex);
+      diagnostics.debug("FilePath: including: "s + std_regex);
     }
-    auto added = filter->include(regex);
+    auto added = filter->include(std_regex);
     if (!added.first) {
       std::stringstream warningMessage;
-      warningMessage << "Invalid regex for include-path: '" << regex
+      warningMessage << "Invalid regex for include-path: '" << std_regex
                      << "' has been ignored. Error: " << added.second;
       diagnostics.warning(warningMessage.str());
     }
@@ -68,31 +72,31 @@ void Filters::enableFilePathFilter() {
 }
 
 void Filters::enableGitDiffFilter() {
-  if (!configuration.gitDiffRef.empty()) {
-    if (configuration.gitProjectRoot.empty()) {
+  auto projectRoot = std::string(configuration.git_project_root);
+  if (!configuration.git_diff_ref.empty()) {
+    if (projectRoot.empty()) {
       std::stringstream debugMessage;
       debugMessage
           << "gitDiffRef option has been provided but the path to the Git project root has not "
              "been specified via gitProjectRoot. The incremental testing will be disabled.";
       diagnostics.warning(debugMessage.str());
-    } else if (!llvm::sys::fs::is_directory(configuration.gitProjectRoot)) {
+    } else if (!llvm::sys::fs::is_directory(projectRoot)) {
       std::stringstream debugMessage;
       debugMessage << "directory provided by gitProjectRoot does not exist, ";
       debugMessage << "the incremental testing will be disabled: ";
-      debugMessage << configuration.gitProjectRoot;
+      debugMessage << projectRoot;
       diagnostics.warning(debugMessage.str());
     } else {
-      std::string gitProjectRoot = configuration.gitProjectRoot;
       llvm::SmallString<256> tmpGitProjectRoot;
-      if (!llvm::sys::fs::real_path(gitProjectRoot, tmpGitProjectRoot)) {
-        gitProjectRoot = tmpGitProjectRoot.str();
+      if (!llvm::sys::fs::real_path(projectRoot, tmpGitProjectRoot)) {
+        projectRoot = tmpGitProjectRoot.str();
 
-        std::string gitDiffBranch = configuration.gitDiffRef;
+        std::string gitDiffBranch = std::string(configuration.git_diff_ref);
         diagnostics.info(std::string("Incremental testing using Git Diff is enabled.\n") +
                          "- Git ref: " + gitDiffBranch + "\n" +
-                         "- Git project root: " + gitProjectRoot);
+                         "- Git project root: " + projectRoot);
         mull::GitDiffFilter *gitDiffFilter = mull::GitDiffFilter::createFromGitDiff(
-            configuration, diagnostics, gitProjectRoot, gitDiffBranch);
+            configuration, diagnostics, projectRoot, gitDiffBranch);
 
         if (gitDiffFilter) {
           storage.emplace_back(gitDiffFilter);
@@ -101,7 +105,7 @@ void Filters::enableGitDiffFilter() {
         }
       } else {
         diagnostics.warning(std::string("could not expand gitProjectRoot to an absolute path: ") +
-                            gitProjectRoot);
+                            projectRoot);
       }
     }
   }

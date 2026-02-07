@@ -1,45 +1,43 @@
---test-program path		Path to a test program
+--test-program PATH		Path to a test program (if different from input executable)
 
---workers number		How many threads to use
+--workers N		Number of parallel workers for mutation search
 
---timeout number		Timeout per test run (milliseconds)
+--timeout MS		Timeout per test run in milliseconds
 
---report-name filename		Filename for the report (only for supported reporters). Defaults to <timestamp>.<extension>
+--include-not-covered		Include mutants on lines not covered by tests
 
---report-dir directory		Where to store report (defaults to '.')
+--dry-run		Skip mutant execution, only discover and report mutants
 
---report-patch-base directory		Create Patches relative to this directory (defaults to gitProjectRoot if available, else absolute path will be used)
+--ld-search-path DIR		Library search path
 
---reporters reporter		Choose reporters:
+--coverage-info PATH		Path to the coverage info file (LLVM profdata)
 
-    :IDE:	Prints compiler-like warnings into stdout
+--debug-coverage		Print coverage ranges
 
-    :SQLite:	Saves results into an SQLite database
+--reporters REPORTER		Output reporters to use (IDE, SQLite, Elements, Patches, GithubAnnotations)
 
-    :Elements:	Generates mutation-testing-elements compatible JSON file
+--report-dir DIR		Directory for report output files
 
-    :Patches:	Generates patch file for each mutation
+--report-name NAME		Filename for the report (only for supported reporters)
 
-    :GithubAnnotations:	Print GithubAnnotations for mutants
+--report-patch-base DIR		Base directory for patch file paths
 
---ide-reporter-show-killed		Makes IDEReporter to also report killed mutations (disabled by default)
+--ide-reporter-show-killed		Show killed mutations in IDE reporter output
 
---debug		Enables Debug Mode: more logs are printed
+--debug		Enable debug mode with additional diagnostic output
 
---strict		Enables Strict Mode: all warning messages are treated as fatal errors
+--strict		Treat warnings as fatal errors
 
---allow-surviving		Do not treat mutants surviving as an error
+--allow-surviving		Do not treat surviving mutants as an error
 
---mutation-score-threshold		If mutation score falls under this threshold, and allow-surviving is not enabled, an error result code is returned
+--mutation-score-threshold SCORE		Minimum mutation score (0-100) required for success
 
 --no-test-output		Does not capture output from test runs
 
 --no-mutant-output		Does not capture output from mutant runs
 
---no-output		Combines -no-test-output and -no-mutant-output
+--no-output		Combines --no-test-output and --no-mutant-output
 
---ld-search-path directory		Library search path
+EXECUTABLE		Path to the executable under test
 
---coverage-info string		Path to the coverage info file (LLVM's profdata)
-
---debug-coverage		Print coverage ranges
+RUNNER_ARGS		Arguments passed to the test runner

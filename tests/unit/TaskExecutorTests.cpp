@@ -1,8 +1,7 @@
 #include "gtest/gtest.h"
 
 #include "mull/Parallelization/Parallelization.h"
-
-#include <mull/Diagnostics/Diagnostics.h>
+#include "rust/mull-core/core.rs.h"
 #include <vector>
 
 using namespace mull;
@@ -33,7 +32,8 @@ public:
 };
 
 TEST(TaskExecutor, SequentialExecution_AddNumber_MoreTasks) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   int workers = 1;
   std::vector<AddNumberTask> tasks;
   for (int i = 0; i < workers; i++) {
@@ -54,7 +54,8 @@ TEST(TaskExecutor, SequentialExecution_AddNumber_MoreTasks) {
 }
 
 TEST(TaskExecutor, SequentialExecution_AddNumber_MoreWorkers) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   int workers = 4;
   std::vector<AddNumberTask> tasks;
   for (int i = 0; i < workers; i++) {
@@ -75,7 +76,8 @@ TEST(TaskExecutor, SequentialExecution_AddNumber_MoreWorkers) {
 }
 
 TEST(TaskExecutor, SequentialExecution_EmptyTask_MoreTasks) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   int workers = 1;
   std::vector<EmptyTask> tasks;
   for (int i = 0; i < workers; i++) {
@@ -96,7 +98,8 @@ TEST(TaskExecutor, SequentialExecution_EmptyTask_MoreTasks) {
 }
 
 TEST(TaskExecutor, SequentialExecution_EmptyTask_MoreWorkers) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   int workers = 4;
   std::vector<EmptyTask> tasks;
   for (int i = 0; i < workers; i++) {

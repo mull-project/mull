@@ -7,7 +7,7 @@ RUN: git -c user.name='Mull' -c user.email=alex@lowlevelbits.org commit -m "Impe
 RUN: cd ..
 RUN: env MULL_CONFIG=mull-ir-frontend.yml %clang_cxx %sysroot -O0 %pass_mull_ir_frontend -g sandbox/sample.cpp -o sample.cpp-ir.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=CHECK_MUTATE
 
-RUN: (unset TERM; %mull_runner -ide-reporter-show-killed sample.cpp-ir.exe 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
+RUN: (unset TERM; env MULL_CONFIG=mull-ir-frontend.yml %mull_runner -ide-reporter-show-killed sample.cpp-ir.exe 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 
 CHECK_MUTATE:[debug] GitDiffFilter: git diff is empty. Skipping instruction: {{.*}}/sample.cpp:4:7
 CHECK_MUTATE:[debug] GitDiffFilter: git diff is empty. Skipping instruction: {{.*}}/sample.cpp:4:11

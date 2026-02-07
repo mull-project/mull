@@ -5,9 +5,9 @@
 #include <utility>
 #include <vector>
 
-namespace mull {
+struct MullDiagnostics;
 
-class Diagnostics;
+namespace mull {
 
 class CompilationDatabase {
 public:
@@ -24,10 +24,12 @@ public:
   CompilationDatabase(Database database, Flags extraFlags, Database bitcodeFlags);
 
   static CompilationDatabase
-  fromFile(Diagnostics &diagnostics, const std::string &path, const std::string &extraFlags,
+  fromFile(const MullDiagnostics &diagnostics, const std::string &path,
+           const std::string &extraFlags,
            const std::unordered_map<std::string, std::string> &bitcodeFlags);
   static CompilationDatabase
-  fromBuffer(Diagnostics &diagnostics, const std::string &buffer, const std::string &extraFlags,
+  fromBuffer(const MullDiagnostics &diagnostics, const std::string &buffer,
+             const std::string &extraFlags,
              const std::unordered_map<std::string, std::string> &bitcodeFlags);
 
   const CompilationDatabase::CompilerAndFlags &

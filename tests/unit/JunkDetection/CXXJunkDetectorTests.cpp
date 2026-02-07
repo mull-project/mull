@@ -4,8 +4,8 @@
 #include "mull/MutationPoint.h"
 #include "mull/Mutators/CXX/CallMutators.h"
 #include "mull/Mutators/NegateConditionMutator.h"
+#include "rust/mull-core/core.rs.h"
 #include "tests/unit/Helpers/BitcodeLoader.h"
-#include <mull/Diagnostics/Diagnostics.h>
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 #include <mull/Mutators/CXX/BitwiseMutators.h>
 #include <mull/Mutators/CXX/NumberMutators.h>
@@ -38,7 +38,8 @@ struct CXXJunkDetectorTestParameter {
 class CXXJunkDetectorTest : public TestWithParam<CXXJunkDetectorTestParameter> {};
 
 TEST_P(CXXJunkDetectorTest, detectJunk) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   auto &parameter = GetParam();
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(parameter.bitcodePath, diagnostics);
@@ -184,7 +185,8 @@ static const CXXJunkDetectorTestParameter parameters[] = {
 INSTANTIATE_TEST_SUITE_P(CXXJunkDetection, CXXJunkDetectorTest, testing::ValuesIn(parameters));
 
 TEST(CXXJunkDetector, compdb_absolute_paths) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   auto path = fixtures::tests_unit_fixtures_junk_detection_compdb_main_cpp_bc_path();
   auto bitcode = loader.loadBitcodeAtPath(path, diagnostics);
@@ -224,7 +226,8 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
 }
 
 TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
       fixtures::tests_unit_fixtures_junk_detection_compdb_main_cpp_bc_path(), diagnostics);
@@ -264,7 +267,8 @@ TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
 }
 
 TEST(CXXJunkDetector, no_compdb) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   auto path = fixtures::tests_unit_fixtures_junk_detection_compdb_main_cpp_bc_path();
   auto bitcode = loader.loadBitcodeAtPath(path, diagnostics);

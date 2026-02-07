@@ -1,8 +1,9 @@
 #include "mull/Filters/CoverageFilter.h"
-#include "mull/Config/Configuration.h"
-#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Mutant.h"
 #include "mull/Path.h"
+
+#include "rust/mull-core/core.rs.h"
+
 #include <llvm/ProfileData/Coverage/CoverageMapping.h>
 
 #if LLVM_VERSION_MAJOR >= 17
@@ -12,7 +13,7 @@
 using namespace mull;
 
 static std::unique_ptr<llvm::coverage::CoverageMapping>
-loadCoverage(const Configuration &configuration, Diagnostics &diagnostics,
+loadCoverage(const MullConfig &configuration, const MullDiagnostics &diagnostics,
              const std::string &profileName, const std::vector<std::string> &objects) {
   if (profileName.empty()) {
     return nullptr;
@@ -41,7 +42,7 @@ loadCoverage(const Configuration &configuration, Diagnostics &diagnostics,
   return std::move(maybeMapping.get());
 }
 
-CoverageFilter::CoverageFilter(const Configuration &configuration, Diagnostics &diagnostics,
+CoverageFilter::CoverageFilter(const MullConfig &configuration, const MullDiagnostics &diagnostics,
                                const std::string &profileName,
                                const std::vector<std::string> &objects)
     : configuration(configuration) {
@@ -101,7 +102,7 @@ bool CoverageFilter::covered(Mutant *mutant) {
 }
 
 bool CoverageFilter::shouldSkip(Mutant *mutant) {
-  if (covered(mutant) || configuration.includeNotCovered) {
+  if (covered(mutant) || configuration.include_not_covered) {
     return false;
   }
   return true;

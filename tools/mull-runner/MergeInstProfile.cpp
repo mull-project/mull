@@ -1,5 +1,5 @@
 #include "MergeInstProfile.h"
-#include "mull/Diagnostics/Diagnostics.h"
+#include "rust/mull-core/core.rs.h"
 #include <llvm/Config/llvm-config.h>
 #include <llvm/ProfileData/InstrProfReader.h>
 #include <llvm/ProfileData/InstrProfWriter.h>
@@ -11,7 +11,7 @@
 
 using namespace std::string_literals;
 
-bool mull::mergeRawInstProfile(Diagnostics &diagnostics, const std::string &input,
+bool mull::mergeRawInstProfile(const MullDiagnostics &diagnostics, const std::string &input,
                                const std::string &output) {
   auto maybeReader = llvm::InstrProfReader::create(input
 #if LLVM_VERSION_MAJOR >= 17

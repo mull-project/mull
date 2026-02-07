@@ -1,10 +1,10 @@
 #include "mull/Filters/GitDiffFilter.h"
 
-#include "mull/Config/Configuration.h"
-#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Mutant.h"
 #include "mull/Runner.h"
 #include "mull/SourceLocation.h"
+
+#include "rust/mull-core/core.rs.h"
 
 #include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/Function.h>
@@ -15,8 +15,8 @@
 
 using namespace mull;
 
-GitDiffFilter *GitDiffFilter::createFromGitDiff(const Configuration &configuration,
-                                                Diagnostics &diagnostics,
+GitDiffFilter *GitDiffFilter::createFromGitDiff(const MullConfig &configuration,
+                                                const MullDiagnostics &diagnostics,
                                                 const std::string &gitProjectRoot,
                                                 const std::string &gitDiffBranch) {
   mull::GitDiffReader gitDiffReader(diagnostics, gitProjectRoot);
@@ -24,7 +24,7 @@ GitDiffFilter *GitDiffFilter::createFromGitDiff(const Configuration &configurati
   return new GitDiffFilter(configuration, diagnostics, gitDiffInfo);
 }
 
-GitDiffFilter::GitDiffFilter(const Configuration &configuration, Diagnostics &diagnostics,
+GitDiffFilter::GitDiffFilter(const MullConfig &configuration, const MullDiagnostics &diagnostics,
                              GitDiffInfo gitDiffInfo)
     : configuration(configuration), diagnostics(diagnostics), gitDiffInfo(std::move(gitDiffInfo)) {}
 
@@ -47,7 +47,7 @@ bool GitDiffFilter::shouldSkip(const SourceLocation &sourceLocation, const std::
 
   /// If no diff, then filtering out.
   if (gitDiffInfo.empty()) {
-    if (configuration.debug.gitDiff) {
+    if (configuration.debug.git_diff) {
       std::stringstream debugMessage;
       debugMessage << "GitDiffFilter: git diff is empty. Skipping " << kind << ": ";
       debugMessage << sourceLocation.filePath << ":";
@@ -59,7 +59,7 @@ bool GitDiffFilter::shouldSkip(const SourceLocation &sourceLocation, const std::
 
   /// If file is not in the diff, then filtering out.
   if (gitDiffInfo.count(sourceLocation.filePath) == 0) {
-    if (configuration.debug.gitDiff) {
+    if (configuration.debug.git_diff) {
       std::stringstream debugMessage;
       debugMessage << "GitDiffFilter: the file is not present in the git diff. ";
       debugMessage << "Skipping " << kind << ": ";
@@ -74,7 +74,7 @@ bool GitDiffFilter::shouldSkip(const SourceLocation &sourceLocation, const std::
   for (auto &range : ranges) {
     unsigned rangeEnd = range.first + range.second - 1;
     if (range.first <= sourceLocation.line && sourceLocation.line <= rangeEnd) {
-      if (configuration.debug.gitDiff) {
+      if (configuration.debug.git_diff) {
         std::stringstream debugMessage;
         debugMessage << "GitDiffFilter: allowing " << kind << ": ";
         debugMessage << sourceLocation.filePath << ":";
@@ -85,7 +85,7 @@ bool GitDiffFilter::shouldSkip(const SourceLocation &sourceLocation, const std::
     }
   }
 
-  if (configuration.debug.gitDiff) {
+  if (configuration.debug.git_diff) {
     std::stringstream debugMessage;
     debugMessage << "GitDiffFilter: skipping " << kind << ": ";
     debugMessage << sourceLocation.filePath << ":";

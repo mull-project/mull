@@ -1,0 +1,36 @@
+load("@rules_rust//rust:defs.bzl", "rust_binary")
+
+rust_binary(
+    name = "mull-docs",
+    srcs = glob(["src/**/*.rs"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//rust/mull-core",
+        "@crates//:clap",
+        "@crates//:clap_complete",
+        "@crates//:clap_mangen",
+        "@crates//:schemars",
+        "@crates//:serde_json",
+        "@crates//:serde_yaml",
+    ],
+)
+
+genrule(
+    name = "generate-docs",
+    outs = [
+        "mull-runner.1",
+        "mull-reporter.1",
+        "mull-config-example.rst",
+        "mull-runner-cli-options.rst",
+        "mull-reporter-cli-options.rst",
+        "mull-runner.bash",
+        "mull-runner.zsh",
+        "mull-runner.fish",
+        "mull-reporter.bash",
+        "mull-reporter.zsh",
+        "mull-reporter.fish",
+    ],
+    cmd = "$(location :mull-docs) $(RULEDIR)",
+    tools = [":mull-docs"],
+    visibility = ["//visibility:public"],
+)

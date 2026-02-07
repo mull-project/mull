@@ -1,6 +1,7 @@
 #include "mull/Filters/ManualFilter.h"
 
 #include "mull/MutationPoint.h"
+
 #include <llvm/Support/raw_ostream.h>
 #include <sstream>
 
@@ -10,7 +11,7 @@ std::string ManualFilter::name() {
   return "manually ignored mutants";
 }
 
-ManualFilter::ManualFilter(mull::Diagnostics &diagnostics)
+ManualFilter::ManualFilter(const MullDiagnostics &diagnostics)
     : diagnostics(diagnostics), factory(diagnostics) {
   factory.init();
 }

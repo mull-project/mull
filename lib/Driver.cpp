@@ -1,8 +1,6 @@
 #include "mull/Driver.h"
 
 #include "mull/BitcodeMetadataReader.h"
-#include "mull/Config/Configuration.h"
-#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Filters/BlockAddressFunctionFilter.h"
 #include "mull/Filters/Filters.h"
 #include "mull/Filters/MutationPointFilter.h"
@@ -13,6 +11,8 @@
 #include "mull/Mutators/MutatorsFactory.h"
 #include "mull/Parallelization/Parallelization.h"
 #include "mull/Program/Program.h"
+
+#include "rust/mull-core/core.rs.h"
 
 #include <llvm/IR/Verifier.h>
 #include <llvm/Support/DynamicLibrary.h>
@@ -28,7 +28,7 @@ using namespace llvm::object;
 using namespace mull;
 using namespace std;
 namespace {
-void printIR(llvm::Module &module, Diagnostics &diagnostics, bool toFile,
+void printIR(llvm::Module &module, const MullDiagnostics &diagnostics, bool toFile,
              const std::string &suffix) {
   if (toFile) {
     std::error_code ec;
@@ -44,16 +44,16 @@ void printIR(llvm::Module &module, Diagnostics &diagnostics, bool toFile,
 }
 
 std::vector<MutationPoint *>
-filterOutJunk(Diagnostics &diagnostics, const Configuration &configuration,
+filterOutJunk(const MullDiagnostics &diagnostics, const MullConfig &configuration,
               std::vector<MutationPoint *> points,
               std::unordered_map<std::string, std::string> bitcodeCompilationFlags) {
   std::string cxxCompilationFlags;
-  for (auto &flag : configuration.compilerFlags) {
-    cxxCompilationFlags += flag + ' ';
+  for (auto &flag : configuration.compiler_flags) {
+    cxxCompilationFlags += std::string(flag) + ' ';
   }
 
   mull::ASTStorage astStorage(diagnostics,
-                              configuration.compilationDatabasePath,
+                              std::string(configuration.compilation_database_path),
                               cxxCompilationFlags,
                               bitcodeCompilationFlags);
 
@@ -70,34 +70,23 @@ filterOutJunk(Diagnostics &diagnostics, const Configuration &configuration,
 
   return out;
 }
+
+std::vector<std::string> toStdVector(const rust::Vec<rust::String> &v) {
+  std::vector<std::string> out;
+  out.reserve(v.size());
+  for (const auto &s : v) {
+    out.emplace_back(std::string(s));
+  }
+  return out;
+}
+
 } // namespace
 
 void mull::mutateBitcode(llvm::Module &module) {
   /// Setup
-
-  Diagnostics diagnostics;
-  std::string configPath = Configuration::findConfig(diagnostics);
-  Configuration configuration;
-  if (configPath.empty()) {
-    diagnostics.warning("Mull cannot find config (mull.yml). Using some defaults.");
-  } else {
-    configuration = Configuration::loadFromDisk(diagnostics, configPath);
-  }
-  configuration.parallelization.normalize();
-
-  if (configuration.debugEnabled) {
-    diagnostics.enableDebugMode();
-  }
-  if (configuration.quiet) {
-    diagnostics.makeQuiet();
-  }
-  if (configuration.silent) {
-    diagnostics.makeSilent();
-  }
-
-  if (!configPath.empty()) {
-    diagnostics.info("Using configuration "s + configPath);
-  }
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
+  const MullConfig &configuration = core->config();
 
   std::vector<std::unique_ptr<mull::Filter>> filterStorage;
   mull::Filters filters(configuration, diagnostics);
@@ -130,8 +119,8 @@ void mull::mutateBitcode(llvm::Module &module) {
         "Mull cannot find compiler flags. Recompile with `-grecord-command-line` flag.");
   }
 
-  if (configuration.debug.printIR || configuration.debug.printIRBefore) {
-    printIR(module, diagnostics, configuration.debug.printIRToFile, ".before.ll");
+  if (configuration.debug.print_ir || configuration.debug.print_ir_before) {
+    printIR(module, diagnostics, configuration.debug.print_ir_to_file, ".before.ll");
   }
 
   {
@@ -172,12 +161,13 @@ void mull::mutateBitcode(llvm::Module &module) {
 
   MutatorsFactory mutatorsFactory(diagnostics);
   MutationsFinder mutationsFinder(
-      mutatorsFactory.mutators(configuration.mutators, configuration.ignoreMutators),
+      mutatorsFactory.mutators(toStdVector(configuration.mutators),
+                               toStdVector(configuration.ignore_mutators)),
       configuration);
 
   std::vector<InstructionSelectionTask> instructionSelectionTasks;
-  instructionSelectionTasks.reserve(configuration.parallelization.workers);
-  for (unsigned i = 0; i < configuration.parallelization.workers; i++) {
+  instructionSelectionTasks.reserve(configuration.workers);
+  for (unsigned i = 0; i < configuration.workers; i++) {
     instructionSelectionTasks.emplace_back(filters.instructionFilters);
   }
 
@@ -195,8 +185,8 @@ void mull::mutateBitcode(llvm::Module &module) {
 
   for (auto filter : filters.mutationFilters) {
     std::vector<MutationFilterTask> tasks;
-    tasks.reserve(configuration.parallelization.workers);
-    for (unsigned i = 0; i < configuration.parallelization.workers; i++) {
+    tasks.reserve(configuration.workers);
+    for (unsigned i = 0; i < configuration.workers; i++) {
       tasks.emplace_back(*filter);
     }
 
@@ -208,7 +198,7 @@ void mull::mutateBitcode(llvm::Module &module) {
     mutations = std::move(tmp);
   }
 
-  if (!configuration.junkDetectionDisabled) {
+  if (!configuration.junk_detection_disabled) {
     mutations =
         filterOutJunk(diagnostics, configuration, std::move(mutations), bitcodeCompilationFlags);
   }
@@ -236,8 +226,8 @@ void mull::mutateBitcode(llvm::Module &module) {
                                                  { ApplyMutationTask(configuration, diagnostics) });
   applyMutations.execute();
 
-  if (configuration.debug.printIR || configuration.debug.printIRAfter) {
-    printIR(module, diagnostics, configuration.debug.printIRToFile, ".after.ll");
+  if (configuration.debug.print_ir || configuration.debug.print_ir_after) {
+    printIR(module, diagnostics, configuration.debug.print_ir_to_file, ".after.ll");
   }
 
   {
@@ -250,8 +240,8 @@ void mull::mutateBitcode(llvm::Module &module) {
               << "debug:\n"
               << " slowIRVerification: true\n"
               << "to the config file ";
-      if (!configuration.pathOnDisk.empty()) {
-        message << "(" << configuration.pathOnDisk << ") ";
+      if (!configuration.config_path.empty()) {
+        message << "(" << std::string(configuration.config_path) << ") ";
       }
       message << "and re-run the failing command.\n\n";
       message << "Otherwise, report the following error message here "

@@ -30,8 +30,9 @@ def mull_build(name):
                 "@llvm_%s//:libclang" % llvm_version,
                 "@llvm_%s//:libllvm" % llvm_version,
                 "@reproc//:reproc++",
-                "@spdlog",
                 "@sqlite3",
+                "//rust/mull-core",
+                "//rust/mull-core:bridge",
             ],
         )
 
@@ -58,7 +59,6 @@ def mull_build(name):
         cc_library(
             name = "libmull_reporter_%s" % llvm_version,
             srcs = native.glob(["tools/mull-reporter/*.cpp"]),
-            hdrs = native.glob(["tools/mull-reporter/*.h"]),
             deps = [
                 "libmull_%s" % llvm_version,
                 ":libmull_cli_options_%s" % llvm_version,

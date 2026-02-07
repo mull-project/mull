@@ -1,12 +1,13 @@
 #include "mull/Reporters/MutationTestingElementsReporter.h"
 
-#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Mutant.h"
 #include "mull/MutationResult.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Mutators/MutatorsFactory.h"
 #include "mull/Reporters/SourceManager.h"
 #include "mull/Result.h"
+
+#include "rust/mull-core/core.rs.h"
 
 #include <json11/json11.hpp>
 #include <llvm/Support/FileSystem.h>
@@ -28,7 +29,7 @@ static bool mutantSurvived(const ExecutionStatus &status) {
   return status == ExecutionStatus::Passed;
 }
 
-static json11::Json createFiles(Diagnostics &diagnostics, const Result &result,
+static json11::Json createFiles(const MullDiagnostics &diagnostics, const Result &result,
                                 const std::set<Mutant *> &killedMutants,
                                 const std::set<Mutant *> &notCoveredMutants) {
   SourceManager sourceManager;
@@ -121,7 +122,7 @@ static std::string getReportDir(const std::string &dir) {
 }
 
 MutationTestingElementsReporter::MutationTestingElementsReporter(
-    Diagnostics &diagnostics, const std::string &reportDir, const std::string &reportName,
+    const MullDiagnostics &diagnostics, const std::string &reportDir, const std::string &reportName,
     std::unordered_map<std::string, std::string> mullInformation)
     : diagnostics(diagnostics), filename(getFilename(reportName)),
       htmlPath(getReportDir(reportDir) + "/" + filename + ".html"),

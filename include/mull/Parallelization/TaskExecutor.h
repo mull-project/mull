@@ -10,18 +10,18 @@
 #include "Progress.h"
 #include "mull/Metrics/MetricsMeasure.h"
 
+struct MullDiagnostics;
+
 namespace mull {
 
-class Diagnostics;
-
 std::vector<int> taskBatches(size_t itemsCount, size_t tasks);
-void printTimeSummary(Diagnostics &diagnostics, MetricsMeasure measure);
+void printTimeSummary(const MullDiagnostics &diagnostics, MetricsMeasure measure);
 
 template <typename Task> class TaskExecutor {
 public:
   using In = typename Task::In;
   using Out = typename Task::Out;
-  TaskExecutor(Diagnostics &diagnostics, std::string name, In &in, Out &out,
+  TaskExecutor(const MullDiagnostics &diagnostics, std::string name, In &in, Out &out,
                std::vector<Task> tasks)
       : diagnostics(diagnostics), in(in), out(out), tasks(std::move(tasks)), name(std::move(name)) {
   }
@@ -92,7 +92,7 @@ private:
     reporter.join();
   }
 
-  Diagnostics &diagnostics;
+  const MullDiagnostics &diagnostics;
   In &in;
   Out &out;
   std::vector<Task> tasks;
@@ -105,7 +105,7 @@ class SingleTaskTag {};
 
 template <> class TaskExecutor<SingleTaskTag> {
 public:
-  explicit TaskExecutor(Diagnostics &diagnostics) : diagnostics(diagnostics) {}
+  explicit TaskExecutor(const MullDiagnostics &diagnostics) : diagnostics(diagnostics) {}
 
   void execute(std::string name, const std::function<void(void)> &task) {
     MetricsMeasure measure;
@@ -122,7 +122,7 @@ public:
   }
 
 private:
-  Diagnostics &diagnostics;
+  const MullDiagnostics &diagnostics;
 };
 
 typedef TaskExecutor<SingleTaskTag> SingleTaskExecutor;

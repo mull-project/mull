@@ -1,8 +1,5 @@
 #include "BitcodeLoader.h"
-
-#include "mull/Config/Configuration.h"
-#include "mull/Diagnostics/Diagnostics.h"
-
+#include "rust/mull-core/core.rs.h"
 #include <llvm/Bitcode/BitcodeReader.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
@@ -15,7 +12,7 @@ using namespace llvm;
 using namespace mull;
 
 std::unique_ptr<Module> mull::parseBitcode(MemoryBufferRef bufferRef, LLVMContext &context,
-                                           Diagnostics &diagnostics) {
+                                           const MullDiagnostics &diagnostics) {
   auto module = parseBitcodeFile(bufferRef, context);
   if (!module) {
     std::stringstream errorMessage;
@@ -36,12 +33,12 @@ std::unique_ptr<Module> mull::parseBitcode(MemoryBufferRef bufferRef, LLVMContex
 }
 
 std::unique_ptr<Module> mull::loadModuleFromBuffer(LLVMContext &context, MemoryBuffer &buffer,
-                                                   Diagnostics &diagnostics) {
+                                                   const MullDiagnostics &diagnostics) {
   return parseBitcode(buffer.getMemBufferRef(), context, diagnostics);
 }
 
 std::unique_ptr<Bitcode> BitcodeLoader::loadBitcodeAtPath(const std::string &path,
-                                                          Diagnostics &diagnostics) {
+                                                          const MullDiagnostics &diagnostics) {
   auto buffer = MemoryBuffer::getFile(path);
   if (!buffer) {
     std::stringstream message;

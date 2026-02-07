@@ -1,10 +1,10 @@
-#include "mull-reporter-cli.h"
-#include "mull/Config/Configuration.h"
-#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Metrics/MetricsMeasure.h"
 #include "mull/Reporters/SQLiteReporter.h"
 #include "mull/Result.h"
 #include "mull/Version.h"
+#include "tools/CLIOptions/CLIOptions.h"
+
+#include "rust/mull-core/core.rs.h"
 
 #include <llvm/Support/FileSystem.h>
 #include <llvm/Support/ManagedStatic.h>
@@ -12,23 +12,24 @@
 #include <algorithm>
 #include <memory>
 #include <sqlite3.h>
+#include <sstream>
 #include <string>
 #include <unistd.h>
-#include <utility>
 
 using namespace std::string_literals;
 
-static std::string validateInputFile(const std::string &inputFile, mull::Diagnostics &diagnostics) {
+static std::string validateInputFile(const std::string &inputFile,
+                                     const MullDiagnostics &diagnostics) {
   if (access(inputFile.c_str(), R_OK) != 0) {
     diagnostics.error("Cannot access sqlite report: "s + inputFile);
     return "";
   }
-  llvm::SmallString<256> inputRealPath;
-  if (llvm::sys::fs::real_path(inputFile, inputRealPath, false)) {
+  llvm::SmallString<256> realPath;
+  if (llvm::sys::fs::real_path(inputFile, realPath, false)) {
     diagnostics.error("Cannot access sqlite report: "s + inputFile);
     return "";
   }
-  return inputRealPath.str().str();
+  return realPath.str().str();
 }
 
 static std::vector<std::string> split(const std::string &input, char delimiter) {
@@ -72,11 +73,6 @@ chooseExecutionResult(const std::vector<mull::ExecutionResult> &results) {
       return result;                                                                               \
     }                                                                                              \
   }
-  // Among several execution results for each mutant, we need to only pick
-  // Various execution statuses are ordered in a somewhat arbitrary way
-  // 'Passed' always has the lowest priority
-
-  // TODO: That's kinda quadratic, perhaps there is a way to speed this up?
   SELECT_MATCHING_STATUS(Failed);
   SELECT_MATCHING_STATUS(Crashed);
   SELECT_MATCHING_STATUS(Timedout);
@@ -91,57 +87,19 @@ chooseExecutionResult(const std::vector<mull::ExecutionResult> &results) {
 
 int main(int argc, char **argv) {
   llvm::llvm_shutdown_obj llvmShutdownObj;
-  mull::Diagnostics diagnostics;
-  llvm::cl::SetVersionPrinter(mull::printVersionInformation);
+  auto mullCLI =
+      init_reporter_cli(tool::argsFromArgv(argc, argv), rust::String(mull::llvmVersionString()));
+  const auto &diagnostics = mullCLI->diag_cli();
+  const auto &cli = mullCLI->cli();
 
-  tool::ReportersCLIOptions reportersOption(diagnostics, tool::ReportersOption);
-
-  llvm::cl::HideUnrelatedOptions(tool::MullCategory);
-  bool validOptions = llvm::cl::ParseCommandLineOptions(argc, argv, "", &llvm::errs());
-  if (!validOptions) {
-    if (!tool::DumpCLIInterface.getValue().empty()) {
-      tool::dumpCLIInterface(diagnostics, tool::DumpCLIInterface.getValue());
-      return 0;
-    }
-    return 1;
-  }
-
-  std::string inputFile = validateInputFile(tool::SQLiteReport.getValue(), diagnostics);
+  std::string inputFile = validateInputFile(std::string(cli.sqlite_report), diagnostics);
 
   mull::MetricsMeasure totalExecutionTime;
   totalExecutionTime.start();
 
-  mull::Configuration configuration;
-  auto configPath = mull::Configuration::findConfig(diagnostics);
-  if (!configPath.empty()) {
-    configuration = mull::Configuration::loadFromDisk(diagnostics, configPath);
-    diagnostics.info("Using config "s + configPath);
-  }
-
-  if (tool::DebugEnabled.getNumOccurrences()) {
-    configuration.debugEnabled = tool::DebugEnabled;
-  }
-  if (configuration.debugEnabled) {
-    diagnostics.enableDebugMode();
-    diagnostics.debug("Diagnostics: Debug Mode enabled. Debug-level messages will be printed.");
-  }
-
-  if (tool::StrictModeEnabled) {
-    diagnostics.enableStrictMode();
-    diagnostics.info(
-        "Diagnostics: Strict Mode enabled. Warning messages will be treated as fatal errors.");
-  }
-
-  if (tool::NoTestOutput.getNumOccurrences() || tool::NoOutput.getNumOccurrences()) {
-    configuration.captureTestOutput = false;
-  }
-  if (tool::NoMutantOutput.getNumOccurrences() || tool::NoOutput.getNumOccurrences()) {
-    configuration.captureMutantOutput = false;
-  }
-
   std::vector<std::unique_ptr<mull::Mutant>> mutants;
   std::vector<std::unique_ptr<mull::MutationResult>> mutationResults;
-  auto raw = mull::SQLiteReporter::loadRawReport(tool::SQLiteReport.getValue());
+  auto raw = mull::SQLiteReporter::loadRawReport(std::string(cli.sqlite_report));
   for (auto &[mutandId, executionResults] : raw.executionResults) {
     auto mutant = mutantFromId(mutandId);
     auto executionResult = chooseExecutionResult(executionResults);
@@ -153,56 +111,42 @@ int main(int argc, char **argv) {
   std::sort(
       std::begin(mutationResults), std::end(mutationResults), mull::MutationResultComparator());
 
-  tool::ReporterParameters params{ .reporterName = tool::ReportName.getValue(),
-                                   .reporterDirectory = tool::ReportDirectory.getValue(),
-                                   .patchBasePathDir = tool::ReportPatchBaseDirectory.getValue(),
-                                   // we should not need the database at this point
-                                   .compilationDatabaseAvailable = true,
-                                   .IDEReporterShowKilled = tool::IDEReporterShowKilled,
-                                   .mullInformation = raw.info };
+  auto params = tool::buildReporterParameters(cli, raw.info);
+  auto reporters = tool::createReporters(diagnostics, params);
 
-  std::vector<std::unique_ptr<mull::Reporter>> reporters = reportersOption.reporters(params);
-
-  // Count surviving mutants, for later
-  std::size_t surviving = std::count_if(
-      std::cbegin(mutationResults), std::cend(mutationResults), [](auto const &resPtr) {
-        return resPtr->getExecutionResult().status == mull::ExecutionStatus::Passed;
+  std::size_t surviving =
+      std::count_if(std::cbegin(mutationResults), std::cend(mutationResults), [](auto const &r) {
+        return r->getExecutionResult().status == mull::ExecutionStatus::Passed;
       });
 
-  // Calculate mutation score for later threshold comparison
   int killedMutantsCount = 0;
   int totalMutantsCount = 0;
-
-  for (auto &mutationResult : mutationResults) {
-    auto &executionResult = mutationResult->getExecutionResult();
-
+  for (auto &mr : mutationResults) {
     totalMutantsCount++;
-    if ((executionResult.status != mull::ExecutionStatus::NotCovered) &&
-        (executionResult.status != mull::ExecutionStatus::Passed)) {
+    auto status = mr->getExecutionResult().status;
+    if (status != mull::ExecutionStatus::NotCovered && status != mull::ExecutionStatus::Passed) {
       killedMutantsCount++;
     }
   }
+  auto score = int(double(killedMutantsCount) / double(totalMutantsCount) * 100);
 
-  auto rawScore = double(killedMutantsCount) / double(totalMutantsCount);
-  auto score = int(rawScore * 100);
-
-  auto result = std::make_unique<mull::Result>(std::move(mutants), std::move(mutationResults));
+  auto mullResult = std::make_unique<mull::Result>(std::move(mutants), std::move(mutationResults));
   for (auto &reporter : reporters) {
-    reporter->reportResults(*result);
+    reporter->reportResults(*mullResult);
   }
 
   totalExecutionTime.finish();
-  std::stringstream stringstream;
-  stringstream << "Total reporting time: " << totalExecutionTime.duration()
-               << mull::MetricsMeasure::precision();
-  diagnostics.info(stringstream.str());
+  std::stringstream ss;
+  ss << "Total reporting time: " << totalExecutionTime.duration()
+     << mull::MetricsMeasure::precision();
+  diagnostics.info(ss.str());
 
   if (surviving) {
-    stringstream.str(""s);
-    stringstream << "Surviving mutants: " << surviving;
-    diagnostics.info(stringstream.str());
+    ss.str(""s);
+    ss << "Surviving mutants: " << surviving;
+    diagnostics.info(ss.str());
 
-    if ((!tool::AllowSurvivingEnabled) && (tool::MutationScoreThreshold > score)) {
+    if (!cli.allow_surviving && cli.mutation_score_threshold > static_cast<uint32_t>(score)) {
       return 1;
     }
   }

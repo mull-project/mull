@@ -1,7 +1,7 @@
 #include "mull/JunkDetection/CXX/ASTStorage.h"
 
-#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/MutationPoint.h"
+#include "rust/mull-core/core.rs.h"
 
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/Basic/DiagnosticOptions.h>
@@ -193,7 +193,8 @@ bool ASTUnitWrapper::hasAST() const {
   return ast != nullptr;
 }
 
-ASTStorage::ASTStorage(Diagnostics &diagnostics, const std::string &cxxCompilationDatabasePath,
+ASTStorage::ASTStorage(const MullDiagnostics &diagnostics,
+                       const std::string &cxxCompilationDatabasePath,
                        const std::string &cxxCompilationFlags,
                        const std::unordered_map<std::string, std::string> &bitcodeCompilationFlags)
     : diagnostics(diagnostics),

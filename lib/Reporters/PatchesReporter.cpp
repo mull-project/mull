@@ -1,11 +1,12 @@
 #include "mull/Reporters/PatchesReporter.h"
 
 #include "mull/Bitcode.h"
-#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/ExecutionResult.h"
 #include "mull/Mutators/MutatorsFactory.h"
 #include "mull/Reporters/SourceCodeReader.h"
 #include "mull/Result.h"
+
+#include "rust/mull-core/core.rs.h"
 
 #include <llvm/ADT/StringExtras.h>
 #include <llvm/IR/DebugInfoMetadata.h>
@@ -45,7 +46,7 @@ static std::string getReportDir(const std::string &reportDir) {
   return reportDir;
 }
 
-PatchesReporter::PatchesReporter(Diagnostics &diagnostics, const std::string &reportDir,
+PatchesReporter::PatchesReporter(const MullDiagnostics &diagnostics, const std::string &reportDir,
                                  const std::string &reportName, const std::string &basePath,
                                  std::unordered_map<std::string, std::string> mullInformation)
     : diagnostics(diagnostics),

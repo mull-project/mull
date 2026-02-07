@@ -15,7 +15,7 @@ int main() {
 /**
 
 RUN: cd %S && env MULL_CONFIG=%S/mull.no_flag.yml %clang_cxx %sysroot -O0 %pass_mull_ir_frontend -gno-record-command-line -g -DFLAG=1 %s -o %s-ir-no-flag.exe 2>&1 | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-JUNK-DETECTION-NO-FLAG-MUTATE
-RUN: %mull_runner -ide-reporter-show-killed %s-ir-no-flag.exe 2>&1 | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-JUNK-DETECTION-NO-FLAG
+RUN: env MULL_CONFIG=%S/mull.no_flag.yml %mull_runner -ide-reporter-show-killed %s-ir-no-flag.exe 2>&1 | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-JUNK-DETECTION-NO-FLAG
 
 WITH-JUNK-DETECTION-NO-FLAG-MUTATE:{{^.*}}sample.cpp:2:2: error: "FLAG is not defined"
 WITH-JUNK-DETECTION-NO-FLAG-MUTATE:{{^.*}}#error "FLAG is not defined"
@@ -27,7 +27,7 @@ TODO: It is interesting why there is no junk even if we have the error above.
 WITH-JUNK-DETECTION-NO-FLAG:[info] Killed mutants (1/1):
 
 RUN: cd %S && env MULL_CONFIG=%S/mull.with_flag.yml %clang_cxx %sysroot -O0 %pass_mull_ir_frontend -gno-record-command-line -g -DFLAG=1 %s -o %s-ir-with-flag.exe 2>&1 | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-JUNK-DETECTION-WITH-FLAG-MUTATE
-RUN: %mull_runner -reporters=IDE -ide-reporter-show-killed %s-ir-with-flag.exe 2>&1 | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-JUNK-DETECTION-WITH-FLAG
+RUN: env MULL_CONFIG=%S/mull.with_flag.yml %mull_runner -reporters=IDE -ide-reporter-show-killed %s-ir-with-flag.exe 2>&1 | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-JUNK-DETECTION-WITH-FLAG
 
 WITH-JUNK-DETECTION-WITH-FLAG-MUTATE-NOT:#error "FLAG is not defined"
 WITH-JUNK-DETECTION-WITH-FLAG-MUTATE-NOT:{{^.*[Ee]rror.*$}}

@@ -1,12 +1,13 @@
 #include "mull/Reporters/IDEReporter.h"
 
-#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Mutant.h"
 #include "mull/MutationResult.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Mutators/MutatorsFactory.h"
 #include "mull/Reporters/SourceCodeReader.h"
 #include "mull/Result.h"
+
+#include "rust/mull-core/core.rs.h"
 
 #include <cassert>
 #include <fstream>
@@ -26,7 +27,7 @@ static bool mutantNotCovered(const ExecutionStatus &status) {
   return status == ExecutionStatus::NotCovered;
 }
 
-static void printMutant(Diagnostics &diagnostics, const std::string &reportFilePath,
+static void printMutant(const MullDiagnostics &diagnostics, const std::string &reportFilePath,
                         MutatorsFactory &factory, SourceCodeReader &sourceCodeReader,
                         const Mutant &mutant, const std::string &status) {
   auto &sourceLocation = mutant.getSourceLocation();
@@ -54,7 +55,7 @@ static void printMutant(Diagnostics &diagnostics, const std::string &reportFileP
   }
 }
 
-static void printMutants(Diagnostics &diagnostics, const std::string &reportFilePath,
+static void printMutants(const MullDiagnostics &diagnostics, const std::string &reportFilePath,
                          MutatorsFactory &factory, SourceCodeReader &reader,
                          const std::vector<Mutant *> &mutants, size_t totalSize,
                          const std::string &status) {
@@ -82,8 +83,8 @@ static std::string getReportDir(const std::string &reportDir) {
   return reportDir;
 }
 
-IDEReporter::IDEReporter(Diagnostics &diagnostics, bool showKilled, const std::string &reportDir,
-                         const std::string &reportName)
+IDEReporter::IDEReporter(const MullDiagnostics &diagnostics, bool showKilled,
+                         const std::string &reportDir, const std::string &reportName)
     : diagnostics(diagnostics), showKilled(showKilled), sourceCodeReader(), reportFilePath() {
   if (!reportName.empty()) {
     reportFilePath = getReportDir(reportDir) + "/" + reportName + ".txt";

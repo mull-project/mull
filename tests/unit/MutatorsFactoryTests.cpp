@@ -1,6 +1,5 @@
-#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Mutators/MutatorsFactory.h"
-
+#include "rust/mull-core/core.rs.h"
 #include <algorithm>
 #include <functional>
 #include <gtest/gtest.h>
@@ -11,7 +10,8 @@ using namespace llvm;
 using namespace std;
 
 TEST(MutatorsFactory, SingleMutators) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   MutatorsFactory factory(diagnostics);
   vector<unique_ptr<Mutator>> mutators;
   Mutator *mutator = nullptr;
@@ -43,7 +43,8 @@ static std::function<bool(unique_ptr<Mutator> &)> predicate(const char *name) {
 }
 
 TEST(MutatorsFactory, CompositeMutators) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   MutatorsFactory factory(diagnostics);
   vector<unique_ptr<Mutator>> mutators;
   vector<unique_ptr<Mutator>>::iterator searchResult;
@@ -75,7 +76,8 @@ TEST(MutatorsFactory, CompositeMutators) {
 }
 
 TEST(MutatorsFactory, UniqueMutators) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   MutatorsFactory factory(diagnostics);
   vector<unique_ptr<Mutator>> mutators;
   vector<unique_ptr<Mutator>>::iterator searchResult;

@@ -1,12 +1,14 @@
 #pragma once
 
-#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Filters/MutationPointFilter.h"
 #include "mull/Mutators/MutatorsFactory.h"
 #include "mull/Reporters/SourceManager.h"
+#include <mutex>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
+
+struct MullDiagnostics;
 
 namespace mull {
 
@@ -20,7 +22,7 @@ struct IgnoreRange {
 
 class ManualFilter : public MutationPointFilter {
 public:
-  explicit ManualFilter(Diagnostics &diagnostics);
+  explicit ManualFilter(const MullDiagnostics &diagnostics);
   bool shouldSkip(MutationPoint *mutationPoint) override;
   std::string name() override;
   ~ManualFilter() override = default;
@@ -30,7 +32,7 @@ private:
   std::unordered_set<std::string> expandIgnoreLine(const std::string &line,
                                                    const std::string &needle);
 
-  Diagnostics &diagnostics;
+  const MullDiagnostics &diagnostics;
   SourceManager sourceManager;
   MutatorsFactory factory;
   std::unordered_map<std::string, std::vector<IgnoreRange>> ignoreRanges;
