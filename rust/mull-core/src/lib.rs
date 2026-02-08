@@ -109,7 +109,7 @@ mod ffi {
     }
 }
 
-fn get_config_path() -> Option<String> {
+pub fn get_config_path() -> Option<String> {
     if let Ok(path) = env::var("MULL_CONFIG") {
         if !path.is_empty() {
             return Some(path);
@@ -168,7 +168,7 @@ fn init_diagnostics(diag: &MullDiagnostics, config: &ffi::MullConfig) {
     }
     if config.strict {
         diag.enable_strict_mode();
-        diag_debug!(
+        diag_info!(
             diag,
             "Diagnostics: Strict Mode enabled. Warning messages will be treated as fatal errors."
         );
@@ -319,7 +319,7 @@ fn apply_shared_cli(
     cli_config.mutation_score_threshold = shared.mutation_score_threshold;
 }
 
-fn normalize_args(args: &[String]) -> Vec<String> {
+pub fn normalize_args(args: &[String]) -> Vec<String> {
     let mut out = Vec::with_capacity(args.len());
     let mut passthrough = false;
     for (i, arg) in args.iter().enumerate() {
@@ -343,7 +343,7 @@ fn normalize_args(args: &[String]) -> Vec<String> {
     out
 }
 
-fn long_version_string(llvm_version: &str) -> &'static str {
+pub fn long_version_string(llvm_version: &str) -> &'static str {
     let s = format!(
         "Mull: Practical mutation testing and fault injection for C and C++\n\
          Home: https://github.com/mull-project/mull\n\

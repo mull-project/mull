@@ -83,7 +83,7 @@ void mull::SQLiteReporter::reportResults(const Result &result) {
   }
 
   const char *query =
-      "INSERT INTO mutant VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)";
+      "INSERT INTO mutant VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13)";
   sqlite3_stmt *stmt;
   sqlite3_prepare(database, query, -1, &stmt, nullptr);
 
@@ -105,6 +105,7 @@ void mull::SQLiteReporter::reportResults(const Result &result) {
     sqlite3_bind_int(stmt, index++, endLocation.line);
     sqlite3_bind_int(stmt, index++, endLocation.column);
     sqlite3_bind_int(stmt, index++, execution.status);
+    sqlite3_bind_int(stmt, index++, execution.exitStatus);
     sqlite3_bind_int64(stmt, index++, execution.runningTime);
     sqlite3_bind_text(stmt, index++, execution.stdoutOutput.c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(stmt, index++, execution.stderrOutput.c_str(), -1, SQLITE_TRANSIENT);
@@ -130,7 +131,8 @@ CREATE TABLE IF NOT EXISTS mutant (
   column_number INT,
   end_line_number INT,
   end_column_number INT,
-  status INT,
+  execution_status INT,
+  exit_status INT,
   duration INT,
   stdout TEXT,
   stderr TEXT

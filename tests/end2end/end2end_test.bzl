@@ -23,9 +23,12 @@ def _mull_fmtlib_sqlite_report_impl(ctx):
     ctx.actions.write(script, "\n".join(cmds), is_executable = True)
 
     ctx.actions.run_shell(
-        inputs = [ctx.executable.mull_runner, script] + test_files,
+        inputs = [ctx.executable.mull_runner, ctx.file.mull_config, script] + test_files,
         outputs = [out],
         command = script.path,
+        env = {
+            "MULL_CONFIG": ctx.file.mull_config.path,
+        },
     )
 
     return [DefaultInfo(files = depset([out]))]
@@ -35,6 +38,7 @@ mull_fmtlib_sqlite_report = rule(
     attrs = {
         "target": attr.label(),
         "mull_runner": attr.label(executable = True, mandatory = True, cfg = "exec"),
+        "mull_config": attr.label(mandatory = True, allow_single_file = True),
     },
 )
 
@@ -55,10 +59,14 @@ def _generate_ide_report_impl(ctx):
         inputs = [
             ctx.executable.mull_reporter,
             ctx.file.sqlite_report,
+            ctx.file.mull_config,
             script,
         ],
         outputs = [out],
         command = script.path,
+        env = {
+            "MULL_CONFIG": ctx.file.mull_config.path,
+        },
     )
 
     return [DefaultInfo(files = depset([out]))]
@@ -68,6 +76,7 @@ generate_ide_report = rule(
     attrs = {
         "sqlite_report": attr.label(mandatory = True, allow_single_file = True),
         "mull_reporter": attr.label(executable = True, mandatory = True, cfg = "exec"),
+        "mull_config": attr.label(mandatory = True, allow_single_file = True),
     },
 )
 
@@ -119,6 +128,7 @@ def define_end2end_test_targets(name):
             testonly = True,
             mull_runner = "//:mull-runner-%s" % llvm_version,
             target = ":fmt_e2e_%s" % llvm_version,
+            mull_config = ":mull.yml",
         )
 
         generate_ide_report(
@@ -126,6 +136,7 @@ def define_end2end_test_targets(name):
             testonly = True,
             mull_reporter = "//:mull-reporter-%s" % llvm_version,
             sqlite_report = "fmt_sqlite_report_%s" % llvm_version,
+            mull_config = ":mull.yml",
         )
 
         # Linux x86_64
