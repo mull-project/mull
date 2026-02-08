@@ -1,0 +1,23 @@
+load("@available_llvm_versions//:mull_llvm_versions.bzl", "AVAILABLE_LLVM_VERSIONS", "EXACT_VERSION_MAPPING")
+load("@rules_rust//rust:defs.bzl", "rust_binary")
+
+[
+    rust_binary(
+        name = "mull-reporter-%s" % llvm_version,
+        srcs = [
+            "mull-reporter.rs",
+        ],
+        rustc_env = {
+            "MULL_LLVM_VERSION": EXACT_VERSION_MAPPING[llvm_version],
+        },
+        visibility = ["//visibility:public"],
+        deps = [
+            "//rust/mull-core",
+            "//rust/mull-reporters",
+            "//rust/mull-state",
+            "@crates//:clap",
+            "@crates//:serde_yaml",
+        ],
+    )
+    for llvm_version in AVAILABLE_LLVM_VERSIONS
+]

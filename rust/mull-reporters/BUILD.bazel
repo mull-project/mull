@@ -1,0 +1,23 @@
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+rust_library(
+    name = "mull-reporters",
+    srcs = glob(["src/**/*.rs"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//rust/mull-core",
+        "//rust/mull-state",
+        "@crates//:rusqlite",
+        "@crates//:serde",
+        "@crates//:serde_json",
+        "@crates//:unicode-width",
+    ],
+)
+
+rust_test(
+    name = "mull-reporters-test",
+    crate = "mull-reporters",
+    proc_macro_deps = [
+        "@crates//:indoc",
+    ],
+)

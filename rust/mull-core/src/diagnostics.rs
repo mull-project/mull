@@ -1,4 +1,4 @@
-use colored::Colorize;
+use colored::{Color, Colorize};
 use std::io::Write;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Mutex;
@@ -8,29 +8,42 @@ pub struct MullDiagnostics {
     strict_mode: AtomicBool,
     quiet: AtomicBool,
     silent: AtomicBool,
+    use_colors: bool,
     seen_progress: Mutex<bool>,
-}
-
-pub fn diagnostics_new() -> Box<MullDiagnostics> {
-    Box::new(MullDiagnostics::new())
+    writer: Mutex<Box<dyn Write>>,
 }
 
 impl MullDiagnostics {
     pub fn new() -> Self {
+        Self::with_writer(Box::new(std::io::stdout()), true)
+    }
+
+    pub fn with_writer(writer: Box<dyn Write>, use_colors: bool) -> Self {
         Self {
             debug_mode: AtomicBool::new(false),
             strict_mode: AtomicBool::new(false),
             quiet: AtomicBool::new(false),
             silent: AtomicBool::new(false),
+            use_colors,
             seen_progress: Mutex::new(false),
+            writer: Mutex::new(writer),
+        }
+    }
+
+    fn prefix(&self, label: &str, color: Color) -> String {
+        if self.use_colors {
+            label.color(color).to_string()
+        } else {
+            label.to_string()
         }
     }
 
     fn prepare(&self) {
         let mut seen = self.seen_progress.lock().unwrap();
         if *seen {
-            println!();
-            let _ = std::io::stdout().flush();
+            let mut w = self.writer.lock().unwrap();
+            let _ = writeln!(w);
+            let _ = w.flush();
             *seen = false;
         }
     }
@@ -51,50 +64,22 @@ impl MullDiagnostics {
         self.silent.store(true, Ordering::Relaxed);
     }
 
-    // C++ APIs
+    // C++ FFI APIs
 
     pub fn info(&self, message: &str) {
-        if self.quiet.load(Ordering::Relaxed) {
-            return;
-        }
-        self.prepare();
-        println!("{} {}", "[info]".green(), message);
+        self.info_fmt(format_args!("{}", message));
     }
 
     pub fn warning(&self, message: &str) {
-        let strict = self.strict_mode.load(Ordering::Relaxed);
-        if self.silent.load(Ordering::Relaxed) && !strict {
-            return;
-        }
-        self.prepare();
-        println!("{} {}", "[warning]".yellow(), message);
-        if strict {
-            println!(
-                "{} {}",
-                "[warning]".yellow(),
-                "Strict Mode enabled: warning messages are treated as fatal errors. Exiting now."
-            );
-            std::process::exit(1);
-        }
+        self.warning_fmt(format_args!("{}", message));
     }
 
     pub fn error(&self, message: &str) -> ! {
-        self.prepare();
-        println!("{} {}", "[error]".red(), message);
-        println!(
-            "{} {}",
-            "[error]".red(),
-            "Error messages are treated as fatal errors. Exiting now."
-        );
-        std::process::exit(1)
+        self.error_fmt(format_args!("{}", message));
     }
 
     pub fn debug(&self, message: &str) {
-        if !self.debug_mode.load(Ordering::Relaxed) {
-            return;
-        }
-        self.prepare();
-        println!("{} {}", "[debug]".cyan(), message);
+        self.debug_fmt(format_args!("{}", message));
     }
 
     pub fn progress(&self, message: &str) {
@@ -105,18 +90,27 @@ impl MullDiagnostics {
             let mut seen = self.seen_progress.lock().unwrap();
             *seen = true;
         }
-        print!("{}", message);
-        let _ = std::io::stdout().flush();
+        let mut w = self.writer.lock().unwrap();
+        let _ = write!(w, "{}", message);
+        let _ = w.flush();
     }
 
-    // Rust APIs
+    pub fn raw_fmt(&self, args: std::fmt::Arguments) {
+        if self.quiet.load(Ordering::Relaxed) {
+            return;
+        }
+        self.prepare();
+        let mut w = self.writer.lock().unwrap();
+        let _ = writeln!(w, "{}", args);
+    }
 
     pub fn info_fmt(&self, args: std::fmt::Arguments) {
         if self.quiet.load(Ordering::Relaxed) {
             return;
         }
         self.prepare();
-        println!("{} {}", "[info]".green(), args);
+        let mut w = self.writer.lock().unwrap();
+        let _ = writeln!(w, "{} {}", self.prefix("[info]", Color::Green), args);
     }
 
     pub fn warning_fmt(&self, args: std::fmt::Arguments) {
@@ -125,11 +119,14 @@ impl MullDiagnostics {
             return;
         }
         self.prepare();
-        println!("{} {}", "[warning]".yellow(), args);
+        let prefix = self.prefix("[warning]", Color::Yellow);
+        let mut w = self.writer.lock().unwrap();
+        let _ = writeln!(w, "{} {}", prefix, args);
         if strict {
-            println!(
+            let _ = writeln!(
+                w,
                 "{} {}",
-                "[warning]".yellow(),
+                prefix,
                 "Strict Mode enabled: warning messages are treated as fatal errors. Exiting now."
             );
             std::process::exit(1);
@@ -138,11 +135,13 @@ impl MullDiagnostics {
 
     pub fn error_fmt(&self, args: std::fmt::Arguments) -> ! {
         self.prepare();
-        println!("{} {}", "[error]".red(), args);
-        println!(
+        let prefix = self.prefix("[error]", Color::Red);
+        let mut w = self.writer.lock().unwrap();
+        let _ = writeln!(w, "{} {}", prefix, args);
+        let _ = writeln!(
+            w,
             "{} {}",
-            "[error]".red(),
-            "Error messages are treated as fatal errors. Exiting now."
+            prefix, "Error messages are treated as fatal errors. Exiting now."
         );
         std::process::exit(1)
     }
@@ -152,7 +151,8 @@ impl MullDiagnostics {
             return;
         }
         self.prepare();
-        println!("{} {}", "[debug]".cyan(), args);
+        let mut w = self.writer.lock().unwrap();
+        let _ = writeln!(w, "{} {}", self.prefix("[debug]", Color::Cyan), args);
     }
 }
 
@@ -163,6 +163,13 @@ impl Default for MullDiagnostics {
 }
 
 // Usage: diag_info!(diag, "Found {} mutants", count);
+
+#[macro_export]
+macro_rules! diag_raw {
+    ($diag:expr, $($arg:tt)*) => {
+        $diag.raw_fmt(format_args!($($arg)*))
+    };
+}
 
 #[macro_export]
 macro_rules! diag_info {

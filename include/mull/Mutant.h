@@ -14,12 +14,13 @@ struct SourceLocation;
 class Mutant {
 public:
   Mutant(std::string identifier, std::string mutatorIdentifier, SourceLocation sourceLocation,
-         SourceLocation endLocation);
+         SourceLocation endLocation, std::string replacement);
 
   const std::string &getIdentifier() const;
   const SourceLocation &getSourceLocation() const;
   const SourceLocation &getEndLocation() const;
   const std::string &getMutatorIdentifier() const;
+  const std::string &getReplacement() const;
   void setCovered(bool covered);
   bool isCovered() const;
 
@@ -33,6 +34,7 @@ private:
   SourceLocation sourceLocation;
   SourceLocation endLocation;
   bool covered;
+  std::string replacement;
 
   /// Needed by AST search
   MutatorKind mutatorKind;
