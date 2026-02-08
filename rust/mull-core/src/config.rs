@@ -1,6 +1,25 @@
-use clap::{Args, Parser};
+use clap::{Args, Parser, ValueEnum};
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, ValueEnum)]
+pub enum ReporterKind {
+    /// IDE-friendly output with file:line:column format
+    #[value(name = "IDE")]
+    IDE,
+    /// SQLite database for offline analysis
+    #[value(name = "SQLite")]
+    SQLite,
+    /// GitHub Actions annotation format
+    #[value(name = "GitHubAnnotations", alias = "GithubAnnotations")]
+    GitHubAnnotations,
+    /// Generate patch files for each mutation
+    #[value(name = "Patches")]
+    Patches,
+    /// Mutation Testing Elements JSON/HTML report
+    #[value(name = "Elements")]
+    Elements,
+}
 
 /// YAML configuration for mull.yml files.
 #[derive(Debug, Clone, Deserialize, Serialize, JsonSchema)]
@@ -139,9 +158,9 @@ pub struct DebugOptionsSpec {
 /// CLI options shared between mull-runner and mull-reporter.
 #[derive(Debug, Clone, Args)]
 pub struct SharedCli {
-    /// Output reporters to use (IDE, SQLite, Elements, Patches, GithubAnnotations).
-    #[arg(long, value_name = "REPORTER")]
-    pub reporters: Vec<String>,
+    /// Output reporters to use, more than one can be used at the same time
+    #[arg(long, value_enum, value_name = "REPORTER")]
+    pub reporters: Vec<ReporterKind>,
 
     /// Directory for report output files.
     #[arg(long = "report-dir", value_name = "DIR", default_value = ".")]

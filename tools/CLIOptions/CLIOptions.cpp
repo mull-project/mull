@@ -64,7 +64,7 @@ std::vector<std::unique_ptr<Reporter>> tool::createReporters(const MullDiagnosti
                                                  params.reporterName,
                                                  params.patchBasePathDir,
                                                  params.mullInformation));
-    } else if (r == "GithubAnnotations") {
+    } else if (r == "GithubAnnotations" || r == "GitHubAnnotations") {
       reporters.emplace_back(new GithubAnnotationsReporter(diagnostics));
     } else {
       diagnostics.warning("Unknown reporter: " + r);

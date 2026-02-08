@@ -7,7 +7,7 @@ use clap::{CommandFactory, FromArgMatches};
 use std::env;
 use std::fs;
 
-use diagnostics::MullDiagnostics;
+pub use diagnostics::MullDiagnostics;
 
 struct MullCore {
     diag: MullDiagnostics,
@@ -109,7 +109,7 @@ mod ffi {
     }
 }
 
-fn get_config_path() -> Option<String> {
+pub fn get_config_path() -> Option<String> {
     if let Ok(path) = env::var("MULL_CONFIG") {
         if !path.is_empty() {
             return Some(path);
@@ -168,7 +168,7 @@ fn init_diagnostics(diag: &MullDiagnostics, config: &ffi::MullConfig) {
     }
     if config.strict {
         diag.enable_strict_mode();
-        diag_debug!(
+        diag_info!(
             diag,
             "Diagnostics: Strict Mode enabled. Warning messages will be treated as fatal errors."
         );
@@ -309,7 +309,11 @@ fn apply_shared_cli(
         yaml_config.capture_mutant_output = false;
     }
     // Copy shared fields
-    cli_config.reporters = shared.reporters.clone();
+    cli_config.reporters = shared
+        .reporters
+        .iter()
+        .map(|r| format!("{:?}", r))
+        .collect();
     cli_config.report_name = shared.report_name.clone().unwrap_or_default();
     cli_config.report_dir = shared.report_dir.clone();
     cli_config.report_patch_base = shared.report_patch_base.clone();
@@ -319,7 +323,7 @@ fn apply_shared_cli(
     cli_config.mutation_score_threshold = shared.mutation_score_threshold;
 }
 
-fn normalize_args(args: &[String]) -> Vec<String> {
+pub fn normalize_args(args: &[String]) -> Vec<String> {
     let mut out = Vec::with_capacity(args.len());
     let mut passthrough = false;
     for (i, arg) in args.iter().enumerate() {
@@ -343,13 +347,13 @@ fn normalize_args(args: &[String]) -> Vec<String> {
     out
 }
 
-fn long_version_string(llvm_version: &str) -> &'static str {
+pub fn long_version_string(llvm_version: &str) -> &'static str {
     let s = format!(
-        "Mull: Practical mutation testing and fault injection for C and C++\n\
+        "{}\n\n\
+         Mull: Practical mutation testing and fault injection for C and C++\n\
          Home: https://github.com/mull-project/mull\n\
          Docs: https://mull.readthedocs.io\n\
          Support: https://mull.readthedocs.io/en/latest/Support.html\n\
-         Version: {}\n\
          LLVM: {}",
         env!("CARGO_PKG_VERSION"),
         llvm_version

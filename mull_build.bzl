@@ -56,15 +56,6 @@ def mull_build(name):
             ],
         )
 
-        cc_library(
-            name = "libmull_reporter_%s" % llvm_version,
-            srcs = native.glob(["tools/mull-reporter/*.cpp"]),
-            deps = [
-                "libmull_%s" % llvm_version,
-                ":libmull_cli_options_%s" % llvm_version,
-            ],
-        )
-
         cc_binary(
             name = "mull-cxx-ir-frontend-%s" % llvm_version,
             srcs = native.glob(["tools/mull-ir-frontend/*.cpp"]),
@@ -108,14 +99,6 @@ def mull_build(name):
             name = "mull-runner-%s" % llvm_version,
             deps = [
                 ":libmull_runner_%s" % llvm_version,
-            ],
-            tags = ["llvm_%s" % llvm_version],
-        )
-
-        cc_binary(
-            name = "mull-reporter-%s" % llvm_version,
-            deps = [
-                ":libmull_reporter_%s" % llvm_version,
             ],
             tags = ["llvm_%s" % llvm_version],
         )

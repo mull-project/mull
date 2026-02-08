@@ -83,7 +83,7 @@ void mull::SQLiteReporter::reportResults(const Result &result) {
   }
 
   const char *query =
-      "INSERT INTO mutant VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12)";
+      "INSERT INTO mutant VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8, ?9, ?10, ?11, ?12, ?13, ?14)";
   sqlite3_stmt *stmt;
   sqlite3_prepare(database, query, -1, &stmt, nullptr);
 
@@ -105,9 +105,11 @@ void mull::SQLiteReporter::reportResults(const Result &result) {
     sqlite3_bind_int(stmt, index++, endLocation.line);
     sqlite3_bind_int(stmt, index++, endLocation.column);
     sqlite3_bind_int(stmt, index++, execution.status);
+    sqlite3_bind_int(stmt, index++, execution.exitStatus);
     sqlite3_bind_int64(stmt, index++, execution.runningTime);
     sqlite3_bind_text(stmt, index++, execution.stdoutOutput.c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_bind_text(stmt, index++, execution.stderrOutput.c_str(), -1, SQLITE_TRANSIENT);
+    sqlite3_bind_text(stmt, index++, mutant->getReplacement().c_str(), -1, SQLITE_TRANSIENT);
     sqlite3_step(stmt);
     sqlite3_clear_bindings(stmt);
     sqlite3_reset(stmt);
@@ -130,10 +132,12 @@ CREATE TABLE IF NOT EXISTS mutant (
   column_number INT,
   end_line_number INT,
   end_column_number INT,
-  status INT,
+  execution_status INT,
+  exit_status INT,
   duration INT,
   stdout TEXT,
-  stderr TEXT
+  stderr TEXT,
+  mutation_replacement TEXT
 );
 
 CREATE TABLE IF NOT EXISTS information (
@@ -144,61 +148,4 @@ CREATE TABLE IF NOT EXISTS information (
 
 static void createTables(const MullDiagnostics &diagnostics, sqlite3 *database) {
   sqlite_exec(diagnostics, database, CreateTables);
-}
-
-RawReport mull::SQLiteReporter::loadRawReport(const std::string &databasePath) {
-  sqlite3 *database;
-  sqlite3_open(databasePath.c_str(), &database);
-
-  std::unordered_map<std::string, std::string> information;
-  sqlite3_stmt *selectInfoStmt;
-  sqlite3_prepare(database, "select * from information", -1, &selectInfoStmt, nullptr);
-  while (sqlite3_step(selectInfoStmt) == SQLITE_ROW) {
-    auto key = sqlite3_column_text(selectInfoStmt, 0);
-    auto value = sqlite3_column_text(selectInfoStmt, 1);
-    information[reinterpret_cast<char const *>(key)] = reinterpret_cast<char const *>(value);
-  }
-  sqlite3_finalize(selectInfoStmt);
-
-  std::unordered_map<std::string, std::vector<ExecutionResult>> mapping;
-
-  sqlite3_stmt *selectMutantsStmt;
-  sqlite3_prepare(database, "select * from mutant", -1, &selectMutantsStmt, nullptr);
-  while (sqlite3_step(selectMutantsStmt) == SQLITE_ROW) {
-    int index = 0;
-    std::string mutant_id =
-        reinterpret_cast<char const *>(sqlite3_column_text(selectMutantsStmt, index++));
-    std::string mutator =
-        reinterpret_cast<char const *>(sqlite3_column_text(selectMutantsStmt, index++));
-    std::string filename =
-        reinterpret_cast<char const *>(sqlite3_column_text(selectMutantsStmt, index++));
-    std::string directory =
-        reinterpret_cast<char const *>(sqlite3_column_text(selectMutantsStmt, index++));
-    auto line_number = sqlite3_column_int(selectMutantsStmt, index++);
-    auto column_number = sqlite3_column_int(selectMutantsStmt, index++);
-    auto end_line_number = sqlite3_column_int(selectMutantsStmt, index++);
-    auto end_column_number = sqlite3_column_int(selectMutantsStmt, index++);
-    auto status = sqlite3_column_int(selectMutantsStmt, index++);
-    auto duration = sqlite3_column_int64(selectMutantsStmt, index++);
-    std::string stdout_string =
-        reinterpret_cast<char const *>(sqlite3_column_text(selectMutantsStmt, index++));
-    std::string stderr_string =
-        reinterpret_cast<char const *>(sqlite3_column_text(selectMutantsStmt, index++));
-
-    ExecutionResult executionResult;
-    executionResult.runningTime = duration;
-    executionResult.stdoutOutput = stdout_string;
-    executionResult.stderrOutput = stderr_string;
-    executionResult.status = static_cast<ExecutionStatus>(status);
-
-    SourceLocation location(directory, filename, directory, filename, line_number, column_number);
-    SourceLocation endLocation(
-        directory, filename, directory, filename, end_line_number, end_column_number);
-    mapping[mutant_id].push_back(executionResult);
-  }
-  sqlite3_finalize(selectMutantsStmt);
-
-  sqlite3_close(database);
-
-  return { .info = std::move(information), .executionResults = std::move(mapping) };
 }

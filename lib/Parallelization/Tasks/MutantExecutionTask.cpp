@@ -38,6 +38,7 @@ void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
       result.status = NotCovered;
     }
     storage.push_back(std::make_unique<MutationResult>(result, mutant.get()));
+    debugMessage << "Run " << mutant->getIdentifier() << "\n";
     SourceLocation sourceLocation = mutant->getSourceLocation();
     debugMessage << sourceLocation.filePath << ":";
     debugMessage << sourceLocation.line << ":" << sourceLocation.column << " ExecutionResult: ";
