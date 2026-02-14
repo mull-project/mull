@@ -2,7 +2,7 @@
 
 #include "mull/MutationPoint.h"
 #include "mull/Parallelization/Progress.h"
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 #include <llvm/IR/Verifier.h>
 #include <sstream>
 

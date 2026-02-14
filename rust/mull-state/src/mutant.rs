@@ -1,6 +1,6 @@
 use mull_core::{diag_error, diagnostics::MullDiagnostics};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct SourceRange {
     pub filepath: String,
     pub begin_line: u64,

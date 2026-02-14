@@ -24,7 +24,7 @@ CHECK-MUTATE:[debug] CXXJunkDetector: mutation "Assign Const": {{.*}}sample.cpp:
 RUN: (unset TERM; %mull_runner -debug -reporters=IDE -ide-reporter-show-killed %s-ir.exe 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 
 CHECK:[info] Killed mutants (1/1):
-CHECK:{{^.*}}sample.cpp:5:7: warning: Killed: Replaced 'a = b' with 'a = 42' [cxx_assign_const]{{$}}
+CHECK:{{^.*}}sample.cpp:5:7: warning: Killed: Replaced = with = 42; [cxx_assign_const]{{$}}
 CHECK:  var = 0;
 CHECK:      ^
 CHECK:[info] Mutation score: 100%

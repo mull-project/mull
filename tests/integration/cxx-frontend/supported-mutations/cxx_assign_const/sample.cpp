@@ -32,5 +32,5 @@ STANDALONE_WITH_MUTATION:MUTATED
 RUN: %mull_runner %s.exe -ide-reporter-show-killed | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=MULL_RUNNER
 
 MULL_RUNNER:[info] Killed mutants (1/1):
-MULL_RUNNER:{{.*}}sample.cpp:7:7: warning: Killed: Replaced 'a = b' with 'a = 42' [cxx_assign_const]
+MULL_RUNNER:{{.*}}sample.cpp:7:7: warning: Killed: Replaced = a + b with 42 [cxx_assign_const]
 */

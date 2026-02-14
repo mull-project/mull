@@ -1,5 +1,5 @@
 #include "ObjectFile.h"
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 #include <llvm/Object/ELF.h>
 #include <llvm/Object/MachO.h>
 #include <llvm/Object/MachOUniversal.h>

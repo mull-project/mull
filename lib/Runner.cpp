@@ -1,5 +1,5 @@
 #include "mull/Runner.h"
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 #include <reproc++/drain.hpp>
 #include <reproc++/reproc.hpp>
 #include <sstream>

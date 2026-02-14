@@ -2,7 +2,7 @@
 #include "mull/Parallelization/TaskExecutor.h"
 #include "mull/Parallelization/Tasks/MutantExecutionTask.h"
 
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 
 using namespace mull;
 

@@ -12,7 +12,7 @@
 #include "mull/Parallelization/Parallelization.h"
 #include "mull/Program/Program.h"
 
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 
 #include <llvm/IR/Verifier.h>
 #include <llvm/Support/DynamicLibrary.h>
@@ -21,6 +21,7 @@
 #include <algorithm>
 #include <sstream>
 #include <unordered_map>
+#include <unordered_set>
 #include <vector>
 
 using namespace llvm;
@@ -92,7 +93,7 @@ void mull::mutateBitcode(llvm::Module &module) {
   mull::Filters filters(configuration, diagnostics);
   filters.enableNoDebugFilter();
   filters.enableFilePathFilter();
-  filters.enableGitDiffFilter();
+  // GitDiffFilter is now handled by Rust implementation
   filters.enableBlockAddressFilter();
   filters.enableVariadicFunctionFilter();
   filters.enableManualFilter();
@@ -182,6 +183,35 @@ void mull::mutateBitcode(llvm::Module &module) {
   std::vector<MutationPoint *> mutationPoints =
       mutationsFinder.getMutationPoints(diagnostics, filteredFunctions);
   std::vector<MutationPoint *> mutations = std::move(mutationPoints);
+
+  // Apply Rust filter chain (GitDiffFilter)
+  {
+    rust::Vec<rust::String> mutantIds;
+    for (auto *point : mutations) {
+      mutantIds.push_back(rust::String(point->getUserIdentifier()));
+    }
+
+    FilterMutantsConfig filterConfig;
+    filterConfig.git_diff_ref = std::string(configuration.git_diff_ref);
+    filterConfig.git_project_root = std::string(configuration.git_project_root);
+    filterConfig.debug_git_diff = configuration.debug.git_diff;
+    filterConfig.workers = configuration.workers;
+
+    rust::Vec<rust::String> keptIds = filter_mutants(core->diag(), mutantIds, filterConfig);
+
+    std::unordered_set<std::string> keptIdSet;
+    for (const auto &id : keptIds) {
+      keptIdSet.insert(std::string(id));
+    }
+
+    std::vector<MutationPoint *> filteredMutations;
+    for (auto *point : mutations) {
+      if (keptIdSet.count(point->getUserIdentifier())) {
+        filteredMutations.push_back(point);
+      }
+    }
+    mutations = std::move(filteredMutations);
+  }
 
   for (auto filter : filters.mutationFilters) {
     std::vector<MutationFilterTask> tasks;

@@ -7,7 +7,7 @@
 #include "mull/Reporters/SourceCodeReader.h"
 #include "mull/Result.h"
 
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 
 #include <cassert>
 #include <fstream>

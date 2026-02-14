@@ -15,14 +15,14 @@ ASTMutationPoint::ASTMutationPoint(std::unique_ptr<ASTMutation> mutation,
   std::ostringstream mis;
   /// mutator:file:line:col:1
   mis << mutationIdentifier << ":" << sourceFilePath << ":" << beginLine << ":" << beginColumn
-      << ":" << endLine << ":" << endColumn;
+      << ":" << endLine << ":" << endColumn; // << ":" << this->mutation->getReplacement();
   this->mutationIdentifier = mis.str();
 
   std::ostringstream mbis;
 
   /// mutator:file:begin_line:begin_col:end_line:end_col
   mbis << mutationIdentifier << ":" << sourceFilePath << ":" << beginLine << ":" << beginColumn
-       << ":" << endLine << ":" << endColumn;
+       << ":" << endLine << ":" << endColumn << ":" << this->mutation->getReplacement();
   this->mutationBinaryRecord = mbis.str();
 }
 

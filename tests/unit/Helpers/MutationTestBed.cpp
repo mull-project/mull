@@ -4,7 +4,7 @@
 #include "mull/JunkDetection/CXX/ASTStorage.h"
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
 #include "mull/Mutators/Mutator.h"
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 
 using namespace mull;
 using namespace mull_test;

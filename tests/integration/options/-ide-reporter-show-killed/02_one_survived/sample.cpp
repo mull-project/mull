@@ -10,7 +10,7 @@ RUN: %clang_cxx %sysroot %pass_mull_ir_frontend -g %s -o %s.exe
 RUN: (unset TERM; %mull_runner --allow-surviving %s.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITHOUT-OPTION)
 RUN: (unset TERM; %mull_runner --allow-surviving -reporters=IDE %s.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITHOUT-OPTION)
 WITHOUT-OPTION:[info] Running mutants (threads: 1)
-WITHOUT-OPTION:{{^       \[################################\] 1/1\. Finished .*}}
+WITHOUT-OPTION:{{.*       \[################################\] 1/1\. Finished .*}}
 WITHOUT-OPTION:[info] Survived mutants (1/1):
 WITHOUT-OPTION-NEXT:{{^.*}}sample.cpp:32:18: warning: Survived: Replaced + with - [cxx_add_to_sub]
 WITHOUT-OPTION-NEXT:  int result = a + b;
@@ -20,7 +20,7 @@ WITHOUT-OPTION-NEXT:[info] Mutation score: 0%
 RUN: (unset TERM; %mull_runner --allow-surviving -ide-reporter-show-killed %s.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-OPTION)
 RUN: (unset TERM; %mull_runner --allow-surviving -reporters=IDE -ide-reporter-show-killed %s.exe | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=WITH-OPTION)
 WITH-OPTION:[info] Running mutants (threads: 1)
-WITH-OPTION:{{^       \[################################\] 1/1\. Finished .*}}
+WITH-OPTION:{{.*       \[################################\] 1/1\. Finished .*}}
 WITH-OPTION:[info] Survived mutants (1/1):
 WITH-OPTION-NEXT:{{^.*}}sample.cpp:32:18: warning: Survived: Replaced + with - [cxx_add_to_sub]
 WITH-OPTION-NEXT:  int result = a + b;

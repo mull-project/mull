@@ -12,7 +12,7 @@
 #include "tests/unit/Helpers/TestModuleFactory.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 #include <fstream>
 #include <gtest/gtest.h>
 #include <json11/json11.hpp>

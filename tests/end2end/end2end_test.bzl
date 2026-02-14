@@ -134,7 +134,7 @@ def define_end2end_test_targets(name):
         generate_ide_report(
             name = "fmt_ide_report_%s" % llvm_version,
             testonly = True,
-            mull_reporter = "//:mull-reporter-%s" % llvm_version,
+            mull_reporter = "//rust/mull-tools:mull-reporter-%s" % llvm_version,
             sqlite_report = "fmt_sqlite_report_%s" % llvm_version,
             mull_config = ":mull.yml",
         )
