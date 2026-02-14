@@ -1,5 +1,6 @@
 pub mod config;
 pub mod diagnostics;
+pub mod utils;
 
 use config::MullConfigSpec;
 
@@ -9,103 +10,95 @@ use std::fs;
 
 pub use diagnostics::MullDiagnostics;
 
-struct MullCore {
-    diag: MullDiagnostics,
-    config: ffi::MullConfig,
+// Runtime config types (used internally and converted to FFI types by mull-cxx-bridge)
+
+#[derive(Debug, Clone, Default)]
+pub struct DebugOptions {
+    pub print_ir: bool,
+    pub print_ir_before: bool,
+    pub print_ir_after: bool,
+    pub print_ir_to_file: bool,
+    pub trace_mutants: bool,
+    pub coverage: bool,
+    pub git_diff: bool,
+    pub filters: bool,
+    pub slow_ir_verification: bool,
 }
 
-struct MullCLI {
-    diag: MullDiagnostics,
-    config: ffi::MullConfig,
-    cli: ffi::CliConfig,
+#[derive(Debug, Clone)]
+pub struct MullConfig {
+    pub timeout: u32,
+    pub workers: u32,
+    pub execution_workers: u32,
+
+    pub debug_enabled: bool,
+    pub quiet: bool,
+    pub silent: bool,
+    pub strict: bool,
+    pub dry_run_enabled: bool,
+    pub capture_test_output: bool,
+    pub capture_mutant_output: bool,
+    pub include_not_covered: bool,
+    pub junk_detection_disabled: bool,
+
+    pub compilation_database_path: String,
+    pub git_diff_ref: String,
+    pub git_project_root: String,
+
+    pub mutators: Vec<String>,
+    pub ignore_mutators: Vec<String>,
+    pub compiler_flags: Vec<String>,
+    pub include_paths: Vec<String>,
+    pub exclude_paths: Vec<String>,
+
+    pub debug: DebugOptions,
+    pub config_path: String,
 }
 
-#[cxx::bridge]
-mod ffi {
-    struct DebugOptions {
-        print_ir: bool,
-        print_ir_before: bool,
-        print_ir_after: bool,
-        print_ir_to_file: bool,
-        trace_mutants: bool,
-        coverage: bool,
-        git_diff: bool,
-        filters: bool,
-        slow_ir_verification: bool,
+#[derive(Debug, Clone)]
+pub struct CliConfig {
+    pub input_file: String,
+    pub test_program: String,
+    pub sqlite_report: String,
+    pub runner_args: Vec<String>,
+
+    pub reporters: Vec<String>,
+    pub report_name: String,
+    pub report_dir: String,
+    pub report_patch_base: String,
+    pub ide_reporter_show_killed: bool,
+
+    pub strict: bool,
+    pub allow_surviving: bool,
+    pub mutation_score_threshold: u32,
+
+    pub ld_search_paths: Vec<String>,
+    pub coverage_info: String,
+}
+
+/// Wrapper for CLI initialization results
+pub struct MullCLI {
+    diag: MullDiagnostics,
+    config: MullConfig,
+    cli: CliConfig,
+}
+
+impl MullCLI {
+    pub fn config_cli(&self) -> &MullConfig {
+        &self.config
     }
 
-    struct MullConfig {
-        timeout: u32,
-        workers: u32,
-        execution_workers: u32,
-
-        debug_enabled: bool,
-        quiet: bool,
-        silent: bool,
-        strict: bool,
-        dry_run_enabled: bool,
-        capture_test_output: bool,
-        capture_mutant_output: bool,
-        include_not_covered: bool,
-        junk_detection_disabled: bool,
-
-        compilation_database_path: String,
-        git_diff_ref: String,
-        git_project_root: String,
-
-        mutators: Vec<String>,
-        ignore_mutators: Vec<String>,
-        compiler_flags: Vec<String>,
-        include_paths: Vec<String>,
-        exclude_paths: Vec<String>,
-
-        debug: DebugOptions,
-        config_path: String,
+    pub fn diag_cli(&self) -> &MullDiagnostics {
+        &self.diag
     }
 
-    struct CliConfig {
-        input_file: String,
-        test_program: String,
-        sqlite_report: String,
-        runner_args: Vec<String>,
-
-        reporters: Vec<String>,
-        report_name: String,
-        report_dir: String,
-        report_patch_base: String,
-        ide_reporter_show_killed: bool,
-
-        strict: bool,
-        allow_surviving: bool,
-        mutation_score_threshold: u32,
-
-        ld_search_paths: Vec<String>,
-        coverage_info: String,
+    pub fn cli(&self) -> &CliConfig {
+        &self.cli
     }
 
-    extern "Rust" {
-        type MullDiagnostics;
-
-        fn enable_debug_mode(self: &MullDiagnostics);
-
-        fn info(self: &MullDiagnostics, message: &str);
-        fn warning(self: &MullDiagnostics, message: &str);
-        fn error(self: &MullDiagnostics, message: &str);
-        fn debug(self: &MullDiagnostics, message: &str);
-        fn progress(self: &MullDiagnostics, message: &str);
-
-        type MullCore;
-
-        fn init_core_ffi() -> Box<MullCore>;
-        fn config(self: &MullCore) -> &MullConfig;
-        fn diag(self: &MullCore) -> &MullDiagnostics;
-
-        type MullCLI;
-        fn init_reporter_cli(args: Vec<String>, llvm_version: String) -> Box<MullCLI>;
-        fn init_runner_cli(args: Vec<String>, llvm_version: String) -> Box<MullCLI>;
-        fn config_cli(self: &MullCLI) -> &MullConfig;
-        fn diag_cli(self: &MullCLI) -> &MullDiagnostics;
-        fn cli(self: &MullCLI) -> &CliConfig;
+    /// Consume the CLI wrapper and return its components
+    pub fn into_parts(self: Box<Self>) -> (MullDiagnostics, MullConfig, CliConfig) {
+        (self.diag, self.config, self.cli)
     }
 }
 
@@ -130,7 +123,7 @@ pub fn get_config_path() -> Option<String> {
     None
 }
 
-fn create_config(diag: &MullDiagnostics) -> ffi::MullConfig {
+fn create_config(diag: &MullDiagnostics) -> MullConfig {
     match get_config_path() {
         Some(path) => match load_yaml_config(&path) {
             Ok(mut config) => {
@@ -158,7 +151,7 @@ fn create_config(diag: &MullDiagnostics) -> ffi::MullConfig {
     }
 }
 
-fn init_diagnostics(diag: &MullDiagnostics, config: &ffi::MullConfig) {
+fn init_diagnostics(diag: &MullDiagnostics, config: &MullConfig) {
     if config.debug_enabled {
         diag.enable_debug_mode();
         diag_debug!(
@@ -181,45 +174,16 @@ fn init_diagnostics(diag: &MullDiagnostics, config: &ffi::MullConfig) {
     }
 }
 
-pub fn init_core() -> (MullDiagnostics, ffi::MullConfig) {
+pub fn init_core() -> (MullDiagnostics, MullConfig) {
     let diag = MullDiagnostics::new();
     let config = create_config(&diag);
     init_diagnostics(&diag, &config);
     (diag, config)
 }
 
-fn init_core_ffi() -> Box<MullCore> {
-    let (diag, config) = init_core();
-    Box::new(MullCore { diag, config })
-}
-
-impl MullCore {
-    fn config(&self) -> &ffi::MullConfig {
-        &self.config
-    }
-
-    fn diag(&self) -> &MullDiagnostics {
-        &self.diag
-    }
-}
-
-impl MullCLI {
-    fn config_cli(&self) -> &ffi::MullConfig {
-        &self.config
-    }
-
-    fn diag_cli(&self) -> &MullDiagnostics {
-        &self.diag
-    }
-
-    fn cli(&self) -> &ffi::CliConfig {
-        &self.cli
-    }
-}
-
 impl MullConfigSpec {
-    fn to_ffi(&self) -> ffi::MullConfig {
-        ffi::MullConfig {
+    fn to_runtime(&self) -> MullConfig {
+        MullConfig {
             timeout: self.timeout,
             workers: self.parallelization.workers,
             execution_workers: self.parallelization.execution_workers,
@@ -241,7 +205,7 @@ impl MullConfigSpec {
             include_paths: self.include_paths.clone(),
             exclude_paths: self.exclude_paths.clone(),
             config_path: String::new(),
-            debug: ffi::DebugOptions {
+            debug: DebugOptions {
                 print_ir: self.debug.print_ir,
                 print_ir_before: self.debug.print_ir_before,
                 print_ir_after: self.debug.print_ir_after,
@@ -256,12 +220,12 @@ impl MullConfigSpec {
     }
 }
 
-fn default_config() -> ffi::MullConfig {
-    MullConfigSpec::default().to_ffi()
+fn default_config() -> MullConfig {
+    MullConfigSpec::default().to_runtime()
 }
 
-fn default_cli_config() -> ffi::CliConfig {
-    ffi::CliConfig {
+fn default_cli_config() -> CliConfig {
+    CliConfig {
         input_file: String::new(),
         test_program: String::new(),
         sqlite_report: String::new(),
@@ -279,13 +243,13 @@ fn default_cli_config() -> ffi::CliConfig {
     }
 }
 
-fn parse_yaml(yaml: &str) -> Result<ffi::MullConfig, String> {
+fn parse_yaml(yaml: &str) -> Result<MullConfig, String> {
     let parsed: MullConfigSpec =
         serde_yaml::from_str(yaml).map_err(|e| format!("Failed to parse YAML: {}", e))?;
-    Ok(parsed.to_ffi())
+    Ok(parsed.to_runtime())
 }
 
-fn load_yaml_config(config_path: &str) -> Result<ffi::MullConfig, String> {
+fn load_yaml_config(config_path: &str) -> Result<MullConfig, String> {
     let contents =
         fs::read_to_string(config_path).map_err(|e| format!("Cannot read config: {}", e))?;
     parse_yaml(&contents)
@@ -294,8 +258,8 @@ fn load_yaml_config(config_path: &str) -> Result<ffi::MullConfig, String> {
 /// Apply SharedCli fields to the yaml config (overrides) and cli config (copies).
 fn apply_shared_cli(
     shared: &config::SharedCli,
-    yaml_config: &mut ffi::MullConfig,
-    cli_config: &mut ffi::CliConfig,
+    yaml_config: &mut MullConfig,
+    cli_config: &mut CliConfig,
 ) {
     // Debug override
     if shared.debug {
@@ -323,7 +287,7 @@ fn apply_shared_cli(
     cli_config.mutation_score_threshold = shared.mutation_score_threshold;
 }
 
-pub fn normalize_args(args: &[String]) -> Vec<String> {
+fn normalize_args(args: &[String]) -> Vec<String> {
     let mut out = Vec::with_capacity(args.len());
     let mut passthrough = false;
     for (i, arg) in args.iter().enumerate() {
@@ -369,7 +333,7 @@ fn arg_present(matches: &clap::ArgMatches, id: &str) -> bool {
         .unwrap_or(false)
 }
 
-fn init_runner_cli(args: Vec<String>, llvm_version: String) -> Box<MullCLI> {
+pub fn init_runner_cli(args: Vec<String>, llvm_version: String) -> Box<MullCLI> {
     let args = normalize_args(&args);
     let cmd = config::RunnerCli::command().long_version(long_version_string(&llvm_version));
     let matches = cmd.get_matches_from(&args);
@@ -422,7 +386,7 @@ fn init_runner_cli(args: Vec<String>, llvm_version: String) -> Box<MullCLI> {
     })
 }
 
-fn init_reporter_cli(args: Vec<String>, llvm_version: String) -> Box<MullCLI> {
+pub fn init_reporter_cli(args: Vec<String>, llvm_version: String) -> Box<MullCLI> {
     let args = normalize_args(&args);
     let cmd = config::ReporterCli::command().long_version(long_version_string(&llvm_version));
     let matches = cmd.get_matches_from(&args);

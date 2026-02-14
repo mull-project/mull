@@ -26,7 +26,7 @@ CHECK-MUTATE:[debug] CXXJunkDetector: mutation "Replace Call": {{.*}}sample.cpp:
 RUN: (unset TERM; %mull_runner -debug -reporters=IDE -ide-reporter-show-killed %s-ir.exe 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 
 CHECK:[info] Killed mutants (1/1):
-CHECK:{{^.*}}sample.cpp:6:13: warning: Killed: Replaced call to a function with 42 [cxx_replace_scalar_call]{{$}}
+CHECK:{{^.*}}sample.cpp:6:13: warning: Killed: Replaced callee() with 42 [cxx_replace_scalar_call]{{$}}
 CHECK:  *result = callee();
 CHECK:            ^
 CHECK:[info] Mutation score: 100%

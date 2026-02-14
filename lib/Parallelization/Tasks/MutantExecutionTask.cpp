@@ -5,7 +5,7 @@
 #include "mull/Runner.h"
 #include "mull/SourceLocation.h"
 
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 
 #include <sstream>
 

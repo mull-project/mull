@@ -20,7 +20,7 @@ CHECK-MUTATE:[debug] CXXJunkDetector: mutation "Unary Minus to Noop": {{.*}}samp
 RUN: (unset TERM; %mull_runner -debug -reporters=IDE -ide-reporter-show-killed %s-ir.exe 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 
 CHECK:[info] Killed mutants (1/1):
-CHECK:{{^.*}}sample.cpp:2:10: warning: Killed: Replaced -x with x [cxx_minus_to_noop]{{$}}
+CHECK:{{^.*}}sample.cpp:2:10: warning: Killed: Replaced - with  [cxx_minus_to_noop]{{$}}
 CHECK:  return -x;
 CHECK:         ^
 CHECK:[info] Mutation score: 100%

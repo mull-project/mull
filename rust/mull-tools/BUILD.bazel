@@ -1,12 +1,16 @@
 load("@available_llvm_versions//:mull_llvm_versions.bzl", "AVAILABLE_LLVM_VERSIONS", "EXACT_VERSION_MAPPING")
+load("@mull_package_info//:mull_package_info.bzl", "MULL_VERSION")
 load("@rules_rust//rust:defs.bzl", "rust_binary")
 
 [
     rust_binary(
         name = "mull-reporter-%s" % llvm_version,
         srcs = [
+            "init_cli.rs",
             "mull-reporter.rs",
+            "reporting.rs",
         ],
+        crate_root = "mull-reporter.rs",
         rustc_env = {
             "MULL_LLVM_VERSION": EXACT_VERSION_MAPPING[llvm_version],
         },
@@ -17,6 +21,42 @@ load("@rules_rust//rust:defs.bzl", "rust_binary")
             "//rust/mull-state",
             "@crates//:clap",
             "@crates//:serde_yaml",
+        ],
+    )
+    for llvm_version in AVAILABLE_LLVM_VERSIONS
+]
+
+[
+    rust_binary(
+        name = "mull-runner-%s" % llvm_version,
+        srcs = [
+            "dynamic_libraries.rs",
+            "init_cli.rs",
+            "mull-runner.rs",
+            "mutant_extractor.rs",
+            "reporting.rs",
+            "runner.rs",
+        ],
+        crate_root = "mull-runner.rs",
+        proc_macro_deps = [
+            "@crates//:indoc",
+        ],
+        rustc_env = {
+            "MULL_LLVM_VERSION": EXACT_VERSION_MAPPING[llvm_version],
+            "MULL_VERSION": MULL_VERSION,
+        },
+        visibility = ["//visibility:public"],
+        deps = [
+            "//rust/mull-core",
+            "//rust/mull-filters",
+            "//rust/mull-reporters",
+            "//rust/mull-state",
+            "//rust/mull-tasks",
+            "@crates//:clap",
+            "@crates//:libc",
+            "@crates//:object",
+            "@crates//:serde_yaml",
+            "@crates//:wait-timeout",
         ],
     )
     for llvm_version in AVAILABLE_LLVM_VERSIONS

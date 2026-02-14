@@ -157,6 +157,40 @@ crate.spec(
     package = "indoc",
     version = "2.0",
 )
+crate.spec(
+    features = ["read"],
+    package = "object",
+    version = "0.36",
+)
+crate.spec(
+    package = "libc",
+    version = "0.2",
+)
+crate.spec(
+    package = "indicatif",
+    version = "0.17",
+)
+crate.spec(
+    package = "console",
+    version = "0.15",
+)
+crate.spec(
+    package = "rayon",
+    version = "1.10",
+)
+crate.spec(
+    package = "wait-timeout",
+    version = "0.2",
+)
+crate.spec(
+    package = "llvm_profparser",
+    version = "0.8",
+)
+crate.spec(
+    default_features = False,
+    package = "git2",
+    version = "0.19",
+)
 crate.annotation(
     additive_build_file_content = """
 cc_library(

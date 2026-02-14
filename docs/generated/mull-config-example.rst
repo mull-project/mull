@@ -14,9 +14,9 @@
    silent: false
    # Turn warnings into errors.
    strict: false
-   # Capture stdout/stderr from the original test run (enabled by default).
+   # Capture stdout/stderr from the original test run (enabled by default). DEPRECATED, use CLI flag instead.
    captureTestOutput: true
-   # Capture stdout/stderr from mutant test runs (enabled by default).
+   # Capture stdout/stderr from mutant test runs (enabled by default). DEPRECATED, use CLI flag instead.
    captureMutantOutput: true
    # Mutator IDs or groups to enable (e.g. cxx_add_to_sub, cxx_logical).
    mutators: []

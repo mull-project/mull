@@ -4,7 +4,7 @@
 #include "mull/MutationPoint.h"
 #include "mull/Mutators/CXX/CallMutators.h"
 #include "mull/Mutators/NegateConditionMutator.h"
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 #include "tests/unit/Helpers/BitcodeLoader.h"
 #include <mull/Mutators/CXX/ArithmeticMutators.h>
 #include <mull/Mutators/CXX/BitwiseMutators.h>

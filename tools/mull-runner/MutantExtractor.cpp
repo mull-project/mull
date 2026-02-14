@@ -1,6 +1,6 @@
 #include "MutantExtractor.h"
 #include "ObjectFile.h"
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 #include <llvm/Object/ObjectFile.h>
 #include <sstream>
 #include <unordered_set>

@@ -6,8 +6,8 @@ fn main() {
         cxx_gen::generate_header_and_cc(tokens, &opt).expect("Failed to generate cxx bridge");
 
     let out_dir = std::env::var("OUT_DIR").unwrap();
-    std::fs::write(format!("{out_dir}/core.rs.h"), &generated.header).unwrap();
-    std::fs::write(format!("{out_dir}/core.rs.cc"), &generated.implementation).unwrap();
+    std::fs::write(format!("{out_dir}/bridge.rs.h"), &generated.header).unwrap();
+    std::fs::write(format!("{out_dir}/bridge.rs.cc"), &generated.implementation).unwrap();
 
     println!("cargo:rerun-if-changed=src/lib.rs");
 }

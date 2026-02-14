@@ -1,5 +1,5 @@
 #include "MergeInstProfile.h"
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 #include <llvm/Config/llvm-config.h>
 #include <llvm/ProfileData/InstrProfReader.h>
 #include <llvm/ProfileData/InstrProfWriter.h>

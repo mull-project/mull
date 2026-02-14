@@ -31,8 +31,8 @@ def mull_build(name):
                 "@llvm_%s//:libllvm" % llvm_version,
                 "@reproc//:reproc++",
                 "@sqlite3",
-                "//rust/mull-core",
-                "//rust/mull-core:bridge",
+                "//rust/mull-cxx-bridge",
+                "//rust/mull-cxx-bridge:bridge",
             ],
         )
 

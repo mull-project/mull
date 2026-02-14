@@ -11,13 +11,13 @@ RUN: %clang_cxx %sysroot -O0 %pass_mull_ir_frontend -g sandbox/sample.cpp -o sam
 
 RUN: (unset TERM; %mull_runner sample.cpp-ir.exe -ide-reporter-show-killed 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 
-CHECK_MUTATE:[debug] GitDiffFilter: allowing instruction: {{.*}}/valid_age.h:4:7
-CHECK_MUTATE:[debug] GitDiffFilter: allowing instruction: {{.*}}/valid_age.h:4:11
+CHECK_MUTATE:[debug] GitDiffFilter: allowing mutant: {{.*}}/valid_age.h:4:11
+CHECK_MUTATE:[debug] GitDiffFilter: allowing mutant: {{.*}}/valid_age.h:4:11
 
 CHECK:[info] Killed mutants (2/2):
 CHECK:{{^.*}}valid_age.h:4:11: warning: Killed: Replaced >= with > [cxx_ge_to_gt]{{$}}
 CHECK:  if (age >= 21) { // This comment line creates a diff!
 CHECK:{{^.*}}valid_age.h:4:11: warning: Killed: Replaced >= with < [cxx_ge_to_lt]{{$}}
 CHECK:  if (age >= 21) { // This comment line creates a diff!
-CHECK:[info] All mutations have been killed
 CHECK:[info] Mutation score: 100%
+CHECK:[info] All mutations have been killed

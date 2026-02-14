@@ -3,7 +3,7 @@
 #include "mull/Runner.h"
 #include <mull/Path.h>
 
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 
 #include <iostream>
 #include <regex>

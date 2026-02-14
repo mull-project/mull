@@ -8,7 +8,7 @@
 #include "mull/Mutators/CXX/RemoveNegation.h"
 #include "mull/Mutators/Mutator.h"
 #include "mull/Mutators/NegateConditionMutator.h"
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 #include <llvm/ADT/STLExtras.h>
 #include <sstream>
 #include <unordered_set>

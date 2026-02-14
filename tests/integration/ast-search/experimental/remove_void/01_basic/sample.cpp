@@ -27,7 +27,7 @@ CHECK-MUTATE:[debug] CXXJunkDetector: mutation "Remove Void": {{.*}}sample.cpp:7
 RUN: (unset TERM; %mull_runner -debug -reporters=IDE -ide-reporter-show-killed %s-ir.exe 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 
 CHECK:[info] Killed mutants (1/1):
-CHECK:{{^.*}}sample.cpp:7:3: warning: Killed: Removed the call to the function [cxx_remove_void_call]{{$}}
+CHECK:{{^.*}}sample.cpp:7:3: warning: Killed: Replaced voidFunction() with  [cxx_remove_void_call]{{$}}
 CHECK:  voidFunction();
 CHECK:  ^
 CHECK:[info] Mutation score: 100%

@@ -14,7 +14,7 @@ CHECK:[info] Killed mutants (1/1):
 CHECK-NEXT:{{^.*}}/main.hh:2:12: warning: Killed: Replaced + with - [cxx_add_to_sub]{{$}}
 CHECK-NEXT:  return a + b;
 CHECK-NEXT:           ^
-CHECK-NEXT:[info] All mutations have been killed
 CHECK-NEXT:[info] Mutation score: 100%
+CHECK-NEXT:[info] All mutations have been killed
 
 */

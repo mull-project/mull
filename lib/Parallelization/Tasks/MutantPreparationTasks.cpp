@@ -1,7 +1,7 @@
 #include "mull/Parallelization/Tasks/MutantPreparationTasks.h"
 #include "mull/MutationPoint.h"
 #include "mull/Parallelization/Progress.h"
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 #include <llvm/IR/Constant.h>
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/Instructions.h>

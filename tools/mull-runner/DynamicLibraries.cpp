@@ -1,6 +1,6 @@
 #include "DynamicLibraries.h"
 #include "ObjectFile.h"
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 #include <llvm/Object/ELFObjectFile.h>
 #include <llvm/Object/ELFTypes.h>
 #include <llvm/Object/MachO.h>

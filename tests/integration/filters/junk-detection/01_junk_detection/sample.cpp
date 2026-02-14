@@ -23,6 +23,6 @@ WITH-JUNK-DETECTION:[info] Killed mutants (1/1):
 WITH-JUNK-DETECTION:{{^.*}}/sample.cpp:3:12: warning: Killed: Replaced + with - [cxx_add_to_sub]{{$}}
 WITH-JUNK-DETECTION:  return a + b;
 WITH-JUNK-DETECTION:           ^
-WITH-JUNK-DETECTION:[info] All mutations have been killed
 WITH-JUNK-DETECTION:[info] Mutation score: 100%
+WITH-JUNK-DETECTION:[info] All mutations have been killed
 **/
