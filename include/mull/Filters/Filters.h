@@ -14,8 +14,6 @@ class InstructionFilter;
 class MutationPointFilter;
 class MutantFilter;
 
-class CoverageFilter;
-
 class Filters {
 public:
   Filters(const MullConfig &configuration, const MullDiagnostics &diagnostics);
@@ -28,12 +26,9 @@ public:
 
   void enableNoDebugFilter();
   void enableFilePathFilter();
-  void enableGitDiffFilter();
   void enableBlockAddressFilter();
   void enableVariadicFunctionFilter();
   void enableManualFilter();
-  CoverageFilter *enableCoverageFilter(const std::string &profileName,
-                                       const std::vector<std::string> &objects);
 
 private:
   const MullConfig &configuration;

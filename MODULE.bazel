@@ -65,14 +65,6 @@ register_toolchains("@llvm_toolchain//:all")
 
 http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
 
-http_archive(
-    name = "json11",
-    build_file = ":third_party/json11/json11.BUILD",
-    integrity = "sha256-bJGfxwlz+J5gZzjkrGT5Grph/r/LIwQA4wv9x9PBszI=",
-    strip_prefix = "json11-402bcde713fbef0c67276fb09b07ffbe8ee13956",
-    urls = ["https://github.com/dropbox/json11/archive/402bcde713fbef0c67276fb09b07ffbe8ee13956.zip"],
-)
-
 python = use_extension("@rules_python//python/extensions:python.bzl", "python")
 python.toolchain(
     python_version = "3.13",

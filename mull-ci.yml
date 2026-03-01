@@ -4,5 +4,4 @@ excludePaths:
   - spdlog
   - googletest
   - reproc
-  - json11
   - llvm

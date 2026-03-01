@@ -51,26 +51,6 @@ mod ffi {
         config_path: String,
     }
 
-    struct CliConfig {
-        input_file: String,
-        test_program: String,
-        sqlite_report: String,
-        runner_args: Vec<String>,
-
-        reporters: Vec<String>,
-        report_name: String,
-        report_dir: String,
-        report_patch_base: String,
-        ide_reporter_show_killed: bool,
-
-        strict: bool,
-        allow_surviving: bool,
-        mutation_score_threshold: u32,
-
-        ld_search_paths: Vec<String>,
-        coverage_info: String,
-    }
-
     extern "Rust" {
         type MullDiagnostics;
 
@@ -88,13 +68,6 @@ mod ffi {
         fn config(self: &MullCore) -> &MullConfig;
         fn diag(self: &MullCore) -> &MullDiagnostics;
 
-        type MullCLI;
-        fn init_reporter_cli(args: Vec<String>, llvm_version: String) -> Box<MullCLI>;
-        fn init_runner_cli(args: Vec<String>, llvm_version: String) -> Box<MullCLI>;
-        fn config_cli(self: &MullCLI) -> &MullConfig;
-        fn diag_cli(self: &MullCLI) -> &MullDiagnostics;
-        fn cli(self: &MullCLI) -> &CliConfig;
-
         fn filter_mutants(
             diag: &MullDiagnostics,
             mutant_ids: Vec<String>,
@@ -104,7 +77,6 @@ mod ffi {
 }
 
 // Re-export FFI types
-pub use ffi::CliConfig;
 pub use ffi::DebugOptions;
 pub use ffi::MullConfig;
 
@@ -194,25 +166,6 @@ fn convert_config(src: &mull_core::MullConfig) -> ffi::MullConfig {
     }
 }
 
-fn convert_cli_config(src: &mull_core::CliConfig) -> ffi::CliConfig {
-    ffi::CliConfig {
-        input_file: src.input_file.clone(),
-        test_program: src.test_program.clone(),
-        sqlite_report: src.sqlite_report.clone(),
-        runner_args: src.runner_args.clone(),
-        reporters: src.reporters.clone(),
-        report_name: src.report_name.clone(),
-        report_dir: src.report_dir.clone(),
-        report_patch_base: src.report_patch_base.clone(),
-        ide_reporter_show_killed: src.ide_reporter_show_killed,
-        strict: src.strict,
-        allow_surviving: src.allow_surviving,
-        mutation_score_threshold: src.mutation_score_threshold,
-        ld_search_paths: src.ld_search_paths.clone(),
-        coverage_info: src.coverage_info.clone(),
-    }
-}
-
 /// FFI wrapper for core initialization
 pub struct MullCore {
     diag: MullDiagnostics,
@@ -230,51 +183,12 @@ impl MullCore {
 }
 
 /// FFI wrapper for CLI initialization
-pub struct MullCLI {
-    diag: MullDiagnostics,
-    config: ffi::MullConfig,
-    cli: ffi::CliConfig,
-}
-
-impl MullCLI {
-    fn config_cli(&self) -> &ffi::MullConfig {
-        &self.config
-    }
-
-    fn diag_cli(&self) -> &MullDiagnostics {
-        &self.diag
-    }
-
-    fn cli(&self) -> &ffi::CliConfig {
-        &self.cli
-    }
-}
 
 fn init_core_ffi() -> Box<MullCore> {
     let (diag, config) = mull_core::init_core();
     Box::new(MullCore {
         diag: MullDiagnostics::from_inner(diag),
         config: convert_config(&config),
-    })
-}
-
-fn init_runner_cli(args: Vec<String>, llvm_version: String) -> Box<MullCLI> {
-    let inner = mull_core::init_runner_cli(args, llvm_version);
-    let (diag, config, cli) = inner.into_parts();
-    Box::new(MullCLI {
-        diag: MullDiagnostics::from_inner(diag),
-        config: convert_config(&config),
-        cli: convert_cli_config(&cli),
-    })
-}
-
-fn init_reporter_cli(args: Vec<String>, llvm_version: String) -> Box<MullCLI> {
-    let inner = mull_core::init_reporter_cli(args, llvm_version);
-    let (diag, config, cli) = inner.into_parts();
-    Box::new(MullCLI {
-        diag: MullDiagnostics::from_inner(diag),
-        config: convert_config(&config),
-        cli: convert_cli_config(&cli),
     })
 }
 
