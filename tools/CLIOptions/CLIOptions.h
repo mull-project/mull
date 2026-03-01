@@ -32,8 +32,6 @@ buildReporterParameters(const CliConfig &cli,
 std::vector<std::unique_ptr<mull::Reporter>> createReporters(const MullDiagnostics &diagnostics,
                                                              const ReporterParameters &params);
 
-void dumpMutators(const MullDiagnostics &diagnostics, std::string out);
-
 /// Convert argv into a rust::Vec<rust::String> suitable for Rust CLI parsing.
 rust::Vec<rust::String> argsFromArgv(int argc, char **argv);
 

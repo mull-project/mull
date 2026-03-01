@@ -41,15 +41,6 @@ static std::string validateInputFile(const std::string &inputFile,
 int main(int argc, char **argv) {
   llvm::llvm_shutdown_obj llvmShutdownObj;
 
-  for (int i = 1; i < argc; i++) {
-    // TODO: Move elsewhere
-    if (std::string(argv[i]) == "--dump-mutators" && i + 1 < argc) {
-      auto core = init_core_ffi();
-      tool::dumpMutators(core->diag(), argv[i + 1]);
-      return 0;
-    }
-  }
-
   auto mullCLI =
       init_runner_cli(tool::argsFromArgv(argc, argv), rust::String(mull::llvmVersionString()));
   const auto &diagnostics = mullCLI->diag_cli();

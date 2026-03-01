@@ -102,3 +102,13 @@ def mull_build(name):
             ],
             tags = ["llvm_%s" % llvm_version],
         )
+
+    # Documentation tool - uses latest LLVM version only
+    latest_llvm = AVAILABLE_LLVM_VERSIONS[0]
+    cc_binary(
+        name = "mull-dump-mutators",
+        srcs = ["tools/mull-dump-mutators/mull-dump-mutators.cpp"],
+        deps = [
+            ":libmull_%s" % latest_llvm,
+        ],
+    )
