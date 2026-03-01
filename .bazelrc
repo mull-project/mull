@@ -1,5 +1,8 @@
 common --test_output=errors
 
+# Hermetic Rust builds: don't inherit shell environment in cargo build scripts
+common --@rules_rust//cargo/settings:use_default_shell_env=False
+
 try-import .bazel.buildbuddy.rc
 try-import .bazel.compilation_mode.bazelrc
 try-import .bazel.build_salt.bazelrc
