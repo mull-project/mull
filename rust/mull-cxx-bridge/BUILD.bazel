@@ -2,17 +2,15 @@ load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@rules_rust//cargo:defs.bzl", "cargo_build_script")
 load("@rules_rust//rust:defs.bzl", "rust_library")
 
-# Shim library to provide system library linkopts needed by Rust dependencies (libgit2, etc.)
+# Shim library to provide dependencies needed by Rust crates (libgit2, etc.)
 cc_library(
     name = "system_libs",
     linkopts = select({
-        "@platforms//os:macos": [
-            "-lz",
-            "-liconv",
-        ],
-        "//conditions:default": ["-lz"],
+        "@platforms//os:macos": ["-liconv"],
+        "//conditions:default": [],
     }),
     visibility = ["//visibility:public"],
+    deps = ["@zlib"],
 )
 
 cargo_build_script(
