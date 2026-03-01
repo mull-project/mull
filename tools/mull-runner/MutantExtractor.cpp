@@ -21,9 +21,10 @@ static std::vector<std::string> split(const std::string &input, char delimiter) 
   std::string string;
   std::istringstream stream(input);
   while (std::getline(stream, string, delimiter)) {
-    if (!string.empty()) {
-      output.push_back(string);
-    }
+    output.push_back(string);
+  }
+  if (!input.empty() && input.back() == delimiter) {
+    output.push_back("");
   }
   return output;
 }
@@ -60,11 +61,17 @@ MutantExtractor::extractMutants(const std::vector<std::string> &mutantHolders) {
 
   std::unordered_set<std::string> deduplicatedEncodings;
   for (auto &encoding : encodings) {
+    if (encoding.empty())
+      continue;
     deduplicatedEncodings.insert(encoding);
   }
   std::vector<std::unique_ptr<Mutant>> mutants;
   for (auto &encoding : deduplicatedEncodings) {
     std::vector<std::string> chunks = split(encoding, ':');
+
+    std::stringstream sss;
+    sss << ", chunks.size() == " << chunks.size();
+    diagnostics.debug(sss.str());
 
     std::string mutator = chunks[0];
     std::string location = chunks[1];
@@ -72,12 +79,20 @@ MutantExtractor::extractMutants(const std::vector<std::string> &mutantHolders) {
     int beginColumn = std::stoi(chunks[3]);
     int endLine = std::stoi(chunks[4]);
     int endColumn = std::stoi(chunks[5]);
+    std::string replacement = chunks.size() == 7 ? chunks[6] : "TBD";
+    auto mutantId = chunks.size() == 7 ? encoding.substr(0, encoding.rfind(':')) : encoding;
+
+    std::stringstream ss;
+    ss << "Found mutant " << encoding << " with id " << mutantId
+       << ", chunks.size() == " << chunks.size();
+    diagnostics.debug(ss.str());
 
     auto mutant = std::make_unique<Mutant>(
-        encoding,
+        mutantId,
         mutator,
         mull::SourceLocation("", location, "", location, beginLine, beginColumn),
-        mull::SourceLocation("", location, "", location, endLine, endColumn));
+        mull::SourceLocation("", location, "", location, endLine, endColumn),
+        replacement);
     mutants.push_back(std::move(mutant));
   }
 

@@ -1,25 +1,65 @@
---reporters REPORTER		Output reporters to use (IDE, SQLite, Elements, Patches, GithubAnnotations)
+.. code-block:: text
 
---report-dir DIR		Directory for report output files
+   Mull: mutation testing report generator
 
---report-name NAME		Filename for the report (only for supported reporters)
+   Usage: mull-reporter [OPTIONS] <SQLITE-REPORT>
 
---report-patch-base DIR		Base directory for patch file paths
+   Arguments:
+     <SQLITE-REPORT>
+             Path to the sqlite report
 
---ide-reporter-show-killed		Show killed mutations in IDE reporter output
+   Options:
+         --reporters <REPORTER>
+             Output reporters to use, more than one can be used at the same time
 
---debug		Enable debug mode with additional diagnostic output
+             Possible values:
+             - IDE:               IDE-friendly output with file:line:column format
+             - SQLite:            SQLite database for offline analysis
+             - GitHubAnnotations: GitHub Actions annotation format
+             - Patches:           Generate patch files for each mutation
+             - Elements:          Mutation Testing Elements JSON/HTML report
 
---strict		Treat warnings as fatal errors
+         --report-dir <DIR>
+             Directory for report output files
 
---allow-surviving		Do not treat surviving mutants as an error
+             [default: .]
 
---mutation-score-threshold SCORE		Minimum mutation score (0-100) required for success
+         --report-name <NAME>
+             Filename for the report (only for supported reporters)
 
---no-test-output		Does not capture output from test runs
+         --report-patch-base <DIR>
+             Base directory for patch file paths
 
---no-mutant-output		Does not capture output from mutant runs
+             [default: .]
 
---no-output		Combines --no-test-output and --no-mutant-output
+         --ide-reporter-show-killed
+             Show killed mutations in IDE reporter output
 
-SQLITE-REPORT		Path to the sqlite report
+         --debug
+             Enable debug mode with additional diagnostic output
+
+         --strict
+             Treat warnings as fatal errors
+
+         --allow-surviving
+             Do not treat surviving mutants as an error
+
+         --mutation-score-threshold <SCORE>
+             Minimum mutation score (0-100) required for success
+
+             [default: 100]
+
+         --no-test-output
+             Does not capture output from test runs
+
+         --no-mutant-output
+             Does not capture output from mutant runs
+
+         --no-output
+             Combines --no-test-output and --no-mutant-output
+
+     -h, --help
+             Print help (see a summary with '-h')
+
+     -V, --version
+             Print version

@@ -1,43 +1,92 @@
---test-program PATH		Path to a test program (if different from input executable)
+.. code-block:: text
 
---workers N		Number of parallel workers for mutation search
+   Mull: Practical mutation testing and fault injection for C and C++
 
---timeout MS		Timeout per test run in milliseconds
+   Usage: mull-runner [OPTIONS] <EXECUTABLE> [RUNNER_ARGS]...
 
---include-not-covered		Include mutants on lines not covered by tests
+   Arguments:
+     <EXECUTABLE>
+             Path to the executable under test
 
---dry-run		Skip mutant execution, only discover and report mutants
+     [RUNNER_ARGS]...
+             Arguments passed to the test runner
 
---ld-search-path DIR		Library search path
+   Options:
+         --test-program <PATH>
+             Path to a test program (if different from input executable)
 
---coverage-info PATH		Path to the coverage info file (LLVM profdata)
+         --workers <N>
+             Number of parallel workers for mutation search
 
---debug-coverage		Print coverage ranges
+         --timeout <MS>
+             Timeout per test run in milliseconds
 
---reporters REPORTER		Output reporters to use (IDE, SQLite, Elements, Patches, GithubAnnotations)
+         --include-not-covered
+             Include mutants on lines not covered by tests
 
---report-dir DIR		Directory for report output files
+         --dry-run
+             Skip mutant execution, only discover and report mutants
 
---report-name NAME		Filename for the report (only for supported reporters)
+         --ld-search-path <DIR>
+             Library search path
 
---report-patch-base DIR		Base directory for patch file paths
+         --coverage-info <PATH>
+             Path to the coverage info file (LLVM profdata)
 
---ide-reporter-show-killed		Show killed mutations in IDE reporter output
+         --debug-coverage
+             Print coverage ranges
 
---debug		Enable debug mode with additional diagnostic output
+         --reporters <REPORTER>
+             Output reporters to use, more than one can be used at the same time
 
---strict		Treat warnings as fatal errors
+             Possible values:
+             - IDE:               IDE-friendly output with file:line:column format
+             - SQLite:            SQLite database for offline analysis
+             - GitHubAnnotations: GitHub Actions annotation format
+             - Patches:           Generate patch files for each mutation
+             - Elements:          Mutation Testing Elements JSON/HTML report
 
---allow-surviving		Do not treat surviving mutants as an error
+         --report-dir <DIR>
+             Directory for report output files
 
---mutation-score-threshold SCORE		Minimum mutation score (0-100) required for success
+             [default: .]
 
---no-test-output		Does not capture output from test runs
+         --report-name <NAME>
+             Filename for the report (only for supported reporters)
 
---no-mutant-output		Does not capture output from mutant runs
+         --report-patch-base <DIR>
+             Base directory for patch file paths
 
---no-output		Combines --no-test-output and --no-mutant-output
+             [default: .]
 
-EXECUTABLE		Path to the executable under test
+         --ide-reporter-show-killed
+             Show killed mutations in IDE reporter output
 
-RUNNER_ARGS		Arguments passed to the test runner
+         --debug
+             Enable debug mode with additional diagnostic output
+
+         --strict
+             Treat warnings as fatal errors
+
+         --allow-surviving
+             Do not treat surviving mutants as an error
+
+         --mutation-score-threshold <SCORE>
+             Minimum mutation score (0-100) required for success
+
+             [default: 100]
+
+         --no-test-output
+             Does not capture output from test runs
+
+         --no-mutant-output
+             Does not capture output from mutant runs
+
+         --no-output
+             Combines --no-test-output and --no-mutant-output
+
+     -h, --help
+             Print help (see a summary with '-h')
+
+     -V, --version
+             Print version

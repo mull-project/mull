@@ -144,6 +144,19 @@ crate.spec(
     package = "serde_json",
     version = "1",
 )
+crate.spec(
+    features = ["bundled"],
+    package = "rusqlite",
+    version = "0.32",
+)
+crate.spec(
+    package = "unicode-width",
+    version = "0.2",
+)
+crate.spec(
+    package = "indoc",
+    version = "2.0",
+)
 crate.annotation(
     additive_build_file_content = """
 cc_library(

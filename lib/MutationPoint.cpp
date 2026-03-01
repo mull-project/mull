@@ -130,8 +130,8 @@ void MutationPoint::recordMutation() {
   assert(originalFunction != nullptr);
   llvm::Module *module = originalFunction->getParent();
   std::string encoding = getUserIdentifier();
-  llvm::Constant *constant =
-      llvm::ConstantDataArray::getString(module->getContext(), llvm::StringRef(encoding));
+  llvm::Constant *constant = llvm::ConstantDataArray::getString(
+      module->getContext(), llvm::StringRef(encoding + ':' + mutator->getReplacement()));
   auto *global = new llvm::GlobalVariable(*module,
                                           constant->getType(),
                                           true,

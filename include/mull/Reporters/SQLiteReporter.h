@@ -13,11 +13,6 @@ namespace mull {
 
 class Result;
 
-struct RawReport {
-  std::unordered_map<std::string, std::string> info;
-  std::unordered_map<std::string, std::vector<mull::ExecutionResult>> executionResults;
-};
-
 class SQLiteReporter : public Reporter {
 public:
   explicit SQLiteReporter(const MullDiagnostics &diagnostics, const std::string &reportDir = "",
@@ -27,7 +22,6 @@ public:
   void reportResults(const Result &result) override;
 
   std::string getDatabasePath();
-  static RawReport loadRawReport(const std::string &databasePath);
 
 private:
   const MullDiagnostics &diagnostics;

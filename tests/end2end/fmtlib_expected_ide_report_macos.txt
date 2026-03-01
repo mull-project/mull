@@ -1,4 +1,4 @@
-Killed mutants (87/128):
+[info] Killed mutants (87/128):
 include/fmt/base.h:1273:74: warning: Killed: Replaced + with - [cxx_add_to_sub]
   return static_cast<int>((0x3a55000000000000ull >> (2 * (c >> 3))) & 3) + 1;
                                                                          ^
@@ -260,7 +260,7 @@ test/scan.h:406:20: warning: Killed: Replaced + with - [cxx_add_to_sub]
 test/scan.h:423:18: warning: Killed: Replaced + with - [cxx_add_to_sub]
     n = (n << 4) + static_cast<unsigned>(digit);
                  ^
-Survived mutants (41/128):
+[info] Survived mutants (41/128):
 include/fmt/base.h:1295:33: warning: Survived: Replaced + with - [cxx_add_to_sub]
   return num_digits == digits10 + 1 &&
                                 ^
@@ -384,4 +384,4 @@ test/printf-test.cc:385:61: warning: Survived: Replaced + with - [cxx_add_to_sub
 test/scan.h:24:44: warning: Survived: Replaced + with - [cxx_add_to_sub]
   if (c >= 'A' && c <= 'F') return c - 'A' + 10;
                                            ^
-Mutation score: 67%
+[info] Mutation score: 67%
