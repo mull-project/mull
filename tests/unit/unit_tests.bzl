@@ -76,10 +76,6 @@ def mull_unit_tests(name):
         )
 
         native.filegroup(
-            name = "MutationFilters/GitDiffReaderTests.cpp_%s_fixtures" % llvm_version,
-        )
-
-        native.filegroup(
             name = "MutationFilters/MutationFilterTests.cpp_%s_fixtures" % llvm_version,
             srcs = [
                 "//tests/unit/fixtures/mutation_filters/file_path:%s_some_test_file_name.c.bc" % llvm_version,
@@ -96,15 +92,6 @@ def mull_unit_tests(name):
         native.filegroup(
             name = "Mutators/NegateConditionMutatorTest.cpp_%s_fixtures" % llvm_version,
             srcs = [":fixtures/hardcode/APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_negate_mutator.ll"],
-        )
-
-        native.filegroup(
-            name = "MutationTestingElementsReporterTest.cpp_%s_fixtures" % llvm_version,
-            srcs = [
-                "//tests/unit/fixtures/simple_test/count_letters:count_letters.c",
-                "//tests/unit/fixtures/simple_test/count_letters:%s_count_letters.c.bc" % llvm_version,
-                "//tests/unit/fixtures/simple_test/count_letters:%s_test_count_letters.c.bc" % llvm_version,
-            ],
         )
 
         native.filegroup(

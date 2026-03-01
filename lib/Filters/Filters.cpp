@@ -1,9 +1,7 @@
 #include "mull/Filters/Filters.h"
 
 #include "mull/Filters/BlockAddressFunctionFilter.h"
-#include "mull/Filters/CoverageFilter.h"
 #include "mull/Filters/FilePathFilter.h"
-#include "mull/Filters/GitDiffFilter.h"
 #include "mull/Filters/ManualFilter.h"
 #include "mull/Filters/NoDebugInfoFilter.h"
 #include "mull/Filters/VariadicFunctionFilter.h"
@@ -69,54 +67,6 @@ void Filters::enableFilePathFilter() {
       diagnostics.warning(warningMessage.str());
     }
   }
-}
-
-void Filters::enableGitDiffFilter() {
-  auto projectRoot = std::string(configuration.git_project_root);
-  if (!configuration.git_diff_ref.empty()) {
-    if (projectRoot.empty()) {
-      std::stringstream debugMessage;
-      debugMessage
-          << "gitDiffRef option has been provided but the path to the Git project root has not "
-             "been specified via gitProjectRoot. The incremental testing will be disabled.";
-      diagnostics.warning(debugMessage.str());
-    } else if (!llvm::sys::fs::is_directory(projectRoot)) {
-      std::stringstream debugMessage;
-      debugMessage << "directory provided by gitProjectRoot does not exist, ";
-      debugMessage << "the incremental testing will be disabled: ";
-      debugMessage << projectRoot;
-      diagnostics.warning(debugMessage.str());
-    } else {
-      llvm::SmallString<256> tmpGitProjectRoot;
-      if (!llvm::sys::fs::real_path(projectRoot, tmpGitProjectRoot)) {
-        projectRoot = tmpGitProjectRoot.str();
-
-        std::string gitDiffBranch = std::string(configuration.git_diff_ref);
-        diagnostics.info(std::string("Incremental testing using Git Diff is enabled.\n") +
-                         "- Git ref: " + gitDiffBranch + "\n" +
-                         "- Git project root: " + projectRoot);
-        mull::GitDiffFilter *gitDiffFilter = mull::GitDiffFilter::createFromGitDiff(
-            configuration, diagnostics, projectRoot, gitDiffBranch);
-
-        if (gitDiffFilter) {
-          storage.emplace_back(gitDiffFilter);
-          instructionFilters.push_back(gitDiffFilter);
-          mutantFilters.push_back(gitDiffFilter);
-        }
-      } else {
-        diagnostics.warning(std::string("could not expand gitProjectRoot to an absolute path: ") +
-                            projectRoot);
-      }
-    }
-  }
-}
-
-CoverageFilter *Filters::enableCoverageFilter(const std::string &profileName,
-                                              const std::vector<std::string> &objects) {
-  auto filter = new CoverageFilter(configuration, diagnostics, profileName, objects);
-  storage.emplace_back(filter);
-  mutantFilters.push_back(filter);
-  return filter;
 }
 
 void Filters::enableBlockAddressFilter() {

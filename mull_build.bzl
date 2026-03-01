@@ -36,26 +36,6 @@ def mull_build(name):
             ],
         )
 
-        cc_library(
-            name = "libmull_cli_options_%s" % llvm_version,
-            srcs = ["tools/CLIOptions/CLIOptions.cpp"],
-            hdrs = ["tools/CLIOptions/CLIOptions.h"],
-            deps = [
-                ":libmull_%s" % llvm_version,
-                "@llvm_%s//:libllvm" % llvm_version,
-            ],
-        )
-
-        cc_library(
-            name = "libmull_runner_%s" % llvm_version,
-            srcs = native.glob(["tools/mull-runner/*.cpp"]),
-            hdrs = native.glob(["tools/mull-runner/*.h"]),
-            deps = [
-                "libmull_%s" % llvm_version,
-                ":libmull_cli_options_%s" % llvm_version,
-            ],
-        )
-
         cc_binary(
             name = "mull-cxx-ir-frontend-%s" % llvm_version,
             srcs = native.glob(["tools/mull-ir-frontend/*.cpp"]),
@@ -95,15 +75,7 @@ def mull_build(name):
             cmd = "cp $(SRCS) $(OUTS)",
         )
 
-        cc_binary(
-            name = "mull-runner-%s" % llvm_version,
-            deps = [
-                ":libmull_runner_%s" % llvm_version,
-            ],
-            tags = ["llvm_%s" % llvm_version],
-        )
-
-    # Documentation tool - uses latest LLVM version only
+    # Documentation tool - uses single LLVM version only
     latest_llvm = AVAILABLE_LLVM_VERSIONS[0]
     cc_binary(
         name = "mull-dump-mutators",
