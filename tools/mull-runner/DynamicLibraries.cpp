@@ -1,7 +1,6 @@
 #include "DynamicLibraries.h"
 #include "ObjectFile.h"
-#include "mull/Diagnostics/Diagnostics.h"
-
+#include "rust/mull-core/core.rs.h"
 #include <llvm/Object/ELFObjectFile.h>
 #include <llvm/Object/ELFTypes.h>
 #include <llvm/Object/MachO.h>
@@ -99,7 +98,7 @@ static std::string resolveLibraryPath(const std::string &library,
   return library;
 }
 
-void mull::resolveLibraries(mull::Diagnostics &diagnostics,
+void mull::resolveLibraries(const MullDiagnostics &diagnostics,
                             std::vector<std::string> &resolvedLibraries,
                             const std::vector<std::string> &libraries,
                             const std::vector<std::string> &librarySearchPaths) {
@@ -128,7 +127,7 @@ void mull::resolveLibraries(mull::Diagnostics &diagnostics,
   }
 }
 
-std::vector<std::string> mull::getDynamicLibraryDependencies(mull::Diagnostics &diagnostics,
+std::vector<std::string> mull::getDynamicLibraryDependencies(const MullDiagnostics &diagnostics,
                                                              const std::string &executablePath) {
   std::vector<std::string> libraries;
   auto [buffer, objectFile] = mull::loadObjectFile(diagnostics, executablePath);
@@ -154,7 +153,7 @@ std::vector<std::string> mull::getDynamicLibraryDependencies(mull::Diagnostics &
   return libraries;
 }
 
-bool mull::hasCoverage(mull::Diagnostics &diagnostics, const std::string &path) {
+bool mull::hasCoverage(const MullDiagnostics &diagnostics, const std::string &path) {
   auto [buffer, objectFile] = loadObjectFile(diagnostics, path);
   if (!objectFile) {
     return false;

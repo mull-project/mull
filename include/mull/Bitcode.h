@@ -15,7 +15,6 @@ class LLVMContext;
 namespace mull {
 
 class MutationPoint;
-class Diagnostics;
 
 class Bitcode {
 public:

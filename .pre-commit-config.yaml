@@ -20,3 +20,14 @@ repos:
     rev: 'v19.1.5'
     hooks:
       - id: clang-format
+  - repo: local
+    hooks:
+      - id: rustfmt
+        name: rustfmt
+        entry: rustfmt
+        language: system
+        types: [rust]
+  - repo: https://github.com/keith/pre-commit-buildifier
+    rev: 8.0.3
+    hooks:
+      - id: buildifier

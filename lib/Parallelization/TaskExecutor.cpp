@@ -1,5 +1,5 @@
 #include "mull/Parallelization/TaskExecutor.h"
-#include "mull/Diagnostics/Diagnostics.h"
+#include "rust/mull-core/core.rs.h"
 #include <cassert>
 #include <sstream>
 
@@ -34,7 +34,7 @@ std::vector<int> taskBatches(size_t itemsCount, size_t tasks) {
   return result;
 }
 
-void printTimeSummary(Diagnostics &diagnostics, MetricsMeasure measure) {
+void printTimeSummary(const MullDiagnostics &diagnostics, MetricsMeasure measure) {
   std::stringstream stringstream;
   stringstream << ". Finished in " << measure.duration() << MetricsMeasure::precision();
   diagnostics.progress(stringstream.str());

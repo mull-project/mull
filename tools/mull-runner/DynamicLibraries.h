@@ -2,18 +2,17 @@
 
 #include <string>
 #include <vector>
-
+struct MullDiagnostics;
 namespace mull {
 
-class Diagnostics;
-
-void resolveLibraries(mull::Diagnostics &diagnostics, std::vector<std::string> &resolvedLibraries,
+void resolveLibraries(const MullDiagnostics &diagnostics,
+                      std::vector<std::string> &resolvedLibraries,
                       const std::vector<std::string> &libraries,
                       const std::vector<std::string> &librarySearchPaths);
 
-std::vector<std::string> getDynamicLibraryDependencies(mull::Diagnostics &diagnostics,
+std::vector<std::string> getDynamicLibraryDependencies(const MullDiagnostics &diagnostics,
                                                        const std::string &executablePath);
 
-bool hasCoverage(mull::Diagnostics &diagnostics, const std::string &path);
+bool hasCoverage(const MullDiagnostics &diagnostics, const std::string &path);
 
 } // namespace mull

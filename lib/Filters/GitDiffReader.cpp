@@ -1,8 +1,9 @@
 #include "mull/Filters/GitDiffReader.h"
 
-#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/Runner.h"
 #include <mull/Path.h>
+
+#include "rust/mull-core/core.rs.h"
 
 #include <iostream>
 #include <regex>
@@ -10,7 +11,7 @@
 
 using namespace mull;
 
-GitDiffReader::GitDiffReader(Diagnostics &diagnostics, const std::string gitRepoPath)
+GitDiffReader::GitDiffReader(const MullDiagnostics &diagnostics, const std::string gitRepoPath)
     : diagnostics(diagnostics), gitRepoPath(gitRepoPath) {}
 
 GitDiffInfo GitDiffReader::readGitDiff(const std::string &gitBranch) {

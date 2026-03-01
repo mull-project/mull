@@ -12,6 +12,6 @@ int main() {
 RUN: %clang_cxx %sysroot %pass_mull_ir_frontend -g %s -o %s.exe
 RUN: MULL_CONFIG=%S/mull-group.yml %clang_cxx %sysroot %pass_mull_ir_frontend -g %s -o %s-group.exe
 RUN: unset TERM; %mull_runner -reporters=IDE %s.exe | %filecheck %s --dump-input=fail
-RUN: unset TERM; %mull_runner -reporters=IDE %s-group.exe | %filecheck %s --dump-input=fail
+RUN: unset TERM; env MULL_CONFIG=%S/mull-group.yml %mull_runner -reporters=IDE %s-group.exe | %filecheck %s --dump-input=fail
 CHECK:[info] No mutants found. Mutation score: infinitely high
 **/

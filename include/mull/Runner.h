@@ -6,20 +6,20 @@
 #include <unordered_map>
 #include <vector>
 
-namespace mull {
+struct MullDiagnostics;
 
-class Diagnostics;
+namespace mull {
 
 class Runner {
 public:
-  explicit Runner(Diagnostics &diagnostics);
+  explicit Runner(const MullDiagnostics &diagnostics);
   ExecutionResult runProgram(const std::string &program, const std::vector<std::string> &arguments,
                              const std::unordered_map<std::string, std::string> &environment,
                              long long int timeout, bool captureOutput, bool failSilently,
                              std::optional<std::string> optionalWorkingDirectory);
 
 private:
-  Diagnostics &diagnostics;
+  const MullDiagnostics &diagnostics;
 };
 
 } // namespace mull

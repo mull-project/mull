@@ -1,7 +1,7 @@
 #include "FixturePaths.h"
+#include "rust/mull-core/core.rs.h"
 #include "tests/unit/Helpers/BitcodeLoader.h"
 #include <gtest/gtest.h>
-#include <mull/Diagnostics/Diagnostics.h>
 #include <mull/FunctionUnderTest.h>
 #include <mull/Mutators/CXX/RelationalMutators.h>
 
@@ -9,7 +9,8 @@ using namespace mull;
 using namespace llvm;
 
 TEST(Relational, LessThanToLessOrEqual) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
       fixtures::tests_unit_fixtures_mutators_boundary_module_cpp_bc_path(), diagnostics);
@@ -27,7 +28,8 @@ TEST(Relational, LessThanToLessOrEqual) {
 }
 
 TEST(Relational, LessOrEqualToLessThan) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
       fixtures::tests_unit_fixtures_mutators_boundary_module_cpp_bc_path(), diagnostics);
@@ -45,7 +47,8 @@ TEST(Relational, LessOrEqualToLessThan) {
 }
 
 TEST(Relational, GreaterThanToGreaterOrEqual) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
       fixtures::tests_unit_fixtures_mutators_boundary_module_cpp_bc_path(), diagnostics);
@@ -63,7 +66,8 @@ TEST(Relational, GreaterThanToGreaterOrEqual) {
 }
 
 TEST(Relational, GreaterOrEqualToGreaterThan) {
-  Diagnostics diagnostics;
+  auto core = init_core_ffi();
+  const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
       fixtures::tests_unit_fixtures_mutators_boundary_module_cpp_bc_path(), diagnostics);

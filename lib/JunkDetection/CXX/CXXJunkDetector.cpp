@@ -1,6 +1,5 @@
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
 
-#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/JunkDetection/CXX/Visitors/BinaryVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/NegateConditionVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/RemoveVoidFunctionVisitor.h"
@@ -10,10 +9,11 @@
 #include "mull/MutationPoint.h"
 #include "mull/Mutators/CXX/RemoveNegation.h"
 #include "mull/Mutators/Mutator.h"
+#include "rust/mull-core/core.rs.h"
 
 using namespace mull;
 
-CXXJunkDetector::CXXJunkDetector(Diagnostics &diagnostics, ASTStorage &astStorage)
+CXXJunkDetector::CXXJunkDetector(const MullDiagnostics &diagnostics, ASTStorage &astStorage)
     : diagnostics(diagnostics), astStorage(astStorage) {}
 
 static const clang::Stmt *findMutantExpression(MutationPoint *point,

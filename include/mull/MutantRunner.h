@@ -1,18 +1,19 @@
 #pragma once
 
 #include "Runner.h"
-#include "mull/Config/Configuration.h"
-#include "mull/Diagnostics/Diagnostics.h"
 #include "mull/MutationResult.h"
 
 #include <memory>
 #include <vector>
 
+struct MullConfig;
+struct MullDiagnostics;
+
 namespace mull {
 
 class MutantRunner {
 public:
-  MutantRunner(Diagnostics &diagnostics, const Configuration &configuration, Runner &runner);
+  MutantRunner(const MullDiagnostics &diagnostics, const MullConfig &configuration, Runner &runner);
   std::vector<std::unique_ptr<MutationResult>>
   runMutants(const std::string &executable, std::vector<std::unique_ptr<Mutant>> &mutants);
   std::vector<std::unique_ptr<MutationResult>>
@@ -20,8 +21,8 @@ public:
              std::vector<std::unique_ptr<Mutant>> &mutants);
 
 private:
-  Diagnostics &diagnostics;
-  const Configuration &configuration;
+  const MullDiagnostics &diagnostics;
+  const MullConfig &configuration;
   Runner &runner;
 };
 

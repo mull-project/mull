@@ -1,5 +1,5 @@
 #include "ObjectFile.h"
-
+#include "rust/mull-core/core.rs.h"
 #include <llvm/Object/ELF.h>
 #include <llvm/Object/MachO.h>
 #include <llvm/Object/MachOUniversal.h>
@@ -19,7 +19,7 @@ static std::string getCurrentArch() {
 }
 
 static std::unique_ptr<llvm::object::ObjectFile>
-getFirstObject(mull::Diagnostics &diagnostics, const std::string &executablePath,
+getFirstObject(const MullDiagnostics &diagnostics, const std::string &executablePath,
                llvm::object::MachOUniversalBinary &binary) {
   assert(!binary.objects().empty());
   auto object = *binary.objects().begin();
@@ -33,7 +33,7 @@ getFirstObject(mull::Diagnostics &diagnostics, const std::string &executablePath
 }
 
 static std::unique_ptr<llvm::object::ObjectFile>
-getObjectFile(mull::Diagnostics &diagnostics, const std::string &executablePath,
+getObjectFile(const MullDiagnostics &diagnostics, const std::string &executablePath,
               std::unique_ptr<llvm::MemoryBuffer> &buffer) {
   auto binaryOr = llvm::object::createBinary(buffer->getMemBufferRef());
   if (!binaryOr) {
@@ -72,7 +72,7 @@ getObjectFile(mull::Diagnostics &diagnostics, const std::string &executablePath,
   return {};
 }
 
-mull::OwnedObjectFile mull::loadObjectFile(mull::Diagnostics &diagnostics,
+mull::OwnedObjectFile mull::loadObjectFile(const MullDiagnostics &diagnostics,
                                            const std::string &executablePath) {
   auto bufferOr = llvm::MemoryBuffer::getFile(executablePath);
   if (!bufferOr) {

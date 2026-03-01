@@ -1,8 +1,5 @@
 #include "mull/Runner.h"
-
-#include "mull/Config/Configuration.h"
-#include "mull/Diagnostics/Diagnostics.h"
-
+#include "rust/mull-core/core.rs.h"
 #include <reproc++/drain.hpp>
 #include <reproc++/reproc.hpp>
 #include <sstream>
@@ -25,7 +22,7 @@ static std::pair<std::string, std::string> drainProcess(reproc::process &process
   return std::make_pair(out, err);
 }
 
-Runner::Runner(Diagnostics &diagnostics) : diagnostics(diagnostics) {}
+Runner::Runner(const MullDiagnostics &diagnostics) : diagnostics(diagnostics) {}
 
 ExecutionResult Runner::runProgram(const std::string &program,
                                    const std::vector<std::string> &arguments,
