@@ -1,6 +1,6 @@
 use mull_core::{diag_debug, diag_warning, diagnostics::MullDiagnostics};
-use object::Object;
-use std::collections::HashSet;
+use object::read::elf::{Dyn, FileHeader, SectionHeader};
+use object::Endianness;
 use std::fs;
 use std::path::Path;
 
@@ -31,19 +31,9 @@ pub fn get_dynamic_library_dependencies(diag: &MullDiagnostics, path: &str) -> V
     match &file {
         object::File::MachO32(macho) => libraries_from_macho(macho, &mut libraries),
         object::File::MachO64(macho) => libraries_from_macho(macho, &mut libraries),
-        _ => {
-            // For ELF and others, imports() works correctly
-            if let Ok(imports) = file.imports() {
-                let mut seen = HashSet::new();
-                for import in imports {
-                    if let Ok(lib) = std::str::from_utf8(import.library()) {
-                        if !lib.is_empty() && seen.insert(lib.to_string()) {
-                            libraries.push(lib.to_string());
-                        }
-                    }
-                }
-            }
-        }
+        object::File::Elf32(elf) => libraries_from_elf(elf, &mut libraries),
+        object::File::Elf64(elf) => libraries_from_elf(elf, &mut libraries),
+        _ => {}
     }
 
     for lib in &libraries {
@@ -51,6 +41,53 @@ pub fn get_dynamic_library_dependencies(diag: &MullDiagnostics, path: &str) -> V
     }
 
     libraries
+}
+
+fn libraries_from_elf<Elf: FileHeader<Endian = Endianness>>(
+    elf: &object::read::elf::ElfFile<'_, Elf>,
+    libraries: &mut Vec<String>,
+) {
+    use object::read::StringTable;
+
+    let endian = elf.endian();
+    let sections = elf.elf_section_table();
+    let data = elf.data();
+
+    // Find the dynamic section and get DT_NEEDED entries
+    for section in sections.iter() {
+        if section.sh_type(endian) != object::elf::SHT_DYNAMIC {
+            continue;
+        }
+
+        // Get the dynamic entries and linked string table
+        let Ok(Some((dynamic_entries, link))) = section.dynamic(endian, data) else {
+            continue;
+        };
+
+        // Get the string table from the linked section
+        let Ok(strtab_section) = sections.section(link) else {
+            continue;
+        };
+        let Ok(strtab_data) = strtab_section.data(endian, data) else {
+            continue;
+        };
+        let strings = StringTable::new(strtab_data, 0, strtab_data.len() as u64);
+
+        // Extract DT_NEEDED entries
+        for dyn_entry in dynamic_entries {
+            let tag = dyn_entry.tag32(endian);
+            if tag == Some(object::elf::DT_NEEDED) {
+                if let Ok(name) = dyn_entry.string(endian, strings) {
+                    if let Ok(s) = std::str::from_utf8(name) {
+                        libraries.push(s.to_string());
+                    }
+                }
+            } else if tag == Some(object::elf::DT_NULL) {
+                break;
+            }
+        }
+        break; // Only process first dynamic section
+    }
 }
 
 fn libraries_from_macho<Mach: object::read::macho::MachHeader>(
