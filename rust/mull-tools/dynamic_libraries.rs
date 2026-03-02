@@ -1,6 +1,8 @@
 use mull_core::{diag_debug, diag_warning, diagnostics::MullDiagnostics};
 use object::read::elf::{Dyn, FileHeader, SectionHeader};
 use object::Endianness;
+#[cfg(target_os = "macos")]
+use object::Object;
 use std::fs;
 use std::path::Path;
 
