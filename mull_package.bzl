@@ -138,7 +138,7 @@ def mull_package(name):
             name = "%s-binaries" % package_name,
             srcs = [
                 "//rust/mull-tools:mull-reporter-%s" % llvm_version,
-                "//:mull-runner-%s" % llvm_version,
+                "//rust/mull-tools:mull-runner-%s" % llvm_version,
             ],
             prefix = "%sbin" % prefix,
             attributes = pkg_attributes(mode = "755"),
