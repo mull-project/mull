@@ -7,8 +7,6 @@ rust_library(
     deps = [
         "//rust/mull-core",
         "@crates//:console",
-        "@crates//:indicatif",
-        "@crates//:libc",
         "@crates//:rayon",
     ],
 )

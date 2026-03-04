@@ -168,10 +168,6 @@ crate.spec(
     version = "0.2",
 )
 crate.spec(
-    package = "indicatif",
-    version = "0.17",
-)
-crate.spec(
     package = "console",
     version = "0.15",
 )

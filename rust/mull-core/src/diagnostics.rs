@@ -9,7 +9,6 @@ pub struct MullDiagnostics {
     quiet: AtomicBool,
     silent: AtomicBool,
     use_colors: bool,
-    progress_active: AtomicBool,
     needs_newline: Mutex<bool>,
     writer: Mutex<Box<dyn Write + Send>>,
 }
@@ -26,7 +25,6 @@ impl MullDiagnostics {
             quiet: AtomicBool::new(false),
             silent: AtomicBool::new(false),
             use_colors,
-            progress_active: AtomicBool::new(false),
             needs_newline: Mutex::new(false),
             writer: Mutex::new(writer),
         }
@@ -41,17 +39,12 @@ impl MullDiagnostics {
     }
 
     fn prepare(&self) {
-        // Check if we need a newline (either progress is active or we've seen progress output)
-        let needs_newline = if self.progress_active.load(Ordering::Relaxed) {
+        let mut needs = self.needs_newline.lock().unwrap();
+        let needs_newline = if *needs {
+            *needs = false;
             true
         } else {
-            let mut needs = self.needs_newline.lock().unwrap();
-            if *needs {
-                *needs = false;
-                true
-            } else {
-                false
-            }
+            false
         };
 
         if needs_newline {
@@ -75,17 +68,6 @@ impl MullDiagnostics {
 
     pub fn make_silent(&self) {
         self.silent.store(true, Ordering::Relaxed);
-    }
-
-    /// Mark that progress output is active (e.g., from indicatif).
-    /// This ensures any info/debug/etc messages will start on a new line.
-    pub fn mark_progress_active(&self) {
-        self.progress_active.store(true, Ordering::Relaxed);
-    }
-
-    /// Mark that progress output has finished.
-    pub fn mark_progress_finished(&self) {
-        self.progress_active.store(false, Ordering::Relaxed);
     }
 
     // C++ FFI APIs
