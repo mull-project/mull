@@ -78,11 +78,13 @@ where
 
     let pb = create_progress_bar(1);
     let start = Instant::now();
+    diag.mark_progress_active();
 
     let result = task();
 
     pb.inc(1);
     pb.finish_with_message(format!("Finished in {}", format_elapsed(start.elapsed())));
+    diag.mark_progress_finished();
 
     result
 }
@@ -108,6 +110,8 @@ where
     diag_info!(diag, "{} (threads: {})", name, workers);
 
     let pb = create_progress_bar(total);
+    diag.mark_progress_active();
+
     let pool = rayon::ThreadPoolBuilder::new()
         .num_threads(workers)
         .build()
@@ -127,6 +131,7 @@ where
     });
 
     pb.finish_with_message(format!("Finished in {}", format_elapsed(start.elapsed())));
+    diag.mark_progress_finished();
 
     results
 }

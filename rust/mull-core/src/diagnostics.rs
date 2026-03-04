@@ -9,7 +9,8 @@ pub struct MullDiagnostics {
     quiet: AtomicBool,
     silent: AtomicBool,
     use_colors: bool,
-    seen_progress: Mutex<bool>,
+    progress_active: AtomicBool,
+    needs_newline: Mutex<bool>,
     writer: Mutex<Box<dyn Write + Send>>,
 }
 
@@ -25,7 +26,8 @@ impl MullDiagnostics {
             quiet: AtomicBool::new(false),
             silent: AtomicBool::new(false),
             use_colors,
-            seen_progress: Mutex::new(false),
+            progress_active: AtomicBool::new(false),
+            needs_newline: Mutex::new(false),
             writer: Mutex::new(writer),
         }
     }
@@ -39,12 +41,17 @@ impl MullDiagnostics {
     }
 
     fn prepare(&self) {
-        let mut seen = self.seen_progress.lock().unwrap();
-        let needs_newline = if *seen {
-            *seen = false;
+        // Check if we need a newline (either progress is active or we've seen progress output)
+        let needs_newline = if self.progress_active.load(Ordering::Relaxed) {
             true
         } else {
-            false
+            let mut needs = self.needs_newline.lock().unwrap();
+            if *needs {
+                *needs = false;
+                true
+            } else {
+                false
+            }
         };
 
         if needs_newline {
@@ -70,6 +77,17 @@ impl MullDiagnostics {
         self.silent.store(true, Ordering::Relaxed);
     }
 
+    /// Mark that progress output is active (e.g., from indicatif).
+    /// This ensures any info/debug/etc messages will start on a new line.
+    pub fn mark_progress_active(&self) {
+        self.progress_active.store(true, Ordering::Relaxed);
+    }
+
+    /// Mark that progress output has finished.
+    pub fn mark_progress_finished(&self) {
+        self.progress_active.store(false, Ordering::Relaxed);
+    }
+
     // C++ FFI APIs
 
     pub fn info(&self, message: &str) {
@@ -93,8 +111,8 @@ impl MullDiagnostics {
             return;
         }
         {
-            let mut seen = self.seen_progress.lock().unwrap();
-            *seen = true;
+            let mut needs = self.needs_newline.lock().unwrap();
+            *needs = true;
         }
         let mut w = self.writer.lock().unwrap();
         let _ = write!(w, "{}", message);
