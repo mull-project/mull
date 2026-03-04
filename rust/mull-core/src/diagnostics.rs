@@ -10,7 +10,6 @@ pub struct MullDiagnostics {
     silent: AtomicBool,
     use_colors: bool,
     seen_progress: Mutex<bool>,
-    progress_bar_active: AtomicBool,
     writer: Mutex<Box<dyn Write + Send>>,
 }
 
@@ -27,7 +26,6 @@ impl MullDiagnostics {
             silent: AtomicBool::new(false),
             use_colors,
             seen_progress: Mutex::new(false),
-            progress_bar_active: AtomicBool::new(false),
             writer: Mutex::new(writer),
         }
     }
@@ -41,18 +39,12 @@ impl MullDiagnostics {
     }
 
     fn prepare(&self) {
-        // When not in a terminal and a progress bar is active, always print a newline
-        // to avoid debug messages appearing on the same line as progress output
-        let needs_newline = if self.progress_bar_active.load(Ordering::Relaxed) {
+        let mut seen = self.seen_progress.lock().unwrap();
+        let needs_newline = if *seen {
+            *seen = false;
             true
         } else {
-            let mut seen = self.seen_progress.lock().unwrap();
-            if *seen {
-                *seen = false;
-                true
-            } else {
-                false
-            }
+            false
         };
 
         if needs_newline {
@@ -107,16 +99,6 @@ impl MullDiagnostics {
         let mut w = self.writer.lock().unwrap();
         let _ = write!(w, "{}", message);
         let _ = w.flush();
-    }
-
-    /// Mark that a progress bar is active (so subsequent messages print a newline first)
-    pub fn mark_progress_active(&self) {
-        self.progress_bar_active.store(true, Ordering::Relaxed);
-    }
-
-    /// Mark that the progress bar has finished
-    pub fn mark_progress_finished(&self) {
-        self.progress_bar_active.store(false, Ordering::Relaxed);
     }
 
     pub fn raw_fmt(&self, args: std::fmt::Arguments) {
