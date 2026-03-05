@@ -69,10 +69,10 @@ pub fn run_program(
             }
         }
         Ok(None) => {
-            // Timed out - capture output before killing
-            capture(&mut child, &mut stdout, &mut stderr);
+            // Timed out - kill first, then capture whatever was buffered
             let _ = child.kill();
             let _ = child.wait();
+            capture(&mut child, &mut stdout, &mut stderr);
             ExecutionResult {
                 status: ExecutionStatus::Timedout,
                 exit_status: -1,

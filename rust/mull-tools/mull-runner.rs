@@ -250,6 +250,12 @@ fn main() {
 
     let mutant_timeout_ms = std::cmp::max(30, baseline.running_time as u64 * 10);
     let mutant_timeout = Duration::from_millis(mutant_timeout_ms);
+    diag_debug!(
+        diag,
+        "Baseline: {}ms, mutant timeout: {}ms",
+        baseline.running_time,
+        mutant_timeout_ms
+    );
     let total = filtered_mutants.len();
     let results: Vec<(Mutant, ExecutionResult)> = run_parallel_task(
         &diag,
@@ -257,6 +263,16 @@ fn main() {
         workers,
         filtered_mutants,
         |idx, mutant| {
+            diag_debug!(
+                diag,
+                "[{}/{}] Running: {}={} {} {}",
+                idx + 1,
+                total,
+                mutant.identifier,
+                "1",
+                executable,
+                args.join(" ")
+            );
             let result = run_program(
                 executable,
                 args,
