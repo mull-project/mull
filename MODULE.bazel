@@ -185,6 +185,7 @@ crate.spec(
 )
 crate.spec(
     default_features = False,
+    features = ["vendored-libgit2"],
     package = "git2",
     version = "0.19",
 )
