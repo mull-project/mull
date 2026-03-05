@@ -92,10 +92,8 @@ impl MullDiagnostics {
         if self.quiet.load(Ordering::Relaxed) {
             return;
         }
-        {
-            let mut needs = self.needs_newline.lock().unwrap();
-            *needs = true;
-        }
+        let mut needs = self.needs_newline.lock().unwrap();
+        *needs = true;
         let mut w = self.writer.lock().unwrap();
         let _ = write!(w, "{}", message);
         let _ = w.flush();
