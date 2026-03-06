@@ -31,6 +31,13 @@ jobs:
           bazel build //...
           bazel test //...
           mv -v bazel-bin/Mull-*.zip packages/
+      - name: Upload fmt SQLite report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fmt-sqlite-report-macos-llvm-${{ matrix.LLVM_VERSION }}
+          path: bazel-bin/tests/end2end/fmt_sqlite_report_${{ matrix.LLVM_VERSION }}.sqlite
+          if-no-files-found: ignore
       - name: Publish package
         if: env.CLOUDSMITH_API_KEY != null
         run: |
