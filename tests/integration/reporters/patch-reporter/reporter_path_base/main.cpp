@@ -20,7 +20,7 @@ RUN: cd %S; %clang_cxx %sysroot -O0 %pass_mull_ir_frontend -g Output/sandbox/mai
 RUN: cd %S/Output; (unset TERM; %mull_runner --report-patch-base %S -debug ./main.cpp-ir.exe --report-name test-ir --reporters Patches --reporters SQLite; test $? = 0; ls -R %S/Output/test-ir-patches; cd %S/Output/test-ir-patches; cat `ls`) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 RUN: cd %S/Output; (unset TERM; %mull_reporter --report-patch-base %S -debug test-ir.sqlite  --report-name test-ir2 --reporters Patches; test $? = 0; ls -R %S/Output/test-ir2-patches; cd %S/Output/test-ir2-patches; cat `ls`) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 
-CHECK:[debug] Writing Patchfile: {{.*}}
+CHECK:{{.*}}[debug] Writing Patchfile: {{.*}}
 CHECK:[info] Patchfiles can be found at './test{{.*}}-patches'
 CHECK:--- a/Output/sandbox/main.cpp 0
 CHECK:+{{\s+}}return a != b;

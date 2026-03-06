@@ -16,6 +16,6 @@ RUN: %mull_runner -reporters=IDE -ide-reporter-show-killed %s.exe -debug | %file
 WITHOUT-DEBUG-NOT:{{^.*\[debug\].*$}}
 WITHOUT-DEBUG:{{^.*}}sample.cpp:2:12: warning: Killed: Replaced + with - [cxx_add_to_sub]{{$}}
 
-WITH-DEBUG:[debug] Diagnostics: Debug Mode enabled. Debug-level messages will be printed.
+WITH-DEBUG:{{.*}}[debug] Diagnostics: Debug Mode enabled. Debug-level messages will be printed.
 WITH-DEBUG:{{^.*}}sample.cpp:2:12: warning: Killed: Replaced + with - [cxx_add_to_sub]{{$}}
 **/

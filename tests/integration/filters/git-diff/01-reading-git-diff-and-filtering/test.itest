@@ -13,8 +13,8 @@ CHECK_FRONTEND:[info] Incremental testing using Git Diff is enabled.
 CHECK_FRONTEND:- Git ref: main
 CHECK_FRONTEND:- Git project root: {{.*}}/sandbox
 
-CHECK_FRONTEND:[debug] GitDiffFilter: allowing mutant: {{.*}}/sample.cpp:4:11
-CHECK_FRONTEND:[debug] GitDiffFilter: skipping mutant: {{.*}}/sample.cpp:7:11
+CHECK_FRONTEND:{{.*}}[debug] GitDiffFilter: allowing mutant: {{.*}}/sample.cpp:4:11
+CHECK_FRONTEND:{{.*}}[debug] GitDiffFilter: skipping mutant: {{.*}}/sample.cpp:7:11
 
 CHECK:[info] Killed mutants (2/2):
 CHECK:{{^.*}}sample.cpp:4:11: warning: Killed: Replaced >= with > [cxx_ge_to_gt]{{$}}
@@ -28,8 +28,8 @@ RUN: (unset TERM; env MULL_CONFIG=mull-runner.yml %mull_runner sample.cpp-ir.exe
 CHECK_RUNNER:[info] Incremental testing using Git Diff is enabled.
 CHECK_RUNNER:- Git ref: main
 CHECK_RUNNER:- Git project root: {{.*}}/sandbox
-CHECK_RUNNER:[debug] GitDiffFilter: allowing mutant: {{.*}}/sample.cpp:4:11
-CHECK_RUNNER:[debug] GitDiffFilter: skipping mutant: {{.*}}/sample.cpp:7:11
+CHECK_RUNNER:{{.*}}[debug] GitDiffFilter: allowing mutant: {{.*}}/sample.cpp:4:11
+CHECK_RUNNER:{{.*}}[debug] GitDiffFilter: skipping mutant: {{.*}}/sample.cpp:7:11
 CHECK_RUNNER:[info] Killed mutants (2/2):
 CHECK_RUNNER:{{^.*}}sample.cpp:4:11: warning: Killed: Replaced >= with > [cxx_ge_to_gt]{{$}}
 CHECK_RUNNER:{{^.*}}sample.cpp:4:11: warning: Killed: Replaced >= with < [cxx_ge_to_lt]{{$}}
