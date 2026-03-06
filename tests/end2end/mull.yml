@@ -3,3 +3,4 @@ mutators:
 excludePaths:
   - gtest
   - gmock
+timeout: 5000
