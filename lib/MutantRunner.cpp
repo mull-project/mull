@@ -19,6 +19,8 @@ MutantRunner::runMutants(const std::string &executable,
 std::vector<std::unique_ptr<MutationResult>>
 MutantRunner::runMutants(const std::string &executable, const std::vector<std::string> &extraArgs,
                          std::vector<std::unique_ptr<Mutant>> &mutants) {
+  diagnostics.debug("Running mutants for: " + executable);
+
   SingleTaskExecutor singleTask(diagnostics);
   ExecutionResult baseline;
   singleTask.execute("Baseline run", [&]() {

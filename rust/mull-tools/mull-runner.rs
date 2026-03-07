@@ -237,6 +237,8 @@ fn main() {
         return;
     }
 
+    diag_debug!(diag, "Running mutants for: {}", executable);
+
     let baseline = run_task(&diag, "Baseline run", || {
         run_program(
             executable,
