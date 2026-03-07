@@ -250,7 +250,8 @@ fn main() {
     });
     baseline.error_on_failure(&diag, "Original test failed (baseline run)");
 
-    let mutant_timeout_ms = std::cmp::max(30, baseline.running_time as u64 * 10);
+    // Add 100ms buffer to absorb spawn overhead variance across environments
+    let mutant_timeout_ms = std::cmp::max(30, baseline.running_time as u64 * 10 + 100);
     let mutant_timeout = Duration::from_millis(mutant_timeout_ms);
     diag_debug!(
         diag,
