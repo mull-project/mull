@@ -15,7 +15,7 @@ def _mull_fmtlib_sqlite_report_impl(ctx):
 
     cmds = []
     for test_file in test_files:
-        cmds.append("%s -debug --allow-surviving --reporters SQLite --report-name fmtlib %s" % (ctx.executable.mull_runner.path, test_file.path))
+        cmds.append("%s --allow-surviving --reporters SQLite --report-name fmtlib %s" % (ctx.executable.mull_runner.path, test_file.path))
 
     cmds.append("cp fmtlib.sqlite %s" % out.path)
 
@@ -46,7 +46,7 @@ def _generate_ide_report_impl(ctx):
     out = ctx.actions.declare_file(ctx.attr.name + ".txt")
 
     cmds = []
-    cmds.append("%s -debug -ide-reporter-show-killed -report-name fmt_ide_report %s" % (ctx.executable.mull_reporter.path, ctx.file.sqlite_report.path))
+    cmds.append("%s -ide-reporter-show-killed -report-name fmt_ide_report %s" % (ctx.executable.mull_reporter.path, ctx.file.sqlite_report.path))
 
     # Make all the absolute paths relative for diff testing
     cmds.append("awk -F\"e2e_test_fmt/\" ' { print $NF } ' fmt_ide_report.txt > fmt_ide_report_relative_paths.txt")

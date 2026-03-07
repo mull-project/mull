@@ -33,7 +33,7 @@ pub fn run_program(
         Err(e) => {
             return ExecutionResult {
                 status: ExecutionStatus::Failed,
-                exit_status: -1,
+                exit_status: -2, // TODO: triggering sqlite rebuild, revert
                 running_time: start.elapsed().as_millis() as i64,
                 stdout_output: String::new(),
                 stderr_output: format!("Failed to spawn: {}", e),
