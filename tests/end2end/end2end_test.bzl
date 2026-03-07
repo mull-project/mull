@@ -15,7 +15,7 @@ def _mull_fmtlib_sqlite_report_impl(ctx):
 
     cmds = []
     for test_file in test_files:
-        cmds.append("%s -debug --allow-surviving --reporters SQLite --report-name fmtlib %s" % (ctx.executable.mull_runner.path, test_file.path))
+        cmds.append("%s --allow-surviving --reporters SQLite --report-name fmtlib %s" % (ctx.executable.mull_runner.path, test_file.path))
 
     cmds.append("cp fmtlib.sqlite %s" % out.path)
 
@@ -127,7 +127,6 @@ def define_end2end_test_targets(name):
             name = "fmt_sqlite_report_%s" % llvm_version,
             testonly = True,
             mull_runner = "//rust/mull-tools:mull-runner-%s" % llvm_version,
-            # mull_runner = "//:mull-runner-%s" % llvm_version,
             target = ":fmt_e2e_%s" % llvm_version,
             mull_config = ":mull.yml",
         )
