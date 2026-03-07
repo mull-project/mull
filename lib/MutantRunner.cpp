@@ -31,6 +31,10 @@ MutantRunner::runMutants(const std::string &executable, const std::vector<std::s
                                  std::nullopt);
   });
 
+  long long mutantTimeout = std::max(30LL, baseline.runningTime * 10);
+  diagnostics.debug("Baseline: " + std::to_string(baseline.runningTime) +
+                    "ms, mutant timeout: " + std::to_string(mutantTimeout) + "ms");
+
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
   std::vector<MutantExecutionTask> tasks;
   tasks.reserve(configuration.execution_workers);

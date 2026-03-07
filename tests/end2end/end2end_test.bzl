@@ -126,7 +126,8 @@ def define_end2end_test_targets(name):
         mull_fmtlib_sqlite_report(
             name = "fmt_sqlite_report_%s" % llvm_version,
             testonly = True,
-            mull_runner = "//rust/mull-tools:mull-runner-%s" % llvm_version,
+            # mull_runner = "//rust/mull-tools:mull-runner-%s" % llvm_version,
+            mull_runner = "//:mull-runner-%s" % llvm_version,
             target = ":fmt_e2e_%s" % llvm_version,
             mull_config = ":mull.yml",
         )
