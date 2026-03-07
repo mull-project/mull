@@ -8,7 +8,7 @@
 #include "mull/Filters/NoDebugInfoFilter.h"
 #include "mull/Filters/VariadicFunctionFilter.h"
 
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 
 #include <llvm/Support/FileSystem.h>
 #include <sstream>

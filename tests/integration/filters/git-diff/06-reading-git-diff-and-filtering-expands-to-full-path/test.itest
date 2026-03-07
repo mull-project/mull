@@ -15,13 +15,11 @@ CHECK_MUTATE:[info] Incremental testing using Git Diff is enabled.
 CHECK_MUTATE:- Git ref: main
 CHECK_MUTATE:- Git project root: {{.*}}/sandbox
 
-CHECK_MUTATE:[debug] GitDiffFilter: allowing instruction: {{.*}}/sample.cpp:4:7
-CHECK_MUTATE:[debug] GitDiffFilter: allowing instruction: {{.*}}/sample.cpp:4:11
-CHECK_MUTATE:[debug] GitDiffFilter: skipping instruction: {{.*}}/sample.cpp:7:7
-CHECK_MUTATE:[debug] GitDiffFilter: skipping instruction: {{.*}}/sample.cpp:7:11
+CHECK_MUTATE:{{.*}}[debug] GitDiffFilter: allowing mutant: {{.*}}/sample.cpp:4:11
+CHECK_MUTATE:{{.*}}[debug] GitDiffFilter: skipping mutant: {{.*}}/sample.cpp:7:11
 
 CHECK:[info] Killed mutants (2/2):
 CHECK:{{^.*}}sample.cpp:4:11: warning: Killed: Replaced >= with > [cxx_ge_to_gt]{{$}}
 CHECK:{{^.*}}sample.cpp:4:11: warning: Killed: Replaced >= with < [cxx_ge_to_lt]{{$}}
-CHECK:[info] All mutations have been killed
 CHECK:[info] Mutation score: 100%
+CHECK:[info] All mutations have been killed

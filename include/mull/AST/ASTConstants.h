@@ -7,8 +7,9 @@
 #include <vector>
 
 namespace mull {
-extern std::vector<
-    std::tuple<clang::BinaryOperator::Opcode, mull::MutatorKind, clang::BinaryOperator::Opcode>>
+extern std::vector<std::tuple<clang::BinaryOperator::Opcode, mull::MutatorKind,
+                              clang::BinaryOperator::Opcode, std::string>>
     BinaryMutations;
-extern std::vector<std::pair<clang::UnaryOperator::Opcode, mull::MutatorKind>> UnaryMutations;
+extern std::vector<std::tuple<clang::UnaryOperator::Opcode, mull::MutatorKind, std::string>>
+    UnaryMutations;
 } // namespace mull

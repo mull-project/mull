@@ -6,7 +6,7 @@
 #include <unordered_map>
 #include <vector>
 
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 
 namespace tool {
 

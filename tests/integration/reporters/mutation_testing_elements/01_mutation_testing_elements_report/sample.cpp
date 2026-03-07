@@ -28,7 +28,7 @@ RU: cat Output/sample-ir2.json | filecheck %s --check-prefix=CHECK-JSON
 CHECK-JSON: "config": {{{.*}} "URL": "https://github.com/mull-project/mull"}{{.*}} "mutants": [{"id": "cxx_remove_void_call", "location": {"end": {"column": 26, "line": 6}, "start": {"column": 3, "line": 6}}, "mutatorName": "{{.*}}", "replacement": "", {{.*}} "status": "Killed"}]{{.*}} "framework": {"brandingInformation": {"homepageUrl": "https://github.com/mull-project/mull"}, "name": "Mull", "version": "{{.*}}, LLVM {{.*}}"}{{.*}}
 
 CHECK:{{^.*}}Killed mutants (1/1):
-CHECK:{{^.*}}sample.cpp:6:3: warning: Killed: Removed the call to the function [cxx_remove_void_call]
+CHECK:{{^.*}}sample.cpp:6:3: warning: Killed: Replaced void_sum(a, b, &result) with  [cxx_remove_void_call]
 CHECK:  void_sum(a, b, &result);
 CHECK:  ^
 CHECK:{{^.*}}Mutation score: 100%

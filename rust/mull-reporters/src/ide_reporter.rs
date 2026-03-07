@@ -95,7 +95,7 @@ fn report_internal(diag: &MullDiagnostics, state: &ExecutionState, show_killed: 
         print_mutants(diag, &mut source_manager, killed, total, "Killed");
     }
     print_mutants(diag, &mut source_manager, survived, total, "Survived");
-    print_mutants(diag, &mut source_manager, not_covered, total, "Not covered");
+    print_mutants(diag, &mut source_manager, not_covered, total, "Not Covered");
 
     diag_info!(diag, "Mutation score: {}%", score);
     if all_killed {

@@ -5,7 +5,7 @@
 #include "mull/Runner.h"
 #include "mull/SourceLocation.h"
 
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 
 #include <sstream>
 
@@ -38,11 +38,8 @@ void MutantExecutionTask::operator()(iterator begin, iterator end, Out &storage,
       result.status = NotCovered;
     }
     storage.push_back(std::make_unique<MutationResult>(result, mutant.get()));
-    debugMessage << "Run " << mutant->getIdentifier() << "\n";
-    SourceLocation sourceLocation = mutant->getSourceLocation();
-    debugMessage << sourceLocation.filePath << ":";
-    debugMessage << sourceLocation.line << ":" << sourceLocation.column << " ExecutionResult: ";
-    debugMessage << result.getStatusAsString();
+    debugMessage << mutant->getIdentifier() << " -> " << result.getStatusAsString();
+    debugMessage << ", " << result.runningTime << "ms";
     diagnostics.debug(debugMessage.str());
     debugMessage.str(std::string());
   }

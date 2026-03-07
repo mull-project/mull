@@ -17,7 +17,7 @@ CHECK-MUTATE-NOT:{{^.*[Ee]rror.*$}}
 RUN: (unset TERM; %mull_runner -debug -reporters=IDE -ide-reporter-show-killed %s-ir.exe 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 
 CHECK-MUTATE:[info] Applying filter: junk (threads: 1)
-CHECK-MUTATE:[debug] CXXJunkDetector: mutation "Mul to Div": {{.*}}sample.cpp:2:12 (end: 2:13)
+CHECK-MUTATE:{{.*}}[debug] CXXJunkDetector: mutation "Mul to Div": {{.*}}sample.cpp:2:12 (end: 2:13)
 
 CHECK:[info] Killed mutants (1/1):
 CHECK:{{^.*}}sample.cpp:2:12: warning: Killed: Replaced * with / [cxx_mul_to_div]{{$}}

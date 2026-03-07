@@ -40,9 +40,9 @@ pub struct MullConfigSpec {
     pub silent: bool,
     /// Turn warnings into errors.
     pub strict: bool,
-    /// Capture stdout/stderr from the original test run (enabled by default).
+    /// Capture stdout/stderr from the original test run (enabled by default). DEPRECATED, use CLI flag instead.
     pub capture_test_output: bool,
-    /// Capture stdout/stderr from mutant test runs (enabled by default).
+    /// Capture stdout/stderr from mutant test runs (enabled by default). DEPRECATED, use CLI flag instead.
     pub capture_mutant_output: bool,
 
     /// Mutator IDs or groups to enable (e.g. cxx_add_to_sub, cxx_logical).
@@ -273,4 +273,21 @@ pub struct ReporterCli {
 
     #[command(flatten)]
     pub shared: SharedCli,
+}
+
+/// Trait for CLI types that contain shared options.
+pub trait HasSharedCli {
+    fn shared(&self) -> &SharedCli;
+}
+
+impl HasSharedCli for RunnerCli {
+    fn shared(&self) -> &SharedCli {
+        &self.shared
+    }
+}
+
+impl HasSharedCli for ReporterCli {
+    fn shared(&self) -> &SharedCli {
+        &self.shared
+    }
 }

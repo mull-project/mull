@@ -1,6 +1,6 @@
 #include "FixturePaths.h"
 #include "mull/JunkDetection/CXX/CompilationDatabase.h"
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 #include <gtest/gtest.h>
 
 #include <string>

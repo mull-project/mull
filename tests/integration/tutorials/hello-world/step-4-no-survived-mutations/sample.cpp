@@ -6,8 +6,8 @@ RUN: (unset TERM; %mull_runner -ide-reporter-show-killed %s-ir.exe 2>&1; test $?
 CHECK:[info] Killed mutants (2/2):
 CHECK:{{^.*}}sample.cpp:14:11: warning: Killed: Replaced >= with > [cxx_ge_to_gt]{{$}}
 CHECK:{{^.*}}sample.cpp:14:11: warning: Killed: Replaced >= with < [cxx_ge_to_lt]{{$}}
-CHECK:[info] All mutations have been killed
 CHECK:[info] Mutation score: 100%
+CHECK:[info] All mutations have been killed
 **/
 
 bool valid_age(int age) {

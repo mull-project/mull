@@ -15,7 +15,7 @@ RUN: (unset TERM; %mull_runner -debug -reporters=IDE -ide-reporter-show-killed %
 CHECK-MUTATE-NOT:{{^.*[Ee]rror.*$}}
 
 CHECK-MUTATE:[info] Applying filter: junk (threads: 1)
-CHECK-MUTATE:[debug] CXXJunkDetector: mutation "Add to Sub": {{.*}}sample.cpp:2:12 (end: 2:13)
+CHECK-MUTATE:{{.*}}[debug] CXXJunkDetector: mutation "Add to Sub": {{.*}}sample.cpp:2:12 (end: 2:13)
 
 CHECK:[info] Killed mutants (1/1):
 CHECK:{{^.*}}sample.cpp:2:12: warning: Killed: Replaced + with - [cxx_add_to_sub]{{$}}

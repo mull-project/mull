@@ -38,5 +38,5 @@ RUN: %mull_runner %s-ast.exe -ide-reporter-show-killed | %filecheck %s --dump-in
 RUN: %mull_runner %s-ir.exe -ide-reporter-show-killed | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=MULL_RUNNER
 
 MULL_RUNNER:[info] Killed mutants (1/1):
-MULL_RUNNER:{{.*}}sample.cpp:6:10: warning: Killed: Replaced !a with a [cxx_remove_negation]
+MULL_RUNNER:{{.*}}sample.cpp:6:10: warning: Killed: Replaced ! with  [cxx_remove_negation]
 */

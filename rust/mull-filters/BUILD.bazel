@@ -1,0 +1,20 @@
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+rust_library(
+    name = "mull-filters",
+    srcs = glob(["src/**/*.rs"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//rust/mull-core",
+        "//rust/mull-state",
+        "//rust/mull-tasks",
+        "@crates//:git2",
+        "@crates//:llvm_profparser",
+        "@crates//:object",
+    ],
+)
+
+rust_test(
+    name = "mull-filters-test",
+    crate = "mull-filters",
+)

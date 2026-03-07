@@ -32,5 +32,5 @@ STANDALONE_WITH_MUTATION:MUTATED
 RUN: %mull_runner %s.exe -ide-reporter-show-killed | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=MULL_RUNNER
 
 MULL_RUNNER:[info] Killed mutants (1/1):
-MULL_RUNNER:{{.*}}sample.cpp:7:3: warning: Killed: Replaced ++x with --x [cxx_pre_inc_to_pre_dec]
+MULL_RUNNER:{{.*}}sample.cpp:7:3: warning: Killed: Replaced ++ with -- [cxx_pre_inc_to_pre_dec]
 */

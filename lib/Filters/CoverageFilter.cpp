@@ -2,7 +2,7 @@
 #include "mull/Mutant.h"
 #include "mull/Path.h"
 
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 
 #include <llvm/ProfileData/Coverage/CoverageMapping.h>
 

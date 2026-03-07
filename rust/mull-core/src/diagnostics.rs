@@ -9,8 +9,8 @@ pub struct MullDiagnostics {
     quiet: AtomicBool,
     silent: AtomicBool,
     use_colors: bool,
-    seen_progress: Mutex<bool>,
-    writer: Mutex<Box<dyn Write>>,
+    needs_newline: Mutex<bool>,
+    writer: Mutex<Box<dyn Write + Send>>,
 }
 
 impl MullDiagnostics {
@@ -18,14 +18,14 @@ impl MullDiagnostics {
         Self::with_writer(Box::new(std::io::stdout()), true)
     }
 
-    pub fn with_writer(writer: Box<dyn Write>, use_colors: bool) -> Self {
+    pub fn with_writer(writer: Box<dyn Write + Send>, use_colors: bool) -> Self {
         Self {
             debug_mode: AtomicBool::new(false),
             strict_mode: AtomicBool::new(false),
             quiet: AtomicBool::new(false),
             silent: AtomicBool::new(false),
             use_colors,
-            seen_progress: Mutex::new(false),
+            needs_newline: Mutex::new(false),
             writer: Mutex::new(writer),
         }
     }
@@ -39,12 +39,18 @@ impl MullDiagnostics {
     }
 
     fn prepare(&self) {
-        let mut seen = self.seen_progress.lock().unwrap();
-        if *seen {
+        let mut needs = self.needs_newline.lock().unwrap();
+        let needs_newline = if *needs {
+            *needs = false;
+            true
+        } else {
+            false
+        };
+
+        if needs_newline {
             let mut w = self.writer.lock().unwrap();
             let _ = writeln!(w);
             let _ = w.flush();
-            *seen = false;
         }
     }
 
@@ -86,10 +92,8 @@ impl MullDiagnostics {
         if self.quiet.load(Ordering::Relaxed) {
             return;
         }
-        {
-            let mut seen = self.seen_progress.lock().unwrap();
-            *seen = true;
-        }
+        let mut needs = self.needs_newline.lock().unwrap();
+        *needs = true;
         let mut w = self.writer.lock().unwrap();
         let _ = write!(w, "{}", message);
         let _ = w.flush();
