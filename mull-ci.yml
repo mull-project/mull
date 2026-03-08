@@ -1,7 +1,5 @@
 mutators:
   - cxx_arithmetic
 excludePaths:
-  - spdlog
   - googletest
-  - reproc
   - llvm
