@@ -2,7 +2,6 @@
 #include "FixturePaths.h"
 #include "mull/FunctionUnderTest.h"
 #include "mull/MutationPoint.h"
-#include "mull/Program/Program.h"
 #include "tests/unit/Helpers/TestModuleFactory.h"
 
 #include <cassert>
