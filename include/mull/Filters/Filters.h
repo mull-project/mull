@@ -21,7 +21,6 @@ public:
   /// TODO: hide
   std::vector<FunctionFilter *> functionFilters;
   std::vector<MutationPointFilter *> mutationFilters;
-  std::vector<MutantFilter *> mutantFilters;
   std::vector<InstructionFilter *> instructionFilters;
 
   void enableNoDebugFilter();

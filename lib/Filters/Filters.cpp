@@ -38,7 +38,6 @@ void Filters::enableFilePathFilter() {
   auto *filter = new mull::FilePathFilter;
   storage.emplace_back(filter);
   mutationFilters.push_back(filter);
-  mutantFilters.push_back(filter);
   functionFilters.push_back(filter);
 
   for (const auto &regex : configuration.exclude_paths) {
