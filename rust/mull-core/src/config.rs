@@ -253,6 +253,11 @@ pub struct RunnerCli {
     #[arg(long = "debug-coverage")]
     pub debug_coverage: bool,
 
+    /// Minimum timeout per mutant run in milliseconds.
+    /// The actual timeout is max(baseline*10, minimum-timeout).
+    #[arg(long = "minimum-timeout", value_name = "MS")]
+    pub minimum_timeout: Option<u64>,
+
     #[command(flatten)]
     pub shared: SharedCli,
 
