@@ -73,6 +73,8 @@ mod ffi {
             mutant_ids: Vec<String>,
             config: FilterMutantsConfig,
         ) -> Vec<String>;
+
+        fn get_clang_resource_dir(compiler_path: &str) -> String;
     }
 }
 
@@ -204,4 +206,17 @@ fn filter_mutants(
         workers: config.workers,
     };
     mull_filters::filter_mutants(&diag.0, mutant_ids, inner_config)
+}
+
+fn get_clang_resource_dir(compiler_path: &str) -> String {
+    use std::process::Command;
+
+    let output = Command::new(compiler_path)
+        .arg("-print-resource-dir")
+        .output();
+
+    match output {
+        Ok(out) if out.status.success() => String::from_utf8_lossy(&out.stdout).trim().to_string(),
+        _ => String::new(),
+    }
 }
