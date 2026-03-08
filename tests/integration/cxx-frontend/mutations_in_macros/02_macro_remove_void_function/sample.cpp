@@ -39,5 +39,5 @@ STANDALONE_WITH_MUTATION:MUTATED
 RUN: %mull_runner %s.exe -ide-reporter-show-killed | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=MULL_RUNNER
 
 MULL_RUNNER:[info] Killed mutants (1/1):
-MULL_RUNNER:{{.*}}sample.cpp:9:32: warning: Killed: Removed the call to the function [cxx_remove_void_call]
+MULL_RUNNER:{{.*}}sample.cpp:9:32: warning: Killed: Replaced voidSum(a, b, result) with  [cxx_remove_void_call]
 */

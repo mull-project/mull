@@ -36,5 +36,5 @@ STANDALONE_WITH_MUTATION:MUTATED
 RUN: %mull_runner %s.exe -ide-reporter-show-killed | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=MULL_RUNNER
 
 MULL_RUNNER:[info] Killed mutants (1/1):
-MULL_RUNNER:{{.*}}sample.cpp:11:9: warning: Killed: Replaced call to a function with 42 [cxx_replace_scalar_call]
+MULL_RUNNER:{{.*}}sample.cpp:11:9: warning: Killed: Replaced sum_internal(a, b) with 42 [cxx_replace_scalar_call]
 */

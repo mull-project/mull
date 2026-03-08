@@ -9,7 +9,7 @@
 #include "mull/MutationPoint.h"
 #include "mull/Mutators/CXX/RemoveNegation.h"
 #include "mull/Mutators/Mutator.h"
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 
 using namespace mull;
 

@@ -1,4 +1,5 @@
 common --test_output=errors
+common --remote_cache_compression
 
 # Hermetic Rust builds: don't inherit shell environment in cargo build scripts
 common --@rules_rust//cargo/settings:use_default_shell_env=False

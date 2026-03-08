@@ -1,5 +1,5 @@
 #include "mull/Filters/GitDiffReader.h"
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 
 #include <gtest/gtest.h>
 

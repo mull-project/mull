@@ -36,6 +36,9 @@
          --debug-coverage
              Print coverage ranges
 
+         --minimum-timeout <MS>
+             Minimum timeout per mutant run in milliseconds. The actual timeout is max(baseline*10, minimum-timeout)
+
          --reporters <REPORTER>
              Output reporters to use, more than one can be used at the same time
 

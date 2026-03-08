@@ -1,5 +1,5 @@
 #include "FixturePaths.h"
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 #include "tests/unit/Helpers/BitcodeLoader.h"
 #include <gtest/gtest.h>
 #include <mull/FunctionUnderTest.h>

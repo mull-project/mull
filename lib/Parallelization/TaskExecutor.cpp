@@ -1,5 +1,5 @@
 #include "mull/Parallelization/TaskExecutor.h"
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 #include <cassert>
 #include <sstream>
 

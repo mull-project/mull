@@ -25,8 +25,8 @@ bool ASTMutationsSearchVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOp
   if (unaryOperator->getOpcode() == clang::UnaryOperator::Opcode::UO_PostDec &&
       mutationMap.isValidMutation(mull::MutatorKind::CXX_PostDecToPostInc)) {
     std::unique_ptr<UnaryOperatorOpcodeMutation> mutator =
-        std::make_unique<UnaryOperatorOpcodeMutation>(unaryOperator,
-                                                      clang::UnaryOperator::Opcode::UO_PostInc);
+        std::make_unique<UnaryOperatorOpcodeMutation>(
+            unaryOperator, clang::UnaryOperator::Opcode::UO_PostInc, "++");
     recordMutationPoint(mull::MutatorKind::CXX_PostDecToPostInc,
                         std::move(mutator),
                         unaryOperator,
@@ -38,8 +38,8 @@ bool ASTMutationsSearchVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOp
   if (unaryOperator->getOpcode() == clang::UnaryOperator::Opcode::UO_PostInc &&
       mutationMap.isValidMutation(mull::MutatorKind::CXX_PostIncToPostDec)) {
     std::unique_ptr<UnaryOperatorOpcodeMutation> mutator =
-        std::make_unique<UnaryOperatorOpcodeMutation>(unaryOperator,
-                                                      clang::UnaryOperator::Opcode::UO_PostDec);
+        std::make_unique<UnaryOperatorOpcodeMutation>(
+            unaryOperator, clang::UnaryOperator::Opcode::UO_PostDec, "--");
     recordMutationPoint(mull::MutatorKind::CXX_PostIncToPostDec,
                         std::move(mutator),
                         unaryOperator,
@@ -51,8 +51,8 @@ bool ASTMutationsSearchVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOp
   if (unaryOperator->getOpcode() == clang::UnaryOperator::Opcode::UO_PreInc &&
       mutationMap.isValidMutation(mull::MutatorKind::CXX_PreIncToPreDec)) {
     std::unique_ptr<UnaryOperatorOpcodeMutation> mutator =
-        std::make_unique<UnaryOperatorOpcodeMutation>(unaryOperator,
-                                                      clang::UnaryOperator::Opcode::UO_PreDec);
+        std::make_unique<UnaryOperatorOpcodeMutation>(
+            unaryOperator, clang::UnaryOperator::Opcode::UO_PreDec, "--");
     recordMutationPoint(mull::MutatorKind::CXX_PreIncToPreDec,
                         std::move(mutator),
                         unaryOperator,
@@ -64,8 +64,8 @@ bool ASTMutationsSearchVisitor::VisitUnaryOperator(clang::UnaryOperator *unaryOp
   if (unaryOperator->getOpcode() == clang::UnaryOperator::Opcode::UO_PreDec &&
       mutationMap.isValidMutation(mull::MutatorKind::CXX_PreDecToPreInc)) {
     std::unique_ptr<UnaryOperatorOpcodeMutation> mutator =
-        std::make_unique<UnaryOperatorOpcodeMutation>(unaryOperator,
-                                                      clang::UnaryOperator::Opcode::UO_PreInc);
+        std::make_unique<UnaryOperatorOpcodeMutation>(
+            unaryOperator, clang::UnaryOperator::Opcode::UO_PreInc, "++");
     recordMutationPoint(mull::MutatorKind::CXX_PreDecToPreInc,
                         std::move(mutator),
                         unaryOperator,
@@ -129,14 +129,10 @@ bool ASTMutationsSearchVisitor::VisitBinaryOperator(clang::BinaryOperator *binar
     return true;
   }
 
-  for (const std::tuple<clang::BinaryOperator::Opcode,
-                        mull::MutatorKind,
-                        clang::BinaryOperator::Opcode> &mutation : mull::BinaryMutations) {
-    if (binaryOperator->getOpcode() == std::get<0>(mutation) &&
-        mutationMap.isValidMutation(std::get<1>(mutation))) {
-      std::unique_ptr<BinaryMutation> binaryMutator =
-          std::make_unique<BinaryMutation>(std::get<2>(mutation));
-      recordMutationPoint(std::get<1>(mutation),
+  for (const auto &[fromOpcode, mutatorKind, toOpcode, replacement] : mull::BinaryMutations) {
+    if (binaryOperator->getOpcode() == fromOpcode && mutationMap.isValidMutation(mutatorKind)) {
+      auto binaryMutator = std::make_unique<BinaryMutation>(toOpcode, replacement);
+      recordMutationPoint(mutatorKind,
                           std::move(binaryMutator),
                           binaryOperator,
                           binaryOperator->getOperatorLoc(),

@@ -13,7 +13,7 @@
 #include <mull/Mutators/CXX/NumberMutators.h>
 #include <mull/Parallelization/Parallelization.h>
 
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 
 #include <gtest/gtest.h>
 

@@ -20,7 +20,7 @@ RUN: cd %S/Output; (unset TERM; %mull_runner -debug ./main.cpp-ir.exe --report-n
 RUN: cd %S/Output; (unset TERM; %mull_reporter -debug test-ir.sqlite --report-name test-ir2 --reporters Patches; test $? = 0; ls -R %S/Output/test-ir2-patches; cd %S/Output/test-ir2-patches; cat `ls`) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 
 
-CHECK:[debug] Writing Patchfile: {{.*}}
+CHECK:{{.*}}[debug] Writing Patchfile: {{.*}}
 CHECK:[info] Patchfiles can be found at './test{{.*}}-patches'
 CHECK:killed-{{.*}}
 CHECK:--- a/{{.*}}/Output/sandbox/main.cpp 0

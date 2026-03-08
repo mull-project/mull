@@ -1,5 +1,5 @@
 #include "mull/Mutators/MutatorsFactory.h"
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 #include <algorithm>
 #include <functional>
 #include <gtest/gtest.h>

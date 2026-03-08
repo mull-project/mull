@@ -1,7 +1,7 @@
 #include "mull/JunkDetection/CXX/CompilationDatabase.h"
 #include "mull/Path.h"
 #include "mull/Runner.h"
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 #include <clang/Tooling/CompilationDatabase.h>
 #include <clang/Tooling/JSONCompilationDatabase.h>
 #include <llvm/ADT/SmallString.h>

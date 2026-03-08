@@ -1,4 +1,5 @@
 use crate::ExecutionStatus;
+use mull_core::{diag_error, MullDiagnostics};
 
 #[derive(Debug)]
 pub struct ExecutionResult {
@@ -10,11 +11,19 @@ pub struct ExecutionResult {
 }
 
 impl ExecutionResult {
-    pub fn debug_description(&self) -> String {
-        // TODO: This is straight from C++, we should do better at the call site!
-        format!(
-            "Original test failed\nstatus: {}\nstdout: '{}'\nstderr: '{}'\n",
-            self.status, self.stdout_output, self.stderr_output
-        )
+    pub fn error_on_failure(&self, diag: &MullDiagnostics, label: &str) {
+        if self.status != ExecutionStatus::Passed {
+            diag_error!(
+                diag,
+                "{}
+status: {}
+stdout: '{}'
+stderr: '{}'",
+                label,
+                self.status,
+                self.stdout_output,
+                self.stderr_output
+            );
+        }
     }
 }

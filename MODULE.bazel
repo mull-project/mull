@@ -16,6 +16,7 @@ bazel_dep(name = "rules_cc", version = "0.2.16")
 bazel_dep(name = "rules_rust", version = "0.68.1")
 bazel_dep(name = "reproc", version = "14.2.5")
 bazel_dep(name = "sqlite3", version = "3.49.1")
+bazel_dep(name = "zlib", version = "1.3.1.bcr.5")
 bazel_dep(name = "googletest", version = "1.16.0")
 bazel_dep(name = "rules_python", version = "1.3.0")
 bazel_dep(name = "bazel_skylib", version = "1.7.1")
@@ -156,6 +157,37 @@ crate.spec(
 crate.spec(
     package = "indoc",
     version = "2.0",
+)
+crate.spec(
+    features = ["read"],
+    package = "object",
+    version = "0.36",
+)
+crate.spec(
+    package = "libc",
+    version = "0.2",
+)
+crate.spec(
+    package = "console",
+    version = "0.15",
+)
+crate.spec(
+    package = "rayon",
+    version = "1.10",
+)
+crate.spec(
+    package = "wait-timeout",
+    version = "0.2",
+)
+crate.spec(
+    package = "llvm_profparser",
+    version = "0.8",
+)
+crate.spec(
+    default_features = False,
+    features = ["vendored-libgit2"],
+    package = "git2",
+    version = "0.19",
 )
 crate.annotation(
     additive_build_file_content = """

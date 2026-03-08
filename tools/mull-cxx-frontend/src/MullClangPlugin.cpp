@@ -3,7 +3,7 @@
 #include "ASTNodeFactory.h"
 #include "MullASTMutator.h"
 #include "MutationMap.h"
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 
 #include <clang/AST/AST.h>
 #include <clang/AST/ASTConsumer.h>

@@ -1,0 +1,67 @@
+load("@rules_cc//cc:defs.bzl", "cc_library")
+load("@rules_rust//cargo:defs.bzl", "cargo_build_script")
+load("@rules_rust//rust:defs.bzl", "rust_library")
+
+# Shim library to provide dependencies needed by Rust crates (libgit2, etc.)
+cc_library(
+    name = "system_libs",
+    linkopts = select({
+        "@platforms//os:macos": ["-liconv"],
+        "//conditions:default": [],
+    }),
+    visibility = ["//visibility:public"],
+    deps = ["@zlib"],
+)
+
+cargo_build_script(
+    name = "build_script",
+    srcs = ["build.rs"],
+    data = ["src/lib.rs"],
+    deps = [
+        "@crates//:cxx-gen",
+        "@crates//:proc-macro2",
+    ],
+)
+
+filegroup(
+    name = "build_script_out_dir",
+    srcs = [":build_script"],
+    output_group = "out_dir",
+)
+
+genrule(
+    name = "bridge_header_gen",
+    srcs = [":build_script_out_dir"],
+    outs = ["bridge.rs.h"],
+    cmd = "find $(SRCS) -name 'bridge.rs.h' | head -1 | xargs -I{} cp {} $@",
+)
+
+genrule(
+    name = "bridge_source_gen",
+    srcs = [":build_script_out_dir"],
+    outs = ["bridge.rs.cc"],
+    cmd = "find $(SRCS) -name 'bridge.rs.cc' | head -1 | xargs -I{} cp {} $@",
+)
+
+cc_library(
+    name = "bridge",
+    srcs = [":bridge_source_gen"],
+    hdrs = [":bridge_header_gen"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":system_libs",
+        "@crates//:cxx_cc",
+    ],
+)
+
+rust_library(
+    name = "mull-cxx-bridge",
+    srcs = ["src/lib.rs"],
+    visibility = ["//visibility:public"],
+    deps = [
+        ":build_script",
+        "//rust/mull-core",
+        "//rust/mull-filters",
+        "@crates//:cxx",
+    ],
+)

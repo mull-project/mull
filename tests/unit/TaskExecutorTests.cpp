@@ -1,7 +1,7 @@
 #include "gtest/gtest.h"
 
 #include "mull/Parallelization/Parallelization.h"
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 #include <vector>
 
 using namespace mull;

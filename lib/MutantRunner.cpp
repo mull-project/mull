@@ -2,7 +2,7 @@
 #include "mull/Parallelization/TaskExecutor.h"
 #include "mull/Parallelization/Tasks/MutantExecutionTask.h"
 
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 
 using namespace mull;
 
@@ -19,6 +19,8 @@ MutantRunner::runMutants(const std::string &executable,
 std::vector<std::unique_ptr<MutationResult>>
 MutantRunner::runMutants(const std::string &executable, const std::vector<std::string> &extraArgs,
                          std::vector<std::unique_ptr<Mutant>> &mutants) {
+  diagnostics.debug("Running mutants for: " + executable);
+
   SingleTaskExecutor singleTask(diagnostics);
   ExecutionResult baseline;
   singleTask.execute("Baseline run", [&]() {
@@ -30,6 +32,10 @@ MutantRunner::runMutants(const std::string &executable, const std::vector<std::s
                                  false,
                                  std::nullopt);
   });
+
+  long long mutantTimeout = std::max(30LL, baseline.runningTime * 10);
+  diagnostics.debug("Baseline: " + std::to_string(baseline.runningTime) +
+                    "ms, mutant timeout: " + std::to_string(mutantTimeout) + "ms");
 
   std::vector<std::unique_ptr<MutationResult>> mutationResults;
   std::vector<MutantExecutionTask> tasks;

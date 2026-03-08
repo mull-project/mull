@@ -1,6 +1,6 @@
 #include "MutantExtractor.h"
 #include "ObjectFile.h"
-#include "rust/mull-core/core.rs.h"
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 #include <llvm/Object/ObjectFile.h>
 #include <sstream>
 #include <unordered_set>
@@ -69,10 +69,6 @@ MutantExtractor::extractMutants(const std::vector<std::string> &mutantHolders) {
   for (auto &encoding : deduplicatedEncodings) {
     std::vector<std::string> chunks = split(encoding, ':');
 
-    std::stringstream sss;
-    sss << ", chunks.size() == " << chunks.size();
-    diagnostics.debug(sss.str());
-
     std::string mutator = chunks[0];
     std::string location = chunks[1];
     int beginLine = std::stoi(chunks[2]);
@@ -81,11 +77,6 @@ MutantExtractor::extractMutants(const std::vector<std::string> &mutantHolders) {
     int endColumn = std::stoi(chunks[5]);
     std::string replacement = chunks.size() == 7 ? chunks[6] : "TBD";
     auto mutantId = chunks.size() == 7 ? encoding.substr(0, encoding.rfind(':')) : encoding;
-
-    std::stringstream ss;
-    ss << "Found mutant " << encoding << " with id " << mutantId
-       << ", chunks.size() == " << chunks.size();
-    diagnostics.debug(ss.str());
 
     auto mutant = std::make_unique<Mutant>(
         mutantId,
