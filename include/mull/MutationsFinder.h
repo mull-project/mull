@@ -12,7 +12,6 @@ struct MullDiagnostics;
 
 namespace mull {
 
-class Program;
 class Bitcode;
 
 class MutationsFinder {

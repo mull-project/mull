@@ -1,58 +1,21 @@
 # buildifier: disable=module-docstring
-load("@available_llvm_versions//:mull_llvm_versions.bzl", "AVAILABLE_LLVM_VERSIONS", "EXACT_VERSION_MAPPING")
-load("@bazel_skylib//rules:expand_template.bzl", "expand_template")
-load("@mull_package_info//:mull_package_info.bzl", "MULL_DESCRIPTION", "MULL_DOCS_URL", "MULL_HOMEPAGE", "MULL_SUPPORT_URL", "MULL_VERSION")
+load("@available_llvm_versions//:mull_llvm_versions.bzl", "AVAILABLE_LLVM_VERSIONS")
 load("@rules_cc//cc:defs.bzl", "cc_binary", "cc_library")
 
 def mull_build(name):
     for llvm_version in AVAILABLE_LLVM_VERSIONS:
-        expand_template(
-            name = "mull_version_%s" % llvm_version,
-            out = "Version-%s.cpp" % llvm_version,
-            substitutions = {
-                "@PROJECT_DESCRIPTION@": MULL_DESCRIPTION,
-                "@PROJECT_HOMEPAGE_URL@": MULL_HOMEPAGE,
-                "@PROJECT_DOCS_URL@": MULL_DOCS_URL,
-                "@PROJECT_SUPPORT_URL@": MULL_SUPPORT_URL,
-                "@PROJECT_VERSION@": MULL_VERSION,
-                "@LLVM_VERSION@": EXACT_VERSION_MAPPING[llvm_version],
-            },
-            template = ":lib/Version.cpp",
-        )
         cc_library(
             name = "libmull_%s" % llvm_version,
-            srcs = native.glob(["lib/**/*.cpp"], exclude = ["lib/Version.cpp"]) + [":mull_version_%s" % llvm_version],
+            srcs = native.glob(["lib/**/*.cpp"]),
             hdrs = native.glob(["include/**/*.h"]),
             includes = ["include"],
             deps = [
                 "@mull_irm_%s//:irm" % llvm_version,
-                "@json11",
                 "@llvm_%s//:libclang" % llvm_version,
                 "@llvm_%s//:libllvm" % llvm_version,
-                "@reproc//:reproc++",
                 "@sqlite3",
                 "//rust/mull-cxx-bridge",
                 "//rust/mull-cxx-bridge:bridge",
-            ],
-        )
-
-        cc_library(
-            name = "libmull_cli_options_%s" % llvm_version,
-            srcs = ["tools/CLIOptions/CLIOptions.cpp"],
-            hdrs = ["tools/CLIOptions/CLIOptions.h"],
-            deps = [
-                ":libmull_%s" % llvm_version,
-                "@llvm_%s//:libllvm" % llvm_version,
-            ],
-        )
-
-        cc_library(
-            name = "libmull_runner_%s" % llvm_version,
-            srcs = native.glob(["tools/mull-runner/*.cpp"]),
-            hdrs = native.glob(["tools/mull-runner/*.h"]),
-            deps = [
-                "libmull_%s" % llvm_version,
-                ":libmull_cli_options_%s" % llvm_version,
             ],
         )
 
@@ -95,10 +58,12 @@ def mull_build(name):
             cmd = "cp $(SRCS) $(OUTS)",
         )
 
-        cc_binary(
-            name = "mull-runner-%s" % llvm_version,
-            deps = [
-                ":libmull_runner_%s" % llvm_version,
-            ],
-            tags = ["llvm_%s" % llvm_version],
-        )
+    # Documentation tool - uses single LLVM version only
+    latest_llvm = AVAILABLE_LLVM_VERSIONS[0]
+    cc_binary(
+        name = "mull-dump-mutators",
+        srcs = ["tools/mull-dump-mutators/mull-dump-mutators.cpp"],
+        deps = [
+            ":libmull_%s" % latest_llvm,
+        ],
+    )

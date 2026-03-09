@@ -55,6 +55,38 @@ def _generate_cli_docs(binary, llvm_version, arg, rst):
     )
     return target_name
 
+def _generate_mutators_rst(ctx):
+    out = ctx.actions.declare_file(ctx.attr.name + ".rst")
+    ctx.actions.run_shell(
+        inputs = [ctx.executable.binary],
+        outputs = [out],
+        command = "%s %s" % (ctx.executable.binary.path, out.path),
+    )
+    return [DefaultInfo(files = depset([out]))]
+
+mull_mutators_rst = rule(
+    implementation = _generate_mutators_rst,
+    attrs = {
+        "binary": attr.label(mandatory = True, executable = True, cfg = "exec"),
+    },
+)
+
+def _generate_mutators_docs(rst):
+    out_filename = "mull-dump-mutators-doc"
+    mull_mutators_rst(
+        name = out_filename,
+        binary = "//:mull-dump-mutators",
+    )
+
+    target_name = "write_mutators_docs"
+    write_source_files(
+        name = target_name,
+        files = {
+            rst: out_filename,
+        },
+    )
+    return target_name
+
 def mull_docs(name):
     """Defines targets to generate rst docs
 
@@ -89,8 +121,8 @@ def mull_docs(name):
     )
     write_targets.append("write_config_example_docs")
 
-    # Mutators doc still uses C++ binary
-    write_targets.append(_generate_cli_docs("mull-runner", llvm_version, "dump-mutators", "generated/Mutators.rst"))
+    # Mutators doc uses dedicated binary
+    write_targets.append(_generate_mutators_docs("generated/Mutators.rst"))
 
     # Generate version file for Sphinx docs
     mull_version_file(

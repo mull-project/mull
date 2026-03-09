@@ -1,7 +1,6 @@
 #include "mull/Parallelization/Tasks/SearchMutationPointsTask.h"
 
 #include "mull/Parallelization/Progress.h"
-#include "mull/Program/Program.h"
 
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Module.h>

@@ -14,7 +14,6 @@ bazel_dep(name = "rules_foreign_cc", version = "0.14.0")
 bazel_dep(name = "toolchains_llvm", version = "1.5.0")
 bazel_dep(name = "rules_cc", version = "0.2.16")
 bazel_dep(name = "rules_rust", version = "0.68.1")
-bazel_dep(name = "reproc", version = "14.2.5")
 bazel_dep(name = "sqlite3", version = "3.49.1")
 bazel_dep(name = "zlib", version = "1.3.1.bcr.5")
 bazel_dep(name = "googletest", version = "1.16.0")
@@ -64,14 +63,6 @@ use_repo(llvm, "llvm_toolchain")
 register_toolchains("@llvm_toolchain//:all")
 
 http_archive = use_repo_rule("@bazel_tools//tools/build_defs/repo:http.bzl", "http_archive")
-
-http_archive(
-    name = "json11",
-    build_file = ":third_party/json11/json11.BUILD",
-    integrity = "sha256-bJGfxwlz+J5gZzjkrGT5Grph/r/LIwQA4wv9x9PBszI=",
-    strip_prefix = "json11-402bcde713fbef0c67276fb09b07ffbe8ee13956",
-    urls = ["https://github.com/dropbox/json11/archive/402bcde713fbef0c67276fb09b07ffbe8ee13956.zip"],
-)
 
 python = use_extension("@rules_python//python/extensions:python.bzl", "python")
 python.toolchain(

@@ -2,7 +2,6 @@
 
 #include "mull/FunctionUnderTest.h"
 #include "mull/Parallelization/Parallelization.h"
-#include "mull/Program/Program.h"
 
 #include "rust/mull-cxx-bridge/bridge.rs.h"
 

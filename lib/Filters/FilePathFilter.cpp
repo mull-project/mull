@@ -1,5 +1,4 @@
 #include "mull/Filters/FilePathFilter.h"
-#include "mull/Mutant.h"
 #include "mull/MutationPoint.h"
 #include "mull/SourceLocation.h"
 
@@ -10,10 +9,6 @@ using namespace mull;
 
 bool FilePathFilter::shouldSkip(MutationPoint *point) {
   return shouldSkip(point->getSourceLocation());
-}
-
-bool FilePathFilter::shouldSkip(Mutant *mutant) {
-  return shouldSkip(mutant->getSourceLocation());
 }
 
 bool FilePathFilter::shouldSkip(llvm::Function *function) {
