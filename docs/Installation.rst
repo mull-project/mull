@@ -45,12 +45,11 @@ Check if everything works:
 Install on macOS
 ****************
 
-Download the latest version from `GitHub Releases <https://github.com/mull-project/mull/releases/latest>`_.
-
-Check the installation:
+Use Homebrew, or download the latest version from `GitHub Releases <https://github.com/mull-project/mull/releases/latest>`_.
 
 .. code-block:: bash
 
+    $ brew install mull-project/mull/mull@19
     $ mull-runner-19 --version
     Mull: Practical mutation testing and fault injection for C and C++
     Home: https://github.com/mull-project/mull

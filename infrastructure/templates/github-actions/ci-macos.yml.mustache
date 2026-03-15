@@ -54,6 +54,13 @@ jobs:
           PACKAGE_FILENAME=$(basename "$PACKAGE_PATH")
           PACKAGE_SHA256=$(shasum -a 256 "$PACKAGE_PATH" | cut -d' ' -f1)
 
+          echo "Triggering Homebrew tap update:"
+          echo "  Channel: $CS_REPO"
+          echo "  Version: $MULL_VERSION"
+          echo "  LLVM: ${{ matrix.LLVM_VERSION }}"
+          echo "  Filename: $PACKAGE_FILENAME"
+          echo "  SHA256: $PACKAGE_SHA256"
+
           curl -X POST \
             -H "Accept: application/vnd.github+json" \
             -H "Authorization: Bearer ${{ env.HOMEBREW_TAP_TOKEN }}" \

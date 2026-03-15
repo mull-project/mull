@@ -103,9 +103,7 @@ def generate_conflicts(current_version, current_channel):
     return "\n".join(lines)
 
 
-def generate_formula(llvm_version, llvm_versions, mull_version, channel):
-    llvm_latest = max(llvm_versions)
-
+def generate_formula(llvm_version, mull_version, channel):
     if channel == "stable":
         channel_desc, channel_caveat, unstable_warning, livecheck = "", "", "", ""
         version_str = mull_version
@@ -122,7 +120,7 @@ def generate_formula(llvm_version, llvm_versions, mull_version, channel):
         livecheck = '\n  livecheck do\n    skip "Testing builds are updated automatically"\n  end\n'
         version_str = f"{mull_version}.pr1"
 
-    llvm_dep = "llvm" if llvm_version == llvm_latest else f"llvm@{llvm_version}"
+    llvm_dep = f"llvm@{llvm_version}"
     url = f"https://dl.cloudsmith.io/public/mull-project/mull-{channel}/raw/names/mull-{llvm_version}/versions/{version_str}/PACKAGE_FILENAME_PLACEHOLDER"
 
     return FORMULA_TEMPLATE.format(
@@ -162,7 +160,7 @@ def main():
             prefix = formula_prefix(channel)
             filename = f"{prefix}@{llvm_version}.rb"
             (formula_dir / filename).write_text(
-                generate_formula(llvm_version, llvm_versions, mull_version, channel)
+                generate_formula(llvm_version, mull_version, channel)
             )
             print(f"  {filename}")
 
