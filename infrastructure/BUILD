@@ -1,5 +1,6 @@
 load("@pypi//:requirements.bzl", "requirement")
 load("@rules_python//python:defs.bzl", "py_binary")
+load(":homebrew_config.bzl", "homebrew_config")
 load(":mull_devcontainers.bzl", "mull_devcontainers")
 load(":mull_github_workflows.bzl", "mull_github_workflows")
 
@@ -35,8 +36,13 @@ mull_github_workflows(
     name = "generate_github_workflows",
 )
 
+homebrew_config(
+    name = "homebrew_config",
+)
+
 py_binary(
     name = "generate-homebrew-formulas",
     srcs = ["generate_homebrew_formulas.py"],
+    data = [":homebrew_config"],
     main = "generate_homebrew_formulas.py",
 )

@@ -2,6 +2,7 @@
 env:
   CLOUDSMITH_API_KEY: ${{ secrets.CLOUDSMITH_API_KEY }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
 on:
   push:
     branches: ["main"]
@@ -46,6 +47,29 @@ jobs:
           done
           echo "All $max_attempts attempts failed."
           exit 1
+      - name: Trigger Homebrew tap update
+        if: env.HOMEBREW_TAP_TOKEN != null && success()
+        run: |
+          CS_REPO=$(cat .mull-ci-cs-repo)
+          MULL_VERSION=$(jq -r .mull_version bazel-bin/infrastructure/homebrew_config.json)
+          PACKAGE_PATH=$(ls packages/Mull-${{ matrix.LLVM_VERSION }}-*.zip)
+          PACKAGE_FILENAME=$(basename "$PACKAGE_PATH")
+          PACKAGE_SHA256=$(shasum -a 256 "$PACKAGE_PATH" | cut -d' ' -f1)
+
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ env.HOMEBREW_TAP_TOKEN }}" \
+            https://api.github.com/repos/mull-project/homebrew-mull/dispatches \
+            -d "{
+              \"event_type\": \"update-formula\",
+              \"client_payload\": {
+                \"channel\": \"$CS_REPO\",
+                \"mull_version\": \"$MULL_VERSION\",
+                \"llvm_version\": \"${{ matrix.LLVM_VERSION }}\",
+                \"package_filename\": \"$PACKAGE_FILENAME\",
+                \"package_sha256\": \"$PACKAGE_SHA256\"
+              }
+            }"
       - name: Move package
         run: |
           mkdir -p /tmp/packages
