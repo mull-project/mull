@@ -8,10 +8,35 @@ Usage:
 
 import json
 import os
+import re
 import sys
 from pathlib import Path
 
 CHANNELS = ["stable", "nightly", "testing"]
+
+
+def read_existing_values(formula_path):
+    """Read version, url, and sha256 from existing formula if not placeholders."""
+    if not formula_path.exists():
+        return None, None, None
+
+    content = formula_path.read_text()
+
+    version_match = re.search(r'version "([^"]+)"', content)
+    url_match = re.search(r'url "([^"]+)"', content)
+    sha256_match = re.search(r'sha256 "([^"]+)"', content)
+
+    version = version_match.group(1) if version_match else None
+    url = url_match.group(1) if url_match else None
+    sha256 = sha256_match.group(1) if sha256_match else None
+
+    # Return None for placeholders
+    if url and "PLACEHOLDER" in url:
+        url = None
+    if sha256 and "PLACEHOLDER" in sha256:
+        sha256 = None
+
+    return version, url, sha256
 
 FORMULA_TEMPLATE = '''\
 class {class_name} < Formula
@@ -103,7 +128,7 @@ def generate_conflicts(current_version, current_channel):
     return "\n".join(lines)
 
 
-def generate_formula(llvm_version, mull_version, channel):
+def generate_formula(llvm_version, mull_version, channel, existing_version=None, existing_url=None, existing_sha256=None):
     if channel == "stable":
         channel_desc, channel_caveat, unstable_warning, livecheck = "", "", "", ""
         version_str = mull_version
@@ -121,15 +146,19 @@ def generate_formula(llvm_version, mull_version, channel):
         version_str = f"{mull_version}.pr1"
 
     llvm_dep = f"llvm@{llvm_version}"
-    url = f"https://dl.cloudsmith.io/public/mull-project/mull-{channel}/raw/names/mull-{llvm_version}/versions/{version_str}/PACKAGE_FILENAME_PLACEHOLDER"
+
+    # Use existing values if available, otherwise use placeholders
+    final_version = existing_version or version_str
+    final_url = existing_url or f"https://dl.cloudsmith.io/public/mull-project/mull-{channel}/raw/names/mull-{llvm_version}/versions/{version_str}/PACKAGE_FILENAME_PLACEHOLDER"
+    final_sha256 = existing_sha256 or "PLACEHOLDER_SHA256"
 
     return FORMULA_TEMPLATE.format(
         class_name=class_name_for(channel, llvm_version),
         llvm_version=llvm_version,
-        mull_version=version_str,
+        mull_version=final_version,
         llvm_dep=llvm_dep,
-        url=url,
-        sha256="PLACEHOLDER_SHA256",
+        url=final_url,
+        sha256=final_sha256,
         conflicts=generate_conflicts(llvm_version, channel),
         channel_desc=channel_desc,
         channel_caveat=channel_caveat,
@@ -159,10 +188,17 @@ def main():
         for channel in CHANNELS:
             prefix = formula_prefix(channel)
             filename = f"{prefix}@{llvm_version}.rb"
-            (formula_dir / filename).write_text(
-                generate_formula(llvm_version, mull_version, channel)
+            formula_path = formula_dir / filename
+
+            # Read existing values to preserve them
+            existing_version, existing_url, existing_sha256 = read_existing_values(formula_path)
+
+            formula_path.write_text(
+                generate_formula(llvm_version, mull_version, channel,
+                                existing_version, existing_url, existing_sha256)
             )
-            print(f"  {filename}")
+            preserved = " (preserved)" if existing_url else " (new)"
+            print(f"  {filename}{preserved}")
 
 
 if __name__ == "__main__":
