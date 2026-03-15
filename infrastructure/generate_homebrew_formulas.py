@@ -32,17 +32,17 @@ class {class_name} < Formula
 
 {conflicts}
   def install
-    bin.install "usr/local/bin/mull-runner-{llvm_version}"
-    bin.install "usr/local/bin/mull-reporter-{llvm_version}"
-    lib.install "usr/local/lib/mull-ir-frontend-{llvm_version}"
-    man1.install "usr/local/share/man/man1/mull-runner-{llvm_version}.1"
-    man1.install "usr/local/share/man/man1/mull-reporter-{llvm_version}.1"
-    bash_completion.install "usr/local/share/bash-completion/completions/mull-runner-{llvm_version}"
-    bash_completion.install "usr/local/share/bash-completion/completions/mull-reporter-{llvm_version}"
-    zsh_completion.install "usr/local/share/zsh/site-functions/_mull-runner-{llvm_version}"
-    zsh_completion.install "usr/local/share/zsh/site-functions/_mull-reporter-{llvm_version}"
-    fish_completion.install "usr/local/share/fish/vendor_completions.d/mull-runner-{llvm_version}.fish"
-    fish_completion.install "usr/local/share/fish/vendor_completions.d/mull-reporter-{llvm_version}.fish"
+    bin.install "bin/mull-runner-{llvm_version}"
+    bin.install "bin/mull-reporter-{llvm_version}"
+    lib.install "lib/mull-ir-frontend-{llvm_version}"
+    man1.install "share/man/man1/mull-runner-{llvm_version}.1"
+    man1.install "share/man/man1/mull-reporter-{llvm_version}.1"
+    bash_completion.install "share/bash-completion/completions/mull-runner-{llvm_version}"
+    bash_completion.install "share/bash-completion/completions/mull-reporter-{llvm_version}"
+    zsh_completion.install "share/zsh/site-functions/_mull-runner-{llvm_version}"
+    zsh_completion.install "share/zsh/site-functions/_mull-reporter-{llvm_version}"
+    fish_completion.install "share/fish/vendor_completions.d/mull-runner-{llvm_version}.fish"
+    fish_completion.install "share/fish/vendor_completions.d/mull-reporter-{llvm_version}.fish"
   end
 
   def caveats

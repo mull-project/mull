@@ -11,17 +11,17 @@ load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
 load(":mull_publish.bzl", "mull_publish_script")
 
-EXPECTED_MACOS_PACKAGE_CONTENT = """usr/local/bin/mull-reporter-{LLVM_VERSION}
-usr/local/bin/mull-runner-{LLVM_VERSION}
-usr/local/lib/mull-ir-frontend-{LLVM_VERSION}
-usr/local/share/bash-completion/completions/mull-reporter-{LLVM_VERSION}
-usr/local/share/bash-completion/completions/mull-runner-{LLVM_VERSION}
-usr/local/share/fish/vendor_completions.d/mull-reporter-{LLVM_VERSION}.fish
-usr/local/share/fish/vendor_completions.d/mull-runner-{LLVM_VERSION}.fish
-usr/local/share/man/man1/mull-reporter-{LLVM_VERSION}.1
-usr/local/share/man/man1/mull-runner-{LLVM_VERSION}.1
-usr/local/share/zsh/site-functions/_mull-reporter-{LLVM_VERSION}
-usr/local/share/zsh/site-functions/_mull-runner-{LLVM_VERSION}
+EXPECTED_MACOS_PACKAGE_CONTENT = """bin/mull-reporter-{LLVM_VERSION}
+bin/mull-runner-{LLVM_VERSION}
+lib/mull-ir-frontend-{LLVM_VERSION}
+share/bash-completion/completions/mull-reporter-{LLVM_VERSION}
+share/bash-completion/completions/mull-runner-{LLVM_VERSION}
+share/fish/vendor_completions.d/mull-reporter-{LLVM_VERSION}.fish
+share/fish/vendor_completions.d/mull-runner-{LLVM_VERSION}.fish
+share/man/man1/mull-reporter-{LLVM_VERSION}.1
+share/man/man1/mull-runner-{LLVM_VERSION}.1
+share/zsh/site-functions/_mull-reporter-{LLVM_VERSION}
+share/zsh/site-functions/_mull-runner-{LLVM_VERSION}
 """
 
 EXPECTED_DEB_PACKAGE_CONTENT = """usr/bin/mull-reporter-{LLVM_VERSION}
@@ -130,7 +130,7 @@ def mull_package(name):
         d[llvm_version] = package_name
 
         if OS_NAME == "macOS":
-            prefix = "/usr/local/"
+            prefix = ""  # Homebrew manages its own prefix
         else:
             prefix = "/usr/"
 
