@@ -28,10 +28,8 @@ jobs:
       - name: Run CI task
         run: |
           brew install bazelisk zlib ncurses sqlite ninja llvm@${{ matrix.LLVM_VERSION }}
-          mkdir -p packages
           bazel build //...
           bazel test //...
-          mv -v bazel-bin/Mull-*.zip packages/
       - name: Publish package
         if: env.CLOUDSMITH_API_KEY != null
         run: |
@@ -73,7 +71,7 @@ jobs:
       - name: Move package
         run: |
           mkdir -p /tmp/packages
-          sudo mv -v packages/Mull-*.zip /tmp/packages/
+          cp -v bazel-bin/Mull-*.zip /tmp/packages/
       - uses: ./.github/actions/attach-package
         with:
           GH_API_KEY: ${{ secrets.GITHUB_TOKEN }}
