@@ -46,6 +46,49 @@ jobs:
           done
           echo "All $max_attempts attempts failed."
           exit 1
+      - name: Trigger Homebrew tap update
+        if: env.CLOUDSMITH_API_KEY != null && success()
+        env:
+          TAP_GITHUB_TOKEN: ${{ secrets.TAP_GITHUB_TOKEN }}
+        run: |
+          CS_REPO=$(cat .mull-ci-cs-repo 2>/dev/null || echo "testing")
+
+          if [[ -z "$TAP_GITHUB_TOKEN" ]]; then
+            echo "TAP_GITHUB_TOKEN not set, skipping tap update"
+            exit 0
+          fi
+
+          # Get version info
+          BASE_VERSION=$(grep -Eo 'version = "[0-9.]+"' MODULE.bazel | grep -Eo '[0-9.]+')
+          VERSION_SUFFIX=$(cat .mull-ci-version-suffix 2>/dev/null || echo "")
+          MULL_VERSION="${BASE_VERSION}${VERSION_SUFFIX}"
+
+          # Get package info
+          PACKAGE_PATH=$(ls packages/Mull-${{ matrix.LLVM_VERSION }}-*.zip)
+          PACKAGE_FILENAME=$(basename "$PACKAGE_PATH")
+          PACKAGE_SHA256=$(shasum -a 256 "$PACKAGE_PATH" | cut -d' ' -f1)
+
+          echo "Triggering Homebrew tap update:"
+          echo "  Channel: $CS_REPO"
+          echo "  Version: $MULL_VERSION"
+          echo "  LLVM: ${{ matrix.LLVM_VERSION }}"
+          echo "  Package: $PACKAGE_FILENAME"
+          echo "  SHA256: $PACKAGE_SHA256"
+
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer $TAP_GITHUB_TOKEN" \
+            https://api.github.com/repos/mull-project/homebrew-mull/dispatches \
+            -d "{
+              \"event_type\": \"update-formula\",
+              \"client_payload\": {
+                \"channel\": \"$CS_REPO\",
+                \"mull_version\": \"$MULL_VERSION\",
+                \"llvm_version\": \"${{ matrix.LLVM_VERSION }}\",
+                \"package_filename\": \"$PACKAGE_FILENAME\",
+                \"package_sha256\": \"$PACKAGE_SHA256\"
+              }
+            }"
       - name: Move package
         run: |
           mkdir -p /tmp/packages

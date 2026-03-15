@@ -34,3 +34,9 @@ mull_devcontainers(
 mull_github_workflows(
     name = "generate_github_workflows",
 )
+
+py_binary(
+    name = "generate-homebrew-formulas",
+    srcs = ["generate_homebrew_formulas.py"],
+    main = "generate_homebrew_formulas.py",
+)
