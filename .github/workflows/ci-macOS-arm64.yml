@@ -52,7 +52,7 @@ jobs:
         run: |
           CS_REPO=$(cat .mull-ci-cs-repo)
           MULL_VERSION=$(jq -r .mull_version bazel-bin/infrastructure/homebrew_config.json)
-          PACKAGE_PATH=$(ls packages/Mull-${{ matrix.LLVM_VERSION }}-*.zip)
+          PACKAGE_PATH=$(ls bazel-bin/Mull-${{ matrix.LLVM_VERSION }}-*.zip)
           PACKAGE_FILENAME=$(basename "$PACKAGE_PATH")
           PACKAGE_SHA256=$(shasum -a 256 "$PACKAGE_PATH" | cut -d' ' -f1)
 
