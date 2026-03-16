@@ -17,8 +17,6 @@ using namespace mull::cxx;
 using namespace mull_test;
 using namespace llvm;
 
-static FilePathFilter nullPathFilter;
-
 static const std::string testCode = std::string(R"(///
 int foo() {
   int var = 0;

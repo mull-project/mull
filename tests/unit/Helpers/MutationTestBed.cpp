@@ -9,7 +9,7 @@
 using namespace mull;
 using namespace mull_test;
 
-MutationTestBed::MutationTestBed() : fixtureGenerator(), nullPathFilter() {}
+MutationTestBed::MutationTestBed() : fixtureGenerator() {}
 
 std::unique_ptr<MutationArtefact> MutationTestBed::generate(const std::string &sourceCode,
                                                             mull::Mutator &mutator) {
@@ -34,7 +34,7 @@ std::unique_ptr<MutationArtefact> MutationTestBed::generate(const std::string &s
   std::vector<MutationPoint *> points;
   for (auto &function : bitcode->getModule()->functions()) {
     FunctionUnderTest functionUnderTest(&function, bitcode.get());
-    functionUnderTest.selectInstructions({});
+    functionUnderTest.selectInstructions();
     auto mutants = mutator.getMutations(bitcode.get(), functionUnderTest);
     std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
   }

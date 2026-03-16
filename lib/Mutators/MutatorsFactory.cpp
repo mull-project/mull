@@ -10,167 +10,12 @@
 #include "mull/Mutators/NegateConditionMutator.h"
 #include "rust/mull-cxx-bridge/bridge.rs.h"
 #include <llvm/ADT/STLExtras.h>
-#include <sstream>
 #include <unordered_set>
 
 using namespace mull;
 using namespace std;
 
-static string Experimental() {
-  return "experimental";
-}
-
-static string CXX_Assignment() {
-  return "cxx_assignment";
-}
-static string CXX_Const_Assignment() {
-  return "cxx_const_assignment";
-}
-static string CXX_Arithmetic_Assignment() {
-  return "cxx_arithmetic_assignment";
-}
-static string CXX_Bitwise_Assignment() {
-  return "cxx_bitwise_assignment";
-}
-static string CXX_Increment() {
-  return "cxx_increment";
-}
-static string CXX_Decrement() {
-  return "cxx_decrement";
-}
-static string CXX_Arithmetic() {
-  return "cxx_arithmetic";
-}
-static string CXX_Bitwise() {
-  return "cxx_bitwise";
-}
-static string CXX_Logical() {
-  return "cxx_logical";
-}
-static string CXX_Comparison() {
-  return "cxx_comparison";
-}
-static string CXX_Boundary() {
-  return "cxx_boundary";
-}
-static string CXX_Calls() {
-  return "cxx_calls";
-}
-static string CXX_All() {
-  return "cxx_all";
-}
-static string CXX_Default() {
-  return "cxx_default";
-}
-
-static void expandGroups(const MullDiagnostics &diagnostics, const vector<string> &groups,
-                         const map<string, vector<string>> &mapping,
-                         unordered_set<string> &expandedGroups) {
-  for (const string &group : groups) {
-    std::string tempGroup = group;
-    if (tempGroup == "all") {
-      diagnostics.warning(
-          "Group 'all' is replaced with 'cxx_all' and will be removed in a future release.");
-      tempGroup = "cxx_all";
-    }
-    if (mapping.count(tempGroup) == 0) {
-      expandedGroups.insert(tempGroup);
-      continue;
-    }
-    expandGroups(diagnostics, mapping.at(tempGroup), mapping, expandedGroups);
-  }
-}
-
-MutatorsFactory::MutatorsFactory(const MullDiagnostics &diagnostics) : diagnostics(diagnostics) {
-  groupsMapping[CXX_Calls()] = { cxx::RemoveVoidCall::ID(), cxx::ReplaceScalarCall::ID() };
-
-  groupsMapping[CXX_Const_Assignment()] = {
-    cxx::NumberAssignConst::ID(), // a = b | a = Const
-    cxx::NumberInitConst::ID(),   // a(b)  | a(Const)
-  };
-
-  groupsMapping[CXX_Bitwise_Assignment()] = {
-    cxx::AndAssignToOrAssign::ID(),        // &=  | |=
-    cxx::OrAssignToAndAssign::ID(),        // |=  | &=
-    cxx::XorAssignToOrAssign::ID(),        // ^=  | |=
-    cxx::LShiftAssignToRShiftAssign::ID(), // <<= | >>=
-    cxx::RShiftAssignToLShiftAssign::ID(), // >>= | <<=
-  };
-
-  groupsMapping[CXX_Arithmetic_Assignment()] = {
-    cxx::AddAssignToSubAssign::ID(), // += | -=
-    cxx::SubAssignToAddAssign::ID(), // -= | +=
-    cxx::MulAssignToDivAssign::ID(), // *= | /=
-    cxx::DivAssignToMulAssign::ID(), // /= | *=
-    cxx::RemAssignToDivAssign::ID(), // %= | /=
-  };
-
-  groupsMapping[CXX_Increment()] = {
-    cxx::PreIncToPreDec::ID(),   // ++x | --x
-    cxx::PostIncToPostDec::ID(), // x++ | x--
-  };
-
-  groupsMapping[CXX_Decrement()] = {
-    cxx::PreDecToPreInc::ID(),   // --x | ++x
-    cxx::PostDecToPostInc::ID(), // x-- | x++
-  };
-
-  groupsMapping[CXX_Arithmetic()] = {
-    cxx::UnaryMinusToNoop::ID(), // -x     | x
-    cxx::AddToSub::ID(),         // a + b  | a - b
-    cxx::SubToAdd::ID(),         // a - b  | a + b
-    cxx::MulToDiv::ID(),         // a * b  | a / b
-    cxx::DivToMul::ID(),         // a / b  | a * b
-    cxx::RemToDiv::ID(),         // a % b  | a / b
-  };
-
-  groupsMapping[CXX_Bitwise()] = {
-    cxx::BitwiseNotToNoop::ID(), // ~x     | x
-    cxx::BitwiseAndToOr::ID(),   // a & b  | a | b
-    cxx::BitwiseOrToAnd::ID(),   // a | b  | a & b
-    cxx::XorToOr::ID(),          // a ^ b  |
-    cxx::LShiftToRShift::ID(),   // a << b | a >> b
-    cxx::RShiftToLShift::ID(),   // a >> b | a << b
-  };
-
-  groupsMapping[CXX_Logical()] = {
-    cxx::RemoveNegation::ID(), // !a     | a
-  };
-
-  groupsMapping[CXX_Comparison()] = {
-    cxx::EqualToNotEqual::ID(),          // == | !=
-    cxx::NotEqualToEqual::ID(),          // != | ==
-    cxx::LessOrEqualToGreaterThan::ID(), // <= | >
-    cxx::LessThanToGreaterOrEqual::ID(), // <  | >=
-    cxx::GreaterOrEqualToLessThan::ID(), // >= | <
-    cxx::GreaterThanToLessOrEqual::ID(), // >  | <=
-  };
-
-  groupsMapping[CXX_Boundary()] = {
-    cxx::LessOrEqualToLessThan::ID(),       // <= | <
-    cxx::LessThanToLessOrEqual::ID(),       // <  | <=
-    cxx::GreaterOrEqualToGreaterThan::ID(), // >= | >
-    cxx::GreaterThanToGreaterOrEqual::ID(), // >  | >=
-  };
-
-  groupsMapping[CXX_Assignment()] = {
-    CXX_Bitwise_Assignment(),
-    CXX_Arithmetic_Assignment(),
-    CXX_Const_Assignment(),
-  };
-
-  groupsMapping[CXX_All()] = { CXX_Assignment(), CXX_Increment(), CXX_Decrement(), CXX_Arithmetic(),
-                               CXX_Comparison(), CXX_Boundary(),  CXX_Bitwise(),   CXX_Calls() };
-
-  groupsMapping[CXX_Default()] = {
-    CXX_Increment(),
-    CXX_Arithmetic(),
-    CXX_Comparison(),
-    CXX_Boundary(),
-  };
-
-  groupsMapping[Experimental()] = { NegateConditionMutator::ID(), CXX_Logical() };
-}
+MutatorsFactory::MutatorsFactory(const MullDiagnostics &diagnostics) : diagnostics(diagnostics) {}
 
 template <typename MutatorClass>
 void addMutator(std::map<std::string, std::unique_ptr<Mutator>> &mapping) {
@@ -236,9 +81,23 @@ Mutator *MutatorsFactory::getMutator(const string &mutatorId) {
 
 std::unordered_set<std::string>
 MutatorsFactory::expandMutatorGroups(const std::vector<std::string> &groups) {
-  std::unordered_set<std::string> expandedGroups;
-  expandGroups(diagnostics, groups, groupsMapping, expandedGroups);
-  return expandedGroups;
+  // Use Rust as the source of truth for mutator group expansion
+  rust::Vec<rust::String> rustGroups;
+  for (const auto &group : groups) {
+    std::string tempGroup = group;
+    if (tempGroup == "all") {
+      diagnostics.warning(
+          "Group 'all' is replaced with 'cxx_all' and will be removed in a future release.");
+      tempGroup = "cxx_all";
+    }
+    rustGroups.push_back(rust::String(tempGroup));
+  }
+  rust::Vec<rust::String> expanded = expand_mutator_groups(rustGroups);
+  std::unordered_set<std::string> result;
+  for (const auto &mutator : expanded) {
+    result.insert(std::string(mutator));
+  }
+  return result;
 }
 
 vector<unique_ptr<Mutator>>
@@ -252,13 +111,13 @@ MutatorsFactory::mutators(const vector<string> &groups,
   std::unordered_set<std::string> expandedGroups;
   std::unordered_set<std::string> expandedIgnoreGroups;
   if (!ignoreGroups.empty()) {
-    expandGroups(diagnostics, ignoreGroups, groupsMapping, expandedIgnoreGroups);
+    expandedIgnoreGroups = expandMutatorGroups(ignoreGroups);
   }
 
   if (groups.empty()) {
-    expandGroups(diagnostics, { CXX_Default() }, groupsMapping, expandedGroups);
+    expandedGroups = expandMutatorGroups({ "cxx_default" });
   } else {
-    expandGroups(diagnostics, groups, groupsMapping, expandedGroups);
+    expandedGroups = expandMutatorGroups(groups);
   }
 
   for (auto &ignoreGroup : expandedIgnoreGroups) {
@@ -288,32 +147,17 @@ MutatorsFactory::mutators(const vector<string> &groups,
 
 /// Command Line Options
 
-std::string MutatorsFactory::descriptionForGroup(const std::vector<std::string> &groupMembers) {
-  if (groupMembers.empty()) {
-    return "empty group?";
-  }
-
-  std::stringstream members;
-  std::copy(groupMembers.begin(),
-            groupMembers.end() - 1,
-            std::ostream_iterator<std::string>(members, ", "));
-  members << *(groupMembers.end() - 1);
-
-  return members.str();
-}
-
 std::vector<std::pair<std::string, std::string>> MutatorsFactory::commandLineOptions() {
   std::vector<std::pair<std::string, std::string>> options;
-  for (auto &group : groupsMapping) {
-    options.emplace_back(group.first, descriptionForGroup(group.second));
+
+  // Get group definitions from Rust
+  rust::Vec<MutatorGroupDef> groupDefs = get_mutator_group_definitions();
+  for (const auto &def : groupDefs) {
+    options.emplace_back(std::string(def.name), std::string(def.description));
   }
 
-  std::unordered_set<std::string> mutatorsSet;
-  std::vector<std::string> groups({ CXX_All() });
-  expandGroups(diagnostics, { CXX_All() }, groupsMapping, mutatorsSet);
-
-  auto allMutators = mutators({ CXX_All() }, {});
-
+  // Get individual mutator descriptions
+  auto allMutators = mutators({ "cxx_all" }, {});
   for (auto &mutator : allMutators) {
     options.emplace_back(mutator->getUniqueIdentifier(), mutator->getDescription());
   }
@@ -323,8 +167,4 @@ std::vector<std::pair<std::string, std::string>> MutatorsFactory::commandLineOpt
 
 std::map<std::string, std::unique_ptr<Mutator>> &MutatorsFactory::getMutatorsMapping() {
   return mutatorsMapping;
-}
-
-std::map<std::string, std::vector<std::string>> &MutatorsFactory::getGroupsMapping() {
-  return groupsMapping;
 }

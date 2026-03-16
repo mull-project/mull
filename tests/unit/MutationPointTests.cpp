@@ -32,7 +32,7 @@ TEST(MutationPoint, ReplaceCallMutator_applyMutation) {
   cxx::ReplaceScalarCall mutator;
   FunctionUnderTest functionUnderTest(bitcode->getModule()->getFunction("replace_call"),
                                       bitcode.get());
-  functionUnderTest.selectInstructions({});
+  functionUnderTest.selectInstructions();
   auto mutationPoints = mutator.getMutations(bitcode.get(), functionUnderTest);
 
   ASSERT_EQ(1U, mutationPoints.size());
@@ -60,10 +60,10 @@ TEST(MutationPoint, OriginalValuePresent) {
   cxx::NumberAssignConst mutator;
   FunctionUnderTest functionUnderTest(bitcode->getModule()->getFunction("replace_assignment"),
                                       bitcode.get());
-  functionUnderTest.selectInstructions({});
+  functionUnderTest.selectInstructions();
   auto mutationPoints = mutator.getMutations(bitcode.get(), functionUnderTest);
 
-  ASSERT_EQ(2U, mutationPoints.size());
+  ASSERT_EQ(1U, mutationPoints.size());
 
   std::vector<std::string> mutantRepresentations;
   for (auto *mutation : mutationPoints) {
@@ -104,49 +104,14 @@ TEST(MutationPoint, dump) {
   cxx::NumberAssignConst mutator;
   FunctionUnderTest functionUnderTest(bitcode->getModule()->getFunction("replace_assignment"),
                                       bitcode.get());
-  functionUnderTest.selectInstructions({});
+  functionUnderTest.selectInstructions();
   auto mutationPoints = mutator.getMutations(bitcode.get(), functionUnderTest);
 
-  ASSERT_EQ(2U, mutationPoints.size());
+  ASSERT_EQ(1U, mutationPoints.size());
 
-  const std::string dump = mutationPoints[1]->dump();
+  const std::string dump = mutationPoints[0]->dump();
 
   auto const dumpRegex = std::regex("Mutation Point: cxx_assign_const .*/module\\.c:6:7");
 
   ASSERT_TRUE(std::regex_search(dump, dumpRegex));
-}
-
-static std::string leftTrimmedString(const std::string &string) {
-  if (string.empty())
-    return "";
-  std::string newString = string;
-  while (newString.at(0) == '\n') {
-    newString.erase(0, 1);
-  }
-  return newString;
-}
-
-TEST(MutationPoint, dumpSourceCodeContext) {
-  auto core = init_core_ffi();
-  const MullDiagnostics &diagnostics = core->diag();
-  BitcodeLoader loader;
-  auto bitcode = loader.loadBitcodeAtPath(
-      fixtures::tests_unit_fixtures_mutators_replace_assignment_module_c_bc_path(), diagnostics);
-
-  cxx::NumberAssignConst mutator;
-  FunctionUnderTest functionUnderTest(bitcode->getModule()->getFunction("replace_assignment"),
-                                      bitcode.get());
-  functionUnderTest.selectInstructions({});
-  auto mutationPoints = mutator.getMutations(bitcode.get(), functionUnderTest);
-
-  ASSERT_EQ(2U, mutationPoints.size());
-
-  ASSERT_EQ(mutationPoints[0]->dumpSourceCodeContext(),
-            "Source code information is unavailable. Possibly a junk mutation.");
-  ASSERT_EQ(mutationPoints[1]->dumpSourceCodeContext(), leftTrimmedString(R"LITERAL(
-5:int replace_assignment(int a) {
-6:  int b = a + 100;
-        ^
-7:
-)LITERAL"));
 }

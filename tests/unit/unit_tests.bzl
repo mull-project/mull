@@ -6,7 +6,6 @@ def mull_unit_tests(name):
     native.filegroup(
         name = "fixtures",
         srcs = [
-            ":fixtures/hardcode/APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_negate_mutator.ll",
             "//tests/unit/fixtures/junk_detection/compdb:compdb_absolute",
             "//tests/unit/fixtures/junk_detection/compdb:compdb_relative",
             "//tests/unit/fixtures/junk_detection/compdb:db_produced_from_clang_MJ_valid_sequence.json",
@@ -23,9 +22,6 @@ def mull_unit_tests(name):
             name = "generated_fixtures_%s" % llvm_version,
             srcs = [
                 "//tests/unit/fixtures/junk_detection/compdb:%s_main.cpp.bc" % llvm_version,
-                "//tests/unit/fixtures/mutation_filters/file_path:%s_some_test_file_name.c.bc" % llvm_version,
-                "//tests/unit/fixtures/mutation_filters/no_debug_filter:%s_with_debug.c.bc" % llvm_version,
-                "//tests/unit/fixtures/mutation_filters/no_debug_filter:%s_without_debug.c.bc" % llvm_version,
                 "//tests/unit/fixtures/mutators:%s_bitwise/bitops.cpp.bc" % llvm_version,
                 "//tests/unit/fixtures/mutators:%s_bitwise/shifts.cpp.bc" % llvm_version,
                 "//tests/unit/fixtures/mutators:%s_boundary/module.cpp.bc" % llvm_version,
@@ -76,22 +72,8 @@ def mull_unit_tests(name):
         )
 
         native.filegroup(
-            name = "MutationFilters/MutationFilterTests.cpp_%s_fixtures" % llvm_version,
-            srcs = [
-                "//tests/unit/fixtures/mutation_filters/file_path:%s_some_test_file_name.c.bc" % llvm_version,
-                "//tests/unit/fixtures/mutation_filters/no_debug_filter:%s_with_debug.c.bc" % llvm_version,
-                "//tests/unit/fixtures/mutation_filters/no_debug_filter:%s_without_debug.c.bc" % llvm_version,
-            ],
-        )
-
-        native.filegroup(
             name = "Mutators/ConditionalsBoundaryMutatorTests.cpp_%s_fixtures" % llvm_version,
             srcs = ["//tests/unit/fixtures/mutators:%s_boundary/module.cpp.bc" % llvm_version],
-        )
-
-        native.filegroup(
-            name = "Mutators/NegateConditionMutatorTest.cpp_%s_fixtures" % llvm_version,
-            srcs = [":fixtures/hardcode/APInt_9a3c2a89c9f30b6c2ab9a1afce2b65d6_negate_mutator.ll"],
         )
 
         native.filegroup(
@@ -180,7 +162,6 @@ def mull_unit_tests(name):
         native.filegroup(name = "Mutations-E2E/Scalar/02_Mutation_Scalar_BinaryOperand_Test.cpp_%s_fixtures" % llvm_version)
 
         for f in native.glob([
-            "MutationFilters/**/*.cpp",
             "Mutators/**/*.cpp",
             "JunkDetection/**/*.cpp",
             "*.cpp",

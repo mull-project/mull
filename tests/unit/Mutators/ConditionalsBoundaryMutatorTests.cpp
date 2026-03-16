@@ -19,7 +19,7 @@ TEST(Relational, LessThanToLessOrEqual) {
   std::vector<MutationPoint *> mutants;
   for (auto &function : bitcode->getModule()->functions()) {
     FunctionUnderTest functionUnderTest(&function, bitcode.get());
-    functionUnderTest.selectInstructions({});
+    functionUnderTest.selectInstructions();
     auto m = mutator.getMutations(bitcode.get(), functionUnderTest);
     std::copy(m.begin(), m.end(), std::back_inserter(mutants));
   }
@@ -38,7 +38,7 @@ TEST(Relational, LessOrEqualToLessThan) {
   std::vector<MutationPoint *> mutants;
   for (auto &function : bitcode->getModule()->functions()) {
     FunctionUnderTest functionUnderTest(&function, bitcode.get());
-    functionUnderTest.selectInstructions({});
+    functionUnderTest.selectInstructions();
     auto m = mutator.getMutations(bitcode.get(), functionUnderTest);
     std::copy(m.begin(), m.end(), std::back_inserter(mutants));
   }
@@ -57,7 +57,7 @@ TEST(Relational, GreaterThanToGreaterOrEqual) {
   std::vector<MutationPoint *> mutants;
   for (auto &function : bitcode->getModule()->functions()) {
     FunctionUnderTest functionUnderTest(&function, bitcode.get());
-    functionUnderTest.selectInstructions({});
+    functionUnderTest.selectInstructions();
     auto m = mutator.getMutations(bitcode.get(), functionUnderTest);
     std::copy(m.begin(), m.end(), std::back_inserter(mutants));
   }
@@ -76,7 +76,7 @@ TEST(Relational, GreaterOrEqualToGreaterThan) {
   std::vector<MutationPoint *> mutants;
   for (auto &function : bitcode->getModule()->functions()) {
     FunctionUnderTest functionUnderTest(&function, bitcode.get());
-    functionUnderTest.selectInstructions({});
+    functionUnderTest.selectInstructions();
     auto m = mutator.getMutations(bitcode.get(), functionUnderTest);
     std::copy(m.begin(), m.end(), std::back_inserter(mutants));
   }

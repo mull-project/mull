@@ -3,5 +3,5 @@ mutators:
 includePaths:
   - "*cpp"
 excludePaths:
-  - "Output/.***"
+  - "*cpp"
 quiet: false

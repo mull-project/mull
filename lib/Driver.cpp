@@ -1,9 +1,6 @@
 #include "mull/Driver.h"
 
 #include "mull/BitcodeMetadataReader.h"
-#include "mull/Filters/BlockAddressFunctionFilter.h"
-#include "mull/Filters/Filters.h"
-#include "mull/Filters/MutationPointFilter.h"
 #include "mull/FunctionUnderTest.h"
 #include "mull/JunkDetection/CXX/ASTStorage.h"
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
@@ -80,6 +77,17 @@ std::vector<std::string> toStdVector(const rust::Vec<rust::String> &v) {
   return out;
 }
 
+bool shouldSkipFunction(llvm::Function *function) {
+  if (function->isVarArg())
+    return true;
+  if (SourceLocation::locationFromFunction(function).isNull())
+    return true;
+  for (auto &bb : *function)
+    if (bb.hasAddressTaken())
+      return true;
+  return false;
+}
+
 } // namespace
 
 void mull::mutateBitcode(llvm::Module &module) {
@@ -87,14 +95,6 @@ void mull::mutateBitcode(llvm::Module &module) {
   auto core = init_core_ffi();
   const MullDiagnostics &diagnostics = core->diag();
   const MullConfig &configuration = core->config();
-
-  std::vector<std::unique_ptr<mull::Filter>> filterStorage;
-  mull::Filters filters(configuration, diagnostics);
-  filters.enableNoDebugFilter();
-  filters.enableFilePathFilter();
-  filters.enableBlockAddressFilter();
-  filters.enableVariadicFunctionFilter();
-  filters.enableManualFilter();
 
   SingleTaskExecutor singleTask(diagnostics);
 
@@ -140,23 +140,11 @@ void mull::mutateBitcode(llvm::Module &module) {
   std::vector<FunctionUnderTest> functionsUnderTest;
   singleTask.execute("Gathering functions under test", [&]() {
     for (llvm::Function &function : module) {
+      if (shouldSkipFunction(&function))
+        continue;
       functionsUnderTest.emplace_back(&function, &bitcode);
     }
   });
-
-  std::vector<FunctionUnderTest> filteredFunctions;
-  for (const auto &function : functionsUnderTest) {
-    bool skip = false;
-    for (auto filter : filters.functionFilters) {
-      if (filter->shouldSkip(function.getFunction())) {
-        skip = true;
-        break;
-      }
-    }
-    if (!skip) {
-      filteredFunctions.emplace_back(function);
-    }
-  }
 
   MutatorsFactory mutatorsFactory(diagnostics);
   MutationsFinder mutationsFinder(
@@ -167,19 +155,19 @@ void mull::mutateBitcode(llvm::Module &module) {
   std::vector<InstructionSelectionTask> instructionSelectionTasks;
   instructionSelectionTasks.reserve(configuration.workers);
   for (unsigned i = 0; i < configuration.workers; i++) {
-    instructionSelectionTasks.emplace_back(filters.instructionFilters);
+    instructionSelectionTasks.emplace_back();
   }
 
   std::vector<int> Nothing;
   TaskExecutor<InstructionSelectionTask> selectionRunner(diagnostics,
                                                          "Instruction selection",
-                                                         filteredFunctions,
+                                                         functionsUnderTest,
                                                          Nothing,
                                                          std::move(instructionSelectionTasks));
   selectionRunner.execute();
 
   std::vector<MutationPoint *> mutationPoints =
-      mutationsFinder.getMutationPoints(diagnostics, filteredFunctions);
+      mutationsFinder.getMutationPoints(diagnostics, functionsUnderTest);
   std::vector<MutationPoint *> mutations = std::move(mutationPoints);
 
   // Apply Rust filter chain
@@ -194,6 +182,14 @@ void mull::mutateBitcode(llvm::Module &module) {
     filterConfig.git_project_root = std::string(configuration.git_project_root);
     filterConfig.debug_git_diff = configuration.debug.git_diff;
     filterConfig.workers = configuration.workers;
+    filterConfig.enable_manual_filter = true;
+    for (const auto &path : configuration.include_paths) {
+      filterConfig.include_paths.push_back(rust::String(std::string(path)));
+    }
+    for (const auto &path : configuration.exclude_paths) {
+      filterConfig.exclude_paths.push_back(rust::String(std::string(path)));
+    }
+    filterConfig.debug_filepath = configuration.debug.filters;
 
     rust::Vec<rust::String> keptIds = filter_mutants(diagnostics, mutantIds, filterConfig);
 
@@ -209,21 +205,6 @@ void mull::mutateBitcode(llvm::Module &module) {
       }
     }
     mutations = std::move(filteredMutations);
-  }
-
-  for (auto filter : filters.mutationFilters) {
-    std::vector<MutationFilterTask> tasks;
-    tasks.reserve(configuration.workers);
-    for (unsigned i = 0; i < configuration.workers; i++) {
-      tasks.emplace_back(*filter);
-    }
-
-    std::string label = std::string("Applying filter: ") + filter->name();
-    std::vector<MutationPoint *> tmp;
-    TaskExecutor<MutationFilterTask> filterRunner(
-        diagnostics, label, mutations, tmp, std::move(tasks));
-    filterRunner.execute();
-    mutations = std::move(tmp);
   }
 
   if (!configuration.junk_detection_disabled) {

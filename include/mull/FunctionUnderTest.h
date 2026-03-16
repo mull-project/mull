@@ -10,7 +10,6 @@ class Instruction;
 } // namespace llvm
 
 namespace mull {
-class InstructionFilter;
 class Bitcode;
 
 class FunctionUnderTest {
@@ -19,7 +18,7 @@ public:
   llvm::Function *getFunction() const;
   Bitcode *getBitcode() const;
   const std::vector<llvm::Instruction *> &getSelectedInstructions() const;
-  void selectInstructions(const std::vector<InstructionFilter *> &filters);
+  void selectInstructions();
 
 private:
   llvm::Function *function;

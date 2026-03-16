@@ -99,7 +99,6 @@ public:
   std::string getOriginalFunctionName() const;
 
   std::string dump() const;
-  std::string dumpSourceCodeContext() const;
 };
 
 } // namespace mull
