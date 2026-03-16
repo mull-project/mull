@@ -154,6 +154,9 @@ fn main() {
             debug_git_diff: config.debug.git_diff,
             // disabled as it's likely reapply the same filter as during the compilation
             enable_manual_filter: false,
+            include_paths: &config.include_paths,
+            exclude_paths: &config.exclude_paths,
+            debug_filepath: config.debug.filters,
         },
     );
 

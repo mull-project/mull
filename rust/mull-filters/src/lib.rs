@@ -1,10 +1,12 @@
 mod coverage_filter;
+mod filepath_filter;
 mod filter_chain;
 mod git_diff_filter;
 mod manual_filter;
 mod mutator_groups;
 
 pub use coverage_filter::{has_coverage, CoverageFilter};
+pub use filepath_filter::FilePathFilter;
 pub use filter_chain::{FilterChain, FilterChainConfig, FilterDecision, FilterResult};
 pub use git_diff_filter::GitDiffFilter;
 pub use manual_filter::ManualFilter;
@@ -36,6 +38,9 @@ pub struct FilterMutantsConfig {
     pub debug_git_diff: bool,
     pub workers: usize,
     pub enable_manual_filter: bool,
+    pub include_paths: Vec<String>,
+    pub exclude_paths: Vec<String>,
+    pub debug_filepath: bool,
 }
 
 /// Filter mutants using the Rust filter chain
@@ -48,7 +53,11 @@ pub fn filter_mutants(
     config: FilterMutantsConfig,
 ) -> Vec<String> {
     // If no filters are enabled, return all mutants
-    if config.git_diff_ref.is_empty() && !config.enable_manual_filter {
+    if config.git_diff_ref.is_empty()
+        && !config.enable_manual_filter
+        && config.include_paths.is_empty()
+        && config.exclude_paths.is_empty()
+    {
         return mutant_ids;
     }
 
@@ -68,6 +77,9 @@ pub fn filter_mutants(
         git_project_root: &config.git_project_root,
         debug_git_diff: config.debug_git_diff,
         enable_manual_filter: config.enable_manual_filter,
+        include_paths: &config.include_paths,
+        exclude_paths: &config.exclude_paths,
+        debug_filepath: config.debug_filepath,
     };
 
     let filter_chain = FilterChain::from_config(diag, filter_config);

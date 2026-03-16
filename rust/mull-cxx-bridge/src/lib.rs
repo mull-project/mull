@@ -9,6 +9,9 @@ mod ffi {
         debug_git_diff: bool,
         workers: usize,
         enable_manual_filter: bool,
+        include_paths: Vec<String>,
+        exclude_paths: Vec<String>,
+        debug_filepath: bool,
     }
 
     struct MutatorGroupDef {
@@ -215,6 +218,9 @@ fn filter_mutants(
         debug_git_diff: config.debug_git_diff,
         workers: config.workers,
         enable_manual_filter: config.enable_manual_filter,
+        include_paths: config.include_paths,
+        exclude_paths: config.exclude_paths,
+        debug_filepath: config.debug_filepath,
     };
     mull_filters::filter_mutants(&diag.0, mutant_ids, inner_config)
 }

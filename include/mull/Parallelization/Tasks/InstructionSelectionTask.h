@@ -5,7 +5,6 @@
 
 namespace mull {
 class progress_counter;
-class InstructionFilter;
 
 class InstructionSelectionTask {
 public:

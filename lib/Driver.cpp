@@ -1,8 +1,6 @@
 #include "mull/Driver.h"
 
 #include "mull/BitcodeMetadataReader.h"
-#include "mull/Filters/Filters.h"
-#include "mull/Filters/MutationPointFilter.h"
 #include "mull/FunctionUnderTest.h"
 #include "mull/JunkDetection/CXX/ASTStorage.h"
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
@@ -98,10 +96,6 @@ void mull::mutateBitcode(llvm::Module &module) {
   const MullDiagnostics &diagnostics = core->diag();
   const MullConfig &configuration = core->config();
 
-  std::vector<std::unique_ptr<mull::Filter>> filterStorage;
-  mull::Filters filters(configuration, diagnostics);
-  filters.enableFilePathFilter();
-
   SingleTaskExecutor singleTask(diagnostics);
 
   /// Actual Work
@@ -189,6 +183,13 @@ void mull::mutateBitcode(llvm::Module &module) {
     filterConfig.debug_git_diff = configuration.debug.git_diff;
     filterConfig.workers = configuration.workers;
     filterConfig.enable_manual_filter = true;
+    for (const auto &path : configuration.include_paths) {
+      filterConfig.include_paths.push_back(rust::String(std::string(path)));
+    }
+    for (const auto &path : configuration.exclude_paths) {
+      filterConfig.exclude_paths.push_back(rust::String(std::string(path)));
+    }
+    filterConfig.debug_filepath = configuration.debug.filters;
 
     rust::Vec<rust::String> keptIds = filter_mutants(diagnostics, mutantIds, filterConfig);
 
@@ -204,21 +205,6 @@ void mull::mutateBitcode(llvm::Module &module) {
       }
     }
     mutations = std::move(filteredMutations);
-  }
-
-  for (auto filter : filters.mutationFilters) {
-    std::vector<MutationFilterTask> tasks;
-    tasks.reserve(configuration.workers);
-    for (unsigned i = 0; i < configuration.workers; i++) {
-      tasks.emplace_back(*filter);
-    }
-
-    std::string label = std::string("Applying filter: ") + filter->name();
-    std::vector<MutationPoint *> tmp;
-    TaskExecutor<MutationFilterTask> filterRunner(
-        diagnostics, label, mutations, tmp, std::move(tasks));
-    filterRunner.execute();
-    mutations = std::move(tmp);
   }
 
   if (!configuration.junk_detection_disabled) {

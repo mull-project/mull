@@ -10,7 +10,6 @@ class Instruction;
 } // namespace llvm
 
 namespace mull {
-class InstructionFilter;
 class Bitcode;
 
 class FunctionUnderTest {

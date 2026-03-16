@@ -1,5 +1,4 @@
 #include "mull/FunctionUnderTest.h"
-#include "mull/Filters/InstructionFilter.h"
 
 #include <llvm/IR/InstIterator.h>
 #include <llvm/ProfileData/Coverage/CoverageMapping.h>

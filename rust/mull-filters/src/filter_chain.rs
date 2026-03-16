@@ -1,4 +1,4 @@
-use crate::{CoverageFilter, GitDiffFilter, ManualFilter, MutantFilter};
+use crate::{CoverageFilter, FilePathFilter, GitDiffFilter, ManualFilter, MutantFilter};
 use mull_core::diag_warning;
 use mull_core::diagnostics::MullDiagnostics;
 use mull_state::{ExecutionStatus, Mutant};
@@ -30,6 +30,12 @@ pub struct FilterChainConfig<'a> {
     pub debug_git_diff: bool,
     /// Enable manual filter (mull-off/mull-on/mull-ignore comments)
     pub enable_manual_filter: bool,
+    /// Include path patterns (regex)
+    pub include_paths: &'a [String],
+    /// Exclude path patterns (regex)
+    pub exclude_paths: &'a [String],
+    /// Enable filepath filter debug output
+    pub debug_filepath: bool,
 }
 
 /// A chain of filters that can be applied to mutants
@@ -97,6 +103,17 @@ impl FilterChain {
                 );
                 chain.add(git_diff_filter);
             }
+        }
+
+        // Add file path filter if patterns are configured
+        if !config.include_paths.is_empty() || !config.exclude_paths.is_empty() {
+            let filepath_filter = FilePathFilter::new(
+                diag,
+                config.include_paths,
+                config.exclude_paths,
+                config.debug_filepath,
+            );
+            chain.add(filepath_filter);
         }
 
         // Add manual filter if enabled

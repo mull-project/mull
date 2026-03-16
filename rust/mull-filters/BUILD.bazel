@@ -11,6 +11,7 @@ rust_library(
         "@crates//:git2",
         "@crates//:llvm_profparser",
         "@crates//:object",
+        "@crates//:regex",
     ],
 )
 
