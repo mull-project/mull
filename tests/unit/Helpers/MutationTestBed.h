@@ -3,8 +3,6 @@
 #include "InMemoryFixture.h"
 #include "MutationArtefact.h"
 
-#include "mull/Filters/FilePathFilter.h"
-
 #include <llvm/IR/LLVMContext.h>
 
 #include <memory>
@@ -22,7 +20,6 @@ public:
 
 private:
   InMemoryFixture fixtureGenerator;
-  mull::FilePathFilter nullPathFilter;
 };
 
 } // namespace mull_test

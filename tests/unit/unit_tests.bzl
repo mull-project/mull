@@ -22,9 +22,6 @@ def mull_unit_tests(name):
             name = "generated_fixtures_%s" % llvm_version,
             srcs = [
                 "//tests/unit/fixtures/junk_detection/compdb:%s_main.cpp.bc" % llvm_version,
-                "//tests/unit/fixtures/mutation_filters/file_path:%s_some_test_file_name.c.bc" % llvm_version,
-                "//tests/unit/fixtures/mutation_filters/no_debug_filter:%s_with_debug.c.bc" % llvm_version,
-                "//tests/unit/fixtures/mutation_filters/no_debug_filter:%s_without_debug.c.bc" % llvm_version,
                 "//tests/unit/fixtures/mutators:%s_bitwise/bitops.cpp.bc" % llvm_version,
                 "//tests/unit/fixtures/mutators:%s_bitwise/shifts.cpp.bc" % llvm_version,
                 "//tests/unit/fixtures/mutators:%s_boundary/module.cpp.bc" % llvm_version,
@@ -72,15 +69,6 @@ def mull_unit_tests(name):
             hdrs = native.glob(["Helpers/*.h"]),
             deps = ["//:libmull_%s" % llvm_version],
             tags = ["unit", "llvm_%s" % llvm_version],
-        )
-
-        native.filegroup(
-            name = "MutationFilters/MutationFilterTests.cpp_%s_fixtures" % llvm_version,
-            srcs = [
-                "//tests/unit/fixtures/mutation_filters/file_path:%s_some_test_file_name.c.bc" % llvm_version,
-                "//tests/unit/fixtures/mutation_filters/no_debug_filter:%s_with_debug.c.bc" % llvm_version,
-                "//tests/unit/fixtures/mutation_filters/no_debug_filter:%s_without_debug.c.bc" % llvm_version,
-            ],
         )
 
         native.filegroup(
@@ -174,7 +162,6 @@ def mull_unit_tests(name):
         native.filegroup(name = "Mutations-E2E/Scalar/02_Mutation_Scalar_BinaryOperand_Test.cpp_%s_fixtures" % llvm_version)
 
         for f in native.glob([
-            "MutationFilters/**/*.cpp",
             "Mutators/**/*.cpp",
             "JunkDetection/**/*.cpp",
             "*.cpp",

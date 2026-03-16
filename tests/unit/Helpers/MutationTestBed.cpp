@@ -9,7 +9,7 @@
 using namespace mull;
 using namespace mull_test;
 
-MutationTestBed::MutationTestBed() : fixtureGenerator(), nullPathFilter() {}
+MutationTestBed::MutationTestBed() : fixtureGenerator() {}
 
 std::unique_ptr<MutationArtefact> MutationTestBed::generate(const std::string &sourceCode,
                                                             mull::Mutator &mutator) {
