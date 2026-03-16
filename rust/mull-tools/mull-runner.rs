@@ -152,6 +152,8 @@ fn main() {
             git_diff_ref: &config.git_diff_ref,
             git_project_root: &config.git_project_root,
             debug_git_diff: config.debug.git_diff,
+            // disabled as it's likely reapply the same filter as during the compilation
+            enable_manual_filter: false,
         },
     );
 

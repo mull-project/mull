@@ -1,7 +1,6 @@
 #include "mull/Filters/Filters.h"
 
 #include "mull/Filters/FilePathFilter.h"
-#include "mull/Filters/ManualFilter.h"
 
 #include "rust/mull-cxx-bridge/bridge.rs.h"
 
@@ -52,10 +51,4 @@ void Filters::enableFilePathFilter() {
       diagnostics.warning(warningMessage.str());
     }
   }
-}
-
-void Filters::enableManualFilter() {
-  auto filter = new mull::ManualFilter(diagnostics);
-  storage.emplace_back(filter);
-  mutationFilters.push_back(filter);
 }

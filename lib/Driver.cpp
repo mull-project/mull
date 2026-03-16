@@ -101,7 +101,6 @@ void mull::mutateBitcode(llvm::Module &module) {
   std::vector<std::unique_ptr<mull::Filter>> filterStorage;
   mull::Filters filters(configuration, diagnostics);
   filters.enableFilePathFilter();
-  filters.enableManualFilter();
 
   SingleTaskExecutor singleTask(diagnostics);
 
@@ -189,6 +188,7 @@ void mull::mutateBitcode(llvm::Module &module) {
     filterConfig.git_project_root = std::string(configuration.git_project_root);
     filterConfig.debug_git_diff = configuration.debug.git_diff;
     filterConfig.workers = configuration.workers;
+    filterConfig.enable_manual_filter = true;
 
     rust::Vec<rust::String> keptIds = filter_mutants(diagnostics, mutantIds, filterConfig);
 

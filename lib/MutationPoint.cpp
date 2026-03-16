@@ -1,7 +1,6 @@
 #include "mull/MutationPoint.h"
 
 #include "mull/Mutators/Mutator.h"
-#include "mull/Reporters/SourceCodeReader.h"
 
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/Function.h>
@@ -188,11 +187,6 @@ std::string MutationPoint::dump() const {
      << getSourceLocation().filePath << ":" << getSourceLocation().line << ":"
      << getSourceLocation().column;
   return ss.str();
-}
-
-std::string MutationPoint::dumpSourceCodeContext() const {
-  SourceCodeReader sourceCodeReader;
-  return sourceCodeReader.getContext(sourceLocation);
 }
 
 const std::string &MutationPoint::getUserIdentifier() const {

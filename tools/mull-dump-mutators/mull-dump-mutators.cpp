@@ -73,9 +73,9 @@ static void dumpMutators(const MullDiagnostics &diagnostics, const std::string &
 
   table << "\n\n";
   table << "Groups:\n";
-  for (const auto &pair : factory.getGroupsMapping()) {
-    table << "    :" << pair.first << ":\t" << MutatorsFactory::descriptionForGroup(pair.second)
-          << "\n\n";
+  rust::Vec<MutatorGroupDef> groupDefs = get_mutator_group_definitions();
+  for (const auto &def : groupDefs) {
+    table << "    :" << std::string(def.name) << ":\t" << std::string(def.description) << "\n\n";
   }
 
   std::error_code ec;

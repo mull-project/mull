@@ -8,6 +8,12 @@ mod ffi {
         git_project_root: String,
         debug_git_diff: bool,
         workers: usize,
+        enable_manual_filter: bool,
+    }
+
+    struct MutatorGroupDef {
+        name: String,
+        description: String,
     }
 
     struct DebugOptions {
@@ -75,6 +81,10 @@ mod ffi {
         ) -> Vec<String>;
 
         fn get_clang_resource_dir(compiler_path: &str) -> String;
+
+        fn expand_mutator_groups(groups: Vec<String>) -> Vec<String>;
+
+        fn get_mutator_group_definitions() -> Vec<MutatorGroupDef>;
     }
 }
 
@@ -204,6 +214,7 @@ fn filter_mutants(
         git_project_root: config.git_project_root,
         debug_git_diff: config.debug_git_diff,
         workers: config.workers,
+        enable_manual_filter: config.enable_manual_filter,
     };
     mull_filters::filter_mutants(&diag.0, mutant_ids, inner_config)
 }
@@ -219,4 +230,19 @@ fn get_clang_resource_dir(compiler_path: &str) -> String {
         Ok(out) if out.status.success() => String::from_utf8_lossy(&out.stdout).trim().to_string(),
         _ => String::new(),
     }
+}
+
+fn expand_mutator_groups(groups: Vec<String>) -> Vec<String> {
+    let group_refs: Vec<&str> = groups.iter().map(|s| s.as_str()).collect();
+    let expanded = mull_filters::expand_mutator_groups(&group_refs);
+    let mut result: Vec<String> = expanded.into_iter().collect();
+    result.sort();
+    result
+}
+
+fn get_mutator_group_definitions() -> Vec<ffi::MutatorGroupDef> {
+    mull_filters::get_group_definitions()
+        .into_iter()
+        .map(|(name, description)| ffi::MutatorGroupDef { name, description })
+        .collect()
 }

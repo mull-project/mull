@@ -21,7 +21,6 @@ public:
   std::vector<MutationPointFilter *> mutationFilters;
 
   void enableFilePathFilter();
-  void enableManualFilter();
 
 private:
   const MullConfig &configuration;

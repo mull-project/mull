@@ -1,4 +1,4 @@
-use crate::{CoverageFilter, GitDiffFilter, MutantFilter};
+use crate::{CoverageFilter, GitDiffFilter, ManualFilter, MutantFilter};
 use mull_core::diag_warning;
 use mull_core::diagnostics::MullDiagnostics;
 use mull_state::{ExecutionStatus, Mutant};
@@ -28,6 +28,8 @@ pub struct FilterChainConfig<'a> {
     pub git_project_root: &'a str,
     /// Enable git diff debug output
     pub debug_git_diff: bool,
+    /// Enable manual filter (mull-off/mull-on/mull-ignore comments)
+    pub enable_manual_filter: bool,
 }
 
 /// A chain of filters that can be applied to mutants
@@ -95,6 +97,11 @@ impl FilterChain {
                 );
                 chain.add(git_diff_filter);
             }
+        }
+
+        // Add manual filter if enabled
+        if config.enable_manual_filter {
+            chain.add(ManualFilter::new());
         }
 
         chain
