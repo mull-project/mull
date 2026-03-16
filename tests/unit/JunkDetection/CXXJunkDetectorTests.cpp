@@ -47,7 +47,7 @@ TEST_P(CXXJunkDetectorTest, detectJunk) {
   std::vector<MutationPoint *> points;
   for (auto &function : bitcode->getModule()->functions()) {
     FunctionUnderTest functionUnderTest(&function, bitcode.get());
-    functionUnderTest.selectInstructions({});
+    functionUnderTest.selectInstructions();
     auto mutants = parameter.mutator->getMutations(bitcode.get(), functionUnderTest);
     std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
   }
@@ -200,7 +200,7 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
   for (auto &mutator : mutators) {
     for (auto &function : bitcode->getModule()->functions()) {
       FunctionUnderTest functionUnderTest(&function, bitcode.get());
-      functionUnderTest.selectInstructions({});
+      functionUnderTest.selectInstructions();
       auto mutants = mutator->getMutations(bitcode.get(), functionUnderTest);
       std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
     }
@@ -283,7 +283,7 @@ TEST(CXXJunkDetector, no_compdb) {
   for (auto &mutator : mutators) {
     for (auto &function : bitcode->getModule()->functions()) {
       FunctionUnderTest functionUnderTest(&function, bitcode.get());
-      functionUnderTest.selectInstructions({});
+      functionUnderTest.selectInstructions();
       auto mutants = mutator->getMutations(bitcode.get(), functionUnderTest);
       std::copy(mutants.begin(), mutants.end(), std::back_inserter(points));
     }

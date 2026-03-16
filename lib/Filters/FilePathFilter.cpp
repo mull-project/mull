@@ -11,11 +11,6 @@ bool FilePathFilter::shouldSkip(MutationPoint *point) {
   return shouldSkip(point->getSourceLocation());
 }
 
-bool FilePathFilter::shouldSkip(llvm::Function *function) {
-  SourceLocation location = SourceLocation::locationFromFunction(function);
-  return shouldSkip(location);
-}
-
 bool FilePathFilter::shouldSkip(llvm::Instruction *instruction) {
   SourceLocation location = SourceLocation::locationFromInstruction(instruction);
   return shouldSkip(location);

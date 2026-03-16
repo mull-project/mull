@@ -1,10 +1,7 @@
 #include "mull/Filters/Filters.h"
 
-#include "mull/Filters/BlockAddressFunctionFilter.h"
 #include "mull/Filters/FilePathFilter.h"
 #include "mull/Filters/ManualFilter.h"
-#include "mull/Filters/NoDebugInfoFilter.h"
-#include "mull/Filters/VariadicFunctionFilter.h"
 
 #include "rust/mull-cxx-bridge/bridge.rs.h"
 
@@ -15,17 +12,7 @@ using namespace mull;
 using namespace std::string_literals;
 
 Filters::Filters(const MullConfig &configuration, const MullDiagnostics &diagnostics)
-    : functionFilters(), mutationFilters(), instructionFilters(), configuration(configuration),
-      diagnostics(diagnostics) {}
-
-void Filters::enableNoDebugFilter() {
-  auto *filter = new mull::NoDebugInfoFilter;
-
-  mutationFilters.push_back(filter);
-  functionFilters.push_back(filter);
-  instructionFilters.push_back(filter);
-  storage.emplace_back(filter);
-}
+    : mutationFilters(), configuration(configuration), diagnostics(diagnostics) {}
 
 void Filters::enableFilePathFilter() {
   if (configuration.include_paths.empty() && configuration.exclude_paths.empty()) {
@@ -38,7 +25,6 @@ void Filters::enableFilePathFilter() {
   auto *filter = new mull::FilePathFilter;
   storage.emplace_back(filter);
   mutationFilters.push_back(filter);
-  functionFilters.push_back(filter);
 
   for (const auto &regex : configuration.exclude_paths) {
     auto std_regex = std::string(regex);
@@ -66,18 +52,6 @@ void Filters::enableFilePathFilter() {
       diagnostics.warning(warningMessage.str());
     }
   }
-}
-
-void Filters::enableBlockAddressFilter() {
-  auto filter = new mull::BlockAddressFunctionFilter;
-  storage.emplace_back(filter);
-  functionFilters.push_back(filter);
-}
-
-void Filters::enableVariadicFunctionFilter() {
-  auto filter = new mull::VariadicFunctionFilter;
-  storage.emplace_back(filter);
-  functionFilters.push_back(filter);
 }
 
 void Filters::enableManualFilter() {

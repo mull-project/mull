@@ -1,6 +1,5 @@
 #pragma once
 
-#include "mull/Filters/FunctionFilter.h"
 #include "mull/Filters/InstructionFilter.h"
 #include "mull/Filters/MutationPointFilter.h"
 
@@ -14,10 +13,9 @@
 namespace mull {
 struct SourceLocation;
 
-class FilePathFilter : public MutationPointFilter, public FunctionFilter, public InstructionFilter {
+class FilePathFilter : public MutationPointFilter, public InstructionFilter {
 public:
   bool shouldSkip(MutationPoint *point) override;
-  bool shouldSkip(llvm::Function *function) override;
   bool shouldSkip(llvm::Instruction *instruction) override;
   bool shouldSkip(const std::string &sourceFilePath) const;
 

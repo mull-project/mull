@@ -23,17 +23,10 @@ const std::vector<llvm::Instruction *> &FunctionUnderTest::getSelectedInstructio
   return selectedInstructions;
 }
 
-void FunctionUnderTest::selectInstructions(const std::vector<InstructionFilter *> &filters) {
+void FunctionUnderTest::selectInstructions() {
   for (llvm::Instruction &instruction : llvm::instructions(function)) {
-    bool selected = true;
-    for (InstructionFilter *filter : filters) {
-      if (filter->shouldSkip(&instruction)) {
-        selected = false;
-        break;
-      }
-    }
-    if (selected) {
-      selectedInstructions.push_back(&instruction);
-    }
+    if (SourceLocation::locationFromInstruction(&instruction).isNull())
+      continue;
+    selectedInstructions.push_back(&instruction);
   }
 }

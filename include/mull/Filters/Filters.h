@@ -9,7 +9,6 @@ struct MullDiagnostics;
 
 namespace mull {
 
-class FunctionFilter;
 class InstructionFilter;
 class MutationPointFilter;
 class MutantFilter;
@@ -19,14 +18,9 @@ public:
   Filters(const MullConfig &configuration, const MullDiagnostics &diagnostics);
 
   /// TODO: hide
-  std::vector<FunctionFilter *> functionFilters;
   std::vector<MutationPointFilter *> mutationFilters;
-  std::vector<InstructionFilter *> instructionFilters;
 
-  void enableNoDebugFilter();
   void enableFilePathFilter();
-  void enableBlockAddressFilter();
-  void enableVariadicFunctionFilter();
   void enableManualFilter();
 
 private:

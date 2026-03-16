@@ -1,7 +1,6 @@
 #include "mull/Driver.h"
 
 #include "mull/BitcodeMetadataReader.h"
-#include "mull/Filters/BlockAddressFunctionFilter.h"
 #include "mull/Filters/Filters.h"
 #include "mull/Filters/MutationPointFilter.h"
 #include "mull/FunctionUnderTest.h"
@@ -80,6 +79,17 @@ std::vector<std::string> toStdVector(const rust::Vec<rust::String> &v) {
   return out;
 }
 
+bool shouldSkipFunction(llvm::Function *function) {
+  if (function->isVarArg())
+    return true;
+  if (SourceLocation::locationFromFunction(function).isNull())
+    return true;
+  for (auto &bb : *function)
+    if (bb.hasAddressTaken())
+      return true;
+  return false;
+}
+
 } // namespace
 
 void mull::mutateBitcode(llvm::Module &module) {
@@ -90,10 +100,7 @@ void mull::mutateBitcode(llvm::Module &module) {
 
   std::vector<std::unique_ptr<mull::Filter>> filterStorage;
   mull::Filters filters(configuration, diagnostics);
-  filters.enableNoDebugFilter();
   filters.enableFilePathFilter();
-  filters.enableBlockAddressFilter();
-  filters.enableVariadicFunctionFilter();
   filters.enableManualFilter();
 
   SingleTaskExecutor singleTask(diagnostics);
@@ -140,23 +147,11 @@ void mull::mutateBitcode(llvm::Module &module) {
   std::vector<FunctionUnderTest> functionsUnderTest;
   singleTask.execute("Gathering functions under test", [&]() {
     for (llvm::Function &function : module) {
+      if (shouldSkipFunction(&function))
+        continue;
       functionsUnderTest.emplace_back(&function, &bitcode);
     }
   });
-
-  std::vector<FunctionUnderTest> filteredFunctions;
-  for (const auto &function : functionsUnderTest) {
-    bool skip = false;
-    for (auto filter : filters.functionFilters) {
-      if (filter->shouldSkip(function.getFunction())) {
-        skip = true;
-        break;
-      }
-    }
-    if (!skip) {
-      filteredFunctions.emplace_back(function);
-    }
-  }
 
   MutatorsFactory mutatorsFactory(diagnostics);
   MutationsFinder mutationsFinder(
@@ -167,19 +162,19 @@ void mull::mutateBitcode(llvm::Module &module) {
   std::vector<InstructionSelectionTask> instructionSelectionTasks;
   instructionSelectionTasks.reserve(configuration.workers);
   for (unsigned i = 0; i < configuration.workers; i++) {
-    instructionSelectionTasks.emplace_back(filters.instructionFilters);
+    instructionSelectionTasks.emplace_back();
   }
 
   std::vector<int> Nothing;
   TaskExecutor<InstructionSelectionTask> selectionRunner(diagnostics,
                                                          "Instruction selection",
-                                                         filteredFunctions,
+                                                         functionsUnderTest,
                                                          Nothing,
                                                          std::move(instructionSelectionTasks));
   selectionRunner.execute();
 
   std::vector<MutationPoint *> mutationPoints =
-      mutationsFinder.getMutationPoints(diagnostics, filteredFunctions);
+      mutationsFinder.getMutationPoints(diagnostics, functionsUnderTest);
   std::vector<MutationPoint *> mutations = std::move(mutationPoints);
 
   // Apply Rust filter chain
