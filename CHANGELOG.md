@@ -5,6 +5,7 @@
 - Updated docs for incremental testing [#1153](https://github.com/mull-project/mull/pull/1153)
 - Added Debian packages [#1154](https://github.com/mull-project/mull/pull/1154)
 - Updated config docs, now all the config options are available under a single documentation page [#1155](https://github.com/mull-project/mull/pull/1155)
+- Added experimental support for Homebrew packages [#1159](https://github.com/mull-project/mull/pull/1159)
 
 - [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2026-01-30..2026-03-18)
 
