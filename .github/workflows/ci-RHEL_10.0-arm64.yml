@@ -36,7 +36,7 @@ jobs:
             set -e
             mkdir -p packages
             bazel test //...
-            bazel build //:mull-package-${{ matrix.LLVM_VERSION }} --stamp
+            bazel build //:mull_packages --stamp
             mv -v bazel-bin/Mull-*.rpm packages/
       - name: Publish package
         uses: devcontainers/ci@v0.3
