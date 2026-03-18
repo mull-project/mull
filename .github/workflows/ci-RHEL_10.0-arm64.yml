@@ -70,11 +70,7 @@ jobs:
     needs: [build-and-test]
     if: ${{ !cancelled() && needs.build-and-test.result == 'success' }}
     runs-on: ubuntu-24.04-arm
-    strategy:
-      fail-fast: false
-      matrix:
-        LLVM_VERSION: [20]
-    name: Smoke test - LLVM ${{ matrix.LLVM_VERSION }}
+    name: Smoke test
     container:
       image: redhat/ubi10:10.0
     steps:
@@ -93,9 +89,11 @@ jobs:
       - name: Setup Cloudsmith repo
         run: |
           curl -1sLf 'https://dl.cloudsmith.io/public/mull-project/mull-${{ steps.metadata.outputs.cs_repo }}/setup.rpm.sh' | bash
-      - name: Install mull
-        run: dnf install -y mull-${{ matrix.LLVM_VERSION }}
-      - name: Smoke test
+      - name: Install and test all mull packages
         run: |
-          mull-runner-${{ matrix.LLVM_VERSION }} --version
-          mull-reporter-${{ matrix.LLVM_VERSION }} --version
+          for version in 20; do
+            echo "=== Testing LLVM $version ==="
+            dnf install -y mull-$version
+            mull-runner-$version --version
+            mull-reporter-$version --version
+          done
