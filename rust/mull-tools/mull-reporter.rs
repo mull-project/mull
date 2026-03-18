@@ -9,8 +9,10 @@ use crate::reporting::show_report;
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
+    let mull_version = env!("MULL_VERSION");
     let llvm_version = env!("MULL_LLVM_VERSION");
-    let (_config, cli, diag) = init_cli::init_cli::<ReporterCli>(args, llvm_version.into());
+    let (_config, cli, diag) =
+        init_cli::init_cli::<ReporterCli>(args, mull_version.into(), llvm_version.into());
 
     let start = Instant::now();
 

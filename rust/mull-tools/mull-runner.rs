@@ -54,8 +54,10 @@ fn temp_file_path(prefix: &str, suffix: &str) -> String {
 
 fn main() {
     let args: Vec<String> = std::env::args().collect();
+    let mull_version = env!("MULL_VERSION");
     let llvm_version = env!("MULL_LLVM_VERSION");
-    let (config, cli, diag) = init_cli::init_cli::<RunnerCli>(args, llvm_version.into());
+    let (config, cli, diag) =
+        init_cli::init_cli::<RunnerCli>(args, mull_version.into(), llvm_version.into());
 
     let start = Instant::now();
 

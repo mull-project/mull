@@ -1,5 +1,4 @@
 load("@available_llvm_versions//:mull_llvm_versions.bzl", "AVAILABLE_LLVM_VERSIONS", "EXACT_VERSION_MAPPING")
-load("@mull_package_info//:mull_package_info.bzl", "MULL_VERSION")
 load("@rules_rust//rust:defs.bzl", "rust_binary")
 
 [
@@ -14,6 +13,8 @@ load("@rules_rust//rust:defs.bzl", "rust_binary")
         rustc_env = {
             "MULL_LLVM_VERSION": EXACT_VERSION_MAPPING[llvm_version],
         },
+        rustc_env_files = ["//infrastructure:version.env"],
+        stamp = -1,
         visibility = ["//visibility:public"],
         deps = [
             "//rust/mull-core",
@@ -43,8 +44,9 @@ load("@rules_rust//rust:defs.bzl", "rust_binary")
         ],
         rustc_env = {
             "MULL_LLVM_VERSION": EXACT_VERSION_MAPPING[llvm_version],
-            "MULL_VERSION": MULL_VERSION,
         },
+        rustc_env_files = ["//infrastructure:version.env"],
+        stamp = -1,
         visibility = ["//visibility:public"],
         deps = [
             "//rust/mull-core",

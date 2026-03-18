@@ -311,7 +311,7 @@ fn normalize_args(args: &[String]) -> Vec<String> {
     out
 }
 
-pub fn long_version_string(llvm_version: &str) -> &'static str {
+pub fn long_version_string(mull_version: &str, llvm_version: &str) -> &'static str {
     let s = format!(
         "{}\n\n\
          Mull: Practical mutation testing and fault injection for C and C++\n\
@@ -319,8 +319,7 @@ pub fn long_version_string(llvm_version: &str) -> &'static str {
          Docs: https://mull.readthedocs.io\n\
          Support: https://mull.readthedocs.io/en/latest/Support.html\n\
          LLVM: {}",
-        env!("CARGO_PKG_VERSION"),
-        llvm_version
+        mull_version, llvm_version
     );
     // Leak is fine: this runs once per CLI invocation then the process exits.
     Box::leak(s.into_boxed_str())
@@ -333,9 +332,14 @@ fn arg_present(matches: &clap::ArgMatches, id: &str) -> bool {
         .unwrap_or(false)
 }
 
-pub fn init_runner_cli(args: Vec<String>, llvm_version: String) -> Box<MullCLI> {
+pub fn init_runner_cli(
+    args: Vec<String>,
+    mull_version: String,
+    llvm_version: String,
+) -> Box<MullCLI> {
     let args = normalize_args(&args);
-    let cmd = config::RunnerCli::command().long_version(long_version_string(&llvm_version));
+    let cmd = config::RunnerCli::command()
+        .long_version(long_version_string(&mull_version, &llvm_version));
     let matches = cmd.get_matches_from(&args);
     let cli = config::RunnerCli::from_arg_matches(&matches).unwrap();
 
@@ -386,9 +390,14 @@ pub fn init_runner_cli(args: Vec<String>, llvm_version: String) -> Box<MullCLI> 
     })
 }
 
-pub fn init_reporter_cli(args: Vec<String>, llvm_version: String) -> Box<MullCLI> {
+pub fn init_reporter_cli(
+    args: Vec<String>,
+    mull_version: String,
+    llvm_version: String,
+) -> Box<MullCLI> {
     let args = normalize_args(&args);
-    let cmd = config::ReporterCli::command().long_version(long_version_string(&llvm_version));
+    let cmd = config::ReporterCli::command()
+        .long_version(long_version_string(&mull_version, &llvm_version));
     let matches = cmd.get_matches_from(&args);
     let cli = config::ReporterCli::from_arg_matches(&matches).unwrap();
 

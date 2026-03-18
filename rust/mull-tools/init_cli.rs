@@ -102,12 +102,16 @@ fn override_config(shared: &SharedCli, yaml_config: &mut MullConfigSpec) {
     }
 }
 
-pub fn init_cli<C>(args: Vec<String>, llvm_version: String) -> (MullConfigSpec, C, MullDiagnostics)
+pub fn init_cli<C>(
+    args: Vec<String>,
+    mull_version: String,
+    llvm_version: String,
+) -> (MullConfigSpec, C, MullDiagnostics)
 where
     C: CommandFactory + FromArgMatches + HasSharedCli,
 {
     let args = normalize_args(&args);
-    let cmd = C::command().long_version(long_version_string(&llvm_version));
+    let cmd = C::command().long_version(long_version_string(&mull_version, &llvm_version));
     let matches = cmd.get_matches_from(&args);
     let cli = C::from_arg_matches(&matches).unwrap();
 
