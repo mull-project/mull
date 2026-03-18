@@ -92,9 +92,14 @@ jobs:
         run: true
       - name: Setup Cloudsmith repo
         run: |
-          curl -1sLf 'https://dl.cloudsmith.io/public/mull-project/${{ steps.metadata.outputs.cs_repo }}/setup.rpm.sh' | bash
+          echo "CS_REPO=${{ steps.metadata.outputs.cs_repo }}"
+          URL="https://dl.cloudsmith.io/public/mull-project/${{ steps.metadata.outputs.cs_repo }}/setup.rpm.sh"
+          echo "Fetching: $URL"
+          curl -1Lf "$URL" | bash -x
       - name: Refresh package cache
         run: true
+      - name: Debug - list available packages
+        run: dnf search mull || true
       - name: Install mull
         run: dnf install -y mull-${{ matrix.LLVM_VERSION }}
       - name: Smoke test

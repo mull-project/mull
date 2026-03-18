@@ -92,9 +92,14 @@ jobs:
         run: [[&PRE_INSTALL_CMD]]
       - name: Setup Cloudsmith repo
         run: |
-          curl -1sLf 'https://dl.cloudsmith.io/public/mull-project/${{ steps.metadata.outputs.cs_repo }}/[[CLOUDSMITH_SETUP_SCRIPT]]' | bash
+          echo "CS_REPO=${{ steps.metadata.outputs.cs_repo }}"
+          URL="https://dl.cloudsmith.io/public/mull-project/${{ steps.metadata.outputs.cs_repo }}/[[CLOUDSMITH_SETUP_SCRIPT]]"
+          echo "Fetching: $URL"
+          curl -1Lf "$URL" | bash -x
       - name: Refresh package cache
         run: [[POST_REPO_CMD]]
+      - name: Debug - list available packages
+        run: [[&SEARCH_CMD]]
       - name: Install mull
         run: [[INSTALL_CMD]] mull-${{ matrix.LLVM_VERSION }}
       - name: Smoke test

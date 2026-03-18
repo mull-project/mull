@@ -58,12 +58,14 @@ def main():
         install_cmd = "dnf install -y"
         cloudsmith_setup_script = "setup.rpm.sh"
         post_repo_cmd = "true"  # dnf refreshes automatically
+        search_cmd = "dnf search mull || true"
     else:
         base_image = f"{os_name_lower}:{args.os_version}"
         pre_install_cmd = "apt-get update && apt-get install -y curl ca-certificates"
         install_cmd = "apt-get install -y"
         cloudsmith_setup_script = "setup.deb.sh"
         post_repo_cmd = "apt-get update"
+        search_cmd = "apt-cache search mull"
 
     template_args = {
         "OS_VERSION": args.os_version,
@@ -78,6 +80,7 @@ def main():
         "INSTALL_CMD": install_cmd,
         "CLOUDSMITH_SETUP_SCRIPT": cloudsmith_setup_script,
         "POST_REPO_CMD": post_repo_cmd,
+        "SEARCH_CMD": search_cmd,
     }
 
     renderer = pystache.Renderer(missing_tags="strict")
