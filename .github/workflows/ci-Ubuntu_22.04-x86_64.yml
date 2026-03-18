@@ -36,7 +36,7 @@ jobs:
             set -e
             mkdir -p packages
             bazel test //...
-            bazel build //:mull_packages --stamp
+            bazel build //:mull_packages --stamp --workspace_status_command=infrastructure/workspace_status.sh
             mv -v bazel-bin/Mull-*.deb packages/
       - name: Publish package
         uses: devcontainers/ci@v0.3
