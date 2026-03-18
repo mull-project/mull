@@ -29,13 +29,7 @@ jobs:
         run: |
           brew install bazelisk zlib ncurses sqlite ninja llvm@${{ matrix.LLVM_VERSION }}
           bazel test //...
-          echo "=== Debug: version suffix file ==="
-          cat .mull-ci-version-suffix || echo "No suffix file"
-          echo "=== Debug: workspace_status output ==="
-          infrastructure/workspace_status.sh
           bazel build //:mull_packages --stamp
-          echo "=== Debug: built binary version ==="
-          bazel-bin/rust/mull-tools/mull-runner-* --version | head -1 || true
       - name: Publish package
         if: env.CLOUDSMITH_API_KEY != null
         run: |

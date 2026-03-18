@@ -36,13 +36,7 @@ jobs:
             set -e
             mkdir -p packages
             bazel test //...
-            echo "=== Debug: version suffix file ==="
-            cat .mull-ci-version-suffix || echo "No suffix file"
-            echo "=== Debug: workspace_status output ==="
-            infrastructure/workspace_status.sh
             bazel build //:mull_packages --stamp
-            echo "=== Debug: built binary version ==="
-            bazel-bin/rust/mull-tools/mull-runner-* --version | head -1 || true
             mv -v bazel-bin/Mull-*.deb packages/
       - name: Publish package
         uses: devcontainers/ci@v0.3
