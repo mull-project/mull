@@ -50,14 +50,31 @@ def main():
     )
     args = parser.parse_args()
 
+    os_name_lower = args.os_name.lower().replace("-arm64", "")
+    if os_name_lower == "rhel":
+        major_version = args.os_version.split(".")[0]
+        base_image = f"redhat/ubi{major_version}:{args.os_version}"
+        pre_install_cmd = "true"  # curl-minimal is pre-installed in UBI
+        install_cmd = "dnf install -y"
+        cloudsmith_setup_script = "setup.rpm.sh"
+    else:
+        base_image = f"{os_name_lower}:{args.os_version}"
+        pre_install_cmd = "apt-get update && apt-get install -y curl ca-certificates"
+        install_cmd = "apt-get install -y"
+        cloudsmith_setup_script = "setup.deb.sh"
+
     template_args = {
         "OS_VERSION": args.os_version,
         "OS_RUNNER": args.runner,
         "OS_NAME": args.os_name,
-        "OS_NAME_LOWER": args.os_name.lower().replace("-arm64", ""),
+        "OS_NAME_LOWER": os_name_lower,
         "LLVM_VERSIONS": f"[{', '.join(args.llvm_versions)}]",
         "PACKAGE_EXTENSION": args.package_extension,
         "OS_ARCH": args.arch,
+        "BASE_IMAGE": base_image,
+        "PRE_INSTALL_CMD": pre_install_cmd,
+        "INSTALL_CMD": install_cmd,
+        "CLOUDSMITH_SETUP_SCRIPT": cloudsmith_setup_script,
     }
 
     renderer = pystache.Renderer(missing_tags="strict")

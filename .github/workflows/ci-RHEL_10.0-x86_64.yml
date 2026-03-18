@@ -66,3 +66,36 @@ jobs:
       - uses: ./.github/actions/attach-package
         with:
           GH_API_KEY: ${{ secrets.GITHUB_TOKEN }}
+  smoke-test:
+    needs: [build-and-test]
+    if: ${{ !cancelled() && needs.build-and-test.result == 'success' }}
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        LLVM_VERSION: [20]
+    name: Smoke test - LLVM ${{ matrix.LLVM_VERSION }}
+    container:
+      image: redhat/ubi10:10.0
+    steps:
+      - name: Determine Cloudsmith repo
+        id: metadata
+        run: |
+          if [ "${{ github.event_name }}" = "pull_request" ]; then
+            echo "cs_repo=testing" >> $GITHUB_OUTPUT
+          elif echo "${{ github.ref }}" | grep -q "^refs/tags/"; then
+            echo "cs_repo=stable" >> $GITHUB_OUTPUT
+          else
+            echo "cs_repo=nightly" >> $GITHUB_OUTPUT
+          fi
+      - name: Install prerequisites
+        run: true
+      - name: Setup Cloudsmith repo
+        run: |
+          curl -1sLf 'https://dl.cloudsmith.io/public/mull-project/mull-${{ steps.metadata.outputs.cs_repo }}/setup.rpm.sh' | bash
+      - name: Install mull
+        run: dnf install -y mull-${{ matrix.LLVM_VERSION }}
+      - name: Smoke test
+        run: |
+          mull-runner-${{ matrix.LLVM_VERSION }} --version
+          mull-reporter-${{ matrix.LLVM_VERSION }} --version
