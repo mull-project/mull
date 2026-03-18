@@ -94,6 +94,18 @@ jobs:
           for version in 17 18 19; do
             echo "=== Testing LLVM $version ==="
             apt-get install -y mull-$version
-            mull-runner-$version --version
-            mull-reporter-$version --version
+
+            runner_version=$(mull-runner-$version --version)
+            echo "$runner_version"
+            if echo "$runner_version" | grep -q '{STABLE_'; then
+              echo "ERROR: mull-runner-$version contains unexpanded stamp variable"
+              exit 1
+            fi
+
+            reporter_version=$(mull-reporter-$version --version)
+            echo "$reporter_version"
+            if echo "$reporter_version" | grep -q '{STABLE_'; then
+              echo "ERROR: mull-reporter-$version contains unexpanded stamp variable"
+              exit 1
+            fi
           done
