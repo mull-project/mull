@@ -92,14 +92,7 @@ jobs:
         run: apt-get update && apt-get install -y curl ca-certificates
       - name: Setup Cloudsmith repo
         run: |
-          echo "CS_REPO=${{ steps.metadata.outputs.cs_repo }}"
-          URL="https://dl.cloudsmith.io/public/mull-project/mull-${{ steps.metadata.outputs.cs_repo }}/setup.deb.sh"
-          echo "Fetching: $URL"
-          curl -1Lf "$URL" | bash -x
-      - name: Refresh package cache
-        run: apt-get update
-      - name: Debug - list available packages
-        run: apt-cache search mull
+          curl -1sLf 'https://dl.cloudsmith.io/public/mull-project/mull-${{ steps.metadata.outputs.cs_repo }}/setup.deb.sh' | bash
       - name: Install mull
         run: apt-get install -y mull-${{ matrix.LLVM_VERSION }}
       - name: Smoke test
