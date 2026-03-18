@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.30.0] - 18 Mar 2026
+
+- Updated docs for incremental testing [#1153](https://github.com/mull-project/mull/pull/1153)
+- Added Debian packages [#1154](https://github.com/mull-project/mull/pull/1154)
+- Updated config docs, now all the config options are available under a single documentation page [#1155](https://github.com/mull-project/mull/pull/1155)
+
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2026-01-30..2026-03-18)
+
 ## [0.29.0] - 29 Jan 2026
 
 - ‼️ Fixed a very old multithreading related bug leading to crashes and inconsistent results (once in a while) [#1064](https://github.com/mull-project/mull/issues/1064) [#1083](https://github.com/mull-project/mull/issues/1083) [#1149](https://github.com/mull-project/mull/pull/1149)
