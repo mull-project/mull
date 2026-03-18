@@ -93,7 +93,7 @@ jobs:
       - name: Setup Cloudsmith repo
         run: |
           echo "CS_REPO=${{ steps.metadata.outputs.cs_repo }}"
-          URL="https://dl.cloudsmith.io/public/mull-project/${{ steps.metadata.outputs.cs_repo }}/[[CLOUDSMITH_SETUP_SCRIPT]]"
+          URL="https://dl.cloudsmith.io/public/mull-project/mull-${{ steps.metadata.outputs.cs_repo }}/[[CLOUDSMITH_SETUP_SCRIPT]]"
           echo "Fetching: $URL"
           curl -1Lf "$URL" | bash -x
       - name: Refresh package cache
