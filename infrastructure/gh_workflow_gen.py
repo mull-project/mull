@@ -54,14 +54,16 @@ def main():
     if os_name_lower == "rhel":
         major_version = args.os_version.split(".")[0]
         base_image = f"redhat/ubi{major_version}:{args.os_version}"
-        pre_install_cmd = "dnf install -y curl"
+        pre_install_cmd = "true"  # curl-minimal is pre-installed in UBI
         install_cmd = "dnf install -y"
         cloudsmith_setup_script = "setup.rpm.sh"
+        post_repo_cmd = "true"  # dnf refreshes automatically
     else:
         base_image = f"{os_name_lower}:{args.os_version}"
         pre_install_cmd = "apt-get update && apt-get install -y curl ca-certificates"
         install_cmd = "apt-get install -y"
         cloudsmith_setup_script = "setup.deb.sh"
+        post_repo_cmd = "apt-get update"
 
     template_args = {
         "OS_VERSION": args.os_version,
@@ -75,6 +77,7 @@ def main():
         "PRE_INSTALL_CMD": pre_install_cmd,
         "INSTALL_CMD": install_cmd,
         "CLOUDSMITH_SETUP_SCRIPT": cloudsmith_setup_script,
+        "POST_REPO_CMD": post_repo_cmd,
     }
 
     renderer = pystache.Renderer(missing_tags="strict")
