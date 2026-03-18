@@ -33,13 +33,13 @@ jobs:
           cat .mull-ci-version-suffix || echo "No suffix file"
           echo "=== Debug: workspace_status output ==="
           infrastructure/workspace_status.sh
-          bazel build //:mull_packages --stamp --workspace_status_command=infrastructure/workspace_status.sh
+          bazel build //:mull_packages --stamp
           echo "=== Debug: built binary version ==="
           bazel-bin/rust/mull-tools/mull-runner-* --version | head -1 || true
       - name: Publish package
         if: env.CLOUDSMITH_API_KEY != null
         run: |
-          bazel run publish && exit 0
+          bazel run publish --stamp && exit 0
 
           max_attempts=3
           attempt=1
@@ -47,7 +47,7 @@ jobs:
           do
             echo "Attempt $attempt failed. Retrying..."
             attempt=$((attempt+1))
-            bazel run publish && exit 0
+            bazel run publish --stamp && exit 0
           done
           echo "All $max_attempts attempts failed."
           exit 1
