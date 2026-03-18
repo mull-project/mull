@@ -15,15 +15,11 @@ runs:
           "push")
             case $GITHUB_REF in
               "refs/heads/"*)
-                echo .trunk$GITHUB_RUN_NUMBER > .mull-ci-version-suffix
+                echo .trunk$(git show -s --format=%ct HEAD) > .mull-ci-version-suffix
                 echo nightly > .mull-ci-cs-repo
               ;;
               "refs/tags/"*)
                 echo stable > .mull-ci-cs-repo
-                if [ `echo $GITHUB_REF | awk -F/ ' { print $3 } '` != `grep -Eo "MULL_VERSION [0-9.]+" CMakeLists.txt | awk ' { print $2 } '` ];
-                then
-                  false
-                fi
               ;;
               *)
                 false
