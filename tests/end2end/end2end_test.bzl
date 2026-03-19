@@ -33,7 +33,7 @@ for test_file in "${{TEST_FILES[@]}}"; do
 done
 
 # Step 2: Run mull-reporter to generate IDE report
-"$MULL_REPORTER" -ide-reporter-show-killed -report-name fmt_ide_report fmtlib.sqlite
+"$MULL_REPORTER" --allow-surviving -ide-reporter-show-killed -report-name fmt_ide_report fmtlib.sqlite
 
 # Step 3: Make paths relative for comparison
 awk -F"e2e_test_fmt/" ' {{ print $NF }} ' fmt_ide_report.txt > fmt_ide_report_relative_paths.txt
