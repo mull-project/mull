@@ -1,82 +1,89 @@
-load("@aspect_bazel_lib//lib:write_source_files.bzl", "write_source_files")
 load("@available_llvm_versions//:mull_llvm_versions.bzl", "AVAILABLE_LLVM_VERSIONS", "CC_PATHS", "CXX_PATHS")
+load("@bazel_skylib//lib:shell.bzl", "shell")
 load("@rules_foreign_cc//foreign_cc:defs.bzl", "cmake")
-load("@rules_multirun//:defs.bzl", "multirun")
 
-def _mull_fmtlib_sqlite_report_impl(ctx):
+def _mull_e2e_test_impl(ctx):
+    """Test rule that generates IDE report and compares to expected.
+
+    By making generation part of the test action (not build action),
+    retries will regenerate the output.
+    """
     test_files = []
-
-    for output in ctx.attr.target[OutputGroupInfo]:
+    for output in ctx.attr.fmt_target[OutputGroupInfo]:
         if output.endswith("-test"):
-            test_file = ctx.attr.target[OutputGroupInfo][output].to_list()[0]
+            test_file = ctx.attr.fmt_target[OutputGroupInfo][output].to_list()[0]
             test_files.append(test_file)
 
-    out = ctx.actions.declare_file(ctx.attr.name + ".sqlite")
+    test_file_paths = " ".join([shell.quote(f.short_path) for f in test_files])
 
-    cmds = []
-    for test_file in test_files:
-        cmds.append("%s --allow-surviving --reporters SQLite --report-name fmtlib -minimum-timeout 500 %s" % (ctx.executable.mull_runner.path, test_file.path))
+    script_content = """#!/bin/bash
+set -e
 
-    cmds.append("cp fmtlib.sqlite %s" % out.path)
+MULL_RUNNER="{mull_runner}"
+MULL_REPORTER="{mull_reporter}"
+MULL_CONFIG="{mull_config}"
+EXPECTED="{expected}"
+TEST_FILES=({test_files})
 
-    script = ctx.actions.declare_file(ctx.attr.name + ".sh")
-    ctx.actions.write(script, "\n".join(cmds), is_executable = True)
+export MULL_CONFIG
 
-    ctx.actions.run_shell(
-        inputs = [ctx.executable.mull_runner, ctx.file.mull_config, script] + test_files,
-        outputs = [out],
-        command = script.path,
-        env = {
-            "MULL_CONFIG": ctx.file.mull_config.path,
-        },
+# Step 1: Run mull-runner on each test binary to generate SQLite report
+for test_file in "${{TEST_FILES[@]}}"; do
+    "$MULL_RUNNER" --allow-surviving --reporters SQLite --report-name fmtlib -minimum-timeout 500 "$test_file"
+done
+
+# Step 2: Run mull-reporter to generate IDE report
+"$MULL_REPORTER" -ide-reporter-show-killed -report-name fmt_ide_report fmtlib.sqlite
+
+# Step 3: Make paths relative for comparison
+awk -F"e2e_test_fmt/" ' {{ print $NF }} ' fmt_ide_report.txt > fmt_ide_report_relative_paths.txt
+
+# Step 4: Compare with expected
+if diff -u "$EXPECTED" fmt_ide_report_relative_paths.txt; then
+    echo "PASS: Output matches expected"
+    exit 0
+else
+    echo "FAIL: Output differs from expected"
+    echo "=== Generated output ==="
+    cat fmt_ide_report_relative_paths.txt
+    exit 1
+fi
+""".format(
+        mull_runner = ctx.executable.mull_runner.short_path,
+        mull_reporter = ctx.executable.mull_reporter.short_path,
+        mull_config = ctx.file.mull_config.short_path,
+        expected = ctx.file.expected.short_path,
+        test_files = test_file_paths,
     )
 
-    return [DefaultInfo(files = depset([out]))]
+    script = ctx.actions.declare_file(ctx.attr.name + "_test.sh")
+    ctx.actions.write(script, script_content, is_executable = True)
 
-mull_fmtlib_sqlite_report = rule(
-    implementation = _mull_fmtlib_sqlite_report_impl,
-    attrs = {
-        "target": attr.label(),
-        "mull_runner": attr.label(executable = True, mandatory = True, cfg = "exec"),
-        "mull_config": attr.label(mandatory = True, allow_single_file = True),
-    },
-)
-
-def _generate_ide_report_impl(ctx):
-    out = ctx.actions.declare_file(ctx.attr.name + ".txt")
-
-    cmds = []
-    cmds.append("%s -ide-reporter-show-killed -report-name fmt_ide_report %s" % (ctx.executable.mull_reporter.path, ctx.file.sqlite_report.path))
-
-    # Make all the absolute paths relative for diff testing
-    cmds.append("awk -F\"e2e_test_fmt/\" ' { print $NF } ' fmt_ide_report.txt > fmt_ide_report_relative_paths.txt")
-    cmds.append("cp fmt_ide_report_relative_paths.txt %s" % out.path)
-
-    script = ctx.actions.declare_file(ctx.attr.name + ".sh")
-    ctx.actions.write(script, "\n".join(cmds), is_executable = True)
-
-    ctx.actions.run_shell(
-        inputs = [
+    runfiles = ctx.runfiles(
+        files = [
+            ctx.executable.mull_runner,
             ctx.executable.mull_reporter,
-            ctx.file.sqlite_report,
             ctx.file.mull_config,
-            script,
-        ],
-        outputs = [out],
-        command = script.path,
-        env = {
-            "MULL_CONFIG": ctx.file.mull_config.path,
-        },
+            ctx.file.expected,
+        ] + test_files,
     )
+    runfiles = runfiles.merge(ctx.attr.mull_runner[DefaultInfo].default_runfiles)
+    runfiles = runfiles.merge(ctx.attr.mull_reporter[DefaultInfo].default_runfiles)
 
-    return [DefaultInfo(files = depset([out]))]
+    return [DefaultInfo(
+        executable = script,
+        runfiles = runfiles,
+    )]
 
-generate_ide_report = rule(
-    implementation = _generate_ide_report_impl,
+mull_e2e_test = rule(
+    implementation = _mull_e2e_test_impl,
+    test = True,
     attrs = {
-        "sqlite_report": attr.label(mandatory = True, allow_single_file = True),
+        "fmt_target": attr.label(mandatory = True),
+        "mull_runner": attr.label(executable = True, mandatory = True, cfg = "exec"),
         "mull_reporter": attr.label(executable = True, mandatory = True, cfg = "exec"),
         "mull_config": attr.label(mandatory = True, allow_single_file = True),
+        "expected": attr.label(mandatory = True, allow_single_file = True),
     },
 )
 
@@ -89,9 +96,6 @@ FMT_TEST_TARGETS = [
 ]
 
 def define_end2end_test_targets(name):
-    linux_x86_64_commands = []
-    linux_aarch64_commands = []
-    macos_commands = []
     for llvm_version in AVAILABLE_LLVM_VERSIONS:
         cmake(
             name = "fmt_e2e_%s" % llvm_version,
@@ -123,91 +127,38 @@ def define_end2end_test_targets(name):
             generate_args = ["-GNinja"],
         )
 
-        mull_fmtlib_sqlite_report(
-            name = "fmt_sqlite_report_%s" % llvm_version,
-            testonly = True,
-            mull_runner = "//rust/mull-tools:mull-runner-%s" % llvm_version,
-            target = ":fmt_e2e_%s" % llvm_version,
-            mull_config = ":mull.yml",
-        )
-
-        generate_ide_report(
-            name = "fmt_ide_report_%s" % llvm_version,
-            testonly = True,
-            mull_reporter = "//rust/mull-tools:mull-reporter-%s" % llvm_version,
-            sqlite_report = "fmt_sqlite_report_%s" % llvm_version,
-            mull_config = ":mull.yml",
-        )
-
         # Linux x86_64
-        write_source_files(
-            name = "update_end2end_fmtlib_test_files_linux_x86_64_%s" % llvm_version,
-            files = {
-                ":fmtlib_expected_ide_report_linux_x86_64.txt": "fmt_ide_report_%s" % llvm_version,
-            },
-            check_that_out_file_exists = False,
-            testonly = True,
+        mull_e2e_test(
+            name = "fmtlib_e2e_test_linux_x86_64_%s" % llvm_version,
+            fmt_target = ":fmt_e2e_%s" % llvm_version,
+            mull_runner = "//rust/mull-tools:mull-runner-%s" % llvm_version,
+            mull_reporter = "//rust/mull-tools:mull-reporter-%s" % llvm_version,
+            mull_config = ":mull.yml",
+            expected = ":fmtlib_expected_ide_report_linux_x86_64.txt",
             target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
-            suggested_update_target = "%s_linux_x86_64" % name,
             tags = ["llvm_%s" % llvm_version, "end2end"],
         )
 
         # Linux aarch64
-        write_source_files(
-            name = "update_end2end_fmtlib_test_files_linux_aarch64_%s" % llvm_version,
-            files = {
-                ":fmtlib_expected_ide_report_linux_aarch64.txt": "fmt_ide_report_%s" % llvm_version,
-            },
-            check_that_out_file_exists = False,
-            testonly = True,
+        mull_e2e_test(
+            name = "fmtlib_e2e_test_linux_aarch64_%s" % llvm_version,
+            fmt_target = ":fmt_e2e_%s" % llvm_version,
+            mull_runner = "//rust/mull-tools:mull-runner-%s" % llvm_version,
+            mull_reporter = "//rust/mull-tools:mull-reporter-%s" % llvm_version,
+            mull_config = ":mull.yml",
+            expected = ":fmtlib_expected_ide_report_linux_aarch64.txt",
             target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:aarch64"],
-            suggested_update_target = "%s_linux_aarch64" % name,
             tags = ["llvm_%s" % llvm_version, "end2end"],
         )
 
-        # macOS, only tested on arm64
-        write_source_files(
-            name = "update_end2end_fmtlib_test_files_macos_%s" % llvm_version,
-            files = {
-                ":fmtlib_expected_ide_report_macos.txt": "fmt_ide_report_%s" % llvm_version,
-            },
-            check_that_out_file_exists = False,
-            testonly = True,
+        # macOS
+        mull_e2e_test(
+            name = "fmtlib_e2e_test_macos_%s" % llvm_version,
+            fmt_target = ":fmt_e2e_%s" % llvm_version,
+            mull_runner = "//rust/mull-tools:mull-runner-%s" % llvm_version,
+            mull_reporter = "//rust/mull-tools:mull-reporter-%s" % llvm_version,
+            mull_config = ":mull.yml",
+            expected = ":fmtlib_expected_ide_report_macos.txt",
             target_compatible_with = ["@platforms//os:macos"],
-            suggested_update_target = "%s_macos" % name,
             tags = ["llvm_%s" % llvm_version, "end2end"],
         )
-        macos_commands.append("update_end2end_fmtlib_test_files_macos_%s" % llvm_version)
-        linux_x86_64_commands.append("update_end2end_fmtlib_test_files_linux_x86_64_%s" % llvm_version)
-        linux_aarch64_commands.append("update_end2end_fmtlib_test_files_linux_aarch64_%s" % llvm_version)
-
-    multirun(
-        name = "%s_macos" % name,
-        commands = macos_commands,
-        jobs = 0,
-        target_compatible_with = ["@platforms//os:macos"],
-        testonly = True,
-    )
-    multirun(
-        name = "%s_linux_x86_64" % name,
-        commands = linux_x86_64_commands,
-        jobs = 0,
-        target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
-        testonly = True,
-    )
-    multirun(
-        name = "%s_linux_aarch64" % name,
-        commands = linux_aarch64_commands,
-        jobs = 0,
-        target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:aarch64"],
-        testonly = True,
-    )
-
-    # Convenience target that runs the appropriate Linux architecture
-    multirun(
-        name = "%s_linux" % name,
-        commands = linux_x86_64_commands + linux_aarch64_commands,
-        jobs = 0,
-        target_compatible_with = ["@platforms//os:linux"],
-        testonly = True,
-    )
