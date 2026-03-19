@@ -29,6 +29,7 @@ export MULL_CONFIG
 
 # Step 1: Run mull-runner on each test binary to generate SQLite report
 for test_file in "${{TEST_FILES[@]}}"; do
+    echo "Testing $test_file"
     "$MULL_RUNNER" --allow-surviving --reporters SQLite --report-name fmtlib -minimum-timeout 500 "$test_file"
 done
 
