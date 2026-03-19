@@ -4,6 +4,8 @@ load(":homebrew_config.bzl", "homebrew_config")
 load(":mull_devcontainers.bzl", "mull_devcontainers")
 load(":mull_github_workflows.bzl", "mull_github_workflows")
 
+exports_files(["version.env"])
+
 py_binary(
     name = "devcontainer_json_gen",
     srcs = ["devcontainer_json_gen.py"],

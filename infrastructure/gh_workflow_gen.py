@@ -75,6 +75,7 @@ def main():
         "PRE_INSTALL_CMD": pre_install_cmd,
         "INSTALL_CMD": install_cmd,
         "CLOUDSMITH_SETUP_SCRIPT": cloudsmith_setup_script,
+        "LLVM_VERSIONS_SPACE_SEPARATED": " ".join(args.llvm_versions),
     }
 
     renderer = pystache.Renderer(missing_tags="strict")

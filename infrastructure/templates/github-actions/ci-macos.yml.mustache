@@ -28,12 +28,12 @@ jobs:
       - name: Run CI task
         run: |
           brew install bazelisk zlib ncurses sqlite ninja llvm@${{ matrix.LLVM_VERSION }}
-          bazel build //...
           bazel test //...
+          bazel build //:mull_packages --stamp
       - name: Publish package
         if: env.CLOUDSMITH_API_KEY != null
         run: |
-          bazel run publish && exit 0
+          bazel run publish --stamp && exit 0
 
           max_attempts=3
           attempt=1
@@ -41,7 +41,7 @@ jobs:
           do
             echo "Attempt $attempt failed. Retrying..."
             attempt=$((attempt+1))
-            bazel run publish && exit 0
+            bazel run publish --stamp && exit 0
           done
           echo "All $max_attempts attempts failed."
           exit 1

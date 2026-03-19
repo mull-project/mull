@@ -249,6 +249,7 @@ def mull_package(name):
                     "%s-fish-completions" % package_name,
                 ],
                 out = "%s.zip" % package_file_name,
+                stamp = -1,
             )
         elif OS_NAME == "rhel":
             pkg_rpm(
@@ -287,6 +288,7 @@ def mull_package(name):
                     "%s-zsh-completions" % package_name,
                     "%s-fish-completions" % package_name,
                 ],
+                stamp = -1,
             )
             pkg_deb(
                 name = package_name,

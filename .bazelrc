@@ -1,8 +1,11 @@
 common --test_output=errors
-# common --remote_cache_compression
+common --remote_cache_compression
 
 # Hermetic Rust builds: don't inherit shell environment in cargo build scripts
 common --@rules_rust//cargo/settings:use_default_shell_env=False
+
+# Workspace status for version stamping
+build --workspace_status_command=infrastructure/workspace_status.sh
 
 try-import .bazel.buildbuddy.rc
 try-import .bazel.compilation_mode.bazelrc

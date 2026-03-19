@@ -1,4 +1,3 @@
-load("@mull_package_info//:mull_package_info.bzl", "MULL_VERSION")
 load("@rules_rust//rust:defs.bzl", "rust_library")
 
 rust_library(
@@ -9,9 +8,6 @@ rust_library(
         "src/lib.rs",
         "src/utils.rs",
     ],
-    rustc_env = {
-        "CARGO_PKG_VERSION": MULL_VERSION,
-    },
     visibility = ["//visibility:public"],
     deps = [
         "@crates//:clap",
