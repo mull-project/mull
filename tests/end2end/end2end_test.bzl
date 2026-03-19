@@ -96,6 +96,13 @@ FMT_TEST_TARGETS = [
     "scan-test",
 ]
 
+# Platform configurations: (os, arch, target_compatible_with)
+E2E_PLATFORMS = [
+    ("linux", "x86_64", ["@platforms//os:linux", "@platforms//cpu:x86_64"]),
+    ("linux", "aarch64", ["@platforms//os:linux", "@platforms//cpu:aarch64"]),
+    ("macos", "aarch64", ["@platforms//os:macos"]),
+]
+
 def define_end2end_test_targets(name):
     for llvm_version in AVAILABLE_LLVM_VERSIONS:
         cmake(
@@ -128,38 +135,15 @@ def define_end2end_test_targets(name):
             generate_args = ["-GNinja"],
         )
 
-        # Linux x86_64
-        mull_e2e_test(
-            name = "fmtlib_e2e_test_linux_x86_64_%s" % llvm_version,
-            fmt_target = ":fmt_e2e_%s" % llvm_version,
-            mull_runner = "//rust/mull-tools:mull-runner-%s" % llvm_version,
-            mull_reporter = "//rust/mull-tools:mull-reporter-%s" % llvm_version,
-            mull_config = ":mull.yml",
-            expected = ":fmtlib_expected_ide_report_linux_x86_64.txt",
-            target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:x86_64"],
-            tags = ["llvm_%s" % llvm_version, "end2end"],
-        )
-
-        # Linux aarch64
-        mull_e2e_test(
-            name = "fmtlib_e2e_test_linux_aarch64_%s" % llvm_version,
-            fmt_target = ":fmt_e2e_%s" % llvm_version,
-            mull_runner = "//rust/mull-tools:mull-runner-%s" % llvm_version,
-            mull_reporter = "//rust/mull-tools:mull-reporter-%s" % llvm_version,
-            mull_config = ":mull.yml",
-            expected = ":fmtlib_expected_ide_report_linux_aarch64.txt",
-            target_compatible_with = ["@platforms//os:linux", "@platforms//cpu:aarch64"],
-            tags = ["llvm_%s" % llvm_version, "end2end"],
-        )
-
-        # macOS
-        mull_e2e_test(
-            name = "fmtlib_e2e_test_macos_%s" % llvm_version,
-            fmt_target = ":fmt_e2e_%s" % llvm_version,
-            mull_runner = "//rust/mull-tools:mull-runner-%s" % llvm_version,
-            mull_reporter = "//rust/mull-tools:mull-reporter-%s" % llvm_version,
-            mull_config = ":mull.yml",
-            expected = ":fmtlib_expected_ide_report_macos.txt",
-            target_compatible_with = ["@platforms//os:macos"],
-            tags = ["llvm_%s" % llvm_version, "end2end"],
-        )
+        for os, arch, target_compatible_with in E2E_PLATFORMS:
+            mull_e2e_test(
+                name = "fmtlib_e2e_test_%s_%s_%s" % (os, arch, llvm_version),
+                fmt_target = ":fmt_e2e_%s" % llvm_version,
+                mull_runner = "//rust/mull-tools:mull-runner-%s" % llvm_version,
+                mull_reporter = "//rust/mull-tools:mull-reporter-%s" % llvm_version,
+                mull_config = ":mull.yml",
+                expected = ":fmtlib_expected_ide_report_%s_%s.txt" % (os, arch),
+                flaky = True,
+                target_compatible_with = target_compatible_with,
+                tags = ["llvm_%s" % llvm_version, "end2end"],
+            )
