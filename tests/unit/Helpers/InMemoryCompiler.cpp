@@ -39,7 +39,7 @@ std::unique_ptr<llvm::Module> InMemoryCompiler::compile(const std::string &code,
   /// Create and initialize CompilerInstance
   clang::CompilerInstance clangCompilerInstance;
   clangCompilerInstance.createDiagnostics(
-#if LLVM_VERSION_MAJOR >= 20
+#if LLVM_VERSION_MAJOR == 20
       *llvm::vfs::getRealFileSystem()
 #endif
   );
