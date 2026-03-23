@@ -27,15 +27,15 @@ git_override(
     remote = "https://github.com/hedronvision/bazel-compile-commands-extractor.git",
 )
 
-TOOLCHAIN_VERSION = "18450561443"
+TOOLCHAIN_VERSION = "23441797865"
 
 llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm", dev_dependency = True)
 llvm.toolchain(
     llvm_version = "19.1.7",
     sha256 = {
-        "darwin-aarch64": "23ca5654dff23c2a7d7d14fc27a32eab9467e2a9b0e665654ef7c142a549e093",
-        "linux-aarch64": "a45eed3d57bf6199d712f897a616037adcabab53770af6325c92bce0efd3abdb",
-        "linux-x86_64": "dc80e312fe8d37e039173ff549d856d1751c4e265e318b87e6c8b877599b95ac",
+        "darwin-aarch64": "fd68fc5abbb107283452bdd5fe0bc8fe88d1c699abb0baa3feec96aad3c4453d",
+        "linux-aarch64": "1c124b19d0ddc19c85bbefc5b1069cd380935da413bc9ccee4c89eeeef0009ee",
+        "linux-x86_64": "84fcfa346beb8ce59b98ea375af645bca546ed397bf68de6f51dd6fe8074e8d8",
     },
     stdlib = {
         "linux-x86_64": "stdc++",
@@ -231,6 +231,7 @@ mull_supported_llvm_versions.configure(
             "19",
             "20",
             "21",
+            "22",
         ],
         "debian:13": [
             "17",
@@ -256,6 +257,7 @@ SUPPORTED_LLVM_VERSIONS = [
     "19",
     "20",
     "21",
+    "22",
 ]
 
 available_llvm_versions = use_extension("//:mull_available_llvm_versions.bzl", "available_llvm_versions")
