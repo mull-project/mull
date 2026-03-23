@@ -15,7 +15,7 @@ jobs:
     runs-on: macos-latest
     strategy:
       matrix:
-        LLVM_VERSION: [16, 17, 18, 19, 20, 21]
+        LLVM_VERSION: [16, 17, 18, 19, 20]
     steps:
       - name: Fix git
         run: |
