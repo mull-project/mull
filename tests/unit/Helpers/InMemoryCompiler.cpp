@@ -85,10 +85,15 @@ std::unique_ptr<llvm::Module> InMemoryCompiler::compile(const std::string &code,
   std::unique_ptr<llvm::MemoryBuffer> buffer = llvm::MemoryBuffer::getMemBufferCopy(testCodeData);
   compilerInvocation.getPreprocessorOpts().addRemappedFile(inMemoryFileName, buffer.get());
 
-  /// Configure target options
+/// Configure target options
+#if LLVM_VERSION_MAJOR >= 21
+  clang::TargetOptions targetOptions;
+  targetOptions.Triple = llvm::sys::getDefaultTargetTriple();
+#else
   const std::shared_ptr<clang::TargetOptions> targetOptions =
       std::make_shared<clang::TargetOptions>();
   targetOptions->Triple = llvm::sys::getDefaultTargetTriple();
+#endif
   clang::TargetInfo *pTargetInfo =
       clang::TargetInfo::CreateTargetInfo(clangCompilerInstance.getDiagnostics(), targetOptions);
   clangCompilerInstance.setTarget(pTargetInfo);
