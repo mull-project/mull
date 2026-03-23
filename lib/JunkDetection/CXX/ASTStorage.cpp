@@ -12,6 +12,9 @@
 #if LLVM_VERSION_MAJOR >= 20
 #include <llvm/Support/VirtualFileSystem.h>
 #endif
+#if LLVM_VERSION_MAJOR > 21
+#include <clang/Driver/CreateASTUnitFromArgs.h>
+#endif
 #include <sstream>
 
 using namespace mull;
@@ -244,6 +247,14 @@ ASTUnitWrapper *ASTStorage::findAST(const std::string &sourceFile) {
 #endif
           ));
 
+#if LLVM_VERSION_MAJOR > 21
+  auto ast = clang::CreateASTUnitFromCommandLine(args.data(),
+                                                 args.data() + args.size(),
+                                                 std::make_shared<clang::PCHContainerOperations>(),
+                                                 std::make_shared<clang::DiagnosticOptions>(),
+                                                 diagnosticsEngine,
+                                                 "");
+#else
   auto ast = clang::ASTUnit::LoadFromCommandLine(args.data(),
                                                  args.data() + args.size(),
                                                  std::make_shared<clang::PCHContainerOperations>(),
@@ -252,6 +263,7 @@ ASTUnitWrapper *ASTStorage::findAST(const std::string &sourceFile) {
 #endif
                                                  diagnosticsEngine,
                                                  "");
+#endif
 
   bool hasErrors = (ast == nullptr) || diagnosticsEngine->hasErrorOccurred() ||
                    diagnosticsEngine->hasUnrecoverableErrorOccurred() ||
