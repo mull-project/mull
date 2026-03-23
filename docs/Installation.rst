@@ -15,7 +15,7 @@ The following examples setup mull repos on deb- and rpm-based systems, respectiv
 
 .. code-block:: bash
 
-    # Ubuntu
+    # Ubuntu / Debian
     curl -1sLf 'https://dl.cloudsmith.io/public/mull-project/mull-stable/setup.deb.sh' | sudo -E bash
     # Red Hat
     curl -1sLf 'https://dl.cloudsmith.io/public/mull-project/mull-stable/setup.rpm.sh' | sudo -E bash
@@ -25,7 +25,7 @@ Install the package:
 
 .. code-block:: bash
 
-    # Ubuntu
+    # Ubuntu / Debian
     sudo apt-get update && apt-get install mull-19
     # Red Hat
     sudo yum update && yum install mull-19

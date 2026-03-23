@@ -12,6 +12,9 @@
 #if LLVM_VERSION_MAJOR >= 20
 #include <llvm/Support/VirtualFileSystem.h>
 #endif
+#if LLVM_VERSION_MAJOR > 21
+#include <clang/Driver/CreateASTUnitFromArgs.h>
+#endif
 #include <sstream>
 
 using namespace mull;
@@ -229,19 +232,38 @@ ASTUnitWrapper *ASTStorage::findAST(const std::string &sourceFile) {
   if (args.size() == 1) {
     args.push_back(sourceFile.c_str());
   }
+#if LLVM_VERSION_MAJOR >= 21
+  clang::DiagnosticOptions diagOpts;
+#endif
 
   clang::IntrusiveRefCntPtr<clang::DiagnosticsEngine> diagnosticsEngine(
       clang::CompilerInstance::createDiagnostics(
-#if LLVM_VERSION_MAJOR >= 20
-          *llvm::vfs::getRealFileSystem(),
+#if LLVM_VERSION_MAJOR < 20
+          new clang::DiagnosticOptions
+#elif LLVM_VERSION_MAJOR == 20
+          *llvm::vfs::getRealFileSystem(), new clang::DiagnosticOptions
+#elif LLVM_VERSION_MAJOR >= 21
+          *llvm::vfs::getRealFileSystem(), diagOpts
 #endif
-          new clang::DiagnosticOptions));
+          ));
 
+#if LLVM_VERSION_MAJOR > 21
+  auto ast = clang::CreateASTUnitFromCommandLine(args.data(),
+                                                 args.data() + args.size(),
+                                                 std::make_shared<clang::PCHContainerOperations>(),
+                                                 std::make_shared<clang::DiagnosticOptions>(),
+                                                 diagnosticsEngine,
+                                                 "");
+#else
   auto ast = clang::ASTUnit::LoadFromCommandLine(args.data(),
                                                  args.data() + args.size(),
                                                  std::make_shared<clang::PCHContainerOperations>(),
+#if LLVM_VERSION_MAJOR >= 21
+                                                 std::make_shared<clang::DiagnosticOptions>(),
+#endif
                                                  diagnosticsEngine,
                                                  "");
+#endif
 
   bool hasErrors = (ast == nullptr) || diagnosticsEngine->hasErrorOccurred() ||
                    diagnosticsEngine->hasUnrecoverableErrorOccurred() ||

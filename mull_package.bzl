@@ -270,7 +270,6 @@ def mull_package(name):
                 requires = [
                     "clang-libs",
                     "llvm-libs",
-                    "libxml2",
                 ],
                 package_name = "mull-%s" % llvm_version,
                 release = "1",
@@ -302,8 +301,6 @@ def mull_package(name):
                 depends = [
                     "libclang-cpp%s" % llvm_version,
                     "libllvm%s" % llvm_version,
-                    "libxml2",
-                    "libsqlite3-0",
                 ],
                 package_file_name = "%s.deb" % package_file_name,
                 architecture = "arm64" if OS_ARCH == "aarch64" else OS_ARCH,
