@@ -80,7 +80,10 @@ pip.parse(
 use_repo(pip, "pypi")
 
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
-rust.toolchain(edition = "2024")
+rust.toolchain(
+    edition = "2024",
+    versions = ["1.94.0"],
+)
 use_repo(rust, "rust_toolchains")
 
 register_toolchains("@rust_toolchains//:all")
