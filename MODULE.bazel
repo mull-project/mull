@@ -86,103 +86,10 @@ use_repo(rust, "rust_toolchains")
 register_toolchains("@rust_toolchains//:all")
 
 crate = use_extension("@rules_rust//crate_universe:extensions.bzl", "crate")
-crate.spec(
-    features = ["derive"],
-    package = "serde",
-    version = "1",
-)
-crate.spec(
-    package = "serde_yaml",
-    version = "0.9",
-)
-crate.spec(
-    features = ["derive"],
-    package = "clap",
-    version = "4",
-)
-crate.spec(
-    package = "clap_mangen",
-    version = "0.2",
-)
-crate.spec(
-    package = "clap_complete",
-    version = "4",
-)
-crate.spec(
-    package = "colored",
-    version = "2",
-)
-crate.spec(
-    package = "cxx",
-    version = "1",
-)
-crate.spec(
-    package = "cxx-gen",
-    version = "0.7",
-)
-crate.spec(
-    package = "proc-macro2",
-    version = "1",
-)
-crate.spec(
-    features = [
-        "derive",
-        "preserve_order",
-    ],
-    package = "schemars",
-    version = "0.8",
-)
-crate.spec(
-    package = "serde_json",
-    version = "1",
-)
-crate.spec(
-    features = ["bundled"],
-    package = "rusqlite",
-    version = "0.32",
-)
-crate.spec(
-    package = "unicode-width",
-    version = "0.2",
-)
-crate.spec(
-    package = "indoc",
-    version = "2.0",
-)
-crate.spec(
-    features = ["read"],
-    package = "object",
-    version = "0.36",
-)
-crate.spec(
-    package = "libc",
-    version = "0.2",
-)
-crate.spec(
-    package = "console",
-    version = "0.15",
-)
-crate.spec(
-    package = "rayon",
-    version = "1.10",
-)
-crate.spec(
-    package = "wait-timeout",
-    version = "0.2",
-)
-crate.spec(
-    package = "llvm_profparser",
-    version = "0.8",
-)
-crate.spec(
-    package = "regex",
-    version = "1",
-)
-crate.spec(
-    default_features = False,
-    features = ["vendored-libgit2"],
-    package = "git2",
-    version = "0.19",
+crate.from_cargo(
+    name = "crates",
+    cargo_lockfile = "//rust:Cargo.lock",
+    manifests = ["//rust:Cargo.toml"],
 )
 crate.annotation(
     additive_build_file_content = """
@@ -197,7 +104,6 @@ cc_library(
 """,
     crate = "cxx",
 )
-crate.from_specs()
 use_repo(crate, "crates")
 
 mull_supported_llvm_versions = use_extension("//:mull_supported_llvm_versions.bzl", "mull_supported_llvm_versions")
