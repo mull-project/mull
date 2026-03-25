@@ -136,8 +136,7 @@ mull_supported_llvm_versions.configure(
             "18",
             "19",
             "20",
-            # TODO: fmtlib fails to build with Clang 21 on macOS
-            # "21",
+            "21",
         ],
         "ubuntu:22.04": [
             "13",
