@@ -159,8 +159,7 @@ mull_supported_llvm_versions.configure(
             "19",
             "20",
             "21",
-            # TODO: //tests/unit:JunkDetection/CXXJunkDetectorTests.cpp_22 is failing
-            # "22",
+            "22",
         ],
         "debian:13": [
             "17",
