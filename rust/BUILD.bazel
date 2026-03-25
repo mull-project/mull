@@ -11,6 +11,19 @@ sh_binary(
 )
 
 sh_test(
+    name = "rust_toolchain_versions_in_sync",
+    srcs = ["check_toolchain_versions.sh"],
+    args = [
+        "$(location //:MODULE.bazel)",
+        "$(location Cargo.toml)",
+    ],
+    data = [
+        "Cargo.toml",
+        "//:MODULE.bazel",
+    ],
+)
+
+sh_test(
     name = "cargo_lockfile_up_to_date",
     srcs = ["check_lockfile.sh"],
     args = [
