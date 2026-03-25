@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 30
     strategy:
       matrix:
-        LLVM_VERSION: [16, 17, 18, 19, 20]
+        LLVM_VERSION: [16, 17, 18, 19, 20, 21]
     steps:
       - name: Fix git
         run: |
