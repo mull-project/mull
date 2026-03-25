@@ -82,6 +82,23 @@ use_repo(pip, "pypi")
 rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
 rust.toolchain(
     edition = "2024",
+    sha256s = {
+        "rustc-1.94.0-aarch64-apple-darwin.tar.xz": "6ba00a4f486af11826335cd7fe405592d959f50afb9489176fc1463cbe75dbf2",
+        "clippy-1.94.0-aarch64-apple-darwin.tar.xz": "42a683cbac0b81b96ad3b887cdade36a57ef3a131c203583ca7e3ce0be98f415",
+        "cargo-1.94.0-aarch64-apple-darwin.tar.xz": "7497ab873993cf38b806548c85bf818ffd71d1c3cf77b5bb4c3d3f1769588a08",
+        "llvm-tools-1.94.0-aarch64-apple-darwin.tar.xz": "3e1e4bf19fc4e6a84221e0fc04e69cccbd659dd49042d58f7e37dbd7d9410e90",
+        "rust-std-1.94.0-aarch64-apple-darwin.tar.xz": "d3293668128b0a7838ef2544ae341eadd4437460ca22098af723349885a10ba2",
+        "rustc-1.94.0-x86_64-unknown-linux-gnu.tar.xz": "31a0d3ac9383dfdeb4fce86eeed5ade3230131c635264c0eab7252dbf235f28e",
+        "clippy-1.94.0-x86_64-unknown-linux-gnu.tar.xz": "935529b0b9150084fa9cc1734c6598efe86b6e7d76f31ad3f8d4bb79ebf6031a",
+        "cargo-1.94.0-x86_64-unknown-linux-gnu.tar.xz": "8e17624f3de39e079845bfb25ed15a042f4b50ceca78e37c56c4b9b15949b9f7",
+        "llvm-tools-1.94.0-x86_64-unknown-linux-gnu.tar.xz": "cf6b8e1d3e48ffa4db37aa59f55382b991f0d347d9b62eebc9ef1d80dffabef4",
+        "rust-std-1.94.0-x86_64-unknown-linux-gnu.tar.xz": "dd33653107c36e040082050d9e547e64dac5b456ba74069430d838c00c189a05",
+        "rustc-1.94.0-aarch64-unknown-linux-gnu.tar.xz": "7261b2fcdb88aef8b21f4b9f915d9a75c959674193f5b38e13fab4569684fc5b",
+        "clippy-1.94.0-aarch64-unknown-linux-gnu.tar.xz": "f7450c414e394450b53be602d37c374e2a2c5a2f51be2b54faf3d1e3272160b1",
+        "cargo-1.94.0-aarch64-unknown-linux-gnu.tar.xz": "d57ab7b23b52cba46e58c78327904d0c7db19892988677b0d59495c8af4bb790",
+        "llvm-tools-1.94.0-aarch64-unknown-linux-gnu.tar.xz": "d9780dbef8b58bf544b255785a420aec64378bc496adb770a628670a0f18171c",
+        "rust-std-1.94.0-aarch64-unknown-linux-gnu.tar.xz": "c781b3ef4fefa5508fbe05820eddc95e46351d905a30921cc020febd9c596a2e",
+    },
     versions = ["1.94.0"],
 )
 use_repo(rust, "rust_toolchains")
