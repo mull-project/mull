@@ -135,6 +135,7 @@ def define_end2end_test_targets(name):
             generate_args = ["-GNinja"],
         )
 
+        expected_suffix = "_macro" if int(llvm_version) >= 22 else ""
         for os, arch, target_compatible_with in E2E_PLATFORMS:
             mull_e2e_test(
                 name = "fmtlib_e2e_test_%s_%s_%s" % (os, arch, llvm_version),
@@ -142,7 +143,7 @@ def define_end2end_test_targets(name):
                 mull_runner = "//rust/mull-tools:mull-runner-%s" % llvm_version,
                 mull_reporter = "//rust/mull-tools:mull-reporter-%s" % llvm_version,
                 mull_config = ":mull.yml",
-                expected = ":fmtlib_expected_ide_report_%s_%s.txt" % (os, arch),
+                expected = ":fmtlib_expected_ide_report_%s_%s%s.txt" % (os, arch, expected_suffix),
                 flaky = True,
                 target_compatible_with = target_compatible_with,
                 tags = ["llvm_%s" % llvm_version, "end2end"],
