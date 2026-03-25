@@ -1,6 +1,6 @@
 load("@rules_cc//cc:defs.bzl", "cc_library")
 load("@rules_rust//cargo:defs.bzl", "cargo_build_script")
-load("@rules_rust//rust:defs.bzl", "rust_library")
+load("@rules_rust//rust:defs.bzl", "rust_static_library")
 
 # Shim library to provide dependencies needed by Rust crates (libgit2, etc.)
 cc_library(
@@ -54,7 +54,7 @@ cc_library(
     ],
 )
 
-rust_library(
+rust_static_library(
     name = "mull-cxx-bridge",
     srcs = ["src/lib.rs"],
     visibility = ["//visibility:public"],
