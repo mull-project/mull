@@ -6,6 +6,8 @@ load("//:mull_package.bzl", "mull_package")
 
 package(default_visibility = ["//visibility:public"])
 
+exports_files(["MODULE.bazel"])
+
 compile_pip_requirements(
     name = "requirements",
     src = "requirements.txt",
