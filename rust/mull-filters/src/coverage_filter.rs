@@ -158,7 +158,13 @@ fn load_coverage_from_profile_path(
     };
 
     // Generate the coverage report
-    let report = coverage_mapping.generate_report();
+    let report = match coverage_mapping.generate_report() {
+        Ok(r) => r,
+        Err(e) => {
+            diag_warning!(diag, "Cannot generate coverage report: {}", e);
+            return uncovered_ranges;
+        }
+    };
 
     // Extract uncovered regions (those with 0 hits)
     for (file_path, coverage_result) in &report.files {
