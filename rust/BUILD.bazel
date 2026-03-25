@@ -1,1 +1,27 @@
 # This file makes rust/ a Bazel package so that .bzl files here can be loaded.
+
+load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
+load("@rules_shell//shell:sh_test.bzl", "sh_test")
+
+sh_binary(
+    name = "update_cargo_lockfile",
+    srcs = ["update_lockfile.sh"],
+    args = ["$(location @rules_rust//rust/toolchain:current_cargo_files)"],
+    data = ["@rules_rust//rust/toolchain:current_cargo_files"],
+)
+
+sh_test(
+    name = "cargo_lockfile_up_to_date",
+    srcs = ["check_lockfile.sh"],
+    args = [
+        "$(location @rules_rust//rust/toolchain:current_cargo_files)",
+        "$(location Cargo.toml)",
+        "$(location Cargo.lock)",
+    ],
+    data = [
+        "Cargo.lock",
+        "Cargo.toml",
+        "@rules_rust//rust/toolchain:current_cargo_files",
+    ],
+    tags = ["local"],
+)
