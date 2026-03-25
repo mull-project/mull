@@ -119,6 +119,7 @@ cc_library(
     hdrs = ["include/cxx.h"],
     strip_include_prefix = "include",
     include_prefix = "rust",
+    copts = ["-fPIC"],
     visibility = ["//visibility:public"],
 )
 """,
