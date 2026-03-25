@@ -28,6 +28,7 @@ sh_test(
     srcs = ["check_lockfile.sh"],
     args = [
         "$(location @rules_rust//rust/toolchain:current_cargo_files)",
+        "$(location @rules_rust//rust/toolchain:current_rustc_files)",
         "$(location Cargo.toml)",
         "$(location Cargo.lock)",
     ],
@@ -35,6 +36,7 @@ sh_test(
         "Cargo.lock",
         "Cargo.toml",
         "@rules_rust//rust/toolchain:current_cargo_files",
+        "@rules_rust//rust/toolchain:current_rustc_files",
     ],
     tags = ["local"],
 )
