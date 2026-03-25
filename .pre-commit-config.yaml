@@ -2,22 +2,18 @@
 # See https://pre-commit.com/hooks.html for more hooks
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v5.0.0
+    rev: v6.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
       - id: check-yaml
       - id: check-added-large-files
   - repo: https://github.com/google/yamlfmt
-    rev: v0.14.0
+    rev: v0.21.0
     hooks:
       - id: yamlfmt
-  - repo: https://github.com/cheshirekow/cmake-format-precommit
-    rev: v0.6.13
-    hooks:
-      - id: cmake-format
   - repo: https://github.com/pre-commit/mirrors-clang-format
-    rev: 'v19.1.5'
+    rev: 'v22.1.1'
     hooks:
       - id: clang-format
   - repo: local
@@ -28,6 +24,6 @@ repos:
         language: system
         types: [rust]
   - repo: https://github.com/keith/pre-commit-buildifier
-    rev: 8.0.3
+    rev: 8.5.1
     hooks:
       - id: buildifier
