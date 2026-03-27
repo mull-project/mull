@@ -7,6 +7,16 @@ inputs:
 runs:
   using: "composite"
   steps:
+    - name: Extract release notes
+      if: contains(github.ref, 'refs/tags/')
+      shell: bash
+      run: |
+        VERSION=${GITHUB_REF_NAME}
+        NOTES=$(awk "/^## \[${VERSION}\]/{found=1; next} found && /^## \[/{exit} found{print}" CHANGELOG.md \
+          | awk 'NF{found=1} found')
+        echo "RELEASE_NOTES<<EOF" >> $GITHUB_ENV
+        echo "$NOTES" >> $GITHUB_ENV
+        echo "EOF" >> $GITHUB_ENV
     - name: Attach package to the tag
       if: contains(github.ref, 'refs/tags/')
       uses: svenstaro/upload-release-action@v2
@@ -16,6 +26,7 @@ runs:
         tag: ${{ github.ref }}
         overwrite: true
         file_glob: true
+        body: ${{ env.RELEASE_NOTES }}
       # This step fails sometimes (with ECONNRESET), but I'm not willing to
       # debug it as the main source of packages is Cloudsmith
       continue-on-error: true
