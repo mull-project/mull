@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.31.1] - 28 Mar 2026
+
+- Fixed extra logging from the plugin [#1174](https://github.com/mull-project/mull/pull/1174)
+
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2026-03-26..2026-03-28)
+
 ## [0.31.0] - 25 Mar 2026
 
 - Added support for LLVM 21 and 22, and precompiled packages for Ubuntu 26.04 [#1165](https://github.com/mull-project/mull/pull/1165) [#1168](https://github.com/mull-project/mull/pull/1168)
