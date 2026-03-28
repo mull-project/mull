@@ -1,7 +1,7 @@
 use clap::{CommandFactory, FromArgMatches};
 use mull_core::config::{HasSharedCli, MullConfigSpec, SharedCli};
 use mull_core::diagnostics::MullDiagnostics;
-use mull_core::{diag_debug, diag_info, diag_warning, get_config_path, long_version_string};
+use mull_core::{diag_debug, diag_info, diag_warning, get_config_path};
 use std::fs;
 
 fn normalize_args(args: &[String]) -> Vec<String> {
@@ -63,12 +63,12 @@ fn load_yaml_config(config_path: &str) -> Result<MullConfigSpec, String> {
     parse_yaml(&contents)
 }
 
-fn create_config(diag: &MullDiagnostics) -> MullConfigSpec {
+fn create_config(diag: &MullDiagnostics) -> (MullConfigSpec, Option<String>) {
     match get_config_path() {
         Some(path) => match load_yaml_config(&path) {
             Ok(config) => {
                 diag_info!(diag, "Using config {}", path);
-                config
+                (config, Some(path.into()))
             }
             Err(e) => {
                 diag_warning!(
@@ -77,7 +77,7 @@ fn create_config(diag: &MullDiagnostics) -> MullConfigSpec {
                     path,
                     e
                 );
-                MullConfigSpec::default()
+                (MullConfigSpec::default(), None)
             }
         },
         None => {
@@ -85,7 +85,7 @@ fn create_config(diag: &MullDiagnostics) -> MullConfigSpec {
                 diag,
                 "Mull cannot find config (mull.yml). Using some defaults."
             );
-            MullConfigSpec::default()
+            (MullConfigSpec::default(), None)
         }
     }
 }
@@ -102,6 +102,20 @@ fn override_config(shared: &SharedCli, yaml_config: &mut MullConfigSpec) {
     }
 }
 
+fn long_version_string(mull_version: &str, llvm_version: &str) -> &'static str {
+    let s = format!(
+        "{}\n\n\
+         Mull: Practical mutation testing and fault injection for C and C++\n\
+         Home: https://github.com/mull-project/mull\n\
+         Docs: https://mull.readthedocs.io\n\
+         Support: https://mull.readthedocs.io/en/latest/Support.html\n\
+         LLVM: {}",
+        mull_version, llvm_version
+    );
+    // Leak is fine: this runs once per CLI invocation then the process exits.
+    Box::leak(s.into_boxed_str())
+}
+
 pub fn init_cli<C>(
     args: Vec<String>,
     mull_version: String,
@@ -116,11 +130,14 @@ where
     let cli = C::from_arg_matches(&matches).unwrap();
 
     let diag = MullDiagnostics::new();
-    let mut yaml_config = create_config(&diag);
+    let (mut yaml_config, maybe_path) = create_config(&diag);
     yaml_config.quiet = false;
 
     override_config(cli.shared(), &mut yaml_config);
     init_diagnostics(&diag, &yaml_config);
+    if let Some(path) = maybe_path {
+        diag_info!(diag, "Using config {}", path);
+    }
 
     (yaml_config, cli, diag)
 }
