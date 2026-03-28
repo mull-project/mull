@@ -127,7 +127,6 @@ fn create_config(diag: &MullDiagnostics) -> MullConfig {
     match get_config_path() {
         Some(path) => match load_yaml_config(&path) {
             Ok(mut config) => {
-                diag_info!(diag, "Using config {}", path);
                 config.config_path = path;
                 config
             }
@@ -178,6 +177,9 @@ pub fn init_core() -> (MullDiagnostics, MullConfig) {
     let diag = MullDiagnostics::new();
     let config = create_config(&diag);
     init_diagnostics(&diag, &config);
+    if !config.config_path.is_empty() {
+        diag_info!(diag, "Using config {}", config.config_path);
+    }
     (diag, config)
 }
 

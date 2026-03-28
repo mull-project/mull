@@ -63,12 +63,12 @@ fn load_yaml_config(config_path: &str) -> Result<MullConfigSpec, String> {
     parse_yaml(&contents)
 }
 
-fn create_config(diag: &MullDiagnostics) -> MullConfigSpec {
+fn create_config(diag: &MullDiagnostics) -> (MullConfigSpec, Option<String>) {
     match get_config_path() {
         Some(path) => match load_yaml_config(&path) {
             Ok(config) => {
                 diag_info!(diag, "Using config {}", path);
-                config
+                (config, Some(path.into()))
             }
             Err(e) => {
                 diag_warning!(
@@ -77,7 +77,7 @@ fn create_config(diag: &MullDiagnostics) -> MullConfigSpec {
                     path,
                     e
                 );
-                MullConfigSpec::default()
+                (MullConfigSpec::default(), None)
             }
         },
         None => {
@@ -85,7 +85,7 @@ fn create_config(diag: &MullDiagnostics) -> MullConfigSpec {
                 diag,
                 "Mull cannot find config (mull.yml). Using some defaults."
             );
-            MullConfigSpec::default()
+            (MullConfigSpec::default(), None)
         }
     }
 }
@@ -116,11 +116,14 @@ where
     let cli = C::from_arg_matches(&matches).unwrap();
 
     let diag = MullDiagnostics::new();
-    let mut yaml_config = create_config(&diag);
+    let (mut yaml_config, maybe_path) = create_config(&diag);
     yaml_config.quiet = false;
 
     override_config(cli.shared(), &mut yaml_config);
     init_diagnostics(&diag, &yaml_config);
+    if let Some(path) = maybe_path {
+        diag_info!(diag, "Using config {}", path);
+    }
 
     (yaml_config, cli, diag)
 }
