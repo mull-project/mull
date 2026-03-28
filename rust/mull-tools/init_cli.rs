@@ -1,7 +1,7 @@
 use clap::{CommandFactory, FromArgMatches};
 use mull_core::config::{HasSharedCli, MullConfigSpec, SharedCli};
 use mull_core::diagnostics::MullDiagnostics;
-use mull_core::{diag_debug, diag_info, diag_warning, get_config_path, long_version_string};
+use mull_core::{diag_debug, diag_info, diag_warning, get_config_path};
 use std::fs;
 
 fn normalize_args(args: &[String]) -> Vec<String> {
@@ -100,6 +100,20 @@ fn override_config(shared: &SharedCli, yaml_config: &mut MullConfigSpec) {
     if shared.no_mutant_output || shared.no_output {
         yaml_config.capture_mutant_output = false;
     }
+}
+
+fn long_version_string(mull_version: &str, llvm_version: &str) -> &'static str {
+    let s = format!(
+        "{}\n\n\
+         Mull: Practical mutation testing and fault injection for C and C++\n\
+         Home: https://github.com/mull-project/mull\n\
+         Docs: https://mull.readthedocs.io\n\
+         Support: https://mull.readthedocs.io/en/latest/Support.html\n\
+         LLVM: {}",
+        mull_version, llvm_version
+    );
+    // Leak is fine: this runs once per CLI invocation then the process exits.
+    Box::leak(s.into_boxed_str())
 }
 
 pub fn init_cli<C>(
