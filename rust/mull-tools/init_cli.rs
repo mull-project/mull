@@ -66,10 +66,7 @@ fn load_yaml_config(config_path: &str) -> Result<MullConfigSpec, String> {
 fn create_config(diag: &MullDiagnostics) -> (MullConfigSpec, Option<String>) {
     match get_config_path() {
         Some(path) => match load_yaml_config(&path) {
-            Ok(config) => {
-                diag_info!(diag, "Using config {}", path);
-                (config, Some(path.into()))
-            }
+            Ok(config) => (config, Some(path.into())),
             Err(e) => {
                 diag_warning!(
                     diag,
