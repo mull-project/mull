@@ -32,10 +32,8 @@ OS_ARCH = "{OS_ARCH}"
 OS_VERSION = "{OS_VERSION}"
 OS_DIST_EXTENSION = "{OS_DIST_EXTENSION}"
 CS_REPO = "{CS_REPO}"
-MULL_HOMEPAGE = "https://github.com/mull-project/mull"
+MULL_HOMEPAGE = "https://mull-project.com"
 MULL_DESCRIPTION = "Practical mutation testing and fault injection for C and C++"
-MULL_SUPPORT_URL = "https://mull.readthedocs.io/en/latest/Support.html"
-MULL_DOCS_URL = "https://mull.readthedocs.io"
 """
 
 def _mull_package_info_repo_impl(repository_ctx):

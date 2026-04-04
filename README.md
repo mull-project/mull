@@ -1,10 +1,8 @@
 # Mull
 
-Mull is a practical [mutation testing](https://mull.readthedocs.io/en/latest/MutationTestingIntro.html) tool for C and C++.
+Mull is a practical mutation testing and fault injection tool for C and C++.
 
-For installation and usage please refer to the latest documentation: https://mull.readthedocs.io
-
-For support visit [this page](https://mull.readthedocs.io/en/latest/Support.html).
+For installation and usage please refer to the latest documentation: https://mull-project.com
 
 ## Join us in Discord
 
@@ -41,4 +39,4 @@ Hosting for precompiled packages is graciously provided by  [Cloudsmith](https:/
 
 ## Copyright
 
-Copyright (c) 2016-2024 Alex Denisov <alex@lowlevelbits.org> and Stanislav Pankevich <s.pankevich@gmail.com>. See LICENSE for details.
+Copyright (c) 2016-2026 Alex Denisov <alex@lowlevelbits.org> and Stanislav Pankevich <s.pankevich@gmail.com>. See LICENSE for details.
