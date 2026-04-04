@@ -103,9 +103,7 @@ fn long_version_string(mull_version: &str, llvm_version: &str) -> &'static str {
     let s = format!(
         "{}\n\n\
          Mull: Practical mutation testing and fault injection for C and C++\n\
-         Home: https://github.com/mull-project/mull\n\
-         Docs: https://mull.readthedocs.io\n\
-         Support: https://mull.readthedocs.io/en/latest/Support.html\n\
+         Home: https://mull-project.com\n\
          LLVM: {}",
         mull_version, llvm_version
     );
