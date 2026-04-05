@@ -42,6 +42,7 @@ mull_ir_frontend = r.Rlocation(f"mull/mull-ir-frontend-{llvm_major_version}")
 filecheck = r.Rlocation("mull/tests/integration/filecheck_runner")
 
 python3 = r.Rlocation("mull/tests/integration/python3")
+jq = r.Rlocation("mull/tests/integration/jq")
 
 config.substitutions.append(("%clang_cc", clang_cc))
 config.substitutions.append(("%clang_cxx", clang_cxx))
@@ -53,6 +54,7 @@ config.substitutions.append(("%mull_frontend_cxx", mull_frontend_cxx))
 config.substitutions.append(("%mull_ir_frontend", mull_ir_frontend))
 config.substitutions.append(("%filecheck", filecheck))
 config.substitutions.append(("%python3", python3))
+config.substitutions.append(("%jq", jq))
 
 config.suffixes = [".cpp", ".c", ".itest"]
 

@@ -48,6 +48,7 @@
              - GitHubAnnotations: GitHub Actions annotation format
              - Patches:           Generate patch files for each mutation
              - Elements:          Mutation Testing Elements JSON/HTML report
+             - Sarif:             SARIF 2.1.0 report (Static Analysis Results Interchange Format)
 
          --report-dir <DIR>
              Directory for report output files
