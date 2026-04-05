@@ -1,0 +1,6 @@
+# mull.yml
+mutators:
+  - cxx_boundary
+  - cxx_comparison
+ignoreMutators:
+  - cxx_eq_to_ne
