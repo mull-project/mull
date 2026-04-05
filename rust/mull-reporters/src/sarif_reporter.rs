@@ -4,8 +4,8 @@ use mull_core::diagnostics::MullDiagnostics;
 use mull_core::{diag_error, diag_info};
 use mull_state::{ExecutionState, ExecutionStatus};
 use serde_sarif::sarif::{
-    ArtifactLocation, Location, Message, PhysicalLocation, Region, ReportingDescriptor,
-    Result as SarifResult, ResultLevel, Run, Sarif, Tool, ToolComponent,
+    ArtifactLocation, Location, Message, MultiformatMessageString, PhysicalLocation, Region,
+    ReportingDescriptor, Result as SarifResult, ResultLevel, Run, Sarif, Tool, ToolComponent,
 };
 use std::collections::BTreeMap;
 use std::fs::File;
@@ -63,30 +63,24 @@ impl SarifReporter {
     }
 }
 
+fn mutation_description(original: Option<&str>, replacement: &str) -> String {
+    match original {
+        Some(orig) => format!("Replaces `{}` with `{}`", orig, replacement),
+        None => format!("Replaces with `{}`", replacement),
+    }
+}
+
 impl Reporter for SarifReporter {
     fn report(&self, diag: &MullDiagnostics, state: &ExecutionState) {
         assert!(!state.execution_results.is_empty());
 
         let mut source_manager = SourceManager::default();
 
-        // Collect unique mutator IDs used in survived/not-covered results as rules
-        let mut rule_ids: BTreeMap<String, ()> = BTreeMap::new();
-        for (mutant, result) in &state.execution_results {
-            if matches!(
-                result.status,
-                ExecutionStatus::Passed | ExecutionStatus::NotCovered
-            ) {
-                rule_ids.insert(mutant.mutator.clone(), ());
-            }
-        }
-        let rules: Vec<ReportingDescriptor> = rule_ids
-            .keys()
-            .map(|id| ReportingDescriptor::builder().id(id.clone()).build())
-            .collect();
-
         let mut sorted: Vec<_> = state.execution_results.iter().collect();
         sorted.sort_by_key(|(mutant, _)| *mutant);
 
+        // (mutator -> (replacement, original)) — first example seen per mutator, for rule descriptions
+        let mut rule_examples: BTreeMap<String, (String, Option<String>)> = BTreeMap::new();
         let mut results: Vec<SarifResult> = Vec::new();
         for (mutant, result) in &sorted {
             let level = match result.status {
@@ -97,17 +91,12 @@ impl Reporter for SarifReporter {
 
             let loc = &mutant.location;
             let original = source_manager.get_source(diag, loc);
-            let message_text = if let Some(original) = original {
-                format!(
-                    "Survived: Replaced {} with {} [{}]",
-                    original, mutant.replacement, mutant.mutator
-                )
-            } else {
-                format!(
-                    "Survived: Replaced with {} [{}]",
-                    mutant.replacement, mutant.mutator
-                )
-            };
+
+            rule_examples
+                .entry(mutant.mutator.clone())
+                .or_insert_with(|| (mutant.replacement.clone(), original.clone()));
+
+            let message_text = mutation_description(original.as_deref(), &mutant.replacement);
 
             let sarif_result = SarifResult::builder()
                 .message(Message::builder().text(message_text).build())
@@ -136,6 +125,17 @@ impl Reporter for SarifReporter {
 
             results.push(sarif_result);
         }
+
+        let rules: Vec<ReportingDescriptor> = rule_examples
+            .into_iter()
+            .map(|(id, (replacement, original))| {
+                let desc = mutation_description(original.as_deref(), &replacement);
+                ReportingDescriptor::builder()
+                    .id(id)
+                    .short_description(MultiformatMessageString::builder().text(desc).build())
+                    .build()
+            })
+            .collect();
 
         let driver = ToolComponent::builder()
             .name("Mull".to_string())
