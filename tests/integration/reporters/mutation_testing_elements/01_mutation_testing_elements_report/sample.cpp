@@ -22,10 +22,17 @@ RUN: [[ -f Output/sample-ir.txt ]]
 RUN: cat Output/sample-ir.txt | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 RUN: [[ -f Output/sample-ir.json ]]
 RUN: [[ -f Output/sample-ir2.json ]]
-TODO: Use jq/structured checks
-RU: cat Output/sample-ir.json | filecheck %s --check-prefix=CHECK-JSON
-RU: cat Output/sample-ir2.json | filecheck %s --check-prefix=CHECK-JSON
-CHECK-JSON: "config": {{{.*}} "URL": "https://github.com/mull-project/mull"}{{.*}} "mutants": [{"id": "cxx_remove_void_call", "location": {"end": {"column": 26, "line": 6}, "start": {"column": 3, "line": 6}}, "mutatorName": "{{.*}}", "replacement": "", {{.*}} "status": "Killed"}]{{.*}} "framework": {"brandingInformation": {"homepageUrl": "https://github.com/mull-project/mull"}, "name": "Mull", "version": "{{.*}}, LLVM {{.*}}"}{{.*}}
+RUN: %jq -r '[.schemaVersion, .framework.name] | .[]' Output/sample-ir.json | %filecheck %s --check-prefix=CHECK-ELEMENTS
+RUN: %jq -r '[.files[].mutants[0] | .id, .status, (.location.start.line | tostring)] | .[]' Output/sample-ir.json | %filecheck %s --check-prefix=CHECK-MUTANT
+RUN: %jq -r '[.schemaVersion, .framework.name] | .[]' Output/sample-ir2.json | %filecheck %s --check-prefix=CHECK-ELEMENTS
+RUN: %jq -r '[.files[].mutants[0] | .id, .status, (.location.start.line | tostring)] | .[]' Output/sample-ir2.json | %filecheck %s --check-prefix=CHECK-MUTANT
+
+CHECK-ELEMENTS: 1.7
+CHECK-ELEMENTS: Mull
+
+CHECK-MUTANT: cxx_remove_void_call
+CHECK-MUTANT: Killed
+CHECK-MUTANT: 6
 
 CHECK:{{^.*}}Killed mutants (1/1):
 CHECK:{{^.*}}sample.cpp:6:3: warning: Killed: Replaced void_sum(a, b, &result) with  [cxx_remove_void_call]
