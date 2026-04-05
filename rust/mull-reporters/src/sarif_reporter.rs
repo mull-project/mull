@@ -113,6 +113,10 @@ impl Reporter for SarifReporter {
                 .message(Message::builder().text(message_text).build())
                 .rule_id(mutant.mutator.clone())
                 .level(level)
+                .partial_fingerprints(BTreeMap::from([(
+                    "primaryLocationLineHash".to_string(),
+                    mutant.identifier.clone(),
+                )]))
                 .locations(vec![Location::builder()
                     .physical_location(
                         PhysicalLocation::builder()

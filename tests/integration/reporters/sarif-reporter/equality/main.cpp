@@ -16,7 +16,7 @@ RUN: %mull_runner --allow-surviving main.cpp-ir.exe --report-name test --reporte
 RUN: %mull_reporter --allow-surviving test.sqlite --report-name test2 --reporters Sarif | %filecheck %s --dump-input=fail --check-prefix=CHECK-REPORTER
 
 RUN: [[ -f %S/test.sarif ]]
-RUN: %jq -r '[.version, .runs[0].tool.driver.name, .runs[0].results[0].ruleId, .runs[0].results[0].level, (.runs[0].results[0].locations[0].physicalLocation.region.startLine | tostring)] | .[]' %S/test.sarif | %filecheck %s --check-prefix=CHECK-SARIF
+RUN: %jq -r '[.version, .runs[0].tool.driver.name, .runs[0].results[0].ruleId, .runs[0].results[0].level, (.runs[0].results[0].locations[0].physicalLocation.region.startLine | tostring), (.runs[0].results[0].partialFingerprints | to_entries[0].key), (.runs[0].results[0].partialFingerprints | to_entries[0].value)] | .[]' %S/test.sarif | %filecheck %s --check-prefix=CHECK-SARIF
 
 RUN: [[ -f %S/test2.sarif ]]
 RUN: %jq -r '[.version, .runs[0].results[0].ruleId] | .[]' %S/test2.sarif | %filecheck %s --check-prefix=CHECK-SARIF2
@@ -29,6 +29,8 @@ CHECK-SARIF: Mull
 CHECK-SARIF: cxx_eq_to_ne
 CHECK-SARIF: warning
 CHECK-SARIF: 2
+CHECK-SARIF: primaryLocationLineHash
+CHECK-SARIF: cxx_eq_to_ne:{{.*}}:2:
 
 CHECK-SARIF2: 2.1.0
 CHECK-SARIF2: cxx_eq_to_ne
