@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.32.0] - 05 Apr 2026
+
+Mull has a new web home https://mull-project.com
+
+- Added Sarif Reporter [#1178](https://github.com/mull-project/mull/pull/1178) [#953](https://github.com/mull-project/mull/issues/953)
+- New guide on Sarif/Code Scanning integration: https://mull-project.com/guides/github-code-scanning/
+
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2026-03-29..2026-04-05)
+
 ## [0.31.1] - 28 Mar 2026
 
 - Fixed extra logging from the plugin [#1174](https://github.com/mull-project/mull/pull/1174)

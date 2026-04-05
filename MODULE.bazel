@@ -2,7 +2,7 @@
 
 module(
     name = "mull",
-    version = "0.31.1",
+    version = "0.32.0",
 )
 
 bazel_dep(name = "platforms", version = "1.0.0")
