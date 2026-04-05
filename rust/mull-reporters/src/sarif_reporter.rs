@@ -12,12 +12,15 @@ use std::fs::File;
 use std::io::BufWriter;
 use std::time::{SystemTime, UNIX_EPOCH};
 
+const SRCROOT: &str = "%SRCROOT%";
+
 pub struct SarifReporter {
     output_path: String,
+    base_path: String,
 }
 
 impl SarifReporter {
-    pub fn new(report_dir: &str, report_name: &str) -> Self {
+    pub fn new(report_dir: &str, report_name: &str, base_path: &str) -> Self {
         let dir = if report_dir.is_empty() {
             "."
         } else {
@@ -37,7 +40,26 @@ impl SarifReporter {
 
         Self {
             output_path: format!("{}/{}.sarif", dir, filename),
+            base_path: base_path.to_string(),
         }
+    }
+
+    fn make_artifact_location(&self, filepath: &str) -> ArtifactLocation {
+        if self.base_path.is_empty() {
+            return ArtifactLocation::builder()
+                .uri(filepath.to_string())
+                .build();
+        }
+
+        let relative = filepath
+            .strip_prefix(&self.base_path)
+            .unwrap_or(filepath)
+            .trim_start_matches('/');
+
+        ArtifactLocation::builder()
+            .uri(relative.to_string())
+            .uri_base_id(SRCROOT.to_string())
+            .build()
     }
 }
 
@@ -94,11 +116,7 @@ impl Reporter for SarifReporter {
                 .locations(vec![Location::builder()
                     .physical_location(
                         PhysicalLocation::builder()
-                            .artifact_location(
-                                ArtifactLocation::builder()
-                                    .uri(loc.filepath.clone())
-                                    .build(),
-                            )
+                            .artifact_location(self.make_artifact_location(&loc.filepath))
                             .region(
                                 Region::builder()
                                     .start_line(loc.begin_line as i64)
@@ -122,13 +140,24 @@ impl Reporter for SarifReporter {
             .rules(rules)
             .build();
 
+        let tool = Tool::builder().driver(driver).build();
+        let run = if !self.base_path.is_empty() {
+            let srcroot = ArtifactLocation::builder()
+                .uri(format!("file://{}/", self.base_path.trim_end_matches('/')))
+                .build();
+            Run::builder()
+                .tool(tool)
+                .results(results)
+                .original_uri_base_ids(BTreeMap::from([(SRCROOT.to_string(), srcroot)]))
+                .build()
+        } else {
+            Run::builder().tool(tool).results(results).build()
+        };
+
         let log = Sarif::builder()
             .version("2.1.0".to_string())
             .schema("https://json.schemastore.org/sarif-2.1.0.json".to_string())
-            .runs(vec![Run::builder()
-                .tool(Tool::builder().driver(driver).build())
-                .results(results)
-                .build()])
+            .runs(vec![run])
             .build();
 
         match File::create(&self.output_path) {

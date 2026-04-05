@@ -53,9 +53,11 @@ pub fn create_reporters(config: &ReporterConfig) -> Vec<Box<dyn Reporter>> {
                     &config.report_dir,
                     &config.report_name,
                 )),
-                ReporterKind::Sarif => {
-                    Box::new(SarifReporter::new(&config.report_dir, &config.report_name))
-                }
+                ReporterKind::Sarif => Box::new(SarifReporter::new(
+                    &config.report_dir,
+                    &config.report_name,
+                    &config.report_patch_base,
+                )),
             }
         })
         .collect();
