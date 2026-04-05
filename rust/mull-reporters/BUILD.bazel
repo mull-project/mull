@@ -9,6 +9,7 @@ rust_library(
         "//rust/mull-state",
         "@crates//:rusqlite",
         "@crates//:serde",
+        "@crates//:serde-sarif",
         "@crates//:serde_json",
         "@crates//:unicode-width",
     ],

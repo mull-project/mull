@@ -18,6 +18,13 @@ native_binary(
     visibility = ["//visibility:public"],
 )
 
+native_binary(
+    name = "jq",
+    src = "@jq",
+    out = "jq",
+    visibility = ["//visibility:public"],
+)
+
 [mull_py_test(src = f) for f in glob([
     "**/*.cpp",
     "**/*.c",

@@ -2,6 +2,7 @@ mod elements_reporter;
 mod github_annotations_reporter;
 mod ide_reporter;
 mod patches_reporter;
+mod sarif_reporter;
 mod source_manager;
 mod sqlite_reporter;
 
@@ -13,6 +14,7 @@ pub use github_annotations_reporter::GitHubAnnotationsReporter;
 pub use ide_reporter::IDEReporter;
 pub use mull_core::config::ReporterKind;
 pub use patches_reporter::PatchesReporter;
+pub use sarif_reporter::SarifReporter;
 pub use sqlite_reporter::SQLiteReporter;
 
 pub trait Reporter {
@@ -50,6 +52,11 @@ pub fn create_reporters(config: &ReporterConfig) -> Vec<Box<dyn Reporter>> {
                 ReporterKind::Elements => Box::new(ElementsReporter::new(
                     &config.report_dir,
                     &config.report_name,
+                )),
+                ReporterKind::Sarif => Box::new(SarifReporter::new(
+                    &config.report_dir,
+                    &config.report_name,
+                    &config.report_patch_base,
                 )),
             }
         })

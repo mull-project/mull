@@ -19,6 +19,9 @@ pub enum ReporterKind {
     /// Mutation Testing Elements JSON/HTML report
     #[value(name = "Elements")]
     Elements,
+    /// SARIF 2.1.0 report (Static Analysis Results Interchange Format)
+    #[value(name = "Sarif")]
+    Sarif,
 }
 
 /// YAML configuration for mull.yml files.

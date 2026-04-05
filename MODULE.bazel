@@ -229,3 +229,7 @@ find_rpmbuild = use_extension("@rules_pkg//toolchains/rpm:rpmbuild_configure.bzl
 use_repo(find_rpmbuild, "rules_pkg_rpmbuild")
 
 register_toolchains("@rules_pkg_rpmbuild//:all")
+
+toolchains = use_extension("@aspect_bazel_lib//lib:extensions.bzl", "toolchains")
+toolchains.jq()
+use_repo(toolchains, "jq")

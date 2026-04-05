@@ -38,6 +38,7 @@ def mull_py_test(src):
                 ":lit.cfg.py",
                 ":filecheck_runner",
                 ":python3",
+                ":jq",
                 "@llvm_%s//:clang" % llvm_version,
                 "@llvm_%s//:clangxx" % llvm_version,
                 "@llvm_%s//:llvm-profdata" % llvm_version,
