@@ -2,7 +2,7 @@ FROM redhat/ubi10:10.0
 
 RUN yum install -y --nogpgcheck --allowerasing \
   vim wget curl sudo file libstdc++-static \
-  git sqlite rpmdevtools ca-certificates
+  git rpmdevtools ca-certificates
 
 
 RUN yum install -y --nogpgcheck llvm-devel clang-devel clang lld

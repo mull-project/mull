@@ -1,10 +1,7 @@
 FROM ubuntu:22.04
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
-  vim wget ninja-build \
-  libz-dev sqlite3 libsqlite3-dev \
-  ncurses-dev libstdc++6 \
-  binutils liblzma-dev \
+  vim wget \
   openssh-client sudo tree file
 
 
