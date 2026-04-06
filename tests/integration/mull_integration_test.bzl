@@ -31,6 +31,7 @@ def mull_py_test(src):
             size = "small",
             args = [
                 "-v",
+                "-a",
                 src,
             ],
             data = [
@@ -39,6 +40,7 @@ def mull_py_test(src):
                 ":filecheck_runner",
                 ":python3",
                 ":jq",
+                ":sqlite3",
                 "@llvm_%s//:clang" % llvm_version,
                 "@llvm_%s//:clangxx" % llvm_version,
                 "@llvm_%s//:llvm-profdata" % llvm_version,
