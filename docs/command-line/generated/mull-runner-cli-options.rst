@@ -89,6 +89,11 @@
          --no-output
              Combines --no-test-output and --no-mutant-output
 
+         --sqlite-busy-timeout <MS>
+             SQLite reporter busy timeout in milliseconds. When the database is locked by another writer, mull will retry for this long before giving up with "database is locked"
+
+             [default: 5000]
+
      -h, --help
              Print help (see a summary with '-h')
 

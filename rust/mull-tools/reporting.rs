@@ -53,6 +53,7 @@ pub fn show_report(
             report_name: cli.report_name.unwrap_or_default(),
             ide_reporter_show_killed: cli.ide_reporter_show_killed,
             report_patch_base: cli.report_patch_base,
+            sqlite_busy_timeout: cli.sqlite_busy_timeout,
         };
         let reporters = create_reporters(&reporter_config);
         for reporter in &reporters {

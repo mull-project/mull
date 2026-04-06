@@ -43,6 +43,7 @@ filecheck = r.Rlocation("mull/tests/integration/filecheck_runner")
 
 python3 = r.Rlocation("mull/tests/integration/python3")
 jq = r.Rlocation("mull/tests/integration/jq")
+sqlite3 = r.Rlocation("mull/tests/integration/sqlite3")
 
 config.substitutions.append(("%clang_cc", clang_cc))
 config.substitutions.append(("%clang_cxx", clang_cxx))
@@ -55,6 +56,7 @@ config.substitutions.append(("%mull_ir_frontend", mull_ir_frontend))
 config.substitutions.append(("%filecheck", filecheck))
 config.substitutions.append(("%python3", python3))
 config.substitutions.append(("%jq", jq))
+config.substitutions.append(("%sqlite3", sqlite3))
 
 config.suffixes = [".cpp", ".c", ".itest"]
 

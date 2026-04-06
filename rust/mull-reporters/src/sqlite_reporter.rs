@@ -4,7 +4,7 @@ use mull_core::{diag_error, diag_info};
 use mull_state::ExecutionState;
 use rusqlite::{named_params, Connection, Result as SqliteResult};
 use std::fs;
-use std::time::{SystemTime, UNIX_EPOCH};
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 const CREATE_TABLES: &str = r#"
 CREATE TABLE IF NOT EXISTS mutant (
@@ -48,10 +48,11 @@ INSERT INTO mutant (
 
 pub struct SQLiteReporter {
     database_path: String,
+    busy_timeout: Duration,
 }
 
 impl SQLiteReporter {
-    pub fn new(report_dir: &str, report_name: &str) -> Self {
+    pub fn new(report_dir: &str, report_name: &str, busy_timeout_ms: u32) -> Self {
         let dir = if report_dir.is_empty() {
             "."
         } else {
@@ -71,11 +72,14 @@ impl SQLiteReporter {
 
         Self {
             database_path: format!("{}/{}.sqlite", dir, name),
+            busy_timeout: Duration::from_millis(busy_timeout_ms as u64),
         }
     }
 
     fn write_report(&self, state: &ExecutionState) -> SqliteResult<()> {
         let mut conn = Connection::open(&self.database_path)?;
+
+        conn.busy_timeout(self.busy_timeout)?;
 
         conn.execute_batch(
             "

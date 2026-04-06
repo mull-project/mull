@@ -13,6 +13,7 @@ jobs:
   macos:
     name: macOS - LLVM ${{ matrix.LLVM_VERSION }}
     runs-on: macos-latest
+    timeout-minutes: 30
     strategy:
       matrix:
         LLVM_VERSION: [16, 17, 18, 19, 20]

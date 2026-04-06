@@ -25,6 +25,13 @@ native_binary(
     visibility = ["//visibility:public"],
 )
 
+native_binary(
+    name = "sqlite3",
+    src = "@sqlite3//:shell",
+    out = "sqlite3",
+    visibility = ["//visibility:public"],
+)
+
 [mull_py_test(src = f) for f in glob([
     "**/*.cpp",
     "**/*.c",

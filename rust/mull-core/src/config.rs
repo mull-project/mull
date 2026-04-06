@@ -212,6 +212,16 @@ pub struct SharedCli {
     /// Combines --no-test-output and --no-mutant-output.
     #[arg(long = "no-output")]
     pub no_output: bool,
+
+    /// SQLite reporter busy timeout in milliseconds.
+    /// When the database is locked by another writer, mull will retry for this
+    /// long before giving up with "database is locked".
+    #[arg(
+        long = "sqlite-busy-timeout",
+        value_name = "MS",
+        default_value_t = 5000
+    )]
+    pub sqlite_busy_timeout: u32,
 }
 
 /// Mull: Practical mutation testing and fault injection for C and C++
