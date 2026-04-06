@@ -27,6 +27,7 @@ pub struct ReporterConfig {
     pub report_name: String,
     pub report_patch_base: String,
     pub ide_reporter_show_killed: bool,
+    pub sqlite_busy_timeout: u32,
 }
 
 pub fn create_reporters(config: &ReporterConfig) -> Vec<Box<dyn Reporter>> {
@@ -40,9 +41,11 @@ pub fn create_reporters(config: &ReporterConfig) -> Vec<Box<dyn Reporter>> {
                     &config.report_dir,
                     &config.report_name,
                 )),
-                ReporterKind::SQLite => {
-                    Box::new(SQLiteReporter::new(&config.report_dir, &config.report_name))
-                }
+                ReporterKind::SQLite => Box::new(SQLiteReporter::new(
+                    &config.report_dir,
+                    &config.report_name,
+                    config.sqlite_busy_timeout,
+                )),
                 ReporterKind::GitHubAnnotations => Box::new(GitHubAnnotationsReporter::new()),
                 ReporterKind::Patches => Box::new(PatchesReporter::new(
                     &config.report_dir,

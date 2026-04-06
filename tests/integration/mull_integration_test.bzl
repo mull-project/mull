@@ -23,6 +23,7 @@ def mull_py_test(src):
         "%s/*.c" % test_dir,
         "%s/*.notest" % test_dir,
         "%s/*.itest" % test_dir,
+        "%s/*.sh" % test_dir,
     ]
     for llvm_version in AVAILABLE_LLVM_VERSIONS:
         py_test(
