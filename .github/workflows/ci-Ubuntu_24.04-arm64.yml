@@ -11,6 +11,7 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-24.04-arm
+    timeout-minutes: 30
     strategy:
       matrix:
         LLVM_VERSION: [14, 15, 16, 17, 18, 19, 20]
