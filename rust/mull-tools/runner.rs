@@ -90,3 +90,40 @@ pub fn run_program(
         },
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::time::Duration;
+
+    /// Verify that run_program does not deadlock when a child process writes
+    /// more output than the OS pipe buffer (typically ~64KB) before exiting.
+    ///
+    /// Without draining stdout/stderr in background threads before calling
+    /// wait_timeout(), the child blocks on write() once the pipe buffer fills
+    /// while the parent blocks on wait() — neither can proceed. This test
+    /// would hang until the timeout fires on an unfixed implementation.
+    #[test]
+    fn large_stdout_does_not_deadlock() {
+        // `seq 1 50000` emits ~290KB of text, well above the ~64KB pipe buffer.
+        let result = run_program(
+            "seq",
+            &["1".to_string(), "50000".to_string()],
+            &[],
+            Duration::from_secs(10),
+            true,
+        );
+        assert_ne!(
+            result.status,
+            ExecutionStatus::Timedout,
+            "run_program timed out — likely a pipe deadlock: child blocked on \
+             write() while parent blocked on wait()"
+        );
+        assert_eq!(result.status, ExecutionStatus::Passed);
+        assert!(
+            result.stdout_output.len() > 64 * 1024,
+            "expected > 64KB of stdout, got {} bytes",
+            result.stdout_output.len()
+        );
+    }
+}
