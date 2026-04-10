@@ -41,21 +41,39 @@ pub fn run_program(
         }
     };
 
-    // Capture whatever output is available (None if Stdio::null was used)
-    let mut stdout = String::new();
-    let mut stderr = String::new();
-    let capture = |child: &mut std::process::Child, stdout: &mut String, stderr: &mut String| {
-        if let Some(mut out) = child.stdout.take() {
-            let _ = out.read_to_string(stdout);
-        }
-        if let Some(mut err) = child.stderr.take() {
-            let _ = err.read_to_string(stderr);
-        }
+    // Drain stdout/stderr in background threads to prevent pipe deadlock.
+    // If the child writes enough to fill the OS pipe buffer (~64KB) before
+    // exiting, it will block on write() and wait_timeout will never return.
+    let stdout_thread = child.stdout.take().map(|mut out| {
+        std::thread::spawn(move || {
+            let mut buf = String::new();
+            let _ = out.read_to_string(&mut buf);
+            buf
+        })
+    });
+    let stderr_thread = child.stderr.take().map(|mut err| {
+        std::thread::spawn(move || {
+            let mut buf = String::new();
+            let _ = err.read_to_string(&mut buf);
+            buf
+        })
+    });
+
+    let join_output = |stdout_thread: Option<std::thread::JoinHandle<String>>,
+                       stderr_thread: Option<std::thread::JoinHandle<String>>|
+     -> (String, String) {
+        let stdout = stdout_thread
+            .map(|t| t.join().unwrap_or_default())
+            .unwrap_or_default();
+        let stderr = stderr_thread
+            .map(|t| t.join().unwrap_or_default())
+            .unwrap_or_default();
+        (stdout, stderr)
     };
 
     match child.wait_timeout(timeout) {
         Ok(Some(status)) => {
-            capture(&mut child, &mut stdout, &mut stderr);
+            let (stdout, stderr) = join_output(stdout_thread, stderr_thread);
             ExecutionResult {
                 status: if status.success() {
                     ExecutionStatus::Passed
@@ -69,10 +87,10 @@ pub fn run_program(
             }
         }
         Ok(None) => {
-            // Timed out - kill first, then capture whatever was buffered
+            // Timed out - kill first, then join reader threads
             let _ = child.kill();
             let _ = child.wait();
-            capture(&mut child, &mut stdout, &mut stderr);
+            let (stdout, stderr) = join_output(stdout_thread, stderr_thread);
             ExecutionResult {
                 status: ExecutionStatus::Timedout,
                 exit_status: -1,
@@ -81,13 +99,16 @@ pub fn run_program(
                 stderr_output: stderr,
             }
         }
-        Err(e) => ExecutionResult {
-            status: ExecutionStatus::Failed,
-            exit_status: -1,
-            running_time: start.elapsed().as_millis() as i64,
-            stdout_output: String::new(),
-            stderr_output: format!("Wait error: {}", e),
-        },
+        Err(e) => {
+            let (stdout, stderr) = join_output(stdout_thread, stderr_thread);
+            ExecutionResult {
+                status: ExecutionStatus::Failed,
+                exit_status: -1,
+                running_time: start.elapsed().as_millis() as i64,
+                stdout_output: stdout,
+                stderr_output: format!("Wait error: {}\n{}", e, stderr),
+            }
+        }
     }
 }
 
