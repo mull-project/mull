@@ -1,5 +1,5 @@
 load("@available_llvm_versions//:mull_llvm_versions.bzl", "AVAILABLE_LLVM_VERSIONS", "EXACT_VERSION_MAPPING")
-load("@rules_rust//rust:defs.bzl", "rust_binary")
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_test")
 
 [
     rust_binary(
@@ -63,3 +63,36 @@ load("@rules_rust//rust:defs.bzl", "rust_binary")
     )
     for llvm_version in AVAILABLE_LLVM_VERSIONS
 ]
+
+rust_test(
+    name = "runner-tests",
+    size = "small",
+    srcs = [
+        "dynamic_libraries.rs",
+        "init_cli.rs",
+        "mull-runner.rs",
+        "mutant_extractor.rs",
+        "reporting.rs",
+        "runner.rs",
+    ],
+    crate_root = "mull-runner.rs",
+    proc_macro_deps = [
+        "@crates//:indoc",
+    ],
+    rustc_env = {
+        "MULL_LLVM_VERSION": "0",
+        "MULL_VERSION": "0.0.0-test",
+    },
+    deps = [
+        "//rust/mull-core",
+        "//rust/mull-filters",
+        "//rust/mull-reporters",
+        "//rust/mull-state",
+        "//rust/mull-tasks",
+        "@crates//:clap",
+        "@crates//:libc",
+        "@crates//:object",
+        "@crates//:serde_yaml",
+        "@crates//:wait-timeout",
+    ],
+)
