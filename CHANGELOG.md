@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.33.0] - 11 Apr 2026
+
+- Fixed a deadlock caused by large `stdout`/`stderr` (by [Chris Cotter](https://github.com/ccotter)) [#1183](https://github.com/mull-project/mull/pull/1183)
+- Added a new option to improve concurrent writing of SQLite reports [#1181](https://github.com/mull-project/mull/pull/1181) [#1135](https://github.com/mull-project/mull/issues/1135)
+
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2026-04-06..2026-04-11)
+
 ## [0.32.0] - 05 Apr 2026
 
 Mull has a new web home https://mull-project.com
