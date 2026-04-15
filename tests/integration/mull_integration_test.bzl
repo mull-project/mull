@@ -47,6 +47,7 @@ def mull_py_test(src):
                 "@llvm_%s//:llvm-profdata" % llvm_version,
                 "//:mull-ast-frontend-%s-gen" % llvm_version,
                 "//:mull-ir-frontend-%s-gen" % llvm_version,
+                "//:mull-instrument-%s" % llvm_version,
                 # "//:mull-runner-%s" % llvm_version,
                 "//rust/mull-tools:mull-runner-%s" % llvm_version,
                 "//rust/mull-tools:mull-reporter-%s" % llvm_version,
