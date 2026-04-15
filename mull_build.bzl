@@ -58,6 +58,16 @@ def mull_build(name):
             cmd = "cp $(SRCS) $(OUTS)",
         )
 
+        cc_binary(
+            name = "mull-instrument-%s" % llvm_version,
+            srcs = ["tools/mull-instrument/mull-instrument.cpp"],
+            deps = [
+                ":libmull_%s" % llvm_version,
+                "@llvm_%s//:libllvm" % llvm_version,
+            ],
+            tags = ["llvm_%s" % llvm_version],
+        )
+
     # Documentation tool - uses single LLVM version only
     latest_llvm = AVAILABLE_LLVM_VERSIONS[0]
     cc_binary(
