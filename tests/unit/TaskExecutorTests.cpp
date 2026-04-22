@@ -32,7 +32,7 @@ public:
 };
 
 TEST(TaskExecutor, SequentialExecution_AddNumber_MoreTasks) {
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
   int workers = 1;
   std::vector<AddNumberTask> tasks;
@@ -54,7 +54,7 @@ TEST(TaskExecutor, SequentialExecution_AddNumber_MoreTasks) {
 }
 
 TEST(TaskExecutor, SequentialExecution_AddNumber_MoreWorkers) {
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
   int workers = 4;
   std::vector<AddNumberTask> tasks;
@@ -76,7 +76,7 @@ TEST(TaskExecutor, SequentialExecution_AddNumber_MoreWorkers) {
 }
 
 TEST(TaskExecutor, SequentialExecution_EmptyTask_MoreTasks) {
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
   int workers = 1;
   std::vector<EmptyTask> tasks;
@@ -98,7 +98,7 @@ TEST(TaskExecutor, SequentialExecution_EmptyTask_MoreTasks) {
 }
 
 TEST(TaskExecutor, SequentialExecution_EmptyTask_MoreWorkers) {
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
   int workers = 4;
   std::vector<EmptyTask> tasks;

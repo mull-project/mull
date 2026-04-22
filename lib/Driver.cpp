@@ -90,12 +90,8 @@ bool shouldSkipFunction(llvm::Function *function) {
 
 } // namespace
 
-void mull::mutateBitcode(llvm::Module &module) {
-  /// Setup
-  auto core = init_core_ffi();
-  const MullDiagnostics &diagnostics = core->diag();
-  const MullConfig &configuration = core->config();
-
+void mull::mutateBitcode(llvm::Module &module, const MullDiagnostics &diagnostics,
+                         const MullConfig &configuration) {
   SingleTaskExecutor singleTask(diagnostics);
 
   /// Actual Work

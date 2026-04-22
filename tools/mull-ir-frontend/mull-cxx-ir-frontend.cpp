@@ -5,6 +5,7 @@
 #else
 #include <llvm/Passes/PassPlugin.h>
 #endif
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 #include <llvm/Support/raw_ostream.h>
 #include <mull/Driver.h>
 
@@ -13,7 +14,8 @@ namespace {
 class MullIRFrontend : public llvm::PassInfoMixin<MullIRFrontend> {
 public:
   llvm::PreservedAnalyses run(llvm::Module &module, llvm::ModuleAnalysisManager &mam) {
-    mull::mutateBitcode(module);
+    auto core = init_core_ffi(DiagOutput::Stdout);
+    mull::mutateBitcode(module, core->diag(), core->config());
     return llvm::PreservedAnalyses::none();
   }
 };

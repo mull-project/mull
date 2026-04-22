@@ -10,7 +10,7 @@ using namespace llvm;
 using namespace std;
 
 TEST(MutatorsFactory, SingleMutators) {
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
   MutatorsFactory factory(diagnostics);
   vector<unique_ptr<Mutator>> mutators;
@@ -43,7 +43,7 @@ static std::function<bool(unique_ptr<Mutator> &)> predicate(const char *name) {
 }
 
 TEST(MutatorsFactory, CompositeMutators) {
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
   MutatorsFactory factory(diagnostics);
   vector<unique_ptr<Mutator>> mutators;
@@ -76,7 +76,7 @@ TEST(MutatorsFactory, CompositeMutators) {
 }
 
 TEST(MutatorsFactory, UniqueMutators) {
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
   MutatorsFactory factory(diagnostics);
   vector<unique_ptr<Mutator>> mutators;

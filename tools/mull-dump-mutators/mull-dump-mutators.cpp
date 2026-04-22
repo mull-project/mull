@@ -95,7 +95,7 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   dumpMutators(core->diag(), argv[1]);
   return 0;
 }

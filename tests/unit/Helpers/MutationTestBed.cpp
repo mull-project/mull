@@ -13,7 +13,7 @@ MutationTestBed::MutationTestBed() : fixtureGenerator() {}
 
 std::unique_ptr<MutationArtefact> MutationTestBed::generate(const std::string &sourceCode,
                                                             mull::Mutator &mutator) {
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
   diagnostics.enable_debug_mode();
 

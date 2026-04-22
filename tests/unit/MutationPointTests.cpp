@@ -23,7 +23,7 @@ using namespace mull;
 using namespace llvm;
 
 TEST(MutationPoint, ReplaceCallMutator_applyMutation) {
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
@@ -50,7 +50,7 @@ TEST(MutationPoint, ReplaceCallMutator_applyMutation) {
 }
 
 TEST(MutationPoint, OriginalValuePresent) {
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   const auto &configuration = core->config();
@@ -95,7 +95,7 @@ TEST(MutationPoint, OriginalValuePresent) {
 }
 
 TEST(MutationPoint, dump) {
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
