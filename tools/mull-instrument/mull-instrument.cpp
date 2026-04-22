@@ -13,7 +13,7 @@
 // Reads from stdin and writes to stdout by default (like opt):
 //   clang++ -c -emit-llvm -g file.cpp -o - | mull-instrument | clang++ -x ir - -o binary
 
-#include <mull/Driver.h>
+#include "rust/mull-cxx-bridge/bridge.rs.h"
 #include <llvm/Bitcode/BitcodeWriter.h>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/Module.h>
@@ -24,22 +24,20 @@
 #include <llvm/Support/SourceMgr.h>
 #include <llvm/Support/SystemUtils.h>
 #include <llvm/Support/ToolOutputFile.h>
-#include <unistd.h>
+#include <mull/Driver.h>
 
-static llvm::cl::opt<std::string> InputFile(llvm::cl::Positional,
-                                             llvm::cl::desc("<input.bc>"),
-                                             llvm::cl::init("-"));
+static llvm::cl::opt<std::string> InputFile(llvm::cl::Positional, llvm::cl::desc("<input.bc>"),
+                                            llvm::cl::init("-"));
 
-static llvm::cl::opt<std::string> OutputFile("o",
-                                              llvm::cl::desc("Output file (default: stdout)"),
-                                              llvm::cl::value_desc("file"),
-                                              llvm::cl::init("-"));
+static llvm::cl::opt<std::string> OutputFile("o", llvm::cl::desc("Output file (default: stdout)"),
+                                             llvm::cl::value_desc("file"), llvm::cl::init("-"));
 
 static llvm::cl::opt<bool> Force("f", llvm::cl::desc("Enable binary output on terminals"));
 
 int main(int argc, char **argv) {
   llvm::InitLLVM X(argc, argv);
-  llvm::cl::ParseCommandLineOptions(argc, argv, "Apply mull mutation instrumentation to LLVM bitcode\n");
+  llvm::cl::ParseCommandLineOptions(
+      argc, argv, "Apply mull mutation instrumentation to LLVM bitcode\n");
 
   llvm::LLVMContext context;
   llvm::SMDiagnostic err;
@@ -50,21 +48,8 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  // When writing bitcode to stdout, redirect fd 1 to fd 2 during
-  // mutateBitcode() so diagnostic output ([info]/[warning]) goes to stderr
-  // rather than corrupting the bitcode stream.
-  int savedStdout = -1;
-  if (OutputFile == "-") {
-    savedStdout = dup(STDOUT_FILENO);
-    dup2(STDERR_FILENO, STDOUT_FILENO);
-  }
-
-  mull::mutateBitcode(*module);
-
-  if (savedStdout != -1) {
-    dup2(savedStdout, STDOUT_FILENO);
-    close(savedStdout);
-  }
+  auto core = init_core_ffi(DiagOutput::Stderr);
+  mull::mutateBitcode(*module, core->diag(), core->config());
 
   std::error_code ec;
   llvm::ToolOutputFile out(OutputFile, ec, llvm::sys::fs::OF_None);

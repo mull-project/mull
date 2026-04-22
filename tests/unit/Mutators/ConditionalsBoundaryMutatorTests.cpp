@@ -9,7 +9,7 @@ using namespace mull;
 using namespace llvm;
 
 TEST(Relational, LessThanToLessOrEqual) {
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
@@ -28,7 +28,7 @@ TEST(Relational, LessThanToLessOrEqual) {
 }
 
 TEST(Relational, LessOrEqualToLessThan) {
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
@@ -47,7 +47,7 @@ TEST(Relational, LessOrEqualToLessThan) {
 }
 
 TEST(Relational, GreaterThanToGreaterOrEqual) {
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
@@ -66,7 +66,7 @@ TEST(Relational, GreaterThanToGreaterOrEqual) {
 }
 
 TEST(Relational, GreaterOrEqualToGreaterThan) {
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(

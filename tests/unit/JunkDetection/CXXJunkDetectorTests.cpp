@@ -45,7 +45,7 @@ struct CXXJunkDetectorTestParameter {
 class CXXJunkDetectorTest : public TestWithParam<CXXJunkDetectorTestParameter> {};
 
 TEST_P(CXXJunkDetectorTest, detectJunk) {
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
   auto &parameter = GetParam();
   BitcodeLoader loader;
@@ -192,7 +192,7 @@ static const CXXJunkDetectorTestParameter parameters[] = {
 INSTANTIATE_TEST_SUITE_P(CXXJunkDetection, CXXJunkDetectorTest, testing::ValuesIn(parameters));
 
 TEST(CXXJunkDetector, compdb_absolute_paths) {
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   auto path = fixtures::tests_unit_fixtures_junk_detection_compdb_main_cpp_bc_path();
@@ -233,7 +233,7 @@ TEST(CXXJunkDetector, compdb_absolute_paths) {
 }
 
 TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   auto bitcode = loader.loadBitcodeAtPath(
@@ -274,7 +274,7 @@ TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
 }
 
 TEST(CXXJunkDetector, no_compdb) {
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
   BitcodeLoader loader;
   auto path = fixtures::tests_unit_fixtures_junk_detection_compdb_main_cpp_bc_path();

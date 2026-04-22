@@ -173,8 +173,12 @@ fn init_diagnostics(diag: &MullDiagnostics, config: &MullConfig) {
     }
 }
 
-pub fn init_core() -> (MullDiagnostics, MullConfig) {
-    let diag = MullDiagnostics::new();
+pub fn init_core(use_stderr: bool) -> (MullDiagnostics, MullConfig) {
+    let diag = if use_stderr {
+        MullDiagnostics::with_writer(Box::new(std::io::stderr()), true)
+    } else {
+        MullDiagnostics::new()
+    };
     let config = create_config(&diag);
     init_diagnostics(&diag, &config);
     if !config.config_path.is_empty() {

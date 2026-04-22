@@ -99,7 +99,7 @@ protected:
   }
 
   bool ParseArgs(const CompilerInstance &CI, const std::vector<std::string> &args) override {
-    auto core = init_core_ffi();
+    auto core = init_core_ffi(DiagOutput::Stdout);
     const auto &config = core->config();
     for (const auto &mutator : config.mutators) {
       mutationMap.addMutation(std::string(mutator));

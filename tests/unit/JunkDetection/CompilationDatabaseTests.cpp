@@ -9,7 +9,7 @@ using namespace mull;
 using namespace std::string_literals;
 
 TEST(CompilationDatabaseFromCompilationFlags, returnsAllFlags) {
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
   const CompilationDatabase database =
       CompilationDatabase::fromBuffer(diagnostics, "", "-I     /usr/foo/include   ", {});
@@ -20,7 +20,7 @@ TEST(CompilationDatabaseFromCompilationFlags, returnsAllFlags) {
 }
 
 TEST(CompilationDatabaseFromCompilationFlags, returnsAllFlagsForAnyFile) {
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
   const CompilationDatabase database =
       CompilationDatabase::fromBuffer(diagnostics, "", "-I /usr/foo/include   ", {});
@@ -42,7 +42,7 @@ TEST(CompilationDatabaseFromCompilationFlags, returnsAllFlagsForAnyFile) {
 }
 
 TEST(CompilationDatabaseFromFile, loadsFromValidFiles) {
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
   const std::vector<std::string> databasePaths({
       fixtures::tests_unit_fixtures_junk_detection_compdb_db_with_arguments_json_path(),
@@ -70,7 +70,7 @@ TEST(CompilationDatabaseFromFile, loadsFromValidFiles) {
 }
 
 TEST(CompilationDatabaseFromFile, includesCompilationFlagsPassedSeparately) {
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
   auto path =
       fixtures::tests_unit_fixtures_junk_detection_compdb_db_with_fullpath_compiler_json_path();
@@ -94,7 +94,7 @@ TEST(CompilationDatabaseFromFile, includesCompilationFlagsPassedSeparately) {
 }
 
 TEST(CompilationDatabaseFromFile, parsesCompilationFlagsFromClangMJCommandValid) {
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
   auto path = fixtures::
       tests_unit_fixtures_junk_detection_compdb_db_produced_from_clang_MJ_valid_sequence_json_path();
@@ -114,7 +114,7 @@ TEST(CompilationDatabaseFromFile, parsesCompilationFlagsFromClangMJCommandValid)
 }
 
 TEST(CompilationDatabaseFromFile, parsesCompilationDatabaseWithEscapedQuotes) {
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
   auto path =
       fixtures::tests_unit_fixtures_junk_detection_compdb_db_with_escaped_quotes_json_path();
@@ -135,7 +135,7 @@ TEST(CompilationDatabaseFromFile, parsesCompilationDatabaseWithEscapedQuotes) {
 TEST(CompilationDatabaseFromFile, parsesCompilationFlagsObtainedFromBitcode) {
   const std::string fakeFile = "/opt/fake/file.cpp";
 
-  auto core = init_core_ffi();
+  auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
 
   std::unordered_map<std::string, std::string> bitcodeFlags;

@@ -3,6 +3,11 @@ use mull_filters::FilterMutantsConfig as FilterMutantsConfigInner;
 
 #[cxx::bridge]
 mod ffi {
+    enum DiagOutput {
+        Stdout,
+        Stderr,
+    }
+
     struct FilterMutantsConfig {
         git_diff_ref: String,
         git_project_root: String,
@@ -73,7 +78,7 @@ mod ffi {
 
         type MullCore;
 
-        fn init_core_ffi() -> Box<MullCore>;
+        fn init_core_ffi(output: DiagOutput) -> Box<MullCore>;
         fn config(self: &MullCore) -> &MullConfig;
         fn diag(self: &MullCore) -> &MullDiagnostics;
 
@@ -199,8 +204,9 @@ impl MullCore {
 
 /// FFI wrapper for CLI initialization
 
-fn init_core_ffi() -> Box<MullCore> {
-    let (diag, config) = mull_core::init_core();
+fn init_core_ffi(output: ffi::DiagOutput) -> Box<MullCore> {
+    let use_stderr = matches!(output, ffi::DiagOutput::Stderr);
+    let (diag, config) = mull_core::init_core(use_stderr);
     Box::new(MullCore {
         diag: MullDiagnostics::from_inner(diag),
         config: convert_config(&config),
