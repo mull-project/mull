@@ -57,6 +57,7 @@ class {class_name} < Formula
 
 {conflicts}
   def install
+    bin.install "bin/mull-instrument-{llvm_version}"
     bin.install "bin/mull-runner-{llvm_version}"
     bin.install "bin/mull-reporter-{llvm_version}"
     lib.install "lib/mull-ir-frontend-{llvm_version}"
@@ -75,6 +76,7 @@ class {class_name} < Formula
       Mull{channel_caveat} has been installed with LLVM {llvm_version} support.
 {unstable_warning}
       Binaries installed:
+        mull-instrument-{llvm_version}
         mull-runner-{llvm_version}
         mull-reporter-{llvm_version}
 

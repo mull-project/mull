@@ -11,7 +11,8 @@ load("@rules_shell//shell:sh_binary.bzl", "sh_binary")
 load("@rules_shell//shell:sh_test.bzl", "sh_test")
 load(":mull_publish.bzl", "mull_publish_script")
 
-EXPECTED_MACOS_PACKAGE_CONTENT = """bin/mull-reporter-{LLVM_VERSION}
+EXPECTED_MACOS_PACKAGE_CONTENT = """bin/mull-instrument-{LLVM_VERSION}
+bin/mull-reporter-{LLVM_VERSION}
 bin/mull-runner-{LLVM_VERSION}
 lib/mull-ir-frontend-{LLVM_VERSION}
 share/bash-completion/completions/mull-reporter-{LLVM_VERSION}
@@ -24,7 +25,8 @@ share/zsh/site-functions/_mull-reporter-{LLVM_VERSION}
 share/zsh/site-functions/_mull-runner-{LLVM_VERSION}
 """
 
-EXPECTED_DEB_PACKAGE_CONTENT = """usr/bin/mull-reporter-{LLVM_VERSION}
+EXPECTED_DEB_PACKAGE_CONTENT = """usr/bin/mull-instrument-{LLVM_VERSION}
+usr/bin/mull-reporter-{LLVM_VERSION}
 usr/bin/mull-runner-{LLVM_VERSION}
 usr/lib/mull-ir-frontend-{LLVM_VERSION}
 usr/share/bash-completion/completions/mull-reporter-{LLVM_VERSION}
@@ -37,7 +39,8 @@ usr/share/zsh/vendor-completions/_mull-reporter-{LLVM_VERSION}
 usr/share/zsh/vendor-completions/_mull-runner-{LLVM_VERSION}
 """
 
-EXPECTED_RPM_PACKAGE_CONTENT = """/usr/bin/mull-reporter-{LLVM_VERSION}
+EXPECTED_RPM_PACKAGE_CONTENT = """/usr/bin/mull-instrument-{LLVM_VERSION}
+/usr/bin/mull-reporter-{LLVM_VERSION}
 /usr/bin/mull-runner-{LLVM_VERSION}
 /usr/lib/mull-ir-frontend-{LLVM_VERSION}
 /usr/share/bash-completion/completions/mull-reporter-{LLVM_VERSION}
@@ -137,6 +140,7 @@ def mull_package(name):
         pkg_files(
             name = "%s-binaries" % package_name,
             srcs = [
+                "//:mull-instrument-%s" % llvm_version,
                 "//rust/mull-tools:mull-reporter-%s" % llvm_version,
                 "//rust/mull-tools:mull-runner-%s" % llvm_version,
             ],
