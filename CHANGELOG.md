@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.34.0] - 12 May 2026
+
+- Added a new standalone `mull-instrument` tool for cases when LLVM plugin is not available (by [Chris Cotter](https://github.com/ccotter)) [#1185](https://github.com/mull-project/mull/pull/1185)
+
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2026-04-12..2026-05-12)
+
 ## [0.33.0] - 11 Apr 2026
 
 - Fixed a deadlock caused by large `stdout`/`stderr` (by [Chris Cotter](https://github.com/ccotter)) [#1183](https://github.com/mull-project/mull/pull/1183)
