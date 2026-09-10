@@ -1,5 +1,9 @@
 # Changelog
 
+## [Unreleased]
+
+- Fixed `cxx_assign_const` and `cxx_init_const` generating equivalent mutants for booleans: a `bool` is read back through `trunc iN %v to i1`, so replacing one with 42 left the program unchanged. Boolean stores are now negated, and reported as `= 1;`/`= 0;` rather than `= 42;` [#1191](https://github.com/mull-project/mull/issues/1191)
+
 ## [0.34.0] - 12 May 2026
 
 - Added a new standalone `mull-instrument` tool for cases when LLVM plugin is not available (by [Chris Cotter](https://github.com/ccotter)) [#1185](https://github.com/mull-project/mull/pull/1185)

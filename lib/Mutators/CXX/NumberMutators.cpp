@@ -1,13 +1,15 @@
 #include "mull/Mutators/CXX/NumberMutators.h"
 
+#include "mull/Mutators/CXX/IntegerStoreReplacement.h"
+
 #include <irm/irm.h>
 
 using namespace mull;
 using namespace mull::cxx;
 
-static std::vector<std::unique_ptr<irm::IRMutation>> getNumberMutators() {
+static std::vector<std::unique_ptr<irm::IRMutation>> getNumberMutators(std::string spelling) {
   std::vector<std::unique_ptr<irm::IRMutation>> mutators;
-  mutators.emplace_back(new irm::StoreIntReplacement(42));
+  mutators.emplace_back(new IntegerStoreReplacement(42, std::move(spelling)));
   mutators.emplace_back(new irm::StoreDoubleReplacement(42));
   mutators.emplace_back(new irm::StoreFloatReplacement(42));
   return mutators;
@@ -18,8 +20,9 @@ std::string NumberAssignConst::ID() {
 }
 
 NumberAssignConst::NumberAssignConst()
-    : TrivialCXXMutator(getNumberMutators(), MutatorKind::CXX_AssignConst, NumberAssignConst::ID(),
-                        "Replaces 'a = b' with 'a = 42'", "= 42;",
+    : TrivialCXXMutator(getNumberMutators("= {};"), MutatorKind::CXX_AssignConst,
+                        NumberAssignConst::ID(),
+                        "Replaces 'a = b' with 'a = 42', negating booleans", "= 42;",
                         "Replaced 'a = b' with 'a = 42'") {}
 
 std::string NumberInitConst::ID() {
@@ -27,6 +30,6 @@ std::string NumberInitConst::ID() {
 }
 
 NumberInitConst::NumberInitConst()
-    : TrivialCXXMutator(getNumberMutators(), MutatorKind::CXX_InitConst, NumberInitConst::ID(),
-                        "Replaces 'T a = b' with 'T a = 42'", "42",
+    : TrivialCXXMutator(getNumberMutators("{}"), MutatorKind::CXX_InitConst, NumberInitConst::ID(),
+                        "Replaces 'T a = b' with 'T a = 42', negating booleans", "42",
                         "Replaced 'T a = b' with 'T a = 42'") {}
