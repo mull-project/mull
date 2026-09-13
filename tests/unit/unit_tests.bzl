@@ -81,6 +81,10 @@ def mull_unit_tests(name):
         )
 
         native.filegroup(
+            name = "Mutators/IntegerStoreReplacementTests.cpp_%s_fixtures" % llvm_version,
+        )
+
+        native.filegroup(
             name = "TaskExecutorTests.cpp_%s_fixtures" % llvm_version,
         )
 

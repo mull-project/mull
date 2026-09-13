@@ -1,6 +1,9 @@
 #include "mull/MutationPoint.h"
 
+#include "mull/Mutators/DescribableMutation.h"
+
 #include "mull/Mutators/Mutator.h"
+#include <irm/irm.h>
 
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/Function.h>
@@ -129,8 +132,20 @@ void MutationPoint::recordMutation() {
   assert(originalFunction != nullptr);
   llvm::Module *module = originalFunction->getParent();
   std::string encoding = getUserIdentifier();
+  std::string replacement = mutator->getReplacement();
+  /// A low-level mutation whose replacement varies by instruction - a boolean
+  /// store, negated rather than set to a constant - names its own.
+  if (const auto *describable = dynamic_cast<const DescribableMutation *>(irMutator)) {
+    /// getOriginalValue() rather than the address directly: by the time a
+    /// mutation is recorded the original function has been cloned and renamed,
+    /// so only it still resolves to the instruction being mutated.
+    if (std::optional<std::string> described = describable->describeReplacement(
+            llvm::dyn_cast<llvm::Instruction>(getOriginalValue()))) {
+      replacement = std::move(*described);
+    }
+  }
   llvm::Constant *constant = llvm::ConstantDataArray::getString(
-      module->getContext(), llvm::StringRef(encoding + ':' + mutator->getReplacement()));
+      module->getContext(), llvm::StringRef(encoding + ':' + replacement));
   auto *global = new llvm::GlobalVariable(*module,
                                           constant->getType(),
                                           true,

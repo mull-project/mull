@@ -7,7 +7,7 @@
 .. |op3| replace:: cxx_and_to_or
 .. |desc3| replace:: Replaces & with |
 .. |op4| replace:: cxx_assign_const
-.. |desc4| replace:: Replaces 'a = b' with 'a = 42'
+.. |desc4| replace:: Replaces 'a = b' with 'a = 42', negating booleans
 .. |op5| replace:: cxx_bitwise_not_to_noop
 .. |desc5| replace:: Replaces ~x with x
 .. |op6| replace:: cxx_div_assign_to_mul_assign
@@ -25,7 +25,7 @@
 .. |op12| replace:: cxx_gt_to_le
 .. |desc12| replace:: Replaces > with <=
 .. |op13| replace:: cxx_init_const
-.. |desc13| replace:: Replaces 'T a = b' with 'T a = 42'
+.. |desc13| replace:: Replaces 'T a = b' with 'T a = 42', negating booleans
 .. |op14| replace:: cxx_le_to_gt
 .. |desc14| replace:: Replaces <= with >
 .. |op15| replace:: cxx_le_to_lt

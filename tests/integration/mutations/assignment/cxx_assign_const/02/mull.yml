@@ -1,0 +1,5 @@
+mutators:
+  - cxx_assign_const
+  - cxx_init_const
+junkDetectionDisabled: true
+quiet: false
