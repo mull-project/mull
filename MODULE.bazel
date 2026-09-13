@@ -165,8 +165,8 @@ mull_supported_llvm_versions.configure(
             "18",
             "19",
         ],
-        "rhel:9.6": ["20"],
-        "rhel:10.0": ["20"],
+        "rhel:9.6": ["21"],
+        "rhel:10.0": ["21"],
     },
 )
 use_repo(mull_supported_llvm_versions, "supported_llvm_versions")
