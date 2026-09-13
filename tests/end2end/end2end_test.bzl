@@ -24,13 +24,14 @@ MULL_REPORTER="{mull_reporter}"
 MULL_CONFIG="{mull_config}"
 EXPECTED="{expected}"
 TEST_FILES=({test_files})
+TEST_ARGS=({test_args})
 
 export MULL_CONFIG
 
 # Step 1: Run mull-runner on each test binary to generate SQLite report
 for test_file in "${{TEST_FILES[@]}}"; do
     echo "Testing $test_file"
-    "$MULL_RUNNER" --allow-surviving --reporters SQLite --report-name fmtlib -minimum-timeout 500 "$test_file"
+    "$MULL_RUNNER" --allow-surviving --reporters SQLite --report-name fmtlib -minimum-timeout 500 "$test_file" "${{TEST_ARGS[@]}}"
 done
 
 # Step 2: Run mull-reporter to generate IDE report
@@ -55,6 +56,7 @@ fi
         mull_config = ctx.file.mull_config.short_path,
         expected = ctx.file.expected.short_path,
         test_files = test_file_paths,
+        test_args = " ".join([shell.quote(a) for a in ctx.attr.test_args]),
     )
 
     script = ctx.actions.declare_file(ctx.attr.name + "_test.sh")
@@ -85,6 +87,7 @@ mull_e2e_test = rule(
         "mull_reporter": attr.label(executable = True, mandatory = True, cfg = "exec"),
         "mull_config": attr.label(mandatory = True, allow_single_file = True),
         "expected": attr.label(mandatory = True, allow_single_file = True),
+        "test_args": attr.string_list(),
     },
 )
 
@@ -154,6 +157,8 @@ def define_end2end_test_targets(name):
                 mull_reporter = "//rust/mull-tools:mull-reporter-%s" % llvm_version,
                 mull_config = ":mull.yml",
                 expected = ":fmtlib_expected_ide_report_%s_%s%s.txt" % (os, arch, expected_suffix),
+                # macOS 26 system frameworks leave FE_INEXACT set before main
+                test_args = ["--gtest_filter=-float_test.isnan"] if os == "macos" else [],
                 flaky = True,
                 target_compatible_with = target_compatible_with,
                 tags = ["llvm_%s" % llvm_version, "end2end"],
