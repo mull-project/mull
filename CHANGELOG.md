@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.34.1] - 13 Sep 2026
+
+- RHEL now targets LLVM 21 [#1169](https://github.com/mull-project/mull/pull/1169)
+- LLVM 21 package for macOS is back [#1169](https://github.com/mull-project/mull/pull/1169)
+
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2026-05-13..2026-09-13)
+
 ## [0.34.0] - 12 May 2026
 
 - Added a new standalone `mull-instrument` tool for cases when LLVM plugin is not available (by [Chris Cotter](https://github.com/ccotter)) [#1185](https://github.com/mull-project/mull/pull/1185)
