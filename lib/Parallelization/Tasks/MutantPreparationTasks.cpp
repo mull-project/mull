@@ -15,6 +15,15 @@ using namespace mull;
 #define BB_WRAP_ITERATOR(inst) inst
 #endif
 
+/// Typed pointers are gone since LLVM 17; before that the pointee type matters.
+static llvm::PointerType *getPointerTo(llvm::Type *pointee) {
+#if LLVM_VERSION_MAJOR >= 17
+  return llvm::PointerType::get(pointee->getContext(), 0);
+#else
+  return llvm::PointerType::get(pointee, 0);
+#endif
+}
+
 void CloneMutatedFunctionsTask::operator()(iterator begin, iterator end, Out &storage,
                                            progress_counter &counter) {
   for (auto it = begin; it != end; it++, counter.increment()) {
@@ -71,7 +80,7 @@ static void insertTrace(llvm::BasicBlock *basicBlock, const std::string &format,
   auto module = basicBlock->getParent()->getParent();
   auto &context = module->getContext();
   llvm::Type *intType = llvm::Type::getInt32Ty(context);
-  llvm::Type *charPtr = llvm::PointerType::get(llvm::Type::getInt8Ty(context), 0);
+  llvm::Type *charPtr = getPointerTo(llvm::Type::getInt8Ty(context));
   llvm::FunctionType *printfType = llvm::FunctionType::get(intType, { charPtr }, true);
   auto print = module->getOrInsertFunction("printf", printfType).getCallee();
 
@@ -94,7 +103,7 @@ void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode,
                                                       const MullConfig &configuration) {
   llvm::Module *module = bitcode.getModule();
   llvm::LLVMContext &context = module->getContext();
-  llvm::Type *charPtr = llvm::PointerType::get(llvm::Type::getInt8Ty(context), 0);
+  llvm::Type *charPtr = getPointerTo(llvm::Type::getInt8Ty(context));
   llvm::FunctionType *getEnvType = llvm::FunctionType::get(charPtr, { charPtr }, false);
   llvm::Value *getenv = module->getOrInsertFunction("getenv", getEnvType).getCallee();
   for (auto pair : bitcode.getMutationPointsMap()) {
@@ -113,7 +122,7 @@ void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode,
       insertTrace(trampolineCall, "mull-trace: trampoline call %s\n", original->getName().str());
     }
     auto anyPoint = pair.second.front();
-    llvm::Type *trampolineType = llvm::PointerType::get(original->getFunctionType(), 0);
+    llvm::Type *trampolineType = getPointerTo(original->getFunctionType());
     auto trampoline = new llvm::AllocaInst(trampolineType, 0, "trampoline", entry);
     if (configuration.debug.trace_mutants) {
       insertTrace(entry, "mull-trace: entering %s\n", original->getName().str());
