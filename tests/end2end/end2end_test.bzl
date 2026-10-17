@@ -131,6 +131,11 @@ def define_end2end_test_targets(name):
             data = [
                 "//:mull-cxx-ir-frontend-%s" % llvm_version,
             ],
+            # toolchains_llvm adds -fno-cxx-modules, which older system clangs reject
+            features = [
+                "-local-%s_disable_cpp_modules" % platform
+                for platform in ["aarch64-darwin", "aarch64-linux", "x86_64-linux"]
+            ],
             env = {
                 "CC": CC_PATHS[llvm_version],
                 "CXX": CXX_PATHS[llvm_version],
