@@ -15,6 +15,7 @@ jobs:
     runs-on: [[ OS_RUNNER ]]
     timeout-minutes: 30
     strategy:
+      fail-fast: false
       matrix:
         LLVM_VERSION: [[ LLVM_VERSIONS ]]
     steps:

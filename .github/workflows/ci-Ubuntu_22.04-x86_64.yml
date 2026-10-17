@@ -13,6 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     strategy:
+      fail-fast: false
       matrix:
         LLVM_VERSION: [13, 14, 15]
     name: Ubuntu 22.04 - LLVM ${{ matrix.LLVM_VERSION }}
