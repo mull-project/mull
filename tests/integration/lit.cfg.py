@@ -26,7 +26,8 @@ def get_os_filename_string():
 
 config = globals()["config"]
 config.name = "Mull integration tests"
-config.test_format = lit.formats.ShTest("0")
+# Tests rely on bash features; lit 24 drops external shell support
+config.test_format = lit.formats.ShTest(execute_external=True, force_execute_external=True)
 
 llvm_major_version = os.environ.get("LLVM_VERSION_MAJOR", None)
 

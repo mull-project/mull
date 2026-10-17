@@ -12,8 +12,9 @@ RUN: %mull_reporter -ide-reporter-show-killed -allow-surviving -reporters=IDE te
 CHECK_SUB:{{.*}}/math.h:6:12: warning: Killed: Replaced - with + [cxx_sub_to_add]
 CHECK_SUB:{{.*}}/math.h:2:12: warning: Survived: Replaced + with - [cxx_add_to_sub]
 
-RUN: %mull_runner -allow-surviving -reporters=SQLite -report-dir %T -report-name report %t.sub.exe
-RUN: %mull_runner -allow-surviving -reporters=SQLite -report-dir %T -report-name report %t.add.exe
-RUN: %mull_reporter -ide-reporter-show-killed -allow-surviving -reporters=IDE %T/report.sqlite | %filecheck %s --dump-input=fail --check-prefix=CHECK_COMBINED
+RUN: rm -rf %t.reports
+RUN: %mull_runner -allow-surviving -reporters=SQLite -report-dir %t.reports -report-name report %t.sub.exe
+RUN: %mull_runner -allow-surviving -reporters=SQLite -report-dir %t.reports -report-name report %t.add.exe
+RUN: %mull_reporter -ide-reporter-show-killed -allow-surviving -reporters=IDE %t.reports/report.sqlite | %filecheck %s --dump-input=fail --check-prefix=CHECK_COMBINED
 CHECK_COMBINED:{{.*}}/math.h:2:12: warning: Killed: Replaced + with - [cxx_add_to_sub]
 CHECK_COMBINED:{{.*}}/math.h:6:12: warning: Killed: Replaced - with + [cxx_sub_to_add]

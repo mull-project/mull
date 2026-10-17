@@ -6,8 +6,8 @@ int main() {
 
 /*
 
-RUN: %clang_cxx -c %S/main.hh -o %T/main.hh.pch
-RUN: %clang_cxx %sysroot %pass_mull_ir_frontend -include-pch %T/main.hh.pch -g -grecord-command-line %s -o %s.exe
+RUN: %clang_cxx -c %S/main.hh -o %t.pch
+RUN: %clang_cxx %sysroot %pass_mull_ir_frontend -include-pch %t.pch -g -grecord-command-line %s -o %s.exe
 RUN: (unset TERM; %mull_runner --allow-surviving -reporters=IDE -ide-reporter-show-killed %s.exe 2>&1; test $? = 0) | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines
 
 CHECK:[info] Killed mutants (1/1):
