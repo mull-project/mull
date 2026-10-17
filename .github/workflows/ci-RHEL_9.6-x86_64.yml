@@ -18,13 +18,13 @@ jobs:
         LLVM_VERSION: [21]
     name: RHEL 9.6 - LLVM ${{ matrix.LLVM_VERSION }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
       - uses: ./.github/actions/detect-package-metadata
       - uses: ./.github/actions/setup-bazel-cache
         with:
           BUILDBUDDY_API_KEY: ${{ secrets.BUILDBUDDY_API_KEY }}
           PLATFORM: rhel-9.6-x86_64
-      - uses: docker/login-action@v2
+      - uses: docker/login-action@v4
         with:
           registry: ghcr.io
           username: ${{ github.repository_owner }}
