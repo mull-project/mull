@@ -37,9 +37,17 @@ jobs:
           runCmd: |
             set -e
             mkdir -p packages
-            bazel test //...
+            bazel test //... || { cp -RL bazel-testlogs ci-testlogs; exit 1; }
             bazel build //:mull_packages --stamp
             mv -v bazel-bin/Mull-*.[[PACKAGE_EXTENSION]] packages/
+      - name: Upload test logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: testlogs-[[ OS_NAME_LOWER ]]-[[OS_VERSION]]-[[OS_ARCH]]-llvm-${{ matrix.LLVM_VERSION }}
+          path: ci-testlogs/
+          if-no-files-found: ignore
+          retention-days: 14
       - name: Publish package
         uses: devcontainers/ci@v0.3
         if: env.CLOUDSMITH_API_KEY != null
