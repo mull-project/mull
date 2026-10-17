@@ -1,5 +1,11 @@
 # Changelog
 
+## [0.34.2] - 17 Oct 2026
+
+- Fix coverage filter when not all objects have coverage (by [@hannah-computer](https://github.com/hannah-computer)) [#1194](https://github.com/mull-project/mull/pull/1194)
+
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2026-09-14..2026-10-17)
+
 ## [0.34.1] - 13 Sep 2026
 
 - RHEL now targets LLVM 21 [#1169](https://github.com/mull-project/mull/pull/1169)
