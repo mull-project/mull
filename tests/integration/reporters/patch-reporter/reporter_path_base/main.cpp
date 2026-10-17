@@ -23,6 +23,6 @@ RUN: cd %S/Output; (unset TERM; %mull_reporter --report-patch-base %S -debug tes
 CHECK:{{.*}}[debug] Writing Patchfile: {{.*}}
 CHECK:[info] Patchfiles can be found at './test{{.*}}-patches'
 CHECK:--- a/Output/sandbox/main.cpp 0
-CHECK:+{{\s+}}return a != b;
+CHECK:+{{[[:space:]]+}}return a != b;
 
 */

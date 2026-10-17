@@ -25,6 +25,6 @@ CHECK:[info] Patchfiles can be found at './test{{.*}}-patches'
 CHECK:killed-{{.*}}
 CHECK:--- a/{{.*}}/Output/sandbox/main.cpp 0
 CHECK:+++ b/{{.*}}/Output/sandbox/main.cpp 0
-CHECK:+{{\s+}}int y = x;
+CHECK:+{{[[:space:]]+}}int y = x;
 
 */
