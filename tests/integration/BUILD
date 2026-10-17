@@ -13,7 +13,7 @@ py_binary(
 
 native_binary(
     name = "python3",
-    src = "@python_3_13//:python3",
+    src = "@python_3_14//:python3",
     out = "python3",
     visibility = ["//visibility:public"],
 )
