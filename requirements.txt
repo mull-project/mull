@@ -1,4 +1,5 @@
 lit==18.1.8
+psutil==7.2.2
 filecheck==0.0.24
 cloudsmith-cli==1.16.0
 pystache==0.6.8

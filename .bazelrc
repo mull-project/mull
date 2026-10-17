@@ -10,3 +10,4 @@ build --workspace_status_command=infrastructure/workspace_status.sh
 try-import .bazel.buildbuddy.rc
 try-import .bazel.compilation_mode.bazelrc
 try-import .bazel.build_salt.bazelrc
+try-import .bazel.debug.bazelrc

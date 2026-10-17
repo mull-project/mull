@@ -37,3 +37,10 @@ runs:
         fi
         echo "common --remote_instance_name=$SALT" > .bazel.build_salt.bazelrc
         cat .bazel.build_salt.bazelrc
+    - name: Enable debug flags
+      if: runner.debug == '1'
+      shell: bash
+      run: |
+        echo "build --verbose_failures --sandbox_debug" > .bazel.debug.bazelrc
+        echo "test --test_timeout=300 --test_output=all" >> .bazel.debug.bazelrc
+        cat .bazel.debug.bazelrc
