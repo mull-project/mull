@@ -15,6 +15,7 @@ jobs:
     runs-on: macos-latest
     timeout-minutes: 30
     strategy:
+      fail-fast: false
       matrix:
         LLVM_VERSION: [16, 17, 18, 19, 20, 21]
     steps:
