@@ -58,6 +58,7 @@ def mull_py_test(src):
             main = "lit_runner.py",
             deps = [
                 requirement("lit"),
+                requirement("psutil"),
                 "@rules_python//python/runfiles",
             ],
             tags = ["lit", "integration", "llvm_%s" % llvm_version],
