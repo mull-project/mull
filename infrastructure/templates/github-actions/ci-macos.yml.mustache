@@ -9,6 +9,9 @@ on:
     tags: ["**"]
   pull_request:
     branches: ["main"]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   macos:
     name: [[OS_NAME]] - LLVM ${{ matrix.LLVM_VERSION }}
