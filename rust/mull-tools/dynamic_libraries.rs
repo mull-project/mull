@@ -77,14 +77,14 @@ fn libraries_from_elf<Elf: FileHeader<Endian = Endianness>>(
 
         // Extract DT_NEEDED entries
         for dyn_entry in dynamic_entries {
-            let tag = dyn_entry.tag32(endian);
-            if tag == Some(object::elf::DT_NEEDED) {
+            let tag = dyn_entry.tag(endian);
+            if tag == object::elf::DT_NEEDED {
                 if let Ok(name) = dyn_entry.string(endian, strings) {
                     if let Ok(s) = std::str::from_utf8(name) {
                         libraries.push(s.to_string());
                     }
                 }
-            } else if tag == Some(object::elf::DT_NULL) {
+            } else if tag == object::elf::DT_NULL {
                 break;
             }
         }
