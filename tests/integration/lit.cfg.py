@@ -41,7 +41,7 @@ mull_reporter = r.Rlocation(f"_main/rust/mull-tools/mull-reporter-{llvm_major_ve
 mull_frontend_cxx = r.Rlocation(f"mull/mull-ast-frontend-{llvm_major_version}")
 mull_ir_frontend = r.Rlocation(f"mull/mull-ir-frontend-{llvm_major_version}")
 mull_instrument = r.Rlocation(f"mull/mull-instrument-{llvm_major_version}")
-filecheck = r.Rlocation("mull/tests/integration/filecheck_runner")
+filecheck = r.Rlocation("mull/tests/integration/FileCheck")
 
 python3 = r.Rlocation("mull/tests/integration/python3")
 jq = r.Rlocation("mull/tests/integration/jq")

@@ -28,6 +28,6 @@ CHECK:[info] Patchfiles can be found at './test{{.*}}-patches'
 CHECK:survived-{{.*}}
 CHECK:--- a/{{.*}}/Output/sandbox/main.cpp 0
 CHECK:+++ b/{{.*}}/Output/sandbox/main.cpp 0
-CHECK:+{{\s+}}x[0] = 42; y;
+CHECK:+{{[[:space:]]+}}x[0] = 42; y;
 
 */

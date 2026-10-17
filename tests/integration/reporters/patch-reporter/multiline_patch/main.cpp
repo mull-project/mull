@@ -33,10 +33,10 @@ CHECK:{{.*}}[debug] Writing Patchfile: {{.*}}
 CHECK:[info] Patchfiles can be found at './test{{.*}}-patches'
 CHECK:{{.*}}cxx_remove_void{{.*}}
 CHECK:--- a{{.*}}/Output/sandbox/main.cpp 0
-CHECK:-{{\s+}}false);
-CHECK:-{{\s+}}7 +
-CHECK:-{{\s+}}9 +
-CHECK:-{{\s+}}false);
-CHECK:+{{\s+}};
+CHECK:-{{[[:space:]]+}}false);
+CHECK:-{{[[:space:]]+}}7 +
+CHECK:-{{[[:space:]]+}}9 +
+CHECK:-{{[[:space:]]+}}false);
+CHECK:+{{[[:space:]]+}};
 
 */

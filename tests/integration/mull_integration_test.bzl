@@ -38,7 +38,7 @@ def mull_py_test(src):
             data = [
                 requirement("lit"),
                 ":lit.cfg.py",
-                ":filecheck_runner",
+                ":filecheck",
                 ":python3",
                 ":jq",
                 ":sqlite3",

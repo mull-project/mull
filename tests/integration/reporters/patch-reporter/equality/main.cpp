@@ -23,7 +23,7 @@ RU: cd %S/Output; (unset TERM; %mull_reporter test-ir.sqlite -debug --report-nam
 CHECK:{{.*}}[debug] Writing Patchfile: {{.*}}
 CHECK:[info] Patchfiles can be found at './test{{.*}}-patches'
 CHECK:--- a{{.*}}/Output/sandbox/main.cpp 0
-CHECK:+{{\s+}}return a != b;
+CHECK:+{{[[:space:]]+}}return a != b;
 CHECK:--
 CHECK:Build Date: {{.*}}
 CHECK:LLVM Version: {{.*}}

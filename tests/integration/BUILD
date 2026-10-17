@@ -1,14 +1,33 @@
 load("@bazel_skylib//rules:native_binary.bzl", "native_binary")
-load("@pypi//:requirements.bzl", "requirement")
-load("@rules_python//python:defs.bzl", "py_binary")
 load("//tests/integration:mull_integration_test.bzl", "mull_py_test")
 
-py_binary(
-    name = "filecheck_runner",
-    srcs = ["filecheck_runner.py"],
-    deps = [
-        requirement("filecheck"),
+[config_setting(
+    name = name,
+    constraint_values = constraints,
+) for name, constraints in {
+    "darwin_aarch64": [
+        "@platforms//os:macos",
+        "@platforms//cpu:aarch64",
     ],
+    "linux_aarch64": [
+        "@platforms//os:linux",
+        "@platforms//cpu:aarch64",
+    ],
+    "linux_x86_64": [
+        "@platforms//os:linux",
+        "@platforms//cpu:x86_64",
+    ],
+}.items()]
+
+native_binary(
+    name = "filecheck",
+    src = select({
+        ":darwin_aarch64": "@filecheck_darwin_aarch64//:bin/FileCheck",
+        ":linux_aarch64": "@filecheck_linux_aarch64//:bin/FileCheck",
+        ":linux_x86_64": "@filecheck_linux_x86_64//:bin/FileCheck",
+    }),
+    out = "FileCheck",
+    visibility = ["//visibility:public"],
 )
 
 native_binary(
