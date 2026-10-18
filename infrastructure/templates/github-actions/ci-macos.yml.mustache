@@ -37,6 +37,12 @@ jobs:
           BUILDBUDDY_API_KEY: ${{ secrets.BUILDBUDDY_API_KEY }}
       - name: Run CI task
         run: |
+          # The runner image preinstalls llvm@N, and mull builds for every installed LLVM
+          for formula in $(brew list --formula | grep -E '^llvm@[0-9]+$'); do
+            if [ "$formula" != "llvm@${{ matrix.LLVM_VERSION }}" ]; then
+              brew uninstall --ignore-dependencies "$formula"
+            fi
+          done
           brew install bazelisk zlib ncurses sqlite ninja llvm@${{ matrix.LLVM_VERSION }}
           bazel test //... || { cp -RL bazel-testlogs ci-testlogs; exit 1; }
           bazel build //:mull_packages --stamp
