@@ -143,6 +143,7 @@ mull_supported_llvm_versions.configure(
             "20",
             "21",
             "22",
+            "23",
         ],
         "ubuntu:22.04": [
             "13",
@@ -192,6 +193,7 @@ SUPPORTED_LLVM_VERSIONS = [
     "20",
     "21",
     "22",
+    "23",
 ]
 
 available_llvm_versions = use_extension("//:mull_available_llvm_versions.bzl", "available_llvm_versions")
