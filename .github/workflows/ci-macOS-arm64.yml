@@ -35,6 +35,11 @@ jobs:
       - uses: ./.github/actions/setup-bazel-cache
         with:
           BUILDBUDDY_API_KEY: ${{ secrets.BUILDBUDDY_API_KEY }}
+      # Enabled by re-running with debug logging, see infrastructure/ci_macos_monitor.sh
+      - name: Start debug monitor
+        if: runner.debug == '1'
+        run: |
+          nohup infrastructure/ci_macos_monitor.sh ci-monitor >/dev/null 2>&1 &
       - name: Run CI task
         run: |
           # The runner image preinstalls llvm@N, and mull builds for every installed LLVM
@@ -52,6 +57,14 @@ jobs:
         with:
           name: testlogs-macos-llvm-${{ matrix.LLVM_VERSION }}
           path: ci-testlogs/
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Upload debug monitor
+        if: always() && runner.debug == '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: monitor-macos-llvm-${{ matrix.LLVM_VERSION }}
+          path: ci-monitor/
           if-no-files-found: ignore
           retention-days: 14
       - name: Publish package

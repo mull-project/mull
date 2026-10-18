@@ -55,6 +55,11 @@ fi
 # Step 3: Run mull-reporter to generate IDE report
 "$MULL_REPORTER" --allow-surviving -ide-reporter-show-killed -report-name fmt_ide_report fmtlib.sqlite
 
+# Keep raw results for investigating flaky runs
+if [ -n "${{TEST_UNDECLARED_OUTPUTS_DIR:-}}" ]; then
+    cp fmtlib.sqlite fmt_ide_report.txt "$TEST_UNDECLARED_OUTPUTS_DIR/"
+fi
+
 # Step 4: Make paths relative for comparison
 while IFS= read -r line; do
     printf '%s\\n' "${{line//"$FMT_SRC_ROOT"/}}"
