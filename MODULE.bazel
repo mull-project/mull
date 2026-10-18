@@ -27,15 +27,15 @@ git_override(
     remote = "https://github.com/hedronvision/bazel-compile-commands-extractor.git",
 )
 
-TOOLCHAIN_VERSION = "39033244429"
+TOOLCHAIN_VERSION = "39167916899"
 
 llvm = use_extension("@toolchains_llvm//toolchain/extensions:llvm.bzl", "llvm", dev_dependency = True)
 llvm.toolchain(
     llvm_version = "23.1.3",
     sha256 = {
-        "darwin-aarch64": "5732cb4fb992da9b3bdafb6e98220b05447c2ce564ec0a58f32f0d57501e1937",
-        "linux-aarch64": "61ef121321f4523ec504b5d208a6a08265dbc8c28de2c9f89565ec87f80fbbfb",
-        "linux-x86_64": "1deb6484c7cefa17d6e72cd8ebb6ed521a869b295e8b07281e9b30a02c60853a",
+        "darwin-aarch64": "33681225d9d97b39cec219d7ec682cf9d23d150fdb44e313b33cce24ea91d532",
+        "linux-aarch64": "ddc6183a585d73fe67d29d47cb5dcdae260b94c3aff057629013128c191f938a",
+        "linux-x86_64": "b01fc07f16c1c29d2bb5deaf88851ecfde67e62cfd152aba8a94d352f4e65323",
     },
     stdlib = {
         "linux-x86_64": "stdc++",
@@ -221,9 +221,9 @@ http_archive(
     strip_prefix = "%s.filecheck" % platform,
     url = "https://github.com/mull-project/toolchains/releases/download/%s/%s.filecheck.tar.xz" % (TOOLCHAIN_VERSION, platform),
 ) for platform, sha256 in {
-    "Darwin-aarch64": "d27f1607761b1aec8d8e83327087aa393029cdbd1b5c9f54d0523cb4fc9b42b7",
-    "Linux-aarch64": "a68c31ae3130f10502e274d8d809d591fa1a511bec1b1699cbf6c006f09cd67b",
-    "Linux-x86_64": "10285d10aef0ce425026bc07169fe66e804137a4162bcad49ed4893abf78e50e",
+    "Darwin-aarch64": "4af4a17327bce1a3a2aa620c69954d1203dbb1eb54ab51c547fcfa52da8c638a",
+    "Linux-aarch64": "f4eeb4544d89351227c26959e08bc96fa085d832ee8307b775d34bf962e03186",
+    "Linux-x86_64": "329772ab930fce1f0bbdf87fd3238f1b1ae480271e57c07b9a1d26cbea59dbe4",
 }.items()]
 
 _ALL_CONTENT = """
