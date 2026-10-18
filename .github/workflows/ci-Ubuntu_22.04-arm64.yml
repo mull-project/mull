@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
   build-and-test:
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -82,7 +82,7 @@ jobs:
   smoke-test:
     needs: [build-and-test]
     if: ${{ !cancelled() && needs.build-and-test.result == 'success' }}
-    runs-on: ubuntu-24.04-arm
+    runs-on: ubuntu-26.04-arm
     name: Smoke test
     container:
       image: ubuntu:22.04

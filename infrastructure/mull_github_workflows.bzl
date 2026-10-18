@@ -62,14 +62,14 @@ def mull_github_workflows(name):
         if os_key == "macos":
             write_targets.append(_generate_github_workflow("macos-26", "macOS", os_key, "zip", "arm64"))
         elif "rhel" in os_key:
-            write_targets.append(_generate_github_workflow("ubuntu-latest", "RHEL", os_key, "rpm", "x86_64"))
-            write_targets.append(_generate_github_workflow("ubuntu-24.04-arm", "RHEL", os_key, "rpm", "arm64"))
+            write_targets.append(_generate_github_workflow("ubuntu-26.04", "RHEL", os_key, "rpm", "x86_64"))
+            write_targets.append(_generate_github_workflow("ubuntu-26.04-arm", "RHEL", os_key, "rpm", "arm64"))
         elif "debian" in os_key:
-            write_targets.append(_generate_github_workflow("ubuntu-latest", "Debian", os_key, "deb", "x86_64"))
-            write_targets.append(_generate_github_workflow("ubuntu-24.04-arm", "Debian", os_key, "deb", "arm64"))
+            write_targets.append(_generate_github_workflow("ubuntu-26.04", "Debian", os_key, "deb", "x86_64"))
+            write_targets.append(_generate_github_workflow("ubuntu-26.04-arm", "Debian", os_key, "deb", "arm64"))
         else:
-            write_targets.append(_generate_github_workflow("ubuntu-latest", "Ubuntu", os_key, "deb", "x86_64"))
-            write_targets.append(_generate_github_workflow("ubuntu-24.04-arm", "Ubuntu", os_key, "deb", "arm64"))
+            write_targets.append(_generate_github_workflow("ubuntu-26.04", "Ubuntu", os_key, "deb", "x86_64"))
+            write_targets.append(_generate_github_workflow("ubuntu-26.04-arm", "Ubuntu", os_key, "deb", "arm64"))
     multirun(
         name = name,
         commands = write_targets,
