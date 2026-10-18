@@ -60,7 +60,7 @@ def mull_github_workflows(name):
     write_targets = []
     for os_key in OS_VERSION_MAPPING:
         if os_key == "macos":
-            write_targets.append(_generate_github_workflow("macos-latest", "macOS", os_key, "zip", "arm64"))
+            write_targets.append(_generate_github_workflow("macos-26", "macOS", os_key, "zip", "arm64"))
         elif "rhel" in os_key:
             write_targets.append(_generate_github_workflow("ubuntu-latest", "RHEL", os_key, "rpm", "x86_64"))
             write_targets.append(_generate_github_workflow("ubuntu-24.04-arm", "RHEL", os_key, "rpm", "arm64"))

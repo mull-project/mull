@@ -15,7 +15,7 @@ concurrency:
 jobs:
   macos:
     name: macOS - LLVM ${{ matrix.LLVM_VERSION }}
-    runs-on: macos-latest
+    runs-on: macos-26
     timeout-minutes: 30
     strategy:
       fail-fast: false
@@ -25,6 +25,11 @@ jobs:
       - name: Fix git
         run: |
           git config --global --add safe.directory $PWD
+      # Newer SDKs ship libc++ headers that require clang >= 19
+      - name: Select Xcode
+        run: |
+          sudo xcode-select -s /Applications/Xcode_26.0.1.app
+          xcrun --show-sdk-path
       - uses: actions/checkout@v7
       - uses: ./.github/actions/detect-package-metadata
       - uses: ./.github/actions/setup-bazel-cache
