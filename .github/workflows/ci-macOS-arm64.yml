@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        LLVM_VERSION: [16, 17, 18, 19, 20, 21, 22]
+        LLVM_VERSION: [16, 17, 18, 19, 20, 21, 22, 23]
     steps:
       - name: Fix git
         run: |
