@@ -8,8 +8,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   llvm-21-dev \
   libclang-21-dev \
-  libc++-21-dev \
-  libc++abi-21-dev \
   clang-21 \
   lld-21
 

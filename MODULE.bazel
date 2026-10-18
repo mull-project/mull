@@ -170,6 +170,7 @@ mull_supported_llvm_versions.configure(
             "17",
             "18",
             "19",
+            "22",
         ],
         "rhel:9.6": ["21"],
         "rhel:10.0": ["21"],

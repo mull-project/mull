@@ -8,8 +8,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   llvm-18-dev \
   libclang-18-dev \
-  libc++-18-dev \
-  libc++abi-18-dev \
   clang-18 \
   lld-18
 

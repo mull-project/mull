@@ -8,8 +8,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   llvm-22-dev \
   libclang-22-dev \
-  libc++-22-dev \
-  libc++abi-22-dev \
   clang-22 \
   lld-22
 

@@ -8,8 +8,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   llvm-20-dev \
   libclang-20-dev \
-  libc++-20-dev \
-  libc++abi-20-dev \
   clang-20 \
   lld-20
 

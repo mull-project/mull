@@ -8,8 +8,6 @@ RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \
   llvm-14-dev \
   libclang-14-dev \
-  libc++-14-dev \
-  libc++abi-14-dev \
   clang-14 \
   lld-14
 
