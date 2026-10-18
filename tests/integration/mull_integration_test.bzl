@@ -1,5 +1,5 @@
 load("@available_llvm_versions//:mull_llvm_versions.bzl", "AVAILABLE_LLVM_VERSIONS")
-load("@pypi//:requirements.bzl", "requirement")
+load("@mull_pypi//:requirements.bzl", "requirement")
 load("@rules_python//python:defs.bzl", "py_test")
 
 def _dirname(filepath):

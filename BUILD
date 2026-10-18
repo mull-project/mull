@@ -1,4 +1,4 @@
-load("@pypi//:requirements.bzl", "requirement")
+load("@mull_pypi//:requirements.bzl", "requirement")
 load("@rules_python//python:defs.bzl", "py_binary")
 load("@rules_python//python:pip.bzl", "compile_pip_requirements")
 load("//:mull_build.bzl", "mull_build")

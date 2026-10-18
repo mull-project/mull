@@ -5,8 +5,6 @@ UBUNTU_CMD = """
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y \\
   llvm-{LLVM_VERSION}-dev \\
   libclang-{LLVM_VERSION}-dev \\
-  libc++-{LLVM_VERSION}-dev \\
-  libc++abi-{LLVM_VERSION}-dev \\
   clang-{LLVM_VERSION} \\
   lld-{LLVM_VERSION}
 """

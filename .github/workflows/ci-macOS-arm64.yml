@@ -20,7 +20,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        LLVM_VERSION: [16, 17, 18, 19, 20, 21]
+        LLVM_VERSION: [16, 17, 18, 19, 20, 21, 22]
     steps:
       - name: Fix git
         run: |
@@ -35,8 +35,19 @@ jobs:
       - uses: ./.github/actions/setup-bazel-cache
         with:
           BUILDBUDDY_API_KEY: ${{ secrets.BUILDBUDDY_API_KEY }}
+      # Enabled by re-running with debug logging, see infrastructure/ci_macos_monitor.sh
+      - name: Start debug monitor
+        if: runner.debug == '1'
+        run: |
+          nohup infrastructure/ci_macos_monitor.sh ci-monitor >/dev/null 2>&1 &
       - name: Run CI task
         run: |
+          # The runner image preinstalls llvm@N, and mull builds for every installed LLVM
+          for formula in $(brew list --formula | grep -E '^llvm@[0-9]+$'); do
+            if [ "$formula" != "llvm@${{ matrix.LLVM_VERSION }}" ]; then
+              brew uninstall --ignore-dependencies "$formula"
+            fi
+          done
           brew install bazelisk zlib ncurses sqlite ninja llvm@${{ matrix.LLVM_VERSION }}
           bazel test //... || { cp -RL bazel-testlogs ci-testlogs; exit 1; }
           bazel build //:mull_packages --stamp
@@ -46,6 +57,14 @@ jobs:
         with:
           name: testlogs-macos-llvm-${{ matrix.LLVM_VERSION }}
           path: ci-testlogs/
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Upload debug monitor
+        if: always() && runner.debug == '1'
+        uses: actions/upload-artifact@v4
+        with:
+          name: monitor-macos-llvm-${{ matrix.LLVM_VERSION }}
+          path: ci-monitor/
           if-no-files-found: ignore
           retention-days: 14
       - name: Publish package
