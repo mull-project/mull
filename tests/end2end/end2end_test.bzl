@@ -16,12 +16,19 @@ def _mull_e2e_test_impl(ctx):
 
     test_file_paths = " ".join([shell.quote(f.short_path) for f in test_files])
 
+    anchor = "include/fmt/base.h"
+    anchor_files = [f for f in ctx.files.fmt_srcs if f.short_path.endswith("/" + anchor)]
+    if len(anchor_files) != 1:
+        fail("expected exactly one %s in fmt_srcs" % anchor)
+    fmt_src_root = anchor_files[0].short_path[:-len(anchor)]
+
     script_content = """#!/bin/bash
 set -e
 
 MULL_RUNNER="{mull_runner}"
 MULL_REPORTER="{mull_reporter}"
 MULL_CONFIG="{mull_config}"
+SQLITE3="{sqlite3}"
 EXPECTED="{expected}"
 TEST_FILES=({test_files})
 TEST_ARGS=({test_args})
@@ -34,13 +41,26 @@ for test_file in "${{TEST_FILES[@]}}"; do
     "$MULL_RUNNER" --allow-surviving --reporters SQLite --report-name fmtlib -minimum-timeout 500 "$test_file" "${{TEST_ARGS[@]}}"
 done
 
-# Step 2: Run mull-reporter to generate IDE report
+# Step 2: Point mutants at the fmt sources shipped with the test
+ANCHOR_PATH="$(realpath "{fmt_src_root}{anchor}")"
+FMT_SRC_ROOT="${{ANCHOR_PATH%{anchor}}}"
+BUILD_SRC_ROOT=$("$SQLITE3" fmtlib.sqlite "SELECT substr(filename, 1, length(filename) - length('{anchor}')) FROM mutant WHERE filename LIKE '%/{anchor}' LIMIT 1;")
+if [ -z "$BUILD_SRC_ROOT" ]; then
+    echo "FAIL: cannot find {anchor} in fmtlib.sqlite"
+    exit 1
+fi
+# mull-reporter takes mutant locations from mutant_id
+"$SQLITE3" fmtlib.sqlite "UPDATE mutant SET mutant_id = replace(mutant_id, '$BUILD_SRC_ROOT', '$FMT_SRC_ROOT'), filename = replace(filename, '$BUILD_SRC_ROOT', '$FMT_SRC_ROOT'), directory = replace(directory, '$BUILD_SRC_ROOT', '$FMT_SRC_ROOT');"
+
+# Step 3: Run mull-reporter to generate IDE report
 "$MULL_REPORTER" --allow-surviving -ide-reporter-show-killed -report-name fmt_ide_report fmtlib.sqlite
 
-# Step 3: Make paths relative for comparison
-awk -F"e2e_test_fmt/" ' {{ print $NF }} ' fmt_ide_report.txt > fmt_ide_report_relative_paths.txt
+# Step 4: Make paths relative for comparison
+while IFS= read -r line; do
+    printf '%s\\n' "${{line//"$FMT_SRC_ROOT"/}}"
+done < fmt_ide_report.txt > fmt_ide_report_relative_paths.txt
 
-# Step 4: Compare with expected
+# Step 5: Compare with expected
 if diff -u "$EXPECTED" fmt_ide_report_relative_paths.txt; then
     echo "PASS: Output matches expected"
     exit 0
@@ -54,6 +74,9 @@ fi
         mull_runner = ctx.executable.mull_runner.short_path,
         mull_reporter = ctx.executable.mull_reporter.short_path,
         mull_config = ctx.file.mull_config.short_path,
+        sqlite3 = ctx.executable.sqlite3.short_path,
+        fmt_src_root = fmt_src_root,
+        anchor = anchor,
         expected = ctx.file.expected.short_path,
         test_files = test_file_paths,
         test_args = " ".join([shell.quote(a) for a in ctx.attr.test_args]),
@@ -66,9 +89,10 @@ fi
         files = [
             ctx.executable.mull_runner,
             ctx.executable.mull_reporter,
+            ctx.executable.sqlite3,
             ctx.file.mull_config,
             ctx.file.expected,
-        ] + test_files,
+        ] + test_files + ctx.files.fmt_srcs,
     )
     runfiles = runfiles.merge(ctx.attr.mull_runner[DefaultInfo].default_runfiles)
     runfiles = runfiles.merge(ctx.attr.mull_reporter[DefaultInfo].default_runfiles)
@@ -85,6 +109,8 @@ mull_e2e_test = rule(
         "fmt_target": attr.label(mandatory = True),
         "mull_runner": attr.label(executable = True, mandatory = True, cfg = "exec"),
         "mull_reporter": attr.label(executable = True, mandatory = True, cfg = "exec"),
+        "sqlite3": attr.label(executable = True, mandatory = True, cfg = "exec"),
+        "fmt_srcs": attr.label(mandatory = True, allow_files = True),
         "mull_config": attr.label(mandatory = True, allow_single_file = True),
         "expected": attr.label(mandatory = True, allow_single_file = True),
         "test_args": attr.string_list(),
@@ -160,6 +186,8 @@ def define_end2end_test_targets(name):
                 fmt_target = ":fmt_e2e_%s" % llvm_version,
                 mull_runner = "//rust/mull-tools:mull-runner-%s" % llvm_version,
                 mull_reporter = "//rust/mull-tools:mull-reporter-%s" % llvm_version,
+                sqlite3 = "//tests/integration:sqlite3",
+                fmt_srcs = "@e2e_test_fmt//:all_srcs",
                 mull_config = ":mull.yml",
                 expected = ":fmtlib_expected_ide_report_%s_%s%s.txt" % (os, arch, expected_suffix),
                 # macOS 26 system frameworks leave FE_INEXACT set before main
