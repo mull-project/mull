@@ -72,12 +72,12 @@ use_repo(python, "python_3_14")
 
 pip = use_extension("@rules_python//python/extensions:pip.bzl", "pip")
 pip.parse(
-    hub_name = "pypi",
+    hub_name = "mull_pypi",
     python_version = "3.14",
     requirements_darwin = "requirements_lock_macos.txt",
     requirements_linux = "requirements_lock_linux.txt",
 )
-use_repo(pip, "pypi")
+use_repo(pip, "mull_pypi")
 
 rules_python_config = use_extension("@rules_python//python/extensions:config.bzl", "config")
 rules_python_config.explicit_init_py(default = True)

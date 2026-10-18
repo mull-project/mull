@@ -1,4 +1,4 @@
-load("@pypi//:requirements.bzl", "requirement")
+load("@mull_pypi//:requirements.bzl", "requirement")
 load("@rules_python//python:defs.bzl", "py_binary")
 load(":homebrew_config.bzl", "homebrew_config")
 load(":mull_devcontainers.bzl", "mull_devcontainers")
