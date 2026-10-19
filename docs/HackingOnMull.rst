@@ -48,8 +48,8 @@ The following commands setup a devcontainer using ``Ubuntu 24.04, LLVM 17`` and 
 .. code-block:: bash
 
     npm install -g @devcontainers/cli
-    devcontainer up --workspace-folder . --config ./.devcontainer/ubuntu_24.04_17/devcontainer.json
-    devcontainer exec --workspace-folder . --config ./.devcontainer/ubuntu_24.04_17/devcontainer.json bash
+    devcontainer up --workspace-folder . --config ./.devcontainer/ubuntu_24.04-llvm-17/devcontainer.json
+    devcontainer exec --workspace-folder . --config ./.devcontainer/ubuntu_24.04-llvm-17/devcontainer.json bash
     bazel build ...
     bazel test ...
 

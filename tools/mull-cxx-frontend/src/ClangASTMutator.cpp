@@ -68,11 +68,7 @@ clang::IfStmt *ClangASTMutator::createMutatedStatement(clang::Stmt *oldStmt, cla
                                       clang::CastKind::CK_PointerToBoolean,
                                       getenvCallExpr,
                                       nullptr,
-#if LLVM_VERSION_MAJOR >= 13
                                       clang::VK_PRValue,
-#else
-                                      clang::VK_RValue,
-#endif
                                       clang::FPOptionsOverride());
 
   std::vector<clang::Stmt *> thenStmtsVec = {};
@@ -80,22 +76,12 @@ clang::IfStmt *ClangASTMutator::createMutatedStatement(clang::Stmt *oldStmt, cla
     thenStmtsVec.push_back(newStmt);
   }
   llvm::ArrayRef<clang::Stmt *> thenStmts = thenStmtsVec;
-  clang::CompoundStmt *compoundThenStmt = clang::CompoundStmt::Create(context,
-                                                                      thenStmts,
-#if LLVM_VERSION_MAJOR >= 15
-                                                                      clang::FPOptionsOverride(),
-#endif
-                                                                      NULL_LOCATION,
-                                                                      NULL_LOCATION);
+  clang::CompoundStmt *compoundThenStmt = clang::CompoundStmt::Create(
+      context, thenStmts, clang::FPOptionsOverride(), NULL_LOCATION, NULL_LOCATION);
 
   llvm::MutableArrayRef<clang::Stmt *> elseStmts = { oldStmt };
-  clang::CompoundStmt *compoundElseStmt = clang::CompoundStmt::Create(context,
-                                                                      elseStmts,
-#if LLVM_VERSION_MAJOR >= 15
-                                                                      clang::FPOptionsOverride(),
-#endif
-                                                                      NULL_LOCATION,
-                                                                      NULL_LOCATION);
+  clang::CompoundStmt *compoundElseStmt = clang::CompoundStmt::Create(
+      context, elseStmts, clang::FPOptionsOverride(), NULL_LOCATION, NULL_LOCATION);
 
   clang::IfStmt *ifStmt =
       factory.createIfStmt(implicitCastExpr, compoundThenStmt, compoundElseStmt);
@@ -114,11 +100,7 @@ clang::ConditionalOperator *ClangASTMutator::createMutatedExpression(clang::Expr
                                       clang::CastKind::CK_PointerToBoolean,
                                       mullShouldMutateCallExpr,
                                       nullptr,
-#if LLVM_VERSION_MAJOR >= 13
                                       clang::VK_PRValue,
-#else
-                                      clang::VK_RValue,
-#endif
                                       clang::FPOptionsOverride());
 
   clang::ConditionalOperator *conditionalOperator =
@@ -149,22 +131,15 @@ clang::CallExpr *ClangASTMutator::createGetenvCallExpr(std::string identifier) {
       factory.createImplicitCastExpr(declRefExpr,
                                      context.getPointerType(_getenvFuncDecl->getType()),
                                      clang::CastKind::CK_FunctionToPointerDecay,
-#if LLVM_VERSION_MAJOR >= 13
-                                     clang::VK_PRValue
-#else
-                                     clang::VK_RValue
-#endif
-      );
+                                     clang::VK_PRValue);
 
   clang::StringLiteral *stringLiteral = clang::StringLiteral::Create(
       context,
       identifier,
 #if LLVM_VERSION_MAJOR >= 18
       clang::StringLiteralKind::Ordinary,
-#elif LLVM_VERSION_MAJOR >= 15
-      clang::StringLiteral::StringKind::Ordinary,
 #else
-      clang::StringLiteral::StringKind::Ascii,
+      clang::StringLiteral::StringKind::Ordinary,
 #endif
       false,
       factory.getStringLiteralArrayType(context.CharTy, identifier.size()),
@@ -176,22 +151,11 @@ clang::CallExpr *ClangASTMutator::createGetenvCallExpr(std::string identifier) {
                                       clang::CastKind::CK_ArrayToPointerDecay,
                                       stringLiteral,
                                       nullptr,
-#if LLVM_VERSION_MAJOR >= 13
                                       clang::VK_PRValue,
-#else
-                                      clang::VK_RValue,
-#endif
                                       clang::FPOptionsOverride());
 
-  clang::CallExpr *callExpr = factory.createCallExprSingleArg(implicitCastExpr,
-                                                              implicitCastExpr2,
-                                                              _getenvFuncDecl->getReturnType(),
-#if LLVM_VERSION_MAJOR >= 13
-                                                              clang::VK_PRValue
-#else
-                                                              clang::VK_RValue
-#endif
-  );
+  clang::CallExpr *callExpr = factory.createCallExprSingleArg(
+      implicitCastExpr, implicitCastExpr2, _getenvFuncDecl->getReturnType(), clang::VK_PRValue);
 
   return callExpr;
 }

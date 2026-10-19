@@ -18,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        LLVM_VERSION: [14, 15, 16, 17, 18, 19, 20]
+        LLVM_VERSION: [16, 17, 18, 19, 20]
     name: Ubuntu 24.04 - LLVM ${{ matrix.LLVM_VERSION }}
     steps:
       - uses: actions/checkout@v7
@@ -104,7 +104,7 @@ jobs:
           curl -1sLf 'https://dl.cloudsmith.io/public/mull-project/mull-${{ steps.metadata.outputs.cs_repo }}/setup.deb.sh' | bash
       - name: Install and test all mull packages
         run: |
-          for version in 14 15 16 17 18 19 20; do
+          for version in 16 17 18 19 20; do
             echo "=== Testing LLVM $version ==="
             apt-get install -y mull-$version
 
