@@ -145,14 +145,7 @@ mull_supported_llvm_versions.configure(
             "22",
             "23",
         ],
-        "ubuntu:22.04": [
-            "13",
-            "14",
-            "15",
-        ],
         "ubuntu:24.04": [
-            "14",
-            "15",
             "16",
             "17",
             "18",
@@ -183,9 +176,6 @@ mull_package_info = use_extension("//:mull_package_info.bzl", "mull_package_info
 use_repo(mull_package_info, "mull_package_info")
 
 SUPPORTED_LLVM_VERSIONS = [
-    "13",
-    "14",
-    "15",
     "16",
     "17",
     "18",

@@ -23,9 +23,7 @@ clang::FunctionDecl *ASTNodeFactory::createFunctionDecl(std::string name,
                                      functionType,
                                      context.getTrivialTypeSourceInfo(functionType),
                                      clang::StorageClass::SC_Extern,
-#if LLVM_VERSION_MAJOR > 13
                                      false, /// bool UsesFPIntrin = false,
-#endif
                                      false, /// bool isInlineSpecified = false,
                                      true,  /// bool hasWrittenPrototype = true,
                                      clang::ConstexprSpecKind::Unspecified);
@@ -52,10 +50,8 @@ clang::StringLiteral *ASTNodeFactory::createStringLiteral(std::string value) {
       value,
 #if LLVM_VERSION_MAJOR >= 18
       clang::StringLiteralKind::Ordinary,
-#elif LLVM_VERSION_MAJOR >= 15
-      clang::StringLiteral::StringKind::Ordinary,
 #else
-      clang::StringLiteral::StringKind::Ascii,
+      clang::StringLiteral::StringKind::Ordinary,
 #endif
       false,
       getConstantArrayType(context.getConstType(context.CharTy), value.size()),
@@ -68,11 +64,7 @@ clang::IfStmt *ASTNodeFactory::createIfStmt(clang::Expr *condExpr, clang::Stmt *
   assert(thenStmt);
   clang::IfStmt *ifStmt = clang::IfStmt::Create(context,
                                                 NULL_LOCATION,
-#if LLVM_VERSION_MAJOR > 13
                                                 clang::IfStatementKind::Ordinary,
-#else
-                                                false,
-#endif
                                                 nullptr,
                                                 nullptr,
                                                 condExpr,

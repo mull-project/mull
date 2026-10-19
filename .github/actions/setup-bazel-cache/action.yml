@@ -5,7 +5,7 @@ inputs:
     description: 'API key for buildbuddy.io'
     required: true
   PLATFORM:
-    description: 'Platform identifier for cache segregation (e.g., ubuntu-22.04-x86_64). If not provided, auto-detected from current OS.'
+    description: 'Platform identifier for cache segregation (e.g., ubuntu-24.04-x86_64). If not provided, auto-detected from current OS.'
     required: false
 runs:
   using: "composite"

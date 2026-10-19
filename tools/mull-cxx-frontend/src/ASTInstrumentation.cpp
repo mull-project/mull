@@ -33,11 +33,7 @@ void ASTInstrumentation::addMutantStringDefinition(std::string identifier, int m
   clang::IdentifierInfo &varDeclIdentifierInfo = context.Idents.get(variableName);
 
   clang::StringLiteral *literal = factory.createStringLiteral(identifier);
-#if LLVM_VERSION_MAJOR >= 13
   literal->setValueKind(clang::VK_PRValue);
-#else
-  literal->setValueKind(clang::VK_RValue);
-#endif
 
   clang::QualType qualType =
       factory.getStringLiteralArrayType(context.getConstType(context.CharTy), identifier.size());

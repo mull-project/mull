@@ -22,11 +22,7 @@ public:
 
 extern "C" __attribute__((visibility("default"))) LLVM_ATTRIBUTE_WEAK ::llvm::PassPluginLibraryInfo
 llvmGetPassPluginInfo() {
-#if LLVM_VERSION_MAJOR > 13
   using OptimizationLevel = llvm::OptimizationLevel;
-#else
-  using OptimizationLevel = llvm::PassBuilder::OptimizationLevel;
-#endif
 
   return { LLVM_PLUGIN_API_VERSION,
            "mull-ir-frontend",

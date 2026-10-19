@@ -28,7 +28,7 @@ Install the package:
     # Ubuntu / Debian
     sudo apt-get update && apt-get install mull-19
     # Red Hat
-    sudo yum update && yum install mull-19
+    sudo yum update && yum install mull-21
 
 Check if everything works:
 

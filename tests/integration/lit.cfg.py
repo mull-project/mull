@@ -70,14 +70,4 @@ else:
     config.substitutions.append(("%libcxx", "-stdlib=libstdc++ -lstdc++"))
     config.available_features.add("LINUX")
 
-if int(llvm_major_version) >= 16:
-    config.substitutions.append(
-        ("%pass_mull_ir_frontend", "-fpass-plugin=" + mull_ir_frontend)
-    )
-else:
-    config.substitutions.append(
-        (
-            "%pass_mull_ir_frontend",
-            "-fexperimental-new-pass-manager -fpass-plugin=" + mull_ir_frontend,
-        )
-    )
+config.substitutions.append(("%pass_mull_ir_frontend", "-fpass-plugin=" + mull_ir_frontend))
