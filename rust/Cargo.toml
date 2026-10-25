@@ -21,12 +21,12 @@ git2 = { version = "0.21", default-features = false, features = [
 ] }
 indoc = "2"
 libc = "0.2"
-llvm_profparser = "0.15"
+llvm_profparser = { version = "0.15", default-features = false }
 object = { version = "0.40", features = ["read"] }
 proc-macro2 = "1"
 rayon = "1"
 regex = "1"
-rusqlite = { version = "0.40", features = ["bundled"] }
+rusqlite = { version = "0.41", features = ["bundled"] }
 schemars = { version = "1", features = ["derive", "preserve_order"] }
 serde = { version = "1", features = ["derive"] }
 serde-saphyr = "2"
