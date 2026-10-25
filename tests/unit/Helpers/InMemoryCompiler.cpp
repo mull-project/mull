@@ -11,7 +11,7 @@
 #if LLVM_VERSION_MAJOR >= 20
 #include <llvm/Support/VirtualFileSystem.h>
 #endif
-#if LLVM_VERSION_MAJOR >= 18
+#if LLVM_VERSION_MAJOR >= 17
 #include <llvm/TargetParser/Host.h>
 #else
 #include <llvm/Support/Host.h>
