@@ -36,7 +36,7 @@ It is also recommended to specify the report name via ``-report-name``, e.g.:
 
 .. code-block:: bash
 
-    mull-runner-18 --reporters=SQLite --report-name=tutorial ./bin/core-test
+    mull-runner --reporters=SQLite --report-name=tutorial ./bin/core-test
 
 In the end, you should see something like this:
 
@@ -87,9 +87,6 @@ The ``information`` table stores a number of key/value pairs with certain facts 
 .. code-block::
 
     sqlite> select * from information;
-      key = LLVM Version
-    value = 12.0.1
-
       key = Build Date
     value = 08 Mar 2022
 

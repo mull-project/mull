@@ -12,7 +12,65 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
+  # mull-runner/mull-reporter don't depend on LLVM; any of the CI images can build them
+  tools:
+    runs-on: ubuntu-26.04
+    timeout-minutes: 30
+    name: Debian 13 - tools
+    steps:
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/detect-package-metadata
+      - uses: ./.github/actions/setup-bazel-cache
+        with:
+          BUILDBUDDY_API_KEY: ${{ secrets.BUILDBUDDY_API_KEY }}
+          PLATFORM: debian-13-x86_64
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.repository_owner }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Build and package
+        uses: devcontainers/ci@v0.3
+        with:
+          imageName: ghcr.io/mull-project/internal-debian-x86_64_13-llvm-22-ci
+          configFile: ./.devcontainer/debian_13-llvm-22/devcontainer.json
+          runCmd: |
+            set -e
+            mkdir -p packages
+            bazel build //:mull_tools_packages --stamp
+            mv -v bazel-bin/Mull-*.deb packages/
+      - name: Publish package
+        uses: devcontainers/ci@v0.3
+        if: env.CLOUDSMITH_API_KEY != null
+        with:
+          imageName: ghcr.io/mull-project/internal-debian-x86_64_13-llvm-22-ci
+          configFile: ./.devcontainer/debian_13-llvm-22/devcontainer.json
+          push: never
+          env: CLOUDSMITH_API_KEY
+          runCmd: |
+            bazel run publish_tools --stamp && exit 0
+
+            max_attempts=3
+            attempt=1
+            until [ "$attempt" -ge "$max_attempts" ]
+            do
+              echo "Attempt $attempt failed. Retrying..."
+              attempt=$((attempt+1))
+              bazel run publish_tools --stamp && exit 0
+            done
+            echo "All $max_attempts attempts failed."
+            exit 1
+      - name: Move package
+        run: |
+          mkdir -p /tmp/packages
+          sudo mv -v packages/Mull-*.deb /tmp/packages/
+      - uses: ./.github/actions/attach-package
+        with:
+          GH_API_KEY: ${{ secrets.GITHUB_TOKEN }}
   build-and-test:
+    # mull-N packages depend on the exact mull version, so publish them only after it
+    needs: [tools]
+    if: ${{ !cancelled() }}
     runs-on: ubuntu-26.04
     timeout-minutes: 30
     strategy:
@@ -41,7 +99,7 @@ jobs:
             set -e
             mkdir -p packages
             bazel test //... || { cp -RL bazel-testlogs ci-testlogs; exit 1; }
-            bazel build //:mull_packages --stamp
+            bazel build //:mull_llvm_packages --stamp
             mv -v bazel-bin/Mull-*.deb packages/
       - name: Upload test logs
         if: failure()
@@ -53,7 +111,7 @@ jobs:
           retention-days: 14
       - name: Publish package
         uses: devcontainers/ci@v0.3
-        if: env.CLOUDSMITH_API_KEY != null
+        if: env.CLOUDSMITH_API_KEY != null && needs.tools.result == 'success'
         with:
           imageName: ghcr.io/mull-project/internal-debian-x86_64_13-llvm-${{ matrix.LLVM_VERSION }}-ci
           configFile: ./.devcontainer/debian_13-llvm-${{ matrix.LLVM_VERSION }}/devcontainer.json
@@ -104,21 +162,33 @@ jobs:
           curl -1sLf 'https://dl.cloudsmith.io/public/mull-project/mull-${{ steps.metadata.outputs.cs_repo }}/setup.deb.sh' | bash
       - name: Install and test all mull packages
         run: |
+          apt-get install -y mull
+          runner_version=$(mull-runner --version)
+          echo "$runner_version"
+          if echo "$runner_version" | grep -q '{STABLE_'; then
+            echo "ERROR: mull-runner contains unexpanded stamp variable"
+            exit 1
+          fi
+
+          reporter_version=$(mull-reporter --version)
+          echo "$reporter_version"
+          if echo "$reporter_version" | grep -q '{STABLE_'; then
+            echo "ERROR: mull-reporter contains unexpanded stamp variable"
+            exit 1
+          fi
+
           for version in 17 18 19 22; do
             echo "=== Testing LLVM $version ==="
             apt-get install -y mull-$version
 
-            runner_version=$(mull-runner-$version --version)
-            echo "$runner_version"
-            if echo "$runner_version" | grep -q '{STABLE_'; then
-              echo "ERROR: mull-runner-$version contains unexpanded stamp variable"
+            plugins=$(mull-runner --version)
+            echo "$plugins"
+            if ! echo "$plugins" | grep -q "mull-ir-frontend-$version (mull [0-9]"; then
+              echo "ERROR: mull-runner does not list a stamped mull-ir-frontend-$version"
               exit 1
             fi
 
-            reporter_version=$(mull-reporter-$version --version)
-            echo "$reporter_version"
-            if echo "$reporter_version" | grep -q '{STABLE_'; then
-              echo "ERROR: mull-reporter-$version contains unexpanded stamp variable"
-              exit 1
-            fi
+            # Deprecated versioned names, kept as symlinks
+            mull-runner-$version --version
+            mull-reporter-$version --version
           done

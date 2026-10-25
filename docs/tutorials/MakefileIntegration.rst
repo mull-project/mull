@@ -51,7 +51,7 @@ Step 4. Run Mull against OpenSSL's tests
 
 .. code-block:: bash
 
-    mull-runner-18 ./test/bio_enc_test
+    mull-runner ./test/bio_enc_test
 
 You should see similar (and pretty long) output:
 

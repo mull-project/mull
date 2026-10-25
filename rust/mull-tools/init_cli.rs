@@ -1,3 +1,4 @@
+use crate::plugins::{describe_plugins, installed_plugins};
 use clap::{CommandFactory, FromArgMatches};
 use mull_core::config::{HasSharedCli, MullConfigSpec, SharedCli};
 use mull_core::diagnostics::MullDiagnostics;
@@ -99,28 +100,28 @@ fn override_config(shared: &SharedCli, yaml_config: &mut MullConfigSpec) {
     }
 }
 
-fn long_version_string(mull_version: &str, llvm_version: &str) -> &'static str {
+fn long_version_string(mull_version: &str) -> &'static str {
+    let plugins = std::env::current_exe()
+        .map(|exe| installed_plugins(&exe))
+        .unwrap_or_default();
     let s = format!(
         "{}\n\n\
          Mull: Practical mutation testing and fault injection for C and C++\n\
          Home: https://mull-project.com\n\
-         LLVM: {}",
-        mull_version, llvm_version
+         {}",
+        mull_version,
+        describe_plugins(&plugins)
     );
     // Leak is fine: this runs once per CLI invocation then the process exits.
     Box::leak(s.into_boxed_str())
 }
 
-pub fn init_cli<C>(
-    args: Vec<String>,
-    mull_version: String,
-    llvm_version: String,
-) -> (MullConfigSpec, C, MullDiagnostics)
+pub fn init_cli<C>(args: Vec<String>, mull_version: String) -> (MullConfigSpec, C, MullDiagnostics)
 where
     C: CommandFactory + FromArgMatches + HasSharedCli,
 {
     let args = normalize_args(&args);
-    let cmd = C::command().long_version(long_version_string(&mull_version, &llvm_version));
+    let cmd = C::command().long_version(long_version_string(&mull_version));
     let matches = cmd.get_matches_from(&args);
     let cli = C::from_arg_matches(&matches).unwrap();
 

@@ -76,6 +76,8 @@ def main():
         "INSTALL_CMD": install_cmd,
         "CLOUDSMITH_SETUP_SCRIPT": cloudsmith_setup_script,
         "LLVM_VERSIONS_SPACE_SEPARATED": " ".join(args.llvm_versions),
+        # The tools job reuses the image of the newest LLVM; the tools don't depend on it
+        "TOOLS_LLVM_VERSION": max(args.llvm_versions, key=int),
     }
 
     renderer = pystache.Renderer(missing_tags="strict")

@@ -57,6 +57,8 @@ cc_library(
 rust_static_library(
     name = "mull-cxx-bridge",
     srcs = ["src/lib.rs"],
+    rustc_env_files = ["//infrastructure:version.env"],
+    stamp = -1,
     visibility = ["//visibility:public"],
     deps = [
         ":build_script",

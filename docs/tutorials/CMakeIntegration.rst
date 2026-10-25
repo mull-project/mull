@@ -47,7 +47,7 @@ Step 4. Run Mull against fmtlib tests
 
 .. code-block:: bash
 
-    mull-runner-18 ./bin/core-test
+    mull-runner ./bin/core-test
 
 You should see similar output:
 
@@ -101,7 +101,7 @@ After rerunning Mull:
 
 .. code-block:: bash
 
-    $ mull-runner-18 ./bin/core-test
+    $ mull-runner ./bin/core-test
     [info] Using config /tmp/sc-ySbkbNvt3/fmt/mull.yml
     [info] Warm up run (threads: 1)
            [################################] 1/1. Finished in 11ms

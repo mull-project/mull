@@ -19,7 +19,6 @@ RUN: %mull_runner --allow-surviving Output/main.cpp.exe --report-name test --rep
 RUN: %mull_reporter --allow-surviving test.sqlite --report-name test2 --reporters SQLite
 RUN: %sqlite3 ./test.sqlite -line "select * from information order by key" | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=CHECK-INFO
 RUN: %sqlite3 ./test2.sqlite -line "select * from information order by key" | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=CHECK-INFO
-CHECK-INFO:  key: LLVM Version
 CHECK-INFO:  key: Mull Version
 
 RUN: %sqlite3 ./test.sqlite -line "select * from mutant" | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=CHECK-MUTANT

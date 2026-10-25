@@ -51,7 +51,7 @@ To recap, recreate the same setup.
 
 .. code-block:: bash
 
-    $ mull-runner-18 ./test/bio_enc_test
+    $ mull-runner ./test/bio_enc_test
     [info] Using config /tmp/sc-g6cD7gfN4/openssl/mull.yml
     [info] Warm up run (threads: 1)
            [################################] 1/1. Finished in 638ms
@@ -121,7 +121,7 @@ Now, rerun Mull:
 
 .. code-block:: bash
 
-    $ mull-runner-18 ./test/bio_enc_test
+    $ mull-runner ./test/bio_enc_test
     [info] Using config /tmp/sc-g6cD7gfN4/openssl/mull.yml
     [info] Warm up run (threads: 1)
            [################################] 1/1. Finished in 282ms
@@ -173,7 +173,7 @@ Rerun Mull:
 
 .. code-block:: bash
 
-    $ mull-runner-18 ./test/bio_enc_test
+    $ mull-runner ./test/bio_enc_test
     [info] Using config /tmp/sc-g6cD7gfN4/openssl/mull.yml
     [info] Warm up run (threads: 1)
            [################################] 1/1. Finished in 1281ms

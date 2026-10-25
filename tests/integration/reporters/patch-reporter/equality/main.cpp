@@ -26,7 +26,6 @@ CHECK:--- a{{.*}}/Output/sandbox/main.cpp 0
 CHECK:+{{[[:space:]]+}}return a != b;
 CHECK:--
 CHECK:Build Date: {{.*}}
-CHECK:LLVM Version: {{.*}}
 CHECK:Mull Version: {{.*}}
 
 */

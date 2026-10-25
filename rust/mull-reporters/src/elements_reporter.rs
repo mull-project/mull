@@ -224,14 +224,7 @@ impl Reporter for ElementsReporter {
         let total = state.execution_results.len();
         let score = (killed_count * 100) / total;
 
-        let version = state.info.get("Mull Version").map(|v| {
-            let llvm = state
-                .info
-                .get("LLVM Version")
-                .map(|s| s.as_str())
-                .unwrap_or("");
-            format!("{}, LLVM {}", v, llvm)
-        });
+        let version = state.info.get("Mull Version").cloned();
 
         let homepage_url = state.info.get("URL").cloned();
 
