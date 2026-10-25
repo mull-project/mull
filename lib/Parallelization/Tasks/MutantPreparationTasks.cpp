@@ -15,6 +15,24 @@ using namespace mull;
 #define BB_WRAP_ITERATOR(inst) inst
 #endif
 
+/// BranchInst is split into UncondBrInst/CondBrInst since LLVM 23.
+static void createBr(llvm::BasicBlock *target, llvm::BasicBlock *insertAtEnd) {
+#if LLVM_VERSION_MAJOR >= 23
+  llvm::UncondBrInst::Create(target, insertAtEnd);
+#else
+  llvm::BranchInst::Create(target, insertAtEnd);
+#endif
+}
+
+static void createCondBr(llvm::Value *condition, llvm::BasicBlock *ifTrue,
+                         llvm::BasicBlock *ifFalse, llvm::BasicBlock *insertAtEnd) {
+#if LLVM_VERSION_MAJOR >= 23
+  llvm::CondBrInst::Create(condition, ifTrue, ifFalse, insertAtEnd);
+#else
+  llvm::BranchInst::Create(ifTrue, ifFalse, condition, insertAtEnd);
+#endif
+}
+
 /// Typed pointers are gone since LLVM 17; before that the pointee type matters.
 static llvm::PointerType *getPointerTo(llvm::Type *pointee) {
 #if LLVM_VERSION_MAJOR >= 17
@@ -130,7 +148,7 @@ void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode,
     new llvm::StoreInst(bitcode.getModule()->getFunction(anyPoint->getOriginalFunctionName()),
                         trampoline,
                         originalBlock);
-    llvm::BranchInst::Create(trampolineCall, originalBlock);
+    createBr(trampolineCall, originalBlock);
     llvm::BasicBlock *head = originalBlock;
 
     for (auto &point : pair.second) {
@@ -165,12 +183,12 @@ void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode,
       }
       new llvm::StoreInst(point->getMutatedFunction(), trampoline, mutationBlock);
 
-      llvm::BranchInst::Create(mutationBlock, head, predicate, mutationCheckBlock);
-      llvm::BranchInst::Create(trampolineCall, mutationBlock);
+      createCondBr(predicate, mutationBlock, head, mutationCheckBlock);
+      createBr(trampolineCall, mutationBlock);
       head = mutationCheckBlock;
     }
 
-    llvm::BranchInst::Create(head, entry);
+    createBr(head, entry);
     std::vector<llvm::Value *> args;
     for (auto &arg : original->args()) {
       args.push_back(&arg);
