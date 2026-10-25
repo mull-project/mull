@@ -40,7 +40,7 @@ def read_existing_values(formula_path):
 
 FORMULA_TEMPLATE = '''\
 class {class_name} < Formula
-  desc "Practical mutation testing for C and C++{channel_desc} (LLVM {llvm_version})"
+  desc "Practical mutation testing for C and C++: Clang/LLVM {llvm_version} plugin{channel_desc}"
   homepage "https://github.com/mull-project/mull"
   version "{mull_version}"
   license "Apache-2.0"
@@ -91,7 +91,7 @@ end
 
 TOOLS_FORMULA_TEMPLATE = '''\
 class {class_name} < Formula
-  desc "Practical mutation testing for C and C++{channel_desc}"
+  desc "Practical mutation testing for C and C++: core tools{channel_desc}"
   homepage "https://github.com/mull-project/mull"
   version "{mull_version}"
   license "Apache-2.0"
