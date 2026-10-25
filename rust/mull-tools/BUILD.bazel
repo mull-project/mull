@@ -21,7 +21,7 @@ load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_test")
             "//rust/mull-reporters",
             "//rust/mull-state",
             "@crates//:clap",
-            "@crates//:serde_yaml",
+            "@crates//:serde-saphyr",
         ],
     )
     for llvm_version in AVAILABLE_LLVM_VERSIONS
@@ -57,7 +57,7 @@ load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_test")
             "@crates//:clap",
             "@crates//:libc",
             "@crates//:object",
-            "@crates//:serde_yaml",
+            "@crates//:serde-saphyr",
             "@crates//:wait-timeout",
         ],
     )
@@ -92,7 +92,7 @@ rust_test(
         "@crates//:clap",
         "@crates//:libc",
         "@crates//:object",
-        "@crates//:serde_yaml",
+        "@crates//:serde-saphyr",
         "@crates//:wait-timeout",
     ],
 )

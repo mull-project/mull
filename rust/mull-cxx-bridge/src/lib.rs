@@ -203,7 +203,6 @@ impl MullCore {
 }
 
 /// FFI wrapper for CLI initialization
-
 fn init_core_ffi(output: ffi::DiagOutput) -> Box<MullCore> {
     let use_stderr = matches!(output, ffi::DiagOutput::Stderr);
     let (diag, config) = mull_core::init_core(use_stderr);

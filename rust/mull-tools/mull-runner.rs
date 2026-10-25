@@ -111,7 +111,7 @@ fn main() {
     // Build environment for warmup run
     let mut warmup_env: Vec<(&str, &str)> = Vec::new();
     let raw_coverage_path_ref = raw_coverage_path.as_deref();
-    if let Some(ref raw_path) = raw_coverage_path_ref {
+    if let Some(raw_path) = raw_coverage_path_ref {
         warmup_env.push(("LLVM_PROFILE_FILE", raw_path));
     }
 
@@ -185,7 +185,7 @@ fn main() {
     if cli.dry_run || config.dry_run_enabled {
         let all_mutants: Vec<Mutant> = filtered_mutants
             .into_iter()
-            .chain(not_covered_mutants.into_iter())
+            .chain(not_covered_mutants)
             .collect();
         let mut state = ExecutionState::default();
         run_task(&diag, "Dry run", || {

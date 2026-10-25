@@ -10,8 +10,8 @@ rust_binary(
         "@crates//:clap_complete",
         "@crates//:clap_mangen",
         "@crates//:schemars",
+        "@crates//:serde-saphyr",
         "@crates//:serde_json",
-        "@crates//:serde_yaml",
     ],
 )
 

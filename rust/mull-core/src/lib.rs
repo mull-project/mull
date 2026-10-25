@@ -102,10 +102,10 @@ impl MullCLI {
 }
 
 pub fn get_config_path() -> Option<String> {
-    if let Ok(path) = env::var("MULL_CONFIG") {
-        if !path.is_empty() {
-            return Some(path);
-        }
+    if let Ok(path) = env::var("MULL_CONFIG")
+        && !path.is_empty()
+    {
+        return Some(path);
     }
     let cwd = env::current_dir().ok()?;
     let mut dir = cwd.as_path();
@@ -232,7 +232,7 @@ fn default_config() -> MullConfig {
 
 fn parse_yaml(yaml: &str) -> Result<MullConfig, String> {
     let parsed: MullConfigSpec =
-        serde_yaml::from_str(yaml).map_err(|e| format!("Failed to parse YAML: {}", e))?;
+        serde_saphyr::from_str(yaml).map_err(|e| format!("Failed to parse YAML: {}", e))?;
     Ok(parsed.to_runtime())
 }
 
