@@ -13,7 +13,80 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 jobs:
+  # mull-runner/mull-reporter don't depend on LLVM
+  tools:
+    name: macOS - tools
+    runs-on: macos-26
+    timeout-minutes: 30
+    steps:
+      - name: Fix git
+        run: |
+          git config --global --add safe.directory $PWD
+      - uses: actions/checkout@v7
+      - uses: ./.github/actions/detect-package-metadata
+      - uses: ./.github/actions/setup-bazel-cache
+        with:
+          BUILDBUDDY_API_KEY: ${{ secrets.BUILDBUDDY_API_KEY }}
+      - name: Build and package
+        run: |
+          brew install bazelisk
+          bazel build //:mull_tools_packages //infrastructure:homebrew_config --stamp
+      - name: Publish package
+        if: env.CLOUDSMITH_API_KEY != null
+        run: |
+          bazel run publish_tools --stamp && exit 0
+
+          max_attempts=3
+          attempt=1
+          until [ "$attempt" -ge "$max_attempts" ]
+          do
+            echo "Attempt $attempt failed. Retrying..."
+            attempt=$((attempt+1))
+            bazel run publish_tools --stamp && exit 0
+          done
+          echo "All $max_attempts attempts failed."
+          exit 1
+      - name: Trigger Homebrew tap update
+        if: env.HOMEBREW_TAP_TOKEN != null && success()
+        run: |
+          CS_REPO=$(cat .mull-ci-cs-repo)
+          MULL_VERSION=$(jq -r .mull_version bazel-bin/infrastructure/homebrew_config.json)
+          PACKAGE_PATH=$(ls bazel-bin/Mull-*-macOS-*.zip | grep -v -- '-LLVM-')
+          PACKAGE_FILENAME=$(basename "$PACKAGE_PATH")
+          PACKAGE_SHA256=$(shasum -a 256 "$PACKAGE_PATH" | cut -d' ' -f1)
+
+          echo "Triggering Homebrew tap update:"
+          echo "  Channel: $CS_REPO"
+          echo "  Version: $MULL_VERSION"
+          echo "  Filename: $PACKAGE_FILENAME"
+          echo "  SHA256: $PACKAGE_SHA256"
+
+          # An empty llvm_version selects the tools formula
+          curl -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${{ env.HOMEBREW_TAP_TOKEN }}" \
+            https://api.github.com/repos/mull-project/homebrew-mull/dispatches \
+            -d "{
+              \"event_type\": \"update-formula\",
+              \"client_payload\": {
+                \"channel\": \"$CS_REPO\",
+                \"mull_version\": \"$MULL_VERSION\",
+                \"llvm_version\": \"\",
+                \"package_filename\": \"$PACKAGE_FILENAME\",
+                \"package_sha256\": \"$PACKAGE_SHA256\"
+              }
+            }"
+      - name: Move package
+        run: |
+          mkdir -p /tmp/packages
+          cp -v bazel-bin/Mull-*.zip /tmp/packages/
+      - uses: ./.github/actions/attach-package
+        with:
+          GH_API_KEY: ${{ secrets.GITHUB_TOKEN }}
   macos:
+    # mull@N formulas depend on the exact mull version, so publish them only after it
+    needs: [tools]
+    if: ${{ !cancelled() }}
     name: macOS - LLVM ${{ matrix.LLVM_VERSION }}
     runs-on: macos-26
     timeout-minutes: 30
@@ -50,7 +123,7 @@ jobs:
           done
           brew install bazelisk zlib ncurses sqlite ninja llvm@${{ matrix.LLVM_VERSION }}
           bazel test //... || { cp -RL bazel-testlogs ci-testlogs; exit 1; }
-          bazel build //:mull_packages --stamp
+          bazel build //:mull_llvm_packages --stamp
       - name: Upload test logs
         if: failure()
         uses: actions/upload-artifact@v4
@@ -68,7 +141,7 @@ jobs:
           if-no-files-found: ignore
           retention-days: 14
       - name: Publish package
-        if: env.CLOUDSMITH_API_KEY != null
+        if: env.CLOUDSMITH_API_KEY != null && needs.tools.result == 'success'
         run: |
           bazel run publish --stamp && exit 0
 
@@ -83,7 +156,7 @@ jobs:
           echo "All $max_attempts attempts failed."
           exit 1
       - name: Trigger Homebrew tap update
-        if: env.HOMEBREW_TAP_TOKEN != null && success()
+        if: env.HOMEBREW_TAP_TOKEN != null && success() && needs.tools.result == 'success'
         run: |
           CS_REPO=$(cat .mull-ci-cs-repo)
           MULL_VERSION=$(jq -r .mull_version bazel-bin/infrastructure/homebrew_config.json)

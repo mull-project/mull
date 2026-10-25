@@ -189,8 +189,8 @@ def define_end2end_test_targets(name):
             mull_e2e_test(
                 name = "fmtlib_e2e_test_%s_%s_%s" % (os, arch, llvm_version),
                 fmt_target = ":fmt_e2e_%s" % llvm_version,
-                mull_runner = "//rust/mull-tools:mull-runner-%s" % llvm_version,
-                mull_reporter = "//rust/mull-tools:mull-reporter-%s" % llvm_version,
+                mull_runner = "//rust/mull-tools:mull-runner",
+                mull_reporter = "//rust/mull-tools:mull-reporter",
                 sqlite3 = "//tests/integration:sqlite3",
                 fmt_srcs = "@e2e_test_fmt//:all_srcs",
                 mull_config = ":mull.yml",

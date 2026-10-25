@@ -11,6 +11,15 @@
 
 namespace {
 
+// Markers read by `mull-runner --version`; `retain` keeps them under --gc-sections
+#if defined(__APPLE__)
+#define MULL_KEEP __attribute__((used))
+#else
+#define MULL_KEEP __attribute__((used, retain))
+#endif
+MULL_KEEP const char llvmVersionMarker[] = "mull-plugin-llvm:" LLVM_VERSION_STRING;
+MULL_KEEP rust::Str (*const mullVersionMarker)() = plugin_version_marker;
+
 class MullIRFrontend : public llvm::PassInfoMixin<MullIRFrontend> {
 public:
   llvm::PreservedAnalyses run(llvm::Module &module, llvm::ModuleAnalysisManager &mam) {

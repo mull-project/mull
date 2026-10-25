@@ -20,24 +20,23 @@ Step 1: Checking version
 ------------------------
 
 Mull comes in a form of a compiler plugin and therefore tied to specific versions
-of Clang and LLVM. As a consequence of that, tools and plugins have a suffix with
-the actual Clang/LLVM version.
+of Clang and LLVM. The plugin and ``mull-instrument`` have a suffix with the
+actual Clang/LLVM version, while ``mull-runner`` and ``mull-reporter`` work with
+any of them and list the installed plugins.
 
 This tutorial assumes that you are using Clang 18 and that you have
-:doc:`installed <../Installation>` Mull on your system and have the ``mull-runner-18``
+:doc:`installed <../Installation>` Mull on your system and have the ``mull-runner``
 executable available:
 
 .. code-block:: bash
 
-    $ mull-runner-18 -version
-    Mull: Practical mutation testing for C and C++
-    Home: https://github.com/mull-project/mull
-    Docs: https://mull.readthedocs.io
-    Support: https://mull.readthedocs.io/en/latest/Support.html
-    Version: 0.26.1
-    Commit: 859af43
-    Date: 06 Apr 2025
-    LLVM: 18.1.8
+    $ mull-runner -version
+    mull-runner 0.36.0
+
+    Mull: Practical mutation testing and fault injection for C and C++
+    Home: https://mull-project.com
+    Plugins:
+      /usr/lib/mull-ir-frontend-18 (mull 0.36.0, LLVM 18.1.8)
 
 Step 2: Enabling compiler plugin
 --------------------------------
@@ -60,7 +59,7 @@ We can already try using ``mull-runner`` and see what happens:
 
 .. code-block:: text
 
-    $ mull-runner-18 ./hello-world
+    $ mull-runner ./hello-world
     [info] Warm up run (threads: 1)
            [################################] 1/1. Finished in 5ms
     [info] Baseline run (threads: 1)
@@ -96,7 +95,7 @@ Let's run ``mull-runner`` again:
 
 .. code-block:: text
 
-    $ mull-runner-18 ./hello-world
+    $ mull-runner ./hello-world
     [info] Warm up run (threads: 1)
            [################################] 1/1. Finished in 4ms
     [info] Baseline run (threads: 1)
@@ -149,7 +148,7 @@ verbose.
         -fpass-plugin=/usr/lib/mull-ir-frontend-18 \
         -g -grecord-command-line \
         main.cpp -o hello-world
-    $ mull-runner-18 -ide-reporter-show-killed hello-world
+    $ mull-runner -ide-reporter-show-killed hello-world
     [info] Warm up run (threads: 1)
            [################################] 1/1. Finished in 151ms
     [info] Baseline run (threads: 1)
@@ -225,7 +224,7 @@ The code:
         -fpass-plugin=/usr/lib/mull-ir-frontend-18 \
         -g -grecord-command-line \
         main.cpp -o hello-world
-    $ mull-runner-18 -ide-reporter-show-killed hello-world
+    $ mull-runner -ide-reporter-show-killed hello-world
     [info] Warm up run (threads: 1)
            [################################] 1/1. Finished in 469ms
     [info] Baseline run (threads: 1)
@@ -268,7 +267,7 @@ Just to recap:
         -fpass-plugin=/usr/lib/mull-ir-frontend-18 \
         -g -grecord-command-line \
         main.cpp -o hello-world
-    $ mull-runner-18 hello-world
+    $ mull-runner hello-world
 
 Next Steps
 ----------

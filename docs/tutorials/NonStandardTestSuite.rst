@@ -115,7 +115,7 @@ Usage of Mull in this case is very similar to a "typical" use-case (see :doc:`He
 
 .. code-block:: shell
 
-    $ mull-runner-18 ./test.exe -ide-reporter-show-killed \
+    $ mull-runner ./test.exe -ide-reporter-show-killed \
       -test-program=python3 -- test.py ./test.exe
     [info] Using config /tmp/sc-kGN35Gr1f/mull.yml
     [info] Warm up run (threads: 1)

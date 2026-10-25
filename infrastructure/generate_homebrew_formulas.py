@@ -46,6 +46,7 @@ class {class_name} < Formula
   license "Apache-2.0"
 {livecheck}
   depends_on "{llvm_dep}"
+  depends_on "{tools_dep}"
   depends_on :macos
 
   on_macos do
@@ -58,17 +59,10 @@ class {class_name} < Formula
 {conflicts}
   def install
     bin.install "bin/mull-instrument-{llvm_version}"
-    bin.install "bin/mull-runner-{llvm_version}"
-    bin.install "bin/mull-reporter-{llvm_version}"
     lib.install "lib/mull-ir-frontend-{llvm_version}"
-    man1.install "share/man/man1/mull-runner-{llvm_version}.1"
-    man1.install "share/man/man1/mull-reporter-{llvm_version}.1"
-    bash_completion.install "share/bash-completion/completions/mull-runner-{llvm_version}"
-    bash_completion.install "share/bash-completion/completions/mull-reporter-{llvm_version}"
-    zsh_completion.install "share/zsh/site-functions/_mull-runner-{llvm_version}"
-    zsh_completion.install "share/zsh/site-functions/_mull-reporter-{llvm_version}"
-    fish_completion.install "share/fish/vendor_completions.d/mull-runner-{llvm_version}.fish"
-    fish_completion.install "share/fish/vendor_completions.d/mull-reporter-{llvm_version}.fish"
+    # Deprecated versioned names of the tools from {tools_dep}
+    bin.install_symlink Formula["{tools_dep}"].opt_bin/"mull-runner" => "mull-runner-{llvm_version}"
+    bin.install_symlink Formula["{tools_dep}"].opt_bin/"mull-reporter" => "mull-reporter-{llvm_version}"
   end
 
   def caveats
@@ -77,8 +71,8 @@ class {class_name} < Formula
 {unstable_warning}
       Binaries installed:
         mull-instrument-{llvm_version}
-        mull-runner-{llvm_version}
-        mull-reporter-{llvm_version}
+
+      mull-runner and mull-reporter come from {tools_dep}.
 
       The Clang plugin is installed at:
         #{{lib}}/mull-ir-frontend-{llvm_version}
@@ -89,7 +83,53 @@ class {class_name} < Formula
   end
 
   test do
-    assert_match "mull-runner", shell_output("#{{bin}}/mull-runner-{llvm_version} --version")
+    # The linked mull-runner finds plugins in HOMEBREW_PREFIX/lib
+    assert_match "mull-ir-frontend-{llvm_version}", shell_output("#{{HOMEBREW_PREFIX}}/bin/mull-runner --version")
+  end
+end
+'''
+
+TOOLS_FORMULA_TEMPLATE = '''\
+class {class_name} < Formula
+  desc "Practical mutation testing for C and C++{channel_desc}"
+  homepage "https://github.com/mull-project/mull"
+  version "{mull_version}"
+  license "Apache-2.0"
+{livecheck}
+  depends_on :macos
+
+  on_macos do
+    on_arm do
+      url "{url}"
+      sha256 "{sha256}"
+    end
+  end
+
+{conflicts}
+  def install
+    bin.install "bin/mull-runner"
+    bin.install "bin/mull-reporter"
+    man1.install "share/man/man1/mull-runner.1"
+    man1.install "share/man/man1/mull-reporter.1"
+    bash_completion.install "share/bash-completion/completions/mull-runner"
+    bash_completion.install "share/bash-completion/completions/mull-reporter"
+    zsh_completion.install "share/zsh/site-functions/_mull-runner"
+    zsh_completion.install "share/zsh/site-functions/_mull-reporter"
+    fish_completion.install "share/fish/vendor_completions.d/mull-runner.fish"
+    fish_completion.install "share/fish/vendor_completions.d/mull-reporter.fish"
+  end
+
+  def caveats
+    <<~EOS
+      Mull{channel_caveat} tools have been installed.
+{unstable_warning}
+      Install a plugin for your LLVM version as well, e.g.:
+        brew install {plugin_example}
+    EOS
+  end
+
+  test do
+    assert_match "mull-runner", shell_output("#{{bin}}/mull-runner --version")
   end
 end
 '''
@@ -114,10 +154,16 @@ def formula_prefix(channel):
     return "mull" if channel == "stable" else f"mull-{channel}"
 
 
-def class_name_for(channel, llvm_version):
+def tools_formula(channel):
+    """Fully qualified, so it never resolves to a homebrew-core formula"""
+    return f"mull-project/mull/{formula_prefix(channel)}"
+
+
+def class_name_for(channel, llvm_version=None):
+    suffix = f"AT{llvm_version}" if llvm_version else ""
     if channel == "stable":
-        return f"MullAT{llvm_version}"
-    return f"Mull{channel.title()}AT{llvm_version}"
+        return f"Mull{suffix}"
+    return f"Mull{channel.title()}{suffix}"
 
 
 def generate_conflicts(current_version, current_channel):
@@ -126,26 +172,56 @@ def generate_conflicts(current_version, current_channel):
         if channel == current_channel:
             continue
         prefix = formula_prefix(channel)
-        lines.append(f'  conflicts_with "{prefix}@{current_version}", because: "both install mull-runner-{current_version}"')
+        if current_version:
+            lines.append(f'  conflicts_with "{prefix}@{current_version}", because: "both install mull-instrument-{current_version}"')
+        else:
+            lines.append(f'  conflicts_with "{prefix}", because: "both install mull-runner"')
     return "\n".join(lines)
 
 
-def generate_formula(llvm_version, mull_version, channel, existing_version=None, existing_url=None, existing_sha256=None):
+def channel_strings(channel, mull_version):
     if channel == "stable":
-        channel_desc, channel_caveat, unstable_warning, livecheck = "", "", "", ""
-        version_str = mull_version
-    elif channel == "nightly":
-        channel_desc = " - Nightly"
-        channel_caveat = " NIGHTLY"
-        unstable_warning = "\n      This is a development build and may be unstable.\n"
-        livecheck = '\n  livecheck do\n    skip "Nightly builds are updated automatically"\n  end\n'
-        version_str = f"{mull_version}.trunk1"
-    else:
-        channel_desc = " - Testing"
-        channel_caveat = " TESTING"
-        unstable_warning = "\n      This is a PR/testing build and may be unstable.\n"
-        livecheck = '\n  livecheck do\n    skip "Testing builds are updated automatically"\n  end\n'
-        version_str = f"{mull_version}.pr1"
+        return "", "", "", "", mull_version
+    if channel == "nightly":
+        return (
+            " - Nightly",
+            " NIGHTLY",
+            "\n      This is a development build and may be unstable.\n",
+            '\n  livecheck do\n    skip "Nightly builds are updated automatically"\n  end\n',
+            f"{mull_version}.trunk1",
+        )
+    return (
+        " - Testing",
+        " TESTING",
+        "\n      This is a PR/testing build and may be unstable.\n",
+        '\n  livecheck do\n    skip "Testing builds are updated automatically"\n  end\n',
+        f"{mull_version}.pr1",
+    )
+
+
+def generate_tools_formula(mull_version, channel, llvm_versions, existing_version=None, existing_url=None, existing_sha256=None):
+    channel_desc, channel_caveat, unstable_warning, livecheck, version_str = channel_strings(channel, mull_version)
+
+    final_version = existing_version or version_str
+    final_url = existing_url or f"https://dl.cloudsmith.io/public/mull-project/mull-{channel}/raw/names/mull/versions/{version_str}/PACKAGE_FILENAME_PLACEHOLDER"
+    final_sha256 = existing_sha256 or "PLACEHOLDER_SHA256"
+
+    return TOOLS_FORMULA_TEMPLATE.format(
+        class_name=class_name_for(channel),
+        mull_version=final_version,
+        url=final_url,
+        sha256=final_sha256,
+        conflicts=generate_conflicts(None, channel),
+        channel_desc=channel_desc,
+        channel_caveat=channel_caveat,
+        unstable_warning=unstable_warning,
+        livecheck=livecheck,
+        plugin_example=f"{formula_prefix(channel)}@{max(llvm_versions)}",
+    )
+
+
+def generate_formula(llvm_version, mull_version, channel, existing_version=None, existing_url=None, existing_sha256=None):
+    channel_desc, channel_caveat, unstable_warning, livecheck, version_str = channel_strings(channel, mull_version)
 
     llvm_dep = f"llvm@{llvm_version}"
 
@@ -159,6 +235,7 @@ def generate_formula(llvm_version, mull_version, channel, existing_version=None,
         llvm_version=llvm_version,
         mull_version=final_version,
         llvm_dep=llvm_dep,
+        tools_dep=tools_formula(channel),
         url=final_url,
         sha256=final_sha256,
         conflicts=generate_conflicts(llvm_version, channel),
@@ -185,6 +262,17 @@ def main():
     print(f"LLVM versions: {llvm_versions}")
 
     formula_dir.mkdir(exist_ok=True)
+
+    for channel in CHANNELS:
+        filename = f"{formula_prefix(channel)}.rb"
+        formula_path = formula_dir / filename
+        existing_version, existing_url, existing_sha256 = read_existing_values(formula_path)
+        formula_path.write_text(
+            generate_tools_formula(mull_version, channel, llvm_versions,
+                                   existing_version, existing_url, existing_sha256)
+        )
+        preserved = " (preserved)" if existing_url else " (new)"
+        print(f"  {filename}{preserved}")
 
     for llvm_version in llvm_versions:
         for channel in CHANNELS:

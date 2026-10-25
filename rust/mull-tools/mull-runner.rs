@@ -1,6 +1,7 @@
 mod dynamic_libraries;
 mod init_cli;
 mod mutant_extractor;
+mod plugins;
 mod reporting;
 mod runner;
 
@@ -55,9 +56,7 @@ fn temp_file_path(prefix: &str, suffix: &str) -> String {
 fn main() {
     let args: Vec<String> = std::env::args().collect();
     let mull_version = env!("MULL_VERSION");
-    let llvm_version = env!("MULL_LLVM_VERSION");
-    let (config, cli, diag) =
-        init_cli::init_cli::<RunnerCli>(args, mull_version.into(), llvm_version.into());
+    let (config, cli, diag) = init_cli::init_cli::<RunnerCli>(args, mull_version.into());
 
     let start = Instant::now();
 
@@ -205,9 +204,6 @@ fn main() {
         state
             .info
             .insert("Mull Version".into(), env!("MULL_VERSION").into());
-        state
-            .info
-            .insert("LLVM Version".into(), llvm_version.into());
         show_report(&diag, &state, cli.shared, &start, "dry run");
         return;
     }
@@ -237,9 +233,6 @@ fn main() {
         state
             .info
             .insert("Mull Version".into(), env!("MULL_VERSION").into());
-        state
-            .info
-            .insert("LLVM Version".into(), llvm_version.into());
         show_report(&diag, &state, cli.shared, &start, "execution");
         return;
     }
@@ -324,9 +317,6 @@ fn main() {
     state
         .info
         .insert("Mull Version".into(), env!("MULL_VERSION").into());
-    state
-        .info
-        .insert("LLVM Version".into(), llvm_version.into());
 
     // Cleanup temp coverage file
     if let Some(raw_path) = &raw_coverage_path {

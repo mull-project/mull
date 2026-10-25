@@ -2,7 +2,7 @@ load("@mull_package_info//:mull_package_info.bzl", "CS_REPO", "MULL_VERSION", "O
 
 MACOS_SCRIPT = """
 ./cloudsmith_runner push raw \\
-  --name mull-{LLVM_VERSION} \\
+  --name {NAME} \\
   --version {MULL_VERSION} \\
   mull-project/mull-{CS_REPO} \\
   --tags macos \\
@@ -27,10 +27,12 @@ def _remap_os_name(os_name):
 def _publish_impl(ctx):
     cmds = []
     cmds.append(PRE_SCRIPT)
-    for (idx, llvm_version) in enumerate(ctx.attr.packages):
+
+    # Keys are package names: `mull` for the tools, `mull-N` for LLVM N
+    for (idx, name) in enumerate(ctx.attr.packages):
         if OS_NAME == "macOS":
             cmd = MACOS_SCRIPT.format(
-                LLVM_VERSION = llvm_version,
+                NAME = name,
                 MULL_VERSION = MULL_VERSION,
                 CS_REPO = CS_REPO,
                 PACKAGE_FILE = ctx.files.packages[idx].short_path,
@@ -45,7 +47,7 @@ def _publish_impl(ctx):
             )
         cmds.append(cmd)
 
-    script = ctx.actions.declare_file("publish.sh")
+    script = ctx.actions.declare_file(ctx.label.name)
     ctx.actions.write(script, "".join(cmds), is_executable = True)
 
     return [DefaultInfo(files = depset([script]))]

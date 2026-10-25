@@ -93,6 +93,8 @@ mod ffi {
         fn expand_mutator_groups(groups: Vec<String>) -> Vec<String>;
 
         fn get_mutator_group_definitions() -> Vec<MutatorGroupDef>;
+
+        fn plugin_version_marker() -> &'static str;
     }
 }
 
@@ -249,6 +251,11 @@ fn expand_mutator_groups(groups: Vec<String>) -> Vec<String> {
     let mut result: Vec<String> = expanded.into_iter().collect();
     result.sort();
     result
+}
+
+/// Embedded in the plugin; `mull-runner --version` finds it by the prefix and reads up to the NUL
+fn plugin_version_marker() -> &'static str {
+    concat!("mull-plugin-version:", env!("MULL_VERSION"), "\0")
 }
 
 fn get_mutator_group_definitions() -> Vec<ffi::MutatorGroupDef> {

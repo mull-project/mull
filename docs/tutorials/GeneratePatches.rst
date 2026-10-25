@@ -45,7 +45,7 @@ Step 4. Run Mull against fmtlib tests
 
 .. code-block:: bash
 
-    mull-runner-18 --reporters=Patches --report-name fmtlib --report-patch-base $PWD ./build.dir/bin/core-test
+    mull-runner --reporters=Patches --report-name fmtlib --report-patch-base $PWD ./build.dir/bin/core-test
 
 You should see similar output:
 
