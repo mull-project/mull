@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.35.0] - 25 Oct 2026
+
+- Added LLVM 23 support (macOS) [#1199](https://github.com/mull-project/mull/pull/1199)
+- Added LLVM 22 packages for macOS, Ubuntu 26.04, and Debian 13 [#1198](https://github.com/mull-project/mull/pull/1198)
+- Removed support for LLVM 13, 14, and 15, and dropped Ubuntu 22.04 packages [#1201](https://github.com/mull-project/mull/pull/1201)
+
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2026-10-18..2026-10-25)
+
 ## [0.34.2] - 17 Oct 2026
 
 - Fix coverage filter when not all objects have coverage (by [@hannah-computer](https://github.com/hannah-computer)) [#1194](https://github.com/mull-project/mull/pull/1194)
