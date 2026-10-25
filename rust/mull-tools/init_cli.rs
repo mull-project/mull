@@ -53,7 +53,7 @@ fn init_diagnostics(diag: &MullDiagnostics, config: &MullConfigSpec) {
 
 fn parse_yaml(yaml: &str) -> Result<MullConfigSpec, String> {
     let parsed: MullConfigSpec =
-        serde_yaml::from_str(yaml).map_err(|e| format!("Failed to parse YAML: {}", e))?;
+        serde_saphyr::from_str(yaml).map_err(|e| format!("Failed to parse YAML: {}", e))?;
     Ok(parsed)
 }
 
@@ -66,7 +66,7 @@ fn load_yaml_config(config_path: &str) -> Result<MullConfigSpec, String> {
 fn create_config(diag: &MullDiagnostics) -> (MullConfigSpec, Option<String>) {
     match get_config_path() {
         Some(path) => match load_yaml_config(&path) {
-            Ok(config) => (config, Some(path.into())),
+            Ok(config) => (config, Some(path)),
             Err(e) => {
                 diag_warning!(
                     diag,

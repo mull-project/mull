@@ -38,7 +38,7 @@ fn load_raw_report(diag: &MullDiagnostics, database_path: &str) -> SqliteResult<
 
         let execution_result = ExecutionResult {
             status: ExecutionStatus::from_i32(execution_status),
-            exit_status: exit_status as i32,
+            exit_status,
             running_time: duration,
             stdout_output: stdout,
             stderr_output: stderr,

@@ -13,7 +13,7 @@ fn report_mutation_score(
     assert!(!state.execution_results.is_empty());
     let mut killed = 0;
     let mut survived = 0;
-    for (_, result) in &state.execution_results {
+    for result in state.execution_results.values() {
         if result.status != ExecutionStatus::Passed && result.status != ExecutionStatus::NotCovered
         {
             killed += 1;
@@ -57,11 +57,11 @@ pub fn show_report(
         };
         let reporters = create_reporters(&reporter_config);
         for reporter in &reporters {
-            reporter.report(&diag, &exec_state);
+            reporter.report(diag, exec_state);
         }
         report_mutation_score(
-            &diag,
-            &exec_state,
+            diag,
+            exec_state,
             cli.allow_surviving,
             cli.mutation_score_threshold,
         )

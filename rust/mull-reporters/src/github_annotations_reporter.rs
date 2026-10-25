@@ -4,6 +4,7 @@ use mull_core::diagnostics::MullDiagnostics;
 use mull_core::{diag_info, diag_raw};
 use mull_state::{ExecutionState, ExecutionStatus};
 
+#[derive(Default)]
 pub struct GitHubAnnotationsReporter {}
 
 impl GitHubAnnotationsReporter {

@@ -79,10 +79,10 @@ fn libraries_from_elf<Elf: FileHeader<Endian = Endianness>>(
         for dyn_entry in dynamic_entries {
             let tag = dyn_entry.tag(endian);
             if tag == object::elf::DT_NEEDED {
-                if let Ok(name) = dyn_entry.string(endian, strings) {
-                    if let Ok(s) = std::str::from_utf8(name) {
-                        libraries.push(s.to_string());
-                    }
+                if let Ok(name) = dyn_entry.string(endian, strings)
+                    && let Ok(s) = std::str::from_utf8(name)
+                {
+                    libraries.push(s.to_string());
                 }
             } else if tag == object::elf::DT_NULL {
                 break;
@@ -107,12 +107,11 @@ fn libraries_from_macho<Mach: object::read::macho::MachHeader>(
     };
 
     for cmd in commands.flatten() {
-        if let Ok(LoadCommandVariant::Dylib(dylib)) = cmd.variant() {
-            if let Ok(name) = cmd.string(endian, dylib.dylib.name) {
-                if let Ok(s) = std::str::from_utf8(name) {
-                    libraries.push(s.to_string());
-                }
-            }
+        if let Ok(LoadCommandVariant::Dylib(dylib)) = cmd.variant()
+            && let Ok(name) = cmd.string(endian, dylib.dylib.name)
+            && let Ok(s) = std::str::from_utf8(name)
+        {
+            libraries.push(s.to_string());
         }
     }
 }
@@ -133,12 +132,11 @@ pub fn maybe_extract_fat_slice<'a>(data: &'a [u8], diag: &MullDiagnostics) -> &'
     ) -> Option<(&'a [u8], bool)> {
         // Try current arch first
         for arch in arches {
-            if let Ok(slice) = arch.data(data) {
-                if let Ok(obj) = object::File::parse(slice) {
-                    if obj.architecture() == current_arch {
-                        return Some((slice, true));
-                    }
-                }
+            if let Ok(slice) = arch.data(data)
+                && let Ok(obj) = object::File::parse(slice)
+                && obj.architecture() == current_arch
+            {
+                return Some((slice, true));
             }
         }
         // Fall back to first
@@ -148,25 +146,25 @@ pub fn maybe_extract_fat_slice<'a>(data: &'a [u8], diag: &MullDiagnostics) -> &'
             .map(|s| (s, false))
     }
 
-    if let Ok(fat) = MachOFatFile32::parse(data) {
-        if let Some((slice, is_current)) = find_slice(data, fat.arches(), current_arch) {
-            if is_current {
-                diag_debug!(diag, "Using {:?} slice from fat binary", current_arch);
-            } else {
-                diag_debug!(diag, "Using first slice from fat binary");
-            }
-            return slice;
+    if let Ok(fat) = MachOFatFile32::parse(data)
+        && let Some((slice, is_current)) = find_slice(data, fat.arches(), current_arch)
+    {
+        if is_current {
+            diag_debug!(diag, "Using {:?} slice from fat binary", current_arch);
+        } else {
+            diag_debug!(diag, "Using first slice from fat binary");
         }
+        return slice;
     }
-    if let Ok(fat) = MachOFatFile64::parse(data) {
-        if let Some((slice, is_current)) = find_slice(data, fat.arches(), current_arch) {
-            if is_current {
-                diag_debug!(diag, "Using {:?} slice from fat binary", current_arch);
-            } else {
-                diag_debug!(diag, "Using first slice from fat binary");
-            }
-            return slice;
+    if let Ok(fat) = MachOFatFile64::parse(data)
+        && let Some((slice, is_current)) = find_slice(data, fat.arches(), current_arch)
+    {
+        if is_current {
+            diag_debug!(diag, "Using {:?} slice from fat binary", current_arch);
+        } else {
+            diag_debug!(diag, "Using first slice from fat binary");
         }
+        return slice;
     }
 
     data

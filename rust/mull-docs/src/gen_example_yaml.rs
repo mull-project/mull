@@ -8,7 +8,7 @@ pub fn generate(output_dir: &Path) {
     let schema = schema_for!(MullConfigSpec);
     let schema_value = serde_json::to_value(&schema).expect("failed to serialize schema");
     let defaults = MullConfigSpec::default();
-    let default_value = serde_yaml::to_value(&defaults).expect("failed to serialize defaults");
+    let default_value = serde_json::to_value(&defaults).expect("failed to serialize defaults");
 
     let mut yaml = String::new();
 
@@ -17,7 +17,7 @@ pub fn generate(output_dir: &Path) {
             let description = get_description(prop_schema, &schema_value);
 
             if let Some(value) = default_value.get(key) {
-                if let serde_yaml::Value::Mapping(map) = value {
+                if let Value::Object(map) = value {
                     if !description.is_empty() {
                         yaml.push_str(&format!("# {}\n", description));
                     }
@@ -25,27 +25,25 @@ pub fn generate(output_dir: &Path) {
 
                     let nested_props = get_nested_properties(prop_schema, &schema_value);
 
-                    for (nested_key, nested_value) in map {
-                        if let serde_yaml::Value::String(k) = nested_key {
-                            let nested_desc = nested_props
-                                .and_then(|p| p.get(k.as_str()))
-                                .map(|s| get_description(s, &schema_value))
-                                .unwrap_or_default();
+                    for (k, nested_value) in map {
+                        let nested_desc = nested_props
+                            .and_then(|p| p.get(k.as_str()))
+                            .map(|s| get_description(s, &schema_value))
+                            .unwrap_or_default();
 
-                            if !nested_desc.is_empty() {
-                                yaml.push_str(&format!("  # {}\n", nested_desc));
-                            }
-
-                            let value_str = if key == "parallelization"
-                                && (k == "workers" || k == "executionWorkers")
-                            {
-                                "$nproc".to_string()
-                            } else {
-                                format_yaml_value(nested_value)
-                            };
-
-                            yaml.push_str(&format!("  {}: {}\n", k, value_str));
+                        if !nested_desc.is_empty() {
+                            yaml.push_str(&format!("  # {}\n", nested_desc));
                         }
+
+                        let value_str = if key == "parallelization"
+                            && (k == "workers" || k == "executionWorkers")
+                        {
+                            "$nproc".to_string()
+                        } else {
+                            format_yaml_value(nested_value)
+                        };
+
+                        yaml.push_str(&format!("  {}: {}\n", k, value_str));
                     }
                 } else {
                     if !description.is_empty() {
@@ -115,20 +113,15 @@ fn get_nested_properties<'a>(
     resolved.get("properties")?.as_object()
 }
 
-fn format_yaml_value(value: &serde_yaml::Value) -> String {
+fn format_yaml_value(value: &Value) -> String {
     match value {
-        serde_yaml::Value::Bool(b) => b.to_string(),
-        serde_yaml::Value::Number(n) => n.to_string(),
-        serde_yaml::Value::String(s) if s.is_empty() => "\"\"".to_string(),
-        serde_yaml::Value::String(s) => format!("\"{}\"", s),
-        serde_yaml::Value::Sequence(seq) if seq.is_empty() => "[]".to_string(),
-        serde_yaml::Value::Sequence(_) => {
-            serde_yaml::to_string(value).unwrap_or_else(|_| "[]".to_string())
-        }
-        serde_yaml::Value::Mapping(_) => {
-            serde_yaml::to_string(value).unwrap_or_else(|_| "{}".to_string())
-        }
-        serde_yaml::Value::Null => "null".to_string(),
-        serde_yaml::Value::Tagged(t) => format_yaml_value(&t.value),
+        Value::Bool(b) => b.to_string(),
+        Value::Number(n) => n.to_string(),
+        Value::String(s) if s.is_empty() => "\"\"".to_string(),
+        Value::String(s) => format!("\"{}\"", s),
+        Value::Array(seq) if seq.is_empty() => "[]".to_string(),
+        Value::Array(_) => serde_saphyr::to_string(value).unwrap_or_else(|_| "[]".to_string()),
+        Value::Object(_) => serde_saphyr::to_string(value).unwrap_or_else(|_| "{}".to_string()),
+        Value::Null => "null".to_string(),
     }
 }

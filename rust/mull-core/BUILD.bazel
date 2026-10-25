@@ -14,7 +14,7 @@ rust_library(
         "@crates//:colored",
         "@crates//:schemars",
         "@crates//:serde",
+        "@crates//:serde-saphyr",
         "@crates//:serde_json",
-        "@crates//:serde_yaml",
     ],
 )

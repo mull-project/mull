@@ -129,9 +129,8 @@ impl MullDiagnostics {
         if strict {
             let _ = writeln!(
                 w,
-                "{} {}",
-                prefix,
-                "Strict Mode enabled: warning messages are treated as fatal errors. Exiting now."
+                "{} Strict Mode enabled: warning messages are treated as fatal errors. Exiting now.",
+                prefix
             );
             std::process::exit(1);
         }
@@ -144,8 +143,8 @@ impl MullDiagnostics {
         let _ = writeln!(w, "{} {}", prefix, args);
         let _ = writeln!(
             w,
-            "{} {}",
-            prefix, "Error messages are treated as fatal errors. Exiting now."
+            "{} Error messages are treated as fatal errors. Exiting now.",
+            prefix
         );
         std::process::exit(1)
     }
