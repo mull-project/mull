@@ -1,7 +1,7 @@
 # buildifier: disable=module-docstring
 load("@available_llvm_versions//:mull_llvm_versions.bzl", "AVAILABLE_LLVM_VERSIONS", "EXACT_VERSION_MAPPING")
 load("@bazel_skylib//rules:diff_test.bzl", "diff_test")
-load("@mull_package_info//:mull_package_info.bzl", "MULL_DESCRIPTION", "MULL_HOMEPAGE", "MULL_VERSION", "OS_ARCH", "OS_NAME", "OS_VERSION")
+load("@mull_package_info//:mull_package_info.bzl", "MULL_HOMEPAGE", "MULL_VERSION", "OS_ARCH", "OS_NAME", "OS_VERSION")
 load("@rules_pkg//pkg:mappings.bzl", "pkg_attributes", "pkg_files", "pkg_mklink")
 load("@rules_pkg//pkg:rpm_pfg.bzl", "pkg_rpm")
 load("@rules_pkg//pkg/private/deb:deb.bzl", "pkg_deb")
@@ -65,6 +65,21 @@ EXPECTED_RPM_LLVM_CONTENT = """/usr/bin/mull-instrument-{LLVM_VERSION}
 /usr/bin/mull-runner-{LLVM_VERSION}
 /usr/lib/mull-ir-frontend-{LLVM_VERSION}
 """
+
+# First line is the summary (deb synopsis, rpm Summary), the rest the long description
+TOOLS_SUMMARY = "Practical mutation testing for C and C++: core tools"
+TOOLS_DESCRIPTION = TOOLS_SUMMARY + """
+Mull is a practical mutation testing and fault injection tool for C and C++.
+This package contains mull-runner, which runs the mutants, and mull-reporter,
+which turns the results into reports. Install mull-<N> for the Clang/LLVM <N>
+compiler plugin."""
+
+LLVM_SUMMARY = "Practical mutation testing for C and C++: Clang/LLVM {LLVM_VERSION} plugin"
+LLVM_DESCRIPTION = LLVM_SUMMARY + """
+Mull is a practical mutation testing and fault injection tool for C and C++.
+This package contains mull-ir-frontend-{LLVM_VERSION}, the Clang/LLVM {LLVM_VERSION} plugin
+that adds mutants at compile time, and mull-instrument-{LLVM_VERSION}, which adds them to
+LLVM bitcode. mull-runner and mull-reporter come from the mull package."""
 
 def _package_contents_impl(ctx):
     out = ctx.actions.declare_file(ctx.attr.name + ".txt")
@@ -254,8 +269,8 @@ def _mull_tools_package(prefix):
             name = package_name,
             srcs = srcs,
             version = MULL_VERSION,
-            summary = MULL_DESCRIPTION,
-            description = MULL_DESCRIPTION,
+            summary = TOOLS_SUMMARY,
+            description = TOOLS_DESCRIPTION,
             url = MULL_HOMEPAGE,
             license = "Apache-2.0",
             package_name = "mull",
@@ -275,7 +290,7 @@ def _mull_tools_package(prefix):
             maintainer = "Alex Denisov <alex@lowlevelbits.org>",
             package = "mull",
             version = MULL_VERSION,
-            description = MULL_DESCRIPTION,
+            description = TOOLS_DESCRIPTION,
             homepage = MULL_HOMEPAGE,
             license = "Apache-2.0",
             package_file_name = "%s.deb" % package_file_name,
@@ -336,8 +351,8 @@ def _mull_llvm_package(prefix, llvm_version, tools_package):
             name = package_name,
             srcs = srcs,
             version = MULL_VERSION,
-            summary = MULL_DESCRIPTION,
-            description = MULL_DESCRIPTION,
+            summary = LLVM_SUMMARY.format(LLVM_VERSION = llvm_version),
+            description = LLVM_DESCRIPTION.format(LLVM_VERSION = llvm_version),
             url = MULL_HOMEPAGE,
             license = "Apache-2.0",
             requires = [
@@ -362,7 +377,7 @@ def _mull_llvm_package(prefix, llvm_version, tools_package):
             maintainer = "Alex Denisov <alex@lowlevelbits.org>",
             package = "mull-%s" % llvm_version,
             version = MULL_VERSION,
-            description = MULL_DESCRIPTION,
+            description = LLVM_DESCRIPTION.format(LLVM_VERSION = llvm_version),
             homepage = MULL_HOMEPAGE,
             license = "Apache-2.0",
             depends = [
