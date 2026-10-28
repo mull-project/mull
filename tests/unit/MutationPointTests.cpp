@@ -29,7 +29,7 @@ TEST(MutationPoint, ReplaceCallMutator_applyMutation) {
   auto bitcode = loader.loadBitcodeAtPath(
       fixtures::tests_unit_fixtures_mutators_replace_call_module_c_bc_path(), diagnostics);
 
-  cxx::ReplaceScalarCall mutator;
+  cxx::ReplaceScalarCallNonZero mutator;
   FunctionUnderTest functionUnderTest(bitcode->getModule()->getFunction("replace_call"),
                                       bitcode.get());
   functionUnderTest.selectInstructions();

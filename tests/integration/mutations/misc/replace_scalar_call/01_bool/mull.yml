@@ -1,0 +1,4 @@
+mutators:
+  - cxx_replace_scalar_call
+junkDetectionDisabled: true
+quiet: false

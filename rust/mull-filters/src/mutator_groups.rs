@@ -31,6 +31,7 @@ pub fn get_group_definitions() -> Vec<(String, String)> {
         ("cxx_comparison", "cxx_eq_to_ne, cxx_ne_to_eq, cxx_le_to_gt, cxx_lt_to_ge, cxx_ge_to_lt, cxx_gt_to_le"),
         ("cxx_boundary", "cxx_le_to_lt, cxx_lt_to_le, cxx_ge_to_gt, cxx_gt_to_ge"),
         ("cxx_calls", "cxx_remove_void_call, cxx_replace_scalar_call"),
+        ("cxx_replace_scalar_call", "cxx_replace_scalar_call_zr, cxx_replace_scalar_call_nz"),
         ("experimental", "negate_mutator, cxx_logical"),
     ];
 
@@ -70,10 +71,15 @@ fn expand_group(group: &str, result: &mut HashSet<String>) {
             expand_group("cxx_logical", result);
         }
 
-        // Leaf groups
         "cxx_calls" => {
             result.insert("cxx_remove_void_call".to_string());
-            result.insert("cxx_replace_scalar_call".to_string());
+            expand_group("cxx_replace_scalar_call", result);
+        }
+
+        // Leaf groups
+        "cxx_replace_scalar_call" => {
+            result.insert("cxx_replace_scalar_call_zr".to_string());
+            result.insert("cxx_replace_scalar_call_nz".to_string());
         }
         "cxx_const_assignment" => {
             result.insert("cxx_assign_const".to_string());
@@ -177,6 +183,21 @@ mod tests {
         assert!(result.contains("cxx_pre_dec_to_pre_inc")); // decrement
         assert!(result.contains("cxx_remove_void_call")); // calls
         assert!(result.contains("cxx_assign_const")); // const_assignment
+    }
+
+    #[test]
+    fn test_expand_replace_scalar_call_group() {
+        let result = expand_mutator_groups(&["cxx_replace_scalar_call"]);
+        assert!(result.contains("cxx_replace_scalar_call_zr"));
+        assert!(result.contains("cxx_replace_scalar_call_nz"));
+        assert_eq!(result.len(), 2);
+
+        let calls = expand_mutator_groups(&["cxx_calls"]);
+        assert!(calls.contains("cxx_remove_void_call"));
+        assert!(calls.contains("cxx_replace_scalar_call_zr"));
+        assert!(calls.contains("cxx_replace_scalar_call_nz"));
+        assert!(!calls.contains("cxx_replace_scalar_call"));
+        assert_eq!(calls.len(), 3);
     }
 
     #[test]

@@ -17,6 +17,12 @@ std::string MutationKindToString(MutatorKind mutatorKind) {
   case MutatorKind::CXX_ReplaceScalarCall: {
     return "Replace Call";
   }
+  case MutatorKind::CXX_ReplaceScalarCallZero: {
+    return "Replace Call with Zero";
+  }
+  case MutatorKind::CXX_ReplaceScalarCallNonZero: {
+    return "Replace Call with Non-Zero";
+  }
   case MutatorKind::CXX_AddToSub: {
     return "Add to Sub";
   }

@@ -26,7 +26,8 @@ void MutatorsFactory::init() {
   addMutator<NegateConditionMutator>(mutatorsMapping);
 
   addMutator<cxx::RemoveVoidCall>(mutatorsMapping);
-  addMutator<cxx::ReplaceScalarCall>(mutatorsMapping);
+  addMutator<cxx::ReplaceScalarCallZero>(mutatorsMapping);
+  addMutator<cxx::ReplaceScalarCallNonZero>(mutatorsMapping);
 
   addMutator<cxx::NumberAssignConst>(mutatorsMapping);
   addMutator<cxx::NumberInitConst>(mutatorsMapping);

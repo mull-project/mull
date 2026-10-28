@@ -25,7 +25,8 @@ static const clang::Stmt *findMutantExpression(MutationPoint *point,
     visitor.TraverseDecl(decl);
     return visitor.foundMutant();
   }
-  case MutatorKind::CXX_ReplaceScalarCall: {
+  case MutatorKind::CXX_ReplaceScalarCallZero:
+  case MutatorKind::CXX_ReplaceScalarCallNonZero: {
     ReplaceCallVisitor visitor(visitorParameters);
     visitor.TraverseDecl(decl);
     return visitor.foundMutant();
