@@ -11,10 +11,16 @@ public:
   RemoveVoidCall();
 };
 
-class ReplaceScalarCall : public TrivialCXXMutator {
+class ReplaceScalarCallZero : public TrivialCXXMutator {
 public:
   static std::string ID();
-  ReplaceScalarCall();
+  ReplaceScalarCallZero();
+};
+
+class ReplaceScalarCallNonZero : public TrivialCXXMutator {
+public:
+  static std::string ID();
+  ReplaceScalarCallNonZero();
 };
 
 } // namespace cxx

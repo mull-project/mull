@@ -31,11 +31,33 @@ TEST(MutatorsFactory, SingleMutators) {
   }
 
   {
-    mutators = factory.mutators({ "cxx_replace_scalar_call" }, {});
+    mutators = factory.mutators({ "cxx_replace_scalar_call_zr" }, {});
     ASSERT_EQ(mutators.size(), 1UL);
     mutator = mutators[0].get();
-    ASSERT_EQ(mutator->getUniqueIdentifier(), "cxx_replace_scalar_call");
+    ASSERT_EQ(mutator->getUniqueIdentifier(), "cxx_replace_scalar_call_zr");
   }
+
+  {
+    mutators = factory.mutators({ "cxx_replace_scalar_call_nz" }, {});
+    ASSERT_EQ(mutators.size(), 1UL);
+    mutator = mutators[0].get();
+    ASSERT_EQ(mutator->getUniqueIdentifier(), "cxx_replace_scalar_call_nz");
+  }
+}
+
+TEST(MutatorsFactory, ReplaceScalarCallGroup) {
+  auto core = init_core_ffi(DiagOutput::Stdout);
+  MutatorsFactory factory(core->diag());
+  std::vector<std::unique_ptr<Mutator>> mutators =
+      factory.mutators({ "cxx_replace_scalar_call" }, {});
+  std::vector<std::string> identifiers;
+  for (auto &mutator : mutators) {
+    identifiers.push_back(mutator->getUniqueIdentifier());
+  }
+  std::sort(identifiers.begin(), identifiers.end());
+  ASSERT_EQ(
+      identifiers,
+      std::vector<std::string>({ "cxx_replace_scalar_call_nz", "cxx_replace_scalar_call_zr" }));
 }
 
 static std::function<bool(unique_ptr<Mutator> &)> predicate(const char *name) {

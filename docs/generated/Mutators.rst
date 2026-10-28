@@ -66,22 +66,24 @@
 .. |desc32| replace:: Replaces !a with a
 .. |op33| replace:: cxx_remove_void_call
 .. |desc33| replace:: Removes calls to a function returning void
-.. |op34| replace:: cxx_replace_scalar_call
+.. |op34| replace:: cxx_replace_scalar_call_nz
 .. |desc34| replace:: Replaces call to a function with 42 (true for bools)
-.. |op35| replace:: cxx_rshift_assign_to_lshift_assign
-.. |desc35| replace:: Replaces >>= with <<=
-.. |op36| replace:: cxx_rshift_to_lshift
-.. |desc36| replace:: Replaces << with >>
-.. |op37| replace:: cxx_sub_assign_to_add_assign
-.. |desc37| replace:: Replaces -= with +=
-.. |op38| replace:: cxx_sub_to_add
-.. |desc38| replace:: Replaces - with +
-.. |op39| replace:: cxx_xor_assign_to_or_assign
-.. |desc39| replace:: Replaces ^= with \|=
-.. |op40| replace:: cxx_xor_to_or
-.. |desc40| replace:: Replaces ^ with |
-.. |op41| replace:: negate_mutator
-.. |desc41| replace:: Negates conditionals !x to x and x to !x
+.. |op35| replace:: cxx_replace_scalar_call_zr
+.. |desc35| replace:: Replaces call to a function with 0 (false for bools)
+.. |op36| replace:: cxx_rshift_assign_to_lshift_assign
+.. |desc36| replace:: Replaces >>= with <<=
+.. |op37| replace:: cxx_rshift_to_lshift
+.. |desc37| replace:: Replaces << with >>
+.. |op38| replace:: cxx_sub_assign_to_add_assign
+.. |desc38| replace:: Replaces -= with +=
+.. |op39| replace:: cxx_sub_to_add
+.. |desc39| replace:: Replaces - with +
+.. |op40| replace:: cxx_xor_assign_to_or_assign
+.. |desc40| replace:: Replaces ^= with \|=
+.. |op41| replace:: cxx_xor_to_or
+.. |desc41| replace:: Replaces ^ with |
+.. |op42| replace:: negate_mutator
+.. |desc42| replace:: Negates conditionals !x to x and x to !x
 
 
 ============= ==================
@@ -129,6 +131,7 @@ Operator Name Operator Semantics
 |op39|        |desc39|
 |op40|        |desc40|
 |op41|        |desc41|
+|op42|        |desc42|
 ============= ==================
 
 
@@ -160,5 +163,7 @@ Groups:
     :cxx_increment:	cxx_pre_inc_to_pre_dec, cxx_post_inc_to_post_dec
 
     :cxx_logical:	cxx_remove_negation
+
+    :cxx_replace_scalar_call:	cxx_replace_scalar_call_zr, cxx_replace_scalar_call_nz
 
     :experimental:	negate_mutator, cxx_logical

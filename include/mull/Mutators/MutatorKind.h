@@ -13,7 +13,10 @@ enum class MutatorKind {
   NegateMutator,
 
   CXX_RemoveVoidCall,
+  /// Only used by the AST frontend; the IR frontend splits it into Zero/NonZero
   CXX_ReplaceScalarCall,
+  CXX_ReplaceScalarCallZero,
+  CXX_ReplaceScalarCallNonZero,
 
   CXX_AddToSub,
   CXX_AddAssignToSubAssign,

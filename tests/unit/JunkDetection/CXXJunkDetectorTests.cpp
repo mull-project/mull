@@ -186,7 +186,10 @@ static const CXXJunkDetectorTestParameter parameters[] = {
       new cxx::RemoveVoidCall, MUTATION_COUNT(7)),
   CXXJunkDetectorTestParameter(
       fixtures::tests_unit_fixtures_mutators_replace_call_junk_cpp_bc_path(),
-      new cxx::ReplaceScalarCall, 11),
+      new cxx::ReplaceScalarCallZero, 11),
+  CXXJunkDetectorTestParameter(
+      fixtures::tests_unit_fixtures_mutators_replace_call_junk_cpp_bc_path(),
+      new cxx::ReplaceScalarCallNonZero, 11),
 };
 
 INSTANTIATE_TEST_SUITE_P(CXXJunkDetection, CXXJunkDetectorTest, testing::ValuesIn(parameters));

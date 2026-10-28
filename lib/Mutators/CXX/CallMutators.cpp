@@ -19,20 +19,30 @@ RemoveVoidCall::RemoveVoidCall()
                         "Removes calls to a function returning void", "",
                         "Removed the call to the function") {}
 
-static std::vector<std::unique_ptr<irm::IRMutation>> getReplaceScalarCall() {
+static std::vector<std::unique_ptr<irm::IRMutation>> getReplaceScalarCall(int value) {
   std::vector<std::unique_ptr<irm::IRMutation>> mutators;
-  mutators.push_back(std::make_unique<irm::IntCallReplacement>(42));
-  mutators.push_back(std::make_unique<irm::FloatCallReplacement>(42));
-  mutators.push_back(std::make_unique<irm::DoubleCallReplacement>(42));
+  mutators.push_back(std::make_unique<irm::IntCallReplacement>(value));
+  mutators.push_back(std::make_unique<irm::FloatCallReplacement>(value));
+  mutators.push_back(std::make_unique<irm::DoubleCallReplacement>(value));
   return mutators;
 }
 
-std::string ReplaceScalarCall::ID() {
-  return "cxx_replace_scalar_call";
+std::string ReplaceScalarCallZero::ID() {
+  return "cxx_replace_scalar_call_zr";
 }
 
-ReplaceScalarCall::ReplaceScalarCall()
-    : TrivialCXXMutator(getReplaceScalarCall(), MutatorKind::CXX_ReplaceScalarCall,
-                        ReplaceScalarCall::ID(),
+ReplaceScalarCallZero::ReplaceScalarCallZero()
+    : TrivialCXXMutator(getReplaceScalarCall(0), MutatorKind::CXX_ReplaceScalarCallZero,
+                        ReplaceScalarCallZero::ID(),
+                        "Replaces call to a function with 0 (false for bools)", "{0}",
+                        "Replaced call to a function with zero") {}
+
+std::string ReplaceScalarCallNonZero::ID() {
+  return "cxx_replace_scalar_call_nz";
+}
+
+ReplaceScalarCallNonZero::ReplaceScalarCallNonZero()
+    : TrivialCXXMutator(getReplaceScalarCall(42), MutatorKind::CXX_ReplaceScalarCallNonZero,
+                        ReplaceScalarCallNonZero::ID(),
                         "Replaces call to a function with 42 (true for bools)", "{0}",
-                        "Replaced call to a function with a constant") {}
+                        "Replaced call to a function with a non-zero constant") {}
