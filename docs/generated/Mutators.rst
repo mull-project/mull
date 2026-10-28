@@ -7,7 +7,7 @@
 .. |op3| replace:: cxx_and_to_or
 .. |desc3| replace:: Replaces & with |
 .. |op4| replace:: cxx_assign_const
-.. |desc4| replace:: Replaces 'a = b' with 'a = 42'
+.. |desc4| replace:: Replaces 'a = b' with 'a = c': a constant b gets its lowest bit flipped (sign for floats), a dynamic b becomes 42 (true for bools)
 .. |op5| replace:: cxx_bitwise_not_to_noop
 .. |desc5| replace:: Replaces ~x with x
 .. |op6| replace:: cxx_div_assign_to_mul_assign
@@ -25,7 +25,7 @@
 .. |op12| replace:: cxx_gt_to_le
 .. |desc12| replace:: Replaces > with <=
 .. |op13| replace:: cxx_init_const
-.. |desc13| replace:: Replaces 'T a = b' with 'T a = 42'
+.. |desc13| replace:: Replaces 'T a = b' with 'T a = c': a constant b gets its lowest bit flipped (sign for floats), a dynamic b becomes 42 (true for bools)
 .. |op14| replace:: cxx_le_to_gt
 .. |desc14| replace:: Replaces <= with >
 .. |op15| replace:: cxx_le_to_lt
@@ -67,7 +67,7 @@
 .. |op33| replace:: cxx_remove_void_call
 .. |desc33| replace:: Removes calls to a function returning void
 .. |op34| replace:: cxx_replace_scalar_call
-.. |desc34| replace:: Replaces call to a function with 42
+.. |desc34| replace:: Replaces call to a function with 42 (true for bools)
 .. |op35| replace:: cxx_rshift_assign_to_lshift_assign
 .. |desc35| replace:: Replaces >>= with <<=
 .. |op36| replace:: cxx_rshift_to_lshift

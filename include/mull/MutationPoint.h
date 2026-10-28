@@ -62,6 +62,7 @@ class MutationPoint {
   const SourceLocation sourceLocation;
   irm::IRMutation *irMutator;
   std::string userIdentifier;
+  std::string replacement;
 
   SourceLocation endLocation;
 
@@ -78,6 +79,7 @@ public:
   Mutator *getMutator() const;
 
   const std::string &getUserIdentifier() const;
+  const std::string &getReplacement() const;
 
   const MutationPointAddress &getAddress() const;
   llvm::Value *getOriginalValue() const;

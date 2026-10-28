@@ -2,9 +2,11 @@
 
 #include "mull/Mutators/Mutator.h"
 
+#include <irm/IRMutation.h>
 #include <llvm/IR/Constants.h>
 #include <llvm/IR/Function.h>
 #include <llvm/IR/Module.h>
+#include <llvm/Support/FormatVariadic.h>
 #include <llvm/Transforms/Utils/Cloning.h>
 #include <llvm/Transforms/Utils/ModuleUtils.h>
 
@@ -69,11 +71,21 @@ MutationPointAddress::addressFromInstruction(const llvm::Instruction *instructio
                               getIndex(instruction->getParent(), instruction));
 }
 
+static std::string formatReplacement(Mutator *mutator, irm::IRMutation *irMutator,
+                                     llvm::Instruction *instruction) {
+  std::string value = irMutator->describeReplacement(instruction);
+  if (value.empty()) {
+    return mutator->getReplacement();
+  }
+  return llvm::formatv(mutator->getReplacement().c_str(), value).str();
+}
+
 MutationPoint::MutationPoint(Mutator *mutator, irm::IRMutation *irMutator,
                              llvm::Instruction *instruction, Bitcode *m)
     : mutator(mutator), address(MutationPointAddress::addressFromInstruction(instruction)),
       bitcode(m), originalFunction(instruction->getFunction()), mutatedFunction(nullptr),
       sourceLocation(SourceLocation::locationFromInstruction(instruction)), irMutator(irMutator),
+      replacement(formatReplacement(mutator, irMutator, instruction)),
       endLocation(SourceLocation::nullSourceLocation()) {
   updateIdentifier();
 }
@@ -130,7 +142,7 @@ void MutationPoint::recordMutation() {
   llvm::Module *module = originalFunction->getParent();
   std::string encoding = getUserIdentifier();
   llvm::Constant *constant = llvm::ConstantDataArray::getString(
-      module->getContext(), llvm::StringRef(encoding + ':' + mutator->getReplacement()));
+      module->getContext(), llvm::StringRef(encoding + ':' + replacement));
   auto *global = new llvm::GlobalVariable(*module,
                                           constant->getType(),
                                           true,
@@ -191,4 +203,8 @@ std::string MutationPoint::dump() const {
 
 const std::string &MutationPoint::getUserIdentifier() const {
   return userIdentifier;
+}
+
+const std::string &MutationPoint::getReplacement() const {
+  return replacement;
 }

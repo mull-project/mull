@@ -42,6 +42,9 @@ TEST(Mutation_ConstAssignment_InitConst, End_2_End) {
 
     auto const dumpRegex = std::regex("Mutation Point: cxx_init_const /in-memory-file.cc:3:7");
     ASSERT_TRUE(std::regex_search(mutationPoint.dump(), dumpRegex));
+
+    /// The stored constant 0 gets its lowest bit flipped
+    ASSERT_EQ(mutationPoint.getReplacement(), "1");
   }
 }
 

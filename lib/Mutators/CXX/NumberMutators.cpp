@@ -19,8 +19,9 @@ std::string NumberAssignConst::ID() {
 
 NumberAssignConst::NumberAssignConst()
     : TrivialCXXMutator(getNumberMutators(), MutatorKind::CXX_AssignConst, NumberAssignConst::ID(),
-                        "Replaces 'a = b' with 'a = 42'", "= 42;",
-                        "Replaced 'a = b' with 'a = 42'") {}
+                        "Replaces 'a = b' with 'a = c': a constant b gets its lowest bit flipped "
+                        "(sign for floats), a dynamic b becomes 42 (true for bools)",
+                        "= {0};", "Replaced 'a = b' with 'a = c'") {}
 
 std::string NumberInitConst::ID() {
   return "cxx_init_const";
@@ -28,5 +29,6 @@ std::string NumberInitConst::ID() {
 
 NumberInitConst::NumberInitConst()
     : TrivialCXXMutator(getNumberMutators(), MutatorKind::CXX_InitConst, NumberInitConst::ID(),
-                        "Replaces 'T a = b' with 'T a = 42'", "42",
-                        "Replaced 'T a = b' with 'T a = 42'") {}
+                        "Replaces 'T a = b' with 'T a = c': a constant b gets its lowest bit "
+                        "flipped (sign for floats), a dynamic b becomes 42 (true for bools)",
+                        "{0}", "Replaced 'T a = b' with 'T a = c'") {}
