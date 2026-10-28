@@ -33,5 +33,6 @@ std::string ReplaceScalarCall::ID() {
 
 ReplaceScalarCall::ReplaceScalarCall()
     : TrivialCXXMutator(getReplaceScalarCall(), MutatorKind::CXX_ReplaceScalarCall,
-                        ReplaceScalarCall::ID(), "Replaces call to a function with 42", "42",
-                        "Replaced call to a function with 42") {}
+                        ReplaceScalarCall::ID(),
+                        "Replaces call to a function with 42 (true for bools)", "{0}",
+                        "Replaced call to a function with a constant") {}
