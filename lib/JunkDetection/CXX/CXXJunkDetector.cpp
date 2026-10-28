@@ -229,6 +229,12 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     sourceLocationEnd = unary->getOperatorLoc();
   }
 
+  /// Init-Const replaces the whole initializer, but its mutation location is the variable name
+  bool replacesInitializer = point->getMutator()->mutatorKind() == MutatorKind::CXX_InitConst;
+  if (replacesInitializer) {
+    sourceLocationEnd = mutantExpression->getSourceRange().getEnd();
+  }
+
   /// Clang AST: how to get more precise debug information in certain cases?
   /// http://clang-developers.42468.n3.nabble.com/Clang-AST-how-to-get-more-precise-debug-information-in-certain-cases-td4065195.html
   /// https://stackoverflow.com/questions/11083066/getting-the-source-behind-clangs-ast
@@ -244,6 +250,9 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
                     std::to_string(mutationLocationBeginColumn) +
                     " (end: " + std::to_string(endLine) + ":" + std::to_string(endColumn) + ")");
 
+  if (replacesInitializer) {
+    point->setBeginLocation(beginLine, beginColumn);
+  }
   point->setEndLocation(endLine, endColumn);
   return false;
 }

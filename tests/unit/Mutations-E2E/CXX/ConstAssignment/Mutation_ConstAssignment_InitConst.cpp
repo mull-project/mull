@@ -40,7 +40,7 @@ TEST(Mutation_ConstAssignment_InitConst, End_2_End) {
   {
     MutationPoint &mutationPoint = *nonJunkMutationPoints.at(0);
 
-    auto const dumpRegex = std::regex("Mutation Point: cxx_init_const /in-memory-file.cc:3:7");
+    auto const dumpRegex = std::regex("Mutation Point: cxx_init_const /in-memory-file.cc:3:13");
     ASSERT_TRUE(std::regex_search(mutationPoint.dump(), dumpRegex));
 
     /// The stored constant 0 gets its lowest bit flipped

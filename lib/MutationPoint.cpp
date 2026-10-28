@@ -120,6 +120,16 @@ void MutationPoint::applyMutation() {
   mutator->applyMutation(mutatedFunction, address, irMutator);
 }
 
+void MutationPoint::setBeginLocation(int line, int column) {
+  sourceLocation = SourceLocation(sourceLocation.unitDirectory,
+                                  sourceLocation.unitFilePath,
+                                  sourceLocation.directory,
+                                  sourceLocation.filePath,
+                                  line,
+                                  column);
+  updateIdentifier();
+}
+
 void MutationPoint::setEndLocation(int line, int column) {
   endLocation = SourceLocation(sourceLocation.unitDirectory,
                                sourceLocation.unitFilePath,
