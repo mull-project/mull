@@ -59,7 +59,7 @@ class MutationPoint {
   Bitcode *bitcode;
   llvm::Function *originalFunction;
   llvm::Function *mutatedFunction;
-  const SourceLocation sourceLocation;
+  SourceLocation sourceLocation;
   irm::IRMutation *irMutator;
   std::string userIdentifier;
   std::string replacement;
@@ -72,6 +72,7 @@ public:
 
   ~MutationPoint() = default;
 
+  void setBeginLocation(int line, int column);
   void setEndLocation(int line, int column);
   void updateIdentifier();
 
