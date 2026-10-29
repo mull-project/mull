@@ -20,7 +20,7 @@ git2 = { version = "0.21", default-features = false, features = [
     "vendored-libgit2",
 ] }
 indoc = "2"
-libc = "0.2"
+lddtree = "0.5"
 llvm_profparser = { version = "0.15", default-features = false }
 object = { version = "0.40", features = ["read"] }
 proc-macro2 = "1"
