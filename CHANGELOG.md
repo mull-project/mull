@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.36.0] - 29 Oct 2026
+
+- Introduced LLVM-version agnostic `mull-runner` and `mull-reporter`. `mull-runner-N` and `mull-reporter-N` are deprecated and will be removed in a future release [#1205](https://github.com/mull-project/mull/pull/1205)
+- Fixed `cxx_assign_const` and `cxx_init_const` to avoid equivalent mutants: instead of emitting `42` they now flip lsb [#1191](https://github.com/mull-project/mull/issues/1191) [#1142](https://github.com/mull-project/mull/issues/1142) [#1206](https://github.com/mull-project/mull/pull/1206)
+- Split `cxx_replace_scalar_call` into `cxx_replace_scalar_call_zr` and `cxx_replace_scalar_call_nz` replacing the calls with a zero and non-zero values [#1186](https://github.com/mull-project/mull/issues/1186) [#1206](https://github.com/mull-project/mull/pull/1206)
+
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2026-10-25..2026-10-29)
+
 ## [0.35.0] - 25 Oct 2026
 
 - Added LLVM 23 support (macOS) [#1199](https://github.com/mull-project/mull/pull/1199)
