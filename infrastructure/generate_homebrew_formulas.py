@@ -75,10 +75,10 @@ class {class_name} < Formula
       mull-runner and mull-reporter come from {tools_dep}.
 
       The Clang plugin is installed at:
-        #{{lib}}/mull-ir-frontend-{llvm_version}
+        #{{HOMEBREW_PREFIX}}/lib/mull-ir-frontend-{llvm_version}
 
       Usage with clang:
-        clang -fpass-plugin=#{{lib}}/mull-ir-frontend-{llvm_version} ...
+        clang -fpass-plugin=#{{HOMEBREW_PREFIX}}/lib/mull-ir-frontend-{llvm_version} ...
     EOS
   end
 
