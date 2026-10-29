@@ -6,7 +6,7 @@ mod reporting;
 mod runner;
 
 use crate::runner::run_program;
-use dynamic_libraries::{get_dynamic_library_dependencies, resolve_libraries};
+use dynamic_libraries::find_dynamic_libraries;
 use mull_core::{config::RunnerCli, diag_debug, diag_error, diagnostics::MullDiagnostics};
 use mull_filters::{has_coverage, FilterChain, FilterChainConfig};
 use mull_state::{ExecutionResult, ExecutionState, ExecutionStatus, Mutant};
@@ -72,15 +72,8 @@ fn main() {
     let mut mutant_holders = vec![input_file.clone()];
 
     // Find and resolve dynamic library dependencies
-    let dependencies = get_dynamic_library_dependencies(&diag, &input_file);
-    diag_debug!(
-        diag,
-        "Found {} dynamic library dependencies",
-        dependencies.len()
-    );
-
-    let resolved = resolve_libraries(&diag, &dependencies, &cli.ld_search_paths);
-    diag_debug!(diag, "Resolved {} libraries with mutants", resolved.len());
+    let resolved = find_dynamic_libraries(&diag, &input_file, &cli.ld_search_paths);
+    diag_debug!(diag, "Resolved {} dynamic libraries", resolved.len());
     mutant_holders.extend(resolved);
 
     // Extract mutants from all holders
