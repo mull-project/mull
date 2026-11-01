@@ -4,6 +4,8 @@
 #include "rust/mull-cxx-bridge/bridge.rs.h"
 #include <llvm/IR/Constant.h>
 #include <llvm/IR/Constants.h>
+#include <llvm/IR/DebugInfoMetadata.h>
+#include <llvm/IR/InstIterator.h>
 #include <llvm/IR/Instructions.h>
 #include <llvm/Transforms/Utils/Cloning.h>
 
@@ -78,7 +80,9 @@ void DeleteOriginalFunctionsTask::deleteFunctions(Bitcode &bitcode) {
       llvm::ValueToValueMapTy map;
       auto originalCopy = CloneFunction(original, map);
       originalCopy->setName(point->getOriginalFunctionName());
+      auto subprogram = original->getSubprogram();
       original->dropAllReferences();
+      original->setSubprogram(subprogram);
       break;
     }
   }
@@ -207,6 +211,13 @@ void InsertMutationTrampolinesTask::insertTrampolines(Bitcode &bitcode,
     callInst->setCallingConv(original->getCallingConv());
     if (!retType->isVoidTy()) {
       retVal->setOperand(0, callInst);
+    }
+
+    if (auto subprogram = original->getSubprogram()) {
+      auto location = llvm::DILocation::get(context, subprogram->getScopeLine(), 0, subprogram);
+      for (auto &instruction : llvm::instructions(original)) {
+        instruction.setDebugLoc(location);
+      }
     }
   }
 }
