@@ -17,9 +17,15 @@ jobs:
     runs-on: ubuntu-26.04-arm
     timeout-minutes: 30
     name: Ubuntu 26.04 - tools
+    outputs:
+      published-version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/detect-package-metadata
+      - name: Determine package version
+        id: version
+        if: env.CLOUDSMITH_API_KEY != null
+        run: echo "version=$(infrastructure/workspace_status.sh | awk '$1 == "STABLE_MULL_VERSION" { print $2 }')" >> $GITHUB_OUTPUT
       - uses: ./.github/actions/setup-bazel-cache
         with:
           BUILDBUDDY_API_KEY: ${{ secrets.BUILDBUDDY_API_KEY }}
@@ -138,8 +144,9 @@ jobs:
         with:
           GH_API_KEY: ${{ secrets.GITHUB_TOKEN }}
   smoke-test:
-    needs: [build-and-test]
-    if: ${{ !cancelled() && needs.build-and-test.result == 'success' }}
+    needs: [tools, build-and-test]
+    # The repository is shared by all PRs, so only the exact version comes from this run
+    if: ${{ !cancelled() && needs.tools.result == 'success' && needs.build-and-test.result == 'success' && needs.tools.outputs.published-version != '' }}
     runs-on: ubuntu-26.04-arm
     name: Smoke test
     container:
@@ -161,8 +168,10 @@ jobs:
         run: |
           curl -1sLf 'https://dl.cloudsmith.io/public/mull-project/mull-${{ steps.metadata.outputs.cs_repo }}/setup.deb.sh' | bash
       - name: Install and test all mull packages
+        env:
+          MULL_VERSION: ${{ needs.tools.outputs.published-version }}
         run: |
-          apt-get install -y mull
+          apt-get install -y mull=$MULL_VERSION
           runner_version=$(mull-runner --version)
           echo "$runner_version"
           if echo "$runner_version" | grep -q '{STABLE_'; then
@@ -179,7 +188,7 @@ jobs:
 
           for version in 17 18 19 20 21 22; do
             echo "=== Testing LLVM $version ==="
-            apt-get install -y mull-$version
+            apt-get install -y mull-$version=$MULL_VERSION
 
             plugins=$(mull-runner --version)
             echo "$plugins"
