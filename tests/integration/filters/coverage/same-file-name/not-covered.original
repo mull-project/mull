@@ -1,0 +1,6 @@
+int not_called(int x, int y) {
+  return x + y;
+}
+int called(int x) {
+  return x;
+}

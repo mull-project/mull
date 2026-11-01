@@ -1,4 +1,4 @@
-use crate::{FilterDecision, MutantFilter};
+use crate::{find_by_path_suffix, FilterDecision, MutantFilter};
 use llvm_profparser::coverage::coverage_mapping::CoverageMapping;
 use mull_core::diagnostics::MullDiagnostics;
 use mull_core::{diag_debug, diag_warning};
@@ -17,7 +17,7 @@ struct CoverageRange {
 
 /// Filter that skips mutants in code not covered by tests
 pub struct CoverageFilter {
-    /// Map of file path -> uncovered ranges
+    /// Map of file path -> uncovered ranges, empty for fully covered files
     uncovered_ranges: HashMap<String, Vec<CoverageRange>>,
     /// Whether to include uncovered mutants anyway
     include_not_covered: bool,
@@ -60,25 +60,13 @@ impl CoverageFilter {
 
         let path = &mutant.location.filepath;
 
-        // Try exact path match first
-        let ranges = if let Some(r) = self.uncovered_ranges.get(path) {
-            r
-        } else {
-            // Try matching by filename - handles cases where coverage data has
-            // different paths (e.g., sandbox paths) than debug info
-            let mutant_filename = Path::new(path).file_name();
-            let mut found_ranges = None;
-            for (cov_path, ranges) in &self.uncovered_ranges {
-                let cov_filename = Path::new(cov_path).file_name();
-                if mutant_filename == cov_filename {
-                    found_ranges = Some(ranges);
-                    break;
-                }
-            }
-            match found_ranges {
-                Some(r) => r,
-                None => return true, // Path not in coverage map means covered
-            }
+        let ranges = match self
+            .uncovered_ranges
+            .get(path)
+            .or_else(|| find_by_path_suffix(&self.uncovered_ranges, path))
+        {
+            Some(r) => r,
+            None => return true, // Path not in coverage map means covered
         };
 
         let line = mutant.location.begin_line;
@@ -190,6 +178,15 @@ fn load_coverage_from_profile_path(
     // Extract uncovered regions (those with 0 hits)
     for (file_path, coverage_result) in &report.files {
         let file_str = file_path.to_string_lossy().to_string();
+        let abs_path = Path::new(&file_str)
+            .canonicalize()
+            .map(|p| p.to_string_lossy().to_string());
+
+        // A fully covered file has to be found too, not just the files with gaps
+        uncovered_ranges.entry(file_str.clone()).or_default();
+        if let Ok(abs_path) = &abs_path {
+            uncovered_ranges.entry(abs_path.clone()).or_default();
+        }
 
         for (loc, &count) in &coverage_result.hits {
             if count == 0 {
@@ -219,9 +216,9 @@ fn load_coverage_from_profile_path(
                     .push(range.clone());
 
                 // Also store with absolute path
-                if let Ok(abs_path) = Path::new(&file_str).canonicalize() {
+                if let Ok(abs_path) = &abs_path {
                     uncovered_ranges
-                        .entry(abs_path.to_string_lossy().to_string())
+                        .entry(abs_path.clone())
                         .or_default()
                         .push(range);
                 }
@@ -263,6 +260,62 @@ pub fn has_coverage(object_path: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use mull_state::SourceRange;
+
+    fn mutant_at(filepath: &str, line: u64) -> Mutant {
+        Mutant {
+            identifier: format!("cxx_add_to_sub:{}:{}:1:{}:2", filepath, line, line),
+            mutator: "cxx_add_to_sub".into(),
+            location: SourceRange::new(filepath.into(), line, 1, line, 2),
+            replacement: String::new(),
+        }
+    }
+
+    fn filter_with(files: &[(&str, &[u64])]) -> CoverageFilter {
+        let uncovered_ranges = files
+            .iter()
+            .map(|(path, lines)| {
+                let ranges = lines
+                    .iter()
+                    .map(|&line| CoverageRange {
+                        line_begin: line,
+                        column_begin: 1,
+                        line_end: line,
+                        column_end: 80,
+                    })
+                    .collect();
+                (path.to_string(), ranges)
+            })
+            .collect();
+        CoverageFilter {
+            uncovered_ranges,
+            include_not_covered: false,
+        }
+    }
+
+    #[test]
+    fn fully_covered_file_ignores_file_with_the_same_name() {
+        let filter = filter_with(&[("/src/a/util.cpp", &[]), ("/src/b/util.cpp", &[1, 2, 3])]);
+        assert!(filter.covered(&mutant_at("/src/a/util.cpp", 2)));
+        assert!(!filter.covered(&mutant_at("/src/b/util.cpp", 2)));
+    }
+
+    #[test]
+    fn different_prefix_matches_on_the_longest_suffix() {
+        let filter = filter_with(&[
+            ("/build/a/util.cpp", &[]),
+            ("/build/b/util.cpp", &[1, 2, 3]),
+        ]);
+        assert!(filter.covered(&mutant_at("/sandbox/1/a/util.cpp", 2)));
+        assert!(!filter.covered(&mutant_at("/sandbox/1/b/util.cpp", 2)));
+    }
+
+    #[test]
+    fn ambiguous_file_name_counts_as_covered() {
+        let filter = filter_with(&[("/build/a/util.cpp", &[2]), ("/build/b/util.cpp", &[2])]);
+        assert!(filter.covered(&mutant_at("/sandbox/util.cpp", 2)));
+    }
+
     /// A minimal relocatable ELF64 file with empty sections of the given names.
     fn elf_with_sections(names: &[&str]) -> Vec<u8> {
         let mut strtab = vec![0u8];

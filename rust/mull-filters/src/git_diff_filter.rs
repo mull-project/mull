@@ -1,4 +1,4 @@
-use crate::{FilterDecision, MutantFilter};
+use crate::{find_by_path_suffix, FilterDecision, MutantFilter};
 use git2::{DiffOptions, Repository};
 use mull_core::diagnostics::MullDiagnostics;
 use mull_core::{diag_debug, diag_info, diag_warning};
@@ -27,6 +27,7 @@ type GitDiffInfo = HashMap<String, Vec<LineRange>>;
 /// Filter that skips mutants not in git diff
 pub struct GitDiffFilter {
     diff_info: GitDiffInfo,
+    project_root: String,
     debug: bool,
 }
 
@@ -51,13 +52,18 @@ impl GitDiffFilter {
             abs_project_root
         );
         let diff_info = read_git_diff(diag, &abs_project_root, git_diff_ref);
-        Self { diff_info, debug }
+        Self {
+            diff_info,
+            project_root: abs_project_root,
+            debug,
+        }
     }
 
     /// Create an empty filter (no filtering)
     pub fn empty() -> Self {
         Self {
             diff_info: HashMap::new(),
+            project_root: String::new(),
             debug: false,
         }
     }
@@ -89,33 +95,25 @@ impl MutantFilter for GitDiffFilter {
         }
 
         // Try to find the file in diff info
-        let ranges = if let Some(r) = self.diff_info.get(file_path) {
-            r
-        } else {
-            // Try matching by filename only (handles different path prefixes)
-            let mutant_filename = Path::new(file_path).file_name();
-            let mut found_ranges = None;
-            for (diff_path, ranges) in &self.diff_info {
-                let diff_filename = Path::new(diff_path).file_name();
-                if mutant_filename == diff_filename {
-                    found_ranges = Some(ranges);
-                    break;
-                }
-            }
-            match found_ranges {
-                Some(r) => r,
-                None => {
-                    if self.debug {
-                        diag_debug!(
+        // A file under the project root and not in the diff has no changes
+        let in_project = Path::new(file_path).starts_with(&self.project_root);
+        let ranges = match self.diff_info.get(file_path).or_else(|| {
+            (!in_project)
+                .then(|| find_by_path_suffix(&self.diff_info, file_path))
+                .flatten()
+        }) {
+            Some(r) => r,
+            None => {
+                if self.debug {
+                    diag_debug!(
                             diag,
                             "GitDiffFilter: the file is not present in the git diff. Skipping mutant: {}:{}:{}",
                             file_path,
                             line,
                             column
                         );
-                    }
-                    return FilterDecision::Skip;
                 }
+                return FilterDecision::Skip;
             }
         };
 

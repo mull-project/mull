@@ -1,0 +1,12 @@
+b/util.cpp is not fully covered, a/util.cpp is. A file must not get the coverage of a file with the same name.
+
+RUN: cd %S && rm -rf sandbox && mkdir -p sandbox/a sandbox/b
+RUN: cd %S && cp covered.original sandbox/a/util.cpp && cp not-covered.original sandbox/b/util.cpp && cp main.original sandbox/main.cpp
+RUN: cd %S/sandbox && env MULL_CONFIG=%S/mull.yml %clang_cxx %sysroot %pass_mull_ir_frontend -g -grecord-command-line -fprofile-instr-generate -fcoverage-mapping -c main.cpp -o main.o
+RUN: cd %S/sandbox && env MULL_CONFIG=%S/mull.yml %clang_cxx %sysroot %pass_mull_ir_frontend -g -grecord-command-line -fprofile-instr-generate -fcoverage-mapping -c a/util.cpp -o a.o
+RUN: cd %S/sandbox && env MULL_CONFIG=%S/mull.yml %clang_cxx %sysroot %pass_mull_ir_frontend -g -grecord-command-line -fprofile-instr-generate -fcoverage-mapping -c b/util.cpp -o b.o
+RUN: cd %S/sandbox && %clang_cxx %sysroot -fprofile-instr-generate -fcoverage-mapping main.o a.o b.o -o test.exe
+RUN: cd %S/sandbox && unset TERM; env MULL_CONFIG=%S/mull.yml %mull_runner --allow-surviving --include-not-covered --ide-reporter-show-killed ./test.exe 2>&1 | %filecheck %s --dump-input=fail
+
+CHECK-DAG:{{.*}}a/util.cpp:2:12: warning: Killed: Replaced + with - [cxx_add_to_sub]
+CHECK-DAG:{{.*}}b/util.cpp:2:12: warning: Not Covered: Replaced + with - [cxx_add_to_sub]
