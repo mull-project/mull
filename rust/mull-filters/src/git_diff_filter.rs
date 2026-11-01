@@ -213,9 +213,14 @@ fn read_git_diff(
     // Generate diff with no context lines (like -U0)
     // Compare base tree to working directory (includes uncommitted changes)
     let mut diff_opts = DiffOptions::new();
-    diff_opts.context_lines(0);
+    diff_opts
+        .context_lines(0)
+        .include_untracked(true)
+        .recurse_untracked_dirs(true)
+        .show_untracked_content(true);
 
-    let diff = match repo.diff_tree_to_workdir(Some(&base_tree), Some(&mut diff_opts)) {
+    // The index tells files added since the ref from the untracked ones
+    let diff = match repo.diff_tree_to_workdir_with_index(Some(&base_tree), Some(&mut diff_opts)) {
         Ok(d) => d,
         Err(e) => {
             diag_warning!(diag, "GitDiffFilter: cannot compute diff: {}", e);
