@@ -184,6 +184,9 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     return true;
   }
   clang::SourceLocation location = ast->getLocation(point->getSourceLocation());
+  if (location.isInvalid()) {
+    return true;
+  }
   clang::SourceManager &sourceManager = ast->getSourceManager();
 
   if (ast->isInSystemHeader(location)) {

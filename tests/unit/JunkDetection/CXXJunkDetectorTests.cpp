@@ -276,6 +276,26 @@ TEST(CXXJunkDetector, DISABLED_compdb_relative_paths) {
   ASSERT_EQ(nonJunkMutationPoints.size(), 7U);
 }
 
+TEST(CXXJunkDetector, location_in_a_file_missing_from_the_ast) {
+  auto core = init_core_ffi(DiagOutput::Stdout);
+  const MullDiagnostics &diagnostics = core->diag();
+  BitcodeLoader loader;
+  auto path = fixtures::tests_unit_fixtures_junk_detection_compdb_main_cpp_bc_path();
+  auto bitcode = loader.loadBitcodeAtPath(path, diagnostics);
+
+  std::string sourceFile = bitcode->getModule()->getSourceFileName();
+  std::string cxxCompilationFlags =
+      std::string("-I ") + fixtures::tests_unit_fixtures_junk_detection_compdb_include_path() +
+      " " + sourceFile;
+  ASTStorage astStorage(diagnostics, "", cxxCompilationFlags, {});
+
+  ASTUnitWrapper *ast = astStorage.findAST(sourceFile);
+  ASSERT_TRUE(ast->hasAST());
+
+  mull::SourceLocation missing("", "/does/not/exist.cpp", "", "/does/not/exist.cpp", 1, 1);
+  ASSERT_TRUE(ast->getLocation(missing).isInvalid());
+}
+
 TEST(CXXJunkDetector, no_compdb) {
   auto core = init_core_ffi(DiagOutput::Stdout);
   const MullDiagnostics &diagnostics = core->diag();
