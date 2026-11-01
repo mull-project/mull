@@ -1,0 +1,5 @@
+int covered(int, int);
+int called(int);
+int main() {
+  return covered(1, 2) == 3 && called(0) == 0 ? 0 : 1;
+}

@@ -1,0 +1,20 @@
+A file added since the ref is all new, whether it is committed or still untracked.
+
+RUN: cd %S && rm -rf sandbox && mkdir sandbox
+RUN: cd %S && cp source.cpp.original sandbox/old.cpp && cp main.original sandbox/main.cpp
+RUN: cd %S/sandbox && git init . -b main && git add . && git -c user.name=Mull -c user.email=mull@example.com commit -m base
+RUN: cd %S && mkdir -p sandbox/new && cp source.cpp.original sandbox/new/committed.cpp
+RUN: cd %S/sandbox && git add . && git -c user.name=Mull -c user.email=mull@example.com commit -m new-file
+RUN: cd %S && cp source.cpp.original sandbox/new/untracked.cpp
+
+RUN: cd %S && env MULL_CONFIG=mull.yml %clang_cxx %sysroot %pass_mull_ir_frontend -g -grecord-command-line -c sandbox/main.cpp -o main.o
+RUN: cd %S && env MULL_CONFIG=mull.yml %clang_cxx %sysroot %pass_mull_ir_frontend -g -grecord-command-line -DNAME=old -c sandbox/old.cpp -o old.o
+RUN: cd %S && env MULL_CONFIG=mull.yml %clang_cxx %sysroot %pass_mull_ir_frontend -g -grecord-command-line -DNAME=committed -c sandbox/new/committed.cpp -o committed.o
+RUN: cd %S && env MULL_CONFIG=mull.yml %clang_cxx %sysroot %pass_mull_ir_frontend -g -grecord-command-line -DNAME=untracked -c sandbox/new/untracked.cpp -o untracked.o
+RUN: cd %S && %clang_cxx %sysroot main.o old.o committed.o untracked.o -o test.exe
+RUN: cd %S && unset TERM; env MULL_CONFIG=mull.yml %mull_runner --allow-surviving --ide-reporter-show-killed ./test.exe 2>&1 | %filecheck %s --dump-input=fail
+
+CHECK-NOT:{{.*}}old.cpp{{.*}}
+CHECK-DAG:{{.*}}new/committed.cpp:2:12: warning: Survived: Replaced + with - [cxx_add_to_sub]
+CHECK-DAG:{{.*}}new/untracked.cpp:2:12: warning: Survived: Replaced + with - [cxx_add_to_sub]
+CHECK-NOT:{{.*}}old.cpp{{.*}}

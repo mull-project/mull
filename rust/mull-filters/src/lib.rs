@@ -14,6 +14,8 @@ pub use mutator_groups::{expand_mutator_groups, get_group_definitions};
 
 use mull_core::diagnostics::MullDiagnostics;
 use mull_state::Mutant;
+use std::collections::HashMap;
+use std::path::Path;
 
 /// Filter trait for deciding whether to skip a mutant
 pub trait MutantFilter: Send + Sync {
@@ -41,6 +43,35 @@ pub struct FilterMutantsConfig {
     pub include_paths: Vec<String>,
     pub exclude_paths: Vec<String>,
     pub debug_filepath: bool,
+}
+
+/// Find the entry sharing the longest path suffix with `path`. Handles cases where the entries
+/// have different path prefixes (e.g., sandbox paths) than debug info. Ambiguous matches are `None`.
+pub(crate) fn find_by_path_suffix<'a, T>(
+    entries: &'a HashMap<String, T>,
+    path: &str,
+) -> Option<&'a T> {
+    let shared_components = |candidate: &str| {
+        Path::new(path)
+            .components()
+            .rev()
+            .zip(Path::new(candidate).components().rev())
+            .take_while(|(lhs, rhs)| lhs == rhs)
+            .count()
+    };
+
+    let mut best = None;
+    let mut best_length = 0;
+    for (candidate, value) in entries {
+        let length = shared_components(candidate);
+        if length > best_length {
+            best = Some(value);
+            best_length = length;
+        } else if length == best_length {
+            best = None;
+        }
+    }
+    best
 }
 
 /// Filter mutants using the Rust filter chain

@@ -14,6 +14,7 @@ clap_complete = "4"
 clap_mangen = "0.3"
 colored = "3"
 console = "0.16"
+ctrlc = { version = "3", features = ["termination"] }
 cxx = "1"
 cxx-gen = "0.7"
 git2 = { version = "0.21", default-features = false, features = [
@@ -21,6 +22,7 @@ git2 = { version = "0.21", default-features = false, features = [
 ] }
 indoc = "2"
 lddtree = "0.5"
+libc = "0.2"
 llvm_profparser = { version = "0.15", default-features = false }
 object = { version = "0.40", features = ["read"] }
 proc-macro2 = "1"

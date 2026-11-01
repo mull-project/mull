@@ -1,0 +1,9 @@
+Mutant identifiers are ':'-separated, and the file path is one of the parts.
+
+RUN: cd %S && rm -rf "sandbox:1" && mkdir "sandbox:1"
+RUN: cd %S && cp sample.c.original "sandbox:1/sample.c"
+RUN: cd %S && env MULL_CONFIG=%S/mull.yml %clang_cc %sysroot %pass_mull_ir_frontend -g -grecord-command-line "sandbox:1/sample.c" -o test.exe
+RUN: cd %S && unset TERM; env MULL_CONFIG=%S/mull.yml %mull_runner --ide-reporter-show-killed ./test.exe 2>&1 | %filecheck %s --dump-input=fail
+
+CHECK:{{.*}}sandbox:1/sample.c:2:12: warning: Killed: Replaced + with - [cxx_add_to_sub]
+CHECK:[info] Mutation score: 100%

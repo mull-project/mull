@@ -28,12 +28,9 @@ fn report_mutation_score(
     // diag_info!(diag, "Mutation score: {}%", score)
     if survived != 0 {
         diag_info!(diag, "Surviving mutants: {}", survived);
-        if !allow_survived && threshold > score as u32 {
-            return true;
-        }
     }
 
-    false
+    !allow_survived && threshold > score as u32
 }
 
 pub fn show_report(

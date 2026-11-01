@@ -5,9 +5,11 @@ mod plugins;
 mod reporting;
 mod runner;
 
-use crate::runner::run_program;
+use crate::runner::{kill_programs_on_interrupt, run_program};
 use dynamic_libraries::find_dynamic_libraries;
-use mull_core::{config::RunnerCli, diag_debug, diag_error, diagnostics::MullDiagnostics};
+use mull_core::{
+    config::RunnerCli, diag_debug, diag_error, diag_warning, diagnostics::MullDiagnostics,
+};
 use mull_filters::{has_coverage, FilterChain, FilterChainConfig};
 use mull_state::{ExecutionResult, ExecutionState, ExecutionStatus, Mutant};
 use mull_tasks::{run_parallel_task, run_task};
@@ -57,6 +59,10 @@ fn main() {
     let args: Vec<String> = std::env::args().collect();
     let mull_version = env!("MULL_VERSION");
     let (config, cli, diag) = init_cli::init_cli::<RunnerCli>(args, mull_version.into());
+
+    if let Err(e) = kill_programs_on_interrupt() {
+        diag_warning!(diag, "Cannot install the interrupt handler: {}", e);
+    }
 
     let start = Instant::now();
 

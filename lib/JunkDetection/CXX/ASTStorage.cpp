@@ -111,7 +111,9 @@ const clang::FileEntry *ASTUnitWrapper::findFileEntry(const std::string &filePat
 
 clang::SourceLocation ASTUnitWrapper::getLocation(const mull::SourceLocation &sourceLocation) {
   auto file = findFileEntry(sourceLocation);
-  assert(file);
+  if (!file) {
+    return clang::SourceLocation();
+  }
   assert(!sourceLocation.isNull());
   auto location = ast->getLocation(file, sourceLocation.line, sourceLocation.column);
   assert(location.isValid());

@@ -50,23 +50,20 @@ fn extract_from_file(diag: &MullDiagnostics, path: &str) -> Vec<String> {
 }
 
 fn parse_encoding(diag: &MullDiagnostics, encoding: &str) -> Option<Mutant> {
-    let chunks: Vec<&str> = encoding.split(':').collect();
-
-    if chunks.len() < 7 {
+    // The file path can contain ':', the other parts cannot
+    let parts = encoding.matches(':').count() + 1;
+    let Some((identifier, replacement)) = encoding.rsplit_once(':').filter(|_| parts >= 7) else {
         diag_warning!(
             diag,
             "Invalid mutant encoding (expected at least 7 parts): {}",
             encoding
         );
         return None;
-    }
-
-    let replacement = chunks[6];
-    let identifier = encoding[..encoding.rfind(':').unwrap()].to_string();
+    };
 
     Some(Mutant::from_identifier(
         diag,
-        identifier,
+        identifier.to_string(),
         replacement.into(),
     ))
 }

@@ -12,7 +12,7 @@ namespace mull {
 
 static llvm::DICompileUnit *getUnit(const llvm::DebugLoc &debugLocation) {
   llvm::DIScope *scope = debugLocation->getScope();
-  while (!llvm::isa<llvm::DISubprogram>(scope) && scope != nullptr) {
+  while (scope != nullptr && !llvm::isa<llvm::DISubprogram>(scope)) {
     scope = scope->getScope();
   }
   return scope ? llvm::cast<llvm::DISubprogram>(scope)->getUnit() : nullptr;
