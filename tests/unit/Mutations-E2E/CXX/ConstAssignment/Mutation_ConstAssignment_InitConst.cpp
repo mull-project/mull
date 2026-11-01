@@ -89,3 +89,55 @@ int foo() {
   ASSERT_EQ(nonJunkMutationPoints.size(), 0);
   ASSERT_EQ(junkMutationPoints.size(), 1);
 }
+
+TEST(Mutation_ConstAssignment_InitConst, DoesNotApply_EmptyBraces) {
+  const std::string testCode = std::string(R"(///
+template <class T> T value() {
+  T var{};
+  return var;
+}
+
+int foo() {
+  int a{};
+  int b = {};
+  double c{};
+  bool d{};
+  return a + b + c + d + value<int>();
+}
+)");
+
+  NumberInitConst mutator;
+
+  MutationTestBed mutationTestBed;
+
+  std::unique_ptr<MutationArtefact> artefact = mutationTestBed.generate(testCode, mutator);
+
+  std::vector<MutationPoint *> nonJunkMutationPoints = artefact->getNonJunkMutationPoints();
+  std::vector<MutationPoint *> junkMutationPoints = artefact->getJunkMutationPoints();
+
+  ASSERT_EQ(nonJunkMutationPoints.size(), 0);
+  ASSERT_EQ(junkMutationPoints.size(), 5);
+}
+
+TEST(Mutation_ConstAssignment_InitConst, Applies_ExplicitValueInBraces) {
+  const std::string testCode = std::string(R"(///
+int foo(int value) {
+  int a{0};
+  int b{value};
+  int c = {7};
+  return a + b + c;
+}
+)");
+
+  NumberInitConst mutator;
+
+  MutationTestBed mutationTestBed;
+
+  std::unique_ptr<MutationArtefact> artefact = mutationTestBed.generate(testCode, mutator);
+
+  std::vector<MutationPoint *> nonJunkMutationPoints = artefact->getNonJunkMutationPoints();
+  std::vector<MutationPoint *> junkMutationPoints = artefact->getJunkMutationPoints();
+
+  ASSERT_EQ(nonJunkMutationPoints.size(), 3);
+  ASSERT_EQ(junkMutationPoints.size(), 0);
+}

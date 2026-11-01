@@ -27,8 +27,12 @@ public:
     if (decl->getLocation() == parameters.sourceLocation) {
       assert(!matchingExpression && "Already found");
       matchingExpression = decl->getInit();
-      /// `T a{b}`: replace `b`, keeping the braces
       if (auto initList = clang::dyn_cast<clang::InitListExpr>(matchingExpression)) {
+        /// `T a{}`: no value was picked, so there is nothing to replace
+        if (initList->getNumInits() == 0) {
+          matchingExpression = nullptr;
+        }
+        /// `T a{b}`: replace `b`, keeping the braces
         if (initList->getNumInits() == 1) {
           matchingExpression = initList->getInit(0);
         }
