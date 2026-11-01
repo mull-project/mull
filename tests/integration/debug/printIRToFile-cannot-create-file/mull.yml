@@ -1,0 +1,6 @@
+mutators:
+  - cxx_add_to_sub
+quiet: false
+debug:
+  printIR: true
+  printIRToFile: true

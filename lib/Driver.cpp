@@ -33,6 +33,7 @@ void printIR(llvm::Module &module, const MullDiagnostics &diagnostics, bool toFi
     llvm::raw_fd_ostream out(filename, ec);
     if (ec) {
       diagnostics.warning("Cannot create file for debugging: "s + filename + ": " + ec.message());
+      return;
     }
     module.print(out, nullptr);
   } else {
