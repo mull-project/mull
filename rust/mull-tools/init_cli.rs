@@ -92,6 +92,9 @@ fn override_config(shared: &SharedCli, yaml_config: &mut MullConfigSpec) {
     if shared.debug {
         yaml_config.debug_enabled = true;
     }
+    if shared.strict {
+        yaml_config.strict = true;
+    }
     if shared.no_test_output || shared.no_output {
         yaml_config.capture_test_output = false;
     }
