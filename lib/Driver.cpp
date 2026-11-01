@@ -13,6 +13,7 @@
 #include <llvm/IR/Verifier.h>
 #include <llvm/Support/DynamicLibrary.h>
 #include <llvm/Support/FileSystem.h>
+#include <llvm/Support/JSON.h>
 
 #include <algorithm>
 #include <sstream>
@@ -171,7 +172,12 @@ void mull::mutateBitcode(llvm::Module &module, const MullDiagnostics &diagnostic
   {
     rust::Vec<rust::String> mutantIds;
     for (auto *point : mutations) {
-      mutantIds.push_back(rust::String(point->getUserIdentifier()));
+      const std::string &id = point->getUserIdentifier();
+      if (!llvm::json::isUTF8(id)) {
+        diagnostics.warning("Skipping a mutant in a non-UTF-8 path: " + llvm::json::fixUTF8(id));
+        continue;
+      }
+      mutantIds.push_back(rust::String(id));
     }
 
     FilterMutantsConfig filterConfig;
