@@ -49,15 +49,22 @@ impl Mutant {
         identifier: String,
         replacement: String,
     ) -> Self {
-        let chunks = identifier.split(":").collect::<Vec<&str>>();
-        assert_eq!(chunks.len(), 6);
-        let mutator = chunks[0].to_string();
+        // The file path can contain ':', the other parts cannot
+        let mut chunks = identifier.rsplitn(5, ':');
+        let end_column = chunks.next().unwrap_or_default();
+        let end_line = chunks.next().unwrap_or_default();
+        let begin_column = chunks.next().unwrap_or_default();
+        let begin_line = chunks.next().unwrap_or_default();
+        let Some((mutator, filepath)) = chunks.next().and_then(|rest| rest.split_once(':')) else {
+            diag_error!(diag, "Invalid mutant identifier: {}", identifier)
+        };
+        let mutator = mutator.to_string();
         let location = SourceRange {
-            filepath: chunks[1].into(),
-            begin_line: parse_u64(diag, chunks[2], "begin line"),
-            begin_column: parse_u64(diag, chunks[3], "begin column"),
-            end_line: parse_u64(diag, chunks[4], "end line"),
-            end_column: parse_u64(diag, chunks[5], "end column"),
+            filepath: filepath.into(),
+            begin_line: parse_u64(diag, begin_line, "begin line"),
+            begin_column: parse_u64(diag, begin_column, "begin column"),
+            end_line: parse_u64(diag, end_line, "end line"),
+            end_column: parse_u64(diag, end_column, "end column"),
         };
 
         Self {
