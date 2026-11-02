@@ -111,7 +111,8 @@ jobs:
             mkdir -p packages
             bazel test //... || { cp -RL bazel-testlogs ci-testlogs; exit 1; }
             bazel build //:mull_llvm_packages --stamp
-            mv -v bazel-bin/Mull-*.deb packages/
+            # `bazel test` also builds an unstamped mull package, which must not overwrite the one from the tools job
+            mv -v bazel-bin/Mull-${{ matrix.LLVM_VERSION }}-*.deb packages/
       - name: Upload test logs
         if: failure()
         uses: actions/upload-artifact@v4

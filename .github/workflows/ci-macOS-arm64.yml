@@ -188,7 +188,8 @@ jobs:
       - name: Move package
         run: |
           mkdir -p /tmp/packages
-          cp -v bazel-bin/Mull-*.zip /tmp/packages/
+          # `bazel test` also builds an unstamped mull package, which must not overwrite the one from the tools job
+          cp -v bazel-bin/Mull-${{ matrix.LLVM_VERSION }}-*.zip /tmp/packages/
       - uses: ./.github/actions/attach-package
         with:
           GH_API_KEY: ${{ secrets.GITHUB_TOKEN }}
