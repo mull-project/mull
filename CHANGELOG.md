@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.37.0] - 02 Nov 2026
+
+‼️ Cloudsmith bandwidth is exhausted again, use packages from [GitHub Releases](https://github.com/mull-project/mull/releases/latest) for installation, [see more details](https://mull-project.com/getting-started/installation/#cloudsmith-bandwidth-limit).
+
+- Added missing debug info [#1138](https://github.com/mull-project/mull/issues/1138) [#1211](https://github.com/mull-project/mull/pull/1211)
+- Empty brace initializers (`T x{}`) are no longer mutated [#1137](https://github.com/mull-project/mull/issues/1137) [#1212](https://github.com/mull-project/mull/pull/1212)
+- Fixed `Could not find dynamic library` warnings on Linux [#1024](https://github.com/mull-project/mull/issues/1024) [#1209](https://github.com/mull-project/mull/pull/1209)
+- Fixed git-diff filter missing new files [#1210](https://github.com/mull-project/mull/pull/1210)
+- Fixed `mull-runner` hanging on timeouts when tests run under a wrapper: timeouts now kill the whole process group [#1210](https://github.com/mull-project/mull/pull/1210)
+- Fixed a rare data race in mutant search [#1210](https://github.com/mull-project/mull/pull/1210)
+- Fixed `--strict` to work on command line [#1210](https://github.com/mull-project/mull/pull/1210)
+- Fixed a few more minor issues [#1210](https://github.com/mull-project/mull/pull/1210)
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2026-10-29..2026-11-02)
+
 ## [0.36.0] - 29 Oct 2026
 
 - Introduced LLVM-version agnostic `mull-runner` and `mull-reporter`. `mull-runner-N` and `mull-reporter-N` are deprecated and will be removed in a future release [#1205](https://github.com/mull-project/mull/pull/1205)
