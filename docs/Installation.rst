@@ -52,6 +52,31 @@ Check if everything works:
     Before 0.36.0 the tools had versioned names (``mull-runner-19``). They are still installed
     as symlinks to ``mull-runner`` and ``mull-reporter``, but will be removed in a future release.
 
+Install from GitHub Releases
+----------------------------
+
+The same packages are attached to every `GitHub release <https://github.com/mull-project/mull/releases>`_,
+in case Cloudsmith is unavailable. Download ``mull`` (``Mull-<version>-<os>-<arch>-<os version>``)
+and the plugin for your LLVM version (``Mull-<N>-<version>-LLVM-<N.x.y>-<os>-<arch>-<os version>``),
+then install both files so that the package manager pulls in their dependencies:
+
+.. code-block:: bash
+
+    # Ubuntu 24.04, x86_64, LLVM 19
+    gh release download 0.36.0 --repo mull-project/mull \
+      --pattern 'Mull-0.36.0-ubuntu-amd64-24.04.deb' \
+      --pattern 'Mull-19-0.36.0-*-ubuntu-amd64-24.04.deb'
+    sudo apt-get install ./Mull-*.deb
+
+    # RHEL 9.6, x86_64, LLVM 21
+    gh release download 0.36.0 --repo mull-project/mull \
+      --pattern 'Mull-0.36.0-rhel-amd64-9.6.rpm' \
+      --pattern 'Mull-21-0.36.0-*-rhel-amd64-9.6.rpm'
+    sudo dnf install ./Mull-*.rpm
+
+Without ``gh``, download the same files from the release page. Packages installed this way don't
+get updates, so repeat the steps to upgrade.
+
 Install on macOS
 ****************
 
