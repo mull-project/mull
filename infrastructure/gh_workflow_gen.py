@@ -56,11 +56,16 @@ def main():
         base_image = f"redhat/ubi{major_version}:{args.os_version}"
         pre_install_cmd = "true"  # curl-minimal is pre-installed in UBI
         install_cmd = "dnf install -y"
+        # The Cloudsmith repos set skip_if_unavailable, which would hide a failing repo
+        reinstall_cmd = 'dnf reinstall -y --setopt="mull-project*.skip_if_unavailable=False"'
+        version_separator = "-"
         cloudsmith_setup_script = "setup.rpm.sh"
     else:
         base_image = f"{os_name_lower}:{args.os_version}"
         pre_install_cmd = "apt-get update && apt-get install -y curl ca-certificates"
         install_cmd = "apt-get install -y"
+        reinstall_cmd = "apt-get install -y --reinstall"
+        version_separator = "="
         cloudsmith_setup_script = "setup.deb.sh"
 
     template_args = {
@@ -74,6 +79,8 @@ def main():
         "BASE_IMAGE": base_image,
         "PRE_INSTALL_CMD": pre_install_cmd,
         "INSTALL_CMD": install_cmd,
+        "REINSTALL_CMD": reinstall_cmd,
+        "VERSION_SEPARATOR": version_separator,
         "CLOUDSMITH_SETUP_SCRIPT": cloudsmith_setup_script,
         "LLVM_VERSIONS_SPACE_SEPARATED": " ".join(args.llvm_versions),
         # The tools job reuses the image of the newest LLVM; the tools don't depend on it

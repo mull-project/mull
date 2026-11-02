@@ -17,9 +17,15 @@ jobs:
     runs-on: ubuntu-26.04
     timeout-minutes: 30
     name: RHEL 10.0 - tools
+    outputs:
+      published-version: ${{ steps.version.outputs.version }}
     steps:
       - uses: actions/checkout@v7
       - uses: ./.github/actions/detect-package-metadata
+      - name: Determine package version
+        id: version
+        if: env.CLOUDSMITH_API_KEY != null
+        run: echo "version=$(infrastructure/workspace_status.sh | awk '$1 == "STABLE_MULL_VERSION" { print $2 }')" >> $GITHUB_OUTPUT
       - uses: ./.github/actions/setup-bazel-cache
         with:
           BUILDBUDDY_API_KEY: ${{ secrets.BUILDBUDDY_API_KEY }}
@@ -64,6 +70,11 @@ jobs:
         run: |
           mkdir -p /tmp/packages
           sudo mv -v packages/Mull-*.rpm /tmp/packages/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages-tools
+          path: /tmp/packages/
+          retention-days: 7
       - uses: ./.github/actions/attach-package
         with:
           GH_API_KEY: ${{ secrets.GITHUB_TOKEN }}
@@ -100,7 +111,8 @@ jobs:
             mkdir -p packages
             bazel test //... || { cp -RL bazel-testlogs ci-testlogs; exit 1; }
             bazel build //:mull_llvm_packages --stamp
-            mv -v bazel-bin/Mull-*.rpm packages/
+            # `bazel test` also builds an unstamped mull package, which must not overwrite the one from the tools job
+            mv -v bazel-bin/Mull-${{ matrix.LLVM_VERSION }}-*.rpm packages/
       - name: Upload test logs
         if: failure()
         uses: actions/upload-artifact@v4
@@ -134,35 +146,36 @@ jobs:
         run: |
           mkdir -p /tmp/packages
           sudo mv -v packages/Mull-*.rpm /tmp/packages/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: packages-llvm-${{ matrix.LLVM_VERSION }}
+          path: /tmp/packages/
+          retention-days: 7
       - uses: ./.github/actions/attach-package
         with:
           GH_API_KEY: ${{ secrets.GITHUB_TOKEN }}
   smoke-test:
-    needs: [build-and-test]
-    if: ${{ !cancelled() && needs.build-and-test.result == 'success' }}
+    needs: [tools, build-and-test]
+    if: ${{ !cancelled() && needs.tools.result == 'success' && needs.build-and-test.result == 'success' }}
     runs-on: ubuntu-26.04
     name: Smoke test
     container:
       image: redhat/ubi10:10.0
     steps:
-      - name: Determine Cloudsmith repo
-        id: metadata
-        run: |
-          if [ "${{ github.event_name }}" = "pull_request" ]; then
-            echo "cs_repo=testing" >> $GITHUB_OUTPUT
-          elif echo "${{ github.ref }}" | grep -q "^refs/tags/"; then
-            echo "cs_repo=stable" >> $GITHUB_OUTPUT
-          else
-            echo "cs_repo=nightly" >> $GITHUB_OUTPUT
-          fi
       - name: Install prerequisites
         run: true
-      - name: Setup Cloudsmith repo
-        run: |
-          curl -1sLf 'https://dl.cloudsmith.io/public/mull-project/mull-${{ steps.metadata.outputs.cs_repo }}/setup.rpm.sh' | bash
+      - uses: actions/download-artifact@v4
+        with:
+          name: packages-tools
+          path: packages/tools
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: packages-llvm-*
+          path: packages/llvm
+          merge-multiple: true
       - name: Install and test all mull packages
         run: |
-          dnf install -y mull
+          dnf install -y ./packages/tools/Mull-*.rpm
           runner_version=$(mull-runner --version)
           echo "$runner_version"
           if echo "$runner_version" | grep -q '{STABLE_'; then
@@ -179,7 +192,7 @@ jobs:
 
           for version in 21; do
             echo "=== Testing LLVM $version ==="
-            dnf install -y mull-$version
+            dnf install -y ./packages/llvm/Mull-$version-*.rpm
 
             plugins=$(mull-runner --version)
             echo "$plugins"
@@ -191,4 +204,37 @@ jobs:
             # Deprecated versioned names, kept as symlinks
             mull-runner-$version --version
             mull-reporter-$version --version
+          done
+      # Reinstalling the exact versions forces downloading them from Cloudsmith
+      - name: Install mull packages from Cloudsmith
+        if: needs.tools.outputs.published-version != ''
+        shell: bash
+        env:
+          MULL_VERSION: ${{ needs.tools.outputs.published-version }}
+        run: |
+          case "$GITHUB_EVENT_NAME:$GITHUB_REF" in
+            pull_request:*) cs_repo=testing ;;
+            *:refs/tags/*) cs_repo=stable ;;
+            *) cs_repo=nightly ;;
+          esac
+          packages=mull-$MULL_VERSION
+          for version in 21; do
+            packages="$packages mull-$version-$MULL_VERSION"
+          done
+          set -o pipefail
+          if ! (curl -1sLf "https://dl.cloudsmith.io/public/mull-project/mull-$cs_repo/setup.rpm.sh" | bash && dnf reinstall -y --setopt="mull-project*.skip_if_unavailable=False" $packages) 2>&1 | tee cloudsmith.log; then
+            # 402: the Cloudsmith quota is exhausted, which isn't something this run can fix
+            if grep -qE '402 +Payment Required|Status code: 402' cloudsmith.log; then
+              echo "::warning title=Cloudsmith unavailable::mull-$cs_repo returns 402 Payment Required, packages can't be installed from Cloudsmith"
+              exit 0
+            fi
+            exit 1
+          fi
+          plugins=$(mull-runner --version)
+          echo "$plugins"
+          for version in 21; do
+            if ! echo "$plugins" | grep -q "mull-ir-frontend-$version (mull [0-9]"; then
+              echo "ERROR: mull-runner does not list mull-ir-frontend-$version"
+              exit 1
+            fi
           done
