@@ -1,0 +1,14 @@
+Both a/util.cpp and b/util.cpp change, but only a is listed in gitDiffPaths.
+
+RUN: cd %S && rm -rf sandbox && mkdir -p sandbox/a sandbox/b
+RUN: cd %S && cp util.cpp.original sandbox/a/util.cpp && cp util.cpp.original sandbox/b/util.cpp && cp main.original sandbox/main.cpp
+RUN: cd %S/sandbox && git init . -b main && git add . && git -c user.name=Mull -c user.email=mull@example.com commit -m base
+RUN: cd %S && cp util.cpp.modified sandbox/a/util.cpp && cp util.cpp.modified sandbox/b/util.cpp
+RUN: cd %S && env MULL_CONFIG=mull.yml %clang_cxx %sysroot %pass_mull_ir_frontend -g -grecord-command-line -c sandbox/main.cpp -o main.o
+RUN: cd %S && env MULL_CONFIG=mull.yml %clang_cxx %sysroot %pass_mull_ir_frontend -g -grecord-command-line -DNAME=first -c sandbox/a/util.cpp -o a.o
+RUN: cd %S && env MULL_CONFIG=mull.yml %clang_cxx %sysroot %pass_mull_ir_frontend -g -grecord-command-line -DNAME=second -c sandbox/b/util.cpp -o b.o
+RUN: cd %S && %clang_cxx %sysroot main.o a.o b.o -o test.exe
+RUN: cd %S && unset TERM; env MULL_CONFIG=mull.yml %mull_runner --allow-surviving --ide-reporter-show-killed ./test.exe 2>&1 | %filecheck %s --dump-input=fail
+
+CHECK:{{.*}}a/util.cpp:2:12: warning: Survived: Replaced + with - [cxx_add_to_sub]
+CHECK-NOT:{{.*}}b/util.cpp{{.*}}

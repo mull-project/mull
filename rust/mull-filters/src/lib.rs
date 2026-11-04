@@ -37,6 +37,7 @@ pub trait MutantFilter: Send + Sync {
 pub struct FilterMutantsConfig {
     pub git_diff_ref: String,
     pub git_project_root: String,
+    pub git_diff_paths: Vec<String>,
     pub debug_git_diff: bool,
     pub workers: usize,
     pub enable_manual_filter: bool,
@@ -106,6 +107,7 @@ pub fn filter_mutants(
         debug_coverage: false,
         git_diff_ref: &config.git_diff_ref,
         git_project_root: &config.git_project_root,
+        git_diff_paths: &config.git_diff_paths,
         debug_git_diff: config.debug_git_diff,
         enable_manual_filter: config.enable_manual_filter,
         include_paths: &config.include_paths,

@@ -183,6 +183,9 @@ void mull::mutateBitcode(llvm::Module &module, const MullDiagnostics &diagnostic
     FilterMutantsConfig filterConfig;
     filterConfig.git_diff_ref = std::string(configuration.git_diff_ref);
     filterConfig.git_project_root = std::string(configuration.git_project_root);
+    for (const auto &path : configuration.git_diff_paths) {
+      filterConfig.git_diff_paths.push_back(rust::String(std::string(path)));
+    }
     filterConfig.debug_git_diff = configuration.debug.git_diff;
     filterConfig.workers = configuration.workers;
     filterConfig.enable_manual_filter = true;
