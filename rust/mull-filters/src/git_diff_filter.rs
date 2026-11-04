@@ -37,6 +37,7 @@ impl GitDiffFilter {
         diag: &MullDiagnostics,
         git_project_root: &str,
         git_diff_ref: &str,
+        git_diff_paths: &[String],
         debug: bool,
     ) -> Self {
         // Expand to absolute path like C++ version does
@@ -45,13 +46,15 @@ impl GitDiffFilter {
             .map(|p| p.to_string_lossy().to_string())
             .unwrap_or_else(|_| git_project_root.to_string());
 
-        diag_info!(
-            diag,
+        let mut message = format!(
             "Incremental testing using Git Diff is enabled.\n- Git ref: {}\n- Git project root: {}",
-            git_diff_ref,
-            abs_project_root
+            git_diff_ref, abs_project_root
         );
-        let diff_info = read_git_diff(diag, &abs_project_root, git_diff_ref);
+        if !git_diff_paths.is_empty() {
+            message.push_str(&format!("\n- Git diff paths: {}", git_diff_paths.join(", ")));
+        }
+        diag_info!(diag, "{}", message);
+        let diff_info = read_git_diff(diag, &abs_project_root, git_diff_ref, git_diff_paths);
         Self {
             diff_info,
             project_root: abs_project_root,
@@ -155,6 +158,7 @@ fn read_git_diff(
     diag: &MullDiagnostics,
     git_project_root: &str,
     git_diff_ref: &str,
+    git_diff_paths: &[String],
 ) -> GitDiffInfo {
     let mut diff_info: GitDiffInfo = HashMap::new();
 
@@ -218,6 +222,9 @@ fn read_git_diff(
         .include_untracked(true)
         .recurse_untracked_dirs(true)
         .show_untracked_content(true);
+    for path in git_diff_paths {
+        diff_opts.pathspec(path);
+    }
 
     // The index tells files added since the ref from the untracked ones
     let diff = match repo.diff_tree_to_workdir_with_index(Some(&base_tree), Some(&mut diff_opts)) {

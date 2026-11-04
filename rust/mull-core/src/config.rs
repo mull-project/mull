@@ -68,6 +68,8 @@ pub struct MullConfigSpec {
     pub git_diff_ref: String,
     /// Root directory of the git project.
     pub git_project_root: String,
+    /// Paths, relative to the git project root, to restrict the git diff to. Empty means the whole project.
+    pub git_diff_paths: Vec<String>,
 
     /// Parallelization settings.
     pub parallelization: ParallelizationSpec,
@@ -96,6 +98,7 @@ impl Default for MullConfigSpec {
             exclude_paths: Vec::new(),
             git_diff_ref: String::new(),
             git_project_root: String::new(),
+            git_diff_paths: Vec::new(),
             parallelization: ParallelizationSpec::default(),
             debug: DebugOptionsSpec::default(),
         }

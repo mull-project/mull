@@ -26,6 +26,8 @@ pub struct FilterChainConfig<'a> {
     pub git_diff_ref: &'a str,
     /// Git project root directory (empty = current dir)
     pub git_project_root: &'a str,
+    /// Paths to restrict the git diff to (empty = the whole project)
+    pub git_diff_paths: &'a [String],
     /// Enable git diff debug output
     pub debug_git_diff: bool,
     /// Enable manual filter (mull-off/mull-on/mull-ignore comments)
@@ -99,6 +101,7 @@ impl FilterChain {
                     diag,
                     config.git_project_root,
                     config.git_diff_ref,
+                    config.git_diff_paths,
                     config.debug_git_diff,
                 );
                 chain.add(git_diff_filter);

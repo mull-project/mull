@@ -36,6 +36,8 @@
    gitDiffRef: ""
    # Root directory of the git project.
    gitProjectRoot: ""
+   # Paths, relative to the git project root, to restrict the git diff to. Empty means the whole project.
+   gitDiffPaths: []
    # Parallelization settings
    parallelization:
      # Number of worker threads for test discovery.

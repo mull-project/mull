@@ -22,6 +22,19 @@ To enable incremental mutation testing, two config options have to be provided t
 Mull: ``gitDiffRef: <branch or commit>`` and ``gitProjectRoot: <path>``
 which is a path to a project's Git root path.
 
+By default, Mull reads the diff of the whole Git repository. In a large repository, where only
+a part of it is mutated, the diff can be restricted to that part with ``gitDiffPaths``, a list of
+paths relative to ``gitProjectRoot``. Like the pathspecs of ``git diff``, an entry can be a directory or a glob.
+This makes reading the diff faster, which matters because Mull reads it every time it
+compiles or runs a file. Mutations outside of these paths are skipped, as if they were not in the diff:
+
+.. code-block:: yaml
+
+   gitDiffRef: origin/main
+   gitProjectRoot: .
+   gitDiffPaths:
+     - src/
+
 An additional debug option (``gitDiff: true``) can be useful for a visualization of how
 exactly Mull whitelists or blacklists found source lines.
 

@@ -11,6 +11,7 @@ mod ffi {
     struct FilterMutantsConfig {
         git_diff_ref: String,
         git_project_root: String,
+        git_diff_paths: Vec<String>,
         debug_git_diff: bool,
         workers: usize,
         enable_manual_filter: bool,
@@ -54,6 +55,7 @@ mod ffi {
         compilation_database_path: String,
         git_diff_ref: String,
         git_project_root: String,
+        git_diff_paths: Vec<String>,
 
         mutators: Vec<String>,
         ignore_mutators: Vec<String>,
@@ -178,6 +180,7 @@ fn convert_config(src: &mull_core::MullConfig) -> ffi::MullConfig {
         compilation_database_path: src.compilation_database_path.clone(),
         git_diff_ref: src.git_diff_ref.clone(),
         git_project_root: src.git_project_root.clone(),
+        git_diff_paths: src.git_diff_paths.clone(),
         mutators: src.mutators.clone(),
         ignore_mutators: src.ignore_mutators.clone(),
         compiler_flags: src.compiler_flags.clone(),
@@ -222,6 +225,7 @@ fn filter_mutants(
     let inner_config = FilterMutantsConfigInner {
         git_diff_ref: config.git_diff_ref,
         git_project_root: config.git_project_root,
+        git_diff_paths: config.git_diff_paths,
         debug_git_diff: config.debug_git_diff,
         workers: config.workers,
         enable_manual_filter: config.enable_manual_filter,

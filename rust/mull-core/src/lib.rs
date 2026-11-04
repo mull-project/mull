@@ -43,6 +43,7 @@ pub struct MullConfig {
     pub compilation_database_path: String,
     pub git_diff_ref: String,
     pub git_project_root: String,
+    pub git_diff_paths: Vec<String>,
 
     pub mutators: Vec<String>,
     pub ignore_mutators: Vec<String>,
@@ -205,6 +206,7 @@ impl MullConfigSpec {
             compilation_database_path: self.compilation_database_path.clone(),
             git_diff_ref: self.git_diff_ref.clone(),
             git_project_root: self.git_project_root.clone(),
+            git_diff_paths: self.git_diff_paths.clone(),
             mutators: self.mutators.clone(),
             ignore_mutators: self.ignore_mutators.clone(),
             compiler_flags: self.compiler_flags.clone(),
