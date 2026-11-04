@@ -51,7 +51,10 @@ impl GitDiffFilter {
             git_diff_ref, abs_project_root
         );
         if !git_diff_paths.is_empty() {
-            message.push_str(&format!("\n- Git diff paths: {}", git_diff_paths.join(", ")));
+            message.push_str(&format!(
+                "\n- Git diff paths: {}",
+                git_diff_paths.join(", ")
+            ));
         }
         diag_info!(diag, "{}", message);
         let diff_info = read_git_diff(diag, &abs_project_root, git_diff_ref, git_diff_paths);
