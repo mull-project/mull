@@ -36,6 +36,9 @@
          --ide-reporter-show-killed
              Show killed mutations in IDE reporter output
 
+         --ide-reporter-show-patches
+             Show a patch for each mutation in IDE reporter output, paths relative to --report-patch-base
+
          --debug
              Enable debug mode with additional diagnostic output
 

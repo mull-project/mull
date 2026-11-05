@@ -49,6 +49,7 @@ pub fn show_report(
             report_dir: cli.report_dir,
             report_name: cli.report_name.unwrap_or_default(),
             ide_reporter_show_killed: cli.ide_reporter_show_killed,
+            ide_reporter_show_patches: cli.ide_reporter_show_patches,
             report_patch_base: cli.report_patch_base,
             sqlite_busy_timeout: cli.sqlite_busy_timeout,
         };

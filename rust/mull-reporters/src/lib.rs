@@ -27,10 +27,14 @@ pub struct ReporterConfig {
     pub report_name: String,
     pub report_patch_base: String,
     pub ide_reporter_show_killed: bool,
+    pub ide_reporter_show_patches: bool,
     pub sqlite_busy_timeout: u32,
 }
 
 pub fn create_reporters(config: &ReporterConfig) -> Vec<Box<dyn Reporter>> {
+    let ide_patch_base = config
+        .ide_reporter_show_patches
+        .then_some(config.report_patch_base.as_str());
     let reporters: Vec<Box<dyn Reporter>> = config
         .reporters
         .iter()
@@ -38,6 +42,7 @@ pub fn create_reporters(config: &ReporterConfig) -> Vec<Box<dyn Reporter>> {
             match kind {
                 ReporterKind::IDE => Box::new(IDEReporter::new(
                     config.ide_reporter_show_killed,
+                    ide_patch_base,
                     &config.report_dir,
                     &config.report_name,
                 )),
@@ -68,6 +73,7 @@ pub fn create_reporters(config: &ReporterConfig) -> Vec<Box<dyn Reporter>> {
     if reporters.is_empty() {
         vec![Box::new(IDEReporter::new(
             config.ide_reporter_show_killed,
+            ide_patch_base,
             &config.report_dir,
             &config.report_name,
         ))]

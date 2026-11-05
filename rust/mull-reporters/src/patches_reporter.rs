@@ -113,38 +113,59 @@ fn ensure_leading_slash(path: &str) -> String {
     }
 }
 
+/// Unified diff of a single mutant, paths relative to `base_path`
+pub(crate) fn render_patch(
+    diag: &MullDiagnostics,
+    source_manager: &mut SourceManager,
+    mutant: &Mutant,
+    base_path: &str,
+) -> Result<String, String> {
+    let loc = &mutant.location;
+    let lines = source_manager
+        .get_source_lines(diag, loc)
+        .ok_or_else(|| format!("cannot read {}", loc.filepath))?;
+
+    let first_line = lines.first().map(|s| s.as_str()).unwrap_or("");
+    let last_line = lines.last().map(|s| s.as_str()).unwrap_or("");
+    let (Some(prefix), Some(suffix)) = (
+        column_offset(first_line, loc.begin_column).map(|offset| &first_line[..offset]),
+        column_offset(last_line, loc.end_column).map(|offset| &last_line[offset..]),
+    ) else {
+        return Err(format!("invalid columns in {}", loc.filepath));
+    };
+
+    let source_path = ensure_leading_slash(strip_base_path(&loc.filepath, base_path));
+    let line_count = loc.end_line - loc.begin_line + 1;
+    let mut patch = format!(
+        "--- a{0} 0\n+++ b{0} 0\n@@ -{1},{2} +{1},1 @@\n",
+        source_path, loc.begin_line, line_count
+    );
+    for line in &lines {
+        patch += &format!("-{}\n", line);
+    }
+    patch += &format!("+{}{}{}\n", prefix, mutant.replacement, suffix);
+    Ok(patch)
+}
+
 impl Reporter for PatchesReporter {
     fn report(&self, diag: &MullDiagnostics, state: &ExecutionState) {
         assert!(!state.execution_results.is_empty());
         let mut source_manager = SourceManager::default();
 
         for (mutant, result) in &state.execution_results {
-            let loc = &mutant.location;
-
-            let Some(lines) = source_manager.get_source_lines(diag, loc) else {
-                diag_warning!(
-                    diag,
-                    "PatchesReporter: Cannot report '{}': cannot read {}",
-                    mutant.identifier,
-                    loc.filepath
-                );
-                continue;
-            };
-
-            let first_line = lines.first().map(|s| s.as_str()).unwrap_or("");
-            let last_line = lines.last().map(|s| s.as_str()).unwrap_or("");
-            let (Some(prefix), Some(suffix)) = (
-                column_offset(first_line, loc.begin_column).map(|offset| &first_line[..offset]),
-                column_offset(last_line, loc.end_column).map(|offset| &last_line[offset..]),
-            ) else {
-                diag_warning!(
-                    diag,
-                    "PatchesReporter: Cannot report '{}': invalid columns in {}",
-                    mutant.identifier,
-                    loc.filepath
-                );
-                continue;
-            };
+            let patch =
+                match render_patch(diag, &mut source_manager, mutant, &self.base_path_prefix) {
+                    Ok(patch) => patch,
+                    Err(reason) => {
+                        diag_warning!(
+                            diag,
+                            "PatchesReporter: Cannot report '{}': {}",
+                            mutant.identifier,
+                            reason
+                        );
+                        continue;
+                    }
+                };
 
             let filename = patch_filename(
                 &self.patches_path,
@@ -154,10 +175,6 @@ impl Reporter for PatchesReporter {
             );
             diag_debug!(diag, "Writing Patchfile: {}", filename);
 
-            let source_path = strip_base_path(&loc.filepath, &self.base_path_prefix);
-            let source_path = ensure_leading_slash(source_path);
-            let line_count = loc.end_line - loc.begin_line + 1;
-
             let mut file = match File::create(&filename) {
                 Ok(f) => f,
                 Err(err) => {
@@ -165,23 +182,7 @@ impl Reporter for PatchesReporter {
                     continue;
                 }
             };
-
-            // Write unified diff header
-            let _ = writeln!(file, "--- a{} 0", source_path);
-            let _ = writeln!(file, "+++ b{} 0", source_path);
-            let _ = writeln!(
-                file,
-                "@@ -{},{} +{},1 @@",
-                loc.begin_line, line_count, loc.begin_line
-            );
-
-            // Write removed lines
-            for line in &lines {
-                let _ = writeln!(file, "-{}", line);
-            }
-
-            // Write replacement line
-            let _ = writeln!(file, "+{}{}{}", prefix, mutant.replacement, suffix);
+            let _ = file.write_all(patch.as_bytes());
 
             // Write info footer
             let mut info: Vec<_> = state.info.iter().collect();
