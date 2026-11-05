@@ -2,6 +2,13 @@ use mull_core::{diag_warning, MullDiagnostics};
 use mull_state::SourceRange;
 use std::collections::HashMap;
 use unicode_width::UnicodeWidthChar;
+
+/// Byte offset of a 1-based column, columns count bytes like clang does
+pub(crate) fn column_offset(line: &str, column: u64) -> Option<usize> {
+    let offset = column.checked_sub(1)? as usize;
+    line.is_char_boundary(offset).then_some(offset)
+}
+
 #[derive(Debug, Default)]
 pub struct SourceManager {
     cache: HashMap<String, Vec<String>>,
@@ -38,9 +45,9 @@ impl SourceManager {
         Some(lines[index].as_str())
     }
 
-    fn build_caret_line(&self, line: &str, column: usize) -> String {
-        let mut caret = String::with_capacity(column + 1);
-        for ch in line.chars().take(column - 1) {
+    fn build_caret_line(&self, line: &str, offset: usize) -> String {
+        let mut caret = String::with_capacity(offset + 1);
+        for ch in line[..offset].chars() {
             match ch {
                 '\t' => caret.push('\t'),
                 _ => {
@@ -62,22 +69,21 @@ impl SourceManager {
     ) -> Option<String> {
         self.ensure_cached(diag, &location.filepath);
         let line = self.get_source_line(diag, location.filepath.clone(), location.begin_line)?;
-        let char_count = line.chars().count();
-        let col = location.begin_column as usize;
-
-        if col == 0 || col > char_count {
+        let Some(offset) =
+            column_offset(line, location.begin_column).filter(|&offset| offset < line.len())
+        else {
             diag_warning!(
                 diag,
-                "Requested column past the line end: filepath: '{}', line: {}, column: {}, char count: {}",
+                "Requested column past the line end or inside a character: filepath: '{}', line: {}, column: {}, byte count: {}",
                 location.filepath,
                 location.begin_line,
                 location.begin_column,
-                char_count
+                line.len()
             );
             return None;
-        }
+        };
 
-        let caret = self.build_caret_line(line, col);
+        let caret = self.build_caret_line(line, offset);
         Some(format!("{}\n{}", line, caret))
     }
 
@@ -99,27 +105,23 @@ impl SourceManager {
         self.ensure_cached(diag, &range.filepath);
         if range.begin_line == range.end_line {
             let line = self.get_source_line(diag, range.filepath.clone(), range.begin_line)?;
-            let column = range.begin_column.checked_sub(1)? as usize;
-            Some(
-                line.chars()
-                    .skip(column)
-                    .take((range.end_column.checked_sub(1)? as usize) - column)
-                    .collect(),
-            )
+            let begin = column_offset(line, range.begin_column)?;
+            let end = column_offset(line, range.end_column)?;
+            line.get(begin..end).map(String::from)
         } else {
             let first_line =
                 self.get_source_line(diag, range.filepath.clone(), range.begin_line)?;
             let last_line = self.get_source_line(diag, range.filepath.clone(), range.end_line)?;
-            let first_column = range.begin_column.checked_sub(1)? as usize;
-            let last_column = range.end_column.checked_sub(1)? as usize;
-            let mut result = first_line.chars().skip(first_column).collect::<String>() + "\n";
+            let first_column = column_offset(first_line, range.begin_column)?;
+            let last_column = column_offset(last_line, range.end_column)?;
+            let mut result = first_line[first_column..].to_string() + "\n";
             for i in range.begin_line.checked_add(1)?..range.end_line {
                 result += &(self
                     .get_source_line(diag, range.filepath.clone(), i)?
                     .to_owned()
                     + "\n");
             }
-            result += &last_line.chars().take(last_column).collect::<String>();
+            result += &last_line[..last_column];
             Some(result)
         }
     }
@@ -242,8 +244,9 @@ mod tests {
         let diag = MullDiagnostics::new();
         let mut sm = fake_sm(vec!["let 中x = 42;"]);
 
+        // 中 is 3 bytes
         assert_eq!(
-            sm.get_source_line_with_caret(&diag, &fake_range(1, 6, 1, 7))
+            sm.get_source_line_with_caret(&diag, &fake_range(1, 8, 1, 9))
                 .unwrap(),
             indoc!(
                 "
@@ -260,15 +263,15 @@ mod tests {
         let mut sm = fake_sm(vec!["let 中x = 42;"]);
 
         assert_eq!(
-            sm.get_source(&diag, &fake_range(1, 4, 1, 7)).unwrap(),
+            sm.get_source(&diag, &fake_range(1, 4, 1, 9)).unwrap(),
             " 中x".to_string()
         );
         assert_eq!(
-            sm.get_source(&diag, &fake_range(1, 5, 1, 6)).unwrap(),
+            sm.get_source(&diag, &fake_range(1, 5, 1, 8)).unwrap(),
             "中".to_string()
         );
         assert_eq!(
-            sm.get_source(&diag, &fake_range(1, 10, 1, 12)).unwrap(),
+            sm.get_source(&diag, &fake_range(1, 12, 1, 14)).unwrap(),
             "42".to_string()
         )
     }
@@ -279,7 +282,7 @@ mod tests {
         let mut sm = fake_sm(vec!["let 👋x = 42;", "let 中y = 10;"]);
 
         assert_eq!(
-            sm.get_source(&diag, &fake_range(1, 4, 2, 6)).unwrap(),
+            sm.get_source(&diag, &fake_range(1, 4, 2, 8)).unwrap(),
             indoc!(
                 " 👋x = 42;
                 let 中"
@@ -293,12 +296,43 @@ mod tests {
         let mut sm = fake_sm(vec!["let 👋x = 42;", "let üy = 20;", "let 中y = 10;"]);
 
         assert_eq!(
-            sm.get_source(&diag, &fake_range(1, 4, 3, 6)).unwrap(),
+            sm.get_source(&diag, &fake_range(1, 4, 3, 8)).unwrap(),
             indoc!(
                 " 👋x = 42;
                 let üy = 20;
                 let 中"
             )
+        );
+    }
+
+    #[test]
+    fn columns_are_bytes_after_non_ascii() {
+        let diag = MullDiagnostics::new();
+        let line = "const char *s = \"üü\"; return a + b;";
+        let mut sm = fake_sm(vec![line]);
+        let plus = line.find('+').unwrap() as u64 + 1;
+
+        assert_eq!(
+            sm.get_source(&diag, &fake_range(1, plus, 1, plus + 1))
+                .unwrap(),
+            "+"
+        );
+        assert_eq!(
+            sm.get_source_line_with_caret(&diag, &fake_range(1, plus, 1, plus + 1))
+                .unwrap(),
+            format!("{}\n{}^", line, " ".repeat(31))
+        );
+    }
+
+    #[test]
+    fn column_inside_a_character_is_rejected() {
+        let diag = MullDiagnostics::with_writer(Box::new(std::io::sink()), false);
+        let mut sm = fake_sm(vec!["let 中x = 42;"]);
+
+        assert_eq!(sm.get_source(&diag, &fake_range(1, 6, 1, 8)), None);
+        assert_eq!(
+            sm.get_source_line_with_caret(&diag, &fake_range(1, 6, 1, 8)),
+            None
         );
     }
 }

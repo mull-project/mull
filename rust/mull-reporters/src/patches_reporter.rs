@@ -1,4 +1,4 @@
-use crate::source_manager::SourceManager;
+use crate::source_manager::{column_offset, SourceManager};
 use crate::Reporter;
 use mull_core::diagnostics::MullDiagnostics;
 use mull_core::{diag_debug, diag_info, diag_warning};
@@ -131,6 +131,21 @@ impl Reporter for PatchesReporter {
                 continue;
             };
 
+            let first_line = lines.first().map(|s| s.as_str()).unwrap_or("");
+            let last_line = lines.last().map(|s| s.as_str()).unwrap_or("");
+            let (Some(prefix), Some(suffix)) = (
+                column_offset(first_line, loc.begin_column).map(|offset| &first_line[..offset]),
+                column_offset(last_line, loc.end_column).map(|offset| &last_line[offset..]),
+            ) else {
+                diag_warning!(
+                    diag,
+                    "PatchesReporter: Cannot report '{}': invalid columns in {}",
+                    mutant.identifier,
+                    loc.filepath
+                );
+                continue;
+            };
+
             let filename = patch_filename(
                 &self.patches_path,
                 &self.base_path_prefix,
@@ -166,13 +181,6 @@ impl Reporter for PatchesReporter {
             }
 
             // Write replacement line
-            let first_line = lines.first().map(|s| s.as_str()).unwrap_or("");
-            let last_line = lines.last().map(|s| s.as_str()).unwrap_or("");
-            let col_start = (loc.begin_column as usize).saturating_sub(1);
-            let col_end = (loc.end_column as usize).saturating_sub(1);
-
-            let prefix: String = first_line.chars().take(col_start).collect();
-            let suffix: String = last_line.chars().skip(col_end).collect();
             let _ = writeln!(file, "+{}{}{}", prefix, mutant.replacement, suffix);
 
             // Write info footer
