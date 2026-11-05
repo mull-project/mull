@@ -44,6 +44,7 @@ pub struct MullConfig {
     pub git_diff_ref: String,
     pub git_project_root: String,
     pub git_diff_paths: Vec<String>,
+    pub mutation_ranges: String,
 
     pub mutators: Vec<String>,
     pub ignore_mutators: Vec<String>,
@@ -207,6 +208,7 @@ impl MullConfigSpec {
             git_diff_ref: self.git_diff_ref.clone(),
             git_project_root: self.git_project_root.clone(),
             git_diff_paths: self.git_diff_paths.clone(),
+            mutation_ranges: self.mutation_ranges.clone(),
             mutators: self.mutators.clone(),
             ignore_mutators: self.ignore_mutators.clone(),
             compiler_flags: self.compiler_flags.clone(),
@@ -232,14 +234,14 @@ fn default_config() -> MullConfig {
     MullConfigSpec::default().to_runtime()
 }
 
-fn parse_yaml(yaml: &str) -> Result<MullConfig, String> {
-    let parsed: MullConfigSpec =
-        serde_saphyr::from_str(yaml).map_err(|e| format!("Failed to parse YAML: {}", e))?;
-    Ok(parsed.to_runtime())
+fn parse_yaml(yaml: &str) -> Result<MullConfigSpec, String> {
+    serde_saphyr::from_str(yaml).map_err(|e| format!("Failed to parse YAML: {}", e))
 }
 
 fn load_yaml_config(config_path: &str) -> Result<MullConfig, String> {
     let contents =
         fs::read_to_string(config_path).map_err(|e| format!("Cannot read config: {}", e))?;
-    parse_yaml(&contents)
+    let mut spec = parse_yaml(&contents)?;
+    spec.resolve_paths(config_path);
+    Ok(spec.to_runtime())
 }

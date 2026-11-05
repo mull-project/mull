@@ -1,0 +1,15 @@
+A ranges file that cannot be read or parsed warns and skips every mutant, strict mode turns the warning into an error.
+
+
+RUN: cd %S && env MULL_CONFIG=malformed.yml %clang_cxx %sysroot %pass_mull_ir_frontend -g -grecord-command-line sample.cpp -o malformed.exe 2>&1 | %filecheck %s --dump-input=fail --check-prefix=CHECK-MALFORMED
+RUN: cd %S && unset TERM; env MULL_CONFIG=plain.yml %mull_runner malformed.exe 2>&1 | %filecheck %s --dump-input=fail --check-prefix=CHECK-NO-MUTANTS
+
+RUN: cd %S && env MULL_CONFIG=missing.yml %clang_cxx %sysroot %pass_mull_ir_frontend -g -grecord-command-line sample.cpp -o missing.exe 2>&1 | %filecheck %s --dump-input=fail --check-prefix=CHECK-MISSING
+RUN: cd %S && unset TERM; env MULL_CONFIG=plain.yml %mull_runner missing.exe 2>&1 | %filecheck %s --dump-input=fail --check-prefix=CHECK-NO-MUTANTS
+
+RUN: cd %S && (env MULL_CONFIG=strict.yml %clang_cxx %sysroot %pass_mull_ir_frontend -g -grecord-command-line sample.cpp -o strict.exe 2>&1; test $? != 0) | %filecheck %s --dump-input=fail --check-prefix=CHECK-STRICT
+
+CHECK-MALFORMED:[warning] mutationRanges: cannot parse '{{.*}}malformed.ranges': line 2: expected '<path>:<first>-<last>' or '<path>:<line>', got 'sample.cpp:two', every mutant is skipped
+CHECK-MISSING:[warning] mutationRanges: cannot read '{{.*}}missing.ranges': {{.*}}, every mutant is skipped
+CHECK-NO-MUTANTS:[info] No mutants found. Mutation score: infinitely high
+CHECK-STRICT:{{.*}}mutationRanges: cannot parse '{{.*}}malformed.ranges'{{.*}}

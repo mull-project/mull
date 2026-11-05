@@ -1,0 +1,11 @@
+Lines 2 and 5 are in the git diff, lines 4-9 are in the ranges: only the mutant on line 5 is in both.
+
+RUN: cd %S && rm -rf sandbox && mkdir sandbox && cp sample.cpp sandbox/sample.cpp
+RUN: cd %S/sandbox && git init . -b main && git add . && git -c user.name=Mull -c user.email=mull@example.com commit -m base
+RUN: cd %S && cp sample.modified.cpp sandbox/sample.cpp
+RUN: cd %S && env MULL_CONFIG=mull.yml %clang_cxx %sysroot %pass_mull_ir_frontend -g -grecord-command-line sandbox/sample.cpp -o sample.exe
+RUN: cd %S && unset TERM; env MULL_CONFIG=mull.yml %mull_runner --ide-reporter-show-killed sample.exe 2>&1 | %filecheck %s --dump-input=fail
+
+CHECK:[info] Killed mutants (1/1):
+CHECK-NEXT:{{.*}}sample.cpp:5:12: warning: Killed: Replaced - with + [cxx_sub_to_add]
+CHECK:[info] Mutation score: 100%

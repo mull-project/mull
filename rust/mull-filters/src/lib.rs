@@ -1,8 +1,10 @@
 mod coverage_filter;
+mod file_ranges;
 mod filepath_filter;
 mod filter_chain;
 mod git_diff_filter;
 mod manual_filter;
+mod mutation_ranges_filter;
 mod mutator_groups;
 
 pub use coverage_filter::{has_coverage, CoverageFilter};
@@ -10,6 +12,7 @@ pub use filepath_filter::FilePathFilter;
 pub use filter_chain::{FilterChain, FilterChainConfig, FilterDecision, FilterResult};
 pub use git_diff_filter::GitDiffFilter;
 pub use manual_filter::ManualFilter;
+pub use mutation_ranges_filter::MutationRangesFilter;
 pub use mutator_groups::{expand_mutator_groups, get_group_definitions};
 
 use mull_core::diagnostics::MullDiagnostics;
@@ -39,6 +42,7 @@ pub struct FilterMutantsConfig {
     pub git_project_root: String,
     pub git_diff_paths: Vec<String>,
     pub debug_git_diff: bool,
+    pub mutation_ranges: String,
     pub workers: usize,
     pub enable_manual_filter: bool,
     pub include_paths: Vec<String>,
@@ -86,6 +90,7 @@ pub fn filter_mutants(
 ) -> Vec<String> {
     // If no filters are enabled, return all mutants
     if config.git_diff_ref.is_empty()
+        && config.mutation_ranges.is_empty()
         && !config.enable_manual_filter
         && config.include_paths.is_empty()
         && config.exclude_paths.is_empty()
@@ -109,6 +114,7 @@ pub fn filter_mutants(
         git_project_root: &config.git_project_root,
         git_diff_paths: &config.git_diff_paths,
         debug_git_diff: config.debug_git_diff,
+        mutation_ranges: &config.mutation_ranges,
         enable_manual_filter: config.enable_manual_filter,
         include_paths: &config.include_paths,
         exclude_paths: &config.exclude_paths,
