@@ -1,0 +1,11 @@
+Sources compiled with relative paths, mull-runner started from another directory.
+
+RUN: cd %S && rm -rf sandbox && mkdir -p sandbox/src sandbox/run
+RUN: cd %S && cp lib.original sandbox/src/lib.cpp && cp main.original sandbox/src/main.cpp
+RUN: cd %S/sandbox/src && env MULL_CONFIG=%S/mull.yml %clang_cxx %sysroot %pass_mull_ir_frontend -g -grecord-command-line -fprofile-instr-generate -fcoverage-mapping -c lib.cpp -o lib.o
+RUN: cd %S/sandbox/src && env MULL_CONFIG=%S/mull.yml %clang_cxx %sysroot %pass_mull_ir_frontend -g -grecord-command-line -fprofile-instr-generate -fcoverage-mapping -c main.cpp -o main.o
+RUN: cd %S/sandbox/src && %clang_cxx %sysroot -fprofile-instr-generate -fcoverage-mapping lib.o main.o -o ../test.exe
+RUN: cd %S/sandbox/run && unset TERM; env MULL_CONFIG=%S/mull.yml %mull_runner --allow-surviving --include-not-covered --ide-reporter-show-killed ../test.exe 2>&1 | %filecheck %s --dump-input=fail
+
+CHECK-DAG:{{.*}}src/lib.cpp:2:12: warning: Killed: Replaced + with - [cxx_add_to_sub]
+CHECK-DAG:{{.*}}src/lib.cpp:5:12: warning: Not Covered: Replaced + with - [cxx_add_to_sub]

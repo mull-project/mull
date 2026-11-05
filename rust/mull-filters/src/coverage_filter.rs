@@ -310,6 +310,110 @@ mod tests {
         assert!(!filter.covered(&mutant_at("/sandbox/1/b/util.cpp", 2)));
     }
 
+    fn mutant_at_column(filepath: &str, line: u64, column: u64) -> Mutant {
+        Mutant {
+            identifier: format!(
+                "cxx_add_to_sub:{}:{}:{}:{}:{}",
+                filepath,
+                line,
+                column,
+                line,
+                column + 1
+            ),
+            mutator: "cxx_add_to_sub".into(),
+            location: SourceRange::new(filepath.into(), line, column, line, column + 1),
+            replacement: String::new(),
+        }
+    }
+
+    fn filter_with_region(
+        path: &str,
+        (line_begin, column_begin): (u64, u64),
+        (line_end, column_end): (u64, u64),
+    ) -> CoverageFilter {
+        CoverageFilter {
+            uncovered_ranges: HashMap::from([(
+                path.to_string(),
+                vec![CoverageRange {
+                    line_begin,
+                    column_begin,
+                    line_end,
+                    column_end,
+                }],
+            )]),
+            include_not_covered: false,
+        }
+    }
+
+    #[test]
+    fn no_coverage_data_counts_as_covered() {
+        let filter = CoverageFilter::empty(false);
+        assert!(filter.covered(&mutant_at("/src/main.c", 2)));
+    }
+
+    #[test]
+    fn file_without_coverage_data_counts_as_covered() {
+        let filter = filter_with(&[("/src/main.c", &[2])]);
+        assert!(filter.covered(&mutant_at("/src/other.c", 2)));
+    }
+
+    #[test]
+    fn single_line_region_respects_columns() {
+        let filter = filter_with_region("/src/main.c", (14, 26), (14, 31));
+        assert!(filter.covered(&mutant_at_column("/src/main.c", 14, 22)));
+        assert!(filter.covered(&mutant_at_column("/src/main.c", 14, 25)));
+        assert!(!filter.covered(&mutant_at_column("/src/main.c", 14, 26)));
+        assert!(!filter.covered(&mutant_at_column("/src/main.c", 14, 31)));
+        assert!(filter.covered(&mutant_at_column("/src/main.c", 14, 32)));
+        assert!(filter.covered(&mutant_at_column("/src/main.c", 13, 26)));
+        assert!(filter.covered(&mutant_at_column("/src/main.c", 15, 26)));
+    }
+
+    #[test]
+    fn multi_line_region_respects_columns_on_the_first_and_last_line_only() {
+        let filter = filter_with_region("/src/main.c", (4, 16), (8, 6));
+        assert!(filter.covered(&mutant_at_column("/src/main.c", 4, 15)));
+        assert!(!filter.covered(&mutant_at_column("/src/main.c", 4, 16)));
+        assert!(!filter.covered(&mutant_at_column("/src/main.c", 6, 1)));
+        assert!(!filter.covered(&mutant_at_column("/src/main.c", 6, 200)));
+        assert!(!filter.covered(&mutant_at_column("/src/main.c", 8, 6)));
+        assert!(filter.covered(&mutant_at_column("/src/main.c", 8, 7)));
+    }
+
+    #[test]
+    fn relative_path_matches_on_the_suffix() {
+        let filter = filter_with(&[("./main.c", &[2])]);
+        assert!(!filter.covered(&mutant_at("/src/main.c", 2)));
+        assert!(filter.covered(&mutant_at("/src/main.c", 3)));
+    }
+
+    #[test]
+    fn decision_depends_on_include_not_covered() {
+        let diag = MullDiagnostics::with_writer(Box::new(std::io::sink()), false);
+        let mut filter = filter_with(&[("/src/main.c", &[2])]);
+        let covered = mutant_at("/src/main.c", 1);
+        let not_covered = mutant_at("/src/main.c", 2);
+
+        assert_eq!(
+            filter.filter_decision(&covered, &diag, false),
+            FilterDecision::Keep
+        );
+        assert_eq!(
+            filter.filter_decision(&not_covered, &diag, false),
+            FilterDecision::Skip
+        );
+
+        filter.include_not_covered = true;
+        assert_eq!(
+            filter.filter_decision(&covered, &diag, false),
+            FilterDecision::Keep
+        );
+        assert_eq!(
+            filter.filter_decision(&not_covered, &diag, false),
+            FilterDecision::ReportAs(ExecutionStatus::NotCovered)
+        );
+    }
+
     #[test]
     fn ambiguous_file_name_counts_as_covered() {
         let filter = filter_with(&[("/build/a/util.cpp", &[2]), ("/build/b/util.cpp", &[2])]);

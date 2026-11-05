@@ -1,0 +1,6 @@
+int covered(int x, int y) {
+  return x + y;
+}
+int not_covered(int x, int y) {
+  return x + y;
+}

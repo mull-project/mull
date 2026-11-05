@@ -132,3 +132,62 @@ pub fn filter_mutants(
         .map(|m| m.identifier)
         .collect()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::find_by_path_suffix;
+    use std::collections::HashMap;
+
+    fn entries(paths: &[&str]) -> HashMap<String, String> {
+        paths
+            .iter()
+            .map(|p| (p.to_string(), p.to_string()))
+            .collect()
+    }
+
+    fn find(paths: &[&str], path: &str) -> Option<String> {
+        find_by_path_suffix(&entries(paths), path).cloned()
+    }
+
+    #[test]
+    fn matches_whole_components_only() {
+        assert_eq!(find(&["/build/xutil.cpp"], "/src/util.cpp"), None);
+        assert_eq!(
+            find(&["/build/a/util.cpp"], "/src/ba/util.cpp"),
+            Some("/build/a/util.cpp".into())
+        );
+    }
+
+    #[test]
+    fn nothing_in_common_is_no_match() {
+        assert_eq!(find(&["/build/main.cpp"], "/src/util.cpp"), None);
+        assert_eq!(find(&[], "/src/util.cpp"), None);
+    }
+
+    #[test]
+    fn longest_suffix_wins() {
+        let paths = [
+            "/build/util.cpp",
+            "/build/a/util.cpp",
+            "/build/x/a/util.cpp",
+        ];
+        assert_eq!(
+            find(&paths, "/src/x/a/util.cpp"),
+            Some("/build/x/a/util.cpp".into())
+        );
+        assert_eq!(find(&paths, "/src/y/a/util.cpp"), None);
+    }
+
+    #[test]
+    fn tie_is_no_match() {
+        let paths = ["/build/a/util.cpp", "/build/b/util.cpp"];
+        assert_eq!(find(&paths, "/src/util.cpp"), None);
+        assert_eq!(find(&paths, "/src/c/util.cpp"), None);
+    }
+
+    #[test]
+    fn relative_entry_matches_absolute_path() {
+        assert_eq!(find(&["./main.c"], "/src/main.c"), Some("./main.c".into()));
+        assert_eq!(find(&["main.c"], "/src/main.c"), Some("main.c".into()));
+    }
+}

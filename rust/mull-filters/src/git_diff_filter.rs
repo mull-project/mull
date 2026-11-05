@@ -282,6 +282,400 @@ fn read_git_diff(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use git2::{IndexAddOption, Oid, Signature};
+    use mull_state::SourceRange;
+    use std::path::PathBuf;
+
+    fn quiet_diag() -> MullDiagnostics {
+        MullDiagnostics::with_writer(Box::new(std::io::sink()), false)
+    }
+
+    fn mutant_at(filepath: &str, line: u64) -> Mutant {
+        Mutant {
+            identifier: format!("cxx_add_to_sub:{}:{}:1:{}:2", filepath, line, line),
+            mutator: "cxx_add_to_sub".into(),
+            location: SourceRange::new(filepath.into(), line, 1, line, 2),
+            replacement: String::new(),
+        }
+    }
+
+    fn filter_with(project_root: &str, files: &[(&str, &[(u32, u32)])]) -> GitDiffFilter {
+        let diff_info = files
+            .iter()
+            .map(|(path, ranges)| {
+                let ranges = ranges
+                    .iter()
+                    .map(|&(start, count)| LineRange { start, count })
+                    .collect();
+                (path.to_string(), ranges)
+            })
+            .collect();
+        GitDiffFilter {
+            diff_info,
+            project_root: project_root.into(),
+            debug: false,
+        }
+    }
+
+    fn keeps(filter: &GitDiffFilter, path: &str, line: u64) -> bool {
+        filter.filter_decision(&mutant_at(path, line), &quiet_diag(), false) == FilterDecision::Keep
+    }
+
+    /// A git repository in a fresh temporary directory
+    struct Sandbox {
+        root: PathBuf,
+        repo: Repository,
+    }
+
+    impl Sandbox {
+        fn new(name: &str) -> Self {
+            let root = std::env::temp_dir().join(format!(
+                "mull-git-diff-filter-{}-{}",
+                std::process::id(),
+                name
+            ));
+            let _ = std::fs::remove_dir_all(&root);
+            std::fs::create_dir_all(&root).unwrap();
+            let repo = Repository::init(&root).unwrap();
+            Self { root, repo }
+        }
+
+        fn write(&self, path: &str, content: &str) {
+            let path = self.root.join(path);
+            std::fs::create_dir_all(path.parent().unwrap()).unwrap();
+            std::fs::write(path, content).unwrap();
+        }
+
+        fn remove(&self, path: &str) {
+            std::fs::remove_file(self.root.join(path)).unwrap();
+        }
+
+        fn stage_all(&self) {
+            let mut index = self.repo.index().unwrap();
+            index.add_all(["*"], IndexAddOption::DEFAULT, None).unwrap();
+            index.update_all(["*"], None).unwrap();
+            index.write().unwrap();
+        }
+
+        fn commit(&self) -> Oid {
+            self.stage_all();
+            let mut index = self.repo.index().unwrap();
+            let tree = self.repo.find_tree(index.write_tree().unwrap()).unwrap();
+            let signature = Signature::now("Mull", "mull@example.com").unwrap();
+            let parent = self.repo.head().ok().map(|h| h.peel_to_commit().unwrap());
+            let parents: Vec<_> = parent.iter().collect();
+            self.repo
+                .commit(
+                    Some("HEAD"),
+                    &signature,
+                    &signature,
+                    "commit",
+                    &tree,
+                    &parents,
+                )
+                .unwrap()
+        }
+
+        fn canonical(&self, path: &str) -> String {
+            self.root
+                .canonicalize()
+                .unwrap()
+                .join(path)
+                .to_string_lossy()
+                .to_string()
+        }
+
+        fn filter(&self, git_ref: &str, paths: &[&str]) -> GitDiffFilter {
+            let paths: Vec<String> = paths.iter().map(|p| p.to_string()).collect();
+            GitDiffFilter::from_git_diff(
+                &quiet_diag(),
+                &self.root.to_string_lossy(),
+                git_ref,
+                &paths,
+                false,
+            )
+        }
+
+        fn ranges(filter: &GitDiffFilter) -> HashMap<String, Vec<(u32, u32)>> {
+            filter
+                .diff_info
+                .iter()
+                .map(|(path, ranges)| {
+                    let mut ranges: Vec<_> = ranges.iter().map(|r| (r.start, r.count)).collect();
+                    ranges.sort();
+                    (path.clone(), ranges)
+                })
+                .collect()
+        }
+    }
+
+    impl Drop for Sandbox {
+        fn drop(&mut self) {
+            let _ = std::fs::remove_dir_all(&self.root);
+        }
+    }
+
+    fn lines(count: u32) -> String {
+        (1..=count).map(|i| format!("line {}\n", i)).collect()
+    }
+
+    fn replace_lines(content: &str, replaced: &[usize]) -> String {
+        content
+            .lines()
+            .enumerate()
+            .map(|(i, line)| {
+                if replaced.contains(&(i + 1)) {
+                    format!("{} changed\n", line)
+                } else {
+                    format!("{}\n", line)
+                }
+            })
+            .collect()
+    }
+
+    #[test]
+    fn empty_diff_skips_everything() {
+        let filter = filter_with("/src", &[]);
+        assert!(!keeps(&filter, "/src/main.cpp", 1));
+        assert!(!keeps(&filter, "/elsewhere/main.cpp", 1));
+    }
+
+    #[test]
+    fn keeps_only_lines_inside_the_hunks() {
+        let filter = filter_with("/src", &[("/src/main.cpp", &[(3, 1), (10, 3)])]);
+        assert!(!keeps(&filter, "/src/main.cpp", 2));
+        assert!(keeps(&filter, "/src/main.cpp", 3));
+        assert!(!keeps(&filter, "/src/main.cpp", 4));
+        assert!(!keeps(&filter, "/src/main.cpp", 9));
+        assert!(keeps(&filter, "/src/main.cpp", 10));
+        assert!(keeps(&filter, "/src/main.cpp", 12));
+        assert!(!keeps(&filter, "/src/main.cpp", 13));
+    }
+
+    #[test]
+    fn file_in_the_project_does_not_match_on_suffix() {
+        let filter = filter_with("/src", &[("/src/a/util.cpp", &[(1, 10)])]);
+        assert!(!keeps(&filter, "/src/b/util.cpp", 2));
+        assert!(!keeps(&filter, "/src/util.cpp", 2));
+    }
+
+    #[test]
+    fn file_outside_of_the_project_matches_on_the_longest_suffix() {
+        let filter = filter_with(
+            "/src",
+            &[
+                ("/src/a/util.cpp", &[(1, 10)]),
+                ("/src/b/util.cpp", &[(20, 1)]),
+            ],
+        );
+        assert!(keeps(&filter, "/sandbox/a/util.cpp", 2));
+        assert!(!keeps(&filter, "/sandbox/b/util.cpp", 2));
+        assert!(keeps(&filter, "/sandbox/b/util.cpp", 20));
+    }
+
+    #[test]
+    fn file_outside_of_the_project_with_an_ambiguous_name_is_skipped() {
+        let filter = filter_with(
+            "/src",
+            &[
+                ("/src/a/util.cpp", &[(1, 10)]),
+                ("/src/b/util.cpp", &[(1, 10)]),
+            ],
+        );
+        assert!(!keeps(&filter, "/sandbox/util.cpp", 2));
+    }
+
+    #[test]
+    fn file_outside_of_the_project_and_not_in_the_diff_is_skipped() {
+        let filter = filter_with("/src", &[("/src/a/util.cpp", &[(1, 10)])]);
+        assert!(!keeps(&filter, "/usr/include/vector", 2));
+    }
+
+    #[test]
+    fn modified_lines_are_separate_hunks() {
+        let sandbox = Sandbox::new("modified");
+        let original = lines(10);
+        sandbox.write("main.cpp", &original);
+        sandbox.commit();
+        sandbox.write("main.cpp", &replace_lines(&original, &[3, 7, 8]));
+
+        let filter = sandbox.filter("HEAD", &[]);
+        assert_eq!(
+            Sandbox::ranges(&filter),
+            HashMap::from([(sandbox.canonical("main.cpp"), vec![(3, 1), (7, 2)])])
+        );
+    }
+
+    #[test]
+    fn inserted_lines_are_new_lines_only() {
+        let sandbox = Sandbox::new("inserted");
+        sandbox.write("main.cpp", &lines(5));
+        sandbox.commit();
+        sandbox.write("main.cpp", &(lines(4) + "new 1\nnew 2\nline 5\n"));
+
+        let filter = sandbox.filter("HEAD", &[]);
+        assert_eq!(
+            Sandbox::ranges(&filter),
+            HashMap::from([(sandbox.canonical("main.cpp"), vec![(5, 2)])])
+        );
+    }
+
+    #[test]
+    fn deleted_lines_and_files_have_no_ranges() {
+        let sandbox = Sandbox::new("deleted");
+        sandbox.write("main.cpp", &lines(5));
+        sandbox.write("gone.cpp", &lines(5));
+        sandbox.commit();
+        sandbox.write("main.cpp", &(lines(2) + "line 4\nline 5\n"));
+        sandbox.remove("gone.cpp");
+
+        let filter = sandbox.filter("HEAD", &[]);
+        assert!(Sandbox::ranges(&filter).is_empty());
+    }
+
+    #[test]
+    fn new_files_are_entirely_new_whether_committed_staged_or_untracked() {
+        let sandbox = Sandbox::new("new-files");
+        sandbox.write("main.cpp", &lines(5));
+        let base = sandbox.commit();
+        sandbox.write("committed.cpp", &lines(2));
+        sandbox.commit();
+        sandbox.write("staged.cpp", &lines(3));
+        sandbox.stage_all();
+        sandbox.write("nested/dir/untracked.cpp", &lines(4));
+
+        let filter = sandbox.filter(&base.to_string(), &[]);
+        assert_eq!(
+            Sandbox::ranges(&filter),
+            HashMap::from([
+                (sandbox.canonical("committed.cpp"), vec![(1, 2)]),
+                (sandbox.canonical("staged.cpp"), vec![(1, 3)]),
+                (sandbox.canonical("nested/dir/untracked.cpp"), vec![(1, 4)]),
+            ])
+        );
+    }
+
+    #[test]
+    fn ignored_files_are_not_in_the_diff() {
+        let sandbox = Sandbox::new("ignored");
+        sandbox.write(".gitignore", "build/\n");
+        sandbox.commit();
+        sandbox.write("build/generated.cpp", &lines(3));
+
+        let filter = sandbox.filter("HEAD", &[]);
+        assert!(Sandbox::ranges(&filter).is_empty());
+    }
+
+    #[test]
+    fn renamed_file_is_entirely_new() {
+        let sandbox = Sandbox::new("renamed");
+        sandbox.write("old.cpp", &lines(3));
+        sandbox.commit();
+        sandbox.remove("old.cpp");
+        sandbox.write("new.cpp", &lines(3));
+
+        let filter = sandbox.filter("HEAD", &[]);
+        assert_eq!(
+            Sandbox::ranges(&filter),
+            HashMap::from([(sandbox.canonical("new.cpp"), vec![(1, 3)])])
+        );
+    }
+
+    #[test]
+    fn committed_and_uncommitted_changes_since_the_ref_are_combined() {
+        let sandbox = Sandbox::new("combined");
+        let original = lines(10);
+        sandbox.write("main.cpp", &original);
+        let base = sandbox.commit();
+        sandbox.write("main.cpp", &replace_lines(&original, &[2]));
+        sandbox.commit();
+        sandbox.write("main.cpp", &replace_lines(&original, &[2, 8]));
+
+        let filter = sandbox.filter(&base.to_string(), &[]);
+        assert_eq!(
+            Sandbox::ranges(&filter),
+            HashMap::from([(sandbox.canonical("main.cpp"), vec![(2, 1), (8, 1)])])
+        );
+    }
+
+    #[test]
+    fn diff_paths_restrict_the_diff() {
+        let sandbox = Sandbox::new("diff-paths");
+        let original = lines(3);
+        sandbox.write("a/util.cpp", &original);
+        sandbox.write("b/util.cpp", &original);
+        sandbox.commit();
+        sandbox.write("a/util.cpp", &replace_lines(&original, &[2]));
+        sandbox.write("b/util.cpp", &replace_lines(&original, &[2]));
+        sandbox.write("a/untracked.cpp", &original);
+        sandbox.write("c/untracked.cpp", &original);
+
+        let filter = sandbox.filter("HEAD", &["a"]);
+        assert_eq!(
+            Sandbox::ranges(&filter),
+            HashMap::from([
+                (sandbox.canonical("a/util.cpp"), vec![(2, 1)]),
+                (sandbox.canonical("a/untracked.cpp"), vec![(1, 3)]),
+            ])
+        );
+    }
+
+    #[test]
+    fn project_root_through_a_symlink_is_canonical() {
+        let sandbox = Sandbox::new("symlinked");
+        let original = lines(3);
+        sandbox.write("main.cpp", &original);
+        sandbox.commit();
+        sandbox.write("main.cpp", &replace_lines(&original, &[2]));
+        let link = sandbox.root.with_extension("link");
+        let _ = std::fs::remove_file(&link);
+        std::os::unix::fs::symlink(&sandbox.root, &link).unwrap();
+
+        let filter = GitDiffFilter::from_git_diff(
+            &quiet_diag(),
+            &link.to_string_lossy(),
+            "HEAD",
+            &[],
+            false,
+        );
+        let _ = std::fs::remove_file(&link);
+        assert_eq!(
+            Path::new(&filter.project_root),
+            sandbox.root.canonicalize().unwrap()
+        );
+        assert!(keeps(&filter, &sandbox.canonical("main.cpp"), 2));
+        assert!(!keeps(&filter, &sandbox.canonical("main.cpp"), 1));
+    }
+
+    #[test]
+    fn unresolvable_ref_skips_everything() {
+        let sandbox = Sandbox::new("bad-ref");
+        sandbox.write("main.cpp", &lines(3));
+        sandbox.commit();
+        sandbox.write("main.cpp", &lines(4));
+
+        let filter = sandbox.filter("does-not-exist", &[]);
+        assert!(filter.diff_info.is_empty());
+        assert!(!keeps(&filter, &sandbox.canonical("main.cpp"), 4));
+    }
+
+    #[test]
+    fn directory_that_is_not_a_repository_skips_everything() {
+        let root = std::env::temp_dir().join(format!(
+            "mull-git-diff-filter-{}-not-a-repo",
+            std::process::id()
+        ));
+        std::fs::create_dir_all(&root).unwrap();
+        let filter = GitDiffFilter::from_git_diff(
+            &quiet_diag(),
+            &root.to_string_lossy(),
+            "HEAD",
+            &[],
+            false,
+        );
+        let _ = std::fs::remove_dir_all(&root);
+        assert!(filter.diff_info.is_empty());
+    }
 
     #[test]
     fn test_line_range_contains() {
