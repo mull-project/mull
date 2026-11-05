@@ -1,24 +1,15 @@
-use crate::{find_by_path_suffix, FilterDecision, MutantFilter};
+use crate::file_ranges::{FileRanges, Span};
+use crate::{FilterDecision, MutantFilter};
 use llvm_profparser::coverage::coverage_mapping::CoverageMapping;
 use mull_core::diagnostics::MullDiagnostics;
 use mull_core::{diag_debug, diag_warning};
 use mull_state::{ExecutionStatus, Mutant};
-use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-
-/// Represents a source code range that is not covered by tests
-#[derive(Debug, Clone)]
-struct CoverageRange {
-    line_begin: u64,
-    column_begin: u64,
-    line_end: u64,
-    column_end: u64,
-}
 
 /// Filter that skips mutants in code not covered by tests
 pub struct CoverageFilter {
-    /// Map of file path -> uncovered ranges, empty for fully covered files
-    uncovered_ranges: HashMap<String, Vec<CoverageRange>>,
+    /// Uncovered regions per file, no regions for fully covered files
+    uncovered_ranges: FileRanges,
     /// Whether to include uncovered mutants anyway
     include_not_covered: bool,
 }
@@ -33,7 +24,7 @@ impl CoverageFilter {
         debug_coverage: bool,
     ) -> Self {
         let uncovered_ranges = if profile_path.is_empty() {
-            HashMap::new()
+            FileRanges::default()
         } else {
             load_coverage_from_profile_path(diag, profile_path, object_files, debug_coverage)
         };
@@ -47,44 +38,21 @@ impl CoverageFilter {
     /// Create an empty coverage filter (no filtering)
     pub fn empty(include_not_covered: bool) -> Self {
         Self {
-            uncovered_ranges: HashMap::new(),
+            uncovered_ranges: FileRanges::default(),
             include_not_covered,
         }
     }
 
     /// Check if a mutant is covered by tests
     pub fn covered(&self, mutant: &Mutant) -> bool {
-        if self.uncovered_ranges.is_empty() {
-            return true;
-        }
-
-        let path = &mutant.location.filepath;
-
-        let ranges = match self
-            .uncovered_ranges
-            .get(path)
-            .or_else(|| find_by_path_suffix(&self.uncovered_ranges, path))
-        {
-            Some(r) => r,
-            None => return true, // Path not in coverage map means covered
-        };
-
-        let line = mutant.location.begin_line;
-        let column = mutant.location.begin_column;
-
-        // Check if mutant location falls within any uncovered range
-        for range in ranges {
-            let in_range_start = (line > range.line_begin)
-                || (line == range.line_begin && column >= range.column_begin);
-            let in_range_end =
-                (line < range.line_end) || (line == range.line_end && column <= range.column_end);
-
-            if in_range_start && in_range_end {
-                return false; // Found in uncovered range
-            }
-        }
-
-        true
+        // A file without coverage data counts as covered
+        let location = &mutant.location;
+        self.uncovered_ranges.contains(
+            &location.filepath,
+            location.begin_line,
+            location.begin_column,
+            true,
+        ) != Some(true)
     }
 }
 
@@ -116,8 +84,8 @@ fn load_coverage_from_profile_path(
     profile_path: &str,
     object_files: &[String],
     debug_coverage: bool,
-) -> HashMap<String, Vec<CoverageRange>> {
-    let mut uncovered_ranges: HashMap<String, Vec<CoverageRange>> = HashMap::new();
+) -> FileRanges {
+    let mut uncovered_ranges = FileRanges::default();
 
     // Parse the instrumentation profile
     let profile = match llvm_profparser::parse(profile_path) {
@@ -183,50 +151,39 @@ fn load_coverage_from_profile_path(
             .map(|p| p.to_string_lossy().to_string());
 
         // A fully covered file has to be found too, not just the files with gaps
-        uncovered_ranges.entry(file_str.clone()).or_default();
-        if let Ok(abs_path) = &abs_path {
-            uncovered_ranges.entry(abs_path.clone()).or_default();
+        // Stored under both the path as written and the absolute path
+        let paths: Vec<&str> = std::iter::once(file_str.as_str())
+            .chain(abs_path.as_deref().ok())
+            .collect();
+        for path in &paths {
+            uncovered_ranges.add_file(path);
         }
 
         for (loc, &count) in &coverage_result.hits {
             if count == 0 {
-                let range = CoverageRange {
-                    line_begin: loc.line_start as u64,
-                    column_begin: loc.column_start as u64,
-                    line_end: loc.line_end as u64,
-                    column_end: loc.column_end as u64,
-                };
+                let begin = (loc.line_start as u64, loc.column_start as u64);
+                let end = (loc.line_end as u64, loc.column_end as u64);
 
                 if debug_coverage {
                     diag_debug!(
                         diag,
                         "mull-coverage: {}:{}:{}:{}:{}",
                         file_str,
-                        range.line_begin,
-                        range.column_begin,
-                        range.line_end,
-                        range.column_end
+                        begin.0,
+                        begin.1,
+                        end.0,
+                        end.1
                     );
                 }
 
-                // Store for both relative and absolute path
-                uncovered_ranges
-                    .entry(file_str.clone())
-                    .or_default()
-                    .push(range.clone());
-
-                // Also store with absolute path
-                if let Ok(abs_path) = &abs_path {
-                    uncovered_ranges
-                        .entry(abs_path.clone())
-                        .or_default()
-                        .push(range);
+                for path in &paths {
+                    uncovered_ranges.insert(path, Span::new(begin, end));
                 }
             }
         }
     }
 
-    uncovered_ranges
+    uncovered_ranges.finish()
 }
 
 /// Check if an object file has coverage instrumentation, i.e. both the coverage map and the
@@ -272,23 +229,15 @@ mod tests {
     }
 
     fn filter_with(files: &[(&str, &[u64])]) -> CoverageFilter {
-        let uncovered_ranges = files
-            .iter()
-            .map(|(path, lines)| {
-                let ranges = lines
-                    .iter()
-                    .map(|&line| CoverageRange {
-                        line_begin: line,
-                        column_begin: 1,
-                        line_end: line,
-                        column_end: 80,
-                    })
-                    .collect();
-                (path.to_string(), ranges)
-            })
-            .collect();
+        let mut uncovered_ranges = FileRanges::default();
+        for (path, lines) in files {
+            uncovered_ranges.add_file(path);
+            for &line in *lines {
+                uncovered_ranges.insert(path, Span::new((line, 1), (line, 80)));
+            }
+        }
         CoverageFilter {
-            uncovered_ranges,
+            uncovered_ranges: uncovered_ranges.finish(),
             include_not_covered: false,
         }
     }
@@ -326,21 +275,11 @@ mod tests {
         }
     }
 
-    fn filter_with_region(
-        path: &str,
-        (line_begin, column_begin): (u64, u64),
-        (line_end, column_end): (u64, u64),
-    ) -> CoverageFilter {
+    fn filter_with_region(path: &str, begin: (u64, u64), end: (u64, u64)) -> CoverageFilter {
+        let mut uncovered_ranges = FileRanges::default();
+        uncovered_ranges.insert(path, Span::new(begin, end));
         CoverageFilter {
-            uncovered_ranges: HashMap::from([(
-                path.to_string(),
-                vec![CoverageRange {
-                    line_begin,
-                    column_begin,
-                    line_end,
-                    column_end,
-                }],
-            )]),
+            uncovered_ranges: uncovered_ranges.finish(),
             include_not_covered: false,
         }
     }

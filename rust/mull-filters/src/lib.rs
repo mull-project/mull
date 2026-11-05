@@ -17,8 +17,6 @@ pub use mutator_groups::{expand_mutator_groups, get_group_definitions};
 
 use mull_core::diagnostics::MullDiagnostics;
 use mull_state::Mutant;
-use std::collections::HashMap;
-use std::path::Path;
 
 /// Filter trait for deciding whether to skip a mutant
 pub trait MutantFilter: Send + Sync {
@@ -48,35 +46,6 @@ pub struct FilterMutantsConfig {
     pub include_paths: Vec<String>,
     pub exclude_paths: Vec<String>,
     pub debug_filepath: bool,
-}
-
-/// Find the entry sharing the longest path suffix with `path`. Handles cases where the entries
-/// have different path prefixes (e.g., sandbox paths) than debug info. Ambiguous matches are `None`.
-pub(crate) fn find_by_path_suffix<'a, T>(
-    entries: &'a HashMap<String, T>,
-    path: &str,
-) -> Option<&'a T> {
-    let shared_components = |candidate: &str| {
-        Path::new(path)
-            .components()
-            .rev()
-            .zip(Path::new(candidate).components().rev())
-            .take_while(|(lhs, rhs)| lhs == rhs)
-            .count()
-    };
-
-    let mut best = None;
-    let mut best_length = 0;
-    for (candidate, value) in entries {
-        let length = shared_components(candidate);
-        if length > best_length {
-            best = Some(value);
-            best_length = length;
-        } else if length == best_length {
-            best = None;
-        }
-    }
-    best
 }
 
 /// Filter mutants using the Rust filter chain
@@ -137,63 +106,4 @@ pub fn filter_mutants(
         .into_iter()
         .map(|m| m.identifier)
         .collect()
-}
-
-#[cfg(test)]
-mod tests {
-    use super::find_by_path_suffix;
-    use std::collections::HashMap;
-
-    fn entries(paths: &[&str]) -> HashMap<String, String> {
-        paths
-            .iter()
-            .map(|p| (p.to_string(), p.to_string()))
-            .collect()
-    }
-
-    fn find(paths: &[&str], path: &str) -> Option<String> {
-        find_by_path_suffix(&entries(paths), path).cloned()
-    }
-
-    #[test]
-    fn matches_whole_components_only() {
-        assert_eq!(find(&["/build/xutil.cpp"], "/src/util.cpp"), None);
-        assert_eq!(
-            find(&["/build/a/util.cpp"], "/src/ba/util.cpp"),
-            Some("/build/a/util.cpp".into())
-        );
-    }
-
-    #[test]
-    fn nothing_in_common_is_no_match() {
-        assert_eq!(find(&["/build/main.cpp"], "/src/util.cpp"), None);
-        assert_eq!(find(&[], "/src/util.cpp"), None);
-    }
-
-    #[test]
-    fn longest_suffix_wins() {
-        let paths = [
-            "/build/util.cpp",
-            "/build/a/util.cpp",
-            "/build/x/a/util.cpp",
-        ];
-        assert_eq!(
-            find(&paths, "/src/x/a/util.cpp"),
-            Some("/build/x/a/util.cpp".into())
-        );
-        assert_eq!(find(&paths, "/src/y/a/util.cpp"), None);
-    }
-
-    #[test]
-    fn tie_is_no_match() {
-        let paths = ["/build/a/util.cpp", "/build/b/util.cpp"];
-        assert_eq!(find(&paths, "/src/util.cpp"), None);
-        assert_eq!(find(&paths, "/src/c/util.cpp"), None);
-    }
-
-    #[test]
-    fn relative_entry_matches_absolute_path() {
-        assert_eq!(find(&["./main.c"], "/src/main.c"), Some("./main.c".into()));
-        assert_eq!(find(&["main.c"], "/src/main.c"), Some("main.c".into()));
-    }
 }

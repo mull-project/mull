@@ -1,32 +1,14 @@
-use crate::{find_by_path_suffix, FilterDecision, MutantFilter};
+use crate::file_ranges::{FileRanges, Span};
+use crate::{FilterDecision, MutantFilter};
 use git2::{DiffOptions, Repository};
 use mull_core::diagnostics::MullDiagnostics;
 use mull_core::{diag_debug, diag_info, diag_warning};
 use mull_state::Mutant;
-use std::collections::HashMap;
 use std::path::Path;
-
-/// A range of lines in a file that were changed
-#[derive(Debug, Clone)]
-struct LineRange {
-    start: u32,
-    count: u32,
-}
-
-impl LineRange {
-    fn contains(&self, line: u64) -> bool {
-        let start = self.start as u64;
-        let end = start + self.count as u64 - 1;
-        start <= line && line <= end
-    }
-}
-
-/// Git diff information: map of file path -> changed line ranges
-type GitDiffInfo = HashMap<String, Vec<LineRange>>;
 
 /// Filter that skips mutants not in git diff
 pub struct GitDiffFilter {
-    diff_info: GitDiffInfo,
+    diff_info: FileRanges,
     project_root: String,
     debug: bool,
 }
@@ -68,7 +50,7 @@ impl GitDiffFilter {
     /// Create an empty filter (no filtering)
     pub fn empty() -> Self {
         Self {
-            diff_info: HashMap::new(),
+            diff_info: FileRanges::default(),
             project_root: String::new(),
             debug: false,
         }
@@ -103,52 +85,40 @@ impl MutantFilter for GitDiffFilter {
         // Try to find the file in diff info
         // A file under the project root and not in the diff has no changes
         let in_project = Path::new(file_path).starts_with(&self.project_root);
-        let ranges = match self.diff_info.get(file_path).or_else(|| {
-            (!in_project)
-                .then(|| find_by_path_suffix(&self.diff_info, file_path))
-                .flatten()
-        }) {
-            Some(r) => r,
+        let in_diff = match self
+            .diff_info
+            .contains(file_path, line, column, !in_project)
+        {
+            Some(in_diff) => in_diff,
             None => {
                 if self.debug {
                     diag_debug!(
-                            diag,
-                            "GitDiffFilter: the file is not present in the git diff. Skipping mutant: {}:{}:{}",
-                            file_path,
-                            line,
-                            column
-                        );
-                }
-                return FilterDecision::Skip;
-            }
-        };
-
-        // Check if line is in any changed range
-        for range in ranges {
-            if range.contains(line) {
-                if self.debug {
-                    diag_debug!(
                         diag,
-                        "GitDiffFilter: allowing mutant: {}:{}:{}",
+                        "GitDiffFilter: the file is not present in the git diff. Skipping mutant: {}:{}:{}",
                         file_path,
                         line,
                         column
                     );
                 }
-                return FilterDecision::Keep;
+                return FilterDecision::Skip;
             }
-        }
+        };
 
         if self.debug {
             diag_debug!(
                 diag,
-                "GitDiffFilter: skipping mutant: {}:{}:{}",
+                "GitDiffFilter: {} mutant: {}:{}:{}",
+                if in_diff { "allowing" } else { "skipping" },
                 file_path,
                 line,
                 column
             );
         }
-        FilterDecision::Skip
+        if in_diff {
+            FilterDecision::Keep
+        } else {
+            FilterDecision::Skip
+        }
     }
 
     fn name(&self) -> &str {
@@ -162,8 +132,8 @@ fn read_git_diff(
     git_project_root: &str,
     git_diff_ref: &str,
     git_diff_paths: &[String],
-) -> GitDiffInfo {
-    let mut diff_info: GitDiffInfo = HashMap::new();
+) -> FileRanges {
+    let mut diff_info = FileRanges::default();
 
     // Open the repository
     let repo = match Repository::open(git_project_root) {
@@ -265,10 +235,11 @@ fn read_git_diff(
 
                 // Skip deletions (0 new lines)
                 if new_lines > 0 {
-                    diff_info.entry(abs_path_str).or_default().push(LineRange {
-                        start: new_start,
-                        count: new_lines,
-                    });
+                    let first = new_start as u64;
+                    diff_info.insert(
+                        &abs_path_str,
+                        Span::lines(first, first + new_lines as u64 - 1),
+                    );
                 }
             }
             true
@@ -276,7 +247,7 @@ fn read_git_diff(
         None, // line callback
     );
 
-    diff_info
+    diff_info.finish()
 }
 
 #[cfg(test)]
@@ -284,6 +255,7 @@ mod tests {
     use super::*;
     use git2::{IndexAddOption, Oid, Signature};
     use mull_state::SourceRange;
+    use std::collections::HashMap;
     use std::path::PathBuf;
 
     fn quiet_diag() -> MullDiagnostics {
@@ -300,18 +272,14 @@ mod tests {
     }
 
     fn filter_with(project_root: &str, files: &[(&str, &[(u32, u32)])]) -> GitDiffFilter {
-        let diff_info = files
-            .iter()
-            .map(|(path, ranges)| {
-                let ranges = ranges
-                    .iter()
-                    .map(|&(start, count)| LineRange { start, count })
-                    .collect();
-                (path.to_string(), ranges)
-            })
-            .collect();
+        let mut diff_info = FileRanges::default();
+        for (path, ranges) in files {
+            for &(start, count) in *ranges {
+                diff_info.insert(path, Span::lines(start as u64, (start + count - 1) as u64));
+            }
+        }
         GitDiffFilter {
-            diff_info,
+            diff_info: diff_info.finish(),
             project_root: project_root.into(),
             debug: false,
         }
@@ -396,14 +364,20 @@ mod tests {
             )
         }
 
-        fn ranges(filter: &GitDiffFilter) -> HashMap<String, Vec<(u32, u32)>> {
+        /// (start, count) of the changed lines per file
+        fn ranges(filter: &GitDiffFilter) -> HashMap<String, Vec<(u64, u64)>> {
             filter
                 .diff_info
                 .iter()
-                .map(|(path, ranges)| {
-                    let mut ranges: Vec<_> = ranges.iter().map(|r| (r.start, r.count)).collect();
-                    ranges.sort();
-                    (path.clone(), ranges)
+                .map(|(path, spans)| {
+                    let lines = spans
+                        .iter()
+                        .map(|span| {
+                            let (first, last) = span.line_range();
+                            (first, last - first + 1)
+                        })
+                        .collect();
+                    (path.to_string(), lines)
                 })
                 .collect()
         }
@@ -675,18 +649,5 @@ mod tests {
         );
         let _ = std::fs::remove_dir_all(&root);
         assert!(filter.diff_info.is_empty());
-    }
-
-    #[test]
-    fn test_line_range_contains() {
-        let range = LineRange {
-            start: 10,
-            count: 5,
-        }; // lines 10-14
-        assert!(!range.contains(9));
-        assert!(range.contains(10));
-        assert!(range.contains(12));
-        assert!(range.contains(14));
-        assert!(!range.contains(15));
     }
 }
