@@ -1,0 +1,28 @@
+Only second() in a/util.cpp is listed. b/util.cpp has the same name and a mutant on the same line.
+The ranges file is relative to the config, the paths in it are relative to the ranges file.
+The ranges restrict the mutants at compile time, and at run time when the build has all of them.
+
+RUN: cd %S && rm -rf sandbox && mkdir -p sandbox/a sandbox/b
+RUN: cd %S && cp a_util.cpp sandbox/a/util.cpp && cp b_util.cpp sandbox/b/util.cpp && cp main.cpp sandbox/main.cpp
+
+RUN: cd %S/sandbox && env MULL_CONFIG=%S/ranges.yml %clang_cxx %sysroot %pass_mull_ir_frontend -g -grecord-command-line -c main.cpp -o main.o
+RUN: cd %S/sandbox && env MULL_CONFIG=%S/ranges.yml %clang_cxx %sysroot %pass_mull_ir_frontend -g -grecord-command-line -c a/util.cpp -o a.o
+RUN: cd %S/sandbox && env MULL_CONFIG=%S/ranges.yml %clang_cxx %sysroot %pass_mull_ir_frontend -g -grecord-command-line -c b/util.cpp -o b.o
+RUN: cd %S/sandbox && %clang_cxx %sysroot main.o a.o b.o -o compile-time.exe
+RUN: cd %S/sandbox && unset TERM; env MULL_CONFIG=%S/plain.yml %mull_runner --ide-reporter-show-killed ./compile-time.exe 2>&1 | %filecheck %s --dump-input=fail --check-prefix=CHECK
+
+RUN: cd %S/sandbox && env MULL_CONFIG=%S/plain.yml %clang_cxx %sysroot %pass_mull_ir_frontend -g -grecord-command-line -c main.cpp -o main.o
+RUN: cd %S/sandbox && env MULL_CONFIG=%S/plain.yml %clang_cxx %sysroot %pass_mull_ir_frontend -g -grecord-command-line -c a/util.cpp -o a.o
+RUN: cd %S/sandbox && env MULL_CONFIG=%S/plain.yml %clang_cxx %sysroot %pass_mull_ir_frontend -g -grecord-command-line -c b/util.cpp -o b.o
+RUN: cd %S/sandbox && %clang_cxx %sysroot main.o a.o b.o -o run-time.exe
+RUN: cd %S/sandbox && unset TERM; env MULL_CONFIG=%S/plain.yml %mull_runner --allow-surviving --ide-reporter-show-killed ./run-time.exe 2>&1 | %filecheck %s --dump-input=fail --check-prefix=CHECK-ALL
+RUN: cd %S/sandbox && unset TERM; env MULL_CONFIG=%S/ranges.yml %mull_runner --ide-reporter-show-killed ./run-time.exe 2>&1 | %filecheck %s --dump-input=fail --check-prefix=CHECK
+
+CHECK:[info] Killed mutants (1/1):
+CHECK-NEXT:{{.*}}a/util.cpp:5:12: warning: Killed: Replaced + with - [cxx_add_to_sub]
+CHECK-NOT:{{.*}}util.cpp:{{.*}}
+CHECK:[info] Mutation score: 100%
+
+CHECK-ALL-DAG:{{.*}}a/util.cpp:2:12: warning: Killed: Replaced + with - [cxx_add_to_sub]
+CHECK-ALL-DAG:{{.*}}a/util.cpp:5:12: warning: Killed: Replaced + with - [cxx_add_to_sub]
+CHECK-ALL-DAG:{{.*}}b/util.cpp:5:12: warning: Killed: Replaced + with - [cxx_add_to_sub]

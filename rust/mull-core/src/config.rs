@@ -70,6 +70,8 @@ pub struct MullConfigSpec {
     pub git_project_root: String,
     /// Paths, relative to the git project root, to restrict the git diff to. Empty means the whole project.
     pub git_diff_paths: Vec<String>,
+    /// File with the line ranges to mutate, one `<path>:<first>-<last>` or `<path>:<line>` per line. Relative to this config, the paths inside relative to the file.
+    pub mutation_ranges: String,
 
     /// Parallelization settings.
     pub parallelization: ParallelizationSpec,
@@ -99,8 +101,24 @@ impl Default for MullConfigSpec {
             git_diff_ref: String::new(),
             git_project_root: String::new(),
             git_diff_paths: Vec::new(),
+            mutation_ranges: String::new(),
             parallelization: ParallelizationSpec::default(),
             debug: DebugOptionsSpec::default(),
+        }
+    }
+}
+
+impl MullConfigSpec {
+    /// Makes relative paths relative to the config file instead of the working directory
+    pub fn resolve_paths(&mut self, config_path: &str) {
+        if !self.mutation_ranges.is_empty() {
+            let config_dir = std::path::Path::new(config_path)
+                .parent()
+                .unwrap_or(std::path::Path::new(""));
+            self.mutation_ranges = config_dir
+                .join(&self.mutation_ranges)
+                .to_string_lossy()
+                .into_owned();
         }
     }
 }

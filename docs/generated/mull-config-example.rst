@@ -38,6 +38,8 @@
    gitProjectRoot: ""
    # Paths, relative to the git project root, to restrict the git diff to. Empty means the whole project.
    gitDiffPaths: []
+   # File with the line ranges to mutate, one `<path>:<first>-<last>` or `<path>:<line>` per line. Relative to this config, the paths inside relative to the file.
+   mutationRanges: ""
    # Parallelization settings
    parallelization:
      # Number of worker threads for test discovery.

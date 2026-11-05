@@ -187,6 +187,7 @@ void mull::mutateBitcode(llvm::Module &module, const MullDiagnostics &diagnostic
       filterConfig.git_diff_paths.push_back(rust::String(std::string(path)));
     }
     filterConfig.debug_git_diff = configuration.debug.git_diff;
+    filterConfig.mutation_ranges = std::string(configuration.mutation_ranges);
     filterConfig.workers = configuration.workers;
     filterConfig.enable_manual_filter = true;
     for (const auto &path : configuration.include_paths) {

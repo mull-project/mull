@@ -1,0 +1,4 @@
+int covered(int, int);
+int main() {
+  return covered(1, 2) == 3 ? 0 : 1;
+}

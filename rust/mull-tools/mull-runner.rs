@@ -153,6 +153,7 @@ fn main() {
             git_project_root: &config.git_project_root,
             git_diff_paths: &config.git_diff_paths,
             debug_git_diff: config.debug.git_diff,
+            mutation_ranges: &config.mutation_ranges,
             // disabled as it's likely reapply the same filter as during the compilation
             enable_manual_filter: false,
             include_paths: &config.include_paths,

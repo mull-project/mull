@@ -22,6 +22,7 @@ def mull_py_test(src):
         "%s/*.cpp" % test_dir,
         "%s/*.c" % test_dir,
         "%s/*.notest" % test_dir,
+        "%s/*.ranges" % test_dir,
         "%s/*.itest" % test_dir,
         "%s/*.sh" % test_dir,
     ]

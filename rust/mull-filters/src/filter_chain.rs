@@ -1,4 +1,6 @@
-use crate::{CoverageFilter, FilePathFilter, GitDiffFilter, ManualFilter, MutantFilter};
+use crate::{
+    CoverageFilter, FilePathFilter, GitDiffFilter, ManualFilter, MutantFilter, MutationRangesFilter,
+};
 use mull_core::diag_warning;
 use mull_core::diagnostics::MullDiagnostics;
 use mull_state::{ExecutionStatus, Mutant};
@@ -30,13 +32,15 @@ pub struct FilterChainConfig<'a> {
     pub git_diff_paths: &'a [String],
     /// Enable git diff debug output
     pub debug_git_diff: bool,
+    /// File listing the line ranges to mutate (empty = disabled)
+    pub mutation_ranges: &'a str,
     /// Enable manual filter (mull-off/mull-on/mull-ignore comments)
     pub enable_manual_filter: bool,
     /// Include path patterns (regex)
     pub include_paths: &'a [String],
     /// Exclude path patterns (regex)
     pub exclude_paths: &'a [String],
-    /// Enable filepath filter debug output
+    /// Enable file path and mutation ranges filter debug output
     pub debug_filepath: bool,
 }
 
@@ -64,6 +68,7 @@ impl FilterChain {
     /// Automatically adds filters based on config settings:
     /// - CoverageFilter: if coverage_profile_path is provided or include_not_covered is set
     /// - GitDiffFilter: if git_diff_ref is not empty
+    /// - MutationRangesFilter: if mutation_ranges is not empty
     pub fn from_config(diag: &MullDiagnostics, config: FilterChainConfig) -> Self {
         let mut chain = Self::new();
 
@@ -106,6 +111,14 @@ impl FilterChain {
                 );
                 chain.add(git_diff_filter);
             }
+        }
+
+        if !config.mutation_ranges.is_empty() {
+            chain.add(MutationRangesFilter::from_file(
+                diag,
+                config.mutation_ranges,
+                config.debug_filepath,
+            ));
         }
 
         // Add file path filter if patterns are configured

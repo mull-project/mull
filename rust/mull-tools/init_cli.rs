@@ -61,7 +61,9 @@ fn parse_yaml(yaml: &str) -> Result<MullConfigSpec, String> {
 fn load_yaml_config(config_path: &str) -> Result<MullConfigSpec, String> {
     let contents =
         fs::read_to_string(config_path).map_err(|e| format!("Cannot read config: {}", e))?;
-    parse_yaml(&contents)
+    let mut spec = parse_yaml(&contents)?;
+    spec.resolve_paths(config_path);
+    Ok(spec)
 }
 
 fn create_config(diag: &MullDiagnostics) -> (MullConfigSpec, Option<String>) {

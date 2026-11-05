@@ -1,0 +1,12 @@
+A gitDiffRef that does not resolve warns and skips every mutant, and strict mode turns the warning into an error.
+
+RUN: cd %S && rm -rf sandbox && mkdir sandbox && cp sample.cpp.original sandbox/sample.cpp
+RUN: cd %S/sandbox && git init . -b main && git add . && git -c user.name=Mull -c user.email=mull@example.com commit -m base
+RUN: cd %S && echo "// a change" >> sandbox/sample.cpp
+RUN: cd %S && env MULL_CONFIG=mull.yml %clang_cxx %sysroot %pass_mull_ir_frontend -g -grecord-command-line sandbox/sample.cpp -o sample.exe 2>&1 | %filecheck %s --dump-input=fail --check-prefix=CHECK-WARNING
+RUN: cd %S && unset TERM; %mull_runner sample.exe 2>&1 | %filecheck %s --dump-input=fail --check-prefix=CHECK-RUNNER
+RUN: cd %S && (env MULL_CONFIG=strict.yml %clang_cxx %sysroot %pass_mull_ir_frontend -g -grecord-command-line sandbox/sample.cpp -o sample.exe 2>&1; test $? != 0) | %filecheck %s --dump-input=fail --check-prefix=CHECK-STRICT
+
+CHECK-WARNING:[warning] GitDiffFilter: cannot find ref 'does-not-exist': {{.*}}
+CHECK-RUNNER:[info] No mutants found. Mutation score: infinitely high
+CHECK-STRICT:{{.*}}GitDiffFilter: cannot find ref 'does-not-exist': {{.*}}

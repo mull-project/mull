@@ -51,8 +51,16 @@ native_binary(
     visibility = ["//visibility:public"],
 )
 
-[mull_py_test(src = f) for f in glob([
-    "**/*.cpp",
-    "**/*.c",
-    "**/*.itest",
-])]
+ITESTS = glob(["**/*.itest"])
+
+ITEST_DIRS = [f.rsplit("/", 1)[0] for f in ITESTS]
+
+# Sources next to an .itest are its inputs, not tests
+[mull_py_test(src = f) for f in ITESTS + [
+    f
+    for f in glob([
+        "**/*.cpp",
+        "**/*.c",
+    ])
+    if f.rsplit("/", 1)[0] not in ITEST_DIRS
+]]

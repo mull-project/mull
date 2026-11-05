@@ -1,24 +1,15 @@
-use crate::{find_by_path_suffix, FilterDecision, MutantFilter};
+use crate::file_ranges::{FileRanges, Span};
+use crate::{FilterDecision, MutantFilter};
 use llvm_profparser::coverage::coverage_mapping::CoverageMapping;
 use mull_core::diagnostics::MullDiagnostics;
 use mull_core::{diag_debug, diag_warning};
 use mull_state::{ExecutionStatus, Mutant};
-use std::collections::HashMap;
 use std::path::{Path, PathBuf};
-
-/// Represents a source code range that is not covered by tests
-#[derive(Debug, Clone)]
-struct CoverageRange {
-    line_begin: u64,
-    column_begin: u64,
-    line_end: u64,
-    column_end: u64,
-}
 
 /// Filter that skips mutants in code not covered by tests
 pub struct CoverageFilter {
-    /// Map of file path -> uncovered ranges, empty for fully covered files
-    uncovered_ranges: HashMap<String, Vec<CoverageRange>>,
+    /// Uncovered regions per file, no regions for fully covered files
+    uncovered_ranges: FileRanges,
     /// Whether to include uncovered mutants anyway
     include_not_covered: bool,
 }
@@ -33,7 +24,7 @@ impl CoverageFilter {
         debug_coverage: bool,
     ) -> Self {
         let uncovered_ranges = if profile_path.is_empty() {
-            HashMap::new()
+            FileRanges::default()
         } else {
             load_coverage_from_profile_path(diag, profile_path, object_files, debug_coverage)
         };
@@ -47,44 +38,21 @@ impl CoverageFilter {
     /// Create an empty coverage filter (no filtering)
     pub fn empty(include_not_covered: bool) -> Self {
         Self {
-            uncovered_ranges: HashMap::new(),
+            uncovered_ranges: FileRanges::default(),
             include_not_covered,
         }
     }
 
     /// Check if a mutant is covered by tests
     pub fn covered(&self, mutant: &Mutant) -> bool {
-        if self.uncovered_ranges.is_empty() {
-            return true;
-        }
-
-        let path = &mutant.location.filepath;
-
-        let ranges = match self
-            .uncovered_ranges
-            .get(path)
-            .or_else(|| find_by_path_suffix(&self.uncovered_ranges, path))
-        {
-            Some(r) => r,
-            None => return true, // Path not in coverage map means covered
-        };
-
-        let line = mutant.location.begin_line;
-        let column = mutant.location.begin_column;
-
-        // Check if mutant location falls within any uncovered range
-        for range in ranges {
-            let in_range_start = (line > range.line_begin)
-                || (line == range.line_begin && column >= range.column_begin);
-            let in_range_end =
-                (line < range.line_end) || (line == range.line_end && column <= range.column_end);
-
-            if in_range_start && in_range_end {
-                return false; // Found in uncovered range
-            }
-        }
-
-        true
+        // A file without coverage data counts as covered
+        let location = &mutant.location;
+        self.uncovered_ranges.contains(
+            &location.filepath,
+            location.begin_line,
+            location.begin_column,
+            true,
+        ) != Some(true)
     }
 }
 
@@ -116,8 +84,8 @@ fn load_coverage_from_profile_path(
     profile_path: &str,
     object_files: &[String],
     debug_coverage: bool,
-) -> HashMap<String, Vec<CoverageRange>> {
-    let mut uncovered_ranges: HashMap<String, Vec<CoverageRange>> = HashMap::new();
+) -> FileRanges {
+    let mut uncovered_ranges = FileRanges::default();
 
     // Parse the instrumentation profile
     let profile = match llvm_profparser::parse(profile_path) {
@@ -183,50 +151,39 @@ fn load_coverage_from_profile_path(
             .map(|p| p.to_string_lossy().to_string());
 
         // A fully covered file has to be found too, not just the files with gaps
-        uncovered_ranges.entry(file_str.clone()).or_default();
-        if let Ok(abs_path) = &abs_path {
-            uncovered_ranges.entry(abs_path.clone()).or_default();
+        // Stored under both the path as written and the absolute path
+        let paths: Vec<&str> = std::iter::once(file_str.as_str())
+            .chain(abs_path.as_deref().ok())
+            .collect();
+        for path in &paths {
+            uncovered_ranges.add_file(path);
         }
 
         for (loc, &count) in &coverage_result.hits {
             if count == 0 {
-                let range = CoverageRange {
-                    line_begin: loc.line_start as u64,
-                    column_begin: loc.column_start as u64,
-                    line_end: loc.line_end as u64,
-                    column_end: loc.column_end as u64,
-                };
+                let begin = (loc.line_start as u64, loc.column_start as u64);
+                let end = (loc.line_end as u64, loc.column_end as u64);
 
                 if debug_coverage {
                     diag_debug!(
                         diag,
                         "mull-coverage: {}:{}:{}:{}:{}",
                         file_str,
-                        range.line_begin,
-                        range.column_begin,
-                        range.line_end,
-                        range.column_end
+                        begin.0,
+                        begin.1,
+                        end.0,
+                        end.1
                     );
                 }
 
-                // Store for both relative and absolute path
-                uncovered_ranges
-                    .entry(file_str.clone())
-                    .or_default()
-                    .push(range.clone());
-
-                // Also store with absolute path
-                if let Ok(abs_path) = &abs_path {
-                    uncovered_ranges
-                        .entry(abs_path.clone())
-                        .or_default()
-                        .push(range);
+                for path in &paths {
+                    uncovered_ranges.insert(path, Span::new(begin, end));
                 }
             }
         }
     }
 
-    uncovered_ranges
+    uncovered_ranges.finish()
 }
 
 /// Check if an object file has coverage instrumentation, i.e. both the coverage map and the
@@ -272,23 +229,15 @@ mod tests {
     }
 
     fn filter_with(files: &[(&str, &[u64])]) -> CoverageFilter {
-        let uncovered_ranges = files
-            .iter()
-            .map(|(path, lines)| {
-                let ranges = lines
-                    .iter()
-                    .map(|&line| CoverageRange {
-                        line_begin: line,
-                        column_begin: 1,
-                        line_end: line,
-                        column_end: 80,
-                    })
-                    .collect();
-                (path.to_string(), ranges)
-            })
-            .collect();
+        let mut uncovered_ranges = FileRanges::default();
+        for (path, lines) in files {
+            uncovered_ranges.add_file(path);
+            for &line in *lines {
+                uncovered_ranges.insert(path, Span::new((line, 1), (line, 80)));
+            }
+        }
         CoverageFilter {
-            uncovered_ranges,
+            uncovered_ranges: uncovered_ranges.finish(),
             include_not_covered: false,
         }
     }
@@ -308,6 +257,100 @@ mod tests {
         ]);
         assert!(filter.covered(&mutant_at("/sandbox/1/a/util.cpp", 2)));
         assert!(!filter.covered(&mutant_at("/sandbox/1/b/util.cpp", 2)));
+    }
+
+    fn mutant_at_column(filepath: &str, line: u64, column: u64) -> Mutant {
+        Mutant {
+            identifier: format!(
+                "cxx_add_to_sub:{}:{}:{}:{}:{}",
+                filepath,
+                line,
+                column,
+                line,
+                column + 1
+            ),
+            mutator: "cxx_add_to_sub".into(),
+            location: SourceRange::new(filepath.into(), line, column, line, column + 1),
+            replacement: String::new(),
+        }
+    }
+
+    fn filter_with_region(path: &str, begin: (u64, u64), end: (u64, u64)) -> CoverageFilter {
+        let mut uncovered_ranges = FileRanges::default();
+        uncovered_ranges.insert(path, Span::new(begin, end));
+        CoverageFilter {
+            uncovered_ranges: uncovered_ranges.finish(),
+            include_not_covered: false,
+        }
+    }
+
+    #[test]
+    fn no_coverage_data_counts_as_covered() {
+        let filter = CoverageFilter::empty(false);
+        assert!(filter.covered(&mutant_at("/src/main.c", 2)));
+    }
+
+    #[test]
+    fn file_without_coverage_data_counts_as_covered() {
+        let filter = filter_with(&[("/src/main.c", &[2])]);
+        assert!(filter.covered(&mutant_at("/src/other.c", 2)));
+    }
+
+    #[test]
+    fn single_line_region_respects_columns() {
+        let filter = filter_with_region("/src/main.c", (14, 26), (14, 31));
+        assert!(filter.covered(&mutant_at_column("/src/main.c", 14, 22)));
+        assert!(filter.covered(&mutant_at_column("/src/main.c", 14, 25)));
+        assert!(!filter.covered(&mutant_at_column("/src/main.c", 14, 26)));
+        assert!(!filter.covered(&mutant_at_column("/src/main.c", 14, 31)));
+        assert!(filter.covered(&mutant_at_column("/src/main.c", 14, 32)));
+        assert!(filter.covered(&mutant_at_column("/src/main.c", 13, 26)));
+        assert!(filter.covered(&mutant_at_column("/src/main.c", 15, 26)));
+    }
+
+    #[test]
+    fn multi_line_region_respects_columns_on_the_first_and_last_line_only() {
+        let filter = filter_with_region("/src/main.c", (4, 16), (8, 6));
+        assert!(filter.covered(&mutant_at_column("/src/main.c", 4, 15)));
+        assert!(!filter.covered(&mutant_at_column("/src/main.c", 4, 16)));
+        assert!(!filter.covered(&mutant_at_column("/src/main.c", 6, 1)));
+        assert!(!filter.covered(&mutant_at_column("/src/main.c", 6, 200)));
+        assert!(!filter.covered(&mutant_at_column("/src/main.c", 8, 6)));
+        assert!(filter.covered(&mutant_at_column("/src/main.c", 8, 7)));
+    }
+
+    #[test]
+    fn relative_path_matches_on_the_suffix() {
+        let filter = filter_with(&[("./main.c", &[2])]);
+        assert!(!filter.covered(&mutant_at("/src/main.c", 2)));
+        assert!(filter.covered(&mutant_at("/src/main.c", 3)));
+    }
+
+    #[test]
+    fn decision_depends_on_include_not_covered() {
+        let diag = MullDiagnostics::with_writer(Box::new(std::io::sink()), false);
+        let mut filter = filter_with(&[("/src/main.c", &[2])]);
+        let covered = mutant_at("/src/main.c", 1);
+        let not_covered = mutant_at("/src/main.c", 2);
+
+        assert_eq!(
+            filter.filter_decision(&covered, &diag, false),
+            FilterDecision::Keep
+        );
+        assert_eq!(
+            filter.filter_decision(&not_covered, &diag, false),
+            FilterDecision::Skip
+        );
+
+        filter.include_not_covered = true;
+        assert_eq!(
+            filter.filter_decision(&covered, &diag, false),
+            FilterDecision::Keep
+        );
+        assert_eq!(
+            filter.filter_decision(&not_covered, &diag, false),
+            FilterDecision::ReportAs(ExecutionStatus::NotCovered)
+        );
     }
 
     #[test]

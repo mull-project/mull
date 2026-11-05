@@ -1,8 +1,10 @@
 mod coverage_filter;
+mod file_ranges;
 mod filepath_filter;
 mod filter_chain;
 mod git_diff_filter;
 mod manual_filter;
+mod mutation_ranges_filter;
 mod mutator_groups;
 
 pub use coverage_filter::{has_coverage, CoverageFilter};
@@ -10,12 +12,11 @@ pub use filepath_filter::FilePathFilter;
 pub use filter_chain::{FilterChain, FilterChainConfig, FilterDecision, FilterResult};
 pub use git_diff_filter::GitDiffFilter;
 pub use manual_filter::ManualFilter;
+pub use mutation_ranges_filter::MutationRangesFilter;
 pub use mutator_groups::{expand_mutator_groups, get_group_definitions};
 
 use mull_core::diagnostics::MullDiagnostics;
 use mull_state::Mutant;
-use std::collections::HashMap;
-use std::path::Path;
 
 /// Filter trait for deciding whether to skip a mutant
 pub trait MutantFilter: Send + Sync {
@@ -39,40 +40,12 @@ pub struct FilterMutantsConfig {
     pub git_project_root: String,
     pub git_diff_paths: Vec<String>,
     pub debug_git_diff: bool,
+    pub mutation_ranges: String,
     pub workers: usize,
     pub enable_manual_filter: bool,
     pub include_paths: Vec<String>,
     pub exclude_paths: Vec<String>,
     pub debug_filepath: bool,
-}
-
-/// Find the entry sharing the longest path suffix with `path`. Handles cases where the entries
-/// have different path prefixes (e.g., sandbox paths) than debug info. Ambiguous matches are `None`.
-pub(crate) fn find_by_path_suffix<'a, T>(
-    entries: &'a HashMap<String, T>,
-    path: &str,
-) -> Option<&'a T> {
-    let shared_components = |candidate: &str| {
-        Path::new(path)
-            .components()
-            .rev()
-            .zip(Path::new(candidate).components().rev())
-            .take_while(|(lhs, rhs)| lhs == rhs)
-            .count()
-    };
-
-    let mut best = None;
-    let mut best_length = 0;
-    for (candidate, value) in entries {
-        let length = shared_components(candidate);
-        if length > best_length {
-            best = Some(value);
-            best_length = length;
-        } else if length == best_length {
-            best = None;
-        }
-    }
-    best
 }
 
 /// Filter mutants using the Rust filter chain
@@ -86,6 +59,7 @@ pub fn filter_mutants(
 ) -> Vec<String> {
     // If no filters are enabled, return all mutants
     if config.git_diff_ref.is_empty()
+        && config.mutation_ranges.is_empty()
         && !config.enable_manual_filter
         && config.include_paths.is_empty()
         && config.exclude_paths.is_empty()
@@ -109,6 +83,7 @@ pub fn filter_mutants(
         git_project_root: &config.git_project_root,
         git_diff_paths: &config.git_diff_paths,
         debug_git_diff: config.debug_git_diff,
+        mutation_ranges: &config.mutation_ranges,
         enable_manual_filter: config.enable_manual_filter,
         include_paths: &config.include_paths,
         exclude_paths: &config.exclude_paths,

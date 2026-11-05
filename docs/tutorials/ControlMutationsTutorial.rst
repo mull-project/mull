@@ -148,6 +148,34 @@ Total 1585 mutants vs 1606 previously. Slightly better, but still not great.
 
 We need something heavier than that!
 
+Mutation Ranges Filter
+----------------------
+
+When you work on a particular piece of code, you can list the exact lines to mutate in a file
+and point ``mutationRanges`` in ``mull.yml`` to it:
+
+.. code-block:: yaml
+
+    mutators:
+      - cxx_add_to_sub
+    mutationRanges: mutation.ranges
+
+Each line of the file is ``<path>:<first>-<last>`` or ``<path>:<line>``, lines starting with ``#`` are comments:
+
+.. code-block:: text
+
+    # the whole function under test
+    crypto/conf/conf_mod.c:540-570
+    providers/implementations/rands/drbg_ctr.c:555
+
+A relative ``mutationRanges`` is relative to ``mull.yml``, and relative paths in the file are relative
+to the file itself. Mull keeps only the mutants starting on the listed lines.
+If the file cannot be read or parsed, Mull warns and skips every mutant.
+
+Like the path filters, ``mutationRanges`` works at both stages. ``mull-ir-frontend`` only creates the listed mutants,
+which makes the build of a large file much faster, and ``mull-runner`` only runs them.
+Combined with ``gitDiffRef``, only the mutants in both the diff and the ranges are kept.
+
 Code Coverage Filter
 --------------------
 
