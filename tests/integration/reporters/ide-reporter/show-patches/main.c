@@ -29,8 +29,8 @@ int main() {
 // KILLED-NEXT:{{.*}}main.c:6:12: warning: Killed: Replaced != with == [cxx_ne_to_eq]
 // KILLED-NEXT:  return x != 2;
 // KILLED-NEXT:           ^
-// KILLED-NEXT:--- a/sandbox/main.c 0
-// KILLED-NEXT:+++ b/sandbox/main.c 0
+// KILLED-NEXT:--- a/sandbox/main.c
+// KILLED-NEXT:+++ b/sandbox/main.c
 // KILLED-NEXT:@@ -6,1 +6,1 @@
 // KILLED-NEXT:-  return x != 2;
 // KILLED-NEXT:+  return x == 2;
@@ -39,8 +39,8 @@ int main() {
 // SURVIVED-NEXT:{{.*}}main.c:2:12: warning: Survived: Replaced + with - [cxx_add_to_sub]
 // SURVIVED-NEXT:  return a + b;
 // SURVIVED-NEXT:           ^
-// SURVIVED-NEXT:--- a/sandbox/main.c 0
-// SURVIVED-NEXT:+++ b/sandbox/main.c 0
+// SURVIVED-NEXT:--- a/sandbox/main.c
+// SURVIVED-NEXT:+++ b/sandbox/main.c
 // SURVIVED-NEXT:@@ -2,1 +2,1 @@
 // SURVIVED-NEXT:-  return a + b;
 // SURVIVED-NEXT:+  return a - b;

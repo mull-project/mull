@@ -26,8 +26,8 @@ RUN: cd %S/Output; (unset TERM; %mull_reporter -debug test-ir.sqlite --report-na
 CHECK:{{.*}}[debug] Writing Patchfile: {{.*}}
 CHECK:[info] Patchfiles can be found at './test{{.*}}-patches'
 CHECK:survived-{{.*}}
-CHECK:--- a/{{.*}}/Output/sandbox/main.cpp 0
-CHECK:+++ b/{{.*}}/Output/sandbox/main.cpp 0
+CHECK:--- a/{{.*}}/Output/sandbox/main.cpp
+CHECK:+++ b/{{.*}}/Output/sandbox/main.cpp
 CHECK:+{{[[:space:]]+}}x[0] = 42; y;
 
 */

@@ -228,8 +228,12 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
 
   // For unary operators we shouldn't consider the location of the whole expression, but only
   // the operator, otherwise it breaks patch reporter in weird ways
+  bool startsAtOperator = false;
   if (auto unary = llvm::dyn_cast<clang::UnaryOperator>(mutantExpression)) {
     sourceLocationEnd = unary->getOperatorLoc();
+    /// E.g. '!a' is mutated at 'a', the patch has to replace the '!' instead
+    startsAtOperator = !unary->isPostfix() &&
+                       sourceManager.isBeforeInTranslationUnit(unary->getOperatorLoc(), location);
   }
 
   /// Init-Const replaces the whole initializer, but its mutation location is the variable name
@@ -253,7 +257,7 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
                     std::to_string(mutationLocationBeginColumn) +
                     " (end: " + std::to_string(endLine) + ":" + std::to_string(endColumn) + ")");
 
-  if (replacesInitializer) {
+  if (replacesInitializer || startsAtOperator) {
     point->setBeginLocation(beginLine, beginColumn);
   }
   point->setEndLocation(endLine, endColumn);

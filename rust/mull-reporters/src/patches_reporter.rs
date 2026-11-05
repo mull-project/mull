@@ -137,7 +137,7 @@ pub(crate) fn render_patch(
     let source_path = ensure_leading_slash(strip_base_path(&loc.filepath, base_path));
     let line_count = loc.end_line - loc.begin_line + 1;
     let mut patch = format!(
-        "--- a{0} 0\n+++ b{0} 0\n@@ -{1},{2} +{1},1 @@\n",
+        "--- a{0}\n+++ b{0}\n@@ -{1},{2} +{1},1 @@\n",
         source_path, loc.begin_line, line_count
     );
     for line in &lines {

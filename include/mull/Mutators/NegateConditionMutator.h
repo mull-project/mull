@@ -40,7 +40,8 @@ public:
     return "Negated !x to x (or x to !x)";
   }
   std::string getReplacement() const override {
-    return "x or !x";
+    /// Only '!x' survives junk detection, the mutant removes the '!'
+    return "";
   }
 
   void applyMutation(llvm::Function *function, const MutationPointAddress &address,

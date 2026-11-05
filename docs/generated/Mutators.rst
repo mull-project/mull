@@ -73,7 +73,7 @@
 .. |op36| replace:: cxx_rshift_assign_to_lshift_assign
 .. |desc36| replace:: Replaces >>= with <<=
 .. |op37| replace:: cxx_rshift_to_lshift
-.. |desc37| replace:: Replaces << with >>
+.. |desc37| replace:: Replaces >> with <<
 .. |op38| replace:: cxx_sub_assign_to_add_assign
 .. |desc38| replace:: Replaces -= with +=
 .. |op39| replace:: cxx_sub_to_add
