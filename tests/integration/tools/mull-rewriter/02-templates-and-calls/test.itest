@@ -1,29 +1,23 @@
 Sites the IR mutates once per instantiation or behind a call: template members, member calls,
-macros, 'auto', enums, conversions, overloaded instantiations
+macros, 'auto', enums, conversions, overloaded instantiations. Every mutant is listed in code.cpp
+under its line, the IR: ones have no source equivalent and exist only in the IR-mutated program.
 
 RUN: rm -rf %S/Output && mkdir -p %S/Output/sandbox
-RUN: cp %S/main.cpp %S/mull.yml %S/Output/sandbox/
-RUN: cd %S/Output/sandbox && %clang_cxx %sysroot -O0 -g -grecord-command-line %pass_mull_ir_frontend main.cpp -o %S/Output/ir.exe
+RUN: cp %S/code.cpp %S/tests.cpp %S/mull.yml %S/Output/sandbox/
+RUN: cd %S/Output/sandbox && %clang_cxx %sysroot -O0 -g -grecord-command-line %pass_mull_ir_frontend -c code.cpp -o %S/Output/code.o
+RUN: cd %S/Output/sandbox && %clang_cxx %sysroot -O0 -c tests.cpp -o %S/Output/tests.o
+RUN: %clang_cxx %sysroot %S/Output/code.o %S/Output/tests.o -o %S/Output/ir.exe
+
+The rewriter reads the mutants from a dry run report
 RUN: cd %S/Output/sandbox && %mull_runner --dry-run --allow-surviving --reporters SQLite --report-dir %S/Output --report-name dry %S/Output/ir.exe
-RUN: echo '[{"directory": "%S/Output/sandbox", "file": "main.cpp", "command": "%clang_cxx %sysroot -c main.cpp"}]' > %S/Output/sandbox/compile_commands.json
-
+RUN: echo '[{"directory": "%S/Output/sandbox", "file": "code.cpp", "command": "%clang_cxx %sysroot -c code.cpp"}]' > %S/Output/sandbox/compile_commands.json
 RUN: %mull_rewriter --report %S/Output/dry.sqlite -p %S/Output/sandbox --root %S/Output/sandbox --output-dir %S/Output/rewritten | %filecheck %s --check-prefix=REWRITER
-No source equivalent: 'twice' is also instantiated with a class without '-', and the IR mutates a
-pointer difference as an integer one
 REWRITER-NOT: Not rewritten
-REWRITER: Not rewritten (no source equivalent): cxx_add_to_sub:{{.*}}main.cpp:43:16
-REWRITER-NEXT: Not rewritten (no source equivalent): cxx_sub_to_add:{{.*}}main.cpp:47:14
+REWRITER: Not rewritten (no source equivalent): cxx_add_to_sub:{{.*}}code.cpp:47:16
+REWRITER-NEXT: Not rewritten (no source equivalent): cxx_sub_to_add:{{.*}}code.cpp:53:14
 REWRITER-NOT: Not rewritten
-REWRITER: Rewrote 25 of 27 mutants in 1 files
+REWRITER: Rewrote 23 of 25 mutants in 1 files
+RUN: %clang_cxx %sysroot -O0 %S/Output/rewritten/code.cpp %S/Output/tests.o -o %S/Output/rewritten.exe
 
-RUN: %clang_cxx %sysroot -O0 %S/Output/rewritten/main.cpp -o %S/Output/rewritten.exe
-RUN: cd %S/Output/sandbox && %mull_runner --allow-surviving -minimum-timeout 2000 --reporters SQLite --report-dir %S/Output --report-name ir %S/Output/ir.exe
-RUN: cd %S/Output/sandbox && %mull_runner --allow-surviving -minimum-timeout 2000 --reporters SQLite --report-dir %S/Output --report-name rewritten %S/Output/rewritten.exe
-
-RUN: %sqlite3 %S/Output/ir.sqlite "ATTACH '%S/Output/rewritten.sqlite' AS r; SELECT 'MISSING', mutator, line_number FROM mutant WHERE mutant_id NOT IN (SELECT mutant_id FROM r.mutant) ORDER BY 2, 3;" | %filecheck %s --check-prefix=MISSING
-MISSING: MISSING|cxx_add_to_sub|43
-MISSING-NEXT: MISSING|cxx_sub_to_add|47
-MISSING-NOT: MISSING
-
-RUN: %sqlite3 %S/Output/ir.sqlite "ATTACH '%S/Output/rewritten.sqlite' AS r; SELECT 'DIFF', i.mutator, i.line_number FROM mutant i JOIN r.mutant m USING (mutant_id) WHERE i.execution_status != 3 AND m.execution_status != 3 AND (i.execution_status != m.execution_status OR i.exit_status != m.exit_status OR i.stdout != m.stdout) ORDER BY 2, 3;" | %filecheck %s --allow-empty --check-prefix=DIFF
-DIFF-NOT: DIFF
+RUN: cd %S/Output/sandbox && %mull_runner -allow-surviving -minimum-timeout 2000 -reporters=IDE -ide-reporter-show-killed %S/Output/ir.exe | %filecheck %S/code.cpp --check-prefixes=CHECK,IR --implicit-check-not=warning:
+RUN: cd %S/Output/sandbox && %mull_runner -allow-surviving -minimum-timeout 2000 -reporters=IDE -ide-reporter-show-killed %S/Output/rewritten.exe | %filecheck %S/code.cpp --implicit-check-not=warning:
