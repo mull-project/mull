@@ -1,3 +1,4 @@
+use crate::patches_reporter::render_patch;
 use crate::source_manager::SourceManager;
 use crate::Reporter;
 use mull_core::diagnostics::MullDiagnostics;
@@ -8,13 +9,21 @@ use std::io::BufWriter;
 
 pub struct IDEReporter {
     show_killed: bool,
+    /// Base path for the patch paths, no patches if `None`
+    patch_base: Option<String>,
     report_filepath: Option<String>,
 }
 
 impl IDEReporter {
-    pub fn new(show_killed: bool, report_dir: &str, report_name: &str) -> Self {
+    pub fn new(
+        show_killed: bool,
+        patch_base: Option<&str>,
+        report_dir: &str,
+        report_name: &str,
+    ) -> Self {
         Self {
             show_killed,
+            patch_base: patch_base.map(String::from),
             report_filepath: if report_name.is_empty() {
                 None
             } else {
@@ -30,6 +39,7 @@ fn print_mutants(
     mut mutants: Vec<&Mutant>,
     total_size: usize,
     label: &str,
+    patch_base: Option<&str>,
 ) {
     if mutants.is_empty() {
         return;
@@ -68,10 +78,26 @@ fn print_mutants(
                 mutant.location.filepath
             ),
         }
+        if let Some(base) = patch_base {
+            match render_patch(diag, source_manager, mutant, base) {
+                Ok(patch) => diag_raw!(diag, "{}", patch.trim_end()),
+                Err(reason) => diag_warning!(
+                    diag,
+                    "IDEReporter: Cannot show the patch for '{}': {}",
+                    mutant.identifier,
+                    reason
+                ),
+            }
+        }
     }
 }
 
-fn report_internal(diag: &MullDiagnostics, state: &ExecutionState, show_killed: bool) {
+fn report_internal(
+    diag: &MullDiagnostics,
+    state: &ExecutionState,
+    show_killed: bool,
+    patch_base: Option<&str>,
+) {
     assert!(!state.execution_results.is_empty());
 
     let mut survived = Vec::new();
@@ -92,10 +118,31 @@ fn report_internal(diag: &MullDiagnostics, state: &ExecutionState, show_killed: 
     let mut source_manager = SourceManager::default();
 
     if show_killed {
-        print_mutants(diag, &mut source_manager, killed, total, "Killed");
+        print_mutants(
+            diag,
+            &mut source_manager,
+            killed,
+            total,
+            "Killed",
+            patch_base,
+        );
     }
-    print_mutants(diag, &mut source_manager, survived, total, "Survived");
-    print_mutants(diag, &mut source_manager, not_covered, total, "Not Covered");
+    print_mutants(
+        diag,
+        &mut source_manager,
+        survived,
+        total,
+        "Survived",
+        patch_base,
+    );
+    print_mutants(
+        diag,
+        &mut source_manager,
+        not_covered,
+        total,
+        "Not Covered",
+        patch_base,
+    );
 
     diag_info!(diag, "Mutation score: {}%", score);
     if all_killed {
@@ -106,14 +153,19 @@ fn report_internal(diag: &MullDiagnostics, state: &ExecutionState, show_killed: 
 impl Reporter for IDEReporter {
     fn report(&self, diag: &MullDiagnostics, state: &ExecutionState) {
         let Some(path) = &self.report_filepath else {
-            report_internal(diag, state, self.show_killed);
+            report_internal(diag, state, self.show_killed, self.patch_base.as_deref());
             return;
         };
 
         match File::create(path) {
             Ok(file) => {
                 let file_diag = MullDiagnostics::with_writer(Box::new(BufWriter::new(file)), false);
-                report_internal(&file_diag, state, self.show_killed);
+                report_internal(
+                    &file_diag,
+                    state,
+                    self.show_killed,
+                    self.patch_base.as_deref(),
+                );
                 diag_info!(diag, "IDE Report saved into {}", path);
             }
             Err(err) => diag_error!(diag, "Cannot create report file {}: {}", path, err),

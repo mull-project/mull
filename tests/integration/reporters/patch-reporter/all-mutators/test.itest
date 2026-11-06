@@ -1,0 +1,54 @@
+Every mutator produces a patch that applies cleanly and gives a source that compiles
+
+RUN: rm -rf %S/Output && mkdir -p %S/Output/sandbox
+RUN: cp %S/main.cpp %S/mull.yml %S/Output/sandbox/
+RUN: cd %S/Output/sandbox && %clang_cxx %sysroot -O0 -g -grecord-command-line %pass_mull_ir_frontend main.cpp -o %S/Output/main.exe
+RUN: cd %S/Output/sandbox && %mull_runner --dry-run --allow-surviving --reporters Patches --report-dir %S/Output --report-name all --report-patch-base %S/Output/sandbox %S/Output/main.exe
+RUN: rm %S/Output/sandbox/mull.yml
+RUN: %python3 %S/check_patches.py --patches %S/Output/all-patches --sources %S/Output/sandbox --compiler "%clang_cxx %sysroot" | %filecheck %s --dump-input=always
+
+CHECK-NOT: FAIL
+CHECK: MUTATOR: cxx_add_assign_to_sub_assign
+CHECK-NEXT: MUTATOR: cxx_add_to_sub
+CHECK-NEXT: MUTATOR: cxx_and_assign_to_or_assign
+CHECK-NEXT: MUTATOR: cxx_and_to_or
+CHECK-NEXT: MUTATOR: cxx_assign_const
+CHECK-NEXT: MUTATOR: cxx_bitwise_not_to_noop
+CHECK-NEXT: MUTATOR: cxx_div_assign_to_mul_assign
+CHECK-NEXT: MUTATOR: cxx_div_to_mul
+CHECK-NEXT: MUTATOR: cxx_eq_to_ne
+CHECK-NEXT: MUTATOR: cxx_ge_to_gt
+CHECK-NEXT: MUTATOR: cxx_ge_to_lt
+CHECK-NEXT: MUTATOR: cxx_gt_to_ge
+CHECK-NEXT: MUTATOR: cxx_gt_to_le
+CHECK-NEXT: MUTATOR: cxx_init_const
+CHECK-NEXT: MUTATOR: cxx_le_to_gt
+CHECK-NEXT: MUTATOR: cxx_le_to_lt
+CHECK-NEXT: MUTATOR: cxx_lshift_assign_to_rshift_assign
+CHECK-NEXT: MUTATOR: cxx_lshift_to_rshift
+CHECK-NEXT: MUTATOR: cxx_lt_to_ge
+CHECK-NEXT: MUTATOR: cxx_lt_to_le
+CHECK-NEXT: MUTATOR: cxx_minus_to_noop
+CHECK-NEXT: MUTATOR: cxx_mul_assign_to_div_assign
+CHECK-NEXT: MUTATOR: cxx_mul_to_div
+CHECK-NEXT: MUTATOR: cxx_ne_to_eq
+CHECK-NEXT: MUTATOR: cxx_or_assign_to_and_assign
+CHECK-NEXT: MUTATOR: cxx_or_to_and
+CHECK-NEXT: MUTATOR: cxx_post_dec_to_post_inc
+CHECK-NEXT: MUTATOR: cxx_post_inc_to_post_dec
+CHECK-NEXT: MUTATOR: cxx_pre_dec_to_pre_inc
+CHECK-NEXT: MUTATOR: cxx_pre_inc_to_pre_dec
+CHECK-NEXT: MUTATOR: cxx_rem_assign_to_div_assign
+CHECK-NEXT: MUTATOR: cxx_rem_to_div
+CHECK-NEXT: MUTATOR: cxx_remove_negation
+CHECK-NEXT: MUTATOR: cxx_remove_void_call
+CHECK-NEXT: MUTATOR: cxx_replace_scalar_call_nz
+CHECK-NEXT: MUTATOR: cxx_replace_scalar_call_zr
+CHECK-NEXT: MUTATOR: cxx_rshift_assign_to_lshift_assign
+CHECK-NEXT: MUTATOR: cxx_rshift_to_lshift
+CHECK-NEXT: MUTATOR: cxx_sub_assign_to_add_assign
+CHECK-NEXT: MUTATOR: cxx_sub_to_add
+CHECK-NEXT: MUTATOR: cxx_xor_assign_to_or_assign
+CHECK-NEXT: MUTATOR: cxx_xor_to_or
+CHECK-NEXT: MUTATOR: negate_mutator
+CHECK-NEXT: FAILURES: 0

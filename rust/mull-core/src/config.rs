@@ -202,6 +202,10 @@ pub struct SharedCli {
     #[arg(long = "ide-reporter-show-killed")]
     pub ide_reporter_show_killed: bool,
 
+    /// Show a patch for each mutation in IDE reporter output, paths relative to --report-patch-base.
+    #[arg(long = "ide-reporter-show-patches")]
+    pub ide_reporter_show_patches: bool,
+
     /// Enable debug mode with additional diagnostic output.
     #[arg(long = "debug")]
     pub debug: bool,

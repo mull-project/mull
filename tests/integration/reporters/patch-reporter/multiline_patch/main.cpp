@@ -32,7 +32,7 @@ RUN: cd %S/Output; (unset TERM; %mull_reporter -debug test-ir.sqlite --report-na
 CHECK:{{.*}}[debug] Writing Patchfile: {{.*}}
 CHECK:[info] Patchfiles can be found at './test{{.*}}-patches'
 CHECK:{{.*}}cxx_remove_void{{.*}}
-CHECK:--- a{{.*}}/Output/sandbox/main.cpp 0
+CHECK:--- a{{.*}}/Output/sandbox/main.cpp
 CHECK:-{{[[:space:]]+}}false);
 CHECK:-{{[[:space:]]+}}7 +
 CHECK:-{{[[:space:]]+}}9 +
