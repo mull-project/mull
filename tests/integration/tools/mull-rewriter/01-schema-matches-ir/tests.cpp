@@ -18,7 +18,7 @@ int main() {
   for (int a = -3; a <= 3; a++) {
     for (int b = -3; b <= 3; b++) {
       bool same = arithmetic(a, b + 4) == reference::arithmetic(a, b + 4) &&
-                  bitwise(a, b) == reference::bitwise(a, b) &&
+                  bitwise(a + 3, b + 3) == reference::bitwise(a + 3, b + 3) &&
                   comparison(a, b) == reference::comparison(a, b) &&
                   increments(a) == reference::increments(a) &&
                   logical(a, b) == reference::logical(a, b) &&

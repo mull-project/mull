@@ -27,7 +27,7 @@ int arithmetic(int a, int b) {
   // CHECK: code.cpp:[[@LINE-1]]:5: warning: Killed: Replaced = with = 42; [cxx_assign_const]
   // CHECK: code.cpp:[[@LINE-2]]:9: warning: Killed: Replaced / with * [cxx_div_to_mul]
   // CHECK: code.cpp:[[@LINE-3]]:14: warning: Killed: Replaced + with - [cxx_add_to_sub]
-  x = x % (a + 1);
+  x = x % (a + 4);
   // CHECK: code.cpp:[[@LINE-1]]:5: warning: Killed: Replaced = with = 42; [cxx_assign_const]
   // CHECK: code.cpp:[[@LINE-2]]:9: warning: Killed: Replaced % with / [cxx_rem_to_div]
   // CHECK: code.cpp:[[@LINE-3]]:14: warning: Killed: Replaced + with - [cxx_add_to_sub]
@@ -40,7 +40,7 @@ int arithmetic(int a, int b) {
   x /= (b + 1);
   // CHECK: code.cpp:[[@LINE-1]]:5: warning: Killed: Replaced /= with *= [cxx_div_assign_to_mul_assign]
   // CHECK: code.cpp:[[@LINE-2]]:11: warning: Killed: Replaced + with - [cxx_add_to_sub]
-  x %= (a + 1);
+  x %= (a + 4);
   // CHECK: code.cpp:[[@LINE-1]]:5: warning: Killed: Replaced %= with /= [cxx_rem_assign_to_div_assign]
   // CHECK: code.cpp:[[@LINE-2]]:11: warning: Killed: Replaced + with - [cxx_add_to_sub]
   return -x;
@@ -48,10 +48,10 @@ int arithmetic(int a, int b) {
 }
 
 int bitwise(int a, int b) {
-  int x = (a & b) - (a ^ b);
-  // CHECK: code.cpp:[[@LINE-1]]:11: warning: Killed: Replaced (a & b) - (a ^ b) with 42 [cxx_init_const]
+  int x = (a & b) + (a ^ b);
+  // CHECK: code.cpp:[[@LINE-1]]:11: warning: Killed: Replaced (a & b) + (a ^ b) with 42 [cxx_init_const]
   // CHECK: code.cpp:[[@LINE-2]]:14: warning: Killed: Replaced & with | [cxx_and_to_or]
-  // CHECK: code.cpp:[[@LINE-3]]:19: warning: Killed: Replaced - with + [cxx_sub_to_add]
+  // CHECK: code.cpp:[[@LINE-3]]:19: warning: Killed: Replaced + with - [cxx_add_to_sub]
   // CHECK: code.cpp:[[@LINE-4]]:24: warning: Killed: Replaced ^ with | [cxx_xor_to_or]
   x = x << 1;
   // CHECK: code.cpp:[[@LINE-1]]:5: warning: Killed: Replaced = with = 42; [cxx_assign_const]
@@ -59,11 +59,11 @@ int bitwise(int a, int b) {
   x = x >> 1;
   // CHECK: code.cpp:[[@LINE-1]]:5: warning: Killed: Replaced = with = 42; [cxx_assign_const]
   // CHECK: code.cpp:[[@LINE-2]]:9: warning: Killed: Replaced >> with << [cxx_rshift_to_lshift]
-  x &= a;
-  // CHECK: code.cpp:[[@LINE-1]]:5: warning: Killed: Replaced &= with |= [cxx_and_assign_to_or_assign]
   x |= b;
   // CHECK: code.cpp:[[@LINE-1]]:5: warning: Killed: Replaced |= with &= [cxx_or_assign_to_and_assign]
-  x ^= a;
+  x &= a;
+  // CHECK: code.cpp:[[@LINE-1]]:5: warning: Killed: Replaced &= with |= [cxx_and_assign_to_or_assign]
+  x ^= b;
   // CHECK: code.cpp:[[@LINE-1]]:5: warning: Killed: Replaced ^= with |= [cxx_xor_assign_to_or_assign]
   x <<= 1;
   // CHECK: code.cpp:[[@LINE-1]]:5: warning: Killed: Replaced <<= with >>= [cxx_lshift_assign_to_rshift_assign]
