@@ -17,8 +17,14 @@ struct PlacedMutant {
   const Mutant *mutant;
   unsigned begin;
   unsigned end;
-  /// If set, the value the site evaluates to instead, the site is still evaluated for its effects
-  std::string value;
+  /// The text replacing the range
+  std::string replacement;
+  /// If set, the value the site evaluates to instead of the replacement
+  std::string value = "";
+  /// The original is still evaluated for its effects
+  bool evaluated = false;
+  /// A C-style cast of the value or `__mull_as` for the type of the original, if needed
+  std::string cast = "";
 };
 
 /// An AST node whose source text gets switched between the original and its mutants
@@ -26,6 +32,8 @@ struct Site {
   unsigned begin;
   unsigned end;
   std::vector<PlacedMutant> mutants;
+  /// A cast of the original, the type of an implicit conversion would not match the mutants
+  std::string originalCast = "";
 };
 
 /// Sites of one file, keyed by their byte range
@@ -38,6 +46,8 @@ public:
 
   void registerMatchers(clang::ast_matchers::MatchFinder &finder);
   void run(const clang::ast_matchers::MatchFinder::MatchResult &result) override;
+  /// Drops the mutants found unrepresentable in some instantiation, call after the matching
+  void finish();
 
   const llvm::StringMap<FileSites> &sites() const {
     return sitesByFile;
@@ -45,15 +55,23 @@ public:
   bool isPlaced(const Mutant &mutant) const {
     return placed.contains(mutant.identifier);
   }
+  /// The mutant fits a node, but has no source equivalent
+  bool isUnrepresentable(const Mutant &mutant) const {
+    return unrepresentable.contains(mutant.identifier);
+  }
 
 private:
+  /// Operator mutants of builtin instantiations have no source equivalent for overloaded ones
+  void poisonOperator(clang::SourceLocation key, const clang::ASTContext &context);
   void place(const clang::Stmt *node, NodeKind kind, llvm::StringRef op, clang::SourceLocation key,
-             const clang::ASTContext &context, clang::QualType valueType = clang::QualType());
+             const clang::ASTContext &context, clang::QualType valueType = clang::QualType(),
+             bool deduced = false);
 
   /// Mutants by "<real path>:<line>:<column>" of their begin
   llvm::StringMap<std::vector<const Mutant *>> mutantsByLocation;
   llvm::StringMap<FileSites> sitesByFile;
   llvm::StringSet<> placed;
+  llvm::StringSet<> unrepresentable;
 };
 
 /// The schema of a file: every site switches between its mutants at run time

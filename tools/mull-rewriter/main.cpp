@@ -172,11 +172,13 @@ int main(int argc, const char **argv) {
   SiteCollector collector(mutants);
   int status = parse(*database, mutatedSources, collector);
   bool missing = std::any_of(mutants.begin(), mutants.end(), [&](const Mutant &mutant) {
-    return targetOf(mutant.mutator) && !collector.isPlaced(mutant);
+    return targetOf(mutant.mutator) && !collector.isPlaced(mutant) &&
+           !collector.isUnrepresentable(mutant);
   });
   if (missing) {
     status |= parse(*database, otherSources, collector);
   }
+  collector.finish();
   if (status != 0) {
     llvm::errs() << "warning: some sources failed to parse, their mutants may be missing\n";
   }
@@ -207,6 +209,8 @@ int main(int argc, const char **argv) {
   for (const Mutant &mutant : mutants) {
     if (!targetOf(mutant.mutator)) {
       llvm::outs() << "Not rewritten (unsupported mutator): " << mutant.identifier << "\n";
+    } else if (collector.isUnrepresentable(mutant)) {
+      llvm::outs() << "Not rewritten (no source equivalent): " << mutant.identifier << "\n";
     } else if (!collector.isPlaced(mutant)) {
       llvm::outs() << "Not rewritten (expression not found, e.g. in a macro): " << mutant.identifier
                    << "\n";
