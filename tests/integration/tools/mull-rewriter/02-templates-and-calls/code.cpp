@@ -49,9 +49,7 @@ template <typename T> T twice(T value) {
 }
 
 long distance(const char *begin, const char *end) {
-  // No source equivalent: the IR mutates the integer difference of the pointers
   return end - begin;
-  // IR: code.cpp:[[@LINE-1]]:14: warning: Killed: Replaced - with + [cxx_sub_to_add]
 }
 
 int resized(int n) {

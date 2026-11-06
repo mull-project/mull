@@ -81,9 +81,16 @@ static const clang::Stmt *findMutantExpression(MutationPoint *point,
     return cxx::UnaryVisitor::findMutant(
         visitorParameters, clang::UnaryOperator::Opcode::UO_PostInc, decl);
 
-  case MutatorKind::CXX_SubToAdd:
-    return cxx::BinaryVisitor::findMutant(
-        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_Sub);
+  case MutatorKind::CXX_SubToAdd: {
+    auto *sub = llvm::cast_or_null<clang::BinaryOperator>(cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_Sub));
+    /// `p - q` of pointers: `p + q` is not a valid program
+    if (sub && sub->getLHS()->getType()->isPointerType() &&
+        sub->getRHS()->getType()->isPointerType()) {
+      return nullptr;
+    }
+    return sub;
+  }
   case MutatorKind::CXX_SubAssignToAddAssign:
     return cxx::BinaryVisitor::findMutant(
         visitorParameters, decl, clang::BinaryOperator::Opcode::BO_SubAssign);
