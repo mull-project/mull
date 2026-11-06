@@ -1,0 +1,12 @@
+Known bug, BUGS.md 6: at -O1 and above cxx_remove_void_call also removes the 'llvm.lifetime.end' of
+the temporary for 'const char &', the mutant has the range of the call and survives
+XFAIL: *
+
+RUN: rm -rf %S/Output && mkdir -p %S/Output/sandbox
+RUN: cp %S/main.cpp %S/mull.yml %S/Output/sandbox/
+RUN: cd %S/Output/sandbox && %clang_cxx %sysroot -O3 -g -grecord-command-line %pass_mull_ir_frontend main.cpp -o %S/Output/ir.exe
+RUN: cd %S/Output/sandbox && %mull_runner --allow-surviving --reporters SQLite --report-dir %S/Output --report-name run %S/Output/ir.exe
+RUN: %sqlite3 %S/Output/run.sqlite "SELECT CASE execution_status WHEN 2 THEN 'SURVIVED' ELSE 'KILLED' END, line_number || ':' || column_number || '-' || end_line_number || ':' || end_column_number FROM mutant ORDER BY 2;" | %filecheck %s
+CHECK-NOT: SURVIVED
+CHECK: KILLED
+CHECK-NOT: SURVIVED

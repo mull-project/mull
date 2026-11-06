@@ -1,0 +1,12 @@
+Known bug, BUGS.md 4: cxx_init_const flips a field of the constant folded 'make_tm(1975)', the patch
+'auto t = 74' does not compile
+XFAIL: *
+
+RUN: rm -rf %S/Output && mkdir -p %S/Output/sandbox
+RUN: cp %S/main.cpp %S/mull.yml %S/Output/sandbox/
+RUN: cd %S/Output/sandbox && %clang_cxx %sysroot -O0 -g -grecord-command-line %pass_mull_ir_frontend main.cpp -o %S/Output/ir.exe
+RUN: cd %S/Output/sandbox && %mull_runner --dry-run --allow-surviving --reporters SQLite --report-dir %S/Output --report-name dry %S/Output/ir.exe
+RUN: %sqlite3 %S/Output/dry.sqlite "SELECT 'MUTANT', line_number || ':' || column_number || '-' || end_line_number || ':' || end_column_number, mutation_replacement FROM mutant ORDER BY line_number;" | %filecheck %s
+CHECK-NOT: MUTANT|8:
+CHECK: MUTANT|9:14-9:16|74
+CHECK-NOT: MUTANT

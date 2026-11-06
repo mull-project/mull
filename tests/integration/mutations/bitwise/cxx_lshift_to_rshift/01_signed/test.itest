@@ -1,0 +1,9 @@
+Known bug, BUGS.md 1: '<<' becomes a logical shift, the mutant prints 2147483646 instead of '-3 >> 1'
+XFAIL: *
+
+RUN: rm -rf %S/Output && mkdir -p %S/Output/sandbox
+RUN: cp %S/main.cpp %S/mull.yml %S/Output/sandbox/
+RUN: cd %S/Output/sandbox && %clang_cxx %sysroot -O0 -g -grecord-command-line %pass_mull_ir_frontend main.cpp -o %S/Output/ir.exe
+RUN: cd %S/Output/sandbox && %mull_runner --allow-surviving --reporters SQLite --report-dir %S/Output --report-name run %S/Output/ir.exe
+RUN: %sqlite3 %S/Output/run.sqlite "SELECT 'STDOUT', trim(stdout) FROM mutant;" | %filecheck %s
+CHECK: STDOUT|-2
