@@ -243,9 +243,14 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
                        sourceManager.isBeforeInTranslationUnit(unary->getOperatorLoc(), location);
   }
 
-  /// Init-Const replaces the whole initializer, but its mutation location is the variable name
-  bool replacesInitializer = point->getMutator()->mutatorKind() == MutatorKind::CXX_InitConst;
-  if (replacesInitializer) {
+  /// Init-Const replaces the whole initializer, its mutation location is the variable name.
+  /// Call mutators replace the whole call, a member call's location is the member name.
+  MutatorKind kind = point->getMutator()->mutatorKind();
+  bool replacesExpression = kind == MutatorKind::CXX_InitConst ||
+                            kind == MutatorKind::CXX_RemoveVoidCall ||
+                            kind == MutatorKind::CXX_ReplaceScalarCallZero ||
+                            kind == MutatorKind::CXX_ReplaceScalarCallNonZero;
+  if (replacesExpression) {
     sourceLocationEnd = mutantExpression->getSourceRange().getEnd();
   }
 
@@ -264,7 +269,7 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
                     std::to_string(mutationLocationBeginColumn) +
                     " (end: " + std::to_string(endLine) + ":" + std::to_string(endColumn) + ")");
 
-  if (replacesInitializer || startsAtOperator) {
+  if (replacesExpression || startsAtOperator) {
     point->setBeginLocation(beginLine, beginColumn);
   }
   point->setEndLocation(endLine, endColumn);

@@ -55,24 +55,24 @@ long distance(const char *begin, const char *end) {
 int resized(int n) {
   vec v;
   v.resize(n + 1);
-  // CHECK: code.cpp:[[@LINE-1]]:5: warning: Killed: Replaced resize with  [cxx_remove_void_call]
+  // CHECK: code.cpp:[[@LINE-1]]:3: warning: Killed: Replaced v.resize(n + 1) with  [cxx_remove_void_call]
   // CHECK: code.cpp:[[@LINE-2]]:14: warning: Killed: Replaced + with - [cxx_add_to_sub]
   return v.get();
-  // CHECK: code.cpp:[[@LINE-1]]:12: warning: Killed: Replaced get with 42 [cxx_replace_scalar_call_nz]
-  // CHECK: code.cpp:[[@LINE-2]]:12: warning: Killed: Replaced get with 0 [cxx_replace_scalar_call_zr]
+  // CHECK: code.cpp:[[@LINE-1]]:10: warning: Killed: Replaced v.get() with 42 [cxx_replace_scalar_call_nz]
+  // CHECK: code.cpp:[[@LINE-2]]:10: warning: Killed: Replaced v.get() with 0 [cxx_replace_scalar_call_zr]
 }
 
 int assigned_digits(int n) {
   big b;
   b.assign(unsigned(n));
-  // CHECK: code.cpp:[[@LINE-1]]:5: warning: Killed: Replaced assign with  [cxx_remove_void_call]
+  // CHECK: code.cpp:[[@LINE-1]]:3: warning: Killed: Replaced b.assign(unsigned(n)) with  [cxx_remove_void_call]
   return b.digits.size;
 }
 
 int assigned_exp(int n) {
   big b;
   b.assign(long(n));
-  // CHECK: code.cpp:[[@LINE-1]]:5: warning: Killed: Replaced assign with  [cxx_remove_void_call]
+  // CHECK: code.cpp:[[@LINE-1]]:3: warning: Killed: Replaced b.assign(long(n)) with  [cxx_remove_void_call]
   return b.exp;
 }
 
