@@ -15,7 +15,7 @@ RUN: %mull_rewriter --report %S/Output/dry.sqlite -p %S/Output/sandbox --root %S
 REWRITER-NOT: Not rewritten
 REWRITER: Not rewritten (no source equivalent): cxx_add_to_sub:{{.*}}code.cpp:47:16
 REWRITER-NOT: Not rewritten
-REWRITER: Rewrote 23 of 24 mutants in 1 files
+REWRITER: Rewrote 22 of 23 mutants in 1 files
 RUN: %clang_cxx %sysroot -O0 %S/Output/rewritten/code.cpp %S/Output/tests.o -o %S/Output/rewritten.exe
 
 RUN: cd %S/Output/sandbox && %mull_runner -allow-surviving -minimum-timeout 2000 -reporters=IDE -ide-reporter-show-killed %S/Output/ir.exe | %filecheck %S/code.cpp --check-prefixes=CHECK,IR --implicit-check-not=warning:

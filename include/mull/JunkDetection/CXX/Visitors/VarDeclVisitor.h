@@ -26,6 +26,10 @@ public:
 
     if (decl->getLocation() == parameters.sourceLocation) {
       assert(!matchingExpression && "Already found");
+      /// The IR also stores constants into structs and pointers, `auto t = 74` is not valid there
+      if (!takesNumber(decl->getType())) {
+        return false;
+      }
       matchingExpression = decl->getInit();
       if (auto initList = clang::dyn_cast<clang::InitListExpr>(matchingExpression)) {
         /// `T a{}`: no value was picked, so there is nothing to replace
@@ -47,6 +51,17 @@ public:
   }
 
 private:
+  /// Dependent types are kept: the instantiations are not visible here
+  bool takesNumber(clang::QualType type) const {
+    if (type->isDependentType()) {
+      return true;
+    }
+    if (type->isEnumeralType()) {
+      return !parameters.astContext.getLangOpts().CPlusPlus;
+    }
+    return type->isArithmeticType();
+  }
+
   const VisitorParameters &parameters;
   clang::Expr *matchingExpression;
 };

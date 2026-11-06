@@ -90,7 +90,6 @@ char letter() {
 
 color picked(int n) {
   auto c = pick(n);
-  // CHECK: code.cpp:[[@LINE-1]]:12: warning: Killed: Replaced pick(n) with 42 [cxx_init_const]
   return c;
 }
 
