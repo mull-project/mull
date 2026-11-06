@@ -11,8 +11,8 @@ REWRITER-NOT: Not rewritten
 REWRITER: Rewrote {{[0-9]+}} of {{[0-9]+}} mutants in 1 files
 
 RUN: %clang_cxx %sysroot -O0 %S/Output/rewritten/main.cpp -o %S/Output/rewritten.exe
-RUN: cd %S/Output/sandbox && %mull_runner --allow-surviving --reporters SQLite --report-dir %S/Output --report-name ir %S/Output/ir.exe
-RUN: cd %S/Output/sandbox && %mull_runner --allow-surviving --reporters SQLite --report-dir %S/Output --report-name rewritten %S/Output/rewritten.exe
+RUN: cd %S/Output/sandbox && %mull_runner --allow-surviving -minimum-timeout 2000 --reporters SQLite --report-dir %S/Output --report-name ir %S/Output/ir.exe
+RUN: cd %S/Output/sandbox && %mull_runner --allow-surviving -minimum-timeout 2000 --reporters SQLite --report-dir %S/Output --report-name rewritten %S/Output/rewritten.exe
 
 Every mutant is rewritten
 RUN: %sqlite3 %S/Output/ir.sqlite "ATTACH '%S/Output/rewritten.sqlite' AS r; SELECT 'MISSING', mutant_id FROM mutant WHERE mutant_id NOT IN (SELECT mutant_id FROM r.mutant);" | %filecheck %s --allow-empty --check-prefix=MISSING

@@ -16,21 +16,25 @@ namespace mull_rewriter {
 
 const char *const RewrittenMarker = "/* Rewritten by mull-rewriter */";
 
-/// `__mull_on(id, encoding)` checks the environment like the IR frontend does, and puts the
-/// encoding into the section mull-runner reads the mutants from
+/// `__mull_on(id)` checks the environment like the IR frontend does. Evaluation at compile time,
+/// e.g. of a constexpr function, always takes the original.
 static const char *const Prelude = R"(#include <stdlib.h>
 #ifndef __mull_on
-#if defined(__APPLE__)
-#define __MULL_MUTANTS_SECTION "__mull,.mull_mutants"
+#if defined(__cplusplus) && __has_builtin(__builtin_is_constant_evaluated)
+#define __mull_on(id) (!__builtin_is_constant_evaluated() && getenv(id) != 0)
 #else
-#define __MULL_MUTANTS_SECTION ".mull_mutants"
+#define __mull_on(id) (getenv(id) != 0)
 #endif
-#define __mull_on(id, encoding)                                                                    \
-  ({                                                                                               \
-    __attribute__((used, section(__MULL_MUTANTS_SECTION))) static const char __mull_mutant[] =     \
-        encoding;                                                                                  \
-    getenv(id) != 0;                                                                               \
-  })
+#endif
+)";
+
+/// The section mull-runner reads the mutants from, filled by globals at the end of the file
+static const char *const SectionDefinition = R"(#ifndef MULL_MUTANTS_SECTION
+#if defined(__APPLE__)
+#define MULL_MUTANTS_SECTION "__mull,.mull_mutants"
+#else
+#define MULL_MUTANTS_SECTION ".mull_mutants"
+#endif
 #endif
 )";
 
@@ -46,16 +50,14 @@ SiteCollector::SiteCollector(const std::vector<Mutant> &mutants) {
 }
 
 void SiteCollector::registerMatchers(MatchFinder &finder) {
-  // Instantiations share the source text and the mutants of their template. The schema uses
-  // statement expressions, which only work inside functions.
-  auto rewritable = allOf(unless(isInTemplateInstantiation()), hasAncestor(functionDecl()));
+  // Instantiations share the source text and the mutants of their template
+  auto rewritable = unless(isInTemplateInstantiation());
   finder.addMatcher(binaryOperator(rewritable).bind("binary"), this);
   finder.addMatcher(unaryOperator(rewritable).bind("unary"), this);
   finder.addMatcher(callExpr(rewritable).bind("call"), this);
-  finder.addMatcher(
-      varDecl(hasInitializer(expr()), unless(isInstantiated()), hasAncestor(functionDecl()))
-          .bind("variable"),
-      this);
+  finder.addMatcher(varDecl(unless(parmVarDecl()), hasInitializer(expr()), unless(isInstantiated()))
+                        .bind("variable"),
+                    this);
 }
 
 void SiteCollector::run(const MatchFinder::MatchResult &result) {
@@ -80,6 +82,9 @@ void SiteCollector::run(const MatchFinder::MatchResult &result) {
     place(call, NodeKind::Call, "", call->getBeginLoc(), context);
   } else if (auto variable = result.Nodes.getNodeAs<VarDecl>("variable")) {
     const Expr *init = variable->getInit();
+    if (!init) {
+      return;
+    }
     place(init, NodeKind::Initializer, "", init->getBeginLoc(), context, variable->getType());
   }
 }
@@ -192,8 +197,12 @@ static bool cuts(unsigned begin, unsigned end, std::pair<unsigned, unsigned> oth
   return overlaps && !contains;
 }
 
+static std::string idMacro(const Mutant &mutant) {
+  return "MULL_ID_" + std::to_string(mutant.index);
+}
+
 RenderedFile renderSchema(const std::string &path, const std::string &source,
-                          const FileSites &sites) {
+                          const FileSites &sites, unsigned fileIndex) {
   RenderedFile output;
   SourceManagerForFile file(path, source);
   SourceManager &sourceManager = file.get();
@@ -218,6 +227,7 @@ RenderedFile renderSchema(const std::string &path, const std::string &source,
   });
 
   std::vector<std::pair<unsigned, unsigned>> rewritten;
+  std::vector<const Mutant *> rendered;
   for (const Site *site : ordered) {
     auto cutBy = [&](unsigned begin, unsigned end) {
       return std::any_of(
@@ -239,9 +249,8 @@ RenderedFile renderSchema(const std::string &path, const std::string &source,
         // E.g. a removed void call
         mutated = "(void)0";
       }
-      const Mutant &mutant = *placed.mutant;
-      schema += "__mull_on(" + quoted(mutant.identifier) + ", " +
-                quoted(mutant.identifier + ":" + mutant.replacement) + ") ? (" + mutated + ") : ";
+      schema += "__mull_on(" + idMacro(*placed.mutant) + ") ? (" + mutated + ") : ";
+      rendered.push_back(placed.mutant);
     }
     if (schema.empty()) {
       continue;
@@ -258,7 +267,25 @@ RenderedFile renderSchema(const std::string &path, const std::string &source,
   if (const auto *buffer = rewriter.getRewriteBufferFor(id)) {
     body = std::string(buffer->begin(), buffer->end());
   }
-  output.text = std::string(RewrittenMarker) + "\n" + Prelude + body;
+  std::sort(rendered.begin(), rendered.end(), [](const Mutant *lhs, const Mutant *rhs) {
+    return lhs->index < rhs->index;
+  });
+  std::string ids;
+  std::string globals;
+  for (const Mutant *mutant : rendered) {
+    ids += "#define " + idMacro(*mutant) + " " + quoted(mutant->identifier) + "\n";
+    globals +=
+        "__attribute__((used, section(MULL_MUTANTS_SECTION))) static const char MULL_MUTANT_" +
+        std::to_string(mutant->index) + "[] = " + idMacro(*mutant) + " \":\" " +
+        quoted(mutant->replacement) + ";\n";
+  }
+  if (!body.empty() && body.back() != '\n') {
+    body += "\n";
+  }
+  // Guarded, a header without include guards may be included twice
+  std::string guard = "MULL_MUTANTS_" + std::to_string(fileIndex);
+  output.text = std::string(RewrittenMarker) + "\n" + Prelude + ids + body + "#ifndef " + guard +
+                "\n#define " + guard + "\n" + SectionDefinition + globals + "#endif\n";
   return output;
 }
 

@@ -29,6 +29,8 @@ struct Mutant {
   unsigned endLine;
   unsigned endColumn;
   std::string replacement;
+  /// Position among the mutants of the report, sorted by identifier
+  unsigned index;
 };
 
 /// The node kind and operator spelling a mutator applies to, none if the mutator is not supported
@@ -39,7 +41,7 @@ struct MutatorTarget {
 };
 std::optional<MutatorTarget> targetOf(llvm::StringRef mutator);
 
-/// Reads the mutants from a Mull SQLite report, an error message on failure
+/// Reads the distinct mutants from a Mull SQLite report, an error message on failure
 std::optional<std::string> readMutants(const std::string &reportPath, std::vector<Mutant> &mutants);
 
 } // namespace mull_rewriter

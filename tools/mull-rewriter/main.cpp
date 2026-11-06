@@ -3,7 +3,7 @@
 // Every mutated expression becomes a switch between the original and its mutants, each mutant
 // enabled by an environment variable named after its identifier, like in the IR frontend:
 //
-//   return a + b;  ->  return (__mull_on("cxx_add_to_sub:...", ...) ? (a - b) : (a + b));
+//   return a + b;  ->  return (__mull_on(MULL_ID_0) ? (a - b) : (a + b));
 //
 // The rewritten program compiles with a plain compiler and mull-runner runs it as usual.
 //
@@ -182,6 +182,7 @@ int main(int argc, const char **argv) {
   }
 
   llvm::DenseSet<const Mutant *> dropped;
+  unsigned fileIndex = 0;
   for (const auto &entry : collector.sites()) {
     std::string path = entry.getKey().str();
     const FileSites &sites = entry.getValue();
@@ -195,7 +196,7 @@ int main(int argc, const char **argv) {
       llvm::errs() << "error: '" << path << "' is already rewritten\n";
       return 1;
     }
-    RenderedFile rendered = renderSchema(path, source, sites);
+    RenderedFile rendered = renderSchema(path, source, sites, fileIndex++);
     dropped.insert(rendered.dropped.begin(), rendered.dropped.end());
     if (!writeFile(destinationOf(path), rendered.text)) {
       return 1;
@@ -207,8 +208,8 @@ int main(int argc, const char **argv) {
     if (!targetOf(mutant.mutator)) {
       llvm::outs() << "Not rewritten (unsupported mutator): " << mutant.identifier << "\n";
     } else if (!collector.isPlaced(mutant)) {
-      llvm::outs() << "Not rewritten (expression not found, in a macro or outside of a function): "
-                   << mutant.identifier << "\n";
+      llvm::outs() << "Not rewritten (expression not found, e.g. in a macro): " << mutant.identifier
+                   << "\n";
     } else if (dropped.contains(&mutant)) {
       llvm::outs() << "Not rewritten (overlaps another mutant): " << mutant.identifier << "\n";
     } else {

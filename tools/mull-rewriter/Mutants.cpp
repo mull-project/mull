@@ -67,8 +67,9 @@ std::optional<std::string> readMutants(const std::string &reportPath,
     return "cannot open '" + reportPath + "': " + error;
   }
 
-  const char *query = "SELECT mutant_id, mutator, filename, line_number, column_number, "
-                      "end_line_number, end_column_number, mutation_replacement FROM mutant";
+  const char *query = "SELECT DISTINCT mutant_id, mutator, filename, line_number, column_number, "
+                      "end_line_number, end_column_number, mutation_replacement FROM mutant "
+                      "ORDER BY mutant_id";
   sqlite3_stmt *statement = nullptr;
   if (sqlite3_prepare_v2(database, query, -1, &statement, nullptr) != SQLITE_OK) {
     std::string error = sqlite3_errmsg(database);
@@ -84,7 +85,8 @@ std::optional<std::string> readMutants(const std::string &reportPath,
                               static_cast<unsigned>(sqlite3_column_int(statement, 4)),
                               static_cast<unsigned>(sqlite3_column_int(statement, 5)),
                               static_cast<unsigned>(sqlite3_column_int(statement, 6)),
-                              columnText(statement, 7) });
+                              columnText(statement, 7),
+                              static_cast<unsigned>(mutants.size()) });
   }
   sqlite3_finalize(statement);
   sqlite3_close(database);

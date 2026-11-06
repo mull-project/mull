@@ -62,8 +62,9 @@ struct RenderedFile {
   /// Mutants that could not be rendered
   std::vector<const Mutant *> dropped;
 };
+/// `fileIndex` names the per-file guard, unique among the rewritten files
 RenderedFile renderSchema(const std::string &path, const std::string &source,
-                          const FileSites &sites);
+                          const FileSites &sites, unsigned fileIndex);
 
 /// The first line of every rewritten file
 extern const char *const RewrittenMarker;
