@@ -11,6 +11,8 @@
 #include "mull/Mutators/Mutator.h"
 #include "rust/mull-cxx-bridge/bridge.rs.h"
 
+#include <llvm/IR/IntrinsicInst.h>
+
 using namespace mull;
 
 CXXJunkDetector::CXXJunkDetector(const MullDiagnostics &diagnostics, ASTStorage &astStorage)
@@ -23,7 +25,13 @@ static const clang::Stmt *findMutantExpression(MutationPoint *point,
   case MutatorKind::CXX_RemoveVoidCall: {
     RemoveVoidFunctionVisitor visitor(visitorParameters);
     visitor.TraverseDecl(decl);
-    return visitor.foundMutant();
+    auto *call = llvm::cast_or_null<clang::CallExpr>(visitor.foundMutant());
+    /// Only builtins like `memcpy` become intrinsics, `llvm.lifetime.end` and others are not calls
+    if (call && llvm::isa<llvm::IntrinsicInst>(point->getOriginalValue()) &&
+        !call->getBuiltinCallee()) {
+      return nullptr;
+    }
+    return call;
   }
   case MutatorKind::CXX_ReplaceScalarCallZero:
   case MutatorKind::CXX_ReplaceScalarCallNonZero: {

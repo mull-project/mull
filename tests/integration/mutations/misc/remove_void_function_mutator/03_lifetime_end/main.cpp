@@ -12,8 +12,7 @@ int main() {
   return b.size != 1;
 }
 
-// Bug: at -O1+ cxx_remove_void_call removes llvm.lifetime.end instead of the call
-// XFAIL: *
+// At -O1+ cxx_remove_void_call removes the call, not the llvm.lifetime.end of its temporary
 
 // RUN: rm -rf %S/Output && mkdir -p %S/Output/sandbox
 // RUN: cp %s %S/mull.yml %S/Output/sandbox/
