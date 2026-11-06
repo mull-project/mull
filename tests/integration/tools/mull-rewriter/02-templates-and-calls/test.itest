@@ -1,0 +1,23 @@
+Sites the IR mutates once per instantiation or behind a call: template members, member calls,
+macros, 'auto', enums, conversions, overloaded instantiations. Every mutant is listed in code.cpp
+under its line, the IR: ones have no source equivalent and exist only in the IR-mutated program.
+
+RUN: rm -rf %S/Output && mkdir -p %S/Output/sandbox
+RUN: cp %S/code.cpp %S/tests.cpp %S/mull.yml %S/Output/sandbox/
+RUN: cd %S/Output/sandbox && %clang_cxx %sysroot -O0 -g -grecord-command-line %pass_mull_ir_frontend -c code.cpp -o %S/Output/code.o
+RUN: cd %S/Output/sandbox && %clang_cxx %sysroot -O0 -c tests.cpp -o %S/Output/tests.o
+RUN: %clang_cxx %sysroot %S/Output/code.o %S/Output/tests.o -o %S/Output/ir.exe
+
+The rewriter reads the mutants from a dry run report
+RUN: cd %S/Output/sandbox && %mull_runner --dry-run --allow-surviving --reporters SQLite --report-dir %S/Output --report-name dry %S/Output/ir.exe
+RUN: echo '[{"directory": "%S/Output/sandbox", "file": "code.cpp", "command": "%clang_cxx %sysroot -c code.cpp"}]' > %S/Output/sandbox/compile_commands.json
+RUN: %mull_rewriter --report %S/Output/dry.sqlite -p %S/Output/sandbox --root %S/Output/sandbox --output-dir %S/Output/rewritten | %filecheck %s --check-prefix=REWRITER
+REWRITER-NOT: Not rewritten
+REWRITER: Not rewritten (no source equivalent): cxx_add_to_sub:{{.*}}code.cpp:47:16
+REWRITER-NEXT: Not rewritten (no source equivalent): cxx_sub_to_add:{{.*}}code.cpp:53:14
+REWRITER-NOT: Not rewritten
+REWRITER: Rewrote 23 of 25 mutants in 1 files
+RUN: %clang_cxx %sysroot -O0 %S/Output/rewritten/code.cpp %S/Output/tests.o -o %S/Output/rewritten.exe
+
+RUN: cd %S/Output/sandbox && %mull_runner -allow-surviving -minimum-timeout 2000 -reporters=IDE -ide-reporter-show-killed %S/Output/ir.exe | %filecheck %S/code.cpp --check-prefixes=CHECK,IR --implicit-check-not=warning:
+RUN: cd %S/Output/sandbox && %mull_runner -allow-surviving -minimum-timeout 2000 -reporters=IDE -ide-reporter-show-killed %S/Output/rewritten.exe | %filecheck %S/code.cpp --implicit-check-not=warning:
