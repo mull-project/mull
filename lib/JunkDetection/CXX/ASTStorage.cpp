@@ -120,15 +120,12 @@ clang::SourceLocation ASTUnitWrapper::getLocation(const mull::SourceLocation &so
   return location;
 }
 
-clang::SourceLocation
-ASTUnitWrapper::getLocForEndOfToken(const clang::SourceLocation sourceLocationEnd) {
-  clang::SourceManager &sourceManager = ast->getSourceManager();
-  /// Clang AST: how to get more precise debug information in certain cases?
-  /// http://clang-developers.42468.n3.nabble.com/Clang-AST-how-to-get-more-precise-debug-information-in-certain-cases-td4065195.html
-  /// https://stackoverflow.com/questions/11083066/getting-the-source-behind-clangs-ast
-  auto sourceLocationEndActual = clang::Lexer::getLocForEndOfToken(
-      sourceLocationEnd, 0, sourceManager, ast->getASTContext().getLangOpts());
-  return sourceLocationEndActual;
+clang::CharSourceRange ASTUnitWrapper::getFileRange(clang::SourceLocation begin,
+                                                    clang::SourceLocation end) {
+  /// Macro arguments map to where they are written, invalid if the range is partly in a macro body
+  return clang::Lexer::makeFileCharRange(clang::CharSourceRange::getTokenRange(begin, end),
+                                         ast->getSourceManager(),
+                                         ast->getASTContext().getLangOpts());
 }
 
 struct SortLocationComparator {

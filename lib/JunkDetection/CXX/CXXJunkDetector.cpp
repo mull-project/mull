@@ -241,11 +241,9 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
   }
 
   clang::SourceLocation mutantExpressionBeginLoc = mutantExpression->getSourceRange().getBegin();
-  int beginLine = sourceManager.getExpansionLineNumber(mutantExpressionBeginLoc, nullptr);
-  int beginColumn = sourceManager.getExpansionColumnNumber(mutantExpressionBeginLoc);
-
-  int mutationLocationBeginLine = sourceManager.getExpansionLineNumber(location, nullptr);
-  int mutationLocationBeginColumn = sourceManager.getExpansionColumnNumber(location);
+  /// File locations: a macro argument is where it is written, not at the macro name
+  bool startsAtMutation =
+      sourceManager.getFileLoc(mutantExpressionBeginLoc) == sourceManager.getFileLoc(location);
 
   /// There are two types of mutated expressions:
   /// 1) Remove-Void, CallExpr example: its mutation location and its getStart() are the same.
@@ -254,9 +252,7 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
   /// [getSourceRange().getBegin(), getSourceRange().getEnd()] range is the whole "a + b"
   /// expression.
   clang::SourceLocation sourceLocationEnd =
-      (beginLine == mutationLocationBeginLine && beginColumn == mutationLocationBeginColumn)
-          ? mutantExpression->getSourceRange().getEnd()
-          : location;
+      startsAtMutation ? mutantExpression->getSourceRange().getEnd() : location;
 
   // For unary operators we shouldn't consider the location of the whole expression, but only
   // the operator, otherwise it breaks patch reporter in weird ways
@@ -279,20 +275,27 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
     sourceLocationEnd = mutantExpression->getSourceRange().getEnd();
   }
 
-  /// Clang AST: how to get more precise debug information in certain cases?
-  /// http://clang-developers.42468.n3.nabble.com/Clang-AST-how-to-get-more-precise-debug-information-in-certain-cases-td4065195.html
-  /// https://stackoverflow.com/questions/11083066/getting-the-source-behind-clangs-ast
-  clang::SourceLocation sourceLocationEndActual = ast->getLocForEndOfToken(sourceLocationEnd);
+  clang::SourceLocation sourceLocationBegin =
+      (replacesExpression || startsAtOperator) ? mutantExpressionBeginLoc : location;
+  clang::CharSourceRange fileRange = ast->getFileRange(sourceLocationBegin, sourceLocationEnd);
+  if (fileRange.isInvalid()) {
+    return true;
+  }
 
-  int endLine = sourceManager.getExpansionLineNumber(sourceLocationEndActual, nullptr);
-  int endColumn = sourceManager.getExpansionColumnNumber(sourceLocationEndActual);
+  int beginLine = sourceManager.getExpansionLineNumber(fileRange.getBegin(), nullptr);
+  int beginColumn = sourceManager.getExpansionColumnNumber(fileRange.getBegin());
+  int endLine = sourceManager.getExpansionLineNumber(fileRange.getEnd(), nullptr);
+  int endColumn = sourceManager.getExpansionColumnNumber(fileRange.getEnd());
+  clang::SourceLocation mutationLocation = sourceManager.getFileLoc(location);
+  int mutationLine = sourceManager.getExpansionLineNumber(mutationLocation, nullptr);
+  int mutationColumn = sourceManager.getExpansionColumnNumber(mutationLocation);
 
   const std::string &sourceFile = point->getSourceLocation().filePath;
   std::string description = MutationKindToString(point->getMutator()->mutatorKind());
   diagnostics.debug(std::string("CXXJunkDetector: mutation \"") + description +
-                    "\": " + sourceFile + ":" + std::to_string(mutationLocationBeginLine) + ":" +
-                    std::to_string(mutationLocationBeginColumn) +
-                    " (end: " + std::to_string(endLine) + ":" + std::to_string(endColumn) + ")");
+                    "\": " + sourceFile + ":" + std::to_string(mutationLine) + ":" +
+                    std::to_string(mutationColumn) + " (end: " + std::to_string(endLine) + ":" +
+                    std::to_string(endColumn) + ")");
 
   if (replacesExpression || startsAtOperator) {
     point->setBeginLocation(beginLine, beginColumn);
