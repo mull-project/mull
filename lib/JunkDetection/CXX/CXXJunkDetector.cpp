@@ -11,12 +11,29 @@
 #include "mull/Mutators/Mutator.h"
 #include "rust/mull-cxx-bridge/bridge.rs.h"
 
+#include <irm/IRMutation.h>
 #include <llvm/IR/IntrinsicInst.h>
 
 using namespace mull;
 
 CXXJunkDetector::CXXJunkDetector(const MullDiagnostics &diagnostics, ASTStorage &astStorage)
     : diagnostics(diagnostics), astStorage(astStorage) {}
+
+/// IR `shl` and `mul` have no signedness: keeps the variant the source type computes in
+static bool matchesSignedness(MutationPoint *point, const clang::Stmt *expression) {
+  irm::Signedness signedness = point->getIRMutator()->signedness();
+  auto *binary = llvm::dyn_cast<clang::BinaryOperator>(expression);
+  if (signedness == irm::Signedness::Any || !binary) {
+    return true;
+  }
+  clang::QualType type = binary->getType();
+  if (auto *compound = llvm::dyn_cast<clang::CompoundAssignOperator>(binary)) {
+    type = compound->getComputationResultType();
+  }
+  /// Dependent types are taken as signed, the instantiations are not visible here
+  bool isUnsigned = type->hasUnsignedIntegerRepresentation();
+  return isUnsigned == (signedness == irm::Signedness::Unsigned);
+}
 
 static const clang::Stmt *findMutantExpression(MutationPoint *point,
                                                VisitorParameters &visitorParameters,
@@ -219,7 +236,7 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
 
   const clang::Stmt *mutantExpression = findMutantExpression(point, visitorParameters, decl);
 
-  if (!mutantExpression) {
+  if (!mutantExpression || !matchesSignedness(point, mutantExpression)) {
     return true;
   }
 

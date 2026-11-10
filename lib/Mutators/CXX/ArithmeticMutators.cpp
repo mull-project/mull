@@ -107,6 +107,7 @@ PreDecToPreInc::PreDecToPreInc()
 static std::vector<std::unique_ptr<irm::IRMutation>> getMulToDiv() {
   std::vector<std::unique_ptr<irm::IRMutation>> mutators;
   mutators.emplace_back(new irm::MulToSDiv());
+  mutators.emplace_back(new irm::MulToUDiv());
   mutators.emplace_back(new irm::FMulToFDiv());
   return mutators;
 }

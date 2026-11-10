@@ -6,6 +6,7 @@ using namespace mull::cxx;
 static std::vector<std::unique_ptr<irm::IRMutation>> getLLShiftToLRShift() {
   std::vector<std::unique_ptr<irm::IRMutation>> mutators;
   mutators.emplace_back(new irm::ShlToLShr());
+  mutators.emplace_back(new irm::ShlToAShr());
   return mutators;
 }
 
