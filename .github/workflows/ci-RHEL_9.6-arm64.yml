@@ -38,8 +38,8 @@ jobs:
       - name: Build and package
         uses: devcontainers/ci@v0.3
         with:
-          imageName: ghcr.io/mull-project/internal-rhel-arm64_9.6-llvm-21-ci
-          configFile: ./.devcontainer/rhel_9.6-llvm-21/devcontainer.json
+          imageName: ghcr.io/mull-project/internal-rhel-arm64_9.6-llvm-22-ci
+          configFile: ./.devcontainer/rhel_9.6-llvm-22/devcontainer.json
           runCmd: |
             set -e
             mkdir -p packages
@@ -49,8 +49,8 @@ jobs:
         uses: devcontainers/ci@v0.3
         if: env.CLOUDSMITH_API_KEY != null
         with:
-          imageName: ghcr.io/mull-project/internal-rhel-arm64_9.6-llvm-21-ci
-          configFile: ./.devcontainer/rhel_9.6-llvm-21/devcontainer.json
+          imageName: ghcr.io/mull-project/internal-rhel-arm64_9.6-llvm-22-ci
+          configFile: ./.devcontainer/rhel_9.6-llvm-22/devcontainer.json
           push: never
           env: CLOUDSMITH_API_KEY
           runCmd: |
@@ -87,7 +87,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        LLVM_VERSION: [21]
+        LLVM_VERSION: [22]
     name: RHEL 9.6 - LLVM ${{ matrix.LLVM_VERSION }}
     steps:
       - uses: actions/checkout@v7
@@ -190,7 +190,7 @@ jobs:
             exit 1
           fi
 
-          for version in 21; do
+          for version in 22; do
             echo "=== Testing LLVM $version ==="
             dnf install -y ./packages/llvm/Mull-$version-*.rpm
 
@@ -218,7 +218,7 @@ jobs:
             *) cs_repo=nightly ;;
           esac
           packages=mull-$MULL_VERSION
-          for version in 21; do
+          for version in 22; do
             packages="$packages mull-$version-$MULL_VERSION"
           done
           set -o pipefail
@@ -232,7 +232,7 @@ jobs:
           fi
           plugins=$(mull-runner --version)
           echo "$plugins"
-          for version in 21; do
+          for version in 22; do
             if ! echo "$plugins" | grep -q "mull-ir-frontend-$version (mull [0-9]"; then
               echo "ERROR: mull-runner does not list mull-ir-frontend-$version"
               exit 1

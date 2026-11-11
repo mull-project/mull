@@ -1,11 +1,11 @@
 {
-  "name": "rhel_9.6-llvm-21",
+  "name": "rhel_10.0-llvm-22",
   "build": {
     "dockerfile": "Dockerfile"
   },
   "runArgs": [
     "--name",
-    "mull-rhel_9.6-llvm-21"
+    "mull-rhel_10.0-llvm-22"
   ],
   "postCreateCommand": "infrastructure/devcontainer_post_create.sh",
   "customizations": {
