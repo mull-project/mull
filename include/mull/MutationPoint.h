@@ -74,6 +74,7 @@ public:
 
   void setBeginLocation(int line, int column);
   void setEndLocation(int line, int column);
+  void setReplacement(std::string text);
   void updateIdentifier();
 
   Mutator *getMutator();

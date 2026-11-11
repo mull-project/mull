@@ -1,5 +1,6 @@
 #include "mull/JunkDetection/CXX/CXXJunkDetector.h"
 
+#include "mull/JunkDetection/CXX/CallOperands.h"
 #include "mull/JunkDetection/CXX/Visitors/BinaryVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/NegateConditionVisitor.h"
 #include "mull/JunkDetection/CXX/Visitors/RemoveVoidFunctionVisitor.h"
@@ -11,8 +12,10 @@
 #include "mull/Mutators/Mutator.h"
 #include "rust/mull-cxx-bridge/bridge.rs.h"
 
+#include <clang/Lex/Lexer.h>
 #include <irm/IRMutation.h>
 #include <llvm/IR/IntrinsicInst.h>
+#include <optional>
 
 using namespace mull;
 
@@ -20,6 +23,36 @@ CXXJunkDetector::CXXJunkDetector(const MullDiagnostics &diagnostics, ASTStorage 
     : diagnostics(diagnostics), astStorage(astStorage) {}
 
 /// IR `shl` and `mul` have no signedness: keeps the variant the source type computes in
+/// The replacement of a call keeps evaluating its object and arguments, like the IR does.
+/// None if one of them has no source text.
+static std::optional<std::string> callReplacement(ASTUnitWrapper &ast, const clang::CallExpr *call,
+                                                  const std::string &value) {
+  std::vector<std::string> operands;
+  for (const clang::Expr *operand : callOperands(call)) {
+    clang::CharSourceRange range =
+        ast.getFileRange(operand->getSourceRange().getBegin(), operand->getSourceRange().getEnd());
+    if (range.isInvalid()) {
+      return std::nullopt;
+    }
+    operands.push_back(clang::Lexer::getSourceText(
+                           range, ast.getSourceManager(), ast.getASTContext().getLangOpts())
+                           .str());
+  }
+  if (operands.empty()) {
+    return value;
+  }
+  std::string replacement;
+  for (const std::string &operand : operands) {
+    replacement += "(void)(" + operand + "), ";
+  }
+  if (value.empty()) {
+    // A removed void call
+    replacement.resize(replacement.size() - 2);
+    return operands.size() == 1 ? replacement : "(" + replacement + ")";
+  }
+  return "(" + replacement + value + ")";
+}
+
 static bool matchesSignedness(MutationPoint *point, const clang::Stmt *expression) {
   irm::Signedness signedness = point->getIRMutator()->signedness();
   auto *binary = llvm::dyn_cast<clang::BinaryOperator>(expression);
@@ -296,6 +329,17 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
                     "\": " + sourceFile + ":" + std::to_string(mutationLine) + ":" +
                     std::to_string(mutationColumn) + " (end: " + std::to_string(endLine) + ":" +
                     std::to_string(endColumn) + ")");
+
+  bool replacesCall = kind == MutatorKind::CXX_RemoveVoidCall ||
+                      kind == MutatorKind::CXX_ReplaceScalarCallZero ||
+                      kind == MutatorKind::CXX_ReplaceScalarCallNonZero;
+  if (auto call = llvm::dyn_cast<clang::CallExpr>(mutantExpression); call && replacesCall) {
+    std::optional<std::string> replacement = callReplacement(*ast, call, point->getReplacement());
+    if (!replacement) {
+      return true;
+    }
+    point->setReplacement(*replacement);
+  }
 
   if (replacesExpression || startsAtOperator) {
     point->setBeginLocation(beginLine, beginColumn);

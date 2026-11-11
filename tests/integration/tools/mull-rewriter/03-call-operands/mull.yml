@@ -1,0 +1,4 @@
+mutators:
+  - cxx_remove_void_call
+  - cxx_replace_scalar_call_zr
+  - cxx_replace_scalar_call_nz
