@@ -160,36 +160,45 @@ jobs:
         run: |
           CS_REPO=$(cat .mull-ci-cs-repo)
           MULL_VERSION=$(jq -r .mull_version bazel-bin/infrastructure/homebrew_config.json)
-          PACKAGE_PATH=$(ls bazel-bin/Mull-${{ matrix.LLVM_VERSION }}-*.zip)
-          PACKAGE_FILENAME=$(basename "$PACKAGE_PATH")
-          PACKAGE_SHA256=$(shasum -a 256 "$PACKAGE_PATH" | cut -d' ' -f1)
+          # mull@N, then mull-extras@N (kind "extras")
+          for kind in "" extras; do
+            if [ -z "$kind" ]; then
+              PACKAGE_PATH=$(ls bazel-bin/Mull-${{ matrix.LLVM_VERSION }}-*.zip)
+            else
+              PACKAGE_PATH=$(ls bazel-bin/Mull-Extras-${{ matrix.LLVM_VERSION }}-*.zip)
+            fi
+            PACKAGE_FILENAME=$(basename "$PACKAGE_PATH")
+            PACKAGE_SHA256=$(shasum -a 256 "$PACKAGE_PATH" | cut -d' ' -f1)
 
-          echo "Triggering Homebrew tap update:"
-          echo "  Channel: $CS_REPO"
-          echo "  Version: $MULL_VERSION"
-          echo "  LLVM: ${{ matrix.LLVM_VERSION }}"
-          echo "  Filename: $PACKAGE_FILENAME"
-          echo "  SHA256: $PACKAGE_SHA256"
+            echo "Triggering Homebrew tap update:"
+            echo "  Channel: $CS_REPO"
+            echo "  Version: $MULL_VERSION"
+            echo "  LLVM: ${{ matrix.LLVM_VERSION }}"
+            echo "  Kind: ${kind:-plugin}"
+            echo "  Filename: $PACKAGE_FILENAME"
+            echo "  SHA256: $PACKAGE_SHA256"
 
-          curl -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${{ env.HOMEBREW_TAP_TOKEN }}" \
-            https://api.github.com/repos/mull-project/homebrew-mull/dispatches \
-            -d "{
-              \"event_type\": \"update-formula\",
-              \"client_payload\": {
-                \"channel\": \"$CS_REPO\",
-                \"mull_version\": \"$MULL_VERSION\",
-                \"llvm_version\": \"${{ matrix.LLVM_VERSION }}\",
-                \"package_filename\": \"$PACKAGE_FILENAME\",
-                \"package_sha256\": \"$PACKAGE_SHA256\"
-              }
-            }"
+            curl -X POST \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${{ env.HOMEBREW_TAP_TOKEN }}" \
+              https://api.github.com/repos/mull-project/homebrew-mull/dispatches \
+              -d "{
+                \"event_type\": \"update-formula\",
+                \"client_payload\": {
+                  \"channel\": \"$CS_REPO\",
+                  \"mull_version\": \"$MULL_VERSION\",
+                  \"llvm_version\": \"${{ matrix.LLVM_VERSION }}\",
+                  \"kind\": \"$kind\",
+                  \"package_filename\": \"$PACKAGE_FILENAME\",
+                  \"package_sha256\": \"$PACKAGE_SHA256\"
+                }
+              }"
+          done
       - name: Move package
         run: |
           mkdir -p /tmp/packages
           # `bazel test` also builds an unstamped mull package, which must not overwrite the one from the tools job
-          cp -v bazel-bin/Mull-${{ matrix.LLVM_VERSION }}-*.zip /tmp/packages/
+          cp -v bazel-bin/Mull-${{ matrix.LLVM_VERSION }}-*.zip bazel-bin/Mull-Extras-${{ matrix.LLVM_VERSION }}-*.zip /tmp/packages/
       - uses: ./.github/actions/attach-package
         with:
           GH_API_KEY: ${{ secrets.GITHUB_TOKEN }}

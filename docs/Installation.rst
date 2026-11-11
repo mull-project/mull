@@ -21,10 +21,13 @@ The following examples setup mull repos on deb- and rpm-based systems, respectiv
     curl -1sLf 'https://dl.cloudsmith.io/public/mull-project/mull-stable/setup.rpm.sh' | sudo -E bash
 
 
-Mull ships as two kinds of packages:
+Mull ships as three kinds of packages:
 
 - ``mull``: ``mull-runner`` and ``mull-reporter``, which work with any LLVM version
-- ``mull-<N>``: the compiler plugin and ``mull-instrument`` for LLVM ``<N>``, which pull in ``mull``
+- ``mull-<N>``: the compiler plugin for LLVM ``<N>``, which pulls in ``mull``
+- ``mull-extras-<N>``: optional tools for LLVM ``<N>``, which pull in ``mull``:
+  ``mull-instrument-<N>`` adds mutants to LLVM bitcode, ``mull-rewriter-<N>`` writes the
+  mutants of a report into the sources
 
 Install the plugin for your LLVM version:
 
@@ -34,6 +37,8 @@ Install the plugin for your LLVM version:
     sudo apt-get update && apt-get install mull-19
     # Red Hat
     sudo yum update && yum install mull-21
+
+The optional tools come the same way, e.g. ``apt-get install mull-extras-19``.
 
 Check if everything works:
 
@@ -92,3 +97,9 @@ Use Homebrew, or download the latest version from `GitHub Releases <https://gith
     Home: https://mull-project.com
     Plugins:
       /opt/homebrew/lib/mull-ir-frontend-19 (mull 0.36.0, LLVM 19.1.7)
+
+The optional tools are in a separate formula:
+
+.. code-block:: bash
+
+    $ brew install mull-project/mull/mull-extras@19

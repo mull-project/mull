@@ -112,7 +112,7 @@ jobs:
             bazel test //... || { cp -RL bazel-testlogs ci-testlogs; exit 1; }
             bazel build //:mull_llvm_packages --stamp
             # `bazel test` also builds an unstamped mull package, which must not overwrite the one from the tools job
-            mv -v bazel-bin/Mull-${{ matrix.LLVM_VERSION }}-*.[[PACKAGE_EXTENSION]] packages/
+            mv -v bazel-bin/Mull-${{ matrix.LLVM_VERSION }}-*.[[PACKAGE_EXTENSION]] bazel-bin/Mull-Extras-${{ matrix.LLVM_VERSION }}-*.[[PACKAGE_EXTENSION]] packages/
       - name: Upload test logs
         if: failure()
         uses: actions/upload-artifact@v4
@@ -204,6 +204,10 @@ jobs:
             # Deprecated versioned names, kept as symlinks
             mull-runner-$version --version
             mull-reporter-$version --version
+
+            [[INSTALL_CMD]] ./packages/llvm/Mull-Extras-$version-*.[[PACKAGE_EXTENSION]]
+            mull-instrument-$version --help
+            mull-rewriter-$version --help
           done
       # Reinstalling the exact versions forces downloading them from Cloudsmith
       - name: Install mull packages from Cloudsmith
@@ -219,7 +223,7 @@ jobs:
           esac
           packages=mull[[VERSION_SEPARATOR]]$MULL_VERSION
           for version in [[&LLVM_VERSIONS_SPACE_SEPARATED]]; do
-            packages="$packages mull-$version[[VERSION_SEPARATOR]]$MULL_VERSION"
+            packages="$packages mull-$version[[VERSION_SEPARATOR]]$MULL_VERSION mull-extras-$version[[VERSION_SEPARATOR]]$MULL_VERSION"
           done
           set -o pipefail
           if ! (curl -1sLf "https://dl.cloudsmith.io/public/mull-project/mull-$cs_repo/[[CLOUDSMITH_SETUP_SCRIPT]]" | bash && [[&REINSTALL_CMD]] $packages) 2>&1 | tee cloudsmith.log; then

@@ -20,9 +20,9 @@ Step 1: Checking version
 ------------------------
 
 Mull comes in a form of a compiler plugin and therefore tied to specific versions
-of Clang and LLVM. The plugin and ``mull-instrument`` have a suffix with the
-actual Clang/LLVM version, while ``mull-runner`` and ``mull-reporter`` work with
-any of them and list the installed plugins.
+of Clang and LLVM. The plugin has a suffix with the actual Clang/LLVM version,
+while ``mull-runner`` and ``mull-reporter`` work with any of them and list the
+installed plugins.
 
 This tutorial assumes that you are using Clang 18 and that you have
 :doc:`installed <../Installation>` Mull on your system and have the ``mull-runner``

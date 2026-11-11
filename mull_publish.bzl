@@ -28,7 +28,7 @@ def _publish_impl(ctx):
     cmds = []
     cmds.append(PRE_SCRIPT)
 
-    # Keys are package names: `mull` for the tools, `mull-N` for LLVM N
+    # Keys are package names: `mull` for the tools, `mull-N` and `mull-extras-N` for LLVM N
     for (idx, name) in enumerate(ctx.attr.packages):
         if OS_NAME == "macOS":
             cmd = MACOS_SCRIPT.format(
