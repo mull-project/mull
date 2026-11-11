@@ -49,13 +49,16 @@ fn extract_from_file(diag: &MullDiagnostics, path: &str) -> Vec<String> {
         .collect()
 }
 
+/// `<identifier>\x1f<replacement>`: the file path and the replacement can contain ':', neither
+/// contains the unit separator
 fn parse_encoding(diag: &MullDiagnostics, encoding: &str) -> Option<Mutant> {
-    // The file path can contain ':', the other parts cannot
-    let parts = encoding.matches(':').count() + 1;
-    let Some((identifier, replacement)) = encoding.rsplit_once(':').filter(|_| parts >= 7) else {
+    let Some((identifier, replacement)) = encoding
+        .split_once('\x1f')
+        .filter(|(identifier, _)| identifier.matches(':').count() >= 5)
+    else {
         diag_warning!(
             diag,
-            "Invalid mutant encoding (expected at least 7 parts): {}",
+            "Invalid mutant encoding (expected <mutator>:<file>:<line>:<column>:<line>:<column>\\x1f<replacement>): {}",
             encoding
         );
         return None;
@@ -92,4 +95,50 @@ pub fn extract_mutants<P: AsRef<Path>>(diag: &MullDiagnostics, paths: &[P]) -> V
     diag_debug!(diag, "Found {} unique mutant(s)", mutants.len());
 
     mutants
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn diag() -> MullDiagnostics {
+        MullDiagnostics::with_writer(Box::new(std::io::sink()), false)
+    }
+
+    #[test]
+    fn splits_at_the_separator() {
+        let mutant = parse_encoding(
+            &diag(),
+            "cxx_remove_void_call:/a:b/c.cpp:7:3:7:20\x1f(void)(ns::advance())",
+        )
+        .unwrap();
+        assert_eq!(
+            mutant.identifier,
+            "cxx_remove_void_call:/a:b/c.cpp:7:3:7:20"
+        );
+        assert_eq!(mutant.location.filepath, "/a:b/c.cpp");
+        assert_eq!(mutant.location.end_column, 20);
+        assert_eq!(mutant.replacement, "(void)(ns::advance())");
+    }
+
+    #[test]
+    fn keeps_tabs_in_the_replacement() {
+        let mutant = parse_encoding(
+            &diag(),
+            "cxx_remove_void_call:/c.cpp:7:3:8:20\x1f(void)(f(a,\n\tb))",
+        )
+        .unwrap();
+        assert_eq!(mutant.replacement, "(void)(f(a,\n\tb))");
+    }
+
+    #[test]
+    fn takes_an_empty_replacement() {
+        let mutant = parse_encoding(&diag(), "cxx_remove_void_call:/c.cpp:7:3:7:20\x1f").unwrap();
+        assert_eq!(mutant.replacement, "");
+    }
+
+    #[test]
+    fn rejects_a_missing_separator() {
+        assert!(parse_encoding(&diag(), "cxx_add_to_sub:/c.cpp:1:2:1:3:-").is_none());
+    }
 }

@@ -34,9 +34,13 @@ CHECK:[info] Patchfiles can be found at './test{{.*}}-patches'
 CHECK:{{.*}}cxx_remove_void{{.*}}
 CHECK:--- a{{.*}}/Output/sandbox/main.cpp
 CHECK:-{{[[:space:]]+}}false);
+CHECK:@@ -9,5 +9,4 @@
 CHECK:-{{[[:space:]]+}}7 +
 CHECK:-{{[[:space:]]+}}9 +
 CHECK:-{{[[:space:]]+}}false);
-CHECK:+{{[[:space:]]+}};
+CHECK:+  ((void)(4 +
+CHECK:+      7 +
+CHECK:+      9 +
+CHECK:+      10), (void)(false));
 
 */

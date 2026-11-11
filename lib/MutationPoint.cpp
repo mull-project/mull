@@ -144,6 +144,10 @@ void MutationPoint::setEndLocation(int line, int column) {
   updateIdentifier();
 }
 
+void MutationPoint::setReplacement(std::string text) {
+  replacement = std::move(text);
+}
+
 void MutationPoint::updateIdentifier() {
   userIdentifier = mutator->getUniqueIdentifier() + ':' + sourceLocation.filePath + ':' +
                    std::to_string(sourceLocation.line) + ':' +
@@ -155,8 +159,9 @@ void MutationPoint::recordMutation() {
   assert(originalFunction != nullptr);
   llvm::Module *module = originalFunction->getParent();
   std::string encoding = getUserIdentifier();
+  /// Unit separator: the path and the replacement may contain ':'
   llvm::Constant *constant = llvm::ConstantDataArray::getString(
-      module->getContext(), llvm::StringRef(encoding + ':' + replacement));
+      module->getContext(), llvm::StringRef(encoding + '\x1f' + replacement));
   auto *global = new llvm::GlobalVariable(*module,
                                           constant->getType(),
                                           true,

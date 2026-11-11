@@ -1,5 +1,7 @@
 #include "Schema.h"
 
+#include "mull/JunkDetection/CXX/CallOperands.h"
+
 #include <clang/AST/Expr.h>
 #include <clang/ASTMatchers/ASTMatchers.h>
 #include <clang/Basic/SourceManager.h>
@@ -8,6 +10,7 @@
 #include <llvm/Support/raw_ostream.h>
 
 #include <algorithm>
+#include <optional>
 
 using namespace clang;
 using namespace clang::ast_matchers;
@@ -145,6 +148,10 @@ void SiteCollector::poisonOperator(SourceLocation key, const ASTContext &context
   }
 }
 
+static bool isScalar(QualType type) {
+  return type->isIntegralOrEnumerationType() || type->isRealFloatingType();
+}
+
 static bool fits(const Mutant &mutant, NodeKind kind, llvm::StringRef op, const Stmt *node) {
   std::optional<MutatorTarget> target = targetOf(mutant.mutator);
   if (!target || target->kind != kind || target->op != op) {
@@ -153,8 +160,12 @@ static bool fits(const Mutant &mutant, NodeKind kind, llvm::StringRef op, const 
   if (kind != NodeKind::Call) {
     return true;
   }
-  bool returnsVoid = cast<CallExpr>(node)->getType()->isVoidType();
-  return returnsVoid == (mutant.mutator == "cxx_remove_void_call");
+  QualType type = cast<CallExpr>(node)->getType();
+  // The IR replaces only calls returning a scalar, not e.g. the object of a member call
+  if (!type->isVoidType() && !isScalar(type)) {
+    return false;
+  }
+  return type->isVoidType() == (mutant.mutator == "cxx_remove_void_call");
 }
 
 /// A call of a conversion operator, its source is just the converted object
@@ -165,9 +176,6 @@ static bool isConversion(const Stmt *node) {
 
 /// Whether the mutant can be written in the source, e.g. IR mutates pointer differences as integers
 static bool representable(NodeKind kind, const Stmt *node, QualType valueType) {
-  auto scalar = [](QualType type) {
-    return type->isIntegralOrEnumerationType() || type->isRealFloatingType();
-  };
   switch (kind) {
   case NodeKind::Binary: {
     auto binary = cast<BinaryOperator>(node);
@@ -179,12 +187,12 @@ static bool representable(NodeKind kind, const Stmt *node, QualType valueType) {
     if (isConversion(node) && !type.getCanonicalType()->isBuiltinType()) {
       return false;
     }
-    return type->isVoidType() || scalar(type);
+    return type->isVoidType() || isScalar(type);
   }
   case NodeKind::Initializer:
   case NodeKind::Assignment:
     // __typeof__ does not take bit-fields
-    return scalar(valueType) && !cast<Expr>(node)->refersToBitField();
+    return isScalar(valueType) && !cast<Expr>(node)->refersToBitField();
   default:
     return true;
   }
@@ -220,6 +228,34 @@ static std::string valueOf(const Mutant &mutant, NodeKind kind, const ASTContext
     value.consume_back(";");
   }
   return literalOf(value, context);
+}
+
+/// Byte ranges of the object and arguments of a call, none if one has no source in the file
+static std::optional<std::vector<std::pair<unsigned, unsigned>>>
+operandsOf(const CallExpr *call, FileID file, const ASTContext &context) {
+  const SourceManager &sourceManager = context.getSourceManager();
+  std::vector<std::pair<unsigned, unsigned>> operands;
+  for (const Expr *operand : mull::callOperands(call)) {
+    CharSourceRange range =
+        Lexer::makeFileCharRange(CharSourceRange::getTokenRange(operand->getSourceRange()),
+                                 sourceManager,
+                                 context.getLangOpts());
+    if (range.isInvalid() || sourceManager.getFileID(range.getBegin()) != file) {
+      return std::nullopt;
+    }
+    operands.emplace_back(sourceManager.getFileOffset(range.getBegin()),
+                          sourceManager.getFileOffset(range.getEnd()));
+  }
+  return operands;
+}
+
+/// The constant replacing a call, the report's replacement also has the operands
+static std::string callValue(const Mutant &mutant, QualType type, const ASTContext &context) {
+  bool zero = mutant.mutator == "cxx_replace_scalar_call_zr";
+  if (type->isBooleanType()) {
+    return literalOf(zero ? "false" : "true", context);
+  }
+  return zero ? "0" : "42";
 }
 
 void SiteCollector::place(const Stmt *node, NodeKind kind, llvm::StringRef op, SourceLocation key,
@@ -280,9 +316,17 @@ void SiteCollector::place(const Stmt *node, NodeKind kind, llvm::StringRef op, S
       placedMutant.evaluated = true;
       placedMutant.cast = castTo(valueType, deduced || valueType->isEnumeralType(), context);
     } else if (kind == NodeKind::Call) {
-      if (!mutant->replacement.empty()) {
-        placedMutant.value = literalOf(mutant->replacement, context);
-        placedMutant.cast = castTo(cast<CallExpr>(node)->getType(), true, context);
+      auto operands = operandsOf(cast<CallExpr>(node), file, context);
+      if (!operands) {
+        unrepresentable.insert(mutant->identifier);
+        continue;
+      }
+      placedMutant.operands = std::move(*operands);
+      placedMutant.replacement = "";
+      QualType type = cast<CallExpr>(node)->getType();
+      if (!type->isVoidType()) {
+        placedMutant.value = callValue(*mutant, type, context);
+        placedMutant.cast = castTo(type, true, context);
       }
     } else {
       if (op == "!" && mutant->replacement.empty()) {
@@ -388,6 +432,11 @@ RenderedFile renderSchema(const std::string &path, const std::string &source,
         // E.g. a removed void call
         mutated = "(void)0";
       }
+      std::string operands;
+      for (auto [begin, end] : placed.operands) {
+        operands += "(void)(" + text(begin, end) + "), ";
+      }
+      mutated = operands + mutated;
       schema += "__mull_on(" + idMacro(*placed.mutant) + ") ? (" + mutated + ") : ";
       rendered.push_back(placed.mutant);
     }
@@ -415,7 +464,7 @@ RenderedFile renderSchema(const std::string &path, const std::string &source,
     ids += "#define " + idMacro(*mutant) + " " + quoted(mutant->identifier) + "\n";
     globals +=
         "__attribute__((used, section(MULL_MUTANTS_SECTION))) static const char MULL_MUTANT_" +
-        std::to_string(mutant->index) + "[] = " + idMacro(*mutant) + " \":\" " +
+        std::to_string(mutant->index) + "[] = " + idMacro(*mutant) + " \"\\x1f\" " +
         quoted(mutant->replacement) + ";\n";
   }
   if (!body.empty() && body.back() != '\n') {

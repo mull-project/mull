@@ -35,14 +35,14 @@ CHECK-MUTANT: Killed
 CHECK-MUTANT: 6
 
 CHECK:{{^.*}}Killed mutants (1/1):
-CHECK:{{^.*}}sample.cpp:6:3: warning: Killed: Replaced void_sum(a, b, &result) with  [cxx_remove_void_call]
+CHECK:{{^.*}}sample.cpp:6:3: warning: Killed: Replaced void_sum(a, b, &result) with ((void)(a), (void)(b), (void)(&result)) [cxx_remove_void_call]
 CHECK:  void_sum(a, b, &result);
 CHECK:  ^
 CHECK:{{^.*}}Mutation score: 100%
 
 RUN: cat Output/sample-ir2.txt | %filecheck %s --dump-input=fail --strict-whitespace --match-full-lines --check-prefix=CHECK-NEW
 CHECK-NEW:{{^.*}}Killed mutants (1/1):
-CHECK-NEW:{{^.*}}sample.cpp:6:3: warning: Killed: Replaced void_sum(a, b, &result) with  [cxx_remove_void_call]
+CHECK-NEW:{{^.*}}sample.cpp:6:3: warning: Killed: Replaced void_sum(a, b, &result) with ((void)(a), (void)(b), (void)(&result)) [cxx_remove_void_call]
 CHECK-NEW:  void_sum(a, b, &result);
 CHECK-NEW:  ^
 CHECK-NEW:{{^.*}}Mutation score: 100%

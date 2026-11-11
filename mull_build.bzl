@@ -76,12 +76,20 @@ def mull_build(name):
                 "tools/mull-rewriter/*.h",
             ]),
             deps = [
+                ":call-operands",
                 "@llvm_%s//:libclang" % llvm_version,
                 "@llvm_%s//:libllvm" % llvm_version,
                 "@sqlite3",
             ],
             tags = ["llvm_%s" % llvm_version],
         )
+
+    # Header-only, shared by the junk detector and mull-rewriter
+    cc_library(
+        name = "call-operands",
+        hdrs = ["include/mull/JunkDetection/CXX/CallOperands.h"],
+        includes = ["include"],
+    )
 
     # Documentation tool - uses single LLVM version only
     latest_llvm = AVAILABLE_LLVM_VERSIONS[0]

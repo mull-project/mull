@@ -136,14 +136,22 @@ pub(crate) fn render_patch(
 
     let source_path = ensure_leading_slash(strip_base_path(&loc.filepath, base_path));
     let line_count = loc.end_line - loc.begin_line + 1;
+    // A replacement keeping the arguments of a call can span several lines
+    let mutated = format!("{}{}{}", prefix, mutant.replacement, suffix);
+    let mutated_lines: Vec<&str> = mutated.split('\n').collect();
     let mut patch = format!(
-        "--- a{0}\n+++ b{0}\n@@ -{1},{2} +{1},1 @@\n",
-        source_path, loc.begin_line, line_count
+        "--- a{0}\n+++ b{0}\n@@ -{1},{2} +{1},{3} @@\n",
+        source_path,
+        loc.begin_line,
+        line_count,
+        mutated_lines.len()
     );
     for line in &lines {
         patch += &format!("-{}\n", line);
     }
-    patch += &format!("+{}{}{}\n", prefix, mutant.replacement, suffix);
+    for line in &mutated_lines {
+        patch += &format!("+{}\n", line);
+    }
     Ok(patch)
 }
 
@@ -194,5 +202,54 @@ impl Reporter for PatchesReporter {
         }
 
         diag_info!(diag, "Patchfiles can be found at '{}'", self.patches_path);
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn patch_of(source: &str, identifier: &str, replacement: &str) -> String {
+        let dir = std::env::temp_dir().join(format!("mull-patch-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        let path = dir.join(format!("{}.cpp", replacement.len()));
+        std::fs::write(&path, source).unwrap();
+        let diag = MullDiagnostics::with_writer(Box::new(std::io::sink()), false);
+        let identifier = identifier.replace("FILE", path.to_str().unwrap());
+        let mutant = Mutant::from_identifier(&diag, identifier, replacement.to_string());
+        let mut source_manager = SourceManager::default();
+        let patch = render_patch(&diag, &mut source_manager, &mutant, dir.to_str().unwrap());
+        patch
+            .unwrap()
+            .lines()
+            .skip(2)
+            .collect::<Vec<_>>()
+            .join("\n")
+    }
+
+    #[test]
+    fn keeps_call_operands() {
+        let patch = patch_of(
+            "  ignore(advance());\n",
+            "cxx_remove_void_call:FILE:1:3:1:20",
+            "(void)(advance())",
+        );
+        assert_eq!(
+            patch,
+            "@@ -1,1 +1,1 @@\n-  ignore(advance());\n+  (void)(advance());"
+        );
+    }
+
+    #[test]
+    fn splits_a_multiline_replacement() {
+        let patch = patch_of(
+            "  ignore(compute(1,\n                 2));\n",
+            "cxx_remove_void_call:FILE:1:3:2:21",
+            "(void)(compute(1,\n                 2))",
+        );
+        assert_eq!(
+            patch,
+            "@@ -1,2 +1,2 @@\n-  ignore(compute(1,\n-                 2));\n+  (void)(compute(1,\n+                 2));"
+        );
     }
 }

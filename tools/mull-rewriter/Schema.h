@@ -25,6 +25,8 @@ struct PlacedMutant {
   bool evaluated = false;
   /// A C-style cast of the value or `__mull_as` for the type of the original, if needed
   std::string cast = "";
+  /// Byte ranges of the object and arguments of a replaced call, still evaluated like in the IR
+  std::vector<std::pair<unsigned, unsigned>> operands;
 };
 
 /// An AST node whose source text gets switched between the original and its mutants
