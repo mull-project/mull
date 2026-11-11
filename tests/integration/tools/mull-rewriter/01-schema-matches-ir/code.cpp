@@ -139,15 +139,15 @@ int negation(int a) {
 
 int calls(int a) {
   consume(a);
-  // CHECK: code.cpp:[[@LINE-1]]:3: warning: Killed: Replaced consume(a) with  [cxx_remove_void_call]
+  // CHECK: code.cpp:[[@LINE-1]]:3: warning: Killed: Replaced consume(a) with (void)(a) [cxx_remove_void_call]
   int x = answer();
   // CHECK: code.cpp:[[@LINE-1]]:11: warning: Killed: Replaced answer() with 42 [cxx_init_const]
   // CHECK: code.cpp:[[@LINE-2]]:11: warning: Killed: Replaced answer() with 42 [cxx_replace_scalar_call_nz]
   // CHECK: code.cpp:[[@LINE-3]]:11: warning: Killed: Replaced answer() with 0 [cxx_replace_scalar_call_zr]
   bool flag = positive(a);
   // CHECK: code.cpp:[[@LINE-1]]:15: warning: Killed: Replaced positive(a) with true [cxx_init_const]
-  // CHECK: code.cpp:[[@LINE-2]]:15: warning: Killed: Replaced positive(a) with true [cxx_replace_scalar_call_nz]
-  // CHECK: code.cpp:[[@LINE-3]]:15: warning: Killed: Replaced positive(a) with false [cxx_replace_scalar_call_zr]
+  // CHECK: code.cpp:[[@LINE-2]]:15: warning: Killed: Replaced positive(a) with ((void)(a), true) [cxx_replace_scalar_call_nz]
+  // CHECK: code.cpp:[[@LINE-3]]:15: warning: Killed: Replaced positive(a) with ((void)(a), false) [cxx_replace_scalar_call_zr]
   return flag ? x : a;
 }
 
