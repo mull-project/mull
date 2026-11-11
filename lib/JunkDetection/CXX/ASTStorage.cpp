@@ -54,6 +54,7 @@ private:
 ASTUnitWrapper::ASTUnitWrapper(std::unique_ptr<clang::ASTUnit> ast) : ast(std::move(ast)) {
   if (this->ast) {
     recordDeclarations();
+    recordFileEntries();
   }
 }
 
@@ -69,19 +70,39 @@ bool ASTUnitWrapper::isInSystemHeader(clang::SourceLocation &location) {
   return ast->getSourceManager().isInSystemHeader(location);
 }
 
-const clang::FileEntry *ASTUnitWrapper::findFileEntry(const mull::SourceLocation &sourceLocation) {
-  assert(!sourceLocation.isNull() && "Missing debug information?");
-
-  const clang::FileEntry *file = findFileEntry(sourceLocation.filePath);
-  return file ? file : findFileEntry(sourceLocation.unitFilePath);
+/// Files that are not on disk, e.g. in-memory sources in tests, match by name
+static std::string realPathOrSelf(llvm::StringRef path) {
+  llvm::SmallString<PATH_MAX> realPath;
+  if (llvm::sys::fs::real_path(path, realPath)) {
+    return path.str();
+  }
+  return std::string(realPath);
 }
 
-const clang::FileEntry *ASTUnitWrapper::findFileEntry(const std::string &filePath) {
+clang::FileID ASTUnitWrapper::findFileID(const mull::SourceLocation &sourceLocation) {
+  assert(!sourceLocation.isNull() && "Missing debug information?");
+
+  clang::FileID file = findFileID(sourceLocation.filePath);
+  return file.isValid() ? file : findFileID(sourceLocation.unitFilePath);
+}
+
+clang::FileID ASTUnitWrapper::findFileID(const std::string &filePath) {
+  auto cached = filesByPath.find(filePath);
+  if (cached != filesByPath.end()) {
+    return cached->second;
+  }
+  clang::FileID file;
+  auto it = filesByRealPath.find(realPathOrSelf(filePath));
+  if (it != filesByRealPath.end()) {
+    file = it->second;
+  }
+  filesByPath.emplace(filePath, file);
+  return file;
+}
+
+void ASTUnitWrapper::recordFileEntries() {
   auto &sourceManager = ast->getSourceManager();
-  auto begin = sourceManager.fileinfo_begin();
-  auto end = sourceManager.fileinfo_end();
-  const clang::FileEntry *file = nullptr;
-  for (auto it = begin; it != end; it++) {
+  for (auto it = sourceManager.fileinfo_begin(); it != sourceManager.fileinfo_end(); it++) {
 #if LLVM_VERSION_MAJOR >= 18
     llvm::StringRef currentSourceFilePath = it->first.getName();
 #else
@@ -96,26 +117,23 @@ const clang::FileEntry *ASTUnitWrapper::findFileEntry(const std::string &filePat
       currentSourceFilePath = it->first->tryGetRealPathName();
 #endif
     }
-    llvm::SmallString<PATH_MAX> realFilePath;
-    llvm::sys::fs::real_path(filePath, realFilePath);
-    llvm::SmallString<PATH_MAX> realSourceFilePath;
-    llvm::sys::fs::real_path(currentSourceFilePath, realSourceFilePath);
-    if (realSourceFilePath.equals(realFilePath)) {
-      file = it->first;
-      break;
+    clang::FileID file = sourceManager.translateFile(it->first);
+    if (file.isValid()) {
+      filesByRealPath.emplace(realPathOrSelf(currentSourceFilePath), file);
     }
   }
-
-  return file;
 }
 
 clang::SourceLocation ASTUnitWrapper::getLocation(const mull::SourceLocation &sourceLocation) {
-  auto file = findFileEntry(sourceLocation);
-  if (!file) {
+  clang::FileID file = findFileID(sourceLocation);
+  if (file.isInvalid()) {
     return clang::SourceLocation();
   }
   assert(!sourceLocation.isNull());
-  auto location = ast->getLocation(file, sourceLocation.line, sourceLocation.column);
+  /// Same as ASTUnit::getLocation without looking up the file each time
+  auto &sourceManager = ast->getSourceManager();
+  auto location = sourceManager.getMacroArgExpandedLocation(
+      sourceManager.translateLineCol(file, sourceLocation.line, sourceLocation.column));
   assert(location.isValid());
   return location;
 }
@@ -205,6 +223,9 @@ ASTStorage::ASTStorage(const MullDiagnostics &diagnostics,
 
 ASTUnitWrapper *ASTStorage::findAST(const mull::SourceLocation &sourceLocation) {
   const std::string &sourceFile = sourceLocation.unitFilePath;
+  if (auto it = astUnits.find(sourceFile); it != astUnits.end()) {
+    return it->second.get();
+  }
   if (llvm::sys::fs::exists(sourceFile)) {
     return findAST(sourceFile);
   }

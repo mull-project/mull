@@ -32,12 +32,17 @@ public:
 
 private:
   void recordDeclarations();
+  void recordFileEntries();
 
-  const clang::FileEntry *findFileEntry(const mull::SourceLocation &sourceLocation);
-  const clang::FileEntry *findFileEntry(const std::string &filePath);
+  clang::FileID findFileID(const mull::SourceLocation &sourceLocation);
+  clang::FileID findFileID(const std::string &filePath);
 
   std::unique_ptr<clang::ASTUnit> ast;
   std::vector<clang::Decl *> decls;
+  /// Real path -> file of the translation unit
+  std::unordered_map<std::string, clang::FileID> filesByRealPath;
+  /// Debug info path -> file, invalid if not part of the translation unit
+  std::unordered_map<std::string, clang::FileID> filesByPath;
 };
 
 class ASTStorage {

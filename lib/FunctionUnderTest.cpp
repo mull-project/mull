@@ -24,7 +24,7 @@ const std::vector<llvm::Instruction *> &FunctionUnderTest::getSelectedInstructio
 
 void FunctionUnderTest::selectInstructions() {
   for (llvm::Instruction &instruction : llvm::instructions(function)) {
-    if (SourceLocation::locationFromInstruction(&instruction).isNull())
+    if (SourceLocation::hasNullLocation(&instruction))
       continue;
     selectedInstructions.push_back(&instruction);
   }
