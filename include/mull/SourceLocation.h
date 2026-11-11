@@ -35,6 +35,9 @@ struct SourceLocation {
   static SourceLocation locationFromInstruction(const llvm::Instruction *instruction);
   static SourceLocation locationFromFunction(const llvm::Function *function);
   static SourceLocation nullSourceLocation();
+  /// Same as locationFrom*(...).isNull() without resolving the paths
+  static bool hasNullLocation(const llvm::Instruction *instruction);
+  static bool hasNullLocation(const llvm::Function *function);
 };
 
 } // namespace mull

@@ -80,6 +80,22 @@ SourceLocation SourceLocation::locationFromFunction(const llvm::Function *functi
   return SourceLocation(unitDirectory, unitFilePath, directory, filePath, line, column);
 }
 
+bool SourceLocation::hasNullLocation(const llvm::Instruction *instruction) {
+  if (instruction->getMetadata(0) == nullptr) {
+    return true;
+  }
+  const llvm::DebugLoc &debugInfo = instruction->getDebugLoc();
+  return debugInfo->getLine() == 0 && debugInfo->getColumn() == 0;
+}
+
+bool SourceLocation::hasNullLocation(const llvm::Function *function) {
+  if (function->getMetadata(0) == nullptr) {
+    return true;
+  }
+  auto debugInfo = llvm::dyn_cast<llvm::DISubprogram>(function->getMetadata(0));
+  return debugInfo == nullptr || debugInfo->getLine() == 0;
+}
+
 bool SourceLocation::isNull() const {
   return (directory.empty() && filePath.empty() && line == 0 && column == 0) ||
          // this case happened when compiled with '-Og', please look at:
