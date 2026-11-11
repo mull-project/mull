@@ -1,5 +1,20 @@
 # Changelog
 
+## [0.38.0] - 12 Nov 2026
+
+‼️ Cloudsmith bandwidth is exhausted again, use packages from [GitHub Releases](https://github.com/mull-project/mull/releases/latest) for installation, [see more details](https://mull-project.com/getting-started/installation/#cloudsmith-bandwidth-limit).
+
+- RHEL packages now use LLVM 22 [#1221](https://github.com/mull-project/mull/pull/1221)
+- Added a new package `mull-extras-N` which contains `mull-instrument-N` and `mull-rewriter-N` [#1223](https://github.com/mull-project/mull/pull/1223)
+- Added `mull-rewriter`, which produces mutants at the source level [#958](https://github.com/mull-project/mull/issues/958) [#1218](https://github.com/mull-project/mull/pull/1218)
+- Added `mutationRanges` filter to mutate only the listed lines [#1132](https://github.com/mull-project/mull/issues/1132) [#1215](https://github.com/mull-project/mull/pull/1215)
+- Added `gitDiffPaths` to restrict the git diff filter to given paths (by [@xolom](https://github.com/xolom)) [#1214](https://github.com/mull-project/mull/pull/1214)
+- Added `--ide-reporter-show-patches` to show a patch for each mutant in the IDE reporter [#958](https://github.com/mull-project/mull/issues/1132) [#1217](https://github.com/mull-project/mull/pull/1217)
+- Fixed some performance issues [#1220](https://github.com/mull-project/mull/pull/1220)
+- Fixed some undetectable and incorrect mutants  [#1219](https://github.com/mull-project/mull/pull/1219) [#1222](https://github.com/mull-project/mull/pull/1222)
+- Fixed call replacement in patches [#1222](https://github.com/mull-project/mull/pull/1222)
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2026-11-03..2026-11-12)
+
 ## [0.37.0] - 02 Nov 2026
 
 ‼️ Cloudsmith bandwidth is exhausted again, use packages from [GitHub Releases](https://github.com/mull-project/mull/releases/latest) for installation, [see more details](https://mull-project.com/getting-started/installation/#cloudsmith-bandwidth-limit).
