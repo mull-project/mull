@@ -266,7 +266,7 @@ include/fmt/format.h:3140:45: warning: Killed: Replaced + with - [cxx_add_to_sub
 include/fmt/format.h:4055:47: warning: Killed: Replaced + with - [cxx_add_to_sub]
     return detail::to_unsigned(buffer_ - str_ + buffer_size - 1);
                                               ^
-test/format-test.cc:914:70: warning: Killed: Replaced with - [cxx_add_to_sub]
+test/format-test.cc:914:70: warning: Killed: Replaced + with - [cxx_add_to_sub]
     EXPECT_THROW_MSG((void)fmt::format(runtime("{0:{1}}"), 0, (value + 1)),
                                                                      ^
 test/format-test.cc:952:19: warning: Killed: Replaced + with - [cxx_add_to_sub]
@@ -278,7 +278,7 @@ test/format-test.cc:1110:19: warning: Killed: Replaced + with - [cxx_add_to_sub]
 test/format-test.cc:1114:19: warning: Killed: Replaced + with - [cxx_add_to_sub]
   format_str[size + 2] = 0;
                   ^
-test/format-test.cc:1140:73: warning: Killed: Replaced with - [cxx_add_to_sub]
+test/format-test.cc:1140:73: warning: Killed: Replaced + with - [cxx_add_to_sub]
     EXPECT_THROW_MSG((void)fmt::format(runtime("{0:.{1}}"), 0.0, (value + 1)),
                                                                         ^
 test/scan.h:23:44: warning: Killed: Replaced + with - [cxx_add_to_sub]
@@ -318,7 +318,7 @@ include/fmt/format-inl.h:352:59: warning: Survived: Replaced + with - [cxx_add_t
 include/fmt/format-inl.h:359:75: warning: Survived: Replaced + with - [cxx_add_to_sub]
                 cache >> (64 - num_significand_bits<float>() - 2 - beta)) +
                                                                           ^
-include/fmt/format-inl.h:1079:38: warning: Survived: Replaced with - [cxx_add_to_sub]
+include/fmt/format-inl.h:1079:38: warning: Survived: Replaced + with - [cxx_add_to_sub]
     FMT_ASSERT(recovered_cache.low() + 1 != 0, "");
                                      ^
 include/fmt/format-inl.h:1120:62: warning: Survived: Replaced + with - [cxx_add_to_sub]

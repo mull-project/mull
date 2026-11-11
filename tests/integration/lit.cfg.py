@@ -65,6 +65,10 @@ config.substitutions.append(("%sqlite3", sqlite3))
 
 config.suffixes = [".cpp", ".c", ".itest"]
 
+# Older clang puts the debug location of macro argument code at the macro name
+if int(llvm_major_version) >= 22:
+    config.available_features.add("llvm_22_or_higher")
+
 if platform.system() == "Darwin":
     config.available_features.add("MACOS")
     config.substitutions.append(("%libcxx", "-stdlib=libc++ -lc++"))

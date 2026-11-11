@@ -11,8 +11,7 @@ int main() {
   return t.tm_year != year;
 }
 
-// Bug: cxx_init_const mutates a field of a constant struct initializer
-// XFAIL: *
+// A struct initializer is not mutated, even when the IR stores it as constant fields
 
 // RUN: rm -rf %S/Output && mkdir -p %S/Output/sandbox
 // RUN: cp %s %S/mull.yml %S/Output/sandbox/

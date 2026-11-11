@@ -102,6 +102,10 @@ const MutationPointAddress &MutationPoint::getAddress() const {
   return address;
 }
 
+irm::IRMutation *MutationPoint::getIRMutator() const {
+  return irMutator;
+}
+
 Value *MutationPoint::getOriginalValue() const {
   auto *function = originalFunction;
   if (mutatedFunction != nullptr) {

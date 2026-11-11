@@ -11,10 +11,29 @@
 #include "mull/Mutators/Mutator.h"
 #include "rust/mull-cxx-bridge/bridge.rs.h"
 
+#include <irm/IRMutation.h>
+#include <llvm/IR/IntrinsicInst.h>
+
 using namespace mull;
 
 CXXJunkDetector::CXXJunkDetector(const MullDiagnostics &diagnostics, ASTStorage &astStorage)
     : diagnostics(diagnostics), astStorage(astStorage) {}
+
+/// IR `shl` and `mul` have no signedness: keeps the variant the source type computes in
+static bool matchesSignedness(MutationPoint *point, const clang::Stmt *expression) {
+  irm::Signedness signedness = point->getIRMutator()->signedness();
+  auto *binary = llvm::dyn_cast<clang::BinaryOperator>(expression);
+  if (signedness == irm::Signedness::Any || !binary) {
+    return true;
+  }
+  clang::QualType type = binary->getType();
+  if (auto *compound = llvm::dyn_cast<clang::CompoundAssignOperator>(binary)) {
+    type = compound->getComputationResultType();
+  }
+  /// Dependent types are taken as signed, the instantiations are not visible here
+  bool isUnsigned = type->hasUnsignedIntegerRepresentation();
+  return isUnsigned == (signedness == irm::Signedness::Unsigned);
+}
 
 static const clang::Stmt *findMutantExpression(MutationPoint *point,
                                                VisitorParameters &visitorParameters,
@@ -23,7 +42,13 @@ static const clang::Stmt *findMutantExpression(MutationPoint *point,
   case MutatorKind::CXX_RemoveVoidCall: {
     RemoveVoidFunctionVisitor visitor(visitorParameters);
     visitor.TraverseDecl(decl);
-    return visitor.foundMutant();
+    auto *call = llvm::cast_or_null<clang::CallExpr>(visitor.foundMutant());
+    /// Only builtins like `memcpy` become intrinsics, `llvm.lifetime.end` and others are not calls
+    if (call && llvm::isa<llvm::IntrinsicInst>(point->getOriginalValue()) &&
+        !call->getBuiltinCallee()) {
+      return nullptr;
+    }
+    return call;
   }
   case MutatorKind::CXX_ReplaceScalarCallZero:
   case MutatorKind::CXX_ReplaceScalarCallNonZero: {
@@ -81,9 +106,16 @@ static const clang::Stmt *findMutantExpression(MutationPoint *point,
     return cxx::UnaryVisitor::findMutant(
         visitorParameters, clang::UnaryOperator::Opcode::UO_PostInc, decl);
 
-  case MutatorKind::CXX_SubToAdd:
-    return cxx::BinaryVisitor::findMutant(
-        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_Sub);
+  case MutatorKind::CXX_SubToAdd: {
+    auto *sub = llvm::cast_or_null<clang::BinaryOperator>(cxx::BinaryVisitor::findMutant(
+        visitorParameters, decl, clang::BinaryOperator::Opcode::BO_Sub));
+    /// `p - q` of pointers: `p + q` is not a valid program
+    if (sub && sub->getLHS()->getType()->isPointerType() &&
+        sub->getRHS()->getType()->isPointerType()) {
+      return nullptr;
+    }
+    return sub;
+  }
   case MutatorKind::CXX_SubAssignToAddAssign:
     return cxx::BinaryVisitor::findMutant(
         visitorParameters, decl, clang::BinaryOperator::Opcode::BO_SubAssign);
@@ -204,16 +236,14 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
 
   const clang::Stmt *mutantExpression = findMutantExpression(point, visitorParameters, decl);
 
-  if (!mutantExpression) {
+  if (!mutantExpression || !matchesSignedness(point, mutantExpression)) {
     return true;
   }
 
   clang::SourceLocation mutantExpressionBeginLoc = mutantExpression->getSourceRange().getBegin();
-  int beginLine = sourceManager.getExpansionLineNumber(mutantExpressionBeginLoc, nullptr);
-  int beginColumn = sourceManager.getExpansionColumnNumber(mutantExpressionBeginLoc);
-
-  int mutationLocationBeginLine = sourceManager.getExpansionLineNumber(location, nullptr);
-  int mutationLocationBeginColumn = sourceManager.getExpansionColumnNumber(location);
+  /// File locations: a macro argument is where it is written, not at the macro name
+  bool startsAtMutation =
+      sourceManager.getFileLoc(mutantExpressionBeginLoc) == sourceManager.getFileLoc(location);
 
   /// There are two types of mutated expressions:
   /// 1) Remove-Void, CallExpr example: its mutation location and its getStart() are the same.
@@ -222,9 +252,7 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
   /// [getSourceRange().getBegin(), getSourceRange().getEnd()] range is the whole "a + b"
   /// expression.
   clang::SourceLocation sourceLocationEnd =
-      (beginLine == mutationLocationBeginLine && beginColumn == mutationLocationBeginColumn)
-          ? mutantExpression->getSourceRange().getEnd()
-          : location;
+      startsAtMutation ? mutantExpression->getSourceRange().getEnd() : location;
 
   // For unary operators we shouldn't consider the location of the whole expression, but only
   // the operator, otherwise it breaks patch reporter in weird ways
@@ -236,28 +264,40 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
                        sourceManager.isBeforeInTranslationUnit(unary->getOperatorLoc(), location);
   }
 
-  /// Init-Const replaces the whole initializer, but its mutation location is the variable name
-  bool replacesInitializer = point->getMutator()->mutatorKind() == MutatorKind::CXX_InitConst;
-  if (replacesInitializer) {
+  /// Init-Const replaces the whole initializer, its mutation location is the variable name.
+  /// Call mutators replace the whole call, a member call's location is the member name.
+  MutatorKind kind = point->getMutator()->mutatorKind();
+  bool replacesExpression = kind == MutatorKind::CXX_InitConst ||
+                            kind == MutatorKind::CXX_RemoveVoidCall ||
+                            kind == MutatorKind::CXX_ReplaceScalarCallZero ||
+                            kind == MutatorKind::CXX_ReplaceScalarCallNonZero;
+  if (replacesExpression) {
     sourceLocationEnd = mutantExpression->getSourceRange().getEnd();
   }
 
-  /// Clang AST: how to get more precise debug information in certain cases?
-  /// http://clang-developers.42468.n3.nabble.com/Clang-AST-how-to-get-more-precise-debug-information-in-certain-cases-td4065195.html
-  /// https://stackoverflow.com/questions/11083066/getting-the-source-behind-clangs-ast
-  clang::SourceLocation sourceLocationEndActual = ast->getLocForEndOfToken(sourceLocationEnd);
+  clang::SourceLocation sourceLocationBegin =
+      (replacesExpression || startsAtOperator) ? mutantExpressionBeginLoc : location;
+  clang::CharSourceRange fileRange = ast->getFileRange(sourceLocationBegin, sourceLocationEnd);
+  if (fileRange.isInvalid()) {
+    return true;
+  }
 
-  int endLine = sourceManager.getExpansionLineNumber(sourceLocationEndActual, nullptr);
-  int endColumn = sourceManager.getExpansionColumnNumber(sourceLocationEndActual);
+  int beginLine = sourceManager.getExpansionLineNumber(fileRange.getBegin(), nullptr);
+  int beginColumn = sourceManager.getExpansionColumnNumber(fileRange.getBegin());
+  int endLine = sourceManager.getExpansionLineNumber(fileRange.getEnd(), nullptr);
+  int endColumn = sourceManager.getExpansionColumnNumber(fileRange.getEnd());
+  clang::SourceLocation mutationLocation = sourceManager.getFileLoc(location);
+  int mutationLine = sourceManager.getExpansionLineNumber(mutationLocation, nullptr);
+  int mutationColumn = sourceManager.getExpansionColumnNumber(mutationLocation);
 
   const std::string &sourceFile = point->getSourceLocation().filePath;
   std::string description = MutationKindToString(point->getMutator()->mutatorKind());
   diagnostics.debug(std::string("CXXJunkDetector: mutation \"") + description +
-                    "\": " + sourceFile + ":" + std::to_string(mutationLocationBeginLine) + ":" +
-                    std::to_string(mutationLocationBeginColumn) +
-                    " (end: " + std::to_string(endLine) + ":" + std::to_string(endColumn) + ")");
+                    "\": " + sourceFile + ":" + std::to_string(mutationLine) + ":" +
+                    std::to_string(mutationColumn) + " (end: " + std::to_string(endLine) + ":" +
+                    std::to_string(endColumn) + ")");
 
-  if (replacesInitializer || startsAtOperator) {
+  if (replacesExpression || startsAtOperator) {
     point->setBeginLocation(beginLine, beginColumn);
   }
   point->setEndLocation(endLine, endColumn);

@@ -11,8 +11,7 @@ int main() {
   return v.size != 2;
 }
 
-// Bug: a member call mutant covers only the member name
-// XFAIL: *
+// A member call mutant covers the whole call
 
 // RUN: rm -rf %S/Output && mkdir -p %S/Output/sandbox
 // RUN: cp %s %S/mull.yml %S/Output/sandbox/

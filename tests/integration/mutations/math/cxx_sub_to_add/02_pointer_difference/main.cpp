@@ -10,8 +10,7 @@ int main() {
   return distance(s + 2, s) != 2 || sub(3, 1) != 2;
 }
 
-// Bug: a pointer difference is mutated into a sum of pointers
-// XFAIL: *
+// A pointer difference is not mutated, a sum of pointers is not a valid program
 
 // RUN: rm -rf %S/Output && mkdir -p %S/Output/sandbox
 // RUN: cp %s %S/mull.yml %S/Output/sandbox/

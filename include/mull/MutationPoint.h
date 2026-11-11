@@ -78,6 +78,7 @@ public:
 
   Mutator *getMutator();
   Mutator *getMutator() const;
+  irm::IRMutation *getIRMutator() const;
 
   const std::string &getUserIdentifier() const;
   const std::string &getReplacement() const;
