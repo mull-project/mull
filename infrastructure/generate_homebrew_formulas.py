@@ -58,7 +58,6 @@ class {class_name} < Formula
 
 {conflicts}
   def install
-    bin.install "bin/mull-instrument-{llvm_version}"
     lib.install "lib/mull-ir-frontend-{llvm_version}"
     # Deprecated versioned names of the tools from {tools_dep}
     bin.install_symlink Formula["{tools_dep}"].opt_bin/"mull-runner" => "mull-runner-{llvm_version}"
@@ -69,10 +68,8 @@ class {class_name} < Formula
     <<~EOS
       Mull{channel_caveat} has been installed with LLVM {llvm_version} support.
 {unstable_warning}
-      Binaries installed:
-        mull-instrument-{llvm_version}
-
       mull-runner and mull-reporter come from {tools_dep}.
+      mull-instrument and mull-rewriter come from {extras_formula}.
 
       The Clang plugin is installed at:
         #{{HOMEBREW_PREFIX}}/lib/mull-ir-frontend-{llvm_version}
@@ -85,6 +82,49 @@ class {class_name} < Formula
   test do
     # The linked mull-runner finds plugins in HOMEBREW_PREFIX/lib
     assert_match "mull-ir-frontend-{llvm_version}", shell_output("#{{HOMEBREW_PREFIX}}/bin/mull-runner --version")
+  end
+end
+'''
+
+EXTRAS_FORMULA_TEMPLATE = '''\
+class {class_name} < Formula
+  desc "Practical mutation testing for C and C++: Clang/LLVM {llvm_version} extra tools{channel_desc}"
+  homepage "https://github.com/mull-project/mull"
+  version "{mull_version}"
+  license "Apache-2.0"
+{livecheck}
+  depends_on "{llvm_dep}"
+  depends_on "{tools_dep}"
+  depends_on :macos
+
+  on_macos do
+    on_arm do
+      url "{url}"
+      sha256 "{sha256}"
+    end
+  end
+
+{conflicts}
+  def install
+    bin.install "bin/mull-instrument-{llvm_version}"
+    bin.install "bin/mull-rewriter-{llvm_version}"
+  end
+
+  def caveats
+    <<~EOS
+      Mull{channel_caveat} extra tools have been installed with LLVM {llvm_version} support.
+{unstable_warning}
+      Binaries installed:
+        mull-instrument-{llvm_version}
+        mull-rewriter-{llvm_version}
+
+      Their mutants run with mull-runner from {tools_dep}.
+    EOS
+  end
+
+  test do
+    assert_match "mull-instrument-{llvm_version}", shell_output("#{{bin}}/mull-instrument-{llvm_version} --help")
+    assert_match "mull-rewriter-{llvm_version}", shell_output("#{{bin}}/mull-rewriter-{llvm_version} --help")
   end
 end
 '''
@@ -159,23 +199,29 @@ def tools_formula(channel):
     return f"mull-project/mull/{formula_prefix(channel)}"
 
 
-def class_name_for(channel, llvm_version=None):
+def extras_prefix(channel):
+    return f"{formula_prefix(channel)}-extras"
+
+
+def class_name_for(channel, llvm_version=None, extras=False):
     suffix = f"AT{llvm_version}" if llvm_version else ""
+    kind = "Extras" if extras else ""
     if channel == "stable":
-        return f"Mull{suffix}"
-    return f"Mull{channel.title()}{suffix}"
+        return f"Mull{kind}{suffix}"
+    return f"Mull{channel.title()}{kind}{suffix}"
 
 
-def generate_conflicts(current_version, current_channel):
+def generate_conflicts(current_version, current_channel, extras=False):
     lines = []
     for channel in CHANNELS:
         if channel == current_channel:
             continue
-        prefix = formula_prefix(channel)
-        if current_version:
-            lines.append(f'  conflicts_with "{prefix}@{current_version}", because: "both install mull-instrument-{current_version}"')
+        if extras:
+            lines.append(f'  conflicts_with "{extras_prefix(channel)}@{current_version}", because: "both install mull-rewriter-{current_version}"')
+        elif current_version:
+            lines.append(f'  conflicts_with "{formula_prefix(channel)}@{current_version}", because: "both install mull-ir-frontend-{current_version}"')
         else:
-            lines.append(f'  conflicts_with "{prefix}", because: "both install mull-runner"')
+            lines.append(f'  conflicts_with "{formula_prefix(channel)}", because: "both install mull-runner"')
     return "\n".join(lines)
 
 
@@ -243,6 +289,30 @@ def generate_formula(llvm_version, mull_version, channel, existing_version=None,
         channel_caveat=channel_caveat,
         unstable_warning=unstable_warning,
         livecheck=livecheck,
+        extras_formula=f"{extras_prefix(channel)}@{llvm_version}",
+    )
+
+
+def generate_extras_formula(llvm_version, mull_version, channel, existing_version=None, existing_url=None, existing_sha256=None):
+    channel_desc, channel_caveat, unstable_warning, livecheck, version_str = channel_strings(channel, mull_version)
+
+    final_version = existing_version or version_str
+    final_url = existing_url or f"https://dl.cloudsmith.io/public/mull-project/mull-{channel}/raw/names/mull-extras-{llvm_version}/versions/{version_str}/PACKAGE_FILENAME_PLACEHOLDER"
+    final_sha256 = existing_sha256 or "PLACEHOLDER_SHA256"
+
+    return EXTRAS_FORMULA_TEMPLATE.format(
+        class_name=class_name_for(channel, llvm_version, extras=True),
+        llvm_version=llvm_version,
+        mull_version=final_version,
+        llvm_dep=f"llvm@{llvm_version}",
+        tools_dep=tools_formula(channel),
+        url=final_url,
+        sha256=final_sha256,
+        conflicts=generate_conflicts(llvm_version, channel, extras=True),
+        channel_desc=channel_desc,
+        channel_caveat=channel_caveat,
+        unstable_warning=unstable_warning,
+        livecheck=livecheck,
     )
 
 
@@ -286,6 +356,16 @@ def main():
             formula_path.write_text(
                 generate_formula(llvm_version, mull_version, channel,
                                 existing_version, existing_url, existing_sha256)
+            )
+            preserved = " (preserved)" if existing_url else " (new)"
+            print(f"  {filename}{preserved}")
+
+            filename = f"{extras_prefix(channel)}@{llvm_version}.rb"
+            formula_path = formula_dir / filename
+            existing_version, existing_url, existing_sha256 = read_existing_values(formula_path)
+            formula_path.write_text(
+                generate_extras_formula(llvm_version, mull_version, channel,
+                                        existing_version, existing_url, existing_sha256)
             )
             preserved = " (preserved)" if existing_url else " (new)"
             print(f"  {filename}{preserved}")

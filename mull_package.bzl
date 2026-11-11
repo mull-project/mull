@@ -48,23 +48,39 @@ EXPECTED_RPM_TOOLS_CONTENT = """/usr/bin/mull-reporter
 /usr/share/zsh/site-functions/_mull-runner
 """
 
-# `mull-N`: the plugin and mull-instrument for LLVM N. On Linux it also keeps the
-# old versioned tool names as symlinks; on macOS the Homebrew formula creates them.
-EXPECTED_MACOS_LLVM_CONTENT = """bin/mull-instrument-{LLVM_VERSION}
-lib/mull-ir-frontend-{LLVM_VERSION}
+# `mull-N`: the plugin for LLVM N. On Linux it also keeps the old versioned tool
+# names as symlinks; on macOS the Homebrew formula creates them.
+EXPECTED_MACOS_LLVM_CONTENT = """lib/mull-ir-frontend-{LLVM_VERSION}
 """
 
-EXPECTED_DEB_LLVM_CONTENT = """usr/bin/mull-instrument-{LLVM_VERSION}
-usr/bin/mull-reporter-{LLVM_VERSION}
+EXPECTED_DEB_LLVM_CONTENT = """usr/bin/mull-reporter-{LLVM_VERSION}
 usr/bin/mull-runner-{LLVM_VERSION}
 usr/lib/mull-ir-frontend-{LLVM_VERSION}
 """
 
-EXPECTED_RPM_LLVM_CONTENT = """/usr/bin/mull-instrument-{LLVM_VERSION}
-/usr/bin/mull-reporter-{LLVM_VERSION}
+EXPECTED_RPM_LLVM_CONTENT = """/usr/bin/mull-reporter-{LLVM_VERSION}
 /usr/bin/mull-runner-{LLVM_VERSION}
 /usr/lib/mull-ir-frontend-{LLVM_VERSION}
 """
+
+# `mull-extras-N`: the standalone tools for LLVM N
+EXPECTED_MACOS_EXTRAS_CONTENT = """bin/mull-instrument-{LLVM_VERSION}
+bin/mull-rewriter-{LLVM_VERSION}
+"""
+
+EXPECTED_DEB_EXTRAS_CONTENT = """usr/bin/mull-instrument-{LLVM_VERSION}
+usr/bin/mull-rewriter-{LLVM_VERSION}
+"""
+
+EXPECTED_RPM_EXTRAS_CONTENT = """/usr/bin/mull-instrument-{LLVM_VERSION}
+/usr/bin/mull-rewriter-{LLVM_VERSION}
+"""
+
+EXPECTED_CONTENT = {
+    "extras": (EXPECTED_MACOS_EXTRAS_CONTENT, EXPECTED_DEB_EXTRAS_CONTENT, EXPECTED_RPM_EXTRAS_CONTENT),
+    "llvm": (EXPECTED_MACOS_LLVM_CONTENT, EXPECTED_DEB_LLVM_CONTENT, EXPECTED_RPM_LLVM_CONTENT),
+    "tools": (EXPECTED_MACOS_TOOLS_CONTENT, EXPECTED_DEB_TOOLS_CONTENT, EXPECTED_RPM_TOOLS_CONTENT),
+}
 
 # First line is the summary (deb synopsis, rpm Summary), the rest the long description
 TOOLS_SUMMARY = "Practical mutation testing for C and C++: core tools"
@@ -78,8 +94,15 @@ LLVM_SUMMARY = "Practical mutation testing for C and C++: Clang/LLVM {LLVM_VERSI
 LLVM_DESCRIPTION = LLVM_SUMMARY + """
 Mull is a practical mutation testing and fault injection tool for C and C++.
 This package contains mull-ir-frontend-{LLVM_VERSION}, the Clang/LLVM {LLVM_VERSION} plugin
-that adds mutants at compile time, and mull-instrument-{LLVM_VERSION}, which adds them to
-LLVM bitcode. mull-runner and mull-reporter come from the mull package."""
+that adds mutants at compile time. mull-runner and mull-reporter come from the mull
+package, mull-instrument and mull-rewriter from mull-extras-{LLVM_VERSION}."""
+
+EXTRAS_SUMMARY = "Practical mutation testing for C and C++: Clang/LLVM {LLVM_VERSION} extra tools"
+EXTRAS_DESCRIPTION = EXTRAS_SUMMARY + """
+Mull is a practical mutation testing and fault injection tool for C and C++.
+This package contains mull-instrument-{LLVM_VERSION}, which adds mutants to LLVM
+bitcode, and mull-rewriter-{LLVM_VERSION}, which writes the mutants of a report into
+the sources. Their mutants run with mull-runner from the mull package."""
 
 def _package_contents_impl(ctx):
     out = ctx.actions.declare_file(ctx.attr.name + ".txt")
@@ -116,18 +139,12 @@ package_contents = rule(
 def _expected_package_contents_impl(ctx):
     out = ctx.actions.declare_file(ctx.attr.name + ".txt")
     path = ctx.file.package.path
-    if ctx.attr.llvm_version:
-        template = EXPECTED_DEB_LLVM_CONTENT
-        if path.endswith(".zip"):
-            template = EXPECTED_MACOS_LLVM_CONTENT
-        if path.endswith(".rpm"):
-            template = EXPECTED_RPM_LLVM_CONTENT
-    else:
-        template = EXPECTED_DEB_TOOLS_CONTENT
-        if path.endswith(".zip"):
-            template = EXPECTED_MACOS_TOOLS_CONTENT
-        if path.endswith(".rpm"):
-            template = EXPECTED_RPM_TOOLS_CONTENT
+    macos, deb, rpm = EXPECTED_CONTENT[ctx.attr.kind]
+    template = deb
+    if path.endswith(".zip"):
+        template = macos
+    if path.endswith(".rpm"):
+        template = rpm
 
     ctx.actions.write(out, template.format(LLVM_VERSION = ctx.attr.llvm_version))
 
@@ -137,6 +154,7 @@ expected_package_contents = rule(
     implementation = _expected_package_contents_impl,
     attrs = {
         "package": attr.label(allow_single_file = True, mandatory = True),
+        "kind": attr.string(mandatory = True, values = EXPECTED_CONTENT.keys()),
         # Empty for the tools package
         "llvm_version": attr.string(),
     },
@@ -151,12 +169,12 @@ def _apt_dry_run_impl(ctx):
 apt_dry_run_sh = rule(
     implementation = _apt_dry_run_impl,
     attrs = {
-        # The LLVM packages depend on the tools package, so install them together
+        # The LLVM and extras packages depend on the tools package, so install them together
         "packages": attr.label_list(allow_files = [".deb"], mandatory = True),
     },
 )
 
-def _package_tests(name, package, llvm_version = ""):
+def _package_tests(name, package, kind, llvm_version = ""):
     package_contents(
         name = "%s-content" % name,
         package = package,
@@ -164,6 +182,7 @@ def _package_tests(name, package, llvm_version = ""):
     expected_package_contents(
         name = "%s-expected-content" % name,
         package = package,
+        kind = kind,
         llvm_version = llvm_version,
     )
     diff_test(
@@ -298,7 +317,7 @@ def _mull_tools_package(prefix):
         )
         _apt_test(package_name, [package_name])
 
-    _package_tests(package_name, package_name)
+    _package_tests(package_name, package_name, "tools")
     return package_name
 
 def _mull_llvm_package(prefix, llvm_version, tools_package):
@@ -313,21 +332,12 @@ def _mull_llvm_package(prefix, llvm_version, tools_package):
     )
 
     pkg_files(
-        name = "%s-binaries" % package_name,
-        srcs = ["//:mull-instrument-%s" % llvm_version],
-        prefix = "%sbin" % prefix,
-        attributes = pkg_attributes(mode = "755"),
-    )
-    pkg_files(
         name = "%s-libraries" % package_name,
         srcs = ["//:mull-ir-frontend-%s-gen" % llvm_version],
         prefix = "%slib" % prefix,
         attributes = pkg_attributes(mode = "755"),
     )
-    srcs = [
-        "%s-binaries" % package_name,
-        "%s-libraries" % package_name,
-    ]
+    srcs = ["%s-libraries" % package_name]
 
     # TODO: drop the versioned names once users had time to move to mull-runner/mull-reporter
     if OS_NAME != "macOS":
@@ -390,7 +400,85 @@ def _mull_llvm_package(prefix, llvm_version, tools_package):
         )
         _apt_test(package_name, [tools_package, package_name])
 
-    _package_tests(package_name, package_name, llvm_version)
+    _package_tests(package_name, package_name, "llvm", llvm_version)
+    return package_name
+
+def _mull_extras_package(prefix, llvm_version, tools_package):
+    package_name = "mull-extras-package-%s" % llvm_version
+    package_file_name = "Mull-Extras-{LLVM_VERSION}-{MULL_VERSION}-LLVM-{FULL_LLVM_VERSION}-{OS_NAME}-{OS_ARCH}-{OS_VERSION}".format(
+        LLVM_VERSION = llvm_version,
+        MULL_VERSION = MULL_VERSION,
+        OS_ARCH = OS_ARCH,
+        OS_NAME = OS_NAME,
+        OS_VERSION = OS_VERSION,
+        FULL_LLVM_VERSION = EXACT_VERSION_MAPPING[llvm_version],
+    )
+
+    pkg_files(
+        name = "%s-binaries" % package_name,
+        srcs = [
+            "//:mull-instrument-%s" % llvm_version,
+            "//:mull-rewriter-%s" % llvm_version,
+        ],
+        prefix = "%sbin" % prefix,
+        attributes = pkg_attributes(mode = "755"),
+    )
+    srcs = ["%s-binaries" % package_name]
+
+    if OS_NAME == "macOS":
+        pkg_zip(
+            name = package_name,
+            srcs = srcs,
+            out = "%s.zip" % package_file_name,
+            stamp = -1,
+        )
+    elif OS_NAME == "rhel":
+        pkg_rpm(
+            name = package_name,
+            srcs = srcs,
+            version = MULL_VERSION,
+            summary = EXTRAS_SUMMARY.format(LLVM_VERSION = llvm_version),
+            description = EXTRAS_DESCRIPTION.format(LLVM_VERSION = llvm_version),
+            url = MULL_HOMEPAGE,
+            license = "Apache-2.0",
+            # mull-runner runs the mutants, it must read the same mutant records and reports
+            requires = [
+                "clang-libs",
+                "llvm-libs",
+                "mull = %s" % MULL_VERSION,
+            ],
+            package_name = "mull-extras-%s" % llvm_version,
+            release = "1",
+            package_file_name = "%s.rpm" % package_file_name,
+            defines = {"__brp_compress": "%{nil}"},
+        )
+    else:
+        pkg_tar(
+            name = "%s-tar" % package_name,
+            srcs = srcs,
+            stamp = -1,
+        )
+        pkg_deb(
+            name = package_name,
+            data = "%s-tar" % package_name,
+            maintainer = "Alex Denisov <alex@lowlevelbits.org>",
+            package = "mull-extras-%s" % llvm_version,
+            version = MULL_VERSION,
+            description = EXTRAS_DESCRIPTION.format(LLVM_VERSION = llvm_version),
+            homepage = MULL_HOMEPAGE,
+            license = "Apache-2.0",
+            # mull-runner runs the mutants, it must read the same mutant records and reports
+            depends = [
+                "libclang-cpp%s" % llvm_version,
+                "libllvm%s" % llvm_version,
+                "mull (= %s)" % MULL_VERSION,
+            ],
+            package_file_name = "%s.deb" % package_file_name,
+            architecture = "arm64" if OS_ARCH == "aarch64" else OS_ARCH,
+        )
+        _apt_test(package_name, [tools_package, package_name])
+
+    _package_tests(package_name, package_name, "extras", llvm_version)
     return package_name
 
 def mull_package(name):
@@ -401,9 +489,11 @@ def mull_package(name):
 
     tools_package = _mull_tools_package(prefix)
 
+    # Published per LLVM version: the plugin and the extras
     llvm_packages = {}
     for llvm_version in AVAILABLE_LLVM_VERSIONS:
         llvm_packages["mull-%s" % llvm_version] = _mull_llvm_package(prefix, llvm_version, tools_package)
+        llvm_packages["mull-extras-%s" % llvm_version] = _mull_extras_package(prefix, llvm_version, tools_package)
 
     native.filegroup(
         name = "mull_tools_packages",
