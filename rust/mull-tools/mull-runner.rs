@@ -7,14 +7,16 @@ mod runner;
 
 use crate::runner::{kill_programs_on_interrupt, run_program};
 use dynamic_libraries::find_dynamic_libraries;
+use mull_cache::{default_cache_path, fingerprint, Cache, RunIdentity};
 use mull_core::{
-    config::RunnerCli, diag_debug, diag_error, diag_warning, diagnostics::MullDiagnostics,
+    config::RunnerCli, diag_debug, diag_error, diag_info, diag_warning,
+    diagnostics::MullDiagnostics,
 };
 use mull_filters::{has_coverage, FilterChain, FilterChainConfig};
 use mull_state::{ExecutionResult, ExecutionState, ExecutionStatus, Mutant};
 use mull_tasks::{run_parallel_task, run_task};
 use mutant_extractor::extract_mutants;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::time::{Duration, Instant};
 
 use crate::reporting::show_report;
@@ -52,6 +54,172 @@ fn temp_file_path(prefix: &str, suffix: &str) -> String {
         pid,
         timestamp,
         suffix
+    )
+}
+
+fn canonical(path: &str) -> String {
+    std::fs::canonicalize(path)
+        .map(|p| p.to_string_lossy().into_owned())
+        .unwrap_or_else(|_| path.to_string())
+}
+
+/// Failing to open the default cache is not worth a warning, an explicit one is
+fn open_cache(
+    diag: &MullDiagnostics,
+    cli: &RunnerCli,
+    mutant_holders: &[String],
+    test_program: &str,
+) -> Option<Cache> {
+    if cli.no_cache {
+        return None;
+    }
+    let test_program = canonical(test_program);
+    let identity = RunIdentity {
+        executable: mutant_holders[0].clone(),
+        test_program: test_program.clone(),
+        args: cli.runner_args.clone(),
+        dylibs: mutant_holders[1..].to_vec(),
+        working_directory: std::env::current_dir()
+            .map(|p| p.to_string_lossy().into_owned())
+            .unwrap_or_default(),
+    };
+    let explicit = cli.cache_path.is_some();
+    let Some(path) = cli
+        .cache_path
+        .as_ref()
+        .map(PathBuf::from)
+        .or_else(|| default_cache_path(&identity))
+    else {
+        diag_debug!(diag, "No cache: cannot determine the cache directory");
+        return None;
+    };
+
+    let mut files: Vec<&str> = mutant_holders.iter().map(String::as_str).collect();
+    if Path::new(&test_program).is_file() && !files.contains(&test_program.as_str()) {
+        files.push(&test_program);
+    }
+    let opened = path
+        .parent()
+        .filter(|dir| !dir.as_os_str().is_empty())
+        .map_or(Ok(()), std::fs::create_dir_all)
+        .and_then(|_| fingerprint(&files))
+        .map_err(|e| e.to_string())
+        .and_then(|fp| {
+            Cache::open(
+                &path,
+                &identity.key(),
+                &fp,
+                Duration::from_millis(cli.shared.sqlite_busy_timeout as u64),
+            )
+            .map_err(|e| e.to_string())
+        });
+    match opened {
+        Ok(cache) => {
+            diag_debug!(diag, "Cache: {}", path.display());
+            Some(cache)
+        }
+        Err(e) if explicit => {
+            diag_warning!(diag, "Cannot open cache '{}': {}", path.display(), e);
+            None
+        }
+        Err(e) => {
+            diag_debug!(diag, "Cannot open cache '{}': {}", path.display(), e);
+            None
+        }
+    }
+}
+
+struct MutantRun<'a> {
+    executable: &'a str,
+    args: &'a [String],
+    timeout_ms: u64,
+    minimum_timeout_ms: u64,
+    capture_test_output: bool,
+    capture_mutant_output: bool,
+    workers: usize,
+    cache: Option<&'a Cache>,
+}
+
+fn run_mutants(
+    diag: &MullDiagnostics,
+    run: &MutantRun,
+    mutants: Vec<Mutant>,
+) -> Vec<(Mutant, ExecutionResult)> {
+    let MutantRun {
+        executable, args, ..
+    } = *run;
+    diag_debug!(diag, "Running mutants for: {}", executable);
+
+    let baseline = run_task(diag, "Baseline run", || {
+        run_program(
+            executable,
+            args,
+            &[],
+            Duration::from_millis(run.timeout_ms),
+            run.capture_test_output,
+        )
+        .unwrap_or_else(|e| e.exit(diag, executable))
+    });
+    baseline.error_on_failure(diag, "Original test failed (baseline run)");
+
+    let baseline_timeout = baseline.running_time as u64 * 10;
+    let mutant_timeout_ms = std::cmp::max(baseline_timeout, run.minimum_timeout_ms);
+    let mutant_timeout = Duration::from_millis(mutant_timeout_ms);
+    diag_debug!(
+        diag,
+        "Baseline: {}ms, mutant timeout: {}ms",
+        baseline.running_time,
+        mutant_timeout_ms
+    );
+    let total = mutants.len();
+    run_parallel_task(
+        diag,
+        "Running mutants",
+        run.workers,
+        mutants,
+        |idx, mutant| {
+            // A concurrent runner sharing the cache may have killed it meanwhile
+            if let Some(cache) = run.cache {
+                match cache.foreign_kill(&mutant) {
+                    Ok(Some(result)) => return (mutant, result),
+                    Ok(None) => {}
+                    Err(e) => diag_warning!(diag, "Cannot read cache: {}", e),
+                }
+            }
+            diag_debug!(
+                diag,
+                "[{}/{}] Running: {}={} {} {}",
+                idx + 1,
+                total,
+                mutant.identifier,
+                "1",
+                executable,
+                args.join(" ")
+            );
+            let result = run_program(
+                executable,
+                args,
+                &[(&mutant.identifier, "1")],
+                mutant_timeout,
+                run.capture_mutant_output,
+            )
+            .unwrap_or_else(|e| e.exit(diag, executable));
+            diag_debug!(
+                diag,
+                "[{}/{}] {} -> {}, {}ms",
+                idx + 1,
+                total,
+                mutant.identifier,
+                result.status,
+                result.running_time
+            );
+            if let Some(cache) = run.cache {
+                if let Err(e) = cache.store(&mutant, &result) {
+                    diag_warning!(diag, "Cannot write cache: {}", e);
+                }
+            }
+            (mutant, result)
+        },
     )
 }
 
@@ -121,6 +289,7 @@ fn main() {
             Duration::from_millis(timeout_ms),
             config.capture_test_output,
         )
+        .unwrap_or_else(|e| e.exit(&diag, executable))
     });
     warmup.error_on_failure(&diag, "Original test failed (warmup run)");
 
@@ -238,68 +407,53 @@ fn main() {
         return;
     }
 
-    diag_debug!(diag, "Running mutants for: {}", executable);
+    let cache = open_cache(&diag, &cli, &mutant_holders, executable);
+    let mut cached_results: Vec<(Mutant, ExecutionResult)> = Vec::new();
+    let pending: Vec<Mutant> = match cache.as_ref().map(Cache::load) {
+        Some(Ok(mut cached)) => filtered_mutants
+            .into_iter()
+            .filter_map(|mutant| {
+                let key = (mutant.identifier.clone(), mutant.replacement.clone());
+                match cached.remove(&key) {
+                    Some(hit) => {
+                        cached_results.push((mutant, hit.into_result()));
+                        None
+                    }
+                    None => Some(mutant),
+                }
+            })
+            .collect(),
+        Some(Err(e)) => {
+            diag_warning!(diag, "Cannot read cache: {}", e);
+            filtered_mutants
+        }
+        None => filtered_mutants,
+    };
+    if !cached_results.is_empty() {
+        diag_info!(diag, "Reusing {} cached result(s)", cached_results.len());
+    }
 
-    let baseline = run_task(&diag, "Baseline run", || {
-        run_program(
-            executable,
-            args,
-            &[],
-            Duration::from_millis(timeout_ms),
-            config.capture_test_output,
-        )
-    });
-    baseline.error_on_failure(&diag, "Original test failed (baseline run)");
-
-    let baseline_timeout = baseline.running_time as u64 * 10;
-    let min_timeout = cli.minimum_timeout.unwrap_or(30);
-    let mutant_timeout_ms = std::cmp::max(baseline_timeout, min_timeout);
-    let mutant_timeout = Duration::from_millis(mutant_timeout_ms);
-    diag_debug!(
-        diag,
-        "Baseline: {}ms, mutant timeout: {}ms",
-        baseline.running_time,
-        mutant_timeout_ms
-    );
-    let total = filtered_mutants.len();
-    let results: Vec<(Mutant, ExecutionResult)> = run_parallel_task(
-        &diag,
-        "Running mutants",
-        workers,
-        filtered_mutants,
-        |idx, mutant| {
-            diag_debug!(
-                diag,
-                "[{}/{}] Running: {}={} {} {}",
-                idx + 1,
-                total,
-                mutant.identifier,
-                "1",
-                executable,
-                args.join(" ")
-            );
-            let result = run_program(
+    let results = if pending.is_empty() {
+        Vec::new()
+    } else {
+        run_mutants(
+            &diag,
+            &MutantRun {
                 executable,
                 args,
-                &[(&mutant.identifier, "1")],
-                mutant_timeout,
-                config.capture_mutant_output,
-            );
-            diag_debug!(
-                diag,
-                "[{}/{}] {} -> {}, {}ms",
-                idx + 1,
-                total,
-                mutant.identifier,
-                result.status,
-                result.running_time
-            );
-            (mutant, result)
-        },
-    );
+                timeout_ms,
+                minimum_timeout_ms: cli.minimum_timeout.unwrap_or(30),
+                capture_test_output: config.capture_test_output,
+                capture_mutant_output: config.capture_mutant_output,
+                workers,
+                cache: cache.as_ref(),
+            },
+            pending,
+        )
+    };
 
     let mut state = ExecutionState::default();
-    for (mutant, result) in results.into_iter() {
+    for (mutant, result) in cached_results.into_iter().chain(results) {
         state.execution_results.insert(mutant, result);
     }
     // Add not-covered mutants with NotCovered status
