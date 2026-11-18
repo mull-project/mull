@@ -110,6 +110,13 @@ static clang::Decl *enclosingDecl(clang::FunctionDecl *function,
   return nullptr;
 }
 
+/// The definition the IR comes from: an instantiation, unlike the template its operators have types
+static clang::Decl *emittedDecl(ASTUnitWrapper &ast, MutationPoint *point,
+                                clang::SourceLocation location) {
+  clang::FunctionDecl *function = ast.getFunction(linkageName(point));
+  return function ? enclosingDecl(function, ast.getSourceManager(), location) : nullptr;
+}
+
 static const clang::Stmt *findMutantExpression(MutationPoint *point,
                                                VisitorParameters &visitorParameters,
                                                clang::Decl *decl) {
@@ -301,11 +308,8 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
   }
 
   clang::Decl *decl = ast->getDecl(location);
-  /// The IR comes from an instantiation, unlike the template its operators have types
-  if (clang::FunctionDecl *function = ast->getFunction(linkageName(point))) {
-    if (clang::Decl *enclosing = enclosingDecl(function, sourceManager, location)) {
-      decl = enclosing;
-    }
+  if (clang::Decl *emitted = emittedDecl(*ast, point, location)) {
+    decl = emitted;
   }
   if (!decl) {
     return true;
