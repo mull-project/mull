@@ -1,0 +1,18 @@
+Globals defined in a header are initialized by whichever unit's copy the linker keeps. a.cpp sees an
+operator+ overload, b.cpp does not: both copies must have the mutants, in either link order.
+
+RUN: rm -rf %S/Output && mkdir -p %S/Output/sandbox
+RUN: cp %S/a.cpp %S/b.cpp %S/globals.h %S/mull.yml %S/Output/sandbox/
+RUN: cd %S/Output/sandbox && %clang_cxx %sysroot -std=c++17 -O0 -g -grecord-command-line %pass_mull_ir_frontend -c a.cpp -o %S/Output/a.o
+RUN: cd %S/Output/sandbox && %clang_cxx %sysroot -std=c++17 -O0 -g -grecord-command-line %pass_mull_ir_frontend -c b.cpp -o %S/Output/b.o
+RUN: %clang_cxx %sysroot %S/Output/a.o %S/Output/b.o %libcxx -o %S/Output/ab.exe
+RUN: %clang_cxx %sysroot %S/Output/b.o %S/Output/a.o %libcxx -o %S/Output/ba.exe
+RUN: cd %S/Output/sandbox && %mull_runner -allow-surviving -reporters=IDE -ide-reporter-show-killed %S/Output/ab.exe | %filecheck %s --dump-input=fail --match-full-lines
+RUN: cd %S/Output/sandbox && %mull_runner -allow-surviving -reporters=IDE -ide-reporter-show-killed %S/Output/ba.exe | %filecheck %s --dump-input=fail --match-full-lines
+CHECK:[info] Killed mutants (5/5):
+CHECK-NEXT:{{.*}}b.cpp:4:30: warning: Killed: Replaced + with - [cxx_add_to_sub]
+CHECK:{{.*}}b.cpp:4:44: warning: Killed: Replaced + with - [cxx_add_to_sub]
+CHECK:{{.*}}globals.h:11:55: warning: Killed: Replaced + with - [cxx_add_to_sub]
+CHECK:{{.*}}globals.h:13:44: warning: Killed: Replaced + with - [cxx_add_to_sub]
+CHECK:{{.*}}globals.h:15:28: warning: Killed: Replaced + with - [cxx_add_to_sub]
+CHECK:[info] Mutation score: 100%

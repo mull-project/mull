@@ -15,6 +15,7 @@
 #include <clang/Lex/Lexer.h>
 #include <irm/IRMutation.h>
 #include <llvm/IR/DebugInfoMetadata.h>
+#include <llvm/IR/InstIterator.h>
 #include <llvm/IR/IntrinsicInst.h>
 #include <optional>
 
@@ -110,11 +111,38 @@ static clang::Decl *enclosingDecl(clang::FunctionDecl *function,
   return nullptr;
 }
 
+/// The global whose initializer, written at the location, the IR function sets
+static clang::Decl *initializedGlobal(ASTUnitWrapper &ast, const llvm::Function &function,
+                                      clang::SourceLocation location) {
+  for (const llvm::Instruction &instruction : llvm::instructions(function)) {
+    for (const llvm::Value *operand : instruction.operands()) {
+      auto global = llvm::dyn_cast<llvm::GlobalVariable>(operand->stripInBoundsConstantOffsets());
+      if (!global) {
+        continue;
+      }
+      auto var = llvm::dyn_cast_or_null<clang::VarDecl>(ast.getDeclByName(global->getName().str()));
+      if (var && contains(ast.getSourceManager(), var->getSourceRange(), location)) {
+        return var;
+      }
+    }
+  }
+  return nullptr;
+}
+
 /// The definition the IR comes from: an instantiation, unlike the template its operators have types
 static clang::Decl *emittedDecl(ASTUnitWrapper &ast, MutationPoint *point,
                                 clang::SourceLocation location) {
-  clang::FunctionDecl *function = ast.getFunction(linkageName(point));
-  return function ? enclosingDecl(function, ast.getSourceManager(), location) : nullptr;
+  if (auto function =
+          llvm::dyn_cast_or_null<clang::FunctionDecl>(ast.getDeclByName(linkageName(point)))) {
+    return enclosingDecl(function, ast.getSourceManager(), location);
+  }
+  const llvm::Function &function =
+      *llvm::cast<llvm::Instruction>(point->getOriginalValue())->getFunction();
+  /// Global initializers run in artificial functions
+  if (function.getSubprogram() && function.getSubprogram()->isArtificial()) {
+    return initializedGlobal(ast, function, location);
+  }
+  return nullptr;
 }
 
 static const clang::Stmt *findMutantExpression(MutationPoint *point,
@@ -123,7 +151,7 @@ static const clang::Stmt *findMutantExpression(MutationPoint *point,
   switch (point->getMutator()->mutatorKind()) {
   case MutatorKind::CXX_RemoveVoidCall: {
     RemoveVoidFunctionVisitor visitor(visitorParameters);
-    visitor.TraverseDecl(decl);
+    traverseDecl(visitor, decl);
     auto *call = llvm::cast_or_null<clang::CallExpr>(visitor.foundMutant());
     /// Only builtins like `memcpy` become intrinsics, `llvm.lifetime.end` and others are not calls
     if (call && llvm::isa<llvm::IntrinsicInst>(point->getOriginalValue()) &&
@@ -135,12 +163,12 @@ static const clang::Stmt *findMutantExpression(MutationPoint *point,
   case MutatorKind::CXX_ReplaceScalarCallZero:
   case MutatorKind::CXX_ReplaceScalarCallNonZero: {
     ReplaceCallVisitor visitor(visitorParameters);
-    visitor.TraverseDecl(decl);
+    traverseDecl(visitor, decl);
     return visitor.foundMutant();
   }
   case MutatorKind::NegateMutator: {
     NegateConditionVisitor visitor(visitorParameters);
-    visitor.TraverseDecl(decl);
+    traverseDecl(visitor, decl);
     return visitor.foundMutant();
   }
   case MutatorKind::CXX_LessThanToLessOrEqual:
@@ -275,7 +303,7 @@ static const clang::Stmt *findMutantExpression(MutationPoint *point,
         visitorParameters, decl, clang::BinaryOperator::Opcode::BO_Assign);
   case MutatorKind::CXX_InitConst: {
     cxx::VarDeclVisitor visitor(visitorParameters);
-    visitor.TraverseDecl(decl);
+    traverseDecl(visitor, decl);
     return visitor.foundMutant();
   }
 

@@ -5,7 +5,7 @@ using namespace mull;
 clang::Expr *cxx::UnaryVisitor::findMutant(const VisitorParameters &parameters,
                                            clang::UnaryOperator::Opcode opcode, clang::Decl *decl) {
   UnaryVisitor visitor(parameters, opcode);
-  visitor.TraverseDecl(decl);
+  traverseDecl(visitor, decl);
   return visitor.foundMutant();
 }
 

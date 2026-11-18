@@ -5,7 +5,7 @@ using namespace mull;
 clang::Expr *cxx::BinaryVisitor::findMutant(const VisitorParameters &parameters, clang::Decl *decl,
                                             clang::BinaryOperator::Opcode opcode) {
   BinaryVisitor visitor(parameters, opcode);
-  visitor.TraverseDecl(decl);
+  traverseDecl(visitor, decl);
   return visitor.foundMutant();
 }
 

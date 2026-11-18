@@ -53,13 +53,13 @@ private:
   std::vector<clang::Decl *> &declarations;
 };
 
-/// Definitions that get code: instantiations and lambda call operators too, not template patterns
-class FunctionVisitor : public clang::RecursiveASTVisitor<FunctionVisitor> {
+/// Definitions that get code: instantiations, lambda call operators and globals, not templates
+class EmittedDeclVisitor : public clang::RecursiveASTVisitor<EmittedDeclVisitor> {
 public:
-  FunctionVisitor(clang::ASTContext &context,
-                  std::unordered_map<std::string, clang::FunctionDecl *> &functions)
+  EmittedDeclVisitor(clang::ASTContext &context,
+                     std::unordered_map<std::string, clang::Decl *> &decls)
       : sourceManager(context.getSourceManager()), mangler(context.createMangleContext()),
-        functions(functions) {}
+        decls(decls) {}
 
   bool shouldVisitTemplateInstantiations() const {
     return true;
@@ -92,17 +92,35 @@ public:
     return true;
   }
 
+  /// Globals with initializers, a static member of a class template has it in a redeclaration
+  bool VisitVarDecl(clang::VarDecl *decl) {
+    clang::VarDecl *definition = decl->getDefinition();
+    if (!decl->hasGlobalStorage() || decl->isStaticLocal() || !definition ||
+        !definition->hasInit() || decl->isInvalidDecl() || decl->getType()->isDependentType() ||
+        decl->getDeclContext()->isDependentContext() || decl->getDescribedVarTemplate() ||
+        llvm::isa<clang::VarTemplatePartialSpecializationDecl>(decl) ||
+        sourceManager.isInSystemHeader(decl->getLocation())) {
+      return true;
+    }
+    if (mangler->shouldMangleDeclName(decl)) {
+      add(clang::GlobalDecl(decl), definition);
+    } else {
+      decls.emplace(decl->getName().str(), definition);
+    }
+    return true;
+  }
+
 private:
-  void add(clang::GlobalDecl global, clang::FunctionDecl *decl) {
+  void add(clang::GlobalDecl global, clang::Decl *decl) {
     std::string name;
     llvm::raw_string_ostream stream(name);
     mangler->mangleName(global, stream);
-    functions.emplace(std::move(stream.str()), decl);
+    decls.emplace(std::move(stream.str()), decl);
   }
 
   clang::SourceManager &sourceManager;
   std::unique_ptr<clang::MangleContext> mangler;
-  std::unordered_map<std::string, clang::FunctionDecl *> &functions;
+  std::unordered_map<std::string, clang::Decl *> &decls;
 };
 
 ASTUnitWrapper::ASTUnitWrapper(std::unique_ptr<clang::ASTUnit> ast) : ast(std::move(ast)) {
@@ -263,22 +281,22 @@ clang::Decl *ASTUnitWrapper::getDecl(clang::SourceLocation &location) {
   return nullptr;
 }
 
-void ASTUnitWrapper::recordFunctions() {
+void ASTUnitWrapper::recordEmittedDecls() {
   assert(ast);
-  functionsByName.emplace();
-  FunctionVisitor visitor(ast->getASTContext(), *functionsByName);
+  declsByName.emplace();
+  EmittedDeclVisitor visitor(ast->getASTContext(), *declsByName);
   visitor.TraverseDecl(ast->getASTContext().getTranslationUnitDecl());
 }
 
-clang::FunctionDecl *ASTUnitWrapper::getFunction(const std::string &mangledName) {
-  if (!ast || mangledName.empty()) {
+clang::Decl *ASTUnitWrapper::getDeclByName(const std::string &name) {
+  if (!ast || name.empty()) {
     return nullptr;
   }
-  if (!functionsByName) {
-    recordFunctions();
+  if (!declsByName) {
+    recordEmittedDecls();
   }
-  auto it = functionsByName->find(mangledName);
-  return it == functionsByName->end() ? nullptr : it->second;
+  auto it = declsByName->find(name);
+  return it == declsByName->end() ? nullptr : it->second;
 }
 
 bool ASTUnitWrapper::hasAST() const {

@@ -82,7 +82,8 @@ std::vector<std::string> toStdVector(const rust::Vec<rust::String> &v) {
 bool shouldSkipFunction(llvm::Function *function) {
   if (function->isVarArg())
     return true;
-  if (SourceLocation::hasNullLocation(function))
+  /// Artificial functions, e.g. global initializers, have no line but their instructions do
+  if (!function->getSubprogram())
     return true;
   for (auto &bb : *function)
     if (bb.hasAddressTaken())

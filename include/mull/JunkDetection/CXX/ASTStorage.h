@@ -29,13 +29,13 @@ public:
   bool isInSystemHeader(clang::SourceLocation &location);
 
   clang::Decl *getDecl(clang::SourceLocation &location);
-  /// The definition, e.g. a template instantiation, emitted under the mangled name
-  clang::FunctionDecl *getFunction(const std::string &mangledName);
+  /// The function or global, e.g. a template instantiation, emitted under the symbol name
+  clang::Decl *getDeclByName(const std::string &name);
   bool hasAST() const;
 
 private:
   void recordDeclarations();
-  void recordFunctions();
+  void recordEmittedDecls();
   void recordFileEntries();
 
   clang::FileID findFileID(const mull::SourceLocation &sourceLocation);
@@ -44,7 +44,7 @@ private:
   std::unique_ptr<clang::ASTUnit> ast;
   std::vector<clang::Decl *> decls;
   /// Built on first use
-  std::optional<std::unordered_map<std::string, clang::FunctionDecl *>> functionsByName;
+  std::optional<std::unordered_map<std::string, clang::Decl *>> declsByName;
   /// Real path -> file of the translation unit
   std::unordered_map<std::string, clang::FileID> filesByRealPath;
   /// Debug info path -> file, invalid if not part of the translation unit

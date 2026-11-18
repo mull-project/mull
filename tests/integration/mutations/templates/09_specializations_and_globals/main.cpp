@@ -55,19 +55,22 @@ int main() {
          scaled<int> != 8 || global != 9;
 }
 
-// Explicit and partial specializations, explicit instantiations, out-of-line members, hidden friends.
-// Globals initialized at startup are not mutated: their initializer functions have no line (Driver.cpp)
+// Explicit and partial specializations, explicit instantiations, out-of-line members, hidden friends,
+// and globals initialized at startup: static members, variable templates and plain globals
 
 // RUN: rm -rf %S/Output && mkdir -p %S/Output/sandbox
 // RUN: cp %s %S/mull.yml %S/Output/sandbox/
 // RUN: cd %S/Output/sandbox && %clang_cxx %sysroot -O0 -g -grecord-command-line %pass_mull_ir_frontend %S/Output/sandbox/main.cpp -o %S/Output/main.exe
 // RUN: cd %S/Output/sandbox && %mull_runner -allow-surviving -reporters=IDE -ide-reporter-show-killed %S/Output/main.exe | %filecheck %s --dump-input=fail --match-full-lines --implicit-check-not=warning:
-// CHECK:[info] Killed mutants (7/7):
+// CHECK:[info] Killed mutants (10/10):
 // CHECK-NEXT:{{.*}}main.cpp:8:12: warning: Killed: Replaced + with - [cxx_add_to_sub]
 // CHECK:{{.*}}main.cpp:11:12: warning: Killed: Replaced + with - [cxx_add_to_sub]
 // CHECK:{{.*}}main.cpp:19:18: warning: Killed: Replaced + with - [cxx_add_to_sub]
 // CHECK:{{.*}}main.cpp:22:20: warning: Killed: Replaced + with - [cxx_add_to_sub]
 // CHECK:{{.*}}main.cpp:28:16: warning: Killed: Replaced + with - [cxx_add_to_sub]
 // CHECK:{{.*}}main.cpp:32:16: warning: Killed: Replaced + with - [cxx_add_to_sub]
+// CHECK:{{.*}}main.cpp:35:50: warning: Killed: Replaced + with - [cxx_add_to_sub]
 // CHECK:{{.*}}main.cpp:39:15: warning: Killed: Replaced + with - [cxx_add_to_sub]
+// CHECK:{{.*}}main.cpp:43:42: warning: Killed: Replaced + with - [cxx_add_to_sub]
+// CHECK:{{.*}}main.cpp:45:19: warning: Killed: Replaced + with - [cxx_add_to_sub]
 // CHECK:[info] Mutation score: 100%
