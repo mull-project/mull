@@ -96,7 +96,10 @@ static bool contains(clang::SourceManager &sourceManager, clang::SourceRange ran
 static clang::Decl *enclosingDecl(clang::FunctionDecl *function,
                                   clang::SourceManager &sourceManager,
                                   clang::SourceLocation location) {
-  if (contains(sourceManager, function->getSourceRange(), location)) {
+  /// Clang 16 collapses the range of an instantiated lambda call operator, its body keeps one
+  clang::Stmt *body = function->getBody();
+  if (contains(sourceManager, function->getSourceRange(), location) ||
+      (body && contains(sourceManager, body->getSourceRange(), location))) {
     return function;
   }
   if (auto ctor = llvm::dyn_cast<clang::CXXConstructorDecl>(function)) {
