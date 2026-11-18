@@ -84,31 +84,31 @@ fn open_cache(
             .unwrap_or_default(),
     };
     let explicit = cli.cache_path.is_some();
-    let Some(path) = cli
-        .cache_path
-        .as_ref()
-        .map(PathBuf::from)
-        .or_else(|| default_cache_path(&identity))
-    else {
-        diag_debug!(diag, "No cache: cannot determine the cache directory");
-        return None;
+    let path = match &cli.cache_path {
+        Some(path) => PathBuf::from(path),
+        None => {
+            let mut files: Vec<&str> = mutant_holders.iter().map(String::as_str).collect();
+            if Path::new(&test_program).is_file() && !files.contains(&test_program.as_str()) {
+                files.push(&test_program);
+            }
+            match fingerprint(&files) {
+                Ok(fp) => default_cache_path(&identity, &fp),
+                Err(e) => {
+                    diag_debug!(diag, "No cache: cannot fingerprint the run: {}", e);
+                    return None;
+                }
+            }
+        }
     };
-
-    let mut files: Vec<&str> = mutant_holders.iter().map(String::as_str).collect();
-    if Path::new(&test_program).is_file() && !files.contains(&test_program.as_str()) {
-        files.push(&test_program);
-    }
     let opened = path
         .parent()
         .filter(|dir| !dir.as_os_str().is_empty())
         .map_or(Ok(()), std::fs::create_dir_all)
-        .and_then(|_| fingerprint(&files))
         .map_err(|e| e.to_string())
-        .and_then(|fp| {
+        .and_then(|_| {
             Cache::open(
                 &path,
                 &identity.key(),
-                &fp,
                 Duration::from_millis(cli.shared.sqlite_busy_timeout as u64),
             )
             .map_err(|e| e.to_string())
@@ -118,12 +118,13 @@ fn open_cache(
             diag_info!(diag, "Using cache: {}", path.display());
             Some(cache)
         }
-        Err(e) if explicit => {
-            diag_warning!(diag, "Cannot open cache '{}': {}", path.display(), e);
-            None
-        }
         Err(e) => {
-            diag_debug!(diag, "Cannot open cache '{}': {}", path.display(), e);
+            let message = format!("Cannot open cache '{}': {}", path.display(), e);
+            if explicit {
+                diag_warning!(diag, "{}", message);
+            } else {
+                diag_debug!(diag, "{}", message);
+            }
             None
         }
     }
@@ -350,133 +351,78 @@ fn main() {
         );
     }
 
-    // Dry run mode - assign DryRun status to all mutants without executing
-    if cli.dry_run || config.dry_run_enabled {
-        let all_mutants: Vec<Mutant> = filtered_mutants
-            .into_iter()
-            .chain(not_covered_mutants)
-            .collect();
-        let mut state = ExecutionState::default();
+    let dry_run = cli.dry_run || config.dry_run_enabled;
+    let mut state = ExecutionState::default();
+    if dry_run {
         run_task(&diag, "Dry run", || {
-            for mutant in all_mutants {
+            for mutant in filtered_mutants.into_iter().chain(not_covered_mutants) {
                 state.execution_results.insert(
                     mutant,
-                    ExecutionResult {
-                        status: ExecutionStatus::DryRun,
-                        exit_status: 0,
-                        running_time: 0,
-                        stdout_output: String::new(),
-                        stderr_output: String::new(),
-                    },
+                    ExecutionResult::with_status(ExecutionStatus::DryRun),
                 );
             }
         });
-        state
-            .info
-            .insert("Mull Version".into(), env!("MULL_VERSION").into());
-        show_report(&diag, &state, cli.shared, &start, "dry run");
-        return;
-    }
-
-    // If no mutants (covered or not-covered), show report and exit
-    if filtered_mutants.is_empty() && not_covered_mutants.is_empty() {
-        let state = ExecutionState::default();
-        show_report(&diag, &state, cli.shared, &start, "execution");
-        return;
-    }
-
-    // If no covered mutants, skip running tests but still report not-covered
-    if filtered_mutants.is_empty() {
-        let mut state = ExecutionState::default();
+    } else {
+        if !filtered_mutants.is_empty() {
+            let cache = open_cache(&diag, &cli, &mutant_holders, executable);
+            let mut cached = match cache.as_ref().map(Cache::load) {
+                Some(Ok(cached)) => cached,
+                Some(Err(e)) => {
+                    diag_warning!(diag, "Cannot read cache: {}", e);
+                    Default::default()
+                }
+                None => Default::default(),
+            };
+            let mut pending = Vec::new();
+            for mutant in filtered_mutants {
+                let key = (mutant.identifier.clone(), mutant.replacement.clone());
+                match cached.remove(&key) {
+                    Some(result) => {
+                        state.execution_results.insert(mutant, result);
+                    }
+                    None => pending.push(mutant),
+                }
+            }
+            if !state.execution_results.is_empty() {
+                diag_info!(
+                    diag,
+                    "Reusing {} cached result(s)",
+                    state.execution_results.len()
+                );
+            }
+            if !pending.is_empty() {
+                let run = MutantRun {
+                    executable,
+                    args,
+                    timeout_ms,
+                    minimum_timeout_ms: cli.minimum_timeout.unwrap_or(30),
+                    capture_test_output: config.capture_test_output,
+                    capture_mutant_output: config.capture_mutant_output,
+                    workers,
+                    cache: cache.as_ref(),
+                };
+                state
+                    .execution_results
+                    .extend(run_mutants(&diag, &run, pending));
+            }
+        }
         for mutant in not_covered_mutants {
             state.execution_results.insert(
                 mutant,
-                ExecutionResult {
-                    status: ExecutionStatus::NotCovered,
-                    exit_status: 0,
-                    running_time: 0,
-                    stdout_output: String::new(),
-                    stderr_output: String::new(),
-                },
+                ExecutionResult::with_status(ExecutionStatus::NotCovered),
             );
         }
+    }
+    if !state.execution_results.is_empty() {
         state
             .info
-            .insert("Mull Version".into(), env!("MULL_VERSION").into());
-        show_report(&diag, &state, cli.shared, &start, "execution");
-        return;
+            .insert("Mull Version".into(), mull_version.into());
     }
 
-    let cache = open_cache(&diag, &cli, &mutant_holders, executable);
-    let mut cached_results: Vec<(Mutant, ExecutionResult)> = Vec::new();
-    let pending: Vec<Mutant> = match cache.as_ref().map(Cache::load) {
-        Some(Ok(mut cached)) => filtered_mutants
-            .into_iter()
-            .filter_map(|mutant| {
-                let key = (mutant.identifier.clone(), mutant.replacement.clone());
-                match cached.remove(&key) {
-                    Some(hit) => {
-                        cached_results.push((mutant, hit.into_result()));
-                        None
-                    }
-                    None => Some(mutant),
-                }
-            })
-            .collect(),
-        Some(Err(e)) => {
-            diag_warning!(diag, "Cannot read cache: {}", e);
-            filtered_mutants
-        }
-        None => filtered_mutants,
-    };
-    if !cached_results.is_empty() {
-        diag_info!(diag, "Reusing {} cached result(s)", cached_results.len());
-    }
-
-    let results = if pending.is_empty() {
-        Vec::new()
-    } else {
-        run_mutants(
-            &diag,
-            &MutantRun {
-                executable,
-                args,
-                timeout_ms,
-                minimum_timeout_ms: cli.minimum_timeout.unwrap_or(30),
-                capture_test_output: config.capture_test_output,
-                capture_mutant_output: config.capture_mutant_output,
-                workers,
-                cache: cache.as_ref(),
-            },
-            pending,
-        )
-    };
-
-    let mut state = ExecutionState::default();
-    for (mutant, result) in cached_results.into_iter().chain(results) {
-        state.execution_results.insert(mutant, result);
-    }
-    // Add not-covered mutants with NotCovered status
-    for mutant in not_covered_mutants {
-        state.execution_results.insert(
-            mutant,
-            ExecutionResult {
-                status: ExecutionStatus::NotCovered,
-                exit_status: 0,
-                running_time: 0,
-                stdout_output: String::new(),
-                stderr_output: String::new(),
-            },
-        );
-    }
-    state
-        .info
-        .insert("Mull Version".into(), env!("MULL_VERSION").into());
-
-    // Cleanup temp coverage file
     if let Some(raw_path) = &raw_coverage_path {
         let _ = std::fs::remove_file(raw_path);
     }
 
-    show_report(&diag, &state, cli.shared, &start, "execution");
+    let label = if dry_run { "dry run" } else { "execution" };
+    show_report(&diag, &state, cli.shared, &start, label);
 }

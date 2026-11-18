@@ -1,5 +1,5 @@
-use mull_state::{ExecutionResult, ExecutionStatus, Mutant};
-use rusqlite::{params, Connection, OptionalExtension, Row, TransactionBehavior};
+use mull_state::{sqlite, ExecutionResult, ExecutionStatus, Mutant};
+use rusqlite::Connection;
 use std::collections::HashMap;
 use std::fs::File;
 use std::io::{self, Read};
@@ -8,53 +8,7 @@ use std::sync::Mutex;
 use std::time::Duration;
 use twox_hash::XxHash3_128;
 
-const SCHEMA_VERSION: i64 = 1;
-
-const SCHEMA: &str = r#"
-CREATE TABLE run (
-  id INTEGER PRIMARY KEY,
-  identity TEXT UNIQUE NOT NULL,
-  fingerprint TEXT NOT NULL
-);
-CREATE TABLE result (
-  run_id INTEGER NOT NULL REFERENCES run(id) ON DELETE CASCADE,
-  mutant_id TEXT NOT NULL,
-  replacement TEXT NOT NULL,
-  status INTEGER NOT NULL,
-  exit_status INTEGER NOT NULL,
-  duration INTEGER NOT NULL,
-  stdout TEXT NOT NULL,
-  stderr TEXT NOT NULL,
-  PRIMARY KEY (run_id, mutant_id, replacement)
-);
-CREATE INDEX result_by_mutant ON result(mutant_id, replacement);
-"#;
-
-const DROP_SCHEMA: &str = r#"
-DROP TABLE IF EXISTS result;
-DROP TABLE IF EXISTS run;
-"#;
-
-const RESULT_COLUMNS: &str =
-    "mutant_id, replacement, status, exit_status, duration, stdout, stderr";
-
-/// Statuses that prove a mutant is killed regardless of which program ran it
-const KILLED: [ExecutionStatus; 4] = [
-    ExecutionStatus::Failed,
-    ExecutionStatus::Crashed,
-    ExecutionStatus::AbnormalExit,
-    ExecutionStatus::FailFast,
-];
-
-fn killed_list() -> String {
-    KILLED
-        .iter()
-        .map(|s| (*s as i32).to_string())
-        .collect::<Vec<_>>()
-        .join(",")
-}
-
-/// What a run is: the cache file it uses by default and its row in a shared cache
+/// What a run is: the cache file it uses by default and its rows in a shared cache
 #[derive(Debug, Clone)]
 pub struct RunIdentity {
     pub executable: String,
@@ -114,109 +68,28 @@ pub fn fingerprint<P: AsRef<Path>>(files: &[P]) -> io::Result<String> {
     Ok(format!("{:032x}", hasher.finish_128()))
 }
 
-/// `$XDG_CACHE_HOME/mull/<identity>.sqlite`, falling back to `~/.cache`
-pub fn default_cache_path(identity: &RunIdentity) -> Option<PathBuf> {
-    let base = std::env::var_os("XDG_CACHE_HOME")
-        .filter(|v| !v.is_empty())
-        .map(PathBuf::from)
-        .or_else(|| {
-            std::env::var_os("HOME")
-                .filter(|v| !v.is_empty())
-                .map(|home| PathBuf::from(home).join(".cache"))
-        })?;
-    Some(base.join("mull").join(format!("{}.sqlite", identity.key())))
+/// `<temp dir>/mull/<identity>-<fingerprint>.sqlite`, a rebuild gets a new file
+pub fn default_cache_path(identity: &RunIdentity, fingerprint: &str) -> PathBuf {
+    std::env::temp_dir()
+        .join("mull")
+        .join(format!("{}-{}.sqlite", identity.key(), fingerprint))
 }
 
 pub struct Cache {
     path: PathBuf,
     busy_timeout: Duration,
-    run_id: i64,
+    identity: String,
     connections: Mutex<Vec<Connection>>,
 }
 
-fn connect(path: &Path, busy_timeout: Duration) -> rusqlite::Result<Connection> {
-    let conn = Connection::open(path)?;
-    conn.busy_timeout(busy_timeout)?;
-    conn.execute_batch(
-        "PRAGMA journal_mode = WAL; PRAGMA synchronous = NORMAL; PRAGMA foreign_keys = ON;",
-    )?;
-    Ok(conn)
-}
-
-fn read_result(row: &Row) -> rusqlite::Result<(String, String, ExecutionResult)> {
-    Ok((
-        row.get(0)?,
-        row.get(1)?,
-        ExecutionResult {
-            status: ExecutionStatus::from_i32(row.get(2)?),
-            exit_status: row.get(3)?,
-            running_time: row.get(4)?,
-            stdout_output: row.get(5)?,
-            stderr_output: row.get(6)?,
-        },
-    ))
-}
-
-/// Results a run may reuse: its own, or a kill from any other run
-pub enum Cached {
-    Own(ExecutionResult),
-    Foreign(ExecutionResult),
-}
-
-impl Cached {
-    pub fn into_result(self) -> ExecutionResult {
-        match self {
-            Cached::Own(r) | Cached::Foreign(r) => r,
-        }
-    }
-}
-
 impl Cache {
-    /// Registers the run; its old results are dropped when the fingerprint changed
-    pub fn open(
-        path: &Path,
-        identity: &str,
-        fingerprint: &str,
-        busy_timeout: Duration,
-    ) -> rusqlite::Result<Self> {
-        let mut conn = connect(path, busy_timeout)?;
-        let tx = conn.transaction_with_behavior(TransactionBehavior::Immediate)?;
-        let version: i64 = tx.query_row("PRAGMA user_version", [], |r| r.get(0))?;
-        if version != SCHEMA_VERSION {
-            tx.execute_batch(DROP_SCHEMA)?;
-            tx.execute_batch(SCHEMA)?;
-            tx.execute_batch(&format!("PRAGMA user_version = {}", SCHEMA_VERSION))?;
-        }
-        let existing: Option<(i64, String)> = tx
-            .query_row(
-                "SELECT id, fingerprint FROM run WHERE identity = ?1",
-                [identity],
-                |r| Ok((r.get(0)?, r.get(1)?)),
-            )
-            .optional()?;
-        let run_id = match existing {
-            Some((id, stored)) if stored == fingerprint => id,
-            Some((id, _)) => {
-                tx.execute("DELETE FROM result WHERE run_id = ?1", [id])?;
-                tx.execute(
-                    "UPDATE run SET fingerprint = ?1 WHERE id = ?2",
-                    params![fingerprint, id],
-                )?;
-                id
-            }
-            None => {
-                tx.execute(
-                    "INSERT INTO run (identity, fingerprint) VALUES (?1, ?2)",
-                    [identity, fingerprint],
-                )?;
-                tx.last_insert_rowid()
-            }
-        };
-        tx.commit()?;
+    pub fn open(path: &Path, identity: &str, busy_timeout: Duration) -> rusqlite::Result<Self> {
+        let conn = sqlite::connect_cache(path, busy_timeout)?;
+        sqlite::prepare_cache(&conn)?;
         Ok(Self {
             path: path.to_path_buf(),
             busy_timeout,
-            run_id,
+            identity: identity.to_string(),
             connections: Mutex::new(vec![conn]),
         })
     }
@@ -228,89 +101,37 @@ impl Cache {
         let pooled = self.connections.lock().unwrap().pop();
         let conn = match pooled {
             Some(c) => c,
-            None => connect(&self.path, self.busy_timeout)?,
+            None => sqlite::connect_cache(&self.path, self.busy_timeout)?,
         };
         let result = f(&conn);
         self.connections.lock().unwrap().push(conn);
         result
     }
 
-    /// Everything reusable for this run, keyed by (mutant id, replacement)
-    pub fn load(&self) -> rusqlite::Result<HashMap<(String, String), Cached>> {
-        self.with_connection(|conn| {
-            let mut cached = HashMap::new();
-            // Foreign kills first: a kill elsewhere outranks a survivor here
-            let mut stmt = conn.prepare(&format!(
-                "SELECT {} FROM result WHERE run_id != ?1 AND status IN ({}) ORDER BY run_id DESC",
-                RESULT_COLUMNS,
-                killed_list()
-            ))?;
-            for row in stmt.query_map([self.run_id], read_result)? {
-                let (id, replacement, result) = row?;
-                // Lowest run id wins, so the choice does not depend on row order
-                cached.insert((id, replacement), Cached::Foreign(result));
-            }
-            let mut stmt = conn.prepare(&format!(
-                "SELECT {} FROM result WHERE run_id = ?1",
-                RESULT_COLUMNS
-            ))?;
-            for row in stmt.query_map([self.run_id], read_result)? {
-                let (id, replacement, result) = row?;
-                let key = (id, replacement);
-                if result.status != ExecutionStatus::Passed || !cached.contains_key(&key) {
-                    cached.insert(key, Cached::Own(result));
-                }
-            }
-            Ok(cached)
-        })
+    /// Own results and foreign kills, keyed by (mutant id, replacement)
+    pub fn load(&self) -> rusqlite::Result<HashMap<(String, String), ExecutionResult>> {
+        self.with_connection(|conn| sqlite::load_cached(conn, &self.identity))
     }
 
     /// A kill recorded by another run since `load`, e.g. by a concurrent runner
     pub fn foreign_kill(&self, mutant: &Mutant) -> rusqlite::Result<Option<ExecutionResult>> {
-        self.with_connection(|conn| {
-            let mut stmt = conn.prepare_cached(&format!(
-                "SELECT {} FROM result WHERE mutant_id = ?1 AND replacement = ?2 AND run_id != ?3 AND status IN ({}) ORDER BY run_id LIMIT 1",
-                RESULT_COLUMNS,
-                killed_list()
-            ))?;
-            stmt.query_row(
-                params![mutant.identifier, mutant.replacement, self.run_id],
-                read_result,
-            )
-            .optional()
-            .map(|row| row.map(|(_, _, result)| result))
-        })
+        self.with_connection(|conn| sqlite::foreign_kill(conn, &self.identity, mutant))
     }
 
     pub fn store(&self, mutant: &Mutant, result: &ExecutionResult) -> rusqlite::Result<()> {
         if !is_cacheable(result.status) {
             return Ok(());
         }
-        self.with_connection(|conn| {
-            let mut stmt = conn.prepare_cached(&format!(
-                "INSERT OR REPLACE INTO result (run_id, {}) VALUES (?1, ?2, ?3, ?4, ?5, ?6, ?7, ?8)",
-                RESULT_COLUMNS
-            ))?;
-            stmt.execute(params![
-                self.run_id,
-                mutant.identifier,
-                mutant.replacement,
-                result.status as i32,
-                result.exit_status,
-                result.running_time,
-                result.stdout_output,
-                result.stderr_output,
-            ])?;
-            Ok(())
-        })
+        self.with_connection(|conn| sqlite::store_cached(conn, &self.identity, mutant, result))
     }
 }
 
 /// Only outcomes of an actual mutant run
 fn is_cacheable(status: ExecutionStatus) -> bool {
-    status == ExecutionStatus::Passed
-        || status == ExecutionStatus::Timedout
-        || KILLED.contains(&status)
+    !matches!(
+        status,
+        ExecutionStatus::NotCovered | ExecutionStatus::DryRun | ExecutionStatus::Invalid
+    )
 }
 
 #[cfg(test)]
@@ -362,8 +183,8 @@ mod tests {
         }
     }
 
-    fn open(dir: &TempDir, identity: &str, fingerprint: &str) -> Cache {
-        Cache::open(&dir.db(), identity, fingerprint, Duration::from_secs(5)).unwrap()
+    fn open(dir: &TempDir, identity: &str) -> Cache {
+        Cache::open(&dir.db(), identity, Duration::from_secs(5)).unwrap()
     }
 
     fn key(m: &Mutant) -> (String, String) {
@@ -373,7 +194,7 @@ mod tests {
     #[test]
     fn own_results_survive_a_restart() {
         let dir = TempDir::new("restart");
-        let cache = open(&dir, "a", "f1");
+        let cache = open(&dir, "a");
         cache
             .store(&mutant(1), &result(ExecutionStatus::Failed))
             .unwrap();
@@ -385,11 +206,9 @@ mod tests {
             .unwrap();
         drop(cache);
 
-        let loaded = open(&dir, "a", "f1").load().unwrap();
+        let loaded = open(&dir, "a").load().unwrap();
         assert_eq!(loaded.len(), 3);
-        let Some(Cached::Own(r)) = loaded.get(&key(&mutant(2))) else {
-            panic!("own survivor not reused")
-        };
+        let r = &loaded[&key(&mutant(2))];
         assert_eq!(r.status, ExecutionStatus::Passed);
         assert_eq!(r.stdout_output, "out");
         assert_eq!(r.stderr_output, "err");
@@ -397,19 +216,9 @@ mod tests {
     }
 
     #[test]
-    fn new_fingerprint_drops_own_results() {
-        let dir = TempDir::new("fingerprint");
-        open(&dir, "a", "f1")
-            .store(&mutant(1), &result(ExecutionStatus::Failed))
-            .unwrap();
-        assert!(open(&dir, "a", "f2").load().unwrap().is_empty());
-        assert!(open(&dir, "a", "f1").load().unwrap().is_empty());
-    }
-
-    #[test]
     fn only_kills_are_shared_between_runs() {
         let dir = TempDir::new("shared");
-        let a = open(&dir, "a", "f");
+        let a = open(&dir, "a");
         a.store(&mutant(1), &result(ExecutionStatus::Failed))
             .unwrap();
         a.store(&mutant(2), &result(ExecutionStatus::Passed))
@@ -417,13 +226,10 @@ mod tests {
         a.store(&mutant(3), &result(ExecutionStatus::Timedout))
             .unwrap();
 
-        let b = open(&dir, "b", "f");
+        let b = open(&dir, "b");
         let loaded = b.load().unwrap();
         assert_eq!(loaded.len(), 1);
-        assert!(matches!(
-            loaded.get(&key(&mutant(1))),
-            Some(Cached::Foreign(_))
-        ));
+        assert_eq!(loaded[&key(&mutant(1))].status, ExecutionStatus::Failed);
         assert!(b.foreign_kill(&mutant(1)).unwrap().is_some());
         assert!(b.foreign_kill(&mutant(2)).unwrap().is_none());
         assert!(b.foreign_kill(&mutant(3)).unwrap().is_none());
@@ -432,29 +238,26 @@ mod tests {
     #[test]
     fn foreign_kill_outranks_own_survivor() {
         let dir = TempDir::new("outrank");
-        let b = open(&dir, "b", "f");
+        let b = open(&dir, "b");
         b.store(&mutant(1), &result(ExecutionStatus::Passed))
             .unwrap();
         b.store(&mutant(2), &result(ExecutionStatus::Timedout))
             .unwrap();
-        let a = open(&dir, "a", "f");
+        let a = open(&dir, "a");
         a.store(&mutant(1), &result(ExecutionStatus::Failed))
             .unwrap();
         a.store(&mutant(2), &result(ExecutionStatus::Failed))
             .unwrap();
 
         let loaded = b.load().unwrap();
-        assert!(matches!(
-            loaded.get(&key(&mutant(1))),
-            Some(Cached::Foreign(_))
-        ));
-        assert!(matches!(loaded.get(&key(&mutant(2))), Some(Cached::Own(_))));
+        assert_eq!(loaded[&key(&mutant(1))].status, ExecutionStatus::Failed);
+        assert_eq!(loaded[&key(&mutant(2))].status, ExecutionStatus::Timedout);
     }
 
     #[test]
     fn non_execution_statuses_are_not_stored() {
         let dir = TempDir::new("statuses");
-        let cache = open(&dir, "a", "f");
+        let cache = open(&dir, "a");
         for status in [
             ExecutionStatus::NotCovered,
             ExecutionStatus::DryRun,

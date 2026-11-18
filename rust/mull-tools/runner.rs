@@ -148,38 +148,16 @@ fn run(
     let stdout_reader = child.stdout.take().map(OutputReader::start);
     let stderr_reader = child.stderr.take().map(OutputReader::start);
 
-    let join_output = |stdout_reader: Option<OutputReader>,
-                       stderr_reader: Option<OutputReader>|
-     -> (String, String) {
-        let deadline = Instant::now() + OUTPUT_DRAIN_TIMEOUT;
-        let stdout = stdout_reader
-            .map(|r| r.collect(deadline))
-            .unwrap_or_default();
-        let stderr = stderr_reader
-            .map(|r| r.collect(deadline))
-            .unwrap_or_default();
-        (stdout, stderr)
-    };
-
     let wait_result = child.wait_timeout(timeout);
-    if !matches!(wait_result, Ok(None)) {
-        PROCESS_GROUPS.lock().unwrap().remove(&group);
-    }
-
-    let result = match wait_result {
+    let (status, exit_status) = match wait_result {
         Ok(Some(status)) => {
-            let (stdout, stderr) = join_output(stdout_reader, stderr_reader);
-            ExecutionResult {
-                status: if status.success() {
-                    ExecutionStatus::Passed
-                } else {
-                    ExecutionStatus::Failed
-                },
-                exit_status: status.code().unwrap_or(-1),
-                running_time: start.elapsed().as_millis() as i64,
-                stdout_output: stdout,
-                stderr_output: stderr,
-            }
+            PROCESS_GROUPS.lock().unwrap().remove(&group);
+            let execution_status = if status.success() {
+                ExecutionStatus::Passed
+            } else {
+                ExecutionStatus::Failed
+            };
+            (execution_status, status.code().unwrap_or(-1))
         }
         Ok(None) => {
             // Timed out - kill the group before reaping, so its ID stays valid
@@ -187,19 +165,23 @@ fn run(
             let _ = child.kill();
             let _ = child.wait();
             PROCESS_GROUPS.lock().unwrap().remove(&group);
-            let (stdout, stderr) = join_output(stdout_reader, stderr_reader);
-            ExecutionResult {
-                status: ExecutionStatus::Timedout,
-                exit_status: -1,
-                running_time: start.elapsed().as_millis() as i64,
-                stdout_output: stdout,
-                stderr_output: stderr,
-            }
+            (ExecutionStatus::Timedout, -1)
         }
         Err(e) => {
+            PROCESS_GROUPS.lock().unwrap().remove(&group);
             kill_process_group(group);
             return Err(RunError::Wait(e));
         }
+    };
+    let deadline = Instant::now() + OUTPUT_DRAIN_TIMEOUT;
+    let collect =
+        |reader: Option<OutputReader>| reader.map(|r| r.collect(deadline)).unwrap_or_default();
+    let result = ExecutionResult {
+        status,
+        exit_status,
+        running_time: start.elapsed().as_millis() as i64,
+        stdout_output: collect(stdout_reader),
+        stderr_output: collect(stderr_reader),
     };
     // Set before the handler kills anything, so any death it caused is seen here
     if interrupted.load(Ordering::SeqCst) {
