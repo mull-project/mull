@@ -13,6 +13,7 @@ def _mull_e2e_test_impl(ctx):
         if output.endswith("-test"):
             test_file = ctx.attr.fmt_target[OutputGroupInfo][output].to_list()[0]
             test_files.append(test_file)
+    test_files = sorted(test_files, key = lambda f: FMT_TEST_TARGETS.index(f.basename))
 
     test_file_paths = " ".join([shell.quote(f.short_path) for f in test_files])
 
@@ -35,10 +36,14 @@ TEST_ARGS=({test_args})
 
 export MULL_CONFIG
 
+# Kills are shared between the test binaries, a fresh cache per attempt
+CACHE_PATH="${{TEST_TMPDIR:-$(mktemp -d)}}/mull-cache.sqlite"
+rm -f "$CACHE_PATH" "$CACHE_PATH"-*
+
 # Step 1: Run mull-runner on each test binary to generate SQLite report
 for test_file in "${{TEST_FILES[@]}}"; do
     echo "Testing $test_file"
-    "$MULL_RUNNER" --allow-surviving --reporters SQLite --report-name fmtlib -minimum-timeout 500 "$test_file" "${{TEST_ARGS[@]}}"
+    "$MULL_RUNNER" --cache-path "$CACHE_PATH" --allow-surviving --reporters SQLite --report-name fmtlib -minimum-timeout 500 "$test_file" "${{TEST_ARGS[@]}}"
 done
 
 # Step 2: Point mutants at the fmt sources shipped with the test
@@ -122,12 +127,13 @@ mull_e2e_test = rule(
     },
 )
 
+# Fastest first: their kills spare the slower binaries most mutant runs
 FMT_TEST_TARGETS = [
-    "chrono-test",
-    "format-test",
+    "scan-test",
     "ostream-test",
     "printf-test",
-    "scan-test",
+    "format-test",
+    "chrono-test",
 ]
 
 # Platform configurations: (os, arch, target_compatible_with)

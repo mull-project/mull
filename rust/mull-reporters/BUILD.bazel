@@ -7,7 +7,6 @@ rust_library(
     deps = [
         "//rust/mull-core",
         "//rust/mull-state",
-        "@crates//:rusqlite",
         "@crates//:serde",
         "@crates//:serde-sarif",
         "@crates//:serde_json",

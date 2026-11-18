@@ -776,6 +776,7 @@ dependencies = [
  "serde-saphyr",
  "serde-sarif",
  "serde_json",
+ "twox-hash",
  "unicode-width",
  "wait-timeout",
 ]

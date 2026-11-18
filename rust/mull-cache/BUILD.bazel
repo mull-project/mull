@@ -1,0 +1,21 @@
+load("@rules_rust//rust:defs.bzl", "rust_library", "rust_test")
+
+rust_library(
+    name = "mull-cache",
+    srcs = glob(["src/**/*.rs"]),
+    visibility = ["//visibility:public"],
+    deps = [
+        "//rust/mull-state",
+        "@crates//:rusqlite",
+        "@crates//:twox-hash",
+    ],
+)
+
+rust_test(
+    name = "mull-cache-tests",
+    size = "small",
+    crate = ":mull-cache",
+    deps = [
+        "//rust/mull-core",
+    ],
+)

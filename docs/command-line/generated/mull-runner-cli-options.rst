@@ -39,6 +39,12 @@
          --minimum-timeout <MS>
              Minimum timeout per mutant run in milliseconds. The actual timeout is max(baseline*10, minimum-timeout)
 
+         --no-cache
+             Do not reuse or record mutant results
+
+         --cache-path <PATH>
+             Mutant results cache, can be shared between test programs. Defaults to a file in the temp directory per executable, test program, arguments, dynamic libraries and their contents
+
          --reporters <REPORTER>
              Output reporters to use, more than one can be used at the same time
 

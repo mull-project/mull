@@ -1,7 +1,7 @@
 use crate::ExecutionStatus;
 use mull_core::{diag_error, MullDiagnostics};
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct ExecutionResult {
     pub status: ExecutionStatus,
     pub exit_status: i32,
@@ -11,6 +11,13 @@ pub struct ExecutionResult {
 }
 
 impl ExecutionResult {
+    pub fn with_status(status: ExecutionStatus) -> Self {
+        Self {
+            status,
+            ..Self::default()
+        }
+    }
+
     pub fn error_on_failure(&self, diag: &MullDiagnostics, label: &str) {
         if self.status != ExecutionStatus::Passed {
             diag_error!(

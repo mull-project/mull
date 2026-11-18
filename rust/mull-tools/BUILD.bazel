@@ -40,6 +40,7 @@ rust_binary(
     stamp = -1,
     visibility = ["//visibility:public"],
     deps = [
+        "//rust/mull-cache",
         "//rust/mull-core",
         "//rust/mull-filters",
         "//rust/mull-reporters",
@@ -75,6 +76,7 @@ rust_test(
         "MULL_VERSION": "0.0.0-test",
     },
     deps = [
+        "//rust/mull-cache",
         "//rust/mull-core",
         "//rust/mull-filters",
         "//rust/mull-reporters",

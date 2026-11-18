@@ -296,6 +296,15 @@ pub struct RunnerCli {
     #[arg(long = "minimum-timeout", value_name = "MS")]
     pub minimum_timeout: Option<u64>,
 
+    /// Do not reuse or record mutant results.
+    #[arg(long = "no-cache", conflicts_with = "cache_path")]
+    pub no_cache: bool,
+
+    /// Mutant results cache, can be shared between test programs.
+    /// Defaults to a file in the temp directory per executable, test program, arguments, dynamic libraries and their contents.
+    #[arg(long = "cache-path", value_name = "PATH")]
+    pub cache_path: Option<String>,
+
     #[command(flatten)]
     pub shared: SharedCli,
 
