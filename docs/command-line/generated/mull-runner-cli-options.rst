@@ -43,7 +43,7 @@
              Do not reuse or record mutant results
 
          --cache-path <PATH>
-             Mutant results cache, can be shared between test programs. Defaults to a file in $XDG_CACHE_HOME/mull (~/.cache/mull) per executable, test program, arguments and dynamic libraries
+             Mutant results cache, can be shared between test programs. Defaults to a file in the temp directory per executable, test program, arguments, dynamic libraries and their contents
 
          --reporters <REPORTER>
              Output reporters to use, more than one can be used at the same time

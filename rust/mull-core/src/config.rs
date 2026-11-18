@@ -300,7 +300,7 @@ pub struct RunnerCli {
     #[arg(long = "no-cache", conflicts_with = "cache_path")]
     pub no_cache: bool,
 
-    /// Mutant results cache, can be shared between test programs. Use a fresh file per build.
+    /// Mutant results cache, can be shared between test programs.
     /// Defaults to a file in the temp directory per executable, test program, arguments, dynamic libraries and their contents.
     #[arg(long = "cache-path", value_name = "PATH")]
     pub cache_path: Option<String>,
