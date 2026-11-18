@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.39.0] - 19 Nov 2026
+
+- Added caching of mutation results, see [Cache and Continuity](https://mull-project.com/guides/cache-and-continuity/) [#1133](https://github.com/mull-project/mull/issues/1133) [#1225](https://github.com/mull-project/mull/pull/1225) [#1228](https://github.com/mull-project/mull/pull/1228)
+- Fixed mutants in templates being dropped [#1226](https://github.com/mull-project/mull/issues/1226) [#1227](https://github.com/mull-project/mull/pull/1227)
+- Default member initializers are now mutated [#1227](https://github.com/mull-project/mull/pull/1227)
+- [All the changes](https://github.com/mull-project/mull/pulls?q=is%3Apr+merged%3A2026-11-12..2026-11-19)
+
 ## [0.38.0] - 12 Nov 2026
 
 ‼️ Cloudsmith bandwidth is exhausted again, use packages from [GitHub Releases](https://github.com/mull-project/mull/releases/latest) for installation, [see more details](https://mull-project.com/getting-started/installation/#cloudsmith-bandwidth-limit).
