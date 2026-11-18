@@ -58,7 +58,8 @@ class {class_name} < Formula
 
 {conflicts}
   def install
-    lib.install "lib/mull-ir-frontend-{llvm_version}"
+    # Homebrew stages into the archive's sole top-level dir (lib/)
+    lib.install "mull-ir-frontend-{llvm_version}"
     # Deprecated versioned names of the tools from {tools_dep}
     bin.install_symlink Formula["{tools_dep}"].opt_bin/"mull-runner" => "mull-runner-{llvm_version}"
     bin.install_symlink Formula["{tools_dep}"].opt_bin/"mull-reporter" => "mull-reporter-{llvm_version}"
@@ -106,8 +107,9 @@ class {class_name} < Formula
 
 {conflicts}
   def install
-    bin.install "bin/mull-instrument-{llvm_version}"
-    bin.install "bin/mull-rewriter-{llvm_version}"
+    # Homebrew stages into the archive's sole top-level dir (bin/)
+    bin.install "mull-instrument-{llvm_version}"
+    bin.install "mull-rewriter-{llvm_version}"
   end
 
   def caveats
