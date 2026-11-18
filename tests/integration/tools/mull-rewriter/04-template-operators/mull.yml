@@ -1,0 +1,7 @@
+mutators:
+  - cxx_lshift_to_rshift
+  - cxx_lt_to_ge
+  - cxx_add_assign_to_sub_assign
+  - cxx_minus_to_noop
+  - cxx_pre_inc_to_pre_dec
+  - cxx_sub_to_add

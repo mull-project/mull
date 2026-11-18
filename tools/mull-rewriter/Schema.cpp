@@ -97,7 +97,10 @@ void SiteCollector::run(const MatchFinder::MatchResult &result) {
           unary->getOperatorLoc(),
           context);
   } else if (auto overloaded = result.Nodes.getNodeAs<CXXOperatorCallExpr>("overloaded")) {
-    poisonOperator(overloaded->getOperatorLoc(), context);
+    // A dependent one is unresolved, a visible overload of any type keeps it in the template
+    if (!overloaded->isTypeDependent()) {
+      poisonOperator(overloaded->getOperatorLoc(), context);
+    }
   } else if (auto call = result.Nodes.getNodeAs<CallExpr>("call")) {
     // The IR frontend reports member calls at either the object or the member name
     place(call, NodeKind::Call, "", call->getBeginLoc(), context);

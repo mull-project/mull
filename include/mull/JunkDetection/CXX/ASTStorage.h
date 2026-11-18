@@ -6,6 +6,7 @@
 #include <clang/Frontend/ASTUnit.h>
 
 #include <memory>
+#include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
@@ -28,10 +29,13 @@ public:
   bool isInSystemHeader(clang::SourceLocation &location);
 
   clang::Decl *getDecl(clang::SourceLocation &location);
+  /// The definition, e.g. a template instantiation, emitted under the mangled name
+  clang::FunctionDecl *getFunction(const std::string &mangledName);
   bool hasAST() const;
 
 private:
   void recordDeclarations();
+  void recordFunctions();
   void recordFileEntries();
 
   clang::FileID findFileID(const mull::SourceLocation &sourceLocation);
@@ -39,6 +43,8 @@ private:
 
   std::unique_ptr<clang::ASTUnit> ast;
   std::vector<clang::Decl *> decls;
+  /// Built on first use
+  std::optional<std::unordered_map<std::string, clang::FunctionDecl *>> functionsByName;
   /// Real path -> file of the translation unit
   std::unordered_map<std::string, clang::FileID> filesByRealPath;
   /// Debug info path -> file, invalid if not part of the translation unit

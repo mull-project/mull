@@ -1,0 +1,2 @@
+mutators:
+  - cxx_lshift_to_rshift

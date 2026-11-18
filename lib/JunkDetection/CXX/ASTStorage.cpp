@@ -3,6 +3,8 @@
 #include "mull/MutationPoint.h"
 #include "rust/mull-cxx-bridge/bridge.rs.h"
 
+#include <clang/AST/GlobalDecl.h>
+#include <clang/AST/Mangle.h>
 #include <clang/AST/RecursiveASTVisitor.h>
 #include <clang/Basic/DiagnosticOptions.h>
 #include <clang/Basic/FileManager.h>
@@ -49,6 +51,58 @@ private:
 
   clang::SourceManager &sourceManager;
   std::vector<clang::Decl *> &declarations;
+};
+
+/// Definitions that get code: instantiations and lambda call operators too, not template patterns
+class FunctionVisitor : public clang::RecursiveASTVisitor<FunctionVisitor> {
+public:
+  FunctionVisitor(clang::ASTContext &context,
+                  std::unordered_map<std::string, clang::FunctionDecl *> &functions)
+      : sourceManager(context.getSourceManager()), mangler(context.createMangleContext()),
+        functions(functions) {}
+
+  bool shouldVisitTemplateInstantiations() const {
+    return true;
+  }
+  /// Lambda classes are implicit
+  bool shouldVisitImplicitCode() const {
+    return true;
+  }
+
+  bool VisitFunctionDecl(clang::FunctionDecl *decl) {
+    /// Implicit constructors run the default member initializers
+    bool implicit = decl->isImplicit() && !llvm::isa<clang::CXXConstructorDecl>(decl);
+    if (!decl->doesThisDeclarationHaveABody() || implicit || decl->isInvalidDecl() ||
+        decl->isDependentContext() || !mangler->shouldMangleDeclName(decl) ||
+        sourceManager.isInSystemHeader(decl->getLocation())) {
+      return true;
+    }
+    if (auto ctor = llvm::dyn_cast<clang::CXXConstructorDecl>(decl)) {
+      add(clang::GlobalDecl(ctor, clang::Ctor_Complete), decl);
+      add(clang::GlobalDecl(ctor, clang::Ctor_Base), decl);
+    } else if (auto dtor = llvm::dyn_cast<clang::CXXDestructorDecl>(decl)) {
+      add(clang::GlobalDecl(dtor, clang::Dtor_Complete), decl);
+      add(clang::GlobalDecl(dtor, clang::Dtor_Base), decl);
+      if (dtor->isVirtual()) {
+        add(clang::GlobalDecl(dtor, clang::Dtor_Deleting), decl);
+      }
+    } else {
+      add(clang::GlobalDecl(decl), decl);
+    }
+    return true;
+  }
+
+private:
+  void add(clang::GlobalDecl global, clang::FunctionDecl *decl) {
+    std::string name;
+    llvm::raw_string_ostream stream(name);
+    mangler->mangleName(global, stream);
+    functions.emplace(std::move(stream.str()), decl);
+  }
+
+  clang::SourceManager &sourceManager;
+  std::unique_ptr<clang::MangleContext> mangler;
+  std::unordered_map<std::string, clang::FunctionDecl *> &functions;
 };
 
 ASTUnitWrapper::ASTUnitWrapper(std::unique_ptr<clang::ASTUnit> ast) : ast(std::move(ast)) {
@@ -207,6 +261,24 @@ clang::Decl *ASTUnitWrapper::getDecl(clang::SourceLocation &location) {
   }
 
   return nullptr;
+}
+
+void ASTUnitWrapper::recordFunctions() {
+  assert(ast);
+  functionsByName.emplace();
+  FunctionVisitor visitor(ast->getASTContext(), *functionsByName);
+  visitor.TraverseDecl(ast->getASTContext().getTranslationUnitDecl());
+}
+
+clang::FunctionDecl *ASTUnitWrapper::getFunction(const std::string &mangledName) {
+  if (!ast || mangledName.empty()) {
+    return nullptr;
+  }
+  if (!functionsByName) {
+    recordFunctions();
+  }
+  auto it = functionsByName->find(mangledName);
+  return it == functionsByName->end() ? nullptr : it->second;
 }
 
 bool ASTUnitWrapper::hasAST() const {

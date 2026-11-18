@@ -1,0 +1,12 @@
+Only b.o's copy of shl1<unsigned> has the mutant, a.o sees an operator<< overload (#1226).
+The linker keeps a.o's copy, the mutant must not be reported as survived.
+
+RUN: rm -rf %S/Output && mkdir -p %S/Output/sandbox
+RUN: cp %S/a.cpp %S/b.cpp %S/shift.h %S/mull.yml %S/Output/sandbox/
+RUN: cd %S/Output/sandbox && %clang_cxx %sysroot -O0 -g -grecord-command-line %pass_mull_ir_frontend -c a.cpp -o %S/Output/a.o
+RUN: cd %S/Output/sandbox && %clang_cxx %sysroot -O0 -g -grecord-command-line %pass_mull_ir_frontend -c b.cpp -o %S/Output/b.o
+RUN: %clang_cxx %sysroot %S/Output/a.o %S/Output/b.o -o %S/Output/ab.exe
+RUN: cd %S/Output/sandbox && %mull_runner -allow-surviving -reporters=IDE -ide-reporter-show-killed %S/Output/ab.exe | %filecheck %s --dump-input=fail --match-full-lines
+CHECK:[info] Killed mutants (1/1):
+CHECK-NEXT:{{.*}}shift.h:4:12: warning: Killed: Replaced << with >> [cxx_lshift_to_rshift]
+CHECK:[info] Mutation score: 100%
