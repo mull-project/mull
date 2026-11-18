@@ -63,7 +63,7 @@ fn canonical(path: &str) -> String {
         .unwrap_or_else(|_| path.to_string())
 }
 
-/// Failing to open the default cache is not worth a warning, an explicit one is
+/// None when disabled, or with a warning when it cannot be used
 fn open_cache(
     diag: &MullDiagnostics,
     cli: &RunnerCli,
@@ -83,22 +83,20 @@ fn open_cache(
             .map(|p| p.to_string_lossy().into_owned())
             .unwrap_or_default(),
     };
-    let explicit = cli.cache_path.is_some();
+    let mut files: Vec<&str> = mutant_holders.iter().map(String::as_str).collect();
+    if Path::new(&test_program).is_file() && !files.contains(&test_program.as_str()) {
+        files.push(&test_program);
+    }
+    let fingerprint = match fingerprint(&files) {
+        Ok(fingerprint) => fingerprint,
+        Err(e) => {
+            diag_warning!(diag, "No cache: cannot fingerprint the run: {}", e);
+            return None;
+        }
+    };
     let path = match &cli.cache_path {
         Some(path) => PathBuf::from(path),
-        None => {
-            let mut files: Vec<&str> = mutant_holders.iter().map(String::as_str).collect();
-            if Path::new(&test_program).is_file() && !files.contains(&test_program.as_str()) {
-                files.push(&test_program);
-            }
-            match fingerprint(&files) {
-                Ok(fp) => default_cache_path(&identity, &fp),
-                Err(e) => {
-                    diag_debug!(diag, "No cache: cannot fingerprint the run: {}", e);
-                    return None;
-                }
-            }
-        }
+        None => default_cache_path(&identity, &fingerprint),
     };
     let opened = path
         .parent()
@@ -109,6 +107,7 @@ fn open_cache(
             Cache::open(
                 &path,
                 &identity.key(),
+                &fingerprint,
                 Duration::from_millis(cli.shared.sqlite_busy_timeout as u64),
             )
             .map_err(|e| e.to_string())
@@ -119,12 +118,7 @@ fn open_cache(
             Some(cache)
         }
         Err(e) => {
-            let message = format!("Cannot open cache '{}': {}", path.display(), e);
-            if explicit {
-                diag_warning!(diag, "{}", message);
-            } else {
-                diag_debug!(diag, "{}", message);
-            }
+            diag_warning!(diag, "Cannot open cache '{}': {}", path.display(), e);
             None
         }
     }
@@ -256,6 +250,12 @@ fn main() {
     diag_debug!(diag, "Found {} mutant(s)", mutants.len());
 
     let executable = cli.test_program.as_ref().unwrap_or(&input_file);
+    let dry_run = cli.dry_run || config.dry_run_enabled;
+    let cache = if dry_run || mutants.is_empty() {
+        None
+    } else {
+        open_cache(&diag, &cli, &mutant_holders, executable)
+    };
     let args = &cli.runner_args;
     let timeout_ms = cli.timeout.unwrap_or(config.timeout) as u64;
     let workers = cli
@@ -351,7 +351,6 @@ fn main() {
         );
     }
 
-    let dry_run = cli.dry_run || config.dry_run_enabled;
     let mut state = ExecutionState::default();
     if dry_run {
         run_task(&diag, "Dry run", || {
@@ -364,7 +363,6 @@ fn main() {
         });
     } else {
         if !filtered_mutants.is_empty() {
-            let cache = open_cache(&diag, &cli, &mutant_holders, executable);
             let mut cached = match cache.as_ref().map(Cache::load) {
                 Some(Ok(cached)) => cached,
                 Some(Err(e)) => {
@@ -383,12 +381,17 @@ fn main() {
                     None => pending.push(mutant),
                 }
             }
-            if !state.execution_results.is_empty() {
+            let reused = state.execution_results.len();
+            let outdated = cache.as_ref().map_or(0, Cache::dropped);
+            if outdated > 0 {
                 diag_info!(
                     diag,
-                    "Reusing {} cached result(s)",
-                    state.execution_results.len()
+                    "Reusing {} cached result(s), {} outdated by a rebuild",
+                    reused,
+                    outdated
                 );
+            } else if reused > 0 {
+                diag_info!(diag, "Reusing {} cached result(s)", reused);
             }
             if !pending.is_empty() {
                 let run = MutantRun {

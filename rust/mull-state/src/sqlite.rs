@@ -1,7 +1,9 @@
 use crate::{ExecutionResult, ExecutionState, ExecutionStatus, Mutant};
 use mull_core::diag_error;
 use mull_core::diagnostics::MullDiagnostics;
-use rusqlite::{params, Connection, OptionalExtension, Result as SqliteResult, Row};
+use rusqlite::{
+    params, Connection, OptionalExtension, Result as SqliteResult, Row, TransactionBehavior,
+};
 use std::collections::HashMap;
 use std::path::Path;
 use std::time::Duration;
@@ -137,8 +139,43 @@ pub fn connect_cache(path: &Path, busy_timeout: Duration) -> SqliteResult<Connec
 pub fn prepare_cache(conn: &Connection) -> SqliteResult<()> {
     conn.execute_batch(CREATE_TABLES)?;
     conn.execute_batch(
-        "CREATE INDEX IF NOT EXISTS mutant_by_id ON mutant(mutant_id, mutation_replacement);",
+        "CREATE INDEX IF NOT EXISTS mutant_by_id ON mutant(mutant_id, mutation_replacement);
+         CREATE TABLE IF NOT EXISTS run (identity TEXT PRIMARY KEY, fingerprint TEXT);",
     )
+}
+
+/// After a rebuild the run's results other than kills are stale: drops them, returns how many
+pub fn refresh_run(
+    conn: &mut Connection,
+    identity: &str,
+    fingerprint: &str,
+) -> SqliteResult<usize> {
+    let tx = conn.transaction_with_behavior(TransactionBehavior::Immediate)?;
+    let recorded: Option<String> = tx
+        .query_row(
+            "SELECT fingerprint FROM run WHERE identity = ?1",
+            [identity],
+            |row| row.get(0),
+        )
+        .optional()?;
+    let dropped = if recorded.as_deref() == Some(fingerprint) {
+        0
+    } else {
+        tx.execute(
+            &format!(
+                "DELETE FROM mutant WHERE run_identity = ?1 AND execution_status NOT IN ({})",
+                killed_statuses()
+            ),
+            [identity],
+        )?
+    };
+    tx.execute(
+        "INSERT INTO run (identity, fingerprint) VALUES (?1, ?2)
+         ON CONFLICT(identity) DO UPDATE SET fingerprint = excluded.fingerprint",
+        [identity, fingerprint],
+    )?;
+    tx.commit()?;
+    Ok(dropped)
 }
 
 /// Own results and foreign kills, keyed by (mutant id, replacement)
