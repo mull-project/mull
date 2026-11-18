@@ -24,8 +24,10 @@ RUN: cd %S && env MULL_CONFIG=%S/mull.yml %clang_cc %sysroot %s %pass_mull_ir_fr
 
 Default cache: a rerun reuses everything, survivors included, and reports the same.
 
-RUN: cd %S/Output/cache && unset TERM; env XDG_CACHE_HOME=%S/Output/cache/xdg MULL_CONFIG=%S/mull.yml %mull_runner --allow-surviving --reporters SQLite --report-name first a.exe 2>&1 | %filecheck %s --dump-input=fail --check-prefix=CHECK-FRESH --implicit-check-not=Reusing
+RUN: cd %S/Output/cache && unset TERM; env XDG_CACHE_HOME=%S/Output/cache/xdg MULL_CONFIG=%S/mull.yml %mull_runner --allow-surviving --reporters SQLite --report-name first a.exe 2>&1 | %filecheck %s --dump-input=fail --check-prefixes=CHECK-DEFAULT-PATH,CHECK-FRESH --implicit-check-not=Reusing
 RUN: cd %S/Output/cache && unset TERM; env XDG_CACHE_HOME=%S/Output/cache/xdg MULL_CONFIG=%S/mull.yml %mull_runner --allow-surviving --reporters SQLite --report-name rerun a.exe 2>&1 | %filecheck %s --dump-input=fail --check-prefix=CHECK-ALL-CACHED --implicit-check-not="Baseline run" --implicit-check-not="Running mutants"
+CHECK-DEFAULT-PATH: [info] Using cache: {{.*}}/Output/cache/xdg/mull/{{.*}}.sqlite
+CHECK-EXPLICIT-PATH: [info] Using cache: shared.sqlite
 CHECK-FRESH: [info] Running mutants
 CHECK-ALL-CACHED: [info] Reusing 2 cached result(s)
 
@@ -47,11 +49,11 @@ RUN: cd %S/Output/cache && diff first.txt resumed.txt
 
 --no-cache skips the cache.
 
-RUN: cd %S/Output/cache && unset TERM; env XDG_CACHE_HOME=%S/Output/cache/xdg MULL_CONFIG=%S/mull.yml %mull_runner --no-cache --allow-surviving a.exe 2>&1 | %filecheck %s --dump-input=fail --check-prefix=CHECK-FRESH --implicit-check-not=Reusing
+RUN: cd %S/Output/cache && unset TERM; env XDG_CACHE_HOME=%S/Output/cache/xdg MULL_CONFIG=%S/mull.yml %mull_runner --no-cache --allow-surviving a.exe 2>&1 | %filecheck %s --dump-input=fail --check-prefix=CHECK-FRESH --implicit-check-not=Reusing --implicit-check-not='Using cache'
 
 Shared cache: kills carry over between programs, survivors are run again.
 
-RUN: cd %S/Output/cache && unset TERM; env MULL_CONFIG=%S/mull.yml %mull_runner --cache-path shared.sqlite --allow-surviving a.exe 2>&1 | %filecheck %s --dump-input=fail --check-prefix=CHECK-FRESH --implicit-check-not=Reusing
+RUN: cd %S/Output/cache && unset TERM; env MULL_CONFIG=%S/mull.yml %mull_runner --cache-path shared.sqlite --allow-surviving a.exe 2>&1 | %filecheck %s --dump-input=fail --check-prefixes=CHECK-EXPLICIT-PATH,CHECK-FRESH --implicit-check-not=Reusing
 RUN: cd %S/Output/cache && unset TERM; env MULL_CONFIG=%S/mull.yml %mull_runner --cache-path shared.sqlite --reporters SQLite --report-name b b.exe 2>&1 | %filecheck %s --dump-input=fail --check-prefix=CHECK-SHARED
 CHECK-SHARED: [info] Reusing 1 cached result(s)
 CHECK-SHARED: [info] Running mutants

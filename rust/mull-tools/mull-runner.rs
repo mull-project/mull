@@ -115,7 +115,7 @@ fn open_cache(
         });
     match opened {
         Ok(cache) => {
-            diag_debug!(diag, "Cache: {}", path.display());
+            diag_info!(diag, "Using cache: {}", path.display());
             Some(cache)
         }
         Err(e) if explicit => {
