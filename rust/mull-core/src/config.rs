@@ -301,6 +301,7 @@ pub struct RunnerCli {
     pub no_cache: bool,
 
     /// Mutant results cache, can be shared between test programs.
+    /// When a program changes, its killed mutants stay killed and the others run again.
     /// Defaults to a file in the temp directory per executable, test program, arguments, dynamic libraries and their contents.
     #[arg(long = "cache-path", value_name = "PATH")]
     pub cache_path: Option<String>,

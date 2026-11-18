@@ -79,19 +79,33 @@ pub struct Cache {
     path: PathBuf,
     busy_timeout: Duration,
     identity: String,
+    dropped: usize,
     connections: Mutex<Vec<Connection>>,
 }
 
 impl Cache {
-    pub fn open(path: &Path, identity: &str, busy_timeout: Duration) -> rusqlite::Result<Self> {
-        let conn = sqlite::connect_cache(path, busy_timeout)?;
+    /// Kills outlive a rebuild, other results of the run are tried again
+    pub fn open(
+        path: &Path,
+        identity: &str,
+        fingerprint: &str,
+        busy_timeout: Duration,
+    ) -> rusqlite::Result<Self> {
+        let mut conn = sqlite::connect_cache(path, busy_timeout)?;
         sqlite::prepare_cache(&conn)?;
+        let dropped = sqlite::refresh_run(&mut conn, identity, fingerprint)?;
         Ok(Self {
             path: path.to_path_buf(),
             busy_timeout,
             identity: identity.to_string(),
+            dropped,
             connections: Mutex::new(vec![conn]),
         })
+    }
+
+    /// Results dropped on open because the run's files changed
+    pub fn dropped(&self) -> usize {
+        self.dropped
     }
 
     fn with_connection<T>(
@@ -184,7 +198,11 @@ mod tests {
     }
 
     fn open(dir: &TempDir, identity: &str) -> Cache {
-        Cache::open(&dir.db(), identity, Duration::from_secs(5)).unwrap()
+        open_built(dir, identity, "build")
+    }
+
+    fn open_built(dir: &TempDir, identity: &str, fingerprint: &str) -> Cache {
+        Cache::open(&dir.db(), identity, fingerprint, Duration::from_secs(5)).unwrap()
     }
 
     fn key(m: &Mutant) -> (String, String) {
@@ -266,6 +284,47 @@ mod tests {
             cache.store(&mutant(1), &result(status)).unwrap();
         }
         assert!(cache.load().unwrap().is_empty());
+    }
+
+    #[test]
+    fn rebuild_keeps_only_kills() {
+        let dir = TempDir::new("rebuild");
+        let cache = open_built(&dir, "a", "one");
+        assert_eq!(cache.dropped(), 0);
+        cache
+            .store(&mutant(1), &result(ExecutionStatus::Failed))
+            .unwrap();
+        cache
+            .store(&mutant(2), &result(ExecutionStatus::Passed))
+            .unwrap();
+        cache
+            .store(&mutant(3), &result(ExecutionStatus::Timedout))
+            .unwrap();
+        drop(cache);
+
+        let same = open_built(&dir, "a", "one");
+        assert_eq!(same.dropped(), 0);
+        assert_eq!(same.load().unwrap().len(), 3);
+        drop(same);
+
+        let rebuilt = open_built(&dir, "a", "two");
+        assert_eq!(rebuilt.dropped(), 2);
+        let loaded = rebuilt.load().unwrap();
+        assert_eq!(loaded.len(), 1);
+        assert_eq!(loaded[&key(&mutant(1))].status, ExecutionStatus::Failed);
+    }
+
+    #[test]
+    fn rebuild_leaves_other_runs_alone() {
+        let dir = TempDir::new("rebuild-shared");
+        let b = open_built(&dir, "b", "one");
+        b.store(&mutant(1), &result(ExecutionStatus::Passed))
+            .unwrap();
+        drop(b);
+
+        assert_eq!(open_built(&dir, "a", "two").dropped(), 0);
+        let loaded = open_built(&dir, "b", "one").load().unwrap();
+        assert_eq!(loaded[&key(&mutant(1))].status, ExecutionStatus::Passed);
     }
 
     #[test]

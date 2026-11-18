@@ -43,7 +43,7 @@
              Do not reuse or record mutant results
 
          --cache-path <PATH>
-             Mutant results cache, can be shared between test programs. Defaults to a file in the temp directory per executable, test program, arguments, dynamic libraries and their contents
+             Mutant results cache, can be shared between test programs. When a program changes, its killed mutants stay killed and the others run again. Defaults to a file in the temp directory per executable, test program, arguments, dynamic libraries and their contents
 
          --reporters <REPORTER>
              Output reporters to use, more than one can be used at the same time
