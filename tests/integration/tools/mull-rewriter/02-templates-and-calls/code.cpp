@@ -17,6 +17,7 @@ struct big {
   int exp = 5;
   template <typename T> void assign(T n) {
     digits.resize(n);
+    // CHECK: code.cpp:[[@LINE-1]]:5: warning: Killed: Replaced digits.resize(n) with ((void)(digits), (void)(n)) [cxx_remove_void_call]
     exp = 0;
     // CHECK: code.cpp:[[@LINE-1]]:9: warning: Killed: Replaced = with = 1; [cxx_assign_const]
   }
