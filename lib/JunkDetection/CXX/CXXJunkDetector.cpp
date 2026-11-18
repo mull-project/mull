@@ -14,6 +14,7 @@
 
 #include <clang/Lex/Lexer.h>
 #include <irm/IRMutation.h>
+#include <llvm/IR/DebugInfoMetadata.h>
 #include <llvm/IR/IntrinsicInst.h>
 #include <optional>
 
@@ -63,9 +64,60 @@ static bool matchesSignedness(MutationPoint *point, const clang::Stmt *expressio
   if (auto *compound = llvm::dyn_cast<clang::CompoundAssignOperator>(binary)) {
     type = compound->getComputationResultType();
   }
-  /// Dependent types are taken as signed, the instantiations are not visible here
+  /// Dependent types, when the instantiation is not found, are taken as signed
   bool isUnsigned = type->hasUnsignedIntegerRepresentation();
   return isUnsigned == (signedness == irm::Signedness::Unsigned);
+}
+
+/// The function the mutated code is written in, which is not the IR function when inlined
+static std::string linkageName(MutationPoint *point) {
+  auto *instruction = llvm::dyn_cast<llvm::Instruction>(point->getOriginalValue());
+  if (!instruction || !instruction->getDebugLoc()) {
+    return {};
+  }
+  llvm::DISubprogram *subprogram = instruction->getDebugLoc()->getScope()->getSubprogram();
+  if (!subprogram) {
+    return {};
+  }
+  llvm::StringRef name = subprogram->getLinkageName();
+  if (name.empty() && subprogram->getDeclaration()) {
+    name = subprogram->getDeclaration()->getLinkageName();
+  }
+  return name.str();
+}
+
+static bool contains(clang::SourceManager &sourceManager, clang::SourceRange range,
+                     clang::SourceLocation location) {
+  clang::BeforeThanCompare<clang::SourceLocation> before(sourceManager);
+  return !before(location, range.getBegin()) && !before(range.getEnd(), location);
+}
+
+/// The function or, for a constructor, the default member initializer written at the location
+static clang::Decl *enclosingDecl(clang::FunctionDecl *function,
+                                  clang::SourceManager &sourceManager,
+                                  clang::SourceLocation location) {
+  /// Clang 16 collapses the range of an instantiated lambda call operator, its body keeps one
+  clang::Stmt *body = function->getBody();
+  if (contains(sourceManager, function->getSourceRange(), location) ||
+      (body && contains(sourceManager, body->getSourceRange(), location))) {
+    return function;
+  }
+  if (auto ctor = llvm::dyn_cast<clang::CXXConstructorDecl>(function)) {
+    for (clang::FieldDecl *field : ctor->getParent()->fields()) {
+      if (field->hasInClassInitializer() &&
+          contains(sourceManager, field->getSourceRange(), location)) {
+        return field;
+      }
+    }
+  }
+  return nullptr;
+}
+
+/// The definition the IR comes from: an instantiation, unlike the template its operators have types
+static clang::Decl *emittedDecl(ASTUnitWrapper &ast, MutationPoint *point,
+                                clang::SourceLocation location) {
+  clang::FunctionDecl *function = ast.getFunction(linkageName(point));
+  return function ? enclosingDecl(function, ast.getSourceManager(), location) : nullptr;
 }
 
 static const clang::Stmt *findMutantExpression(MutationPoint *point,
@@ -259,6 +311,9 @@ bool CXXJunkDetector::isJunk(MutationPoint *point) {
   }
 
   clang::Decl *decl = ast->getDecl(location);
+  if (clang::Decl *emitted = emittedDecl(*ast, point, location)) {
+    decl = emitted;
+  }
   if (!decl) {
     return true;
   }
