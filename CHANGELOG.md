@@ -1,5 +1,9 @@
 # Changelog
 
+## [0.39.1] - 19 Nov 2026
+
+- Fixed a crash in junk detection when a translation unit uses a precompiled header (by [@xolom](https://github.com/xolom)) [#1230](https://github.com/mull-project/mull/pull/1230)
+
 ## [0.39.0] - 19 Nov 2026
 
 - Added caching of mutation results, see [Cache and Continuity](https://mull-project.com/guides/cache-and-continuity/) [#1133](https://github.com/mull-project/mull/issues/1133) [#1225](https://github.com/mull-project/mull/pull/1225) [#1228](https://github.com/mull-project/mull/pull/1228)
