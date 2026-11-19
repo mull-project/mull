@@ -17,6 +17,7 @@
 #if LLVM_VERSION_MAJOR > 21
 #include <clang/Driver/CreateASTUnitFromArgs.h>
 #endif
+#include <iterator>
 #include <sstream>
 
 using namespace mull;
@@ -146,9 +147,15 @@ clang::FileID ASTUnitWrapper::findFileID(const std::string &filePath) {
     return cached->second;
   }
   clang::FileID file;
-  auto it = filesByRealPath.find(realPathOrSelf(filePath));
+  auto realPath = realPathOrSelf(filePath);
+  auto it = filesByRealPath.find(realPath);
+  if (it == filesByRealPath.end()) {
+    /// Translating a file can load the source locations of a PCH, and with them more files
+    recordFileEntries();
+    it = filesByRealPath.find(realPath);
+  }
   if (it != filesByRealPath.end()) {
-    file = it->second;
+    file = ast->getSourceManager().translateFile(it->second);
   }
   filesByPath.emplace(filePath, file);
   return file;
@@ -156,6 +163,11 @@ clang::FileID ASTUnitWrapper::findFileID(const std::string &filePath) {
 
 void ASTUnitWrapper::recordFileEntries() {
   auto &sourceManager = ast->getSourceManager();
+  size_t fileCount = std::distance(sourceManager.fileinfo_begin(), sourceManager.fileinfo_end());
+  if (fileCount == recordedFileCount) {
+    return;
+  }
+  recordedFileCount = fileCount;
   for (auto it = sourceManager.fileinfo_begin(); it != sourceManager.fileinfo_end(); it++) {
 #if LLVM_VERSION_MAJOR >= 18
     llvm::StringRef currentSourceFilePath = it->first.getName();
@@ -171,10 +183,9 @@ void ASTUnitWrapper::recordFileEntries() {
       currentSourceFilePath = it->first->tryGetRealPathName();
 #endif
     }
-    clang::FileID file = sourceManager.translateFile(it->first);
-    if (file.isValid()) {
-      filesByRealPath.emplace(realPathOrSelf(currentSourceFilePath), file);
-    }
+    /// Not translated to a FileID here: that can load a PCH's source locations, which
+    /// adds files to the table being iterated and invalidates the iterator
+    filesByRealPath.emplace(realPathOrSelf(currentSourceFilePath), it->first);
   }
 }
 
