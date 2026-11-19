@@ -45,8 +45,15 @@ private:
   std::vector<clang::Decl *> decls;
   /// Built on first use
   std::optional<std::unordered_map<std::string, clang::FunctionDecl *>> functionsByName;
-  /// Real path -> file of the translation unit
-  std::unordered_map<std::string, clang::FileID> filesByRealPath;
+#if LLVM_VERSION_MAJOR >= 18
+  using FileRef = clang::FileEntryRef;
+#else
+  using FileRef = const clang::FileEntry *;
+#endif
+  /// Real path -> file the source manager knows. Translating it to a FileID can load source
+  /// locations of a PCH, which adds files to the table this is recorded from.
+  std::unordered_map<std::string, FileRef> filesByRealPath;
+  size_t recordedFileCount = 0;
   /// Debug info path -> file, invalid if not part of the translation unit
   std::unordered_map<std::string, clang::FileID> filesByPath;
 };
