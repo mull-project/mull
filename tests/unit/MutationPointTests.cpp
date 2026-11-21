@@ -90,7 +90,10 @@ TEST(MutationPoint, OriginalValuePresent) {
     std::string s;
     llvm::raw_string_ostream stream(s);
     mutation->getOriginalValue()->print(stream);
-    ASSERT_EQ(s, mutantRepresentations[i]);
+    // Metadata slot numbers depend on what else is in the module, LLVM 24 numbers them differently
+    const std::regex slot("!\\d+");
+    ASSERT_EQ(std::regex_replace(s, slot, "!N"),
+              std::regex_replace(mutantRepresentations[i], slot, "!N"));
   }
 }
 
