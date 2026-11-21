@@ -2,7 +2,8 @@ name: LLVM watch
 # Weekly: mull against LLVM trunk, and the LLVM version RHEL would install now
 on:
   schedule:
-    - cron: "0 6 * * 1"
+    # Friday 15:00 UTC: 17:00 CEST, 16:00 CET
+    - cron: "0 15 * * 5"
   workflow_dispatch:
 permissions:
   contents: read
