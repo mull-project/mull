@@ -73,7 +73,8 @@ jobs:
             sudo curl -fsSL https://github.com/bazelbuild/bazelisk/releases/download/v1.27.0/bazelisk-linux-amd64 -o /usr/local/bin/bazel
             sudo chmod +x /usr/local/bin/bazel
           }
-          bazel test //... || { cp -RL bazel-testlogs ci-testlogs; exit 1; }
+          # The devcontainer and workflow generators follow MODULE.bazel, there are no files for trunk
+          bazel test -- //... -//infrastructure/... || { cp -RL bazel-testlogs ci-testlogs; exit 1; }
       - name: Upload test logs
         if: failure()
         uses: actions/upload-artifact@v4
@@ -105,10 +106,14 @@ jobs:
           for image in $(sed -n 's/^FROM //p' .devcontainer/rhel_*/Dockerfile | sort -u); do
             key=rhel:${image##*:}
             configured=$(python3 -c "import re, sys; print(' '.join(re.findall(r'\d+', re.search(r'\"$key\": \[(.*?)\]', open('MODULE.bazel').read(), re.S).group(1))))")
-            available=$(docker run --rm "$image" dnf -q repoquery --latest-limit=1 --qf '%{version}\n' llvm-devel | tail -1)
+            # Installs it like the Dockerfiles do, rpm tells the version
+            available=$(docker run --rm "$image" bash -c 'yum install -y --nogpgcheck llvm-devel >&2 && rpm -q --qf "%{VERSION}" llvm-devel' || true)
             major=${available%%.*}
             echo "$image: llvm-devel $available, MODULE.bazel $key: $configured" | tee -a $GITHUB_STEP_SUMMARY
-            if ! echo " $configured " | grep -q " $major "; then
+            if [ -z "$available" ]; then
+              echo "- Could not install llvm-devel in \`$image\`" >> body.md
+              status=1
+            elif ! echo " $configured " | grep -q " $major "; then
               echo "- \`$image\` installs llvm-devel $available, \`MODULE.bazel\` configures $key for LLVM $configured" >> body.md
               status=1
             fi
