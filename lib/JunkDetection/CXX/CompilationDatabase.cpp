@@ -147,7 +147,13 @@ CompilationDatabase::fromBuffer(const MullDiagnostics &diagnostics, const std::s
                                 const std::unordered_map<std::string, std::string> &bitcodeFlags) {
   std::string errorMessage;
   auto jsondb = clang::tooling::JSONCompilationDatabase::loadFromBuffer(
-      buffer, errorMessage, clang::tooling::JSONCommandLineSyntax::AutoDetect);
+#if LLVM_VERSION_MAJOR >= 24
+      // No base directory: a relative "directory" stays relative, as before LLVM 24
+      "",
+#endif
+      buffer,
+      errorMessage,
+      clang::tooling::JSONCommandLineSyntax::AutoDetect);
   if (!jsondb) {
     diagnostics.warning("Can not parse compilation database: "s + errorMessage);
   }
