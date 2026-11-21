@@ -36,6 +36,8 @@ struct Site {
   std::vector<PlacedMutant> mutants;
   /// A cast of the original, the type of an implicit conversion would not match the mutants
   std::string originalCast = "";
+  /// Instantiations need different casts of the original, none fits all
+  bool unrepresentable = false;
 };
 
 /// Sites of one file, keyed by their byte range
@@ -72,7 +74,8 @@ private:
   /// Mutants by "<real path>:<line>:<column>" of their begin
   llvm::StringMap<std::vector<const Mutant *>> mutantsByLocation;
   llvm::StringMap<FileSites> sitesByFile;
-  llvm::StringSet<> placed;
+  /// The site range of each placed mutant, by identifier
+  llvm::StringMap<std::pair<unsigned, unsigned>> placed;
   llvm::StringSet<> unrepresentable;
 };
 
