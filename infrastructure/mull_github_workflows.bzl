@@ -35,6 +35,8 @@ def _generate_github_workflow(runner, os_name, os_key, ext, arch):
             ext,
             "--arch",
             arch,
+            "--workflow-file",
+            "ci-%s.yml" % output_name,
             "--llvm-versions",
         ] + OS_VERSION_MAPPING[os_key],
         tool = ":gh_workflow_gen",

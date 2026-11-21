@@ -5,6 +5,15 @@ on:
     # Friday 15:00 UTC: 17:00 CEST, 16:00 CET
     - cron: "0 15 * * 5"
   workflow_dispatch:
+  # Only checks that the scripts still work with MODULE.bazel
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "MODULE.bazel"
+      - ".devcontainer/rhel_*/Dockerfile"
+      - ".github/workflows/llvm-watch.yml"
+      - "infrastructure/ci_report_issue.sh"
+      - "infrastructure/ci_use_llvm_version.py"
 permissions:
   contents: read
   issues: write
@@ -13,7 +22,29 @@ env:
   ISSUE_ASSIGNEE: AlexDenisov
   RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
 jobs:
+  scripts:
+    if: github.event_name == 'pull_request'
+    name: Watch scripts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Check the scripts against MODULE.bazel
+        run: |
+          bash -n infrastructure/ci_report_issue.sh
+          python3 infrastructure/ci_use_llvm_version.py MODULE.bazel ubuntu:24.04 999
+          grep -q '"ubuntu:24.04": \["999"\]' MODULE.bazel
+          grep -q '^    "999",$' MODULE.bazel
+          git checkout MODULE.bazel
+          # The RHEL job reads the configured versions of every RHEL devcontainer image
+          for image in $(sed -n 's/^FROM //p' .devcontainer/rhel_*/Dockerfile | sort -u); do
+            key=rhel:${image##*:}
+            configured=$(python3 -c "import re, sys; print(' '.join(re.findall(r'\d+', re.search(r'\"$key\": \[(.*?)\]', open('MODULE.bazel').read(), re.S).group(1))))")
+            echo "$image: $key -> $configured"
+            [ -n "$configured" ]
+          done
   llvm-trunk:
+    if: github.event_name != 'pull_request'
     name: Ubuntu 24.04 - LLVM trunk
     runs-on: ubuntu-24.04
     timeout-minutes: 120
@@ -61,6 +92,7 @@ jobs:
           fi
           infrastructure/ci_report_issue.sh "LLVM trunk: mull is broken" body.md
   rhel:
+    if: github.event_name != 'pull_request'
     name: RHEL - LLVM version
     runs-on: ubuntu-24.04
     timeout-minutes: 30
