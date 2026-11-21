@@ -74,7 +74,8 @@ jobs:
             sudo chmod +x /usr/local/bin/bazel
           }
           # The devcontainer and workflow generators follow MODULE.bazel, there are no files for trunk
-          bazel test -- //... -//infrastructure/... || { cp -RL bazel-testlogs ci-testlogs; exit 1; }
+          # All the breakages at once, not only the first one
+          bazel test --keep_going -- //... -//infrastructure/... || { cp -RL bazel-testlogs ci-testlogs; exit 1; }
       - name: Upload test logs
         if: failure()
         uses: actions/upload-artifact@v4
