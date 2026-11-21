@@ -57,7 +57,7 @@ public:
     return sitesByFile;
   }
   bool isPlaced(const Mutant &mutant) const {
-    return placed.contains(mutant.identifier);
+    return placed.count(mutant.identifier) != 0;
   }
   /// The mutant fits a node, but has no source equivalent
   bool isUnrepresentable(const Mutant &mutant) const {
