@@ -20,7 +20,13 @@ namespace {
 MULL_KEEP const char llvmVersionMarker[] = "mull-plugin-llvm:" LLVM_VERSION_STRING;
 MULL_KEEP rust::Str (*const mullVersionMarker)() = plugin_version_marker;
 
-class MullIRFrontend : public llvm::PassInfoMixin<MullIRFrontend> {
+#if LLVM_VERSION_MAJOR >= 24
+template <typename T> using PassInfoMixin = llvm::OptionalPassInfoMixin<T>;
+#else
+template <typename T> using PassInfoMixin = llvm::PassInfoMixin<T>;
+#endif
+
+class MullIRFrontend : public PassInfoMixin<MullIRFrontend> {
 public:
   llvm::PreservedAnalyses run(llvm::Module &module, llvm::ModuleAnalysisManager &mam) {
     auto core = init_core_ffi(DiagOutput::Stdout);
