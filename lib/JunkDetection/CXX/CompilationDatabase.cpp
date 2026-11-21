@@ -4,6 +4,7 @@
 #include <clang/Tooling/CompilationDatabase.h>
 #include <clang/Tooling/JSONCompilationDatabase.h>
 #include <llvm/ADT/SmallString.h>
+#include <llvm/Support/MemoryBuffer.h>
 #include <llvm/Support/Path.h>
 
 #include <algorithm>
@@ -132,8 +133,22 @@ CompilationDatabase::fromFile(const MullDiagnostics &diagnostics, const std::str
   std::unique_ptr<clang::tooling::JSONCompilationDatabase> jsondb{ nullptr };
   if (!path.empty()) {
     std::string errorMessage;
+#if LLVM_VERSION_MAJOR >= 24
+    // loadFromFile resolves a relative "directory" against the file, keep it relative as before
+    auto buffer = llvm::MemoryBuffer::getFile(path);
+    if (buffer) {
+      jsondb = clang::tooling::JSONCompilationDatabase::loadFromBuffer(
+          "",
+          (*buffer)->getBuffer(),
+          errorMessage,
+          clang::tooling::JSONCommandLineSyntax::AutoDetect);
+    } else {
+      errorMessage = "Error while opening JSON database: " + buffer.getError().message();
+    }
+#else
     jsondb = clang::tooling::JSONCompilationDatabase::loadFromFile(
         path, errorMessage, clang::tooling::JSONCommandLineSyntax::AutoDetect);
+#endif
     if (!jsondb) {
       diagnostics.warning("Can not read compilation database: "s + errorMessage);
     }
@@ -147,7 +162,13 @@ CompilationDatabase::fromBuffer(const MullDiagnostics &diagnostics, const std::s
                                 const std::unordered_map<std::string, std::string> &bitcodeFlags) {
   std::string errorMessage;
   auto jsondb = clang::tooling::JSONCompilationDatabase::loadFromBuffer(
-      buffer, errorMessage, clang::tooling::JSONCommandLineSyntax::AutoDetect);
+#if LLVM_VERSION_MAJOR >= 24
+      // No base directory: a relative "directory" stays relative, as before LLVM 24
+      "",
+#endif
+      buffer,
+      errorMessage,
+      clang::tooling::JSONCommandLineSyntax::AutoDetect);
   if (!jsondb) {
     diagnostics.warning("Can not parse compilation database: "s + errorMessage);
   }
