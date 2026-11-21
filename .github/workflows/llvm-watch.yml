@@ -1,0 +1,123 @@
+name: LLVM watch
+# Weekly: mull against LLVM trunk, and the LLVM version RHEL would install now
+on:
+  schedule:
+    # Friday 15:00 UTC: 17:00 CEST, 16:00 CET
+    - cron: "0 15 * * 5"
+  workflow_dispatch:
+  # Only checks that the scripts still work with MODULE.bazel
+  pull_request:
+    branches: ["main"]
+    paths:
+      - "MODULE.bazel"
+      - ".devcontainer/rhel_*/Dockerfile"
+      - ".github/workflows/llvm-watch.yml"
+      - "infrastructure/ci_report_issue.sh"
+      - "infrastructure/ci_use_llvm_version.py"
+permissions:
+  contents: read
+  issues: write
+env:
+  GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  ISSUE_ASSIGNEE: AlexDenisov
+  RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+jobs:
+  scripts:
+    if: github.event_name == 'pull_request'
+    name: Watch scripts
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - name: Check the scripts against MODULE.bazel
+        run: |
+          bash -n infrastructure/ci_report_issue.sh
+          python3 infrastructure/ci_use_llvm_version.py MODULE.bazel ubuntu:24.04 999
+          grep -q '"ubuntu:24.04": \["999"\]' MODULE.bazel
+          grep -q '^    "999",$' MODULE.bazel
+          git checkout MODULE.bazel
+          # The RHEL job reads the configured versions of every RHEL devcontainer image
+          for image in $(sed -n 's/^FROM //p' .devcontainer/rhel_*/Dockerfile | sort -u); do
+            key=rhel:${image##*:}
+            configured=$(python3 -c "import re, sys; print(' '.join(re.findall(r'\d+', re.search(r'\"$key\": \[(.*?)\]', open('MODULE.bazel').read(), re.S).group(1))))")
+            echo "$image: $key -> $configured"
+            [ -n "$configured" ]
+          done
+  llvm-trunk:
+    if: github.event_name != 'pull_request'
+    name: Ubuntu 24.04 - LLVM trunk
+    runs-on: ubuntu-24.04
+    timeout-minutes: 120
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install LLVM trunk
+        id: install
+        run: |
+          wget -qO- https://apt.llvm.org/llvm-snapshot.gpg.key | sudo tee /etc/apt/trusted.gpg.d/apt.llvm.org.asc
+          echo "deb http://apt.llvm.org/noble/ llvm-toolchain-noble main" | sudo tee /etc/apt/sources.list.d/llvm-trunk.list
+          sudo apt-get update
+          # The unversioned repository has the development branch, the highest version
+          version=$(apt-cache search --names-only '^llvm-[0-9]+-dev$' | grep -Eo '^llvm-[0-9]+' | cut -d- -f2 | sort -n | tail -1)
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y llvm-$version-dev libclang-$version-dev clang-$version lld-$version
+          echo "version=$version" >> $GITHUB_OUTPUT
+          echo "LLVM trunk: $(/usr/lib/llvm-$version/bin/llvm-config --version), $(dpkg-query -W -f '${Version}' llvm-$version-dev)" | tee -a $GITHUB_STEP_SUMMARY
+      - uses: ./.github/actions/setup-bazel-cache
+        with:
+          BUILDBUDDY_API_KEY: ${{ secrets.BUILDBUDDY_API_KEY }}
+          PLATFORM: ubuntu-24.04-x86_64-llvm-trunk
+      - name: Build and test
+        run: |
+          python3 infrastructure/ci_use_llvm_version.py MODULE.bazel ubuntu:24.04 ${{ steps.install.outputs.version }}
+          git diff MODULE.bazel
+          command -v bazel || {
+            sudo curl -fsSL https://github.com/bazelbuild/bazelisk/releases/download/v1.27.0/bazelisk-linux-amd64 -o /usr/local/bin/bazel
+            sudo chmod +x /usr/local/bin/bazel
+          }
+          bazel test //... || { cp -RL bazel-testlogs ci-testlogs; exit 1; }
+      - name: Upload test logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: testlogs-ubuntu-24.04-x86_64-llvm-trunk
+          path: ci-testlogs/
+          if-no-files-found: ignore
+          retention-days: 14
+      - name: Report failure
+        if: failure() && github.event_name == 'schedule'
+        run: |
+          if [ "${{ steps.install.outcome }}" = "failure" ]; then
+            echo "The LLVM trunk packages from apt.llvm.org could not be installed, likely a broken snapshot: $RUN_URL" > body.md
+          else
+            echo "mull fails to build or pass the tests with LLVM ${{ steps.install.outputs.version }} (trunk): $RUN_URL" > body.md
+          fi
+          infrastructure/ci_report_issue.sh "LLVM trunk: mull is broken" body.md
+  rhel:
+    if: github.event_name != 'pull_request'
+    name: RHEL - LLVM version
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v7
+      # RHEL minor updates move llvm-devel to a new major version, the CI images get it on a rebuild
+      - name: Compare the LLVM of the UBI repositories with MODULE.bazel
+        run: |
+          status=0
+          for image in $(sed -n 's/^FROM //p' .devcontainer/rhel_*/Dockerfile | sort -u); do
+            key=rhel:${image##*:}
+            configured=$(python3 -c "import re, sys; print(' '.join(re.findall(r'\d+', re.search(r'\"$key\": \[(.*?)\]', open('MODULE.bazel').read(), re.S).group(1))))")
+            available=$(docker run --rm "$image" dnf -q repoquery --latest-limit=1 --qf '%{version}\n' llvm-devel | tail -1)
+            major=${available%%.*}
+            echo "$image: llvm-devel $available, MODULE.bazel $key: $configured" | tee -a $GITHUB_STEP_SUMMARY
+            if ! echo " $configured " | grep -q " $major "; then
+              echo "- \`$image\` installs llvm-devel $available, \`MODULE.bazel\` configures $key for LLVM $configured" >> body.md
+              status=1
+            fi
+          done
+          exit $status
+      - name: Report failure
+        if: failure() && github.event_name == 'schedule'
+        run: |
+          [ -f body.md ] || echo "Could not check the LLVM version of the UBI repositories" > body.md
+          echo "" >> body.md
+          echo "$RUN_URL" >> body.md
+          infrastructure/ci_report_issue.sh "RHEL: llvm-devel changed its LLVM version" body.md

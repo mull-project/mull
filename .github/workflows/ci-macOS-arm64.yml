@@ -3,12 +3,55 @@ env:
   CLOUDSMITH_API_KEY: ${{ secrets.CLOUDSMITH_API_KEY }}
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   HOMEBREW_TAP_TOKEN: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+# Docs, other workflows and other OSes don't affect this build. Generated files and their templates
+# are tested.
+# Tag pushes skip path filters, a release always builds and publishes every package.
 on:
   push:
     branches: ["main"]
     tags: ["**"]
+    paths:
+      - "**"
+      - "!**.md"
+      - "!docs/**"
+      - "docs/BUILD"
+      - "docs/*.bzl"
+      - "docs/generated/**"
+      - "docs/command-line/generated/**"
+      - "docs/mull-version.txt"
+      - "!.github/workflows/**"
+      - ".github/workflows/BUILD"
+      - ".github/workflows/ci-macOS-arm64.yml"
+      - "!.devcontainer/**"
+      - ".devcontainer/BUILD"
+      - "!infrastructure/templates/**"
+      - "infrastructure/templates/github-actions/ci-macos.yml.mustache"
+      - "!infrastructure/ci_report_issue.sh"
+      - "!infrastructure/ci_use_llvm_version.py"
+      - "!.pre-commit-config.yaml"
+      - "!LICENSE"
   pull_request:
     branches: ["main"]
+    paths:
+      - "**"
+      - "!**.md"
+      - "!docs/**"
+      - "docs/BUILD"
+      - "docs/*.bzl"
+      - "docs/generated/**"
+      - "docs/command-line/generated/**"
+      - "docs/mull-version.txt"
+      - "!.github/workflows/**"
+      - ".github/workflows/BUILD"
+      - ".github/workflows/ci-macOS-arm64.yml"
+      - "!.devcontainer/**"
+      - ".devcontainer/BUILD"
+      - "!infrastructure/templates/**"
+      - "infrastructure/templates/github-actions/ci-macos.yml.mustache"
+      - "!infrastructure/ci_report_issue.sh"
+      - "!infrastructure/ci_use_llvm_version.py"
+      - "!.pre-commit-config.yaml"
+      - "!LICENSE"
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}

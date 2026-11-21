@@ -44,6 +44,11 @@ def main():
         type=str,
     )
     parser.add_argument(
+        "--workflow-file",
+        help="Name of the generated workflow file",
+        type=str,
+    )
+    parser.add_argument(
         "--llvm-versions",
         help="Supported LLVM versions",
         nargs="+",
@@ -76,6 +81,7 @@ def main():
         "LLVM_VERSIONS": f"[{', '.join(args.llvm_versions)}]",
         "PACKAGE_EXTENSION": args.package_extension,
         "OS_ARCH": args.arch,
+        "WORKFLOW_FILE": args.workflow_file,
         "BASE_IMAGE": base_image,
         "PRE_INSTALL_CMD": pre_install_cmd,
         "INSTALL_CMD": install_cmd,
