@@ -75,6 +75,25 @@ void SiteCollector::finish() {
         return true;
       });
     }
+    llvm::SmallVector<std::pair<unsigned, unsigned>> empty;
+    for (auto &entry : file.getValue()) {
+      if (entry.second.mutants.empty()) {
+        empty.push_back(entry.first);
+      }
+    }
+    for (auto range : empty) {
+      file.getValue().erase(range);
+    }
+  }
+  // A file left without mutants is not rewritten
+  llvm::SmallVector<std::string> unchanged;
+  for (auto &file : sitesByFile) {
+    if (file.getValue().empty()) {
+      unchanged.push_back(file.getKey().str());
+    }
+  }
+  for (const std::string &path : unchanged) {
+    sitesByFile.erase(path);
   }
 }
 
@@ -261,6 +280,18 @@ static std::string callValue(const Mutant &mutant, QualType type, const ASTConte
   return zero ? "0" : "42";
 }
 
+/// Merges the placement of another instantiation, whose type may differ
+static void merge(PlacedMutant &placed, const PlacedMutant &other) {
+  if (placed.value == other.value && placed.cast == other.cast) {
+    return;
+  }
+  // Typed like the original in each instantiation, a bool takes 42 as true
+  placed.cast = "__mull_as";
+  if (placed.value != other.value) {
+    placed.value = placed.mutant->mutator == "cxx_replace_scalar_call_zr" ? "0" : "42";
+  }
+}
+
 void SiteCollector::place(const Stmt *node, NodeKind kind, llvm::StringRef op, SourceLocation key,
                           const ASTContext &context, QualType valueType, bool deduced) {
   const SourceManager &sourceManager = context.getSourceManager();
@@ -308,9 +339,6 @@ void SiteCollector::place(const Stmt *node, NodeKind kind, llvm::StringRef op, S
       unrepresentable.insert(mutant->identifier);
       continue;
     }
-    if (placed.contains(mutant->identifier)) {
-      continue;
-    }
     // A call is replaced as a whole, the IR frontend may report just the member name
     PlacedMutant placedMutant{ mutant, siteBegin, siteEnd, mutant->replacement };
     // Keeps the type where it matters: enums, 'auto' and the type of a call
@@ -345,14 +373,39 @@ void SiteCollector::place(const Stmt *node, NodeKind kind, llvm::StringRef op, S
         continue;
       }
     }
-    Site &site = sitesByFile[path][{ siteBegin, siteEnd }];
-    site.begin = siteBegin;
-    site.end = siteEnd;
-    if (kind == NodeKind::Call && isConversion(node)) {
-      site.originalCast = castTo(cast<CallExpr>(node)->getType(), true, context);
+    std::pair<unsigned, unsigned> siteRange{ siteBegin, siteEnd };
+    auto placedAt = placed.find(mutant->identifier);
+    if (placedAt != placed.end() && placedAt->second != siteRange) {
+      continue;
     }
-    site.mutants.push_back(placedMutant);
-    placed.insert(mutant->identifier);
+    // Instantiations share the text of the site, each one must agree with it
+    Site &site = sitesByFile[path][siteRange];
+    std::string originalCast = kind == NodeKind::Call && isConversion(node)
+                                   ? castTo(cast<CallExpr>(node)->getType(), true, context)
+                                   : "";
+    if (site.mutants.empty() && !site.unrepresentable) {
+      site.begin = siteBegin;
+      site.end = siteEnd;
+      site.originalCast = originalCast;
+    } else if (site.originalCast != originalCast) {
+      // No text names the type of the conversion in every instantiation
+      site.unrepresentable = true;
+    }
+    if (site.unrepresentable) {
+      for (const PlacedMutant &other : site.mutants) {
+        unrepresentable.insert(other.mutant->identifier);
+      }
+      unrepresentable.insert(mutant->identifier);
+      continue;
+    }
+    auto same = llvm::find_if(site.mutants,
+                              [&](const PlacedMutant &other) { return other.mutant == mutant; });
+    if (same == site.mutants.end()) {
+      site.mutants.push_back(placedMutant);
+      placed[mutant->identifier] = siteRange;
+    } else {
+      merge(*same, placedMutant);
+    }
   }
 }
 

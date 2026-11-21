@@ -1,0 +1,33 @@
+A header template is instantiated in two translation units, a conversion operator returns a
+different type in each: the rewritten header is shared, it must keep the type of both. No cast fits
+both, the mutants of the conversion are left out. Every mutant is listed in the sources under its
+line, the IR: ones exist only in the IR-mutated program.
+
+RUN: rm -rf %S/Output && mkdir -p %S/Output/sandbox
+RUN: cp %S/unwrap.h %S/narrow.cpp %S/wide.cpp %S/tests.cpp %S/mull.yml %S/Output/sandbox/
+RUN: cd %S/Output/sandbox && %clang_cxx %sysroot -O0 -g -grecord-command-line %pass_mull_ir_frontend -c narrow.cpp -o %S/Output/narrow.o
+RUN: cd %S/Output/sandbox && %clang_cxx %sysroot -O0 -g -grecord-command-line %pass_mull_ir_frontend -c wide.cpp -o %S/Output/wide.o
+RUN: cd %S/Output/sandbox && %clang_cxx %sysroot -O0 -c tests.cpp -o %S/Output/tests.o
+RUN: %clang_cxx %sysroot %S/Output/narrow.o %S/Output/wide.o %S/Output/tests.o -o %S/Output/ir.exe
+
+RUN: cd %S/Output/sandbox && %mull_runner --dry-run --allow-surviving --reporters SQLite --report-dir %S/Output --report-name dry %S/Output/ir.exe
+RUN: echo '[{"directory": "%S/Output/sandbox", "file": "narrow.cpp", "command": "%clang_cxx %sysroot -c narrow.cpp"}, {"directory": "%S/Output/sandbox", "file": "wide.cpp", "command": "%clang_cxx %sysroot -c wide.cpp"}]' > %S/Output/sandbox/compile_commands.json
+RUN: %mull_rewriter --report %S/Output/dry.sqlite -p %S/Output/sandbox --root %S/Output/sandbox --output-dir %S/Output/rewritten | %filecheck %s --check-prefix=REWRITER
+REWRITER-DAG: Not rewritten (no source equivalent): cxx_replace_scalar_call_nz:{{.*}}unwrap.h:7:18
+REWRITER-DAG: Not rewritten (no source equivalent): cxx_replace_scalar_call_zr:{{.*}}unwrap.h:7:18
+REWRITER: Rewrote 4 of 6 mutants in 2 files
+The header is not rewritten, the rewritten sources include the original
+RUN: %clang_cxx %sysroot -O0 -I %S/Output/sandbox %S/Output/rewritten/narrow.cpp %S/Output/rewritten/wide.cpp %S/Output/tests.o -o %S/Output/rewritten.exe
+
+With no mutant on, the rewritten program behaves as the original
+RUN: %S/Output/ir.exe
+RUN: %S/Output/rewritten.exe
+
+RUN: cd %S/Output/sandbox && %mull_runner -allow-surviving -minimum-timeout 2000 -reporters=IDE -ide-reporter-show-killed %S/Output/ir.exe > %S/Output/ir.txt
+RUN: cd %S/Output/sandbox && %mull_runner -allow-surviving -minimum-timeout 2000 -reporters=IDE -ide-reporter-show-killed %S/Output/rewritten.exe > %S/Output/rewritten.txt
+RUN: grep unwrap.h: %S/Output/ir.txt | %filecheck %S/unwrap.h --check-prefix=IR --implicit-check-not=warning:
+RUN: grep narrow.cpp: %S/Output/ir.txt | %filecheck %S/narrow.cpp --implicit-check-not=warning:
+RUN: grep wide.cpp: %S/Output/ir.txt | %filecheck %S/wide.cpp --implicit-check-not=warning:
+RUN: ! grep unwrap.h: %S/Output/rewritten.txt
+RUN: grep narrow.cpp: %S/Output/rewritten.txt | %filecheck %S/narrow.cpp --implicit-check-not=warning:
+RUN: grep wide.cpp: %S/Output/rewritten.txt | %filecheck %S/wide.cpp --implicit-check-not=warning:
