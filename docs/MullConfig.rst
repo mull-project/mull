@@ -12,7 +12,7 @@ until it finds the config file or reaches the root of the file system.
 Alternatively, you can set ``MULL_CONFIG`` to point to the config file.
 
 All mull tools (compiler plugin, runner, reporter) reuse the same config.
-Config of CLI tools (runner, reporter) can be overriden via the corresponding CLI flags.
+Config of CLI tools (runner, reporter) can be overridden via the corresponding CLI flags.
 
 Here is an example config file containing all the supported fields.
 
